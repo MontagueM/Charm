@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="HelixToolkit.SharpDX.Assimp" Version="2.21.1" />
+      <PackageReference Include="HelixToolkit.SharpDX.Core.Wpf" Version="2.21.1" />
+      <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Field\Field.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\Hadronic\Symmetry\bin\release\net6.0\win-x64\native\Symmetry.dll">
+        <Link>Symmetry.dll</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+</Project>

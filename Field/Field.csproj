@@ -1,0 +1,373 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="DirectXTexNet" Version="1.0.3" />
+      <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="..\ThirdParty\fbx\EFbxType.cs">
+        <Link>fbx\EFbxType.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAMatrix.cs">
+        <Link>fbx\FbxAMatrix.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAnimCurve.cs">
+        <Link>fbx\FbxAnimCurve.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAnimCurveBase.cs">
+        <Link>fbx\FbxAnimCurveBase.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAnimCurveDef.cs">
+        <Link>fbx\FbxAnimCurveDef.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAnimCurveFilterUnroll.cs">
+        <Link>fbx\FbxAnimCurveFilterUnroll.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAnimCurveKey.cs">
+        <Link>fbx\FbxAnimCurveKey.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAnimCurveNode.cs">
+        <Link>fbx\FbxAnimCurveNode.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAnimLayer.cs">
+        <Link>fbx\FbxAnimLayer.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAnimStack.cs">
+        <Link>fbx\FbxAnimStack.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxAxisSystem.cs">
+        <Link>fbx\FbxAxisSystem.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxBindingTable.cs">
+        <Link>fbx\FbxBindingTable.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxBindingTableBase.cs">
+        <Link>fbx\FbxBindingTableBase.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxBindingTableEntry.cs">
+        <Link>fbx\FbxBindingTableEntry.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxBlendShape.cs">
+        <Link>fbx\FbxBlendShape.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxBlendShapeChannel.cs">
+        <Link>fbx\FbxBlendShapeChannel.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxCamera.cs">
+        <Link>fbx\FbxCamera.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxCluster.cs">
+        <Link>fbx\FbxCluster.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxCollection.cs">
+        <Link>fbx\FbxCollection.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxConnection.cs">
+        <Link>fbx\FbxConnection.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxConstraint.cs">
+        <Link>fbx\FbxConstraint.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxConstraintAim.cs">
+        <Link>fbx\FbxConstraintAim.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxConstraintParent.cs">
+        <Link>fbx\FbxConstraintParent.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxConstraintPosition.cs">
+        <Link>fbx\FbxConstraintPosition.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxConstraintRotation.cs">
+        <Link>fbx\FbxConstraintRotation.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxConstraintScale.cs">
+        <Link>fbx\FbxConstraintScale.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxDataType.cs">
+        <Link>fbx\FbxDataType.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxDeformer.cs">
+        <Link>fbx\FbxDeformer.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxDocument.cs">
+        <Link>fbx\FbxDocument.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxDocumentInfo.cs">
+        <Link>fbx\FbxDocumentInfo.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxDouble4x4.cs">
+        <Link>fbx\FbxDouble4x4.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxDoubleTemplates.cs">
+        <Link>fbx\FbxDoubleTemplates.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxEmitter.cs">
+        <Link>fbx\FbxEmitter.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxEntryView.cs">
+        <Link>fbx\FbxEntryView.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxEuler.cs">
+        <Link>fbx\FbxEuler.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxExporter.cs">
+        <Link>fbx\FbxExporter.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxFileTexture.cs">
+        <Link>fbx\FbxFileTexture.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxGeometry.cs">
+        <Link>fbx\FbxGeometry.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxGeometryBase.cs">
+        <Link>fbx\FbxGeometryBase.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxGlobalSettings.cs">
+        <Link>fbx\FbxGlobalSettings.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxImplementation.cs">
+        <Link>fbx\FbxImplementation.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxImporter.cs">
+        <Link>fbx\FbxImporter.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxIOBase.cs">
+        <Link>fbx\FbxIOBase.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxIOFileHeaderInfo.cs">
+        <Link>fbx\FbxIOFileHeaderInfo.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxIOPluginRegistry.cs">
+        <Link>fbx\FbxIOPluginRegistry.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxIOSettings.cs">
+        <Link>fbx\FbxIOSettings.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayer.cs">
+        <Link>fbx\FbxLayer.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerContainer.cs">
+        <Link>fbx\FbxLayerContainer.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElement.cs">
+        <Link>fbx\FbxLayerElement.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementArray.cs">
+        <Link>fbx\FbxLayerElementArray.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementArrayTemplateFbxColor.cs">
+        <Link>fbx\FbxLayerElementArrayTemplateFbxColor.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementArrayTemplateFbxSurfaceMaterial.cs">
+        <Link>fbx\FbxLayerElementArrayTemplateFbxSurfaceMaterial.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementArrayTemplateFbxVector2.cs">
+        <Link>fbx\FbxLayerElementArrayTemplateFbxVector2.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementArrayTemplateFbxVector4.cs">
+        <Link>fbx\FbxLayerElementArrayTemplateFbxVector4.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementArrayTemplateInt.cs">
+        <Link>fbx\FbxLayerElementArrayTemplateInt.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementBinormal.cs">
+        <Link>fbx\FbxLayerElementBinormal.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementMaterial.cs">
+        <Link>fbx\FbxLayerElementMaterial.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementNormal.cs">
+        <Link>fbx\FbxLayerElementNormal.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementTangent.cs">
+        <Link>fbx\FbxLayerElementTangent.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementTemplateFbxColor.cs">
+        <Link>fbx\FbxLayerElementTemplateFbxColor.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementTemplateFbxSurfaceMaterial.cs">
+        <Link>fbx\FbxLayerElementTemplateFbxSurfaceMaterial.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementTemplateFbxVector2.cs">
+        <Link>fbx\FbxLayerElementTemplateFbxVector2.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementTemplateFbxVector4.cs">
+        <Link>fbx\FbxLayerElementTemplateFbxVector4.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementUV.cs">
+        <Link>fbx\FbxLayerElementUV.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLayerElementVertexColor.cs">
+        <Link>fbx\FbxLayerElementVertexColor.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLight.cs">
+        <Link>fbx\FbxLight.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxLimits.cs">
+        <Link>fbx\FbxLimits.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxManager.cs">
+        <Link>fbx\FbxManager.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxMarker.cs">
+        <Link>fbx\FbxMarker.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxMatrix.cs">
+        <Link>fbx\FbxMatrix.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxMesh.cs">
+        <Link>fbx\FbxMesh.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxNode.cs">
+        <Link>fbx\FbxNode.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxNodeAttribute.cs">
+        <Link>fbx\FbxNodeAttribute.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxNull.cs">
+        <Link>fbx\FbxNull.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxNurbsCurve.cs">
+        <Link>fbx\FbxNurbsCurve.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxObject.cs">
+        <Link>fbx\FbxObject.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPose.cs">
+        <Link>fbx\FbxPose.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxProperty.cs">
+        <Link>fbx\FbxProperty.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyBool.cs">
+        <Link>fbx\FbxPropertyBool.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyDouble.cs">
+        <Link>fbx\FbxPropertyDouble.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyDouble3.cs">
+        <Link>fbx\FbxPropertyDouble3.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyEAreaLightShape.cs">
+        <Link>fbx\FbxPropertyEAreaLightShape.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyEBlendMode.cs">
+        <Link>fbx\FbxPropertyEBlendMode.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyEDecayType.cs">
+        <Link>fbx\FbxPropertyEDecayType.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyEGateFit.cs">
+        <Link>fbx\FbxPropertyEGateFit.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyEInheritType.cs">
+        <Link>fbx\FbxPropertyEInheritType.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyELightType.cs">
+        <Link>fbx\FbxPropertyELightType.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyEntryView.cs">
+        <Link>fbx\FbxPropertyEntryView.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyEProjectionType.cs">
+        <Link>fbx\FbxPropertyEProjectionType.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyEWrapMode.cs">
+        <Link>fbx\FbxPropertyEWrapMode.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyFlags.cs">
+        <Link>fbx\FbxPropertyFlags.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyFloat.cs">
+        <Link>fbx\FbxPropertyFloat.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyInt.cs">
+        <Link>fbx\FbxPropertyInt.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyMarkerELook.cs">
+        <Link>fbx\FbxPropertyMarkerELook.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyNullELook.cs">
+        <Link>fbx\FbxPropertyNullELook.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxPropertyString.cs">
+        <Link>fbx\FbxPropertyString.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxQuaternion.cs">
+        <Link>fbx\FbxQuaternion.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxScene.cs">
+        <Link>fbx\FbxScene.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSemanticEntryView.cs">
+        <Link>fbx\FbxSemanticEntryView.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxShape.cs">
+        <Link>fbx\FbxShape.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSharpProgressCallback.cs">
+        <Link>fbx\FbxSharpProgressCallback.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSkeleton.cs">
+        <Link>fbx\FbxSkeleton.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSkin.cs">
+        <Link>fbx\FbxSkin.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxStatus.cs">
+        <Link>fbx\FbxStatus.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSubDeformer.cs">
+        <Link>fbx\FbxSubDeformer.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSurfaceLambert.cs">
+        <Link>fbx\FbxSurfaceLambert.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSurfaceMaterial.cs">
+        <Link>fbx\FbxSurfaceMaterial.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSurfacePhong.cs">
+        <Link>fbx\FbxSurfacePhong.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxSystemUnit.cs">
+        <Link>fbx\FbxSystemUnit.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxTexture.cs">
+        <Link>fbx\FbxTexture.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxTime.cs">
+        <Link>fbx\FbxTime.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxTimeSpan.cs">
+        <Link>fbx\FbxTimeSpan.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\FbxTransform.cs">
+        <Link>fbx\FbxTransform.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\Globals.cs">
+        <Link>fbx\Globals.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\NativeMethods.cs">
+        <Link>fbx\NativeMethods.cs</Link>
+      </Compile>
+      <Compile Include="..\ThirdParty\fbx\SWIGTYPE_EFbxQuatInterpMode.cs">
+        <Link>fbx\SWIGTYPE_EFbxQuatInterpMode.cs</Link>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\ThirdParty\UnityFbxSdkNative.dll">
+        <Link>UnityFbxSdkNative.dll</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+</Project>
