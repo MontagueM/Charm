@@ -37,19 +37,18 @@
                         EnableDesignModeRendering="True"
                         EnableSwapChainRendering="True"
                         Background="#1d1d1d" BackgroundColor="#1d1d1d"
-                        IsShadowMappingEnabled="False"
+                        IsShadowMappingEnabled="True"
                         ShowCoordinateSystem="True"
                         ShowFrameRate="True"
                         ShowTriangleCountInfo="True"
                         EnableDeferredRendering="False" EnableRenderFrustum="True"
-                        x:Name="V3Dx"
                         Title="{Binding Title}"
                         TextBrush="White"
                         TitleFontFamily="Arial"
                         SubTitle="{Binding SubTitle}"
                         >
             <hx:Viewport3DX.Camera>
-                 <hx:PerspectiveCamera NearPlaneDistance="0.1" FarPlaneDistance="Infinity" Position="0,0,5"/>
+                 <hx:PerspectiveCamera Position="0,0,5"/>
             </hx:Viewport3DX.Camera> 
             <hx:Element3DPresenter Content="{Binding ModelGroup}"/>
         </hx:Viewport3DX>

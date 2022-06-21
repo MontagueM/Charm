@@ -9,7 +9,7 @@ public struct Vector2
     public float X;
     public float Y;
         
-    public Vector2(int x, int y, int z)
+    public Vector2(int x, int y)
     {
         X = x / 32_767.0f;
         Y = y / 32_767.0f;

@@ -269,4 +269,42 @@ public class MainViewModel : INotifyPropertyChanged
 
         var a = 0;
     }
+
+    public void LoadEntityFromFbx(string modelFile)
+    {
+        var importer = new Importer();
+        importer.Configuration.SkeletonSizeScale = 0.02f;
+        importer.Configuration.GlobalScale = 1f;
+        HelixToolkitScene scene = importer.Load(modelFile);
+        bool bSkel = false;
+        ModelGroup.AddNode(scene.Root);
+        foreach (var node in scene.Root.Items.Traverse(false))
+        {
+            if (node is BoneSkinMeshNode m)
+            {
+                var material = new DiffuseMaterial
+                {
+                    DiffuseColor = new Color4(0.7f, 0.7f, 0.7f, 1.0f)
+                };
+                m.ModelMatrix = m.ModelMatrix * SharpDX.Matrix.RotationX(-(float) Math.PI / 2) * SharpDX.Matrix.RotationY(-(float) Math.PI / 2);
+                m.Material = material;
+                if (!bSkel)
+                {
+                    var mat = new DiffuseMaterial
+                    {
+                        DiffuseColor = new Color4(1f, 0f, 0f, 1.0f)
+                    };
+                    var skeleton = m.CreateSkeletonNode(mat, importer.Configuration.SkeletonEffects, importer.Configuration.SkeletonSizeScale);
+                    skeleton.ModelMatrix = m.ModelMatrix;
+                    ModelGroup.AddNode(skeleton);
+                    ModelGroup.AddNode(new NodePostEffectXRayGrid {
+                        EffectName = importer.Configuration.SkeletonEffects,
+                        Color = mat.DiffuseColor,
+                        GridDensity = 1,
+                    });
+                    bSkel = true;
+                }
+            }
+        }
+    }
 }

@@ -184,7 +184,7 @@ public class FbxHandler
         }
 
         _scene.GetRootNode().AddChild(rootNode);
-        rootNode.LclRotation.Set(new FbxDouble3(-90, 0, 0));
+        // rootNode.LclRotation.Set(new FbxDouble3(-90, 0, 0));
         return skeletonNodes;
     }
 
@@ -209,7 +209,7 @@ public class FbxHandler
     public static void AddEntityToScene(Entity entity, ELOD detailLevel)
     {
         var dynamicParts = entity.Load(detailLevel);
-        _scene.GetRootNode().LclRotation.Set(new FbxDouble3(90, 0, 0));
+        // _scene.GetRootNode().LclRotation.Set(new FbxDouble3(90, 0, 0));
         var skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
         foreach (var dynamicPart in dynamicParts)
         {

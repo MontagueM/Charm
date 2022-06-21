@@ -60,6 +60,7 @@ public partial class DynamicView : UserControl
         }
         FbxHandler.AddEntityToScene(Entity, detailLevel);
         FbxHandler.ExportScene("C:/T/test.fbx");
+        MVM.LoadEntityFromFbx("C:/T/test.fbx");
         
         // MVM.SetSkeleton(Entity.Skeleton.GetBoneNodes());
         
