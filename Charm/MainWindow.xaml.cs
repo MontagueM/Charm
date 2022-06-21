@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using Field;
 using Field.General;
-using Field.USD;
 
 namespace Charm;
 /// <summary>
@@ -34,7 +33,11 @@ public partial class MainWindow
         // Get all hash64
         TagHash64Handler.Initialise();
         
-        UsdHandler.Test();
+        // Initialise fbx handler
+        FbxHandler.Initialise();
+        
+        // Initialise FNV handler
+        FnvHandler.Initialise();
     }
 
     private void CheckPackagesPathValidity()

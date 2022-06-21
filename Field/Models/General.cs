@@ -71,6 +71,11 @@ public struct Vector3
             return vec3;
         }
     }
+    
+    public static Vector3 operator -(Vector3 x, Vector3 y)
+    {
+        return new Vector3(x.X - y.X, x.Y - y.Y, x.Z - y.Z);
+    }
 }
 
 public struct IntVector3
@@ -219,6 +224,100 @@ public struct Vector4
         }
         return res;
     }
+    
+    public float this[int index]
+    {
+        get
+        {
+            switch (index)
+            {
+                case 0:
+                    return X;
+                case 1:
+                    return Y;
+                case 2:
+                    return Z;
+                case 3:
+                    return W;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
+        set
+        {
+            switch (index)
+            {
+                case 0:
+                    X = value;
+                    return;
+                case 1:
+                    Y = value;
+                    return;
+                case 2:
+                    Z = value;
+                    return;
+                case 3:
+                    W = value;
+                    return;
+            }
+            throw new IndexOutOfRangeException();
+        }
+    }
+}
+
+public struct IntVector4
+{
+    public int X;
+    public int Y;
+    public int Z;
+    public int W;
+
+    public IntVector4(int x, int y, int z, int w)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+        W = w;
+    }
+    
+    public int this[int index]
+    {
+        get
+        {
+            switch (index)
+            {
+                case 0:
+                    return X;
+                case 1:
+                    return Y;
+                case 2:
+                    return Z;
+                case 3:
+                    return W;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
+        set
+        {
+            switch (index)
+            {
+                case 0:
+                    X = value;
+                    return;
+                case 1:
+                    Y = value;
+                    return;
+                case 2:
+                    Z = value;
+                    return;
+                case 3:
+                    W = value;
+                    return;
+            }
+            throw new IndexOutOfRangeException();
+        }
+    }
 }
 
 public enum EPrimitiveType  // name comes from bungie
@@ -246,10 +345,10 @@ public struct D2Class_306D8080
     public List<D2Class_366D8080> Meshes;
     public long Unk38;
     public long Unk40;
-    public float UVScaleX;
+    public float TexcoordScaleX;
     public float Unk4C;
-    public float UVScaleY;
-    public Vector2 UVOffset;
+    public float TexcoordScaleY;
+    public Vector2 TexcoordOffset;
 }
     
 [StructLayout(LayoutKind.Sequential, Size = 0x6)]
@@ -289,10 +388,11 @@ public class Part
     public uint IndexOffset;
     public uint IndexCount;
     public EPrimitiveType PrimitiveType;
+    public int DetailLevel;
     public List<UIntVector3> Indices = new List<UIntVector3>();
     public List<uint> VertexIndices = new List<uint>();
     public List<Vector4> VertexPositions = new List<Vector4>();
-    public List<Vector2> VertexUVs = new List<Vector2>();
+    public List<Vector2> VertexTexcoords = new List<Vector2>();
     public List<Vector4> VertexNormals = new List<Vector4>();
     public List<Vector4> VertexColours = new List<Vector4>();
 

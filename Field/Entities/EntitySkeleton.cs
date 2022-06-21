@@ -1,4 +1,5 @@
-﻿using Field.Models;
+﻿using Field.General;
+using Field.Models;
 
 namespace Field.Entities;
 
@@ -16,6 +17,8 @@ public class EntitySkeleton : EntityResource
         {
             BoneNode node = new BoneNode();
             node.ParentNodeIndex = skelInfo.NodeHierarchy[i].ParentNodeIndex;
+            node.Hash = skelInfo.NodeHierarchy[i].NodeHash.Hash;
+            node.Name = FnvHandler.GetStringFromHash(node.Hash);
             node.DefaultObjectSpaceTransform = new ObjectSpaceTransform
             {
                 QuaternionRotation = skelInfo.DefaultObjectSpaceTransforms[i].Rotation,
@@ -46,4 +49,6 @@ public struct BoneNode
     public ObjectSpaceTransform DefaultObjectSpaceTransform;
     public ObjectSpaceTransform DefaultInverseObjectSpaceTransform;
     public int ParentNodeIndex;
+    public uint Hash;
+    public string Name;
 }

@@ -35,14 +35,15 @@ public class EntityModel : Tag
         if (details.Count == 0) return new List<D2Class_CB6E8080>();
         sbyte minDetailLevel = details.Min();
         sbyte maxDetailLevel = details.Max();
-        
+        List<uint> existingIndexCount = new List<uint>();
         if (detailLevel == ELOD.MostDetail)
         {
             foreach (D2Class_CB6E8080 part in Header.Meshes[0].Parts)
             {
-                if ((sbyte)part.DetailLevel == minDetailLevel)
+                if ((sbyte)part.DetailLevel == minDetailLevel && !existingIndexCount.Contains(part.IndexCount))
                 {
                     parts.Add(part);
+                    existingIndexCount.Add(part.IndexCount);
                 }
             }
         }
@@ -50,7 +51,7 @@ public class EntityModel : Tag
         {
             foreach (D2Class_CB6E8080 part in Header.Meshes[0].Parts)
             {
-                if ((sbyte)part.DetailLevel == maxDetailLevel)
+                if ((sbyte)part.DetailLevel == maxDetailLevel && !existingIndexCount.Contains(part.IndexCount))
                 {
                     parts.Add(part);
                 }
@@ -76,6 +77,7 @@ public class EntityModel : Tag
         foreach (D2Class_CB6E8080 part in dynamicParts)
         {
             DynamicPart dynamicPart = new DynamicPart(part);
+            dynamicPart.DetailLevel = part.DetailLevel;
             dynamicPart.GetAllData(mesh, Header);
             parts.Add(dynamicPart);
         }
@@ -86,7 +88,7 @@ public class EntityModel : Tag
 
 public class DynamicPart : Part
 {
-    public List<Vector4> VertexWeights = new List<Vector4>();
+    public List<VertexWeight> VertexWeights = new List<VertexWeight>();
 
     public DynamicPart(D2Class_CB6E8080 part) : base()
     {
@@ -114,18 +116,30 @@ public class DynamicPart : Part
         // Have to call it like this b/c we don't know the format of the vertex data here
         mesh.Vertices1.Buffer.ParseBuffer(this, uniqueVertexIndices);
         mesh.Vertices2.Buffer.ParseBuffer(this, uniqueVertexIndices);
+        if (mesh.OldWeights != null)
+        {
+            mesh.OldWeights.Buffer.ParseBuffer(this, uniqueVertexIndices);
+        }
+        if (mesh.VertexColour != null)
+        {
+            mesh.VertexColour.Buffer.ParseBuffer(this, uniqueVertexIndices);
+        }
+        if (mesh.SinglePassSkinningBuffer != null)
+        {
+            mesh.SinglePassSkinningBuffer.Buffer.ParseBuffer(this, uniqueVertexIndices);
+        }
 
         TransformPositions(model);
-        TransformUVs(model);
+        TransformTexcoords(model);
     }
     
-    private void TransformUVs(D2Class_076F8080 header)
+    private void TransformTexcoords(D2Class_076F8080 header)
     {
-        for (int i = 0; i < VertexUVs.Count; i++)
+        for (int i = 0; i < VertexTexcoords.Count; i++)
         {
-            VertexUVs[i] = new Vector2(
-                VertexUVs[i].X * header.UVScale.X + header.UVTranslation.X,
-                VertexUVs[i].Y * -header.UVScale.Y + 1 - header.UVTranslation.Y
+            VertexTexcoords[i] = new Vector2(
+                VertexTexcoords[i].X * header.TexcoordScale.X + header.TexcoordTranslation.X,
+                VertexTexcoords[i].Y * -header.TexcoordScale.Y + 1 - header.TexcoordTranslation.Y
             );
         }
     }

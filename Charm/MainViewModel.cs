@@ -160,7 +160,7 @@ public class MainViewModel : INotifyPropertyChanged
                     Vector3 res = v4n.ToEuler();
                     SharpDX.Vector3 n = new SharpDX.Vector3(res.X, res.Y, res.Z);
                     normals.Add(n);
-                    var v2t = part.BasePart.VertexUVs[lookup[(int)vertexIndex]];
+                    var v2t = part.BasePart.VertexTexcoords[lookup[(int)vertexIndex]];
                     SharpDX.Vector2 t = new SharpDX.Vector2(v2t.X, v2t.Y);
                     textureCoordinates.Add(t);
                 }
@@ -187,7 +187,7 @@ public class MainViewModel : INotifyPropertyChanged
                     var v4n = part.EntityPart.VertexNormals[lookup[(int)vertexIndex]];
                     SharpDX.Vector3 n = new SharpDX.Vector3(v4n.X, v4n.Y, v4n.Z);
                     normals.Add(n);
-                    var v2t = part.EntityPart.VertexUVs[lookup[(int)vertexIndex]];
+                    var v2t = part.EntityPart.VertexTexcoords[lookup[(int)vertexIndex]];
                     SharpDX.Vector2 t = new SharpDX.Vector2(v2t.X, v2t.Y);
                     textureCoordinates.Add(t);
                 }

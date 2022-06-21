@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Field.Entities;
+using Field.General;
 using Field.Models;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 
@@ -48,19 +49,18 @@ public partial class DynamicView : UserControl
         Entity = new Entity(hash);
     }
 
-    private async void LoadDynamic(ELOD detailLevel)
+    private void LoadDynamic(ELOD detailLevel)
     {
-        await Task.Run(() =>
-        {
-            if (Entity == null)
-            {
-                GetDynamicContainer(Hash);
-            }
-            dynamicParts = Entity.Load(detailLevel);
-        });
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-        var displayParts = MakeDisplayParts(dynamicParts);
-        MVM.SetEntity(displayParts, Entity.Skeleton.GetBoneNodes());
+        // MVM.SetEntity(displayParts, Entity.Skeleton.GetBoneNodes());
+
+        if (Entity == null)
+        {
+            GetDynamicContainer(Hash);
+        }
+        FbxHandler.AddEntityToScene(Entity, detailLevel);
+        FbxHandler.ExportScene("C:/T/test.fbx");
+        
         // MVM.SetSkeleton(Entity.Skeleton.GetBoneNodes());
         
         if (Name != null)

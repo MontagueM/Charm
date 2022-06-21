@@ -370,4 +370,10 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="fnv_charm.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

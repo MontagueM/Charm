@@ -265,8 +265,8 @@ public struct D2Class_076F8080  // Entity model
     [DestinyOffset(0x50)]
     public Vector4 ModelScale;
     public Vector4 ModelTranslation;
-    public Vector2 UVScale;
-    public Vector2 UVTranslation;
+    public Vector2 TexcoordScale;
+    public Vector2 TexcoordTranslation;
     public Vector4 Unk80;
     public DestinyHash Unk90;
     public DestinyHash Unk94;
@@ -278,7 +278,7 @@ public struct D2Class_C56E8080
     [DestinyField(FieldType.TagHash)]
     public VertexHeader Vertices1;  // vert file 1 (positions)
     [DestinyField(FieldType.TagHash)]
-    public VertexHeader Vertices2;  // vert file 2 (uv/normals)
+    public VertexHeader Vertices2;  // vert file 2 (texcoords/normals)
     [DestinyField(FieldType.TagHash)]
     public VertexHeader OldWeights;  // old weights
     public DestinyHash Unk0C;  // nothing ever
@@ -1006,4 +1006,10 @@ public struct D2Class_7E988080
     public Tag Unk00;
     [DestinyField(FieldType.TagHash)]
     public Tag Unk08;
+}
+
+public struct VertexWeight
+{
+    public IntVector4 WeightValues;
+    public IntVector4 WeightIndices;
 }
