@@ -50,11 +50,11 @@ public struct D2Class_ED9A8080
     public short Unk04;
     public short Unk06;
     public int Unk08;  // some pointer
-    public TagTypeHash Unk0C;  // the class of the final target resource
-    [DestinyField(FieldType.ResourceInTagWeird)]
-    public dynamic? Resource10;  // non-standard resource in tag, the resource type is actually the one before and its like a double-pointer thing. means nothing to me so wont parse these kinds.
-    [DestinyOffset(0x20), DestinyField(FieldType.TagHash)]
-    public Tag Unk20;
+    // public TagTypeHash Unk0C;  // the class of the final target resource
+    // [DestinyField(FieldType.ResourceInTagWeird)]
+    // public dynamic? Resource10;  // non-standard resource in tag, the resource type is actually the one before and its like a double-pointer thing. means nothing to me so wont parse these kinds.
+    // [DestinyOffset(0x20), DestinyField(FieldType.TagHash)]
+    // public Tag Unk20;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
@@ -131,9 +131,11 @@ public struct D2Class_8F6D8080
 [StructLayout(LayoutKind.Sequential, Size = 0x38)]
 public struct D2Class_8F9A8080
 {
-    public InlineGlobalPointer Unk0;
+    // public InlineGlobalPointer Unk0;
+    [DestinyOffset(0x10)]
     public DestinyHash Unk10;
-    public InlineGlobalPointer Unk18;
+    // public InlineGlobalPointer Unk18;
+    [DestinyOffset(0x28)]
     public DestinyHash Unk28;
 }
 
@@ -221,7 +223,7 @@ public struct D2Class_DE818080
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_4F9F8080> DefaultInverseObjectSpaceTransforms;
     [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_06008080> RangeIndexMAp;
+    public List<D2Class_06008080> RangeIndexMap;
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_06008080> InnerIndexMap;
     public Vector4 UnkE0;

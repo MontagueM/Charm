@@ -38,6 +38,7 @@ public static class Endian
 public class DestinyHash : IComparable<DestinyHash>
 {
     public uint Hash;
+    public string String;
      
     public DestinyHash(string hash)
     {
@@ -46,25 +47,29 @@ public class DestinyHash : IComparable<DestinyHash>
         {
             Hash = Endian.SwapU32(Hash);
         }
+        String = FnvHandler.GetStringFromHash(Hash);
     }
         
     public DestinyHash(uint hash)
     {
         Hash = hash;
+        String = FnvHandler.GetStringFromHash(Hash);
     }
 
     public DestinyHash()
     {
     }
         
-    public string GetString()
+    public string GetHashString()
     {
         return Endian.U32ToString(Hash);
     }
 
+    
     public override string ToString()
     {
-        return GetString();
+        if (String != "") return String;
+        return Endian.U32ToString(Hash);
     }
         
     public override int GetHashCode()
@@ -116,7 +121,7 @@ public class TagHash : DestinyHash
         
     public T ToTag<T>() where T : Tag, new()
     {
-        return (T)Activator.CreateInstance(typeof(T), new object[] { GetString() });
+        return (T)Activator.CreateInstance(typeof(T), new object[] { GetHashString() });
     }
 }
 
@@ -185,10 +190,11 @@ public struct InlineClass
     public TagTypeHash Class;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Size = 0x10)]
 public struct InlineGlobalPointer
 {
-    public TagHash TargetTag;
+    [DestinyField(FieldType.TagHash)]
+    public Tag TargetTag;
     public TagTypeHash Class;
     public long Offset;
 }

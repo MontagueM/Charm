@@ -273,7 +273,7 @@ public class MainViewModel : INotifyPropertyChanged
     public void LoadEntityFromFbx(string modelFile)
     {
         var importer = new Importer();
-        importer.Configuration.SkeletonSizeScale = 0.02f;
+        importer.Configuration.SkeletonSizeScale = 0.015f;
         importer.Configuration.GlobalScale = 1f;
         HelixToolkitScene scene = importer.Load(modelFile);
         bool bSkel = false;

@@ -26,6 +26,9 @@ public partial class MainWindow
             
         // Check if packages path exists in config
         CheckPackagesPathValidity();
+
+        // Initialise FNV handler
+        FnvHandler.Initialise();
             
         // Initialise global string cache
         PackageHandler.GenerateGlobalStringContainerCache();
@@ -35,9 +38,6 @@ public partial class MainWindow
         
         // Initialise fbx handler
         FbxHandler.Initialise();
-        
-        // Initialise FNV handler
-        FnvHandler.Initialise();
     }
 
     private void CheckPackagesPathValidity()

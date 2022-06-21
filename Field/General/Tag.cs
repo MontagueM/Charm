@@ -88,7 +88,7 @@ public class Tag : File
         Parse();
     }
 
-    public Tag(TagHash hash) : base(hash.GetString())
+    public Tag(TagHash hash) : base(hash.GetHashString())
     {
         Parse();
     }
@@ -137,6 +137,10 @@ public class Tag : File
                 else if (field.FieldType.FullName.Contains("D2Class_"))
                 {
                     field.SetValue(result, ReadStruct(field.FieldType, handle));
+                }
+                else if (field.FieldType == typeof(DestinyHash))
+                {
+                    field.SetValue(result, new DestinyHash(handle.ReadUInt32()));
                 }
                 else
                 {
@@ -238,7 +242,7 @@ public class Tag : File
                         for (int i = 0; i < arraySize; i++)
                         {
                             TagHash tagHash = new TagHash(handle.ReadUInt32());
-                            if (tagHash.Hash != 0x811c9dc5 && tagHash.Hash != 0xffffffff && CheckTagHashValid(tagHash.GetString()))
+                            if (tagHash.Hash != 0x811c9dc5 && tagHash.Hash != 0xffffffff && CheckTagHashValid(tagHash.GetHashString()))
                             {
                                 // dynamic tag = Activator.CreateInstance(field.FieldType.GetElementType(), tagHash);
                                 // tag.Parse();

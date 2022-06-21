@@ -14,6 +14,7 @@ public class Entity : Tag
     public EntitySkeleton Skeleton;
     public EntityModel Model;
     public EntityModel PhysicsModel;
+    public EntityControlRig ControlRig;
     
     public Entity(string hash) : base(hash)
     {
@@ -42,6 +43,9 @@ public class Entity : Tag
                     break;
                 case D2Class_DD818080:  // Entity skeleton
                     Skeleton = new EntitySkeleton(resource.ResourceHash);
+                    break;
+                case D2Class_668B8080:  // Entity skeleton
+                    ControlRig = new EntityControlRig(resource.ResourceHash);
                     break;
                 default:
                     // throw new NotImplementedException($"Implement parsing for {resource.ResourceHash.Header.Unk08}");
