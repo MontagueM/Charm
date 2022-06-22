@@ -39,6 +39,9 @@ public class VertexBuffer : Tag
             case 1:
                 status = ReadVertexDataType1(part);
                 break;
+            case 5:
+                status = ReadVertexDataType5(part);
+                break;
             case 6:
                 status = ReadVertexDataType6(part, vertexIndex);
                 break;
@@ -104,6 +107,28 @@ public class VertexBuffer : Tag
         }
         return true;
     }
+    
+    private bool ReadVertexDataType5(Part part)
+    {
+        switch (header.Stride)
+        {
+            case 4:
+                // it can be longer here, its not broken i think
+                if (Handle.BaseStream.Length <= Handle.BaseStream.Position)
+                {
+                    part.VertexColours.Add(new Vector4(0, 0, 0, 0));
+                }
+                else
+                {
+                    part.VertexColours.Add(new Vector4(Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte()));
+                }
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+    
     private bool ReadVertexDataType6(Part part, uint vertexIndex)
     {
         DynamicPart dynamicPart = (DynamicPart) part;

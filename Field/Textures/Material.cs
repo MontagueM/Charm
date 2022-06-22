@@ -52,14 +52,10 @@ public class Material : Tag
         if (Header.PixelShader != null)
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
-            string usf = HlslToUsf(hlsl);
-            File.WriteAllText($"{saveDirectory}/{Hash}_PS.hlsl", usf);
+            string usf = new UsfConverter().HlslToUsf(this, hlsl);
+            File.WriteAllText($"{saveDirectory}/{Hash}_PS.hlsl", hlsl);
+            File.WriteAllText($"{saveDirectory}/{Hash}_PS.usf", usf);
         }
-    }
-
-    private string HlslToUsf(string hlsl)
-    {
-        StringBuilder usf = new StringBuilder(hlsl);
     }
 }
 
