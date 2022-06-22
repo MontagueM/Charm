@@ -95,6 +95,7 @@ public class DynamicPart : Part
         IndexOffset = part.IndexOffset;
         IndexCount = part.IndexCount;
         PrimitiveType = (EPrimitiveType)part.PrimitiveType;
+        Material = part.Material;
     }
     
     public DynamicPart() : base()

@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Field.General;
+using Field.Textures;
 
 namespace Field.Models;
 
@@ -395,6 +396,7 @@ public class Part
     public List<Vector2> VertexTexcoords = new List<Vector2>();
     public List<Vector4> VertexNormals = new List<Vector4>();
     public List<Vector4> VertexColours = new List<Vector4>();
+    public Material Material;
 
     public Part(D2Class_376D8080 staticPartEntry)
     {

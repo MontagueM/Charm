@@ -1,6 +1,8 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 using Field.Entities;
 using Field.General;
+using File = System.IO.File;
 
 namespace Field.Textures;
 
@@ -19,6 +21,45 @@ public class Material : Tag
     protected override void ParseStructs()
     {
         Header = ReadHeader<D2Class_AA6D8080>();
+    }
+
+    public void SaveAllTextures(string saveDirectory)
+    {
+        
+    }
+    
+    [DllImport("HLSLDecompiler.dll", EntryPoint = "DecompileHLSL", CallingConvention = CallingConvention.StdCall)]
+    public static extern int DecompileHLSL(
+        IntPtr pShaderBytecode,
+        int BytecodeLength,
+        out IntPtr pHlslText,
+        out IntPtr pShaderModel
+    );
+
+    private string Decompile(byte[] shaderBytecode)
+    {
+        GCHandle gcHandle = GCHandle.Alloc(shaderBytecode, GCHandleType.Pinned);
+        IntPtr pShaderBytecode = gcHandle.AddrOfPinnedObject();
+        IntPtr pHlslText = new IntPtr();
+        IntPtr pShaderModel = new IntPtr();
+        int result = DecompileHLSL(pShaderBytecode, shaderBytecode.Length, out pHlslText, out pShaderBytecode);
+        string hlsl = Marshal.PtrToStringUTF8(pHlslText);
+        return hlsl;
+    }
+
+    public void SavePixelShader(string saveDirectory)
+    {
+        if (Header.PixelShader != null)
+        {
+            string hlsl = Decompile(Header.PixelShader.GetBytecode());
+            string usf = HlslToUsf(hlsl);
+            File.WriteAllText($"{saveDirectory}/{Hash}_PS.hlsl", usf);
+        }
+    }
+
+    private string HlslToUsf(string hlsl)
+    {
+        StringBuilder usf = new StringBuilder(hlsl);
     }
 }
 

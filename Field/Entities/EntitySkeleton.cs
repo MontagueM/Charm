@@ -17,8 +17,7 @@ public class EntitySkeleton : EntityResource
         {
             BoneNode node = new BoneNode();
             node.ParentNodeIndex = skelInfo.NodeHierarchy[i].ParentNodeIndex;
-            node.Hash = skelInfo.NodeHierarchy[i].NodeHash.Hash;
-            node.Name = FnvHandler.GetStringFromHash(node.Hash);
+            node.Hash = skelInfo.NodeHierarchy[i].NodeHash;
             node.DefaultObjectSpaceTransform = new ObjectSpaceTransform
             {
                 QuaternionRotation = skelInfo.DefaultObjectSpaceTransforms[i].Rotation,
@@ -49,6 +48,5 @@ public struct BoneNode
     public ObjectSpaceTransform DefaultObjectSpaceTransform;
     public ObjectSpaceTransform DefaultInverseObjectSpaceTransform;
     public int ParentNodeIndex;
-    public uint Hash;
-    public string Name;
+    public DestinyHash Hash;
 }

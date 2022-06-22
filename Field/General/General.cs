@@ -38,7 +38,7 @@ public static class Endian
 public class DestinyHash : IComparable<DestinyHash>
 {
     public uint Hash;
-    public string String;
+    private string _string;
      
     public DestinyHash(string hash)
     {
@@ -47,13 +47,13 @@ public class DestinyHash : IComparable<DestinyHash>
         {
             Hash = Endian.SwapU32(Hash);
         }
-        String = FnvHandler.GetStringFromHash(Hash);
+        _string = FnvHandler.GetStringFromHash(Hash);
     }
         
     public DestinyHash(uint hash)
     {
         Hash = hash;
-        String = FnvHandler.GetStringFromHash(Hash);
+        _string = FnvHandler.GetStringFromHash(Hash);
     }
 
     public DestinyHash()
@@ -68,7 +68,7 @@ public class DestinyHash : IComparable<DestinyHash>
     
     public override string ToString()
     {
-        if (String != "") return String;
+        if (_string != "") return _string;
         return Endian.U32ToString(Hash);
     }
         

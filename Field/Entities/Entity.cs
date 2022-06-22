@@ -67,4 +67,13 @@ public class Entity : Tag
         }
         return dynamicParts;
     }
+
+    public void SaveMaterialsFromParts(string saveDirectory, List<DynamicPart> dynamicParts)
+    {
+        foreach (var dynamicPart in dynamicParts)
+        {
+            dynamicPart.Material.SaveAllTextures(saveDirectory);
+            dynamicPart.Material.SavePixelShader(saveDirectory);
+        }
+    }
 }

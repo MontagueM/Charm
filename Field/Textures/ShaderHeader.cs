@@ -16,9 +16,9 @@ public class ShaderHeader : Tag
         Header = ReadHeader<D2Class_ShaderHeader>();
     }
 
-    private void GetBytecode()
+    public byte[] GetBytecode()
     {
-        byte[] data = new TextureBuffer(PackageHandler.GetEntryReference(Hash)).GetBufferData();
+        return new ShaderBytecode(PackageHandler.GetEntryReference(Hash)).GetBufferData();
     }
 }
 

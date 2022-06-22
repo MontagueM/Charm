@@ -161,9 +161,9 @@ public class FbxHandler
         List<FbxNode> skeletonNodes = new List<FbxNode>();
         foreach (var boneNode in boneNodes)
         {
-            FbxSkeleton skeleton = FbxSkeleton.Create(_manager, boneNode.Name);
+            FbxSkeleton skeleton = FbxSkeleton.Create(_manager, boneNode.Hash.ToString());
             skeleton.SetSkeletonType(FbxSkeleton.EType.eLimbNode);
-            FbxNode node = FbxNode.Create(_manager, FnvHandler.GetStringFromHash(boneNode.Hash));
+            FbxNode node = FbxNode.Create(_manager, boneNode.Hash.ToString());
             node.SetNodeAttribute(skeleton);
             Vector3 location = boneNode.DefaultObjectSpaceTransform.Translation;
             if (boneNode.ParentNodeIndex != -1)
@@ -206,9 +206,8 @@ public class FbxHandler
         exporter.Destroy();
     }
 
-    public static void AddEntityToScene(Entity entity, ELOD detailLevel)
+    public static void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel)
     {
-        var dynamicParts = entity.Load(detailLevel);
         // _scene.GetRootNode().LclRotation.Set(new FbxDouble3(90, 0, 0));
         var skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
         foreach (var dynamicPart in dynamicParts)
@@ -220,5 +219,10 @@ public class FbxHandler
                 AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
             }
         }
+    }
+
+    public static void Clear()
+    {
+        _scene.Clear();
     }
 }

@@ -364,6 +364,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="..\ThirdParty\3Dmigoto\x64\Release\HLSLDecompiler.dll">
+        <Link>HLSLDecompiler.dll</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <Content Include="..\ThirdParty\UnityFbxSdkNative.dll">
         <Link>UnityFbxSdkNative.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -374,6 +378,10 @@
       <None Update="fnv_charm.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ThirdParty\DXDecompiler\src\DXDecompiler\DXDecompiler.csproj" />
     </ItemGroup>
 
 </Project>

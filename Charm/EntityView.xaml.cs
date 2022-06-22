@@ -58,7 +58,8 @@ public partial class DynamicView : UserControl
         {
             GetDynamicContainer(Hash);
         }
-        FbxHandler.AddEntityToScene(Entity, detailLevel);
+        dynamicParts = Entity.Load(detailLevel);
+        FbxHandler.AddEntityToScene(Entity, dynamicParts, detailLevel);
         FbxHandler.ExportScene("C:/T/test.fbx");
         MVM.LoadEntityFromFbx("C:/T/test.fbx");
         
@@ -73,6 +74,16 @@ public partial class DynamicView : UserControl
             MVM.Title = Hash;
         }
         // MVM.SubTitle = "Entity";
+        FbxHandler.Clear();
+        ExportFullEntity();
+    }
+
+    private void ExportFullEntity()
+    {
+        FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
+        string path = "C:/T/full";
+        Entity.SaveMaterialsFromParts(path, dynamicParts);
+        FbxHandler.ExportScene($"{path}/full.fbx");
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(List<DynamicPart> containerParts)
