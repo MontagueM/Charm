@@ -73,7 +73,9 @@ public class Entity : Tag
         foreach (var dynamicPart in dynamicParts)
         {
             dynamicPart.Material.SaveAllTextures(saveDirectory);
+            // dynamicPart.Material.SaveVertexShader(saveDirectory);
             dynamicPart.Material.SavePixelShader(saveDirectory);
+            // Environment.Exit(5);
         }
     }
 }

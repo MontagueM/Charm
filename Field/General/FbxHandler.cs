@@ -1,6 +1,7 @@
 ﻿using Autodesk.Fbx;
 using Field.Entities;
 using Field.Models;
+using Field.Textures;
 
 namespace Field.General;
 
@@ -9,14 +10,14 @@ public class FbxHandler
 {
     private static FbxManager _manager;
     private static FbxScene _scene;
-    
+
     public static void Initialise()
     {
         _manager = FbxManager.Create();
         _scene = FbxScene.Create(_manager, "");
     }
 
-    public static FbxMesh AddMeshPartToScene(DynamicPart part)
+    public static FbxMesh AddMeshPartToScene(DynamicPart part, int index)
     {
         FbxMesh mesh = CreateMeshPart(part);
         FbxNode node = FbxNode.Create(_manager, mesh.GetName());
@@ -36,6 +37,16 @@ public class FbxHandler
         {
             AddColoursToMesh(mesh, part);
         }
+
+        // for importing to other engines
+        if (InfoConfigHandler.bOpen)
+        {
+            InfoConfigHandler.AddMaterial(part.Material);
+            InfoConfigHandler.AddPart(part, node.GetName());   
+        }
+
+
+        AddMaterial(mesh, node, index);
 
         _scene.GetRootNode().AddChild(node);
         return mesh;
@@ -155,6 +166,20 @@ public class FbxHandler
         mesh.AddDeformer(skin);
     }
 
+    private static void AddMaterial(FbxMesh mesh, FbxNode node, int index)
+    {
+        FbxSurfacePhong fbxMaterial = FbxSurfacePhong.Create(_scene, $"{node.GetName()}_{index}");
+        fbxMaterial.ShadingModel.Set("Phong");
+        fbxMaterial.DiffuseFactor.Set(1);
+        node.SetShadingMode(FbxNode.EShadingMode.eTextureShading);
+        node.AddMaterial(fbxMaterial);
+
+        // if this doesnt exist, it wont load the material slots in unreal
+        FbxLayerElementMaterial materialLayer = FbxLayerElementMaterial.Create(mesh, $"matlayer_{node.GetName()}_{index}");
+        materialLayer.SetMappingMode(FbxLayerElement.EMappingMode.eAllSame);
+        mesh.GetLayer(0).SetMaterials(materialLayer);
+    }
+
     public static List<FbxNode> AddSkeleton(List<BoneNode> boneNodes)
     {
         FbxNode rootNode = null;
@@ -209,14 +234,22 @@ public class FbxHandler
     public static void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel)
     {
         // _scene.GetRootNode().LclRotation.Set(new FbxDouble3(90, 0, 0));
-        var skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
-        foreach (var dynamicPart in dynamicParts)
+        List<FbxNode> skeletonNodes = new List<FbxNode>();
+        if (entity.Skeleton != null)
         {
-            FbxMesh mesh = AddMeshPartToScene(dynamicPart);
+            skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
+        }
+        for( int i = 0; i < dynamicParts.Count; i++)
+        {
+            var dynamicPart = dynamicParts[i];
+            FbxMesh mesh = AddMeshPartToScene(dynamicPart, i);
             
             if (dynamicPart.VertexWeights.Count > 0)
             {
-                AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
+                if (skeletonNodes.Count > 0)
+                {
+                    AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
+                }
             }
         }
     }

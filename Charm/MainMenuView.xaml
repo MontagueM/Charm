@@ -18,6 +18,7 @@
             <RowDefinition Height="30*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
+        <!-- AB8FA380 variks -->
         <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Center" FontSize="96" Text="AB8FA380" KeyDown="TagHashBoxKeydown" x:Name="TagHashBox"/>
     </Grid>
 </UserControl>

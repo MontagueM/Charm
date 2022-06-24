@@ -45,26 +45,26 @@ public class TextureHeader : Tag
         Array.Copy(data, 0, final, header.Length, data.Length);
         GCHandle gcHandle = GCHandle.Alloc(final, GCHandleType.Pinned);
         IntPtr pixelPtr = gcHandle.AddrOfPinnedObject();
-        var scratchImage = TexHelper.Instance.LoadFromDDSMemory(pixelPtr, final.Length, DDS_FLAGS.ALLOW_LARGE_FILES);
+        var scratchImage = TexHelper.Instance.LoadFromDDSMemory(pixelPtr, final.Length, DDS_FLAGS.NONE);
         if (TexHelper.Instance.IsCompressed(format))
         {
-            scratchImage = scratchImage.Decompress(DXGI_FORMAT.R8G8B8A8_UNORM);
+            scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
         }
 
-        if (IsCubemap())
-        {
-            var s1 = scratchImage.FlipRotate(2, TEX_FR_FLAGS.FLIP_VERTICAL).FlipRotate(0, TEX_FR_FLAGS.FLIP_HORIZONTAL);
-            var s2 = scratchImage.FlipRotate(0, TEX_FR_FLAGS.ROTATE90);
-            var s3 = scratchImage.FlipRotate(1, TEX_FR_FLAGS.ROTATE270);
-            var s4 = scratchImage.FlipRotate(4, TEX_FR_FLAGS.FLIP_VERTICAL).FlipRotate(0, TEX_FR_FLAGS.FLIP_HORIZONTAL);
-            scratchImage = TexHelper.Instance.InitializeTemporary(
-                new[]
-                {
-                    s3.GetImage(0), s2.GetImage(0), s4.GetImage(0),
-                    scratchImage.GetImage(5), s1.GetImage(0), scratchImage.GetImage(3),
-                },
-                scratchImage.GetMetadata());
-        }
+        // if (IsCubemap())
+        // {
+        //     var s1 = scratchImage.FlipRotate(2, TEX_FR_FLAGS.FLIP_VERTICAL).FlipRotate(0, TEX_FR_FLAGS.FLIP_HORIZONTAL);
+        //     var s2 = scratchImage.FlipRotate(0, TEX_FR_FLAGS.ROTATE90);
+        //     var s3 = scratchImage.FlipRotate(1, TEX_FR_FLAGS.ROTATE270);
+        //     var s4 = scratchImage.FlipRotate(4, TEX_FR_FLAGS.FLIP_VERTICAL).FlipRotate(0, TEX_FR_FLAGS.FLIP_HORIZONTAL);
+        //     scratchImage = TexHelper.Instance.InitializeTemporary(
+        //         new[]
+        //         {
+        //             s3.GetImage(0), s2.GetImage(0), s4.GetImage(0),
+        //             scratchImage.GetImage(5), s1.GetImage(0), scratchImage.GetImage(3),
+        //         },
+        //         scratchImage.GetMetadata());
+        // }
         gcHandle.Free();
         return scratchImage;
     }
@@ -84,6 +84,13 @@ public class TextureHeader : Tag
         }
         scratchImage.Dispose();
         return ms;
+    }
+    
+    public void SaveToDDSFile(string savePath)
+    {
+        ScratchImage scratchImage = GetScratchImage();
+        scratchImage.SaveToDDSFile(DDS_FLAGS.NONE, savePath);
+        scratchImage.Dispose();
     }
 
     public UnmanagedMemoryStream GetTextureToDisplay()

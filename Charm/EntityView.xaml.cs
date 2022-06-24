@@ -80,10 +80,14 @@ public partial class DynamicView : UserControl
 
     private void ExportFullEntity()
     {
-        FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
         string path = "C:/T/full";
+        InfoConfigHandler.MakeFile();
+        FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
         Entity.SaveMaterialsFromParts(path, dynamicParts);
-        FbxHandler.ExportScene($"{path}/full.fbx");
+        string meshName = "full";
+        FbxHandler.ExportScene($"{path}/{meshName}.fbx");
+        InfoConfigHandler.SetMeshName(meshName);
+        InfoConfigHandler.WriteToFile(path);
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(List<DynamicPart> containerParts)

@@ -20,7 +20,7 @@ public partial class MainWindow
     public MainWindow()
     {
         InitializeComponent();
-            
+        
         // Hide tab by default
         MainTabControl.Visibility = Visibility.Hidden;
             

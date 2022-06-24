@@ -45,44 +45,56 @@ public class UsfConverter
     private List<Cbuffer> cbuffers = new List<Cbuffer>();
     private List<Input> inputs = new List<Input>();
     private List<Output> outputs = new List<Output>();
-    private int shaderInstructionStartIndex;
     
-    public string HlslToUsf(Material material, string hlslText)
+    public string HlslToUsf(Material material, string hlslText, bool bIsVertexShader)
     {
         hlsl = new StringReader(hlslText);
         usf = new StringBuilder();
         bOpacityEnabled = false;
         ProcessHlslData();
-        WriteTextureComments(material);
-        WriteCbuffers(material);
-        WriteFunctionDefinition();
-        hlsl = new StringReader(hlslText);
-        ConvertInstructions();
         if (bOpacityEnabled)
         {
-            usf.Insert(1, "// masked");
+            usf.AppendLine("// masked");
+        }
+        // WriteTextureComments(material, bIsVertexShader);
+        WriteCbuffers(material, bIsVertexShader);
+        WriteFunctionDefinition(bIsVertexShader);
+        hlsl = new StringReader(hlslText);
+        ConvertInstructions();
+
+        if (!bIsVertexShader)
+        {
+            AddOutputs();
         }
 
-        AddOutputs();
-        WriteFooter();
+        WriteFooter(bIsVertexShader);
         return usf.ToString();
     }
 
     private void ProcessHlslData()
     {
         string line = string.Empty;
+        bool bFindOpacity = false;
         do
         {
             line = hlsl.ReadLine();
             if (line != null)
             {
-                if (line.Contains("bitmask")) // at end of function definition
+                if (line.Contains("r0,r1")) // at end of function definition
                 {
-                    // todo maybe check to see if all the inputs are actually utilised
-                    break;
+                    bFindOpacity = true;
                 }
 
-                shaderInstructionStartIndex++;
+                if (bFindOpacity)
+                {
+                    if (line.Contains("discard"))
+                    {
+                        bOpacityEnabled = true;
+                        break;
+                    }
+                    continue;
+                }
+
                 if (line.Contains("Texture"))
                 {
                     Texture texture = new Texture();
@@ -130,11 +142,12 @@ public class UsfConverter
         } while (line != null);
     }
 
-    private void WriteTextureComments(Material material)
+    private void WriteTextureComments(Material material, bool bIsVertexShader)
     {
         var textureIndices = textures.Select(x => x.Index);
-        // todo vertex shader
-        foreach (var inputTexture in material.Header.PSTextures.OrderBy(x => x.TextureIndex))
+        var array = material.Header.PSTextures.OrderBy(x => x.TextureIndex);
+        if (bIsVertexShader) array = material.Header.VSTextures.OrderBy(x => x.TextureIndex);
+        foreach (var inputTexture in array)
         {
             string hash = "NONE";
             if (textureIndices.Contains((int)inputTexture.TextureIndex))  // if our input texture indices match the textures in the shader
@@ -146,30 +159,53 @@ public class UsfConverter
         }
     }
 
-    private void WriteCbuffers(Material material)
+    private void WriteCbuffers(Material material, bool bIsVertexShader)
     {
         // Try to find matches, pixel shader has Unk2D0 Unk2E0 Unk2F0 Unk300 available
         foreach (var cbuffer in cbuffers)
         {
             usf.AppendLine($"static {cbuffer.Type} {cbuffer.Variable}[{cbuffer.Count}] = ").AppendLine("{");
             
-            dynamic data = null; 
-            if (cbuffer.Count == material.Header.Unk2D0.Count)
+            dynamic data = null;
+            if (bIsVertexShader)
             {
-                data = material.Header.Unk2D0;
+                if (cbuffer.Count == material.Header.Unk90.Count)
+                {
+                    data = material.Header.Unk90;
+                }
+                else if (cbuffer.Count == material.Header.UnkA0.Count)
+                {
+                    data = material.Header.UnkA0;
+                }
+                else if (cbuffer.Count == material.Header.UnkB0.Count)
+                {
+                    data = material.Header.UnkB0;
+                }
+                else if (cbuffer.Count == material.Header.UnkC0.Count)
+                {
+                    data = material.Header.UnkC0;
+                }
             }
-            else if (cbuffer.Count == material.Header.Unk2E0.Count)
+            else
             {
-                data = material.Header.Unk2E0;
+                if (cbuffer.Count == material.Header.Unk2D0.Count)
+                {
+                    data = material.Header.Unk2D0;
+                }
+                else if (cbuffer.Count == material.Header.Unk2E0.Count)
+                {
+                    data = material.Header.Unk2E0;
+                }
+                else if (cbuffer.Count == material.Header.Unk2F0.Count)
+                {
+                    data = material.Header.Unk2F0;
+                }
+                else if (cbuffer.Count == material.Header.Unk300.Count)
+                {
+                    data = material.Header.Unk300;
+                }   
             }
-            else if (cbuffer.Count == material.Header.Unk2F0.Count)
-            {
-                data = material.Header.Unk2F0;
-            }
-            else if (cbuffer.Count == material.Header.Unk300.Count)
-            {
-                data = material.Header.Unk300;
-            }
+
 
             for (int i = 0; i < cbuffer.Count; i++)
             {
@@ -196,28 +232,80 @@ public class UsfConverter
         }
     }
     
-    private void WriteFunctionDefinition()
+    private void WriteFunctionDefinition(bool bIsVertexShader)
     {
-        usf.AppendLine("#define cmp -").AppendLine("struct shader {").AppendLine("FMaterialAttributes main(");
-        foreach (var texture in textures)
+        if (!bIsVertexShader)
         {
-            usf.AppendLine($"   {texture.Type} {texture.Variable},");
+            foreach (var i in inputs)
+            {
+                if (i.Type == "float4")
+                {
+                    usf.AppendLine($"static {i.Type} {i.Variable} = " + "{1, 1, 1, 1};\n");
+                }
+                else if (i.Type == "float3")
+                {
+                    usf.AppendLine($"static {i.Type} {i.Variable} = " + "{1, 1, 1};\n");
+                }
+                else if (i.Type == "uint")
+                {
+                    usf.AppendLine($"static {i.Type} {i.Variable} = " + "1;\n");
+                }
+            }
         }
-        for (var i = 0; i < inputs.Count; i++)
+        usf.AppendLine("#define cmp -").AppendLine("struct shader {");
+        if (bIsVertexShader)
         {
-            if (i == inputs.Count - 1)
+            foreach (var output in outputs)
             {
-                usf.AppendLine($"   {inputs[i].Type} {inputs[i].Variable})");
+                usf.AppendLine($"{output.Type} {output.Variable};");
             }
-            else
-            {
-                usf.AppendLine($"   {inputs[i].Type} {inputs[i].Variable},");
-            }
-        }
 
-        usf.AppendLine("{").AppendLine("    FMaterialAttributes output;");
-        // Output render targets, todo support vertex shader
-        usf.AppendLine("    float4 o0,o1,o2;");
+            usf.AppendLine().AppendLine("void main(");
+            foreach (var texture in textures)
+            {
+                usf.AppendLine($"   {texture.Type} {texture.Variable},");
+            }
+            for (var i = 0; i < inputs.Count; i++)
+            {
+                if (i == inputs.Count - 1)
+                {
+                    usf.AppendLine($"   {inputs[i].Type} {inputs[i].Variable}) // {inputs[i].Semantic}");
+                }
+                else
+                {
+                    usf.AppendLine($"   {inputs[i].Type} {inputs[i].Variable}, // {inputs[i].Semantic}");
+                }
+            }
+        }
+        else
+        {
+            usf.AppendLine("FMaterialAttributes main(");
+            foreach (var texture in textures)
+            {
+                usf.AppendLine($"   {texture.Type} {texture.Variable},");
+            }
+
+            usf.AppendLine($"   float2 tx)");
+
+            usf.AppendLine("{").AppendLine("    FMaterialAttributes output;");
+            // Output render targets, todo support vertex shader
+            usf.AppendLine("    float4 o0,o1,o2;");
+            foreach (var i in inputs)
+            {
+                if (i.Type == "float4")
+                {
+                    usf.AppendLine($"    {i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyxy;");
+                }
+                else if (i.Type == "float3")
+                {
+                    usf.AppendLine($"    {i.Variable}.xyz = {i.Variable}.xyz * tx.xyx;");
+                }
+                else if (i.Type == "uint")
+                {
+                    usf.AppendLine($"    {i.Variable}.x = {i.Variable}.x * tx.x;");
+                }
+            }
+        }
     }
 
     private void ConvertInstructions()
@@ -227,17 +315,22 @@ public class UsfConverter
         {
             texDict.Add(texture.Index, texture);
         }
-        
-        for (int i = 0; i < shaderInstructionStartIndex+1; i++) hlsl.ReadLine();
-        
-        string line = string.Empty;
+        string line = hlsl.ReadLine();
+
+        while (!line.Contains("SV_TARGET2"))
+        {
+            line = hlsl.ReadLine();
+        }
+        hlsl.ReadLine();
         do
         {
             line = hlsl.ReadLine();
             if (line != null)
             {
-                if (line.Contains("return;")) break;
-
+                if (line.Contains("return;"))
+                {
+                    break;
+                }
                 if (line.Contains("Sample"))
                 {
                     var equal = line.Split("=")[0];
@@ -273,7 +366,10 @@ public class UsfConverter
         float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
-        output.Normal = float3(normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
+        output.Normal = float3(normal_in_world_space.x, normal_in_world_space.z, normal_in_world_space.y);
+		//output.Normal = Material_Texture2D_2.SampleLevel(Material_Texture2D_0Sampler, v3.xy, 0).xyz;
+        //output.Normal.z = sqrt(1.0 - saturate(dot(output.Normal.xy, output.Normal.xy)));
+        //output.Normal = normalize(output.Normal);
 
         // Roughness
         float smoothness = saturate(8 * (normal_length - 0.375));
@@ -284,13 +380,19 @@ public class UsfConverter
         output.EmissiveColor = (o2.y - 0.5) * 2;
         output.AmbientOcclusion = o2.y * 2; // Texture AO
 
+        output.OpacityMask = 1;
+
         return output;
         ";
         usf.AppendLine(outputString);
     }
 
-    private void WriteFooter()
+    private void WriteFooter(bool bIsVertexShader)
     {
-        usf.AppendLine("}").AppendLine("};").AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},{String.Join(',', inputs.Select(x => x.Variable))});");
+        usf.AppendLine("}").AppendLine("};");
+        if (!bIsVertexShader)
+        {
+            usf.AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},tx);");
+        }
     }
 }

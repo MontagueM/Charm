@@ -25,7 +25,16 @@ public class Material : Tag
 
     public void SaveAllTextures(string saveDirectory)
     {
-        
+        foreach (var e in Header.VSTextures)
+        {
+            // todo change to 64 bit hash?
+            e.Texture.SaveToDDSFile($"{saveDirectory}/VS_{e.TextureIndex}_{e.Texture.Hash}.dds");
+        }
+        foreach (var e in Header.PSTextures)
+        {
+            // todo change to 64 bit hash?
+            e.Texture.SaveToDDSFile($"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}.dds");
+        }
     }
     
     [DllImport("HLSLDecompiler.dll", EntryPoint = "DecompileHLSL", CallingConvention = CallingConvention.StdCall)]
@@ -52,9 +61,20 @@ public class Material : Tag
         if (Header.PixelShader != null)
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
-            string usf = new UsfConverter().HlslToUsf(this, hlsl);
             File.WriteAllText($"{saveDirectory}/{Hash}_PS.hlsl", hlsl);
-            File.WriteAllText($"{saveDirectory}/{Hash}_PS.usf", usf);
+            string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
+            File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
+        }
+    }
+    
+    public void SaveVertexShader(string saveDirectory)
+    {
+        if (Header.VertexShader != null)
+        {
+            string hlsl = Decompile(Header.VertexShader.GetBytecode());
+            File.WriteAllText($"{saveDirectory}/VS_{Hash}.hlsl", hlsl);
+            string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
+            File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
         }
     }
 }
