@@ -25,4 +25,11 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <Page Update="ConfigSettingControl.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>ConfigView.xaml</DependentUpon>
+      </Page>
+    </ItemGroup>
+
 </Project>

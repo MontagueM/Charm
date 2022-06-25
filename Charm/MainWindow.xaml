@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Background="#3d3d3d" Foreground="#FFE6E6E6">
             <MenuItem Header="Settings" Background="#3d3d3d" Foreground="#FFE6E6E6">
-                <MenuItem Header="Set Packages Path" Background="#3d3d3d" Foreground="#FFE6E6E6"/>
+                <MenuItem Header="Open config panel" Background="#3d3d3d" Foreground="#FFE6E6E6" Click="OpenConfigPanel_OnClick"/>
             </MenuItem>
             <MenuItem Header="Summative Views" Background="#3d3d3d" Foreground="#FFE6E6E6">
                 <MenuItem Header="View All Strings" Background="#3d3d3d" Foreground="#FFE6E6E6"/>

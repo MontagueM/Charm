@@ -11,7 +11,7 @@ public class InfoConfigHandler
 
     public static void MakeFile()
     {
-        Dictionary<string, Dictionary<string, Dictionary<int, string>>> mats = new Dictionary<string, Dictionary<string, Dictionary<int, string>>>();
+        Dictionary<string, Dictionary<string, Dictionary<int, TexInfo>>> mats = new Dictionary<string, Dictionary<string, Dictionary<int, TexInfo>>>();
         _config.Add("Materials", mats);
         Dictionary<string, string> parts = new Dictionary<string, string>();
         _config.Add("Parts", parts);
@@ -20,23 +20,23 @@ public class InfoConfigHandler
 
     public static void AddMaterial(Material material)
     {
-        Dictionary<string, Dictionary<int, string>> textures = new Dictionary<string, Dictionary<int, string>>();
+        Dictionary<string, Dictionary<int, TexInfo>> textures = new Dictionary<string, Dictionary<int, TexInfo>>();
         if (_config["Materials"].ContainsKey(material.Hash))
         {
             return;
         }
         _config["Materials"].Add(material.Hash, textures);
-        Dictionary<int, string> vstex = new Dictionary<int, string>();
+        Dictionary<int, TexInfo> vstex = new Dictionary<int, TexInfo>();
         textures.Add("VS", vstex);
         foreach (var vst in material.Header.VSTextures)
         {
-            vstex.Add((int)vst.TextureIndex, vst.Texture.Hash);
+            vstex.Add((int)vst.TextureIndex, new TexInfo {Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
         }
-        Dictionary<int, string> pstex = new Dictionary<int, string>();
+        Dictionary<int, TexInfo> pstex = new Dictionary<int, TexInfo>();
         textures.Add("PS", pstex);
         foreach (var pst in material.Header.PSTextures)
         {
-            pstex.Add((int)pst.TextureIndex, pst.Texture.Hash);
+            pstex.Add((int)pst.TextureIndex, new TexInfo {Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
         }
     }
     
@@ -50,6 +50,11 @@ public class InfoConfigHandler
         _config["MeshName"] = meshName;
     }
 
+    public static void SetUnrealInteropPath(string interopPath)
+    {
+        _config["UnrealInteropPath"] = interopPath;
+    }
+
     public static void WriteToFile(string path)
     {
         MemoryStream ms = new MemoryStream();
@@ -58,4 +63,10 @@ public class InfoConfigHandler
         _config.Clear();
         bOpen = false;
     }
+}
+
+public struct TexInfo
+{
+    public string Hash  { get; set; }
+    public bool SRGB  { get; set; }
 }

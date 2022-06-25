@@ -8,6 +8,7 @@ namespace Field.Textures;
 public class TextureHeader : Tag
 {
     public D2Class_TextureHeader Header;
+    
     public TextureHeader(TagHash hash) : base(hash)
     {
     }
@@ -48,7 +49,14 @@ public class TextureHeader : Tag
         var scratchImage = TexHelper.Instance.LoadFromDDSMemory(pixelPtr, final.Length, DDS_FLAGS.NONE);
         if (TexHelper.Instance.IsCompressed(format))
         {
-            scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
+            if (TexHelper.Instance.IsSRGB(format))
+            {
+                scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB);
+            }
+            else
+            {
+                scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
+            }
         }
 
         // if (IsCubemap())
@@ -67,6 +75,11 @@ public class TextureHeader : Tag
         // }
         gcHandle.Free();
         return scratchImage;
+    }
+
+    public bool IsSrgb()
+    {
+        return TexHelper.Instance.IsSRGB((DXGI_FORMAT)Header.Format);
     }
 
     public UnmanagedMemoryStream GetTexture()

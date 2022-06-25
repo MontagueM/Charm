@@ -87,6 +87,9 @@ public partial class DynamicView : UserControl
         string meshName = "full";
         FbxHandler.ExportScene($"{path}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
+        InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+        // todo add config settings for unreal engine export directory stuff
+        AutomatedImporter.SaveInteropUnrealPythonFile(path, meshName);
         InfoConfigHandler.WriteToFile(path);
     }
 

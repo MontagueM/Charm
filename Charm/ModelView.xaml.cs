@@ -29,10 +29,6 @@ public partial class ModelView : UserControl
         InitializeComponent();
     }
 
-    private void OnControlLoaded(object sender, RoutedEventArgs e)
-    {
-    }
-
     // Menu buttons
 
     private void Grid_Checked(object sender, RoutedEventArgs e)

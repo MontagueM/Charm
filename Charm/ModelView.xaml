@@ -8,7 +8,6 @@
         xmlns:scene="clr-namespace:HelixToolkit.Wpf.SharpDX.Model;assembly=HelixToolkit.Wpf.SharpDX"
         xmlns:charm="clr-namespace:Charm"
         mc:Ignorable="d"
-        Loaded="OnControlLoaded"
         Name="UCModelView"
         d:DesignHeight="1080" d:DesignWidth="1920">
     <UserControl.Resources>
