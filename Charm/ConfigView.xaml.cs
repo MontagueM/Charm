@@ -27,6 +27,14 @@ public partial class ConfigView : UserControl
         cpp.SettingValue = val == "" ? "Not set" : val;
         cpp.ChangeButton.Click += PackagesPath_OnClick;
         ConfigPanel.Children.Add(cpp);
+        
+        // Save path
+        ConfigSettingControl csp = new ConfigSettingControl();
+        csp.SettingName = "Export save path";
+        val = ConfigHandler.GetExportSavePath();
+        csp.SettingValue = val == "" ? "Not set" : val;
+        csp.ChangeButton.Click += ExportSavePath_OnClick;
+        ConfigPanel.Children.Add(csp);
 
         // Unreal interop path
         ConfigSettingControl cui = new ConfigSettingControl();
@@ -36,12 +44,12 @@ public partial class ConfigView : UserControl
         cui.ChangeButton.Click += UnrealInteropPath_OnClick;
         ConfigPanel.Children.Add(cui);
         
-        // Unreal interop import to child folder boolean
+        // Enable UE5 interop
         ConfigSettingControl cii = new ConfigSettingControl();
-        cii.SettingName = "Import to unreal into a child folder of the content path";
-        bool bval = ConfigHandler.GetUnrealInteropImportToChildFolder();
+        cii.SettingName = "Generate unreal engine importing files";
+        bool bval = ConfigHandler.GetUnrealInteropEnabled();
         cii.SettingValue = bval.ToString();
-        cii.ChangeButton.Click += UnrealInteropChildFolder_OnClick;
+        cii.ChangeButton.Click += UnrealInteropEnabled_OnClick;
         ConfigPanel.Children.Add(cii);
     }
 
@@ -51,15 +59,21 @@ public partial class ConfigView : UserControl
         PopulateConfigPanel();
     }
     
+    private void ExportSavePath_OnClick(object sender, RoutedEventArgs e)
+    {
+        ConfigHandler.OpenExportSavePathDialog();
+        PopulateConfigPanel();
+    }
+    
     private void UnrealInteropPath_OnClick(object sender, RoutedEventArgs e)
     {
         ConfigHandler.OpenUnrealInteropPathDialog();
         PopulateConfigPanel();
     }
     
-    private void UnrealInteropChildFolder_OnClick(object sender, RoutedEventArgs e)
+    private void UnrealInteropEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.SetUnrealInteropImportToChildFolder(!ConfigHandler.GetUnrealInteropImportToChildFolder());
+        ConfigHandler.SetUnrealInteropEnabled(!ConfigHandler.GetUnrealInteropEnabled());
         PopulateConfigPanel();
     }
 }

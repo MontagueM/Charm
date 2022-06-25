@@ -67,6 +67,59 @@ public class ConfigHandler
         return true;
     }
     #endregion
+    
+    #region exportSavePath
+    public static void CheckExportSavePathIsValid()
+    {
+        if (_config.AppSettings.Settings["exportSavePath"] == null)
+        {
+            OpenExportSavePathDialog();
+        }
+    }
+
+    public static void OpenExportSavePathDialog()
+    {
+        using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+        {
+            dialog.Description = "Select the folder to export to";
+            bool success = false;
+            while (!success)
+            {
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    success = TrySetExportSavePath(dialog.SelectedPath);
+                }
+
+                if (!success)
+                {
+                    MessageBox.Show("Directory selected is invalid, please select the correct directory.");
+                }
+            }
+        }
+    }
+        
+    public static string GetExportSavePath()
+    {
+        if (_config.AppSettings.Settings["exportSavePath"] == null)
+        {
+            return "";
+        }
+        return _config.AppSettings.Settings["exportSavePath"].Value;
+    }
+
+    private static bool TrySetExportSavePath(string path)
+    {
+        if (path == "")
+        {
+            return false;
+        }
+        
+        _config.AppSettings.Settings.Add("exportSavePath", path);
+        Save();
+        return true;
+    }
+    #endregion
 
     #region unrealInteropPath
     
@@ -116,29 +169,29 @@ public class ConfigHandler
     
     #endregion
 
-    #region importToChildFolder
+    #region unrealInteropEnabled
 
-    public static void SetUnrealInteropImportToChildFolder(bool bImportToChildFolder)
+    public static void SetUnrealInteropEnabled(bool bUnrealInteropEnabled)
     {
-        if (_config.AppSettings.Settings["importToChildFolder"] == null)
+        if (_config.AppSettings.Settings["unrealInteropEnabled"] == null)
         {
-            _config.AppSettings.Settings.Add("importToChildFolder", bImportToChildFolder.ToString());
+            _config.AppSettings.Settings.Add("unrealInteropEnabled", bUnrealInteropEnabled.ToString());
         }
         else
         {
-            _config.AppSettings.Settings["importToChildFolder"].Value = bImportToChildFolder.ToString();
+            _config.AppSettings.Settings["unrealInteropEnabled"].Value = bUnrealInteropEnabled.ToString();
         }
 
         Save();
     }
     
-    public static bool GetUnrealInteropImportToChildFolder()
+    public static bool GetUnrealInteropEnabled()
     {
-        if (_config.AppSettings.Settings["importToChildFolder"] == null)
+        if (_config.AppSettings.Settings["unrealInteropEnabled"] == null)
         {
             return true;
         }
-        return _config.AppSettings.Settings["importToChildFolder"].Value == "True";
+        return _config.AppSettings.Settings["unrealInteropEnabled"].Value == "False";
     }
     
     #endregion

@@ -80,17 +80,16 @@ public partial class DynamicView : UserControl
 
     private void ExportFullEntity()
     {
-        string path = "C:/T/full";
         InfoConfigHandler.MakeFile();
+        string savePath = ConfigHandler.GetExportSavePath();
         FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
-        Entity.SaveMaterialsFromParts(path, dynamicParts);
+        Entity.SaveMaterialsFromParts(savePath, dynamicParts);
         string meshName = "full";
-        FbxHandler.ExportScene($"{path}/{meshName}.fbx");
+        FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-        // todo add config settings for unreal engine export directory stuff
-        AutomatedImporter.SaveInteropUnrealPythonFile(path, meshName);
-        InfoConfigHandler.WriteToFile(path);
+        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName);
+        InfoConfigHandler.WriteToFile(savePath);
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(List<DynamicPart> containerParts)

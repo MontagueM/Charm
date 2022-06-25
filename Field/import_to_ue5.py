@@ -7,12 +7,15 @@ class CharmImporter:
     def __init__(self, folder_path: str) -> None:
         self.folder_path = folder_path
         self.config = json.load(open(self.folder_path + "/info.cfg"))
-        self.content_path = self.config["UnrealInteropPath"]
+        self.content_path = f"{self.config['UnrealInteropPath']}/{self.config['MeshName']}"
+        if not unreal.EditorAssetLibrary.does_directory_exist(self.content_path):
+            unreal.EditorAssetLibrary.make_directory(self.content_path)
 
-def import_entity(self):
+    def import_entity(self):
         self.make_materials()
         self.import_entity_mesh()
         self.assign_materials()
+        unreal.EditorAssetLibrary.save_directory(self.content_path, False) # this doesnt actually work, if anyone can fix it please do
 
     def assign_materials(self) -> None:
         # Identify entity mesh
@@ -67,7 +70,6 @@ def import_entity(self):
         for mat in materials_to_make:
             material = self.make_material(mat)
             unreal.MaterialEditingLibrary.recompile_material(material)
-            unreal.EditorAssetLibrary.save_loaded_asset(material)
 
     def make_material(self, matstr: str) -> unreal.Material:
         # Make base material
