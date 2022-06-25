@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,6 +9,7 @@ using Field.Entities;
 using Field.General;
 using Field.Models;
 using HelixToolkit.SharpDX.Core.Model.Scene;
+using File = System.IO.File;
 
 namespace Charm;
 
@@ -81,10 +83,11 @@ public partial class DynamicView : UserControl
     private void ExportFullEntity()
     {
         InfoConfigHandler.MakeFile();
-        string savePath = ConfigHandler.GetExportSavePath();
+        string meshName = Entity.Hash;
+        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
+        Directory.CreateDirectory(savePath);
         Entity.SaveMaterialsFromParts(savePath, dynamicParts);
-        string meshName = "full";
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());

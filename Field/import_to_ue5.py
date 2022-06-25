@@ -75,7 +75,7 @@ class CharmImporter:
         # Make base material
         material = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_" + matstr, f"/Game/{self.content_path}/Materials", unreal.Material, unreal.MaterialFactoryNew())
 
-        if os.path.exists(f"{self.folder_path}/PS_{matstr}.usf"):
+        if os.path.exists(f"{self.folder_path}/Shaders/PS_{matstr}.usf"):
             # Add textures
             texture_samples = self.add_textures(material, matstr)
 
@@ -114,7 +114,7 @@ class CharmImporter:
 
         # Check the material shader exists
         code = ""
-        f = open(f"{self.folder_path}/PS_{matstr}.usf", "r").read()
+        f = open(f"{self.folder_path}/Shaders/PS_{matstr}.usf", "r").read()
         code = f
 
         # If the material is masked, change its blend mode for alpha + make it two-sided
@@ -151,7 +151,7 @@ class CharmImporter:
         tex_factory = unreal.TextureFactory()
         tex_factory.set_editor_property('supported_class', unreal.Texture2D)
         # Only pixel shader for now
-        names = [f"{self.folder_path}/PS_{i}_{texstruct['Hash']}.dds" for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
+        names = [f"{self.folder_path}/Textures/PS_{i}_{texstruct['Hash']}.dds" for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
         srgbs = [texstruct['SRGB'] for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
         task = unreal.AutomatedAssetImportData()
             

@@ -70,11 +70,13 @@ public class Entity : Tag
 
     public void SaveMaterialsFromParts(string saveDirectory, List<DynamicPart> dynamicParts)
     {
+        Directory.CreateDirectory($"{saveDirectory}/Textures");
+        Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var dynamicPart in dynamicParts)
         {
-            dynamicPart.Material.SaveAllTextures(saveDirectory);
+            dynamicPart.Material.SaveAllTextures($"{saveDirectory}/Textures");
             // dynamicPart.Material.SaveVertexShader(saveDirectory);
-            dynamicPart.Material.SavePixelShader(saveDirectory);
+            dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
             // Environment.Exit(5);
         }
     }
