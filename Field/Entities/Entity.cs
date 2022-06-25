@@ -74,6 +74,7 @@ public class Entity : Tag
         Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var dynamicPart in dynamicParts)
         {
+            if (dynamicPart.Material == null) continue;
             dynamicPart.Material.SaveAllTextures($"{saveDirectory}/Textures");
             // dynamicPart.Material.SaveVertexShader(saveDirectory);
             dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");

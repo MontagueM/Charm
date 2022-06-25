@@ -38,7 +38,7 @@ public class FbxHandler
         }
 
         // for importing to other engines
-        if (InfoConfigHandler.bOpen)
+        if (InfoConfigHandler.bOpen && part.Material != null) // todo consider why some materials are null
         {
             InfoConfigHandler.AddMaterial(part.Material);
             InfoConfigHandler.AddPart(part, node.GetName());   

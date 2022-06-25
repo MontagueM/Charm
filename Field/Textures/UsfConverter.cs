@@ -60,7 +60,11 @@ public class UsfConverter
         WriteCbuffers(material, bIsVertexShader);
         WriteFunctionDefinition(bIsVertexShader);
         hlsl = new StringReader(hlslText);
-        ConvertInstructions();
+        bool success = ConvertInstructions();
+        if (!success)
+        {
+            return "";
+        }
 
         if (!bIsVertexShader)
         {
@@ -308,7 +312,7 @@ public class UsfConverter
         }
     }
 
-    private void ConvertInstructions()
+    private bool ConvertInstructions()
     {
         Dictionary<int, Texture> texDict = new Dictionary<int, Texture>();
         foreach (var texture in textures)
@@ -316,10 +320,14 @@ public class UsfConverter
             texDict.Add(texture.Index, texture);
         }
         string line = hlsl.ReadLine();
-
         while (!line.Contains("SV_TARGET2"))
         {
             line = hlsl.ReadLine();
+            if (line == null)
+            {
+                // its a broken pixel shader that uses some kind of memory textures
+                return false;
+            }
         }
         hlsl.ReadLine();
         do
@@ -352,6 +360,8 @@ public class UsfConverter
                 }
             }
         } while (line != null);
+
+        return true;
     }
 
     private void AddOutputs()

@@ -63,7 +63,10 @@ public class Material : Tag
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
             File.WriteAllText($"{saveDirectory}/{Hash}_PS.hlsl", hlsl);
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-            File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
+            if (usf != String.Empty)
+            {
+                File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
+            }
         }
     }
     
@@ -74,7 +77,10 @@ public class Material : Tag
             string hlsl = Decompile(Header.VertexShader.GetBytecode());
             File.WriteAllText($"{saveDirectory}/VS_{Hash}.hlsl", hlsl);
             string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
-            File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
+            if (usf != String.Empty)
+            {
+                File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
+            }
         }
     }
 }
