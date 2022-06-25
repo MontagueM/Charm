@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Field;
 using Field.General;
+using Field.Models;
 
 namespace Charm;
 /// <summary>

@@ -15,7 +15,7 @@ class CharmImporter:
         self.make_materials()
         self.import_entity_mesh()
         self.assign_materials()
-        unreal.EditorAssetLibrary.save_directory(self.content_path, False) # this doesnt actually work, if anyone can fix it please do
+        unreal.EditorAssetLibrary.save_directory(self.content_path, False)  # this doesnt actually work, if anyone can fix it please do
 
     def assign_materials(self) -> None:
         # Identify entity mesh

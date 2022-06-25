@@ -1,9 +1,8 @@
-﻿using Autodesk.Fbx;
-using Field.Entities;
-using Field.Models;
-using Field.Textures;
+﻿using Field.Entities;
+using Field.General;
+using Internal.Fbx;
 
-namespace Field.General;
+namespace Field.Models;
 
 
 public class FbxHandler
@@ -47,7 +46,9 @@ public class FbxHandler
 
 
         AddMaterial(mesh, node, index);
+        AddSmoothing(mesh);
 
+        
         _scene.GetRootNode().AddChild(node);
         return mesh;
     }
@@ -113,7 +114,7 @@ public class FbxHandler
         colLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
         foreach (var colour in part.VertexColours)
         {
-            colLayer.GetDirectArray().Add(new FbxVector4(colour.X, colour.Y, colour.Z, colour.W));
+            colLayer.GetDirectArray().Add(new FbxColor(colour.X, colour.Y, colour.Z, colour.W));
         }
         mesh.GetLayer(0).SetVertexColors(colLayer);
     }
@@ -169,7 +170,6 @@ public class FbxHandler
     private static void AddMaterial(FbxMesh mesh, FbxNode node, int index)
     {
         FbxSurfacePhong fbxMaterial = FbxSurfacePhong.Create(_scene, $"{node.GetName()}_{index}");
-        fbxMaterial.ShadingModel.Set("Phong");
         fbxMaterial.DiffuseFactor.Set(1);
         node.SetShadingMode(FbxNode.EShadingMode.eTextureShading);
         node.AddMaterial(fbxMaterial);
@@ -178,6 +178,16 @@ public class FbxHandler
         FbxLayerElementMaterial materialLayer = FbxLayerElementMaterial.Create(mesh, $"matlayer_{node.GetName()}_{index}");
         materialLayer.SetMappingMode(FbxLayerElement.EMappingMode.eAllSame);
         mesh.GetLayer(0).SetMaterials(materialLayer);
+    }
+
+    private static void AddSmoothing(FbxMesh mesh)
+    {
+        FbxLayerElementSmoothing smoothingLayer = FbxLayerElementSmoothing.Create(mesh, $"smoothingLayerName");
+        smoothingLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByPolygon);
+        smoothingLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+        mesh.GetLayer(0).SetSmoothing(smoothingLayer);
+        
+        mesh.SetMeshSmoothness(FbxMesh.ESmoothness.eFine);
     }
 
     public static List<FbxNode> AddSkeleton(List<BoneNode> boneNodes)
@@ -217,14 +227,14 @@ public class FbxHandler
     {
         if (_manager.GetIOSettings() == null)
         {
-            FbxIOSettings ios = FbxIOSettings.Create(_manager, Globals.IOSROOT);
+            FbxIOSettings ios = FbxIOSettings.Create(_manager, FbxWrapperNative.IOSROOT);
             _manager.SetIOSettings(ios);
         }
-        _manager.GetIOSettings().SetBoolProp(Globals.EXP_FBX_MATERIAL, true);
-        _manager.GetIOSettings().SetBoolProp(Globals.EXP_FBX_TEXTURE, true);
-        _manager.GetIOSettings().SetBoolProp(Globals.EXP_FBX_EMBEDDED, true);
-        _manager.GetIOSettings().SetBoolProp(Globals.EXP_FBX_ANIMATION, true);
-        _manager.GetIOSettings().SetBoolProp(Globals.EXP_FBX_GLOBAL_SETTINGS, true);
+        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_MATERIAL, true);
+        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_TEXTURE, true);
+        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_EMBEDDED, true);
+        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
+        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
         FbxExporter exporter = FbxExporter.Create(_manager, "");
         exporter.Initialize(fileName, -1);  // -1 == use binary not ascii, binary is more space efficient
         exporter.Export(_scene);
