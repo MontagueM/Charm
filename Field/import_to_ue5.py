@@ -15,7 +15,7 @@ class CharmImporter:
         self.make_materials()
         self.import_entity_mesh()
         self.assign_materials()
-        unreal.EditorAssetLibrary.save_directory(self.content_path, False)  # this doesnt actually work, if anyone can fix it please do
+        unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)  # this doesnt actually work, if anyone can fix it please do
 
     def assign_materials(self) -> None:
         # Identify entity mesh
@@ -152,21 +152,18 @@ class CharmImporter:
         tex_factory.set_editor_property('supported_class', unreal.Texture2D)
         # Only pixel shader for now
         names = [f"{self.folder_path}/Textures/PS_{i}_{texstruct['Hash']}.dds" for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
-        srgbs = [texstruct['SRGB'] for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
-        task = unreal.AutomatedAssetImportData()
-            
-        task.set_editor_property('filenames', names)
-        task.set_editor_property('destination_path', f'/Game/{self.content_path}/Textures')
-        task.set_editor_property('replace_existing', False)  # dont do extra work if we dont need to
-        
-        textures = unreal.AssetToolsHelpers.get_asset_tools().import_assets_automated(task)
-        unreal.EditorAssetLibrary.save_loaded_assets(textures)
-        for i, t in enumerate(textures):
-            t.set_editor_property('srgb', srgbs[i])
-            if srgbs[i] == True:
-                t.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_DEFAULT)
-            else:
-                t.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_VECTOR_DISPLACEMENTMAP)
+        srgbs = {int(i): texstruct['SRGB'] for i, texstruct in self.config["Materials"][matstr]["PS"].items()}
+        import_tasks = []
+        for name in names:
+            asset_import_task = unreal.AssetImportTask()
+            asset_import_task.set_editor_property('filename', name)
+            asset_import_task.set_editor_property('destination_path', f'/Game/{self.content_path}/Textures')
+            asset_import_task.set_editor_property('save', True)
+            asset_import_task.set_editor_property('replace_existing', False)  # dont do extra work if we dont need to
+            asset_import_task.set_editor_property('automated', True)
+            import_tasks.append(asset_import_task)
+
+        unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(import_tasks)
 
         # Make texture samples
         for i, texstruct in self.config["Materials"][matstr]["PS"].items():
@@ -175,12 +172,21 @@ class CharmImporter:
 
             ts_TextureUePath = f"/Game/{self.content_path}/Textures/PS_{i}_{texstruct['Hash']}.PS_{i}_{texstruct['Hash']}"
             ts_LoadedTexture = unreal.EditorAssetLibrary.load_asset(ts_TextureUePath)
+
+            ts_LoadedTexture.set_editor_property('srgb', srgbs[i])
+            if srgbs[i] == True:
+                ts_LoadedTexture.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_DEFAULT)
+            else:
+                ts_LoadedTexture.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_VECTOR_DISPLACEMENTMAP)
+
             texture_sample.set_editor_property('texture', ts_LoadedTexture)
             if texstruct['SRGB'] == True:
                 texture_sample.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
             else:
                 texture_sample.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
             texture_samples[i] = texture_sample
+
+            unreal.EditorAssetLibrary.save_loaded_asset(ts_LoadedTexture)
 
         return texture_samples
 

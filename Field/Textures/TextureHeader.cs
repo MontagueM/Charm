@@ -58,6 +58,14 @@ public class TextureHeader : Tag
                 scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
             }
         }
+        else if (TexHelper.Instance.IsSRGB(format))
+        {
+            scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SRGB, 0);
+        }
+        else
+        {
+            scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
+        }
 
         // if (IsCubemap())
         // {
@@ -102,7 +110,7 @@ public class TextureHeader : Tag
     public void SaveToDDSFile(string savePath)
     {
         ScratchImage scratchImage = GetScratchImage();
-        scratchImage.SaveToDDSFile(DDS_FLAGS.NONE, savePath);
+        scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath);
         scratchImage.Dispose();
     }
 

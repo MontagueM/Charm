@@ -19,6 +19,8 @@
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
         <!-- AB8FA380 variks -->
-        <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Center" FontSize="96" Text="AB8FA380" KeyDown="TagHashBoxKeydown" x:Name="TagHashBox"/>
+        <!-- 3b00ab80 atraks -->
+        <!-- 4901ab80 taniks normal, 100bb780 abomination -->
+        <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Center" FontSize="96" Text="100bb780" KeyDown="TagHashBoxKeydown" x:Name="TagHashBox"/>
     </Grid>
 </UserControl>

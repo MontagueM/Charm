@@ -217,7 +217,18 @@ public class UsfConverter
                 {
                     case "float4":
                         if (data == null) usf.AppendLine("    float4(0.0, 0.0, 0.0, 0.0),");
-                        else usf.AppendLine($"    float4({data[i].Unk00.X}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}),");
+                        else
+                        {
+                            try
+                            {
+                                var x = data[i].Unk00.X; // really bad but required
+                                usf.AppendLine($"    float4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}),");
+                            }
+                            catch (Exception e)  // figure out whats up here, taniks breaks it
+                            {
+                                usf.AppendLine("    float4(0.0, 0.0, 0.0, 0.0),");
+                            }
+                        }
                         break;
                     case "float3":
                         if (data == null) usf.AppendLine("    float3(0.0, 0.0, 0.0),");
