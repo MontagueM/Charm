@@ -186,6 +186,10 @@ public class DynamicPart : Part
     {
         var map = ((D2Class_8F6D8080) parentResource.Header.Unk18).ExternalMaterialsMap;
         var mats = ((D2Class_8F6D8080) parentResource.Header.Unk18).ExternalMaterials;
+        if (map.Count == 0 || mats.Count == 0)
+        {
+            return null;
+        }
         var mapEntry = map[externalMaterialIndex];
         // For now we'll just set as the first material in the array
         List<Material> materials = new List<Material>();
