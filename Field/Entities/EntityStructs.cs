@@ -121,11 +121,34 @@ public struct D2Class_6E908080
     public long RelativePointer00;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x3E0)]
+/*
+ * The external material map provides the mapping of external material index -> material tag
+ * could be these external materials are dynamic themselves - we'll extract them all but select the first
+ */
+[StructLayout(LayoutKind.Sequential, Size = 0x450)]
 public struct D2Class_8F6D8080
 {
     [DestinyOffset(0x224), DestinyField(FieldType.TagHash)] 
     public EntityModel Model;
+    [DestinyOffset(0x3C0), DestinyField(FieldType.TablePointer)] 
+    public List<D2Class_976D8080> ExternalMaterialsMap;
+    [DestinyOffset(0x400), DestinyField(FieldType.TablePointer)] 
+    public List<D2Class_14008080> ExternalMaterials;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0xC)]
+public struct D2Class_976D8080
+{
+    public int MaterialCount;
+    public int MaterialStartIndex;
+    public int Unk08;  // maybe some kind of LOD or dynamic marker
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x4)]
+public struct D2Class_14008080
+{
+    [DestinyField(FieldType.TagHash)]
+    public Material Material;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x38)]
@@ -302,7 +325,7 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
 {
     [DestinyField(FieldType.TagHash)]
     public Material Material;  // AA6D8080
-    public short Unk04;
+    public short ExternalMaterialIndex;
     public short PrimitiveType;
     public uint IndexOffset;
     public uint IndexCount;

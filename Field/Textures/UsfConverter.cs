@@ -330,6 +330,7 @@ public class UsfConverter
         {
             texDict.Add(texture.Index, texture);
         }
+        List<int> sortedIndices = texDict.Keys.OrderBy(x => x).ToList();
         string line = hlsl.ReadLine();
         while (!line.Contains("SV_TARGET2"))
         {
@@ -358,7 +359,7 @@ public class UsfConverter
                     var sampleUv = line.Split(", ")[1].Split(")")[0];
                     var dotAfter = line.Split(").")[1];
                     // todo add dimension
-                    usf.AppendLine($"   {equal}= Material_Texture2D_{texDict[texIndex].Index}.SampleLevel(Material_Texture2D_{sampleIndex-1}Sampler, {sampleUv}, 0).{dotAfter}");
+                    usf.AppendLine($"   {equal}= Material_Texture2D_{sortedIndices.IndexOf(texIndex)}.SampleLevel(Material_Texture2D_{sampleIndex-1}Sampler, {sampleUv}, 0).{dotAfter}");
                 }
                 // todo add load, levelofdetail, o0.w, discard
                 else if (line.Contains("discard"))

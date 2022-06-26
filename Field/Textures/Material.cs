@@ -45,7 +45,7 @@ public class Material : Tag
         out IntPtr pShaderModel
     );
 
-    private string Decompile(byte[] shaderBytecode)
+    public string Decompile(byte[] shaderBytecode)
     {
         GCHandle gcHandle = GCHandle.Alloc(shaderBytecode, GCHandleType.Pinned);
         IntPtr pShaderBytecode = gcHandle.AddrOfPinnedObject();
@@ -118,6 +118,19 @@ public struct D2Class_AA6D8080
     public List<D2Class_3F018080> Unk2F0;
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_90008080> Unk300;
+    
+    [DestinyOffset(0x340), DestinyField(FieldType.TagHash)]
+    public ShaderHeader ComputeShader;
+    [DestinyOffset(0x348), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_CF6D8080> CSTextures;
+    [DestinyOffset(0x360), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_09008080> Unk360;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_90008080> Unk370;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_3F018080> Unk380;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_90008080> Unk390;
     
 }
 

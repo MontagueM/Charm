@@ -1,5 +1,6 @@
 ﻿using Field.General;
 using Field.Models;
+using Field.Textures;
 
 namespace Field.Entities;
 
@@ -16,10 +17,13 @@ public class EntityModel : Tag
         Header = ReadHeader<D2Class_076F8080>();
     }
 
-    public List<DynamicPart> Load(ELOD detailLevel)
+    /*
+     * We need the parent resource to get access to the external materials
+     */
+    public List<DynamicPart> Load(ELOD detailLevel, EntityResource parentResource)
     {
         List<D2Class_CB6E8080> dynamicParts = GetPartsOfDetailLevel(detailLevel);
-        List<DynamicPart> parts = GenerateParts(dynamicParts);
+        List<DynamicPart> parts = GenerateParts(dynamicParts, parentResource);
         return parts;
     }
     
@@ -35,23 +39,36 @@ public class EntityModel : Tag
         if (details.Count == 0) return new List<D2Class_CB6E8080>();
         sbyte minDetailLevel = details.Min();
         sbyte maxDetailLevel = details.Max();
-        List<uint> existingIndexCount = new List<uint>();
+        Dictionary<uint, D2Class_CB6E8080> existingIndexCount = new Dictionary<uint, D2Class_CB6E8080>();
         if (detailLevel == ELOD.MostDetail)
         {
             foreach (D2Class_CB6E8080 part in Header.Meshes[0].Parts)
             {
-                if ((sbyte)part.DetailLevel == minDetailLevel && !existingIndexCount.Contains(part.IndexCount))
+                if (part.DetailLevel == minDetailLevel)
                 {
-                    parts.Add(part);
-                    existingIndexCount.Add(part.IndexCount);
+
+                    if (!existingIndexCount.ContainsKey(part.IndexCount))
+                    {
+                        // parts.Add(part);
+                        existingIndexCount.Add(part.IndexCount, part);
+                    }
+                    else if (existingIndexCount.ContainsKey(part.IndexCount))
+                    {
+                        if (existingIndexCount[part.IndexCount].Material == null)
+                        {
+                            existingIndexCount[part.IndexCount] = part;
+                        }
+                    }
                 }
             }
+
+            parts = existingIndexCount.Values.ToList();
         }
         else if (detailLevel == ELOD.LeastDetail)
         {
             foreach (D2Class_CB6E8080 part in Header.Meshes[0].Parts)
             {
-                if ((sbyte)part.DetailLevel == maxDetailLevel && !existingIndexCount.Contains(part.IndexCount))
+                if (part.DetailLevel == maxDetailLevel && !existingIndexCount.ContainsKey(part.IndexCount))
                 {
                     parts.Add(part);
                 }
@@ -68,7 +85,7 @@ public class EntityModel : Tag
         return parts;
     }
     
-    private List<DynamicPart> GenerateParts(List<D2Class_CB6E8080> dynamicParts)
+    private List<DynamicPart> GenerateParts(List<D2Class_CB6E8080> dynamicParts, EntityResource parentResource)
     {
         List<DynamicPart> parts = new List<DynamicPart>();
         if (Header.Meshes.Count > 1) throw new Exception("Multiple meshes not supported");
@@ -76,7 +93,7 @@ public class EntityModel : Tag
         D2Class_C56E8080 mesh = Header.Meshes[0];
         foreach (D2Class_CB6E8080 part in dynamicParts)
         {
-            DynamicPart dynamicPart = new DynamicPart(part);
+            DynamicPart dynamicPart = new DynamicPart(part, parentResource);
             dynamicPart.DetailLevel = part.DetailLevel;
             dynamicPart.GetAllData(mesh, Header);
             parts.Add(dynamicPart);
@@ -90,12 +107,19 @@ public class DynamicPart : Part
 {
     public List<VertexWeight> VertexWeights = new List<VertexWeight>();
 
-    public DynamicPart(D2Class_CB6E8080 part) : base()
+    public DynamicPart(D2Class_CB6E8080 part, EntityResource parentResource) : base()
     {
         IndexOffset = part.IndexOffset;
         IndexCount = part.IndexCount;
         PrimitiveType = (EPrimitiveType)part.PrimitiveType;
-        Material = part.Material;
+        if (part.ExternalMaterialIndex == -1)
+        {
+            Material = part.Material;
+        }
+        else
+        {
+            Material = GetMaterialFromExternalMaterial(part.ExternalMaterialIndex, parentResource);
+        }
     }
     
     public DynamicPart() : base()
@@ -156,5 +180,20 @@ public class DynamicPart : Part
                 VertexPositions[i].W
             );
         }
+    }
+
+    private Material GetMaterialFromExternalMaterial(short externalMaterialIndex, EntityResource parentResource)
+    {
+        var map = ((D2Class_8F6D8080) parentResource.Header.Unk18).ExternalMaterialsMap;
+        var mats = ((D2Class_8F6D8080) parentResource.Header.Unk18).ExternalMaterials;
+        var mapEntry = map[externalMaterialIndex];
+        // For now we'll just set as the first material in the array
+        List<Material> materials = new List<Material>();
+        for (int i = mapEntry.MaterialStartIndex; i < mapEntry.MaterialStartIndex + mapEntry.MaterialCount; i++)
+        {
+            materials.Add(mats[i].Material);
+        }
+
+        return materials[0];
     }
 }

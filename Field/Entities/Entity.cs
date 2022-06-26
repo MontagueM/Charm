@@ -13,6 +13,7 @@ public class Entity : Tag
     // Entity features
     public EntitySkeleton Skeleton;
     public EntityModel Model;
+    public EntityResource ModelParentResource;
     public EntityModel PhysicsModel;
     public EntityControlRig ControlRig;
     
@@ -37,6 +38,7 @@ public class Entity : Tag
             {
                 case D2Class_8A6D8080:  // Entity model
                     Model = ((D2Class_8F6D8080)resource.ResourceHash.Header.Unk18).Model;
+                    ModelParentResource = resource.ResourceHash;
                     break;
                 case D2Class_5B6D8080:  // Entity physics model
                     PhysicsModel = ((D2Class_6C6D8080)resource.ResourceHash.Header.Unk18).PhysicsModel;
@@ -59,11 +61,11 @@ public class Entity : Tag
         var dynamicParts = new List<DynamicPart>();
         if (PhysicsModel != null)
         {
-            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel)).ToList();
+            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, ModelParentResource)).ToList();
         }
         if (Model != null)
         {
-            dynamicParts = dynamicParts.Concat(Model.Load(detailLevel)).ToList();
+            dynamicParts = dynamicParts.Concat(Model.Load(detailLevel, ModelParentResource)).ToList();
         }
         return dynamicParts;
     }
@@ -74,6 +76,10 @@ public class Entity : Tag
         Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var dynamicPart in dynamicParts)
         {
+            if ($"{dynamicPart.IndexOffset}_{dynamicPart.IndexCount}_{dynamicPart.DetailLevel}" == "132170_2027_0")
+            {
+                var a = 0;
+            }
             if (dynamicPart.Material == null) continue;
             dynamicPart.Material.SaveAllTextures($"{saveDirectory}/Textures");
             // dynamicPart.Material.SaveVertexShader(saveDirectory);
