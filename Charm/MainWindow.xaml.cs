@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using Field;
 using Field.General;
 using Field.Models;
+using Field.Statics;
 
 namespace Charm;
 /// <summary>

@@ -28,31 +28,39 @@ public class Material : Tag
         foreach (var e in Header.VSTextures)
         {
             // todo change to 64 bit hash?
-            e.Texture.SaveToDDSFile($"{saveDirectory}/VS_{e.TextureIndex}_{e.Texture.Hash}.dds");
+            string path = $"{saveDirectory}/VS_{e.TextureIndex}_{e.Texture.Hash}.dds";
+            if (!File.Exists(path))
+            {
+                e.Texture.SaveToDDSFile(path); 
+            }
         }
         foreach (var e in Header.PSTextures)
         {
             // todo change to 64 bit hash?
-            e.Texture.SaveToDDSFile($"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}.dds");
+            string path = $"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}.dds";
+            if (!File.Exists(path))
+            {
+                e.Texture.SaveToDDSFile(path); 
+            }
         }
     }
     
-    [DllImport("HLSLDecompiler.dll", EntryPoint = "DecompileHLSL", CallingConvention = CallingConvention.StdCall)]
+    [DllImport("HLSLDecompiler.dll", EntryPoint = "DecompileHLSL", CallingConvention = CallingConvention.Cdecl)]
     public static extern int DecompileHLSL(
         IntPtr pShaderBytecode,
         int BytecodeLength,
-        out IntPtr pHlslText,
-        out IntPtr pShaderModel
+        out IntPtr pHlslText
     );
 
     public string Decompile(byte[] shaderBytecode)
     {
         GCHandle gcHandle = GCHandle.Alloc(shaderBytecode, GCHandleType.Pinned);
         IntPtr pShaderBytecode = gcHandle.AddrOfPinnedObject();
-        IntPtr pHlslText = new IntPtr();
-        IntPtr pShaderModel = new IntPtr();
-        int result = DecompileHLSL(pShaderBytecode, shaderBytecode.Length, out pHlslText, out pShaderBytecode);
+        IntPtr pHlslText = Marshal.AllocHGlobal(50000);
+        int result = DecompileHLSL(pShaderBytecode, shaderBytecode.Length, out pHlslText);
         string hlsl = Marshal.PtrToStringUTF8(pHlslText);
+        // Marshal.FreeHGlobal(pHlslText);
+        gcHandle.Free();
         return hlsl;
     }
 

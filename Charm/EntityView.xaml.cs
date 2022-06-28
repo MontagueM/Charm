@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -62,8 +64,9 @@ public partial class DynamicView : UserControl
         }
         dynamicParts = Entity.Load(detailLevel);
         FbxHandler.AddEntityToScene(Entity, dynamicParts, detailLevel);
-        FbxHandler.ExportScene("C:/T/test.fbx");
-        MVM.LoadEntityFromFbx("C:/T/test.fbx");
+        string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
+        FbxHandler.ExportScene(filePath);
+        MVM.LoadEntityFromFbx(filePath);
         
         // MVM.SetSkeleton(Entity.Skeleton.GetBoneNodes());
         
@@ -85,13 +88,17 @@ public partial class DynamicView : UserControl
         InfoConfigHandler.MakeFile();
         string meshName = Entity.Hash;
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        Console.WriteLine("A");
         FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
         Directory.CreateDirectory(savePath);
+        Console.WriteLine("B");
         Entity.SaveMaterialsFromParts(savePath, dynamicParts);
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
+        Console.WriteLine("C");
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
         AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName);
+        Console.WriteLine("D");
         InfoConfigHandler.WriteToFile(savePath);
     }
 

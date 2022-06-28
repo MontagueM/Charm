@@ -158,4 +158,102 @@ public class MainViewModel : INotifyPropertyChanged
             }
         }
     }
+    
+            // https://stackoverflow.com/questions/33374434/improve-wpf-rendering-performance-using-helix-toolkit
+        public void SetChildren(List<DisplayPart> parts)
+        {
+            foreach (var part in parts)
+            { 
+                MeshNode model = new MeshNode();
+                MeshGeometry3D Model = new MeshGeometry3D();
+                Matrix[] ModelInstances = new Matrix[part.Translations.Count];
+                PhongMaterial ModelMaterial = new PhongMaterial();
+                
+                HelixToolkit.SharpDX.Core.MeshGeometry3D mesh = new HelixToolkit.SharpDX.Core.MeshGeometry3D();
+                IntCollection triangleIndices = new IntCollection();
+                Vector3Collection positions = new Vector3Collection();
+                Vector3Collection normals = new Vector3Collection();
+                Vector2Collection textureCoordinates = new Vector2Collection();
+
+
+                if (part.BasePart.Indices.Count > 0)
+                {
+                    // Conversion lookup table
+                    Dictionary<int, int> lookup = new Dictionary<int, int>();
+                    for (int i = 0; i < part.BasePart.VertexIndices.Count; i++)
+                    {
+                        lookup[(int)part.BasePart.VertexIndices[i]] = i;
+                    }
+                    foreach (var vertexIndex in part.BasePart.VertexIndices)
+                    {
+                        var v4p = part.BasePart.VertexPositions[lookup[(int)vertexIndex]];
+                        SharpDX.Vector3 p = new SharpDX.Vector3(v4p.X, v4p.Y, v4p.Z);
+                        positions.Add(p);
+                        // We need to check if the normal is Euler or Quaternion
+                        var v4n = part.BasePart.VertexNormals[lookup[(int)vertexIndex]];
+                        Vector3 res = ConsiderQuatToEulerConvert(v4n);
+                        SharpDX.Vector3 n = new SharpDX.Vector3(res.X, res.Y, res.Z);
+                        normals.Add(n);
+                        var v2t = part.BasePart.VertexTexcoords[lookup[(int)vertexIndex]];
+                        SharpDX.Vector2 t = new SharpDX.Vector2(v2t.X, v2t.Y);
+                        textureCoordinates.Add(t);
+                    }
+                    foreach (UIntVector3 face in part.BasePart.Indices)
+                    {
+                        triangleIndices.Add(lookup[(int)face.X]);
+                        triangleIndices.Add(lookup[(int)face.Y]);
+                        triangleIndices.Add(lookup[(int)face.Z]);
+                    }  
+                }
+                
+                mesh.Positions = positions;
+                mesh.Normals = normals;
+                mesh.TextureCoordinates = textureCoordinates;
+                mesh.TriangleIndices = triangleIndices;
+                model.Geometry = mesh;
+                model.Material = new DiffuseMaterial
+                {
+                    DiffuseColor = new Color4(0.7f, 0.7f, 0.7f, 1.0f)
+                };
+                List<Matrix> instances = new List<Matrix>();
+                
+                for (int i = 0; i < part.Translations.Count; i++)
+                {
+                    SharpDX.Vector3 scale = new SharpDX.Vector3(part.Scales[i].X, part.Scales[i].Y, part.Scales[i].Z);
+                    SharpDX.Quaternion rotation = new SharpDX.Quaternion(part.Rotations[i].X, part.Rotations[i].Y, part.Rotations[i].Z, part.Rotations[i].W);
+                    SharpDX.Vector3 translation = new SharpDX.Vector3(part.Translations[i].X, part.Translations[i].Y, part.Translations[i].Z);
+                    SharpDX.Matrix matrix = new SharpDX.Matrix();
+                    SharpDX.Vector3 scalingOrigin = SharpDX.Vector3.Zero;
+                    matrix = SharpDX.Matrix.Transformation(scalingOrigin, SharpDX.Quaternion.Identity, scale, SharpDX.Vector3.Zero, rotation, translation);
+                    // Transform Y-up to Z-up
+                    // instances.Add(matrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2));
+                    instances.Add(matrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2));
+
+                }
+                ModelInstances = instances.ToArray();
+                model.Instances = ModelInstances;
+                ModelGroup.AddNode(model);
+            }
+        }
+
+        private Vector3 ConsiderQuatToEulerConvert(Vector4 v4N)
+        {
+            Vector3 res = new Vector3();
+            if (Math.Abs(v4N.Magnitude - 1) < 0.01)  // Quaternion
+            {
+                var quat = new Quaternion(v4N.X, v4N.Y, v4N.Z, v4N.W);
+                var a = new SharpDX.Vector3(1, 0, 0);
+                var result = SharpDX.Vector3.Transform(a, quat);
+                res.X = result.X;
+                res.Y = result.Y;
+                res.Z = result.Z;
+            }
+            else
+            {
+                res.X = v4N.X;
+                res.Y = v4N.Y;
+                res.Z = v4N.Z;
+            }
+            return res;
+        }
 }

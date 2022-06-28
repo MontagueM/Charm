@@ -334,56 +334,6 @@ public enum ELOD : sbyte
     All,
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x60)]
-public struct D2Class_306D8080
-{
-    public long FileSize;
-    [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_386D8080> MaterialAssignments;
-    [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_376D8080> Parts;
-    [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_366D8080> Meshes;
-    public long Unk38;
-    public long Unk40;
-    public float TexcoordScaleX;
-    public float Unk4C;
-    public float TexcoordScaleY;
-    public Vector2 TexcoordOffset;
-}
-    
-[StructLayout(LayoutKind.Sequential, Size = 0x6)]
-public struct D2Class_386D8080
-{
-    public ushort PartIndex;
-    public sbyte Unk02;
-    public sbyte Unk03;
-    public ushort Unk04;
-}
-
-[StructLayout(LayoutKind.Sequential, Size = 0xC)]
-public struct D2Class_376D8080
-{
-    public uint IndexOffset;
-    public uint IndexCount;
-    public ushort Unk08;
-    public sbyte DetailLevel;
-    public sbyte PrimitiveType;
-}
-    
-[StructLayout(LayoutKind.Sequential, Size = 0x14)]
-public struct D2Class_366D8080
-{
-    [DestinyField(FieldType.TagHash)]
-    public IndexHeader Indices;
-    [DestinyField(FieldType.TagHash)]
-    public VertexHeader Vertices1;
-    [DestinyField(FieldType.TagHash)]
-    public VertexHeader Vertices2;
-    [DestinyField(FieldType.TagHash)]
-    public VertexHeader Vertices3;
-}
-
 public class Part
 {
     public uint IndexOffset;
@@ -398,13 +348,6 @@ public class Part
     public List<Vector4> VertexColours = new List<Vector4>();
     public Material Material;
 
-    public Part(D2Class_376D8080 staticPartEntry)
-    {
-        IndexOffset = staticPartEntry.IndexOffset;
-        IndexCount = staticPartEntry.IndexCount;
-        PrimitiveType = (EPrimitiveType)staticPartEntry.PrimitiveType;
-    }
-        
     public Part()
     {
     }

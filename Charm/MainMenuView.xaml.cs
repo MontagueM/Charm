@@ -114,8 +114,11 @@ public partial class MainMenuView : UserControl
                 case 0x80809AD8:
                     newTab.Content = new DynamicView(hash);
                     break;
+                case 0x80806D44:
+                    newTab.Content = new StaticView(hash);
+                    break;
                 default:
-                    MessageBox.Show("Unknown reference: " + reference);
+                    MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
                     break;
             }
         }
