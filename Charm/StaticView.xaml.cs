@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,22 +19,16 @@ public partial class StaticView : UserControl
 
     public StaticView(string hash)
     {
+        Hash = hash;
         InitializeComponent();
-        GetStaticContainer(hash);
-    }
-    
-    private void OnControlLoaded(object sender, RoutedEventArgs e)
-    {
-        LoadStatic(ELOD.MostDetail);
     }
 
     private void GetStaticContainer(string hash)
     {
         Container = new StaticContainer(new TagHash(hash));
-        var a = 0;
     }
 
-    private async void LoadStatic(ELOD detailLevel)
+    public async void LoadStatic(ELOD detailLevel)
     {
         await Task.Run(() =>
         {
@@ -47,6 +42,23 @@ public partial class StaticView : UserControl
         var displayParts = MakeDisplayParts(parts);
         MVM.SetChildren(displayParts);
         MVM.Title = Hash;
+        ExportFullStatic();
+    }
+
+    private void ExportFullStatic()
+    {
+        InfoConfigHandler.MakeFile();
+        string meshName = Hash;
+        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        List<Part> parts = Container.Load(ELOD.MostDetail);
+        FbxHandler.AddStaticToScene(parts);
+        Directory.CreateDirectory(savePath);
+        Container.SaveMaterialsFromParts(savePath, parts);
+        FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+        InfoConfigHandler.SetMeshName(meshName);
+        InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, true);
+        InfoConfigHandler.WriteToFile(savePath);
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(List<Part> containerParts)

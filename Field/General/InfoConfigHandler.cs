@@ -52,7 +52,11 @@ public class InfoConfigHandler
 
     public static void SetUnrealInteropPath(string interopPath)
     {
-        _config["UnrealInteropPath"] = new string(interopPath.Split("\\Content\\").Last().ToArray());
+        _config["UnrealInteropPath"] = new string(interopPath.Split("\\Content").Last().ToArray()).TrimStart('\\');
+        if (_config["UnrealInteropPath"] == "")
+        {
+            _config["UnrealInteropPath"] = "Content";
+        }
     }
 
     public static void WriteToFile(string path)

@@ -126,6 +126,8 @@ public struct D2Class_AA6D8080
     public List<D2Class_3F018080> Unk2F0;
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_90008080> Unk300;
+    [DestinyOffset(0x324)] 
+    public DestinyHash PSVector4Container; // should be taghash or smth
     
     [DestinyOffset(0x340), DestinyField(FieldType.TagHash)]
     public ShaderHeader ComputeShader;

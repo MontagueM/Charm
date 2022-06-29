@@ -1,5 +1,6 @@
 ﻿using Field.Entities;
 using Field.General;
+using Field.Statics;
 using Internal.Fbx;
 
 namespace Field.Models;
@@ -16,7 +17,7 @@ public class FbxHandler
         _scene = FbxScene.Create(_manager, "");
     }
 
-    public static FbxMesh AddMeshPartToScene(DynamicPart part, int index)
+    public static FbxMesh AddMeshPartToScene(Part part, int index)
     {
         FbxMesh mesh = CreateMeshPart(part);
         FbxNode node = FbxNode.Create(_manager, mesh.GetName());
@@ -46,14 +47,14 @@ public class FbxHandler
 
 
         AddMaterial(mesh, node, index);
-        AddSmoothing(mesh);
+        // AddSmoothing(mesh);
 
         
         _scene.GetRootNode().AddChild(node);
         return mesh;
     }
 
-    private static FbxMesh CreateMeshPart(DynamicPart part)
+    private static FbxMesh CreateMeshPart(Part part)
     {
         FbxMesh mesh = FbxMesh.Create(_manager, $"{part.IndexOffset}_{part.IndexCount}_{part.DetailLevel}");
         // Conversion lookup table
@@ -81,20 +82,30 @@ public class FbxHandler
         return mesh;
     }
 
-    private static void AddNormalsToMesh(FbxMesh mesh, DynamicPart part)
+    private static void AddNormalsToMesh(FbxMesh mesh, Part part)
     {
         FbxLayerElementNormal normalsLayer = FbxLayerElementNormal.Create(mesh, "normalLayerName");
         normalsLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         normalsLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+        bool bQuaternion = true;
+        // Check if quaternion
         foreach (var normal in part.VertexNormals)
         {
-            normalsLayer.GetDirectArray().Add(new FbxVector4(normal.X, normal.Y, normal.Z));
+            if (bQuaternion)
+            {
+                Vector3 norm3 = normal.ToEuler();
+                normalsLayer.GetDirectArray().Add(new FbxVector4(norm3.X, norm3.Y, norm3.Z));
+            }
+            else
+            {
+                normalsLayer.GetDirectArray().Add(new FbxVector4(normal.X, normal.Y, normal.Z));
+            }
         }
         mesh.GetLayer(0).SetNormals(normalsLayer);
     }
 
     
-    private static void AddTexcoordsToMesh(FbxMesh mesh, DynamicPart part)
+    private static void AddTexcoordsToMesh(FbxMesh mesh, Part part)
     {
         FbxLayerElementUV uvLayer = FbxLayerElementUV.Create(mesh, "uvLayerName");
         uvLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
@@ -107,7 +118,7 @@ public class FbxHandler
     }
     
     
-    private static void AddColoursToMesh(FbxMesh mesh, DynamicPart part)
+    private static void AddColoursToMesh(FbxMesh mesh, Part part)
     {
         FbxLayerElementVertexColor colLayer = FbxLayerElementVertexColor.Create(mesh, "colourLayerName");
         colLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
@@ -264,6 +275,16 @@ public class FbxHandler
         }
     }
 
+    public static void AddStaticToScene(List<Part> parts)
+    {
+        for( int i = 0; i < parts.Count; i++)
+        {
+            Part part = parts[i];
+            AddMeshPartToScene(part, i);
+        }
+    }
+
+    
     public static void Clear()
     {
         _scene.Clear();

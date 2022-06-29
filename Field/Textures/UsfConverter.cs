@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Runtime.InteropServices;
+using System.Text;
+using Field.General;
 using Field.Models;
 
 namespace Field.Textures;
@@ -207,7 +209,28 @@ public class UsfConverter
                 else if (cbuffer.Count == material.Header.Unk300.Count)
                 {
                     data = material.Header.Unk300;
-                }   
+                }
+                else
+                {
+                    if (material.Header.PSVector4Container.Hash != 0xffff_ffff)
+                    {
+                        // Try the Vector4 storage file
+                        Field.General.File container = new Field.General.File(PackageHandler.GetEntryReference(material.Header.PSVector4Container.GetHashString()));
+                        byte[] containerData = container.GetData();
+                        int num = containerData.Length / 16;
+                        if (cbuffer.Count == num)
+                        {
+                            List<Vector4> float4s = new List<Vector4>();
+                            for (int i = 0; i < containerData.Length / 16; i++)
+                            {
+                                float4s.Add(StructConverter.ToStructure<Vector4>(containerData.Skip(i*16).Take(16).ToArray()));
+                            }
+
+                            data = float4s;
+                        }                        
+                    }
+
+                }
             }
 
 
@@ -221,8 +244,15 @@ public class UsfConverter
                         {
                             try
                             {
-                                var x = data[i].Unk00.X; // really bad but required
-                                usf.AppendLine($"    float4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}),");
+                                if (data[i] is Vector4)
+                                {
+                                    usf.AppendLine($"    float4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}),");
+                                }
+                                else
+                                {
+                                    var x = data[i].Unk00.X; // really bad but required
+                                    usf.AppendLine($"    float4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}),");
+                                }
                             }
                             catch (Exception e)  // figure out whats up here, taniks breaks it
                             {

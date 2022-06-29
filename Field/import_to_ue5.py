@@ -14,10 +14,34 @@ class CharmImporter:
     def import_entity(self):
         self.make_materials()
         self.import_entity_mesh()
-        self.assign_materials()
-        unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)  # this doesnt actually work, if anyone can fix it please do
+        self.assign_entity_materials()
+        unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
 
-    def assign_materials(self) -> None:
+    def import_static(self):
+        self.make_materials()
+        self.import_static_mesh()
+        self.assign_static_materials()
+        unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
+
+    def assign_static_materials(self) -> None:
+        # Identify static mesh
+        mesh = unreal.load_asset(f"/Game/{self.content_path}/{self.config['MeshName']}")
+
+        # Check material slots and compare names from config
+        mesh_materials = mesh.get_editor_property("static_materials")
+        material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.content_path}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
+        new_mesh_materials = []
+        for skeletal_material in mesh_materials:
+            slot_name = skeletal_material.get_editor_property("material_slot_name").__str__()
+            slot_name = '_'.join(slot_name.split('_')[:-1])
+            if slot_name in material_slot_name_dict.keys():
+                if material_slot_name_dict[slot_name] != None:
+                    skeletal_material.set_editor_property("material_interface", material_slot_name_dict[slot_name])
+            new_mesh_materials.append(skeletal_material)
+        print(new_mesh_materials)
+        mesh.set_editor_property("static_materials", new_mesh_materials)
+
+    def assign_entity_materials(self) -> None:
         # Identify entity mesh
         mesh = unreal.load_asset(f"/Game/{self.content_path}/{self.config['MeshName']}")
 
@@ -48,6 +72,7 @@ class CharmImporter:
         options.set_editor_property('import_textures', False)
         options.set_editor_property('import_materials', False)
         options.set_editor_property('import_as_skeletal', True)
+        # todo fix this, not static mesh import data
         options.static_mesh_import_data.set_editor_property('convert_scene', False)
         options.static_mesh_import_data.set_editor_property('combine_meshes', False)
         options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
@@ -56,6 +81,29 @@ class CharmImporter:
         options.static_mesh_import_data.set_editor_property("build_nanite", False)  # todo add nanite option
         task.set_editor_property("options", options)
 
+        unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+        
+    def import_static_mesh(self) -> None:
+        task = unreal.AssetImportTask()
+        task.set_editor_property("automated", True)
+        task.set_editor_property("destination_path", f"/Game/{self.content_path}/")
+        task.set_editor_property("filename", f"{self.folder_path}/{self.config['MeshName']}.fbx")
+        task.set_editor_property("replace_existing", True)
+        task.set_editor_property("save", True)
+    
+        options = unreal.FbxImportUI()
+        options.set_editor_property('import_mesh', True)
+        options.set_editor_property('import_textures', False)
+        options.set_editor_property('import_materials', False)
+        options.set_editor_property('import_as_skeletal', False)
+        options.static_mesh_import_data.set_editor_property('convert_scene', False)
+        options.static_mesh_import_data.set_editor_property('combine_meshes', False)
+        options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
+        options.static_mesh_import_data.set_editor_property('auto_generate_collision', False)
+        options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
+        options.static_mesh_import_data.set_editor_property("build_nanite", False)  # todo add nanite option
+        task.set_editor_property("options", options)
+    
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
 
     def make_materials(self) -> None:

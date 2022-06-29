@@ -32,14 +32,6 @@ public partial class DynamicView : UserControl
         InitializeComponent();
         Hash = hash;
     }
-    
-    private void OnControlLoaded(object sender, RoutedEventArgs e)
-    {
-        if (Hash != null)
-        {
-            LoadDynamic(ELOD.MostDetail);    
-        }
-    }
 
     public void LoadDynamic(ELOD detailLevel, Entity entity, string name)
     {
@@ -53,7 +45,7 @@ public partial class DynamicView : UserControl
         Entity = new Entity(hash);
     }
 
-    private void LoadDynamic(ELOD detailLevel)
+    public void LoadDynamic(ELOD detailLevel)
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         // MVM.SetEntity(displayParts, Entity.Skeleton.GetBoneNodes());
@@ -88,17 +80,13 @@ public partial class DynamicView : UserControl
         InfoConfigHandler.MakeFile();
         string meshName = Entity.Hash;
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
-        Console.WriteLine("A");
         FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
         Directory.CreateDirectory(savePath);
-        Console.WriteLine("B");
         Entity.SaveMaterialsFromParts(savePath, dynamicParts);
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
-        Console.WriteLine("C");
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
         AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName);
-        Console.WriteLine("D");
         InfoConfigHandler.WriteToFile(savePath);
     }
 

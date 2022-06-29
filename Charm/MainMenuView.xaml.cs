@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using Field.General;
+using Field.Models;
 using Field.Textures;
 using SharpDX.Toolkit.Graphics;
 
@@ -112,10 +113,14 @@ public partial class MainMenuView : UserControl
             switch (reference)
             {
                 case 0x80809AD8:
-                    newTab.Content = new DynamicView(hash);
+                    DynamicView dynamicView = new DynamicView(hash);
+                    dynamicView.LoadDynamic(ELOD.MostDetail);
+                    newTab.Content = dynamicView;
                     break;
                 case 0x80806D44:
-                    newTab.Content = new StaticView(hash);
+                    StaticView staticView = new StaticView(hash);
+                    staticView.LoadStatic(ELOD.MostDetail);
+                    newTab.Content = staticView;
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));

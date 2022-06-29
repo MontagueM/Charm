@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Field.General;
 using Field.Models;
+using Field.Textures;
 using File = Field.General.File;
 
 namespace Field.Statics;
@@ -12,6 +13,18 @@ public class StaticContainer
     public StaticContainer(TagHash hash)
     {
         _hash = hash.Hash;
+    }
+    
+    public void SaveMaterialsFromParts(string saveDirectory, List<Part> parts)
+    {
+        Directory.CreateDirectory($"{saveDirectory}/Textures");
+        Directory.CreateDirectory($"{saveDirectory}/Shaders");
+        foreach (var part in parts)
+        {
+            if (part.Material == null) continue;
+            part.Material.SaveAllTextures($"{saveDirectory}/Textures");
+            part.Material.SavePixelShader($"{saveDirectory}/Shaders");
+        }
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllLoadStaticContainer", CallingConvention = CallingConvention.StdCall)]
@@ -43,6 +56,7 @@ public struct PartUnmanaged
     public File.UnmanagedData VertexTexcoords;
     public File.UnmanagedData VertexNormals;
     public File.UnmanagedData VertexColours;
+    public uint MaterialHash;
 
     public Part Decode()
     {
@@ -50,7 +64,7 @@ public struct PartUnmanaged
         outPart.IndexOffset = IndexOffset;
         outPart.IndexCount = IndexCount;
         outPart.PrimitiveType = (EPrimitiveType)PrimitiveType;
-        
+        outPart.Material = new Material(new TagHash(MaterialHash));
         // Indices
         UIntVector3[] indices = new UIntVector3[Indices.dataSize];
         Copy(Indices.dataPtr, indices, 0, Indices.dataSize);
