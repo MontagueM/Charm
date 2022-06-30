@@ -97,7 +97,8 @@ class CharmImporter:
         options.set_editor_property('import_materials', False)
         options.set_editor_property('import_as_skeletal', False)
         options.static_mesh_import_data.set_editor_property('convert_scene', False)
-        options.static_mesh_import_data.set_editor_property('combine_meshes', False)
+        options.static_mesh_import_data.set_editor_property('import_uniform_scale', 100.0)
+        options.static_mesh_import_data.set_editor_property('combine_meshes', True)  # maybe not best? idk
         options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
         options.static_mesh_import_data.set_editor_property('auto_generate_collision', False)
         options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
@@ -147,6 +148,7 @@ class CharmImporter:
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "BaseColor", unreal.MaterialProperty.MP_BASE_COLOR)
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "Metallic", unreal.MaterialProperty.MP_METALLIC)
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "Roughness", unreal.MaterialProperty.MP_ROUGHNESS)
+        unreal.MaterialEditingLibrary.connect_material_property(mat_att, "EmissiveColor", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "OpacityMask", unreal.MaterialProperty.MP_OPACITY_MASK)
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "Normal", unreal.MaterialProperty.MP_NORMAL)
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "AmbientOcclusion", unreal.MaterialProperty.MP_AMBIENT_OCCLUSION)

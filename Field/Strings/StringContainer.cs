@@ -6,11 +6,7 @@ namespace Field.Strings;
 public class StringContainer : Tag
 {
     public D2Class_EF998080 Header;
-        
-    public StringContainer(string hash) : base(hash)
-    {
-    }
-        
+    
     public StringContainer(TagHash hash) : base(hash)
     {
     }

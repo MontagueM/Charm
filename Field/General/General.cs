@@ -102,6 +102,9 @@ public class DestinyHash : IComparable<DestinyHash>
 
         return 0;
     }
+    
+    public static implicit operator uint(DestinyHash d) => d.Hash;
+    public static implicit operator string(DestinyHash d) => d.GetHashString();
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 4)]
@@ -122,6 +125,18 @@ public class TagHash : DestinyHash
     public T ToTag<T>() where T : Tag, new()
     {
         return (T)Activator.CreateInstance(typeof(T), new object[] { GetHashString() });
+    }
+    
+    public bool IsValid()
+    {
+        if (Hash < 0x80a00000 || Hash > 0x80ffffff)
+        {
+            return false;
+        }
+        
+        // If really wanted to, could check if the pkg id exists etc but bad for performance
+
+        return true;
     }
 }
 

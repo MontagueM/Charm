@@ -17,10 +17,6 @@ public class Entity : Tag
     public EntityModel PhysicsModel;
     public EntityControlRig ControlRig;
     
-    public Entity(string hash) : base(hash)
-    {
-    }
-    
     public Entity(TagHash hash) : base(hash)
     {
     }

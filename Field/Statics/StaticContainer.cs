@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using Field.General;
 using Field.Models;
 using Field.Textures;
-using File = Field.General.File;
 
 namespace Field.Statics;
 
@@ -28,11 +27,11 @@ public class StaticContainer
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllLoadStaticContainer", CallingConvention = CallingConvention.StdCall)]
-    public extern static File.UnmanagedData DllLoadStaticContainer(uint staticContainerHash, ELOD detailLevel);
+    public extern static DestinyFile.UnmanagedData DllLoadStaticContainer(uint staticContainerHash, ELOD detailLevel);
 
     public List<Part> Load(ELOD detailLevel)
     {
-        File.UnmanagedData unmanagedData = DllLoadStaticContainer(_hash, detailLevel);
+        DestinyFile.UnmanagedData unmanagedData = DllLoadStaticContainer(_hash, detailLevel);
         List<Part> outPart = new List<Part>();
         outPart.EnsureCapacity(unmanagedData.dataSize);
         for (int i = 0; i < unmanagedData.dataSize; i++)
@@ -50,12 +49,12 @@ public struct PartUnmanaged
     public uint IndexOffset;
     public uint IndexCount;
     public sbyte PrimitiveType;
-    public File.UnmanagedData Indices;
-    public File.UnmanagedData VertexIndices;
-    public File.UnmanagedData VertexPositions;
-    public File.UnmanagedData VertexTexcoords;
-    public File.UnmanagedData VertexNormals;
-    public File.UnmanagedData VertexColours;
+    public DestinyFile.UnmanagedData Indices;
+    public DestinyFile.UnmanagedData VertexIndices;
+    public DestinyFile.UnmanagedData VertexPositions;
+    public DestinyFile.UnmanagedData VertexTexcoords;
+    public DestinyFile.UnmanagedData VertexNormals;
+    public DestinyFile.UnmanagedData VertexColours;
     public uint MaterialHash;
 
     public Part Decode()

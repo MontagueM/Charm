@@ -79,18 +79,22 @@ public enum FieldType
     StringNoContainer, // u32 key no container
 }
     
-public class Tag : File
+public class Tag : DestinyFile
 {
     public Type HeaderType;
+    public new TagHash Hash;
 
-    public Tag(string hash) : base(hash)
+    public Tag(TagHash tagHash) : base(tagHash)
     {
-        Parse();
-    }
-
-    public Tag(TagHash hash) : base(hash.GetHashString())
-    {
-        Parse();
+        Hash = tagHash;
+        Console.WriteLine($"Parsing tag {tagHash}.");
+        if (tagHash.IsValid())
+        {
+            Console.WriteLine($"Parsing valid tag {tagHash}.");
+            Parse();
+            Console.WriteLine($"Parsed valid tag {tagHash}.");
+        }
+        Console.WriteLine($"Parsed tag {tagHash}.");
     }
 
     public virtual object GetHeader()
@@ -141,6 +145,10 @@ public class Tag : File
                 else if (field.FieldType == typeof(DestinyHash))
                 {
                     field.SetValue(result, new DestinyHash(handle.ReadUInt32()));
+                }
+                else if (field.FieldType == typeof(TagHash))
+                {
+                    field.SetValue(result, new TagHash(handle.ReadUInt32()));
                 }
                 else
                 {
@@ -242,26 +250,16 @@ public class Tag : File
                         for (int i = 0; i < arraySize; i++)
                         {
                             TagHash tagHash = new TagHash(handle.ReadUInt32());
-                            if (tagHash.Hash != 0x811c9dc5 && tagHash.Hash != 0xffffffff && CheckTagHashValid(tagHash.GetHashString()))
-                            {
-                                // dynamic tag = Activator.CreateInstance(field.FieldType.GetElementType(), tagHash);
-                                // tag.Parse();
-                                dynamic tag = PackageHandler.GetTag(field.FieldType.GetElementType(), tagHash);
-                                tagArray[i] = tag;
-                            }
+                            dynamic tag = PackageHandler.GetTag(field.FieldType.GetElementType(), tagHash);
+                            tagArray[i] = tag;
                         }
                         field.SetValue(result, tagArray);
                     }
                     else
                     {
                         TagHash tagHash = new TagHash(handle.ReadUInt32());
-                        if (tagHash.Hash != 0x811c9dc5 && tagHash.Hash != 0xffffffff)
-                        {
-                            // dynamic tag = Activator.CreateInstance(field.FieldType, tagHash);
-                            // tag.Parse();
-                            dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash);
-                            field.SetValue(result, tag);
-                        }
+                        dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash);
+                        field.SetValue(result, tag);
                     }
                 }
                 else if (fieldType == FieldType.ResourcePointer)
@@ -349,10 +347,8 @@ public class Tag : File
                     {
                         tagHash = new TagHash(u64);
                     }
-                    if (tagHash.Hash != 0x811c9dc5 && tagHash.Hash != 0xffffffff && (tagHash.Hash != 0 && bIs32Bit == 0))
+                    if (tagHash.Hash != 0 && bIs32Bit == 0)
                     {
-                        // dynamic tag = Activator.CreateInstance(field.FieldType, tagHash);
-                        // tag.Parse();
                         dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash);
                         field.SetValue(result, tag);
                     }
@@ -366,7 +362,7 @@ public class Tag : File
                     {
                         tagHash = new TagHash(u64);
                     }
-                    if ((tagHash.Hash != 0x811c9dc5 && tagHash.Hash != 0xffffffff) || (tagHash.Hash != 0 && bIs32Bit == 0))
+                    if (tagHash.Hash != 0 && bIs32Bit == 0)
                     {
                         StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash);
                         DestinyHash key = new DestinyHash(handle.ReadUInt32());
@@ -431,36 +427,6 @@ public class Tag : File
     protected virtual void ParseData()
     {
     }
-        
-    public static bool CheckTagHashValid(string hash)
-    {
-        if (hash.Length != 8 && hash.Length != 16)
-        {
-            return false;
-        }
-
-        if (hash.Length == 8)
-        { 
-            // Quick verify
-            if (!hash.EndsWith("80") || hash.EndsWith("8080"))
-            {
-                return false;
-            }
-
-            return true;
-        }
-        if (hash.Length == 16)
-        {
-            // Quick verify
-            if (!hash.StartsWith("0000"))
-            {
-                return false;
-            }
-
-            return true;
-        }
-        return false;
-    }
 }
 
 public class Tag<T> : Tag where T : struct
@@ -468,10 +434,6 @@ public class Tag<T> : Tag where T : struct
     public T Header;
 
     public Tag(TagHash tagHash) : base(tagHash)
-    {
-    }
-        
-    public Tag(string tagHash) : base(tagHash)
     {
     }
 

@@ -31,7 +31,11 @@ public class PackageHandler
     
     public static dynamic GetTag(Type type, TagHash hash)
     {
-        // Check if tag exists already in the cache and return if it does exist
+        if (!hash.IsValid())
+        {
+            return null;
+        }
+            // Check if tag exists already in the cache and return if it does exist
         if (Cache.ContainsKey(hash.Hash))
         {
             return Cache[hash.Hash];
@@ -39,24 +43,24 @@ public class PackageHandler
         // Create a new tag and add it to the cache as it doesn't exist
         dynamic tag = Activator.CreateInstance(type, hash);
         bool status = AddToCache(hash.Hash, tag);
-        if (!status)
+        if (!status)  // already exists in cache, caused by threading
         {
-            Environment.Exit(77);
-            throw new Exception($"Failed to add tag with hash {hash} to PackageHandler cache.");
+            // Environment.Exit(77);
+            // throw new Exception($"Failed to add tag with hash {hash} to PackageHandler cache.");
         }
         return tag;
     }
     
     public static void GenerateGlobalStringContainerCache()
     {
-        List<string> hashes = new List<string>();
+        List<DestinyHash> hashes = new List<DestinyHash>();
         // Iterate over all the 02218080 files and their string containers inside
-        File.UnmanagedData pAllEntries = GetAllEntriesOfReference("045EAE80", "02218080"); // 045EAE80 to speed it up
+        DestinyFile.UnmanagedData pAllEntries = GetAllEntriesOfReference(new DestinyHash("045EAE80").Hash, new DestinyHash("02218080").Hash); // 045EAE80 to speed it up
         int[] vals = new int[pAllEntries.dataSize];
         Marshal.Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
         foreach (int i in vals)
         {
-            string hash = Endian.U32ToString((uint) (0x80800000 + (0x172 << 0xD) + i));
+            TagHash hash = new TagHash((uint) (0x80800000 + (0x172 << 0xD) + i));
             Tag<D2Class_02218080> f = new Tag<D2Class_02218080>(hash);
             foreach (var q in f.Header.Unk28)
             {
@@ -86,22 +90,22 @@ public class PackageHandler
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllEntriesOfReference", CallingConvention = CallingConvention.StdCall)]
-    public extern static File.UnmanagedData GetAllEntriesOfReference([MarshalAs(UnmanagedType.LPStr)] string hash, [MarshalAs(UnmanagedType.LPStr)] string reference);
+    public extern static DestinyFile.UnmanagedData GetAllEntriesOfReference(uint hash, uint reference);
 
     [DllImport("Symmetry.dll", EntryPoint = "DllGetEntryReference", CallingConvention = CallingConvention.StdCall)]
-    public extern static IntPtr DllGetEntryReference([MarshalAs(UnmanagedType.LPStr)] string hash);
+    public extern static uint DllGetEntryReference(uint hash);
 
     [DllImport("Symmetry.dll", EntryPoint = "DllGetEntryTypes", CallingConvention = CallingConvention.StdCall)]
-    public extern static int DllGetEntryTypes([MarshalAs(UnmanagedType.LPStr)] string hash);
+    public extern static int DllGetEntryTypes(uint hash);
 
     
-    public static string GetEntryReference(string hash)
+    public static TagHash GetEntryReference(TagHash hash)
     {
-        IntPtr pRef = DllGetEntryReference(hash);
-        return Marshal.PtrToStringAnsi(pRef);
+        uint refHash = DllGetEntryReference(hash.Hash);
+        return new TagHash(refHash);
     }
 
-    public static void GetEntryTypes(string hash, out int hType, out int hSubtype)
+    public static void GetEntryTypes(uint hash, out int hType, out int hSubtype)
     {
         int combinedTypes = DllGetEntryTypes(hash);
         hType = (combinedTypes >> 16) & 0xFFFF;

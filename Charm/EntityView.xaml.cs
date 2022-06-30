@@ -18,7 +18,7 @@ namespace Charm;
 public partial class DynamicView : UserControl
 {
     public Entity Entity;
-    public string Hash;
+    public TagHash Hash;
     private List<DynamicPart> dynamicParts;
     private string Name;
 
@@ -27,7 +27,7 @@ public partial class DynamicView : UserControl
         InitializeComponent();
     }
 
-    public DynamicView(string hash)
+    public DynamicView(TagHash hash)
     {
         InitializeComponent();
         Hash = hash;
@@ -40,7 +40,7 @@ public partial class DynamicView : UserControl
         Name = name;
     }
 
-    private void GetDynamicContainer(string hash)
+    private void GetDynamicContainer(TagHash hash)
     {
         Entity = new Entity(hash);
     }
@@ -68,7 +68,7 @@ public partial class DynamicView : UserControl
         }
         else
         {
-            MVM.Title = Hash;
+            MVM.Title = Hash.GetHashString();
         }
         // MVM.SubTitle = "Entity";
         FbxHandler.Clear();
@@ -78,7 +78,7 @@ public partial class DynamicView : UserControl
     private void ExportFullEntity()
     {
         InfoConfigHandler.MakeFile();
-        string meshName = Entity.Hash;
+        string meshName = Entity.Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
         Directory.CreateDirectory(savePath);

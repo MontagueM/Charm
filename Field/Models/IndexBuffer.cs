@@ -10,7 +10,7 @@ public class IndexBuffer : Tag
     private D2Class_IndexHeader header;
 
     
-    public IndexBuffer(string hash, IndexHeader parent) : base(hash)
+    public IndexBuffer(TagHash hash, IndexHeader parent) : base(hash)
     {
         header = parent.Header;
     }

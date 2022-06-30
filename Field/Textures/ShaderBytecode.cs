@@ -7,11 +7,7 @@ public class ShaderBytecode : Tag
     public ShaderBytecode(TagHash hash) : base(hash)
     {
     }
-    
-    public ShaderBytecode(string hash) : base(hash)
-    {
-    }
-    
+
     public byte[] GetBufferData()
     {
         GetHandle();

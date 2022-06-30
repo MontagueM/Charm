@@ -2,12 +2,12 @@
 
 namespace Field.General;
 
-public class File
+public class DestinyFile
 {
-    public string Hash;
+    public TagHash Hash;
     protected BinaryReader Handle;
     
-    public File(string hash)
+    public DestinyFile(TagHash hash)
     {
         Hash = hash;
     }
@@ -44,7 +44,7 @@ public class File
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetData", CallingConvention = CallingConvention.StdCall)]
-    public static extern UnmanagedData DllGetData([MarshalAs(UnmanagedType.LPStr)] string hash);
+    public static extern UnmanagedData DllGetData(uint hash);
 
     public void CloseHandle()
     {

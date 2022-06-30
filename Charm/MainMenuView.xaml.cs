@@ -30,64 +30,45 @@ public partial class MainMenuView : UserControl
 
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Return)
+        if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R)
         {
-            string hash = TagHashBox.Text.Replace(" ", "");
-            if (Field.General.Tag.CheckTagHashValid(hash))
-            {
+            return;
+        }
+        string strHash = TagHashBox.Text.Replace(" ", "");
+        if (strHash.Length == 16)
+        {
+            strHash = TagHash64Handler.GetTagHash64(strHash);
+        }
+        TagHash hash = new TagHash(strHash);
+        if (!hash.IsValid())
+        {
+            TagHashBox.Text = "INVALID HASH";
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.Return:
                 AddWindow(hash);
-            }
-            else
-            {
-                TagHashBox.Text = "INVALID HASH";
-            }
-        }
-        else if (e.Key == Key.H)
-        {
-            string hash = TagHashBox.Text.Replace(" ", "");
-            if (Field.General.Tag.CheckTagHashValid(hash))
-            {
-                if (hash.Length == 16)
-                {
-                    hash = TagHash64Handler.GetTagHash64(hash);
-                }
+                break;
+            case Key.H:
                 OpenHxD(hash);
-            }
-            else
-            {
-                TagHashBox.Text = "INVALID HASH";
-            } 
-        }
-        else if (e.Key == Key.R)
-        {
-            string hash = TagHashBox.Text.Replace(" ", "");
-            if (Field.General.Tag.CheckTagHashValid(hash))
-            {
-                string refHash = PackageHandler.GetEntryReference(hash);
-                if (Field.General.Tag.CheckTagHashValid(refHash))
-                {
-                    OpenHxD(refHash);
-                }
-                else
-                {
-                    TagHashBox.Text = "INVALID HASH";
-                } 
-            }
-            else
-            {
-                TagHashBox.Text = "INVALID HASH";
-            } 
+                break;
+            case Key.R:
+                TagHash refHash = PackageHandler.GetEntryReference(hash);
+                OpenHxD(refHash);
+                break;
         }
     }
 
-    private void OpenHxD(string hash)
+    private void OpenHxD(TagHash hash)
     {
         string path = $"I:/temp/{hash}.bin";
         using (var fileStream = new FileStream(path, FileMode.Create))
         {
             using (var writer = new BinaryWriter(fileStream))
             {
-                byte[] data = new Field.General.File(hash).GetData();
+                byte[] data = new DestinyFile(hash).GetData();
                 writer.Write(data);
             }
         }
@@ -100,17 +81,17 @@ public partial class MainMenuView : UserControl
         }.Start();
     }
         
-    public static void AddWindow(string hash)
+    public static void AddWindow(TagHash hash)
     {
         // Adds a new tab to the tab control
         TabItem newTab = new TabItem();
-        newTab.Header = hash;
-        uint reference = Endian.SwapU32(Convert.ToUInt32(PackageHandler.GetEntryReference(hash), 16));
+        newTab.Header = hash.GetHashString();
+        DestinyHash reference = PackageHandler.GetEntryReference(hash);
         int hType, hSubtype;
         PackageHandler.GetEntryTypes(hash, out hType, out hSubtype);
         if (hType == 8)
         {
-            switch (reference)
+            switch (reference.Hash)
             {
                 case 0x80809AD8:
                     DynamicView dynamicView = new DynamicView(hash);
@@ -121,6 +102,11 @@ public partial class MainMenuView : UserControl
                     StaticView staticView = new StaticView(hash);
                     staticView.LoadStatic(ELOD.MostDetail);
                     newTab.Content = staticView;
+                    break;
+                case 0x808093AD:
+                    MapView mapView = new MapView(hash);
+                    mapView.LoadMap();
+                    newTab.Content = mapView;
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));

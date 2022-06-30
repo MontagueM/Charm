@@ -14,9 +14,6 @@ public class Material : Tag
     public Material(TagHash hash) : base(hash)
     {
     }
-    public Material(string hash) : base(hash)
-    {
-    }
 
     protected override void ParseStructs()
     {
@@ -127,7 +124,7 @@ public struct D2Class_AA6D8080
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_90008080> Unk300;
     [DestinyOffset(0x324)] 
-    public DestinyHash PSVector4Container; // should be taghash or smth
+    public TagHash PSVector4Container;
     
     [DestinyOffset(0x340), DestinyField(FieldType.TagHash)]
     public ShaderHeader ComputeShader;

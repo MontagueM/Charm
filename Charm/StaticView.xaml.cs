@@ -14,22 +14,24 @@ namespace Charm;
 public partial class StaticView : UserControl
 {
     public StaticContainer Container;
-    public string Hash;
+    public TagHash Hash;
     private List<Part> parts;
 
-    public StaticView(string hash)
+    public StaticView(TagHash hash)
     {
         Hash = hash;
         InitializeComponent();
     }
 
-    private void GetStaticContainer(string hash)
+    private void GetStaticContainer(TagHash hash)
     {
-        Container = new StaticContainer(new TagHash(hash));
+        Container = new StaticContainer(new TagHash(hash.Hash));
     }
 
     public async void LoadStatic(ELOD detailLevel)
     {
+        GetStaticContainer(Hash);
+        parts = Container.Load(detailLevel);
         await Task.Run(() =>
         {
             if (Container == null)
@@ -41,14 +43,14 @@ public partial class StaticView : UserControl
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         var displayParts = MakeDisplayParts(parts);
         MVM.SetChildren(displayParts);
-        MVM.Title = Hash;
+        MVM.Title = Hash.GetHashString();
         ExportFullStatic();
     }
 
     private void ExportFullStatic()
     {
         InfoConfigHandler.MakeFile();
-        string meshName = Hash;
+        string meshName = Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         List<Part> parts = Container.Load(ELOD.MostDetail);
         FbxHandler.AddStaticToScene(parts);

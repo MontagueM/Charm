@@ -148,23 +148,6 @@ public class UsfConverter
         } while (line != null);
     }
 
-    private void WriteTextureComments(Material material, bool bIsVertexShader)
-    {
-        var textureIndices = textures.Select(x => x.Index);
-        var array = material.Header.PSTextures.OrderBy(x => x.TextureIndex);
-        if (bIsVertexShader) array = material.Header.VSTextures.OrderBy(x => x.TextureIndex);
-        foreach (var inputTexture in array)
-        {
-            string hash = "NONE";
-            if (textureIndices.Contains((int)inputTexture.TextureIndex))  // if our input texture indices match the textures in the shader
-            {
-                hash = inputTexture.Texture.Hash;
-            }
-
-            usf.AppendLine($"// t{inputTexture.TextureIndex} : {hash}");
-        }
-    }
-
     private void WriteCbuffers(Material material, bool bIsVertexShader)
     {
         // Try to find matches, pixel shader has Unk2D0 Unk2E0 Unk2F0 Unk300 available
@@ -215,7 +198,7 @@ public class UsfConverter
                     if (material.Header.PSVector4Container.Hash != 0xffff_ffff)
                     {
                         // Try the Vector4 storage file
-                        Field.General.File container = new Field.General.File(PackageHandler.GetEntryReference(material.Header.PSVector4Container.GetHashString()));
+                        DestinyFile container = new DestinyFile(PackageHandler.GetEntryReference(material.Header.PSVector4Container));
                         byte[] containerData = container.GetData();
                         int num = containerData.Length / 16;
                         if (cbuffer.Count == num)

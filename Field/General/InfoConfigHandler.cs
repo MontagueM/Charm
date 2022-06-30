@@ -71,6 +71,6 @@ public class InfoConfigHandler
 
 public struct TexInfo
 {
-    public string Hash  { get; set; }
+    public DestinyHash Hash  { get; set; }
     public bool SRGB  { get; set; }
 }

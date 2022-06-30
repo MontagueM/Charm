@@ -11,9 +11,12 @@ public class TagHash64Handler
     
     public static uint GetTagHash64(ulong tagHash64)
     {
-        if (tagHash64Dict.ContainsKey(tagHash64))
+        if (CheckTagHash64Valid(tagHash64))
         {
-            return tagHash64Dict[tagHash64];
+            if (tagHash64Dict.ContainsKey(tagHash64))
+            {
+                return tagHash64Dict[tagHash64];
+            }  
         }
 
         return 0;
@@ -34,10 +37,19 @@ public class TagHash64Handler
     {
         tagHash64Dict.TryAdd(tag, hash);
     }
+    
+    public static bool CheckTagHash64Valid(ulong hash)
+    {
+        if ((hash & 0xffff) != 0)  // Only want to accept a subset of them
+        {
+            return false;
+        }
+        return true;
+    }
 
     public static void Initialise()
     {
-        File.UnmanagedDictionary unmanagedDictionary = DllInitialiseTH64H();
+        DestinyFile.UnmanagedDictionary unmanagedDictionary = DllInitialiseTH64H();
         long[] keys = new long[unmanagedDictionary.Keys.dataSize];
         Marshal.Copy(unmanagedDictionary.Keys.dataPtr, keys, 0, unmanagedDictionary.Keys.dataSize);
         int[] vals = new int[unmanagedDictionary.Values.dataSize];
@@ -47,5 +59,5 @@ public class TagHash64Handler
     }
 
     [DllImport("Symmetry.dll", EntryPoint = "DllInitialiseTH64H", CallingConvention = CallingConvention.StdCall)]
-    public extern static File.UnmanagedDictionary DllInitialiseTH64H();
+    public extern static DestinyFile.UnmanagedDictionary DllInitialiseTH64H();
 }

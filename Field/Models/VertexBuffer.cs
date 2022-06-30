@@ -7,7 +7,7 @@ public class VertexBuffer : Tag
 {
     private D2Class_VertexHeader header;
 
-    public VertexBuffer(string hash, VertexHeader parent) : base(hash)
+    public VertexBuffer(TagHash hash, VertexHeader parent) : base(hash)
     {
         header = parent.Header;
     }

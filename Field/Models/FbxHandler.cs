@@ -194,7 +194,7 @@ public class FbxHandler
     private static void AddSmoothing(FbxMesh mesh)
     {
         FbxLayerElementSmoothing smoothingLayer = FbxLayerElementSmoothing.Create(mesh, $"smoothingLayerName");
-        smoothingLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByPolygon);
+        smoothingLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByEdge);
         smoothingLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
         mesh.GetLayer(0).SetSmoothing(smoothingLayer);
         
@@ -250,6 +250,7 @@ public class FbxHandler
         exporter.Initialize(fileName, -1);  // -1 == use binary not ascii, binary is more space efficient
         exporter.Export(_scene);
         exporter.Destroy();
+        _scene.Clear();
     }
 
     public static void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel)
