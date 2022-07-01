@@ -87,14 +87,10 @@ public class Tag : DestinyFile
     public Tag(TagHash tagHash) : base(tagHash)
     {
         Hash = tagHash;
-        Console.WriteLine($"Parsing tag {tagHash}.");
         if (tagHash.IsValid())
         {
-            Console.WriteLine($"Parsing valid tag {tagHash}.");
             Parse();
-            Console.WriteLine($"Parsed valid tag {tagHash}.");
         }
-        Console.WriteLine($"Parsed tag {tagHash}.");
     }
 
     public virtual object GetHeader()

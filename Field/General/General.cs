@@ -69,7 +69,7 @@ public class DestinyHash : IComparable<DestinyHash>
     public override string ToString()
     {
         if (_string != "") return _string;
-        return Endian.U32ToString(Hash);
+        return GetHashString();
     }
         
     public override int GetHashCode()

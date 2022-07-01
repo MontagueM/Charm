@@ -86,7 +86,7 @@ public partial class DynamicView : UserControl
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName);
+        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
         InfoConfigHandler.WriteToFile(savePath);
     }
 

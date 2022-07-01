@@ -207,7 +207,7 @@ public struct Vector4
         return new Vector3(X, Y, Z);
     }
     
-    public Vector3 ToEuler()
+    public Vector3 NormalToEuler()
     {
         Vector3 res = new Vector3();
         if (Math.Abs(Magnitude - 1) < 0.01)  // Quaternion

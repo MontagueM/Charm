@@ -19,10 +19,83 @@ class CharmImporter:
 
     def import_static(self):
         self.make_materials()
-        self.import_static_mesh()
+        self.import_static_mesh(combine=True)
         self.assign_static_materials()
         unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
 
+    def import_map(self):
+        # self.make_materials()
+        # self.import_static_mesh(combine=False)
+        self.assemble_map()
+        # self.assign_static_materials()
+        unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
+        
+    def assemble_map(self) -> None:
+        # Create new level asset
+        unreal.EditorLevelLibrary.new_level(f'/Game/{self.content_path}/map_{self.config["MeshName"]}')
+        
+        static_names = {}
+        for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.content_path}/Statics/', recursive=False):
+            name = x.split('/')[-1].split("_")[1]
+            if name not in static_names.keys():
+                static_names[name] = []
+            static_names[name].append(x)
+
+        for static, instances in self.config["Instances"].items():
+            try:  # fix this
+                parts = static_names[static]
+            except:
+                print(f"Failed on {static}")
+            for part in parts:
+                sm = unreal.EditorAssetLibrary.load_asset(part)
+                for instance in instances:
+                    quat = unreal.Quat(instance["Rotation"][0], instance["Rotation"][1], instance["Rotation"][2], instance["Rotation"][3])
+                    euler = quat.euler()
+                    rotator = unreal.Rotator(euler.x, euler.y, euler.z)
+                    location = [-instance["Translation"][0]*100, instance["Translation"][1]*100, instance["Translation"][2]*100]
+                    s = unreal.EditorLevelLibrary.spawn_actor_from_object(sm, location=location, rotation=rotator)  # l must be UE4 Object
+                    s.set_actor_label(s.get_actor_label() + f"_{instance['Scale']}")
+                    s.set_actor_relative_scale3d([instance["Scale"]]*3)
+
+
+        # for i, a in enumerate(assets):
+        #     name = a.split('.')[0].split('/')[-1].split(origin_folder)[-1][1:]
+        #     # s = name.split('_')
+        #     # print(s)
+        #     # continue
+        #     sm = unreal.EditorAssetLibrary.load_asset(a)
+        #     # instance_component = unreal.HierarchicalInstancedStaticMeshComponent()
+        #     # instance_component.set_editor_property("static_mesh", sm)
+        #     try:
+        #         data = helper[name]
+        #     except KeyError:
+        #         continue
+        #     # transforms = unreal.Array(unreal.Transform)
+        #     for d in data:
+        #         r = d[1]
+        #         l = d[0]
+        #         l = [-l[0]*100, l[1]*100, l[2]*100]
+        #         rotator = unreal.Rotator(-r[0], r[1], -r[2])
+        #         # transform = rotator.transform()
+        #         # transform.set_editor_property("translation", l)
+        #         # transform.set_editor_property("scale3d", [d[2]]*3)
+        #         # transforms.append(transform)
+        #         s = unreal.EditorLevelLibrary.spawn_actor_from_object(sm, location=l, rotation=rotator)  # l must be UE4 Object
+        #         s.set_actor_scale3d([d[2]]*3)
+        # 
+        #     # instance_component.add_instances(transforms, False)
+        #     # unreal.EditorAssetLibrary.duplicate_asset(template_path + "HLODTemplate", f"/Game/{data_path}/actors/{name}")
+        #     # actorbp = unreal.EditorAssetLibrary.load_asset(f"/Game/{data_path}/actors/{name}")
+        #     # actor_spawn = unreal.EditorAssetLibrary.load_blueprint_class(f"/Game/{data_path}/actors/{name}")
+        #     # actor = unreal.EditorLevelLibrary.spawn_actor_from_class(actor_spawn, location=[0, 0, 0])
+        #     # actor.set_actor_label(name, True)
+        # 
+        #     # instance_component.attach_to_component(actor.root_component, ' ', unreal.AttachmentRule.KEEP_WORLD,
+        #     #                                        unreal.AttachmentRule.KEEP_WORLD, unreal.AttachmentRule.KEEP_WORLD,
+        #     #                                        False)
+        #     # actor.set_editor_property('root_component', instance_component)
+        unreal.EditorLevelLibrary.save_current_level()
+        
     def assign_static_materials(self) -> None:
         # Identify static mesh
         mesh = unreal.load_asset(f"/Game/{self.content_path}/{self.config['MeshName']}")
@@ -83,10 +156,10 @@ class CharmImporter:
 
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
         
-    def import_static_mesh(self) -> None:
+    def import_static_mesh(self, combine) -> None:
         task = unreal.AssetImportTask()
         task.set_editor_property("automated", True)
-        task.set_editor_property("destination_path", f"/Game/{self.content_path}/")
+        task.set_editor_property("destination_path", f"/Game/{self.content_path}/Statics/")
         task.set_editor_property("filename", f"{self.folder_path}/{self.config['MeshName']}.fbx")
         task.set_editor_property("replace_existing", True)
         task.set_editor_property("save", True)
@@ -98,7 +171,7 @@ class CharmImporter:
         options.set_editor_property('import_as_skeletal', False)
         options.static_mesh_import_data.set_editor_property('convert_scene', False)
         options.static_mesh_import_data.set_editor_property('import_uniform_scale', 100.0)
-        options.static_mesh_import_data.set_editor_property('combine_meshes', True)  # maybe not best? idk
+        options.static_mesh_import_data.set_editor_property('combine_meshes', combine)
         options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
         options.static_mesh_import_data.set_editor_property('auto_generate_collision', False)
         options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)

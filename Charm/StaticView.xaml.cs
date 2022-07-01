@@ -53,13 +53,13 @@ public partial class StaticView : UserControl
         string meshName = Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         List<Part> parts = Container.Load(ELOD.MostDetail);
-        FbxHandler.AddStaticToScene(parts);
+        FbxHandler.AddStaticToScene(parts, meshName);
         Directory.CreateDirectory(savePath);
         Container.SaveMaterialsFromParts(savePath, parts);
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, true);
+        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Static);
         InfoConfigHandler.WriteToFile(savePath);
     }
 

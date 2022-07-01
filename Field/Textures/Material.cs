@@ -63,10 +63,9 @@ public class Material : Tag
 
     public void SavePixelShader(string saveDirectory)
     {
-        if (Header.PixelShader != null)
+        if (Header.PixelShader != null && !File.Exists($"{saveDirectory}/PS_{Hash}.usf"))
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
-            File.WriteAllText($"{saveDirectory}/{Hash}_PS.hlsl", hlsl);
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
             if (usf != String.Empty)
             {
@@ -77,10 +76,9 @@ public class Material : Tag
     
     public void SaveVertexShader(string saveDirectory)
     {
-        if (Header.VertexShader != null)
+        if (Header.VertexShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
         {
             string hlsl = Decompile(Header.VertexShader.GetBytecode());
-            File.WriteAllText($"{saveDirectory}/VS_{Hash}.hlsl", hlsl);
             string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
             if (usf != String.Empty)
             {

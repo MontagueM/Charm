@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <PackageReference Include="DirectXTexNet" Version="1.0.3" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta1" />
       <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
     </ItemGroup>
 
@@ -36,10 +37,6 @@
       <None Update="import_to_ue5.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\ThirdParty\DXDecompiler\src\DXDecompiler\DXDecompiler.csproj" />
     </ItemGroup>
 
     <ItemGroup>

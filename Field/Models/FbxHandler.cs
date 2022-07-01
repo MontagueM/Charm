@@ -17,9 +17,9 @@ public class FbxHandler
         _scene = FbxScene.Create(_manager, "");
     }
 
-    public static FbxMesh AddMeshPartToScene(Part part, int index)
+    public static FbxMesh AddMeshPartToScene(Part part, int index, string meshName)
     {
-        FbxMesh mesh = CreateMeshPart(part);
+        FbxMesh mesh = CreateMeshPart(part, index, meshName);
         FbxNode node = FbxNode.Create(_manager, mesh.GetName());
         node.SetNodeAttribute(mesh);
 
@@ -54,9 +54,21 @@ public class FbxHandler
         return mesh;
     }
 
-    private static FbxMesh CreateMeshPart(Part part)
+    private static FbxMesh CreateMeshPart(Part part, int index, string meshName)
     {
-        FbxMesh mesh = FbxMesh.Create(_manager, $"{part.IndexOffset}_{part.IndexCount}_{part.DetailLevel}");
+        bool done = false;
+        FbxMesh mesh = null;
+        while (!done)
+        {
+            try
+            {
+                mesh = FbxMesh.Create(_manager, $"{meshName}_{index}");
+                done = true;
+            }
+            catch (Exception e)
+            {
+            }
+        }
         // Conversion lookup table
         Dictionary<int, int> lookup = new Dictionary<int, int>();
         for (int i = 0; i < part.VertexIndices.Count; i++)
@@ -93,7 +105,7 @@ public class FbxHandler
         {
             if (bQuaternion)
             {
-                Vector3 norm3 = normal.ToEuler();
+                Vector3 norm3 = normal.NormalToEuler();
                 normalsLayer.GetDirectArray().Add(new FbxVector4(norm3.X, norm3.Y, norm3.Z));
             }
             else
@@ -264,7 +276,7 @@ public class FbxHandler
         for( int i = 0; i < dynamicParts.Count; i++)
         {
             var dynamicPart = dynamicParts[i];
-            FbxMesh mesh = AddMeshPartToScene(dynamicPart, i);
+            FbxMesh mesh = AddMeshPartToScene(dynamicPart, i, entity.Hash);
             
             if (dynamicPart.VertexWeights.Count > 0)
             {
@@ -276,12 +288,12 @@ public class FbxHandler
         }
     }
 
-    public static void AddStaticToScene(List<Part> parts)
+    public static void AddStaticToScene(List<Part> parts, string meshName)
     {
         for( int i = 0; i < parts.Count; i++)
         {
             Part part = parts[i];
-            AddMeshPartToScene(part, i);
+            AddMeshPartToScene(part, i, meshName);
         }
     }
 

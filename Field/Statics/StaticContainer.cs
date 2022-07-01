@@ -8,10 +8,10 @@ namespace Field.Statics;
 
 public class StaticContainer
 {
-    private uint _hash;
+    public TagHash Hash;
     public StaticContainer(TagHash hash)
     {
-        _hash = hash.Hash;
+        Hash = hash;
     }
     
     public void SaveMaterialsFromParts(string saveDirectory, List<Part> parts)
@@ -20,7 +20,7 @@ public class StaticContainer
         Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var part in parts)
         {
-            if (part.Material == null) continue;
+            if (part.Material == null || !part.Material.Hash.IsValid()) continue;
             part.Material.SaveAllTextures($"{saveDirectory}/Textures");
             part.Material.SavePixelShader($"{saveDirectory}/Shaders");
         }
@@ -31,7 +31,7 @@ public class StaticContainer
 
     public List<Part> Load(ELOD detailLevel)
     {
-        DestinyFile.UnmanagedData unmanagedData = DllLoadStaticContainer(_hash, detailLevel);
+        DestinyFile.UnmanagedData unmanagedData = DllLoadStaticContainer(Hash.Hash, detailLevel);
         List<Part> outPart = new List<Part>();
         outPart.EnsureCapacity(unmanagedData.dataSize);
         for (int i = 0; i < unmanagedData.dataSize; i++)
