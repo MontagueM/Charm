@@ -33,7 +33,7 @@ public partial class MapView : UserControl
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         var displayParts = MakeDisplayParts();
         MVM.SetChildren(displayParts);
-        ExportFullMap();  // 8CB6B580 bazaar, 17A7B580 annex, 933ED580 courtyard
+        ExportFullMap();  // 8CB6B580 bazaar, 17A7B580 annex, 933ED580 courtyard, 6E35D580 office
     }
     
     private void ExportFullMap()
@@ -82,7 +82,7 @@ public partial class MapView : UserControl
         {
             // inefficiency as sometimes there are two instance count entries with same hash. why? idk
             var model = StaticMap.Header.Statics[c.StaticIndex].Static;
-            var parts = model.Load(ELOD.LeastDetail);
+            var parts = model.Load(ELOD.MostDetail);
             for (int i = c.InstanceOffset; i < c.InstanceOffset + c.InstanceCount; i++)
             {
                 foreach (var part in parts)

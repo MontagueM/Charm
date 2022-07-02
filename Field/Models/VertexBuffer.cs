@@ -70,7 +70,7 @@ public class VertexBuffer : Tag
             case 0x18:
                 part.VertexPositions.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
                 part.VertexNormals.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
-                // Tangent
+                part.VertexTangents.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
                 break;
             default:
                 return false;
@@ -85,22 +85,15 @@ public class VertexBuffer : Tag
             case 0x4:
                 part.VertexTexcoords.Add(new Vector2(Handle.ReadInt16(), Handle.ReadInt16()));
                 break;
-            case 0x8:
-                DynamicPart dynamicPart = (DynamicPart) part;
-                var vertexWeight = new VertexWeight();
-                vertexWeight.WeightValues = new IntVector4(Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte());
-                vertexWeight.WeightIndices = new IntVector4(Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte());
-                dynamicPart.VertexWeights.Add(vertexWeight);
-                break;
             case 0x18:
                 part.VertexPositions.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
                 part.VertexNormals.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
-                // Tangent
+                part.VertexTangents.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
                 break;
             case 0x30: // physics
                 part.VertexPositions.Add(new Vector4(Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle()));
                 part.VertexNormals.Add(new Vector4(Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle()));
-                // Tangent
+                part.VertexTangents.Add(new Vector4(Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle()));
                 break;
             default:
                 return false;

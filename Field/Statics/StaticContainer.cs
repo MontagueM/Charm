@@ -54,6 +54,7 @@ public struct PartUnmanaged
     public DestinyFile.UnmanagedData VertexPositions;
     public DestinyFile.UnmanagedData VertexTexcoords;
     public DestinyFile.UnmanagedData VertexNormals;
+    public DestinyFile.UnmanagedData VertexTangents;
     public DestinyFile.UnmanagedData VertexColours;
     public uint MaterialHash;
 
@@ -88,6 +89,11 @@ public struct PartUnmanaged
         Vector4[] vertexNormals = new Vector4[VertexNormals.dataSize];
         Copy(VertexNormals.dataPtr, vertexNormals, 0, VertexNormals.dataSize);
         outPart.VertexNormals = vertexNormals.ToList();
+        
+        // VertexTangents
+        Vector4[] vertexTangents = new Vector4[VertexTangents.dataSize];
+        Copy(VertexTangents.dataPtr, vertexTangents, 0, VertexTangents.dataSize);
+        outPart.VertexTangents = vertexTangents.ToList();
         
         // VertexColours
         Vector4[] vertexColours = new Vector4[VertexColours.dataSize];

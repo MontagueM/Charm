@@ -27,6 +27,11 @@ public class FbxHandler
         {
             AddNormalsToMesh(mesh, part);
         }
+        
+        if (part.VertexTangents.Count > 0)
+        {
+            AddTangentsToMesh(mesh, part);
+        }
 
         if (part.VertexTexcoords.Count > 0)
         {
@@ -47,7 +52,7 @@ public class FbxHandler
 
 
         AddMaterial(mesh, node, index);
-        // AddSmoothing(mesh);
+        AddSmoothing(mesh);
 
         
         _scene.GetRootNode().AddChild(node);
@@ -114,6 +119,30 @@ public class FbxHandler
             }
         }
         mesh.GetLayer(0).SetNormals(normalsLayer);
+    }
+    
+    private static void AddTangentsToMesh(FbxMesh mesh, Part part)
+    {
+        FbxLayerElementTangent tangentsLayer = FbxLayerElementTangent.Create(mesh, "tangentLayerName");
+        tangentsLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
+        tangentsLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+        bool bQuaternion = true;
+        // Check if quaternion
+        
+        // todo more efficient to do AddMultiple
+        foreach (var tangent in part.VertexTangents)
+        {
+            if (bQuaternion)
+            {
+                Vector3 tan3 = tangent.NormalToEuler();
+                tangentsLayer.GetDirectArray().Add(new FbxVector4(tan3.X, tan3.Y, tan3.Z));
+            }
+            else
+            {
+                tangentsLayer.GetDirectArray().Add(new FbxVector4(tangent.X, tangent.Y, tangent.Z));
+            }
+        }
+        mesh.GetLayer(0).SetTangents(tangentsLayer);
     }
 
     
@@ -208,6 +237,15 @@ public class FbxHandler
         FbxLayerElementSmoothing smoothingLayer = FbxLayerElementSmoothing.Create(mesh, $"smoothingLayerName");
         smoothingLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByEdge);
         smoothingLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+
+        FbxArrayInt edges = mesh.mEdgeArray;
+        List<int> sharpEdges = new List<int>();
+        var numEdges = edges.GetCount();
+        for (int i = 0; i < numEdges; i++)
+        {
+            smoothingLayer.GetDirectArray().Add(i);
+        }
+        
         mesh.GetLayer(0).SetSmoothing(smoothingLayer);
         
         mesh.SetMeshSmoothness(FbxMesh.ESmoothness.eFine);

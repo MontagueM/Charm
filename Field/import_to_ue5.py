@@ -28,10 +28,10 @@ class CharmImporter:
         unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
 
     def import_map(self):
-        self.make_materials()
+        # self.make_materials()
         self.import_static_mesh(combine=False)
-        self.assemble_map()
         self.assign_map_materials()
+        self.assemble_map()
         unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
         
     def assemble_map(self) -> None:
@@ -357,5 +357,5 @@ class CharmImporter:
 
 if __name__ == "__main__":
     importer = CharmImporter(os.path.dirname(os.path.realpath(__file__)), b_unique_folder=False)
-    # importer.import_entity()
-    importer.update_material_code()
+    importer.import_entity()
+    # importer.update_material_code()

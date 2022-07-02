@@ -18,7 +18,7 @@ public class InfoConfigHandler
         _config.Add("Materials", mats);
         Dictionary<string, string> parts = new Dictionary<string, string>();
         _config.Add("Parts", parts);
-        ConcurrentDictionary<string, List<JsonInstance>> instances = new ConcurrentDictionary<string, List<JsonInstance>>();
+        ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> instances = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
         _config.Add("Instances", instances);
         bOpen = true;
     }
@@ -76,7 +76,7 @@ public class InfoConfigHandler
 
     public static void AddStaticInstances(List<D2Class_406D8080> instances, string staticMesh)
     {
-        List<JsonInstance> jsonInstances = new List<JsonInstance>(instances.Count);
+        ConcurrentBag<JsonInstance> jsonInstances = new ConcurrentBag<JsonInstance>();
         foreach (var instance in instances)
         {
             jsonInstances.Add(new JsonInstance
@@ -88,7 +88,10 @@ public class InfoConfigHandler
         }
         if (_config["Instances"].ContainsKey(staticMesh))
         {
-            _config["Instances"][staticMesh].AddRange(jsonInstances);
+            foreach (var jsonInstance in jsonInstances)
+            {
+                _config["Instances"][staticMesh].Add(jsonInstance);
+            }
         }
         else
         {
