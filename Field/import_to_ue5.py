@@ -4,10 +4,14 @@ import json
 
 
 class CharmImporter:
-    def __init__(self, folder_path: str) -> None:
+    def __init__(self, folder_path: str, b_unique_folder: bool) -> None:
         self.folder_path = folder_path
-        self.config = json.load(open(self.folder_path + "/info.cfg"))
-        self.content_path = f"{self.config['UnrealInteropPath']}/{self.config['MeshName']}"
+        info_name = f"{__file__.split('/')[-1].split('_')[0]}_info.cfg"
+        self.config = json.load(open(self.folder_path + f"/{info_name}"))
+        if b_unique_folder:
+            self.content_path = f"{self.config['UnrealInteropPath']}/{self.config['MeshName']}"
+        else:
+            self.content_path = f"{self.config['UnrealInteropPath']}"
         if not unreal.EditorAssetLibrary.does_directory_exist(self.content_path):
             unreal.EditorAssetLibrary.make_directory(self.content_path)
 
@@ -24,10 +28,10 @@ class CharmImporter:
         unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
 
     def import_map(self):
-        # self.make_materials()
-        # self.import_static_mesh(combine=False)
+        self.make_materials()
+        self.import_static_mesh(combine=False)
         self.assemble_map()
-        # self.assign_static_materials()
+        self.assign_map_materials()
         unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
         
     def assemble_map(self) -> None:
@@ -51,7 +55,7 @@ class CharmImporter:
                 for instance in instances:
                     quat = unreal.Quat(instance["Rotation"][0], instance["Rotation"][1], instance["Rotation"][2], instance["Rotation"][3])
                     euler = quat.euler()
-                    rotator = unreal.Rotator(euler.x, euler.y, euler.z)
+                    rotator = unreal.Rotator(-euler.x+180, -euler.y+180, -euler.z)
                     location = [-instance["Translation"][0]*100, instance["Translation"][1]*100, instance["Translation"][2]*100]
                     s = unreal.EditorLevelLibrary.spawn_actor_from_object(sm, location=location, rotation=rotator)  # l must be UE4 Object
                     s.set_actor_label(s.get_actor_label() + f"_{instance['Scale']}")
@@ -95,14 +99,33 @@ class CharmImporter:
         #     #                                        False)
         #     # actor.set_editor_property('root_component', instance_component)
         unreal.EditorLevelLibrary.save_current_level()
-        
+
+    def assign_map_materials(self) -> None:
+        for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.content_path}/Statics/', recursive=False):
+            # Identify static mesh
+            mesh = unreal.load_asset(x)
+
+            # Check material slots and compare names from config
+            mesh_materials = mesh.get_editor_property("static_materials")
+            material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.config['UnrealInteropPath']}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
+            new_mesh_materials = []
+            for skeletal_material in mesh_materials:
+                slot_name = skeletal_material.get_editor_property("material_slot_name").__str__()
+                slot_name = '_'.join(slot_name.split('_')[:-1])
+                if slot_name in material_slot_name_dict.keys():
+                    if material_slot_name_dict[slot_name] != None:
+                        skeletal_material.set_editor_property("material_interface", material_slot_name_dict[slot_name])
+                new_mesh_materials.append(skeletal_material)
+            print(new_mesh_materials)
+            mesh.set_editor_property("static_materials", new_mesh_materials)
+    
     def assign_static_materials(self) -> None:
         # Identify static mesh
         mesh = unreal.load_asset(f"/Game/{self.content_path}/{self.config['MeshName']}")
 
         # Check material slots and compare names from config
         mesh_materials = mesh.get_editor_property("static_materials")
-        material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.content_path}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
+        material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.config['UnrealInteropPath']}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
         new_mesh_materials = []
         for skeletal_material in mesh_materials:
             slot_name = skeletal_material.get_editor_property("material_slot_name").__str__()
@@ -120,7 +143,7 @@ class CharmImporter:
 
         # Check material slots and compare names from config
         mesh_materials = mesh.get_editor_property("materials")
-        material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.content_path}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
+        material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.config['UnrealInteropPath']}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
         new_mesh_materials = []
         for skeletal_material in mesh_materials:
             slot_name = skeletal_material.get_editor_property("material_slot_name").__str__()
@@ -185,7 +208,7 @@ class CharmImporter:
         materials = list(self.config["Materials"].keys())
 
         # Check if materials exist already
-        existing_materials = [x.split('/')[-1].split('.')[0][2:] for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.content_path}/Materials/', recursive=False) if unreal.EditorAssetLibrary.find_asset_data(x).asset_class == 'Material']
+        existing_materials = [x.split('/')[-1].split('.')[0][2:] for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.config["UnrealInteropPath"]}/Materials/', recursive=False) if unreal.EditorAssetLibrary.find_asset_data(x).asset_class == 'Material']
         materials_to_make = list(set(materials)-set(existing_materials))
 
         # If doesn't exist, make
@@ -195,7 +218,7 @@ class CharmImporter:
 
     def make_material(self, matstr: str) -> unreal.Material:
         # Make base material
-        material = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_" + matstr, f"/Game/{self.content_path}/Materials", unreal.Material, unreal.MaterialFactoryNew())
+        material = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_" + matstr, f"/Game/{self.config['UnrealInteropPath']}/Materials", unreal.Material, unreal.MaterialFactoryNew())
 
         if os.path.exists(f"{self.folder_path}/Shaders/PS_{matstr}.usf"):
             # Add textures
@@ -236,12 +259,10 @@ class CharmImporter:
         # Definitions
 
         # Check the material shader exists
-        code = ""
-        f = open(f"{self.folder_path}/Shaders/PS_{matstr}.usf", "r").read()
-        code = f
+        code = open(f"{self.folder_path}/Shaders/PS_{matstr}.usf", "r").read()
 
         # If the material is masked, change its blend mode for alpha + make it two-sided
-        if "// masked" in f:
+        if "// masked" in code:
             material.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
             material.set_editor_property("two_sided", True)
 
@@ -313,7 +334,28 @@ class CharmImporter:
 
         return texture_samples
 
+    """
+    Updates all materials used by this model to the latest .usfs found in the Shaders/ folder.
+    Very useful for improving the material quality without much manual work.
+    """
+    def update_material_code(self) -> None:
+        # Get all materials to update
+        materials = list(self.config["Materials"].keys())
+
+        # For each material, find the code node and update it
+        mats = {unreal.EditorAssetLibrary.load_asset(f"/Game/{self.config['UnrealInteropPath']}/Materials/M_{matstr}"): matstr for matstr in materials}
+        it = unreal.ObjectIterator()
+        for x in it:
+            if x.get_outer() in mats:
+                if isinstance(x, unreal.MaterialExpressionCustom):
+                    code = open(f"{self.folder_path}/Shaders/PS_{mats[x.get_outer()]}.usf", "r").read()
+                    x.set_editor_property('code', code)
+                    print(f"Updated material {mats[x.get_outer()]}")
+
+        unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/Materials/", False)
+
 
 if __name__ == "__main__":
-    importer = CharmImporter(os.path.dirname(os.path.realpath(__file__)))
-    importer.import_entity()
+    importer = CharmImporter(os.path.dirname(os.path.realpath(__file__)), b_unique_folder=False)
+    # importer.import_entity()
+    importer.update_material_code()

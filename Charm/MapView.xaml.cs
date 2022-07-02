@@ -33,7 +33,7 @@ public partial class MapView : UserControl
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         var displayParts = MakeDisplayParts();
         MVM.SetChildren(displayParts);
-        ExportFullMap();
+        ExportFullMap();  // 8CB6B580 bazaar, 17A7B580 annex, 933ED580 courtyard
     }
     
     private void ExportFullMap()
@@ -41,6 +41,10 @@ public partial class MapView : UserControl
         InfoConfigHandler.MakeFile();
         string meshName = Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        if (ConfigHandler.GetSingleFolderMapsEnabled())
+        {
+            savePath = ConfigHandler.GetExportSavePath() + "/Maps";
+        }
         InfoConfigHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
         // Extract all
@@ -67,7 +71,7 @@ public partial class MapView : UserControl
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map);
+        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetSingleFolderMapsEnabled());
         InfoConfigHandler.WriteToFile(savePath);
     }
 

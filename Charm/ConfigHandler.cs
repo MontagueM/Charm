@@ -8,6 +8,8 @@ public class ConfigHandler
 {
     private static Configuration _config = ConfigurationManager.OpenExeConfiguration(System.Windows.Forms.Application.ExecutablePath);
 
+    // Todo convert these into general functions, eg GetBool(...) or GetPath(...) SetPath(...) etc, way cleaner
+    
     #region packagesPath
     public static void CheckPackagesPathIsValid()
     {
@@ -194,6 +196,33 @@ public class ConfigHandler
         return _config.AppSettings.Settings["unrealInteropEnabled"].Value == "False";
     }
     
+    #endregion
+
+    #region singleFolderMapsEnabled
+
+    public static void SetSingleFolderMapsEnabled(bool bSingleFolderMapsEnabled)
+    {
+        if (_config.AppSettings.Settings["singleFolderMapsEnabled"] == null)
+        {
+            _config.AppSettings.Settings.Add("singleFolderMapsEnabled", bSingleFolderMapsEnabled.ToString());
+        }
+        else
+        {
+            _config.AppSettings.Settings["singleFolderMapsEnabled"].Value = bSingleFolderMapsEnabled.ToString();
+        }
+
+        Save();
+    }
+    
+    public static bool GetSingleFolderMapsEnabled()
+    {
+        if (_config.AppSettings.Settings["singleFolderMapsEnabled"] == null)
+        {
+            return true;
+        }
+        return _config.AppSettings.Settings["singleFolderMapsEnabled"].Value == "False";
+    }
+
     #endregion
     
     private static void Save()

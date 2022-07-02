@@ -99,7 +99,14 @@ public class InfoConfigHandler
     public static void WriteToFile(string path)
     {
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
-        File.WriteAllText($"{path}/info.cfg", s);
+        if (_config.ContainsKey("MeshName"))
+        {
+            File.WriteAllText($"{path}/{_config["MeshName"]}_info.cfg", s);
+        }
+        else
+        {
+            File.WriteAllText($"{path}/info.cfg", s);
+        }
         _config.Clear();
         bOpen = false;
     }

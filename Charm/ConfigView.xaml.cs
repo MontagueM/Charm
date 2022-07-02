@@ -51,6 +51,14 @@ public partial class ConfigView : UserControl
         cii.SettingValue = bval.ToString();
         cii.ChangeButton.Click += UnrealInteropEnabled_OnClick;
         ConfigPanel.Children.Add(cii);
+        
+        // Enable combined extraction folder for maps
+        ConfigSettingControl cef = new ConfigSettingControl();
+        cef.SettingName = "Use single folder extraction for maps";
+        bval = ConfigHandler.GetSingleFolderMapsEnabled();
+        cef.SettingValue = bval.ToString();
+        cef.ChangeButton.Click += SingleFolderMapsEnabled_OnClick;
+        ConfigPanel.Children.Add(cef);
     }
 
     private void PackagesPath_OnClick(object sender, RoutedEventArgs e)
@@ -74,6 +82,12 @@ public partial class ConfigView : UserControl
     private void UnrealInteropEnabled_OnClick(object sender, RoutedEventArgs e)
     {
         ConfigHandler.SetUnrealInteropEnabled(!ConfigHandler.GetUnrealInteropEnabled());
+        PopulateConfigPanel();
+    }
+    
+    private void SingleFolderMapsEnabled_OnClick(object sender, RoutedEventArgs e)
+    {
+        ConfigHandler.SetSingleFolderMapsEnabled(!ConfigHandler.GetSingleFolderMapsEnabled());
         PopulateConfigPanel();
     }
 }
