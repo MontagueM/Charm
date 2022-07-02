@@ -6,12 +6,31 @@
              xmlns:local="clr-namespace:Charm"
              mc:Ignorable="d"
              d:DesignHeight="1080" d:DesignWidth="1920">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="ctModules">
+            <Grid Height="150">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100*" />
+                    <ColumnDefinition Width="100*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Left" Text="{Binding Name}"/>
+                <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding Hash}" Click="DisplayMapButton_OnClick" Content="Get map"/>
+            </Grid>
+        </ControlTemplate>  
+    </UserControl.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100*"/>
-        </Grid.RowDefinitions>
+        <ListView Grid.Row="0" x:Name="MapList">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                    <Setter Property="Template" Value="{StaticResource ctModules}"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"></StackPanel>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
     </Grid>
 </UserControl>

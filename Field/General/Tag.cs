@@ -337,13 +337,13 @@ public class Tag : DestinyFile
                 else if (fieldType == FieldType.TagHash64)
                 {
                     TagHash tagHash = new TagHash(handle.ReadUInt32());
-                    int bIs32Bit = (handle.ReadInt32() >> 31) & 0x1;
+                    int bIs32Bit = handle.ReadInt32();
                     var u64 = handle.ReadUInt64();
                     if (bIs32Bit == 0)
                     {
                         tagHash = new TagHash(u64);
                     }
-                    if (tagHash.Hash != 0 && bIs32Bit == 0)
+                    if (tagHash.IsValid())// && bIs32Bit == 0)
                     {
                         dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash);
                         field.SetValue(result, tag);

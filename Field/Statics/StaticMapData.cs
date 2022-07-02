@@ -38,8 +38,8 @@ public struct D2Class_AD938080
     [DestinyOffset(0x98)]
     public DestinyHash Unk98;
     [DestinyOffset(0xA0)]
-    public Vector4 UnkA0;
-    public Vector4 UnkB0;
+    public Vector4 UnkA0; // likely a bound corner
+    public Vector4 UnkB0; // likely the other bound corner
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
@@ -194,10 +194,8 @@ public struct D2Class_C96C8080
 public struct D2Class_0D6A8080
 {
     // no filesize
-    [DestinyOffset(0x8), DestinyField(FieldType.TagHash64)] 
-    public StaticMapData StaticMap;
-    [DestinyOffset(0x10),DestinyField(FieldType.TagHash)]
-    public Tag<D2Class_0D6A8080> Unk10;
+    [DestinyOffset(0x8), DestinyField(FieldType.TagHash)] 
+    public StaticMapData StaticMap;  // could make it StaticMapData but dont want it to load it, could have a NoLoad option
     [DestinyOffset(0x2C)]
     public DestinyHash Unk2C;
 }
