@@ -89,7 +89,7 @@ public partial class MainMenuView : UserControl
         DestinyHash reference = PackageHandler.GetEntryReference(hash);
         int hType, hSubtype;
         PackageHandler.GetEntryTypes(hash, out hType, out hSubtype);
-        if (hType == 8)
+        if ((hType == 8 || hType == 16) && hSubtype == 0)
         {
             switch (reference.Hash)
             {
@@ -107,6 +107,11 @@ public partial class MainMenuView : UserControl
                     MapView mapView = new MapView(hash);
                     mapView.LoadMap();
                     newTab.Content = mapView;
+                    break;
+                case 0x80808E8E:
+                    ActivityView activityView = new ActivityView();
+                    newTab.Name = activityView.LoadActivity(hash);
+                    newTab.Content = activityView;
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));

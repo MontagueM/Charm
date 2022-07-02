@@ -41,6 +41,9 @@ public partial class MainWindow
         
         // Initialise fbx handler
         FbxHandler.Initialise();
+        
+        // Get all activity names
+        PackageHandler.GetAllActivityNames();
     }
 
     private void OpenConfigPanel_OnClick(object sender, RoutedEventArgs e)

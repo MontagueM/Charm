@@ -268,7 +268,7 @@ public class Tag : DestinyFile
                         Type innerType = Type.GetType($"Field.D2Class_{Endian.U32ToString(resourceClass)}, Field, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
                         if (innerType == null)
                         {
-                            if (T == typeof(D2Class_069B8080))  // If entity resource, don't bother reading if we don't know it (too many types)
+                            if (T == typeof(D2Class_069B8080) || T == typeof(D2Class_85988080))  // If entity resource or map data resource, don't bother reading if we don't know it (too many types)
                             {
                                 return result;
                             }

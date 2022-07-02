@@ -8,6 +8,7 @@ public class PackageHandler
 {
     private static Dictionary<uint, dynamic> Cache = new Dictionary<uint, dynamic>();
     private static List<StringContainer> GlobalStringContainerCache = new List<StringContainer>();
+    private static Dictionary<TagHash, string> ActivityNames = new Dictionary<TagHash, string>();
 
     private static bool AddToCache(uint hash, dynamic tag)
     {
@@ -97,6 +98,9 @@ public class PackageHandler
 
     [DllImport("Symmetry.dll", EntryPoint = "DllGetEntryTypes", CallingConvention = CallingConvention.StdCall)]
     public extern static int DllGetEntryTypes(uint hash);
+    
+    [DllImport("Symmetry.dll", EntryPoint = "DllGetAllActivityNames", CallingConvention = CallingConvention.StdCall)]
+    public extern static DestinyFile.UnmanagedData DllGetAllActivityNames();
 
     
     public static TagHash GetEntryReference(TagHash hash)
@@ -110,5 +114,73 @@ public class PackageHandler
         int combinedTypes = DllGetEntryTypes(hash);
         hType = (combinedTypes >> 16) & 0xFFFF;
         hSubtype = combinedTypes & 0xFFFF;
+    }
+    
+    public static void GetAllActivityNames()
+    {
+        DestinyFile.UnmanagedData unmanagedData = DllGetAllActivityNames();
+        D2Class_C59E8080_Out[] managedArray = new D2Class_C59E8080_Out[unmanagedData.dataSize];
+        Copy(unmanagedData.dataPtr, managedArray, 0, unmanagedData.dataSize);
+        for (var i = 0; i < managedArray.Length; i++)
+        {
+            var th = new TagHash(managedArray[i].TagHash);
+            string activityName = Marshal.PtrToStringAnsi(managedArray[i].ActivityName);
+            if (ActivityNames.ContainsKey(th))
+            {
+                // Take the shorter
+                if (ActivityNames[th].Length > activityName.Length)
+                {
+                    ActivityNames[th] = activityName;
+                }
+            }
+            else
+            {
+                ActivityNames.Add(th, activityName);
+            }
+        }
+    }
+
+    public static string GetActivityName(TagHash hash)
+    {
+        if (ActivityNames.ContainsKey(hash))
+        {
+            return ActivityNames[hash];
+        }
+        return "";
+    }
+    
+    public struct D2Class_C59E8080
+    {
+        public TagHash TagHash;
+        public DestinyHash TagClass;
+        public string ActivityName;
+    }
+    
+    [StructLayout(LayoutKind.Sequential)]
+    private struct D2Class_C59E8080_Out
+    {
+        public uint TagHash;
+        public uint TagClass;
+        public IntPtr ActivityName;
+    }
+    
+    [DllImport("kernel32.dll", EntryPoint = "RtlCopyMemory", SetLastError = false)]
+    static extern void CopyMemory(IntPtr destination, IntPtr source, UIntPtr length);
+
+    public static void Copy<T>(IntPtr source, T[] destination, int startIndex, int length)
+        where T : struct
+    {
+        var gch = GCHandle.Alloc(destination, GCHandleType.Pinned);
+        try
+        {
+            var targetPtr = Marshal.UnsafeAddrOfPinnedArrayElement(destination, startIndex);
+            var bytesToCopy = Marshal.SizeOf(typeof(T)) * length;
+
+            CopyMemory(targetPtr, source, (UIntPtr)bytesToCopy);
+        }
+        finally
+        {
+            gch.Free();
+        }
     }
 }
