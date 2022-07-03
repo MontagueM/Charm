@@ -36,7 +36,7 @@
                         EnableDesignModeRendering="True"
                         EnableSwapChainRendering="True"
                         Background="#1d1d1d" BackgroundColor="#1d1d1d"
-                        IsShadowMappingEnabled="True"
+                        IsShadowMappingEnabled="False"
                         ShowCoordinateSystem="True"
                         ShowFrameRate="True"
                         ShowTriangleCountInfo="True"
@@ -49,6 +49,7 @@
             <hx:Viewport3DX.Camera>
                  <hx:PerspectiveCamera Position="0,0,5"/>
             </hx:Viewport3DX.Camera> 
+            <hx:AmbientLight3D Color="#ffffffff" />
             <hx:Element3DPresenter Content="{Binding ModelGroup}"/>
         </hx:Viewport3DX>
     </Grid>

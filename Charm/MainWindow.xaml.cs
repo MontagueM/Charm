@@ -28,6 +28,7 @@ public partial class MainWindow
     
     public MainWindow()
     {
+        // todo give this all a progressbar
         InitializeComponent();
         
         // Hide tab by default

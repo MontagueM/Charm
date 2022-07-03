@@ -131,29 +131,32 @@ public class MainViewModel : INotifyPropertyChanged
         ModelGroup.AddNode(scene.Root);
         foreach (var node in scene.Root.Items.Traverse(false))
         {
-            if (node is BoneSkinMeshNode m)
+            if (node is MeshNode mn)
             {
                 var material = new DiffuseMaterial
                 {
                     DiffuseColor = new Color4(0.7f, 0.7f, 0.7f, 1.0f)
                 };
-                m.ModelMatrix = m.ModelMatrix * SharpDX.Matrix.RotationX(-(float) Math.PI / 2) * SharpDX.Matrix.RotationY(-(float) Math.PI / 2);
-                m.Material = material;
-                if (!bSkel)
+                mn.ModelMatrix = node.ModelMatrix * SharpDX.Matrix.RotationX(-(float) Math.PI / 2) * SharpDX.Matrix.RotationY(-(float) Math.PI / 2);
+                mn.Material = material;
+                if (mn is BoneSkinMeshNode m)
                 {
-                    var mat = new DiffuseMaterial
+                    if (!bSkel)
                     {
-                        DiffuseColor = new Color4(1f, 0f, 0f, 1.0f)
-                    };
-                    var skeleton = m.CreateSkeletonNode(mat, importer.Configuration.SkeletonEffects, importer.Configuration.SkeletonSizeScale);
-                    skeleton.ModelMatrix = m.ModelMatrix;
-                    ModelGroup.AddNode(skeleton);
-                    ModelGroup.AddNode(new NodePostEffectXRayGrid {
-                        EffectName = importer.Configuration.SkeletonEffects,
-                        Color = mat.DiffuseColor,
-                        GridDensity = 1,
-                    });
-                    bSkel = true;
+                        var mat = new DiffuseMaterial
+                        {
+                            DiffuseColor = new Color4(1f, 0f, 0f, 1.0f)
+                        };
+                        var skeleton = m.CreateSkeletonNode(mat, importer.Configuration.SkeletonEffects, importer.Configuration.SkeletonSizeScale);
+                        skeleton.ModelMatrix = m.ModelMatrix;
+                        ModelGroup.AddNode(skeleton);
+                        ModelGroup.AddNode(new NodePostEffectXRayGrid {
+                            EffectName = importer.Configuration.SkeletonEffects,
+                            Color = mat.DiffuseColor,
+                            GridDensity = 1,
+                        });
+                        bSkel = true;
+                    }
                 }
             }
         }

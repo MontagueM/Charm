@@ -49,12 +49,6 @@ public class InvestmentHandler
                     break;
             }
         }
-
-        // var x = GetInvestmentData(new DestinyHash(2221042414));
-        // var y = x.GetArtArrangementIndex();
-        // var z = GetArtArrangementHash(x);
-        var w = GetEntitiesFromHash(new DestinyHash(2221042414));
-        var a = 0;
     }
     
     public static InventoryItem GetInventoryItem(DestinyHash hash)

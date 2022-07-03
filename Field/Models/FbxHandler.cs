@@ -104,7 +104,7 @@ public class FbxHandler
         FbxLayerElementNormal normalsLayer = FbxLayerElementNormal.Create(mesh, "normalLayerName");
         normalsLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         normalsLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
-        bool bQuaternion = true;
+        bool bQuaternion = false;  // todo fix this
         // Check if quaternion
         foreach (var normal in part.VertexNormals)
         {
@@ -126,7 +126,7 @@ public class FbxHandler
         FbxLayerElementTangent tangentsLayer = FbxLayerElementTangent.Create(mesh, "tangentLayerName");
         tangentsLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         tangentsLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
-        bool bQuaternion = true;
+        bool bQuaternion = false;
         // Check if quaternion
         
         // todo more efficient to do AddMultiple

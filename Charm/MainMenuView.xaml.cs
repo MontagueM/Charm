@@ -39,7 +39,9 @@ public partial class MainMenuView : UserControl
         
         // forcing investment
         DynamicView investmentView = new DynamicView();
-        investmentView.LoadApi(strHash, ELOD.MostDetail);
+        investmentView.LoadApi(new DestinyHash(UInt32.Parse(strHash)), ELOD.MostDetail);
+        _newestTab = new TabItem();
+        _newestTab.Header = strHash;
         _newestTab.Content = investmentView;
         _mainWindow.MainTabControl.Items.Add(_newestTab);
         SetNewestTabSelected();

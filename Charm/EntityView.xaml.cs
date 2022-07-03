@@ -45,9 +45,33 @@ public partial class DynamicView : UserControl
         LoadDynamic(detailLevel);
     }
 
-    public void LoadApi(string hash, ELOD detailLevel)
+    public void LoadApi(DestinyHash hash, ELOD detailLevel)
     {
-        
+        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
+        List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(hash);
+        foreach (var entity in entities)
+        {
+            // todo refactor this so I dont have to do this stupid shit
+            Entity = entity;
+            if (Entity == null)
+            {
+                GetDynamicContainer(Hash);
+            }
+            dynamicParts = Entity.Load(detailLevel);
+            FbxHandler.AddEntityToScene(Entity, dynamicParts, detailLevel);
+        }
+        FbxHandler.ExportScene(filePath);
+        MVM.LoadEntityFromFbx(filePath);
+        FbxHandler.Clear();
+        if (Name != null)
+        {
+            MVM.Title = Name;
+        }
+        else
+        {
+            MVM.Title = hash.GetHashString();
+        }
     }
 
     public void LoadDynamic(ELOD detailLevel)
