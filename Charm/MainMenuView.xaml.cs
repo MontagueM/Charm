@@ -17,6 +17,7 @@ namespace Charm;
 public partial class MainMenuView : UserControl
 {
     private static MainWindow _mainWindow = null;
+    private static TabItem _newestTab = null;
         
     public MainMenuView()
     {
@@ -38,6 +39,11 @@ public partial class MainMenuView : UserControl
         if (strHash.Length == 16)
         {
             strHash = TagHash64Handler.GetTagHash64(strHash);
+        }
+        if (strHash == "")
+        {
+            TagHashBox.Text = "INVALID HASH";
+            return;
         }
         TagHash hash = new TagHash(strHash);
         if (!hash.IsValid())
@@ -84,8 +90,8 @@ public partial class MainMenuView : UserControl
     public static void AddWindow(TagHash hash)
     {
         // Adds a new tab to the tab control
-        TabItem newTab = new TabItem();
-        newTab.Header = hash.GetHashString();
+        _newestTab = new TabItem();
+        _newestTab.Header = hash.GetHashString();
         DestinyHash reference = PackageHandler.GetEntryReference(hash);
         int hType, hSubtype;
         PackageHandler.GetEntryTypes(hash, out hType, out hSubtype);
@@ -96,23 +102,23 @@ public partial class MainMenuView : UserControl
                 case 0x80809AD8:
                     DynamicView dynamicView = new DynamicView(hash);
                     dynamicView.LoadDynamic(ELOD.MostDetail);
-                    newTab.Content = dynamicView;
+                    _newestTab.Content = dynamicView;
                     break;
                 case 0x80806D44:
                     StaticView staticView = new StaticView(hash);
                     staticView.LoadStatic(ELOD.MostDetail);
-                    newTab.Content = staticView;
+                    _newestTab.Content = staticView;
                     break;
                 case 0x808093AD:
                     MapView mapView = new MapView(hash);
                     mapView.LoadMap();
-                    newTab.Content = mapView;
+                    _newestTab.Content = mapView;
                     break;
                 case 0x80808E8E:
                     ActivityView activityView = new ActivityView();
-                    var activityName = activityView.LoadActivity(hash);
-                    newTab.Header = activityName.Replace('_', '.');
-                    newTab.Content = activityView;
+                    activityView.LoadActivity(hash);
+                    _newestTab.Content = activityView;
+                    SetNewestTabSelected();
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
@@ -124,7 +130,16 @@ public partial class MainMenuView : UserControl
             throw new NotImplementedException();
         }
 
-        _mainWindow.MainTabControl.Items.Add(newTab);
-        _mainWindow.MainTabControl.SelectedItem = newTab;
+        _mainWindow.MainTabControl.Items.Add(_newestTab);
+    }
+
+    public static void SetNewestTabSelected()
+    {
+        _mainWindow.MainTabControl.SelectedItem = _newestTab;
+    }
+    
+    public static void SetNewestTabName(string newName)
+    {
+        _newestTab.Header = newName.Replace('_', '.');
     }
 }

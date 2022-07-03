@@ -28,13 +28,33 @@ public partial class MapView : UserControl
         GetStaticMapData();
     }
 
-    private void GetStaticMapData()
+    private async void GetStaticMapData()
+    {
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "Loading map tag",
+            "Making UI",
+            "Exporting full map"
+        });
+        await Task.Run(GetTag);
+        MainWindow.Progress.CompleteStage();
+        await Task.Run(SetMapUI);
+        MainWindow.Progress.CompleteStage();
+        await Task.Run(ExportFullMap);
+        MainWindow.Progress.CompleteStage();
+        MainMenuView.SetNewestTabSelected();
+    }
+
+    private void GetTag()
     {
         StaticMap = new StaticMapData(Hash);
+    }
+
+    private void SetMapUI()
+    {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         var displayParts = MakeDisplayParts();
         MVM.SetChildren(displayParts);
-        ExportFullMap();  // 8CB6B580 bazaar, 17A7B580 annex, 933ED580 courtyard, 6E35D580 office
     }
     
     private void ExportFullMap()

@@ -1,4 +1,8 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Security.Policy;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Field;
@@ -14,11 +18,21 @@ public partial class ActivityView : UserControl
     {
         InitializeComponent();
     } 
-    public string LoadActivity(TagHash hash)
+    public async void LoadActivity(TagHash hash)
     {
-        _activity = new Activity(hash);
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "Loading activity tag",
+            "Loading UI"
+        });
+        await Task.Run(() =>
+        {
+            _activity = new Activity(hash);
+        });
+        MainWindow.Progress.CompleteStage();
         LoadUI();
-        return PackageHandler.GetActivityName(hash);
+        MainWindow.Progress.CompleteStage();
+        MainMenuView.SetNewestTabName(PackageHandler.GetActivityName(hash));
     }
 
     private void LoadUI()

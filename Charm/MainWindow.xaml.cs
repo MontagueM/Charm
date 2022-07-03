@@ -19,6 +19,13 @@ namespace Charm;
 /// </summary>
 public partial class MainWindow
 {
+    public static ProgressView Progress = null;
+    
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        Progress = ProgressView;
+    }
+    
     public MainWindow()
     {
         InitializeComponent();
