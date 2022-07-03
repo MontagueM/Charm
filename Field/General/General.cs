@@ -59,6 +59,15 @@ public class DestinyHash : IComparable<DestinyHash>
     public DestinyHash()
     {
     }
+    
+    public virtual bool IsValid()
+    {
+        if (Hash == 0x811c9dc5)
+        {
+            return false;
+        }
+        return true;
+    }
         
     public string GetHashString()
     {
@@ -103,6 +112,11 @@ public class DestinyHash : IComparable<DestinyHash>
         return 0;
     }
     
+    public bool CompareTo(D2Class_454F8080 x, DestinyHash y)
+    {
+        return x.AssignmentHash.Equals(y);
+    }
+    
     public static implicit operator uint(DestinyHash d) => d.Hash;
     public static implicit operator string(DestinyHash d) => d.GetHashString();
 }
@@ -127,7 +141,7 @@ public class TagHash : DestinyHash
         return (T)Activator.CreateInstance(typeof(T), new object[] { GetHashString() });
     }
     
-    public bool IsValid()
+    public override bool IsValid()
     {
         if (Hash < 0x80a00000 || Hash > 0x80ffffff)
         {

@@ -73,7 +73,7 @@ public enum FieldType
     TagHash,  // a tag hash that points to a tag
     Resource, // resource, no pointer just the resource class right there
     TagHash64,  // taghash but in the 64bit format
-    ResourceInTablePointer,  // a pointer that points to a resource in a specified table
+    ResourceInTablePointer,  // a pointer that points to a resource in a specified table so has a constant type
     String, // u32 container + u32 key
     String64, // u64 container + u32 key
     StringNoContainer, // u32 key no container
@@ -299,7 +299,7 @@ public class Tag : DestinyFile
                         throw new NotImplementedException();
                     }
                 }
-                else if (fieldType == FieldType.ResourcePointer)
+                else if (fieldType == FieldType.ResourceInTablePointer)
                 {
                     long resourcePointer = handle.ReadInt64();
                     handle.BaseStream.Seek(resourcePointer-8, SeekOrigin.Current);
@@ -345,8 +345,15 @@ public class Tag : DestinyFile
                     }
                     if (tagHash.IsValid())// && bIs32Bit == 0)
                     {
-                        dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash);
-                        field.SetValue(result, tag);
+                        if (field.FieldType == typeof(TagHash))
+                        {
+                            field.SetValue(result, tagHash);
+                        }
+                        else
+                        {
+                            dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash);
+                            field.SetValue(result, tag); 
+                        }
                     }
                 }
                 else if (fieldType == FieldType.String64)

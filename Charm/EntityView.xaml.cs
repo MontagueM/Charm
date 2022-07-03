@@ -27,12 +27,6 @@ public partial class DynamicView : UserControl
         InitializeComponent();
     }
 
-    public DynamicView(TagHash hash)
-    {
-        InitializeComponent();
-        Hash = hash;
-    }
-
     public void LoadDynamic(ELOD detailLevel, Entity entity, string name)
     {
         Entity = entity;
@@ -43,6 +37,17 @@ public partial class DynamicView : UserControl
     private void GetDynamicContainer(TagHash hash)
     {
         Entity = new Entity(hash);
+    }
+
+    public void LoadDynamic(TagHash hash, ELOD detailLevel)
+    {
+        GetDynamicContainer(hash);
+        LoadDynamic(detailLevel);
+    }
+
+    public void LoadApi(string hash, ELOD detailLevel)
+    {
+        
     }
 
     public void LoadDynamic(ELOD detailLevel)

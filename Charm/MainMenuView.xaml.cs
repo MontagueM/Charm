@@ -36,6 +36,15 @@ public partial class MainMenuView : UserControl
             return;
         }
         string strHash = TagHashBox.Text.Replace(" ", "");
+        
+        // forcing investment
+        DynamicView investmentView = new DynamicView();
+        investmentView.LoadApi(strHash, ELOD.MostDetail);
+        _newestTab.Content = investmentView;
+        _mainWindow.MainTabControl.Items.Add(_newestTab);
+        SetNewestTabSelected();
+        return;
+        
         if (strHash.Length == 16)
         {
             strHash = TagHash64Handler.GetTagHash64(strHash);
@@ -100,8 +109,8 @@ public partial class MainMenuView : UserControl
             switch (reference.Hash)
             {
                 case 0x80809AD8:
-                    DynamicView dynamicView = new DynamicView(hash);
-                    dynamicView.LoadDynamic(ELOD.MostDetail);
+                    DynamicView dynamicView = new DynamicView();
+                    dynamicView.LoadDynamic(hash, ELOD.MostDetail);
                     _newestTab.Content = dynamicView;
                     break;
                 case 0x80806D44:

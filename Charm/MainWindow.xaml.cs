@@ -51,6 +51,9 @@ public partial class MainWindow
         
         // Get all activity names
         PackageHandler.GetAllActivityNames();
+        
+        // Initialise investment
+        InvestmentHandler.Initialise();
     }
 
     private void OpenConfigPanel_OnClick(object sender, RoutedEventArgs e)
