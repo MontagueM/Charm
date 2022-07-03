@@ -31,9 +31,11 @@ public partial class ActivityView : UserControl
         var maps = new ObservableCollection<DisplayMap>();
         foreach (var mapEntry in _activity.Header.Unk50)
         {
+            if (mapEntry.MapReference is null)  // idk why this can happen but it can, some weird stuff with h64
+                continue;
             DisplayMap displayMap = new DisplayMap();
-            // mapEntry.
-            displayMap.Name = mapEntry.Unk10.BubbleName;  // assuming Unk10 is 0F978080
+            displayMap.Name = mapEntry.Unk10.BubbleName;  // assuming Unk10 is 0F978080 or 0B978080
+
             // only first is wrong, but for now anyway - actually maybe do the largest one?
             var mapresourcelist = mapEntry.MapReference.Header.ChildMapReference.Header.MapResources;
             string mapHash = "";

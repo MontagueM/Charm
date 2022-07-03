@@ -27,7 +27,7 @@ public struct D2Class_8E8E8080
     public DestinyHash Unk10;
     public DestinyHash Unk14;
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk18;  // 6A988080
+    public dynamic? Unk18;  // 6A988080 + 20978080
     [DestinyField(FieldType.TagHash64)]
     public Tag Unk20;  // some weird kind of parent thing with names, contains the string container for this tag
     [DestinyOffset(0x40), DestinyField(FieldType.TablePointer)]
@@ -122,7 +122,7 @@ public struct D2Class_DD978080
 }
 
 /// <summary>
-/// Directive table + audio links
+/// Directive table + audio links for activity directives.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Size = 0x88)]
 public struct D2Class_6A988080
@@ -135,9 +135,40 @@ public struct D2Class_6A988080
     public DestinyHash Unk24;
 }
 
+/// <summary>
+/// Directive table for public events so no audio linked.
+/// </summary>
+[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+public struct D2Class_20978080
+{
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_28898080> PEDirectiveTables;
+    [DestinyOffset(0x20)]
+    public DestinyHash StartingBubbleName;
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 4)]
 public struct D2Class_28898080
 {
     [DestinyField(FieldType.TagHash)]
     public Tag DialogTable;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+public struct D2Class_0B978080
+{
+    [DestinyField(FieldType.RelativePointer)]
+    public string BubbleName;
+    public DestinyHash Unk08;
+    public DestinyHash Unk0C;
+    public DestinyHash Unk10;
+    [DestinyOffset(0x40), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_0C008080> Unk40;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_0C008080
+{
+    public DestinyHash Unk00;
+    public DestinyHash Unk04;
 }

@@ -28,7 +28,7 @@ class CharmImporter:
         unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
 
     def import_map(self):
-        # self.make_materials()
+        self.make_materials()
         self.import_static_mesh(combine=False)
         self.assign_map_materials()
         self.assemble_map()

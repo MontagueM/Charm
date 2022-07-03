@@ -110,7 +110,8 @@ public partial class MainMenuView : UserControl
                     break;
                 case 0x80808E8E:
                     ActivityView activityView = new ActivityView();
-                    newTab.Header = activityView.LoadActivity(hash);
+                    var activityName = activityView.LoadActivity(hash);
+                    newTab.Header = activityName.Replace('_', '.');
                     newTab.Content = activityView;
                     break;
                 default:
