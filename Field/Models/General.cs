@@ -4,7 +4,7 @@ using Field.Textures;
 
 namespace Field.Models;
 
-[StructLayout(LayoutKind.Sequential, Size = 0x0C)]
+[StructLayout(LayoutKind.Sequential, Size = 8)]
 public struct Vector2
 {
     public float X;
@@ -17,6 +17,19 @@ public struct Vector2
     }
         
     public Vector2(float x, float y)
+    {
+        X = x;
+        Y = y;
+    }
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct IntVector2
+{
+    public int X;
+    public int Y;
+        
+    public IntVector2(int x, int y)
     {
         X = x;
         Y = y;

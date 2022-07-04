@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using DirectXTexNet;
 using Field.Entities;
 using Field.General;
 using Field.Models;
@@ -130,11 +131,125 @@ public struct D2Class_8F6D8080
 {
     [DestinyOffset(0x224), DestinyField(FieldType.TagHash)] 
     public EntityModel Model;
+    [DestinyOffset(0x310), DestinyField(FieldType.TagHash)] 
+    public Tag<D2Class_1C6E8080> TexturePlates;
     [DestinyOffset(0x3C0), DestinyField(FieldType.TablePointer)] 
     public List<D2Class_976D8080> ExternalMaterialsMap;
     [DestinyOffset(0x400), DestinyField(FieldType.TablePointer)] 
     public List<D2Class_14008080> ExternalMaterials;
 }
+
+#region Texture Plates
+
+public class TexturePlate : Tag
+{
+    public D2Class_919E8080 Header;
+
+    public TexturePlate(TagHash hash) : base(hash)
+    {
+    }
+
+    protected override void ParseStructs()
+    {
+        Header = ReadHeader<D2Class_919E8080>();
+    }
+
+    public ScratchImage MakePlatedTexture()
+    {
+        var dimension = GetPlateDimensions();
+        if (dimension.X == 0)
+        {
+            return null;
+        }
+        // todo srgb check?
+        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, dimension.X, dimension.Y, 1, 0, 0);
+
+        foreach (var transform in Header.PlateTransforms)
+        {
+            ScratchImage original = transform.Texture.GetScratchImage();;
+            ScratchImage resizedOriginal = original.Resize(transform.Scale.X, transform.Scale.Y, 0);
+            TexHelper.Instance.CopyRectangle(resizedOriginal.GetImage(0, 0, 0), 0, 0, transform.Scale.X, transform.Scale.Y, outputPlate.GetImage(0, 0, 0), TEX_FILTER_FLAGS.SRGB, transform.Translation.X, transform.Translation.Y);
+            original.Dispose();
+            resizedOriginal.Dispose();
+        }
+        
+        return outputPlate;
+    }
+
+    public void SavePlatedTexture(string savePath)
+    {
+        var simg = MakePlatedTexture();
+        if (simg != null)
+            TextureHeader.SaveToDDSFile(savePath, simg);
+    }
+
+    public IntVector2 GetPlateDimensions()
+    {
+        int maxDimension = 0;  // plate must be square
+        foreach (var transform in Header.PlateTransforms)
+        {
+            if (transform.Translation.X + transform.Scale.X > maxDimension)
+            {
+                maxDimension = transform.Translation.X + transform.Scale.X;
+            }
+            else if (transform.Translation.Y + transform.Scale.Y > maxDimension)
+            {
+                maxDimension = transform.Translation.Y + transform.Scale.Y;
+            }
+        }
+        
+        // Find power of two that fits this dimension, ie round up the exponent to nearest integer
+        maxDimension = (int)Math.Pow(2, Math.Ceiling(Math.Log2(maxDimension)));
+
+        return new IntVector2(maxDimension, maxDimension);
+    }
+}
+
+/// <summary>
+/// Texture plate header that stores all the texture plates used for the EntityModel.
+/// </summary>
+[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+public struct D2Class_1C6E8080
+{
+    public long FileSize;
+    [DestinyOffset(0x18)] 
+    public byte Unk18;
+    public byte Unk19;
+    public short Unk1A;
+    public int Unk1C;
+    public int Unk20;
+    public int Unk24;
+    [DestinyField(FieldType.TagHash)]
+    public TexturePlate AlbedoPlate;
+    [DestinyField(FieldType.TagHash)]
+    public TexturePlate NormalPlate;
+    [DestinyField(FieldType.TagHash)]
+    public TexturePlate GStackPlate;
+    [DestinyField(FieldType.TagHash)]
+    public TexturePlate DyemapPlate;
+}
+
+/// <summary>
+/// Texture plate that stores the data for placing textures on a canvas.
+/// </summary>
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_919E8080
+{
+    public long FileSize;
+    [DestinyOffset(0x10), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_939E8080> PlateTransforms;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x14)]
+public struct D2Class_939E8080
+{
+    [DestinyField(FieldType.TagHash)]
+    public TextureHeader Texture;
+    public IntVector2 Translation;
+    public IntVector2 Scale;
+}
+
+#endregion
 
 [StructLayout(LayoutKind.Sequential, Size = 0xC)]
 public struct D2Class_976D8080

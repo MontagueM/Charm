@@ -23,7 +23,7 @@ public class TextureHeader : Tag
         Header = ReadHeader<D2Class_TextureHeader>();
     }
 
-    private ScratchImage GetScratchImage()
+    public ScratchImage GetScratchImage()
     {
         DXGI_FORMAT format = (DXGI_FORMAT)Header.Format;
         byte[] data;
@@ -110,6 +110,11 @@ public class TextureHeader : Tag
     public void SaveToDDSFile(string savePath)
     {
         ScratchImage scratchImage = GetScratchImage();
+        SaveToDDSFile(savePath, scratchImage);
+    }
+    
+    public static void SaveToDDSFile(string savePath, ScratchImage scratchImage)
+    {
         scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath);
         scratchImage.Dispose();
     }

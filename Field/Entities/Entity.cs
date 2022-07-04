@@ -11,11 +11,11 @@ public class Entity : Tag
     public List<EntityResource> Resources;
     
     // Entity features
-    public EntitySkeleton Skeleton;
-    public EntityModel Model;
-    public EntityResource ModelParentResource;
-    public EntityModel PhysicsModel;
-    public EntityControlRig ControlRig;
+    public EntitySkeleton Skeleton = null;
+    public EntityModel Model = null;
+    public EntityResource ModelParentResource = null;
+    public EntityModel PhysicsModel = null;
+    public EntityControlRig ControlRig = null;
     
     public Entity(TagHash hash) : base(hash)
     {
@@ -82,5 +82,15 @@ public class Entity : Tag
             dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
             // Environment.Exit(5);
         }
+    }
+
+    public void SaveTexturePlates(string saveDirectory)
+    {
+        Directory.CreateDirectory($"{saveDirectory}/Textures/");
+        var rsrc = ((D2Class_8F6D8080) ModelParentResource.Header.Unk18).TexturePlates.Header;
+        rsrc.AlbedoPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo.dds");
+        rsrc.NormalPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal.dds");
+        rsrc.GStackPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_gstack.dds");
+        rsrc.DyemapPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_dyemap.dds");
     }
 }

@@ -15,122 +15,159 @@ using File = System.IO.File;
 
 namespace Charm;
 
-public partial class DynamicView : UserControl
+public partial class EntityView : UserControl
 {
-    public Entity Entity;
     public TagHash Hash;
-    private List<DynamicPart> dynamicParts;
     private string Name;
 
-    public DynamicView()
+    public EntityView()
     {
         InitializeComponent();
     }
 
-    public void LoadDynamic(ELOD detailLevel, Entity entity, string name)
+    public async void LoadEntity(TagHash entityHash)
     {
-        Entity = entity;
-        LoadDynamic(detailLevel);
-        Name = name;
+        Entity entity = new Entity(entityHash);
+        AddEntity(entity, ELOD.MostDetail);
+        LoadUI();
+        ExportFull(new List<Entity>{entity}, entityHash);
     }
 
-    private void GetDynamicContainer(TagHash hash)
+    public async void LoadEntityFromApi(DestinyHash apiHash)
     {
-        Entity = new Entity(hash);
-    }
-
-    public void LoadDynamic(TagHash hash, ELOD detailLevel)
-    {
-        GetDynamicContainer(hash);
-        LoadDynamic(detailLevel);
-    }
-
-    public void LoadApi(DestinyHash hash, ELOD detailLevel)
-    {
-        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-        string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
-        List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(hash);
+        List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
         foreach (var entity in entities)
         {
-            // todo refactor this so I dont have to do this stupid shit
-            Entity = entity;
-            if (Entity == null)
-            {
-                GetDynamicContainer(Hash);
-            }
-            dynamicParts = Entity.Load(detailLevel);
-            FbxHandler.AddEntityToScene(Entity, dynamicParts, detailLevel);
+            AddEntity(entity, ELOD.MostDetail);
         }
-        FbxHandler.ExportScene(filePath);
-        MVM.LoadEntityFromFbx(filePath);
-        FbxHandler.Clear();
-        if (Name != null)
-        {
-            MVM.Title = Name;
-        }
-        else
-        {
-            MVM.Title = hash.GetHashString();
-        }
+        LoadUI();
+        ExportFull(entities, apiHash);
     }
 
-    public void LoadDynamic(ELOD detailLevel)
+    private void AddEntity(Entity entity, ELOD detailLevel)
+    {
+        var dynamicParts = entity.Load(detailLevel);
+        FbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
+    }
+
+    private void LoadUI()
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-        // MVM.SetEntity(displayParts, Entity.Skeleton.GetBoneNodes());
-
-        if (Entity == null)
-        {
-            GetDynamicContainer(Hash);
-        }
-        dynamicParts = Entity.Load(detailLevel);
-        FbxHandler.AddEntityToScene(Entity, dynamicParts, detailLevel);
         string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
         FbxHandler.ExportScene(filePath);
         MVM.LoadEntityFromFbx(filePath);
-        
-        // MVM.SetSkeleton(Entity.Skeleton.GetBoneNodes());
-        
-        if (Name != null)
-        {
-            MVM.Title = Name;
-        }
-        else
-        {
-            MVM.Title = Hash.GetHashString();
-        }
-        // MVM.SubTitle = "Entity";
         FbxHandler.Clear();
-        ExportFullEntity();
     }
 
-    private void ExportFullEntity()
+    private void ExportFull(List<Entity> entities, string name)
     {
         InfoConfigHandler.MakeFile();
-        string meshName = Entity.Hash.GetHashString();
+        string meshName = name;
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
-        FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
         Directory.CreateDirectory(savePath);
-        Entity.SaveMaterialsFromParts(savePath, dynamicParts);
+        
+        foreach (var entity in entities)
+        {
+            var dynamicParts = entity.Load(ELOD.MostDetail);
+            FbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
+            entity.SaveMaterialsFromParts(savePath, dynamicParts);
+            entity.SaveTexturePlates(savePath);
+        }
+
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         InfoConfigHandler.SetMeshName(meshName);
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
         AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
         InfoConfigHandler.WriteToFile(savePath);
     }
-
-    private List<MainViewModel.DisplayPart> MakeDisplayParts(List<DynamicPart> containerParts)
-    {
-        List<MainViewModel.DisplayPart> displayParts = new List<MainViewModel.DisplayPart>();
-        foreach (DynamicPart part in containerParts)
-        {
-            MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
-            displayPart.EntityPart = part;
-            displayPart.Translations.Add(Vector3.Zero);
-            displayPart.Rotations.Add(Vector4.Quaternion);
-            displayPart.Scales.Add(Vector3.One);
-            displayParts.Add(displayPart);
-        }
-        return displayParts;
-    }
+    
+    // // old ones vvv
+    //
+    // private void GetDynamicContainer(TagHash hash)
+    // {
+    //     Entity = new Entity(hash);
+    // }
+    //
+    // public void LoadDynamic(TagHash hash, ELOD detailLevel)
+    // {
+    //     GetDynamicContainer(hash);
+    //     LoadDynamic(detailLevel);
+    // }
+    //
+    // public void LoadApiEntity(DestinyHash hash, ELOD detailLevel)
+    // {
+    //     MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+    //     string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
+    //     List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(hash);
+    //     foreach (var entity in entities)
+    //     {
+    //         // todo refactor this so I dont have to do this stupid shit
+    //         Entity = entity;
+    //         if (Entity == null)
+    //         {
+    //             GetDynamicContainer(Hash);
+    //         }
+    //         dynamicParts = Entity.Load(detailLevel);
+    //         FbxHandler.AddEntityToScene(Entity, dynamicParts, detailLevel);
+    //     }
+    //     FbxHandler.ExportScene(filePath);
+    //     MVM.LoadEntityFromFbx(filePath);
+    //     FbxHandler.Clear();
+    //     if (Name != null)
+    //     {
+    //         MVM.Title = Name;
+    //     }
+    //     else
+    //     {
+    //         MVM.Title = hash.GetHashString();
+    //     }
+    //     ExportFullEntity();
+    // }
+    //
+    // public void LoadEntity(ELOD detailLevel)
+    // {
+    //     MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+    //     // MVM.SetEntity(displayParts, Entity.Skeleton.GetBoneNodes());
+    //
+    //     if (Entity == null)
+    //     {
+    //         GetDynamicContainer(Hash);
+    //     }
+    //     dynamicParts = Entity.Load(detailLevel);
+    //     FbxHandler.AddEntityToScene(Entity, dynamicParts, detailLevel);
+    //     string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
+    //     FbxHandler.ExportScene(filePath);
+    //     MVM.LoadEntityFromFbx(filePath);
+    //     
+    //     // MVM.SetSkeleton(Entity.Skeleton.GetBoneNodes());
+    //     
+    //     if (Name != null)
+    //     {
+    //         MVM.Title = Name;
+    //     }
+    //     else
+    //     {
+    //         MVM.Title = Hash.GetHashString();
+    //     }
+    //     // MVM.SubTitle = "Entity";
+    //     FbxHandler.Clear();
+    //     ExportFullEntity();
+    // }
+    //
+    //
+    //
+    // private void ExportFullEntity()
+    // {
+    //     InfoConfigHandler.MakeFile();
+    //     string meshName = Entity.Hash.GetHashString();
+    //     string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+    //     FbxHandler.AddEntityToScene(Entity, dynamicParts, ELOD.MostDetail);
+    //     Directory.CreateDirectory(savePath);
+    //     Entity.SaveMaterialsFromParts(savePath, dynamicParts);
+    //     FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+    //     InfoConfigHandler.SetMeshName(meshName);
+    //     InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+    //     AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
+    //     InfoConfigHandler.WriteToFile(savePath);
+    // }
 }

@@ -38,8 +38,8 @@ public partial class MainMenuView : UserControl
         string strHash = TagHashBox.Text.Replace(" ", "");
         
         // forcing investment
-        DynamicView investmentView = new DynamicView();
-        investmentView.LoadApi(new DestinyHash(UInt32.Parse(strHash)), ELOD.MostDetail);
+        EntityView investmentView = new EntityView();
+        investmentView.LoadEntityFromApi(new DestinyHash(UInt32.Parse(strHash)));
         _newestTab = new TabItem();
         _newestTab.Header = strHash;
         _newestTab.Content = investmentView;
@@ -111,8 +111,8 @@ public partial class MainMenuView : UserControl
             switch (reference.Hash)
             {
                 case 0x80809AD8:
-                    DynamicView dynamicView = new DynamicView();
-                    dynamicView.LoadDynamic(hash, ELOD.MostDetail);
+                    EntityView dynamicView = new EntityView();
+                    dynamicView.LoadEntity(hash);
                     _newestTab.Content = dynamicView;
                     break;
                 case 0x80806D44:
