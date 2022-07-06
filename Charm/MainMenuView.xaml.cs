@@ -153,4 +153,31 @@ public partial class MainMenuView : UserControl
     {
         _newestTab.Header = newName.Replace('_', '.');
     }
+
+    public static void MakeNewTab(string name, UserControl content)
+    {
+        // Check if the name already exists, if so set newest tab to that
+        var items = _mainWindow.MainTabControl.Items;
+        foreach (TabItem item in items)
+        {
+            if (name == (string) item.Header)
+            {
+                _newestTab = item;
+                return;
+            }
+        }
+        
+        _newestTab = new TabItem();
+        _newestTab.Content = content;
+        _mainWindow.MainTabControl.Items.Add(_newestTab);
+        SetNewestTabName(name);
+    }
+
+    private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        ApiView apiView = new ApiView();
+        apiView.LoadApiView();
+        MakeNewTab("API View", apiView);
+        SetNewestTabSelected();
+    }
 }

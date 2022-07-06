@@ -161,14 +161,15 @@ public class TexturePlate : Tag
         {
             return null;
         }
-        // todo srgb check?
-        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, dimension.X, dimension.Y, 1, 0, 0);
+
+        bool bSrgb = Header.PlateTransforms[0].Texture.IsSrgb();
+        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM, dimension.X, dimension.Y, 1, 0, 0);
 
         foreach (var transform in Header.PlateTransforms)
         {
-            ScratchImage original = transform.Texture.GetScratchImage();;
+            ScratchImage original = transform.Texture.GetScratchImage();
             ScratchImage resizedOriginal = original.Resize(transform.Scale.X, transform.Scale.Y, 0);
-            TexHelper.Instance.CopyRectangle(resizedOriginal.GetImage(0, 0, 0), 0, 0, transform.Scale.X, transform.Scale.Y, outputPlate.GetImage(0, 0, 0), TEX_FILTER_FLAGS.SRGB, transform.Translation.X, transform.Translation.Y);
+            TexHelper.Instance.CopyRectangle(resizedOriginal.GetImage(0, 0, 0), 0, 0, transform.Scale.X, transform.Scale.Y, outputPlate.GetImage(0, 0, 0), bSrgb ? TEX_FILTER_FLAGS.SRGB : 0, transform.Translation.X, transform.Translation.Y);
             original.Dispose();
             resizedOriginal.Dispose();
         }

@@ -21,6 +21,7 @@
         <!-- AB8FA380 variks -->
         <!-- 3b00ab80 atraks -->
         <!-- 4901ab80 taniks normal, 100bb780 abomination -->
+        <Button Click="ApiViewButton_OnClick">api view</Button>
         <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Center" FontSize="96" Text="2221042414" KeyDown="TagHashBoxKeydown" x:Name="TagHashBox"/>
     </Grid>
 </UserControl>

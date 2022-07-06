@@ -102,10 +102,15 @@ public class Tag : DestinyFile
     {
         HeaderType = typeof(T);
         if (!IsStructureValid(typeof(T).FullName)) throw new Exception("Structure failed to validate, likely some changes to the game.");
-        return ReadStruct(typeof(T), Handle);
+        dynamic ret;
+        lock (Handle)
+        {
+            ret = ReadStruct(typeof(T), Handle);
+        }
+        return ret;
     }
 
-    public static dynamic ReadStruct(Type T, BinaryReader handle)
+    public dynamic ReadStruct(Type T, BinaryReader handle)
     {
         long startOffset = handle.BaseStream.Position;
         object result = Activator.CreateInstance(T);
@@ -157,76 +162,54 @@ public class Tag : DestinyFile
                 FieldType fieldType = attField.Value;
                 if (fieldType == FieldType.TablePointer)
                 {
-                    Type genericType = typeof(List<>).MakeGenericType(field.FieldType.GenericTypeArguments[0].UnderlyingSystemType);
-                    var list = Activator.CreateInstance(genericType);
                     var tableSize = handle.ReadInt64();
                     var tablePointer = handle.ReadInt64();
                     var tableOffset = fieldOffset + tablePointer+24;
-                    for (int j = 0; j < tableSize; j++)
+                    if (field.FieldType.FullName.Contains("IndexAccessList"))
                     {
-                        dynamic value;
-                        var type = field.FieldType.GenericTypeArguments[0];
-                        if (field.FieldType.FullName.Contains("D2Class_")) // array of classes, overriding arrays if pure class hashes
+                        Type genericType = typeof(IndexAccessList<>).MakeGenericType(field.FieldType.GenericTypeArguments[0].UnderlyingSystemType);
+                        dynamic? list = Activator.CreateInstance(genericType);
+                        list.Count = tableSize;
+                        list.Offset = tableOffset;
+                        list.ParentTag = this;
+                        field.SetValue(result, list);
+                    }
+                    else
+                    {
+                        Type genericType = typeof(List<>).MakeGenericType(field.FieldType.GenericTypeArguments[0].UnderlyingSystemType);
+                        var list = Activator.CreateInstance(genericType);
+
+                        for (int j = 0; j < tableSize; j++)
                         {
-                            handle.BaseStream.Seek(tableOffset + j*type.StructLayoutAttribute.Size, SeekOrigin.Begin);
-                            value = ReadStruct(type, handle);
-                        }
-                        else
-                        {
-                            handle.BaseStream.Seek(tableOffset + j*4, SeekOrigin.Begin);
-                            uint hash = handle.ReadUInt32();
-                            if (type == typeof(DestinyHash))
+                            dynamic value;
+                            var type = field.FieldType.GenericTypeArguments[0];
+                            if (field.FieldType.FullName.Contains("D2Class_")) // array of classes, overriding arrays if pure class hashes
                             {
-                                value = new DestinyHash(hash);
+                                handle.BaseStream.Seek(tableOffset + j*type.StructLayoutAttribute.Size, SeekOrigin.Begin);
+                                value = ReadStruct(type, handle);
                             }
                             else
                             {
-                                value = Activator.CreateInstance(type, new TagHash(hash));
+                                handle.BaseStream.Seek(tableOffset + j*4, SeekOrigin.Begin);
+                                uint hash = handle.ReadUInt32();
+                                if (type == typeof(DestinyHash))
+                                {
+                                    value = new DestinyHash(hash);
+                                }
+                                else
+                                {
+                                    value = Activator.CreateInstance(type, new TagHash(hash));
+                                }
                             }
+                            // dynamic value = StructConverter.ToStructure(handle.ReadBytes(Marshal.SizeOf(field.FieldType.GenericTypeArguments[0])), field.FieldType.GenericTypeArguments[0]);
+                            ((IList) list).Add(value);
                         }
-                        // dynamic value = StructConverter.ToStructure(handle.ReadBytes(Marshal.SizeOf(field.FieldType.GenericTypeArguments[0])), field.FieldType.GenericTypeArguments[0]);
-                        ((IList) list).Add(value);
+                        field.SetValue(result, list);  
                     }
+
                     handle.BaseStream.Seek(fieldOffset + 0x10, SeekOrigin.Begin);
-                    field.SetValue(result, list);
+
                 }
-                // else if (field.FieldType == typeof(RelativePointer))
-                // {
-                //     throw new NotImplementedException();
-                //     object b = result;
-                //     RelativePointer pointer = (RelativePointer)field.GetValue(b);
-                //     // pointer.SetOriginal();
-                //     pointer.Add(startOffset + Marshal.OffsetOf(typeof(T), field.Name).ToInt64());
-                //     field.SetValue(b, pointer);
-                //     result = (T)b;
-                // }
-                // else if (field.FieldType == typeof(Resource))
-                // {
-                //     throw new NotImplementedException();
-                //     object b = result;
-                //     Resource resource = (Resource)field.GetValue(b);
-                //     
-                //     // Check what the class is, if we don't know it we don't bother reading it
-                //     resource.Pointer.Add(startOffset + Marshal.OffsetOf(typeof(T), field.Name).ToInt64());
-                //
-                //     handle.BaseStream.Seek(resource.Pointer.Get() - 4, SeekOrigin.Begin);
-                //     uint tagClass = handle.ReadUInt32();
-                //     switch (tagClass)
-                //     {
-                //         case 0x80806d8f: // Stores the hash of the EntityModel type
-                //             // resource.Read<EntityResource_8F6D8080>(handle, entityResourceType.EntityModelHeader);
-                //             break;
-                //         default:
-                //             break;
-                //     }
-                //     var a = 0;
-                //
-                //     // pointer.SetOriginal();
-                //     
-                //     
-                //     field.SetValue(b, resource);
-                //     result = (T)b;
-                // }
                 else if (fieldType == FieldType.ResourceInTag)
                 {
                     handle.BaseStream.Seek(0x10, SeekOrigin.Current);
@@ -356,6 +339,28 @@ public class Tag : DestinyFile
                         }
                     }
                 }
+                else if (fieldType == FieldType.String)
+                {
+                    uint indexOrHash = handle.ReadUInt32();
+                    TagHash tagHash = new TagHash(indexOrHash);
+                    DestinyHash key = new DestinyHash(handle.ReadUInt32());
+                    if (tagHash.IsValid())
+                    {
+                        StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash);
+                        string resStr = tag.GetStringFromHash(ELanguage.English, key);
+                        field.SetValue(result, resStr);
+                    }
+                    else if (indexOrHash != 0xFF_FF)
+                    {
+                        StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), InvestmentHandler.GetStringContainerFromIndex(indexOrHash));
+                        string resStr = tag.GetStringFromHash(ELanguage.English, key);
+                        field.SetValue(result, resStr);
+                    }
+                    else  // uses an index system instead
+                    {
+                        field.SetValue(result, string.Empty);
+                    }
+                }
                 else if (fieldType == FieldType.String64)
                 {
                     TagHash tagHash = new TagHash(handle.ReadUInt32());
@@ -445,3 +450,69 @@ public class Tag<T> : Tag where T : struct
         Header = ReadHeader<T>();
     }
 }
+
+/// <summary>
+/// Used like a normal table list, but is not loaded by the Tag parser.
+/// Structures can be accessed by index like a List.
+/// Best used for extremely large tables that cause performance issues when using a normal List.
+/// </summary>
+/// <typeparam name="T">The structure of that list</typeparam>
+public class IndexAccessList<T> : IEnumerable<T> where T : struct
+{
+    public long Count;
+    public long Offset;
+    public Tag ParentTag = null;
+    
+    public IEnumerator<T> GetEnumerator()
+    {
+        throw new NotSupportedException();
+        // foreach (Guest guest in _guestList)
+        // {
+        //     yield return guest;
+        // }
+    }
+
+    public T ElementAt(int index)
+    {
+        if (index >= Count || index < 0)
+        {
+            throw new IndexOutOfRangeException();
+        }
+        var handle = ParentTag.GetHandle();
+        T structure;
+        lock (handle)
+        {
+            handle.BaseStream.Seek(Offset + index * typeof(T).StructLayoutAttribute.Size, SeekOrigin.Begin);
+            structure = ParentTag.ReadStruct(typeof(T), handle);
+        }
+
+        
+        // wont close handle bc this likely will be accessed by many things
+        return structure;
+    }
+ 
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}
+
+// public class ConcurrentBinaryReader
+// {
+//     private PipeReader _pr;
+//
+//     public ConcurrentBinaryReader(MemoryStream ms)
+//     {
+//         _pr = PipeReader.Create(ms);
+//     }
+//
+//     public long Seek(long offset, SeekOrigin origin)
+//     {
+//         return _pr.AsStream().Seek(offset, origin);
+//     }
+//     
+//     public void ReadUInt32(long offset, SeekOrigin origin)
+//     {
+//         _pr.ReadAsync();
+//     }
+// }

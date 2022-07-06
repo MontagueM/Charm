@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="Charm.ApiView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm"
+             mc:Ignorable="d"
+             d:DesignHeight="1080" d:DesignWidth="1920">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+        
+        <TextBox x:Name="textBox" TextChanged="TextBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"/>
+        
+        <ListView x:Name="ApiItemList" Grid.Row="1">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Button HorizontalAlignment="Right" Tag="{Binding Hash}" Click="DisplayApiEntityButton_OnClick">
+                        <WrapPanel>
+                            <TextBlock HorizontalAlignment="Left" Text="{Binding Name}"/>
+                        </WrapPanel>
+                    </Button>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        
+        <local:ModelView Grid.Column="1" Grid.RowSpan="2" x:Name="ModelView"/>
+    </Grid>
+</UserControl>

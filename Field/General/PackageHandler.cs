@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using Field.Strings;
 
@@ -6,9 +7,10 @@ namespace Field.General;
 
 public class PackageHandler
 {
-    private static Dictionary<uint, dynamic> Cache = new Dictionary<uint, dynamic>();
+    private static ConcurrentDictionary<uint, dynamic> Cache = new ConcurrentDictionary<uint, dynamic>();
     private static List<StringContainer> GlobalStringContainerCache = new List<StringContainer>();
     private static Dictionary<TagHash, string> ActivityNames = new Dictionary<TagHash, string>();
+
 
     private static bool AddToCache(uint hash, dynamic tag)
     {

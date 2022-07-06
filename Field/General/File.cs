@@ -14,6 +14,13 @@ public class DestinyFile
     
     public BinaryReader GetHandle()
     {
+        if (Handle != null)
+        {
+            if (Handle.BaseStream.CanRead)
+            {
+                return Handle;
+            }
+        }
         Handle = new BinaryReader(GetStream());
         return Handle;
     }

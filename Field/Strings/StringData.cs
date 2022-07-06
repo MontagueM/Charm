@@ -11,21 +11,35 @@ public class StringData : Tag
     {
     }
 
+    private byte[] ReadChars(int offset, int num)
+    {
+        byte[] ret = new byte[num];
+        for (int i = 0; i < num; i++)
+        {
+            if (offset + i == Header.StringData.Count) 
+                return ret;
+            ret[i] = Header.StringData[offset+i].StringCharacter;
+        }
+
+        return ret;
+    }
+
     private string GetStringFromPart(D2Class_F7998080 part)
     {
-        Handle.BaseStream.Seek(part.StringDataPointer, SeekOrigin.Begin);
+        // Handle.BaseStream.Seek(part.StringDataPointer, SeekOrigin.Begin);
+        int dataOffset = (int) (part.StringDataPointer - Header.StringParts[0].StringDataPointer);
         StringBuilder builder = new StringBuilder();
         int c = 0;
         while (c < part.ByteLength)
         {
-            byte[] sectionData = Handle.ReadBytes(3);
+            byte[] sectionData = ReadChars(dataOffset+c, 3);
             int val = sectionData[0];
             if (val >= 0xC0 && val <= 0xDF)  // 2 byte unicode
             {
                 var rawBytes = BitConverter.ToUInt32(Encoding.Convert(Encoding.UTF8, Encoding.UTF32, sectionData));
                 builder.Append(Convert.ToChar(rawBytes));
                 c += 2;
-                Handle.BaseStream.Seek(-1, SeekOrigin.Current);
+                // Handle.BaseStream.Seek(-1, SeekOrigin.Current);
             }
             else if (val >= 0xE0 && val <= 0xEF)  // 3 byte unicode
             {
@@ -37,7 +51,7 @@ public class StringData : Tag
             {
                 builder.Append(Encoding.UTF8.GetString(new [] { sectionData[0] }));
                 c += 1;
-                Handle.BaseStream.Seek(-2, SeekOrigin.Current);
+                // Handle.BaseStream.Seek(-2, SeekOrigin.Current);
             }
         }
         
@@ -46,21 +60,19 @@ public class StringData : Tag
     
     private List<string> ParseStringParts(D2Class_F5998080 combination)
     {
-        Handle.BaseStream.Seek(combination.StartStringPartPointer, SeekOrigin.Begin);
-        List<D2Class_F7998080> stringParts = new List<D2Class_F7998080>();
-        if (combination.PartCount > 1)
-        {
-            var a = 0;
-        }
-        for (int i = 0; i < combination.PartCount; i++)
-        {
-            stringParts.Add(ReadStruct(typeof(D2Class_F7998080), Handle));
-        }
+        // Handle.BaseStream.Seek(combination.StartStringPartPointer, SeekOrigin.Begin);
+        int partStartIndex = (int)(combination.StartStringPartPointer - 0x60) / 0x20; // this is bad as magic numbers but means we dont parse multiple times
+        // List<D2Class_F7998080> stringParts = new List<D2Class_F7998080>();
+        // for (int i = 0; i < combination.PartCount; i++)
+        // {
+        //     // stringParts.Add(ReadStruct(typeof(D2Class_F7998080), Handle));
+        // }
 
         List<string> strings = new List<string>();
-        foreach (var part in stringParts)
+        // foreach (var part in stringParts)
+        for (int i = 0; i < combination.PartCount; i++)
         {
-            strings.Add(GetStringFromPart(part));
+            strings.Add(GetStringFromPart(Header.StringParts[partStartIndex+i]));
         }
 
         return strings;
@@ -73,10 +85,10 @@ public class StringData : Tag
     /// <returns>The string of the index given.</returns>
     public string ParseStringIndex(int stringIndex)
     {
-        GetHandle();
+        // GetHandle();
         D2Class_F5998080 combination = Header.StringCombinations[stringIndex];
         List<string> strings = ParseStringParts(combination);
-        CloseHandle();
+        // CloseHandle();
         return string.Join("", strings.ToArray());
     }
 

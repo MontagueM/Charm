@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Field.Entities;
 using Field.General;
+using Field.Strings;
 
 namespace Field;
 
@@ -12,7 +13,7 @@ public struct D2Class_97798080
 {
     public long FileSize;
     [DestinyField(FieldType.TablePointer)] 
-    public List<D2Class_9B798080> InventoryItemDefinitionEntries;
+    public IndexAccessList<D2Class_9B798080> InventoryItemDefinitionEntries;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x20)]
@@ -166,6 +167,155 @@ public struct D2Class_7B738080
 
 #endregion
 
+#region String Stuff
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_99548080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    // public List<D2Class_9D548080> StringThings;
+    public IndexAccessList<D2Class_9D548080> StringThings;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_9D548080
+{
+    public DestinyHash ApiHash;
+    [DestinyOffset(0x10), DestinyField(FieldType.TagHash64)]
+    public Tag<D2Class_9F548080> StringThing;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x130)]
+public struct D2Class_9F548080
+{
+    public long FileSize;
+    // commented out as not useful rn
+    // [DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk08;  // D2Class_EF548080
+    // [DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk10;  // D2Class_E7548080
+    // [DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk18;
+    // [DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk20;  // D2Class_E5548080
+    // [DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk28;  // D2Class_E4548080
+    // [DestinyOffset(0x68), DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk68;  // D2Class_CA548080
+    // [DestinyOffset(0x78), DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk78;  // D2Class_B4548080
+
+    [DestinyOffset(0x88)]
+    public short Unk88;
+    public short Unk8A;
+    [DestinyField(FieldType.String)]
+    public string ItemName;  // "displayProperties" -> "name"
+    [DestinyOffset(0x98), DestinyField(FieldType.String)]
+    public string ItemType;  // "itemTypeDisplayName"
+    [DestinyOffset(0xB0), DestinyField(FieldType.String)]
+    public string ItemFlavourText;  // "flavorText"
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_F1598080> UnkB8;
+
+    public DestinyHash UnkC8;  // "bucketTypeHash" / "equipmentSlotTypeHash"
+    public DestinyHash UnkCC;  // DestinySandboxPatternDefinition hash
+    public DestinyHash UnkD0;  // DestinySandboxPatternDefinition hash
+    
+    // ive missed lots of stuff here
+    
+    [DestinyOffset(0x120), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_59238080> Unk120;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 2)]
+public struct D2Class_F1598080
+{
+    public short Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_59238080
+{
+    [DestinyOffset(0x10)]
+    public short Unk10;
+    [DestinyOffset(0x14)]
+    public DestinyHash Unk14;
+}
+
+
+/// <summary>
+/// Item destruction, includes the term "Dismantle".
+/// </summary>
+[StructLayout(LayoutKind.Sequential, Size = 0x1C)]
+public struct D2Class_EF548080
+{
+    [DestinyField(FieldType.String)]
+    public string DestructionTerm;
+    // some other terms, integers
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_E7548080
+{
+    public short Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_E5548080
+{
+    public short Unk00;
+    public short Unk02;
+    public short Unk04;
+    [DestinyOffset(0x8), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_F2598080> Unk08;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_AE578080> Unk18;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_F2598080
+{
+    public short Unk00;
+    [DestinyOffset(0x4)]
+    public DestinyHash Unk04;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 2)]
+public struct D2Class_AE578080
+{
+    public short Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_E4548080
+{
+    public short Unk00;
+    [DestinyOffset(0x4)]
+    public DestinyHash Unk04;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_CA548080
+{
+}
+
+/// <summary>
+/// Item inspection, includes the term "Details".
+/// </summary>
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_B4548080
+{
+    public DestinyHash Unk00;
+    public DestinyHash Unk04;
+    [DestinyOffset(0x0C), DestinyField(FieldType.String)]
+    public string InspectionTerm;
+    public int Unk14;
+}
+
+
+#endregion
+
 #region ArtArrangement
 
 /// <summary>
@@ -176,7 +326,7 @@ public struct D2Class_F2708080
 {
     public long FileSize;
     [DestinyField(FieldType.TablePointer)] 
-    public List<D2Class_ED6F8080> ArtArrangementHashes;
+    public IndexAccessList<D2Class_ED6F8080> ArtArrangementHashes;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 4)]
@@ -198,7 +348,7 @@ public struct D2Class_CE558080
 {
     public long FileSize;
     [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_D4558080> ArtArrangementEntityAssignments;
+    public IndexAccessList<D2Class_D4558080> ArtArrangementEntityAssignments;
     // [DestinyField(FieldType.TablePointer)]
     // public List<D2Class_D8558080> FinalAssignment;  // this is not needed as the above table has resource pointers
 }
@@ -243,8 +393,10 @@ public struct D2Class_DA558080
 public struct D2Class_434F8080
 {
     public long FileSize;
+    // This is large but kept as a list so we can perform binary searches... todo implement binary search for IndexAccessList
+    // We could do binary searches... or we could not and transform into a dictionary
     [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_454F8080> EntityArrangementMap;
+    public IndexAccessList<D2Class_454F8080> EntityArrangementMap;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 8)]
@@ -269,5 +421,46 @@ public struct D2Class_A36F8080
     public TagHash Entity;  // These is Entity but dont want to load every API Entity in the entire game
 }
 
+#endregion
+
+#region InventoryItem hashmap
+
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_8C798080
+{
+    public long FileSize;
+    // These tables are just placeholders, instead we transform the bytes into a dict for best performance
+    [DestinyField(FieldType.TablePointer)]
+    public IndexAccessList<D2Class_96798080> ExoticHashmap;
+    [DestinyField(FieldType.TablePointer)]
+    public IndexAccessList<D2Class_96798080> GeneralHashmap;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_96798080
+{
+    public DestinyHash ApiHash;
+    public int HashIndex;
+}
+
+#endregion
+
+#region String container hash + indexmap
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_095A8080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public IndexAccessList<D2Class_0E5A8080> StringContainerMap;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_0E5A8080
+{
+    public DestinyHash BankFnvHash;  // some kind of name for the bank
+    [DestinyOffset(0x8), DestinyField(FieldType.TagHash64)]
+    public StringContainer StringContainer;
+}
 
 #endregion

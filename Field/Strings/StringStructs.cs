@@ -49,7 +49,7 @@ public struct D2Class_F7998080
 [StructLayout(LayoutKind.Sequential, Size = 0x1)]
 public struct D2Class_05008080
 {
-    public char StringCharacter;
+    public byte StringCharacter;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]

@@ -15,8 +15,10 @@ public class StringContainer : Tag
     public string GetStringFromHash(ELanguage language, DestinyHash hash)
     {
         // return Header.StringData[(int)language].ParseStringIndex(Header.StringHashTable.BinarySearch(hash));
-        return Header.StringData.ParseStringIndex(Header.StringHashTable.BinarySearch(hash));
-
+        int index = Header.StringHashTable.BinarySearch(hash);
+        if (index < 0) 
+            return String.Empty;
+        return Header.StringData.ParseStringIndex(index);
     }
         
     public Dictionary<DestinyHash, string> GetAllStrings(ELanguage language)
