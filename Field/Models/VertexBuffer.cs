@@ -19,31 +19,32 @@ public class VertexBuffer : Tag
     /// <param name="uniqueVertexIndices">All the vertex indices that will be acquired.</param>
     public void ParseBuffer(Part part, HashSet<uint> uniqueVertexIndices)
     {
-        GetHandle();
-        foreach (var vertexIndex in uniqueVertexIndices)
+        using (var handle = GetHandle())
         {
-            ReadVertexData(part, vertexIndex);
+            foreach (var vertexIndex in uniqueVertexIndices)
+            {
+                ReadVertexData(part, vertexIndex, handle);
+            } 
         }
-        CloseHandle();
     }
 
-    private void ReadVertexData(Part part, uint vertexIndex)
+    private void ReadVertexData(Part part, uint vertexIndex, BinaryReader handle)
     {
-        Handle.BaseStream.Seek(vertexIndex * header.Stride, SeekOrigin.Begin);
+        handle.BaseStream.Seek(vertexIndex * header.Stride, SeekOrigin.Begin);
         bool status = false;
         switch (header.Type)
         {
             case 0:
-                status = ReadVertexDataType0(part);
+                status = ReadVertexDataType0(part, handle);
                 break;
             case 1:
-                status = ReadVertexDataType1(part);
+                status = ReadVertexDataType1(part, handle);
                 break;
             case 5:
-                status = ReadVertexDataType5(part);
+                status = ReadVertexDataType5(part, handle);
                 break;
             case 6:
-                status = ReadVertexDataType6(part, vertexIndex);
+                status = ReadVertexDataType6(part, vertexIndex, handle);
                 break;
             default:
                 throw new NotImplementedException($"Vertex type {header.Type} is not implemented.");
@@ -55,22 +56,22 @@ public class VertexBuffer : Tag
         }
     }
     
-    private bool ReadVertexDataType0(Part part)
+    private bool ReadVertexDataType0(Part part, BinaryReader handle)
     {
         switch (header.Stride)
         {
             case 0x4:
-                part.VertexTexcoords.Add(new Vector2(Handle.ReadInt16(), Handle.ReadInt16()));
+                part.VertexTexcoords.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
             case 0x10:
-                part.VertexPositions.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
+                part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 // Quaternion normal
-                part.VertexNormals.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16()));
+                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16()));
                 break;
             case 0x18:
-                part.VertexPositions.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
-                part.VertexNormals.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
-                part.VertexTangents.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
+                part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 break;
             default:
                 return false;
@@ -78,22 +79,22 @@ public class VertexBuffer : Tag
         return true;
     }
     
-    private bool ReadVertexDataType1(Part part)
+    private bool ReadVertexDataType1(Part part, BinaryReader handle)
     {
         switch (header.Stride)
         {
             case 0x4:
-                part.VertexTexcoords.Add(new Vector2(Handle.ReadInt16(), Handle.ReadInt16()));
+                part.VertexTexcoords.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
             case 0x18:
-                part.VertexPositions.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
-                part.VertexNormals.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
-                part.VertexTangents.Add(new Vector4(Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), Handle.ReadInt16(), true));
+                part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 break;
             case 0x30: // physics
-                part.VertexPositions.Add(new Vector4(Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle()));
-                part.VertexNormals.Add(new Vector4(Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle()));
-                part.VertexTangents.Add(new Vector4(Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle(), Handle.ReadSingle()));
+                part.VertexPositions.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle()));
+                part.VertexNormals.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle()));
+                part.VertexTangents.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle()));
                 break;
             default:
                 return false;
@@ -101,19 +102,19 @@ public class VertexBuffer : Tag
         return true;
     }
     
-    private bool ReadVertexDataType5(Part part)
+    private bool ReadVertexDataType5(Part part, BinaryReader handle)
     {
         switch (header.Stride)
         {
             case 4:
                 // it can be longer here, its not broken i think
-                if (Handle.BaseStream.Length <= Handle.BaseStream.Position)
+                if (handle.BaseStream.Length <= handle.BaseStream.Position)
                 {
                     part.VertexColours.Add(new Vector4(0, 0, 0, 0));
                 }
                 else
                 {
-                    part.VertexColours.Add(new Vector4(Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte()));
+                    part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()));
                 }
                 break;
             default:
@@ -122,7 +123,7 @@ public class VertexBuffer : Tag
         return true;
     }
     
-    private bool ReadVertexDataType6(Part part, uint vertexIndex)
+    private bool ReadVertexDataType6(Part part, uint vertexIndex, BinaryReader handle)
     {
         DynamicPart dynamicPart = (DynamicPart) part;
         switch (header.Stride)
@@ -176,25 +177,25 @@ public class VertexBuffer : Tag
                 // If 2 weights per vertex, we know its vertexIndex % 8, if 4 vertexIndex % 4
                 if (weightCount == 2)
                 {
-                    Handle.BaseStream.Seek(chunkIndex * 0x20 + (vertexIndex % 8) * 4, SeekOrigin.Begin);
-                    vw.WeightIndices = new IntVector4(Handle.ReadByte(), Handle.ReadByte(), 0, 0);
-                    vw.WeightValues = new IntVector4(Handle.ReadByte(), Handle.ReadByte(), 0, 0);
+                    handle.BaseStream.Seek(chunkIndex * 0x20 + (vertexIndex % 8) * 4, SeekOrigin.Begin);
+                    vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
+                    vw.WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
                     dynamicPart.VertexWeights.Add(vw);
                 }
                 else
                 {
-                    Handle.BaseStream.Seek(chunkIndex * 0x20 + (vertexIndex % 4) * 8, SeekOrigin.Begin);
-                    vw.WeightValues = new IntVector4(Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte());
+                    handle.BaseStream.Seek(chunkIndex * 0x20 + (vertexIndex % 4) * 8, SeekOrigin.Begin);
+                    vw.WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte());
                     if (vw.WeightValues.X + vw.WeightValues.Y + vw.WeightValues.Z == 255)
                     {
                         vw.WeightValues.W = 0;
                     }
-                    vw.WeightIndices = new IntVector4(Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte(), Handle.ReadByte());
+                    vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte());
                     dynamicPart.VertexWeights.Add(vw);
                 }
                 break;
                 // old code vvv
-                // Handle.BaseStream.Seek(0, SeekOrigin.Begin);
+                // handle.BaseStream.Seek(0, SeekOrigin.Begin);
                 // bool bInHeader = false;
                 // foreach (Vector4 partVertexPosition in part.VertexPositions)
                 // {
@@ -219,7 +220,7 @@ public class VertexBuffer : Tag
                 //     while (bDoWhile)
                 //     {
                 //         int comp1, comp2, comp3;
-                //         comp3 = Handle.ReadInt32();
+                //         comp3 = handle.ReadInt32();
                 //         comp1 = comp3 & 0x0000ffff;
                 //         comp2 = (int) (comp3 & 0xffff0000);
                 //         // Check if we're in header, there are often zero values or same value for both
@@ -290,11 +291,11 @@ public class VertexBuffer : Tag
                 //             }
                 //
                 //             byte w0, w1;
-                //             Handle.BaseStream.Seek(blendIndex * 32 + lastBlendCount + i * 2, SeekOrigin.Begin);
-                //             indices[i] = Handle.ReadByte();
-                //             indices[i+1] = Handle.ReadByte();
-                //             w0 = Handle.ReadByte();
-                //             w1 = Handle.ReadByte();
+                //             handle.BaseStream.Seek(blendIndex * 32 + lastBlendCount + i * 2, SeekOrigin.Begin);
+                //             indices[i] = handle.ReadByte();
+                //             indices[i+1] = handle.ReadByte();
+                //             w0 = handle.ReadByte();
+                //             w1 = handle.ReadByte();
                 //             weights[i] = w0;
                 //             weights[i + 1] = w1;
                 //         }

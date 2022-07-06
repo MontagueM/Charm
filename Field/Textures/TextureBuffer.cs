@@ -11,9 +11,11 @@ public class TextureBuffer : Tag
 
     public byte[] GetBufferData()
     {
-        GetHandle();
-        byte[] data = Handle.ReadBytes((int)Handle.BaseStream.Length);
-        CloseHandle();
+        byte[] data;
+        using (var handle = GetHandle())
+        {
+            data = handle.ReadBytes((int)handle.BaseStream.Length);
+        }
         return data;
     }
 }

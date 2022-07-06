@@ -29,6 +29,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Field.General;
 
 namespace DirectXTex
 {
@@ -515,7 +516,7 @@ namespace DirectXTex
             IntPtr pointer = Marshal.AllocHGlobal(length);
             // Convert it
             Marshal.StructureToPtr(value, pointer, false);
-            Marshal.Copy(pointer, destination, 0, length);
+            PackageHandler.Copy(pointer, destination, 0, length);
             Marshal.FreeHGlobal(pointer);
             // Done
             return destination;

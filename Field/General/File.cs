@@ -2,10 +2,18 @@
 
 namespace Field.General;
 
+/// <summary>
+/// Represents the file behind the Tag, handles all the file-based processing including reading data.
+/// To make this thread-safe (particularly the MemoryStream handle) we ensure the byte[] data is cached and only ever
+/// read once, then generate a new handle each time GetHandle is called. This should only really ever be used
+/// in a dispose-oriented system, as otherwise you will have many leftover streams causing leakage.
+/// We store the data in this file instead of in PackageHandler BytesCache as we expect one DestinyFile to be made
+/// per tag, never more (as long as PackageHandler GetTag is used).
+/// </summary>
 public class DestinyFile
 {
     public TagHash Hash;
-    protected BinaryReader Handle;
+    private byte[] _data = null;
     
     public DestinyFile(TagHash hash)
     {
@@ -14,20 +22,7 @@ public class DestinyFile
     
     public BinaryReader GetHandle()
     {
-        if (Handle != null)
-        {
-            if (Handle.BaseStream.CanRead)
-            {
-                return Handle;
-            }
-        }
-        Handle = new BinaryReader(GetStream());
-        return Handle;
-    }
-
-    public Stream GetStream()
-    {
-        return new MemoryStream(GetData());
+        return new BinaryReader(new MemoryStream(GetData()));
     }
 
     public struct UnmanagedData
@@ -44,17 +39,24 @@ public class DestinyFile
         
     public byte[] GetData()
     {
-        UnmanagedData unmanagedData = DllGetData(Hash);
-        byte[] managedArray = new byte[unmanagedData.dataSize];
-        Marshal.Copy(unmanagedData.dataPtr, managedArray, 0, unmanagedData.dataSize);
-        return managedArray;
+        if (_data == null)
+        {
+            if (PackageHandler.BytesCache.ContainsKey(Hash))
+            {
+                _data = PackageHandler.BytesCache[Hash];
+            }
+            else
+            {
+                UnmanagedData unmanagedData = DllGetData(Hash);
+                byte[] managedArray = new byte[unmanagedData.dataSize];
+                PackageHandler.Copy(unmanagedData.dataPtr, managedArray, 0, unmanagedData.dataSize);
+                _data = managedArray;  
+            }
+        }
+
+        return _data;
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetData", CallingConvention = CallingConvention.StdCall)]
     public static extern UnmanagedData DllGetData(uint hash);
-
-    public void CloseHandle()
-    {
-        Handle.Close();
-    }
 }

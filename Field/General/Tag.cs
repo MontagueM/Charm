@@ -103,9 +103,10 @@ public class Tag : DestinyFile
         HeaderType = typeof(T);
         if (!IsStructureValid(typeof(T).FullName)) throw new Exception("Structure failed to validate, likely some changes to the game.");
         dynamic ret;
-        lock (Handle)
+        using (var handle = GetHandle())
         {
-            ret = ReadStruct(typeof(T), Handle);
+            ret = ReadStruct(typeof(T), handle);
+
         }
         return ret;
     }
@@ -422,10 +423,8 @@ public class Tag : DestinyFile
         
     protected void Parse()
     {
-        GetHandle();
         ParseStructs();
         ParseData();
-        CloseHandle();
     }
         
     protected virtual void ParseStructs()
@@ -478,19 +477,27 @@ public class IndexAccessList<T> : IEnumerable<T> where T : struct
         {
             throw new IndexOutOfRangeException();
         }
-        var handle = ParentTag.GetHandle();
-        T structure;
-        lock (handle)
+
+        using (var handle = ParentTag.GetHandle())
         {
             handle.BaseStream.Seek(Offset + index * typeof(T).StructLayoutAttribute.Size, SeekOrigin.Begin);
-            structure = ParentTag.ReadStruct(typeof(T), handle);
+            T structure = ParentTag.ReadStruct(typeof(T), handle);
+            return structure; 
         }
-
+    }
+    
+    public T ElementAt(int index, BinaryReader handle)
+    {
+        if (index >= Count || index < 0)
+        {
+            throw new IndexOutOfRangeException();
+        }
         
-        // wont close handle bc this likely will be accessed by many things
+        handle.BaseStream.Seek(Offset + index * typeof(T).StructLayoutAttribute.Size, SeekOrigin.Begin);
+        T structure = ParentTag.ReadStruct(typeof(T), handle);
         return structure;
     }
- 
+
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();

@@ -12,8 +12,8 @@ public struct D2Class_EF998080
     public List<DestinyHash> StringHashTable;
     // [DestinyField(FieldType.TagHash), MarshalAs(UnmanagedType.ByValArray, SizeConst = 13)]
     // public StringData[] StringData;
-    [DestinyField(FieldType.TagHash)]  // only working with english rn
-    public StringData StringData;
+    [DestinyField(FieldType.TagHash)]  // only working with english rn for speed
+    public StringData StringData;  // actually StringData class
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x4)]
@@ -27,12 +27,12 @@ public struct D2Class_F1998080
 {
     public long FileSize;
     [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_F7998080> StringParts;
+    public IndexAccessList<D2Class_F7998080> StringParts;
     // might be a colour table here
     [DestinyOffset(0x28), DestinyField(FieldType.TablePointer)]
-    public List<D2Class_05008080> StringData;
+    public IndexAccessList<D2Class_05008080> StringData;
     [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_F5998080> StringCombinations;
+    public IndexAccessList<D2Class_F5998080> StringCombinations;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x20)]
@@ -40,7 +40,8 @@ public struct D2Class_F7998080
 {
     [DestinyOffset(0x8), DestinyField(FieldType.RelativePointer)]
     public long StringDataPointer;
-    public DestinyHash Unk10;
+    // public DestinyHash Unk10;
+    [DestinyOffset(0x14)]
     public ushort ByteLength;  // these can differ if multibyte unicode
     public ushort StringLength;
     // public ushort CipherShift;  // now always zero

@@ -36,24 +36,31 @@ public partial class ProgressView : UserControl
 
     public void SetProgressStages(List<string> progressStages)
     {
-        TotalStageCount = progressStages.Count;
-        _progressStages = new Queue<string>();
-        foreach (var progressStage in progressStages)
+        Dispatcher.Invoke(() =>
         {
-            _progressStages.Enqueue(progressStage);
-        }
-        UpdateProgress();
-        Show();
+            TotalStageCount = progressStages.Count;
+            _progressStages = new Queue<string>();
+            foreach (var progressStage in progressStages)
+            {
+                _progressStages.Enqueue(progressStage);
+            }
+        
+            UpdateProgress();
+            Show(); 
+        });
     }
 
     public void CompleteStage()
     {
-        _progressStages.Dequeue();
-        UpdateProgress();
-        if (_progressStages.Count == 0)
+        Dispatcher.Invoke(() =>
         {
-            Hide();
-        }
+            _progressStages.Dequeue();
+            UpdateProgress();
+            if (_progressStages.Count == 0)
+            {
+                Hide();
+            } 
+        });
     }
 
     public string GetCurrentStageName()

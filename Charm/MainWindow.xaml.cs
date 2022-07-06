@@ -24,6 +24,7 @@ public partial class MainWindow
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         Progress = ProgressView;
+        Task.Run(InitialiseHandlers);
     }
     
     public MainWindow()
@@ -37,24 +38,43 @@ public partial class MainWindow
         // Check if packages path exists in config
         ConfigHandler.CheckPackagesPathIsValid();
         MainTabControl.Visibility = Visibility.Visible;
+    }
 
-        // Initialise FNV handler
-        FnvHandler.Initialise();
-            
-        // Initialise global string cache
-        PackageHandler.GenerateGlobalStringContainerCache();
-            
-        // Get all hash64
-        TagHash64Handler.Initialise();
+    private async void InitialiseHandlers()
+    {
+        Progress.SetProgressStages(new List<string>
+        {
+            "FNV Handler",
+            "Hash64",
+            "Investment",
+            "Global string cache",
+            "Fbx Handler",
+            "Activity Names",
+        });
         
-        // Initialise fbx handler
-        FbxHandler.Initialise();
+        // Initialise FNV handler -- must be before InvestmentHandler
+        await Task.Run(FnvHandler.Initialise);
+        Progress.CompleteStage();
         
-        // Get all activity names
-        PackageHandler.GetAllActivityNames();
+        // Get all hash64 -- must be before InvestmentHandler
+        await Task.Run(TagHash64Handler.Initialise);
+        Progress.CompleteStage();
         
         // Initialise investment
-        InvestmentHandler.Initialise();
+        await Task.Run(InvestmentHandler.Initialise);
+        Progress.CompleteStage();
+
+        // Initialise global string cache
+        await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
+        Progress.CompleteStage();
+        
+        // Initialise fbx handler
+        await Task.Run(FbxHandler.Initialise);
+        Progress.CompleteStage();
+        
+        // Get all activity names
+        await Task.Run(PackageHandler.GetAllActivityNames);
+        Progress.CompleteStage();
     }
 
     private void OpenConfigPanel_OnClick(object sender, RoutedEventArgs e)

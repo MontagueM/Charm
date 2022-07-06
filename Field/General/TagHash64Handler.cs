@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Xml;
 using Field;
@@ -51,11 +52,13 @@ public class TagHash64Handler
     {
         DestinyFile.UnmanagedDictionary unmanagedDictionary = DllInitialiseTH64H();
         long[] keys = new long[unmanagedDictionary.Keys.dataSize];
-        Marshal.Copy(unmanagedDictionary.Keys.dataPtr, keys, 0, unmanagedDictionary.Keys.dataSize);
+        PackageHandler.Copy(unmanagedDictionary.Keys.dataPtr, keys, 0, unmanagedDictionary.Keys.dataSize);
         int[] vals = new int[unmanagedDictionary.Values.dataSize];
-        Marshal.Copy(unmanagedDictionary.Values.dataPtr, vals, 0, unmanagedDictionary.Values.dataSize);
-        List<ulong> kl = keys.Select(x => (ulong)x).ToList();
-        tagHash64Dict = kl.ToDictionary(x => x, x => (uint)vals[kl.IndexOf(x)]);
+        PackageHandler.Copy(unmanagedDictionary.Values.dataPtr, vals, 0, unmanagedDictionary.Values.dataSize);
+        for (int i = 0; i < keys.Length; i++)
+        {
+            tagHash64Dict[(ulong)keys[i]] = (uint)vals[i];
+        }
     }
 
     [DllImport("Symmetry.dll", EntryPoint = "DllInitialiseTH64H", CallingConvention = CallingConvention.StdCall)]

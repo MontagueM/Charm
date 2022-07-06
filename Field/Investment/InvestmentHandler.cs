@@ -29,7 +29,6 @@ public class InvestmentHandler
     private static Dictionary<int, TagHash> _stringContainerIndexmap = null;
     public static ConcurrentDictionary<DestinyHash, InventoryItem> InventoryItems = null;
 
-
     public static void Initialise()
     {
         GetAllInvestmentTags();
@@ -42,9 +41,6 @@ public class InvestmentHandler
 
     public static string GetItemName(DestinyHash hash)
     {
-        var w = GetItemIndex(hash);
-        // var u = _inventoryItemStringThing.Header.StringThings.ElementAt(GetItemIndex(hash));
-        // var y = _inventoryItemStringThing.Header.StringThings.ElementAt(GetItemIndex(hash)).StringThing;
         return InventoryItemStringThings[GetItemIndex(hash)].Header.ItemName;
     }
 
@@ -61,6 +57,7 @@ public class InvestmentHandler
         PackageHandler.Copy(unmanagedDictionary.Keys.dataPtr, keys, 0, unmanagedDictionary.Keys.dataSize);
         uint[] vals = new uint[unmanagedDictionary.Values.dataSize];
         PackageHandler.Copy(unmanagedDictionary.Values.dataPtr, vals, 0, unmanagedDictionary.Values.dataSize);
+        // maybe i can parallel this? todo maybe parallel
         for (int i = 0; i < vals.Length; i++)
         {
             switch (vals[i])
@@ -85,7 +82,6 @@ public class InvestmentHandler
                     break;
                 case 0x8080798c:
                     _inventoryItemIndexDictTag = new Tag<D2Class_8C798080>(new TagHash(keys[i]));
-                    GetHashIndexDict();
                     break;
                 case 0x80805a09:
                     _stringContainerIndexTag = new Tag<D2Class_095A8080>(new TagHash(keys[i]));
@@ -102,7 +98,6 @@ public class InvestmentHandler
         var temp = new Dictionary<int, uint>(size);
 
         var br = _inventoryItemStringThing.Header.StringThings.ParentTag.GetHandle();
-        
         br.BaseStream.Seek(_inventoryItemStringThing.Header.StringThings.Offset, SeekOrigin.Begin);
         for (int i = 0; i < size; i++)
         {
@@ -110,12 +105,11 @@ public class InvestmentHandler
             temp.Add(i, br.ReadUInt32());
             br.BaseStream.Seek(0xC, SeekOrigin.Current);
         }
-
+        PackageHandler.CacheHashDataList(temp.Values.ToArray());
         Parallel.ForEach(temp, kvp =>
         {
             InventoryItemStringThings.TryAdd(kvp.Key, PackageHandler.GetTag(typeof(Tag<D2Class_9F548080>), kvp.Value));
         });
-        
         br.Close();
     }
     
@@ -131,6 +125,10 @@ public class InvestmentHandler
             br.BaseStream.Seek(0x10, SeekOrigin.Current);
             _stringContainerIndexmap.Add(i, new TagHash(br.ReadUInt64()));
         }
+        
+        // This cache helps the StringThing stuff to be faster
+        PackageHandler.CacheHashDataList(_stringContainerIndexmap.Values.Where(x => x.IsValid()).Select(x => x.Hash).ToArray());
+
         br.Close();
     }
 
@@ -152,28 +150,7 @@ public class InvestmentHandler
         }
         br.Close();
     }
-    
-    private static void GetHashIndexDict()
-    {
-        // int exoticSize = (int)_inventoryItemIndexDictTag.Header.ExoticHashmap.Count;
-        // int generalSize = (int)_inventoryItemIndexDictTag.Header.GeneralHashmap.Count;
-        // InventoryItemHashmap = new Dictionary<DestinyHash, int>(exoticSize+generalSize);
-        // var br = _inventoryItemIndexDictTag.Header.ExoticHashmap.ParentTag.GetHandle();
-        //
-        // br.BaseStream.Seek(_inventoryItemIndexDictTag.Header.GeneralHashmap.Offset, SeekOrigin.Begin);
-        // for (int i = 0; i < generalSize; i++)
-        // {
-        //     InventoryItemHashmap.Add(new DestinyHash(br.ReadUInt32()), br.ReadInt32());
-        // }
-        // br.BaseStream.Seek(_inventoryItemIndexDictTag.Header.ExoticHashmap.Offset, SeekOrigin.Begin);
-        // for (int i = 0; i < exoticSize; i++)
-        // {
-        //     InventoryItemHashmap.TryAdd(new DestinyHash(br.ReadUInt32()), br.ReadInt32());
-        // }
-        // br.Close();
-        
-    }
-    
+
     public static InventoryItem GetInventoryItem(DestinyHash hash)
     {
         return GetInventoryItem(InventoryItemIndexmap[hash]);
@@ -204,11 +181,16 @@ public class InvestmentHandler
         }
         br.Close();
         // Now we can use parallel code as not reading from a single file
+        
+        // try the many many instead
+        PackageHandler.CacheHashDataList(temp.Values.Select(x => x.Hash).ToArray());
+
         Parallel.ForEach(temp, kvp =>
         {
             InventoryItems.TryAdd(kvp.Key, PackageHandler.GetTag(typeof(InventoryItem), kvp.Value));
         });
     }
+
 
     public static DestinyHash GetArtArrangementHash(InventoryItem item)
     {
@@ -255,7 +237,7 @@ public class InvestmentHandler
     private static Entity GetEntityFromAssignmentHash(DestinyHash assignmentHash)
     {
         // We can binary search here as the list is sorted.
-        var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
+        // var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
         // var index = _entityAssignmentsMap.Header.EntityArrangementMap.BinarySearch(x, new D2Class_454F8080());
         // return new Entity(_entityAssignmentsMap.Header.EntityArrangementMap[index].EntityParent.Header.Entity);
         return null;

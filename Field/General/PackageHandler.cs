@@ -8,8 +8,9 @@ namespace Field.General;
 public class PackageHandler
 {
     private static ConcurrentDictionary<uint, dynamic> Cache = new ConcurrentDictionary<uint, dynamic>();
-    private static List<StringContainer> GlobalStringContainerCache = new List<StringContainer>();
+    private static ConcurrentBag<StringContainer> GlobalStringContainerCache = new ConcurrentBag<StringContainer>();
     private static Dictionary<TagHash, string> ActivityNames = new Dictionary<TagHash, string>();
+    public static Dictionary<TagHash, byte[]> BytesCache = new Dictionary<TagHash, byte[]>();
 
 
     private static bool AddToCache(uint hash, dynamic tag)
@@ -31,6 +32,27 @@ public class PackageHandler
     {
         return GetTag(type, new TagHash(hash));
     }
+    
+    public static void CacheHashDataList(uint[] hashes)
+    {
+        GCHandle handle = GCHandle.Alloc(hashes, GCHandleType.Pinned);
+        DestinyFile.UnmanagedDictionary ud = DllGetDataMany(new DestinyFile.UnmanagedData {dataPtr = handle.AddrOfPinnedObject(), dataSize = hashes.Length});
+        uint[] keys = new uint[ud.Keys.dataSize];
+        Copy(ud.Keys.dataPtr, keys, 0, ud.Keys.dataSize);
+        DestinyFile.UnmanagedData[] vals = new DestinyFile.UnmanagedData[ud.Values.dataSize];
+        Copy(ud.Values.dataPtr, vals, 0, ud.Values.dataSize);
+        // Dictionary<uint, byte[]> data = new Dictionary<uint, byte[]>(keys.Length);
+        for (int i = 0; i < keys.Length; i++)
+        {        
+            byte[] managedArray = new byte[vals[i].dataSize];
+            Copy(vals[i].dataPtr, managedArray, 0, vals[i].dataSize);
+            BytesCache[new TagHash(keys[i])] = managedArray;
+        }
+    }
+    
+    [DllImport("Symmetry.dll", EntryPoint = "DllGetDataMany", CallingConvention = CallingConvention.StdCall)]
+    public extern static DestinyFile.UnmanagedDictionary DllGetDataMany(DestinyFile.UnmanagedData pHashes);
+
     
     public static dynamic GetTag(Type type, TagHash hash)
     {
@@ -60,8 +82,9 @@ public class PackageHandler
         // Iterate over all the 02218080 files and their string containers inside
         DestinyFile.UnmanagedData pAllEntries = GetAllEntriesOfReference(new DestinyHash("045EAE80").Hash, new DestinyHash("02218080").Hash); // 045EAE80 to speed it up
         int[] vals = new int[pAllEntries.dataSize];
-        Marshal.Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
-        foreach (int i in vals)
+        Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
+        // foreach (int i in vals)
+        Parallel.ForEach(vals, i =>
         {
             TagHash hash = new TagHash((uint) (0x80800000 + (0x172 << 0xD) + i));
             Tag<D2Class_02218080> f = new Tag<D2Class_02218080>(hash);
@@ -72,10 +95,11 @@ public class PackageHandler
                 {
                     continue;
                 }
+
                 hashes.Add(q.Unk10.Hash);
                 GlobalStringContainerCache.Add(q.Unk10);
             }
-        }
+        });
     }
     
     public static string GetGlobalString(DestinyHash key)

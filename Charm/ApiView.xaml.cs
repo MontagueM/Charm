@@ -39,16 +39,8 @@ public partial class ApiView : UserControl
 
     private void GetInventoryItemsWithGeometry()
     {
-        var s = Stopwatch.StartNew();
         _apiItems = new ConcurrentBag<ApiItem>();
-        // foreach (var (key, value) in InvestmentHandler.InventoryItemHashmap)
-        // {
-        //     InventoryItem item = InvestmentHandler.GetInventoryItem(key);
-        //     if (item.GetArtArrangementIndex() == -1) continue;
-        //     string name = InvestmentHandler.GetItemName(key);
-        //     _apiItems.Add(new ApiItem {Hash = key, Name = name});
-        // }
-        
+
         // accessing a single file must be done 1. using locks or 2. synchronously
         // add code to the IndexAccessList to use a single thread to read all the data, but then use
         // parallel code to get all the child files
@@ -61,14 +53,6 @@ public partial class ApiView : UserControl
             string name = InvestmentHandler.GetItemName(kvp.Value);
             _apiItems.Add(new ApiItem {Hash = kvp.Key, Name = $"{name}-{kvp.Key.Hash.ToString()}"});
         });
-        // {
-        //
-        // }
-        s.Stop();
-        var t = s.ElapsedMilliseconds;
-
-        
-        var a = 0;
     }
 
     private void RefreshItemList()
