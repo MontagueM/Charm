@@ -418,7 +418,7 @@ public struct D2Class_A36F8080
 {
     public long FileSize;
     [DestinyField(FieldType.TagHash64)]
-    public TagHash Entity;  // These is Entity but dont want to load every API Entity in the entire game
+    public Entity Entity;  // These is Entity but dont want to load every API Entity in the entire game
 }
 
 #endregion

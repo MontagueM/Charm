@@ -8,7 +8,7 @@
              d:DesignHeight="1080" d:DesignWidth="1920">
     <Grid Width="1920" Height="1080" x:Name="Grid">
         <!-- So we stop clicking on the main screen, need HitTestVisible -->
-        <!-- <Rectangle IsHitTestVisible="True" Fill="Transparent"/> -->
+        <Rectangle IsHitTestVisible="True" Fill="Transparent"/>
         <StackPanel Orientation="Vertical" Height="150" Width="500" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Gray">
             <ProgressBar x:Name="ProgressBar" Height="50" Value="50"></ProgressBar>
             <TextBlock x:Name="ProgressText" Height="50" Text="Loading"></TextBlock>

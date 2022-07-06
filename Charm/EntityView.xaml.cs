@@ -41,7 +41,7 @@ public partial class EntityView : UserControl
             AddEntity(entity, ELOD.MostDetail);
         }
         LoadUI();
-        ExportFull(entities, apiHash);
+        // ExportFull(entities, apiHash);
     }
 
     private void AddEntity(Entity entity, ELOD detailLevel)

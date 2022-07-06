@@ -30,6 +30,6 @@
             </ListView.ItemTemplate>
         </ListView>
         
-        <local:ModelView Grid.Column="1" Grid.RowSpan="2" x:Name="ModelView"/>
+        <local:EntityView Grid.Column="1" Grid.RowSpan="2" x:Name="EntityView"/>
     </Grid>
 </UserControl>

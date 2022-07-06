@@ -40,10 +40,10 @@ public class DestinyHash : IComparable<DestinyHash>
     public uint Hash;
     private string _string;
      
-    public DestinyHash(string hash)
+    public DestinyHash(string hash, bool bBigEndianString = false)
     {
         Hash = uint.Parse(hash, NumberStyles.HexNumber);
-        if (hash.EndsWith("80"))
+        if (hash.EndsWith("80") || bBigEndianString)
         {
             Hash = Endian.SwapU32(Hash);
         }

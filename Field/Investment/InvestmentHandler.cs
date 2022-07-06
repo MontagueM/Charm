@@ -239,8 +239,10 @@ public class InvestmentHandler
         // We can binary search here as the list is sorted.
         // var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
         // var index = _entityAssignmentsMap.Header.EntityArrangementMap.BinarySearch(x, new D2Class_454F8080());
+        Tag<D2Class_A36F8080> tag = PackageHandler.GetTag(typeof(Tag<D2Class_A36F8080>), _sortedArrangementHashmap[assignmentHash]);
+        return tag.Header.Entity;
         // return new Entity(_entityAssignmentsMap.Header.EntityArrangementMap[index].EntityParent.Header.Entity);
-        return null;
+        // return null;
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllInvestmentTags", CallingConvention = CallingConvention.StdCall)]

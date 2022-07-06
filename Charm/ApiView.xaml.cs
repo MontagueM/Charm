@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Field;
+using Field.Entities;
 using Field.General;
 
 namespace Charm;
@@ -40,13 +41,6 @@ public partial class ApiView : UserControl
     private void GetInventoryItemsWithGeometry()
     {
         _apiItems = new ConcurrentBag<ApiItem>();
-
-        // accessing a single file must be done 1. using locks or 2. synchronously
-        // add code to the IndexAccessList to use a single thread to read all the data, but then use
-        // parallel code to get all the child files
-        // the key requirement is that the parallel must NOT use duplicate handles
-        // if so, we will cause thread-dangerous situations
-        //
         Parallel.ForEach(InvestmentHandler.InventoryItems, kvp =>
         {
             if (kvp.Value.GetArtArrangementIndex() == -1) return;
@@ -73,25 +67,15 @@ public partial class ApiView : UserControl
                 displayItems.Add(item);
             }
         });
-        // todo make sure we dont ever do activator create instance / new Tag stuff bc we should do PackageHandler.GetTag ...
-        // todo better perf from initial caching now... also need to check if they have art arrangements lol
-        // foreach (var (key, value) in InvestmentHandler.InventoryItemHashmap)
-        // {
-        //     if (apiItems.Count > 50) break;
-        //     InventoryItem item = InvestmentHandler.GetInventoryItem(key);
-        //     if (item.GetArtArrangementIndex() == -1) continue;
-        //     string name = InvestmentHandler.GetItemName(key);
-        //     if (key.Hash.ToString().Contains(searchStr) || name.Contains(searchStr))
-        //     {
-        //         apiItems.Add(new ApiItem {Hash = key, Name = name});
-        //     }
-        // }
         ApiItemList.ItemsSource = displayItems;
     }
 
 private void DisplayApiEntityButton_OnClick(object sender, RoutedEventArgs e)
 {
-        
+    var apiHash = new DestinyHash((sender as Button).Tag as string, true);
+    List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
+    EntityView.LoadEntityFromApi(apiHash);
+    var a = 0;
 }
     
 private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
