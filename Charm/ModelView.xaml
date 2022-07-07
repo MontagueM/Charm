@@ -25,7 +25,7 @@
             <RowDefinition Height="2*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <Menu x:Name="menu" Grid.ColumnSpan="1" Grid.Column="2" BorderBrush="#3d3d3d">
+        <Menu x:Name="menu" Grid.ColumnSpan="1" Grid.Column="2">
             <MenuItem Header="_Viewer">
                 <MenuItem Header="G_rid" IsCheckable="True" IsChecked="True" Checked="Grid_Checked" Unchecked="Grid_Unchecked"/>
             </MenuItem>
@@ -36,13 +36,14 @@
                         EnableDesignModeRendering="True"
                         EnableSwapChainRendering="True"
                         IsShadowMappingEnabled="False"
-                        ShowCoordinateSystem="True"
-                        ShowFrameRate="True"
-                        ShowTriangleCountInfo="True"
+                        ShowCoordinateSystem="False"
+                        ShowFrameRate="False"
+                        ShowTriangleCountInfo="False"
                         EnableDeferredRendering="False" EnableRenderFrustum="True"
                         Title="{Binding Title}"
                         TextBrush="White"
                         TitleFontFamily="Arial"
+                        ShowViewCube="False"
                         SubTitle="{Binding SubTitle}"
                         >
             <hx:Viewport3DX.Camera>

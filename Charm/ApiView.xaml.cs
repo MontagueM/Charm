@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Field;
 using Field.Entities;
@@ -20,6 +21,7 @@ namespace Charm;
 public partial class ApiView : UserControl
 {
     private ConcurrentBag<ApiItem> _apiItems = null;
+    private ToggleButton _pressedButton = null;
     
     public ApiView()
     {
@@ -50,7 +52,8 @@ public partial class ApiView : UserControl
         {
             if (kvp.Value.GetArtArrangementIndex() == -1) return;
             string name = InvestmentHandler.GetItemName(kvp.Value);
-            _apiItems.Add(new ApiItem {Hash = kvp.Key, Name = $"{name}-{kvp.Key.Hash.ToString()}"});
+            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
+            _apiItems.Add(new ApiItem {Hash = kvp.Key, Name = $"{name} | {kvp.Key.Hash.ToString()}", Type = type});
         });
     }
 
@@ -74,10 +77,15 @@ public partial class ApiView : UserControl
         });
         ApiItemList.ItemsSource = displayItems;
     }
-
+    
     private void DisplayApiEntityButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var apiHash = new DestinyHash((sender as Button).Tag as string, true);
+        var btn = sender as ToggleButton;
+        if (_pressedButton != null)
+            _pressedButton.IsChecked = false;
+        _pressedButton = btn;
+        btn.IsChecked = true;
+        var apiHash = new DestinyHash((btn.DataContext as ApiItem).Hash, true);
         List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
         EntityView.LoadEntityFromApi(apiHash);
         var a = 0;
@@ -91,18 +99,8 @@ public partial class ApiView : UserControl
 
 public class ApiItem
 {
-    private string name;
-    private string hash;
-    
-    public string Name
-    {
-        get => name;
-        set => name = value;
-    }
-    
-    public string Hash
-    {
-        get => hash;
-        set => hash = value;
-    }
+    public string Name { get; set; }
+    public string Hash { get; set; }
+    public string Type { get; set; }
+    public bool IsChecked { get; set; }
 }

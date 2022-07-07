@@ -22,6 +22,8 @@ namespace Charm;
 public partial class MainWindow
 {
     public static ProgressView Progress = null;
+    private static TabItem _newestTab = null;
+
     
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -102,10 +104,86 @@ public partial class MainWindow
 
     private void OpenConfigPanel_OnClick(object sender, RoutedEventArgs e)
     {
-        TabItem newTab = new TabItem();
-        newTab.Header = "Configuration";
-        newTab.Content = new ConfigView();
-        MainTabControl.Items.Add(newTab);
-        MainTabControl.SelectedItem = newTab;
+        MakeNewTab("Configuration", new ConfigView());
+        SetNewestTabSelected();
+    }
+    
+    public void SetNewestTabSelected()
+    {
+        MainTabControl.SelectedItem = _newestTab;
+    }
+    
+    public void SetNewestTabName(string newName)
+    {
+        _newestTab.Header = newName.Replace('_', '.');
+    }
+
+    public void MakeNewTab(string name, UserControl content)
+    {
+        // Testing making it all caps
+        name = name.ToUpper();
+        
+        // Check if the name already exists, if so set newest tab to that
+        var items = MainTabControl.Items;
+        foreach (TabItem item in items)
+        {
+            if (name == (string) item.Header)
+            {
+                _newestTab = item;
+                return;
+            }
+        }
+        
+        _newestTab = new TabItem();
+        _newestTab.Content = content;
+        MainTabControl.Items.Add(_newestTab);
+        SetNewestTabName(name);
+    }
+    
+    public void AddWindow(TagHash hash)
+    {
+        // Adds a new tab to the tab control
+        UserControl content;
+        DestinyHash reference = PackageHandler.GetEntryReference(hash);
+        int hType, hSubtype;
+        PackageHandler.GetEntryTypes(hash, out hType, out hSubtype);
+        if ((hType == 8 || hType == 16) && hSubtype == 0)
+        {
+            switch (reference.Hash)
+            {
+                case 0x80809AD8:
+                    EntityView dynamicView = new EntityView();
+                    dynamicView.LoadEntity(hash);
+                    content = dynamicView;
+                    MakeNewTab(hash, content);
+                    break;
+                case 0x80806D44:
+                    StaticView staticView = new StaticView(hash);
+                    staticView.LoadStatic(ELOD.MostDetail);
+                    content = staticView;
+                    MakeNewTab(hash, content);
+                    break;
+                case 0x808093AD:
+                    MapView mapView = new MapView(hash);
+                    mapView.LoadMap();
+                    content = mapView;
+                    MakeNewTab(hash, content);
+                    break;
+                case 0x80808E8E:
+                    ActivityView activityView = new ActivityView();
+                    activityView.LoadActivity(hash);
+                    content = activityView;
+                    MakeNewTab(hash, content);
+                    SetNewestTabSelected();
+                    break;
+                default:
+                    MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
+                    break;
+            }
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
     }
 }

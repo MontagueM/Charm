@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using Field;
 using Field.General;
@@ -17,6 +18,13 @@ public partial class MapView : UserControl
     public StaticMapData StaticMap;
     public TagHash Hash;
 
+    private static MainWindow _mainWindow = null;
+
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        _mainWindow = Window.GetWindow(this) as MainWindow;
+    }
+    
     public MapView(TagHash hash)
     {
         InitializeComponent();
@@ -42,7 +50,7 @@ public partial class MapView : UserControl
         MainWindow.Progress.CompleteStage();
         await Task.Run(ExportFullMap);
         MainWindow.Progress.CompleteStage();
-        MainMenuView.SetNewestTabSelected();
+        _mainWindow.SetNewestTabSelected();
     }
 
     private void GetTag()

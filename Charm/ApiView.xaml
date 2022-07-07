@@ -22,11 +22,12 @@
         <ListView x:Name="ApiItemList" Grid.Row="1">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Button HorizontalAlignment="Right" Tag="{Binding Hash}" Click="DisplayApiEntityButton_OnClick">
-                        <WrapPanel>
-                            <TextBlock HorizontalAlignment="Left" Text="{Binding Name}" FontFamily="./fonts/ald55.otf#Aldine"/>
-                        </WrapPanel>
-                    </Button>
+                    <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}" IsChecked="{Binding IsChecked}" Click="DisplayApiEntityButton_OnClick">
+                        <StackPanel>
+                            <TextBlock TextAlignment="Left" Text="{Binding Name}"/>
+                            <TextBlock TextAlignment="Right" Text="{Binding Type}"/>
+                        </StackPanel>
+                    </ToggleButton>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

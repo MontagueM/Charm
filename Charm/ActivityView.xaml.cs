@@ -14,6 +14,13 @@ public partial class ActivityView : UserControl
 {
     private Activity _activity;
     
+    private static MainWindow _mainWindow = null;
+
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        _mainWindow = Window.GetWindow(this) as MainWindow;
+    }
+    
     public ActivityView()
     {
         InitializeComponent();
@@ -32,7 +39,7 @@ public partial class ActivityView : UserControl
         MainWindow.Progress.CompleteStage();
         LoadUI();
         MainWindow.Progress.CompleteStage();
-        MainMenuView.SetNewestTabName(PackageHandler.GetActivityName(hash));
+        _mainWindow.SetNewestTabName(PackageHandler.GetActivityName(hash));
     }
 
     private void LoadUI()
@@ -78,7 +85,7 @@ public partial class ActivityView : UserControl
 
     private void DisplayMapButton_OnClick(object sender, RoutedEventArgs e)
     {
-        MainMenuView.AddWindow(new TagHash((sender as Button).Tag as string));
+        _mainWindow.AddWindow(new TagHash((sender as Button).Tag as string));
     }
 }
 
