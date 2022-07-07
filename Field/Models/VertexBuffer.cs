@@ -86,6 +86,14 @@ public class VertexBuffer : Tag
             case 0x4:
                 part.VertexTexcoords.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
+            case 0x8:
+                VertexWeight vw = new VertexWeight
+                {
+                    WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
+                    WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
+                };
+                (part as DynamicPart).VertexWeights.Add(vw);
+                break;
             case 0x18:
                 part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));

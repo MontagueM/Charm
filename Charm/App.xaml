@@ -5,6 +5,12 @@
              StartupUri="MainWindow.xaml"
              Startup="Application_Startup">
     <Application.Resources>
-         
+        <FontFamily x:Key="NeueHaasGrotesk75Bold">./fonts/nhaasgroteskdspro-75bd.otf#Neue Haas Grotesk</FontFamily>
+        <FontFamily x:Key="Aldine55">fonts/#ald55</FontFamily>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontFamily" Value="Aldine55" />
+            <Setter Property="FontSize" Value="23" />
+        </Style>
     </Application.Resources>
 </Application>

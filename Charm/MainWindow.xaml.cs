@@ -50,6 +50,7 @@ public partial class MainWindow
             "Global string cache",
             "Fbx Handler",
             "Activity Names",
+            "Font Handler",
         });
         
         // Initialise FNV handler -- must be before InvestmentHandler
@@ -74,6 +75,10 @@ public partial class MainWindow
         
         // Get all activity names
         await Task.Run(PackageHandler.GetAllActivityNames);
+        Progress.CompleteStage();
+        
+        // Load all the fonts
+        await Task.Run(FontHandler.Initialise);
         Progress.CompleteStage();
     }
 

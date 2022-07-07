@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Field;
 using Field.Entities;
 using Field.General;
@@ -68,6 +69,8 @@ public partial class ApiView : UserControl
             }
         });
         ApiItemList.ItemsSource = displayItems;
+        FontFamily fontFamily = new FontFamily(@"fonts/#ald55");
+        textBox.FontFamily = fontFamily;
     }
 
 private void DisplayApiEntityButton_OnClick(object sender, RoutedEventArgs e)

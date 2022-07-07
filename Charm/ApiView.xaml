@@ -23,7 +23,7 @@
                 <DataTemplate>
                     <Button HorizontalAlignment="Right" Tag="{Binding Hash}" Click="DisplayApiEntityButton_OnClick">
                         <WrapPanel>
-                            <TextBlock HorizontalAlignment="Left" Text="{Binding Name}"/>
+                            <TextBlock HorizontalAlignment="Left" Text="{Binding Name}" FontFamily="./fonts/ald55.otf#Aldine"/>
                         </WrapPanel>
                     </Button>
                 </DataTemplate>
