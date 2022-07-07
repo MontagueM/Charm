@@ -1,8 +1,12 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing.Text;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -69,22 +73,20 @@ public partial class ApiView : UserControl
             }
         });
         ApiItemList.ItemsSource = displayItems;
-        FontFamily fontFamily = new FontFamily(@"fonts/#ald55");
-        textBox.FontFamily = fontFamily;
     }
 
-private void DisplayApiEntityButton_OnClick(object sender, RoutedEventArgs e)
-{
-    var apiHash = new DestinyHash((sender as Button).Tag as string, true);
-    List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
-    EntityView.LoadEntityFromApi(apiHash);
-    var a = 0;
-}
+    private void DisplayApiEntityButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var apiHash = new DestinyHash((sender as Button).Tag as string, true);
+        List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
+        EntityView.LoadEntityFromApi(apiHash);
+        var a = 0;
+    }
     
-private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-{
-    RefreshItemList();
-}
+    private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        RefreshItemList();
+    }
 }
 
 public class ApiItem

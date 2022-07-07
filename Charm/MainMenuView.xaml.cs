@@ -156,6 +156,9 @@ public partial class MainMenuView : UserControl
 
     public static void MakeNewTab(string name, UserControl content)
     {
+        // Testing making it all caps
+        name = name.ToUpper();
+        
         // Check if the name already exists, if so set newest tab to that
         var items = _mainWindow.MainTabControl.Items;
         foreach (TabItem item in items)

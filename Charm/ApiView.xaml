@@ -16,7 +16,8 @@
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
         
-        <TextBox x:Name="textBox" TextChanged="TextBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"/>
+        <TextBox x:Name="textBox" TextChanged="TextBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
+                 FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36"/>
         
         <ListView x:Name="ApiItemList" Grid.Row="1">
             <ListView.ItemTemplate>

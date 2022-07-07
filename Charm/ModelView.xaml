@@ -25,9 +25,9 @@
             <RowDefinition Height="2*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <Menu x:Name="menu" Grid.ColumnSpan="1" Grid.Column="2" Background="#3d3d3d" Foreground="#FFE6E6E6" BorderBrush="#3d3d3d">
+        <Menu x:Name="menu" Grid.ColumnSpan="1" Grid.Column="2" BorderBrush="#3d3d3d">
             <MenuItem Header="_Viewer">
-                <MenuItem Header="G_rid" IsCheckable="True" IsChecked="True" Checked="Grid_Checked" Unchecked="Grid_Unchecked" Background="#3d3d3d" Foreground="#FFE6E6E6"/>
+                <MenuItem Header="G_rid" IsCheckable="True" IsChecked="True" Checked="Grid_Checked" Unchecked="Grid_Unchecked"/>
             </MenuItem>
         </Menu>
         
@@ -35,7 +35,6 @@
                         EffectsManager="{Binding EffectsManager}"
                         EnableDesignModeRendering="True"
                         EnableSwapChainRendering="True"
-                        Background="#1d1d1d" BackgroundColor="#1d1d1d"
                         IsShadowMappingEnabled="False"
                         ShowCoordinateSystem="True"
                         ShowFrameRate="True"

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Field;
 using Field.General;
 using Field.Models;
@@ -46,19 +48,26 @@ public partial class MainWindow
         {
             "FNV Handler",
             "Hash64",
+            "Font Handler",
             "Investment",
             "Global string cache",
             "Fbx Handler",
             "Activity Names",
-            "Font Handler",
         });
-        
-        // Initialise FNV handler -- must be before InvestmentHandler
+
+        // Initialise FNV handler -- must be first bc my code is shit
         await Task.Run(FnvHandler.Initialise);
         Progress.CompleteStage();
-        
+
         // Get all hash64 -- must be before InvestmentHandler
         await Task.Run(TagHash64Handler.Initialise);
+        Progress.CompleteStage();
+        
+        // Load all the fonts
+        await Task.Run(() =>
+        {
+            RegisterFonts(FontHandler.Initialise());
+        });
         Progress.CompleteStage();
         
         // Initialise investment
@@ -76,10 +85,19 @@ public partial class MainWindow
         // Get all activity names
         await Task.Run(PackageHandler.GetAllActivityNames);
         Progress.CompleteStage();
+    }
+
+    private void RegisterFonts(ConcurrentDictionary<FontHandler.FontInfo, FontFamily> initialise)
+    {
+        foreach (var (key, value) in initialise)
+        {
+            Application.Current.Resources.Add($"{key.Family} {key.Subfamily}", value);
+        }
+
+        // Debug font list
+        List<string> fontList = initialise.Select(pair => pair.Key.Family + " " + pair.Key.Subfamily).ToList();
         
-        // Load all the fonts
-        await Task.Run(FontHandler.Initialise);
-        Progress.CompleteStage();
+        var a = 0;
     }
 
     private void OpenConfigPanel_OnClick(object sender, RoutedEventArgs e)
