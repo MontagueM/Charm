@@ -15,6 +15,10 @@
       <PackageReference Include="HelixToolkit.SharpDX.Core.Wpf" Version="2.21.1" />
       <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
       <PackageReference Include="Serilog" Version="2.11.1-dev-01397" />
+      <PackageReference Include="Serilog.Expressions" Version="3.4.0" />
+      <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00947" />
+      <PackageReference Include="Serilog.Sinks.RichTextBox.Wpf" Version="1.1.0" />
+      <PackageReference Include="VersionChecker" Version="1.1.0" />
     </ItemGroup>
 
     <ItemGroup>

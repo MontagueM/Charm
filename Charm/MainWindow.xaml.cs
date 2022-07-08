@@ -14,6 +14,7 @@ using Field;
 using Field.General;
 using Field.Models;
 using Field.Statics;
+using VersionChecker;
 
 namespace Charm;
 /// <summary>
@@ -23,8 +24,8 @@ public partial class MainWindow
 {
     public static ProgressView Progress = null;
     private static TabItem _newestTab = null;
+    private static LogView _logView;
 
-    
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         Progress = ProgressView;
@@ -33,8 +34,10 @@ public partial class MainWindow
     
     public MainWindow()
     {
-        // todo give this all a progressbar
         InitializeComponent();
+        
+        _logView = new LogView();
+        LogHandler.Initialise(_logView);
         
         // Hide tab by default
         MainTabControl.Visibility = Visibility.Hidden;
@@ -42,20 +45,51 @@ public partial class MainWindow
         // Check if packages path exists in config
         ConfigHandler.CheckPackagesPathIsValid();
         MainTabControl.Visibility = Visibility.Visible;
+
+        // Check version
+        CheckVersion();
+    }
+
+    private async void CheckVersion()
+    {
+        var currentVersion = new ApplicationVersion("1.0.0");
+        var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/tree/main/Charm/versions.xml", currentVersion);
+        try
+        {
+            var upToDate = await versionChecker.IsUpToDate();
+            if (!upToDate)
+            {
+                MessageBox.Show("New version available on GitHub!");
+            }
+        }
+        catch (Exception)
+        {
+            // Could not get or parse version file
+            #if !DEBUG
+            MessageBox.Show("Could not get version.");
+            #endif
+        }
     }
 
     private async void InitialiseHandlers()
     {
         Progress.SetProgressStages(new List<string>
         {
+            "fonts",
             "fnv hashes",
             "hash 64",
-            "fonts",
             "investment",
             "global string cache",
             "fbx",
             "activity names",
         });
+
+        // Load all the fonts
+        await Task.Run(() =>
+        {
+            RegisterFonts(FontHandler.Initialise());
+        });
+        Progress.CompleteStage();
 
         // Initialise FNV handler -- must be first bc my code is shit
         await Task.Run(FnvHandler.Initialise);
@@ -64,14 +98,7 @@ public partial class MainWindow
         // Get all hash64 -- must be before InvestmentHandler
         await Task.Run(TagHash64Handler.Initialise);
         Progress.CompleteStage();
-        
-        // Load all the fonts
-        await Task.Run(() =>
-        {
-            RegisterFonts(FontHandler.Initialise());
-        });
-        Progress.CompleteStage();
-        
+
         // Initialise investment
         await Task.Run(InvestmentHandler.Initialise);
         Progress.CompleteStage();
@@ -106,6 +133,12 @@ public partial class MainWindow
     {
         MakeNewTab("Configuration", new ConfigView());
         SetNewestTabSelected();
+    }
+    
+    private void OpenLogPanel_OnClick(object sender, RoutedEventArgs e)
+    {
+        MakeNewTab("Log", _logView);
+        SetNewestTabSelected();    
     }
     
     public void SetNewestTabSelected()
@@ -186,4 +219,5 @@ public partial class MainWindow
             throw new NotImplementedException();
         }
     }
+    
 }

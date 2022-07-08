@@ -9,9 +9,9 @@
     <Grid Width="1920" Height="1080" x:Name="Grid">
         <!-- So we stop clicking on the main screen, need HitTestVisible -->
         <Rectangle IsHitTestVisible="True" Fill="Transparent"/>
-        <StackPanel Orientation="Vertical" Height="110" Width="500" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource BackgroundColour14}">
+        <StackPanel Orientation="Vertical" Height="105" Width="500" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource BackgroundColour14}">
             <ProgressBar x:Name="ProgressBar" Height="50" Value="50" Background="{StaticResource BackgroundColour7}" Foreground="{StaticResource AccentColour}"></ProgressBar>
-            <TextBlock x:Name="ProgressText" Height="50" Text="LOADING" FontSize="38" HorizontalAlignment="Center"></TextBlock>
+            <TextBlock x:Name="ProgressText" Height="50" Text="LOADING" FontSize="38" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
         </StackPanel>
     </Grid>
 </UserControl>

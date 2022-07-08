@@ -30,6 +30,12 @@
         <Setter Property="BorderBrush" Value="{StaticResource ForegroundColour90}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColour90}" />
     </Style>
+    
+    <Style TargetType="RichTextBox">
+        <Setter Property="Background" Value="{StaticResource BackgroundColour20}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ForegroundColour90}" />
+        <Setter Property="Foreground" Value="{StaticResource ForegroundColour90}" />
+    </Style>
 
     <Style TargetType="TabControl">
         <Setter Property="Background" Value="{StaticResource BackgroundColour7}" />
@@ -55,8 +61,8 @@
                         <Border
                             Name="Border"
                             Margin="0,0,-4,0"
-                            Background="{StaticResource BackgroundColour20}"
-                            BorderBrush="{StaticResource  BackgroundColour20}"
+                            Background="{StaticResource BackgroundColour14}"
+                            BorderBrush="{StaticResource  BackgroundColour14}"
                             BorderThickness="1,1,1,1"
                             CornerRadius="2,2,0,0">
                             <ContentPresenter x:Name="ContentSite"
@@ -64,23 +70,28 @@
                                               HorizontalAlignment="Center"
                                               ContentSource="Header"
                                               Margin="12,2,12,2"
-                                              RecognizesAccessKey="True" />
+                                              RecognizesAccessKey="True"
+                                              />
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Panel.ZIndex" Value="100" />
                             <Setter TargetName="Border" Property="Background"
-                                    Value="{StaticResource BackgroundColour20}" />
+                                    Value="{StaticResource BackgroundColour30}" />
                             <Setter TargetName="Border" Property="BorderThickness" Value="1,1,1,0" />
-                            <Setter Property="Background" Value="{StaticResource BackgroundColour20}" />
+                            <Setter Property="Background" Value="{StaticResource BackgroundColour30}" />
                             <Setter Property="Foreground" Value="{StaticResource ForegroundColour90}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="Border" Property="Background"
-                                    Value="{StaticResource BackgroundColour20}" />
+                                    Value="{StaticResource BackgroundColour14}" />
                             <Setter TargetName="Border" Property="BorderBrush"
-                                    Value="{StaticResource BackgroundColour20}" />
+                                    Value="{StaticResource BackgroundColour14}" />
+                            <Setter Property="Foreground"
+                                    Value="{StaticResource ForegroundColour75}" />
+                            <Setter Property="Background"
+                                    Value="{StaticResource BackgroundColour14}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

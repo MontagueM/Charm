@@ -15,6 +15,7 @@ using System.Windows.Media;
 using Field;
 using Field.Entities;
 using Field.General;
+using Serilog;
 
 namespace Charm;
 
@@ -22,10 +23,19 @@ public partial class ApiView : UserControl
 {
     private ConcurrentBag<ApiItem> _apiItems = null;
     private ToggleButton _pressedButton = null;
-    
+    private readonly ILogger _apiLog = Log.ForContext<ApiView>();
+
     public ApiView()
     {
         InitializeComponent();
+        ExportView.SetExportFunction(ExportFull);
+    }
+
+    private void ExportFull(object sender, RoutedEventArgs e)
+    {
+        var btn = sender as Button;
+        ExportInfo info = (ExportInfo)btn.Tag;
+        EntityView.ExportFull(InvestmentHandler.GetEntitiesFromHash(info.Hash), info.Name);
     }
     
     public async void LoadApiView()
@@ -53,6 +63,8 @@ public partial class ApiView : UserControl
             if (kvp.Value.GetArtArrangementIndex() == -1) return;
             string name = InvestmentHandler.GetItemName(kvp.Value);
             string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
+            if (type == "Finisher" || type.Contains("Emote"))
+                return;  // they point to Animation instead of Entity
             _apiItems.Add(new ApiItem {Hash = kvp.Key, Name = $"{name} | {kvp.Key.Hash.ToString()}", Type = type.Trim()});  // for some reason some of the types have spaces after
         });
     }
@@ -81,14 +93,16 @@ public partial class ApiView : UserControl
     private void DisplayApiEntityButton_OnClick(object sender, RoutedEventArgs e)
     {
         var btn = sender as ToggleButton;
+        var hash = (btn.DataContext as ApiItem).Hash;
+        _apiLog.Debug($"Loading UI entity model {hash}");
         if (_pressedButton != null)
             _pressedButton.IsChecked = false;
         _pressedButton = btn;
         btn.IsChecked = true;
-        var apiHash = new DestinyHash((btn.DataContext as ApiItem).Hash, true);
-        List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
+        var apiHash = new DestinyHash(hash, true);
         EntityView.LoadEntityFromApi(apiHash);
-        var a = 0;
+        ExportView.SetExportInfo(apiHash);
+        _apiLog.Debug($"Loaded UI entity model {hash}");
     }
     
     private void TextBox_TextChanged(object sender, TextChangedEventArgs e)

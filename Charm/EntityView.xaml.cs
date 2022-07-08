@@ -11,6 +11,7 @@ using Field.Entities;
 using Field.General;
 using Field.Models;
 using HelixToolkit.SharpDX.Core.Model.Scene;
+using Serilog;
 using File = System.IO.File;
 
 namespace Charm;
@@ -19,6 +20,8 @@ public partial class EntityView : UserControl
 {
     public TagHash Hash;
     private string Name;
+    private readonly ILogger _entityLog = Log.ForContext<EntityView>();
+
 
     public EntityView()
     {
@@ -65,8 +68,9 @@ public partial class EntityView : UserControl
         FbxHandler.Clear();
     }
 
-    private void ExportFull(List<Entity> entities, string name)
+    public void ExportFull(List<Entity> entities, string name)
     {
+        _entityLog.Debug($"Exporting entity model name:{name}");
         InfoConfigHandler.MakeFile();
         string meshName = name;
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
@@ -85,6 +89,7 @@ public partial class EntityView : UserControl
         InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
         AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
         InfoConfigHandler.WriteToFile(savePath);
+        _entityLog.Information($"Exported (full) entity model {name} to {savePath.Replace('\\', '/')}/");
     }
     
     // // old ones vvv

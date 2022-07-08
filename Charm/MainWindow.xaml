@@ -12,12 +12,13 @@
             <ColumnDefinition Width="100*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1.5*" />
+            <RowDefinition Height="3*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
             <MenuItem Header="Settings">
-                <MenuItem Header="Open config panel" Click="OpenConfigPanel_OnClick"/>
+                <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick"/>
+                <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/>
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1" x:Name="MainTabControl">

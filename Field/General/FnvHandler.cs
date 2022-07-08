@@ -5,7 +5,7 @@ namespace Field.General;
 
 public class FnvHandler
 {
-    private static ConcurrentDictionary<uint, string> _fnvMap;
+    private static ConcurrentDictionary<uint, string> _fnvMap = new ConcurrentDictionary<uint, string>();
 
     private static List<string> _customStrings = new List<string>
     {

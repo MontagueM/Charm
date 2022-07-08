@@ -7,6 +7,19 @@
              mc:Ignorable="d"
              d:DesignHeight="100" d:DesignWidth="1000">
     <Grid>
-        <TextBlock>Exporting TBD</TextBlock>
+        <!-- If exporting is not allowed, we hide the options with this red error quad -->
+        <Rectangle x:Name="DisabledOverlay" Visibility="Hidden" IsHitTestVisible="True" Fill="Red" Opacity="0.5" Panel.ZIndex="100"/>
+        <Grid VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="100*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100*"/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="ExportName" VerticalAlignment="Center" Grid.Column="0" Margin="50,0,0,0" Text="Exporting: NONE"/>
+            <Button Grid.Column="2" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton"/>
+        </Grid>
     </Grid>
 </UserControl>

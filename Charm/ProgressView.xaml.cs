@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Serilog;
 
 namespace Charm;
 
@@ -10,7 +11,8 @@ public partial class ProgressView : UserControl
 {
     private Queue<string> _progressStages;
     private int TotalStageCount;
-    
+    private ILogger _progressLog;
+
     public ProgressView()
     {
         InitializeComponent();
@@ -36,6 +38,7 @@ public partial class ProgressView : UserControl
 
     public void SetProgressStages(List<string> progressStages)
     {
+        _progressLog = Log.Logger.ForContext<ProgressView>();
         Dispatcher.Invoke(() =>
         {
             TotalStageCount = progressStages.Count;
@@ -54,7 +57,8 @@ public partial class ProgressView : UserControl
     {
         Dispatcher.Invoke(() =>
         {
-            _progressStages.Dequeue();
+            string removed = _progressStages.Dequeue();
+            _progressLog.Debug($"Completed loading stage: {removed}");
             UpdateProgress();
             if (_progressStages.Count == 0)
             {
@@ -67,7 +71,9 @@ public partial class ProgressView : UserControl
     {
         if (_progressStages.Count > 0)
         {
-            return _progressStages.Peek();
+            var stage = _progressStages.Peek();
+            _progressLog.Debug($"Starting loading stage: {stage}");
+            return stage;
         }
         return "Loading";
     }
