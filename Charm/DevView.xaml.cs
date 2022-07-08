@@ -31,13 +31,6 @@ public partial class DevView : UserControl
         }
         string strHash = TagHashBox.Text.Replace(" ", "");
         
-        // forcing investment
-        EntityView investmentView = new EntityView();
-        investmentView.LoadEntityFromApi(new DestinyHash(UInt32.Parse(strHash)));
-        _mainWindow.MakeNewTab(strHash, investmentView);
-        _mainWindow.SetNewestTabSelected();
-        return;
-        
         if (strHash.Length == 16)
         {
             strHash = TagHash64Handler.GetTagHash64(strHash);

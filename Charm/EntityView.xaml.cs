@@ -33,7 +33,7 @@ public partial class EntityView : UserControl
         Entity entity = new Entity(entityHash);
         AddEntity(entity, ELOD.MostDetail);
         LoadUI();
-        ExportFull(new List<Entity>{entity}, entityHash);
+        // ExportFull(new List<Entity>{entity}, entityHash);
     }
 
     public async void LoadEntityFromApi(DestinyHash apiHash)

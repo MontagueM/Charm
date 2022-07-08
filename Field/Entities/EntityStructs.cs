@@ -1154,3 +1154,21 @@ public struct VertexWeight
     public IntVector4 WeightValues;
     public IntVector4 WeightIndices;
 }
+
+#region Named entities
+
+[StructLayout(LayoutKind.Sequential, Size = 0x50)]
+public struct D2Class_75988080
+{
+    public long FileSize;
+    [DestinyField(FieldType.RelativePointer)]
+    public string DestinationGlobalTagBagName;
+    public TagHash DestinationGlobalTagBag;
+    [DestinyOffset(0x20)] 
+    public TagHash PatrolTable1;
+    [DestinyOffset(0x28), DestinyField(FieldType.RelativePointer)] 
+    public string PatrolTableName;
+    public TagHash PatrolTable2;
+}
+
+#endregion

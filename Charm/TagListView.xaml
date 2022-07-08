@@ -1,10 +1,11 @@
-﻿<UserControl x:Class="Charm.ApiView"
+﻿<UserControl x:Class="Charm.TagListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Charm"
              mc:Ignorable="d"
+             Loaded="OnControlLoaded"
              d:DesignHeight="1080" d:DesignWidth="1920">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -17,13 +18,13 @@
             <RowDefinition Height="5*"/>
         </Grid.RowDefinitions>
         
-        <TextBox x:Name="textBox" TextChanged="TextBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
+        <TextBox x:Name="searchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
                  FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36"/>
         
-        <ListView x:Name="ApiItemList" Grid.Row="1" Grid.RowSpan="2">
+        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}" Click="DisplayApiEntityButton_OnClick">
+                    <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}" Click="TagItem_OnClick">
                         <StackPanel>
                             <TextBlock TextAlignment="Left" Text="{Binding Name}"/>
                             <TextBlock TextAlignment="Right" Text="{Binding Type}"/>
@@ -33,9 +34,9 @@
             </ListView.ItemTemplate>
         </ListView>
         
+        <!-- TODO make it so there can be other views here for things like textures, music, etc -->
         <local:EntityView Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" x:Name="EntityView"/>
         
         <local:ExportView Grid.Column="1" Grid.Row="2" x:Name="ExportView"/>
-
     </Grid>
 </UserControl>

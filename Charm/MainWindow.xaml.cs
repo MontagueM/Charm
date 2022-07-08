@@ -176,7 +176,6 @@ public partial class MainWindow
     public void AddWindow(TagHash hash)
     {
         // Adds a new tab to the tab control
-        UserControl content;
         DestinyHash reference = PackageHandler.GetEntryReference(hash);
         int hType, hSubtype;
         PackageHandler.GetEntryTypes(hash, out hType, out hSubtype);
@@ -187,26 +186,34 @@ public partial class MainWindow
                 case 0x80809AD8:
                     EntityView dynamicView = new EntityView();
                     dynamicView.LoadEntity(hash);
-                    content = dynamicView;
-                    MakeNewTab(hash, content);
+                    MakeNewTab(hash, dynamicView);
                     break;
                 case 0x80806D44:
                     StaticView staticView = new StaticView(hash);
                     staticView.LoadStatic(ELOD.MostDetail);
-                    content = staticView;
-                    MakeNewTab(hash, content);
+                    MakeNewTab(hash, staticView);
                     break;
                 case 0x808093AD:
                     MapView mapView = new MapView(hash);
                     mapView.LoadMap();
-                    content = mapView;
-                    MakeNewTab(hash, content);
+                    MakeNewTab(hash, mapView);
                     break;
                 case 0x80808E8E:
                     ActivityView activityView = new ActivityView();
                     activityView.LoadActivity(hash);
-                    content = activityView;
-                    MakeNewTab(hash, content);
+                    MakeNewTab(hash, activityView);
+                    SetNewestTabSelected();
+                    break;
+                case 0x80808930:
+                    var tagBagView = new EntityListView();
+                    tagBagView.LoadContent(EEntityListType.DestinationGlobalTagBag, hash);
+                    MakeNewTab(hash, tagBagView);
+                    SetNewestTabSelected();
+                    break;
+                case 0x80809EED:
+                    var budgetSetView = new EntityListView();
+                    budgetSetView.LoadContent(EEntityListType.BudgetSet, hash);
+                    MakeNewTab(hash, budgetSetView);
                     SetNewestTabSelected();
                     break;
                 default:

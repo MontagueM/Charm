@@ -32,7 +32,15 @@ public partial class MainMenuView : UserControl
     {
         ApiView apiView = new ApiView();
         apiView.LoadApiView();
-        _mainWindow.MakeNewTab("API View", apiView);
+        _mainWindow.MakeNewTab("api", apiView);
+        _mainWindow.SetNewestTabSelected();
+    }
+    
+    private void NamedEntitiesListViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListView tagListView = new TagListView();
+        tagListView.LoadContent(ETagListType.DestinationGlobalTagBagList);
+        _mainWindow.MakeNewTab("destination global tag bag", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
 }

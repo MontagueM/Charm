@@ -12,6 +12,10 @@ public class PackageHandler
     private static Dictionary<TagHash, string> ActivityNames = new Dictionary<TagHash, string>();
     public static Dictionary<TagHash, byte[]> BytesCache = new Dictionary<TagHash, byte[]>();
 
+    public static uint MakeHash(int pkgId, int entryId)
+    {
+        return (uint) (0x80800000 + (pkgId << 0xD) + entryId);
+    }
 
     private static bool AddToCache(uint hash, dynamic tag)
     {
@@ -80,13 +84,11 @@ public class PackageHandler
     {
         List<DestinyHash> hashes = new List<DestinyHash>();
         // Iterate over all the 02218080 files and their string containers inside
-        DestinyFile.UnmanagedData pAllEntries = GetAllEntriesOfReference(new DestinyHash("045EAE80").Hash, new DestinyHash("02218080").Hash); // 045EAE80 to speed it up
-        int[] vals = new int[pAllEntries.dataSize];
-        Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
+        var vals = GetAllEntriesOfReference(0x0172, 0x80802102); // 045EAE80 to speed it up
         // foreach (int i in vals)
-        Parallel.ForEach(vals, i =>
+        Parallel.ForEach(vals, val =>
         {
-            TagHash hash = new TagHash((uint) (0x80800000 + (0x172 << 0xD) + i));
+            TagHash hash = new TagHash(val);
             Tag<D2Class_02218080> f = new Tag<D2Class_02218080>(hash);
             foreach (var q in f.Header.Unk28)
             {
@@ -117,7 +119,15 @@ public class PackageHandler
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllEntriesOfReference", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData GetAllEntriesOfReference(uint hash, uint reference);
+    public extern static DestinyFile.UnmanagedData DllGetAllEntriesOfReference(uint hash, uint reference);
+
+    public static List<uint> GetAllEntriesOfReference(int pkgId, uint reference)
+    {
+        var pAllEntries = DllGetAllEntriesOfReference(MakeHash(pkgId, 0), reference);
+        int[] vals = new int[pAllEntries.dataSize];
+        Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
+        return vals.Select(x => MakeHash(pkgId, x)).ToList();
+    }
 
     [DllImport("Symmetry.dll", EntryPoint = "DllGetEntryReference", CallingConvention = CallingConvention.StdCall)]
     public extern static uint DllGetEntryReference(uint hash);

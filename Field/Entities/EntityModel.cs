@@ -190,6 +190,8 @@ public class DynamicPart : Part
         {
             return null;
         }
+        if (externalMaterialIndex >= map.Count)
+            return null; // todo this is actually wrong ig...
         var mapEntry = map[externalMaterialIndex];
         // For now we'll just set as the first material in the array
         List<Material> materials = new List<Material>();

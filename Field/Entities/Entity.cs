@@ -87,6 +87,10 @@ public class Entity : Tag
     public void SaveTexturePlates(string saveDirectory)
     {
         Directory.CreateDirectory($"{saveDirectory}/Textures/");
+        if (((D2Class_8F6D8080) ModelParentResource.Header.Unk18).TexturePlates is null)
+        {
+            return;
+        }
         var rsrc = ((D2Class_8F6D8080) ModelParentResource.Header.Unk18).TexturePlates.Header;
         rsrc.AlbedoPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo.dds");
         rsrc.NormalPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal.dds");

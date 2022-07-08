@@ -18,10 +18,8 @@ public class FontHandler
     private static void SaveAllFonts()
     {
         // 0x80a00000 represents 0100 package
-        var pAllEntries = PackageHandler.GetAllEntriesOfReference(0x80a00000, 0x80803c0f);
-        uint[] vals = new uint[pAllEntries.dataSize];
-        PackageHandler.Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
-        Tag<D2Class_0F3C8080> fontsContainer = PackageHandler.GetTag(typeof(Tag<D2Class_0F3C8080>),0x80800000 + (0x100 << 0xD) + vals[0]);
+        var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
+        Tag<D2Class_0F3C8080> fontsContainer = PackageHandler.GetTag(typeof(Tag<D2Class_0F3C8080>),vals[0]);
         // Check if the font exists in the Fonts/ folder, if not extract it
         if (!Directory.Exists("fonts/"))
         {

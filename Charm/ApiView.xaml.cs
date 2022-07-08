@@ -116,5 +116,4 @@ public class ApiItem
     public string Name { get; set; }
     public string Hash { get; set; }
     public string Type { get; set; }
-    public bool IsChecked { get; set; }
 }

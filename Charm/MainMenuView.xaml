@@ -10,17 +10,23 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*"/>
-            <ColumnDefinition Width="200*"/>
+            <ColumnDefinition Width="100*"/>
+            <ColumnDefinition Width="100*"/>
+            <ColumnDefinition Width="100*"/>
             <ColumnDefinition Width="100*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="100*" />
-            <RowDefinition Height="30*" />
+            <RowDefinition Height="100*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
         <!-- AB8FA380 variks -->
         <!-- 3b00ab80 atraks -->
         <!-- 4901ab80 taniks normal, 100bb780 abomination -->
-        <Button Click="ApiViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="22">api view</Button>
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
+            <TextBlock Text="Entity" FontSize="42" HorizontalAlignment="Center" Padding="0,0,0,50"/>
+            <Button Click="ApiViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,20" Padding="20, 20, 20, 20" >API</Button>
+            <Button Click="NamedEntitiesListViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,20" Padding="20, 20, 20, 20" >NAMED ENTITIES</Button>
+        </StackPanel>
     </Grid>
 </UserControl>
