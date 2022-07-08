@@ -38,6 +38,12 @@ public partial class EntityView : UserControl
         List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
         foreach (var entity in entities)
         {
+            // todo find out why sometimes this is null
+            if (entity == null)
+            {
+                continue;
+                var a = 0;
+            }
             AddEntity(entity, ELOD.MostDetail);
         }
         LoadUI();

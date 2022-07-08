@@ -48,13 +48,13 @@ public partial class MainWindow
     {
         Progress.SetProgressStages(new List<string>
         {
-            "FNV Handler",
-            "Hash64",
-            "Font Handler",
-            "Investment",
-            "Global string cache",
-            "Fbx Handler",
-            "Activity Names",
+            "fnv hashes",
+            "hash 64",
+            "fonts",
+            "investment",
+            "global string cache",
+            "fbx",
+            "activity names",
         });
 
         // Initialise FNV handler -- must be first bc my code is shit

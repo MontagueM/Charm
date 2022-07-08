@@ -14,12 +14,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>
             <RowDefinition Height="100*"/>
+            <RowDefinition Height="5*"/>
         </Grid.RowDefinitions>
         
         <TextBox x:Name="textBox" TextChanged="TextBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
                  FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36"/>
         
-        <ListView x:Name="ApiItemList" Grid.Row="1">
+        <ListView x:Name="ApiItemList" Grid.Row="1" Grid.RowSpan="2">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}" IsChecked="{Binding IsChecked}" Click="DisplayApiEntityButton_OnClick">
@@ -32,6 +33,9 @@
             </ListView.ItemTemplate>
         </ListView>
         
-        <local:EntityView Grid.Column="1" Grid.RowSpan="2" x:Name="EntityView"/>
+        <local:EntityView Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" x:Name="EntityView"/>
+        
+        <local:ExportView Grid.Column="1" Grid.Row="2" x:Name="ExportView"/>
+
     </Grid>
 </UserControl>

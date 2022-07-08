@@ -4,71 +4,7 @@
                     xmlns:charm="clr-namespace:Charm"
                     xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.AeroLite">
     <!-- https://material.io/design/color/dark-theme.html#ui-application -->
-    <!-- <Style x:Key="ButtonStyle" TargetType="{x:Type ToggleButton}"> -->
-    <!--     <Setter Property="BorderBrush"> -->
-    <!--         <Setter.Value> -->
-    <!--             <SolidColorBrush Color="#FFE6E6E6"/> -->
-    <!--         </Setter.Value> -->
-    <!--     </Setter> -->
-    <!--     <Setter Property="Template"> -->
-    <!--         <Setter.Value> -->
-    <!--             <ControlTemplate TargetType="{x:Type ToggleButton}"> -->
-    <!--                 <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0.8" CornerRadius="3"> -->
-    <!--                     <TextBlock Foreground="{TemplateBinding BorderBrush}" Text="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
-    <!--                 </Border> -->
-    <!--             </ControlTemplate> -->
-    <!--         </Setter.Value> -->
-    <!--     </Setter> -->
-    <!--     <Style.Triggers> -->
-    <!--         <Trigger Property="IsMouseOver" Value="True"> -->
-    <!--             <Setter Property="Background" Value="Red"/> -->
-    <!--         </Trigger> -->
-    <!--     </Style.Triggers> -->
-    <!--      -->
-    <!-- </Style> -->
-    <!-- -->
-    <!-- <Style TargetType="ToggleButton" x:Key="Button_Command"> -->
-    <!--     <Setter Property="Foreground" Value="#a0a0a0"/> -->
-    <!--     <Setter Property="Template"> -->
-    <!--         <Setter.Value> -->
-    <!--             <ControlTemplate TargetType="{x:Type ToggleButton}"> -->
-    <!--                 <Border x:Name="ButtonBackground" BorderBrush="White"> -->
-    <!--                     <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left" Margin="20,0,0,0"/> -->
-    <!--                     <Border.BorderThickness>1</Border.BorderThickness> -->
-    <!--                     <Border.CornerRadius>2</Border.CornerRadius> -->
-    <!--                     <Border.Background> -->
-    <!--                         <SolidColorBrush Color="#3d3d3d"/> -->
-    <!--                     </Border.Background> -->
-    <!--                      -->
-    <!--                 </Border> -->
-    <!--                  -->
-    <!--                 <ControlTemplate.Triggers> -->
-    <!--                     <Trigger Property="IsMouseOver" Value="True"> -->
-    <!--                         <Setter TargetName="ButtonBackground" Property="Background"> -->
-    <!--                             <Setter.Value> -->
-    <!--                                 <SolidColorBrush Color="#FF4E4F51"/> -->
-    <!--                             </Setter.Value> -->
-    <!--                         </Setter> -->
-    <!--                     </Trigger> -->
-    <!--                     <Trigger Property="IsChecked" Value="True" > -->
-    <!-- -->
-    <!--                         <Setter TargetName="ButtonBackground" Property="Background"> -->
-    <!--                             <Setter.Value> -->
-    <!--                                 <SolidColorBrush Color="#FF666B70"/> -->
-    <!--                             </Setter.Value> -->
-    <!--                         </Setter> -->
-    <!--                     </Trigger> -->
-    <!--                 </ControlTemplate.Triggers> -->
-    <!--             </ControlTemplate> -->
-    <!--         </Setter.Value> -->
-    <!--     </Setter> -->
-    <!-- </Style> -->
-    <!-- <Style TargetType="ScrollBar"> -->
-    <!--     <Setter Property="Background" Value="#3d3d3d"/> -->
-    <!--     <Setter Property="BorderBrush" Value="White"/> -->
-    <!-- </Style> -->
-
-    <!-- New -->
+    
     <!-- Numbers come from the luminance -->
     <Brush x:Key="BackgroundColour7">#121212</Brush>
     <Color x:Key="BackgroundColour7C">#121212</Color>
@@ -98,6 +34,12 @@
     <Style TargetType="TabControl">
         <Setter Property="Background" Value="{StaticResource BackgroundColour7}" />
         <Setter Property="BorderBrush" Value="{StaticResource BackgroundColour7}" />
+    </Style>
+    
+    <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="{StaticResource ForegroundColour90}" />
     </Style>
 
     <Style TargetType="TabItem">

@@ -226,7 +226,8 @@ public class InvestmentHandler
             {
                 foreach (var assignment in entryMultipleEntityAssignment.EntityAssignmentResource.EntityAssignments)
                 {
-                    entities.Add(GetEntityFromAssignmentHash(assignment.EntityAssignmentHash));
+                    if (assignment.EntityAssignmentHash.IsValid())
+                        entities.Add(GetEntityFromAssignmentHash(assignment.EntityAssignmentHash));
                 }
             }
         }

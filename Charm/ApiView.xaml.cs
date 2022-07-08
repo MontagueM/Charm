@@ -53,7 +53,7 @@ public partial class ApiView : UserControl
             if (kvp.Value.GetArtArrangementIndex() == -1) return;
             string name = InvestmentHandler.GetItemName(kvp.Value);
             string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
-            _apiItems.Add(new ApiItem {Hash = kvp.Key, Name = $"{name} | {kvp.Key.Hash.ToString()}", Type = type});
+            _apiItems.Add(new ApiItem {Hash = kvp.Key, Name = $"{name} | {kvp.Key.Hash.ToString()}", Type = type.Trim()});  // for some reason some of the types have spaces after
         });
     }
 
