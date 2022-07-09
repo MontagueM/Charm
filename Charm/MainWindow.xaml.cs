@@ -26,7 +26,8 @@ public partial class MainWindow
 {
     public static ProgressView Progress = null;
     private static TabItem _newestTab = null;
-    private static LogView _logView;
+    private static LogView _logView = null;
+    private static TabItem _logTab = null;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -40,6 +41,10 @@ public partial class MainWindow
         
         _logView = new LogView();
         LogHandler.Initialise(_logView);
+        
+        // Make log
+        MakeNewTab("Log", _logView);
+        _logTab = _newestTab;
         
         // Hide tab by default
         MainTabControl.Visibility = Visibility.Hidden;
@@ -180,6 +185,11 @@ public partial class MainWindow
     public void SetNewestTabSelected()
     {
         MainTabControl.SelectedItem = _newestTab;
+    }
+
+    public void SetLoggerSelected()
+    {
+        MainTabControl.SelectedItem = _logTab;
     }
     
     public void SetNewestTabName(string newName)

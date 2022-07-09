@@ -13,6 +13,7 @@
     <UserControl.Resources>
         <charm:MainViewModel x:Key="MVM"/>
         <hx:RenderTechniqueConverter x:Key="RenderTechniqueConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
     </UserControl.Resources>
     <UserControl.DataContext>
         <Binding Source="{StaticResource MVM}"/>
@@ -28,7 +29,7 @@
         </Grid.RowDefinitions>
         <Menu x:Name="menu" Grid.Column="0">
             <MenuItem Header="_Viewer">
-                <MenuItem Header="G_rid" IsCheckable="True" IsChecked="True" Checked="Grid_Checked" Unchecked="Grid_Unchecked"/>
+                <MenuItem x:Name="GridCheckbox" Header="Grid" IsCheckable="True" IsChecked="True"/>
             </MenuItem>
         </Menu>
         
@@ -65,6 +66,15 @@
             </hx:Viewport3DX.InputBindings>
             <hx:AmbientLight3D Color="#ffffffff" />
             <hx:Element3DPresenter Content="{Binding ModelGroup}"/>
+            <hx:LineGeometryModel3D x:Name="GridModel" 
+                                    Geometry="{Binding Grid}"
+                                    Transform="{Binding GridTransform}"
+                                    Smoothness="2"
+                                    Thickness="1.0"
+                                    Color="{StaticResource BackgroundColour14C}"
+                                    Visibility="{Binding IsChecked,
+                                                     ElementName=GridCheckbox,
+                                                     Converter={StaticResource BoolToVisibility}}"/>
         </hx:Viewport3DX>
     </Grid>
 </UserControl>

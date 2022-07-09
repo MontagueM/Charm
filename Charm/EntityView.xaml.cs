@@ -28,11 +28,11 @@ public partial class EntityView : UserControl
         InitializeComponent();
     }
 
-    public async void LoadEntity(TagHash entityHash)
+    public bool LoadEntity(TagHash entityHash)
     {
         Entity entity = new Entity(entityHash);
         AddEntity(entity, ELOD.MostDetail);
-        LoadUI();
+        return LoadUI();
         // ExportFull(new List<Entity>{entity}, entityHash);
     }
 
@@ -59,13 +59,14 @@ public partial class EntityView : UserControl
         FbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
     }
 
-    private void LoadUI()
+    private bool LoadUI()
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
         FbxHandler.ExportScene(filePath);
-        MVM.LoadEntityFromFbx(filePath);
+        bool loaded = MVM.LoadEntityFromFbx(filePath);
         FbxHandler.Clear();
+        return loaded;
     }
 
     public void ExportFull(List<Entity> entities, string name)

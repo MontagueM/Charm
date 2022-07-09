@@ -85,6 +85,9 @@ public class MainViewModel : INotifyPropertyChanged
 
 
     public PerspectiveCamera Camera { get; set; }
+    
+    public LineGeometry3D Grid { get; private set; }
+    public Media3D.Transform3D GridTransform { get; private set; }
 
     public MainViewModel()
     {
@@ -101,6 +104,10 @@ public class MainViewModel : INotifyPropertyChanged
             UpDirection = new Vector3D(0, 1, 0),
             LookDirection = new Vector3D(-0, -0, -5),
         };
+        
+        // floor plane grid
+        Grid = LineBuilder.GenerateGrid();
+        GridTransform = new TranslateTransform3D(-5, 0, -5);
     }
 
     private void ResetCamera()
@@ -150,7 +157,7 @@ public class MainViewModel : INotifyPropertyChanged
         ModelGroup.Clear();
     }
     
-    public void LoadEntityFromFbx(string modelFile)
+    public bool LoadEntityFromFbx(string modelFile)
     {
         Clear();
         var importer = new Importer();
@@ -158,6 +165,10 @@ public class MainViewModel : INotifyPropertyChanged
         importer.Configuration.SkeletonSizeScale = 0.02f;
         importer.Configuration.GlobalScale = 1f;
         HelixToolkitScene scene = importer.Load(modelFile);
+        if (scene == null)  // unsure why this happens, but seems to be always bone related for massive objects
+        {
+            return false;
+        }
         bool bSkel = false;
         ModelGroup.AddNode(scene.Root);
         foreach (var node in scene.Root.Items.Traverse(false))
@@ -191,6 +202,8 @@ public class MainViewModel : INotifyPropertyChanged
                 }
             }
         }
+
+        return true;
     }
     
     // https://stackoverflow.com/questions/33374434/improve-wpf-rendering-performance-using-helix-toolkit

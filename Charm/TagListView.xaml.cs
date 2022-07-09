@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -41,6 +43,10 @@ public enum ETagListType
     Package,
 }
 
+/// <summary>
+/// The current implementation of Package is limited so you cannot have nested views below a Package.
+/// For future, would be better to split the tag items up so we can cache them based on parents.
+/// </summary>
 public partial class TagListView : UserControl
 {
     private struct ParentInfo
@@ -48,6 +54,7 @@ public partial class TagListView : UserControl
         public ETagListType TagListType;
         public TagHash? Hash;
         public string SearchTerm;
+        public ConcurrentBag<TagItem> AllTagItems;
     }
     
     private ConcurrentBag<TagItem> _allTagItems;
@@ -68,45 +75,51 @@ public partial class TagListView : UserControl
         InitializeComponent();
     }
 
-    public void LoadContent(ETagListType tagListType, TagHash contentValue = null, bool bFromBack = false)
+    public void LoadContent(ETagListType tagListType, TagHash contentValue = null, bool bFromBack = false, ConcurrentBag<TagItem> overrideItems = null)
     {
         _tagListLogger.Debug($"Loading content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-        switch (tagListType)
+        if (overrideItems != null)
         {
-            case ETagListType.DestinationGlobalTagBagList:
-                LoadDestinationGlobalTagBagList();
-                break;
-            case ETagListType.Back:
-                Back_Clicked();
-                return;
-            case ETagListType.DestinationGlobalTagBag:
-                LoadDestinationGlobalTagBag(contentValue);
-                break;
-            case ETagListType.BudgetSet:
-                LoadBudgetSet(contentValue);
-                break;
-            case ETagListType.Entity:
-                LoadEntity(contentValue);
-                return;
-            case ETagListType.ApiList:
-                LoadApiList();
-                break;
-            case ETagListType.ApiEntity:
-                LoadApiEntity(contentValue);
-                return;
-            case ETagListType.EntityList:
-                LoadEntityList();
-                break;
-            case ETagListType.Package:
-                LoadPackage(contentValue);
-                break;
-            default:
-                throw new NotImplementedException();
+            _allTagItems = overrideItems;
         }
-        
-        if (contentValue != null && !bFromBack)
+        else
         {
-            _parentStack.Push(new ParentInfo { Hash = _currentHash, TagListType = _tagListType, SearchTerm = SearchBox.Text});
+            if (contentValue != null && !bFromBack && tagListType != ETagListType.Entity) // if the type nests no new info, it isnt a parent
+            {
+                _parentStack.Push(new ParentInfo { AllTagItems = _allTagItems, Hash = _currentHash, TagListType = _tagListType, SearchTerm = SearchBox.Text});
+            } 
+            switch (tagListType)
+            {
+                case ETagListType.DestinationGlobalTagBagList:
+                    LoadDestinationGlobalTagBagList();
+                    break;
+                case ETagListType.Back:
+                    Back_Clicked();
+                    return;
+                case ETagListType.DestinationGlobalTagBag:
+                    LoadDestinationGlobalTagBag(contentValue);
+                    break;
+                case ETagListType.BudgetSet:
+                    LoadBudgetSet(contentValue);
+                    break;
+                case ETagListType.Entity:
+                    LoadEntity(contentValue);
+                    return;
+                case ETagListType.ApiList:
+                    LoadApiList();
+                    break;
+                case ETagListType.ApiEntity:
+                    LoadApiEntity(contentValue);
+                    return;
+                case ETagListType.EntityList:
+                    LoadEntityList();
+                    break;
+                case ETagListType.Package:
+                    LoadPackage(contentValue);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         _currentHash = contentValue;
@@ -257,7 +270,24 @@ public partial class TagListView : UserControl
     {
         ParentInfo parentInfo = _parentStack.Pop();
         SearchBox.Text = parentInfo.SearchTerm;
-        LoadContent(parentInfo.TagListType, parentInfo.Hash, true);
+        LoadContent(parentInfo.TagListType, parentInfo.Hash, true, parentInfo.AllTagItems);
+    }
+    
+    private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
+    {
+        _bTrimName = true;
+        RefreshItemList();
+    }
+
+    private string TrimName(string name)
+    {
+        return name.Split("\\").Last().Split(".")[0];
+    }
+
+    private void ToggleButton_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        _bTrimName = false;
+        RefreshItemList();
     }
 
     #region Destination Global Tag Bag
@@ -345,7 +375,12 @@ public partial class TagListView : UserControl
 
     private void LoadEntity(TagHash tagHash)
     {
-        EntityView.LoadEntity(tagHash);
+        bool bLoadedSuccessfully = EntityView.LoadEntity(tagHash);
+        if (!bLoadedSuccessfully)
+        {
+            _tagListLogger.Error($"UI failed to load entity for hash {tagHash}. You can still try to export the full model instead.");
+            _mainWindow.SetLoggerSelected();
+        }
         ExportView.SetExportInfo(tagHash);
     }
     
@@ -354,9 +389,19 @@ public partial class TagListView : UserControl
     /// Named: destination global tag bags 0x80808930, budget sets 0x80809eed
     /// All others: reference 0x80809ad8
     /// They're sorted into packages first.
+    /// To check they have a model, I take an approach that means processing 40k entities happens quickly.
+    /// To do so, I can't use the tag parser as this is way too slow. Instead, I check
+    /// 1. at least 2 resources
+    /// 2. the first or second resource contains a Unk0x10 == D2Class_8A6D8080
+    /// If someone wants to make this list work for entities with other things like skeletons etc, this is easy to
+    /// customise to desired system. 
     /// </summary>
     private void LoadEntityList()
     {
+        // If there are packages, we don't want to reload the view as very poor for performance.
+        if (_allTagItems != null)
+            return;
+
         _allTagItems = new ConcurrentBag<TagItem>();
         // only in 010a
         var dgtbVals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80808930);
@@ -404,10 +449,42 @@ public partial class TagListView : UserControl
                 }
             }
         });
+        // We could also cache all the entity resources for an extra speed-up, but should be careful of memory there
+        PackageHandler.CacheHashDataList(eVals.Select(x => x.Hash).ToArray());
         Parallel.ForEach(eVals, val =>
         {
             if (existingEntities.Contains(val)) // O(1) check
                 return; 
+            
+            // Check the entity has geometry
+            bool bHasGeometry = false;
+            using (var handle = new Tag(val).GetHandle())
+            {
+                handle.BaseStream.Seek(8, SeekOrigin.Begin);
+                int resourceCount = handle.ReadInt32();
+                if (resourceCount > 2)
+                {
+                    handle.BaseStream.Seek(0x10, SeekOrigin.Begin);
+                    int resourcesOffset = handle.ReadInt32() + 0x20;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        handle.BaseStream.Seek(resourcesOffset + i * 0xC, SeekOrigin.Begin);
+                        using (var handle2 = new Tag(new TagHash(handle.ReadUInt32())).GetHandle())
+                        {
+                            handle2.BaseStream.Seek(0x10, SeekOrigin.Begin);
+                            int checkOffset = handle2.ReadInt32() + 0x10 - 4;
+                            handle2.BaseStream.Seek(checkOffset, SeekOrigin.Begin);
+                            if (handle2.ReadUInt32() == 0x80806d8a)
+                            {
+                                bHasGeometry = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!bHasGeometry)
+                return;
             
             _allTagItems.Add(new TagItem
             {
@@ -450,23 +527,6 @@ public partial class TagListView : UserControl
     }
 
     #endregion
-
-    private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
-    {
-        _bTrimName = true;
-        RefreshItemList();
-    }
-
-    private string TrimName(string name)
-    {
-        return name.Split("\\").Last().Split(".")[0];
-    }
-
-    private void ToggleButton_OnUnchecked(object sender, RoutedEventArgs e)
-    {
-        _bTrimName = false;
-        RefreshItemList();
-    }
 }
 
 public class TagItem
