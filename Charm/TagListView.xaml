@@ -18,15 +18,17 @@
             <RowDefinition Height="5*"/>
         </Grid.RowDefinitions>
         
-        <TextBox x:Name="searchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
+        <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
                  FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36"/>
         
-        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2">
+        <CheckBox Checked="ToggleButton_OnChecked" Unchecked="ToggleButton_OnUnchecked" x:Name="TrimCheckbox" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Right" Padding="10,0,30,0" Content="Trim names"/>
+        
+        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}" Click="TagItem_OnClick">
                         <StackPanel>
-                            <TextBlock TextAlignment="Left" Text="{Binding Name}"/>
+                            <TextBlock FontSize="{Binding FontSize}" TextAlignment="Left" Text="{Binding Name}"/>
                             <TextBlock TextAlignment="Right" Text="{Binding Type}"/>
                         </StackPanel>
                     </ToggleButton>

@@ -30,8 +30,10 @@ public partial class MainMenuView : UserControl
     
     private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        ApiView apiView = new ApiView();
-        apiView.LoadApiView();
+        // ApiView apiView = new ApiView();
+        // apiView.LoadApiView();
+        TagListView apiView = new TagListView();
+        apiView.LoadContent(ETagListType.ApiList);
         _mainWindow.MakeNewTab("api", apiView);
         _mainWindow.SetNewestTabSelected();
     }

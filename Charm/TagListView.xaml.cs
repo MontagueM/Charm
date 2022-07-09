@@ -12,6 +12,7 @@ using System.Windows.Input;
 using Field;
 using Field.General;
 using Microsoft.Toolkit.Mvvm.Input;
+using Serilog;
 
 namespace Charm;
 
@@ -27,8 +28,12 @@ public enum ETagListType
     BudgetSet,
     [Description("Entity")]
     Entity,
-    [Description("Back")]
+    [Description("BACK")]
     Back,
+    [Description("Api List")]
+    ApiList,
+    [Description("Api Entity")]
+    ApiEntity,
 }
 
 public partial class TagListView : UserControl
@@ -45,6 +50,8 @@ public partial class TagListView : UserControl
     private ETagListType _tagListType;
     private TagHash? _currentHash = null;
     private Stack<ParentInfo> _parentStack = new Stack<ParentInfo>();
+    private bool _bTrimName = true;
+    private readonly ILogger _tagListLogger = Log.ForContext<TagListView>();
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -58,6 +65,7 @@ public partial class TagListView : UserControl
 
     public void LoadContent(ETagListType tagListType, TagHash tagHash = null, bool bFromBack = false)
     {
+        _tagListLogger.Debug($"Loading content type {tagListType} tagHash {tagHash} from back {bFromBack}");
         switch (tagListType)
         {
             case ETagListType.DestinationGlobalTagBagList:
@@ -67,13 +75,19 @@ public partial class TagListView : UserControl
                 Back_Clicked();
                 return;
             case ETagListType.DestinationGlobalTagBag:
-                DestinationGlobalTagBag_Click(tagHash);
+                LoadDestinationGlobalTagBag(tagHash);
                 break;
             case ETagListType.BudgetSet:
-                BudgetSet_Click(tagHash);
+                LoadBudgetSet(tagHash);
                 break;
             case ETagListType.Entity:
-                Entity_Click(tagHash);
+                LoadEntity(tagHash);
+                return;
+            case ETagListType.ApiList:
+                LoadApiList();
+                break;
+            case ETagListType.ApiEntity:
+                LoadApiEntity(tagHash);
                 return;
             default:
                 throw new NotImplementedException();
@@ -81,52 +95,75 @@ public partial class TagListView : UserControl
         
         if (tagHash != null && !bFromBack)
         {
-            _parentStack.Push(new ParentInfo { Hash = _currentHash, TagListType = _tagListType, SearchTerm = searchBox.Text});
+            _parentStack.Push(new ParentInfo { Hash = _currentHash, TagListType = _tagListType, SearchTerm = SearchBox.Text});
         }
 
         _currentHash = tagHash;
         _tagListType = tagListType;
         if (!bFromBack)
         {
-            searchBox.Text = "";
+            SearchBox.Text = "";
         }
 
         RefreshItemList();
+        _tagListLogger.Debug($"Loaded content type {tagListType} tagHash {tagHash} from back {bFromBack}");
     }
 
     private void SetItemListByString(string searchStr)
     {
+        if (_allTagItems == null)
+            return;
+        if (_allTagItems.IsEmpty)
+            return;
+
+        if (_allTagItems.First().Name.Contains("\\"))
+        {
+            TrimCheckbox.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            TrimCheckbox.Visibility = Visibility.Hidden;
+        }
+
         var displayItems = new ConcurrentBag<TagItem>();
         // Select and sort by relevance to selected string
         Parallel.ForEach(_allTagItems, item =>
         { 
             if (displayItems.Count > 50) return;
-            if (item.Name.ToLower().Contains(searchStr))
+            string name = _bTrimName ? TrimName(item._name) : item._name;
+            if (name.ToLower().Contains(searchStr))
             {
-                displayItems.Add(item);
+                displayItems.Add(new TagItem
+                {
+                    Hash = item.Hash,
+                    Name = name,
+                    TagType = item.TagType,
+                    Type = item.Type,
+                    FontSize = _bTrimName ? 16 : 12,
+                });
             }
         });
         
+        List<TagItem> tagItems = displayItems.ToList();
+        tagItems.Sort((p, q) => String.Compare(p.Name, q.Name, StringComparison.OrdinalIgnoreCase));
+
         // If we have a parent, add a TagItem that is actually a back button as first
         if (_parentStack.Count > 0)
         {
-            List<TagItem> tagItems = displayItems.ToList();
             tagItems.Insert(0, new TagItem
             {
-                Name = "Back",
+                Name = "BACK",
                 TagType = ETagListType.Back,
+                FontSize = 24
             });
-            TagList.ItemsSource = tagItems;
         }
-        else
-        {
-            TagList.ItemsSource = displayItems;
-        }
+
+        TagList.ItemsSource = tagItems;
     }
 
     private void RefreshItemList()
     {
-        SetItemListByString(searchBox.Text);
+        SetItemListByString(SearchBox.Text.ToLower());
     }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -152,7 +189,7 @@ public partial class TagListView : UserControl
     private void Back_Clicked()
     {
         ParentInfo parentInfo = _parentStack.Pop();
-        searchBox.Text = parentInfo.SearchTerm;
+        SearchBox.Text = parentInfo.SearchTerm;
         LoadContent(parentInfo.TagListType, parentInfo.Hash, true);
     }
 
@@ -173,16 +210,10 @@ public partial class TagListView : UserControl
             _allTagItems.Add(new TagItem 
             { 
                 Hash = dgtbParent.Header.DestinationGlobalTagBag,
-                Name = $"[{dgtbParent.Header.DestinationGlobalTagBag}] {dgtbParent.Header.DestinationGlobalTagBagName}",
+                Name = dgtbParent.Header.DestinationGlobalTagBagName,
                 TagType = ETagListType.DestinationGlobalTagBag
             });
         });
-    }
-    
-    private void DestinationGlobalTagBag_Click(TagHash hash)
-    {
-        LoadDestinationGlobalTagBag(hash);
-        RefreshItemList();
     }
     
     private void LoadDestinationGlobalTagBag(TagHash hash)
@@ -211,7 +242,7 @@ public partial class TagListView : UserControl
             _allTagItems.Add(new TagItem 
             { 
                 Hash = val.Unk08.Hash,
-                Name = $"[{val.Unk08.Hash}] {val.Unk00}",
+                Name = val.Unk00,
                 TagType = tagType,
                 Type = overrideType
             });
@@ -221,12 +252,6 @@ public partial class TagListView : UserControl
     #endregion
     
     #region Budget Set
-    
-    private void BudgetSet_Click(TagHash hash)
-    {
-        LoadBudgetSet(hash);
-        RefreshItemList();
-    }
     
     private void LoadBudgetSet(TagHash hash)
     {
@@ -238,7 +263,7 @@ public partial class TagListView : UserControl
             _allTagItems.Add(new TagItem 
             { 
                 Hash = val.Unk08.Hash,
-                Name = $"[{val.Unk08.Hash}] {val.Unk00}",
+                Name = val.Unk00,
                 TagType = ETagListType.Entity,
             });
         });
@@ -248,20 +273,76 @@ public partial class TagListView : UserControl
 
     #region Entity
 
-    private void Entity_Click(TagHash tagHash)
+    private void LoadEntity(TagHash tagHash)
     {
         EntityView.LoadEntity(tagHash);
         ExportView.SetExportInfo(tagHash);
     }
 
     #endregion
+    
+    #region API
+    
+    private void LoadApiList()
+    {
+        _allTagItems = new ConcurrentBag<TagItem>();
+        Parallel.ForEach(InvestmentHandler.InventoryItems, kvp =>
+        {
+            if (kvp.Value.GetArtArrangementIndex() == -1) return;
+            string name = InvestmentHandler.GetItemName(kvp.Value);
+            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
+            if (type == "Finisher" || type.Contains("Emote"))
+                return;  // they point to Animation instead of Entity
+            _allTagItems.Add(new TagItem 
+            {
+                Hash = kvp.Key,
+                Name = name,
+                Type = type.Trim(),
+                TagType = ETagListType.ApiEntity
+            });  // for some reason some of the types have spaces after
+        });
+    }
+    
+    private void LoadApiEntity(TagHash hash)
+    {
+        var apiHash = new DestinyHash(hash.GetHashString(), false);
+        EntityView.LoadEntityFromApi(apiHash);
+        ExportView.SetExportInfo(apiHash);
+    }
+
+    #endregion
+
+    private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
+    {
+        _bTrimName = true;
+        RefreshItemList();
+    }
+
+    private string TrimName(string name)
+    {
+        return name.Split("\\").Last().Split(".")[0];
+    }
+
+    private void ToggleButton_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        _bTrimName = false;
+        RefreshItemList();
+    }
 }
 
 public class TagItem
 {
     private string _type = String.Empty;
-    public string Name { get; set; }
+    public string _name = String.Empty;
+
+    public string Name
+    {
+        get => _name == "BACK" ? "BACK" : $"[{Hash}]  {_name}";
+        set => _name = value;
+    }
     public string Hash { get; set; }
+    
+    public int FontSize { get; set; }
 
     public string Type
     {

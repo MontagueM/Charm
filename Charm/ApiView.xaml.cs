@@ -58,15 +58,7 @@ public partial class ApiView : UserControl
     private void GetInventoryItemsWithGeometry()
     {
         _apiItems = new ConcurrentBag<ApiItem>();
-        Parallel.ForEach(InvestmentHandler.InventoryItems, kvp =>
-        {
-            if (kvp.Value.GetArtArrangementIndex() == -1) return;
-            string name = InvestmentHandler.GetItemName(kvp.Value);
-            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
-            if (type == "Finisher" || type.Contains("Emote"))
-                return;  // they point to Animation instead of Entity
-            _apiItems.Add(new ApiItem {Hash = kvp.Key, Name = $"{name} | {kvp.Key.Hash.ToString()}", Type = type.Trim()});  // for some reason some of the types have spaces after
-        });
+
     }
 
     private void RefreshItemList()
