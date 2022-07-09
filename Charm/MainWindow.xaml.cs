@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -15,6 +16,7 @@ using Field.General;
 using Field.Models;
 using Field.Statics;
 using VersionChecker;
+using Encoding = SharpDX.Text.Encoding;
 
 namespace Charm;
 /// <summary>
@@ -65,9 +67,9 @@ public partial class MainWindow
         catch (Exception)
         {
             // Could not get or parse version file
-            #if !DEBUG
+#if !DEBUG
             MessageBox.Show("Could not get version.");
-            #endif
+#endif
         }
     }
 
@@ -124,8 +126,42 @@ public partial class MainWindow
         }
 
         // Debug font list
-        List<string> fontList = initialise.Select(pair => pair.Key.Family + " " + pair.Key.Subfamily).ToList();
-        
+        List<string> fontList = initialise.Select(pair => (pair.Key.Family + " " + pair.Key.Subfamily).Trim()).ToList();
+        foreach (var s in fontList)
+        {
+            Debug.WriteLine(s);
+        }
+        /*
+        AXIS Std H
+        AXIS Std R
+        AXIS Std M
+        Cromwell NF
+        Neue Haas Grotesk Text Pro 66 Medium Italic
+        Neue Haas Grotesk Text Pro 55 Roman
+        Neue Haas Grotesk Text Pro 65 Medium
+        Neue Haas Grotesk Text Pro 56 Italic
+        Aldine 401 BT
+        Cromwell HPLHS
+        Destiny Symbols
+        Sandoll MjNeo1Uni 04 Md
+        Neue Haas Unica W1G Bold
+        Neue Haas Unica W1G Medium Italic
+        Neue Haas Unica W1G Medium
+        Neue Haas Unica W1G Regular
+        Neue Haas Unica W1G Italic
+        Neue Haas Grotesk Display Pro 75 Bold
+        Iwata New Reisho Pro M
+        M Ying Hei HK W8
+        M Ying Hei HK W4
+        M Ying Hei HK W7
+        Sandoll GothicNeo1Unicode 09 Hv
+        Sandoll GothicNeo1Unicode 07 Bd
+        Sandoll GothicNeo1Unicode 05 Md
+        M Ying Hei PRC W8
+        M Ying Hei PRC W4
+        Destiny Keys Regular
+        M Ying Hei PRC W7
+        */
         var a = 0;
     }
 
@@ -202,18 +238,6 @@ public partial class MainWindow
                     ActivityView activityView = new ActivityView();
                     activityView.LoadActivity(hash);
                     MakeNewTab(hash, activityView);
-                    SetNewestTabSelected();
-                    break;
-                case 0x80808930:
-                    var tagBagView = new EntityListView();
-                    tagBagView.LoadContent(EEntityListType.DestinationGlobalTagBag, hash);
-                    MakeNewTab(hash, tagBagView);
-                    SetNewestTabSelected();
-                    break;
-                case 0x80809EED:
-                    var budgetSetView = new EntityListView();
-                    budgetSetView.LoadContent(EEntityListType.BudgetSet, hash);
-                    MakeNewTab(hash, budgetSetView);
                     SetNewestTabSelected();
                     break;
                 default:

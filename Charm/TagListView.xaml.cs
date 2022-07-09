@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using ConcurrentCollections;
 using Field;
 using Field.General;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -34,6 +35,10 @@ public enum ETagListType
     ApiList,
     [Description("Api Entity")]
     ApiEntity,
+    [Description("Entity List [Packages]")]
+    EntityList,
+    [Description("Package")]
+    Package,
 }
 
 public partial class TagListView : UserControl
@@ -63,9 +68,9 @@ public partial class TagListView : UserControl
         InitializeComponent();
     }
 
-    public void LoadContent(ETagListType tagListType, TagHash tagHash = null, bool bFromBack = false)
+    public void LoadContent(ETagListType tagListType, TagHash contentValue = null, bool bFromBack = false)
     {
-        _tagListLogger.Debug($"Loading content type {tagListType} tagHash {tagHash} from back {bFromBack}");
+        _tagListLogger.Debug($"Loading content type {tagListType} contentValue {contentValue} from back {bFromBack}");
         switch (tagListType)
         {
             case ETagListType.DestinationGlobalTagBagList:
@@ -75,30 +80,36 @@ public partial class TagListView : UserControl
                 Back_Clicked();
                 return;
             case ETagListType.DestinationGlobalTagBag:
-                LoadDestinationGlobalTagBag(tagHash);
+                LoadDestinationGlobalTagBag(contentValue);
                 break;
             case ETagListType.BudgetSet:
-                LoadBudgetSet(tagHash);
+                LoadBudgetSet(contentValue);
                 break;
             case ETagListType.Entity:
-                LoadEntity(tagHash);
+                LoadEntity(contentValue);
                 return;
             case ETagListType.ApiList:
                 LoadApiList();
                 break;
             case ETagListType.ApiEntity:
-                LoadApiEntity(tagHash);
+                LoadApiEntity(contentValue);
                 return;
+            case ETagListType.EntityList:
+                LoadEntityList();
+                break;
+            case ETagListType.Package:
+                LoadPackage(contentValue);
+                break;
             default:
                 throw new NotImplementedException();
         }
         
-        if (tagHash != null && !bFromBack)
+        if (contentValue != null && !bFromBack)
         {
             _parentStack.Push(new ParentInfo { Hash = _currentHash, TagListType = _tagListType, SearchTerm = SearchBox.Text});
         }
 
-        _currentHash = tagHash;
+        _currentHash = contentValue;
         _tagListType = tagListType;
         if (!bFromBack)
         {
@@ -106,7 +117,18 @@ public partial class TagListView : UserControl
         }
 
         RefreshItemList();
-        _tagListLogger.Debug($"Loaded content type {tagListType} tagHash {tagHash} from back {bFromBack}");
+        _tagListLogger.Debug($"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+    }
+
+    /// <summary>
+    /// For when we want stuff in packages, we then split up based on what the taghash value is.
+    /// I kinda cheat here, I store everything in one massive _allTagItems including the packages
+    /// </summary>
+    /// <param name="packageId">Package ID for this package to load data for.</param>
+    private void LoadPackage(TagHash pkgHash)
+    {
+        int pkgId = pkgHash.GetPkgId();
+        _allTagItems = new ConcurrentBag<TagItem>(_allTagItems.Where(x => x.Hash.GetPkgId() == pkgId && x.TagType != ETagListType.Package));
     }
 
     private void SetItemListByString(string searchStr)
@@ -128,10 +150,22 @@ public partial class TagListView : UserControl
         var displayItems = new ConcurrentBag<TagItem>();
         // Select and sort by relevance to selected string
         Parallel.ForEach(_allTagItems, item =>
-        { 
-            if (displayItems.Count > 50) return;
+        {
+            if (!TagItem.GetEnumDescription(_tagListType).Contains("List"))
+            {
+                if (displayItems.Count > 50) return;
+
+            }
+            else if (TagItem.GetEnumDescription(_tagListType).Contains("[Packages]"))
+            {
+                // Package-enabled lists have [Packages] in their enum
+                if (item.TagType != ETagListType.Package)
+                {
+                    return;
+                }
+            }
             string name = _bTrimName ? TrimName(item._name) : item._name;
-            if (name.ToLower().Contains(searchStr))
+            if (name.ToLower().Contains(searchStr) || item.Hash.GetHashString().ToLower().Contains(searchStr) || item.Hash.Hash.ToString().Contains(searchStr))
             {
                 displayItems.Add(new TagItem
                 {
@@ -139,6 +173,7 @@ public partial class TagListView : UserControl
                     Name = name,
                     TagType = item.TagType,
                     Type = item.Type,
+                    Subname = item.Subname,
                     FontSize = _bTrimName ? 16 : 12,
                 });
             }
@@ -146,7 +181,7 @@ public partial class TagListView : UserControl
         
         List<TagItem> tagItems = displayItems.ToList();
         tagItems.Sort((p, q) => String.Compare(p.Name, q.Name, StringComparison.OrdinalIgnoreCase));
-
+        tagItems = tagItems.DistinctBy(t => t.Hash).ToList();
         // If we have a parent, add a TagItem that is actually a back button as first
         if (_parentStack.Count > 0)
         {
@@ -159,6 +194,38 @@ public partial class TagListView : UserControl
         }
 
         TagList.ItemsSource = tagItems;
+    }
+    
+    /// <summary>
+    /// From all the existing items in _allTagItems, we generate the packages for it
+    /// and add but only if packages don't exist already.
+    /// </summary>
+    private void MakePackageTagItems()
+    {
+        ConcurrentHashSet<int> packageIds = new ConcurrentHashSet<int>();
+        bool bBroken = false;
+        Parallel.ForEach(_allTagItems, (item, state) =>
+        {
+            if (item.TagType == ETagListType.Package)
+            {
+                bBroken = true;
+                state.Break();
+            }
+            packageIds.Add(item.Hash.GetPkgId());
+        });
+        
+        if (bBroken)
+            return;
+        
+        Parallel.ForEach(packageIds, pkgId =>
+        {
+            _allTagItems.Add(new TagItem
+            {
+                Name = String.Join('_', PackageHandler.GetPackageName(pkgId).Split('_').Skip(1).SkipLast(1)),
+                Hash = new TagHash(PackageHandler.MakeHash(pkgId, 0)),
+                TagType = ETagListType.Package
+            });
+        });
     }
 
     private void RefreshItemList()
@@ -223,7 +290,9 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(destinationGlobalTagBag.Header.Unk18, val =>
         {
-            TagHash reference = PackageHandler.GetEntryReference(val.Unk08.Hash);
+            if (val.Tag == null)
+                return;
+            TagHash reference = PackageHandler.GetEntryReference(val.Tag.Hash);
             ETagListType tagType;
             string overrideType = String.Empty;
             switch (reference.Hash)
@@ -241,8 +310,9 @@ public partial class TagListView : UserControl
             }
             _allTagItems.Add(new TagItem 
             { 
-                Hash = val.Unk08.Hash,
-                Name = val.Unk00,
+                Hash = val.Tag.Hash,
+                Name = val.TagPath,
+                Subname = val.TagNote,
                 TagType = tagType,
                 Type = overrideType
             });
@@ -262,8 +332,8 @@ public partial class TagListView : UserControl
         {
             _allTagItems.Add(new TagItem 
             { 
-                Hash = val.Unk08.Hash,
-                Name = val.Unk00,
+                Hash = val.Tag.Hash,
+                Name = val.TagPath,
                 TagType = ETagListType.Entity,
             });
         });
@@ -278,9 +348,79 @@ public partial class TagListView : UserControl
         EntityView.LoadEntity(tagHash);
         ExportView.SetExportInfo(tagHash);
     }
+    
+    /// <summary>
+    /// We load all of them including no names, but add an option to only show names.
+    /// Named: destination global tag bags 0x80808930, budget sets 0x80809eed
+    /// All others: reference 0x80809ad8
+    /// They're sorted into packages first.
+    /// </summary>
+    private void LoadEntityList()
+    {
+        _allTagItems = new ConcurrentBag<TagItem>();
+        // only in 010a
+        var dgtbVals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80808930);
+        // only in the sr_globals, not best but it works
+        var bsVals = PackageHandler.GetAllEntriesOfReference(0x010f, 0x80809eed);
+        bsVals.AddRange(PackageHandler.GetAllEntriesOfReference(0x011a, 0x80809eed));
+        bsVals.AddRange( PackageHandler.GetAllEntriesOfReference(0x0312, 0x80809eed));
+        // everywhere
+        var eVals = PackageHandler.GetAllEntities();
+        ConcurrentHashSet<uint> existingEntities = new ConcurrentHashSet<uint>();
+        Parallel.ForEach(dgtbVals, val =>
+        {
+            Tag<D2Class_30898080> dgtb = new Tag<D2Class_30898080>( new TagHash(val));
+            foreach (var entry in dgtb.Header.Unk18)
+            {
+                if (entry.Tag == null)
+                    continue;
+                if (entry.TagPath.Contains(".pattern.tft"))
+                {
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = entry.Tag.Hash,
+                        Name = entry.TagPath,
+                        Subname = entry.TagNote,
+                        TagType = ETagListType.Entity
+                    });
+                    existingEntities.Add(entry.Tag.Hash);
+                }
+            }
+        });
+        Parallel.ForEach(bsVals, val =>
+        {
+            Tag<D2Class_ED9E8080> bs = new Tag<D2Class_ED9E8080>( new TagHash(val));
+            foreach (var entry in bs.Header.Unk28)
+            {
+                if (entry.TagPath.Contains(".pattern.tft"))
+                {
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = entry.Tag.Hash,
+                        Name = entry.TagPath,
+                        TagType = ETagListType.Entity
+                    });
+                    existingEntities.Add(entry.Tag.Hash);
+                }
+            }
+        });
+        Parallel.ForEach(eVals, val =>
+        {
+            if (existingEntities.Contains(val)) // O(1) check
+                return; 
+            
+            _allTagItems.Add(new TagItem
+            {
+                Hash = val,
+                TagType = ETagListType.Entity
+            });
+        });
+
+        MakePackageTagItems();
+    }
 
     #endregion
-    
+
     #region API
     
     private void LoadApiList()
@@ -303,9 +443,8 @@ public partial class TagListView : UserControl
         });
     }
     
-    private void LoadApiEntity(TagHash hash)
+    private void LoadApiEntity(DestinyHash apiHash)
     {
-        var apiHash = new DestinyHash(hash.GetHashString(), false);
         EntityView.LoadEntityFromApi(apiHash);
         ExportView.SetExportInfo(apiHash);
     }
@@ -337,10 +476,23 @@ public class TagItem
 
     public string Name
     {
-        get => _name == "BACK" ? "BACK" : $"[{Hash}]  {_name}";
+        get
+        {
+            if (_name == "BACK")
+                return _name;
+            if (TagType == ETagListType.ApiEntity)
+                return $"[{Hash.Hash}]  {_name}";
+            if (TagType == ETagListType.Package)
+                return $"[{Hash.GetPkgId():X4}]  {_name}";
+            
+            return $"[{Hash}]  {_name}";
+        }
         set => _name = value;
     }
-    public string Hash { get; set; }
+    
+    public string Subname { get; set; }
+    
+    public DestinyHash Hash { get; set; }
     
     public int FontSize { get; set; }
 

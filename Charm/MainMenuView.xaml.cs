@@ -38,11 +38,19 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
     
-    private void NamedEntitiesListViewButton_OnClick(object sender, RoutedEventArgs e)
+    private void NamedEntitiesBagsViewButton_OnClick(object sender, RoutedEventArgs e)
     {
         TagListView tagListView = new TagListView();
         tagListView.LoadContent(ETagListType.DestinationGlobalTagBagList);
         _mainWindow.MakeNewTab("destination global tag bag", tagListView);
+        _mainWindow.SetNewestTabSelected();
+    }
+    
+    private void EntitiesListViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListView tagListView = new TagListView();
+        tagListView.LoadContent(ETagListType.EntityList);
+        _mainWindow.MakeNewTab("entities", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
 }

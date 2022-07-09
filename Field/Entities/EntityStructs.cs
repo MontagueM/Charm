@@ -1116,9 +1116,11 @@ public struct D2Class_34898080
 public struct D2Class_33898080
 {
     [DestinyField(FieldType.RelativePointer)]
-    public string Unk00;
+    public string TagPath;
     [DestinyField(FieldType.TagHash64)]
-    public Tag Unk08;  // if .pattern.tft, then Entity - if .budget_set.tft, then parent of itself
+    public Tag Tag;  // if .pattern.tft, then Entity - if .budget_set.tft, then parent of itself
+    [DestinyField(FieldType.RelativePointer)]
+    public string TagNote;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x58)]
@@ -1135,9 +1137,9 @@ public struct D2Class_ED9E8080
 public struct D2Class_F19E8080
 {
     [DestinyField(FieldType.RelativePointer)]
-    public string Unk00;
+    public string TagPath;
     [DestinyField(FieldType.TagHash64)]
-    public Tag Unk08;  // if .pattern.tft, then Entity
+    public Tag Tag;  // if .pattern.tft, then Entity
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 8)]

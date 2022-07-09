@@ -19,36 +19,50 @@
     </UserControl.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400*" />
+            <ColumnDefinition Width="98*" />
+            <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="2*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <Menu x:Name="menu" Grid.ColumnSpan="1" Grid.Column="2">
+        <Menu x:Name="menu" Grid.Column="0">
             <MenuItem Header="_Viewer">
                 <MenuItem Header="G_rid" IsCheckable="True" IsChecked="True" Checked="Grid_Checked" Unchecked="Grid_Unchecked"/>
             </MenuItem>
         </Menu>
         
-        <hx:Viewport3DX Grid.Row="1"
+        <TextBlock
+            Grid.Column="1"
+            Grid.Row="0"
+            FontSize="12"
+            Foreground="{StaticResource ForegroundColour90}"
+            Text="{Binding ElementName=Viewport, Path=RenderDetailOutput}" />
+        
+        <hx:Viewport3DX x:Name="ModelViewport" Grid.Row="1" Grid.ColumnSpan="1"
                         EffectsManager="{Binding EffectsManager}"
-                        EnableDesignModeRendering="True"
+                        EnableDesignModeRendering="False"
                         EnableSwapChainRendering="True"
                         IsShadowMappingEnabled="False"
                         ShowCoordinateSystem="False"
-                        ShowFrameRate="False"
-                        ShowTriangleCountInfo="False"
+                        ShowFrameRate="True"
+                        ShowTriangleCountInfo="True"
                         EnableDeferredRendering="False" EnableRenderFrustum="True"
                         Title="{Binding Title}"
-                        TextBrush="White"
+                        TextBrush="{StaticResource ForegroundColour75}"
                         TitleFontFamily="Arial"
                         ShowViewCube="False"
                         SubTitle="{Binding SubTitle}"
-                        >
-            <hx:Viewport3DX.Camera>
-                 <hx:PerspectiveCamera Position="0,0,5"/>
-            </hx:Viewport3DX.Camera> 
+                        InfoForeground="{StaticResource ForegroundColour75}"
+                        InfoBackground="{StaticResource BackgroundColour14}"
+                        Camera="{Binding Camera}">
+            <hx:Viewport3DX.InputBindings>
+                <KeyBinding Key="R" Command="{Binding RotateCommand}"/>
+                <KeyBinding Key="W" Command="{Binding ForwardCommand}"/>
+                <KeyBinding Key="A" Command="{Binding LeftCommand}"/>
+                <KeyBinding Key="S" Command="{Binding BackCommand}"/>
+                <KeyBinding Key="D" Command="{Binding RightCommand}"/>
+            </hx:Viewport3DX.InputBindings>
             <hx:AmbientLight3D Color="#ffffffff" />
             <hx:Element3DPresenter Content="{Binding ModelGroup}"/>
         </hx:Viewport3DX>

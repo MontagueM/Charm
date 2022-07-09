@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Field.Entities;
 using Field.Models;
 using HelixToolkit.SharpDX.Core;
@@ -13,6 +14,7 @@ using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf;
 using HelixToolkit.Wpf.SharpDX;
+using Microsoft.Toolkit.Mvvm.Input;
 using SharpDX;
 using Vector3 = Field.Models.Vector3;
 using Vector4 = Field.Models.Vector4;
@@ -71,12 +73,41 @@ public class MainViewModel : INotifyPropertyChanged
     public SceneNodeGroupModel3D ModelGroup { get; } = new SceneNodeGroupModel3D();
 
     public HelixToolkitScene Scene;
-    
+
+    private Point3D _cameraPosition;
+    private Vector3D _cameraLookDirection;
+
+    public RelayCommand RotateCommand { get; set; }
+    public RelayCommand LeftCommand { get; set; }
+    public RelayCommand ForwardCommand { get; set; }
+    public RelayCommand BackCommand { get; set; }
+    public RelayCommand RightCommand { get; set; }
+
+
+    public PerspectiveCamera Camera { get; set; }
+
     public MainViewModel()
     {
         EffectsManager = new  DefaultEffectsManager();
         Scene = new HelixToolkitScene(new GroupNode());
         ModelGroup.AddNode(Scene.Root);
+        
+        RotateCommand = new RelayCommand(ResetCamera);
+        // ForwardCommand = new RelayCommand(MoveCameraForward);
+
+        Camera = new PerspectiveCamera
+        {
+            Position = new Point3D(0, 0, 5),
+            UpDirection = new Vector3D(0, 1, 0),
+            LookDirection = new Vector3D(-0, -0, -5),
+        };
+    }
+
+    private void ResetCamera()
+    {
+        Camera.Position = new Point3D(0, 0, 5);
+        Camera.UpDirection = new Vector3D(0, 1, 0);
+        Camera.LookDirection = new Vector3D(-0, -0, -5);
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

@@ -185,6 +185,17 @@ public class PackageHandler
         return "";
     }
     
+    [DllImport("Symmetry.dll", EntryPoint = "DllGetAllEntities", CallingConvention = CallingConvention.StdCall)]
+    public extern static DestinyFile.UnmanagedData DllGetAllEntities();
+
+    public static List<TagHash> GetAllEntities()
+    {
+        DestinyFile.UnmanagedData pAllEntries = DllGetAllEntities();
+        uint[] vals = new uint[pAllEntries.dataSize];
+        Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
+        return vals.Select(x => new TagHash(x)).ToList();
+    }
+
     public struct D2Class_C59E8080
     {
         public TagHash TagHash;
@@ -218,5 +229,14 @@ public class PackageHandler
         {
             gch.Free();
         }
+    }
+    
+    [DllImport("Symmetry.dll", EntryPoint = "DllGetPackageName", CallingConvention = CallingConvention.StdCall)]
+    public extern static IntPtr DllGetPackageName(int packageId);
+
+    public static string GetPackageName(int pkgId)
+    {
+        IntPtr pStr = DllGetPackageName(pkgId);
+        return Marshal.PtrToStringAnsi(pStr);
     }
 }

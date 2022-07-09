@@ -68,6 +68,11 @@ public class DestinyHash : IComparable<DestinyHash>
         }
         return true;
     }
+
+    public int GetPkgId()
+    {
+        return (int)((Hash >> 0xD) & 0x3ff);
+    }
         
     public string GetHashString()
     {
@@ -125,6 +130,10 @@ public class DestinyHash : IComparable<DestinyHash>
 public class TagHash : DestinyHash
 {
     public TagHash(string hash) : base(hash)
+    {
+    }
+    
+    public TagHash(DestinyHash hash) : base(hash)
     {
     }
         

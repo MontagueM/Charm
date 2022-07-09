@@ -94,7 +94,7 @@ public class FontHandler
                 familyRecord = nameRecords.First(x => x.NameId == 1);
             }
             br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + familyRecord.StringOffset, SeekOrigin.Begin);
-            fontInfo.Family = ReadString(br, familyRecord.Length);
+            fontInfo.Family = ReadString(br, familyRecord.Length).Trim();
             
             OtfNameRecord subfamilyRecord;
             try
@@ -106,7 +106,7 @@ public class FontHandler
                 subfamilyRecord = nameRecords.FirstOrDefault(x => x.NameId == 2);
             }
             br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + subfamilyRecord.StringOffset, SeekOrigin.Begin);
-            fontInfo.Subfamily = ReadString(br, subfamilyRecord.Length);
+            fontInfo.Subfamily = ReadString(br, subfamilyRecord.Length).Trim();
         }
 
         return fontInfo;
@@ -129,7 +129,18 @@ public class FontHandler
             sb.Append(c);
         }
 
-        return sb.ToString();
+        return ConvertWideChar(sb.ToString());
+    }
+    
+    private static string ConvertWideChar(string s)
+    {
+        if (s.Contains("\x00")) // wchar_t
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(s);
+            bytes = bytes.Where(x => x != '\x00').ToArray();
+            return Encoding.UTF8.GetString(bytes);
+        }
+        return s;
     }
 }
 

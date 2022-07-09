@@ -13,32 +13,45 @@
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="5*"/>
-            <RowDefinition Height="100*"/>
-            <RowDefinition Height="5*"/>
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="100*" />
+            <RowDefinition Height="5*" />
         </Grid.RowDefinitions>
-        
-        <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
-                 FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36"/>
-        
-        <CheckBox Checked="ToggleButton_OnChecked" Unchecked="ToggleButton_OnUnchecked" x:Name="TrimCheckbox" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Right" Padding="10,0,30,0" Content="Trim names"/>
-        
+
+        <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0"
+                 TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
+                 FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36" />
+
+        <CheckBox Checked="ToggleButton_OnChecked" Unchecked="ToggleButton_OnUnchecked" x:Name="TrimCheckbox"
+                  IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                  HorizontalAlignment="Right" Padding="10,0,30,0" Content="Trim names" />
+
         <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}" Click="TagItem_OnClick">
-                        <StackPanel>
-                            <TextBlock FontSize="{Binding FontSize}" TextAlignment="Left" Text="{Binding Name}"/>
-                            <TextBlock TextAlignment="Right" Text="{Binding Type}"/>
-                        </StackPanel>
+                    <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}"
+                                  Click="TagItem_OnClick">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80*" />
+                                <ColumnDefinition Width="20*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="60*" />
+                                <RowDefinition Height="40*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Column="0" Grid.Row="0" FontSize="{Binding FontSize}" Text="{Binding Name}" />
+                            <TextBlock Grid.Column="0" Grid.Row="1" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource ForegroundColour75}" Text="{Binding Subname}" />
+                            <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" />
+                        </Grid>
                     </ToggleButton>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        
+
         <!-- TODO make it so there can be other views here for things like textures, music, etc -->
-        <local:EntityView Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" x:Name="EntityView"/>
-        
-        <local:ExportView Grid.Column="1" Grid.Row="2" x:Name="ExportView"/>
+        <local:EntityView Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" x:Name="EntityView" />
+
+        <local:ExportView Grid.Column="1" Grid.Row="2" x:Name="ExportView" />
     </Grid>
 </UserControl>

@@ -26,7 +26,8 @@
         <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
             <TextBlock Text="Entity" FontSize="42" HorizontalAlignment="Center" Padding="0,0,0,50"/>
             <Button Click="ApiViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,20" Padding="20, 20, 20, 20" >API</Button>
-            <Button Click="NamedEntitiesListViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,20" Padding="20, 20, 20, 20" >NAMED ENTITIES</Button>
+            <Button Click="NamedEntitiesBagsViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,20" Padding="20, 20, 20, 20" >NAMED ENTITIES BAGS</Button>
+            <Button Click="EntitiesListViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,20" Padding="20, 20, 20, 20" >ENTITIES LIST</Button>
         </StackPanel>
     </Grid>
 </UserControl>
