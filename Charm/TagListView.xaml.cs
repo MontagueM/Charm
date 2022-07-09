@@ -63,6 +63,7 @@ public partial class TagListView : UserControl
     private TagHash? _currentHash = null;
     private Stack<ParentInfo> _parentStack = new Stack<ParentInfo>();
     private bool _bTrimName = true;
+    private bool _bShowNamedOnly = true;
     private readonly ILogger _tagListLogger = Log.ForContext<TagListView>();
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -75,7 +76,8 @@ public partial class TagListView : UserControl
         InitializeComponent();
     }
 
-    public void LoadContent(ETagListType tagListType, TagHash contentValue = null, bool bFromBack = false, ConcurrentBag<TagItem> overrideItems = null)
+    public async void LoadContent(ETagListType tagListType, TagHash contentValue = null, bool bFromBack = false,
+        ConcurrentBag<TagItem> overrideItems = null)
     {
         _tagListLogger.Debug($"Loading content type {tagListType} contentValue {contentValue} from back {bFromBack}");
         if (overrideItems != null)
@@ -84,10 +86,16 @@ public partial class TagListView : UserControl
         }
         else
         {
-            if (contentValue != null && !bFromBack && tagListType != ETagListType.Entity) // if the type nests no new info, it isnt a parent
+            if (contentValue != null && !bFromBack &&
+                tagListType != ETagListType.Entity && tagListType != ETagListType.ApiEntity) // if the type nests no new info, it isnt a parent
             {
-                _parentStack.Push(new ParentInfo { AllTagItems = _allTagItems, Hash = _currentHash, TagListType = _tagListType, SearchTerm = SearchBox.Text});
-            } 
+                _parentStack.Push(new ParentInfo
+                {
+                    AllTagItems = _allTagItems, Hash = _currentHash, TagListType = _tagListType,
+                    SearchTerm = SearchBox.Text
+                });
+            }
+
             switch (tagListType)
             {
                 case ETagListType.DestinationGlobalTagBagList:
@@ -104,15 +112,19 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.Entity:
                     LoadEntity(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
                     return;
                 case ETagListType.ApiList:
                     LoadApiList();
                     break;
                 case ETagListType.ApiEntity:
                     LoadApiEntity(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
                     return;
                 case ETagListType.EntityList:
-                    LoadEntityList();
+                    await LoadEntityList();
                     break;
                 case ETagListType.Package:
                     LoadPackage(contentValue);
@@ -121,17 +133,20 @@ public partial class TagListView : UserControl
                     throw new NotImplementedException();
             }
         }
-
         _currentHash = contentValue;
         _tagListType = tagListType;
         if (!bFromBack)
         {
             SearchBox.Text = "";
         }
-
+        
         RefreshItemList();
-        _tagListLogger.Debug($"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+
+        _tagListLogger.Debug(
+            $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
     }
+
+
 
     /// <summary>
     /// For when we want stuff in packages, we then split up based on what the taghash value is.
@@ -151,19 +166,24 @@ public partial class TagListView : UserControl
         if (_allTagItems.IsEmpty)
             return;
 
-        if (_allTagItems.First().Name.Contains("\\"))
-        {
-            TrimCheckbox.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            TrimCheckbox.Visibility = Visibility.Hidden;
-        }
+        // if (_allTagItems.First().Name.Contains("\\"))
+        // {
+        //     TrimCheckbox.Visibility = Visibility.Visible;
+        // }
+        // else
+        // {
+        //     TrimCheckbox.Visibility = Visibility.Hidden;
+        // }
 
         var displayItems = new ConcurrentBag<TagItem>();
         // Select and sort by relevance to selected string
         Parallel.ForEach(_allTagItems, item =>
         {
+            if (_bShowNamedOnly && item._name == String.Empty)
+            {
+                return;
+            }
+            
             if (!TagItem.GetEnumDescription(_tagListType).Contains("List"))
             {
                 if (displayItems.Count > 50) return;
@@ -178,6 +198,7 @@ public partial class TagListView : UserControl
                 }
             }
             string name = _bTrimName ? TrimName(item._name) : item._name;
+            bool bWasTrimmed = name != item._name;
             if (name.ToLower().Contains(searchStr) || item.Hash.GetHashString().ToLower().Contains(searchStr) || item.Hash.Hash.ToString().Contains(searchStr))
             {
                 displayItems.Add(new TagItem
@@ -187,7 +208,7 @@ public partial class TagListView : UserControl
                     TagType = item.TagType,
                     Type = item.Type,
                     Subname = item.Subname,
-                    FontSize = _bTrimName ? 16 : 12,
+                    FontSize = _bTrimName || !bWasTrimmed ? 16 : 12,
                 });
             }
         });
@@ -273,9 +294,15 @@ public partial class TagListView : UserControl
         LoadContent(parentInfo.TagListType, parentInfo.Hash, true, parentInfo.AllTagItems);
     }
     
-    private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
+    private void TrimCheckbox_OnChecked(object sender, RoutedEventArgs e)
     {
         _bTrimName = true;
+        RefreshItemList();
+    }
+    
+    private void TrimCheckbox_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        _bTrimName = false;
         RefreshItemList();
     }
 
@@ -283,10 +310,16 @@ public partial class TagListView : UserControl
     {
         return name.Split("\\").Last().Split(".")[0];
     }
-
-    private void ToggleButton_OnUnchecked(object sender, RoutedEventArgs e)
+    
+    private void ShowNamedCheckbox_OnChecked(object sender, RoutedEventArgs e)
     {
-        _bTrimName = false;
+        _bShowNamedOnly = true;
+        RefreshItemList();
+    }
+    
+    private void ShowNamedCheckbox_OnUnchecked(object sender, RoutedEventArgs e)
+    {
+        _bShowNamedOnly = false;
         RefreshItemList();
     }
 
@@ -396,104 +429,117 @@ public partial class TagListView : UserControl
     /// If someone wants to make this list work for entities with other things like skeletons etc, this is easy to
     /// customise to desired system. 
     /// </summary>
-    private void LoadEntityList()
+    private async Task LoadEntityList()
     {
         // If there are packages, we don't want to reload the view as very poor for performance.
         if (_allTagItems != null)
             return;
+        
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            $"loading entity list",
+        });
+        EntityView.Visibility = Visibility.Hidden;
 
-        _allTagItems = new ConcurrentBag<TagItem>();
-        // only in 010a
-        var dgtbVals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80808930);
-        // only in the sr_globals, not best but it works
-        var bsVals = PackageHandler.GetAllEntriesOfReference(0x010f, 0x80809eed);
-        bsVals.AddRange(PackageHandler.GetAllEntriesOfReference(0x011a, 0x80809eed));
-        bsVals.AddRange( PackageHandler.GetAllEntriesOfReference(0x0312, 0x80809eed));
-        // everywhere
-        var eVals = PackageHandler.GetAllEntities();
-        ConcurrentHashSet<uint> existingEntities = new ConcurrentHashSet<uint>();
-        Parallel.ForEach(dgtbVals, val =>
+        await Task.Run(() =>
         {
-            Tag<D2Class_30898080> dgtb = new Tag<D2Class_30898080>( new TagHash(val));
-            foreach (var entry in dgtb.Header.Unk18)
+            _allTagItems = new ConcurrentBag<TagItem>();
+            // only in 010a
+            var dgtbVals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80808930);
+            // only in the sr_globals, not best but it works
+            var bsVals = PackageHandler.GetAllEntriesOfReference(0x010f, 0x80809eed);
+            bsVals.AddRange(PackageHandler.GetAllEntriesOfReference(0x011a, 0x80809eed));
+            bsVals.AddRange( PackageHandler.GetAllEntriesOfReference(0x0312, 0x80809eed));
+            // everywhere
+            var eVals = PackageHandler.GetAllEntities();
+            ConcurrentHashSet<uint> existingEntities = new ConcurrentHashSet<uint>();
+            Parallel.ForEach(dgtbVals, val =>
             {
-                if (entry.Tag == null)
-                    continue;
-                if (entry.TagPath.Contains(".pattern.tft"))
+                Tag<D2Class_30898080> dgtb = new Tag<D2Class_30898080>( new TagHash(val));
+                foreach (var entry in dgtb.Header.Unk18)
                 {
-                    _allTagItems.Add(new TagItem
+                    if (entry.Tag == null)
+                        continue;
+                    if (entry.TagPath.Contains(".pattern.tft"))
                     {
-                        Hash = entry.Tag.Hash,
-                        Name = entry.TagPath,
-                        Subname = entry.TagNote,
-                        TagType = ETagListType.Entity
-                    });
-                    existingEntities.Add(entry.Tag.Hash);
-                }
-            }
-        });
-        Parallel.ForEach(bsVals, val =>
-        {
-            Tag<D2Class_ED9E8080> bs = new Tag<D2Class_ED9E8080>( new TagHash(val));
-            foreach (var entry in bs.Header.Unk28)
-            {
-                if (entry.TagPath.Contains(".pattern.tft"))
-                {
-                    _allTagItems.Add(new TagItem
-                    {
-                        Hash = entry.Tag.Hash,
-                        Name = entry.TagPath,
-                        TagType = ETagListType.Entity
-                    });
-                    existingEntities.Add(entry.Tag.Hash);
-                }
-            }
-        });
-        // We could also cache all the entity resources for an extra speed-up, but should be careful of memory there
-        PackageHandler.CacheHashDataList(eVals.Select(x => x.Hash).ToArray());
-        Parallel.ForEach(eVals, val =>
-        {
-            if (existingEntities.Contains(val)) // O(1) check
-                return; 
-            
-            // Check the entity has geometry
-            bool bHasGeometry = false;
-            using (var handle = new Tag(val).GetHandle())
-            {
-                handle.BaseStream.Seek(8, SeekOrigin.Begin);
-                int resourceCount = handle.ReadInt32();
-                if (resourceCount > 2)
-                {
-                    handle.BaseStream.Seek(0x10, SeekOrigin.Begin);
-                    int resourcesOffset = handle.ReadInt32() + 0x20;
-                    for (int i = 0; i < 2; i++)
-                    {
-                        handle.BaseStream.Seek(resourcesOffset + i * 0xC, SeekOrigin.Begin);
-                        using (var handle2 = new Tag(new TagHash(handle.ReadUInt32())).GetHandle())
+                        _allTagItems.Add(new TagItem
                         {
-                            handle2.BaseStream.Seek(0x10, SeekOrigin.Begin);
-                            int checkOffset = handle2.ReadInt32() + 0x10 - 4;
-                            handle2.BaseStream.Seek(checkOffset, SeekOrigin.Begin);
-                            if (handle2.ReadUInt32() == 0x80806d8a)
+                            Hash = entry.Tag.Hash,
+                            Name = entry.TagPath,
+                            Subname = entry.TagNote,
+                            TagType = ETagListType.Entity
+                        });
+                        existingEntities.Add(entry.Tag.Hash);
+                    }
+                }
+            });
+            Parallel.ForEach(bsVals, val =>
+            {
+                Tag<D2Class_ED9E8080> bs = new Tag<D2Class_ED9E8080>( new TagHash(val));
+                foreach (var entry in bs.Header.Unk28)
+                {
+                    if (entry.TagPath.Contains(".pattern.tft"))
+                    {
+                        _allTagItems.Add(new TagItem
+                        {
+                            Hash = entry.Tag.Hash,
+                            Name = entry.TagPath,
+                            TagType = ETagListType.Entity
+                        });
+                        existingEntities.Add(entry.Tag.Hash);
+                    }
+                }
+            });
+            // We could also cache all the entity resources for an extra speed-up, but should be careful of memory there
+            PackageHandler.CacheHashDataList(eVals.Select(x => x.Hash).ToArray());
+            Parallel.ForEach(eVals, val =>
+            {
+                if (existingEntities.Contains(val)) // O(1) check
+                    return; 
+            
+                // Check the entity has geometry
+                bool bHasGeometry = false;
+                using (var handle = new Tag(val).GetHandle())
+                {
+                    handle.BaseStream.Seek(8, SeekOrigin.Begin);
+                    int resourceCount = handle.ReadInt32();
+                    if (resourceCount > 2)
+                    {
+                        handle.BaseStream.Seek(0x10, SeekOrigin.Begin);
+                        int resourcesOffset = handle.ReadInt32() + 0x20;
+                        for (int i = 0; i < 2; i++)
+                        {
+                            handle.BaseStream.Seek(resourcesOffset + i * 0xC, SeekOrigin.Begin);
+                            using (var handle2 = new Tag(new TagHash(handle.ReadUInt32())).GetHandle())
                             {
-                                bHasGeometry = true;
-                                break;
+                                handle2.BaseStream.Seek(0x10, SeekOrigin.Begin);
+                                int checkOffset = handle2.ReadInt32() + 0x10 - 4;
+                                handle2.BaseStream.Seek(checkOffset, SeekOrigin.Begin);
+                                if (handle2.ReadUInt32() == 0x80806d8a)
+                                {
+                                    bHasGeometry = true;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
-            }
-            if (!bHasGeometry)
-                return;
+                if (!bHasGeometry)
+                    return;
             
-            _allTagItems.Add(new TagItem
-            {
-                Hash = val,
-                TagType = ETagListType.Entity
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = val,
+                    TagType = ETagListType.Entity
+                });
             });
+
+            MakePackageTagItems();
         });
 
-        MakePackageTagItems();
+        MainWindow.Progress.CompleteStage();
+        EntityView.Visibility = Visibility.Visible;
+        RefreshItemList();  // bc of async stuff
     }
 
     #endregion
@@ -523,7 +569,10 @@ public partial class TagListView : UserControl
     private void LoadApiEntity(DestinyHash apiHash)
     {
         EntityView.LoadEntityFromApi(apiHash);
-        ExportView.SetExportInfo(apiHash);
+        Dispatcher.Invoke(() =>
+        {
+            ExportView.SetExportInfo(apiHash);
+        });
     }
 
     #endregion

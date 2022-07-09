@@ -11,7 +11,9 @@
         <Rectangle IsHitTestVisible="True" Fill="Transparent"/>
         <StackPanel Orientation="Vertical" Height="105" Width="500" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource BackgroundColour14}">
             <ProgressBar x:Name="ProgressBar" Height="50" Value="50" Background="{StaticResource BackgroundColour7}" Foreground="{StaticResource AccentColour}"></ProgressBar>
-            <TextBlock x:Name="ProgressText" Height="50" Text="LOADING" FontSize="38" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+            <Viewbox Height="50" Width="450">
+                <TextBlock x:Name="ProgressText" Text="LOADING" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></TextBlock>
+            </Viewbox>
         </StackPanel>
     </Grid>
 </UserControl>

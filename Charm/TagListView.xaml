@@ -22,9 +22,15 @@
                  TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
                  FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36" />
 
-        <CheckBox Checked="ToggleButton_OnChecked" Unchecked="ToggleButton_OnUnchecked" x:Name="TrimCheckbox"
-                  IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"
-                  HorizontalAlignment="Right" Padding="10,0,30,0" Content="Trim names" />
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,2,30,0">
+            <CheckBox Checked="TrimCheckbox_OnChecked" Unchecked="TrimCheckbox_OnUnchecked" x:Name="TrimCheckbox"
+                      IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                      HorizontalAlignment="Left" Content="Trim names" />
+            <CheckBox Checked="ShowNamedCheckbox_OnChecked" Unchecked="ShowNamedCheckbox_OnUnchecked" x:Name="ShowNamedCheckbox"
+                      IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                      HorizontalAlignment="Left" Content="Filter named" />
+        </StackPanel>
+
 
         <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListView.ItemTemplate>

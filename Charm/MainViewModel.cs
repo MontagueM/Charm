@@ -105,7 +105,6 @@ public class MainViewModel : INotifyPropertyChanged
             LookDirection = new Vector3D(-0, -0, -5),
         };
         
-        // floor plane grid
         Grid = LineBuilder.GenerateGrid();
         GridTransform = new TranslateTransform3D(-5, 0, -5);
     }
