@@ -159,7 +159,7 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>(_allTagItems.Where(x => x.Hash.GetPkgId() == pkgId && x.TagType != ETagListType.Package));
     }
 
-    private void SetItemListByString(string searchStr)
+    private void SetItemListByString(string searchStr, bool bPackageSearchAllOverride = false)
     {
         if (_allTagItems == null)
             return;
@@ -189,7 +189,7 @@ public partial class TagListView : UserControl
                 if (displayItems.Count > 50) return;
 
             }
-            else if (TagItem.GetEnumDescription(_tagListType).Contains("[Packages]"))
+            else if (TagItem.GetEnumDescription(_tagListType).Contains("[Packages]") && !bPackageSearchAllOverride)
             {
                 // Package-enabled lists have [Packages] in their enum
                 if (item.TagType != ETagListType.Package)
@@ -199,7 +199,9 @@ public partial class TagListView : UserControl
             }
             string name = _bTrimName ? TrimName(item._name) : item._name;
             bool bWasTrimmed = name != item._name;
-            if (name.ToLower().Contains(searchStr) || item.Hash.GetHashString().ToLower().Contains(searchStr) || item.Hash.Hash.ToString().Contains(searchStr))
+            if (name.ToLower().Contains(searchStr) 
+                || item.Hash.GetHashString().ToLower().Contains(searchStr) 
+                || item.Hash.Hash.ToString().Contains(searchStr))
             {
                 displayItems.Add(new TagItem
                 {
@@ -212,6 +214,11 @@ public partial class TagListView : UserControl
                 });
             }
         });
+        if (displayItems.Count == 0 && TagItem.GetEnumDescription(_tagListType).Contains("[Packages]") && !bPackageSearchAllOverride)
+        {
+            SetItemListByString(searchStr, true);
+            return;
+        }
         
         List<TagItem> tagItems = displayItems.ToList();
         tagItems.Sort((p, q) => String.Compare(p.Name, q.Name, StringComparison.OrdinalIgnoreCase));
