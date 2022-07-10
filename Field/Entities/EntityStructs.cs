@@ -433,7 +433,7 @@ public struct D2Class_C56E8080
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_CB6E8080> Parts;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 37)]
-    public short[] Unk30;
+    public short[] PartGroups;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x24)]
@@ -447,7 +447,7 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     public uint IndexCount;
     public uint Unk10;  // might be number of strips?
     public short Unk14;
-    public short Unk16;
+    public short Unk16;  // some kind of index
     public int Unk18;  // sbyte gear_dye_change_color_index
     public sbyte Unk1C;
     public sbyte DetailLevel;

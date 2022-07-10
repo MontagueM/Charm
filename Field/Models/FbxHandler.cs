@@ -63,11 +63,11 @@ public class FbxHandler
     {
         bool done = false;
         FbxMesh mesh = null;
-        while (!done)
+        while (!done)  // bc fbx is not thread-safe
         {
             try
             {
-                mesh = FbxMesh.Create(_manager, $"{meshName}_{index}");
+                mesh = FbxMesh.Create(_manager, $"{meshName}_Group{part.GroupIndex}_{index}");
                 done = true;
             }
             catch (Exception e)

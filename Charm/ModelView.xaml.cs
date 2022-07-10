@@ -19,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Field.Models;
 
 namespace Charm;
 
@@ -29,21 +30,62 @@ public partial class ModelView : UserControl
         InitializeComponent();
     }
 
-    // Menu buttons
-
-    private void Grid_Checked(object sender, RoutedEventArgs e)
+    public ELOD GetSelectedLod()
     {
-        // if (HelixGrid != null)
-        // {
-        // HelixGrid.Visible = true;
-        // }
+        ELOD selected = (ELOD)LodCombobox.SelectedIndex;
+        return selected;
     }
 
-    private void Grid_Unchecked(object sender, RoutedEventArgs e)
+    public int GetSelectedGroupIndex()
     {
-        // if (HelixGrid != null)
-        // {
-        // HelixGrid.Visible = false;
-        // }
+        int selected = GroupsCombobox.SelectedIndex;
+        return selected;
+    }
+
+    private Action _loadEntityFunc = null;
+    private bool _bFromSelectionChange = false;
+
+    public void SetEntityFunction(Action action)
+    {
+        _loadEntityFunc = action;
+    }
+
+    private void LodCombobox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // We need the LoadEntity function bound with its data
+        if (_loadEntityFunc != null)
+        {
+            _loadEntityFunc();
+        }
+    }
+
+    private void GroupsCombobox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        _bFromSelectionChange = true;
+        if (_loadEntityFunc != null)
+        {
+            _loadEntityFunc();
+        }
+
+        _bFromSelectionChange = false;
+    }
+
+    public void SetGroupIndices(HashSet<int> hashSet)
+    {
+        if (_bFromSelectionChange)
+            return;
+        
+        GroupsCombobox.Items.Clear();
+        var l = hashSet.ToList();
+        l.Sort();
+        
+        foreach (var i in l)
+        {
+            GroupsCombobox.Items.Add(new ComboBoxItem
+            {
+                Content = $"Group {i+1}/{l.Count}",
+                IsSelected = i == l.Last()
+            });
+        }
     }
 }

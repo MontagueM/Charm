@@ -55,13 +55,13 @@ public class Entity : Tag
     public List<DynamicPart> Load(ELOD detailLevel)
     {
         var dynamicParts = new List<DynamicPart>();
-        if (PhysicsModel != null)
-        {
-            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, ModelParentResource)).ToList();
-        }
         if (Model != null)
         {
             dynamicParts = dynamicParts.Concat(Model.Load(detailLevel, ModelParentResource)).ToList();
+        }
+        if (PhysicsModel != null)
+        {
+            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, ModelParentResource)).ToList();
         }
         return dynamicParts;
     }

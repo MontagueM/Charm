@@ -13,6 +13,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using ConcurrentCollections;
 using Field;
+using Field.Entities;
 using Field.General;
 using Microsoft.Toolkit.Mvvm.Input;
 using Serilog;
@@ -421,7 +422,17 @@ public partial class TagListView : UserControl
             _tagListLogger.Error($"UI failed to load entity for hash {tagHash}. You can still try to export the full model instead.");
             _mainWindow.SetLoggerSelected();
         }
+        ExportView.SetExportFunction(ExportEntityFull);
         ExportView.SetExportInfo(tagHash);
+        EntityView.ModelView.SetEntityFunction(() => EntityView.LoadEntity(tagHash));
+    }
+    
+    private void ExportEntityFull(object sender, RoutedEventArgs e)
+    {
+        var btn = sender as Button;
+        ExportInfo info = (ExportInfo)btn.Tag;
+        Entity entity = new Entity(new TagHash(info.Hash));
+        EntityView.ExportFull(new List<Entity> {entity}, info.Name);
     }
     
     /// <summary>

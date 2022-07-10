@@ -24,14 +24,21 @@
             <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*" />
+            <RowDefinition Height="4*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <Menu Grid.Column="0">
-            <MenuItem Header="_Viewer">
-                <MenuItem x:Name="GridCheckbox" Header="_Grid" IsCheckable="True" IsChecked="True" />
-            </MenuItem>
-        </Menu>
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <CheckBox x:Name="GridCheckbox" Margin="10,0,10,0" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center">Grid</CheckBox>
+            <ComboBox x:Name="LodCombobox" SelectionChanged="LodCombobox_OnSelectionChanged" Margin="10,0,10,0">
+                <ComboBoxItem IsSelected="True">Most Detail</ComboBoxItem>
+                <ComboBoxItem>Least Detail</ComboBoxItem>
+                <ComboBoxItem>All Detail</ComboBoxItem>
+            </ComboBox>
+            <ComboBox x:Name="GroupsCombobox" SelectionChanged="GroupsCombobox_OnSelectionChanged" Margin="10,0,10,0">
+                <!-- <ComboBoxItem IsSelected="True">Group 1/n</ComboBoxItem> -->
+            </ComboBox>
+        </StackPanel>
 
         <TextBlock
             Grid.Column="1"
