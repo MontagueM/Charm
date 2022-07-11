@@ -46,11 +46,55 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
     
-    private void EntitiesListViewButton_OnClick(object sender, RoutedEventArgs e)
+    private void AllEntitiesViewButton_OnClick(object sender, RoutedEventArgs e)
     {
         TagListView tagListView = new TagListView();
         tagListView.LoadContent(ETagListType.EntityList);
         _mainWindow.MakeNewTab("entities", tagListView);
         _mainWindow.SetNewestTabSelected();
+    }
+
+    private void ActivitiesViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListView tagListView = new TagListView();
+        tagListView.LoadContent(ETagListType.ActivityList);
+        _mainWindow.MakeNewTab("activities", tagListView);
+        _mainWindow.SetNewestTabSelected();
+    }
+
+    private void AllStaticsViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListView tagListView = new TagListView();
+        tagListView.LoadContent(ETagListType.StaticsList);
+        _mainWindow.MakeNewTab("statics", tagListView);
+        _mainWindow.SetNewestTabSelected();    
+    }
+
+    private void DialogViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void MusicViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void AllAudioViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void AllStringsViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void AllTexturesViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListView tagListView = new TagListView();
+        tagListView.LoadContent(ETagListType.TextureList);
+        _mainWindow.MakeNewTab("textures", tagListView);
+        _mainWindow.SetNewestTabSelected();    
     }
 }

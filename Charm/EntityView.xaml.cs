@@ -72,7 +72,7 @@ public partial class EntityView : UserControl
 
     public void ExportFull(List<Entity> entities, string name)
     {
-        _entityLog.Debug($"Exporting entity model name:{name}");
+        _entityLog.Debug($"Exporting entity model name: {name}");
         InfoConfigHandler.MakeFile();
         string meshName = name;
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";

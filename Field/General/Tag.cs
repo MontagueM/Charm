@@ -199,6 +199,7 @@ public class Tag : DestinyFile
                                 }
                                 else
                                 {
+                                    // todo should prob use GetTag instead
                                     value = Activator.CreateInstance(type, new TagHash(hash));
                                 }
                             }

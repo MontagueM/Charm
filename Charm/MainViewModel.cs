@@ -43,9 +43,7 @@ public class MainViewModel : INotifyPropertyChanged
     private string subTitle;
 
     private string title;
-        
-    public TextureModel SkyboxTexture { set; get; }
-        
+    
     public string Title
     {
         get
@@ -107,6 +105,8 @@ public class MainViewModel : INotifyPropertyChanged
         
         Grid = LineBuilder.GenerateGrid();
         GridTransform = new TranslateTransform3D(-5, 0, -5);
+        
+        // EnvironmentMap = TextureModel.Create("C:/T/full/Textures/2D47A280.dds");
     }
 
     private void ResetCamera()

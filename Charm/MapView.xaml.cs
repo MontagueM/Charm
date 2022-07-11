@@ -15,8 +15,8 @@ namespace Charm;
 
 public partial class MapView : UserControl
 {
-    public StaticMapData StaticMap;
-    public TagHash Hash;
+    // public StaticMapData StaticMap;
+    // public TagHash Hash;
 
     private static MainWindow _mainWindow = null;
 
@@ -25,50 +25,44 @@ public partial class MapView : UserControl
         _mainWindow = Window.GetWindow(this) as MainWindow;
     }
     
-    public MapView(TagHash hash)
+    public MapView()
     {
         InitializeComponent();
-        Hash = hash;
     }
 
-    public void LoadMap()
+    public void LoadMap(TagHash tagHash)
     {
-        GetStaticMapData();
-    }
-
-    private async void GetStaticMapData()
-    {
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            "Loading map tag",
-            "Making UI",
-            "Exporting full map"
-        });
-        await Task.Run(GetTag);
-        MainWindow.Progress.CompleteStage();
-        await Task.Run(SetMapUI);
-        MainWindow.Progress.CompleteStage();
-        await Task.Run(ExportFullMap);
-        MainWindow.Progress.CompleteStage();
+        GetStaticMapData(tagHash);
         _mainWindow.SetNewestTabSelected();
     }
 
-    private void GetTag()
+    private async void GetStaticMapData(TagHash tagHash)
     {
-        StaticMap = new StaticMapData(Hash);
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "loading map tag",
+            "making UI",
+        });
+        await Task.Run(() =>
+        {
+            StaticMapData staticMapData = new StaticMapData(tagHash);
+            MainWindow.Progress.CompleteStage();
+            SetMapUI(staticMapData);
+            MainWindow.Progress.CompleteStage();
+        });
     }
 
-    private void SetMapUI()
+    private void SetMapUI(StaticMapData staticMapData)
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-        var displayParts = MakeDisplayParts();
+        var displayParts = MakeDisplayParts(staticMapData);
         MVM.SetChildren(displayParts);
     }
     
-    private void ExportFullMap()
+    public static void ExportFullMap(StaticMapData staticMapData)
     {
         InfoConfigHandler.MakeFile();
-        string meshName = Hash.GetHashString();
+        string meshName = staticMapData.Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
@@ -77,7 +71,7 @@ public partial class MapView : UserControl
         InfoConfigHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
         // Extract all
-        List<D2Class_BD938080> extractedStatics = StaticMap.Header.Statics.DistinctBy(x => x.Static.Hash).ToList();
+        List<D2Class_BD938080> extractedStatics = staticMapData.Header.Statics.DistinctBy(x => x.Static.Hash).ToList();
         // Parallel.ForEach(extractedStatics, s =>
         // {
         //     var parts = s.Static.Load(ELOD.MostDetail);
@@ -91,10 +85,10 @@ public partial class MapView : UserControl
             s.Static.SaveMaterialsFromParts(savePath, parts);  // todo this MUST be parallel, slowest thing here
         }
 
-        Parallel.ForEach(StaticMap.Header.InstanceCounts, c =>
+        Parallel.ForEach(staticMapData.Header.InstanceCounts, c =>
         {
-            var model = StaticMap.Header.Statics[c.StaticIndex].Static;
-            InfoConfigHandler.AddStaticInstances(StaticMap.Header.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), model.Hash);
+            var model = staticMapData.Header.Statics[c.StaticIndex].Static;
+            InfoConfigHandler.AddStaticInstances(staticMapData.Header.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), model.Hash);
         });
         
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
@@ -104,13 +98,13 @@ public partial class MapView : UserControl
         InfoConfigHandler.WriteToFile(savePath);
     }
 
-    private List<MainViewModel.DisplayPart> MakeDisplayParts()
+    private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap)
     {
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
-        Parallel.ForEach(StaticMap.Header.InstanceCounts, c =>
+        Parallel.ForEach(staticMap.Header.InstanceCounts, c =>
         {
             // inefficiency as sometimes there are two instance count entries with same hash. why? idk
-            var model = StaticMap.Header.Statics[c.StaticIndex].Static;
+            var model = staticMap.Header.Statics[c.StaticIndex].Static;
             var parts = model.Load(ELOD.MostDetail);
             for (int i = c.InstanceOffset; i < c.InstanceOffset + c.InstanceCount; i++)
             {
@@ -118,9 +112,9 @@ public partial class MapView : UserControl
                 {
                     MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
                     displayPart.BasePart = part;
-                    displayPart.Translations.Add(StaticMap.Header.Instances[i].Position);
-                    displayPart.Rotations.Add(StaticMap.Header.Instances[i].Rotation);
-                    displayPart.Scales.Add(StaticMap.Header.Instances[i].Scale);
+                    displayPart.Translations.Add(staticMap.Header.Instances[i].Position);
+                    displayPart.Rotations.Add(staticMap.Header.Instances[i].Rotation);
+                    displayPart.Scales.Add(staticMap.Header.Instances[i].Scale);
                     displayParts.Add(displayPart);
                 }
 

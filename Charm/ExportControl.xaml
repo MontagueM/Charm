@@ -9,6 +9,7 @@
     <Grid>
         <!-- If exporting is not allowed, we hide the options with this red error quad -->
         <Rectangle x:Name="DisabledOverlay" Visibility="Hidden" IsHitTestVisible="True" Fill="Red" Opacity="0.5" Panel.ZIndex="100"/>
+        <Border BorderBrush="{StaticResource BackgroundColour30}" BorderThickness="1" Panel.ZIndex="1"/>
         <Grid VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100*" />

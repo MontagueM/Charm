@@ -17,25 +17,35 @@ public class PackageHandler
         return (uint) (0x80800000 + (pkgId << 0xD) + entryId);
     }
 
-    private static bool AddToCache(uint hash, dynamic tag)
+    // public static dynamic GetTag(Type type, ulong hash)
+    // {
+    //     return GetTag(type, TagHash64Handler.GetTagHash64(hash));
+    // }
+    //
+    // public static dynamic GetTag(Type type, uint hash)
+    // {
+    //     return GetTag(type, new TagHash(hash));
+    // }
+    
+    public static Tag<T> GetTag<T>(ulong hash) where T : struct
     {
-        return Cache.TryAdd(hash, tag);
+        return GetTag<T>(TagHash64Handler.GetTagHash64(hash));
     }
     
-    public static dynamic GetTag(Type type, ulong hash)
+    public static Tag<T> GetTag<T>(TagHash hash) where T : struct
     {
-        return GetTag(type, TagHash64Handler.GetTagHash64(hash));
+        return GetTag(typeof(T), hash);
+    }
+    
+    public static Tag<T> GetTag<T>(uint hash) where T : struct
+    {
+        return GetTag(typeof(T), new TagHash(hash));
     }
 
-    public static dynamic GetTag(Type type, uint hash)
-    {
-        return GetTag(type, new TagHash(hash));
-    }
-    
-    public static dynamic GetTag(Type type, string hash)
-    {
-        return GetTag(type, new TagHash(hash));
-    }
+    // public static dynamic GetTag(Type type, string hash)
+    // {
+    //     return GetTag(type, new TagHash(hash));
+    // }
     
     public static void CacheHashDataList(uint[] hashes)
     {
@@ -70,13 +80,12 @@ public class PackageHandler
             return Cache[hash.Hash];
         }
         // Create a new tag and add it to the cache as it doesn't exist
-        dynamic tag = Activator.CreateInstance(type, hash);
-        bool status = AddToCache(hash.Hash, tag);
-        if (!status)  // already exists in cache, caused by threading
+        if (type.IsValueType)  // checking its a struct
         {
-            // Environment.Exit(77);
-            // throw new Exception($"Failed to add tag with hash {hash} to PackageHandler cache.");
+            type = typeof(Tag<>).MakeGenericType(type);
         }
+        dynamic tag = Activator.CreateInstance(type, hash);
+        Cache.TryAdd(hash, tag);
         return tag;
     }
     
@@ -185,12 +194,23 @@ public class PackageHandler
         return "";
     }
     
-    [DllImport("Symmetry.dll", EntryPoint = "DllGetAllEntities", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData DllGetAllEntities();
+    [DllImport("Symmetry.dll", EntryPoint = "DllGetAllTagsWithReference", CallingConvention = CallingConvention.StdCall)]
+    public extern static DestinyFile.UnmanagedData DllGetAllTagsWithReference(uint reference);
 
-    public static List<TagHash> GetAllEntities()
+    public static List<TagHash> GetAllTagsWithReference(uint reference)
     {
-        DestinyFile.UnmanagedData pAllEntries = DllGetAllEntities();
+        DestinyFile.UnmanagedData pAllEntries = DllGetAllTagsWithReference(reference);
+        uint[] vals = new uint[pAllEntries.dataSize];
+        Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
+        return vals.Select(x => new TagHash(x)).ToList();
+    }
+    
+    [DllImport("Symmetry.dll", EntryPoint = "DllGetAllTagsWithTypes", CallingConvention = CallingConvention.StdCall)]
+    public extern static DestinyFile.UnmanagedData DllGetAllTagsWithTypes(int type, int subType);
+
+    public static List<TagHash> GetAllTagsWithTypes(int type, int subType)
+    {
+        DestinyFile.UnmanagedData pAllEntries = DllGetAllTagsWithTypes(type, subType);
         uint[] vals = new uint[pAllEntries.dataSize];
         Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
         return vals.Select(x => new TagHash(x)).ToList();

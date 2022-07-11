@@ -235,14 +235,14 @@ public partial class MainWindow
                     MakeNewTab(hash, dynamicView);
                     break;
                 case 0x80806D44:
-                    StaticView staticView = new StaticView(hash);
-                    staticView.LoadStatic(ELOD.MostDetail);
-                    MakeNewTab(hash, staticView);
+                    // StaticView staticView = new StaticView(hash);
+                    // staticView.LoadStatic(ELOD.MostDetail);
+                    // MakeNewTab(hash, staticView);
                     break;
                 case 0x808093AD:
-                    MapView mapView = new MapView(hash);
-                    mapView.LoadMap();
-                    MakeNewTab(hash, mapView);
+                    // MapView mapView = new MapView(hash);
+                    // mapView.LoadMap();
+                    // MakeNewTab(hash, mapView);
                     break;
                 case 0x80808E8E:
                     ActivityView activityView = new ActivityView();

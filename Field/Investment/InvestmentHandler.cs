@@ -108,7 +108,7 @@ public class InvestmentHandler
         PackageHandler.CacheHashDataList(temp.Values.ToArray());
         Parallel.ForEach(temp, kvp =>
         {
-            InventoryItemStringThings.TryAdd(kvp.Key, PackageHandler.GetTag(typeof(Tag<D2Class_9F548080>), kvp.Value));
+            InventoryItemStringThings.TryAdd(kvp.Key, PackageHandler.GetTag<D2Class_9F548080>(kvp.Value));
         });
         br.Close();
     }
@@ -240,7 +240,7 @@ public class InvestmentHandler
         // We can binary search here as the list is sorted.
         // var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
         // var index = _entityAssignmentsMap.Header.EntityArrangementMap.BinarySearch(x, new D2Class_454F8080());
-        Tag<D2Class_A36F8080> tag = PackageHandler.GetTag(typeof(Tag<D2Class_A36F8080>), _sortedArrangementHashmap[assignmentHash]);
+        Tag<D2Class_A36F8080> tag = PackageHandler.GetTag<D2Class_A36F8080>(_sortedArrangementHashmap[assignmentHash]);
         return tag.Header.Entity;
         // return new Entity(_entityAssignmentsMap.Header.EntityArrangementMap[index].EntityParent.Header.Entity);
         // return null;

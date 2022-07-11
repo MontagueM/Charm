@@ -15,6 +15,7 @@ using ConcurrentCollections;
 using Field;
 using Field.Entities;
 using Field.General;
+using Field.Textures;
 using Microsoft.Toolkit.Mvvm.Input;
 using Serilog;
 
@@ -42,6 +43,32 @@ public enum ETagListType
     EntityList,
     [Description("Package")]
     Package,
+    [Description("Activity List")]
+    ActivityList,
+    [Description("Activity")]
+    Activity,
+    [Description("Statics List [Packages]")]
+    StaticsList,
+    [Description("Static")]
+    Static,
+    [Description("Texture List [Packages]")]
+    TextureList,
+    [Description("Texture")]
+    Texture,
+}
+
+public enum EViewerType
+{
+    [Description("Entity")]
+    Entity,
+    [Description("Static")]
+    Static,
+    [Description("Activity")]
+    Activity,
+    [Description("Texture1D")]
+    Texture1D,
+    [Description("Texture2D")]
+    Texture2D,
 }
 
 /// <summary>
@@ -88,7 +115,7 @@ public partial class TagListView : UserControl
         else
         {
             if (contentValue != null && !bFromBack &&
-                tagListType != ETagListType.Entity && tagListType != ETagListType.ApiEntity) // if the type nests no new info, it isnt a parent
+                tagListType != ETagListType.Entity && tagListType != ETagListType.ApiEntity && tagListType != ETagListType.Activity && tagListType != ETagListType.Static && tagListType != ETagListType.Texture) // if the type nests no new info, it isnt a parent
             {
                 _parentStack.Push(new ParentInfo
                 {
@@ -130,6 +157,30 @@ public partial class TagListView : UserControl
                 case ETagListType.Package:
                     LoadPackage(contentValue);
                     break;
+                case ETagListType.ActivityList:
+                    LoadActivityList();
+                    break;
+                case ETagListType.Activity:
+                    LoadActivity(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                    return;
+                case ETagListType.StaticsList:
+                    await LoadStaticList();
+                    break;
+                case ETagListType.Static:
+                    LoadStatic(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                    return;
+                case ETagListType.TextureList:
+                    await LoadTextureList();
+                    break;
+                case ETagListType.Texture:
+                    LoadTexture(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                    return;
                 default:
                     throw new NotImplementedException();
             }
@@ -146,8 +197,6 @@ public partial class TagListView : UserControl
         _tagListLogger.Debug(
             $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
     }
-
-
 
     /// <summary>
     /// For when we want stuff in packages, we then split up based on what the taghash value is.
@@ -330,6 +379,20 @@ public partial class TagListView : UserControl
         _bShowNamedOnly = false;
         RefreshItemList();
     }
+    
+    /// <summary>
+    /// We only allow one viewer visible at a time, so setting the viewer hides the rest.
+    /// </summary>
+    /// <param name="eViewerType">Viewer type to set visible.</param>
+    private void SetViewer(EViewerType eViewerType)
+    {
+        EntityControl.Visibility = eViewerType == EViewerType.Entity ? Visibility.Visible : Visibility.Hidden;
+        ActivityControl.Visibility = eViewerType == EViewerType.Activity ? Visibility.Visible : Visibility.Hidden;
+        StaticControl.Visibility = eViewerType == EViewerType.Static ? Visibility.Visible : Visibility.Hidden;
+        TextureControl.Visibility = eViewerType == EViewerType.Texture1D ? Visibility.Visible : Visibility.Hidden;
+        CubemapControl.Visibility = eViewerType == EViewerType.Texture2D ? Visibility.Visible : Visibility.Hidden;
+        ExportControl.Visibility = Visibility.Visible;
+    }
 
     #region Destination Global Tag Bag
 
@@ -342,7 +405,7 @@ public partial class TagListView : UserControl
         var vals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80809875);
         Parallel.ForEach(vals, val =>
         {
-            Tag<D2Class_75988080> dgtbParent = new Tag<D2Class_75988080>( new TagHash(val));
+            Tag<D2Class_75988080> dgtbParent = PackageHandler.GetTag<D2Class_75988080>(val);
             if (!dgtbParent.Header.DestinationGlobalTagBag.IsValid())
                 return;
             _allTagItems.Add(new TagItem 
@@ -356,7 +419,7 @@ public partial class TagListView : UserControl
     
     private void LoadDestinationGlobalTagBag(TagHash hash)
     {
-        Tag<D2Class_30898080> destinationGlobalTagBag = new Tag<D2Class_30898080>(hash);
+        Tag<D2Class_30898080> destinationGlobalTagBag = PackageHandler.GetTag<D2Class_30898080>(hash);
         
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(destinationGlobalTagBag.Header.Unk18, val =>
@@ -396,8 +459,8 @@ public partial class TagListView : UserControl
     
     private void LoadBudgetSet(TagHash hash)
     {
-        Tag<D2Class_7E988080> budgetSetHeader = new Tag<D2Class_7E988080>(hash);
-        Tag<D2Class_ED9E8080> budgetSet = new Tag<D2Class_ED9E8080>(budgetSetHeader.Header.Unk00.Hash);
+        Tag<D2Class_7E988080> budgetSetHeader = PackageHandler.GetTag<D2Class_7E988080>( hash);
+        Tag<D2Class_ED9E8080> budgetSet = PackageHandler.GetTag<D2Class_ED9E8080>(budgetSetHeader.Header.Unk00.Hash);
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(budgetSet.Header.Unk28, val =>
         {
@@ -416,15 +479,16 @@ public partial class TagListView : UserControl
 
     private void LoadEntity(TagHash tagHash)
     {
-        bool bLoadedSuccessfully = EntityView.LoadEntity(tagHash);
+        SetViewer(EViewerType.Entity);
+        bool bLoadedSuccessfully = EntityControl.LoadEntity(tagHash);
         if (!bLoadedSuccessfully)
         {
             _tagListLogger.Error($"UI failed to load entity for hash {tagHash}. You can still try to export the full model instead.");
             _mainWindow.SetLoggerSelected();
         }
-        ExportView.SetExportFunction(ExportEntityFull);
-        ExportView.SetExportInfo(tagHash);
-        EntityView.ModelView.SetEntityFunction(() => EntityView.LoadEntity(tagHash));
+        ExportControl.SetExportFunction(ExportEntityFull);
+        ExportControl.SetExportInfo(tagHash);
+        EntityControl.ModelView.SetModelFunction(() => EntityControl.LoadEntity(tagHash));
     }
     
     private void ExportEntityFull(object sender, RoutedEventArgs e)
@@ -432,7 +496,7 @@ public partial class TagListView : UserControl
         var btn = sender as Button;
         ExportInfo info = (ExportInfo)btn.Tag;
         Entity entity = new Entity(new TagHash(info.Hash));
-        EntityView.ExportFull(new List<Entity> {entity}, info.Name);
+        EntityControl.ExportFull(new List<Entity> {entity}, info.Name);
     }
     
     /// <summary>
@@ -457,7 +521,6 @@ public partial class TagListView : UserControl
         {
             $"loading entity list",
         });
-        EntityView.Visibility = Visibility.Hidden;
 
         await Task.Run(() =>
         {
@@ -469,11 +532,11 @@ public partial class TagListView : UserControl
             bsVals.AddRange(PackageHandler.GetAllEntriesOfReference(0x011a, 0x80809eed));
             bsVals.AddRange( PackageHandler.GetAllEntriesOfReference(0x0312, 0x80809eed));
             // everywhere
-            var eVals = PackageHandler.GetAllEntities();
+            var eVals = PackageHandler.GetAllTagsWithReference(0x80809ad8);
             ConcurrentHashSet<uint> existingEntities = new ConcurrentHashSet<uint>();
             Parallel.ForEach(dgtbVals, val =>
             {
-                Tag<D2Class_30898080> dgtb = new Tag<D2Class_30898080>( new TagHash(val));
+                Tag<D2Class_30898080> dgtb = PackageHandler.GetTag<D2Class_30898080>(val);
                 foreach (var entry in dgtb.Header.Unk18)
                 {
                     if (entry.Tag == null)
@@ -493,7 +556,7 @@ public partial class TagListView : UserControl
             });
             Parallel.ForEach(bsVals, val =>
             {
-                Tag<D2Class_ED9E8080> bs = new Tag<D2Class_ED9E8080>( new TagHash(val));
+                Tag<D2Class_ED9E8080> bs = PackageHandler.GetTag<D2Class_ED9E8080>(val);
                 foreach (var entry in bs.Header.Unk28)
                 {
                     if (entry.TagPath.Contains(".pattern.tft"))
@@ -556,7 +619,6 @@ public partial class TagListView : UserControl
         });
 
         MainWindow.Progress.CompleteStage();
-        EntityView.Visibility = Visibility.Visible;
         RefreshItemList();  // bc of async stuff
     }
 
@@ -586,13 +648,220 @@ public partial class TagListView : UserControl
     
     private void LoadApiEntity(DestinyHash apiHash)
     {
-        EntityView.LoadEntityFromApi(apiHash);
+        SetViewer(EViewerType.Entity);
+        EntityControl.LoadEntityFromApi(apiHash);
         Dispatcher.Invoke(() =>
         {
-            ExportView.SetExportInfo(apiHash);
+            ExportControl.SetExportInfo(apiHash);
         });
     }
 
+    #endregion
+
+    #region Activity
+
+    /// <summary>
+    /// Type 0x80808e8e.
+    /// </summary>
+    private void LoadActivityList()
+    {
+        _allTagItems = new ConcurrentBag<TagItem>();
+        var vals = PackageHandler.GetAllTagsWithReference(0x80808e8e);
+        Parallel.ForEach(vals, val =>
+        {
+            _allTagItems.Add(new TagItem 
+            { 
+                Hash = val,
+                Name = PackageHandler.GetActivityName(val),
+                TagType = ETagListType.Activity
+            });
+        });
+    }
+
+    private void LoadActivity(TagHash tagHash)
+    {
+        SetViewer(EViewerType.Activity);
+        
+        ActivityControl.LoadActivity(tagHash);
+        ExportControl.SetExportFunction(ExportActivityFull);
+        ExportControl.SetExportInfo(tagHash);
+        EntityControl.ModelView.SetModelFunction(() => EntityControl.LoadEntity(tagHash));
+    }
+
+    private void ExportActivityFull(object sender, RoutedEventArgs e)
+    {
+        var btn = sender as Button;
+        ExportInfo info = (ExportInfo)btn.Tag;
+        ActivityControl.ExportFull();
+    }
+    
+    #endregion
+
+    #region Static
+    
+    private async Task LoadStaticList()
+    {
+        // If there are packages, we don't want to reload the view as very poor for performance.
+        if (_allTagItems != null)
+            return;
+        
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            $"loading static list",
+        });
+
+        await Task.Run(() =>
+        {
+            _allTagItems = new ConcurrentBag<TagItem>();
+            var eVals = PackageHandler.GetAllTagsWithReference(0x80806d44);
+            Parallel.ForEach(eVals, val =>
+            {
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = val,
+                    TagType = ETagListType.Static
+                });
+            });
+
+            MakePackageTagItems();
+        });
+
+        MainWindow.Progress.CompleteStage();
+        RefreshItemList();  // bc of async stuff
+    }
+    
+    private void LoadStatic(TagHash tagHash)
+    {
+        SetViewer(EViewerType.Static);
+        StaticControl.LoadStatic(tagHash, StaticControl.ModelView.GetSelectedLod());
+        ExportControl.SetExportFunction(ExportStaticFull);
+        ExportControl.SetExportInfo(tagHash);
+        StaticControl.ModelView.SetModelFunction(() => StaticControl.LoadStatic(tagHash, StaticControl.ModelView.GetSelectedLod()));
+    }
+    
+    private void ExportStaticFull(object sender, RoutedEventArgs e)
+    {
+        var btn = sender as Button;
+        ExportInfo info = (ExportInfo)btn.Tag;
+        StaticControl.ExportFullStatic(new TagHash(info.Hash));
+    }
+
+    #endregion
+    
+    #region Texture
+    
+    private async Task LoadTextureList()
+    {
+        // If there are packages, we don't want to reload the view as very poor for performance.
+        if (_allTagItems != null)
+            return;
+        
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "caching textures 1d",
+            "caching textures 2d",
+            "caching textures 3d",
+            "adding textures to ui 1d",
+            "adding textures to ui 2d",
+            "adding textures to ui 3d",
+        });
+        
+        await Task.Run(() =>
+        {
+            _allTagItems = new ConcurrentBag<TagItem>();
+            var tex1d = PackageHandler.GetAllTagsWithTypes(32, 1);
+            var tex2d = PackageHandler.GetAllTagsWithTypes(32, 2);
+            var tex3d = PackageHandler.GetAllTagsWithTypes(32, 3);
+            PackageHandler.CacheHashDataList(tex1d.Select(x => x.Hash).ToArray());
+            MainWindow.Progress.CompleteStage();
+            PackageHandler.CacheHashDataList(tex2d.Select(x => x.Hash).ToArray());
+            MainWindow.Progress.CompleteStage();
+            PackageHandler.CacheHashDataList(tex3d.Select(x => x.Hash).ToArray());
+            MainWindow.Progress.CompleteStage();
+
+            Parallel.ForEach(tex1d, val =>
+            {
+                using (var handle = new Tag(val).GetHandle())
+                {
+                    handle.BaseStream.Seek(0x22, SeekOrigin.Begin);
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = val,
+                        Name = $"Texture 1D {handle.ReadUInt16()} x {handle.ReadUInt16()}",
+                        TagType = ETagListType.Texture
+                    });
+                }
+            });
+            MainWindow.Progress.CompleteStage();
+
+            Parallel.ForEach(tex2d, val =>
+            {
+                using (var handle = new Tag(val).GetHandle())
+                {
+                    handle.BaseStream.Seek(0x22, SeekOrigin.Begin);
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = val,
+                        Name = $"Texture 2D {handle.ReadUInt16()} x {handle.ReadUInt16()}",
+                        TagType = ETagListType.Texture
+                    });
+                }
+            });
+            MainWindow.Progress.CompleteStage();
+
+            Parallel.ForEach(tex3d, val =>
+            {
+                using (var handle = new Tag(val).GetHandle())
+                {
+                    handle.BaseStream.Seek(0x22, SeekOrigin.Begin);
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = val,
+                        Name = $"Texture 3D {handle.ReadUInt16()} x {handle.ReadUInt16()}",
+                        TagType = ETagListType.Texture
+                    });
+                }
+            });
+            MainWindow.Progress.CompleteStage();
+
+            MakePackageTagItems();
+        });
+
+        RefreshItemList();  // bc of async stuff
+    }
+
+    /// <summary>
+    /// I could do it tiled, but cba to bother with it when you can just batch export to filesystem.
+    /// </summary>
+    private void LoadTexture(TagHash tagHash)
+    {
+        TextureHeader textureHeader = PackageHandler.GetTag(typeof(TextureHeader), tagHash);
+        if (textureHeader.IsCubemap())
+        {
+            SetViewer(EViewerType.Texture2D);
+            CubemapControl.LoadCubemap(textureHeader);
+        }
+        else if (textureHeader.IsVolume())
+        {
+            SetViewer(EViewerType.Texture1D);
+            TextureControl.LoadTexture(textureHeader);
+        }
+        else
+        {
+            SetViewer(EViewerType.Texture1D);
+            TextureControl.LoadTexture(textureHeader);
+        }
+        ExportControl.SetExportFunction(ExportTexture);
+        ExportControl.SetExportInfo(tagHash);
+    }
+    
+    private void ExportTexture(object sender, RoutedEventArgs e)
+    {
+        var btn = sender as Button;
+        ExportInfo info = (ExportInfo)btn.Tag;
+        TextureView.ExportTexture(new TagHash(info.Hash));
+    }
+    
     #endregion
 }
 

@@ -55,9 +55,12 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <!-- TODO make it so there can be other views here for things like textures, music, etc -->
-        <local:EntityView Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" x:Name="EntityView" />
+        <local:EntityView Visibility="Hidden" x:Name="EntityControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
+        <local:StaticView Visibility="Hidden" x:Name="StaticControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
+        <local:ActivityView Visibility="Hidden" x:Name="ActivityControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
+        <local:TextureView Visibility="Hidden" x:Name="TextureControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
+        <local:CubemapView Visibility="Hidden" x:Name="CubemapControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
 
-        <local:ExportView Grid.Column="1" Grid.Row="2" x:Name="ExportView" />
+        <local:ExportView x:Name="ExportControl" Visibility="Hidden" Grid.Column="1" Grid.Row="2"/>
     </Grid>
 </UserControl>

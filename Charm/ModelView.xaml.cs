@@ -42,29 +42,29 @@ public partial class ModelView : UserControl
         return selected;
     }
 
-    private Action _loadEntityFunc = null;
+    private Action _loadModelFunc = null;
     private bool _bFromSelectionChange = false;
 
-    public void SetEntityFunction(Action action)
+    public void SetModelFunction(Action action)
     {
-        _loadEntityFunc = action;
+        _loadModelFunc = action;
     }
 
     private void LodCombobox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         // We need the LoadEntity function bound with its data
-        if (_loadEntityFunc != null)
+        if (_loadModelFunc != null)
         {
-            _loadEntityFunc();
+            _loadModelFunc();
         }
     }
 
     private void GroupsCombobox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         _bFromSelectionChange = true;
-        if (_loadEntityFunc != null)
+        if (_loadModelFunc != null)
         {
-            _loadEntityFunc();
+            _loadModelFunc();
         }
 
         _bFromSelectionChange = false;
