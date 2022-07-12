@@ -15,6 +15,7 @@ using Field;
 using Field.General;
 using Field.Models;
 using Field.Statics;
+using Serilog;
 using VersionChecker;
 using Encoding = SharpDX.Text.Encoding;
 
@@ -54,7 +55,14 @@ public partial class MainWindow
         MainTabControl.Visibility = Visibility.Visible;
 
         // Check version
-        CheckVersion();
+        try
+        {
+            CheckVersion();
+        }
+        finally
+        {
+            Log.Information("Version check complete.");
+        }
     }
 
     private async void CheckVersion()
@@ -69,12 +77,13 @@ public partial class MainWindow
                 MessageBox.Show("New version available on GitHub!");
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
             // Could not get or parse version file
-#if !DEBUG
+            #if !DEBUG
             MessageBox.Show("Could not get version.");
-#endif
+            #endif
+            Log.Error($"Could not get version error {e}.");
         }
     }
 

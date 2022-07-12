@@ -36,7 +36,7 @@ public struct D2Class_8E8E8080
     public List<D2Class_24898080> Unk50;
     public DestinyHash Unk60;
     [DestinyField(FieldType.TagHash)]
-    public Tag Unk64;
+    public Tag Unk64;  // an entity thing
     [DestinyField(FieldType.TagHash64)] 
     public Tag UnkActivity68;
 }
@@ -78,7 +78,62 @@ public struct D2Class_48898080
     public DestinyHash ActivityPhaseName;
     public DestinyHash ActivityPhaseName2;
     [DestinyField(FieldType.TagHash)] 
-    public Tag UnkEntityReference;
+    public Tag<D2Class_898E8080> UnkEntityReference;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+public struct D2Class_898E8080
+{
+    public long FileSize;
+    public long Unk08;
+    [DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk10;  // 46938080 has dialogue table, 45938080 unk
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk14;  // D2Class_898E8080 entity script stuff
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+public struct D2Class_46938080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag DialogueTable;
+    [DestinyOffset(0x3C)] 
+    public int Unk3C;
+    public float Unk40;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+public struct D2Class_45938080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag Unk00;
+    [DestinyOffset(0x18), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_28998080> Unk18;
+    [DestinyOffset(0x3C)] 
+    public int Unk3C;
+    public float Unk40;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+public struct D2Class_28998080
+{
+    public DestinyHash Unk00;
+    public DestinyHash Unk04;
+    public DestinyHash Unk08;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_1A978080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_478F8080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag Unk00;
 }
 
 /// <summary>
@@ -130,9 +185,12 @@ public struct D2Class_6A988080
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_28898080> DirectiveTables;
     [DestinyField(FieldType.TagHash64)] 
-    public Tag DialogTable;
+    public Tag DialogueTable;
     public DestinyHash StartingBubbleName;
     public DestinyHash Unk24;
+    [DestinyOffset(0x2C), DestinyField(FieldType.TagHash)]
+    public Tag MusicTable;
+    
 }
 
 /// <summary>
@@ -151,7 +209,7 @@ public struct D2Class_20978080
 public struct D2Class_28898080
 {
     [DestinyField(FieldType.TagHash)]
-    public Tag DialogTable;
+    public Tag DialogueTable;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x38)]

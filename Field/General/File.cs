@@ -22,7 +22,12 @@ public class DestinyFile
     
     public BinaryReader GetHandle()
     {
-        return new BinaryReader(new MemoryStream(GetData()));
+        return new BinaryReader(GetStream());
+    }
+
+    public MemoryStream GetStream()
+    {
+        return new MemoryStream(GetData());
     }
 
     public struct UnmanagedData

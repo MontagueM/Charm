@@ -60,6 +60,7 @@
         <local:ActivityView Visibility="Hidden" x:Name="ActivityControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
         <local:TextureView Visibility="Hidden" x:Name="TextureControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
         <local:CubemapView Visibility="Hidden" x:Name="CubemapControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
+        <local:DialogueView Visibility="Hidden" x:Name="DialogueControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
 
         <local:ExportView x:Name="ExportControl" Visibility="Hidden" Grid.Column="1" Grid.Row="2"/>
     </Grid>

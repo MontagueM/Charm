@@ -372,7 +372,7 @@ public class Tag : DestinyFile
                     {
                         tagHash = new TagHash(u64);
                     }
-                    if (tagHash.Hash != 0 && bIs32Bit == 0)
+                    if (tagHash.Hash != 0)
                     {
                         StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash);
                         DestinyHash key = new DestinyHash(handle.ReadUInt32());
