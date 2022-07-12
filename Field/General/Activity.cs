@@ -209,7 +209,33 @@ public struct D2Class_20978080
 public struct D2Class_28898080
 {
     [DestinyField(FieldType.TagHash)]
-    public Tag DialogueTable;
+    public Tag<D2Class_C78E8080> DialogueTable;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_C78E8080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_C98E8080> DirectiveTable;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x80)]
+public struct D2Class_C98E8080
+{
+    public DestinyHash Hash;
+    public int Unk04;
+
+    [DestinyOffset(0x10), DestinyField(FieldType.String64)]
+    public string NameString;
+    [DestinyOffset(0x28), DestinyField(FieldType.String64)]
+    public string DescriptionString;
+    [DestinyOffset(0x40), DestinyField(FieldType.String64)]
+    public string ObjectiveString;
+    [DestinyOffset(0x58), DestinyField(FieldType.String64)]
+    public string Unk58;
+    [DestinyOffset(0x70)] 
+    public int ObjectiveTargetCount;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x38)]

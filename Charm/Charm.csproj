@@ -39,6 +39,22 @@
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>ConfigView.xaml</DependentUpon>
       </Page>
+      <Page Update="ActivityMapView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>ActivityView.xaml</DependentUpon>
+      </Page>
+      <Page Update="ActivityDialogueView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>ActivityView.xaml</DependentUpon>
+      </Page>
+      <Page Update="ActivityDirectiveView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>ActivityView.xaml</DependentUpon>
+      </Page>
+      <Page Update="ActivityMusicView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>ActivityView.xaml</DependentUpon>
+      </Page>
     </ItemGroup>
 
 </Project>

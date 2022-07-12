@@ -57,8 +57,12 @@ public enum ETagListType
     Texture,
     [Description("Dialogue List")]
     DialogueList,
-    [Description("Dialogue")]
+    [Description("Dialogue List")]
     Dialogue,
+    [Description("Directive List")]
+    DirectiveList,
+    [Description("Directive")]
+    Directive,
 }
 
 public enum EViewerType
@@ -67,14 +71,14 @@ public enum EViewerType
     Entity,
     [Description("Static")]
     Static,
-    [Description("Activity")]
-    Activity,
     [Description("Texture1D")]
     Texture1D,
     [Description("Texture2D")]
     Texture2D,
     [Description("Dialogue")]
     Dialogue,
+    [Description("Directive")]
+    Directive,
 }
 
 /// <summary>
@@ -126,7 +130,8 @@ public partial class TagListView : UserControl
                                      && tagListType != ETagListType.Activity 
                                      && tagListType != ETagListType.Static 
                                      && tagListType != ETagListType.Texture
-                                     && tagListType != ETagListType.Dialogue) // if the type nests no new info, it isnt a parent
+                                     && tagListType != ETagListType.Dialogue
+                                     && tagListType != ETagListType.Directive) // if the type nests no new info, it isnt a parent
             {
                 _parentStack.Push(new ParentInfo
                 {
@@ -193,10 +198,18 @@ public partial class TagListView : UserControl
                         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
                     return;
                 case ETagListType.DialogueList:
-                    LoadDialogueList();
+                    LoadDialogueList(contentValue);
                     break;
                 case ETagListType.Dialogue:
                     LoadDialogue(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                    return;
+                case ETagListType.DirectiveList:
+                    LoadDirectiveList(contentValue);
+                    break;
+                case ETagListType.Directive:
+                    LoadDirective(contentValue);
                     _tagListLogger.Debug(
                         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
                     return;
@@ -406,11 +419,12 @@ public partial class TagListView : UserControl
     private void SetViewer(EViewerType eViewerType)
     {
         EntityControl.Visibility = eViewerType == EViewerType.Entity ? Visibility.Visible : Visibility.Hidden;
-        ActivityControl.Visibility = eViewerType == EViewerType.Activity ? Visibility.Visible : Visibility.Hidden;
+        // ActivityControl.Visibility = eViewerType == EViewerType.Activity ? Visibility.Visible : Visibility.Hidden;
         StaticControl.Visibility = eViewerType == EViewerType.Static ? Visibility.Visible : Visibility.Hidden;
         TextureControl.Visibility = eViewerType == EViewerType.Texture1D ? Visibility.Visible : Visibility.Hidden;
         CubemapControl.Visibility = eViewerType == EViewerType.Texture2D ? Visibility.Visible : Visibility.Hidden;
         DialogueControl.Visibility = eViewerType == EViewerType.Dialogue ? Visibility.Visible : Visibility.Hidden;
+        DirectiveControl.Visibility = eViewerType == EViewerType.Directive ? Visibility.Visible : Visibility.Hidden;
         ExportControl.Visibility = eViewerType == EViewerType.Dialogue ? Visibility.Hidden : Visibility.Visible;
     }
 
@@ -700,19 +714,19 @@ public partial class TagListView : UserControl
 
     private void LoadActivity(TagHash tagHash)
     {
-        SetViewer(EViewerType.Activity);
-        
-        ActivityControl.LoadActivity(tagHash);
-        ExportControl.SetExportFunction(ExportActivityFull);
-        ExportControl.SetExportInfo(tagHash);
-        EntityControl.ModelView.SetModelFunction(() => EntityControl.LoadEntity(tagHash));
+        ActivityView activityView = new ActivityView();
+        _mainWindow.MakeNewTab(PackageHandler.GetActivityName(tagHash), activityView);
+        activityView.LoadActivity(tagHash);
+        _mainWindow.SetNewestTabSelected();
+        // ExportControl.SetExportFunction(ExportActivityMapFull);
+        // ExportControl.SetExportInfo(tagHash);
     }
 
-    private void ExportActivityFull(object sender, RoutedEventArgs e)
+    private void ExportActivityMapFull(object sender, RoutedEventArgs e)
     {
         var btn = sender as Button;
         ExportInfo info = (ExportInfo)btn.Tag;
-        ActivityControl.ExportFull();
+        // ActivityControl.ExportFull();
     }
     
     #endregion
@@ -889,29 +903,11 @@ public partial class TagListView : UserControl
     /// <summary>
     /// We assume all dialogue tables come from activities.
     /// </summary>
-    private void LoadDialogueList()
+    private void LoadDialogueList(TagHash tagHash)
     {
-        _allTagItems = new ConcurrentBag<TagItem>();
-        var vals = PackageHandler.GetAllTagsWithReference(0x80808e8e);
-        Parallel.ForEach(vals, val =>
-        {
-            _allTagItems.Add(new TagItem 
-            { 
-                Hash = val,
-                Name = PackageHandler.GetActivityName(val),
-                TagType = ETagListType.Dialogue
-            });
-        });
-    }
-
-    private void LoadDialogue(TagHash tagHash)
-    {
-        SetViewer(EViewerType.Dialogue);
         Field.Activity activity = PackageHandler.GetTag(typeof(Field.Activity), tagHash);
-        
-        // Directive tables 0x8080986a but wont bother with these here as not a dialogue thing, only text
-        
-        
+        _allTagItems = new ConcurrentBag<TagItem>();
+  
         // Dialogue tables can be in the 0x80808948 entries
         ConcurrentBag<TagHash> dialogueTables = new ConcurrentBag<TagHash>();
         if (activity.Header.Unk18 is D2Class_6A988080)
@@ -932,11 +928,54 @@ public partial class TagListView : UserControl
             }
         });
 
-        if (dialogueTables.Count != 1)
+        Parallel.ForEach(dialogueTables, hash =>
         {
-            throw new NotImplementedException();
+            _allTagItems.Add(new TagItem 
+            { 
+                Hash = hash,
+                Name = hash,
+                TagType = ETagListType.Dialogue
+            });
+        });
+    }
+
+    private void LoadDialogue(TagHash tagHash)
+    {
+        SetViewer(EViewerType.Dialogue);
+        DialogueControl.Load(tagHash);
+    }
+
+    #endregion
+    
+    #region Directive
+    
+    private void LoadDirectiveList(TagHash tagHash)
+    {
+        Field.Activity activity = PackageHandler.GetTag(typeof(Field.Activity), tagHash);
+        _allTagItems = new ConcurrentBag<TagItem>();
+  
+        // Dialogue tables can be in the 0x80808948 entries
+        if (activity.Header.Unk18 is D2Class_6A988080)
+        {
+            var dialogueTables =
+                ((D2Class_6A988080) activity.Header.Unk18).DirectiveTables.Select(x => x.DialogueTable.Hash);
+            
+            Parallel.ForEach(dialogueTables, hash =>
+            {
+                _allTagItems.Add(new TagItem 
+                { 
+                    Hash = hash,
+                    Name = hash,
+                    TagType = ETagListType.Directive
+                });
+            });
         }
-        DialogueControl.Load(dialogueTables.First());
+    }
+
+    private void LoadDirective(TagHash tagHash)
+    {
+        SetViewer(EViewerType.Directive);
+        DirectiveControl.Load(tagHash);
     }
 
     #endregion

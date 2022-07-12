@@ -8,7 +8,7 @@
              d:DesignHeight="1080" d:DesignWidth="1920">
     <UserControl.Resources>
         <ControlTemplate x:Key="DialogueTemplate">
-            <Button Height="70" Width="900" Margin="0,5,0,5"
+            <Button Height="70" Width="900" Margin="20,5,20,5"
                     Click="Button_OnClick" Tag="{Binding Sound}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -25,8 +25,8 @@
                                Foreground="{StaticResource ForegroundColour75}" Text="{Binding Narrator}" />
                     <TextBlock Grid.Row="1"  HorizontalAlignment="Right"
                                FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
-                               VerticalAlignment="Bottom" FontSize="12"
-                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding RecursionDepth}" Margin="0,0,5,5" />
+                               VerticalAlignment="Bottom" FontSize="8"
+                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding RecursionDepth}" Margin="0,0,2,2" />
                 </Grid>
             </Button>
         </ControlTemplate>

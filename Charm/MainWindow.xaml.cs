@@ -254,10 +254,10 @@ public partial class MainWindow
                     // MakeNewTab(hash, mapView);
                     break;
                 case 0x80808E8E:
-                    ActivityView activityView = new ActivityView();
-                    activityView.LoadActivity(hash);
-                    MakeNewTab(hash, activityView);
-                    SetNewestTabSelected();
+                    // ActivityView activityView = new ActivityView();
+                    // activityView.LoadActivity(hash);
+                    // MakeNewTab(hash, activityView);
+                    // SetNewestTabSelected();
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));

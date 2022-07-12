@@ -70,19 +70,6 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();    
     }
 
-    private void DialogueViewButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        TagListView tagListView = new TagListView();
-        tagListView.LoadContent(ETagListType.DialogueList);
-        _mainWindow.MakeNewTab("dialogue", tagListView);
-        _mainWindow.SetNewestTabSelected();
-    }
-
-    private void MusicViewButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        throw new NotImplementedException();
-    }
-
     private void AllAudioViewButton_OnClick(object sender, RoutedEventArgs e)
     {
         throw new NotImplementedException();

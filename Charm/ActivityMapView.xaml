@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="Charm.ActivityMapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm"
+             mc:Ignorable="d"
+             d:DesignHeight="1000" d:DesignWidth="960">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="bubbleTemplate">
+            <Grid Height="50">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100*" />
+                    <ColumnDefinition Width="100*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" HorizontalAlignment="Left" Text="{Binding Name}"/>
+                <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding Hash}" Click="GetBubbleContentsButton_OnClick" Content="View contents"/>
+            </Grid>
+        </ControlTemplate>  
+        <ControlTemplate x:Key="staticTemplate">
+            <Grid Height="20">
+                <CheckBox Grid.Column="0" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Tag="{Binding Hash}" IsChecked="{Binding Selected}">
+                    <TextBlock TextAlignment="Center" Text="{Binding Name}"/>
+                </CheckBox>
+            </Grid>
+        </ControlTemplate>  
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100*" />
+            <RowDefinition Height="100*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+        <ListView Grid.Row="0" Grid.ColumnSpan="2" x:Name="MapList">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                    <Setter Property="Template" Value="{StaticResource bubbleTemplate}"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"></StackPanel>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+        <ListView Grid.Row="1" Grid.Column="0" x:Name="StaticList">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                    <Setter Property="Template" Value="{StaticResource staticTemplate}"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"></StackPanel>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+        <TextBlock Grid.Row="1" Grid.Column="1" FontSize="32">Dynamic stuff here</TextBlock>
+    </Grid>
+</UserControl>
