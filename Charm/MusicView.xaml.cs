@@ -30,14 +30,17 @@ public partial class MusicView : UserControl
                 throw new NotImplementedException();
             }
 
-            if (music.Header.Unk28[0].Unk00 is D2Class_F5458080)
+            var resource = music.Header.Unk28[0].Unk00;
+            if (resource is D2Class_F5458080)
             {
-                WwiseLoop loop = ((D2Class_F5458080) music.Header.Unk28[0].Unk00).MusicLoopSound;
+                WwiseLoop loop = ((D2Class_F5458080) resource).MusicLoopSound;
+                MusicLoopName.Text = ((D2Class_F5458080) resource).WwiseMusicLoopName;
                 WemList.ItemsSource = GetWemItems(loop);
+                EventList.ItemsSource = GetEventItems(((D2Class_F5458080) resource).Unk18);
             }
             else
             {
-                if (music.Header.Unk28[0].Unk00 is not D2Class_F7458080)
+                if (resource is not D2Class_F7458080)
                 {
                     throw new NotImplementedException();
                 }
@@ -53,7 +56,7 @@ public partial class MusicView : UserControl
             items.Add(new WemItem
             {
                 Name = wem.Hash,
-                Hash = wem.Hash,
+                Hash = PackageHandler.GetEntryReference(wem.Hash),
                 Duration = wem.Duration,
                 Wem = wem,
             });
@@ -73,6 +76,21 @@ public partial class MusicView : UserControl
         MusicPlayer.SetWem(wem);
         MusicPlayer.Play();
     }
+    
+    private ConcurrentBag<EventItem> GetEventItems(List<D2Class_FB458080> array)
+    {
+        var items = new ConcurrentBag<EventItem>();
+        Parallel.ForEach(array, entry =>
+        {
+            items.Add(new EventItem
+            {
+                Name = entry.EventName,
+                Hash = entry.EventHash,
+            });
+        });
+
+        return items;
+    }
 }
 
 public class WemItem
@@ -81,4 +99,10 @@ public class WemItem
     public string Duration { get; set; }
     public string Hash { get; set; }
     public Wem Wem { get; set; }
+}
+
+public class EventItem
+{
+    public string Name { get; set; }
+    public string Hash { get; set; }
 }

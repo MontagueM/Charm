@@ -8,7 +8,7 @@
              d:DesignHeight="1080" d:DesignWidth="1920">
     <UserControl.Resources>
         <ControlTemplate x:Key="WemTemplate">
-            <Button Height="70" Width="900" Margin="20,5,20,5"
+            <Button Height="70" Width="880" Margin="0,5,0,5"
                     Click="PlayWem_OnClick">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -31,6 +31,24 @@
                 </Grid>
             </Button>
         </ControlTemplate>
+        <ControlTemplate x:Key="EventTemplate">
+            <Button Height="70" Width="880" Margin="0,5,0,5">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60*" />
+                        <RowDefinition Height="40*" />
+                    </Grid.RowDefinitions>
+                    <Border Grid.RowSpan="3" BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="1" Panel.ZIndex="1" />
+                    <TextBlock Grid.Row="0" TextWrapping="WrapWithOverflow"
+                               HorizontalAlignment="Left" Text="{Binding Name}" />
+                    <TextBlock Grid.Row="1"  HorizontalAlignment="Left"
+                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+                               VerticalAlignment="Center" FontSize="16"
+                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding Hash}" />
+                </Grid>
+            </Button>
+        </ControlTemplate>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -39,11 +57,15 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>
+            <RowDefinition Height="5*"/>
             <RowDefinition Height="85*"/>
             <RowDefinition Height="10*"/>
         </Grid.RowDefinitions>
-        <TextBlock FontSize="44" Text="content" HorizontalAlignment="Center"/>
-        <ListView Grid.Row="1" Grid.Column="0" x:Name="WemList">
+        <Viewbox Grid.ColumnSpan="2">
+            <TextBlock x:Name="MusicLoopName" HorizontalAlignment="Center"/>
+        </Viewbox>
+        <TextBlock Grid.Row="1" FontSize="40" Text="wems" HorizontalAlignment="Center"/>
+        <ListView Grid.Row="2" Grid.Column="0" x:Name="WemList">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -56,6 +78,21 @@
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
         </ListView>
-        <local:MusicPlayerControl Grid.Column="0" Grid.Row="2" x:Name="MusicPlayer"/>
+        <local:MusicPlayerControl Grid.Column="0" Grid.Row="3" x:Name="MusicPlayer"/>
+        
+        <TextBlock Grid.Column="1" Grid.Row="1" FontSize="40" Text="events" HorizontalAlignment="Center"/>
+        <ListView Grid.Row="2" Grid.Column="1" x:Name="EventList">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                    <Setter Property="Template" Value="{StaticResource EventTemplate}" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"></StackPanel>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
     </Grid>
 </UserControl>
