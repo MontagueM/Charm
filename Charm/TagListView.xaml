@@ -32,7 +32,7 @@
         </StackPanel>
 
 
-        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}"
@@ -62,6 +62,7 @@
         <local:CubemapView Visibility="Hidden" x:Name="CubemapControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
         <local:DialogueView Visibility="Hidden" x:Name="DialogueControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
         <local:DirectiveView Visibility="Hidden" x:Name="DirectiveControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
+        <local:MusicView Visibility="Hidden" x:Name="MusicControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" />
 
         <local:ExportView x:Name="ExportControl" Visibility="Hidden" Grid.Column="1" Grid.Row="2"/>
     </Grid>

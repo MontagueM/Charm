@@ -40,7 +40,7 @@ public partial class ActivityView : UserControl
         MainWindow.Progress.CompleteStage();
         DirectiveControl.LoadUI(_activity.Hash);
         MainWindow.Progress.CompleteStage();
-        MusicControl.LoadUI();
+        MusicControl.LoadUI(_activity);
         MainWindow.Progress.CompleteStage();
     }
 }

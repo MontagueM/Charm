@@ -189,7 +189,7 @@ public struct D2Class_6A988080
     public DestinyHash StartingBubbleName;
     public DestinyHash Unk24;
     [DestinyOffset(0x2C), DestinyField(FieldType.TagHash)]
-    public Tag MusicTable;
+    public Tag<D2Class_EB458080> Music;
     
 }
 
@@ -256,3 +256,73 @@ public struct D2Class_0C008080
     public DestinyHash Unk00;
     public DestinyHash Unk04;
 }
+
+#region Audio
+
+[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+public struct D2Class_EB458080
+{
+    public long FileSize;
+    [DestinyField(FieldType.RelativePointer)]
+    public string MusicTemplateName;
+    [DestinyField(FieldType.TagHash64)]
+    public Tag MusicTemplateTag; // F0458080
+
+    public long Unk20;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_ED458080> Unk28;  
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_ED458080
+{
+    [DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+public struct D2Class_F5458080
+{
+    [DestinyField(FieldType.RelativePointer)]
+    public string WwiseMusicLoopName;
+    [DestinyField(FieldType.TagHash64)]
+    public WwiseLoop MusicLoopSound;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_FB458080> Unk18;
+
+    public DestinyHash Unk28;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_F7458080
+{
+    [DestinyField(FieldType.RelativePointer)]
+    public string WwiseMusicLoopName;
+    [DestinyField(FieldType.TagHash64)]
+    public WwiseLoop MusicLoopSound;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_FA458080> Unk18;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_FA458080
+{
+    public DestinyHash Unk00;
+    [DestinyOffset(8), DestinyField(FieldType.RelativePointer)]
+    public string EventName;
+
+    public DestinyHash Unk10;  // eventhash? idk
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_FB458080
+{
+    public DestinyHash Unk00;
+    [DestinyOffset(8), DestinyField(FieldType.RelativePointer)]
+    public string EventName;
+
+    public int Unk10;
+    public DestinyHash EventHash;
+}
+
+#endregion

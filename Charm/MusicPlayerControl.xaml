@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="Charm.MusicPlayerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm"
+             mc:Ignorable="d"
+             d:DesignHeight="150" d:DesignWidth="1000">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100*" />
+            <RowDefinition Height="100*" />
+        </Grid.RowDefinitions>
+        <!-- TODO replace this with images, eg using C# Path with SVG https://jxnblk.github.io/paths/?d=M20%2016%20L20%2048%20L44%2032%20Z -->
+        <Button Grid.Column="0" Margin="200,15,200,15">
+            <TextBlock Text="PLAY" TextAlignment="Center" VerticalAlignment="Center" />
+        </Button>
+        <Slider Grid.Column="1" VerticalAlignment="Center" Margin="150,0,150,0" Value="7.7" x:Name="VolumeBar"
+                ValueChanged="VolumeBar_OnValueChanged" IsMoveToPointEnabled="True" Maximum="1" Minimum="0"/>
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10*" />
+                <ColumnDefinition Width="80*" />
+                <ColumnDefinition Width="10*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Text="--:--" x:Name="CurrentDuration"/>
+            <Slider Grid.Column="1" VerticalAlignment="Center" Margin="10,0,10,0" Value="0" x:Name="ProgressBar" Maximum="1" Minimum="0"
+                    ValueChanged="ProgressBar_OnValueChanged" IsMoveToPointEnabled="True"/>
+            <TextBlock Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Text="--:--" x:Name="TotalDuration"/>
+        </Grid>
+    </Grid>
+</UserControl>
