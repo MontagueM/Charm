@@ -38,7 +38,9 @@ public class Wem : Tag
     public WaveChannel32 MakeWaveChannel()
     {
         CheckLoaded();
-        return new WaveChannel32(_wemReader);
+        var waveChannel = new WaveChannel32(_wemReader);
+        waveChannel.PadWithZeroes = false;
+        return waveChannel;
     }
     
     public TimeSpan GetDuration()

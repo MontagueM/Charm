@@ -36,14 +36,14 @@ public partial class DialogueView : UserControl
         ListView.ItemsSource = GenerateUIRecursive(0, dialogueTree);
     }
 
-    private ObservableCollection<DisplayVoiceline> GenerateUIRecursive(int recursionDepth, List<dynamic?> dialogueTree)
+    private ObservableCollection<VoicelineItem> GenerateUIRecursive(int recursionDepth, List<dynamic?> dialogueTree)
     {
-        ObservableCollection<DisplayVoiceline> result = new ObservableCollection<DisplayVoiceline>();
+        ObservableCollection<VoicelineItem> result = new ObservableCollection<VoicelineItem>();
         foreach (var dyn in dialogueTree)
         {
             if (dyn is List<dynamic?>)
             {
-                ObservableCollection<DisplayVoiceline> res = GenerateUIRecursive(recursionDepth+1, dyn);
+                ObservableCollection<VoicelineItem> res = GenerateUIRecursive(recursionDepth+1, dyn);
                 foreach (var q in res)
                 {
                     result.Add(q);
@@ -52,7 +52,7 @@ public partial class DialogueView : UserControl
             else
             {
                 D2Class_33978080 a = dyn;
-                result.Add(new DisplayVoiceline
+                result.Add(new VoicelineItem
                     { 
                         Narrator = a.NarratorString,
                         Voiceline = a.Unk28,
@@ -68,18 +68,23 @@ public partial class DialogueView : UserControl
 
     private void PlayWem_OnClick(object sender, RoutedEventArgs e)
     {
-        WemItem item = (WemItem)(sender as Button).DataContext;
+        VoicelineItem item = (VoicelineItem) (sender as Button).DataContext;
+        PlayWem(item.Wem);
+    }
+
+    public void PlayWem(Wem wem)
+    {
+        MusicPlayer.SetWem(wem);
+        MusicPlayer.Play();
     }
 }
 
-public class DisplayVoiceline
+public class VoicelineItem
 {
     public string Narrator { get; set; }
 
     public string Voiceline { get; set; }
-
-    public string Hash { get; set; }
-
+    
     public Wem Wem { get; set; }
 
     public int RecursionDepth { get; set; }

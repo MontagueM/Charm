@@ -153,6 +153,9 @@
         <Setter Property="Background" Value="{StaticResource BackgroundColour7}" />
         <Setter Property="BorderBrush" Value="{StaticResource BackgroundColour20}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColour90}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
     </Style>
     <Style TargetType="ListViewItem">
         <Setter Property="Template">
