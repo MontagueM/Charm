@@ -32,11 +32,11 @@
         </StackPanel>
 
 
-        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2">
+        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2" SelectionChanged="TagList_OnSelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}"
-                                  Click="TagItem_OnClick">
+                    <ToggleButton x:Name="btn" Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}"
+                                  Click="TagItem_OnClick" IsChecked="{Binding IsChecked}">
                         <Grid Background="Transparent">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="80*" />

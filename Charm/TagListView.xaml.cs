@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using ConcurrentCollections;
 using Field;
 using Field.Entities;
@@ -106,6 +107,7 @@ public partial class TagListView : UserControl
     private readonly ILogger _tagListLogger = Log.ForContext<TagListView>();
     private TagListView _tagListControl = null;
     private ToggleButton _previouslySelected = null;
+    private int _selectedIndex = -1;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -265,11 +267,24 @@ public partial class TagListView : UserControl
     
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if ((e.Key == Key.Down || e.Key == Key.Right) && TagList.SelectedItem != null)
-        {
-            var item = TagList.SelectedItem;
-            var a = 0;
-        }
+        // if ((e.Key == Key.Down || e.Key == Key.Right))
+        // {
+        //     // find the selected one
+        //     List<TagItem> tagItems = TagList.Items.OfType<TagItem>().ToList();
+        //     var selected = tagItems.FirstOrDefault(x => x.IsChecked);
+        //     if (selected != null)
+        //     {
+        //         int index = tagItems.IndexOf(selected);
+        //         var z = TagList.ItemContainerGenerator.ContainerFromIndex(index);
+        //         var w = GetChildOfType<ToggleButton>(z);
+        //         w.IsChecked = false;
+        //         var x = TagList.ItemContainerGenerator.ContainerFromIndex(index+1);
+        //         var y = GetChildOfType<ToggleButton>(x);
+        //         y.IsChecked = true;
+        //     }
+        //     var item = TagList.SelectedItem;
+        //     var a = 0;
+        // }
     }
 
     private void SetItemListByString(string searchStr, bool bPackageSearchAllOverride = false)
@@ -398,15 +413,30 @@ public partial class TagListView : UserControl
     private void TagItem_OnClick(object sender, RoutedEventArgs e)
     {
         var btn = sender as ToggleButton;
-        // (sender as ToggleButton).IsChecked = true;
         TagItem tagItem = btn.DataContext as TagItem;
         TagHash tagHash = tagItem.Hash == null ? null : new TagHash(tagItem.Hash);
         if (_previouslySelected != null)
             _previouslySelected.IsChecked = false;
+        _selectedIndex = TagList.Items.IndexOf(tagItem);
         // if (_previouslySelected == btn)
             // _previouslySelected.IsChecked = !_previouslySelected.IsChecked;
         _previouslySelected = btn;
         LoadContent(tagItem.TagType, tagHash);
+    }
+    
+    public static T GetChildOfType<T>(DependencyObject depObj) 
+        where T : DependencyObject
+    {
+        if (depObj == null) return null;
+
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+        {
+            var child = VisualTreeHelper.GetChild(depObj, i);
+
+            var result = (child as T) ?? GetChildOfType<T>(child);
+            if (result != null) return result;
+        }
+        return null;
     }
 
     /// <summary>
@@ -1177,6 +1207,34 @@ public partial class TagListView : UserControl
     }
     
     #endregion
+
+    private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (TagList.SelectedIndex > _selectedIndex)
+        {
+            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
+            currentButton.IsChecked = false;
+            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex+1));
+            if (nextButton != null)
+            {
+                nextButton.IsChecked = true;
+                _selectedIndex++;
+                TagItem_OnClick(nextButton, null);
+            }
+        }
+        else
+        {
+            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
+            currentButton.IsChecked = false;
+            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex-1));
+            if (nextButton != null)
+            {
+                nextButton.IsChecked = true;
+                _selectedIndex--;
+                TagItem_OnClick(nextButton, null);   
+            }
+        }
+    }
 }
 
 public class TagItem
@@ -1205,6 +1263,8 @@ public class TagItem
     public DestinyHash Hash { get; set; }
     
     public int FontSize { get; set; }
+    
+    public bool IsChecked { get; set; }
 
     public string Type
     {
