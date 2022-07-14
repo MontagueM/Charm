@@ -32,7 +32,7 @@ public partial class MainMenuView : UserControl
     {
         // ApiView apiView = new ApiView();
         // apiView.LoadApiView();
-        TagListView apiView = new TagListView();
+        TagListViewerView apiView = new TagListViewerView();
         apiView.LoadContent(ETagListType.ApiList);
         _mainWindow.MakeNewTab("api", apiView);
         _mainWindow.SetNewestTabSelected();
@@ -40,7 +40,7 @@ public partial class MainMenuView : UserControl
     
     private void NamedEntitiesBagsViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListView tagListView = new TagListView();
+        TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.DestinationGlobalTagBagList);
         _mainWindow.MakeNewTab("destination global tag bag", tagListView);
         _mainWindow.SetNewestTabSelected();
@@ -48,7 +48,7 @@ public partial class MainMenuView : UserControl
     
     private void AllEntitiesViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListView tagListView = new TagListView();
+        TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.EntityList);
         _mainWindow.MakeNewTab("entities", tagListView);
         _mainWindow.SetNewestTabSelected();
@@ -56,7 +56,7 @@ public partial class MainMenuView : UserControl
 
     private void ActivitiesViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListView tagListView = new TagListView();
+        TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.ActivityList);
         _mainWindow.MakeNewTab("activities", tagListView);
         _mainWindow.SetNewestTabSelected();
@@ -64,7 +64,7 @@ public partial class MainMenuView : UserControl
 
     private void AllStaticsViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListView tagListView = new TagListView();
+        TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.StaticsList);
         _mainWindow.MakeNewTab("statics", tagListView);
         _mainWindow.SetNewestTabSelected();    
@@ -77,12 +77,15 @@ public partial class MainMenuView : UserControl
 
     private void AllStringsViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.StringContainersList);
+        _mainWindow.MakeNewTab("strings", tagListView);
+        _mainWindow.SetNewestTabSelected();      
     }
 
     private void AllTexturesViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListView tagListView = new TagListView();
+        TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.TextureList);
         _mainWindow.MakeNewTab("textures", tagListView);
         _mainWindow.SetNewestTabSelected();    

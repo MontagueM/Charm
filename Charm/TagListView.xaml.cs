@@ -15,6 +15,7 @@ using ConcurrentCollections;
 using Field;
 using Field.Entities;
 using Field.General;
+using Field.Strings;
 using Field.Textures;
 using Microsoft.Toolkit.Mvvm.Input;
 using Serilog;
@@ -63,22 +64,20 @@ public enum ETagListType
     DirectiveList,
     [Description("Directive")]
     Directive,
-}
-
-public enum EViewerType
-{
-    [Description("Entity")]
-    Entity,
-    [Description("Static")]
-    Static,
-    [Description("Texture1D")]
-    Texture1D,
-    [Description("Texture2D")]
-    Texture2D,
-    [Description("Dialogue")]
-    Dialogue,
-    [Description("Directive")]
-    Directive,
+    [Description("String Containers List [Packages]")]
+    StringContainersList,
+    [Description("String Container")]
+    StringContainer,
+    [Description("Strings")]
+    Strings,
+    [Description("String")]
+    String,
+    [Description("Sounds Packages List")]
+    SoundsPackagesList,
+    [Description("Sounds List")]
+    SoundsList,
+    [Description("Sounds")]
+    Sound,
 }
 
 /// <summary>
@@ -103,6 +102,7 @@ public partial class TagListView : UserControl
     private bool _bTrimName = true;
     private bool _bShowNamedOnly = true;
     private readonly ILogger _tagListLogger = Log.ForContext<TagListView>();
+    private TagListView _tagListControl = null;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -112,6 +112,17 @@ public partial class TagListView : UserControl
     public TagListView()
     {
         InitializeComponent();
+    }
+    
+    private TagListViewerView GetParent()
+    {
+        if (Parent is Grid)
+        {
+            if ((Parent as Grid).Parent is TagListViewerView)
+                return (Parent as Grid).Parent as TagListViewerView;
+        }
+        _tagListLogger.Error($"Parent is not a TagListViewerView, is {Parent.GetType().Name}.");
+        return null;
     }
 
     public async void LoadContent(ETagListType tagListType, TagHash contentValue = null, bool bFromBack = false,
@@ -131,7 +142,9 @@ public partial class TagListView : UserControl
                                      && tagListType != ETagListType.Static 
                                      && tagListType != ETagListType.Texture
                                      && tagListType != ETagListType.Dialogue
-                                     && tagListType != ETagListType.Directive) // if the type nests no new info, it isnt a parent
+                                     && tagListType != ETagListType.Directive
+                                     && tagListType != ETagListType.StringContainer
+                                     && tagListType != ETagListType.String) // if the type nests no new info, it isnt a parent
             {
                 _parentStack.Push(new ParentInfo
                 {
@@ -213,6 +226,36 @@ public partial class TagListView : UserControl
                     _tagListLogger.Debug(
                         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
                     return;
+                case ETagListType.StringContainersList:
+                    LoadStringContainersList();
+                    break;
+                case ETagListType.StringContainer:
+                    LoadStringContainer(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                    return;
+                case ETagListType.Strings:
+                    LoadStrings(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                    return;
+                case ETagListType.String:
+                    return;
+                // case ETagListType.SoundPackageList:
+                //     LoadSoundList();
+                //     _tagListLogger.Debug(
+                //         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                //     return;
+                // case ETagListType.SoundList:
+                //     LoadSoundList();
+                //     _tagListLogger.Debug(
+                //         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                //     return;
+                // case ETagListType.Sound:
+                //     LoadSound(contentValue);
+                //     _tagListLogger.Debug(
+                //         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                //     return;
                 default:
                     throw new NotImplementedException();
             }
@@ -416,16 +459,10 @@ public partial class TagListView : UserControl
     /// We only allow one viewer visible at a time, so setting the viewer hides the rest.
     /// </summary>
     /// <param name="eViewerType">Viewer type to set visible.</param>
-    private void SetViewer(EViewerType eViewerType)
+    private void SetViewer(TagView.EViewerType eViewerType)
     {
-        EntityControl.Visibility = eViewerType == EViewerType.Entity ? Visibility.Visible : Visibility.Hidden;
-        // ActivityControl.Visibility = eViewerType == EViewerType.Activity ? Visibility.Visible : Visibility.Hidden;
-        StaticControl.Visibility = eViewerType == EViewerType.Static ? Visibility.Visible : Visibility.Hidden;
-        TextureControl.Visibility = eViewerType == EViewerType.Texture1D ? Visibility.Visible : Visibility.Hidden;
-        CubemapControl.Visibility = eViewerType == EViewerType.Texture2D ? Visibility.Visible : Visibility.Hidden;
-        DialogueControl.Visibility = eViewerType == EViewerType.Dialogue ? Visibility.Visible : Visibility.Hidden;
-        DirectiveControl.Visibility = eViewerType == EViewerType.Directive ? Visibility.Visible : Visibility.Hidden;
-        ExportControl.Visibility = eViewerType == EViewerType.Dialogue ? Visibility.Hidden : Visibility.Visible;
+        var viewer = GetParent().TagView;
+        viewer.SetViewer(eViewerType);
     }
 
     #region Destination Global Tag Bag
@@ -513,24 +550,26 @@ public partial class TagListView : UserControl
 
     private void LoadEntity(TagHash tagHash)
     {
-        SetViewer(EViewerType.Entity);
-        bool bLoadedSuccessfully = EntityControl.LoadEntity(tagHash);
+        var viewer = GetParent().TagView;
+        SetViewer(TagView.EViewerType.Entity);
+        bool bLoadedSuccessfully = viewer.EntityControl.LoadEntity(tagHash);
         if (!bLoadedSuccessfully)
         {
             _tagListLogger.Error($"UI failed to load entity for hash {tagHash}. You can still try to export the full model instead.");
             _mainWindow.SetLoggerSelected();
         }
-        ExportControl.SetExportFunction(ExportEntityFull);
-        ExportControl.SetExportInfo(tagHash);
-        EntityControl.ModelView.SetModelFunction(() => EntityControl.LoadEntity(tagHash));
+        viewer.ExportControl.SetExportFunction(ExportEntityFull);
+        viewer.ExportControl.SetExportInfo(tagHash);
+        viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntity(tagHash));
     }
     
     private void ExportEntityFull(object sender, RoutedEventArgs e)
     {
+        var viewer = GetParent().TagView;
         var btn = sender as Button;
         ExportInfo info = (ExportInfo)btn.Tag;
         Entity entity = new Entity(new TagHash(info.Hash));
-        EntityControl.ExportFull(new List<Entity> {entity}, info.Name);
+        viewer.EntityControl.ExportFull(new List<Entity> {entity}, info.Name);
     }
     
     /// <summary>
@@ -682,11 +721,12 @@ public partial class TagListView : UserControl
     
     private void LoadApiEntity(DestinyHash apiHash)
     {
-        SetViewer(EViewerType.Entity);
-        EntityControl.LoadEntityFromApi(apiHash);
+        var viewer = GetParent().TagView;
+        SetViewer(TagView.EViewerType.Entity);
+        viewer.EntityControl.LoadEntityFromApi(apiHash);
         Dispatcher.Invoke(() =>
         {
-            ExportControl.SetExportInfo(apiHash);
+            viewer.ExportControl.SetExportInfo(apiHash);
         });
     }
 
@@ -766,18 +806,20 @@ public partial class TagListView : UserControl
     
     private void LoadStatic(TagHash tagHash)
     {
-        SetViewer(EViewerType.Static);
-        StaticControl.LoadStatic(tagHash, StaticControl.ModelView.GetSelectedLod());
-        ExportControl.SetExportFunction(ExportStaticFull);
-        ExportControl.SetExportInfo(tagHash);
-        StaticControl.ModelView.SetModelFunction(() => StaticControl.LoadStatic(tagHash, StaticControl.ModelView.GetSelectedLod()));
+        var viewer = GetParent().TagView;
+        SetViewer(TagView.EViewerType.Static);
+        viewer.StaticControl.LoadStatic(tagHash, viewer.StaticControl.ModelView.GetSelectedLod());
+        viewer.ExportControl.SetExportFunction(ExportStaticFull);
+        viewer.ExportControl.SetExportInfo(tagHash);
+        viewer.StaticControl.ModelView.SetModelFunction(() => viewer.StaticControl.LoadStatic(tagHash, viewer.StaticControl.ModelView.GetSelectedLod()));
     }
     
     private void ExportStaticFull(object sender, RoutedEventArgs e)
     {
+        var viewer = GetParent().TagView;
         var btn = sender as Button;
         ExportInfo info = (ExportInfo)btn.Tag;
-        StaticControl.ExportFullStatic(new TagHash(info.Hash));
+        viewer.StaticControl.ExportFullStatic(new TagHash(info.Hash));
     }
 
     #endregion
@@ -869,24 +911,25 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadTexture(TagHash tagHash)
     {
+        var viewer = GetParent().TagView;
         TextureHeader textureHeader = PackageHandler.GetTag(typeof(TextureHeader), tagHash);
         if (textureHeader.IsCubemap())
         {
-            SetViewer(EViewerType.Texture2D);
-            CubemapControl.LoadCubemap(textureHeader);
+            SetViewer(TagView.EViewerType.Texture2D);
+            viewer.CubemapControl.LoadCubemap(textureHeader);
         }
         else if (textureHeader.IsVolume())
         {
-            SetViewer(EViewerType.Texture1D);
-            TextureControl.LoadTexture(textureHeader);
+            SetViewer(TagView.EViewerType.Texture1D);
+            viewer.TextureControl.LoadTexture(textureHeader);
         }
         else
         {
-            SetViewer(EViewerType.Texture1D);
-            TextureControl.LoadTexture(textureHeader);
+            SetViewer(TagView.EViewerType.Texture1D);
+            viewer.TextureControl.LoadTexture(textureHeader);
         }
-        ExportControl.SetExportFunction(ExportTexture);
-        ExportControl.SetExportInfo(tagHash);
+        viewer.ExportControl.SetExportFunction(ExportTexture);
+        viewer.ExportControl.SetExportInfo(tagHash);
     }
     
     private void ExportTexture(object sender, RoutedEventArgs e)
@@ -939,10 +982,13 @@ public partial class TagListView : UserControl
         });
     }
 
+
+    // TODO replace this by deleting DialogueControl and using TagList instead
     private void LoadDialogue(TagHash tagHash)
     {
-        SetViewer(EViewerType.Dialogue);
-        DialogueControl.Load(tagHash);
+        var viewer = GetParent().TagView;
+        SetViewer(TagView.EViewerType.Dialogue);
+        viewer.DialogueControl.Load(tagHash);
     }
 
     #endregion
@@ -972,12 +1018,82 @@ public partial class TagListView : UserControl
         }
     }
 
+    // TODO replace with taglist control
     private void LoadDirective(TagHash tagHash)
     {
-        SetViewer(EViewerType.Directive);
-        DirectiveControl.Load(tagHash);
+        SetViewer(TagView.EViewerType.Directive);
+        var viewer = GetParent().TagView;
+        viewer.DirectiveControl.Load(tagHash);
     }
 
+    #endregion
+
+    #region String
+
+    private async Task LoadStringContainersList()
+    {
+        // If there are packages, we don't want to reload the view as very poor for performance.
+        if (_allTagItems != null)
+            return;
+        
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "caching string tags",
+            "load string list",
+        });
+        
+        await Task.Run(() =>
+        {
+            _allTagItems = new ConcurrentBag<TagItem>();
+            var vals = PackageHandler.GetAllTagsWithReference(0x808099ef);
+            // PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
+            MainWindow.Progress.CompleteStage();
+
+            Parallel.ForEach(vals, val =>
+            {
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = val,
+                    Name = $"{val}",
+                    TagType = ETagListType.StringContainer
+                });
+            });
+            MainWindow.Progress.CompleteStage();
+
+            MakePackageTagItems();
+        });
+
+        RefreshItemList();  // bc of async stuff
+    }
+    
+    private void LoadStringContainer(TagHash tagHash)
+    { 
+        SetViewer(TagView.EViewerType.TagList);
+        var viewer = GetParent().TagView;
+        viewer.TagListControl.LoadContent(ETagListType.Strings, tagHash, true);
+    }
+    
+    // Would be nice to do something with colour formatting.
+    private void LoadStrings(TagHash tagHash)
+    {
+        _allTagItems = new ConcurrentBag<TagItem>();
+        StringContainer stringContainer = PackageHandler.GetTag(typeof(StringContainer), tagHash);
+        Parallel.ForEach(stringContainer.Header.StringHashTable, hash =>
+        {
+            _allTagItems.Add(new TagItem
+            {
+                Name = stringContainer.GetStringFromHash(ELanguage.English, hash),
+                Hash = hash,
+                TagType = ETagListType.String
+            });
+        });
+        RefreshItemList();
+    }
+
+    #endregion
+    
+    #region Sound
+    
     #endregion
 }
 

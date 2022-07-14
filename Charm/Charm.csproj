@@ -56,6 +56,10 @@
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>ActivityView.xaml</DependentUpon>
       </Page>
+      <Page Update="TagListView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>TagListViewerView.xaml</DependentUpon>
+      </Page>
     </ItemGroup>
 
 </Project>
