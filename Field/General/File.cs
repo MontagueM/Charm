@@ -55,6 +55,7 @@ public class DestinyFile
                 UnmanagedData unmanagedData = DllGetData(Hash);
                 byte[] managedArray = new byte[unmanagedData.dataSize];
                 PackageHandler.Copy(unmanagedData.dataPtr, managedArray, 0, unmanagedData.dataSize);
+                PackageHandler.BytesCache.TryAdd(Hash, managedArray);
                 _data = managedArray;  
             }
         }

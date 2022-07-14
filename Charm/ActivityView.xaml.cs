@@ -31,7 +31,7 @@ public partial class ActivityView : UserControl
         _activity = null;
         await Task.Run(() =>
         {
-            _activity = new Activity(hash);
+            _activity = PackageHandler.GetTag(typeof(Activity), hash);
         });
         MainWindow.Progress.CompleteStage();
         MapControl.LoadUI(_activity);

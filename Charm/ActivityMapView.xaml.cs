@@ -26,6 +26,8 @@ public partial class ActivityMapView : UserControl
     public void LoadUI(Activity activity)
     {
         MapList.ItemsSource = GetMapList(activity);
+        ExportControl.SetExportFunction(ExportFull, true);
+        ExportControl.SetExportInfo(activity.Hash);
     }
 
     private ObservableCollection<DisplayBubble> GetMapList(Activity activity)
@@ -79,8 +81,9 @@ public partial class ActivityMapView : UserControl
         StaticList.ItemsSource = sortedItems;
     }
 
-    public async void ExportFull(Activity activity)
+    public async void ExportFull(ExportInfo info)
     {
+        Activity activity = PackageHandler.GetTag(typeof(Activity), new TagHash(info.Hash));
         _activityLog.Debug($"Exporting activity data name: {PackageHandler.GetActivityName(activity.Hash)}, hash: {activity.Hash}");
         
         var maps = new List<StaticMapData>();
@@ -100,6 +103,13 @@ public partial class ActivityMapView : UserControl
             }
         }
 
+        if (maps.Count == 0)
+        {
+            _activityLog.Error("No maps selected for export.");
+            MessageBox.Show("No maps selected for export.");
+            return;
+        }
+
         List<string> mapStages = maps.Select(x => $"exporting {x.Hash}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages);
         // FbxHandler and InfoConfigHandler are not thread-safe and would need to rewrite to make it work so not doing it that way for now at least
@@ -114,6 +124,7 @@ public partial class ActivityMapView : UserControl
         });
 
         _activityLog.Information($"Exported activity data name: {PackageHandler.GetActivityName(activity.Hash)}, hash: {activity.Hash}");
+        MessageBox.Show("Activity map data exported completed.");
     }
 }
 

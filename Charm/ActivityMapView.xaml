@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Charm"
              mc:Ignorable="d"
-             d:DesignHeight="1000" d:DesignWidth="960">
+             d:DesignHeight="1000" d:DesignWidth="1900">
     <UserControl.Resources>
         <ControlTemplate x:Key="bubbleTemplate">
             <Grid Height="50">
@@ -27,8 +27,9 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="100*" />
-            <RowDefinition Height="100*" />
+            <RowDefinition Height="45*" />
+            <RowDefinition Height="50*" />
+            <RowDefinition Height="5*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*" />
@@ -61,5 +62,6 @@
             </ListView.ItemsPanel>
         </ListView>
         <TextBlock Grid.Row="1" Grid.Column="1" FontSize="32">Dynamic stuff here</TextBlock>
+        <local:ExportControl Grid.Row="2" Grid.ColumnSpan="2" x:Name="ExportControl"/>
     </Grid>
 </UserControl>

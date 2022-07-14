@@ -1,11 +1,19 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
+using Field;
+using Field.General;
+using Serilog;
 using FontFamily = System.Windows.Media.FontFamily;
 
-namespace Field.General;
+namespace Charm;
 
 public class FontHandler
 {
@@ -17,10 +25,12 @@ public class FontHandler
 
     private static void SaveAllFonts()
     {
+        Log.Information("1");
         // 0x80a00000 represents 0100 package
         var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
         Tag<D2Class_0F3C8080> fontsContainer = PackageHandler.GetTag<D2Class_0F3C8080>(vals[0]);
         // Check if the font exists in the Fonts/ folder, if not extract it
+        Log.Information("2");
         if (!Directory.Exists("fonts/"))
         {
             Directory.CreateDirectory("fonts/");
@@ -38,12 +48,14 @@ public class FontHandler
                 } 
             }
         });
+        Log.Information("3");
     }
 
     private static ConcurrentDictionary<FontInfo, FontFamily> LoadAllFonts()
     {
         ConcurrentDictionary<FontInfo, FontFamily> fontFamilies = new ConcurrentDictionary<FontInfo, FontFamily>();
-        
+        Log.Information("4");
+
         Parallel.ForEach(Directory.GetFiles(@"fonts/"), s =>
         {
             var otfPath = Environment.CurrentDirectory + "/" + s;
@@ -51,6 +63,8 @@ public class FontHandler
             FontFamily font = new FontFamily(otfPath + $"#{fontInfo.Family}");
             fontFamilies[fontInfo] = font;
         });
+        Log.Information("5");
+
         return fontFamilies;
     }
 
@@ -63,13 +77,18 @@ public class FontHandler
     private static FontInfo GetFontInfo(string fontPath)
     {
         FontInfo fontInfo;
+        Log.Information($"f1 {fontPath}");
         using (var br = new BinaryReaderBE(new MemoryStream(File.ReadAllBytes(fontPath))))
         {
+            Log.Information($"fa {fontPath}");
+
             byte[] val = br.ReadBytes(4);
             while (Encoding.ASCII.GetString(val) != "name")
             {
                 val = br.ReadBytes(4);
             }
+            Log.Information($"fb {fontPath}");
+
 
             var nameTableRecord = StructConverter.ReadStructure<OtfNameTableRecord>(br);
 
@@ -82,6 +101,7 @@ public class FontHandler
             {
                 nameRecords.Add(StructConverter.ReadStructure<OtfNameRecord>(br));
             }
+            Log.Information($"fc {fontPath}");
 
             OtfNameRecord familyRecord;
             try
@@ -94,7 +114,8 @@ public class FontHandler
             }
             br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + familyRecord.StringOffset, SeekOrigin.Begin);
             fontInfo.Family = ReadString(br, familyRecord.Length).Trim();
-            
+            Log.Information($"fd {fontPath}");
+
             OtfNameRecord subfamilyRecord;
             try
             {
@@ -104,9 +125,12 @@ public class FontHandler
             {
                 subfamilyRecord = nameRecords.FirstOrDefault(x => x.NameId == 2);
             }
+            Log.Information($"fe {fontPath}");
+
             br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + subfamilyRecord.StringOffset, SeekOrigin.Begin);
             fontInfo.Subfamily = ReadString(br, subfamilyRecord.Length).Trim();
         }
+        Log.Information($"f2 {fontPath}");
 
         return fontInfo;
     }
@@ -168,63 +192,4 @@ struct OtfNameRecord
     public ushort NameId;
     public ushort Length;
     public ushort StringOffset;
-}
-
-public class BinaryReaderBE : BinaryReader { 
-    public BinaryReaderBE(System.IO.Stream stream)  : base(stream) { }
-
-    public override int ReadInt32()
-    {
-        var data = base.ReadBytes(4);
-        Array.Reverse(data);
-        return BitConverter.ToInt32(data, 0);
-    }
-
-    public override Int16 ReadInt16()
-    {
-        var data = base.ReadBytes(2);
-        Array.Reverse(data);
-        return BitConverter.ToInt16(data, 0);
-    }
-
-    public override Int64 ReadInt64()
-    {
-        var data = base.ReadBytes(8);
-        Array.Reverse(data);
-        return BitConverter.ToInt64(data, 0);
-    }
-
-    public override UInt32 ReadUInt32()
-    {
-        var data = base.ReadBytes(4);
-        Array.Reverse(data);
-        return BitConverter.ToUInt32(data, 0);
-    }
-
-}
-
-[StructLayout(LayoutKind.Sequential, Size = 0x18)]
-public struct D2Class_0F3C8080
-{
-    public long FileSize;
-    [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_113C8080> FontParents;
-}
-
-[StructLayout(LayoutKind.Sequential, Size = 4)]
-public struct D2Class_113C8080
-{
-    [DestinyField(FieldType.TagHash)]
-    public Tag<D2Class_123C8080> FontParent;
-}
-
-[StructLayout(LayoutKind.Sequential, Size = 0x20)]
-public struct D2Class_123C8080
-{
-    public long FileSize;
-    [DestinyField(FieldType.TagHash)]
-    public DestinyFile FontFile;
-    [DestinyOffset(0x10), DestinyField(FieldType.RelativePointer)]
-    public string FontName;
-    public long FontFileSize;
 }

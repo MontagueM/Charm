@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Charm"
              mc:Ignorable="d"
-             d:DesignHeight="1000" d:DesignWidth="960">
+             d:DesignHeight="1000" d:DesignWidth="1900">
     <Grid>
         <TabControl x:Name="ActivityTabControl">
             <TabItem Header="MAP" x:Name="MapTab">

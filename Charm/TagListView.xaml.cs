@@ -570,11 +570,9 @@ public partial class TagListView : UserControl
         viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntity(tagHash));
     }
     
-    private void ExportEntityFull(object sender, RoutedEventArgs e)
+    private void ExportEntityFull(ExportInfo info)
     {
         var viewer = GetViewer();
-        var btn = sender as Button;
-        ExportInfo info = (ExportInfo)btn.Tag;
         Entity entity = new Entity(new TagHash(info.Hash));
         viewer.EntityControl.ExportFull(new List<Entity> {entity}, info.Name);
     }
@@ -832,11 +830,9 @@ public partial class TagListView : UserControl
         viewer.StaticControl.ModelView.SetModelFunction(() => viewer.StaticControl.LoadStatic(tagHash, viewer.StaticControl.ModelView.GetSelectedLod()));
     }
     
-    private void ExportStaticFull(object sender, RoutedEventArgs e)
+    private void ExportStaticFull(ExportInfo info)
     {
         var viewer = GetViewer();
-        var btn = sender as Button;
-        ExportInfo info = (ExportInfo)btn.Tag;
         viewer.StaticControl.ExportFullStatic(new TagHash(info.Hash));
     }
 
@@ -950,10 +946,8 @@ public partial class TagListView : UserControl
         viewer.ExportControl.SetExportInfo(tagHash);
     }
     
-    private void ExportTexture(object sender, RoutedEventArgs e)
+    private void ExportTexture(ExportInfo info)
     {
-        var btn = sender as Button;
-        ExportInfo info = (ExportInfo)btn.Tag;
         TextureView.ExportTexture(new TagHash(info.Hash));
     }
     

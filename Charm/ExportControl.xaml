@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Charm.ExportView"
+﻿<UserControl x:Class="Charm.ExportControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -19,7 +19,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="100*"/>
             </Grid.RowDefinitions>
-            <TextBlock x:Name="ExportName" VerticalAlignment="Center" Grid.Column="0" Margin="50,0,0,0" Text="Exporting: NONE"/>
+            <TextBlock x:Name="ExportName" VerticalAlignment="Center" Grid.Column="0" Margin="5,0,0,0" Text="Exporting: NONE"/>
             <Button Grid.Column="2" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton"/>
         </Grid>
     </Grid>

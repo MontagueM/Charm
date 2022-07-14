@@ -20,6 +20,10 @@ public class Entity : Tag
     public Entity(TagHash hash) : base(hash)
     {
     }
+    
+    public Entity(TagHash hash, bool disableLoad) : base(hash, disableLoad)
+    {
+    }
 
     protected override void ParseStructs()
     {

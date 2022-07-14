@@ -35,7 +35,7 @@
         
         <local:EntityView Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" x:Name="EntityView"/>
         
-        <local:ExportView Grid.Column="1" Grid.Row="2" x:Name="ExportView"/>
+        <local:ExportControl Grid.Column="1" Grid.Row="2" x:Name="ExportControl"/>
 
     </Grid>
 </UserControl>

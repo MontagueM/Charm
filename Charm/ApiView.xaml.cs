@@ -28,13 +28,11 @@ public partial class ApiView : UserControl
     public ApiView()
     {
         InitializeComponent();
-        ExportView.SetExportFunction(ExportFull);
+        ExportControl.SetExportFunction(ExportFull);
     }
 
-    private void ExportFull(object sender, RoutedEventArgs e)
+    private void ExportFull(ExportInfo info)
     {
-        var btn = sender as Button;
-        ExportInfo info = (ExportInfo)btn.Tag;
         EntityView.ExportFull(InvestmentHandler.GetEntitiesFromHash(info.Hash), info.Name);
     }
     
@@ -93,7 +91,7 @@ public partial class ApiView : UserControl
         btn.IsChecked = true;
         var apiHash = new DestinyHash(hash, true);
         EntityView.LoadEntityFromApi(apiHash);
-        ExportView.SetExportInfo(apiHash);
+        ExportControl.SetExportInfo(apiHash);
         _apiLog.Debug($"Loaded UI entity model {hash}");
     }
     

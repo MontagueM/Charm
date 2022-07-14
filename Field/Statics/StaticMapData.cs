@@ -172,7 +172,7 @@ public struct D2Class_85988080
 {
     public Vector4 Rotation;
     public Vector4 Translation;
-    [DestinyOffset(0x28), DestinyField(FieldType.TagHash64)]
+    [DestinyOffset(0x28), DestinyField(FieldType.TagHash64, true)]
     public Entity Entity;
     [DestinyOffset(0x78), DestinyField(FieldType.ResourcePointer)]
     public dynamic? DataResource;

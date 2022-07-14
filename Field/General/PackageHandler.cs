@@ -10,7 +10,7 @@ public class PackageHandler
     private static ConcurrentDictionary<uint, dynamic> Cache = new ConcurrentDictionary<uint, dynamic>();
     private static ConcurrentBag<StringContainer> GlobalStringContainerCache = new ConcurrentBag<StringContainer>();
     private static Dictionary<TagHash, string> ActivityNames = new Dictionary<TagHash, string>();
-    public static Dictionary<TagHash, byte[]> BytesCache = new Dictionary<TagHash, byte[]>();
+    public static ConcurrentDictionary<TagHash, byte[]> BytesCache = new ConcurrentDictionary<TagHash, byte[]>();
 
     public static uint MakeHash(int pkgId, int entryId)
     {
@@ -27,19 +27,19 @@ public class PackageHandler
     //     return GetTag(type, new TagHash(hash));
     // }
     
-    public static Tag<T> GetTag<T>(ulong hash) where T : struct
+    public static Tag<T> GetTag<T>(ulong hash, bool disableLoad=false) where T : struct
     {
-        return GetTag<T>(TagHash64Handler.GetTagHash64(hash));
+        return GetTag<T>(TagHash64Handler.GetTagHash64(hash), disableLoad);
     }
     
-    public static Tag<T> GetTag<T>(TagHash hash) where T : struct
+    public static Tag<T> GetTag<T>(TagHash hash, bool disableLoad=false) where T : struct
     {
-        return GetTag(typeof(T), hash);
+        return GetTag(typeof(T), hash, disableLoad);
     }
     
-    public static Tag<T> GetTag<T>(uint hash) where T : struct
+    public static Tag<T> GetTag<T>(uint hash, bool disableLoad=false) where T : struct
     {
-        return GetTag(typeof(T), new TagHash(hash));
+        return GetTag(typeof(T), new TagHash(hash), disableLoad);
     }
 
     // public static dynamic GetTag(Type type, string hash)
@@ -68,7 +68,7 @@ public class PackageHandler
     public extern static DestinyFile.UnmanagedDictionary DllGetDataMany(DestinyFile.UnmanagedData pHashes);
 
     
-    public static dynamic GetTag(Type type, TagHash hash)
+    public static dynamic GetTag(Type type, TagHash hash, bool disableLoad=false)
     {
         if (!hash.IsValid())
         {
@@ -84,7 +84,12 @@ public class PackageHandler
         {
             type = typeof(Tag<>).MakeGenericType(type);
         }
-        dynamic tag = Activator.CreateInstance(type, hash);
+
+        dynamic tag;
+        if (disableLoad)
+            tag = Activator.CreateInstance(type, hash, disableLoad);
+        else
+            tag = Activator.CreateInstance(type, hash);
         Cache.TryAdd(hash, tag);
         return tag;
     }

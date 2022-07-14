@@ -34,15 +34,28 @@ public enum ELanguage
 public class DestinyFieldAttribute : Attribute
 {
     internal FieldType _val;
+    internal bool _disableLoad;
+    
     public FieldType Value
     {
         get { return _val; }
+    }
+    
+    public bool DisableLoad
+    {
+        get { return _disableLoad; }
     }
 
 
     public DestinyFieldAttribute(FieldType d2FieldType)
     {
         _val = d2FieldType;
+    }
+    
+    public DestinyFieldAttribute(FieldType d2FieldType, bool disableLoad)
+    {
+        _val = d2FieldType;
+        _disableLoad = disableLoad;
     }
 }
 
@@ -78,7 +91,7 @@ public enum FieldType
     String64, // u64 container + u32 key
     StringNoContainer, // u32 key no container
 }
-    
+
 public class Tag : DestinyFile
 {
     public Type HeaderType;
@@ -88,6 +101,15 @@ public class Tag : DestinyFile
     {
         Hash = tagHash;
         if (tagHash.IsValid())
+        {
+            Parse();
+        }
+    }
+    
+    public Tag(TagHash tagHash, bool disableLoad) : base(tagHash)
+    {
+        Hash = tagHash;
+        if (tagHash.IsValid() && !disableLoad)
         {
             Parse();
         }
@@ -106,7 +128,6 @@ public class Tag : DestinyFile
         using (var handle = GetHandle())
         {
             ret = ReadStruct(typeof(T), handle);
-
         }
         return ret;
     }
@@ -161,6 +182,7 @@ public class Tag : DestinyFile
             else  // custom read
             { 
                 FieldType fieldType = attField.Value;
+                bool disableLoad = attField.DisableLoad;
                 if (fieldType == FieldType.TablePointer)
                 {
                     var tableSize = handle.ReadInt64();
@@ -231,7 +253,7 @@ public class Tag : DestinyFile
                         for (int i = 0; i < arraySize; i++)
                         {
                             TagHash tagHash = new TagHash(handle.ReadUInt32());
-                            dynamic tag = PackageHandler.GetTag(field.FieldType.GetElementType(), tagHash);
+                            dynamic tag = PackageHandler.GetTag(field.FieldType.GetElementType(), tagHash, disableLoad);
                             tagArray[i] = tag;
                         }
                         field.SetValue(result, tagArray);
@@ -239,7 +261,7 @@ public class Tag : DestinyFile
                     else
                     {
                         TagHash tagHash = new TagHash(handle.ReadUInt32());
-                        dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash);
+                        dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash, disableLoad);
                         field.SetValue(result, tag);
                     }
                 }
@@ -336,7 +358,7 @@ public class Tag : DestinyFile
                         }
                         else
                         {
-                            dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash);
+                            dynamic tag = PackageHandler.GetTag(field.FieldType, tagHash, disableLoad);
                             field.SetValue(result, tag); 
                         }
                     }
@@ -348,13 +370,13 @@ public class Tag : DestinyFile
                     DestinyHash key = new DestinyHash(handle.ReadUInt32());
                     if (tagHash.IsValid())
                     {
-                        StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash);
+                        StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash, disableLoad);
                         string resStr = tag.GetStringFromHash(ELanguage.English, key);
                         field.SetValue(result, resStr);
                     }
                     else if (indexOrHash != 0xFF_FF)
                     {
-                        StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), InvestmentHandler.GetStringContainerFromIndex(indexOrHash));
+                        StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), InvestmentHandler.GetStringContainerFromIndex(indexOrHash), disableLoad);
                         string resStr = tag.GetStringFromHash(ELanguage.English, key);
                         field.SetValue(result, resStr);
                     }
@@ -374,7 +396,7 @@ public class Tag : DestinyFile
                     }
                     if (tagHash.Hash != 0)
                     {
-                        StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash);
+                        StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash, disableLoad);
                         DestinyHash key = new DestinyHash(handle.ReadUInt32());
                         string resStr = tag.GetStringFromHash(ELanguage.English, key);
                         field.SetValue(result, resStr);
@@ -422,7 +444,7 @@ public class Tag : DestinyFile
     //     return resource;
     // }
         
-    protected void Parse()
+    protected virtual void Parse()
     {
         ParseStructs();
         ParseData();
