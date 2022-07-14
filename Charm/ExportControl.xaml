@@ -14,13 +14,12 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100*" />
                 <ColumnDefinition Width="100*" />
-                <ColumnDefinition Width="100*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="100*"/>
             </Grid.RowDefinitions>
-            <TextBlock x:Name="ExportName" VerticalAlignment="Center" Grid.Column="0" Margin="5,0,0,0" Text="Exporting: NONE"/>
-            <Button Grid.Column="2" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton"/>
+            <TextBlock x:Name="ExportName" VerticalAlignment="Center" Grid.Column="0" TextAlignment="Center" Text="Exporting: NONE"/>
+            <Button Grid.Column="1" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton"/>
         </Grid>
     </Grid>
 </UserControl>

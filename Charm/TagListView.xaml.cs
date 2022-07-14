@@ -32,13 +32,13 @@ public enum ETagListType
     DestinationGlobalTagBag,
     [Description("Budget Set")]
     BudgetSet,
-    [Description("Entity")]
+    [Description("Entity [Final]")]
     Entity,
     [Description("BACK")]
     Back,
     [Description("Api List")]
     ApiList,
-    [Description("Api Entity")]
+    [Description("Api Entity [Final]")]
     ApiEntity,
     [Description("Entity List [Packages]")]
     EntityList,
@@ -46,39 +46,39 @@ public enum ETagListType
     Package,
     [Description("Activity List")]
     ActivityList,
-    [Description("Activity")]
+    [Description("Activity [Final]")]
     Activity,
     [Description("Statics List [Packages]")]
     StaticsList,
-    [Description("Static")]
+    [Description("Static [Final]")]
     Static,
     [Description("Texture List [Packages]")]
     TextureList,
-    [Description("Texture")]
+    [Description("Texture [Final]")]
     Texture,
     [Description("Dialogue List")]
     DialogueList,
-    [Description("Dialogue List")]
+    [Description("Dialogue [Final]")]
     Dialogue,
     [Description("Directive List")]
     DirectiveList,
-    [Description("Directive")]
+    [Description("Directive [Final]")]
     Directive,
     [Description("String Containers List [Packages]")]
     StringContainersList,
-    [Description("String Container")]
+    [Description("String Container [Final]")]
     StringContainer,
     [Description("Strings")]
     Strings,
-    [Description("String")]
+    [Description("String [Final]")]
     String,
     [Description("Sounds Packages List")]
     SoundsPackagesList,
-    [Description("Sounds Package")]
+    [Description("Sounds Package [Final]")]
     SoundsPackage,
     [Description("Sounds List")]
     SoundsList,
-    [Description("Sound")]
+    [Description("Sound [Final]")]
     Sound,
 }
 
@@ -105,6 +105,7 @@ public partial class TagListView : UserControl
     private bool _bShowNamedOnly = true;
     private readonly ILogger _tagListLogger = Log.ForContext<TagListView>();
     private TagListView _tagListControl = null;
+    private ToggleButton _previouslySelected = null;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -139,18 +140,7 @@ public partial class TagListView : UserControl
         }
         else
         {
-            if (contentValue != null && !bFromBack 
-                                     && tagListType != ETagListType.Entity 
-                                     && tagListType != ETagListType.ApiEntity 
-                                     && tagListType != ETagListType.Activity 
-                                     && tagListType != ETagListType.Static 
-                                     && tagListType != ETagListType.Texture
-                                     && tagListType != ETagListType.Dialogue
-                                     && tagListType != ETagListType.Directive
-                                     && tagListType != ETagListType.StringContainer
-                                     && tagListType != ETagListType.String
-                                     && tagListType != ETagListType.SoundsPackage
-                                     && tagListType != ETagListType.Sound) // if the type nests no new info, it isnt a parent
+            if (contentValue != null && !bFromBack && !TagItem.GetEnumDescription(tagListType).Contains("[Final]")) // if the type nests no new info, it isnt a parent
             {
                 _parentStack.Push(new ParentInfo
                 {
@@ -175,17 +165,13 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.Entity:
                     LoadEntity(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.ApiList:
                     LoadApiList();
                     break;
                 case ETagListType.ApiEntity:
                     LoadApiEntity(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.EntityList:
                     await LoadEntityList();
                     break;
@@ -197,84 +183,70 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.Activity:
                     LoadActivity(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.StaticsList:
                     await LoadStaticList();
                     break;
                 case ETagListType.Static:
                     LoadStatic(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.TextureList:
                     await LoadTextureList();
                     break;
                 case ETagListType.Texture:
                     LoadTexture(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.DialogueList:
                     LoadDialogueList(contentValue);
                     break;
                 case ETagListType.Dialogue:
                     LoadDialogue(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.DirectiveList:
                     LoadDirectiveList(contentValue);
                     break;
                 case ETagListType.Directive:
                     LoadDirective(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.StringContainersList:
                     LoadStringContainersList();
                     break;
                 case ETagListType.StringContainer:
                     LoadStringContainer(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.Strings:
                     LoadStrings(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.String:
-                    return;
+                    break;
                 case ETagListType.SoundsPackagesList:
                     LoadSoundsPackagesList();
                     break;
                 case ETagListType.SoundsPackage:
                     LoadSoundsPackage(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 case ETagListType.SoundsList:
                     LoadSoundsList(contentValue);
                     break;
                 case ETagListType.Sound:
                     LoadSound(contentValue);
-                    _tagListLogger.Debug(
-                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                    return;
+                    break;
                 default:
                     throw new NotImplementedException();
             }
         }
-        _currentHash = contentValue;
-        _tagListType = tagListType;
-        if (!bFromBack)
+
+        if (!TagItem.GetEnumDescription(tagListType).Contains("[Final]"))
         {
-            SearchBox.Text = "";
-        }
+            _currentHash = contentValue;
+            _tagListType = tagListType;
+            if (!bFromBack)
+            {
+                SearchBox.Text = "";
+            }
         
-        RefreshItemList();
+            RefreshItemList();
+        }
 
         _tagListLogger.Debug(
             $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
@@ -289,6 +261,15 @@ public partial class TagListView : UserControl
     {
         int pkgId = pkgHash.GetPkgId();
         _allTagItems = new ConcurrentBag<TagItem>(_allTagItems.Where(x => x.Hash.GetPkgId() == pkgId && x.TagType != ETagListType.Package));
+    }
+    
+    private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if ((e.Key == Key.Down || e.Key == Key.Right) && TagList.SelectedItem != null)
+        {
+            var item = TagList.SelectedItem;
+            var a = 0;
+        }
     }
 
     private void SetItemListByString(string searchStr, bool bPackageSearchAllOverride = false)
@@ -417,9 +398,14 @@ public partial class TagListView : UserControl
     private void TagItem_OnClick(object sender, RoutedEventArgs e)
     {
         var btn = sender as ToggleButton;
+        // (sender as ToggleButton).IsChecked = true;
         TagItem tagItem = btn.DataContext as TagItem;
         TagHash tagHash = tagItem.Hash == null ? null : new TagHash(tagItem.Hash);
-        btn.IsChecked = false;  // todo fix this for entity
+        if (_previouslySelected != null)
+            _previouslySelected.IsChecked = false;
+        // if (_previouslySelected == btn)
+            // _previouslySelected.IsChecked = !_previouslySelected.IsChecked;
+        _previouslySelected = btn;
         LoadContent(tagItem.TagType, tagHash);
     }
 
@@ -1222,7 +1208,16 @@ public class TagItem
 
     public string Type
     {
-        get => _type == String.Empty ? GetEnumDescription(TagType) : _type;
+        get
+        {
+            if (_type == String.Empty)
+            {
+                var t = GetEnumDescription(TagType);
+                if (t.Contains("[Final]"))
+                    return t.Split("[Final]")[0].Trim();
+            }
+            return _type;
+        }
         set => _type = value;
     }
 

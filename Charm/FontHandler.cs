@@ -56,13 +56,14 @@ public class FontHandler
         ConcurrentDictionary<FontInfo, FontFamily> fontFamilies = new ConcurrentDictionary<FontInfo, FontFamily>();
         Log.Information("4");
 
-        Parallel.ForEach(Directory.GetFiles(@"fonts/"), s =>
+        // Parallel.ForEach(Directory.GetFiles(@"fonts/"), s =>
+        foreach (var s in Directory.GetFiles(@"fonts/"))
         {
             var otfPath = Environment.CurrentDirectory + "/" + s;
             FontInfo fontInfo = GetFontInfo(otfPath);
             FontFamily font = new FontFamily(otfPath + $"#{fontInfo.Family}");
             fontFamilies[fontInfo] = font;
-        });
+        }//);
         Log.Information("5");
 
         return fontFamilies;

@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:Charm"
              mc:Ignorable="d"
              Loaded="OnControlLoaded"
+             PreviewKeyDown="Window_PreviewKeyDown"
              d:DesignHeight="1000" d:DesignWidth="960">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -36,7 +37,7 @@
                 <DataTemplate>
                     <ToggleButton Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}"
                                   Click="TagItem_OnClick">
-                        <Grid>
+                        <Grid Background="Transparent">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="80*" />
                                 <ColumnDefinition Width="20*" />
