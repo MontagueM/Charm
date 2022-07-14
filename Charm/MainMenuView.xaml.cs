@@ -30,8 +30,6 @@ public partial class MainMenuView : UserControl
     
     private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        // ApiView apiView = new ApiView();
-        // apiView.LoadApiView();
         TagListViewerView apiView = new TagListViewerView();
         apiView.LoadContent(ETagListType.ApiList);
         _mainWindow.MakeNewTab("api", apiView);
@@ -72,7 +70,10 @@ public partial class MainMenuView : UserControl
 
     private void AllAudioViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.SoundsPackagesList);
+        _mainWindow.MakeNewTab("sounds", tagListView);
+        _mainWindow.SetNewestTabSelected();    
     }
 
     private void AllStringsViewButton_OnClick(object sender, RoutedEventArgs e)

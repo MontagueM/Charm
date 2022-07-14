@@ -42,6 +42,7 @@ public partial class TagView : UserControl
         DirectiveControl.Visibility = eViewerType == EViewerType.Directive ? Visibility.Visible : Visibility.Hidden;
         MusicControl.Visibility = eViewerType == EViewerType.Music ? Visibility.Visible : Visibility.Hidden;
         TagListControl.Visibility = eViewerType == EViewerType.TagList ? Visibility.Visible : Visibility.Hidden;
-        ExportControl.Visibility = eViewerType == EViewerType.Dialogue ? Visibility.Hidden : Visibility.Visible;
+        ExportControl.Visibility = Visibility.Visible;  // always see unless we dont want to
+        MusicPlayer.Visibility = Visibility.Hidden;  // always hidden unless specifically required
     }
 }

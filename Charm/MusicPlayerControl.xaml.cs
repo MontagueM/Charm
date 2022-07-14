@@ -53,9 +53,10 @@ public partial class MusicPlayerControl : UserControl
         MakeOutput();
         _output.Init(_waveProvider);
         CanPlay = true;
-        CurrentDuration.Text = Wem.GetDurationString(_waveProvider.CurrentTime);
+        CurrentDuration.Text = Wem.GetDurationString(_waveProvider.CurrentTime);  // todo make this all correct
         TotalDuration.Text = wem.Duration;
         _prevPositionValue = 0;
+        ProgressBar.Value = 0;
         SetPlayingText(wem.Hash);
     }
     
@@ -175,11 +176,22 @@ public partial class MusicPlayerControl : UserControl
         {
             _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
         }
-        
     }
 
     private void ProgressBar_OnDragCompleted(object sender, DragCompletedEventArgs e)
     {
-        throw new NotImplementedException();
+        _prevPositionValue = 0;
+        var s = sender as Slider;
+        if (IsPlaying())  // To only take manual changes
+        {
+            _output.Stop();
+            _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
+            SetPosition(_waveProvider.Position, true);
+            Play();
+        }
+        else
+        {
+            _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
+        }    
     }
 }

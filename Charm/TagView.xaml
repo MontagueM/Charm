@@ -11,15 +11,20 @@
             <RowDefinition Height="95*" />
             <RowDefinition Height="5*" />
         </Grid.RowDefinitions>
-        <local:EntityView Visibility="Hidden" x:Name="EntityControl"/>
-        <local:StaticView Visibility="Hidden" x:Name="StaticControl"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+        <local:EntityView Visibility="Hidden" x:Name="EntityControl" Grid.ColumnSpan="2"/>
+        <local:StaticView Visibility="Hidden" x:Name="StaticControl" Grid.ColumnSpan="2"/>
         <!-- <local:ActivityView Visibility="Hidden" x:Name="ActivityControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" /> -->
-        <local:TextureView Visibility="Hidden" x:Name="TextureControl"/>
-        <local:CubemapView Visibility="Hidden" x:Name="CubemapControl"/>
-        <local:DialogueView Visibility="Hidden" x:Name="DialogueControl"/>
-        <local:DirectiveView Visibility="Hidden" x:Name="DirectiveControl"/>
-        <local:MusicView Visibility="Hidden" x:Name="MusicControl"/>
-        <local:TagListView Visibility="Hidden" x:Name="TagListControl"/>
-        <local:ExportView x:Name="ExportControl" Visibility="Hidden" Grid.Row="2"/>
+        <local:TextureView Visibility="Hidden" x:Name="TextureControl" Grid.ColumnSpan="2"/>
+        <local:CubemapView Visibility="Hidden" x:Name="CubemapControl" Grid.ColumnSpan="2"/>
+        <local:DialogueView Visibility="Hidden" x:Name="DialogueControl" Grid.ColumnSpan="2"/>
+        <local:DirectiveView Visibility="Hidden" x:Name="DirectiveControl" Grid.ColumnSpan="2"/>
+        <local:MusicView Visibility="Hidden" x:Name="MusicControl" Grid.ColumnSpan="2"/>
+        <local:TagListView Visibility="Hidden" x:Name="TagListControl" Grid.ColumnSpan="2"/>
+        <local:ExportView x:Name="ExportControl" Visibility="Hidden" Grid.Column="0" Grid.Row="1"/>
+        <local:MusicPlayerControl x:Name="MusicPlayer" Visibility="Hidden" Grid.Column="1" Grid.Row="1"/>
     </Grid>
 </UserControl>

@@ -74,9 +74,11 @@ public enum ETagListType
     String,
     [Description("Sounds Packages List")]
     SoundsPackagesList,
+    [Description("Sounds Package")]
+    SoundsPackage,
     [Description("Sounds List")]
     SoundsList,
-    [Description("Sounds")]
+    [Description("Sound")]
     Sound,
 }
 
@@ -114,12 +116,14 @@ public partial class TagListView : UserControl
         InitializeComponent();
     }
     
-    private TagListViewerView GetParent()
+    private TagView GetViewer()
     {
         if (Parent is Grid)
         {
             if ((Parent as Grid).Parent is TagListViewerView)
-                return (Parent as Grid).Parent as TagListViewerView;
+                return ((Parent as Grid).Parent as TagListViewerView).TagView;
+            else if ((Parent as Grid).Parent is TagView)
+                return (Parent as Grid).Parent as TagView;
         }
         _tagListLogger.Error($"Parent is not a TagListViewerView, is {Parent.GetType().Name}.");
         return null;
@@ -144,7 +148,9 @@ public partial class TagListView : UserControl
                                      && tagListType != ETagListType.Dialogue
                                      && tagListType != ETagListType.Directive
                                      && tagListType != ETagListType.StringContainer
-                                     && tagListType != ETagListType.String) // if the type nests no new info, it isnt a parent
+                                     && tagListType != ETagListType.String
+                                     && tagListType != ETagListType.SoundsPackage
+                                     && tagListType != ETagListType.Sound) // if the type nests no new info, it isnt a parent
             {
                 _parentStack.Push(new ParentInfo
                 {
@@ -241,21 +247,22 @@ public partial class TagListView : UserControl
                     return;
                 case ETagListType.String:
                     return;
-                // case ETagListType.SoundPackageList:
-                //     LoadSoundList();
-                //     _tagListLogger.Debug(
-                //         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                //     return;
-                // case ETagListType.SoundList:
-                //     LoadSoundList();
-                //     _tagListLogger.Debug(
-                //         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                //     return;
-                // case ETagListType.Sound:
-                //     LoadSound(contentValue);
-                //     _tagListLogger.Debug(
-                //         $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
-                //     return;
+                case ETagListType.SoundsPackagesList:
+                    LoadSoundsPackagesList();
+                    break;
+                case ETagListType.SoundsPackage:
+                    LoadSoundsPackage(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                    return;
+                case ETagListType.SoundsList:
+                    LoadSoundsList(contentValue);
+                    break;
+                case ETagListType.Sound:
+                    LoadSound(contentValue);
+                    _tagListLogger.Debug(
+                        $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+                    return;
                 default:
                     throw new NotImplementedException();
             }
@@ -461,7 +468,7 @@ public partial class TagListView : UserControl
     /// <param name="eViewerType">Viewer type to set visible.</param>
     private void SetViewer(TagView.EViewerType eViewerType)
     {
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         viewer.SetViewer(eViewerType);
     }
 
@@ -550,7 +557,7 @@ public partial class TagListView : UserControl
 
     private void LoadEntity(TagHash tagHash)
     {
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Entity);
         bool bLoadedSuccessfully = viewer.EntityControl.LoadEntity(tagHash);
         if (!bLoadedSuccessfully)
@@ -565,7 +572,7 @@ public partial class TagListView : UserControl
     
     private void ExportEntityFull(object sender, RoutedEventArgs e)
     {
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         var btn = sender as Button;
         ExportInfo info = (ExportInfo)btn.Tag;
         Entity entity = new Entity(new TagHash(info.Hash));
@@ -721,7 +728,7 @@ public partial class TagListView : UserControl
     
     private void LoadApiEntity(DestinyHash apiHash)
     {
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Entity);
         viewer.EntityControl.LoadEntityFromApi(apiHash);
         Dispatcher.Invoke(() =>
@@ -806,7 +813,7 @@ public partial class TagListView : UserControl
     
     private void LoadStatic(TagHash tagHash)
     {
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Static);
         viewer.StaticControl.LoadStatic(tagHash, viewer.StaticControl.ModelView.GetSelectedLod());
         viewer.ExportControl.SetExportFunction(ExportStaticFull);
@@ -816,7 +823,7 @@ public partial class TagListView : UserControl
     
     private void ExportStaticFull(object sender, RoutedEventArgs e)
     {
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         var btn = sender as Button;
         ExportInfo info = (ExportInfo)btn.Tag;
         viewer.StaticControl.ExportFullStatic(new TagHash(info.Hash));
@@ -911,7 +918,7 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadTexture(TagHash tagHash)
     {
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         TextureHeader textureHeader = PackageHandler.GetTag(typeof(TextureHeader), tagHash);
         if (textureHeader.IsCubemap())
         {
@@ -986,7 +993,7 @@ public partial class TagListView : UserControl
     // TODO replace this by deleting DialogueControl and using TagList instead
     private void LoadDialogue(TagHash tagHash)
     {
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Dialogue);
         viewer.DialogueControl.Load(tagHash);
     }
@@ -1022,7 +1029,7 @@ public partial class TagListView : UserControl
     private void LoadDirective(TagHash tagHash)
     {
         SetViewer(TagView.EViewerType.Directive);
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         viewer.DirectiveControl.Load(tagHash);
     }
 
@@ -1069,7 +1076,7 @@ public partial class TagListView : UserControl
     private void LoadStringContainer(TagHash tagHash)
     { 
         SetViewer(TagView.EViewerType.TagList);
-        var viewer = GetParent().TagView;
+        var viewer = GetViewer();
         viewer.TagListControl.LoadContent(ETagListType.Strings, tagHash, true);
     }
     
@@ -1093,6 +1100,81 @@ public partial class TagListView : UserControl
     #endregion
     
     #region Sound
+    
+    private async Task LoadSoundsPackagesList()
+    {
+        // If there are packages, we don't want to reload the view as very poor for performance.
+        if (_allTagItems != null)
+            return;
+        
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "caching sound tags",
+            "load sound packages list",
+        });
+        
+        await Task.Run(() =>
+        {
+            _allTagItems = new ConcurrentBag<TagItem>();
+            var vals = PackageHandler.GetAllTagsWithTypes(26, 7);
+            MainWindow.Progress.CompleteStage();
+
+            ConcurrentHashSet<int> packageIds = new ConcurrentHashSet<int>();
+            Parallel.ForEach(vals, hash =>
+            {
+                packageIds.Add(hash.GetPkgId());
+            });
+            
+            Parallel.ForEach(packageIds, pkgId =>
+            {
+                _allTagItems.Add(new TagItem
+                {
+                    Name = String.Join('_', PackageHandler.GetPackageName(pkgId).Split('_').Skip(1).SkipLast(1)),
+                    Hash = new TagHash(PackageHandler.MakeHash(pkgId, 0)),
+                    TagType = ETagListType.SoundsPackage
+                });
+            });
+        });
+
+        MainWindow.Progress.CompleteStage();
+        RefreshItemList();  // bc of async stuff
+    }
+    
+    private void LoadSoundsPackage(TagHash tagHash)
+    { 
+        SetViewer(TagView.EViewerType.TagList);
+        var viewer = GetViewer();
+        viewer.MusicPlayer.Visibility = Visibility.Visible;
+        viewer.TagListControl.LoadContent(ETagListType.SoundsList, tagHash, true);
+    }
+    
+    private void LoadSoundsList(TagHash tagHash)
+    { 
+        var vals = PackageHandler.GetTagsWithTypes(tagHash.GetPkgId(), 26, 7);
+        PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
+        _allTagItems = new ConcurrentBag<TagItem>();
+        Parallel.ForEach(vals, hash =>
+        {
+            Wem wem = PackageHandler.GetTag(typeof(Wem), hash);
+                
+            _allTagItems.Add(new TagItem
+            {
+                Name = PackageHandler.GetEntryReference(hash),
+                Hash = hash,
+                Subname = wem.Duration,
+                TagType = ETagListType.Sound
+            });
+        });
+
+        RefreshItemList();
+    }
+    
+    private void LoadSound(TagHash tagHash)
+    {
+        var viewer = GetViewer();
+        viewer.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), tagHash));
+        viewer.MusicPlayer.Play();
+    }
     
     #endregion
 }

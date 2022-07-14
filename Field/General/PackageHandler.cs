@@ -215,6 +215,17 @@ public class PackageHandler
         Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
         return vals.Select(x => new TagHash(x)).ToList();
     }
+    
+    [DllImport("Symmetry.dll", EntryPoint = "DllGetTagsWithTypes", CallingConvention = CallingConvention.StdCall)]
+    public extern static DestinyFile.UnmanagedData DllGetTagsWithTypes(int pkgId, int type, int subType);
+
+    public static List<TagHash> GetTagsWithTypes(int pkgId, int type, int subType)
+    {
+        DestinyFile.UnmanagedData pAllEntries = DllGetTagsWithTypes(pkgId, type, subType);
+        uint[] vals = new uint[pAllEntries.dataSize];
+        Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
+        return vals.Select(x => new TagHash(x)).ToList();
+    }
 
     public struct D2Class_C59E8080
     {
