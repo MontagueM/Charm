@@ -257,7 +257,7 @@ public class Tag : DestinyFile
                             {
                                 return result;
                             }
-                            throw new NotImplementedException($"Unable to find type for resource class {Endian.U32ToString(resourceClass)}");
+                            throw new NotImplementedException($"[RESOURCE POINTER] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
                         }
                         dynamic resource = ReadStruct(innerType, handle);
                         handle.BaseStream.Seek(fieldOffset + 8, SeekOrigin.Begin);  // return back to keep reading
@@ -270,7 +270,7 @@ public class Tag : DestinyFile
                     Type innerType = Type.GetType($"Field.D2Class_{Endian.U32ToString(resourceClass)}, Field, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
                     if (innerType == null)
                     {
-                        throw new NotImplementedException($"Unable to find type for resource class {Endian.U32ToString(resourceClass)}");
+                        throw new NotImplementedException($"[RESOURCE] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
                     }
                     dynamic resource = ReadStruct(innerType, handle);
                     field.SetValue(result, resource);

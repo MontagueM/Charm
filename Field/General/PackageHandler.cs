@@ -75,7 +75,7 @@ public class PackageHandler
             return null;
         }
             // Check if tag exists already in the cache and return if it does exist
-        if (Cache.ContainsKey(hash.Hash))
+        if (Cache.ContainsKey(hash.Hash) && BytesCache.ContainsKey(hash))
         {
             return Cache[hash.Hash];
         }

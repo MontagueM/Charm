@@ -117,7 +117,6 @@ public partial class MusicPlayerControl : UserControl
     
     public void SetVolume(double volume)
     {
-        _musicLog.Debug($"Setting volume to {volume}");
         if (_waveProvider != null)
             _waveProvider.Volume = (float)volume;
     }

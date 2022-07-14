@@ -537,7 +537,7 @@ public partial class TagListView : UserControl
     
     private void LoadBudgetSet(TagHash hash)
     {
-        Tag<D2Class_7E988080> budgetSetHeader = PackageHandler.GetTag<D2Class_7E988080>( hash);
+        Tag<D2Class_7E988080> budgetSetHeader = PackageHandler.GetTag<D2Class_7E988080>(hash);
         Tag<D2Class_ED9E8080> budgetSet = PackageHandler.GetTag<D2Class_ED9E8080>(budgetSetHeader.Header.Unk00.Hash);
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(budgetSet.Header.Unk28, val =>
@@ -599,7 +599,10 @@ public partial class TagListView : UserControl
         
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            $"loading entity list",
+            "loading global tag bags",
+            "loading budget sets",
+            "caching entity tags",
+            "loading entities"
         });
 
         await Task.Run(() =>
@@ -634,6 +637,8 @@ public partial class TagListView : UserControl
                     }
                 }
             });
+            MainWindow.Progress.CompleteStage();
+
             Parallel.ForEach(bsVals, val =>
             {
                 Tag<D2Class_ED9E8080> bs = PackageHandler.GetTag<D2Class_ED9E8080>(val);
@@ -651,8 +656,15 @@ public partial class TagListView : UserControl
                     }
                 }
             });
+            MainWindow.Progress.CompleteStage();
+
             // We could also cache all the entity resources for an extra speed-up, but should be careful of memory there
             PackageHandler.CacheHashDataList(eVals.Select(x => x.Hash).ToArray());
+            var erVals = PackageHandler.GetAllTagsWithReference(0x80809b06);
+            PackageHandler.CacheHashDataList(erVals.Select(x => x.Hash).ToArray());
+            MainWindow.Progress.CompleteStage();
+
+            
             Parallel.ForEach(eVals, val =>
             {
                 if (existingEntities.Contains(val)) // O(1) check
@@ -694,11 +706,10 @@ public partial class TagListView : UserControl
                     TagType = ETagListType.Entity
                 });
             });
-
+            MainWindow.Progress.CompleteStage();
             MakePackageTagItems();
         });
 
-        MainWindow.Progress.CompleteStage();
         RefreshItemList();  // bc of async stuff
     }
 
@@ -1148,24 +1159,33 @@ public partial class TagListView : UserControl
         viewer.TagListControl.LoadContent(ETagListType.SoundsList, tagHash, true);
     }
     
-    private void LoadSoundsList(TagHash tagHash)
-    { 
-        var vals = PackageHandler.GetTagsWithTypes(tagHash.GetPkgId(), 26, 7);
-        PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
-        _allTagItems = new ConcurrentBag<TagItem>();
-        Parallel.ForEach(vals, hash =>
+    private async void LoadSoundsList(TagHash tagHash)
+    {
+        MainWindow.Progress.SetProgressStages(new List<string>
         {
-            Wem wem = PackageHandler.GetTag(typeof(Wem), hash);
-                
-            _allTagItems.Add(new TagItem
+            "loading sounds",
+        });
+        
+        await Task.Run(() =>
+        {
+            var vals = PackageHandler.GetTagsWithTypes(tagHash.GetPkgId(), 26, 7);
+            PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
+            _allTagItems = new ConcurrentBag<TagItem>();
+            Parallel.ForEach(vals, hash =>
             {
-                Name = PackageHandler.GetEntryReference(hash),
-                Hash = hash,
-                Subname = wem.Duration,
-                TagType = ETagListType.Sound
+                Wem wem = PackageHandler.GetTag(typeof(Wem), hash);
+                
+                _allTagItems.Add(new TagItem
+                {
+                    Name = PackageHandler.GetEntryReference(hash),
+                    Hash = hash,
+                    Subname = wem.Duration,
+                    TagType = ETagListType.Sound
+                });
             });
         });
-
+        
+        MainWindow.Progress.CompleteStage();
         RefreshItemList();
     }
     

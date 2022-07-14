@@ -53,7 +53,7 @@ public class LogHandler
         {
             ex = (Exception)e.ExceptionObject;
             
-            Log.Fatal("\n### Crash ###\n" + ex.Message + ex.StackTrace);
+            Log.Fatal("\n### Crash ###\n" + ex.Source + ex.InnerException + ex + ex.Message + ex.StackTrace);
             Log.CloseAndFlush();
         }
         finally
