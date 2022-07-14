@@ -103,7 +103,7 @@ public partial class TagListView : UserControl
     private TagHash? _currentHash = null;
     private Stack<ParentInfo> _parentStack = new Stack<ParentInfo>();
     private bool _bTrimName = true;
-    private bool _bShowNamedOnly = true;
+    private bool _bShowNamedOnly = false;
     private readonly ILogger _tagListLogger = Log.ForContext<TagListView>();
     private TagListView _tagListControl = null;
     private ToggleButton _previouslySelected = null;
@@ -294,20 +294,24 @@ public partial class TagListView : UserControl
         if (_allTagItems.IsEmpty)
             return;
 
-        // if (_allTagItems.First().Name.Contains("\\"))
-        // {
-        //     TrimCheckbox.Visibility = Visibility.Visible;
-        // }
-        // else
-        // {
-        //     TrimCheckbox.Visibility = Visibility.Hidden;
-        // }
+        // Check if trim names and filter named should be visible (if there any named items)
+        if (_allTagItems.Any(x => x.Name.Contains('\\')))
+        {
+            TrimCheckbox.Visibility = Visibility.Visible;
+            ShowNamedCheckbox.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _bShowNamedOnly = false;
+            TrimCheckbox.Visibility = Visibility.Hidden;
+            ShowNamedCheckbox.Visibility = Visibility.Hidden;
+        }
 
         var displayItems = new ConcurrentBag<TagItem>();
         // Select and sort by relevance to selected string
         Parallel.ForEach(_allTagItems, item =>
         {
-            if (_bShowNamedOnly && item._name == String.Empty)
+            if (_bShowNamedOnly && item.Name == String.Empty)
             {
                 return;
             }
@@ -325,8 +329,8 @@ public partial class TagListView : UserControl
                     return;
                 }
             }
-            string name = _bTrimName ? TrimName(item._name) : item._name;
-            bool bWasTrimmed = name != item._name;
+            string name = _bTrimName ? TrimName(item.Name) : item.Name;
+            bool bWasTrimmed = name != item.Name;
             if (name.ToLower().Contains(searchStr) 
                 || item.Hash.GetHashString().ToLower().Contains(searchStr) 
                 || item.Hash.Hash.ToString().Contains(searchStr))
@@ -419,7 +423,7 @@ public partial class TagListView : UserControl
             _previouslySelected.IsChecked = false;
         _selectedIndex = TagList.Items.IndexOf(tagItem);
         // if (_previouslySelected == btn)
-            // _previouslySelected.IsChecked = !_previouslySelected.IsChecked;
+        // _previouslySelected.IsChecked = !_previouslySelected.IsChecked;
         _previouslySelected = btn;
         LoadContent(tagItem.TagType, tagHash);
     }
@@ -1210,29 +1214,34 @@ public partial class TagListView : UserControl
 
     private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_selectedIndex == -1)
+            return;
         if (TagList.SelectedIndex > _selectedIndex)
         {
             var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
+            if (currentButton == null)
+                return;
             currentButton.IsChecked = false;
             var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex+1));
-            if (nextButton != null)
-            {
-                nextButton.IsChecked = true;
-                _selectedIndex++;
-                TagItem_OnClick(nextButton, null);
-            }
+            if (nextButton == null)
+                return;
+            nextButton.IsChecked = true;
+            _selectedIndex++;
+            TagItem_OnClick(nextButton, null);
         }
-        else
+        else if (TagList.SelectedIndex < _selectedIndex)
         {
             var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
+            if (currentButton == null)
+                return;
             currentButton.IsChecked = false;
             var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex-1));
-            if (nextButton != null)
-            {
-                nextButton.IsChecked = true;
-                _selectedIndex--;
-                TagItem_OnClick(nextButton, null);   
-            }
+            if (nextButton == null)
+                return;
+            nextButton.IsChecked = true;
+            _selectedIndex--;
+            TagItem_OnClick(nextButton, null);   
+            
         }
     }
 }
@@ -1240,32 +1249,29 @@ public partial class TagListView : UserControl
 public class TagItem
 {
     private string _type = String.Empty;
-    public string _name = String.Empty;
 
-    public string Name
-    {
-        get
-        {
-            if (_name == "BACK")
-                return _name;
-            if (TagType == ETagListType.ApiEntity)
-                return $"[{Hash.Hash}]  {_name}";
-            if (TagType == ETagListType.Package)
-                return $"[{Hash.GetPkgId():X4}]  {_name}";
-            
-            return $"[{Hash}]  {_name}";
-        }
-        set => _name = value;
-    }
-    
+    public string Name { get; set; }
+
     public string Subname { get; set; }
     
     public DestinyHash Hash { get; set; }
-    
+
+    public string HashString
+    {
+        get
+        {
+            if (Name == "BACK")
+                return "";
+            if (TagType == ETagListType.ApiEntity)
+                return $"[{Hash.Hash}]";
+            if (TagType == ETagListType.Package)
+                return $"[{Hash.GetPkgId():X4}]";
+            return $"[{Hash:X8}]";
+        }
+    }
+
     public int FontSize { get; set; }
     
-    public bool IsChecked { get; set; }
-
     public string Type
     {
         get
@@ -1275,6 +1281,7 @@ public class TagItem
                 var t = GetEnumDescription(TagType);
                 if (t.Contains("[Final]"))
                     return t.Split("[Final]")[0].Trim();
+                return t;
             }
             return _type;
         }

@@ -27,7 +27,7 @@
                       IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"
                       HorizontalAlignment="Left" Content="Trim names" />
             <CheckBox Checked="ShowNamedCheckbox_OnChecked" Unchecked="ShowNamedCheckbox_OnUnchecked" x:Name="ShowNamedCheckbox"
-                      IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                      IsChecked="False" VerticalAlignment="Center" VerticalContentAlignment="Center"
                       HorizontalAlignment="Left" Content="Filter named" />
         </StackPanel>
 
@@ -35,20 +35,23 @@
         <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2" SelectionChanged="TagList_OnSelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ToggleButton x:Name="btn" Height="50" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}"
-                                  Click="TagItem_OnClick" IsChecked="{Binding IsChecked}">
+                    <ToggleButton x:Name="btn" Height="60" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}"
+                                  Click="TagItem_OnClick">
                         <Grid Background="Transparent">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80*" />
+                                <ColumnDefinition Width="12*" />
+                                <ColumnDefinition Width="68*" />
                                 <ColumnDefinition Width="20*" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="60*" />
                                 <RowDefinition Height="40*" />
+                                <RowDefinition Height="30*" />
+                                <RowDefinition Height="30*" />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Column="0" Grid.Row="0" FontSize="{Binding FontSize}" Text="{Binding Name}" />
-                            <TextBlock Grid.Column="0" Grid.Row="1" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource ForegroundColour75}" Text="{Binding Subname}" />
-                            <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" />
+                            <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="{Binding FontSize}" Text="{Binding HashString}" />
+                            <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Grid.RowSpan="3" TextWrapping="WrapWithOverflow" FontSize="{Binding FontSize}" Text="{Binding Name}" />
+                            <TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource ForegroundColour75}" Text="{Binding Subname}" />
+                            <TextBlock Grid.Column="2" Grid.Row="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
                         </Grid>
                     </ToggleButton>
                 </DataTemplate>
