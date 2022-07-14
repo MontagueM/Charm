@@ -63,12 +63,12 @@ public class VertexBuffer : Tag
             case 0x4:
                 part.VertexTexcoords.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
-            case 0x10:
-                part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
-                // Quaternion normal
-                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16()));
-                break;
-            case 0x18:
+            // case 0x10:
+            //     part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+            //     // Quaternion normal
+            //     part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16()));
+            //     break;
+            case 0x18:  // normal and tangent euler
                 part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
@@ -94,12 +94,12 @@ public class VertexBuffer : Tag
                 };
                 (part as DynamicPart).VertexWeights.Add(vw);
                 break;
-            case 0x18:
+            case 0x18:  // normals and tangents are euler
                 part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                 break;
-            case 0x30: // physics
+            case 0x30: // physics, normals and tangents are euler
                 part.VertexPositions.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle()));
                 part.VertexNormals.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle()));
                 part.VertexTangents.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle()));

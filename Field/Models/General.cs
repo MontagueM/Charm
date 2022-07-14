@@ -219,26 +219,7 @@ public struct Vector4
     {
         return new Vector3(X, Y, Z);
     }
-    
-    public Vector3 NormalToEuler()
-    {
-        Vector3 res = new Vector3();
-        if (Math.Abs(Magnitude - 1) < 0.01)  // Quaternion
-        {
-            var quat = new SharpDX.Quaternion(X, Y, Z, W);
-            var a = new SharpDX.Vector3(1, 0, 0);
-            var result = SharpDX.Vector3.Transform(a, quat);
-            res.X = result.X;
-            res.Y = result.Y;
-            res.Z = result.Z;
-        }
-        else
-        {
-            throw new Exception("Quaternion invalid, not normalised");
-        }
-        return res;
-    }
-    
+
     public float this[int index]
     {
         get

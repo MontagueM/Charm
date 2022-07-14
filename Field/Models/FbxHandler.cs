@@ -104,19 +104,10 @@ public class FbxHandler
         FbxLayerElementNormal normalsLayer = FbxLayerElementNormal.Create(mesh, "normalLayerName");
         normalsLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         normalsLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
-        bool bQuaternion = false;  // todo fix this
         // Check if quaternion
         foreach (var normal in part.VertexNormals)
         {
-            if (bQuaternion)
-            {
-                Vector3 norm3 = normal.NormalToEuler();
-                normalsLayer.GetDirectArray().Add(new FbxVector4(norm3.X, norm3.Y, norm3.Z));
-            }
-            else
-            {
-                normalsLayer.GetDirectArray().Add(new FbxVector4(normal.X, normal.Y, normal.Z));
-            }
+            normalsLayer.GetDirectArray().Add(new FbxVector4(normal.X, normal.Y, normal.Z));
         }
         mesh.GetLayer(0).SetNormals(normalsLayer);
     }
@@ -126,21 +117,10 @@ public class FbxHandler
         FbxLayerElementTangent tangentsLayer = FbxLayerElementTangent.Create(mesh, "tangentLayerName");
         tangentsLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         tangentsLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
-        bool bQuaternion = false;
-        // Check if quaternion
-        
         // todo more efficient to do AddMultiple
         foreach (var tangent in part.VertexTangents)
         {
-            if (bQuaternion)
-            {
-                Vector3 tan3 = tangent.NormalToEuler();
-                tangentsLayer.GetDirectArray().Add(new FbxVector4(tan3.X, tan3.Y, tan3.Z));
-            }
-            else
-            {
-                tangentsLayer.GetDirectArray().Add(new FbxVector4(tangent.X, tangent.Y, tangent.Z));
-            }
+            tangentsLayer.GetDirectArray().Add(new FbxVector4(tangent.X, tangent.Y, tangent.Z));
         }
         mesh.GetLayer(0).SetTangents(tangentsLayer);
     }
