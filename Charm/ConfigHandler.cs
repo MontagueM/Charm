@@ -63,8 +63,16 @@ public class ConfigHandler
         {
             return false;
         }
-            
-        _config.AppSettings.Settings.Add("packagesPath", path);
+        
+        if (_config.AppSettings.Settings["packagesPath"] == null)
+        {
+            _config.AppSettings.Settings.Add("packagesPath", path);
+        }
+        else
+        {
+            _config.AppSettings.Settings["packagesPath"].Value = path;
+        }
+        
         Save();
         return true;
     }
@@ -116,8 +124,14 @@ public class ConfigHandler
         {
             return false;
         }
-        
-        _config.AppSettings.Settings.Add("exportSavePath", path);
+        if (_config.AppSettings.Settings["exportSavePath"] == null)
+        {
+            _config.AppSettings.Settings.Add("exportSavePath", path);
+        }
+        else
+        {
+            _config.AppSettings.Settings["exportSavePath"].Value = path;
+        }
         Save();
         return true;
     }
