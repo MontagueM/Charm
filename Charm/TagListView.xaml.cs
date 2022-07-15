@@ -294,23 +294,21 @@ public partial class TagListView : UserControl
         if (_allTagItems.IsEmpty)
             return;
 
-        // Check if trim names and filter named should be visible (if there any named items)
-        if (_allTagItems.Any(x => x.Name.Contains('\\')))
-        {
-            TrimCheckbox.Visibility = Visibility.Visible;
-            ShowNamedCheckbox.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            _bShowNamedOnly = false;
-            TrimCheckbox.Visibility = Visibility.Hidden;
-            ShowNamedCheckbox.Visibility = Visibility.Hidden;
-        }
+        bool bShowTrimCheckbox = false;
+        bool bNoName = false;
+        bool bName = false;
 
         var displayItems = new ConcurrentBag<TagItem>();
         // Select and sort by relevance to selected string
         Parallel.ForEach(_allTagItems, item =>
         {
+            if (item.Name.Contains('\\'))
+                bShowTrimCheckbox = true;
+            if (item.Name == String.Empty)
+                bNoName = true;
+            if (item.Name != String.Empty)
+                bName = true;
+            
             if (_bShowNamedOnly && item.Name == String.Empty)
             {
                 return;
@@ -352,6 +350,16 @@ public partial class TagListView : UserControl
                 });
             }
         });
+        
+        // Check if trim names and filter named should be visible (if there any named items)
+        TrimCheckbox.Visibility = bShowTrimCheckbox ? Visibility.Visible : Visibility.Hidden;
+        TrimCheckbox.Visibility = bName && bNoName ? Visibility.Visible : Visibility.Hidden;
+
+        if (bNoName)
+        {
+            _bShowNamedOnly = false;
+        }
+
         if (displayItems.Count == 0 && TagItem.GetEnumDescription(_tagListType).Contains("[Packages]") && !bPackageSearchAllOverride)
         {
             SetItemListByString(searchStr, true);
@@ -1290,7 +1298,7 @@ public class TagItem
     }
 
     public int FontSize { get; set; }
-    
+
     public string Type
     {
         get
