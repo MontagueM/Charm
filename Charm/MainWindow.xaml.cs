@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Field;
 using Field.General;
@@ -18,7 +19,6 @@ using Field.Statics;
 using Field.Textures;
 using Serilog;
 using VersionChecker;
-using Encoding = SharpDX.Text.Encoding;
 
 namespace Charm;
 /// <summary>
@@ -30,11 +30,16 @@ public partial class MainWindow
     private static TabItem _newestTab = null;
     private static LogView _logView = null;
     private static TabItem _logTab = null;
+    private bool _bHasInitialised = false;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         Progress = ProgressView;
-        Task.Run(InitialiseHandlers);
+        if (MainMenuTab.Visibility == Visibility.Visible)
+        {
+            Task.Run(InitialiseHandlers);
+            _bHasInitialised = true;
+        }
     }
     
     public MainWindow()
@@ -49,11 +54,19 @@ public partial class MainWindow
         _logTab = _newestTab;
         
         // Hide tab by default
-        MainTabControl.Visibility = Visibility.Hidden;
+        HideMainMenu();
             
         // Check if packages path exists in config
-        ConfigHandler.CheckPackagesPathIsValid();
-        MainTabControl.Visibility = Visibility.Visible;
+        // ConfigHandler.CheckPackagesPathIsValid();
+        if (ConfigHandler.DoesPathKeyExist("packagesPath") && ConfigHandler.DoesPathKeyExist("exportSavePath"))
+        {
+            MainMenuTab.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            MakeNewTab("Configuration", new ConfigView());
+            SetNewestTabSelected();
+        }
 
         // Check version
         try
@@ -194,6 +207,22 @@ public partial class MainWindow
         MakeNewTab("Log", _logView);
         SetNewestTabSelected();    
     }
+
+    public void HideMainMenu()
+    {
+        MainMenuTab.Visibility = Visibility.Collapsed;
+    }
+    
+    public void ShowMainMenu()
+    {
+        MainMenuTab.Visibility = Visibility.Visible;
+        MainTabControl.SelectedItem = MainMenuTab;
+        if (_bHasInitialised == false)
+        {
+            Task.Run(InitialiseHandlers);
+            _bHasInitialised = true;
+        }
+    }
     
     public void SetNewestTabSelected()
     {
@@ -228,6 +257,7 @@ public partial class MainWindow
         
         _newestTab = new TabItem();
         _newestTab.Content = content;
+        _newestTab.MouseDown += MenuTab_OnMouseDown;
         MainTabControl.Items.Add(_newestTab);
         SetNewestTabName(name);
     }
@@ -273,5 +303,12 @@ public partial class MainWindow
             throw new NotImplementedException();
         }
     }
-    
+
+    private void MenuTab_OnMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Middle)
+        {
+            MainTabControl.Items.Remove(sender as TabItem);
+        }
+    }
 }

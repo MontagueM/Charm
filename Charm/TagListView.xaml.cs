@@ -353,7 +353,7 @@ public partial class TagListView : UserControl
         
         // Check if trim names and filter named should be visible (if there any named items)
         TrimCheckbox.Visibility = bShowTrimCheckbox ? Visibility.Visible : Visibility.Hidden;
-        TrimCheckbox.Visibility = bName && bNoName ? Visibility.Visible : Visibility.Hidden;
+        ShowNamedCheckbox.Visibility = bName && bNoName ? Visibility.Visible : Visibility.Hidden;
 
         if (bNoName)
         {
@@ -1276,8 +1276,12 @@ public partial class TagListView : UserControl
 public class TagItem
 {
     private string _type = String.Empty;
+    private string _name = String.Empty;
 
-    public string Name { get; set; }
+    public string Name
+    {
+        get => _name; set => _name = value;
+    }
 
     public string Subname { get; set; }
     

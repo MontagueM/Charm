@@ -81,17 +81,28 @@ public partial class ConfigView : UserControl
         }
         return items;
     }
+    
+    private void ConsiderShowingMainMenu()
+    {
+        if (ConfigHandler.DoesPathKeyExist("packagesPath") && ConfigHandler.DoesPathKeyExist("exportSavePath"))
+        {
+            var _mainWindow = Window.GetWindow(this) as MainWindow;
+            _mainWindow.ShowMainMenu();
+        }
+    }
 
     private void PackagesPath_OnClick(object sender, RoutedEventArgs e)
     {
         ConfigHandler.OpenPackagesPathDialog();
         PopulateConfigPanel();
+        ConsiderShowingMainMenu();
     }
     
     private void ExportSavePath_OnClick(object sender, RoutedEventArgs e)
     {
         ConfigHandler.OpenExportSavePathDialog();
         PopulateConfigPanel();
+        ConsiderShowingMainMenu();
     }
     
     private void UnrealInteropPath_OnClick(object sender, RoutedEventArgs e)
@@ -102,6 +113,11 @@ public partial class ConfigView : UserControl
     
     private void UnrealInteropEnabled_OnClick(object sender, RoutedEventArgs e)
     {
+        if (!ConfigHandler.DoesPathKeyExist("unrealInteropPath"))
+        {
+            MessageBox.Show("Please set the path to the Unreal Engine content folder first.");
+            return;
+        }
         ConfigHandler.SetUnrealInteropEnabled(!ConfigHandler.GetUnrealInteropEnabled());
         PopulateConfigPanel();
     }

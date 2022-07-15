@@ -2,8 +2,9 @@
 using System.ComponentModel;
 using System.Configuration;
 using System.IO;
-using System.Windows.Forms;
+using System.Windows;
 using Field.Textures;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace Charm;
 
@@ -12,15 +13,12 @@ public class ConfigHandler
     private static Configuration _config = ConfigurationManager.OpenExeConfiguration(System.Windows.Forms.Application.ExecutablePath);
 
     // Todo convert these into general functions, eg GetBool(...) or GetPath(...) SetPath(...) etc, way cleaner
-    
-    #region packagesPath
-    public static void CheckPackagesPathIsValid()
+    public static bool DoesPathKeyExist(string key)
     {
-        if (_config.AppSettings.Settings["packagesPath"] == null)
-        {
-            OpenPackagesPathDialog();
-        }
+        return _config.AppSettings.Settings[key] != null;
     }
+
+    #region packagesPath
 
     public static void OpenPackagesPathDialog()
     {
@@ -75,20 +73,13 @@ public class ConfigHandler
         {
             _config.AppSettings.Settings["packagesPath"].Value = path;
         }
-        
         Save();
         return true;
     }
+
     #endregion
     
     #region exportSavePath
-    public static void CheckExportSavePathIsValid()
-    {
-        if (_config.AppSettings.Settings["exportSavePath"] == null)
-        {
-            OpenExportSavePathDialog();
-        }
-    }
 
     public static void OpenExportSavePathDialog()
     {
@@ -168,6 +159,7 @@ public class ConfigHandler
         if (_config.AppSettings.Settings["unrealInteropPath"] == null)
         {
             _config.AppSettings.Settings.Add("unrealInteropPath", interopPath);
+            SetUnrealInteropEnabled(true);
         }
         else
         {
@@ -208,9 +200,9 @@ public class ConfigHandler
     {
         if (_config.AppSettings.Settings["unrealInteropEnabled"] == null)
         {
-            return true;
+            return false;
         }
-        return _config.AppSettings.Settings["unrealInteropEnabled"].Value == "False";
+        return _config.AppSettings.Settings["unrealInteropEnabled"].Value == "True";
     }
     
     #endregion
@@ -237,7 +229,7 @@ public class ConfigHandler
         {
             return true;
         }
-        return _config.AppSettings.Settings["singleFolderMapsEnabled"].Value == "False";
+        return _config.AppSettings.Settings["singleFolderMapsEnabled"].Value == "True";
     }
 
     #endregion
