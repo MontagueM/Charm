@@ -51,6 +51,9 @@ public class Dialogue : Tag
                         result.Add(res2a[0]);
                     }
                     break;
+                case D2Class_33978080:
+                    result.Add(entry.Unk08);
+                    break;
                 default:
                     throw new NotImplementedException();
             }

@@ -87,7 +87,7 @@ public struct D2Class_898E8080
     public long FileSize;
     public long Unk08;
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk10;  // 46938080 has dialogue table, 45938080 unk
+    public dynamic? Unk10;  // 46938080 has dialogue table, 45938080 unk, 19978080 unk
     [DestinyField(FieldType.TagHash)]
     public Tag Unk14;  // D2Class_898E8080 entity script stuff
 }
@@ -102,6 +102,27 @@ public struct D2Class_46938080
     public float Unk40;
 }
 
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_19978080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag Unk00;
+
+    public DestinyHash Unk10;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_18978080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag Unk00;
+
+    public DestinyHash Unk10;
+    [DestinyOffset(0x18)]
+    public DestinyHash Unk18;
+    public int Unk1C;
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 0x58)]
 public struct D2Class_45938080
 {
@@ -112,6 +133,21 @@ public struct D2Class_45938080
     [DestinyOffset(0x3C)] 
     public int Unk3C;
     public float Unk40;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+public struct D2Class_44938080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag Unk00;
+    [DestinyOffset(0x18), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_28998080> Unk18;
+    [DestinyOffset(0x3C)] 
+    public int Unk3C;
+    public float Unk40;
+    public DestinyHash Unk44;
+    [DestinyOffset(0x50)] 
+    public int Unk50;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]

@@ -177,8 +177,8 @@ public class PackageHandler
             string activityName = Marshal.PtrToStringAnsi(managedArray[i].ActivityName);
             if (ActivityNames.ContainsKey(th))
             {
-                // Take the shorter
-                if (ActivityNames[th].Length > activityName.Length)
+                // Take the longer
+                if (activityName.Length > ActivityNames[th].Length)
                 {
                     ActivityNames[th] = activityName;
                 }

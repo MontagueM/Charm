@@ -394,7 +394,7 @@ public class Tag : DestinyFile
                     {
                         tagHash = new TagHash(u64);
                     }
-                    if (tagHash.Hash != 0)
+                    if (tagHash.IsValid())
                     {
                         StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash, disableLoad);
                         DestinyHash key = new DestinyHash(handle.ReadUInt32());

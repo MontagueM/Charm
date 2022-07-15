@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using Field;
 using Field.General;
@@ -28,19 +29,37 @@ public partial class ActivityView : UserControl
             "loading directive ui",
             "loading music ui",
         });
+        MapControl.Visibility = Visibility.Hidden;
         _activity = null;
         await Task.Run(() =>
         {
             _activity = PackageHandler.GetTag(typeof(Activity), hash);
         });
         MainWindow.Progress.CompleteStage();
-        MapControl.LoadUI(_activity);
-        MainWindow.Progress.CompleteStage();
-        DialogueControl.LoadUI(_activity.Hash);
-        MainWindow.Progress.CompleteStage();
-        DirectiveControl.LoadUI(_activity.Hash);
-        MainWindow.Progress.CompleteStage();
-        MusicControl.LoadUI(_activity);
-        MainWindow.Progress.CompleteStage();
+        await Task.Run(() =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                MapControl.LoadUI(_activity);
+            });
+            MainWindow.Progress.CompleteStage();
+            Dispatcher.Invoke(() =>
+            {
+                DialogueControl.LoadUI(_activity.Hash);
+            });
+            MainWindow.Progress.CompleteStage();
+            Dispatcher.Invoke(() =>
+            {
+                DirectiveControl.LoadUI(_activity.Hash);
+            });
+            MainWindow.Progress.CompleteStage();
+            Dispatcher.Invoke(() =>
+            {
+                MusicControl.LoadUI(_activity);
+            });
+            MainWindow.Progress.CompleteStage();
+        });
+
+        MapControl.Visibility = Visibility.Visible;
     }
 }

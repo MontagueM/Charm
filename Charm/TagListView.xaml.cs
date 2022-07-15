@@ -329,8 +329,14 @@ public partial class TagListView : UserControl
                     return;
                 }
             }
-            string name = _bTrimName ? TrimName(item.Name) : item.Name;
-            bool bWasTrimmed = name != item.Name;
+            string name = item.Name;
+            bool bWasTrimmed = false;
+            if (item.Name.Contains("\\") && _bTrimName)
+            {
+                name = TrimName(name);
+                bWasTrimmed = true;
+            }
+            // bool bWasTrimmed = name != item.Name;
             if (name.ToLower().Contains(searchStr) 
                 || item.Hash.GetHashString().ToLower().Contains(searchStr) 
                 || item.Hash.Hash.ToString().Contains(searchStr))
@@ -779,10 +785,13 @@ public partial class TagListView : UserControl
         var vals = PackageHandler.GetAllTagsWithReference(0x80808e8e);
         Parallel.ForEach(vals, val =>
         {
+            var activityName = PackageHandler.GetActivityName(val);
+            // if (activityName == "crucible" || activityName == "iron_banner" || activityName == "trials")
+            //     activityName = PackageHandler.GetPackageName(val.GetPkgId());
             _allTagItems.Add(new TagItem 
             { 
                 Hash = val,
-                Name = PackageHandler.GetActivityName(val),
+                Name = activityName,
                 TagType = ETagListType.Activity
             });
         });
@@ -987,7 +996,9 @@ public partial class TagListView : UserControl
         ConcurrentBag<TagHash> dialogueTables = new ConcurrentBag<TagHash>();
         if (activity.Header.Unk18 is D2Class_6A988080)
         {
-            dialogueTables.Add(((D2Class_6A988080)activity.Header.Unk18).DialogueTable.Hash);
+            var entry = (D2Class_6A988080) activity.Header.Unk18;
+            if (entry.DialogueTable != null)
+                dialogueTables.Add(entry.DialogueTable.Hash);
         }
         Parallel.ForEach(activity.Header.Unk50, val =>
         {

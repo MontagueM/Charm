@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Field;
 using Field.General;
-using Serilog;
 using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Charm;
@@ -25,12 +24,10 @@ public class FontHandler
 
     private static void SaveAllFonts()
     {
-        Log.Information("1");
         // 0x80a00000 represents 0100 package
         var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
         Tag<D2Class_0F3C8080> fontsContainer = PackageHandler.GetTag<D2Class_0F3C8080>(vals[0]);
         // Check if the font exists in the Fonts/ folder, if not extract it
-        Log.Information("2");
         if (!Directory.Exists("fonts/"))
         {
             Directory.CreateDirectory("fonts/");
@@ -48,13 +45,11 @@ public class FontHandler
                 } 
             }
         });
-        Log.Information("3");
     }
 
     private static ConcurrentDictionary<FontInfo, FontFamily> LoadAllFonts()
     {
         ConcurrentDictionary<FontInfo, FontFamily> fontFamilies = new ConcurrentDictionary<FontInfo, FontFamily>();
-        Log.Information("4");
 
         // Parallel.ForEach(Directory.GetFiles(@"fonts/"), s =>
         foreach (var s in Directory.GetFiles(@"fonts/"))
@@ -64,7 +59,6 @@ public class FontHandler
             FontFamily font = new FontFamily(otfPath + $"#{fontInfo.Family}");
             fontFamilies[fontInfo] = font;
         }//);
-        Log.Information("5");
 
         return fontFamilies;
     }
@@ -78,17 +72,14 @@ public class FontHandler
     private static FontInfo GetFontInfo(string fontPath)
     {
         FontInfo fontInfo;
-        Log.Information($"f1 {fontPath}");
         using (var br = new BinaryReaderBE(new MemoryStream(File.ReadAllBytes(fontPath))))
         {
-            Log.Information($"fa {fontPath}");
 
             byte[] val = br.ReadBytes(4);
             while (Encoding.ASCII.GetString(val) != "name")
             {
                 val = br.ReadBytes(4);
             }
-            Log.Information($"fb {fontPath}");
 
 
             var nameTableRecord = StructConverter.ReadStructure<OtfNameTableRecord>(br);
@@ -102,7 +93,6 @@ public class FontHandler
             {
                 nameRecords.Add(StructConverter.ReadStructure<OtfNameRecord>(br));
             }
-            Log.Information($"fc {fontPath}");
 
             OtfNameRecord familyRecord;
             try
@@ -115,7 +105,6 @@ public class FontHandler
             }
             br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + familyRecord.StringOffset, SeekOrigin.Begin);
             fontInfo.Family = ReadString(br, familyRecord.Length).Trim();
-            Log.Information($"fd {fontPath}");
 
             OtfNameRecord subfamilyRecord;
             try
@@ -126,12 +115,10 @@ public class FontHandler
             {
                 subfamilyRecord = nameRecords.FirstOrDefault(x => x.NameId == 2);
             }
-            Log.Information($"fe {fontPath}");
 
             br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + subfamilyRecord.StringOffset, SeekOrigin.Begin);
             fontInfo.Subfamily = ReadString(br, subfamilyRecord.Length).Trim();
         }
-        Log.Information($"f2 {fontPath}");
 
         return fontInfo;
     }

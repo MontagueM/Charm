@@ -25,6 +25,8 @@ public partial class MusicView : UserControl
         if (activity.Header.Unk18 is D2Class_6A988080)
         {
             var music = ((D2Class_6A988080) activity.Header.Unk18).Music;
+            if (music == null)
+                return;
             if (music.Header.Unk28.Count != 1)
             {
                 throw new NotImplementedException();
