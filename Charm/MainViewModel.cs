@@ -101,6 +101,7 @@ public class MainViewModel : INotifyPropertyChanged
             Position = new Point3D(0, 0, 5),
             UpDirection = new Vector3D(0, 1, 0),
             LookDirection = new Vector3D(-0, -0, -5),
+            FarPlaneDistance = 100000000,
         };
         
         Grid = LineBuilder.GenerateGrid();

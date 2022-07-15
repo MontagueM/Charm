@@ -15,6 +15,5 @@
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
         <local:ModelView x:Name="ModelView"/>
-
     </Grid> 
 </UserControl>

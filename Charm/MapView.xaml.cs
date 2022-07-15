@@ -30,33 +30,32 @@ public partial class MapView : UserControl
         InitializeComponent();
     }
 
-    public void LoadMap(TagHash tagHash)
+    public void LoadMap(TagHash tagHash, ELOD detailLevel)
     {
-        GetStaticMapData(tagHash);
-        _mainWindow.SetNewestTabSelected();
+        GetStaticMapData(tagHash, detailLevel);
+        // _mainWindow.SetNewestTabSelected();
     }
 
-    private async void GetStaticMapData(TagHash tagHash)
+    private async void GetStaticMapData(TagHash tagHash, ELOD detailLevel)
     {
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            "loading map tag",
-            "making UI",
-        });
         await Task.Run(() =>
         {
             StaticMapData staticMapData = new StaticMapData(tagHash);
-            MainWindow.Progress.CompleteStage();
-            SetMapUI(staticMapData);
-            MainWindow.Progress.CompleteStage();
+            SetMapUI(staticMapData, detailLevel);
         });
     }
 
-    private void SetMapUI(StaticMapData staticMapData)
+    private void SetMapUI(StaticMapData staticMapData, ELOD detailLevel)
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-        var displayParts = MakeDisplayParts(staticMapData);
+        var displayParts = MakeDisplayParts(staticMapData, detailLevel);
         MVM.SetChildren(displayParts);
+    }
+
+    public void Clear()
+    {
+        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        MVM.Clear();
     }
     
     public static void ExportFullMap(StaticMapData staticMapData)
@@ -98,7 +97,7 @@ public partial class MapView : UserControl
         InfoConfigHandler.WriteToFile(savePath);
     }
 
-    private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap)
+    private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap, ELOD detailLevel)
     {
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
         Parallel.ForEach(staticMap.Header.InstanceCounts, c =>

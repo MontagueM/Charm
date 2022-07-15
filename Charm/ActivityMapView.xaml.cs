@@ -126,6 +126,29 @@ public partial class ActivityMapView : UserControl
         _activityLog.Information($"Exported activity data name: {PackageHandler.GetActivityName(activity.Hash)}, hash: {activity.Hash}");
         MessageBox.Show("Activity map data exported completed.");
     }
+
+    private void StaticMap_OnClick(object sender, RoutedEventArgs e)
+    {
+        var s = sender as Button;
+        var dc = s.DataContext as DisplayStaticMap;
+        MapControl.Clear();
+        if (dc.Name == "Select all")
+        {
+            foreach (DisplayStaticMap item in StaticList.Items)
+            {
+                if (item.Name != "Select all")
+                {
+                    MapControl.LoadMap(new TagHash(item.Hash), MapControl.ModelView.GetSelectedLod());
+                }
+            }
+        }
+        else
+        {
+            var tagHash = new TagHash(dc.Hash);
+            MapControl.ModelView.SetModelFunction(() => MapControl.LoadMap(tagHash, MapControl.ModelView.GetSelectedLod()));
+            MapControl.LoadMap(tagHash, MapControl.ModelView.GetSelectedLod());
+        }
+    }
 }
 
 public class DisplayBubble
