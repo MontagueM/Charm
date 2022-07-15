@@ -768,8 +768,16 @@ public partial class TagListView : UserControl
         viewer.EntityControl.LoadEntityFromApi(apiHash);
         Dispatcher.Invoke(() =>
         {
+            viewer.ExportControl.SetExportFunction(ExportApiEntityFull);
             viewer.ExportControl.SetExportInfo(apiHash);
+            viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntityFromApi(apiHash));
         });
+    }
+    
+    private void ExportApiEntityFull(ExportInfo info)
+    {
+        var viewer = GetViewer();
+        viewer.EntityControl.ExportFull(InvestmentHandler.GetEntitiesFromHash(info.Hash), info.Name);
     }
 
     #endregion

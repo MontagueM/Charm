@@ -60,6 +60,14 @@
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>TagListViewerView.xaml</DependentUpon>
       </Page>
+      <Page Update="ConfigSettingComboControl.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>ConfigView.xaml</DependentUpon>
+      </Page>
+      <Page Update="TagView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>TagListViewerView.xaml</DependentUpon>
+      </Page>
     </ItemGroup>
 
 </Project>

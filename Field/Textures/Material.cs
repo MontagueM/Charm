@@ -25,19 +25,19 @@ public class Material : Tag
         foreach (var e in Header.VSTextures)
         {
             // todo change to 64 bit hash?
-            string path = $"{saveDirectory}/VS_{e.TextureIndex}_{e.Texture.Hash}.dds";
+            string path = $"{saveDirectory}/VS_{e.TextureIndex}_{e.Texture.Hash}";
             if (!File.Exists(path))
             {
-                e.Texture.SaveToDDSFile(path); 
+                e.Texture.SavetoFile(path); 
             }
         }
         foreach (var e in Header.PSTextures)
         {
             // todo change to 64 bit hash?
-            string path = $"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}.dds";
+            string path = $"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}";
             if (!File.Exists(path))
             {
-                e.Texture.SaveToDDSFile(path); 
+                e.Texture.SavetoFile(path); 
             }
         }
     }

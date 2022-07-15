@@ -181,7 +181,7 @@ public class TexturePlate : Tag
     {
         var simg = MakePlatedTexture();
         if (simg != null)
-            TextureHeader.SaveToDDSFile(savePath, simg);
+            TextureHeader.SavetoFile(savePath, simg);
     }
 
     public IntVector2 GetPlateDimensions()

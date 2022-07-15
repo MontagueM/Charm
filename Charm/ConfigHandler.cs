@@ -1,6 +1,9 @@
-﻿using System.Configuration;
+﻿using System;
+using System.ComponentModel;
+using System.Configuration;
 using System.IO;
 using System.Windows.Forms;
+using Field.Textures;
 
 namespace Charm;
 
@@ -235,6 +238,45 @@ public class ConfigHandler
             return true;
         }
         return _config.AppSettings.Settings["singleFolderMapsEnabled"].Value == "False";
+    }
+
+    #endregion
+    
+    #region outputTextureFormat
+
+    public static void SetOutputTextureFormat(ETextureFormat outputTextureFormat)
+    {
+        if (_config.AppSettings.Settings["outputTextureFormat"] == null)
+        {
+            _config.AppSettings.Settings.Add("outputTextureFormat", outputTextureFormat.ToString());
+        }
+        else
+        {
+            _config.AppSettings.Settings["outputTextureFormat"].Value = outputTextureFormat.ToString();
+        }
+
+        Save();
+    }
+    
+    public static ETextureFormat GetOutputTextureFormat()
+    {
+        if (_config.AppSettings.Settings["outputTextureFormat"] == null)
+        {
+            return ETextureFormat.DDS_BGRA_UNCOMP_DX10;
+        }
+        return FindEnumValue(_config.AppSettings.Settings["outputTextureFormat"].Value);
+    }
+    
+    private static ETextureFormat FindEnumValue(string description)
+    {
+        for (int i = 0; i < typeof(ETextureFormat).GetFields().Length-1; i++)
+        {
+            if (((ETextureFormat)i).ToString() == description)
+            {
+                return (ETextureFormat)i;
+            }
+        }
+        return ETextureFormat.DDS_BGRA_UNCOMP_DX10;
     }
 
     #endregion

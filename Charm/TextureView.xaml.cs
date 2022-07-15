@@ -42,8 +42,8 @@ public partial class TextureView : UserControl
     public static void ExportTexture(TagHash tagHash)
     {
         TextureHeader textureHeader = PackageHandler.GetTag(typeof(TextureHeader), tagHash);
-        string savePath = ConfigHandler.GetExportSavePath() + $"/Textures/{tagHash}.dds";
+        string savePath = ConfigHandler.GetExportSavePath() + $"/Textures/{tagHash}";
         Directory.CreateDirectory(ConfigHandler.GetExportSavePath() + "/Textures/");
-        textureHeader.SaveToDDSFile(savePath);
+        textureHeader.SavetoFile(savePath);
     }
 }

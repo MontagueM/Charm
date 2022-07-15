@@ -294,7 +294,7 @@ class CharmImporter:
 
         tex_factory = unreal.TextureFactory()
         tex_factory.set_editor_property('supported_class', unreal.Texture2D)
-        # Only pixel shader for now
+        # Only pixel shader for now, todo replace .dds with the extension
         names = [f"{self.folder_path}/Textures/PS_{i}_{texstruct['Hash']}.dds" for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
         srgbs = {int(i): texstruct['SRGB'] for i, texstruct in self.config["Materials"][matstr]["PS"].items()}
         import_tasks = []

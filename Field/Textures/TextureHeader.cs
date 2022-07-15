@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 using DirectXTex;
 using DirectXTexNet;
 using Field.General;
@@ -119,18 +120,30 @@ public class TextureHeader : Tag
         return ms;
     }
     
-    public void SaveToDDSFile(string savePath)
+    public static void SavetoFile(string savePath, ScratchImage simg)
     {
-        ScratchImage scratchImage = GetScratchImage();
-        SaveToDDSFile(savePath, scratchImage);
+        TextureExtractor.SaveTextureToFile(savePath, simg);
     }
     
-    public static void SaveToDDSFile(string savePath, ScratchImage scratchImage)
+    public void SavetoFile(string savePath)
     {
-        scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath);
-        scratchImage.Dispose();
+        ScratchImage simg = GetScratchImage();
+        TextureExtractor.SaveTextureToFile(savePath, simg);
     }
 
+    
+    // public void SaveToDDSFile(string savePath)
+    // {
+    //     ScratchImage scratchImage = GetScratchImage();
+    //     SaveToDDSFile(savePath, scratchImage);
+    // }
+    
+    // public static void SaveToDDSFile(string savePath, ScratchImage scratchImage)
+    // {
+    //     scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath);
+    //     scratchImage.Dispose();
+    // }
+    
     public UnmanagedMemoryStream GetTextureToDisplay()
     {
         ScratchImage scratchImage = GetScratchImage();

@@ -15,6 +15,7 @@ using Field;
 using Field.General;
 using Field.Models;
 using Field.Statics;
+using Field.Textures;
 using Serilog;
 using VersionChecker;
 using Encoding = SharpDX.Text.Encoding;
@@ -130,6 +131,9 @@ public partial class MainWindow
         // Get all activity names
         await Task.Run(PackageHandler.GetAllActivityNames);
         Progress.CompleteStage();
+        
+        // Set texture format
+        TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
     }
 
     private void RegisterFonts(ConcurrentDictionary<FontHandler.FontInfo, FontFamily> initialise)

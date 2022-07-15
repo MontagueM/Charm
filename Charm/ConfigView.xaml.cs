@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using Field.Textures;
 
 namespace Charm;
 
@@ -59,6 +61,25 @@ public partial class ConfigView : UserControl
         cef.SettingValue = bval.ToString();
         cef.ChangeButton.Click += SingleFolderMapsEnabled_OnClick;
         ConfigPanel.Children.Add(cef);
+        
+        // Output texture format
+        ConfigSettingComboControl ctf = new ConfigSettingComboControl();
+        ctf.SettingName = "Output texture format";
+        ETextureFormat etfval = ConfigHandler.GetOutputTextureFormat();
+        ctf.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems<ETextureFormat>();
+        ctf.SettingsCombobox.SelectedIndex = (int)etfval;
+        ctf.ChangeButton.Click += OutputTextureFormat_OnClick;
+        ConfigPanel.Children.Add(ctf);
+    }
+
+    private List<ComboBoxItem> MakeEnumComboBoxItems<T>() where T : Enum
+    {
+        List<ComboBoxItem> items = new List<ComboBoxItem>();
+        foreach (T val in Enum.GetValues(typeof(T)))
+        {
+            items.Add(new ComboBoxItem { Content = TagItem.GetEnumDescription(val) });
+        }
+        return items;
     }
 
     private void PackagesPath_OnClick(object sender, RoutedEventArgs e)
@@ -89,5 +110,13 @@ public partial class ConfigView : UserControl
     {
         ConfigHandler.SetSingleFolderMapsEnabled(!ConfigHandler.GetSingleFolderMapsEnabled());
         PopulateConfigPanel();
+    }
+    
+    private void OutputTextureFormat_OnClick(object sender, RoutedEventArgs e)
+    {
+        // ConfigHandler.SetOutputTextureFormat();
+        var index = ((sender as Button).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
+        ConfigHandler.SetOutputTextureFormat((ETextureFormat)index);
+        PopulateConfigPanel();    
     }
 }
