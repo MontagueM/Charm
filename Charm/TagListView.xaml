@@ -10,19 +10,25 @@
              d:DesignHeight="1000" d:DesignWidth="960">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="15*" />
+            <ColumnDefinition Width="70*" />
+            <ColumnDefinition Width="15*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="5*" />
             <RowDefinition Height="100*" />
             <RowDefinition Height="5*" />
         </Grid.RowDefinitions>
+        
+        <Button x:Name="BulkExportButton" Grid.Row="0" Grid.Column="0" Margin="10" Click="BulkExport_OnClick" Visibility="Hidden">
+            <TextBlock TextAlignment="Center" VerticalAlignment="Center" Text="Bulk export" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" TextWrapping="WrapWithOverflow"/>
+        </Button>
 
-        <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Left" Margin="102,0,0,0"
-                 TextWrapping="Wrap" VerticalAlignment="Center" Width="700" FontSize="30"
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Stretch"
+                 TextWrapping="Wrap" VerticalAlignment="Center" FontSize="30" Padding="5,0,5,0"
                  FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36" />
 
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,2,30,0">
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left" Margin="10,0,0,0">
             <CheckBox Checked="TrimCheckbox_OnChecked" Unchecked="TrimCheckbox_OnUnchecked" x:Name="TrimCheckbox"
                       IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"
                       HorizontalAlignment="Left" Content="Trim names" />
@@ -32,7 +38,7 @@
         </StackPanel>
 
 
-        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2" SelectionChanged="TagList_OnSelectionChanged">
+        <ListView x:Name="TagList" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="3" SelectionChanged="TagList_OnSelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ToggleButton x:Name="btn" Height="60" HorizontalContentAlignment="Stretch" Tag="{Binding Hash}"

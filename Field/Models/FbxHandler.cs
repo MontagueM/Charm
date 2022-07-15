@@ -278,6 +278,14 @@ public class FbxHandler
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
         FbxExporter exporter = FbxExporter.Create(_manager, "");
         exporter.Initialize(fileName, -1);  // -1 == use binary not ascii, binary is more space efficient
+        
+        // Make directory for file
+        string directory = Path.GetDirectoryName(fileName);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        
         exporter.Export(_scene);
         exporter.Destroy();
         _scene.Clear();

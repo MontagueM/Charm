@@ -70,27 +70,37 @@ public partial class EntityView : UserControl
         return loaded;
     }
 
-    public void ExportFull(List<Entity> entities, string name)
+    public void Export(List<Entity> entities, string name, EExportType exportType)
     {
         _entityLog.Debug($"Exporting entity model name: {name}");
-        InfoConfigHandler.MakeFile();
+        string savePath = ConfigHandler.GetExportSavePath();
         string meshName = name;
-        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        if (exportType == EExportType.Full)
+        {
+            savePath += $"/{meshName}";
+            InfoConfigHandler.MakeFile();
+        }
         Directory.CreateDirectory(savePath);
         
         foreach (var entity in entities)
         {
             var dynamicParts = entity.Load(ELOD.MostDetail);
             FbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
-            entity.SaveMaterialsFromParts(savePath, dynamicParts);
-            entity.SaveTexturePlates(savePath);
+            if (exportType == EExportType.Full)
+            {
+                entity.SaveMaterialsFromParts(savePath, dynamicParts);
+                entity.SaveTexturePlates(savePath);
+            }
         }
 
         FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
-        InfoConfigHandler.SetMeshName(meshName);
-        InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
-        InfoConfigHandler.WriteToFile(savePath);
-        _entityLog.Information($"Exported (full) entity model {name} to {savePath.Replace('\\', '/')}/");
+        if (exportType == EExportType.Full)
+        {
+            InfoConfigHandler.SetMeshName(meshName);
+            InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
+            InfoConfigHandler.WriteToFile(savePath);
+        }
+        _entityLog.Information($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 }

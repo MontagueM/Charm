@@ -8,6 +8,12 @@ using Field.General;
 
 namespace Charm;
 
+public enum EExportType
+{
+    Full,
+    Minimal
+}
+
 public partial class ExportControl : UserControl
 {
     private bool _bExportFunctionSet = false;
@@ -48,12 +54,17 @@ public partial class ExportControl : UserControl
         }
         await Task.Run(() =>
         {
-            _routedFunction(info);
+            RoutedFunction(info);
         });
         if (!_disableLoadingBar)
         {
             MainWindow.Progress.CompleteStage();
         }
+    }
+    
+    public void RoutedFunction(ExportInfo info)
+    {
+        _routedFunction(info);
     }
     
     public void SetExportInfo(string name, DestinyHash hash)
@@ -73,6 +84,12 @@ public partial class ExportControl : UserControl
 
 public struct ExportInfo
 {
-    public string Name;
+    private string _name = String.Empty;
+    
+    public string Name {
+        get => _name == String.Empty ? Hash : _name;
+        set => _name = value;
+    }
     public DestinyHash Hash;
+    public EExportType ExportType = EExportType.Full;
 }

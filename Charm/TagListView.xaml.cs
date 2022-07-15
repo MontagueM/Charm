@@ -262,6 +262,7 @@ public partial class TagListView : UserControl
     private void LoadPackage(TagHash pkgHash)
     {
         int pkgId = pkgHash.GetPkgId();
+        SetBulkGroup(pkgId.ToString("x4"));
         _allTagItems = new ConcurrentBag<TagItem>(_allTagItems.Where(x => x.Hash.GetPkgId() == pkgId && x.TagType != ETagListType.Package));
     }
     
@@ -456,6 +457,28 @@ public partial class TagListView : UserControl
         }
         return null;
     }
+    
+    public static List<T> GetChildrenOfType<T>(DependencyObject depObj) 
+        where T : DependencyObject
+    {
+        var children = new List<T>();
+        if (depObj == null) return children;
+
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+        {
+            var child = VisualTreeHelper.GetChild(depObj, i);
+
+            if (child is T)
+            {
+                children.Add(child as T);
+            }
+            else
+            {
+                children.AddRange(GetChildrenOfType<T>(child));
+            }
+        }
+        return children;
+    }
 
     /// <summary>
     /// Use the ParentInfo to go back to previous tag data.
@@ -599,16 +622,16 @@ public partial class TagListView : UserControl
             _tagListLogger.Error($"UI failed to load entity for hash {tagHash}. You can still try to export the full model instead.");
             _mainWindow.SetLoggerSelected();
         }
-        viewer.ExportControl.SetExportFunction(ExportEntityFull);
+        SetExportFunction(ExportEntity);
         viewer.ExportControl.SetExportInfo(tagHash);
         viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntity(tagHash));
     }
     
-    private void ExportEntityFull(ExportInfo info)
+    private void ExportEntity(ExportInfo info)
     {
         var viewer = GetViewer();
         Entity entity = new Entity(new TagHash(info.Hash));
-        viewer.EntityControl.ExportFull(new List<Entity> {entity}, info.Name);
+        viewer.EntityControl.Export(new List<Entity> {entity}, info.Name, info.ExportType);
     }
     
     /// <summary>
@@ -776,16 +799,23 @@ public partial class TagListView : UserControl
         viewer.EntityControl.LoadEntityFromApi(apiHash);
         Dispatcher.Invoke(() =>
         {
-            viewer.ExportControl.SetExportFunction(ExportApiEntityFull);
+            SetExportFunction(ExportApiEntityFull);
             viewer.ExportControl.SetExportInfo(apiHash);
             viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntityFromApi(apiHash));
         });
+    }
+
+    private void SetExportFunction(Action<ExportInfo> function)
+    {
+        var viewer = GetViewer();
+        viewer.ExportControl.SetExportFunction(function);
+        ShowBulkExportButton();
     }
     
     private void ExportApiEntityFull(ExportInfo info)
     {
         var viewer = GetViewer();
-        viewer.EntityControl.ExportFull(InvestmentHandler.GetEntitiesFromHash(info.Hash), info.Name);
+        viewer.EntityControl.Export(InvestmentHandler.GetEntitiesFromHash(info.Hash), info.Name, info.ExportType);
     }
 
     #endregion
@@ -870,15 +900,15 @@ public partial class TagListView : UserControl
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Static);
         viewer.StaticControl.LoadStatic(tagHash, viewer.StaticControl.ModelView.GetSelectedLod());
-        viewer.ExportControl.SetExportFunction(ExportStaticFull);
+        SetExportFunction(ExportStatic);
         viewer.ExportControl.SetExportInfo(tagHash);
         viewer.StaticControl.ModelView.SetModelFunction(() => viewer.StaticControl.LoadStatic(tagHash, viewer.StaticControl.ModelView.GetSelectedLod()));
     }
     
-    private void ExportStaticFull(ExportInfo info)
+    private void ExportStatic(ExportInfo info)
     {
         var viewer = GetViewer();
-        viewer.StaticControl.ExportFullStatic(new TagHash(info.Hash));
+        viewer.StaticControl.ExportStatic(new TagHash(info.Hash), info.Name, info.ExportType);
     }
 
     #endregion
@@ -987,7 +1017,7 @@ public partial class TagListView : UserControl
             SetViewer(TagView.EViewerType.Texture1D);
             viewer.TextureControl.LoadTexture(textureHeader);
         }
-        viewer.ExportControl.SetExportFunction(ExportTexture);
+        SetExportFunction(ExportTexture);
         viewer.ExportControl.SetExportInfo(tagHash);
     }
     
@@ -1256,6 +1286,7 @@ public partial class TagListView : UserControl
             _selectedIndex++;
             TagItem_OnClick(nextButton, null);
         }
+        
         else if (TagList.SelectedIndex < _selectedIndex)
         {
             var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
@@ -1270,6 +1301,59 @@ public partial class TagListView : UserControl
             TagItem_OnClick(nextButton, null);   
             
         }
+    }
+
+    public void ShowBulkExportButton()
+    {
+        BulkExportButton.Visibility = Visibility.Visible;
+    }
+    
+    public void SetBulkGroup(string group)
+    {
+        var tab = ((Parent as Grid).Parent as TagListViewerView).Parent as TabItem;
+        BulkExportButton.Tag = $"{group}_{tab.Header}";
+    }
+
+    private async void BulkExport_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (BulkExportButton.Tag == null)
+        {
+            return;
+        }
+
+        var groupName = BulkExportButton.Tag as string;
+        var viewer = GetViewer();
+        bool bStaticShowing = viewer.StaticControl.Visibility == Visibility.Visible;
+        bool bEntityShowing = viewer.EntityControl.Visibility == Visibility.Visible;
+        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Hidden : viewer.StaticControl.Visibility;
+        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Hidden : viewer.EntityControl.Visibility;
+        
+        // Iterate over all buttons and export it
+        var items = TagList.ItemsSource.Cast<TagItem>();
+        var exportItems = items.Where(x => x.TagType != ETagListType.Back && x.TagType != ETagListType.Package).ToList();
+        if (exportItems.Count == 0)
+        {
+            MessageBox.Show("No tags to export.");
+            return;
+        }
+        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i+1}/{exportItems.Count}: {x.Hash}").ToList());
+        await Task.Run(() =>
+        {
+            foreach (var tagItem in exportItems)
+            {
+                var name = tagItem.Name == String.Empty ? tagItem.Hash.GetHashString() : tagItem.Name;
+                var exportInfo = new ExportInfo
+                {
+                    Hash = tagItem.Hash,
+                    Name = $"/Bulk_{groupName}/{name}",
+                    ExportType = EExportType.Minimal
+                };
+                viewer.ExportControl.RoutedFunction(exportInfo);
+                MainWindow.Progress.CompleteStage();
+            }
+        });
+        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Visible : viewer.StaticControl.Visibility;
+        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Visible : viewer.EntityControl.Visibility;
     }
 }
 

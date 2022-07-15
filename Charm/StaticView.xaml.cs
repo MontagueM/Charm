@@ -13,30 +13,18 @@ namespace Charm;
 
 public partial class StaticView : UserControl
 {
-    public StaticContainer Container;
-    private List<Part> parts;
-
     public StaticView()
     {
         InitializeComponent();
     }
-
-    private void GetStaticContainer(TagHash hash)
-    {
-        Container = new StaticContainer(new TagHash(hash.Hash));
-    }
-
+    
     public async void LoadStatic(TagHash hash, ELOD detailLevel)
     {
-        GetStaticContainer(hash);
-        parts = Container.Load(detailLevel);
+        var container = new StaticContainer(new TagHash(hash.Hash));
+        var parts = container.Load(detailLevel);
         await Task.Run(() =>
         {
-            if (Container == null)
-            {
-                GetStaticContainer(hash);
-            }
-            parts = Container.Load(detailLevel);
+            parts = container.Load(detailLevel);
         });
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         MVM.Clear();
@@ -45,20 +33,28 @@ public partial class StaticView : UserControl
         MVM.Title = hash.GetHashString();
     }
 
-    public void ExportFullStatic(TagHash hash)
+    public void ExportStatic(TagHash hash, string name, EExportType exportType)
     {
-        InfoConfigHandler.MakeFile();
+        string savePath = ConfigHandler.GetExportSavePath();
         string meshName = hash.GetHashString();
-        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
-        List<Part> parts = Container.Load(ELOD.MostDetail);
+        if (exportType == EExportType.Full)
+        {
+            savePath += $"/{name}";
+            InfoConfigHandler.MakeFile();
+        }
+        var container = new StaticContainer(new TagHash(hash.Hash));
+        List<Part> parts = container.Load(ELOD.MostDetail);
         FbxHandler.AddStaticToScene(parts, meshName);
         Directory.CreateDirectory(savePath);
-        Container.SaveMaterialsFromParts(savePath, parts);
-        FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
-        InfoConfigHandler.SetMeshName(meshName);
-        InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Static);
-        InfoConfigHandler.WriteToFile(savePath);
+        if (exportType == EExportType.Full)
+        {
+            container.SaveMaterialsFromParts(savePath, parts);
+            InfoConfigHandler.SetMeshName(meshName);
+            InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Static);
+            InfoConfigHandler.WriteToFile(savePath);
+        }
+        FbxHandler.ExportScene($"{savePath}/{name}.fbx");
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(List<Part> containerParts)
