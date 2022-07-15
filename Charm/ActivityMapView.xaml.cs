@@ -85,7 +85,10 @@ public partial class ActivityMapView : UserControl
     {
         Activity activity = PackageHandler.GetTag(typeof(Activity), new TagHash(info.Hash));
         _activityLog.Debug($"Exporting activity data name: {PackageHandler.GetActivityName(activity.Hash)}, hash: {activity.Hash}");
-        
+        Dispatcher.Invoke(() =>
+        {
+            MapControl.Visibility = Visibility.Hidden;
+        });
         var maps = new List<StaticMapData>();
         bool bSelectAll = false;
         foreach (DisplayStaticMap item in StaticList.Items)
@@ -123,31 +126,49 @@ public partial class ActivityMapView : UserControl
             // Parallel.ForEach(maps, MapView.ExportFullMap);
         });
 
+        Dispatcher.Invoke(() =>
+        {
+            MapControl.Visibility = Visibility.Visible;
+        });
         _activityLog.Information($"Exported activity data name: {PackageHandler.GetActivityName(activity.Hash)}, hash: {activity.Hash}");
         MessageBox.Show("Activity map data exported completed.");
     }
 
-    private void StaticMap_OnClick(object sender, RoutedEventArgs e)
+    private async void StaticMap_OnClick(object sender, RoutedEventArgs e)
     {
         var s = sender as Button;
         var dc = s.DataContext as DisplayStaticMap;
         MapControl.Clear();
+        _activityLog.Debug($"Loading UI for static map hash: {dc.Hash}");
+        MapControl.Visibility = Visibility.Hidden;
+        var lod = MapControl.ModelView.GetSelectedLod();
         if (dc.Name == "Select all")
         {
-            foreach (DisplayStaticMap item in StaticList.Items)
+            var items = StaticList.Items.Cast<DisplayStaticMap>().Where(x => x.Name != "Select all");
+            List<string> mapStages = items.Select(x => $"loading to ui: {x.Hash}").ToList();
+            MainWindow.Progress.SetProgressStages(mapStages);
+            await Task.Run(() =>
             {
-                if (item.Name != "Select all")
+                foreach (DisplayStaticMap item in items)
                 {
-                    MapControl.LoadMap(new TagHash(item.Hash), MapControl.ModelView.GetSelectedLod());
+                    MapControl.LoadMap(new TagHash(item.Hash), lod);
+                    MainWindow.Progress.CompleteStage();
                 }
-            }
+            });
         }
         else
         {
             var tagHash = new TagHash(dc.Hash);
-            MapControl.ModelView.SetModelFunction(() => MapControl.LoadMap(tagHash, MapControl.ModelView.GetSelectedLod()));
-            MapControl.LoadMap(tagHash, MapControl.ModelView.GetSelectedLod());
+            MainWindow.Progress.SetProgressStages(new List<string> {tagHash });
+            // cant do this rn bc of lod problems with dupes
+            // MapControl.ModelView.SetModelFunction(() => MapControl.LoadMap(tagHash, MapControl.ModelView.GetSelectedLod()));
+            await Task.Run(() =>
+            {
+                MapControl.LoadMap(tagHash, lod);
+                MainWindow.Progress.CompleteStage();
+            });
         }
+        MapControl.Visibility = Visibility.Visible;
     }
 }
 

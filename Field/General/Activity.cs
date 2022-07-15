@@ -106,7 +106,7 @@ public struct D2Class_46938080
 public struct D2Class_19978080
 {
     [DestinyField(FieldType.TagHash64)]
-    public Tag Unk00;
+    public Tag DialogueTable;
 
     public DestinyHash Unk10;
 }
@@ -115,7 +115,7 @@ public struct D2Class_19978080
 public struct D2Class_18978080
 {
     [DestinyField(FieldType.TagHash64)]
-    public Tag Unk00;
+    public Tag DialogueTable;
 
     public DestinyHash Unk10;
     [DestinyOffset(0x18)]
@@ -127,7 +127,7 @@ public struct D2Class_18978080
 public struct D2Class_45938080
 {
     [DestinyField(FieldType.TagHash64)]
-    public Tag Unk00;
+    public Tag DialogueTable;
     [DestinyOffset(0x18), DestinyField(FieldType.TablePointer)]
     public List<D2Class_28998080> Unk18;
     [DestinyOffset(0x3C)] 
@@ -139,7 +139,7 @@ public struct D2Class_45938080
 public struct D2Class_44938080
 {
     [DestinyField(FieldType.TagHash64)]
-    public Tag Unk00;
+    public Tag DialogueTable;
     [DestinyOffset(0x18), DestinyField(FieldType.TablePointer)]
     public List<D2Class_28998080> Unk18;
     [DestinyOffset(0x3C)] 
@@ -148,6 +148,21 @@ public struct D2Class_44938080
     public DestinyHash Unk44;
     [DestinyOffset(0x50)] 
     public int Unk50;
+}
+
+/// <summary>
+/// Generally used in ambients to provide dialogue and music together.
+/// </summary>
+[StructLayout(LayoutKind.Sequential, Size = 0x50)]
+public struct D2Class_D5908080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag DialogueTable;
+    [DestinyOffset(0x38), DestinyField(FieldType.TagHash)] 
+    public Tag<D2Class_EB458080> Music;
+    public int Unk3C;
+    public float Unk40;
+    public DestinyHash Unk44;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]

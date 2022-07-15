@@ -10,8 +10,8 @@ public partial class ActivityDirectiveView : UserControl
         InitializeComponent();
     }
     
-    public void LoadUI(TagHash tagHash)
+    public void LoadUI(TagHash activityHash)
     {
-        TagList.LoadContent(ETagListType.DirectiveList, tagHash, true);
+        TagList.LoadContent(ETagListType.DirectiveList, activityHash, true);
     }
 }

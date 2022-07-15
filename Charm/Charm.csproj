@@ -68,6 +68,14 @@
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>TagListViewerView.xaml</DependentUpon>
       </Page>
+      <Page Update="MusicWemsControl.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>MusicView.xaml</DependentUpon>
+      </Page>
+      <Page Update="MusicEventsControl.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>MusicView.xaml</DependentUpon>
+      </Page>
     </ItemGroup>
 
 </Project>

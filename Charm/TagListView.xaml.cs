@@ -81,6 +81,10 @@ public enum ETagListType
     SoundsList,
     [Description("Sound [Final]")]
     Sound,
+    [Description("Music List")]
+    MusicList,
+    [Description("Music [Final]")]
+    Music,
 }
 
 /// <summary>
@@ -232,6 +236,12 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.Sound:
                     LoadSound(contentValue);
+                    break;
+                case ETagListType.MusicList:
+                    LoadMusicList(contentValue);
+                    break;
+                case ETagListType.Music:
+                    LoadMusic(contentValue);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -1051,11 +1061,11 @@ public partial class TagListView : UserControl
             foreach (var d2Class48898080 in val.Unk18)
             {
                 var resource = d2Class48898080.UnkEntityReference.Header.Unk10;
-                if (resource is D2Class_46938080)
+                if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
+                    resource is D2Class_18978080 || resource is D2Class_19978080)
                 {
-                    var d2Class46938080 = (D2Class_46938080)resource;
-                    if (d2Class46938080.DialogueTable != null)
-                        dialogueTables.Add(d2Class46938080.DialogueTable.Hash);
+                    if (resource.DialogueTable != null)
+                        dialogueTables.Add(resource.DialogueTable.Hash);
                 }
             }
         });
@@ -1092,10 +1102,25 @@ public partial class TagListView : UserControl
         // Dialogue tables can be in the 0x80808948 entries
         if (activity.Header.Unk18 is D2Class_6A988080)
         {
-            var dialogueTables =
+            var directiveTables =
                 ((D2Class_6A988080) activity.Header.Unk18).DirectiveTables.Select(x => x.DialogueTable.Hash);
             
-            Parallel.ForEach(dialogueTables, hash =>
+            Parallel.ForEach(directiveTables, hash =>
+            {
+                _allTagItems.Add(new TagItem 
+                { 
+                    Hash = hash,
+                    Name = hash,
+                    TagType = ETagListType.Directive
+                });
+            });
+        }
+        else if (activity.Header.Unk18 is D2Class_20978080)
+        {
+            var directiveTables =
+                ((D2Class_20978080) activity.Header.Unk18).PEDirectiveTables.Select(x => x.DialogueTable.Hash);
+            
+            Parallel.ForEach(directiveTables, hash =>
             {
                 _allTagItems.Add(new TagItem 
                 { 
@@ -1269,6 +1294,56 @@ public partial class TagListView : UserControl
     
     #endregion
 
+    #region Music
+
+    /// <summary>
+    /// We assume all music tables come from activities.
+    /// </summary>
+    private void LoadMusicList(TagHash tagHash)
+    {
+        Field.Activity activity = PackageHandler.GetTag(typeof(Field.Activity), tagHash);
+        _allTagItems = new ConcurrentBag<TagItem>();
+  
+        ConcurrentBag<TagHash> musics = new ConcurrentBag<TagHash>();
+        Parallel.ForEach(activity.Header.Unk50, val =>
+        {
+            foreach (var d2Class48898080 in val.Unk18)
+            {
+                var resource = d2Class48898080.UnkEntityReference.Header.Unk10;
+                if (resource is D2Class_D5908080)
+                {
+                    var res = (D2Class_D5908080)resource;
+                    if (res.Music != null)
+                    {
+                        musics.Add(res.Music.Hash);
+                    }
+                }
+            }
+        });
+        
+        if (activity.Header.Unk18 is D2Class_6A988080)
+            musics.Add(((D2Class_6A988080) activity.Header.Unk18).Music.Hash);
+
+        Parallel.ForEach(musics, hash =>
+        {
+            _allTagItems.Add(new TagItem 
+            { 
+                Hash = hash,
+                Name = hash,
+                TagType = ETagListType.Music
+            });
+        });
+    }
+
+    private void LoadMusic(TagHash tagHash)
+    {
+        var viewer = GetViewer();
+        SetViewer(TagView.EViewerType.Music);
+        viewer.MusicControl.Load(tagHash);
+    }
+
+    #endregion
+    
     private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_selectedIndex == -1)

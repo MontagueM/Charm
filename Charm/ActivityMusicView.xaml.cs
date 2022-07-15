@@ -12,8 +12,8 @@ public partial class ActivityMusicView : UserControl
     }
     
     // Activity only has one music table ever so no taglist
-    public void LoadUI(Activity activity)
+    public void LoadUI(TagHash activityHash)
     {
-        MusicControl.Load(activity);
+        TagList.LoadContent(ETagListType.MusicList, activityHash, true);
     }
 }

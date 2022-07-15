@@ -55,7 +55,7 @@ public partial class ActivityView : UserControl
             MainWindow.Progress.CompleteStage();
             Dispatcher.Invoke(() =>
             {
-                MusicControl.LoadUI(_activity);
+                MusicControl.LoadUI(_activity.Hash);
             });
             MainWindow.Progress.CompleteStage();
         });

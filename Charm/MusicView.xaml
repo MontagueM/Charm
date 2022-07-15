@@ -6,93 +6,15 @@
              xmlns:local="clr-namespace:Charm"
              mc:Ignorable="d"
              d:DesignHeight="1080" d:DesignWidth="1920">
-    <UserControl.Resources>
-        <ControlTemplate x:Key="WemTemplate">
-            <Button Height="70" Width="880" Margin="0,5,0,5"
-                    Click="PlayWem_OnClick">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="60*" />
-                        <RowDefinition Height="40*" />
-                    </Grid.RowDefinitions>
-                    <Border Grid.RowSpan="3" BorderBrush="{StaticResource BackgroundColour30}"
-                            BorderThickness="1" Panel.ZIndex="1" />
-                    <TextBlock Grid.Row="0" HorizontalAlignment="Left" Margin="10,0,0,0"
-                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
-                               VerticalAlignment="Center" Text="{Binding Name}" />
-                    <TextBlock Grid.Row="1" HorizontalAlignment="Left" Margin="10,0,0,0"
-                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
-                               VerticalAlignment="Center"
-                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding Duration}" />
-                    <TextBlock Grid.Row="0" HorizontalAlignment="Right" Margin="0,0,10,0"
-                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
-                               VerticalAlignment="Center"
-                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding Hash}"/>
-                </Grid>
-            </Button>
-        </ControlTemplate>
-        <ControlTemplate x:Key="EventTemplate">
-            <Button Height="70" Width="880" Margin="0,5,0,5">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="60*" />
-                        <RowDefinition Height="40*" />
-                    </Grid.RowDefinitions>
-                    <Border Grid.RowSpan="3" BorderBrush="{StaticResource BackgroundColour30}"
-                            BorderThickness="1" Panel.ZIndex="1" />
-                    <TextBlock Grid.Row="0" TextWrapping="WrapWithOverflow"
-                               HorizontalAlignment="Left" Text="{Binding Name}" />
-                    <TextBlock Grid.Row="1"  HorizontalAlignment="Left"
-                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
-                               VerticalAlignment="Center" FontSize="16"
-                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding Hash}" />
-                </Grid>
-            </Button>
-        </ControlTemplate>
-    </UserControl.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="50*" />
-            <ColumnDefinition Width="50*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="5*"/>
-            <RowDefinition Height="5*"/>
-            <RowDefinition Height="85*"/>
-            <RowDefinition Height="10*"/>
-        </Grid.RowDefinitions>
-        <Viewbox Grid.ColumnSpan="2">
-            <TextBlock x:Name="MusicLoopName" HorizontalAlignment="Center"/>
-        </Viewbox>
-        <TextBlock Grid.Row="1" FontSize="40" Text="wems" HorizontalAlignment="Center"/>
-        <ListView Grid.Row="2" Grid.Column="0" x:Name="WemList">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="OverridesDefaultStyle" Value="True" />
-                    <Setter Property="Template" Value="{StaticResource WemTemplate}" />
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Vertical"></StackPanel>
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-        </ListView>
-        <local:MusicPlayerControl Grid.Column="0" Grid.Row="3" x:Name="MusicPlayer"/>
         
-        <TextBlock Grid.Column="1" Grid.Row="1" FontSize="40" Text="events" HorizontalAlignment="Center"/>
-        <ListView Grid.Row="2" Grid.Column="1" x:Name="EventList">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="OverridesDefaultStyle" Value="True" />
-                    <Setter Property="Template" Value="{StaticResource EventTemplate}" />
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Vertical"></StackPanel>
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-        </ListView>
+        <TabControl x:Name="MusicTabControl">
+            <TabItem Header="WEMS">
+                <local:MusicWemsControl x:Name="WemsControl"/>
+            </TabItem>
+            <TabItem Header="EVENTS">
+                <local:MusicEventsControl x:Name="EventsControl"/>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

@@ -7,12 +7,6 @@
              mc:Ignorable="d"
              d:DesignHeight="1080" d:DesignWidth="1920">
     <Grid>
-        <TabControl x:Name="MusicTabControl">
-            <TabItem Header="MUSIC">
-                <local:MusicView x:Name="MusicControl"/>
-            </TabItem>
-            <TabItem Header="TBD">
-            </TabItem>
-        </TabControl>
+        <local:TagListViewerView x:Name="TagList"/>
     </Grid>
 </UserControl>

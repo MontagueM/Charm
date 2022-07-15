@@ -35,7 +35,7 @@ public class Material : Tag
         {
             // todo change to 64 bit hash?
             string path = $"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}";
-            if (!File.Exists(path))
+            if (!File.Exists(path + ".dds") && !File.Exists(path + ".png") && !File.Exists(path + ".tga"))
             {
                 e.Texture.SavetoFile(path); 
             }

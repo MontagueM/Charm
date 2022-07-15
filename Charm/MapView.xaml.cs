@@ -23,6 +23,7 @@ public partial class MapView : UserControl
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
+        ModelView.LodCombobox.SelectedIndex = 1; // default to least detail
     }
     
     public MapView()
@@ -36,20 +37,20 @@ public partial class MapView : UserControl
         // _mainWindow.SetNewestTabSelected();
     }
 
-    private async void GetStaticMapData(TagHash tagHash, ELOD detailLevel)
+    private void GetStaticMapData(TagHash tagHash, ELOD detailLevel)
     {
-        await Task.Run(() =>
-        {
-            StaticMapData staticMapData = new StaticMapData(tagHash);
-            SetMapUI(staticMapData, detailLevel);
-        });
+        StaticMapData staticMapData = new StaticMapData(tagHash);
+        SetMapUI(staticMapData, detailLevel);
     }
 
     private void SetMapUI(StaticMapData staticMapData, ELOD detailLevel)
     {
-        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         var displayParts = MakeDisplayParts(staticMapData, detailLevel);
-        MVM.SetChildren(displayParts);
+        Dispatcher.Invoke(() =>
+        {
+            MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+            MVM.SetChildren(displayParts);
+        });
     }
 
     public void Clear()
