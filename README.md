@@ -6,10 +6,6 @@ A new, flashier, fully C# version of my previous tool Phonon. It is designed to 
 
 ## How do I install and use it?
 
-Do not run Destiny 2 at the same time as booting Phonon for the first time.
-
-You won't get banned but if they try to read the same package Phonon will not like it.
-
 - Download the latest release and run Charm.exe.
 - You'll need .NET 6.0 x64 installed but most people have that.
 - Set the packages and export paths first.
@@ -33,6 +29,14 @@ Here's a brief list of what Charm can currently do:
 ## Reporting issues
 
 If you experience any issue, you can register an issue in this repository. If the program has crashed, it is extremely valuable to provide the charm.log file.
+
+## Learning and Contributing
+
+To learn about how Charm works or to contribute, check out the [wiki](https://github.com/MontagueM/Charm/wiki).
+
+## Sponsor
+
+I put a sponsor on this project as some people wanted to contribute, if you want to you can help me out :)
 
 ## License
 
