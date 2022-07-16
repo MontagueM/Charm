@@ -133,6 +133,7 @@ public partial class ConfigView : UserControl
         // ConfigHandler.SetOutputTextureFormat();
         var index = ((sender as Button).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
         ConfigHandler.SetOutputTextureFormat((ETextureFormat)index);
+        TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
         PopulateConfigPanel();    
     }
 }

@@ -120,7 +120,10 @@ public partial class ActivityMapView : UserControl
         {
             foreach (var staticMapData in maps)
             {
-                MapView.ExportFullMap(staticMapData);
+                Dispatcher.Invoke(() =>
+                {
+                    MapView.ExportFullMap(staticMapData);
+                });
                 MainWindow.Progress.CompleteStage();
             }
             // Parallel.ForEach(maps, MapView.ExportFullMap);
@@ -146,6 +149,12 @@ public partial class ActivityMapView : UserControl
         {
             var items = StaticList.Items.Cast<DisplayStaticMap>().Where(x => x.Name != "Select all");
             List<string> mapStages = items.Select(x => $"loading to ui: {x.Hash}").ToList();
+            if (mapStages.Count == 0)
+            {
+                _activityLog.Error("No maps selected for export.");
+                MessageBox.Show("No maps selected for export.");
+                return;
+            }
             MainWindow.Progress.SetProgressStages(mapStages);
             await Task.Run(() =>
             {
