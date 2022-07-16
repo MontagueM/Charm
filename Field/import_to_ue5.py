@@ -40,7 +40,10 @@ class CharmImporter:
         
         static_names = {}
         for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.content_path}/Statics/', recursive=False):
-            name = x.split('/')[-1].split("_")[1]
+            if "Group" in x:
+                name = x.split('/')[-1].split("_")[1]
+            else:
+                name = x.split('/')[-1].split(".")[0]
             if name not in static_names.keys():
                 static_names[name] = []
             static_names[name].append(x)
@@ -197,6 +200,7 @@ class CharmImporter:
         options.static_mesh_import_data.set_editor_property('combine_meshes', combine)
         options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
         options.static_mesh_import_data.set_editor_property('auto_generate_collision', False)
+        options.static_mesh_import_data.set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS)
         options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
         options.static_mesh_import_data.set_editor_property("build_nanite", False)  # todo add nanite option
         task.set_editor_property("options", options)

@@ -7,28 +7,32 @@
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
              mc:Ignorable="d"
              x:Name="CubemapV"
-             d:DesignHeight="1080" d:DesignWidth="1920">
+             d:DesignHeight="1080" d:DesignWidth="960">
     <UserControl.Resources>
-        <local:MainViewModel x:Key="MVM" />
+        <local:MainViewModel x:Key="MVM"/>
+        <hx:RenderTechniqueConverter x:Key="RenderTechniqueConverter"/>
     </UserControl.Resources>
+    <UserControl.DataContext>
+        <Binding Source="{StaticResource MVM}"/>
+    </UserControl.DataContext>
     <Grid>
         <hx:Viewport3DX x:Name="CubemapViewport"
                         EffectsManager="{Binding EffectsManager}"
-                        EnableDesignModeRendering="False"
+                        EnableDesignModeRendering="True"
                         EnableSwapChainRendering="True"
                         IsShadowMappingEnabled="False"
-                        ShowCoordinateSystem="False"
-                        ShowFrameRate="True"
-                        ShowTriangleCountInfo="True"
+                        ShowCoordinateSystem="True"
                         EnableDeferredRendering="False" EnableRenderFrustum="True"
                         Title="{Binding Title}"
                         TextBrush="{StaticResource ForegroundColour75}"
-                        TitleFontFamily="Arial"
                         ShowViewCube="False"
                         SubTitle="{Binding SubTitle}"
                         InfoForeground="{StaticResource ForegroundColour75}"
                         InfoBackground="{StaticResource BackgroundColour14}"
-                        Camera="{Binding Camera}">
+                        >
+            <hx:Viewport3DX.Camera>
+                <hx:PerspectiveCamera Position="0,0,5"/>
+            </hx:Viewport3DX.Camera> 
         </hx:Viewport3DX>
     </Grid>
 </UserControl>

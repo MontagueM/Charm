@@ -53,7 +53,7 @@ public partial class StaticView : UserControl
             if (ConfigHandler.GetUnrealInteropEnabled())
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Static);
+                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Static, ConfigHandler.GetOutputTextureFormat());
             }
         }
         fbxHandler.ExportScene($"{savePath}/{name}.fbx");

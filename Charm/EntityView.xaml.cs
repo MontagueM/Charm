@@ -99,7 +99,7 @@ public partial class EntityView : UserControl
             if (ConfigHandler.GetUnrealInteropEnabled())
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
+                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
             }
         }
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
