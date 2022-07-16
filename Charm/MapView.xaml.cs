@@ -72,12 +72,6 @@ public partial class MapView : UserControl
         Directory.CreateDirectory(savePath);
         // Extract all
         List<D2Class_BD938080> extractedStatics = staticMapData.Header.Statics.DistinctBy(x => x.Static.Hash).ToList();
-        // Parallel.ForEach(extractedStatics, s =>
-        // {
-        //     var parts = s.Static.Load(ELOD.MostDetail);
-        //     FbxHandler.AddStaticToScene(parts);
-        //     s.Static.SaveMaterialsFromParts(savePath, parts);
-        // });
         foreach (var s in extractedStatics)
         {
             var parts = s.Static.Load(ELOD.MostDetail);

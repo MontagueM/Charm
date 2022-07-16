@@ -53,11 +53,12 @@ public class TextureHeader : Tag
         GCHandle gcHandle = GCHandle.Alloc(final, GCHandleType.Pinned);
         IntPtr pixelPtr = gcHandle.AddrOfPinnedObject();
         var scratchImage = TexHelper.Instance.LoadFromDDSMemory(pixelPtr, final.Length, DDS_FLAGS.ALLOW_LARGE_FILES);
+        gcHandle.Free();
         if (IsCubemap())
         {
             if (TexHelper.Instance.IsCompressed(format))
             {
-                scratchImage = scratchImage.Decompress(DXGI_FORMAT.R8G8B8A8_UNORM);
+                scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.R8G8B8A8_UNORM);
             }
             var s1 = scratchImage.FlipRotate(2, TEX_FR_FLAGS.FLIP_VERTICAL).FlipRotate(0, TEX_FR_FLAGS.FLIP_HORIZONTAL);
             var s2 = scratchImage.FlipRotate(0, TEX_FR_FLAGS.ROTATE90);
@@ -77,11 +78,11 @@ public class TextureHeader : Tag
             {
                 if (TexHelper.Instance.IsSRGB(format))
                 {
-                    scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB);
+                    scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.B8G8R8A8_UNORM_SRGB);
                 }
                 else
                 {
-                    scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
+                    scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.B8G8R8A8_UNORM);
                 }
             }
             else if (TexHelper.Instance.IsSRGB(format))
@@ -93,9 +94,22 @@ public class TextureHeader : Tag
                 scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
             }
         }
-
-        gcHandle.Free();
         return scratchImage;
+    }
+
+    private ScratchImage DecompressScratchImage(ScratchImage scratchImage, DXGI_FORMAT format)
+    {
+        while (true)
+        {
+            try
+            {
+                scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
+                return scratchImage;
+            }
+            catch (AccessViolationException)
+            {
+            }
+        }
     }
 
     public bool IsSrgb()

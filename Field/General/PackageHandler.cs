@@ -76,8 +76,19 @@ public class PackageHandler
         }
             // Check if tag exists already in the cache and return if it does exist
         if (Cache.ContainsKey(hash.Hash) && BytesCache.ContainsKey(hash))
-        {
-            return Cache[hash.Hash];
+        {   
+            if (Cache[hash.Hash].GetType() == type)
+                return Cache[hash.Hash];
+            if (type.IsValueType)
+            {
+                if (Cache[hash.Hash].GetType().GenericTypeArguments[0].UnderlyingSystemType == type)
+                {
+                    return Cache[hash.Hash];
+                }
+            }
+
+            dynamic r;
+            Cache.TryRemove(hash.Hash, out r);
         }
         // Create a new tag and add it to the cache as it doesn't exist
         if (type.IsValueType)  // checking its a struct

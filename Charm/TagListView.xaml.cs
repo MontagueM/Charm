@@ -1320,9 +1320,12 @@ public partial class TagListView : UserControl
                 }
             }
         });
-        
+
         if (activity.Header.Unk18 is D2Class_6A988080)
-            musics.Add(((D2Class_6A988080) activity.Header.Unk18).Music.Hash);
+        {
+            if (((D2Class_6A988080) activity.Header.Unk18).Music != null)
+                musics.Add(((D2Class_6A988080) activity.Header.Unk18).Music.Hash);
+        }
 
         Parallel.ForEach(musics, hash =>
         {

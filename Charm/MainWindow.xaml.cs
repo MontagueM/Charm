@@ -113,7 +113,6 @@ public partial class MainWindow
             "fbx",
             "activity names",
         });
-
         // Load all the fonts
         await Task.Run(() =>
         {
@@ -243,7 +242,7 @@ public partial class MainWindow
     {
         // Testing making it all caps
         name = name.ToUpper();
-        
+        name = name.Replace('_', '.');
         // Check if the name already exists, if so set newest tab to that
         var items = MainTabControl.Items;
         foreach (TabItem item in items)
