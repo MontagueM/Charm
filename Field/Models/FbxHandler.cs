@@ -8,19 +8,31 @@ namespace Field.Models;
 
 public class FbxHandler
 {
-    private static FbxManager _manager;
-    private static FbxScene _scene;
+    private FbxManager _manager;
+    private FbxScene _scene;
+    public InfoConfigHandler InfoHandler;
+    private static object _fbxLock = new object();
 
-    public static void Initialise()
+    public FbxHandler(bool bMakeInfoHandler=true)
     {
-        _manager = FbxManager.Create();
-        _scene = FbxScene.Create(_manager, "");
+        lock (_fbxLock) // bc fbx is not thread-safe
+        {
+            _manager = FbxManager.Create();
+            _scene = FbxScene.Create(_manager, "");
+        }
+
+        if (bMakeInfoHandler)
+            InfoHandler = new InfoConfigHandler();
     }
 
-    public static FbxMesh AddMeshPartToScene(Part part, int index, string meshName)
+    public FbxMesh AddMeshPartToScene(Part part, int index, string meshName)
     {
         FbxMesh mesh = CreateMeshPart(part, index, meshName);
-        FbxNode node = FbxNode.Create(_manager, mesh.GetName());
+        FbxNode node;
+        lock (_fbxLock)
+        {
+            node = FbxNode.Create(_manager, mesh.GetName());
+        }
         node.SetNodeAttribute(mesh);
 
         if (part.VertexNormals.Count > 0)
@@ -44,10 +56,10 @@ public class FbxHandler
         }
 
         // for importing to other engines
-        if (InfoConfigHandler.bOpen && part.Material != null) // todo consider why some materials are null
+        if (InfoHandler != null && part.Material != null) // todo consider why some materials are null
         {
-            InfoConfigHandler.AddMaterial(part.Material);
-            InfoConfigHandler.AddPart(part, node.GetName());   
+            InfoHandler.AddMaterial(part.Material);
+            InfoHandler.AddPart(part, node.GetName());   
         }
 
 
@@ -59,21 +71,15 @@ public class FbxHandler
         return mesh;
     }
 
-    private static FbxMesh CreateMeshPart(Part part, int index, string meshName)
+    private FbxMesh CreateMeshPart(Part part, int index, string meshName)
     {
         bool done = false;
-        FbxMesh mesh = null;
-        while (!done)  // bc fbx is not thread-safe
+        FbxMesh mesh;
+        lock (_fbxLock)
         {
-            try
-            {
-                mesh = FbxMesh.Create(_manager, $"{meshName}_Group{part.GroupIndex}_{index}");
-                done = true;
-            }
-            catch (Exception e)
-            {
-            }
+            mesh = FbxMesh.Create(_manager, $"{meshName}_Group{part.GroupIndex}_{index}");
         }
+
         // Conversion lookup table
         Dictionary<int, int> lookup = new Dictionary<int, int>();
         for (int i = 0; i < part.VertexIndices.Count; i++)
@@ -99,9 +105,13 @@ public class FbxHandler
         return mesh;
     }
 
-    private static void AddNormalsToMesh(FbxMesh mesh, Part part)
+    private void AddNormalsToMesh(FbxMesh mesh, Part part)
     {
-        FbxLayerElementNormal normalsLayer = FbxLayerElementNormal.Create(mesh, "normalLayerName");
+        FbxLayerElementNormal normalsLayer;
+        lock (_fbxLock)
+        {
+            normalsLayer = FbxLayerElementNormal.Create(mesh, "normalLayerName");
+        }
         normalsLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         normalsLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
         // Check if quaternion
@@ -112,9 +122,13 @@ public class FbxHandler
         mesh.GetLayer(0).SetNormals(normalsLayer);
     }
     
-    private static void AddTangentsToMesh(FbxMesh mesh, Part part)
+    private void AddTangentsToMesh(FbxMesh mesh, Part part)
     {
-        FbxLayerElementTangent tangentsLayer = FbxLayerElementTangent.Create(mesh, "tangentLayerName");
+        FbxLayerElementTangent tangentsLayer;
+        lock (_fbxLock)
+        {
+            tangentsLayer = FbxLayerElementTangent.Create(mesh, "tangentLayerName");
+        }
         tangentsLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         tangentsLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
         // todo more efficient to do AddMultiple
@@ -126,9 +140,13 @@ public class FbxHandler
     }
 
     
-    private static void AddTexcoordsToMesh(FbxMesh mesh, Part part)
+    private void AddTexcoordsToMesh(FbxMesh mesh, Part part)
     {
-        FbxLayerElementUV uvLayer = FbxLayerElementUV.Create(mesh, "uvLayerName");
+        FbxLayerElementUV uvLayer;
+        lock (_fbxLock)
+        {
+            uvLayer = FbxLayerElementUV.Create(mesh, "uvLayerName");
+        }
         uvLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         uvLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
         foreach (var tx in part.VertexTexcoords)
@@ -139,9 +157,13 @@ public class FbxHandler
     }
     
     
-    private static void AddColoursToMesh(FbxMesh mesh, Part part)
+    private void AddColoursToMesh(FbxMesh mesh, Part part)
     {
-        FbxLayerElementVertexColor colLayer = FbxLayerElementVertexColor.Create(mesh, "colourLayerName");
+        FbxLayerElementVertexColor colLayer;
+        lock (_fbxLock)
+        {
+            colLayer = FbxLayerElementVertexColor.Create(mesh, "colourLayerName");
+        }
         colLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         colLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
         foreach (var colour in part.VertexColours)
@@ -152,15 +174,23 @@ public class FbxHandler
     }
 
 
-    private static void AddWeightsToMesh(FbxMesh mesh, DynamicPart part, List<FbxNode> skeletonNodes)
+    private void AddWeightsToMesh(FbxMesh mesh, DynamicPart part, List<FbxNode> skeletonNodes)
     {
-        FbxSkin skin = FbxSkin.Create(_manager, "skinName");
+        FbxSkin skin;
+        lock (_fbxLock)
+        {
+            skin = FbxSkin.Create(_manager, "skinName");
+        }
         HashSet<int> seen = new HashSet<int>();
         
         List<FbxCluster> weightClusters = new List<FbxCluster>();
         foreach (var node in skeletonNodes)
         {
-            FbxCluster weightCluster = FbxCluster.Create(_manager, node.GetName());
+            FbxCluster weightCluster;
+            lock (_fbxLock)
+            {
+                weightCluster = FbxCluster.Create(_manager, node.GetName());
+            }
             weightCluster.SetLink(node);
             weightCluster.SetLinkMode(FbxCluster.ELinkMode.eTotalOne);
             FbxAMatrix transform = node.EvaluateGlobalTransform();
@@ -199,22 +229,31 @@ public class FbxHandler
         mesh.AddDeformer(skin);
     }
 
-    private static void AddMaterial(FbxMesh mesh, FbxNode node, int index)
+    private void AddMaterial(FbxMesh mesh, FbxNode node, int index)
     {
-        FbxSurfacePhong fbxMaterial = FbxSurfacePhong.Create(_scene, $"{node.GetName()}_{index}");
+        FbxSurfacePhong fbxMaterial;
+        FbxLayerElementMaterial materialLayer;
+        lock (_fbxLock)
+        {
+            fbxMaterial = FbxSurfacePhong.Create(_scene, $"{node.GetName()}_{index}");
+            materialLayer = FbxLayerElementMaterial.Create(mesh, $"matlayer_{node.GetName()}_{index}");
+        }
         fbxMaterial.DiffuseFactor.Set(1);
         node.SetShadingMode(FbxNode.EShadingMode.eTextureShading);
         node.AddMaterial(fbxMaterial);
 
         // if this doesnt exist, it wont load the material slots in unreal
-        FbxLayerElementMaterial materialLayer = FbxLayerElementMaterial.Create(mesh, $"matlayer_{node.GetName()}_{index}");
         materialLayer.SetMappingMode(FbxLayerElement.EMappingMode.eAllSame);
         mesh.GetLayer(0).SetMaterials(materialLayer);
     }
 
-    private static void AddSmoothing(FbxMesh mesh)
+    private void AddSmoothing(FbxMesh mesh)
     {
-        FbxLayerElementSmoothing smoothingLayer = FbxLayerElementSmoothing.Create(mesh, $"smoothingLayerName");
+        FbxLayerElementSmoothing smoothingLayer;
+        lock (_fbxLock)
+        {
+            smoothingLayer = FbxLayerElementSmoothing.Create(mesh, $"smoothingLayerName");
+        }
         smoothingLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByEdge);
         smoothingLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
 
@@ -231,15 +270,20 @@ public class FbxHandler
         mesh.SetMeshSmoothness(FbxMesh.ESmoothness.eFine);
     }
 
-    public static List<FbxNode> AddSkeleton(List<BoneNode> boneNodes)
+    public List<FbxNode> AddSkeleton(List<BoneNode> boneNodes)
     {
         FbxNode rootNode = null;
         List<FbxNode> skeletonNodes = new List<FbxNode>();
         foreach (var boneNode in boneNodes)
         {
-            FbxSkeleton skeleton = FbxSkeleton.Create(_manager, boneNode.Hash.ToString());
+            FbxSkeleton skeleton;
+            FbxNode node;
+            lock (_fbxLock)
+            {
+                skeleton = FbxSkeleton.Create(_manager, boneNode.Hash.ToString());
+                node = FbxNode.Create(_manager, boneNode.Hash.ToString());
+            }
             skeleton.SetSkeletonType(FbxSkeleton.EType.eLimbNode);
-            FbxNode node = FbxNode.Create(_manager, boneNode.Hash.ToString());
             node.SetNodeAttribute(skeleton);
             Vector3 location = boneNode.DefaultObjectSpaceTransform.Translation;
             if (boneNode.ParentNodeIndex != -1)
@@ -264,34 +308,38 @@ public class FbxHandler
         return skeletonNodes;
     }
 
-    public static void ExportScene(string fileName)
+    public void ExportScene(string fileName)
     {
-        if (_manager.GetIOSettings() == null)
-        {
-            FbxIOSettings ios = FbxIOSettings.Create(_manager, FbxWrapperNative.IOSROOT);
-            _manager.SetIOSettings(ios);
-        }
-        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_MATERIAL, true);
-        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_TEXTURE, true);
-        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_EMBEDDED, true);
-        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
-        _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
-        FbxExporter exporter = FbxExporter.Create(_manager, "");
-        exporter.Initialize(fileName, -1);  // -1 == use binary not ascii, binary is more space efficient
-        
         // Make directory for file
         string directory = Path.GetDirectoryName(fileName);
         if (!Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
         }
-        
-        exporter.Export(_scene);
-        exporter.Destroy();
+        lock (_fbxLock)
+        {
+            if (_manager.GetIOSettings() == null)
+            {
+                FbxIOSettings ios = FbxIOSettings.Create(_manager, FbxWrapperNative.IOSROOT);
+                _manager.SetIOSettings(ios);
+            }
+            _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_MATERIAL, true);
+            _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_TEXTURE, true);
+            _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_EMBEDDED, true);
+            _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
+            _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
+            var exporter = FbxExporter.Create(_manager, "");
+            exporter.Initialize(fileName, -1);  // -1 == use binary not ascii, binary is more space efficient
+            exporter.Export(_scene);
+            exporter.Destroy();
+        }
         _scene.Clear();
+        if (InfoHandler != null)
+            InfoHandler.WriteToFile(directory);
+
     }
 
-    public static void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel)
+    public void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel)
     {
         // _scene.GetRootNode().LclRotation.Set(new FbxDouble3(90, 0, 0));
         List<FbxNode> skeletonNodes = new List<FbxNode>();
@@ -314,7 +362,7 @@ public class FbxHandler
         }
     }
 
-    public static void AddStaticToScene(List<Part> parts, string meshName)
+    public void AddStaticToScene(List<Part> parts, string meshName)
     {
         for( int i = 0; i < parts.Count; i++)
         {
@@ -323,9 +371,18 @@ public class FbxHandler
         }
     }
 
-    
-    public static void Clear()
+    public void Clear()
     {
         _scene.Clear();
+    }
+
+    public void Dispose()
+    {
+        lock (_fbxLock)
+        {
+            _scene.Destroy();
+            _manager.Destroy();
+        }
+        InfoHandler.Dispose();
     }
 }

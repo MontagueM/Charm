@@ -345,6 +345,11 @@ public class UsfConverter
         }
         List<int> sortedIndices = texDict.Keys.OrderBy(x => x).ToList();
         string line = hlsl.ReadLine();
+        if (line == null)
+        {
+            // its a broken pixel shader that uses some kind of memory textures
+            return false;
+        }
         while (!line.Contains("SV_TARGET2"))
         {
             line = hlsl.ReadLine();

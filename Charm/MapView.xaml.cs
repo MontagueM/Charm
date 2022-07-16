@@ -10,6 +10,7 @@ using Field;
 using Field.General;
 using Field.Models;
 using Field.Statics;
+using Serilog;
 
 namespace Charm;
 
@@ -61,35 +62,37 @@ public partial class MapView : UserControl
     
     public static void ExportFullMap(StaticMapData staticMapData)
     {
-        InfoConfigHandler.MakeFile();
+        FbxHandler fbxHandler = new FbxHandler();
         string meshName = staticMapData.Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
             savePath = ConfigHandler.GetExportSavePath() + "/Maps";
         }
-        InfoConfigHandler.SetMeshName(meshName);
+        fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
         // Extract all
         List<D2Class_BD938080> extractedStatics = staticMapData.Header.Statics.DistinctBy(x => x.Static.Hash).ToList();
-        foreach (var s in extractedStatics)
+        // foreach (var s in extractedStatics)
+        Parallel.ForEach(extractedStatics, s =>
         {
             var parts = s.Static.Load(ELOD.MostDetail);
-            FbxHandler.AddStaticToScene(parts, s.Static.Hash);
-            s.Static.SaveMaterialsFromParts(savePath, parts);  // todo this MUST be parallel, slowest thing here
-        }
+            fbxHandler.AddStaticToScene(parts, s.Static.Hash);
+            s.Static.SaveMaterialsFromParts(savePath, parts);
+        });
 
         Parallel.ForEach(staticMapData.Header.InstanceCounts, c =>
         {
             var model = staticMapData.Header.Statics[c.StaticIndex].Static;
-            InfoConfigHandler.AddStaticInstances(staticMapData.Header.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), model.Hash);
+            fbxHandler.InfoHandler.AddStaticInstances(staticMapData.Header.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), model.Hash);
         });
         
-        FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
-        InfoConfigHandler.SetMeshName(meshName);
-        InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+        fbxHandler.InfoHandler.SetMeshName(meshName);
+        fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
         AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetSingleFolderMapsEnabled());
-        InfoConfigHandler.WriteToFile(savePath);
+        fbxHandler.InfoHandler.WriteToFile(savePath);
+        fbxHandler.Dispose();
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap, ELOD detailLevel)

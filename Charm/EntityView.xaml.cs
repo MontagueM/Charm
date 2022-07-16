@@ -23,21 +23,22 @@ public partial class EntityView : UserControl
     private string Name;
     private readonly ILogger _entityLog = Log.ForContext<EntityView>();
 
-
     public EntityView()
     {
         InitializeComponent();
     }
 
-    public bool LoadEntity(TagHash entityHash)
+    public bool LoadEntity(TagHash entityHash, FbxHandler fbxHandler)
     {
+        fbxHandler.Clear();
         Entity entity = new Entity(entityHash);
-        AddEntity(entity, ModelView.GetSelectedLod());
-        return LoadUI();
+        AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
+        return LoadUI(fbxHandler);
     }
 
-    public async void LoadEntityFromApi(DestinyHash apiHash)
+    public async void LoadEntityFromApi(DestinyHash apiHash, FbxHandler fbxHandler)
     {
+        fbxHandler.Clear();
         List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
         foreach (var entity in entities)
         {
@@ -45,47 +46,46 @@ public partial class EntityView : UserControl
             if (entity == null)
             {
                 continue;
-                var a = 0;
             }
-            AddEntity(entity, ModelView.GetSelectedLod());
+            AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
         }
-        LoadUI();
+        LoadUI(fbxHandler);
     }
 
-    private void AddEntity(Entity entity, ELOD detailLevel)
+    private void AddEntity(Entity entity, ELOD detailLevel, FbxHandler fbxHandler)
     {
         var dynamicParts = entity.Load(detailLevel);
         ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
         dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
-        FbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
+        fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
     }
 
-    private bool LoadUI()
+    private bool LoadUI(FbxHandler fbxHandler)
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
-        FbxHandler.ExportScene(filePath);
+        fbxHandler.ExportScene(filePath);
         bool loaded = MVM.LoadEntityFromFbx(filePath);
-        FbxHandler.Clear();
+        fbxHandler.Clear();
         return loaded;
     }
 
     public void Export(List<Entity> entities, string name, EExportType exportType)
     {
+        FbxHandler fbxHandler = new FbxHandler(exportType == EExportType.Full);
         _entityLog.Debug($"Exporting entity model name: {name}");
         string savePath = ConfigHandler.GetExportSavePath();
         string meshName = name;
         if (exportType == EExportType.Full)
         {
             savePath += $"/{meshName}";
-            InfoConfigHandler.MakeFile();
         }
         Directory.CreateDirectory(savePath);
         
         foreach (var entity in entities)
         {
             var dynamicParts = entity.Load(ELOD.MostDetail);
-            FbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
+            fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
             if (exportType == EExportType.Full)
             {
                 entity.SaveMaterialsFromParts(savePath, dynamicParts);
@@ -93,14 +93,15 @@ public partial class EntityView : UserControl
             }
         }
 
-        FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         if (exportType == EExportType.Full)
         {
-            InfoConfigHandler.SetMeshName(meshName);
-            InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+            fbxHandler.InfoHandler.SetMeshName(meshName);
+            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
             AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
-            InfoConfigHandler.WriteToFile(savePath);
+            fbxHandler.InfoHandler.WriteToFile(savePath);
         }
+        fbxHandler.Dispose();
         _entityLog.Information($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 }

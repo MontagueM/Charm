@@ -113,21 +113,16 @@ public partial class ActivityMapView : UserControl
             return;
         }
 
-        List<string> mapStages = maps.Select(x => $"exporting {x.Hash}").ToList();
+        List<string> mapStages = maps.Select((x, i) => $"exporting {i+1}/{maps.Count}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages);
-        // FbxHandler and InfoConfigHandler are not thread-safe and would need to rewrite to make it work so not doing it that way for now at least
-        await Task.Run(() =>
+        // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
+        Parallel.ForEach(maps, staticMapData =>
         {
-            foreach (var staticMapData in maps)
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    MapView.ExportFullMap(staticMapData);
-                });
-                MainWindow.Progress.CompleteStage();
-            }
-            // Parallel.ForEach(maps, MapView.ExportFullMap);
+            MapView.ExportFullMap(staticMapData);
+            MainWindow.Progress.CompleteStage();
         });
+        // MapView.ExportFullMap(staticMapData);
+            // MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>
         {

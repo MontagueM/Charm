@@ -24,6 +24,10 @@ public class Material : Tag
     {
         foreach (var e in Header.VSTextures)
         {
+            if (e.Texture == null)
+            {
+                continue;
+            }
             // todo change to 64 bit hash?
             string path = $"{saveDirectory}/VS_{e.TextureIndex}_{e.Texture.Hash}";
             if (!File.Exists(path))
@@ -33,6 +37,10 @@ public class Material : Tag
         }
         foreach (var e in Header.PSTextures)
         {
+            if (e.Texture == null)
+            {
+                continue;
+            }
             // todo change to 64 bit hash?
             string path = $"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}";
             if (!File.Exists(path + ".dds") && !File.Exists(path + ".png") && !File.Exists(path + ".tga"))
@@ -69,7 +77,13 @@ public class Material : Tag
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
             if (usf != String.Empty)
             {
-                File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
+                try
+                {
+                    File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
+                }
+                catch (IOException)  // threading error
+                {
+                }
             }
         }
     }

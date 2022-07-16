@@ -35,26 +35,26 @@ public partial class StaticView : UserControl
 
     public void ExportStatic(TagHash hash, string name, EExportType exportType)
     {
+        FbxHandler fbxHandler = new FbxHandler(exportType == EExportType.Full);
         string savePath = ConfigHandler.GetExportSavePath();
         string meshName = hash.GetHashString();
         if (exportType == EExportType.Full)
         {
             savePath += $"/{name}";
-            InfoConfigHandler.MakeFile();
         }
         var container = new StaticContainer(new TagHash(hash.Hash));
         List<Part> parts = container.Load(ELOD.MostDetail);
-        FbxHandler.AddStaticToScene(parts, meshName);
+        fbxHandler.AddStaticToScene(parts, meshName);
         Directory.CreateDirectory(savePath);
         if (exportType == EExportType.Full)
         {
             container.SaveMaterialsFromParts(savePath, parts);
-            InfoConfigHandler.SetMeshName(meshName);
-            InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+            fbxHandler.InfoHandler.SetMeshName(meshName);
+            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
             AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Static);
-            InfoConfigHandler.WriteToFile(savePath);
+            fbxHandler.InfoHandler.WriteToFile(savePath);
         }
-        FbxHandler.ExportScene($"{savePath}/{name}.fbx");
+        fbxHandler.ExportScene($"{savePath}/{name}.fbx");
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(List<Part> containerParts)

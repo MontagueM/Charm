@@ -46,15 +46,12 @@ namespace Charm
 
                     // Initialise investment
                     InvestmentHandler.Initialise();
-
-                    // Initialise fbx handler
-                    FbxHandler.Initialise();
-
+                    
+                    FbxHandler fbxHandler = new FbxHandler();
 
                     DestinyHash hash = new DestinyHash(apiHash);
 
                     var entities = InvestmentHandler.GetEntitiesFromHash(hash);
-                    InfoConfigHandler.MakeFile();
                     string meshName = hash;
                     string savePath = ConfigHandler.GetExportSavePath() + $"/API_{meshName}";
                     Directory.CreateDirectory(savePath);
@@ -62,18 +59,17 @@ namespace Charm
                     foreach (var entity in entities)
                     {
                         var dynamicParts = entity.Load(ELOD.MostDetail);
-                        FbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
+                        fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
                         entity.SaveMaterialsFromParts(savePath, dynamicParts);
                         entity.SaveTexturePlates(savePath);
                     }
 
-                    FbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
-                    InfoConfigHandler.SetMeshName(meshName);
-                    InfoConfigHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+                    fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+                    fbxHandler.InfoHandler.SetMeshName(meshName);
+                    fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
                     AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
-                    InfoConfigHandler.WriteToFile(savePath);
+                    fbxHandler.InfoHandler.WriteToFile(savePath);
                     Console.WriteLine($"[Charm] Saved all data to {savePath}.");
-                    var a = 0;
                 }
             }
         }

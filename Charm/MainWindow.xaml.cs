@@ -110,7 +110,6 @@ public partial class MainWindow
             "hash 64",
             "investment",
             "global string cache",
-            "fbx",
             "activity names",
         });
         // Load all the fonts
@@ -135,11 +134,7 @@ public partial class MainWindow
         // Initialise global string cache
         await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
         Progress.CompleteStage();
-        
-        // Initialise fbx handler
-        await Task.Run(FbxHandler.Initialise);
-        Progress.CompleteStage();
-        
+
         // Get all activity names
         await Task.Run(PackageHandler.GetAllActivityNames);
         Progress.CompleteStage();
@@ -272,9 +267,9 @@ public partial class MainWindow
             switch (reference.Hash)
             {
                 case 0x80809AD8:
-                    EntityView dynamicView = new EntityView();
-                    dynamicView.LoadEntity(hash);
-                    MakeNewTab(hash, dynamicView);
+                    // EntityView dynamicView = new EntityView();
+                    // dynamicView.LoadEntity(hash);
+                    // MakeNewTab(hash, dynamicView);
                     break;
                 case 0x80806D44:
                     // StaticView staticView = new StaticView(hash);

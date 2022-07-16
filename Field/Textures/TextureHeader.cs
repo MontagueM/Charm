@@ -136,13 +136,19 @@ public class TextureHeader : Tag
     
     public static void SavetoFile(string savePath, ScratchImage simg)
     {
-        TextureExtractor.SaveTextureToFile(savePath, simg);
+        try
+        {
+            TextureExtractor.SaveTextureToFile(savePath, simg);
+        }
+        catch (FileLoadException)
+        {
+        }
     }
     
     public void SavetoFile(string savePath)
     {
         ScratchImage simg = GetScratchImage();
-        TextureExtractor.SaveTextureToFile(savePath, simg);
+        SavetoFile(savePath, simg);
     }
 
     

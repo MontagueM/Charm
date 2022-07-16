@@ -16,6 +16,7 @@ using ConcurrentCollections;
 using Field;
 using Field.Entities;
 using Field.General;
+using Field.Models;
 using Field.Strings;
 using Field.Textures;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -112,10 +113,12 @@ public partial class TagListView : UserControl
     private TagListView _tagListControl = null;
     private ToggleButton _previouslySelected = null;
     private int _selectedIndex = -1;
+    private FbxHandler _globalFbxHandler = null;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
+        _globalFbxHandler = new FbxHandler(false);
     }
     
     public TagListView()
@@ -626,7 +629,7 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Entity);
-        bool bLoadedSuccessfully = viewer.EntityControl.LoadEntity(tagHash);
+        bool bLoadedSuccessfully = viewer.EntityControl.LoadEntity(tagHash, _globalFbxHandler);
         if (!bLoadedSuccessfully)
         {
             _tagListLogger.Error($"UI failed to load entity for hash {tagHash}. You can still try to export the full model instead.");
@@ -634,7 +637,7 @@ public partial class TagListView : UserControl
         }
         SetExportFunction(ExportEntity);
         viewer.ExportControl.SetExportInfo(tagHash);
-        viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntity(tagHash));
+        viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntity(tagHash, _globalFbxHandler));
     }
     
     private void ExportEntity(ExportInfo info)
@@ -806,12 +809,12 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Entity);
-        viewer.EntityControl.LoadEntityFromApi(apiHash);
+        viewer.EntityControl.LoadEntityFromApi(apiHash, _globalFbxHandler);
         Dispatcher.Invoke(() =>
         {
             SetExportFunction(ExportApiEntityFull);
             viewer.ExportControl.SetExportInfo(apiHash);
-            viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntityFromApi(apiHash));
+            viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntityFromApi(apiHash, _globalFbxHandler));
         });
     }
 

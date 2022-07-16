@@ -9,21 +9,30 @@ namespace Field.General;
 
 public class InfoConfigHandler
 {
-    public static bool bOpen = false;
-    private static Dictionary<string, dynamic> _config = new Dictionary<string, dynamic>();
+    public bool bOpen = false;
+    private ConcurrentDictionary<string, dynamic> _config = new ConcurrentDictionary<string, dynamic>();
 
-    public static void MakeFile()
+    public InfoConfigHandler()
     {
         ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>> mats = new ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>>();
-        _config.Add("Materials", mats);
-        Dictionary<string, string> parts = new Dictionary<string, string>();
-        _config.Add("Parts", parts);
+        _config.TryAdd("Materials", mats);
+        ConcurrentDictionary<string, string> parts = new ConcurrentDictionary<string, string>();
+        _config.TryAdd("Parts", parts);
         ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> instances = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
-        _config.Add("Instances", instances);
+        _config.TryAdd("Instances", instances);
         bOpen = true;
     }
 
-    public static void AddMaterial(Material material)
+    public void Dispose()
+    {
+        if (bOpen)
+        {
+            _config.Clear();
+            bOpen = false; 
+        }
+    }
+
+    public void AddMaterial(Material material)
     {
         if (!material.Hash.IsValid())
         {
@@ -38,27 +47,33 @@ public class InfoConfigHandler
         textures.Add("VS", vstex);
         foreach (var vst in material.Header.VSTextures)
         {
-            vstex.Add((int)vst.TextureIndex, new TexInfo {Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
+            if (vst.Texture != null)
+            {
+                vstex.Add((int)vst.TextureIndex, new TexInfo {Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
+            }
         }
         Dictionary<int, TexInfo> pstex = new Dictionary<int, TexInfo>();
         textures.Add("PS", pstex);
         foreach (var pst in material.Header.PSTextures)
         {
-            pstex.Add((int)pst.TextureIndex, new TexInfo {Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
+            if (pst.Texture != null)
+            {
+                pstex.Add((int)pst.TextureIndex, new TexInfo {Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
+            }
         }
     }
     
-    public static void AddPart(Part part, string partName)
+    public void AddPart(Part part, string partName)
     {
-        _config["Parts"].Add(partName, part.Material.Hash.GetHashString());
+        _config["Parts"].TryAdd(partName, part.Material.Hash.GetHashString());
     }
 
-    public static void SetMeshName(string meshName)
+    public void SetMeshName(string meshName)
     {
         _config["MeshName"] = meshName;
     }
 
-    public static void SetUnrealInteropPath(string interopPath)
+    public void SetUnrealInteropPath(string interopPath)
     {
         _config["UnrealInteropPath"] = new string(interopPath.Split("\\Content").Last().ToArray()).TrimStart('\\');
         if (_config["UnrealInteropPath"] == "")
@@ -74,7 +89,7 @@ public class InfoConfigHandler
         public float Scale;
     }
 
-    public static void AddStaticInstances(List<D2Class_406D8080> instances, string staticMesh)
+    public void AddStaticInstances(List<D2Class_406D8080> instances, string staticMesh)
     {
         ConcurrentBag<JsonInstance> jsonInstances = new ConcurrentBag<JsonInstance>();
         foreach (var instance in instances)
@@ -99,7 +114,7 @@ public class InfoConfigHandler
         }
     }
     
-    public static void WriteToFile(string path)
+    public void WriteToFile(string path)
     {
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
         if (_config.ContainsKey("MeshName"))
@@ -110,8 +125,7 @@ public class InfoConfigHandler
         {
             File.WriteAllText($"{path}/info.cfg", s);
         }
-        _config.Clear();
-        bOpen = false;
+        Dispose();
     }
 }
 
