@@ -88,19 +88,21 @@ public partial class EntityView : UserControl
             fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
             if (exportType == EExportType.Full)
             {
-                entity.SaveMaterialsFromParts(savePath, dynamicParts);
+                entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled());
                 entity.SaveTexturePlates(savePath);
             }
         }
 
-        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         if (exportType == EExportType.Full)
         {
             fbxHandler.InfoHandler.SetMeshName(meshName);
-            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
-            fbxHandler.InfoHandler.WriteToFile(savePath);
+            if (ConfigHandler.GetUnrealInteropEnabled())
+            {
+                fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
+            }
         }
+        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
         _entityLog.Information($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }

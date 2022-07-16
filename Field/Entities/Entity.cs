@@ -70,20 +70,19 @@ public class Entity : Tag
         return dynamicParts;
     }
 
-    public void SaveMaterialsFromParts(string saveDirectory, List<DynamicPart> dynamicParts)
+    public void SaveMaterialsFromParts(string saveDirectory, List<DynamicPart> dynamicParts, bool bSaveShaders)
     {
         Directory.CreateDirectory($"{saveDirectory}/Textures");
         Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var dynamicPart in dynamicParts)
         {
-            if ($"{dynamicPart.IndexOffset}_{dynamicPart.IndexCount}_{dynamicPart.DetailLevel}" == "132170_2027_0")
-            {
-                var a = 0;
-            }
             if (dynamicPart.Material == null) continue;
             dynamicPart.Material.SaveAllTextures($"{saveDirectory}/Textures");
             // dynamicPart.Material.SaveVertexShader(saveDirectory);
-            dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
+            if (bSaveShaders)
+            {
+                dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
+            }
             // Environment.Exit(5);
         }
     }

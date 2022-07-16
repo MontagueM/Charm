@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using Field.Entities;
 using Field.General;
@@ -9,6 +10,7 @@ namespace Field.Textures;
 public class Material : Tag
 {
     public D2Class_AA6D8080 Header;
+    public static object _lock = new object();
 
     
     public Material(TagHash hash) : base(hash)
@@ -51,21 +53,81 @@ public class Material : Tag
     }
     
     [DllImport("HLSLDecompiler.dll", EntryPoint = "DecompileHLSL", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int DecompileHLSL(
+    public static extern IntPtr DecompileHLSL(
         IntPtr pShaderBytecode,
         int BytecodeLength,
-        out IntPtr pHlslText
+        out int pHlslTextLength
     );
 
     public string Decompile(byte[] shaderBytecode)
     {
-        GCHandle gcHandle = GCHandle.Alloc(shaderBytecode, GCHandleType.Pinned);
-        IntPtr pShaderBytecode = gcHandle.AddrOfPinnedObject();
-        IntPtr pHlslText = Marshal.AllocHGlobal(50000);
-        int result = DecompileHLSL(pShaderBytecode, shaderBytecode.Length, out pHlslText);
-        string hlsl = Marshal.PtrToStringUTF8(pHlslText);
-        // Marshal.FreeHGlobal(pHlslText);
-        gcHandle.Free();
+        // tried doing it via dll pinvoke but seemed to cause way too many problems so doing it via exe instead
+        // string hlsl;
+        // lock (_lock)
+        // {
+        //     GCHandle gcHandle = GCHandle.Alloc(shaderBytecode, GCHandleType.Pinned);
+        //     IntPtr pShaderBytecode = gcHandle.AddrOfPinnedObject();
+        //     IntPtr pHlslText = Marshal.AllocHGlobal(5000);
+        //     int len;
+        //     pHlslText = DecompileHLSL(pShaderBytecode, shaderBytecode.Length, out int pHlslTextLength);
+        //     // len = Marshal.ReadInt32(pHlslTextLength);
+        //     len = pHlslTextLength;
+        //     hlsl = Marshal.PtrToStringUTF8(pHlslText);
+        //     gcHandle.Free();
+        // }
+        // // Marshal.FreeHGlobal(pHlslText);
+        // return hlsl;
+        string directory = "hlsl_temp";
+        string binPath = $"{directory}/ps{Hash}.bin";
+        string hlslPath = $"{directory}/ps{Hash}.hlsl";
+
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory("hlsl_temp/");
+        }
+
+        lock (_lock)
+        {
+            if (!File.Exists(binPath))
+            {
+                File.WriteAllBytes(binPath, shaderBytecode);
+            } 
+        }
+
+        if (!File.Exists(hlslPath))
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = false;
+            startInfo.UseShellExecute = false;
+            startInfo.FileName = "3dmigoto_shader_decomp.exe";
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.Arguments = $"-D {binPath}";
+            using (Process exeProcess = Process.Start(startInfo))
+            {
+                exeProcess.WaitForExit();
+            }
+
+            if (!File.Exists(hlslPath))
+            {
+                throw new FileNotFoundException($"Decompilation failed for {Hash}");
+            }
+        }
+
+        string hlsl = "";
+        lock (_lock)
+        {
+            while (hlsl == "")
+            {
+                try  // needed for slow machines
+                {
+                    hlsl = File.ReadAllText(hlslPath);
+                }
+                catch (IOException)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+        }
         return hlsl;
     }
 

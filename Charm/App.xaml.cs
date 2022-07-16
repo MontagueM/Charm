@@ -60,15 +60,17 @@ namespace Charm
                     {
                         var dynamicParts = entity.Load(ELOD.MostDetail);
                         fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
-                        entity.SaveMaterialsFromParts(savePath, dynamicParts);
+                        entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled());
                         entity.SaveTexturePlates(savePath);
                     }
 
-                    fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
                     fbxHandler.InfoHandler.SetMeshName(meshName);
-                    fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-                    AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
-                    fbxHandler.InfoHandler.WriteToFile(savePath);
+                    if (ConfigHandler.GetUnrealInteropEnabled())
+                    {
+                        fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+                        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity);
+                    }
+                    fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
                     Console.WriteLine($"[Charm] Saved all data to {savePath}.");
                 }
             }

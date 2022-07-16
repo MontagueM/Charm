@@ -78,7 +78,7 @@ public partial class MapView : UserControl
         {
             var parts = s.Static.Load(ELOD.MostDetail);
             fbxHandler.AddStaticToScene(parts, s.Static.Hash);
-            s.Static.SaveMaterialsFromParts(savePath, parts);
+            s.Static.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled());
         });
 
         Parallel.ForEach(staticMapData.Header.InstanceCounts, c =>
@@ -86,12 +86,12 @@ public partial class MapView : UserControl
             var model = staticMapData.Header.Statics[c.StaticIndex].Static;
             fbxHandler.InfoHandler.AddStaticInstances(staticMapData.Header.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), model.Hash);
         });
-        
+        if (ConfigHandler.GetUnrealInteropEnabled())
+        {
+            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetSingleFolderMapsEnabled());
+        }
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
-        fbxHandler.InfoHandler.SetMeshName(meshName);
-        fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetSingleFolderMapsEnabled());
-        fbxHandler.InfoHandler.WriteToFile(savePath);
         fbxHandler.Dispose();
     }
 

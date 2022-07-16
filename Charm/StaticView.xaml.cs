@@ -48,11 +48,13 @@ public partial class StaticView : UserControl
         Directory.CreateDirectory(savePath);
         if (exportType == EExportType.Full)
         {
-            container.SaveMaterialsFromParts(savePath, parts);
+            container.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled());
             fbxHandler.InfoHandler.SetMeshName(meshName);
-            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Static);
-            fbxHandler.InfoHandler.WriteToFile(savePath);
+            if (ConfigHandler.GetUnrealInteropEnabled())
+            {
+                fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Static);
+            }
         }
         fbxHandler.ExportScene($"{savePath}/{name}.fbx");
     }
