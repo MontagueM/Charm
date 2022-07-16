@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using Field.General;
 using Field.Models;
@@ -107,7 +108,7 @@ public class UsfConverter
                     texture.Dimension = line.Split("<")[0];
                     texture.Type = line.Split("<")[1].Split(">")[0];
                     texture.Variable = line.Split("> ")[1].Split(" :")[0];
-                    texture.Index = Int32.Parse(new string(texture.Variable.Skip(1).ToArray()));
+                    texture.Index = Int32.TryParse(new string(texture.Variable.Skip(1).ToArray()), out int index) ? index : -1;
                     textures.Add(texture);
                 }
                 else if (line.Contains("SamplerState"))
@@ -120,16 +121,16 @@ public class UsfConverter
                     line = hlsl.ReadLine();
                     Cbuffer cbuffer = new Cbuffer();
                     cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
-                    cbuffer.Index = Int32.Parse(new string(cbuffer.Variable.Skip(2).ToArray()));
-                    cbuffer.Count = Int32.Parse(new string(line.Split("[")[1].Split("]")[0]));
+                    cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
+                    cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
                     cbuffer.Type = line.Split("cb")[0].Trim();
                     cbuffers.Add(cbuffer);
                 }
-                else if (line.Contains(" v") && line.Contains(" : "))
+                else if (line.Contains(" v") && line.Contains(" : ") && !line.Contains("?"))
                 {
                     Input input = new Input();
                     input.Variable = "v" + line.Split("v")[1].Split(" : ")[0];
-                    input.Index = Int32.Parse(new string(input.Variable.Skip(1).ToArray()));
+                    input.Index = Int32.TryParse(new string(input.Variable.Skip(1).ToArray()), out int index) ? index : -1;
                     input.Semantic = line.Split(" : ")[1].Split(",")[0];
                     input.Type = line.Split(" v")[0].Trim();
                     inputs.Add(input);
@@ -138,7 +139,7 @@ public class UsfConverter
                 {
                     Output output = new Output();
                     output.Variable = "o" + line.Split(" o")[2].Split(" : ")[0];
-                    output.Index = Int32.Parse(new string(output.Variable.Skip(1).ToArray()));
+                    output.Index = Int32.TryParse(new string(output.Variable.Skip(1).ToArray()), out int index) ? index : -1;
                     output.Semantic = line.Split(" : ")[1].Split(",")[0];
                     output.Type = line.Split("out ")[1].Split(" o")[0];
                     outputs.Add(output);

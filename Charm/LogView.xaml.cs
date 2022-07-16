@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Windows.Forms;
+using System.Windows;
+using System.Windows.Threading;
+// using System.Windows.Forms;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -26,6 +28,7 @@ public class LogHandler
     {
         InitLogger(logView);
         
+        // Application.Current.DispatcherUnhandledException += DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += CatchUnhandledException;
     }
 
@@ -54,11 +57,30 @@ public class LogHandler
             ex = (Exception)e.ExceptionObject;
             
             Log.Fatal("\n### Crash ###\n" + ex.Source + ex.InnerException + ex + ex.Message + ex.StackTrace);
+            Log.Fatal("Config file:\n" + File.ReadAllText("Charm.exe.config"));
             Log.CloseAndFlush();
         }
         finally
         {
-            Application.Exit();
+            Application.Current.Shutdown();
+        }
+    }
+    
+    static void DispatcherUnhandledException
+        (object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        Exception ex;
+        try
+        {
+            ex = (Exception)e.Exception;
+            
+            Log.Fatal("\n### Crash ###\n" + ex.Source + ex.InnerException + ex + ex.Message + ex.StackTrace);
+            Log.Fatal("Config file:\n" + File.ReadAllText("Charm.exe.config"));
+            Log.CloseAndFlush();
+        }
+        finally
+        {
+            Application.Current.Shutdown();
         }
     }
 }

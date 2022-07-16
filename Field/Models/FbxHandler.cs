@@ -66,8 +66,10 @@ public class FbxHandler
         AddMaterial(mesh, node, index);
         AddSmoothing(mesh);
 
-        
-        _scene.GetRootNode().AddChild(node);
+        lock (_fbxLock)
+        {
+            _scene.GetRootNode().AddChild(node);
+        }
         return mesh;
     }
 
