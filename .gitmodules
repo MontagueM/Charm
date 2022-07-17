@@ -1,3 +1,4 @@
 [submodule "ThirdParty/revorbstd"]
 	path = ThirdParty/revorbstd
 	url = https://github.com/xyx0826/revorbstd
+	branch = big-enough

@@ -41,21 +41,21 @@ public partial class MainWindow
             _bHasInitialised = true;
         }
     }
-    
+
     public MainWindow()
     {
         InitializeComponent();
-        
+
         _logView = new LogView();
         LogHandler.Initialise(_logView);
-        
+
         // Make log
         MakeNewTab("Log", _logView);
         _logTab = _newestTab;
-        
+
         // Hide tab by default
         HideMainMenu();
-            
+
         // Check if packages path exists in config
         // ConfigHandler.CheckPackagesPathIsValid();
         if (ConfigHandler.DoesPathKeyExist("packagesPath") && ConfigHandler.DoesPathKeyExist("exportSavePath"))
@@ -114,9 +114,9 @@ public partial class MainWindow
         catch (Exception e)
         {
             // Could not get or parse version file
-            #if !DEBUG
+#if !DEBUG
             MessageBox.Show("Could not get version.");
-            #endif
+#endif
             Log.Error($"Could not get version error {e}.");
         }
     }
@@ -158,7 +158,7 @@ public partial class MainWindow
         // Get all activity names
         await Task.Run(PackageHandler.GetAllActivityNames);
         Progress.CompleteStage();
-        
+
         // Set texture format
         TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
     }
@@ -215,18 +215,18 @@ public partial class MainWindow
         MakeNewTab("Configuration", new ConfigView());
         SetNewestTabSelected();
     }
-    
+
     private void OpenLogPanel_OnClick(object sender, RoutedEventArgs e)
     {
         MakeNewTab("Log", _logView);
-        SetNewestTabSelected();    
+        SetNewestTabSelected();
     }
 
     public void HideMainMenu()
     {
         MainMenuTab.Visibility = Visibility.Collapsed;
     }
-    
+
     public void ShowMainMenu()
     {
         MainMenuTab.Visibility = Visibility.Visible;
@@ -237,7 +237,7 @@ public partial class MainWindow
             _bHasInitialised = true;
         }
     }
-    
+
     public void SetNewestTabSelected()
     {
         MainTabControl.SelectedItem = _newestTab;
@@ -247,7 +247,7 @@ public partial class MainWindow
     {
         MainTabControl.SelectedItem = _logTab;
     }
-    
+
     public void SetNewestTabName(string newName)
     {
         _newestTab.Header = newName.Replace('_', '.');
@@ -262,20 +262,20 @@ public partial class MainWindow
         var items = MainTabControl.Items;
         foreach (TabItem item in items)
         {
-            if (name == (string) item.Header)
+            if (name == (string)item.Header)
             {
                 _newestTab = item;
                 return;
             }
         }
-        
+
         _newestTab = new TabItem();
         _newestTab.Content = content;
         _newestTab.MouseDown += MenuTab_OnMouseDown;
         MainTabControl.Items.Add(_newestTab);
         SetNewestTabName(name);
     }
-    
+
     public void AddWindow(TagHash hash)
     {
         // Adds a new tab to the tab control

@@ -52,6 +52,7 @@ public partial class MusicPlayerControl : UserControl
         _waveProvider = wem.MakeWaveChannel();
         MakeOutput();
         _output.Init(_waveProvider);
+        SetVolume(VolumeBar.Value);
         CanPlay = true;
         CurrentDuration.Text = Wem.GetDurationString(_waveProvider.CurrentTime);  // todo make this all correct
         TotalDuration.Text = wem.Duration;
