@@ -266,6 +266,6 @@ FakesAssemblies/
 /atmosphere.ico
 /atmosphere.png
 /logos.pptx
-ThirdParty/
-ThirdParty/3Dmigoto
-ThirdParty/DXDecompiler
+#ThirdParty/
+#ThirdParty/3Dmigoto
+#ThirdParty/DXDecompiler
