@@ -120,11 +120,15 @@ public class InfoConfigHandler
         if (_config["Parts"].Count == 1)
         {
             var part = _config["Parts"][_config["Parts"].Keys[0]];
-            var instance = _config["Instances"][_config["Instances"].Keys[0]];
+            //I'm not sure what to do if it's 0, so I guess I'll leave that to fix it in the future if something breakes.
+            if (_config["Instances"].Count != 0)
+            {
+                var instance = _config["Instances"][_config["Instances"].Keys[0]];
+                _config["Instances"] = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
+                _config["Instances"][_config["MeshName"]] = instance;
+            }
             _config["Parts"] = new ConcurrentDictionary<string, string>();
-            _config["Instances"] = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
             _config["Parts"][_config["MeshName"]] = part;
-            _config["Instances"][_config["MeshName"]] = instance;
         }
         
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
