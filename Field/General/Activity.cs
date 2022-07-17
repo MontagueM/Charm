@@ -348,11 +348,35 @@ public struct D2Class_F5458080
 public struct D2Class_F7458080
 {
     [DestinyField(FieldType.RelativePointer)]
-    public string WwiseMusicLoopName;
+    public string AmbientMusicSetName;
     [DestinyField(FieldType.TagHash64)]
-    public WwiseLoop MusicLoopSound;
+    public Tag<D2Class_50968080> AmbientMusicSet;
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_FA458080> Unk18;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_50968080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_318A8080> Unk08;
+    public DestinyHash Unk18;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+public struct D2Class_318A8080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public WwiseLoop MusicLoopSound;
+
+    public float Unk10;
+    public DestinyHash Unk14;
+    public float Unk18;
+    public DestinyHash Unk1C;
+    public float Unk20;
+    public DestinyHash Unk24;
+    public int Unk28;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
