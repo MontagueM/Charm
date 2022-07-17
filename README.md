@@ -10,6 +10,12 @@ A new, flashier, fully C# version of my previous tool Phonon. It is designed to 
 - You'll need .NET 6.0 x64 installed but most people have that.
 - Set the packages and export paths first.
 
+If you encounter any problems, take a look in the charm.log file and look at the exception.
+
+### Known issues
+
+* `Unhandled Exception: System.ArgumentException: Invalid hash given: 2157969408.` - delete the empty paths.cache file and try again.
+
 ## Functionality
 
 Here's a brief list of what Charm can currently do:
