@@ -96,7 +96,7 @@ public partial class MainWindow
     private async void CheckVersion()
     {
         var currentVersion = new ApplicationVersion("1.0.0");
-        var versionChecker = new ApplicationVersionChecker("http://192.168.1.159/", currentVersion);
+        var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         versionChecker.LatestVersionName = "version";
         try
         {

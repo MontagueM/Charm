@@ -26,6 +26,11 @@ Here's a brief list of what Charm can currently do:
 - Entity names where possible.
 - Music, dialogue, directives viewing and playback.
 
+### Some tricks
+
+* Middle click tabs to close them.
+* In a packages view, you can type in any hash and it will take you to it. No need to look through all the packages.
+
 ## Reporting issues
 
 If you experience any issue, you can register an issue in this repository. If the program has crashed, it is extremely valuable to provide the charm.log file.
@@ -44,4 +49,4 @@ The Charm source code is licensed under GPLv3. All other used code and DLLs are 
 
 ## Credits
 
-Thanks to Alcidine, BIOS, Carson Reed, Delta, and nblock for testing, feedback, and help throughout the project's development.
+Thanks to Alcidine, BIOS, Carson Reed, Delta, and nblock for testing, feedback, and help throughout the project's development. HighRTT for audio help (RevorbStd and librevorb).
