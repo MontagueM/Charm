@@ -6,8 +6,8 @@ A new, flashier, fully C# version of my previous tool Phonon. It is designed to 
 
 ## How do I install and use it?
 
+- You'll need [.NET 6.0 x64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-6.0.7-windows-x64-installer) installed.
 - Download the latest release and run Charm.exe.
-- You'll need .NET 6.0 x64 installed but most people have that.
 - Set the packages and export paths first.
 
 If you encounter any problems, take a look in the charm.log file and look at the exception.
