@@ -24,7 +24,7 @@ Here's a brief list of what Charm can currently do:
 - Interoperability with DARE for extraction of higher quality textures than the API provides.
 - Extraction of static models, maps, entity models, textures, audio.
 - For entities, FK skeletons are provided where they exist.
-- All geometry can export with shaders that can be imported into Unreal Engine 5 (tutorial here).
+- All geometry can export with shaders that can be imported into Unreal Engine 5 [tutorial](https://github.com/MontagueM/Charm/wiki/Charm-----UE5-Interoperability).
 - Viewing and extraction of information tied to activities.
 - Batch extraction sorted into packages.
 - Arrow keys for navigating the list of buttons easily.
