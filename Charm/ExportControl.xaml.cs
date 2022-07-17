@@ -92,4 +92,9 @@ public struct ExportInfo
     }
     public DestinyHash Hash;
     public EExportType ExportType = EExportType.Full;
+
+    public ExportInfo()
+    {
+        Hash = new DestinyHash();
+    }
 }

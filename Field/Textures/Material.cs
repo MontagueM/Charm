@@ -52,12 +52,12 @@ public class Material : Tag
         }
     }
     
-    [DllImport("HLSLDecompiler.dll", EntryPoint = "DecompileHLSL", CallingConvention = CallingConvention.Cdecl)]
-    public static extern IntPtr DecompileHLSL(
-        IntPtr pShaderBytecode,
-        int BytecodeLength,
-        out int pHlslTextLength
-    );
+    // [DllImport("HLSLDecompiler.dll", EntryPoint = "DecompileHLSL", CallingConvention = CallingConvention.Cdecl)]
+    // public static extern IntPtr DecompileHLSL(
+    //     IntPtr pShaderBytecode,
+    //     int BytecodeLength,
+    //     out int pHlslTextLength
+    // );
 
     public string Decompile(byte[] shaderBytecode)
     {
