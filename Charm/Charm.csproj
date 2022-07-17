@@ -8,6 +8,9 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<Configurations>Release;Debug;</Configurations>
 		<Platforms>x64</Platforms>
+		<IsPackable>false</IsPackable>
+		<Authors />
+		<Company>MontagueM</Company>
     </PropertyGroup>
 
     <ItemGroup>
@@ -77,5 +80,9 @@
         <DependentUpon>MusicView.xaml</DependentUpon>
       </Page>
     </ItemGroup>
+
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+      <Exec Command="xcopy &quot;$(SolutionDir)ThirdParty\librevorb.dll&quot; &quot;$(SolutionDir)ThirdParty\revorbstd&quot; /y" />
+    </Target>
 
 </Project>

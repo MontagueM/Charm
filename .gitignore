@@ -269,3 +269,5 @@ FakesAssemblies/
 #ThirdParty/
 #ThirdParty/3Dmigoto
 #ThirdParty/DXDecompiler
+# Include libreborb dll
+!/ThirdParty/*.dll
