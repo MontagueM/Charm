@@ -32,13 +32,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\..\Hadronic\Symmetry\bin\release\net6.0\win-x64\native\Symmetry.dll">
-        <Link>Symmetry.dll</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
       <Page Update="ConfigSettingControl.xaml">
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>ConfigView.xaml</DependentUpon>
