@@ -69,26 +69,46 @@ public partial class MainWindow
         }
 
         // Check version
+        CheckVersion();
+
+        // Log game version
+        CheckGameVersion();
+
+
+        var a = 0;
+    }
+
+    private void CheckGameVersion()
+    {
         try
         {
-            CheckVersion();
+            var path = ConfigHandler.GetPackagesPath().Split("packages")[0] + "destiny2.exe";
+            var versionInfo = FileVersionInfo.GetVersionInfo(path);
+            string version = versionInfo.FileVersion;
+            Log.Information("Game version: " + version);
         }
-        finally
+        catch (Exception e)
         {
-            Log.Information("Version check complete.");
+            Log.Error($"Could not get game version error {e}.");
         }
     }
 
     private async void CheckVersion()
     {
         var currentVersion = new ApplicationVersion("1.0.0");
-        var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/tree/main/Charm/versions.xml", currentVersion);
+        var versionChecker = new ApplicationVersionChecker("http://192.168.1.159/", currentVersion);
+        versionChecker.LatestVersionName = "version";
         try
         {
             var upToDate = await versionChecker.IsUpToDate();
             if (!upToDate)
             {
                 MessageBox.Show("New version available on GitHub!");
+                Log.Information($"Version is not to date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
+            }
+            else
+            {
+                Log.Information($"Version is up to date ({versionChecker.CurrentVersion.Id}).");
             }
         }
         catch (Exception e)
