@@ -151,6 +151,9 @@ public partial class MusicPlayerControl : UserControl
 
     private void PlayPause_OnClick(object sender, RoutedEventArgs e)
     {
+        if (_output == null)
+            return;
+
         if (IsPlaying())
         {
             Pause();
