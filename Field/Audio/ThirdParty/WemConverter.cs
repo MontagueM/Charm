@@ -41,10 +41,7 @@ static class WemConverter
         var vorbisStream = new MemoryStream();
         vorbis.ConvertToOgg(vorbisStream);
         vorbisStream.Position = 0;
-        UnmanagedMemoryStream ms = Revorb.Jiggle(vorbisStream.ToArray());
-        byte[] outData = new byte[ms.Length];
-        ms.Read(outData);
-        return new MemoryStream(outData);
+        return Revorb.Jiggle(vorbisStream.ToArray());
     }
 
     private static void CheckCodebookFile()
