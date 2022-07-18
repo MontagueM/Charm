@@ -76,7 +76,12 @@ public class DestinyHash : IComparable<DestinyHash>
     {
         return (int)((Hash >> 0xD) & 0x3ff);
     }
-        
+    
+    public int GetEntryIndex()
+    {
+        return (int)(Hash % 8192);
+    }
+
     public string GetHashString()
     {
         return Endian.U32ToString(Hash);
