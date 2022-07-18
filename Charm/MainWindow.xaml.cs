@@ -103,8 +103,8 @@ public partial class MainWindow
             var upToDate = await versionChecker.IsUpToDate();
             if (!upToDate)
             {
-                MessageBox.Show("New version available on GitHub!");
-                Log.Information($"Version is not to date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
+                MessageBox.Show($"New version available on GitHub! (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id})");
+                Log.Information($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
             }
             else
             {
@@ -276,53 +276,21 @@ public partial class MainWindow
         SetNewestTabName(name);
     }
 
-    public void AddWindow(TagHash hash)
-    {
-        // Adds a new tab to the tab control
-        DestinyHash reference = PackageHandler.GetEntryReference(hash);
-        int hType, hSubtype;
-        PackageHandler.GetEntryTypes(hash, out hType, out hSubtype);
-        if ((hType == 8 || hType == 16) && hSubtype == 0)
-        {
-            switch (reference.Hash)
-            {
-                case 0x80809AD8:
-                    // EntityView dynamicView = new EntityView();
-                    // dynamicView.LoadEntity(hash);
-                    // MakeNewTab(hash, dynamicView);
-                    break;
-                case 0x80806D44:
-                    // StaticView staticView = new StaticView(hash);
-                    // staticView.LoadStatic(ELOD.MostDetail);
-                    // MakeNewTab(hash, staticView);
-                    break;
-                case 0x808093AD:
-                    // MapView mapView = new MapView(hash);
-                    // mapView.LoadMap();
-                    // MakeNewTab(hash, mapView);
-                    break;
-                case 0x80808E8E:
-                    // ActivityView activityView = new ActivityView();
-                    // activityView.LoadActivity(hash);
-                    // MakeNewTab(hash, activityView);
-                    // SetNewestTabSelected();
-                    break;
-                default:
-                    MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
-                    break;
-            }
-        }
-        else
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     private void MenuTab_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Middle)
         {
             MainTabControl.Items.Remove(sender as TabItem);
+        }
+    }
+
+
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.D && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            MakeNewTab("Dev", new DevView());
+            SetNewestTabSelected();
         }
     }
 }

@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Charm"
         mc:Ignorable="d"
         Loaded="OnControlLoaded"
+        PreviewKeyDown="MainWindow_PreviewKeyDown"
         Title="Charm" Height="1080" Width="1920">
     <Grid>
         <Grid.ColumnDefinitions>
