@@ -65,8 +65,8 @@ public partial class ActivityMapView : UserControl
                     StaticMapData tag = m.MapResource.Header.DataTables[1].DataTable.Header.DataEntries[0].DataResource.StaticMapParent.Header.StaticMap;
                     items.Add(new DisplayStaticMap
                     {
-                        Hash = tag.Hash,
-                        Name = $"{tag.Hash}: {tag.Header.Instances.Count} instances, {tag.Header.Statics.Count} uniques",
+                        Hash = m.MapResource.Hash,
+                        Name = $"{m.MapResource.Hash}: {tag.Header.Instances.Count} instances, {tag.Header.Statics.Count} uniques",
                         Instances = tag.Header.Instances.Count
                     });
                 }
@@ -89,7 +89,7 @@ public partial class ActivityMapView : UserControl
         {
             MapControl.Visibility = Visibility.Hidden;
         });
-        var maps = new List<StaticMapData>();
+        var maps = new List<Tag<D2Class_07878080>>();
         bool bSelectAll = false;
         foreach (DisplayStaticMap item in StaticList.Items)
         {
@@ -101,7 +101,7 @@ public partial class ActivityMapView : UserControl
             {
                 if (item.Selected || bSelectAll)
                 {
-                    maps.Add(PackageHandler.GetTag(typeof(StaticMapData), new TagHash(item.Hash)));
+                    maps.Add(PackageHandler.GetTag<D2Class_07878080>(new TagHash(item.Hash)));
                 }
             }
         }
@@ -116,9 +116,9 @@ public partial class ActivityMapView : UserControl
         List<string> mapStages = maps.Select((x, i) => $"exporting {i+1}/{maps.Count}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages);
         // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
-        Parallel.ForEach(maps, staticMapData =>
+        Parallel.ForEach(maps, map =>
         {
-            MapView.ExportFullMap(staticMapData);
+            MapView.ExportFullMap(map);
             MainWindow.Progress.CompleteStage();
         });
         // MapView.ExportFullMap(staticMapData);

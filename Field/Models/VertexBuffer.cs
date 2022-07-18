@@ -63,6 +63,13 @@ public class VertexBuffer : Tag
             case 0x4:
                 part.VertexTexcoords.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
+            case 0x8:
+                part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                break;
+            case 0xC:
+                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                part.VertexTexcoords.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                break;
             // case 0x10:
             //     part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
             //     // Quaternion normal
