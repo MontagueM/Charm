@@ -195,7 +195,7 @@ public class ConfigHandler
 
         Save();
     }
-    
+
     public static bool GetUnrealInteropEnabled()
     {
         if (_config.AppSettings.Settings["unrealInteropEnabled"] == null)
@@ -205,6 +205,33 @@ public class ConfigHandler
         return _config.AppSettings.Settings["unrealInteropEnabled"].Value == "True";
     }
     
+    #endregion
+
+    #region blenderInteropEnabled
+    
+    public static void SetBlenderInteropEnabled(bool bBlenderInteropEnabled)
+    {
+        if (_config.AppSettings.Settings["blenderInteropEnabled"] == null)
+        {
+            _config.AppSettings.Settings.Add("blenderInteropEnabled", bBlenderInteropEnabled.ToString());
+        }
+        else
+        {
+            _config.AppSettings.Settings["blenderInteropEnabled"].Value = bBlenderInteropEnabled.ToString();
+        }
+
+        Save();
+    }
+    
+    public static bool GetBlenderInteropEnabled()
+    {
+        if (_config.AppSettings.Settings["blenderInteropEnabled"] == null)
+        {
+            return false;
+        }
+        return _config.AppSettings.Settings["blenderInteropEnabled"].Value == "True";
+    }
+
     #endregion
 
     #region singleFolderMapsEnabled

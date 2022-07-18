@@ -69,6 +69,7 @@ namespace Charm
                     {
                         fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
                         AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                        //AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
                     }
                     fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
                     Console.WriteLine($"[Charm] Saved all data to {savePath}.");
