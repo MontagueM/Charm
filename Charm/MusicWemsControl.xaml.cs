@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -47,6 +49,29 @@ public partial class MusicWemsControl : UserControl
     {
         WwiseLoop loop = res.MusicLoopSound;
         WemList.ItemsSource = GetWemItems(loop);
+    }
+    
+    public async void Load(D2Class_F7458080 res)
+    {
+        // ambient_music_set instead of wwise_loop
+        MainWindow.Progress.SetProgressStages(res.AmbientMusicSet.Header.Unk08.Select((x,i) => $"Loading ambient music {i+1}/{res.AmbientMusicSet.Header.Unk08.Count}").ToList());
+        
+        ConcurrentBag<WemItem> wemItems = new ConcurrentBag<WemItem>();
+        await Task.Run(() =>
+        {
+            Parallel.ForEach(res.AmbientMusicSet.Header.Unk08, entry =>
+            {
+                var items = GetWemItems(entry.MusicLoopSound);
+                foreach (var wemItem in items)
+                {
+                    wemItem.Name += $" (Ambient group {entry.MusicLoopSound.Hash})";
+                    wemItems.Add(wemItem);
+                }
+                MainWindow.Progress.CompleteStage();
+            });
+        });
+
+        WemList.ItemsSource = wemItems;
     }
 }
 

@@ -320,7 +320,8 @@ class CharmImporter:
 
             ts_TextureUePath = f"/Game/{self.content_path}/Textures/PS_{i}_{texstruct['Hash']}.PS_{i}_{texstruct['Hash']}"
             ts_LoadedTexture = unreal.EditorAssetLibrary.load_asset(ts_TextureUePath)
-
+            if not ts_LoadedTexture:  # some cubemaps and 3d textures cannot be loaded for now
+                continue
             ts_LoadedTexture.set_editor_property('srgb', srgbs[i])
             if srgbs[i] == True:
                 ts_LoadedTexture.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_DEFAULT)

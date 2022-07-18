@@ -38,6 +38,12 @@ public partial class MusicView : UserControl
             WemsControl.Load(res);
             EventsControl.Load(res);
         }
+        else if (resource is D2Class_F7458080)
+        {
+            var res = (D2Class_F7458080) resource;
+            WemsControl.Load(res);
+            EventsControl.Load(res);
+        }
         else
         {
             if (resource is not D2Class_F7458080)

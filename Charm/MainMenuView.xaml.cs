@@ -89,6 +89,6 @@ public partial class MainMenuView : UserControl
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.TextureList);
         _mainWindow.MakeNewTab("textures", tagListView);
-        _mainWindow.SetNewestTabSelected();    
+        _mainWindow.SetNewestTabSelected();
     }
 }

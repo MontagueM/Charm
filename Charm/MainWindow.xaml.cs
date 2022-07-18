@@ -41,21 +41,21 @@ public partial class MainWindow
             _bHasInitialised = true;
         }
     }
-    
+
     public MainWindow()
     {
         InitializeComponent();
-        
+
         _logView = new LogView();
         LogHandler.Initialise(_logView);
-        
+
         // Make log
         MakeNewTab("Log", _logView);
         _logTab = _newestTab;
-        
+
         // Hide tab by default
         HideMainMenu();
-            
+
         // Check if packages path exists in config
         // ConfigHandler.CheckPackagesPathIsValid();
         if (ConfigHandler.DoesPathKeyExist("packagesPath") && ConfigHandler.DoesPathKeyExist("exportSavePath"))
@@ -95,7 +95,7 @@ public partial class MainWindow
 
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("1.0.0");
+        var currentVersion = new ApplicationVersion("1.0.4");
         var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         versionChecker.LatestVersionName = "version";
         try
@@ -103,8 +103,8 @@ public partial class MainWindow
             var upToDate = await versionChecker.IsUpToDate();
             if (!upToDate)
             {
-                MessageBox.Show("New version available on GitHub!");
-                Log.Information($"Version is not to date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
+                MessageBox.Show($"New version available on GitHub! (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id})");
+                Log.Information($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
             }
             else
             {
@@ -114,9 +114,9 @@ public partial class MainWindow
         catch (Exception e)
         {
             // Could not get or parse version file
-            #if !DEBUG
+#if !DEBUG
             MessageBox.Show("Could not get version.");
-            #endif
+#endif
             Log.Error($"Could not get version error {e}.");
         }
     }
@@ -158,7 +158,7 @@ public partial class MainWindow
         // Get all activity names
         await Task.Run(PackageHandler.GetAllActivityNames);
         Progress.CompleteStage();
-        
+
         // Set texture format
         TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
     }
@@ -215,18 +215,18 @@ public partial class MainWindow
         MakeNewTab("Configuration", new ConfigView());
         SetNewestTabSelected();
     }
-    
+
     private void OpenLogPanel_OnClick(object sender, RoutedEventArgs e)
     {
         MakeNewTab("Log", _logView);
-        SetNewestTabSelected();    
+        SetNewestTabSelected();
     }
 
     public void HideMainMenu()
     {
         MainMenuTab.Visibility = Visibility.Collapsed;
     }
-    
+
     public void ShowMainMenu()
     {
         MainMenuTab.Visibility = Visibility.Visible;
@@ -237,7 +237,7 @@ public partial class MainWindow
             _bHasInitialised = true;
         }
     }
-    
+
     public void SetNewestTabSelected()
     {
         MainTabControl.SelectedItem = _newestTab;
@@ -247,7 +247,7 @@ public partial class MainWindow
     {
         MainTabControl.SelectedItem = _logTab;
     }
-    
+
     public void SetNewestTabName(string newName)
     {
         _newestTab.Header = newName.Replace('_', '.');
@@ -262,60 +262,18 @@ public partial class MainWindow
         var items = MainTabControl.Items;
         foreach (TabItem item in items)
         {
-            if (name == (string) item.Header)
+            if (name == (string)item.Header)
             {
                 _newestTab = item;
                 return;
             }
         }
-        
+
         _newestTab = new TabItem();
         _newestTab.Content = content;
         _newestTab.MouseDown += MenuTab_OnMouseDown;
         MainTabControl.Items.Add(_newestTab);
         SetNewestTabName(name);
-    }
-    
-    public void AddWindow(TagHash hash)
-    {
-        // Adds a new tab to the tab control
-        DestinyHash reference = PackageHandler.GetEntryReference(hash);
-        int hType, hSubtype;
-        PackageHandler.GetEntryTypes(hash, out hType, out hSubtype);
-        if ((hType == 8 || hType == 16) && hSubtype == 0)
-        {
-            switch (reference.Hash)
-            {
-                case 0x80809AD8:
-                    // EntityView dynamicView = new EntityView();
-                    // dynamicView.LoadEntity(hash);
-                    // MakeNewTab(hash, dynamicView);
-                    break;
-                case 0x80806D44:
-                    // StaticView staticView = new StaticView(hash);
-                    // staticView.LoadStatic(ELOD.MostDetail);
-                    // MakeNewTab(hash, staticView);
-                    break;
-                case 0x808093AD:
-                    // MapView mapView = new MapView(hash);
-                    // mapView.LoadMap();
-                    // MakeNewTab(hash, mapView);
-                    break;
-                case 0x80808E8E:
-                    // ActivityView activityView = new ActivityView();
-                    // activityView.LoadActivity(hash);
-                    // MakeNewTab(hash, activityView);
-                    // SetNewestTabSelected();
-                    break;
-                default:
-                    MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
-                    break;
-            }
-        }
-        else
-        {
-            throw new NotImplementedException();
-        }
     }
 
     private void MenuTab_OnMouseDown(object sender, MouseButtonEventArgs e)
@@ -323,6 +281,16 @@ public partial class MainWindow
         if (e.ChangedButton == MouseButton.Middle)
         {
             MainTabControl.Items.Remove(sender as TabItem);
+        }
+    }
+
+
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.D && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            MakeNewTab("Dev", new DevView());
+            SetNewestTabSelected();
         }
     }
 }

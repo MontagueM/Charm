@@ -37,17 +37,20 @@ public static class Endian
 [StructLayout(LayoutKind.Sequential, Size = 4)]
 public class DestinyHash : IComparable<DestinyHash>
 {
-    public uint Hash;
+    public uint Hash = 0x811c9dc5;
     private string _string;
      
     public DestinyHash(string hash, bool bBigEndianString = false)
     {
-        Hash = uint.Parse(hash, NumberStyles.HexNumber);
-        if (hash.EndsWith("80") || bBigEndianString)
+        bool parsed = uint.TryParse(hash, NumberStyles.HexNumber, null, out Hash);
+        if (parsed)
         {
-            Hash = Endian.SwapU32(Hash);
+            if (hash.EndsWith("80") || bBigEndianString)
+            {
+                Hash = Endian.SwapU32(Hash);
+            }
+            _string = FnvHandler.GetStringFromHash(Hash);
         }
-        _string = FnvHandler.GetStringFromHash(Hash);
     }
         
     public DestinyHash(uint hash)

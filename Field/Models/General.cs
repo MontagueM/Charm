@@ -170,7 +170,7 @@ public struct Vector4
         W = w;
     }
         
-    public Vector4(sbyte x, sbyte y, sbyte z, sbyte w)
+    public Vector4(byte x, byte y, byte z, byte w)
     {
         X = x / 255.0f;
         Y = y / 255.0f;
