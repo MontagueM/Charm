@@ -16,6 +16,6 @@
                 <local:MusicEventsControl x:Name="EventsControl"/>
             </TabItem>
         </TabControl>
-        <TextBlock x:Name="SoundbankHash" FontSize="16" Text="" HorizontalAlignment="Center"/>
+        <TextBlock x:Name="SoundbankHash" Text="" HorizontalAlignment="Center"/>
     </Grid>
 </UserControl>
