@@ -91,4 +91,9 @@ public partial class MainMenuView : UserControl
         _mainWindow.MakeNewTab("textures", tagListView);
         _mainWindow.SetNewestTabSelected();    
     }
+
+    private void MainMenuView_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        var x = 0;
+    }
 }
