@@ -1273,7 +1273,8 @@ public partial class TagListView : UserControl
             Parallel.ForEach(vals, hash =>
             {
                 Wem wem = PackageHandler.GetTag(typeof(Wem), hash);
-                
+                if (wem.GetData().Length == 1)
+                    return;
                 _allTagItems.Add(new TagItem
                 {
                     Name = PackageHandler.GetEntryReference(hash),
