@@ -85,6 +85,11 @@ public class IndexBuffer : Tag
                             continue;
                         }
                         uint i2 = handle.ReadUInt16();
+                        if (i2 == 0xFF_FF)
+                        {
+                            triCount = 0;
+                            continue;
+                        }
                         uint i3 = handle.ReadUInt16();
                         if (i3 == 0xFF_FF)
                         {

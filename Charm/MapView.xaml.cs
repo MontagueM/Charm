@@ -73,10 +73,8 @@ public partial class MapView : UserControl
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
 
-        // Extract terrain
         ExtractDataTables(map, savePath, fbxHandler);
-        
-        
+
         if (ConfigHandler.GetUnrealInteropEnabled())
         {
             fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
@@ -94,7 +92,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
                 {
-                    staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
+                    // staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
                 }
                 else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
                 {

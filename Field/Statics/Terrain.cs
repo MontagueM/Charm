@@ -23,9 +23,23 @@ public class Terrain : Tag
     // To test use edz.strike_hmyn and alleys_a adf6ae80
     public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, bool bSaveShaders, D2Class_7D6C8080 parentResource)
     {
+        if (Hash == "F0E6AE80")
+        {
+            var a = 0;
+        }
         // Uses triangle strip + only using first set of vertices and indices
         List<Part> parts = new List<Part>();
-        Header.Unk78.ForEach(part => parts.Add(MakePart(part)));
+        // foreach (var part in Header.Unk78)
+        // {
+        //     if (part.Unk0B == 0)
+        //     {
+        //         parts.Add(MakePart(part));
+        //     }
+        // }
+        foreach (var part in Header.Unk50)
+        {
+            parts.Add(MakePart(part));
+        }
         fbxHandler.AddStaticToScene(parts, Hash);
     }
 
@@ -33,6 +47,29 @@ public class Terrain : Tag
     {
         Part part = new Part();
         part.Indices = Header.Indices1.Buffer.ParseBuffer(EPrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
+        // Get unique vertex indices we need to get data for
+        HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
+        foreach (UIntVector3 index in part.Indices)
+        {
+            uniqueVertexIndices.Add(index.X);
+            uniqueVertexIndices.Add(index.Y);
+            uniqueVertexIndices.Add(index.Z);
+        }
+        part.VertexIndices = uniqueVertexIndices.ToList();
+
+        Header.Vertices1.Buffer.ParseBuffer(part, uniqueVertexIndices);
+        Header.Vertices2.Buffer.ParseBuffer(part, uniqueVertexIndices);
+
+        return part;
+    }
+    
+    uint prevoffset = 0;
+    
+    public Part MakePart(D2Class_866C8080 entry)
+    {
+        Part part = new Part();
+        part.Indices = Header.Indices1.Buffer.ParseBuffer(EPrimitiveType.TriangleStrip, prevoffset, entry.Unk40-prevoffset);
+        prevoffset = entry.Unk40;
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
         foreach (UIntVector3 index in part.Indices)
@@ -116,14 +153,14 @@ public struct D2Class_866C8080
     public float Unk18;
     [DestinyOffset(0x20)]
     public Vector4 Unk20;
-    public int Unk30;
-    public int Unk34;
-    public int Unk38;
-    public int Unk3C;
-    public int Unk40;
-    public int Unk44;
-    public int Unk48;
-    public int Unk4C;
+    public uint Unk30;
+    public uint Unk34;
+    public uint Unk38;
+    public uint Unk3C;
+    public uint Unk40;
+    public uint Unk44;
+    public uint Unk48;
+    public uint Unk4C;
     [DestinyField(FieldType.TagHash)]
     public TextureHeader Dyemap;
 }
