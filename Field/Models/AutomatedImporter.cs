@@ -46,7 +46,7 @@ public class AutomatedImporter
     public static void SaveInteropBlenderPythonFile(string saveDirectory, string meshName, EImportType importType, ETextureFormat textureFormat, bool bSingleFolder = true)
     {
         // Copy and rename file
-        string saveDirectory = saveDirectory.Replace("\\", "/")
+        saveDirectory = saveDirectory.Replace("\\", "/");
         File.Copy("import_to_blender.py", $"{saveDirectory}/{meshName}_import_to_blender.py", true);
         // if (importType == EImportType.Static) TODO?
         // {
