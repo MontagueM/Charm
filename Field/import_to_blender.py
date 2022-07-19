@@ -14,8 +14,9 @@ BPY = bpy.ops
 
 #####
 Name = "MAP_HASH"
-Filepath = "OUTPUT_DIR"
+Filepath = os.path.abspath(bpy.context.space_data.text.filepath+"/..") #"OUTPUT_DIR"
 #####
+#print(Filepath)
 
 info_name = Name + "_info.cfg" 
 config = json.load(open(Filepath + f"\\{info_name}"))
@@ -30,7 +31,7 @@ def assemble_map():
     oldobjects = bpy.data.objects.items()
 
     BPY.import_scene.fbx(filepath=FileName)
-    #add_to_collection()
+    
     
     #Now get all the objects in the scene after the import
     newobjects = bpy.data.objects.items()
@@ -71,6 +72,7 @@ def assemble_map():
                
                 ob_copy.scale = [instance["Scale"]]*3
     
+    add_to_collection()
     print("Assigning materials...")
     assign_map_materials()
 
@@ -211,16 +213,31 @@ def cleanup():
     print("Done cleaning up!")
 
 def add_to_collection(): #Needs to be fixed
-    obj = bpy.context.selected_objects
-    #obj_old_coll = obj.users_collection #list of all collection the obj is in
+    #make a collection for the objects
+    bpy.data.collections.new(str(Name))
+    #link the collection to the scene
+    bpy.context.scene.collection.children.link(bpy.data.collections[str(Name)])
 
-    new_coll = bpy.data.collections.new(name="COLLECTION TEST") #create new coll in data
-    bpy.context.scene.collection.children.link(new_coll) #add new coll to the scene
-    new_coll.objects.link(obj) #link obj to scene
+    C = bpy.context
 
-    #for ob in obj_old_coll: #unlink from all  precedent obj collections
-        #ob.objects.unlink(obj)
+    # List of object references
+    objs = C.selected_objects
 
+    # Set target collection to a known collection 
+    coll_target = C.scene.collection.children.get(str(Name))
+
+    # If target found and object list not empty
+    if coll_target and objs:
+
+        # Loop through all objects
+        for ob in objs:
+            # Loop through all collections the obj is linked to
+            for coll in ob.users_collection:
+                # Unlink the object
+                coll.objects.unlink(ob)
+
+            # Link each object to the target collection
+            coll_target.objects.link(ob)
 
 if __name__ == "__main__":
     #Deselect all objects just in case 
