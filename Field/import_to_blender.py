@@ -30,7 +30,7 @@ def assemble_map():
     oldobjects = bpy.data.objects.items()
 
     BPY.import_scene.fbx(filepath=FileName)
-    add_to_collection()
+    #add_to_collection()
     
     #Now get all the objects in the scene after the import
     newobjects = bpy.data.objects.items()
@@ -210,16 +210,16 @@ def cleanup():
             bpy.data.images.remove(block)
     print("Done cleaning up!")
 
-def add_to_collection():
-    obj = bpy.context.selectable_objects
-    obj_old_coll = obj.users_collection #list of all collection the obj is in
+def add_to_collection(): #Needs to be fixed
+    obj = bpy.context.selected_objects
+    #obj_old_coll = obj.users_collection #list of all collection the obj is in
 
     new_coll = bpy.data.collections.new(name="COLLECTION TEST") #create new coll in data
     bpy.context.scene.collection.children.link(new_coll) #add new coll to the scene
     new_coll.objects.link(obj) #link obj to scene
 
-    for ob in obj_old_coll: #unlink from all  precedent obj collections
-        ob.objects.unlink(obj)
+    #for ob in obj_old_coll: #unlink from all  precedent obj collections
+        #ob.objects.unlink(obj)
 
 
 if __name__ == "__main__":
