@@ -35,11 +35,12 @@ public partial class ActivityMapView : UserControl
         var maps = new ObservableCollection<DisplayBubble>();
         foreach (var mapEntry in activity.Header.Unk50)
         {
-            if (mapEntry.MapReference is null)  // idk why this can happen but it can, some weird stuff with h64
+            // idk why this can happen but it can, some weird stuff with h64
+            // for the child map reference, ive only seen it once so far but the hash for it was just FFFFFFFF in the map reference file
+            if (mapEntry.MapReference is null || mapEntry.MapReference.Header.ChildMapReference == null)
                 continue;
             DisplayBubble displayMap = new DisplayBubble();
             displayMap.Name = mapEntry.Unk10.BubbleName;  // assuming Unk10 is 0F978080 or 0B978080
-
             displayMap.Hash = mapEntry.MapReference.Header.ChildMapReference.Hash;
             maps.Add(displayMap);
         }
