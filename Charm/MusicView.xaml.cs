@@ -37,12 +37,16 @@ public partial class MusicView : UserControl
             var res = (D2Class_F5458080) resource;
             WemsControl.Load(res);
             EventsControl.Load(res);
+            var sbhash = res.MusicLoopSound.Header.Unk18.Header.SoundBank.Hash;
+            SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.GetPkgId().ToString("X4")}-{sbhash.GetEntryIndex().ToString("X4")}";
         }
         else if (resource is D2Class_F7458080)
         {
             var res = (D2Class_F7458080) resource;
             WemsControl.Load(res);
             EventsControl.Load(res);
+            var sbhash = res.AmbientMusicSet.Header.Unk08[0].MusicLoopSound.Header.Unk18.Header.SoundBank.Hash;
+            SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.GetPkgId().ToString("X4")}-{sbhash.GetEntryIndex().ToString("X4")}";
         }
         else
         {
