@@ -39,7 +39,7 @@ public class TextureHeader : Tag
         }
         else
         {
-            data = new TextureBuffer(PackageHandler.GetEntryReference(Hash)).GetBufferData();
+            data = PackageHandler.GetTag(typeof(TextureBuffer), PackageHandler.GetEntryReference(Hash)).GetBufferData();
         }
 
         DirectXTexUtility.TexMetadata metadata = DirectXTexUtility.GenerateMetaData(Header.Width, Header.Height, Header.MipLevels, (DirectXTexUtility.DXGIFormat)format, Header.ArraySize == 6);

@@ -175,6 +175,11 @@ public partial class ActivityMapView : UserControl
         }
         MapControl.Visibility = Visibility.Visible;
     }
+    
+    public void Dispose()
+    {
+        MapControl.Dispose();
+    }
 }
 
 public class DisplayBubble
