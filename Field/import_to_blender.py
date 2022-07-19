@@ -14,7 +14,7 @@ BPY = bpy.ops
 
 #####
 Name = "MAP_HASH"
-Filepath = "OUTPUT_DIR".replace("\\", "/")
+Filepath = "OUTPUT_DIR"
 #####
 
 info_name = Name + "_info.cfg" 
