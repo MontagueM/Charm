@@ -40,7 +40,7 @@ public partial class MapView : UserControl
 
     private void GetStaticMapData(TagHash tagHash, ELOD detailLevel)
     {
-        StaticMapData staticMapData = new StaticMapData(tagHash);
+        StaticMapData staticMapData = PackageHandler.GetTag(typeof(StaticMapData), tagHash);
         SetMapUI(staticMapData, detailLevel);
     }
 
@@ -52,12 +52,19 @@ public partial class MapView : UserControl
             MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
             MVM.SetChildren(displayParts);
         });
+        displayParts.Clear();
     }
 
     public void Clear()
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         MVM.Clear();
+    }
+
+    public void Dispose()
+    {
+        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        MVM.Dispose();
     }
     
     public static void ExportFullMap(StaticMapData staticMapData)

@@ -277,7 +277,7 @@ public class PackageHandler
             gch.Free();
         }
     }
-    
+
     [DllImport("Symmetry.dll", EntryPoint = "DllGetPackageName", CallingConvention = CallingConvention.StdCall)]
     public extern static IntPtr DllGetPackageName(int packageId);
 

@@ -92,7 +92,7 @@ public partial class DevView : UserControl
         }
         else if (hType == 32)
         {
-            TextureHeader textureHeader = new TextureHeader(new TagHash(hash));
+            TextureHeader textureHeader = PackageHandler.GetTag(typeof(TextureHeader), new TagHash(hash));
             if (textureHeader.IsCubemap())
             {
                 var cubemapView = new CubemapView();

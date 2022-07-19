@@ -280,7 +280,13 @@ public partial class MainWindow
     {
         if (e.ChangedButton == MouseButton.Middle)
         {
-            MainTabControl.Items.Remove(sender as TabItem);
+            TabItem tab = (TabItem)sender;
+            MainTabControl.Items.Remove(tab);
+            dynamic content = tab.Content;
+            if (content is ActivityView av)
+            {
+                av.Dispose();
+            }
         }
     }
 
