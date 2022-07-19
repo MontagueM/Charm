@@ -64,7 +64,7 @@ public class VertexBuffer : Tag
                 part.VertexTexcoords.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
             case 0x8:
-                part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                part.VertexPositions.Add(new Vector4(handle.ReadUInt16(), handle.ReadUInt16(), handle.ReadUInt32(), 0, true));
                 break;
             case 0xC:
                 part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));

@@ -23,19 +23,19 @@ public class Terrain : Tag
     // To test use edz.strike_hmyn and alleys_a adf6ae80
     public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, bool bSaveShaders, D2Class_7D6C8080 parentResource)
     {
-        if (Hash == "F0E6AE80")
+        if (Hash != "F0E6AE80")
         {
-            var a = 0;
+            // return;
         }
         // Uses triangle strip + only using first set of vertices and indices
         List<Part> parts = new List<Part>();
-        // foreach (var part in Header.Unk78)
-        // {
-        //     if (part.Unk0B == 0)
-        //     {
-        //         parts.Add(MakePart(part));
-        //     }
-        // }
+        foreach (var part in Header.Unk78)
+        {
+            if (part.Unk0B == 0)
+            {
+                parts.Add(MakePart(part));
+            }
+        }
         var globalOffset = new Vector3(
             (Header.Unk10.X + Header.Unk20.X) / 2,
             (Header.Unk10.Y + Header.Unk20.Y) / 2,
@@ -45,20 +45,23 @@ public class Terrain : Tag
         var y = new List<float>();
         var z = new List<float>();
         Vector3 localOffset;
-        foreach (var partEntry in Header.Unk50)
-        {
-            Part part = MakePart(partEntry);
-            parts.Add(part);
-
-            x.AddRange(part.VertexPositions.Select(x => x.X));
-            y.AddRange(part.VertexPositions.Select(y => y.Y));
-            z.AddRange(part.VertexPositions.Select(z => z.Z));
-        }
+        // foreach (var partEntry in Header.Unk50)
+        // {
+        //     Part part = MakePart(partEntry);
+        //     parts.Add(part);
+        //
+        //     x.AddRange(part.VertexPositions.Select(a => a.X));
+        //     y.AddRange(part.VertexPositions.Select(a => a.Y));
+        //     z.AddRange(part.VertexPositions.Select(a => a.Z));
+        // }
         localOffset = new Vector3((x.Max() + x.Min())/2, (y.Max() + y.Min())/2, (z.Max() + z.Min())/2);
-
+        var min = new Vector3(x.Min(), y.Min(), z.Min());
+        var max = new Vector3(x.Max(), y.Max(), z.Max());
         foreach (var part in parts)
         {
-            TransformPositions(part, globalOffset, localOffset);
+            // scale by 1.99 ish, -1 for all sides, multiply by 512?
+            TransformPositions(part, globalOffset, localOffset, min, max);
+            // TransformPositions2(part, globalOffset, localOffset, min, max);
         }
         
         fbxHandler.AddStaticToScene(parts, Hash);
@@ -107,14 +110,37 @@ public class Terrain : Tag
         return part;
     }
     
-    private void TransformPositions(Part part, Vector3 globalOffset, Vector3 localOffset)
+    private void TransformPositions(Part part, Vector3 globalOffset, Vector3 localOffset, Vector3 min, Vector3 max)
+    {
+        for (int i = 0; i < part.VertexPositions.Count; i++)
+        {
+            // based on middle points
+            part.VertexPositions[i] = new Vector4(
+                (part.VertexPositions[i].X - localOffset.X) * 512 * 2 + globalOffset.X,
+                (part.VertexPositions[i].Y - localOffset.Y) * 512 * 2 + globalOffset.Y,
+                (part.VertexPositions[i].Z - localOffset.Z) * 1 * 2 + globalOffset.Z,
+                part.VertexPositions[i].W
+            );
+            // interpolate
+            var a = 0;
+            // part.VertexPositions[i] = new Vector4(
+            //         Header.Unk10.X + Math.Abs((Header.Unk20.X - Header.Unk10.X) * (part.VertexPositions[i].X - min.X) / (max.X - min.X)),
+            //         Header.Unk10.Y + Math.Abs((Header.Unk20.Y - Header.Unk10.Y) * (part.VertexPositions[i].Y - min.Y) / (max.Y - min.Y)),
+            //         Header.Unk10.Z + Math.Abs((Header.Unk20.Z - Header.Unk10.Z) * (part.VertexPositions[i].Z - min.Z) / (max.Z - min.Z)),
+            //     part.VertexPositions[i].W
+            // );
+            var b = 0;
+        }
+    }
+    
+    private void TransformPositions2(Part part, Vector3 globalOffset, Vector3 localOffset, Vector3 min, Vector3 max)
     {
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
             part.VertexPositions[i] = new Vector4(
-                (part.VertexPositions[i].X - localOffset.X) * 512 + globalOffset.X,
-                (part.VertexPositions[i].Y - localOffset.Y) * 512 + globalOffset.Y,
-                (part.VertexPositions[i].Z - localOffset.Z) * 4 + globalOffset.Z,
+                Header.Unk10.X + ((float)1.96875 * part.VertexPositions[i].X - 1) * 512,
+                Header.Unk10.Y + ((float)1.96875 * part.VertexPositions[i].Y - 1) * 512,
+                Header.Unk10.Z + ((float)1.96875 * part.VertexPositions[i].Z - 1),
                 part.VertexPositions[i].W
             );
         }

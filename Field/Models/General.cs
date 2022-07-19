@@ -161,6 +161,24 @@ public struct Vector4
             W = w / 32_767.0f;  
         }
     }
+    
+    public Vector4(uint x, uint y, uint z, uint w, bool bIsVector3 = false)
+    {
+        if (bIsVector3)
+        {
+            X = x / 65_535.0f;
+            Y = y / 65_535.0f;
+            Z = z / 65_535.0f;
+            W = w;
+        }
+        else
+        {
+            X = x / 65_535.0f;
+            Y = y / 65_535.0f;
+            Z = z / 65_535.0f;
+            W = w / 65_535.0f;  
+        }
+    }
 
     public Vector4(float x, float y, float z, float w)
     {
