@@ -400,4 +400,14 @@ public struct D2Class_FB458080
     public DestinyHash EventHash;
 }
 
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_F0458080
+{
+    public long FileSize;
+    public int Unk08;
+    public int Unk0C;
+    public int WwiseSwitchKey;
+}
+
+
 #endregion
