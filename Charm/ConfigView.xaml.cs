@@ -76,7 +76,9 @@ public partial class ConfigView : UserControl
         ETextureFormat etfval = ConfigHandler.GetOutputTextureFormat();
         ctf.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems<ETextureFormat>();
         ctf.SettingsCombobox.SelectedIndex = (int)etfval;
-        ctf.ChangeButton.Click += OutputTextureFormat_OnClick;
+        ctf.SettingsCombobox.SelectionChanged += OutputTextureFormat_OnSelectionChanged;
+        ctf.ChangeButton.Visibility = Visibility.Hidden;
+        //ctf.ChangeButton.Click += OutputTextureFormat_OnClick;
         ConfigPanel.Children.Add(ctf);
 
         TextBlock lbl = new TextBlock();
@@ -156,6 +158,13 @@ public partial class ConfigView : UserControl
     {
         // ConfigHandler.SetOutputTextureFormat();
         var index = ((sender as Button).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
+        ConfigHandler.SetOutputTextureFormat((ETextureFormat)index);
+        TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
+        PopulateConfigPanel();    
+    }
+    private void OutputTextureFormat_OnSelectionChanged(object sender, RoutedEventArgs e)
+    {
+        var index = ((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
         ConfigHandler.SetOutputTextureFormat((ETextureFormat)index);
         TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
         PopulateConfigPanel();    
