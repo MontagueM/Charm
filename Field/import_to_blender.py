@@ -18,7 +18,7 @@ Filepath = "OUTPUT_DIR"
 #####
 
 info_name = Name + "_info.cfg" 
-config = json.load(open(Filepath + f"/{info_name}"))
+config = json.load(open(Filepath + f"\\{info_name}"))
 FileName = Filepath + "\\" + Name + ".fbx" 
 
 original_statics = {} #original static objects
