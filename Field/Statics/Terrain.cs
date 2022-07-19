@@ -36,10 +36,31 @@ public class Terrain : Tag
         //         parts.Add(MakePart(part));
         //     }
         // }
-        foreach (var part in Header.Unk50)
+        var globalOffset = new Vector3(
+            (Header.Unk10.X + Header.Unk20.X) / 2,
+            (Header.Unk10.Y + Header.Unk20.Y) / 2,
+            (Header.Unk10.Z + Header.Unk20.Z) / 2);
+
+        var x = new List<float>();
+        var y = new List<float>();
+        var z = new List<float>();
+        Vector3 localOffset;
+        foreach (var partEntry in Header.Unk50)
         {
-            parts.Add(MakePart(part));
+            Part part = MakePart(partEntry);
+            parts.Add(part);
+
+            x.AddRange(part.VertexPositions.Select(x => x.X));
+            y.AddRange(part.VertexPositions.Select(y => y.Y));
+            z.AddRange(part.VertexPositions.Select(z => z.Z));
         }
+        localOffset = new Vector3((x.Max() + x.Min())/2, (y.Max() + y.Min())/2, (z.Max() + z.Min())/2);
+
+        foreach (var part in parts)
+        {
+            TransformPositions(part, globalOffset, localOffset);
+        }
+        
         fbxHandler.AddStaticToScene(parts, Hash);
     }
 
@@ -82,8 +103,21 @@ public class Terrain : Tag
 
         Header.Vertices1.Buffer.ParseBuffer(part, uniqueVertexIndices);
         Header.Vertices2.Buffer.ParseBuffer(part, uniqueVertexIndices);
-
+        
         return part;
+    }
+    
+    private void TransformPositions(Part part, Vector3 globalOffset, Vector3 localOffset)
+    {
+        for (int i = 0; i < part.VertexPositions.Count; i++)
+        {
+            part.VertexPositions[i] = new Vector4(
+                (part.VertexPositions[i].X - localOffset.X) * 512 + globalOffset.X,
+                (part.VertexPositions[i].Y - localOffset.Y) * 512 + globalOffset.Y,
+                (part.VertexPositions[i].Z - localOffset.Z) * 4 + globalOffset.Z,
+                part.VertexPositions[i].W
+            );
+        }
     }
 }
 
