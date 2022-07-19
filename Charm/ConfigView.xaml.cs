@@ -78,7 +78,6 @@ public partial class ConfigView : UserControl
         ctf.SettingsCombobox.SelectedIndex = (int)etfval;
         ctf.SettingsCombobox.SelectionChanged += OutputTextureFormat_OnSelectionChanged;
         ctf.ChangeButton.Visibility = Visibility.Hidden;
-        //ctf.ChangeButton.Click += OutputTextureFormat_OnClick;
         ConfigPanel.Children.Add(ctf);
 
         TextBlock lbl = new TextBlock();
@@ -154,14 +153,6 @@ public partial class ConfigView : UserControl
         PopulateConfigPanel();
     }
     
-    private void OutputTextureFormat_OnClick(object sender, RoutedEventArgs e)
-    {
-        // ConfigHandler.SetOutputTextureFormat();
-        var index = ((sender as Button).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
-        ConfigHandler.SetOutputTextureFormat((ETextureFormat)index);
-        TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
-        PopulateConfigPanel();    
-    }
     private void OutputTextureFormat_OnSelectionChanged(object sender, RoutedEventArgs e)
     {
         var index = ((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
