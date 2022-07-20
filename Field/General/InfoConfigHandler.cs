@@ -11,6 +11,7 @@ public class InfoConfigHandler
 {
     public bool bOpen = false;
     private ConcurrentDictionary<string, dynamic> _config = new ConcurrentDictionary<string, dynamic>();
+    private Dictionary<string, dynamic> _matTexs = new Dictionary<string, dynamic>();
 
     public InfoConfigHandler()
     {
@@ -53,14 +54,17 @@ public class InfoConfigHandler
             }
         }
         Dictionary<int, TexInfo> pstex = new Dictionary<int, TexInfo>();
+        List<string> pstexhash = new List<string>();
         textures.Add("PS", pstex);
         foreach (var pst in material.Header.PSTextures)
         {
             if (pst.Texture != null)
             {
+                pstexhash.Add(pst.Texture.Hash + " " + pst.Texture.IsSrgb());
                 pstex.Add((int)pst.TextureIndex, new TexInfo {Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
             }
         }
+        _matTexs.TryAdd(material.Hash, pstexhash); //No reason to add VS textures really
     }
     
     public void AddPart(Part part, string partName)
@@ -140,6 +144,12 @@ public class InfoConfigHandler
         {
             File.WriteAllText($"{path}/info.cfg", s);
         }
+
+        //TODO: Check if "Blender export" is checked in the settings
+        string m = JsonConvert.SerializeObject(_matTexs, Formatting.Indented);
+        string blenderPath = $"{path}/{_config["MeshName"]}_BlenderMats.json";
+        File.WriteAllText(blenderPath, m);
+             
         Dispose();
     }
 }
