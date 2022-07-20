@@ -151,11 +151,11 @@ def assign_map_materials():
                 texture.alpha_mode = "CHANNEL_PACKED"
                 texnode.image = texture      #Assign the texture to the node
 
-            #assign a texture to material's diffuse and normal just to help a little 
-            if texture.colorspace_settings.name == "sRGB":     
-                link_diffuse(materials[k])
-            if texture.colorspace_settings.name == "Non-Color":
-                link_normal(materials[k], n) 
+                #assign a texture to material's diffuse and normal just to help a little 
+                if texture.colorspace_settings.name == "sRGB":     
+                    link_diffuse(materials[k])
+                if texture.colorspace_settings.name == "Non-Color":
+                    link_normal(materials[k], n) 
             n += 1
 
 def find_nodes_by_type(material, node_type):
