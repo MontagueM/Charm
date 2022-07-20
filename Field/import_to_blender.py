@@ -145,9 +145,11 @@ def assign_map_materials():
             #     texnode.parent = matnodes.get('Normal')
 
             texture = bpy.data.images.get("PS_" + str(n) + "_" + i[:8] + "TEX_EXT")
-            texture.colorspace_settings.name = colorspace
-            texture.alpha_mode = "CHANNEL_PACKED"
-            texnode.image = texture      
+           
+            if texture:
+                texture.colorspace_settings.name = colorspace
+                texture.alpha_mode = "CHANNEL_PACKED"
+                texnode.image = texture      #Assign the texture to the node
 
             #assign a texture to material's diffuse and normal just to help a little 
             if texture.colorspace_settings.name == "sRGB":     
