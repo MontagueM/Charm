@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Field;
+using Field.Entities;
 using Field.General;
 using Field.Models;
 using Field.Textures;
@@ -30,7 +31,7 @@ public partial class DevView : UserControl
     
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R)
+        if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R && e.Key != Key.E)
         {
             return;
         }
@@ -69,6 +70,17 @@ public partial class DevView : UserControl
                 else
                 {
                     TagHashBox.Text = $"REF {refHash}";
+                }
+                break;
+            case Key.E:
+                Entity entity = PackageHandler.GetTag(typeof(Entity), hash);
+                if (entity.Model != null)
+                {
+                    OpenHxD(entity.Model.Hash);
+                }
+                else
+                {
+                    TagHashBox.Text = $"NO MODEL";
                 }
                 break;
         }

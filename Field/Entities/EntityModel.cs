@@ -51,8 +51,7 @@ public class EntityModel : Tag
             }
             else
             {
-                if (eDetailLevel == ELOD.MostDetail && (part.DetailLevel == 0 || part.DetailLevel == 1 || part.DetailLevel == 2 ||
-                    part.DetailLevel == 10))
+                if (eDetailLevel == ELOD.MostDetail && (part.DetailLevel == 0 || part.DetailLevel == 1 || part.DetailLevel == 2 || part.DetailLevel == 3 || part.DetailLevel == 10))
                 {
                     parts.Add(i, part);
                 }
