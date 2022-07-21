@@ -16,18 +16,16 @@ Name = "MAP_HASH"
 Filepath = os.path.abspath(bpy.context.space_data.text.filepath+"/..") #"OUTPUT_DIR"
 #
 
-#Directories
-info_name = Name + "_info.cfg"
-mat_json = Name + "_BlenderMats.json" 
-#
-
 #Files to open
-mat_config = json.load(open(Filepath + "\\" + mat_json))
+info_name = Name + "_info.cfg"
 config = json.load(open(Filepath + f"\\{info_name}"))
 FileName = Filepath + "\\" + Name + ".fbx" 
 #
 
 original_statics = {} #original static objects
+
+#Dont Touch This
+Blender_Mats = BLENDER_MATS
 
 def assemble_map():
     print("Starting import on map: " + Name)
@@ -37,12 +35,11 @@ def assemble_map():
 
     BPY.import_scene.fbx(filepath=FileName) #Just imports the fbx, no special settings needed
     
-    #Now get all the objects in the scene after the import
+    #Now grabs all the objects in the scene after the import
     newobjects = bpy.data.objects.items()
 
     for ob in oldobjects:
         if ob[0] not in newobjects:
-            #print("Removing: " + ob[0])
             newobjects.remove(ob) #Removes every object from the list that wasnt imported (makes things not instance multiple times?)
 
     print("Imported map: " + Name)
@@ -122,11 +119,19 @@ def assign_map_materials():
             bpy.data.images.load(Filepath + "/Textures/" + f"/{img}", check_existing = True)
             print(f"Loaded {img}")
     
-    #New way of assigning textures to materials, kinda cleaner but required a new json file to be created from the tool
-    for k, mat in mat_config.items():
+    #New way of assigning textures to materials, kinda cleaner than using the cfg file
+    for k, mat in Blender_Mats.items():
         n = 0 #Kinda hacky, but it works
         matnodes = materials[k].node_tree.nodes
+        matnodes['Principled BSDF'].inputs['Metallic'].default_value = 0
         for i in mat:
+            current_image = "PS_" + str(n) + "_" + i[:8] + "TEX_EXT"
+
+            #Check if the material already has a texture node with a specific name, avoids duplicates
+            for k1, node in matnodes.items():
+                if node.label == current_image:
+                    return
+                    
             isSRGB = i[9:].lower() #Also kinda hacky
             if str(isSRGB) == "true":
                 colorspace = "sRGB"
@@ -144,9 +149,13 @@ def assign_map_materials():
             #     frame.name = "Normal"
             #     texnode.parent = matnodes.get('Normal')
 
-            texture = bpy.data.images.get("PS_" + str(n) + "_" + i[:8] + "TEX_EXT")
-           
+            texture = bpy.data.images.get(current_image)
+
+            if not texture: #Rare(?) case where the textures PS 'index' starts at 2 instead of 0
+                texture = bpy.data.images.get("PS_2" + "_" + i[:8] + "TEX_EXT")
+            
             if texture:
+                texnode.label = texture.name
                 texture.colorspace_settings.name = colorspace
                 texture.alpha_mode = "CHANNEL_PACKED"
                 texnode.image = texture      #Assign the texture to the node
@@ -192,8 +201,10 @@ def link_diffuse(material):
     shader_node = s_list[0]
     image_socket = image_node.outputs['Color']
     shader_socket = shader_node.inputs['Base Color']
+    if shader_socket.is_linked:
+            return False
     material.node_tree.links.new(shader_socket, image_socket)
-    s_list.clear #clear the list so we don't try to link to the same nodes again
+    #s_list.clear #clear the list so we don't try to link to the same nodes again
 
 def link_normal(material, num = 0):
     it_list = find_nodes_by_type(material, 'TEX_IMAGE')
@@ -202,10 +213,13 @@ def link_normal(material, num = 0):
         return False
     image_node = it_list[num]
     shader_node = s_list[0]
-    image_socket = image_node.outputs['Color']
-    shader_socket = shader_node.inputs['Color']
-    material.node_tree.links.new(shader_socket, image_socket)
-    s_list.clear #clear the list so we don't try to link to the same nodes again
+    if image_node.image.colorspace_settings.name == "Non-Color":
+        image_socket = image_node.outputs['Color']
+        shader_socket = shader_node.inputs['Color']
+        if shader_socket.is_linked:
+            return False
+        material.node_tree.links.new(shader_socket, image_socket)
+    #s_list.clear #clear the list so we don't try to link to the same nodes again
                      
 def cleanup():
     print(f"Cleaning up...")

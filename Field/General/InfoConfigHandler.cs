@@ -11,7 +11,7 @@ public class InfoConfigHandler
 {
     public bool bOpen = false;
     private ConcurrentDictionary<string, dynamic> _config = new ConcurrentDictionary<string, dynamic>();
-    private Dictionary<string, dynamic> _matTexs = new Dictionary<string, dynamic>();
+    private ConcurrentDictionary<string, dynamic> _matTexs = new ConcurrentDictionary<string, dynamic>();
 
     public InfoConfigHandler()
     {
@@ -136,20 +136,20 @@ public class InfoConfigHandler
         }
         
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
+        string m = JsonConvert.SerializeObject(_matTexs, Formatting.Indented);
         if (_config.ContainsKey("MeshName"))
         {
             File.WriteAllText($"{path}/{_config["MeshName"]}_info.cfg", s);
+            
+            string text = File.ReadAllText($"{path}/{_config["MeshName"]}_import_to_blender.py");
+            text = text.Replace("BLENDER_MATS", m);
+            File.WriteAllText($"{path}/{_config["MeshName"]}_import_to_blender.py", text);
         }
         else
         {
             File.WriteAllText($"{path}/info.cfg", s);
         }
 
-        //TODO: Check if "Blender export" is checked in the settings
-        string m = JsonConvert.SerializeObject(_matTexs, Formatting.Indented);
-        string blenderPath = $"{path}/{_config["MeshName"]}_BlenderMats.json";
-        File.WriteAllText(blenderPath, m);
-             
         Dispose();
     }
 }
