@@ -24,9 +24,6 @@ FileName = Filepath + "\\" + Name + ".fbx"
 
 original_statics = {} #original static objects
 
-#Dont Touch This
-#Blender_Mats = BLENDER_MATS
-
 def assemble_map():
     print("Starting import on map: " + Name)
     
@@ -57,7 +54,7 @@ def assemble_map():
         try:  # fix this
             parts = static_names[static]
         except:
-            print(f"Failed on {static}")
+            continue
         for part in parts:
             for instance in instances:
 
