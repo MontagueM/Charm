@@ -25,7 +25,7 @@ FileName = Filepath + "\\" + Name + ".fbx"
 original_statics = {} #original static objects
 
 #Dont Touch This
-Blender_Mats = BLENDER_MATS
+#Blender_Mats = BLENDER_MATS
 
 def assemble_map():
     print("Starting import on map: " + Name)
@@ -119,21 +119,23 @@ def assign_map_materials():
             bpy.data.images.load(Filepath + "/Textures/" + f"/{img}", check_existing = True)
             print(f"Loaded {img}")
     
-    #New way of assigning textures to materials, kinda cleaner than using the cfg file
-    for k, mat in Blender_Mats.items():
+    #New way of getting info from cfg, thank you Mont
+    d = {x : [y["PS"].values()] for x, y in config["Materials"].items()}
+
+    for k, mat in d.items():
         n = 0 #Kinda hacky, but it works
         matnodes = materials[k].node_tree.nodes
         matnodes['Principled BSDF'].inputs['Metallic'].default_value = 0
-        for i in mat:
-            current_image = "PS_" + str(n) + "_" + i[:8] + "TEX_EXT"
+        for info in mat[0]:
+ 
+            current_image = "PS_" + str(n) + "_" + info["Hash"] + "TEX_EXT"
 
             #Check if the material already has a texture node with a specific name, avoids duplicates
             for k1, node in matnodes.items():
                 if node.label == current_image:
                     return
                     
-            isSRGB = i[9:].lower() #Also kinda hacky
-            if str(isSRGB) == "true":
+            if info["SRGB"]:
                 colorspace = "sRGB"
             else: 
                 colorspace = "Non-Color"
@@ -152,7 +154,7 @@ def assign_map_materials():
             texture = bpy.data.images.get(current_image)
 
             if not texture: #Rare(?) case where the textures PS 'index' starts at 2 instead of 0
-                texture = bpy.data.images.get("PS_2" + "_" + i[:8] + "TEX_EXT")
+                texture = bpy.data.images.get("PS_2" + "_" + info["Hash"] + "TEX_EXT")
             
             if texture:
                 texnode.label = texture.name
