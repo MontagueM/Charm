@@ -31,7 +31,7 @@ public partial class EntityView : UserControl
     public bool LoadEntity(TagHash entityHash, FbxHandler fbxHandler)
     {
         fbxHandler.Clear();
-        Entity entity = new Entity(entityHash);
+        Entity entity = PackageHandler.GetTag(typeof(Entity), entityHash);
         AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
         return LoadUI(fbxHandler);
     }

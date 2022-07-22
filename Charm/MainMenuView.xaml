@@ -25,7 +25,7 @@
         <!-- 3b00ab80 atraks -->
         <!-- 4901ab80 taniks normal, 100bb780 abomination -->
         <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
-            <TextBlock Text="Entity" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
+            <TextBlock Text="Dynamic" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="ApiViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
                 <TextBlock Text="API" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
@@ -33,14 +33,14 @@
                 <TextBlock Text="NAMED BAGS" VerticalAlignment="Center" FontSize="36" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllEntitiesViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,40" Padding="20, 20, 20, 20" >
-                <TextBlock Text="ALL" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
+                <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
         </StackPanel>
         
         <StackPanel Grid.Row="1" Grid.Column="2" Margin="10,0,0,0">
-            <TextBlock Text="Maps" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
+            <TextBlock Text="Static" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllStaticsViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="ALL STATICS" VerticalAlignment="Center" FontSize="40" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
+                <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="40" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
         </StackPanel>
 
@@ -53,7 +53,7 @@
             <!--     <TextBlock Text="MUSIC" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/> -->
             <!-- </Button> -->
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllAudioViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="ALL" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
+                <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
         </StackPanel>
         

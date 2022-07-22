@@ -12,6 +12,8 @@ A new, flashier, fully C# version of my previous tool Phonon. It is designed to 
 
 If you encounter any problems, take a look in the charm.log file and look at the exception.
 
+Also take a look at the [Charm wiki](https://github.com/MontagueM/DestinyDocs/blob/main/Charm/Home.md) for more info.
+
 ### Known issues
 
 * `Unhandled Exception: System.ArgumentException: Invalid hash given: 2157969408.` - delete the empty paths.cache file and try again.
@@ -24,7 +26,7 @@ Here's a brief list of what Charm can currently do:
 - Interoperability with DARE for extraction of higher quality textures than the API provides.
 - Extraction of static models, maps, entity models, textures, audio.
 - For entities, FK skeletons are provided where they exist.
-- All geometry can export with shaders that can be imported into Unreal Engine 5 (see [tutorial](https://github.com/MontagueM/Charm/wiki/Charm-----UE5-Interoperability)).
+- All geometry can export with shaders that can be imported into Unreal Engine 5 (see [tutorial](https://github.com/MontagueM/DestinyDocs/blob/main/Charm/UE5-Interoperability.md)).
 - All geometry can be imported into Blender with basic texture application. (see [tutorial](https://github.com/DeltaDesigns/Charm/wiki/Blender-Importing)). 
 - Viewing and extraction of information tied to activities.
 - Batch extraction sorted into packages.
