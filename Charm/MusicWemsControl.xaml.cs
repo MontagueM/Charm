@@ -16,7 +16,7 @@ public partial class MusicWemsControl : UserControl
         InitializeComponent();
     }
     
-    private ConcurrentBag<WemItem> GetWemItems(WwiseLoop tag)
+    private ConcurrentBag<WemItem> GetWemItems(WwiseSound tag)
     {
         var items = new ConcurrentBag<WemItem>();
         Parallel.ForEach(tag.Header.Unk20, wem =>
@@ -47,7 +47,7 @@ public partial class MusicWemsControl : UserControl
 
     public void Load(D2Class_F5458080 res)
     {
-        WwiseLoop loop = res.MusicLoopSound;
+        WwiseSound loop = res.MusicLoopSound;
         WemList.ItemsSource = GetWemItems(loop);
     }
     

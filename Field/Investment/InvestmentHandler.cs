@@ -98,12 +98,12 @@ public class InvestmentHandler
         GetContainerIndexDict(); // must be before GetInventoryItemStringThings
 
 
-        await Task.Run(() =>
+        Task.WaitAll(new []
         {
-            Task.Run(GetInventoryItemDict);
-            Task.Run(GetInventoryItemStringThings);
-            Task.Run(GetEntityAssignmentDict);
-            Task.Run(GetSandboxPatternAssignmentsDict);
+            Task.Run(GetInventoryItemDict),
+            Task.Run(GetInventoryItemStringThings),
+            Task.Run(GetEntityAssignmentDict),
+            Task.Run(GetSandboxPatternAssignmentsDict),
         });
     }
 
@@ -190,13 +190,23 @@ public class InvestmentHandler
         if (item.GetWeaponPatternIndex() == -1)
             return null;
         
-        var patternGlobalId = _sandboxPatternGlobalTagIdTag.Header.SandboxPatternGlobalTagId[item.GetWeaponPatternIndex()].PatternGlobalTagIdHash;
+        var patternGlobalId = GetPatternGlobalTagId(item);
         var patternData = _sortedPatternGlobalTagIdAssignments[patternGlobalId];
         if (PackageHandler.GetEntryReference(patternData) == 0x80809ad8)
         {
             return PackageHandler.GetTag(typeof(Entity), patternData);
         }
         return null;
+    }
+    
+    public static DestinyHash GetPatternGlobalTagId(InventoryItem item)
+    {
+        return _sandboxPatternGlobalTagIdTag.Header.SandboxPatternGlobalTagId[item.GetWeaponPatternIndex()].PatternGlobalTagIdHash;
+    }
+    
+    public static DestinyHash GetWeaponContentGroupHash(InventoryItem item)
+    {
+        return _sandboxPatternGlobalTagIdTag.Header.SandboxPatternGlobalTagId[item.GetWeaponPatternIndex()].WeaponContentGroupHash;
     }
 
     public static InventoryItem GetInventoryItem(DestinyHash hash)
@@ -289,7 +299,7 @@ public class InvestmentHandler
         // var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
         // var index = _entityAssignmentsMap.Header.EntityArrangementMap.BinarySearch(x, new D2Class_454F8080());
         Tag<D2Class_A36F8080> tag = PackageHandler.GetTag<D2Class_A36F8080>(_sortedArrangementHashmap[assignmentHash]);
-        return tag.Header.Entity;
+        return PackageHandler.GetTag(typeof(Entity), tag.Header.EntityData);
         // return new Entity(_entityAssignmentsMap.Header.EntityArrangementMap[index].EntityParent.Header.Entity);
         // return null;
     }

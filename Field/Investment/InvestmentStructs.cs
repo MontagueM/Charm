@@ -463,6 +463,10 @@ public struct D2Class_AE528080
 {
     public DestinyHash PatternHash;  // "patternHash" from API
     public DestinyHash PatternGlobalTagIdHash;  // "patternGlobalTagIdHash" from API
+
+    [DestinyOffset(0x10)] 
+    public DestinyHash WeaponContentGroupHash; // "weaponContentGroupHash" from API
+    public DestinyHash WeaponTypeHash; // "weaponTypeHash" from API
     // filters are also in here but idc
 }
 
@@ -471,7 +475,7 @@ public struct D2Class_A36F8080
 {
     public long FileSize;
     [DestinyField(FieldType.TagHash64)]
-    public Entity Entity;
+    public TagHash EntityData;  // can be entity, can be audio group for entity
 }
 
 #endregion

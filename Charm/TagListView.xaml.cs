@@ -88,7 +88,7 @@ public enum ETagListType
     Music,
     [Description("Weapon Audio Group List")]
     WeaponAudioGroupList,
-    [Description("Weapon Audio Group")]
+    [Description("Weapon Audio Group [Final]")]
     WeaponAudioGroup,
     [Description("Weapon Audio List")]
     WeaponAudioList,
@@ -1465,9 +1465,12 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(InvestmentHandler.InventoryItems, kvp =>
         {
-            if (kvp.Value.GetWeaponPatternIndex() == -1) return;
+            if (kvp.Value.GetWeaponPatternIndex() == -1) 
+                return;
             string name = InvestmentHandler.GetItemName(kvp.Value);
             string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
+            if (type == "Vehicle" || type == "Ship")
+                return;
             _allTagItems.Add(new TagItem 
             {
                 Hash = kvp.Key,
@@ -1489,15 +1492,49 @@ public partial class TagListView : UserControl
     private void LoadWeaponAudioList(DestinyHash apiHash)
     {
         _allTagItems = new ConcurrentBag<TagItem>();
-        // There should be a correct way of doing this but this works fine and was way faster to code.
         var val = InvestmentHandler.GetPatternEntityFromHash(apiHash);
-        var a = 0;
+        if (val == null || val.PatternAudio == null)
+        {
+            RefreshItemList();
+            return;
+        }
+        var resource = (D2Class_6E358080)val.PatternAudio.Header.Unk18;
+        var item = InvestmentHandler.GetInventoryItem(apiHash);
+        var patternGlobalTagIdHash = InvestmentHandler.GetWeaponContentGroupHash(item);
+        foreach (var entry in resource.PatternAudioGroups)
+        {
+            if (entry.WeaponContentGroup1Hash.Equals(patternGlobalTagIdHash) && entry.AudioGroup != null)
+            {
+                var audioGroup = PackageHandler.GetTag<D2Class_0D8C8080>(entry.AudioGroup.Header.EntityData);
+                audioGroup.Header.Audio.ForEach(audio =>
+                {
+                    foreach (var s in audio.Sounds)
+                    {
+                        if (s.Sound == null)
+                            continue;
+                    
+                        _allTagItems.Add(new TagItem
+                        {
+                            Hash = s.Sound.Hash,
+                            Name = s.WwiseEventName,
+                            Subname = audio.WwiseEventHash,
+                            TagType = ETagListType.WeaponAudio
+                        });
+                    }
+                });
+            }
+        }
+        RefreshItemList();
     }
-
+    
     private void LoadWeaponAudio(TagHash tagHash)
     {
         var viewer = GetViewer();
-        viewer.MusicControl.Load(tagHash);
+        WwiseSound tag = PackageHandler.GetTag(typeof(WwiseSound), tagHash);
+        if (tag.Header.Unk20.Count == 0)
+            return;
+        viewer.MusicPlayer.SetWem(tag.Header.Unk20[0]);
+        viewer.MusicPlayer.Play();
     }
 
     #endregion
