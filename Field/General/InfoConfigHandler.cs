@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Text.Json;
 using Field.Models;
 using Field.Statics;
@@ -11,7 +11,6 @@ public class InfoConfigHandler
 {
     public bool bOpen = false;
     private ConcurrentDictionary<string, dynamic> _config = new ConcurrentDictionary<string, dynamic>();
-    private ConcurrentDictionary<string, dynamic> _matTexs = new ConcurrentDictionary<string, dynamic>();
 
     public InfoConfigHandler()
     {
@@ -54,17 +53,14 @@ public class InfoConfigHandler
             }
         }
         Dictionary<int, TexInfo> pstex = new Dictionary<int, TexInfo>();
-        List<string> pstexhash = new List<string>();
         textures.Add("PS", pstex);
         foreach (var pst in material.Header.PSTextures)
         {
             if (pst.Texture != null)
             {
-                pstexhash.Add(pst.Texture.Hash + " " + pst.Texture.IsSrgb());
                 pstex.Add((int)pst.TextureIndex, new TexInfo {Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
             }
         }
-        _matTexs.TryAdd(material.Hash, pstexhash); //No reason to add VS textures really
     }
     
     public void AddPart(Part part, string partName)
@@ -136,20 +132,14 @@ public class InfoConfigHandler
         }
         
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
-        string m = JsonConvert.SerializeObject(_matTexs, Formatting.Indented);
         if (_config.ContainsKey("MeshName"))
         {
             File.WriteAllText($"{path}/{_config["MeshName"]}_info.cfg", s);
-            
-            string text = File.ReadAllText($"{path}/{_config["MeshName"]}_import_to_blender.py");
-            text = text.Replace("BLENDER_MATS", m);
-            File.WriteAllText($"{path}/{_config["MeshName"]}_import_to_blender.py", text);
         }
         else
         {
             File.WriteAllText($"{path}/info.cfg", s);
         }
-
         Dispose();
     }
 }
