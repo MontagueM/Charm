@@ -277,7 +277,8 @@ public class Tag : DestinyFile
                         {
                             if (T == typeof(D2Class_069B8080) || T == typeof(D2Class_85988080))  // If entity resource or map data resource, don't bother reading if we don't know it (too many types)
                             {
-                                return result;
+                                handle.BaseStream.Seek(fieldOffset + 8, SeekOrigin.Begin);  // return back to keep reading
+                                continue;
                             }
                             throw new NotImplementedException($"[RESOURCE POINTER] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
                         }
