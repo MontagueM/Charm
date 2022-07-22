@@ -47,8 +47,11 @@ def assemble_map():
 
     static_names = {}
     for x in newobjects:
-        obj_name = x[0][:8]
-   
+        if len(config["Instances"].items()) == 1: #Fix for error that occurs when theres only 1 object in the fbx
+            for newname, value in config["Instances"].items():
+                x[1].name = newname
+
+        obj_name = x[1].name[:8]
         if obj_name not in static_names.keys():
             static_names[obj_name] = []
         static_names[obj_name].append(x)
@@ -57,10 +60,11 @@ def assemble_map():
         try:  # fix this
             parts = static_names[static]
         except:
-            print(f"Failed on {static}")
+            print(f"Failed on {static}. FBX may contain only 1 object")
+            continue
+
         for part in parts:
             for instance in instances:
-
                 ob_copy = part[1].copy()
                 bpy.context.collection.objects.link(ob_copy) #makes the instances?
 
@@ -71,9 +75,8 @@ def assemble_map():
                 ob_copy.location = location
                 ob_copy.rotation_mode = 'QUATERNION'
                 ob_copy.rotation_quaternion = quat
-               
                 ob_copy.scale = [instance["Scale"]]*3
-    
+  
     add_to_collection()
     print("Assigning materials...")
     assign_map_materials()
