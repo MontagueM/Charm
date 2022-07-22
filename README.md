@@ -35,6 +35,20 @@ Here's a brief list of what Charm can currently do:
 - Entity names where possible.
 - Music, dialogue, directives viewing and playback.
 
+Not yet implemented:
+
+- audio exporting https://github.com/MontagueM/Charm/issues/5
+- string exporting https://github.com/MontagueM/Charm/issues/1
+- game version checking https://github.com/MontagueM/Charm/issues/3
+- parallelise batch extraction https://github.com/MontagueM/Charm/issues/6
+- enable nanite for maps in UE5 https://github.com/MontagueM/Charm/issues/7
+- use HLODs for maps in UE5 https://github.com/MontagueM/Charm/issues/8
+- add more UE5 shader controls https://github.com/MontagueM/Charm/issues/9
+- terrain for maps https://github.com/MontagueM/Charm/issues/20
+- better crash management https://github.com/MontagueM/Charm/issues/43
+- animations https://github.com/MontagueM/Charm/issues/45
+
+
 ### Some tricks
 
 * Middle click tabs to close them.
