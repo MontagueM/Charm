@@ -46,12 +46,9 @@
 
         <StackPanel Grid.Row="1" Grid.Column="3" Margin="10,0,0,0">
             <TextBlock Text="Audio" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
-            <!-- <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="DialogueViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20"> -->
-            <!--     <TextBlock Text="DIALOGUE" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/> -->
-            <!-- </Button> -->
-            <!-- <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="MusicViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20"> -->
-            <!--     <TextBlock Text="MUSIC" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/> -->
-            <!-- </Button> -->
+            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="WeaponAudioViewButton_Click" Margin="20,0,20,40" Padding="20, 20, 20, 20">
+                <TextBlock Text="WEAPONS" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
+            </Button>
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllAudioViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
                 <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>

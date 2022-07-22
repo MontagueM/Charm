@@ -22,9 +22,12 @@ public class InvestmentHandler
     private static Tag<D2Class_CE558080> _entityAssignmentTag = null;
     private static Tag<D2Class_434F8080> _entityAssignmentsMap = null;
     private static Tag<D2Class_99548080> _inventoryItemStringThing = null;
+    private static Tag<D2Class_8C978080> _sandboxPatternAssignmentsTag = null;
+    private static Tag<D2Class_AA528080> _sandboxPatternGlobalTagIdTag = null;
     public static ConcurrentDictionary<int, Tag<D2Class_9F548080>> InventoryItemStringThings = null;
     public static Dictionary<DestinyHash, int> InventoryItemIndexmap = null;
     private static Dictionary<DestinyHash, TagHash> _sortedArrangementHashmap = null;
+    private static Dictionary<DestinyHash, TagHash> _sortedPatternGlobalTagIdAssignments = null;
     private static Tag<D2Class_095A8080> _stringContainerIndexTag = null;
     private static Dictionary<int, TagHash> _stringContainerIndexmap = null;
     public static ConcurrentDictionary<DestinyHash, InventoryItem> InventoryItems = null;
@@ -49,7 +52,7 @@ public class InvestmentHandler
         return InventoryItemIndexmap[hash];
     }
 
-    private static void GetAllInvestmentTags()
+    private static async void GetAllInvestmentTags()
     {
         // Iterate over all investment pkgs until we find all the tags we need
         var unmanagedDictionary = DllGetAllInvestmentTags();
@@ -58,13 +61,12 @@ public class InvestmentHandler
         uint[] vals = new uint[unmanagedDictionary.Values.dataSize];
         PackageHandler.Copy(unmanagedDictionary.Values.dataPtr, vals, 0, unmanagedDictionary.Values.dataSize);
         // maybe i can parallel this? todo maybe parallel
-        for (int i = 0; i < vals.Length; i++)
+        Parallel.ForEach(vals, (val, state, i) =>
         {
             switch (vals[i])
             {
                 case 0x80807997:
                     _inventoryItemMap = new Tag<D2Class_97798080>(new TagHash(keys[i]));
-                    GetInventoryItemDict();
                     break;
                 case 0x808070f2:
                     _artArrangementMap = new Tag<D2Class_F2708080>(new TagHash(keys[i]));
@@ -72,23 +74,37 @@ public class InvestmentHandler
                 case 0x808055ce:
                     _entityAssignmentTag = new Tag<D2Class_CE558080>(new TagHash(keys[i]));
                     break;
-                case 0x80804f43:
-                    _entityAssignmentsMap = new Tag<D2Class_434F8080>(new TagHash(keys[i]));
-                    GetEntityAssignmentDict(); 
-                    break;
                 case 0x80805499:
                     _inventoryItemStringThing = new Tag<D2Class_99548080>(new TagHash(keys[i]));
-                    GetInventoryItemStringThings();
                     break;
                 case 0x8080798c:
                     _inventoryItemIndexDictTag = new Tag<D2Class_8C798080>(new TagHash(keys[i]));
                     break;
                 case 0x80805a09:
                     _stringContainerIndexTag = new Tag<D2Class_095A8080>(new TagHash(keys[i]));
-                    GetContainerIndexDict();
+                    break;
+                case 0x80804ea4: // points to parent of the sandbox pattern ref list thing + entity assignment map
+                    var parent = new Tag<D2Class_A44E8080>(new TagHash(keys[i]));
+                    _sandboxPatternAssignmentsTag = parent.Header.SandboxPatternAssignmentsTag; // also art dye refs
+
+                    _entityAssignmentsMap = parent.Header.EntityAssignmentsMap;
+
+                    break;
+                case 0x808052aa: // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
+                    _sandboxPatternGlobalTagIdTag = new Tag<D2Class_AA528080>(new TagHash(keys[i]));
                     break;
             }
-        }
+        });
+        GetContainerIndexDict(); // must be before GetInventoryItemStringThings
+
+
+        await Task.Run(() =>
+        {
+            Task.Run(GetInventoryItemDict);
+            Task.Run(GetInventoryItemStringThings);
+            Task.Run(GetEntityAssignmentDict);
+            Task.Run(GetSandboxPatternAssignmentsDict);
+        });
     }
 
     private static void GetInventoryItemStringThings()
@@ -149,6 +165,38 @@ public class InvestmentHandler
             _sortedArrangementHashmap.Add(new DestinyHash(br.ReadUInt32()), new TagHash(br.ReadUInt32()));
         }
         br.Close();
+    }
+    
+    private static void GetSandboxPatternAssignmentsDict()
+    {
+        int size = (int)_sandboxPatternAssignmentsTag.Header.AssingmentBSL.Count;
+        _sortedPatternGlobalTagIdAssignments = new Dictionary<DestinyHash, TagHash>(size);
+        var br = _sandboxPatternAssignmentsTag.Header.AssingmentBSL.ParentTag.GetHandle();
+        
+        br.BaseStream.Seek(_sandboxPatternAssignmentsTag.Header.AssingmentBSL.Offset, SeekOrigin.Begin);
+        for (int i = 0; i < size; i++)
+        {
+            // skips art dye refs, theyre not tag64
+            var h = new DestinyHash(br.ReadUInt32());
+            br.BaseStream.Seek(0xC, SeekOrigin.Current);
+            _sortedPatternGlobalTagIdAssignments.Add(h, new TagHash(br.ReadUInt64()));
+        }
+        br.Close();
+    }
+    
+    public static Entity? GetPatternEntityFromHash(DestinyHash hash)
+    {
+        var item = GetInventoryItem(hash);
+        if (item.GetWeaponPatternIndex() == -1)
+            return null;
+        
+        var patternGlobalId = _sandboxPatternGlobalTagIdTag.Header.SandboxPatternGlobalTagId[item.GetWeaponPatternIndex()].PatternGlobalTagIdHash;
+        var patternData = _sortedPatternGlobalTagIdAssignments[patternGlobalId];
+        if (PackageHandler.GetEntryReference(patternData) == 0x80809ad8)
+        {
+            return PackageHandler.GetTag(typeof(Entity), patternData);
+        }
+        return null;
     }
 
     public static InventoryItem GetInventoryItem(DestinyHash hash)
@@ -266,10 +314,20 @@ public class InventoryItem : Tag
 
     public int GetArtArrangementIndex()
     {
-        if (Header.Unk90 is D2Class_77738080)
+        if (Header.Unk90 is D2Class_77738080 entry)
         {
-            if (((D2Class_77738080) Header.Unk90).Arrangements.Count > 0)
-                return ((D2Class_77738080) Header.Unk90).Arrangements[0].ArtArrangementHash;
+            if (entry.Arrangements.Count > 0)
+                return entry.Arrangements[0].ArtArrangementHash;
+        }
+        return -1;
+    }
+    
+    public int GetWeaponPatternIndex()
+    {
+        if (Header.Unk90 is D2Class_77738080 entry)
+        {
+            if (entry.WeaponPatternIndex > 0)
+                return entry.WeaponPatternIndex;
         }
         return -1;
     }
