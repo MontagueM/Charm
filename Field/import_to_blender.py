@@ -2,6 +2,9 @@ import bpy
 import json
 import mathutils
 import os
+#MAYBE TO DO: Add color sampling so non-color textures that arent normals dont connect to the normal node?
+#https://www.geeksforgeeks.org/find-most-used-colors-in-image-using-python/
+
 
 #Adapted from Monteven's UE5 import script
 
@@ -54,7 +57,7 @@ def assemble_map():
         try:  # fix this
             parts = static_names[static]
         except:
-            continue
+            print(f"Failed on {static}")
         for part in parts:
             for instance in instances:
 
@@ -110,9 +113,6 @@ def assign_map_materials():
     #Get all the images in the directory and load them
     for img in os.listdir(Filepath + "/Textures/"):
         if img.endswith("TEX_EXT"):
-            for i in bpy.data.images:
-                if i == img:
-                    break
             bpy.data.images.load(Filepath + "/Textures/" + f"/{img}", check_existing = True)
             print(f"Loaded {img}")
     
@@ -121,50 +121,45 @@ def assign_map_materials():
 
     for k, mat in d.items():
         n = 0 #Kinda hacky, but it works
-        matnodes = materials[k].node_tree.nodes
-        matnodes['Principled BSDF'].inputs['Metallic'].default_value = 0
-        for info in mat[0]:
- 
-            current_image = "PS_" + str(n) + "_" + info["Hash"] + "TEX_EXT"
+        matnodes = bpy.data.materials[k].node_tree.nodes
+        matnodes['Principled BSDF'].inputs['Metallic'].default_value = 0 
+
+        if not len(find_nodes_by_type(bpy.data.materials[k], 'TEX_IMAGE')) > 0: #
 
             #Check if the material already has a texture node with a specific name, avoids duplicates
-            for k1, node in matnodes.items():
-                if node.label == current_image:
-                    return
-                    
-            if info["SRGB"]:
-                colorspace = "sRGB"
-            else: 
-                colorspace = "Non-Color"
-
-            texnode = matnodes.new('ShaderNodeTexImage')
-            texnode.hide = True
-            texnode.location = (-370.0, 200.0 + (float(n)*-1.1)*50) #shitty offsetting
-
-            # if colorspace == "Non-Color": idk if ill use this but ill keep it here
-            #     frame = matnodes.new('NodeFrame')
-            #     frame.color = (0.0, 0, 0.25)
-            #     frame.label = 'Y Channel has to be inverted'
-            #     frame.name = "Normal"
-            #     texnode.parent = matnodes.get('Normal')
-
-            texture = bpy.data.images.get(current_image)
-
-            if not texture: #Rare(?) case where the textures PS 'index' starts at 2 instead of 0
-                texture = bpy.data.images.get("PS_2" + "_" + info["Hash"] + "TEX_EXT")
+            for info in mat[0]:
+                current_image = "PS_" + str(n) + "_" + info["Hash"] + "TEX_EXT"
             
-            if texture:
-                texnode.label = texture.name
-                texture.colorspace_settings.name = colorspace
-                texture.alpha_mode = "CHANNEL_PACKED"
-                texnode.image = texture      #Assign the texture to the node
+                if info["SRGB"]:
+                    colorspace = "sRGB"
+                else: 
+                    colorspace = "Non-Color"
 
-                #assign a texture to material's diffuse and normal just to help a little 
-                if texture.colorspace_settings.name == "sRGB":     
-                    link_diffuse(materials[k])
-                if texture.colorspace_settings.name == "Non-Color":
-                    link_normal(materials[k], n) 
-            n += 1
+                texnode = matnodes.new('ShaderNodeTexImage')
+                texnode.hide = True
+                texnode.location = (-370.0, 200.0 + (float(n)*-1.1)*50) #shitty offsetting
+
+                texture = bpy.data.images.get(current_image)
+
+                if not texture: #Rare(?) case where the textures PS 'index' starts at 2 instead of 0
+                    texture = bpy.data.images.get("PS_2" + "_" + info["Hash"] + "TEX_EXT")
+                
+                if texture:
+                    texnode.label = texture.name
+                    texture.colorspace_settings.name = colorspace
+                    texture.alpha_mode = "CHANNEL_PACKED"
+                    texnode.image = texture      #Assign the texture to the node
+
+                    #assign a texture to material's diffuse and normal just to help a little 
+                    if texture.colorspace_settings.name == "sRGB":     
+                        link_diffuse(bpy.data.materials[k])
+                    if texture.colorspace_settings.name == "Non-Color":
+                        if int(n) == 0:
+                            link_diffuse(bpy.data.materials[k])
+                        else:
+                            link_normal(bpy.data.materials[k], n)
+                n += 1
+
 
 def find_nodes_by_type(material, node_type):
     """ Return a list of all of the nodes in the material
@@ -201,9 +196,9 @@ def link_diffuse(material):
     image_socket = image_node.outputs['Color']
     shader_socket = shader_node.inputs['Base Color']
     if shader_socket.is_linked:
-            return False
+        return
     material.node_tree.links.new(shader_socket, image_socket)
-    #s_list.clear #clear the list so we don't try to link to the same nodes again
+
 
 def link_normal(material, num = 0):
     it_list = find_nodes_by_type(material, 'TEX_IMAGE')
@@ -216,9 +211,8 @@ def link_normal(material, num = 0):
         image_socket = image_node.outputs['Color']
         shader_socket = shader_node.inputs['Color']
         if shader_socket.is_linked:
-            return False
+            return
         material.node_tree.links.new(shader_socket, image_socket)
-    #s_list.clear #clear the list so we don't try to link to the same nodes again
                      
 def cleanup():
     print(f"Cleaning up...")
@@ -245,30 +239,25 @@ def cleanup():
             bpy.data.images.remove(block)
     print("Done cleaning up!")
 
-def add_to_collection(): #Needs to be fixed
+def add_to_collection():
+
     #make a collection for the objects
     bpy.data.collections.new(str(Name))
-    #link the collection to the scene
     bpy.context.scene.collection.children.link(bpy.data.collections[str(Name)])
 
     C = bpy.context
-
     # List of object references
     objs = C.selected_objects
-
     # Set target collection to a known collection 
     coll_target = C.scene.collection.children.get(str(Name))
-
     # If target found and object list not empty
     if coll_target and objs:
-
         # Loop through all objects
         for ob in objs:
             # Loop through all collections the obj is linked to
             for coll in ob.users_collection:
                 # Unlink the object
                 coll.objects.unlink(ob)
-
             # Link each object to the target collection
             coll_target.objects.link(ob)
 
