@@ -36,7 +36,7 @@ using System.ComponentModel;
 /// <summary>
 /// Provides a ViewModel for the Main window.
 /// </summary>
-public class MainViewModel : INotifyPropertyChanged
+public class MainViewModel : INotifyPropertyChanged, IDisposable
 {
     public EffectsManager EffectsManager { get; set; }
         
@@ -154,7 +154,25 @@ public class MainViewModel : INotifyPropertyChanged
 
     public void Clear()
     {
+        // need to iterate over everything to wipe the arrays
+        Parallel.ForEach(ModelGroup.GroupNode.Items, node =>
+        {
+            if (node is MeshNode mn)
+            {
+                MeshGeometry3D mesh = mn.Geometry as MeshGeometry3D;
+                mn.Instances = null;
+                mesh.ClearAllGeometryData();
+                var q = mesh as IDisposable;
+                Disposer.RemoveAndDispose(ref q);
+                mn.Material = null;
+            }
+            node.Detach();
+            node.Dispose();
+            var n = node as IDisposable;
+            Disposer.RemoveAndDispose(ref n);
+        });
         ModelGroup.Clear();
+        GC.Collect();
     }
     
     public bool LoadEntityFromFbx(string modelFile)
@@ -221,8 +239,7 @@ public class MainViewModel : INotifyPropertyChanged
             Vector3Collection positions = new Vector3Collection();
             Vector3Collection normals = new Vector3Collection();
             Vector2Collection textureCoordinates = new Vector2Collection();
-
-
+            mesh.SetAsTransient();
             if (part.BasePart.Indices.Count > 0)
             {
                 // Conversion lookup table
@@ -301,5 +318,21 @@ public class MainViewModel : INotifyPropertyChanged
             res.Z = v4N.Z;
         }
         return res;
+    }
+
+    public void Dispose()
+    {
+        Clear();
+        if (ModelGroup != null)
+        {
+            var modelGroup = ModelGroup as IDisposable;
+            Disposer.RemoveAndDispose(ref modelGroup);
+        }
+        if (EffectsManager != null)
+        {
+            var effectManager = EffectsManager as IDisposable;
+            Disposer.RemoveAndDispose(ref effectManager);
+        }
+        GC.SuppressFinalize(this);
     }
 }

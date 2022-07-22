@@ -48,7 +48,7 @@ public partial class MainMenuView : UserControl
     {
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.EntityList);
-        _mainWindow.MakeNewTab("entities", tagListView);
+        _mainWindow.MakeNewTab("dynamics", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
 

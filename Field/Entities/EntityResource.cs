@@ -10,11 +10,6 @@ public class EntityResource : Tag
     public EntityResource(TagHash hash) : base(hash)
     {
     }
-    
-    public EntityResource(EntityResource resource) : base(resource.Hash)
-    {
-        Header = resource.Header;
-    }
 
     protected override void ParseStructs()
     {

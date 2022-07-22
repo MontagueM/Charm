@@ -95,7 +95,7 @@ public partial class MainWindow
 
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("1.0.5");
+        var currentVersion = new ApplicationVersion("1.0.6");
         var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         versionChecker.LatestVersionName = "version";
         try
@@ -280,7 +280,13 @@ public partial class MainWindow
     {
         if (e.ChangedButton == MouseButton.Middle)
         {
-            MainTabControl.Items.Remove(sender as TabItem);
+            TabItem tab = (TabItem)sender;
+            MainTabControl.Items.Remove(tab);
+            dynamic content = tab.Content;
+            if (content is ActivityView av)
+            {
+                av.Dispose();
+            }
         }
     }
 

@@ -643,7 +643,7 @@ public partial class TagListView : UserControl
     private void ExportEntity(ExportInfo info)
     {
         var viewer = GetViewer();
-        Entity entity = new Entity(new TagHash(info.Hash));
+        Entity entity = PackageHandler.GetTag(typeof(Entity), new TagHash(info.Hash));
         viewer.EntityControl.Export(new List<Entity> {entity}, info.Name, info.ExportType);
     }
     
