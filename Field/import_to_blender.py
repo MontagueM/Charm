@@ -2,25 +2,28 @@ import bpy
 import json
 import mathutils
 import os
+#MAYBE TO DO: Add color sampling so non-color textures that arent normals dont connect to the normal node?
+#https://www.geeksforgeeks.org/find-most-used-colors-in-image-using-python/
+
 
 #Adapted from Monteven's UE5 import script
 
-
-#Globally get all the objects in the scene
+#Globally gets all the objects in the scene
 objects = bpy.data.objects
 vis_objects = [ob for ob in bpy.context.view_layer.objects if ob.visible_get()]
 scene = bpy.context.scene
 BPY = bpy.ops
 
-#####
+#Info
 Name = "MAP_HASH"
 Filepath = os.path.abspath(bpy.context.space_data.text.filepath+"/..") #"OUTPUT_DIR"
-#####
-#print(Filepath)
+#
 
-info_name = Name + "_info.cfg" 
+#Files to open
+info_name = Name + "_info.cfg"
 config = json.load(open(Filepath + f"\\{info_name}"))
 FileName = Filepath + "\\" + Name + ".fbx" 
+#
 
 original_statics = {} #original static objects
 
@@ -30,15 +33,13 @@ def assemble_map():
     #Grab all the objects currently in the scene
     oldobjects = bpy.data.objects.items()
 
-    BPY.import_scene.fbx(filepath=FileName)
+    BPY.import_scene.fbx(filepath=FileName) #Just imports the fbx, no special settings needed
     
-    
-    #Now get all the objects in the scene after the import
+    #Now grabs all the objects in the scene after the import
     newobjects = bpy.data.objects.items()
 
     for ob in oldobjects:
         if ob[0] not in newobjects:
-            #print("Removing: " + ob[0])
             newobjects.remove(ob) #Removes every object from the list that wasnt imported (makes things not instance multiple times?)
 
     print("Imported map: " + Name)
@@ -64,6 +65,7 @@ def assemble_map():
                 bpy.context.collection.objects.link(ob_copy) #makes the instances?
 
                 location = [instance["Translation"][0], instance["Translation"][1], instance["Translation"][2]]
+                #Reminder that blender uses WXYZ, the order in the confing file is XYZW, so W is always first
                 quat = mathutils.Quaternion([instance["Rotation"][3], instance["Rotation"][0], instance["Rotation"][1], instance["Rotation"][2]])
 
                 ob_copy.location = location
@@ -77,69 +79,87 @@ def assemble_map():
     assign_map_materials()
 
 def assign_map_materials():
-        materials = bpy.data.materials
+    materials = bpy.data.materials
+    
+    static_names = {}
+    for x in objects: #find the original static objects and add them to static_names
+        part = x.name.rpartition('.')
+        obj_name = part[0]
+        if obj_name not in static_names.keys():
+            static_names[obj_name] = []
+            original_statics[obj_name] = []
+
+        static_names[obj_name].append(x)
+        original_statics[obj_name].append(x)
         
-        static_names = {}
-        for x in objects: #find the original static objects and add them to static_names
-            part = x.name.rpartition('.')
-            obj_name = part[0]
-            if obj_name not in static_names.keys():
-                static_names[obj_name] = []
-                original_statics[obj_name] = []
-
-            static_names[obj_name].append(x)
-            original_statics[obj_name].append(x)
-            
-        for staticname, matname in config["Parts"].items(): #assign the objects matching material from the config file
-            if staticname in static_names.keys():
-                obj = bpy.data.objects[str(staticname)]
-                for slt in obj.material_slots:
-                    if matname in materials.keys():
-                        slt.material = materials[matname]
-                        print(f"Existing material {matname} assigned to {staticname}")
-                    else: 
-                        if slt.material.name != matname:
-                            slt.material.name = matname
-
-        for obj in bpy.data.objects: #remove any duplicate materials that may have been created
+    for staticname, matname in config["Parts"].items(): #assign the objects matching material from the config file
+        if staticname in static_names.keys():
+            obj = bpy.data.objects[str(staticname)]
             for slt in obj.material_slots:
-                part = slt.name.rpartition('.')
-                if part[2].isnumeric() and part[0] in materials:
-                    slt.material = materials.get(part[0])
-           
+                if matname in materials.keys():
+                    slt.material = materials[matname]
+                    print(f"Existing material {matname} assigned to {staticname}")
+                else: 
+                    if slt.material.name != matname:
+                        slt.material.name = matname
 
-        #Get all the images in the directory and load them
-        for img in os.listdir(Filepath + "/Textures/"):
-            if img.endswith("TEX_EXT"):
-                for i in bpy.data.images:
-                    if i == img:
-                        break
-                bpy.data.images.load(Filepath + "/Textures/" + f"/{img}", check_existing = True)
-                print(f"Loaded {img}")
+    for obj in bpy.data.objects: #remove any duplicate materials that may have been created
+        for slt in obj.material_slots:
+            part = slt.name.rpartition('.')
+            if part[2].isnumeric() and part[0] in materials:
+                slt.material = materials.get(part[0])
+        
 
-        for mat, ps in config["Materials"].items():
-            for ps, texnum in ps.items():
-                for texnum, hash in texnum.items():
-                    for hash, image in hash.items():
-                        try:
-                            matnodes = materials[mat].node_tree.nodes
-                            texnode = matnodes.new('ShaderNodeTexImage')
-                            texnode.hide = True
-                            texnode.location = (-370.0, -200.0 + (float(texnum)*1.1)*50) #shitty offsetting
+    #Get all the images in the directory and load them
+    for img in os.listdir(Filepath + "/Textures/"):
+        if img.endswith("TEX_EXT"):
+            bpy.data.images.load(Filepath + "/Textures/" + f"/{img}", check_existing = True)
+            print(f"Loaded {img}")
+    
+    #New way of getting info from cfg, thank you Mont
+    d = {x : [y["PS"].values()] for x, y in config["Materials"].items()}
 
-                            texture = bpy.data.images.get("PS_" + texnum + "_" + image[:8] + "TEX_EXT")
-                            texture.colorspace_settings.name = "sRGB"
-                            texture.alpha_mode = "CHANNEL_PACKED"
-                            texnode.image = texture
-                            
-                            #assign a texture to material's diffuse just to help a little 
-                            if int(texnum) == 0 and texnode.image == texture:
-                                link_diffuse(materials[mat])
-                            break
-                        except:
-                            continue
-            continue
-                       
+    for k, mat in d.items():
+        n = 0 #Kinda hacky, but it works
+        matnodes = bpy.data.materials[k].node_tree.nodes
+        matnodes['Principled BSDF'].inputs['Metallic'].default_value = 0 
+
+        if not len(find_nodes_by_type(bpy.data.materials[k], 'TEX_IMAGE')) > 0: #
+
+            #Check if the material already has a texture node with a specific name, avoids duplicates
+            for info in mat[0]:
+                current_image = "PS_" + str(n) + "_" + info["Hash"] + "TEX_EXT"
+            
+                if info["SRGB"]:
+                    colorspace = "sRGB"
+                else: 
+                    colorspace = "Non-Color"
+
+                texnode = matnodes.new('ShaderNodeTexImage')
+                texnode.hide = True
+                texnode.location = (-370.0, 200.0 + (float(n)*-1.1)*50) #shitty offsetting
+
+                texture = bpy.data.images.get(current_image)
+
+                if not texture: #Rare(?) case where the textures PS 'index' starts at 2 instead of 0
+                    texture = bpy.data.images.get("PS_2" + "_" + info["Hash"] + "TEX_EXT")
+                
+                if texture:
+                    texnode.label = texture.name
+                    texture.colorspace_settings.name = colorspace
+                    texture.alpha_mode = "CHANNEL_PACKED"
+                    texnode.image = texture      #Assign the texture to the node
+
+                    #assign a texture to material's diffuse and normal just to help a little 
+                    if texture.colorspace_settings.name == "sRGB":     
+                        link_diffuse(bpy.data.materials[k])
+                    if texture.colorspace_settings.name == "Non-Color":
+                        if int(n) == 0:
+                            link_diffuse(bpy.data.materials[k])
+                        else:
+                            link_normal(bpy.data.materials[k], n)
+                n += 1
+
 
 def find_nodes_by_type(material, node_type):
     """ Return a list of all of the nodes in the material
@@ -155,10 +175,10 @@ def find_nodes_by_type(material, node_type):
     return node_list
 
 def link_diffuse(material):
-    """ Find at least one image texture in the material
+    """ Finds at least one image texture in the material
         and at least one Principled shader.
         If they both exist and neither have a link to
-        the relevant alpha socket, connect them.
+        the relevant input socket, connect them.
         There are many ways this can fail.
         if there's no image; if there's no principled
         shader; if the selected image/principled sockets
@@ -167,26 +187,33 @@ def link_diffuse(material):
         Does not try alternatives if there are multiple
         images or multiple principled shaders.
     """
-    #print(f'processing material {material.name}')
     it_list = find_nodes_by_type(material, 'TEX_IMAGE')
-    # if len(it_list) > 1:
-    #     print(f'{material.name}: too many image textures. Trying the first one')
     s_list = find_nodes_by_type(material, 'BSDF_PRINCIPLED')
     if len(s_list) == 0:
-        #print(f'{material.name}: no principled shader.')
-        return False
-    # if len(s_list) != 1:
-    #     print(f'{material.name}: too many principled shaders. Trying the first one')
+        return False  
     image_node = it_list[0]
     shader_node = s_list[0]
-    #print(f'{material.name}: Attempting to connect {image_node.name} diffuse to {shader_node.name}')
     image_socket = image_node.outputs['Color']
     shader_socket = shader_node.inputs['Base Color']
-   
+    if shader_socket.is_linked:
+        return
     material.node_tree.links.new(shader_socket, image_socket)
-    #return True
-                       
 
+
+def link_normal(material, num = 0):
+    it_list = find_nodes_by_type(material, 'TEX_IMAGE')
+    s_list = find_nodes_by_type(material, 'NORMAL_MAP')
+    if len(s_list) == 0:
+        return False
+    image_node = it_list[num]
+    shader_node = s_list[0]
+    if image_node.image.colorspace_settings.name == "Non-Color":
+        image_socket = image_node.outputs['Color']
+        shader_socket = shader_node.inputs['Color']
+        if shader_socket.is_linked:
+            return
+        material.node_tree.links.new(shader_socket, image_socket)
+                     
 def cleanup():
     print(f"Cleaning up...")
     #Delete all the objects in original_statics
@@ -212,37 +239,30 @@ def cleanup():
             bpy.data.images.remove(block)
     print("Done cleaning up!")
 
-def add_to_collection(): #Needs to be fixed
+def add_to_collection():
+
     #make a collection for the objects
     bpy.data.collections.new(str(Name))
-    #link the collection to the scene
     bpy.context.scene.collection.children.link(bpy.data.collections[str(Name)])
 
     C = bpy.context
-
     # List of object references
     objs = C.selected_objects
-
     # Set target collection to a known collection 
     coll_target = C.scene.collection.children.get(str(Name))
-
     # If target found and object list not empty
     if coll_target and objs:
-
         # Loop through all objects
         for ob in objs:
             # Loop through all collections the obj is linked to
             for coll in ob.users_collection:
                 # Unlink the object
                 coll.objects.unlink(ob)
-
             # Link each object to the target collection
             coll_target.objects.link(ob)
 
 if __name__ == "__main__":
     #Deselect all objects just in case 
     bpy.ops.object.select_all(action='DESELECT')
-
     assemble_map()
-    assign_map_materials()
     cleanup()
