@@ -38,10 +38,11 @@ public class WwiseSound : Tag
     private MixingSampleProvider MakeProvider()
     {
         MixingSampleProvider provider = new MixingSampleProvider(Header.Unk20[0].MakeWaveChannel().WaveFormat);
-        foreach (var wem in Header.Unk20)
+        Parallel.ForEach(Header.Unk20, wem =>
         {
             provider.AddMixerInput(wem.MakeWaveChannel());
-        }
+        });
+
         return provider;
     }
     

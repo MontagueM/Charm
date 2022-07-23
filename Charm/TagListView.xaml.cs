@@ -1621,13 +1621,13 @@ public partial class TagListView : UserControl
             return sounds;
     }
     
-    private void LoadWeaponAudio(TagHash tagHash)
+    private async void LoadWeaponAudio(TagHash tagHash)
     {
         var viewer = GetViewer();
         WwiseSound tag = PackageHandler.GetTag(typeof(WwiseSound), tagHash);
         if (tag.Header.Unk20.Count == 0)
             return;
-        viewer.MusicPlayer.SetSound(tag);
+        await viewer.MusicPlayer.SetSound(tag);
         viewer.MusicPlayer.Play();
     }
 

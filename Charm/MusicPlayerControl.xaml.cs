@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -62,12 +63,28 @@ public partial class MusicPlayerControl : UserControl
         SetPlayingText(wem.Hash);
     }
     
-    public void SetSound(WwiseSound sound)
+    public async Task SetSound(WwiseSound sound)
     {
         if (_output != null)
             _output.Dispose();
         _sound = sound;
-        _waveProvider = sound.MakeWaveChannel();
+        if (sound.Header.Unk20.Count > 10)
+        {
+            MainWindow.Progress.SetProgressStages(new List<string>
+            {
+                $"loading sound {sound.Hash}",
+            });
+            await Task.Run(() => 
+            {
+                _waveProvider = sound.MakeWaveChannel();
+            });
+            MainWindow.Progress.CompleteStage();            
+        }
+        else
+        {
+            _waveProvider = sound.MakeWaveChannel();
+        }
+
         MakeOutput();
         _output.Init(_waveProvider);
         SetVolume(VolumeBar.Value);
