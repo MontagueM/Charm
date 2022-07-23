@@ -1174,3 +1174,66 @@ public struct D2Class_75988080
 }
 
 #endregion
+
+#region Audio
+
+[StructLayout(LayoutKind.Sequential, Size = 0x6b8)]
+public struct D2Class_6E358080
+{
+    [DestinyOffset(0x648), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_9B318080> PatternAudioGroups;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x128)]
+public struct D2Class_9B318080
+{
+    public DestinyHash WeaponContentGroup1Hash;
+    [DestinyOffset(0x8)]
+    public DestinyHash Unk08;
+    [DestinyOffset(0x18), DestinyField(FieldType.TagHash64)]
+    public TagHash StringContainer;  // idk why but i presume debug strings
+    public DestinyHash WeaponContentGroup2Hash;  // "weaponContentGroupHash" from API
+    // theres other stringcontainer stuff but skipping it
+    [DestinyOffset(0xD0), DestinyField(FieldType.TagHash64)]
+    public Tag<D2Class_A36F8080> AudioGroup;
+    public float UnkE0;
+    [DestinyOffset(0x110)]
+    public float Unk110;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_0D8C8080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_0F8C8080> Audio;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_0F8C8080
+{
+    public DestinyHash WwiseEventHash;
+    [DestinyOffset(0x8), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_138C8080> Sounds;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_138C8080
+{
+    public short Unk00;
+    public short Unk02;
+    [DestinyOffset(0x8)]
+    public DestinyHash Unk08;
+    [DestinyOffset(0x10), DestinyField(FieldType.RelativePointer)] 
+    public string WwiseEventName;
+    [DestinyField(FieldType.TagHash64)]
+    public WwiseSound Sound;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x540)]
+public struct D2Class_97318080
+{
+    public long None;
+}
+
+#endregion

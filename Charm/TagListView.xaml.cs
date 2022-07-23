@@ -86,6 +86,14 @@ public enum ETagListType
     MusicList,
     [Description("Music [Final]")]
     Music,
+    [Description("Weapon Audio Group List")]
+    WeaponAudioGroupList,
+    [Description("Weapon Audio Group [Final]")]
+    WeaponAudioGroup,
+    [Description("Weapon Audio List")]
+    WeaponAudioList,
+    [Description("Weapon Audio [Final]")]
+    WeaponAudio,
 }
 
 /// <summary>
@@ -245,6 +253,18 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.Music:
                     LoadMusic(contentValue);
+                    break;
+                case ETagListType.WeaponAudioGroupList:
+                    LoadWeaponAudioGroupList();
+                    break;
+                case ETagListType.WeaponAudioGroup:
+                    LoadWeaponAudioGroup(contentValue);
+                    break;
+                case ETagListType.WeaponAudioList:
+                    LoadWeaponAudioList(contentValue);
+                    break;
+                case ETagListType.WeaponAudio:
+                    LoadWeaponAudio(contentValue);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -540,6 +560,93 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         viewer.SetViewer(eViewerType);
+    }
+    
+        private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_selectedIndex == -1)
+            return;
+        if (TagList.SelectedIndex > _selectedIndex)
+        {
+            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
+            if (currentButton == null)
+                return;
+            currentButton.IsChecked = false;
+            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex+1));
+            if (nextButton == null)
+                return;
+            nextButton.IsChecked = true;
+            _selectedIndex++;
+            TagItem_OnClick(nextButton, null);
+        }
+        
+        else if (TagList.SelectedIndex < _selectedIndex)
+        {
+            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
+            if (currentButton == null)
+                return;
+            currentButton.IsChecked = false;
+            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex-1));
+            if (nextButton == null)
+                return;
+            nextButton.IsChecked = true;
+            _selectedIndex--;
+            TagItem_OnClick(nextButton, null);   
+            
+        }
+    }
+
+    public void ShowBulkExportButton()
+    {
+        BulkExportButton.Visibility = Visibility.Visible;
+    }
+    
+    public void SetBulkGroup(string group)
+    {
+        var tab = ((Parent as Grid).Parent as TagListViewerView).Parent as TabItem;
+        BulkExportButton.Tag = $"{group}_{tab.Header}";
+    }
+
+    private async void BulkExport_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (BulkExportButton.Tag == null)
+        {
+            return;
+        }
+
+        var groupName = BulkExportButton.Tag as string;
+        var viewer = GetViewer();
+        bool bStaticShowing = viewer.StaticControl.Visibility == Visibility.Visible;
+        bool bEntityShowing = viewer.EntityControl.Visibility == Visibility.Visible;
+        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Hidden : viewer.StaticControl.Visibility;
+        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Hidden : viewer.EntityControl.Visibility;
+        
+        // Iterate over all buttons and export it
+        var items = TagList.ItemsSource.Cast<TagItem>();
+        var exportItems = items.Where(x => x.TagType != ETagListType.Back && x.TagType != ETagListType.Package).ToList();
+        if (exportItems.Count == 0)
+        {
+            MessageBox.Show("No tags to export.");
+            return;
+        }
+        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i+1}/{exportItems.Count}: {x.Hash}").ToList());
+        await Task.Run(() =>
+        {
+            foreach (var tagItem in exportItems)
+            {
+                var name = tagItem.Name == String.Empty ? tagItem.Hash.GetHashString() : tagItem.Name;
+                var exportInfo = new ExportInfo
+                {
+                    Hash = tagItem.Hash,
+                    Name = $"/Bulk_{groupName}/{name}",
+                    ExportType = EExportType.Minimal
+                };
+                viewer.ExportControl.RoutedFunction(exportInfo);
+                MainWindow.Progress.CompleteStage();
+            }
+        });
+        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Visible : viewer.StaticControl.Visibility;
+        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Visible : viewer.EntityControl.Visibility;
     }
 
     #region Destination Global Tag Bag
@@ -1351,92 +1458,87 @@ public partial class TagListView : UserControl
 
     #endregion
     
-    private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    #region Weapon Audio
+    
+    private void LoadWeaponAudioGroupList()
     {
-        if (_selectedIndex == -1)
-            return;
-        if (TagList.SelectedIndex > _selectedIndex)
+        _allTagItems = new ConcurrentBag<TagItem>();
+        Parallel.ForEach(InvestmentHandler.InventoryItems, kvp =>
         {
-            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
-            if (currentButton == null)
+            if (kvp.Value.GetWeaponPatternIndex() == -1) 
                 return;
-            currentButton.IsChecked = false;
-            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex+1));
-            if (nextButton == null)
+            string name = InvestmentHandler.GetItemName(kvp.Value);
+            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
+            if (type == "Vehicle" || type == "Ship")
                 return;
-            nextButton.IsChecked = true;
-            _selectedIndex++;
-            TagItem_OnClick(nextButton, null);
-        }
-        
-        else if (TagList.SelectedIndex < _selectedIndex)
-        {
-            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
-            if (currentButton == null)
-                return;
-            currentButton.IsChecked = false;
-            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex-1));
-            if (nextButton == null)
-                return;
-            nextButton.IsChecked = true;
-            _selectedIndex--;
-            TagItem_OnClick(nextButton, null);   
-            
-        }
-    }
-
-    public void ShowBulkExportButton()
-    {
-        BulkExportButton.Visibility = Visibility.Visible;
+            _allTagItems.Add(new TagItem 
+            {
+                Hash = kvp.Key,
+                Name = name,
+                Type = type.Trim(),
+                TagType = ETagListType.WeaponAudioGroup
+            });
+        });
     }
     
-    public void SetBulkGroup(string group)
+    private void LoadWeaponAudioGroup(TagHash tagHash)
     {
-        var tab = ((Parent as Grid).Parent as TagListViewerView).Parent as TabItem;
-        BulkExportButton.Tag = $"{group}_{tab.Header}";
-    }
-
-    private async void BulkExport_OnClick(object sender, RoutedEventArgs e)
-    {
-        if (BulkExportButton.Tag == null)
-        {
-            return;
-        }
-
-        var groupName = BulkExportButton.Tag as string;
         var viewer = GetViewer();
-        bool bStaticShowing = viewer.StaticControl.Visibility == Visibility.Visible;
-        bool bEntityShowing = viewer.EntityControl.Visibility == Visibility.Visible;
-        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Hidden : viewer.StaticControl.Visibility;
-        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Hidden : viewer.EntityControl.Visibility;
-        
-        // Iterate over all buttons and export it
-        var items = TagList.ItemsSource.Cast<TagItem>();
-        var exportItems = items.Where(x => x.TagType != ETagListType.Back && x.TagType != ETagListType.Package).ToList();
-        if (exportItems.Count == 0)
+        SetViewer(TagView.EViewerType.TagList);
+        viewer.TagListControl.LoadContent(ETagListType.WeaponAudioList, tagHash, true);
+        viewer.MusicPlayer.Visibility = Visibility.Visible;
+    }
+    
+    private void LoadWeaponAudioList(DestinyHash apiHash)
+    {
+        _allTagItems = new ConcurrentBag<TagItem>();
+        var val = InvestmentHandler.GetPatternEntityFromHash(apiHash);
+        if (val == null || val.PatternAudio == null)
         {
-            MessageBox.Show("No tags to export.");
+            RefreshItemList();
             return;
         }
-        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i+1}/{exportItems.Count}: {x.Hash}").ToList());
-        await Task.Run(() =>
+        var resource = (D2Class_6E358080)val.PatternAudio.Header.Unk18;
+        var item = InvestmentHandler.GetInventoryItem(apiHash);
+        var patternGlobalTagIdHash = InvestmentHandler.GetWeaponContentGroupHash(item);
+        foreach (var entry in resource.PatternAudioGroups)
         {
-            foreach (var tagItem in exportItems)
+            if (entry.WeaponContentGroup1Hash.Equals(patternGlobalTagIdHash) && entry.AudioGroup != null)
             {
-                var name = tagItem.Name == String.Empty ? tagItem.Hash.GetHashString() : tagItem.Name;
-                var exportInfo = new ExportInfo
+                var audioGroup = PackageHandler.GetTag<D2Class_0D8C8080>(entry.AudioGroup.Header.EntityData);
+                audioGroup.Header.Audio.ForEach(audio =>
                 {
-                    Hash = tagItem.Hash,
-                    Name = $"/Bulk_{groupName}/{name}",
-                    ExportType = EExportType.Minimal
-                };
-                viewer.ExportControl.RoutedFunction(exportInfo);
-                MainWindow.Progress.CompleteStage();
+                    foreach (var s in audio.Sounds)
+                    {
+                        if (s.Sound == null)
+                            continue;
+                    
+                        _allTagItems.Add(new TagItem
+                        {
+                            Hash = s.Sound.Hash,
+                            Name = s.WwiseEventName,
+                            Subname = audio.WwiseEventHash,
+                            TagType = ETagListType.WeaponAudio
+                        });
+                    }
+                });
             }
-        });
-        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Visible : viewer.StaticControl.Visibility;
-        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Visible : viewer.EntityControl.Visibility;
+        }
+        RefreshItemList();
     }
+    
+    private void LoadWeaponAudio(TagHash tagHash)
+    {
+        var viewer = GetViewer();
+        WwiseSound tag = PackageHandler.GetTag(typeof(WwiseSound), tagHash);
+        if (tag.Header.Unk20.Count == 0)
+            return;
+        viewer.MusicPlayer.SetWem(tag.Header.Unk20[0]);
+        viewer.MusicPlayer.Play();
+    }
+
+    #endregion
+
 }
 
 public class TagItem

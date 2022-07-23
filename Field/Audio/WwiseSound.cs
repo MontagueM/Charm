@@ -2,11 +2,11 @@
 
 namespace Field;
 
-public class WwiseLoop : Tag
+public class WwiseSound : Tag
 {
     public D2Class_38978080 Header;
     
-    public WwiseLoop(TagHash hash) : base(hash)
+    public WwiseSound(TagHash hash) : base(hash)
     {
         
     }

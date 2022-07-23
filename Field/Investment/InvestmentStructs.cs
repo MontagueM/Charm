@@ -413,12 +413,69 @@ public struct D2Class_454F8080 : IComparer<D2Class_454F8080>
     }
 }
 
+[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+public struct D2Class_A44E8080
+{
+    public long FileSize;
+    [DestinyOffset(0x10), DestinyField(FieldType.TagHash64)]
+    public Tag<D2Class_8C978080> SandboxPatternAssignmentsTag;
+    [DestinyOffset(0x28), DestinyField(FieldType.TagHash64)]
+    public Tag<D2Class_434F8080> EntityAssignmentsMap;
+}
+
+/// <summary>
+/// The assignment map for api entity sandbox patterns, for things like skeletons and audio || OR art dye references
+/// </summary>
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_8C978080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public IndexAccessList<D2Class_0F878080> AssingmentBSL;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_0B008080> Unk18;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_0F878080 : IComparer<D2Class_0F878080>
+{
+    public DestinyHash ApiHash;
+    [DestinyField(FieldType.TagHash64)]
+    public TagHash EntityRelationHash;  // can be entity or smth else, if SandboxPattern is entity if ArtDyeReference idk
+    
+    public int Compare(D2Class_0F878080 x, D2Class_0F878080 y)
+    {
+        if (x.ApiHash.Equals(y.ApiHash)) return 0;
+        return x.ApiHash.CompareTo(y.ApiHash);
+    }
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_AA528080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_AE528080> SandboxPatternGlobalTagId;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+public struct D2Class_AE528080
+{
+    public DestinyHash PatternHash;  // "patternHash" from API
+    public DestinyHash PatternGlobalTagIdHash;  // "patternGlobalTagIdHash" from API
+
+    [DestinyOffset(0x10)] 
+    public DestinyHash WeaponContentGroupHash; // "weaponContentGroupHash" from API
+    public DestinyHash WeaponTypeHash; // "weaponTypeHash" from API
+    // filters are also in here but idc
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
 public struct D2Class_A36F8080
 {
     public long FileSize;
     [DestinyField(FieldType.TagHash64)]
-    public Entity Entity;  // These is Entity but dont want to load every API Entity in the entire game
+    public TagHash EntityData;  // can be entity, can be audio group for entity
 }
 
 #endregion

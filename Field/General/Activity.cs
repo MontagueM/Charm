@@ -337,7 +337,7 @@ public struct D2Class_F5458080
     [DestinyField(FieldType.RelativePointer)]
     public string WwiseMusicLoopName;
     [DestinyField(FieldType.TagHash64)]
-    public WwiseLoop MusicLoopSound;
+    public WwiseSound MusicLoopSound;
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_FB458080> Unk18;
 
@@ -368,7 +368,7 @@ public struct D2Class_50968080
 public struct D2Class_318A8080
 {
     [DestinyField(FieldType.TagHash64)]
-    public WwiseLoop MusicLoopSound;
+    public WwiseSound MusicLoopSound;
 
     public float Unk10;
     public DestinyHash Unk14;
