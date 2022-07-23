@@ -61,6 +61,22 @@ public partial class MusicPlayerControl : UserControl
         SetPlayingText(wem.Hash);
     }
     
+    public void SetSound(WwiseSound sound)
+    {
+        if (_output != null)
+            _output.Dispose();
+        _waveProvider = sound.MakeWaveChannel();
+        MakeOutput();
+        _output.Init(_waveProvider);
+        SetVolume(VolumeBar.Value);
+        CanPlay = true;
+        CurrentDuration.Text = Wem.GetDurationString(_waveProvider.CurrentTime);  // todo make this all correct
+        TotalDuration.Text = sound.Duration;
+        _prevPositionValue = 0;
+        ProgressBar.Value = 0;
+        SetPlayingText(sound.Hash);
+    }
+    
     public void Play()
     {
         _musicLog.Information($"Playing {_wem.Hash}");
