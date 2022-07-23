@@ -1627,7 +1627,7 @@ public partial class TagListView : UserControl
         WwiseSound tag = PackageHandler.GetTag(typeof(WwiseSound), tagHash);
         if (tag.Header.Unk20.Count == 0)
             return;
-        viewer.MusicPlayer.SetWem(tag.Header.Unk20[0]);
+        viewer.MusicPlayer.SetSound(tag);
         viewer.MusicPlayer.Play();
     }
 

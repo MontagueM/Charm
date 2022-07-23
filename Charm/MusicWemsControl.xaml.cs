@@ -35,8 +35,8 @@ public partial class MusicWemsControl : UserControl
     
     private void Play_OnClick(object sender, RoutedEventArgs e)
     {
-        WwiseSound item = (WwiseSound) (sender as Button).DataContext;
-        PlaySound(item);
+        WemItem item = (WemItem) (sender as Button).DataContext;
+        PlayWem(item.Wem);
     }
 
     public void PlaySound(WwiseSound sound)

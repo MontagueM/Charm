@@ -9,19 +9,25 @@ public class WwiseSound : Tag
 {
     public D2Class_38978080 Header;
     private MemoryStream _soundStream = null;
-    private VorbisWaveReader _soundReader = null;
+    private WaveFileReader _soundReader = null;
     
     public WwiseSound(TagHash hash) : base(hash)
     {
         
     }
 
+    public void Reset()
+    {
+        _soundStream.Position = 0;
+    }
+
     public void Load()
     {
         var provider = MakeProvider();
+        _soundStream = new MemoryStream();
         WaveFileWriter.WriteWavFileToStream(_soundStream, provider.ToWaveProvider());
         _soundStream.Position = 0;
-        _soundReader = new VorbisWaveReader(_soundStream);
+        _soundReader = new WaveFileReader(_soundStream);
     }
     
     protected override void ParseStructs()
@@ -31,8 +37,7 @@ public class WwiseSound : Tag
     
     private MixingSampleProvider MakeProvider()
     {
-        MixingSampleProvider provider =
-            new MixingSampleProvider(NAudio.Wave.WaveFormat.CreateIeeeFloatWaveFormat(44100, 1));
+        MixingSampleProvider provider = new MixingSampleProvider(Header.Unk20[0].MakeWaveChannel().WaveFormat);
         foreach (var wem in Header.Unk20)
         {
             provider.AddMixerInput(wem.MakeWaveChannel());
@@ -70,6 +75,8 @@ public class WwiseSound : Tag
     public WaveChannel32 MakeWaveChannel()
     {
         CheckLoaded();
-        return new WaveChannel32(_soundReader);
+        var waveChannel = new WaveChannel32(_soundReader);
+        waveChannel.PadWithZeroes = false;
+        return waveChannel;
     }
 }
