@@ -1233,7 +1233,149 @@ public struct D2Class_138C8080
 [StructLayout(LayoutKind.Sequential, Size = 0x540)]
 public struct D2Class_97318080
 {
-    public long None;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0xB0)]
+public struct D2Class_F62C8080
+{
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x338)]
+public struct D2Class_F42C8080
+{
+    [DestinyOffset(0x2c8), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_FA2C8080> PatternAudioGroups;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x258)]
+public struct D2Class_FA2C8080
+{
+    [DestinyOffset(0x10)]
+    public DestinyHash WeaponContentGroupHash; // "weaponContentGroupHash" from API
+    public DestinyHash Unk14;
+    public DestinyHash Unk18;
+    [DestinyOffset(0x30)]
+    public DestinyHash WeaponTypeHash1; // "weaponTypeHash" from API
+    public byte Unk34;
+    public byte Unk35;
+    public byte Unk36;
+    public byte Unk37;
+    public float Unk38;
+    public float Unk3C;
+    public float Unk40;
+    [DestinyOffset(0x48)]
+    public int Unk48;
+    [DestinyOffset(0x50)]
+    public DestinyHash Unk50;
+    [DestinyOffset(0x60), DestinyField(FieldType.TagHash64)]
+    public Tag Unk60;
+    [DestinyOffset(0x78), DestinyField(FieldType.TagHash64)]
+    public Tag Unk78;
+    [DestinyOffset(0x90), DestinyField(FieldType.TagHash64)]
+    public Tag Unk90;
+    [DestinyOffset(0xA8), DestinyField(FieldType.TagHash64)]
+    public Tag UnkA8;
+    [DestinyOffset(0xC0), DestinyField(FieldType.TagHash64)]
+    public Tag UnkC0;
+    [DestinyOffset(0xD8), DestinyField(FieldType.TagHash64)]
+    public Tag UnkD8;
+    [DestinyOffset(0xF0), DestinyField(FieldType.TagHash64)]
+    public Tag<D2Class_A36F8080> AudioEntityParent;
+    [DestinyOffset(0x120)]
+    public DestinyHash WeaponTypeHash2; // "weaponTypeHash" from API
+    [DestinyOffset(0x130), DestinyField(FieldType.TagHash64)]
+    public Tag Unk130;
+    [DestinyOffset(0x148), DestinyField(FieldType.TagHash64)]
+    public Tag Unk148;
+    [DestinyOffset(0x168)]
+    public int Unk168;
+    [DestinyOffset(0x178)]
+    public int Unk178;
+    [DestinyOffset(0x180)]
+    public float Unk180;
+    public float Unk184;
+    public float Unk188;
+    public int Unk18C;
+    public int Unk190;
+    public float Unk194;
+    public float Unk198;
+    [DestinyOffset(0x1A8)]
+    public int Unk1A8;
+    public float Unk1AC;
+    [DestinyOffset(0x1C0), DestinyField(FieldType.TagHash64)]
+    public Tag Unk1C0;
+    [DestinyOffset(0x1D8), DestinyField(FieldType.TagHash64)]
+    public Tag Unk1D8;
+
+    // public List<D2Class_87978080> Unk1E8;
+    // public List<D2Class_84978080> Unk1F8;
+    // public List<D2Class_062D8080> Unk208;
+    [DestinyOffset(0x248), DestinyField(FieldType.TagHash64)]
+    public Tag Unk248;
+}
+
+
+[StructLayout(LayoutKind.Sequential, Size = 0xA0)]
+public struct D2Class_2D098080
+{
+    public long FileSize;
+    public DestinyHash Unk08;
+    [DestinyOffset(0x18), DestinyField(FieldType.TagHash64)]
+    public Entity? Unk18;
+    [DestinyOffset(0x30), DestinyField(FieldType.TagHash64)]
+    public Entity? Unk30;
+    [DestinyOffset(0x48), DestinyField(FieldType.TagHash64)]
+    public Entity? Unk48;
+    [DestinyOffset(0x60), DestinyField(FieldType.TagHash64)]
+    public Entity? Unk60;
+    [DestinyOffset(0x78), DestinyField(FieldType.TagHash64)]
+    public Entity? Unk78;
+    [DestinyOffset(0x90), DestinyField(FieldType.TagHash64)]
+    public Entity? Unk90;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x390)]
+public struct D2Class_79818080
+{
+    [DestinyOffset(0x1a8), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_F1918080> WwiseSounds1;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_F1918080> WwiseSounds2;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_F1918080
+{
+    [DestinyOffset(0x10), DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk10;
+}
+
+
+[StructLayout(LayoutKind.Sequential, Size = 0x68)]
+public struct D2Class_40668080
+{
+    [DestinyOffset(0x28), DestinyField(FieldType.TagHash64)]
+    public WwiseSound Sound;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_72818080
+{
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_00488080
+{
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x300)]
+public struct D2Class_79948080
+{
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x40)]
+public struct D2Class_E3918080
+{
 }
 
 #endregion

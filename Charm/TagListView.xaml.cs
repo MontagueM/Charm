@@ -562,7 +562,7 @@ public partial class TagListView : UserControl
         viewer.SetViewer(eViewerType);
     }
     
-        private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_selectedIndex == -1)
             return;
@@ -1493,17 +1493,20 @@ public partial class TagListView : UserControl
     {
         _allTagItems = new ConcurrentBag<TagItem>();
         var val = InvestmentHandler.GetPatternEntityFromHash(apiHash);
-        if (val == null || val.PatternAudio == null)
+        if (val == null || (val.PatternAudio == null && val.PatternAudioUnnamed == null))
         {
             RefreshItemList();
             return;
         }
+
+        var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.Header.Unk18;
         var resource = (D2Class_6E358080)val.PatternAudio.Header.Unk18;
         var item = InvestmentHandler.GetInventoryItem(apiHash);
-        var patternGlobalTagIdHash = InvestmentHandler.GetWeaponContentGroupHash(item);
+        var weaponContentGroupHash = InvestmentHandler.GetWeaponContentGroupHash(item);
+        // Named
         foreach (var entry in resource.PatternAudioGroups)
         {
-            if (entry.WeaponContentGroup1Hash.Equals(patternGlobalTagIdHash) && entry.AudioGroup != null)
+            if (entry.WeaponContentGroup1Hash.Equals(weaponContentGroupHash) && entry.AudioGroup != null)
             {
                 var audioGroup = PackageHandler.GetTag<D2Class_0D8C8080>(entry.AudioGroup.Header.EntityData);
                 audioGroup.Header.Audio.ForEach(audio =>
@@ -1524,16 +1527,107 @@ public partial class TagListView : UserControl
                 });
             }
         }
+        // Unnamed
+        var sounds = GetWeaponUnnamedSounds(resourceUnnamed, weaponContentGroupHash);
+        foreach (var s in sounds)
+        {
+            if (s == null)
+                continue;
+                    
+            _allTagItems.Add(new TagItem
+            {
+                Hash = s.Hash,
+                Subname = s.Hash,
+                TagType = ETagListType.WeaponAudio
+            });
+        }
+        
         RefreshItemList();
     }
+
+    public List<WwiseSound> GetWeaponUnnamedSounds(D2Class_F42C8080 resource, DestinyHash weaponContentGroupHash)
+    {
+        List<WwiseSound> sounds = new List<WwiseSound>();
+        resource.PatternAudioGroups.ForEach(entry =>
+        {
+            if (!entry.WeaponContentGroupHash.Equals(weaponContentGroupHash))
+                return;
+            
+            List<Tag> entitiesParents = new List<Tag> {entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248};
+            List<Entity> entities = new List<Entity>();
+            foreach (var tag in entitiesParents)
+            {
+                if (tag == null)
+                    continue;
+                var reference = PackageHandler.GetEntryReference(tag.Hash);
+                if (reference == 0x80806fa3)
+                {
+                    var entityData = PackageHandler.GetTag<D2Class_A36F8080>(tag.Hash).Header.EntityData;
+                    var reference2 = PackageHandler.GetEntryReference(entityData);
+                    if (reference2 == 0x80802d09)
+                    {
+                        var tagInner = PackageHandler.GetTag<D2Class_2D098080>(entityData);
+                        if (tagInner.Header.Unk18 != null)
+                            entities.Add(tagInner.Header.Unk18);
+                        if (tagInner.Header.Unk30 != null)
+                            entities.Add(tagInner.Header.Unk30);
+                        if (tagInner.Header.Unk48 != null)
+                            entities.Add(tagInner.Header.Unk48);
+                        if (tagInner.Header.Unk60 != null)
+                            entities.Add(tagInner.Header.Unk60);
+                        if (tagInner.Header.Unk78 != null)
+                            entities.Add(tagInner.Header.Unk78);
+                        if (tagInner.Header.Unk90 != null)
+                            entities.Add(tagInner.Header.Unk90);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
+                else if (reference == 0x80809ad8)
+                {
+                    entities.Add(PackageHandler.GetTag(typeof(Entity), tag.Hash));
+                }
+                else if (reference != 0x8080325a)  // 0x8080325a materials, 
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            foreach (var entity in entities)
+            {
+                foreach (var e in entity.Header.EntityResources)
+                {
+                    if (e.ResourceHash.Header.Unk18 is D2Class_79818080 a)
+                    {
+                        foreach (var d2ClassF1918080 in a.WwiseSounds1)
+                        {
+                            if (d2ClassF1918080.Unk10 is D2Class_40668080 b)
+                            {
+                                sounds.Add(b.Sound);
+                            }
+                        }
+                        foreach (var d2ClassF1918080 in a.WwiseSounds2)
+                        {
+                            if (d2ClassF1918080.Unk10 is D2Class_40668080 b)
+                            {
+                                sounds.Add(b.Sound);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+            return sounds;
+    }
     
-    private void LoadWeaponAudio(TagHash tagHash)
+    private async void LoadWeaponAudio(TagHash tagHash)
     {
         var viewer = GetViewer();
         WwiseSound tag = PackageHandler.GetTag(typeof(WwiseSound), tagHash);
         if (tag.Header.Unk20.Count == 0)
             return;
-        viewer.MusicPlayer.SetWem(tag.Header.Unk20[0]);
+        await viewer.MusicPlayer.SetSound(tag);
         viewer.MusicPlayer.Play();
     }
 

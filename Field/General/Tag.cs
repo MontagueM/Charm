@@ -275,10 +275,10 @@ public class Tag : DestinyFile
                         Type innerType = Type.GetType($"Field.D2Class_{Endian.U32ToString(resourceClass)}, Field, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
                         if (innerType == null)
                         {
-                            if (T == typeof(D2Class_069B8080) || T == typeof(D2Class_85988080))  // If entity resource or map data resource, don't bother reading if we don't know it (too many types)
+                            if (T == typeof(D2Class_069B8080) || T == typeof(D2Class_85988080) || T == typeof(D2Class_F1918080))  // If entity resource or map data resource, don't bother reading if we don't know it (too many types)
                             {
                                 handle.BaseStream.Seek(fieldOffset + 8, SeekOrigin.Begin);  // return back to keep reading
-                                continue;
+                                return result;
                             }
                             throw new NotImplementedException($"[RESOURCE POINTER] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
                         }
