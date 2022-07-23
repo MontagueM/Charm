@@ -73,7 +73,7 @@ public partial class MapView : UserControl
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
 
-        ExtractDataTables(map, savePath, fbxHandler);
+        ExtractDataTables(map, savePath, fbxHandler, false);
 
         if (ConfigHandler.GetUnrealInteropEnabled())
         {
@@ -84,7 +84,25 @@ public partial class MapView : UserControl
         fbxHandler.Dispose();
     }
     
-    private static void ExtractDataTables(Tag<D2Class_07878080> map, string savePath, FbxHandler fbxHandler)
+    public static void ExportMinimalMap(Tag<D2Class_07878080> map)
+    {
+        FbxHandler fbxHandler = new FbxHandler();
+        string meshName = map.Hash.GetHashString();
+        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        if (ConfigHandler.GetSingleFolderMapsEnabled())
+        {
+            savePath = ConfigHandler.GetExportSavePath() + "/Maps";
+        }
+        fbxHandler.InfoHandler.SetMeshName(meshName);
+        Directory.CreateDirectory(savePath);
+
+        ExtractDataTables(map, savePath, fbxHandler, true);
+
+        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+        fbxHandler.Dispose();
+    }
+    
+    private static void ExtractDataTables(Tag<D2Class_07878080> map, string savePath, FbxHandler fbxHandler, bool bMinimal=false)
     {
         Parallel.ForEach(map.Header.DataTables, data =>
         {
@@ -92,7 +110,14 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
                 {
-                    // staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
+                    if (bMinimal)
+                    {
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadArrangedIntoFbxScene(fbxHandler);
+                    }
+                    else
+                    {
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
+                    }
                 }
                 else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
                 {

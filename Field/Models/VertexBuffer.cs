@@ -63,8 +63,15 @@ public class VertexBuffer : Tag
             case 0x4:
                 part.VertexTexcoords.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
-            case 0x8:
-                part.VertexPositions.Add(new Vector4(handle.ReadUInt16(), handle.ReadUInt16(), handle.ReadUInt32(), 0, true));
+            case 0x8:  // all terrain-specific
+                var v = new Vector4(handle.ReadUInt16(), handle.ReadUInt16(), handle.ReadInt16(), handle.ReadUInt16(), true);
+                if (v.W > 0)
+                {
+                    v.Z += 2 * v.W;  // terrain uses a z precision extension.
+                }
+                
+                part.VertexPositions.Add(v);
+                
                 break;
             case 0xC:
                 part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));

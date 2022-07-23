@@ -162,20 +162,23 @@ public struct Vector4
         }
     }
     
-    public Vector4(uint x, uint y, uint z, uint w, bool bIsVector3 = false)
+    /// <summary>
+    /// Terrain specific to ease computation.
+    /// </summary>
+    public Vector4(ushort x, ushort y, short z, ushort w, bool bIsVector3 = false)
     {
         if (bIsVector3)
         {
             X = x / 65_535.0f;
             Y = y / 65_535.0f;
-            Z = z / 65_535.0f;
+            Z = z / 32_767.0f;
             W = w;
         }
         else
         {
             X = x / 65_535.0f;
             Y = y / 65_535.0f;
-            Z = z / 65_535.0f;
+            Z = z / 32_767.0f;
             W = w / 65_535.0f;  
         }
     }
@@ -188,7 +191,7 @@ public struct Vector4
         W = w;
     }
         
-    public Vector4(sbyte x, sbyte y, sbyte z, sbyte w)
+    public Vector4(byte x, byte y, byte z, byte w)
     {
         X = x / 255.0f;
         Y = y / 255.0f;

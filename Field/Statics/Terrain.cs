@@ -23,17 +23,24 @@ public class Terrain : Tag
     // To test use edz.strike_hmyn and alleys_a adf6ae80
     public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, bool bSaveShaders, D2Class_7D6C8080 parentResource)
     {
-        if (Hash != "F0E6AE80")
-        {
-            // return;
-        }
+        // if (Hash != "5EE7AE80")
+        // {
+        //     return;
+        // }
         // Uses triangle strip + only using first set of vertices and indices
         List<Part> parts = new List<Part>();
-        foreach (var part in Header.Unk78)
+        var x = new List<float>();
+        var y = new List<float>();
+        var z = new List<float>();
+        foreach (var partEntry in Header.Unk78)
         {
-            if (part.Unk0B == 0)
+            if (partEntry.Unk0B == 0)
             {
-                parts.Add(MakePart(part));
+                var part = MakePart(partEntry);
+                parts.Add(part);
+                x.AddRange(part.VertexPositions.Select(a => a.X));
+                y.AddRange(part.VertexPositions.Select(a => a.Y));
+                z.AddRange(part.VertexPositions.Select(a => a.Z));
             }
         }
         var globalOffset = new Vector3(
@@ -41,9 +48,7 @@ public class Terrain : Tag
             (Header.Unk10.Y + Header.Unk20.Y) / 2,
             (Header.Unk10.Z + Header.Unk20.Z) / 2);
 
-        var x = new List<float>();
-        var y = new List<float>();
-        var z = new List<float>();
+
         Vector3 localOffset;
         // foreach (var partEntry in Header.Unk50)
         // {
@@ -83,6 +88,23 @@ public class Terrain : Tag
 
         Header.Vertices1.Buffer.ParseBuffer(part, uniqueVertexIndices);
         Header.Vertices2.Buffer.ParseBuffer(part, uniqueVertexIndices);
+        
+        // debug todo remove
+        // foreach (var partVertexPosition in part.VertexPositions)
+        // {
+        //     if (partVertexPosition.W == 0)
+        //     {
+        //         part.VertexColours.Add(new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+        //     }
+        //     else if (partVertexPosition.W == 1)
+        //     {
+        //         part.VertexColours.Add(new Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+        //     }
+        //     else
+        //     {
+        //         part.VertexColours.Add(new Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+        //     }
+        // }
 
         return part;
     }
@@ -118,7 +140,7 @@ public class Terrain : Tag
             part.VertexPositions[i] = new Vector4(
                 (part.VertexPositions[i].X - localOffset.X) * 512 * 2 + globalOffset.X,
                 (part.VertexPositions[i].Y - localOffset.Y) * 512 * 2 + globalOffset.Y,
-                (part.VertexPositions[i].Z - localOffset.Z) * 1 * 2 + globalOffset.Z,
+                (part.VertexPositions[i].Z - localOffset.Z) * 2 * 2 + globalOffset.Z,
                 part.VertexPositions[i].W
             );
             // interpolate

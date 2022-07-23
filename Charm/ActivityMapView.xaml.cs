@@ -118,7 +118,8 @@ public partial class ActivityMapView : UserControl
         // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
         Parallel.ForEach(maps, map =>
         {
-            MapView.ExportFullMap(map);
+            // MapView.ExportFullMap(map);
+            MapView.ExportMinimalMap(map);
             MainWindow.Progress.CompleteStage();
         });
         // MapView.ExportFullMap(staticMapData);

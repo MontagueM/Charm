@@ -20,6 +20,16 @@ public class StaticMapData : Tag
         Header = ReadHeader<D2Class_AD938080>();
     }
 
+    public void LoadArrangedIntoFbxScene(FbxHandler fbxHandler)
+    {
+        Parallel.ForEach(Header.InstanceCounts, c =>
+        {
+            var s = Header.Statics[c.StaticIndex].Static;
+            var parts = s.Load(ELOD.MostDetail);
+            fbxHandler.AddStaticInstancesToScene(parts, Header.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), s.Hash);
+        });
+    }
+
     public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, bool bSaveShaders)
     {
         List<D2Class_BD938080> extractedStatics = Header.Statics.DistinctBy(x => x.Static.Hash).ToList();
