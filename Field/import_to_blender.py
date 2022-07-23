@@ -120,17 +120,16 @@ def assign_map_materials():
             print(f"Loaded {img}")
     
     #New way of getting info from cfg, thank you Mont
-    d = {x : [y["PS"]] for x, y in config["Materials"].items()}
+    d = {x : y["PS"] for x, y in config["Materials"].items()}
     
     for k, mat in d.items():
-       
         matnodes = bpy.data.materials[k].node_tree.nodes
         matnodes['Principled BSDF'].inputs['Metallic'].default_value = 0 
 
         #To make sure the current material already doesnt have at least one texture node
         if not len(find_nodes_by_type(bpy.data.materials[k], 'TEX_IMAGE')) > 0: #
             tex_num = 0 #To keep track of the current position in the list
-            for n, info in mat[0].items():
+            for n, info in mat.items():
                 #print(k + " " + n)
                 current_image = "PS_" + str(n) + "_" + info["Hash"] + "TEX_EXT"
             
