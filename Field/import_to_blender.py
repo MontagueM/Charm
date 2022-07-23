@@ -47,8 +47,11 @@ def assemble_map():
 
     static_names = {}
     for x in newobjects:
-        obj_name = x[0][:8]
-   
+        if len(config["Instances"].items()) == 1: #Fix for error that occurs when theres only 1 object in the fbx
+            for newname, value in config["Instances"].items():
+                x[1].name = newname
+
+        obj_name = x[1].name[:8]
         if obj_name not in static_names.keys():
             static_names[obj_name] = []
         static_names[obj_name].append(x)
@@ -57,10 +60,11 @@ def assemble_map():
         try:  # fix this
             parts = static_names[static]
         except:
-            print(f"Failed on {static}")
+            print(f"Failed on {static}. FBX may contain only 1 object")
+            continue
+
         for part in parts:
             for instance in instances:
-
                 ob_copy = part[1].copy()
                 bpy.context.collection.objects.link(ob_copy) #makes the instances?
 
@@ -71,9 +75,8 @@ def assemble_map():
                 ob_copy.location = location
                 ob_copy.rotation_mode = 'QUATERNION'
                 ob_copy.rotation_quaternion = quat
-               
                 ob_copy.scale = [instance["Scale"]]*3
-    
+  
     add_to_collection()
     print("Assigning materials...")
     assign_map_materials()
@@ -117,17 +120,17 @@ def assign_map_materials():
             print(f"Loaded {img}")
     
     #New way of getting info from cfg, thank you Mont
-    d = {x : [y["PS"].values()] for x, y in config["Materials"].items()}
-
+    d = {x : y["PS"] for x, y in config["Materials"].items()}
+    
     for k, mat in d.items():
-        n = 0 #Kinda hacky, but it works
         matnodes = bpy.data.materials[k].node_tree.nodes
         matnodes['Principled BSDF'].inputs['Metallic'].default_value = 0 
 
+        #To make sure the current material already doesnt have at least one texture node
         if not len(find_nodes_by_type(bpy.data.materials[k], 'TEX_IMAGE')) > 0: #
-
-            #Check if the material already has a texture node with a specific name, avoids duplicates
-            for info in mat[0]:
+            tex_num = 0 #To keep track of the current position in the list
+            for n, info in mat.items():
+                #print(k + " " + n)
                 current_image = "PS_" + str(n) + "_" + info["Hash"] + "TEX_EXT"
             
                 if info["SRGB"]:
@@ -140,10 +143,7 @@ def assign_map_materials():
                 texnode.location = (-370.0, 200.0 + (float(n)*-1.1)*50) #shitty offsetting
 
                 texture = bpy.data.images.get(current_image)
-
-                if not texture: #Rare(?) case where the textures PS 'index' starts at 2 instead of 0
-                    texture = bpy.data.images.get("PS_2" + "_" + info["Hash"] + "TEX_EXT")
-                
+    
                 if texture:
                     texnode.label = texture.name
                     texture.colorspace_settings.name = colorspace
@@ -154,11 +154,12 @@ def assign_map_materials():
                     if texture.colorspace_settings.name == "sRGB":     
                         link_diffuse(bpy.data.materials[k])
                     if texture.colorspace_settings.name == "Non-Color":
-                        if int(n) == 0:
+                        if int(tex_num) == 0:
                             link_diffuse(bpy.data.materials[k])
                         else:
-                            link_normal(bpy.data.materials[k], n)
-                n += 1
+                            link_normal(bpy.data.materials[k], int(tex_num))
+                tex_num += 1
+                
 
 
 def find_nodes_by_type(material, node_type):
@@ -206,6 +207,7 @@ def link_normal(material, num = 0):
     if len(s_list) == 0:
         return False
     image_node = it_list[num]
+    #print(len(image_node.items()))
     shader_node = s_list[0]
     if image_node.image.colorspace_settings.name == "Non-Color":
         image_socket = image_node.outputs['Color']
