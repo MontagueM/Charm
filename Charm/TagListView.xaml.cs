@@ -1399,8 +1399,8 @@ public partial class TagListView : UserControl
     private void LoadSound(TagHash tagHash)
     {
         var viewer = GetViewer();
-        viewer.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), tagHash));
-        viewer.MusicPlayer.Play();
+        if (viewer.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), tagHash)))
+            viewer.MusicPlayer.Play();
     }
     
     #endregion

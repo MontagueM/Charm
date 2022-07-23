@@ -46,12 +46,19 @@ public partial class MusicPlayerControl : UserControl
         PlayingText.Text = $"PLAYING: {name}";
     }
 
-    public void SetWem(Wem wem)
+    public bool SetWem(Wem wem)
     {
         if (_output != null)
             _output.Dispose();
         _wem = wem;
         _waveProvider = wem.MakeWaveChannel();
+        if (_waveProvider == null)
+        {
+            CanPlay = false;
+            _musicLog.Error("WaveProvider is null");
+            MessageBox.Show("Error: WaveProvider is null");
+            return false;
+        }
         MakeOutput();
         _output.Init(_waveProvider);
         SetVolume(VolumeBar.Value);
@@ -61,6 +68,7 @@ public partial class MusicPlayerControl : UserControl
         _prevPositionValue = 0;
         ProgressBar.Value = 0;
         SetPlayingText(wem.Hash);
+        return true;
     }
     
     public async Task SetSound(WwiseSound sound)
@@ -98,6 +106,11 @@ public partial class MusicPlayerControl : UserControl
     
     public void Play()
     {
+        if (_output == null)
+        {
+            _musicLog.Error("Output is null");
+            return;
+        }
         string name = _wem == null ? _sound.Hash : _wem.Hash;
         _musicLog.Information($"Playing {name}");
         (PlayPause.Content as TextBlock).Text = "PAUSE";

@@ -47,8 +47,8 @@ public partial class MusicWemsControl : UserControl
     
     public void PlayWem(Wem wem)
     {
-        MusicPlayer.SetWem(wem);
-        MusicPlayer.Play();
+        if (MusicPlayer.SetWem(wem))
+            MusicPlayer.Play();
     }
 
     public void Load(D2Class_F5458080 res)

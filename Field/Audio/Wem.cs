@@ -35,12 +35,19 @@ public class Wem : Tag
         return WemConverter.ConvertSoundFile(GetStream());
     }
     
-    public WaveChannel32 MakeWaveChannel()
+    public WaveChannel32? MakeWaveChannel()
     {
         CheckLoaded();
-        var waveChannel = new WaveChannel32(_wemReader);
-        waveChannel.PadWithZeroes = false;
-        return waveChannel;
+        try
+        {
+            var waveChannel = new WaveChannel32(_wemReader);
+            waveChannel.PadWithZeroes = false;
+            return waveChannel;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
     
     public TimeSpan GetDuration()
