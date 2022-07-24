@@ -123,6 +123,18 @@ public struct D2Class_18978080
     public int Unk1C;
 }
 
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_17978080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag DialogueTable;
+
+    public DestinyHash Unk10;
+    [DestinyOffset(0x18)]
+    public DestinyHash Unk18;
+    public int Unk1C;
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 0x58)]
 public struct D2Class_45938080
 {

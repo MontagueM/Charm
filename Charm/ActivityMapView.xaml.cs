@@ -138,7 +138,7 @@ public partial class ActivityMapView : UserControl
         var s = sender as Button;
         var dc = s.DataContext as DisplayStaticMap;
         MapControl.Clear();
-        _activityLog.Debug($"Loading UI for static map hash: {dc.Hash}");
+        _activityLog.Debug($"Loading UI for static map hash: {dc.Name}");
         MapControl.Visibility = Visibility.Hidden;
         var lod = MapControl.ModelView.GetSelectedLod();
         if (dc.Name == "Select all")
