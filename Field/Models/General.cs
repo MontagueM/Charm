@@ -135,6 +135,14 @@ public struct Vector4
         Z = z;
         W = 0;
     }
+    
+    public Vector4(double x, double y, double z, double w)
+    {
+        X = (float)x;
+        Y = (float)y;
+        Z = (float)z;
+        W = (float)w;
+    }
         
     public Vector4(int x, int y, int z)
     {

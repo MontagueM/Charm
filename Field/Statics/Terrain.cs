@@ -21,12 +21,15 @@ public class Terrain : Tag
     }
     
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, bool bSaveShaders, D2Class_7D6C8080 parentResource)
+    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource)
     {
-        // if (Hash != "5EE7AE80")
-        // {
-        //     return;
-        // }
+        Directory.CreateDirectory(saveDirectory + "/Textures/Terrain/");
+        Directory.CreateDirectory(saveDirectory + "/Shaders/Terrain/");
+
+        if (Hash != "CAC7D380")
+        {
+            return;
+        }
         // Uses triangle strip + only using first set of vertices and indices
         List<Part> parts = new List<Part>();
         var x = new List<float>();
@@ -41,6 +44,15 @@ public class Terrain : Tag
                 x.AddRange(part.VertexPositions.Select(a => a.X));
                 y.AddRange(part.VertexPositions.Select(a => a.Y));
                 z.AddRange(part.VertexPositions.Select(a => a.Z));
+                // Material
+                if (partEntry.Material == null) continue;
+                partEntry.Material.SaveAllTextures($"{saveDirectory}/Textures/Terrain/");
+                part.Material = partEntry.Material;
+                // dynamicPart.Material.SaveVertexShader(saveDirectory);
+                if (bSaveShaders)
+                {
+                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/Terrain/");
+                }
             }
         }
         var globalOffset = new Vector3(
@@ -50,15 +62,17 @@ public class Terrain : Tag
 
 
         Vector3 localOffset;
-        // foreach (var partEntry in Header.Unk50)
-        // {
-        //     Part part = MakePart(partEntry);
-        //     parts.Add(part);
-        //
-        //     x.AddRange(part.VertexPositions.Select(a => a.X));
-        //     y.AddRange(part.VertexPositions.Select(a => a.Y));
-        //     z.AddRange(part.VertexPositions.Select(a => a.Z));
-        // }
+        for (int i = 0; i < Header.Unk50.Count; i++)
+        {
+            // Part part = MakePart(partEntry);
+            // parts.Add(part);
+            var partEntry = Header.Unk50[i];
+            if (partEntry.Dyemap != null)
+                partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/Terrain/{Hash}_Dyemap_{i}_{partEntry.Dyemap.Hash}");
+            // x.AddRange(part.VertexPositions.Select(a => a.X));
+            // y.AddRange(part.VertexPositions.Select(a => a.Y));
+            // z.AddRange(part.VertexPositions.Select(a => a.Z));
+        }
         localOffset = new Vector3((x.Max() + x.Min())/2, (y.Max() + y.Min())/2, (z.Max() + z.Min())/2);
         var min = new Vector3(x.Min(), y.Min(), z.Min());
         var max = new Vector3(x.Max(), y.Max(), z.Max());
@@ -66,6 +80,7 @@ public class Terrain : Tag
         {
             // scale by 1.99 ish, -1 for all sides, multiply by 512?
             TransformPositions(part, globalOffset, localOffset, min, max);
+            TransformTexcoords(part);
             // TransformPositions2(part, globalOffset, localOffset, min, max);
         }
         
@@ -75,6 +90,7 @@ public class Terrain : Tag
     public Part MakePart(D2Class_846C8080 entry)
     {
         Part part = new Part();
+        part.GroupIndex = entry.Unk0A;
         part.Indices = Header.Indices1.Buffer.ParseBuffer(EPrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
@@ -137,10 +153,10 @@ public class Terrain : Tag
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
             // based on middle points
-            part.VertexPositions[i] = new Vector4(
-                (part.VertexPositions[i].X - localOffset.X) * 512 * 2 + globalOffset.X,
-                (part.VertexPositions[i].Y - localOffset.Y) * 512 * 2 + globalOffset.Y,
-                (part.VertexPositions[i].Z - localOffset.Z) * 2 * 2 + globalOffset.Z,
+            part.VertexPositions[i] = new Vector4(  // technically actually 1008 1008 4 not 1024 1024 4?
+                (part.VertexPositions[i].X - localOffset.X) * 1.96875 * 512 + globalOffset.X,
+                (part.VertexPositions[i].Y - localOffset.Y) * 1.96875 * 512 + globalOffset.Y,
+                (part.VertexPositions[i].Z - localOffset.Z) * 0.0078125 * 512 + globalOffset.Z,
                 part.VertexPositions[i].W
             );
             // interpolate
@@ -152,6 +168,17 @@ public class Terrain : Tag
             //     part.VertexPositions[i].W
             // );
             var b = 0;
+        }
+    }
+    
+    private void TransformTexcoords(Part part)
+    {
+        for (int i = 0; i < part.VertexTexcoords.Count; i++)
+        {
+            part.VertexTexcoords[i] = new Vector2(
+                part.VertexTexcoords[i].X * 10 + 8.8,
+                part.VertexTexcoords[i].Y * -20 + 1 - 0
+            );
         }
     }
     
@@ -251,7 +278,7 @@ public struct D2Class_866C8080
 public struct D2Class_846C8080
 {
     [DestinyField(FieldType.TagHash)]
-    public Material Unk00;
+    public Material Material;
     public uint IndexOffset;
     public ushort IndexCount;
     public byte Unk0A;

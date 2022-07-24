@@ -112,7 +112,7 @@ public partial class MapView : UserControl
                 {
                     if (bMinimal)
                     {
-                        staticMapResource.StaticMapParent.Header.StaticMap.LoadArrangedIntoFbxScene(fbxHandler);
+                        // staticMapResource.StaticMapParent.Header.StaticMap.LoadArrangedIntoFbxScene(fbxHandler);
                     }
                     else
                     {
