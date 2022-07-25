@@ -110,7 +110,11 @@ public class PackageHandler
         List<DestinyHash> hashes = new List<DestinyHash>();
         // Iterate over all the 02218080 files and their string containers inside
         var vals = GetAllEntriesOfReference(0x0172, 0x80802102); // 045EAE80 to speed it up
-        // foreach (int i in vals)
+        CacheHashDataList(vals.ToArray());
+        var valsActivities = GetAllTagsWithReference(0x80808e8b); // to get the activity location names etc
+        CacheHashDataList(valsActivities.Select(x => x.Hash).ToArray());
+
+        // global strings
         Parallel.ForEach(vals, val =>
         {
             TagHash hash = new TagHash(val);
@@ -126,6 +130,14 @@ public class PackageHandler
                 hashes.Add(q.Unk10.Hash);
                 GlobalStringContainerCache.Add(q.Unk10);
             }
+        });
+        
+        // activity strings
+        Parallel.ForEach(valsActivities, hash =>
+        {
+            Tag<D2Class_8B8E8080> f = new Tag<D2Class_8B8E8080>(hash);
+            if (f.Header.StringContainer != null)
+                GlobalStringContainerCache.Add(f.Header.StringContainer);
         });
     }
     

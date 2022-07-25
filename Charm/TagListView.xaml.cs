@@ -371,7 +371,8 @@ public partial class TagListView : UserControl
             // bool bWasTrimmed = name != item.Name;
             if (name.ToLower().Contains(searchStr) 
                 || item.Hash.GetHashString().ToLower().Contains(searchStr) 
-                || item.Hash.Hash.ToString().Contains(searchStr))
+                || item.Hash.Hash.ToString().Contains(searchStr)
+                || item.Subname.ToLower().Contains(searchStr))
             {
                 displayItems.Add(new TagItem
                 {
@@ -943,21 +944,33 @@ public partial class TagListView : UserControl
     #region Activity
 
     /// <summary>
-    /// Type 0x80808e8e.
+    /// Type 0x80808e8e, but we use a child of it (0x80808e8b) so we can get the location.
     /// </summary>
     private void LoadActivityList()
     {
         _allTagItems = new ConcurrentBag<TagItem>();
+
+        // Getting names
+        var valsChild = PackageHandler.GetAllTagsWithReference(0x80808e8b);
+        ConcurrentDictionary<string, string> names = new ConcurrentDictionary<string, string>();
+        Parallel.ForEach(valsChild, val =>
+        {
+            Tag<D2Class_8B8E8080> tag = PackageHandler.GetTag<D2Class_8B8E8080>(val);
+            foreach (var entry in tag.Header.Activities)
+            {
+                names.TryAdd(entry.ActivityName, tag.Header.LocationName);
+            }
+        });
+        
         var vals = PackageHandler.GetAllTagsWithReference(0x80808e8e);
         Parallel.ForEach(vals, val =>
         {
             var activityName = PackageHandler.GetActivityName(val);
-            // if (activityName == "crucible" || activityName == "iron_banner" || activityName == "trials")
-            //     activityName = PackageHandler.GetPackageName(val.GetPkgId());
             _allTagItems.Add(new TagItem 
             { 
                 Hash = val,
                 Name = activityName,
+                Subname = names.ContainsKey(activityName) && !names[activityName].StartsWith("%%NOGLOBALSTRING") ? names[activityName] : "",
                 TagType = ETagListType.Activity
             });
         });
@@ -1618,7 +1631,7 @@ public partial class TagListView : UserControl
                 }
             }
         });
-            return sounds;
+        return sounds;
     }
     
     private async void LoadWeaponAudio(TagHash tagHash)
