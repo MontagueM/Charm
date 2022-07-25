@@ -22,8 +22,9 @@ public class Activity : Tag
 public struct D2Class_8E8E8080
 {
     public long FileSize;
-    public DestinyHash LocationName;  // these all have actual string hashes but have no string container given directly
-    public DestinyHash ActivityName;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string LocationName;  // these all have actual string hashes but have no string container given directly
+    public DestinyHash Unk0C;
     public DestinyHash Unk10;
     public DestinyHash Unk14;
     [DestinyField(FieldType.ResourcePointer)]
@@ -41,16 +42,48 @@ public struct D2Class_8E8E8080
     public Tag UnkActivity68;
 }
 
+[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+public struct D2Class_8B8E8080
+{
+    public long FileSize;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string LocationName;
+    [DestinyOffset(0x10), DestinyField(FieldType.TagHash64)]
+    public StringContainer StringContainer;
+    [DestinyField(FieldType.TagHash)] 
+    public Tag Events;
+    [DestinyField(FieldType.TagHash)] 
+    public Tag TagBags;
+    public uint Unk18;
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk1C;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_2E898080> Activities;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_2E898080
+{
+    public DestinyHash ShortActivityName;
+    [DestinyOffset(0x8)]
+    public DestinyHash Unk08;
+    public DestinyHash Unk10;
+    [DestinyField(FieldType.RelativePointer)]
+    public string ActivityName;
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 0x90)]
 public struct D2Class_26898080
 {
-    public DestinyHash LocationName;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string LocationName;
     public DestinyHash ActivityName;
-    public DestinyHash BubbleName;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string BubbleName;
     public DestinyHash Unk0C;
     public DestinyHash Unk10;
-    [DestinyOffset(0x18)]
-    public DestinyHash BubbleName2;
+    [DestinyOffset(0x18), DestinyField(FieldType.StringNoContainer)]
+    public string BubbleName2;
     [DestinyOffset(0x20)]
     public DestinyHash Unk20;
     public DestinyHash Unk24;
@@ -72,9 +105,11 @@ public struct D2Class_26898080
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
 public struct D2Class_48898080
 {
-    public DestinyHash LocationName;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string LocationName;
     public DestinyHash ActivityName;
-    public DestinyHash BubbleName;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string BubbleName;
     public DestinyHash ActivityPhaseName;
     public DestinyHash ActivityPhaseName2;
     [DestinyField(FieldType.TagHash)] 
@@ -205,9 +240,11 @@ public struct D2Class_478F8080
 [StructLayout(LayoutKind.Sequential, Size = 0x38)]
 public struct D2Class_24898080
 {
-    public DestinyHash LocationName;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string LocationName;
     public DestinyHash ActivityName;
-    public DestinyHash BubbleName;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string BubbleName;
     [DestinyOffset(0x10), DestinyField(FieldType.ResourcePointer)]
     public dynamic? Unk10;  // 0F978080
     [DestinyField(FieldType.TablePointer)]
@@ -249,7 +286,8 @@ public struct D2Class_6A988080
     public List<D2Class_28898080> DirectiveTables;
     [DestinyField(FieldType.TagHash64)] 
     public Tag DialogueTable;
-    public DestinyHash StartingBubbleName;
+    [DestinyField(FieldType.StringNoContainer)]
+    public string StartingBubbleName;
     public DestinyHash Unk24;
     [DestinyOffset(0x2C), DestinyField(FieldType.TagHash)]
     public Tag<D2Class_EB458080> Music;
@@ -264,8 +302,8 @@ public struct D2Class_20978080
 {
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_28898080> PEDirectiveTables;
-    [DestinyOffset(0x20)]
-    public DestinyHash StartingBubbleName;
+    [DestinyOffset(0x20), DestinyField(FieldType.StringNoContainer)]
+    public string StartingBubbleName;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 4)]
