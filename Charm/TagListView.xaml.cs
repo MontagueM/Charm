@@ -371,7 +371,8 @@ public partial class TagListView : UserControl
             // bool bWasTrimmed = name != item.Name;
             if (name.ToLower().Contains(searchStr) 
                 || item.Hash.GetHashString().ToLower().Contains(searchStr) 
-                || item.Hash.Hash.ToString().Contains(searchStr))
+                || item.Hash.Hash.ToString().Contains(searchStr)
+                || item.Subname.ToLower().Contains(searchStr))
             {
                 displayItems.Add(new TagItem
                 {
