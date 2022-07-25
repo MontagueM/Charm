@@ -40,7 +40,7 @@ public partial class ActivityMapView : UserControl
             if (mapEntry.MapReference is null || mapEntry.MapReference.Header.ChildMapReference == null)
                 continue;
             DisplayBubble displayMap = new DisplayBubble();
-            displayMap.Name = mapEntry.BubbleName.StartsWith("%%NOGLOBALSTRING") ? $"({mapEntry.Unk10.BubbleName})" : $"{mapEntry.BubbleName} ({mapEntry.Unk10.BubbleName})";  // assuming Unk10 is 0F978080 or 0B978080
+            displayMap.Name = $"{mapEntry.BubbleName} ({mapEntry.Unk10.BubbleName})";  // assuming Unk10 is 0F978080 or 0B978080
             displayMap.Hash = mapEntry.MapReference.Header.ChildMapReference.Hash;
             maps.Add(displayMap);
         }

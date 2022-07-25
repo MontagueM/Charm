@@ -81,7 +81,7 @@ public class PackageHandler
                 return Cache[hash.Hash];
             if (type.IsValueType)
             {
-                if (Cache[hash.Hash].GetType().GenericTypeArguments[0].UnderlyingSystemType == type)
+                if (Cache[hash.Hash].GetType().GenericTypeArguments.Length > 0 && Cache[hash.Hash].GetType().GenericTypeArguments[0].UnderlyingSystemType == type)
                 {
                     return Cache[hash.Hash];
                 }
@@ -135,9 +135,9 @@ public class PackageHandler
         // activity strings
         Parallel.ForEach(valsActivities, hash =>
         {
-            Tag<D2Class_8B8E8080> f = new Tag<D2Class_8B8E8080>(hash);
-            if (f.Header.StringContainer != null)
-                GlobalStringContainerCache.Add(f.Header.StringContainer);
+        Tag<D2Class_8B8E8080> f = new Tag<D2Class_8B8E8080>(hash);
+        if (f.Header.StringContainer != null)
+        GlobalStringContainerCache.Add(f.Header.StringContainer);
         });
     }
     

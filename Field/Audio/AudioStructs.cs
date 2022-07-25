@@ -82,8 +82,7 @@ public struct D2Class_33978080
     [DestinyField(FieldType.TagHash)]
     public Tag Unk74;
     public DestinyHash Unk78;
-    [DestinyField(FieldType.StringNoContainer)]
-    public string NarratorString;
+    public DestinyHash NarratorString;
     public float Unk80;
 }
 
