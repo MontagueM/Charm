@@ -1658,7 +1658,7 @@ public class TagItem
         get => _name; set => _name = value;
     }
 
-    public string Subname { get; set; }
+    public string Subname { get; set; } = String.Empty;
     
     public DestinyHash Hash { get; set; }
 
@@ -1676,7 +1676,7 @@ public class TagItem
         }
     }
 
-    public int FontSize { get; set; }
+    public int FontSize { get; set; } = 16;
 
     public string Type
     {
