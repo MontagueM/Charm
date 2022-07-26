@@ -290,13 +290,19 @@ public partial class MainWindow
         }
     }
 
-
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.D && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
         {
             MakeNewTab("Dev", new DevView());
             SetNewestTabSelected();
+        }
+        else if (e.Key == Key.C 
+                 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
+                 && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift
+                 && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+        {
+            throw new ExternalException("Crash induced.");
         }
     }
 }
