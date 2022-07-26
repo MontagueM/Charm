@@ -13,6 +13,7 @@ public class Wem : Tag
 {
     private MemoryStream _wemStream = null;
     private VorbisWaveReader _wemReader = null;
+    private bool _bDisposed = false;
     
     public Wem(TagHash hash) : base(hash)
     {
@@ -20,13 +21,14 @@ public class Wem : Tag
 
     public void Load()
     {
+        _bDisposed = false;
         _wemStream = GetWemStream();
         _wemReader = new VorbisWaveReader(_wemStream);
     }
 
     private void CheckLoaded()
     {
-        if (_wemStream == null)
+        if (_wemStream == null || _bDisposed)
             Load();
     }
     
@@ -69,5 +71,12 @@ public class Wem : Tag
             var timespan = GetDuration();
             return GetDurationString(timespan);
         }
+    }
+
+    public void Dispose()
+    {
+        _wemReader?.Dispose();
+        _wemStream?.Dispose();
+        _bDisposed = true;
     }
 }

@@ -135,7 +135,8 @@ public partial class MusicPlayerControl : UserControl
         {
             Dispatcher.Invoke(() =>
             {
-                SetPosition(_waveProvider.Position);
+                if (IsPlaying())
+                    SetPosition(_waveProvider.Position);
             });
             System.Threading.Thread.Sleep(100);
         }
@@ -249,5 +250,14 @@ public partial class MusicPlayerControl : UserControl
         {
             _waveProvider.Position = (long)(s.Value * duration.TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
         }    
+    }
+
+    public void Dispose()
+    {
+        CanPlay = false;
+        _output?.Stop();
+        _waveProvider?.Dispose();
+        _output?.Dispose();
+        _wem.Dispose();
     }
 }
