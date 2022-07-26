@@ -44,8 +44,8 @@ public static class Endian
 public class DestinyHash : IComparable<DestinyHash>
 {
     public uint Hash = 0x811c9dc5;
-    private string _devString;
-    private string _containerString;
+    private string _devString = String.Empty;
+    private string _containerString = String.Empty;
 
     private void SetDevString()
     {
