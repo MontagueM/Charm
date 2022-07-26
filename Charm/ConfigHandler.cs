@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Configuration;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using Field.Textures;
 using MessageBox = System.Windows.Forms.MessageBox;
@@ -92,6 +93,11 @@ public class ConfigHandler
                 System.Windows.Forms.DialogResult result = dialog.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
+                    if (dialog.SelectedPath.Contains(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))
+                    {
+                        MessageBox.Show("You cannot export to the same directory as the executable.");
+                        continue;
+                    }
                     success = TrySetExportSavePath(dialog.SelectedPath);
                 }
 
