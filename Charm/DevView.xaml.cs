@@ -160,6 +160,10 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+                case 0x80808be0:
+                    Animation animation = PackageHandler.GetTag(typeof(Animation), hash);
+                    animation.Load();
+                    break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
                     break;

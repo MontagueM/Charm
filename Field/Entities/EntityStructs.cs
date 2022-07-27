@@ -1217,19 +1217,6 @@ public struct D2Class_0F8C8080
     public List<D2Class_138C8080> Sounds;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x28)]
-public struct D2Class_138C8080
-{
-    public short Unk00;
-    public short Unk02;
-    [DestinyOffset(0x8)]
-    public DestinyHash Unk08;
-    [DestinyOffset(0x10), DestinyField(FieldType.RelativePointer)] 
-    public string WwiseEventName;
-    [DestinyField(FieldType.TagHash64)]
-    public WwiseSound Sound;
-}
-
 [StructLayout(LayoutKind.Sequential, Size = 0x540)]
 public struct D2Class_97318080
 {

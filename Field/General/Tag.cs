@@ -173,6 +173,18 @@ public class Tag : DestinyFile
                 {
                     field.SetValue(result, new TagHash(handle.ReadUInt32()));
                 }
+                else if (field.FieldType.BaseType == typeof(Enum))
+                {
+                    Type field0 = field.FieldType.GetFields()[0].FieldType;
+                    if (field0 == typeof(Int16))
+                    {
+                        field.SetValue(result, (Enum) Enum.ToObject(field.FieldType, handle.ReadInt16()));
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
                 else
                 {
                     dynamic value = StructConverter.ToStructure(handle.ReadBytes(Marshal.SizeOf(field.FieldType)), field.FieldType);
@@ -436,14 +448,14 @@ public class Tag : DestinyFile
     [DllImport("Symmetry.dll", EntryPoint = "DllIsStructureValid", CallingConvention = CallingConvention.StdCall)]
     public extern static bool IsStructureValid([MarshalAs(UnmanagedType.LPStr)] string structureType);
         
-    // protected object ReadResource()
-    // {
-    //     // A resource is from a pointer in header; if that pointer - 4 is a class hash, then it's a resource
-    //     // There are also global pointer things but they can't be pointed to by the header
-    //     var resourceType = ReadStruct<ResourceType>();
-    //     var resource = ReadResource(resourceType);
-    //     return resource;
-    // }
+// protected object ReadResource()
+// {
+//     // A resource is from a pointer in header; if that pointer - 4 is a class hash, then it's a resource
+//     // There are also global pointer things but they can't be pointed to by the header
+//     var resourceType = ReadStruct<ResourceType>();
+//     var resource = ReadResource(resourceType);
+//     return resource;
+// }
         
     protected virtual void Parse()
     {

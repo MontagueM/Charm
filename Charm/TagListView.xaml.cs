@@ -1526,13 +1526,13 @@ public partial class TagListView : UserControl
                 {
                     foreach (var s in audio.Sounds)
                     {
-                        if (s.Sound == null)
+                        if (s.Resource == null)
                             continue;
                     
                         _allTagItems.Add(new TagItem
                         {
-                            Hash = s.Sound.Hash,
-                            Name = s.WwiseEventName,
+                            Hash = s.Resource.Hash,
+                            Name = s.ResourceName,
                             Subname = audio.WwiseEventHash,
                             TagType = ETagListType.WeaponAudio
                         });
