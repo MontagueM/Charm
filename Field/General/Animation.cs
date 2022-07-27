@@ -17,10 +17,144 @@ public class Animation : Tag
         Header = ReadHeader<D2Class_E08B8080>();
     }
 
+    /// <summary>
+    /// Parsing the tag data into the raw, uncompressed data so it can be used by people.
+    /// </summary>
     public void Load()
     {
-        var b = Header;
+        MakeAnimationNodes();
+        ParseStaticData();
+        ParseAnimatedData();
         var a = 0;
+    }
+
+    private void ParseAnimatedData()
+    {
+        
+    }
+
+    private Dictionary<int, AnimationNode> _nodes;
+
+    /// <summary>
+    /// Fills the _nodes dictionary with empties to be filled with good data.
+    /// </summary>
+    private void MakeAnimationNodes()
+    {
+        _nodes = new Dictionary<int, AnimationNode>();
+        for (var i = 0; i < Header.NodeCount; i++)
+        {
+            _nodes.Add(i, new AnimationNode(i));
+        }
+    }
+    
+    /// <summary>
+    /// 1. Converts the data to its true values
+    /// 2. Adds the static data to the AnimationNodes dict
+    /// </summary>
+    private void ParseStaticData()
+    {
+        var staticHeader = (D2Class_408B8080)Header.StaticBoneData;
+        if (staticHeader.CodecType != AnimationCodecType._animation_codec_type_pose_quantized)
+            throw new NotImplementedException();
+
+        // As the data is stored as a short array, we use a custom reader.
+        using (var stream = new AnimationStream(staticHeader.StreamData))
+        {
+            foreach (var index in Header.StaticScaleControlMap)
+            {
+                var scale = stream.ReadQuantisedFloat(staticHeader.ScaleStreamQuantisation);
+                _nodes[index.Value].ScaleStream.Add(scale);
+            }
+            foreach (var index in Header.StaticRotationControlMap)
+            {
+                var rot = stream.ReadQuantisedFloat4(new FloatQuantise { Minimum = 2, Extent = -1 });
+                _nodes[index.Value].RotationStream.Add(rot);
+            }
+            foreach (var index in Header.StaticTranslationControlMap)
+            {
+                var tra = stream.ReadQuantisedFloat3(staticHeader.TranslationStreamQuantisation);
+                _nodes[index.Value].TranslationStream.Add(tra);
+            }
+        }
+    }
+}
+
+/// <summary>
+/// It can be assumed that an AnimationNode with 1 frame is a static node.
+/// </summary>
+public struct AnimationNode
+{
+    public int NodeIndex = -1;
+    // todo these lists should be dicts instead if we want to use multiple threads to maintain frame order
+    public List<float> ScaleStream = new List<float>();
+    public List<Vector4> RotationStream = new List<Vector4>();
+    public List<Vector3> TranslationStream = new List<Vector3>();
+    
+    public AnimationNode(int nodeIndex)
+    {
+        NodeIndex = nodeIndex;
+    }
+}
+
+public class AnimationStream : IDisposable
+{
+    private List<ushort> _data;
+    private int _index;
+    
+    public AnimationStream(List<D2Class_0A008080> ushortStream)
+    {
+        _data = ushortStream.Select(x => x.Value).ToList();
+        _index = 0;
+    }
+
+    public float ReadFloat()
+    {
+        float value = _data[_index++] / 65535f;
+        return value;
+    }
+
+    public float ReadQuantisedFloat(FloatQuantise quantisation)
+    {
+        float value = ReadFloat();
+        float corrected = value * quantisation.Minimum + quantisation.Extent;
+        return corrected;
+    }
+
+    public void Dispose()
+    {
+        _data.Clear();
+        _index = 0;
+    }
+
+    public Vector4 ReadFloat4()
+    {
+        return new Vector4(ReadFloat(), ReadFloat(), ReadFloat(), ReadFloat());
+    }
+    
+    public Vector3 ReadFloat3()
+    {
+        return new Vector3(ReadFloat(), ReadFloat(), ReadFloat());
+    }
+    
+    public Vector3 ReadQuantisedFloat3(Float3Quantise quantisation)
+    {
+        var vec = ReadFloat3();
+        var corrected = new Vector3(
+            vec.X * quantisation.Minimum.X + quantisation.Extent.X,
+            vec.Y * quantisation.Minimum.Y + quantisation.Extent.Y,
+            vec.Z * quantisation.Minimum.Z + quantisation.Extent.Z);
+        return corrected;
+    }
+
+    public Vector4 ReadQuantisedFloat4(FloatQuantise quantisation)
+    {
+        var vec = ReadFloat4();
+        var corrected = new Vector4(
+            vec.X * quantisation.Minimum + quantisation.Extent,
+            vec.Y * quantisation.Minimum + quantisation.Extent,
+            vec.Z * quantisation.Minimum + quantisation.Extent,
+            vec.W * quantisation.Minimum + quantisation.Extent);
+        return corrected;
     }
 }
 
@@ -84,7 +218,7 @@ public struct D2Class_E08B8080
 [StructLayout(LayoutKind.Sequential, Size = 2)]
 public struct D2Class_0A008080
 {
-    public short Index;
+    public ushort Value;
 }
 
 public enum AnimationCodecType : short
