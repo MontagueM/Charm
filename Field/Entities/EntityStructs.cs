@@ -666,7 +666,7 @@ public struct D2Class_41268080
 [StructLayout(LayoutKind.Sequential, Size = 4)]
 public struct D2Class_0F008080
 {
-    public float Unk00;
+    public float Value;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]

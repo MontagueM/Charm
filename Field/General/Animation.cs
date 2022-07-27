@@ -7,7 +7,8 @@ namespace Field;
 public class Animation : Tag
 {
     public D2Class_E08B8080 Header;
-    
+    private Dictionary<int, AnimationNode> _nodes;
+
     public Animation(TagHash hash) : base(hash)
     {
     }
@@ -18,7 +19,7 @@ public class Animation : Tag
     }
 
     /// <summary>
-    /// Parsing the tag data into the raw, uncompressed data so it can be used by people.
+    /// Parsing the tag data into the raw, fully uncompressed data so it can be used by people.
     /// </summary>
     public void Load()
     {
@@ -30,11 +31,121 @@ public class Animation : Tag
 
     private void ParseAnimatedData()
     {
-        
+        if (Header.AnimatedBoneData is D2Class_428B8080 uncomp)
+        {
+            if (uncomp.CodecType != (AnimationCodecType)2)
+                throw new NotImplementedException();
+            ParseAnimatedUncompressedCodec2(uncomp);
+        }
+        else if (Header.AnimatedBoneData is D2Class_438B8080 comp)
+        {
+            if (comp.CodecType != (AnimationCodecType)1)
+                throw new NotImplementedException();
+            ParseAnimatedCompressedCodec1(comp);
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
     }
 
-    private Dictionary<int, AnimationNode> _nodes;
+    private void ParseAnimatedCompressedCodec1(D2Class_438B8080 header)
+    {
+        throw new NotImplementedException();
+    }
 
+    private void ParseAnimatedUncompressedCodec2(D2Class_428B8080 header)
+    {
+        Dictionary<int, FloatQuantise> scaleQuants = new Dictionary<int, FloatQuantise>();
+        Dictionary<int, Float3Quantise> translateQuants = new Dictionary<int, Float3Quantise>();
+        Dictionary<int, Float4Quantise> rotateQuants = new Dictionary<int, Float4Quantise>();
+        int offset = 0;
+        foreach (var index in Header.AnimatedScaleControlMap)
+        {
+            
+            var quant = new FloatQuantise
+            {
+                Minimum = header.SRTQuantisationMinimums[offset].Value,
+                Extent = header.SRTQuantisationExtents[offset].Value
+            };
+            scaleQuants.Add(index.Value, quant);
+            offset++;
+        }
+        foreach (var index in Header.AnimatedRotationControlMap)
+        {
+            
+            var quant = new Float4Quantise
+            {
+                Minimum = new Vector4
+                (
+                    header.SRTQuantisationMinimums[offset].Value,
+                    header.SRTQuantisationMinimums[offset+1].Value,
+                    header.SRTQuantisationMinimums[offset+2].Value,
+                    header.SRTQuantisationMinimums[offset+3].Value
+                ),
+                Extent = new Vector4
+                (
+                    header.SRTQuantisationExtents[offset].Value,
+                    header.SRTQuantisationExtents[offset+1].Value,
+                    header.SRTQuantisationExtents[offset+2].Value,
+                    header.SRTQuantisationExtents[offset+3].Value
+                ),
+            };
+            rotateQuants.Add(index.Value, quant);
+            offset += 4;
+        }
+        foreach (var index in Header.AnimatedTranslationControlMap)
+        {
+            var quant = new Float3Quantise
+            {
+                Minimum = new Vector3
+                (
+                    header.SRTQuantisationMinimums[offset].Value,
+                    header.SRTQuantisationMinimums[offset+1].Value,
+                    header.SRTQuantisationMinimums[offset+2].Value
+                ),
+                Extent = new Vector3
+                (
+                    header.SRTQuantisationExtents[offset].Value,
+                    header.SRTQuantisationExtents[offset+1].Value,
+                    header.SRTQuantisationExtents[offset+2].Value
+                ),
+            };
+            translateQuants.Add(index.Value, quant);
+            offset += 3;
+        }
+        
+        using (var stream = new AnimationStream(header.StreamData))
+        {
+            foreach (var index in Header.AnimatedScaleControlMap)
+            {
+                for (int i = 0; i < header.FrameCount; i++)
+                {
+                    var scale = stream.ReadQuantisedFloat(scaleQuants[index.Value]);
+                    _nodes[index.Value].ScaleStream.Add(scale);   
+                }
+            }
+
+            foreach (var index in Header.AnimatedRotationControlMap)
+            {
+                for (int i = 0; i < header.FrameCount; i++)
+                {
+                    var rot = stream.ReadQuantisedFloat4(rotateQuants[index.Value]);
+                    _nodes[index.Value].RotationStream.Add(rot);
+                }
+            }
+
+            foreach (var index in Header.AnimatedTranslationControlMap)
+            {
+                for (int i = 0; i < header.FrameCount; i++)
+                {
+                    var tra = stream.ReadQuantisedFloat3(translateQuants[index.Value]);
+                    _nodes[index.Value].TranslationStream.Add(tra);
+                }
+            }
+        }
+    }
+    
     /// <summary>
     /// Fills the _nodes dictionary with empties to be filled with good data.
     /// </summary>
@@ -156,6 +267,17 @@ public class AnimationStream : IDisposable
             vec.W * quantisation.Minimum + quantisation.Extent);
         return corrected;
     }
+    
+    public Vector4 ReadQuantisedFloat4(Float4Quantise quantisation)
+    {
+        var vec = ReadFloat4();
+        var corrected = new Vector4(
+            vec.X * quantisation.Minimum.X + quantisation.Extent.X,
+            vec.Y * quantisation.Minimum.Y + quantisation.Extent.Y,
+            vec.Z * quantisation.Minimum.Z + quantisation.Extent.Z,
+            vec.W * quantisation.Minimum.W + quantisation.Extent.W);
+        return corrected;
+    }
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x190)]
@@ -239,6 +361,13 @@ public struct Float3Quantise
 {
     public Vector3 Minimum;
     public Vector3 Extent;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct Float4Quantise
+{
+    public Vector4 Minimum;
+    public Vector4 Extent;
 }
 
 /// <summary>
