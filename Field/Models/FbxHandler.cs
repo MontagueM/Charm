@@ -341,9 +341,8 @@ public class FbxHandler
 
     }
 
-    public void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel)
+    public void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel, Animation animation=null)
     {
-        // _scene.GetRootNode().LclRotation.Set(new FbxDouble3(90, 0, 0));
         List<FbxNode> skeletonNodes = new List<FbxNode>();
         if (entity.Skeleton != null)
         {
@@ -362,6 +361,8 @@ public class FbxHandler
                 }
             }
         }
+        if (animation != null)
+            AddAnimationToEntity(animation, skeletonNodes);
     }
 
     public void AddStaticToScene(List<Part> parts, string meshName)
@@ -370,6 +371,61 @@ public class FbxHandler
         {
             Part part = parts[i];
             AddMeshPartToScene(part, i, meshName);
+        }
+    }
+    
+    public void AddAnimationToEntity(Animation animation, List<FbxNode> skeletonNodes)
+    {
+        animation.Load();
+        
+
+        FbxAnimStack animStack;
+        FbxAnimLayer animLayer;
+        FbxTime time;
+        lock (_fbxLock)
+        {
+            animStack = FbxAnimStack.Create(_scene, "animStackName");
+            animLayer = FbxAnimLayer.Create(_scene, "animLayerName");
+            time = new FbxTime();
+            animStack.AddMember(animLayer);        
+        }
+        string[] dims = { "X", "Y", "Z" };
+        foreach (var track in animation.Tracks)
+        {
+            var scale = dims.Select(x => skeletonNodes[track.TrackIndex].LclScaling.GetCurve(animLayer, x, true)).ToList();
+            var rotation = dims.Select(x => skeletonNodes[track.TrackIndex].LclRotation.GetCurve(animLayer, x, true)).ToList();
+            var translation = dims.Select(x => skeletonNodes[track.TrackIndex].LclTranslation.GetCurve(animLayer, x, true)).ToList();
+
+            scale.ForEach(x => x.KeyModifyBegin());
+            rotation.ForEach(x => x.KeyModifyBegin());
+            translation.ForEach(x => x.KeyModifyBegin());
+
+            for (int d = 0; d < dims.Length; d++)
+            {
+                for (int i = 0; i < track.TrackTimes.Count; i++)
+                {
+                    float frameTime = track.TrackTimes[i];
+                    time.SetSecondDouble(frameTime);
+                    
+                    var scaleKeyIndex = scale[d].KeyAdd(time);
+                    scale[d].KeySetValue(scaleKeyIndex, track.TrackScales[i]);
+                    scale[d].KeySetInterpolation(scaleKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
+                    
+                    var rotDim = Array.FindIndex(dims, x => x == animation.rotXYZ[d]);
+                    var rotationKeyIndex = rotation[d].KeyAdd(time);
+                    rotation[d].KeySetValue(rotationKeyIndex, (animation.flipRot[d] == 1 ? -1 : 1) * track.TrackRotations[i][rotDim] + animation.rot[d]);
+                    rotation[d].KeySetInterpolation(rotationKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
+                    
+                    var traDim = Array.FindIndex(dims, x => x == animation.traXYZ[d]);
+                    var translationKeyIndex = translation[d].KeyAdd(time);
+                    translation[d].KeySetValue(translationKeyIndex, (animation.flipTra[d] == 1 ? -1 : 1) * track.TrackTranslations[i][traDim] + animation.tra[d]);
+                    translation[d].KeySetInterpolation(translationKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
+                } 
+            }
+
+            scale.ForEach(x => x.KeyModifyEnd());
+            rotation.ForEach(x => x.KeyModifyEnd());
+            translation.ForEach(x => x.KeyModifyEnd());     
         }
     }
 

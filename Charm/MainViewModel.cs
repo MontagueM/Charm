@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -14,6 +15,7 @@ using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf;
 using HelixToolkit.Wpf.SharpDX;
+using HelixToolkit.Wpf.SharpDX.Controls;
 using Microsoft.Toolkit.Mvvm.Input;
 using SharpDX;
 using Vector3 = Field.Models.Vector3;
@@ -86,6 +88,9 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     
     public LineGeometry3D Grid { get; private set; }
     public Media3D.Transform3D GridTransform { get; private set; }
+    
+    private CompositionTargetEx compositeHelper = new CompositionTargetEx();
+    private NodeAnimationUpdater animationUpdater;
 
     public MainViewModel()
     {
@@ -107,6 +112,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         Grid = LineBuilder.GenerateGrid();
         GridTransform = new TranslateTransform3D(-5, 0, -5);
         
+        compositeHelper.Rendering += CompositeHelper_Rendering;
         // EnvironmentMap = TextureModel.Create("C:/T/full/Textures/2D47A280.dds");
     }
 
@@ -221,7 +227,30 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             }
         }
 
+        if (scene.Animations != null)
+        {
+            if (scene.Animations.Count == 1)
+            {
+                var anim = scene.Animations[0];
+                animationUpdater = new NodeAnimationUpdater(anim);
+                animationUpdater.RepeatMode = AnimationRepeatMode.Loop;
+                // animationUpdater.Speed = (float)0.00001;
+            }
+            else if (scene.Animations.Count > 1)
+            {
+                throw new NotImplementedException();
+            }  
+        }
+
         return true;
+    }
+    
+    private void CompositeHelper_Rendering(object sender, System.Windows.Media.RenderingEventArgs e)
+    {
+        if (animationUpdater != null)
+        {
+            animationUpdater.Update(Stopwatch.GetTimestamp(), Stopwatch.Frequency);
+        }
     }
     
     // https://stackoverflow.com/questions/33374434/improve-wpf-rendering-performance-using-helix-toolkit

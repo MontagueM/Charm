@@ -4,12 +4,32 @@ using Field.Models;
 
 namespace Field;
 
+/// Animations require a skeleton to work correctly, but these are given above. Therefore, we
+/// cannot allow the direct search of animations and instead need to understand the interfaces
+/// of the animations so we can pair it with skeletons correctly.
+
+
+/// <summary>
+/// 
+/// </summary>
 public class Animation : Tag
 {
     public D2Class_E08B8080 Header;
-    private Dictionary<int, AnimationNode> _nodes;
+    private Dictionary<int, AnimationNode> _nodes = null;
+    public List<AnimationTrack> Tracks = null;
+    public static readonly int FrameRate = 30;
+    public Vector3 tra;
+    public Vector3 rot;
+    public Vector3 flipTra;
+    public Vector3 flipRot;
+    public string[] traXYZ;
+    public string[] rotXYZ;
 
     public Animation(TagHash hash) : base(hash)
+    {
+    }
+    
+    public Animation(TagHash hash, bool disableLoad) : base(hash, disableLoad)
     {
     }
 
@@ -17,16 +37,34 @@ public class Animation : Tag
     {
         Header = ReadHeader<D2Class_E08B8080>();
     }
+    
+    public void ParseTag()
+    {
+        Parse();
+    }
 
     /// <summary>
     /// Parsing the tag data into the raw, fully uncompressed data so it can be used by people.
     /// </summary>
     public void Load()
     {
+        if (_nodes != null)
+            return;
         MakeAnimationNodes();
         ParseStaticData();
         ParseAnimatedData();
+        MakeAnimationTracks();
         var a = 0;
+    }
+
+    private void MakeAnimationTracks()
+    {
+        Tracks = new List<AnimationTrack>();
+        foreach (var node in _nodes)
+        {
+            var track = new AnimationTrack(Header.FrameCount, node.Value);
+            Tracks.Add(track);
+        }
     }
 
     private void ParseAnimatedData()
@@ -207,6 +245,74 @@ public struct AnimationNode
     }
 }
 
+/// <summary>
+/// An animation track represents the full animation of a single node.
+/// </summary>
+public struct AnimationTrack
+{
+    public int TrackIndex = -1;
+    public List<float> TrackTimes = new List<float>();
+    public List<float> TrackScales = new List<float>();
+    public List<Vector3> TrackRotations = new List<Vector3>();
+    public List<Vector3> TrackTranslations = new List<Vector3>();
+    
+    public AnimationTrack(int frameCount, AnimationNode animationNode)
+    {
+        TrackIndex = animationNode.NodeIndex;
+
+        for (int i = 0; i < frameCount; i++)
+        {
+            TrackTimes.Add((float)i / Animation.FrameRate);
+        }
+        
+        if (animationNode.ScaleStream.Count == 1) // static
+        {
+            TrackScales = TrackTimes.Select(x => animationNode.ScaleStream[0]).ToList();
+        }
+        else if (animationNode.ScaleStream.Count == 0)
+        {
+            throw new NotImplementedException();
+        }
+        else
+        {
+            TrackScales = animationNode.ScaleStream.ToList();
+        }
+        
+        if (animationNode.RotationStream.Count == 1) // static
+        {
+            TrackRotations = TrackTimes.Select(x => animationNode.RotationStream[0].QuaternionToEulerAngles()).ToList();
+        }
+        else if (animationNode.RotationStream.Count == 0)
+        {
+            throw new NotImplementedException();
+        }
+        else
+        {
+            TrackRotations = animationNode.RotationStream.Select(x => x.QuaternionToEulerAngles()).ToList();
+        }
+        // testing reassignment
+        // TrackRotations = TrackRotations.Select(x => new Vector3(-x.Z, -x.X, x.Y)).ToList();
+        // xyz
+        // TrackRotations = TrackRotations.Select(x => new Vector3(x.X, x.Y, x.Z)).ToList();
+        
+        if (animationNode.TranslationStream.Count == 1) // static
+        {
+            TrackTranslations = TrackTimes.Select(x => animationNode.TranslationStream[0]).ToList();
+        }
+        else if (animationNode.TranslationStream.Count == 0)
+        {
+            throw new NotImplementedException();
+        }
+        else
+        {
+            TrackTranslations = animationNode.TranslationStream.ToList();
+        }
+        // TrackTranslations = TrackTranslations.Select(x => new Vector3(-x.Z, -x.X, x.Y)).ToList();
+        // tried xyz, xzy
+        // TrackTranslations = TrackTranslations.Select(x => new Vector3(x.Z, x.X, x.Y)).ToList();
+    }
+}
+
 public class AnimationStream : IDisposable
 {
     private List<ushort> _data;
@@ -290,9 +396,9 @@ public struct D2Class_E08B8080
     [DestinyField(FieldType.ResourcePointer)]
     public dynamic? AnimatedBoneData;  // 438b8080 compressed, 428b8080 uncompressed
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk20;  // 4c8b8080
+    public dynamic? Unk20;  // 4c8b8080, 4b8b8080
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk28;  // 488b8080
+    public dynamic? Unk28;  // 488b8080, 468B8080
     [DestinyOffset(0x60), DestinyField(FieldType.ResourcePointer)]
     public dynamic? Unk60;  // 428b8080 if compressed
     [DestinyOffset(0x70)]
@@ -451,6 +557,19 @@ public struct D2Class_4C8B8080 // basically same frame/quantisation stuff
     public List<D2Class_0F008080> Unk40;
 }
 
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_4B8B8080
+{
+    public short Unk00;
+    public short Unk02;
+    [DestinyOffset(0xC)]
+    public int FrameCount;
+    public float Unk10;
+    public float Unk14;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_0A008080> Unk18;
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 2)]
 public struct D2Class_528B8080
 {
@@ -476,6 +595,21 @@ public struct D2Class_488B8080
     public List<D2Class_06008080> Unk50;
 }
 
+[StructLayout(LayoutKind.Sequential, Size = 0x40)]
+public struct D2Class_468B8080
+{
+    public short Unk00;
+    public short Unk02;
+    [DestinyOffset(0xC)] 
+    public int Unk0C;
+    public float Unk10;
+    public float Unk14;
+    public float Unk18;
+    public float Unk1C;
+    [DestinyOffset(0x30), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_0A008080> Unk30;
+}
+
 #endregion
 
 #region EOF Resources
@@ -484,7 +618,7 @@ public struct D2Class_488B8080
 public struct D2Class_088C8080
 {
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk00;  // 11/12/138c8080
+    public dynamic? Unk00;  // 0a/11/12/13/1a8c8080
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0xc)]
@@ -515,6 +649,25 @@ public struct D2Class_138C8080
     public string ResourceName;
     [DestinyField(FieldType.TagHash64)]
     public Tag Resource;  // can be WwiseSound (wwise_event) or Entity (pattern tft)
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 6)]
+public struct D2Class_1A8C8080
+{
+    public short Unk00;
+    public short Unk02;
+    public short Unk04;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_0A8C8080
+{
+    public short Unk00;
+    public short Unk02;
+    [DestinyOffset(8), DestinyField(FieldType.RelativePointer)] 
+    public string ResourceName;
+    [DestinyField(FieldType.TagHash64)]
+    public Tag Resource;  // object_behaviours.tft
 }
 
 #endregion

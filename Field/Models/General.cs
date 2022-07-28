@@ -43,11 +43,20 @@ public struct Vector3
     public float Y;
     public float Z;
         
-    public Vector3(int x, int y, int z)
+    public Vector3(int x, int y, int z, bool bAsInt=false)
     {
-        X = x / 32_767.0f;
-        Y = y / 32_767.0f;
-        Z = z / 32_767.0f;
+        if (bAsInt)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+        else
+        {
+            X = x / 32_767.0f;
+            Y = y / 32_767.0f;
+            Z = z / 32_767.0f;  
+        }
     }
         
     public Vector3(uint x, uint y, uint z)
@@ -89,6 +98,40 @@ public struct Vector3
     public static Vector3 operator -(Vector3 x, Vector3 y)
     {
         return new Vector3(x.X - y.X, x.Y - y.Y, x.Z - y.Z);
+    }
+    
+    public float this[int index]
+    {
+        get
+        {
+            switch (index)
+            {
+                case 0:
+                    return X;
+                case 1:
+                    return Y;
+                case 2:
+                    return Z;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
+        set
+        {
+            switch (index)
+            {
+                case 0:
+                    X = value;
+                    return;
+                case 1:
+                    Y = value;
+                    return;
+                case 2:
+                    Z = value;
+                    return;
+            }
+            throw new IndexOutOfRangeException();
+        }
     }
 }
 
@@ -257,6 +300,46 @@ public struct Vector4
             }
             throw new IndexOutOfRangeException();
         }
+    }
+    
+    // From https://github.com/OwlGamingCommunity/V/blob/492d0cb3e89a97112ac39bf88de39da57a3a1fbf/Source/owl_core/Server/MapLoader.cs
+    public Vector3 QuaternionToEulerAngles()
+    {
+        Vector3 retVal = new Vector3();
+
+        // roll (x-axis rotation)
+        double sinr_cosp = +2.0 * (W * X + Y * Z);
+        double cosr_cosp = +1.0 - 2.0 * (X * X + Y * Y);
+        retVal.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+        // pitch (y-axis rotation)
+        double sinp = +2.0 * (W * Y - Z * X);
+        double absSinP = Math.Abs(sinp);
+        bool bSinPOutOfRage = absSinP >= 1.0;
+        if (bSinPOutOfRage)
+        {
+            retVal.Y = 90.0f; // use 90 degrees if out of range
+        }
+        else
+        {
+            retVal.Y = (float)Math.Asin(sinp);
+        }
+
+        // yaw (z-axis rotation)
+        double siny_cosp = +2.0 * (W * Z + X * Y);
+        double cosy_cosp = +1.0 - 2.0 * (Y * Y + Z * Z);
+        retVal.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+        // Rad to Deg
+        retVal.X *= (float)(180.0f / Math.PI);
+
+        if (!bSinPOutOfRage) // only mult if within range
+        {
+            retVal.Y *= (float)(180.0f / Math.PI);
+        }
+        retVal.Z *= (float)(180.0f / Math.PI);
+        
+        return retVal;
     }
 }
 

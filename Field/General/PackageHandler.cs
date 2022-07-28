@@ -76,9 +76,11 @@ public class PackageHandler
         }
             // Check if tag exists already in the cache and return if it does exist
         if (Cache.ContainsKey(hash.Hash) && BytesCache.ContainsKey(hash))
-        {   
+        {
             if (Cache[hash.Hash].GetType() == type)
+            {
                 return Cache[hash.Hash];
+            }
             if (type.IsValueType)
             {
                 if (Cache[hash.Hash].GetType().GenericTypeArguments.Length > 0 && Cache[hash.Hash].GetType().GenericTypeArguments[0].UnderlyingSystemType == type)

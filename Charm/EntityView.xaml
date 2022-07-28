@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Charm"
+             Loaded="OnControlLoaded"
              mc:Ignorable="d"
              FontSize="24"
              d:DesignHeight="1080" d:DesignWidth="1920">
@@ -12,8 +13,31 @@
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="5*"/>
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
-        <local:ModelView x:Name="ModelView"/>
+        <StackPanel Orientation="Horizontal">
+            <Label Content="Translation:"/>
+            <TextBox Text="0" x:Name="TraX"/>
+            <TextBox Text="0" x:Name="TraY"/>
+            <TextBox Text="0" x:Name="TraZ"/>
+            <CheckBox x:Name="FlipTraX"/>
+            <CheckBox x:Name="FlipTraY"/>
+            <CheckBox x:Name="FlipTraZ"/>
+            <TextBox Text="Z" x:Name="TraXX"/>
+            <TextBox Text="X" x:Name="TraYY"/>
+            <TextBox Text="Y" x:Name="TraZZ"/>
+            <Label Content="Rotation:"/>
+            <TextBox Text="0" x:Name="RotX"/>
+            <TextBox Text="0" x:Name="RotY"/>
+            <TextBox Text="90" x:Name="RotZ"/>
+            <CheckBox x:Name="FlipRotX"/>
+            <CheckBox x:Name="FlipRotY"/>
+            <CheckBox x:Name="FlipRotZ"/>
+            <TextBox Text="Z" x:Name="RotXX"/>
+            <TextBox Text="X" x:Name="RotYY"/>
+            <TextBox Text="Y" x:Name="RotZZ"/>
+        </StackPanel>
+        <local:ModelView Grid.Row="1" x:Name="ModelView"/>
     </Grid> 
 </UserControl>

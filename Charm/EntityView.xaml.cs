@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Field;
 using Field.Entities;
 using Field.General;
 using Field.Models;
@@ -19,19 +20,33 @@ namespace Charm;
 
 public partial class EntityView : UserControl
 {
-    public TagHash Hash;
-    private string Name;
     private readonly ILogger _entityLog = Log.ForContext<EntityView>();
+    private static MainWindow _mainWindow = null;
+    private Entity _loadedEntity = null;
 
     public EntityView()
     {
         InitializeComponent();
     }
+    
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        _mainWindow = Window.GetWindow(this) as MainWindow;
+    }
 
-    public bool LoadEntity(TagHash entityHash, FbxHandler fbxHandler)
+    public bool LoadEntity(TagHash entityHash, FbxHandler fbxHandler, bool bBlockRecursion=false)
     {
         fbxHandler.Clear();
         Entity entity = PackageHandler.GetTag(typeof(Entity), entityHash);
+        _loadedEntity = entity;
+        // todo fix this
+        if (entity.AnimationGroup != null && !bBlockRecursion)  // Make a new tab and use that with FullEntityView
+        {
+            var fev = new FullEntityView();
+            _mainWindow.MakeNewTab(entityHash, fev);
+            _mainWindow.SetNewestTabSelected();
+            return fev.LoadEntity(entityHash, fbxHandler);
+        }
         AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
         return LoadUI(fbxHandler);
     }
@@ -52,12 +67,21 @@ public partial class EntityView : UserControl
         LoadUI(fbxHandler);
     }
 
-    private void AddEntity(Entity entity, ELOD detailLevel, FbxHandler fbxHandler)
+    private void AddEntity(Entity entity, ELOD detailLevel, FbxHandler fbxHandler, Animation animation=null)
     {
         var dynamicParts = entity.Load(detailLevel);
         ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
         dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
-        fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
+        if (animation != null)
+        {
+            animation.tra = new Vector3(int.Parse(TraX.Text), int.Parse(TraY.Text), int.Parse(TraZ.Text), true);
+            animation.rot = new Vector3(int.Parse(RotX.Text), int.Parse(RotY.Text), int.Parse(RotZ.Text), true);
+            animation.flipTra = new Vector3(Convert.ToInt32(FlipTraX.IsChecked), Convert.ToInt32(FlipTraY.IsChecked), Convert.ToInt32(FlipTraZ.IsChecked), true);
+            animation.flipRot = new Vector3(Convert.ToInt32(FlipRotX.IsChecked), Convert.ToInt32(FlipRotY.IsChecked), Convert.ToInt32(FlipRotZ.IsChecked), true);
+            animation.traXYZ = new [] { TraXX.Text, TraYY.Text, TraZZ.Text };
+            animation.rotXYZ = new [] { RotXX.Text, RotYY.Text, RotZZ.Text };
+        }
+        fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel, animation);
     }
 
     private bool LoadUI(FbxHandler fbxHandler)
@@ -107,5 +131,14 @@ public partial class EntityView : UserControl
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
         _entityLog.Information($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
+    }
+
+    public void LoadAnimation(TagHash tagHash, FbxHandler fbxHandler)
+    {
+        Animation animation = PackageHandler.GetTag(typeof(Animation), tagHash);
+        // to load an animation into the viewer, we need to save the fbx then load
+        fbxHandler.Clear();
+        AddEntity(_loadedEntity, ModelView.GetSelectedLod(), fbxHandler, animation);
+        LoadUI(fbxHandler);
     }
 }

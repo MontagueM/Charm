@@ -604,8 +604,53 @@ public struct D2Class_F8258080
     [DestinyField(FieldType.ResourceInTag)]
     public dynamic? Unk00;
     // lots of array stuff
-    [DestinyOffset(0xA8), DestinyField(FieldType.TagHash), MarshalAs(UnmanagedType.ByValArray, SizeConst = 33)]
-    public Tag[] UnkA8;
+    // [DestinyOffset(0xA8), DestinyField(FieldType.TagHash), MarshalAs(UnmanagedType.ByValArray, SizeConst = 33)]
+    // public Tag[] UnkA8;
+    [DestinyOffset(0xA8), DestinyField(FieldType.TagHash)]
+    public Tag<D2Class_9F288080> AnimationGroup;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x78)]
+public struct D2Class_9F288080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_DF8B8080> Animations;
+    [DestinyOffset(0x48), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_EA8A8080> Unk48;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_DE8B8080> AnimationsUnk58;
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk68;
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk6C;
+    public int Unk70;
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk74;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+public struct D2Class_DF8B8080
+{
+    [DestinyField(FieldType.TagHash64, disableLoad: true)]
+    public Animation Animation;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 4)]
+public struct D2Class_EA8A8080
+{
+    public DestinyHash Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+public struct D2Class_DE8B8080
+{
+    [DestinyOffset(0x10)]
+    public DestinyHash AnimationHash;
+    public float Unk14;
+    [DestinyField(FieldType.TagHash64, disableLoad: true)]
+    public Animation Animation;
+    public long FirstListIndex;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0xBA0)]

@@ -52,7 +52,7 @@
                         EnableDesignModeRendering="False"
                         EnableSwapChainRendering="True"
                         IsShadowMappingEnabled="False"
-                        ShowCoordinateSystem="False"
+                        ShowCoordinateSystem="True"
                         ShowFrameRate="True"
                         ShowTriangleCountInfo="True"
                         EnableDeferredRendering="False" EnableRenderFrustum="True"

@@ -124,10 +124,10 @@ public partial class DevView : UserControl
             switch (reference.Hash)
             {
                 case 0x80809AD8:
-                    EntityView entityView = new EntityView();
-                    entityView.LoadEntity(hash, _fbxHandler);
+                    FullEntityView entityView = new FullEntityView();
                     _mainWindow.MakeNewTab(hash, entityView);
                     _mainWindow.SetNewestTabSelected();
+                    entityView.LoadEntity(hash, _fbxHandler);
                     break;
                 case 0x80806D44:
                     StaticView staticView = new StaticView();

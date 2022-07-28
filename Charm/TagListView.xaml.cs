@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -94,6 +95,10 @@ public enum ETagListType
     WeaponAudioList,
     [Description("Weapon Audio [Final]")]
     WeaponAudio,
+    [Description("Animation List")]
+    AnimationList,
+    [Description("Animation [Final]")]
+    Animation,
 }
 
 /// <summary>
@@ -121,12 +126,12 @@ public partial class TagListView : UserControl
     private TagListView _tagListControl = null;
     private ToggleButton _previouslySelected = null;
     private int _selectedIndex = -1;
-    private FbxHandler _globalFbxHandler = null;
+    private FbxHandler _globalFbxHandler = new FbxHandler(false);
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
-        _globalFbxHandler = new FbxHandler(false);
+        // _globalFbxHandler = new FbxHandler(false);
     }
     
     public TagListView()
@@ -265,6 +270,12 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.WeaponAudio:
                     LoadWeaponAudio(contentValue);
+                    break;
+                case ETagListType.AnimationList:
+                    LoadAnimationList(contentValue);
+                    break;
+                case ETagListType.Animation:
+                    LoadAnimation(contentValue);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -1646,6 +1657,44 @@ public partial class TagListView : UserControl
 
     #endregion
 
+    #region Animation
+    
+    /// <summary>
+    /// Animations come from Entity.
+    /// </summary>
+    private void LoadAnimationList(TagHash tagHash)
+    {
+        Entity entity = PackageHandler.GetTag(typeof(Entity), tagHash);
+        
+        // Preload the viewer with the entity
+        var viewer = GetViewer();
+        SetViewer(TagView.EViewerType.Entity);
+        viewer.EntityControl.LoadEntity(tagHash, _globalFbxHandler, true);
+        
+        _allTagItems = new ConcurrentBag<TagItem>();
+        
+        Parallel.ForEach(((D2Class_F8258080)entity.AnimationGroup.Header.Unk18).AnimationGroup.Header.Animations, entry =>
+        {
+            Animation anim = entry.Animation;
+            anim.ParseTag();
+
+            string typeName = anim.Header.AnimatedBoneData?.GetType().Name;
+            _allTagItems.Add(new TagItem 
+            { 
+                Hash = anim.Hash,
+                Name = $"Frames: {anim.Header.FrameCount}, Length: {Math.Round((float)anim.Header.FrameCount / Animation.FrameRate, 2)} seconds, Compressed: {anim.Header.AnimatedBoneData is not D2Class_428B8080} [{typeName ?? "NONE"}]",
+                TagType = ETagListType.Animation
+            });
+        });
+    }
+
+    private void LoadAnimation(TagHash tagHash)
+    {
+        var viewer = GetViewer();
+        viewer.EntityControl.LoadAnimation(tagHash, _globalFbxHandler);
+    }
+    
+    #endregion
 }
 
 public class TagItem

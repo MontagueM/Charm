@@ -18,6 +18,7 @@ public class Entity : Tag
     public EntityResource PatternAudio = null;
     public EntityResource PatternAudioUnnamed = null;
     public EntityControlRig ControlRig = null;
+    public EntityResource AnimationGroup = null;
     
     public Entity(TagHash hash) : base(hash)
     {
@@ -56,6 +57,9 @@ public class Entity : Tag
                     break;
                 case D2Class_F62C8080:
                     PatternAudioUnnamed = resource.ResourceHash;
+                    break;
+                case D2Class_13268080:
+                    AnimationGroup = resource.ResourceHash;
                     break;
                 default:
                     // throw new NotImplementedException($"Implement parsing for {resource.ResourceHash.Header.Unk08}");
