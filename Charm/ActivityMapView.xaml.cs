@@ -40,7 +40,7 @@ public partial class ActivityMapView : UserControl
             if (mapEntry.MapReference is null || mapEntry.MapReference.Header.ChildMapReference == null)
                 continue;
             DisplayBubble displayMap = new DisplayBubble();
-            displayMap.Name = mapEntry.Unk10.BubbleName;  // assuming Unk10 is 0F978080 or 0B978080
+            displayMap.Name = $"{mapEntry.BubbleName} ({mapEntry.Unk10.BubbleName})";  // assuming Unk10 is 0F978080 or 0B978080
             displayMap.Hash = mapEntry.MapReference.Header.ChildMapReference.Hash;
             maps.Add(displayMap);
         }
@@ -138,7 +138,7 @@ public partial class ActivityMapView : UserControl
         var s = sender as Button;
         var dc = s.DataContext as DisplayStaticMap;
         MapControl.Clear();
-        _activityLog.Debug($"Loading UI for static map hash: {dc.Hash}");
+        _activityLog.Debug($"Loading UI for static map hash: {dc.Name}");
         MapControl.Visibility = Visibility.Hidden;
         var lod = MapControl.ModelView.GetSelectedLod();
         if (dc.Name == "Select all")

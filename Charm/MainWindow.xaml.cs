@@ -95,7 +95,7 @@ public partial class MainWindow
 
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("1.1.0");
+        var currentVersion = new ApplicationVersion("1.1.4");
         var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         versionChecker.LatestVersionName = "version";
         try
@@ -290,13 +290,19 @@ public partial class MainWindow
         }
     }
 
-
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.D && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
         {
             MakeNewTab("Dev", new DevView());
             SetNewestTabSelected();
+        }
+        else if (e.Key == Key.C 
+                 && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
+                 && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift
+                 && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
+        {
+            throw new ExternalException("Crash induced.");
         }
     }
 }

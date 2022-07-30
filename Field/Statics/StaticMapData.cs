@@ -209,8 +209,8 @@ public struct D2Class_19808080
     // todo rest of this
     // [DestinyField(FieldType.ResourcePointer)]
     // public dynamic? Unk00;
-    [DestinyOffset(0x24), DestinyField(FieldType.StringNoContainer)]
-    public string EntityName;
+    [DestinyOffset(0x24)]
+    public DestinyHash EntityName;
 }
 
 /// <summary>

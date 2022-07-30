@@ -33,16 +33,22 @@ public partial class MusicWemsControl : UserControl
         return items;
     }
     
-    private void PlayWem_OnClick(object sender, RoutedEventArgs e)
+    private void Play_OnClick(object sender, RoutedEventArgs e)
     {
         WemItem item = (WemItem) (sender as Button).DataContext;
         PlayWem(item.Wem);
     }
 
+    public void PlaySound(WwiseSound sound)
+    {
+        MusicPlayer.SetSound(sound);
+        MusicPlayer.Play();
+    }
+    
     public void PlayWem(Wem wem)
     {
-        MusicPlayer.SetWem(wem);
-        MusicPlayer.Play();
+        if (MusicPlayer.SetWem(wem))
+            MusicPlayer.Play();
     }
 
     public void Load(D2Class_F5458080 res)

@@ -14,7 +14,15 @@ public class Activity : Tag
 
     protected override void ParseStructs()
     {
-        Header = ReadHeader<D2Class_8E8E8080>();
+        // Getting the string container
+        StringContainer sc;
+        using (var handle = GetHandle())
+        {
+            handle.BaseStream.Seek(0x28, SeekOrigin.Begin);
+            var tag = PackageHandler.GetTag<D2Class_8B8E8080>(new TagHash(handle.ReadUInt64()));
+            sc = tag.Header.StringContainer;
+        }
+        Header = ReadHeader<D2Class_8E8E8080>(sc);
     }
 }
 
@@ -23,7 +31,7 @@ public struct D2Class_8E8E8080
 {
     public long FileSize;
     public DestinyHash LocationName;  // these all have actual string hashes but have no string container given directly
-    public DestinyHash ActivityName;
+    public DestinyHash Unk0C;
     public DestinyHash Unk10;
     public DestinyHash Unk14;
     [DestinyField(FieldType.ResourcePointer)]
@@ -39,6 +47,35 @@ public struct D2Class_8E8E8080
     public Tag Unk64;  // an entity thing
     [DestinyField(FieldType.TagHash64)] 
     public Tag UnkActivity68;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+public struct D2Class_8B8E8080
+{
+    public long FileSize;
+    public DestinyHash LocationName;
+    [DestinyOffset(0x10), DestinyField(FieldType.TagHash64)]
+    public StringContainer StringContainer;
+    [DestinyField(FieldType.TagHash)] 
+    public Tag Events;
+    [DestinyField(FieldType.TagHash)] 
+    public Tag TagBags;
+    public uint Unk18;
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk1C;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_2E898080> Activities;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_2E898080
+{
+    public DestinyHash ShortActivityName;
+    [DestinyOffset(0x8)]
+    public DestinyHash Unk08;
+    public DestinyHash Unk10;
+    [DestinyField(FieldType.RelativePointer)]
+    public string ActivityName;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x90)]
@@ -113,6 +150,18 @@ public struct D2Class_19978080
 
 [StructLayout(LayoutKind.Sequential, Size = 0x20)]
 public struct D2Class_18978080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag DialogueTable;
+
+    public DestinyHash Unk10;
+    [DestinyOffset(0x18)]
+    public DestinyHash Unk18;
+    public int Unk1C;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_17978080
 {
     [DestinyField(FieldType.TagHash64)]
     public Tag DialogueTable;
