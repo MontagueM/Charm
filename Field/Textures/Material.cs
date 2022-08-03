@@ -77,6 +77,7 @@ public class Material : Tag
         // }
         // // Marshal.FreeHGlobal(pHlslText);
         // return hlsl;
+        //type = "ps";
         string directory = "hlsl_temp";
         string binPath = $"{directory}/ps{Hash}.bin";
         string hlslPath = $"{directory}/ps{Hash}.hlsl";
@@ -137,16 +138,30 @@ public class Material : Tag
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-            if (usf != String.Empty)
+            string vfx = new VfxConverter().HlslToVfx(this, hlsl, false);
+            StringBuilder vmat = new StringBuilder();
+            if (usf != String.Empty || vfx != String.Empty)
             {
                 try
                 {
                     File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
+                    File.WriteAllText($"{saveDirectory}/PS_{Hash}.vfx", vfx);
+                    Console.WriteLine($"Saved pixel shader {Hash}");
                 }
                 catch (IOException)  // threading error
                 {
                 }
             }
+            
+            vmat.AppendLine("Layer0 \n{");
+            vmat.AppendLine($"   shader \"ps_{Hash}.vfx\"");
+            foreach (var e in Header.PSTextures)
+            {
+                //Console.WriteLine("Saving texture " + e.Texture.Hash + " " + e.TextureIndex + " " + e.Texture.IsSrgb().ToString());
+                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/PS_" + $"{e.TextureIndex}_{e.Texture.Hash}.png");
+            }
+            vmat.AppendLine("}");
+            File.WriteAllText($"{saveDirectory}/{Hash}.vmat", vmat.ToString());
         }
     }
     
@@ -158,7 +173,14 @@ public class Material : Tag
             string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
             if (usf != String.Empty)
             {
-                File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
+                try
+                {
+                    File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
+                    Console.WriteLine($"Saved vertex shader {Hash}");
+                }
+                catch (IOException)  // threading error
+                {
+                }
             }
         }
     }
