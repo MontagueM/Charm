@@ -99,4 +99,26 @@ public partial class MainMenuView : UserControl
         _mainWindow.MakeNewTab("textures", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
+
+    private void SkeletonButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        FbxHandler fbxHandler = new FbxHandler();
+        // Init skeleton for all these meshes
+        fbxHandler.SetGlobalSkeleton(new TagHash("4065a180")); // one of the ones that looks like a player skeleton
+        
+        // Add model
+        uint sunbracers = 1862800747;
+        var entities = InvestmentHandler.GetEntitiesFromHash(new DestinyHash(sunbracers));
+        var entity = entities[0];
+        var parts = entity.Load(ELOD.MostDetail);
+        fbxHandler.AddEntityToScene(entity, parts, ELOD.MostDetail);
+        
+        // Add animation
+        Field.Animation animation = PackageHandler.GetTag(typeof(Field.Animation), new TagHash("20FCA880")); // idle animation  
+        animation.Load();
+        fbxHandler.AddAnimationToEntity(animation, fbxHandler._globalSkeletonNodes);
+        
+        // Save
+        fbxHandler.ExportScene("C:/T/skeleton.fbx");
+    }
 }

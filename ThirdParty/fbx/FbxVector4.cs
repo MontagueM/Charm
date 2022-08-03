@@ -8,6 +8,9 @@
 // the SWIG interface file instead.
 //------------------------------------------------------------------------------
 
+
+using System.Runtime.InteropServices;
+
 namespace Internal.Fbx {
 
 public class FbxVector4 : FbxDouble4 {
@@ -19,6 +22,13 @@ public class FbxVector4 : FbxDouble4 {
 
   internal static global::System.Runtime.InteropServices.HandleRef getCPtr(FbxVector4 obj) {
     return (obj == null) ? new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero) : obj.swigCPtr;
+  }
+  
+  public double[] GetManaged() 
+  {
+    double[] x = new double[4];
+    Marshal.Copy(swigCPtr.Handle, x, 0, 4);
+    return x;
   }
 
   ~FbxVector4() {

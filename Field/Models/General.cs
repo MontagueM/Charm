@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Field.General;
 using Field.Textures;
+using Internal.Fbx;
 
 namespace Field.Models;
 
@@ -132,6 +133,11 @@ public struct Vector3
             }
             throw new IndexOutOfRangeException();
         }
+    }
+
+    public FbxVector4 ToFbxVector4()
+    {
+        return new FbxVector4(X, Y, Z);
     }
 }
 
@@ -340,6 +346,11 @@ public struct Vector4
         retVal.Z *= (float)(180.0f / Math.PI);
         
         return retVal;
+    }
+
+    public FbxQuaternion ToFbxQuaternion()
+    {
+        return new FbxQuaternion(X, Y, Z, W);
     }
 }
 

@@ -22,8 +22,8 @@ public class Animation : Tag
     public Vector3 rot;
     public Vector3 flipTra;
     public Vector3 flipRot;
-    public string[] traXYZ;
-    public string[] rotXYZ;
+    public string[] traXYZ = { "X", "Y", "Z" };
+    public string[] rotXYZ = { "X", "Y", "Z" };
 
     public Animation(TagHash hash) : base(hash)
     {
