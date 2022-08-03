@@ -14,7 +14,7 @@ public class FbxHandler
     public InfoConfigHandler InfoHandler;
     private static object _fbxLock = new object();
     public List<FbxNode> _globalSkeletonNodes = new List<FbxNode>();  // used for attaching all models to one skeleton
-
+    public List<BoneNode> _globalBoneNodes = new List<BoneNode>();
     public FbxHandler(bool bMakeInfoHandler=true)
     {
         lock (_fbxLock) // bc fbx is not thread-safe
@@ -177,6 +177,32 @@ public class FbxHandler
         mesh.GetLayer(0).SetVertexColors(colLayer);
     }
 
+    /// <summary>
+    /// Bind pose uses global transforms?
+    /// </summary>
+    private void AddBindPose(List<FbxNode> clusterNodes)
+    {
+        FbxPose pose = FbxPose.Create(_scene, "bindPoseName");
+        pose.SetIsBindPose(true);
+        
+        for (int i = 0; i < clusterNodes.Count; i++)
+        {
+            // Setting the global transform for each cluster (but really its node link)
+            var node = clusterNodes[i];
+            var boneNode = _globalBoneNodes[i];
+            // setting the bind matrix from DOST
+            FbxMatrix bindMatrix = new FbxMatrix();
+            bindMatrix.SetIdentity();
+            bindMatrix.SetTQS(
+                boneNode.DefaultObjectSpaceTransform.Translation.ToFbxVector4(),
+                boneNode.DefaultObjectSpaceTransform.QuaternionRotation.ToFbxQuaternion(),
+                new FbxVector4(boneNode.DefaultObjectSpaceTransform.Scale, boneNode.DefaultObjectSpaceTransform.Scale, boneNode.DefaultObjectSpaceTransform.Scale)
+                );
+            pose.Add(node, bindMatrix);
+        }
+        
+        _scene.AddPose(pose);
+    }
 
     private void AddWeightsToMesh(FbxMesh mesh, DynamicPart part, List<FbxNode> skeletonNodes)
     {
@@ -432,6 +458,7 @@ public class FbxHandler
                 else if (_globalSkeletonNodes.Count > 0)
                 {
                     AddWeightsToMesh(mesh, dynamicPart, _globalSkeletonNodes);
+                    AddBindPose(_globalSkeletonNodes);
                 }
             }
         }
@@ -507,6 +534,7 @@ public class FbxHandler
     {
         _scene.Clear();
         _globalSkeletonNodes.Clear();
+        _globalBoneNodes.Clear();
     }
 
     public void Dispose()
@@ -522,6 +550,7 @@ public class FbxHandler
     public void SetGlobalSkeleton(TagHash tagHash)
     {
         EntitySkeleton skeleton = PackageHandler.GetTag(typeof(EntitySkeleton), tagHash);
-        _globalSkeletonNodes = MakeFbxSkeletonHierarchy(skeleton.GetBoneNodes());
+        _globalBoneNodes = skeleton.GetBoneNodes();
+        _globalSkeletonNodes = MakeFbxSkeletonHierarchy(_globalBoneNodes);
     }
 }

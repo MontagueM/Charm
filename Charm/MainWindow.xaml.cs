@@ -103,7 +103,9 @@ public partial class MainWindow
             var upToDate = await versionChecker.IsUpToDate();
             if (!upToDate)
             {
+#if !DEBUG
                 MessageBox.Show($"New version available on GitHub! (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id})");
+#endif  
                 Log.Information($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
             }
             else

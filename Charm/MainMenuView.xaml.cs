@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Packaging;
@@ -108,11 +109,31 @@ public partial class MainMenuView : UserControl
         
         // Add model
         uint sunbracers = 1862800747;
-        var entities = InvestmentHandler.GetEntitiesFromHash(new DestinyHash(sunbracers));
-        var entity = entities[0];
-        var parts = entity.Load(ELOD.MostDetail);
-        fbxHandler.AddEntityToScene(entity, parts, ELOD.MostDetail);
-        
+        uint astrocyte = 866590993;
+        uint chromatic = 3488362706;
+        uint transversive = 138282166;
+        uint wise_bond = 1016461220;
+        var helm = astrocyte;
+        var chest = chromatic;
+        var arms = sunbracers;
+        var legs = transversive;
+        var classitem = wise_bond;
+        List<uint> models = new List<uint>
+        {
+            helm,
+            chest,
+            arms,
+            legs,
+            classitem
+        };
+        foreach (var model in models)
+        {
+            var entities = InvestmentHandler.GetEntitiesFromHash(new DestinyHash(model));
+            var entity = entities[0];
+            var parts = entity.Load(ELOD.MostDetail);
+            fbxHandler.AddEntityToScene(entity, parts, ELOD.MostDetail);
+        }
+
         // Add animation
         Field.Animation animation = PackageHandler.GetTag(typeof(Field.Animation), new TagHash("20FCA880")); // idle animation  
         animation.Load();
