@@ -109,13 +109,14 @@ public partial class MainMenuView : UserControl
         
         // Add model
         uint sunbracers = 1862800747;
+        uint contraverse = 1906093346;
         uint astrocyte = 866590993;
         uint chromatic = 3488362706;
         uint transversive = 138282166;
         uint wise_bond = 1016461220;
         var helm = astrocyte;
         var chest = chromatic;
-        var arms = sunbracers;
+        var arms = contraverse;
         var legs = transversive;
         var classitem = wise_bond;
         List<uint> models = new List<uint>
@@ -135,11 +136,21 @@ public partial class MainMenuView : UserControl
         }
 
         // Add animation
-        Field.Animation animation = PackageHandler.GetTag(typeof(Field.Animation), new TagHash("20FCA880")); // idle animation  
+        string animHash = "29e8dc80"; // 38C0A380 clap, 20FCA880 good
+        Field.Animation animation = PackageHandler.GetTag(typeof(Field.Animation), new TagHash(animHash)); // idle animation  
         animation.Load();
+        animation.SaveToFile($"C:/T/animation_{animHash}.json");
         fbxHandler.AddAnimationToEntity(animation, fbxHandler._globalSkeletonNodes);
         
         // Save
-        fbxHandler.ExportScene("C:/T/skeleton.fbx");
+        fbxHandler.ExportScene($"C:/T/skeleton_{animHash}.fbx");
+    }
+
+    private void AnimationsButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.AnimationPackageList);
+        _mainWindow.MakeNewTab("animations", tagListView);
+        _mainWindow.SetNewestTabSelected();
     }
 }

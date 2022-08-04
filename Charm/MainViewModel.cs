@@ -234,6 +234,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                 var anim = scene.Animations[0];
                 animationUpdater = new NodeAnimationUpdater(anim);
                 animationUpdater.RepeatMode = AnimationRepeatMode.Loop;
+                scene.Root.ModelMatrix = Matrix.RotationX(-(float) Math.PI / 2);
                 // animationUpdater.Speed = (float)0.00001;
             }
             else if (scene.Animations.Count > 1)

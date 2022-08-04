@@ -180,7 +180,7 @@ public class FbxHandler
     /// <summary>
     /// Bind pose uses global transforms?
     /// </summary>
-    private void AddBindPose(List<FbxNode> clusterNodes)
+    private void AddBindPose(List<FbxNode> clusterNodes, List<BoneNode> boneNodes)
     {
         FbxPose pose = FbxPose.Create(_scene, "bindPoseName");
         pose.SetIsBindPose(true);
@@ -189,7 +189,7 @@ public class FbxHandler
         {
             // Setting the global transform for each cluster (but really its node link)
             var node = clusterNodes[i];
-            var boneNode = _globalBoneNodes[i];
+            var boneNode = boneNodes[i];
             // setting the bind matrix from DOST
             FbxMatrix bindMatrix = new FbxMatrix();
             bindMatrix.SetIdentity();
@@ -438,11 +438,12 @@ public class FbxHandler
 
     public void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel, Animation animation=null)
     {
-        List<FbxNode> skeletonNodes = new List<FbxNode>();
+        // List<FbxNode> skeletonNodes = new List<FbxNode>();
         if (entity.Skeleton != null)
         {
             // skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
-            skeletonNodes = MakeFbxSkeletonHierarchy(entity.Skeleton.GetBoneNodes());
+            _globalBoneNodes = entity.Skeleton.GetBoneNodes();
+            _globalSkeletonNodes = MakeFbxSkeletonHierarchy(_globalBoneNodes);
         }
         for( int i = 0; i < dynamicParts.Count; i++)
         {
@@ -451,19 +452,20 @@ public class FbxHandler
             
             if (dynamicPart.VertexWeights.Count > 0)
             {
-                if (skeletonNodes.Count > 0)
-                {
-                    AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
-                }
-                else if (_globalSkeletonNodes.Count > 0)
+                // if (skeletonNodes.Count > 0)
+                // {
+                //     AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
+                //     AddBindPose(skeletonNodes, entity.Skeleton.GetBoneNodes());
+                // }
+                if (_globalSkeletonNodes.Count > 0)
                 {
                     AddWeightsToMesh(mesh, dynamicPart, _globalSkeletonNodes);
-                    AddBindPose(_globalSkeletonNodes);
+                    AddBindPose(_globalSkeletonNodes, _globalBoneNodes);
                 }
             }
         }
         if (animation != null)
-            AddAnimationToEntity(animation, skeletonNodes);
+            AddAnimationToEntity(animation, _globalSkeletonNodes);
     }
 
     public void AddStaticToScene(List<Part> parts, string meshName)

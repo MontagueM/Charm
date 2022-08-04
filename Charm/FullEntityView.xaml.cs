@@ -1,4 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
+using Field.Entities;
 using Field.General;
 using Field.Models;
 
@@ -19,8 +21,16 @@ public partial class FullEntityView : UserControl
         bLoadedSuccessfully &= GeometryControl.LoadEntity(entityHash, fbxHandler, true);
 
         // Load geom for animation screen + the animation list
-        AnimationControl.LoadContent(ETagListType.AnimationList, entityHash, true);
-
+        Entity entity = PackageHandler.GetTag(typeof(Entity), entityHash);
+        if (entity.AnimationGroup != null)
+            AnimationControl.LoadContent(ETagListType.AnimationList, entityHash, true);
+        else
+        {
+            AnimationTab.IsSelected = false;
+            AnimationTab.Visibility = Visibility.Hidden;
+            GeometryTab.IsSelected = true;
+        }
+        
         return bLoadedSuccessfully;
     }
 }

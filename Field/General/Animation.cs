@@ -1,6 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using Field.General;
-using Field.Models;
+using Newtonsoft.Json;
+using SharpDX;
+using Vector3 = Field.Models.Vector3;
+using Vector4 = Field.Models.Vector4;
 
 namespace Field;
 
@@ -226,6 +229,89 @@ public class Animation : Tag
             }
         }
     }
+
+    public void SaveToFile(string savePath)
+    {
+        AnimationHeaderJson obj = new AnimationHeaderJson();
+        obj.frame_count = Header.FrameCount;
+        obj.duration_in_frames = Header.FrameCount - 1;
+        obj.node_count = Header.NodeCount;
+        obj.rig_control_count = Header.RigControlCount;
+        obj.static_bone_data = new AnimationBoneDataJson();
+        obj.animated_bone_data = new AnimationBoneDataJson();
+        obj.static_bone_data.transform_stream_header = new TransformStreamHeaderJson();
+        var staticHeader = (D2Class_408B8080)Header.StaticBoneData;
+        obj.static_bone_data.transform_stream_header.scale_stream_count = staticHeader.ScaleStreamCount;
+        obj.static_bone_data.transform_stream_header.rotation_stream_count = staticHeader.RotationStreamCount;
+        obj.static_bone_data.transform_stream_header.translation_stream_count = staticHeader.TranslationStreamCount;
+        // obj.static_bone_data.transform_stream_header.streams = new StreamsJson();
+        // obj.static_bone_data.transform_stream_header.streams.frame_count = staticHeader.FrameCount;
+        // obj.static_bone_data.transform_stream_header.streams.frames = new List<FrameJson>();
+        obj.animated_bone_data.transform_stream_header = new TransformStreamHeaderJson();
+        var animatedHeader = (D2Class_428B8080)Header.AnimatedBoneData;
+        obj.animated_bone_data.transform_stream_header.scale_stream_count = animatedHeader.ScaleStreamCount;
+        obj.animated_bone_data.transform_stream_header.rotation_stream_count = animatedHeader.RotationStreamCount;
+        obj.animated_bone_data.transform_stream_header.translation_stream_count = animatedHeader.TranslationStreamCount;
+        // obj.animated_bone_data.transform_stream_header.streams = new StreamsJson();
+        // obj.animated_bone_data.transform_stream_header.streams.frame_count = animatedHeader.FrameCount;
+        // obj.animated_bone_data.transform_stream_header.streams.frames = new List<FrameJson>();
+
+        obj.bone_data_frames = new Dictionary<int, FrameJson>();
+            
+        foreach (var track in Tracks)
+        {
+            obj.bone_data_frames.Add(track.TrackIndex, new FrameJson
+            {
+                scales = track.TrackScales,
+                rotations = track.TrackRotations,
+                translations = track.TrackTranslations
+            });
+        }
+        
+        JsonSerializer serializer = new JsonSerializer();
+        serializer.Formatting = Formatting.Indented;
+        serializer.Serialize(new StreamWriter(savePath), obj);
+    }
+
+    private struct AnimationHeaderJson
+    {
+        public int frame_count;
+        public int duration_in_frames;
+        public int node_count;
+        public int rig_control_count;
+        public AnimationBoneDataJson static_bone_data;
+        public AnimationBoneDataJson animated_bone_data;
+        public Dictionary<int, FrameJson> bone_data_frames; // not correct but want it here
+    }
+
+    private struct AnimationBoneDataJson
+    {
+        public TransformStreamHeaderJson transform_stream_header;
+        public List<int> scale_control_map;
+        public List<int> rotation_control_map;
+        public List<int> translation_control_map;
+    }
+
+    private struct TransformStreamHeaderJson
+    {
+        public int scale_stream_count;
+        public int rotation_stream_count;
+        public int translation_stream_count;
+        public StreamsJson streams;
+    }
+
+    private struct StreamsJson
+    {
+        public int frame_count;
+        public List<FrameJson> frames;
+    }
+
+    private struct FrameJson
+    {
+        public List<float> scales;
+        public List<Vector3> rotations;
+        public List<Vector3> translations;
+    }
 }
 
 /// <summary>
@@ -280,7 +366,7 @@ public struct AnimationTrack
         
         if (animationNode.RotationStream.Count == 1) // static
         {
-            TrackRotations = TrackTimes.Select(x => animationNode.RotationStream[0].QuaternionToEulerAngles()).ToList();
+            TrackRotations = TrackTimes.Select(x => animationNode.RotationStream[0].QuaternionToEulerAnglesZYX()).ToList();
         }
         else if (animationNode.RotationStream.Count == 0)
         {
@@ -288,7 +374,7 @@ public struct AnimationTrack
         }
         else
         {
-            TrackRotations = animationNode.RotationStream.Select(x => x.QuaternionToEulerAngles()).ToList();
+            TrackRotations = animationNode.RotationStream.Select(x => x.QuaternionToEulerAnglesZYX()).ToList();
         }
         // testing reassignment
         // TrackRotations = TrackRotations.Select(x => new Vector3(-x.Z, -x.X, x.Y)).ToList();
@@ -382,6 +468,8 @@ public class AnimationStream : IDisposable
             vec.Y * quantisation.Minimum.Y + quantisation.Extent.Y,
             vec.Z * quantisation.Minimum.Z + quantisation.Extent.Z,
             vec.W * quantisation.Minimum.W + quantisation.Extent.W);
+        if (Math.Round(corrected.Magnitude, 4) != 1)
+            throw new Exception("Quaternion magnitude is not 1");
         return corrected;
     }
 }

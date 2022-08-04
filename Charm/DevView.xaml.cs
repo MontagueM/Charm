@@ -39,7 +39,7 @@ public partial class DevView : UserControl
         strHash = Regex.Replace(strHash, @"(\s+|r|h)", "");
         if (strHash.Length == 16)
         {
-            strHash = TagHash64Handler.GetTagHash64(strHash);
+            strHash = TagHash64Handler.GetTagHash64String(strHash);
         }
         if (strHash == "")
         {

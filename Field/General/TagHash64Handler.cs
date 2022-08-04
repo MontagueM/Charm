@@ -23,7 +23,7 @@ public class TagHash64Handler
         return 0;
     }
     
-    public static string GetTagHash64(string tagHash64Str)
+    public static string GetTagHash64String(string tagHash64Str)
     {
         ulong tagHash64 = Endian.SwapU64(UInt64.Parse(tagHash64Str, NumberStyles.HexNumber));
         if (tagHash64Dict.ContainsKey(tagHash64))
@@ -32,6 +32,17 @@ public class TagHash64Handler
         }
 
         return "";
+    }
+    
+    public static uint GetTagHash64(string tagHash64Str)
+    {
+        ulong tagHash64 = Endian.SwapU64(UInt64.Parse(tagHash64Str, NumberStyles.HexNumber));
+        if (tagHash64Dict.ContainsKey(tagHash64))
+        {
+            return tagHash64Dict[tagHash64];
+        }
+
+        return 0;
     }
     
     private static void AddTagHash64(ulong tag, uint hash)

@@ -76,13 +76,21 @@ public class DestinyHash : IComparable<DestinyHash>
     
     public DestinyHash(string hash, bool bBigEndianString = false)
     {
-        bool parsed = uint.TryParse(hash, NumberStyles.HexNumber, null, out Hash);
-        if (parsed)
+        bool parsed;
+        if (hash.Length == 8)
         {
-            if (hash.EndsWith("80") || bBigEndianString)
+            parsed = uint.TryParse(hash, NumberStyles.HexNumber, null, out Hash);
+            if (parsed)
             {
-                Hash = Endian.SwapU32(Hash);
+                if (hash.EndsWith("80") || bBigEndianString)
+                {
+                    Hash = Endian.SwapU32(Hash);
+                }
             }
+        }
+        else
+        {
+            Hash = TagHash64Handler.GetTagHash64(hash);
         }
     }
         

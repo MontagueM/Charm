@@ -14,10 +14,10 @@
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
         <TabControl>
-            <TabItem Header="GEOMETRY">
+            <TabItem Header="GEOMETRY" x:Name="GeometryTab">
                 <local:EntityView x:Name="GeometryControl" />
             </TabItem>
-            <TabItem IsSelected="True" Header="ANIMATION">
+            <TabItem IsSelected="True" x:Name="AnimationTab" Header="ANIMATION">
                 <local:TagListViewerView x:Name="AnimationControl" />
             </TabItem>
         </TabControl>
