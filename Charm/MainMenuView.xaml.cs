@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Packaging;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
+using Field;
+using Field.Entities;
 using Field.General;
 using Field.Models;
 using Field.Textures;
@@ -101,49 +104,57 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    private void SkeletonButton_OnClick(object sender, RoutedEventArgs e)
+    private void CinematicsButton_OnClick(object sender, RoutedEventArgs e)
     {
-        FbxHandler fbxHandler = new FbxHandler();
-        // Init skeleton for all these meshes
-        fbxHandler.SetGlobalSkeleton(new TagHash("4065a180")); // one of the ones that looks like a player skeleton
-        
-        // Add model
-        uint sunbracers = 1862800747;
-        uint contraverse = 1906093346;
-        uint astrocyte = 866590993;
-        uint chromatic = 3488362706;
-        uint transversive = 138282166;
-        uint wise_bond = 1016461220;
-        var helm = astrocyte;
-        var chest = chromatic;
-        var arms = contraverse;
-        var legs = transversive;
-        var classitem = wise_bond;
-        List<uint> models = new List<uint>
+        string activityHash = "9694ea80";
+        Field.Activity activity = PackageHandler.GetTag(typeof(Field.Activity), new TagHash(activityHash));
+        EntityResource cinematicResource = ((D2Class_0C468080) activity.Header.Unk40[0].Unk70[0].UnkEntityReference.Header.Unk18.Header.EntityResources[1]
+            .EntityResourceParent.Header.EntityResource.Header.Unk18).CinematicEntity.Header.EntityResources.Last().ResourceHash;
+        HashSet<string> cinematicModels = new HashSet<string>();
+        foreach (D2Class_AE5F8080 groupEntry in ((D2Class_B75F8080)cinematicResource.Header.Unk18).CinematicEntityGroups)
         {
-            helm,
-            chest,
-            arms,
-            legs,
-            classitem
-        };
-        foreach (var model in models)
-        {
-            var entities = InvestmentHandler.GetEntitiesFromHash(new DestinyHash(model));
-            var entity = entities[0];
-            var parts = entity.Load(ELOD.MostDetail);
-            fbxHandler.AddEntityToScene(entity, parts, ELOD.MostDetail);
+            foreach (D2Class_B15F8080 entityEntry in groupEntry.CinematicEntities)
+            {
+                var entityWithModel = entityEntry.CinematicEntityModel;
+                var entityWithAnims = entityEntry.CinematicEntityAnimations;
+                if (entityWithModel != null)
+                {
+                    cinematicModels.Add(entityWithModel.Hash.ToString());
+                    if (entityWithAnims.AnimationGroup != null) // caiatl
+                    {
+                        foreach (var animation in ((D2Class_F8258080) entityWithAnims.AnimationGroup.Header.Unk18).AnimationGroup.Header.Animations)
+                        {
+                            if (animation.Animation == null)
+                                continue;
+                            animation.Animation.ParseTag();
+                            animation.Animation.Load();
+                            FbxHandler fbxHandler = new FbxHandler();
+                            fbxHandler.AddEntityToScene(entityWithModel, entityWithModel.Load(ELOD.MostDetail), ELOD.MostDetail, animation.Animation);
+                            fbxHandler.ExportScene($"C:/T/cinematic/{entityWithModel.Hash}_{animation.Animation.Hash}_{animation.Animation.Header.FrameCount}_{Math.Round((float)animation.Animation.Header.FrameCount/30)}.fbx");
+                            fbxHandler.Dispose();
+                        }
+                    }
+                    if (entityWithModel.Hash == "91EBA880" && entityWithAnims.AnimationGroup != null) // player
+                    {
+                        foreach (var animation in ((D2Class_F8258080) entityWithAnims.AnimationGroup.Header.Unk18).AnimationGroup.Header.Animations)
+                        {
+                            animation.Animation.ParseTag();
+                            animation.Animation.Load();
+                            FbxHandler fbxHandler = new FbxHandler();
+                            fbxHandler.AddPlayerSkeletonAndMesh();
+                            fbxHandler.AddAnimationToEntity(animation.Animation);
+                            fbxHandler.ExportScene($"C:/T/cinematic/player_{animation.Animation.Hash}_{animation.Animation.Header.FrameCount}_{Math.Round((float)animation.Animation.Header.FrameCount/30)}.fbx");
+                            fbxHandler.Dispose();
+                        }
+
+                        var c = 0;
+                    }
+                }
+                var a = 0;
+            }
         }
 
-        // Add animation
-        string animHash = "29e8dc80"; // 38C0A380 clap, 20FCA880 good
-        Field.Animation animation = PackageHandler.GetTag(typeof(Field.Animation), new TagHash(animHash)); // idle animation  
-        animation.Load();
-        animation.SaveToFile($"C:/T/animation_{animHash}.json");
-        fbxHandler.AddAnimationToEntity(animation, fbxHandler._globalSkeletonNodes);
-        
-        // Save
-        fbxHandler.ExportScene($"C:/T/skeleton_{animHash}.fbx");
+        var b = 0;
     }
 
     private void AnimationsButton_OnClick(object sender, RoutedEventArgs e)

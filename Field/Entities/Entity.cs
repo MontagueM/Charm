@@ -19,6 +19,7 @@ public class Entity : Tag
     public EntityResource PatternAudioUnnamed = null;
     public EntityControlRig ControlRig = null;
     public EntityResource AnimationGroup = null;
+    public EntityResource CinematicAnimationGroup = null;
     
     public Entity(TagHash hash) : base(hash)
     {
@@ -35,9 +36,9 @@ public class Entity : Tag
 
     protected override void ParseData()
     {
-        foreach (var resource in Header.EntityResources)
+        foreach (var resource in Header.EntityResources) 
         {
-            switch (resource.ResourceHash.Header.Unk10)
+            switch (resource.ResourceHash.Header.Unk10) // todo replace all these with Unk18 checks
             {
                 case D2Class_8A6D8080:  // Entity model
                     Model = ((D2Class_8F6D8080)resource.ResourceHash.Header.Unk18).Model;
@@ -60,6 +61,9 @@ public class Entity : Tag
                     break;
                 case D2Class_13268080:
                     AnimationGroup = resource.ResourceHash;
+                    break;
+                case D2Class_AA5F8080:
+                    CinematicAnimationGroup = resource.ResourceHash;
                     break;
                 default:
                     // throw new NotImplementedException($"Implement parsing for {resource.ResourceHash.Header.Unk08}");

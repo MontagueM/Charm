@@ -72,6 +72,8 @@ public class Animation : Tag
 
     private void ParseAnimatedData()
     {
+        if ((object)Header.AnimatedBoneData == null)
+            return;
         if (Header.AnimatedBoneData is D2Class_428B8080 uncomp)
         {
             if (uncomp.CodecType != (AnimationCodecType)2)

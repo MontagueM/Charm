@@ -1411,3 +1411,69 @@ public struct D2Class_E3918080
 }
 
 #endregion
+
+#region Cinematic
+
+[StructLayout(LayoutKind.Sequential, Size = 0x4b0)]
+public struct D2Class_0B468080
+{
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x190)]
+public struct D2Class_0C468080
+{
+    [DestinyOffset(0xb8), DestinyField(FieldType.TagHash64)]
+    public Entity CinematicEntity;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_B85F8080
+{
+    
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x100)]
+public struct D2Class_AA5F8080
+{
+    
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x220)]
+public struct D2Class_B75F8080
+{
+    [DestinyOffset(0x1a0), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_AE5F8080> CinematicEntityGroups;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x68)]
+public struct D2Class_AE5F8080
+{
+    [DestinyOffset(0x10)]
+    public DestinyHash Unk10;  // sorted by this hash
+    // This might break if the type is not 8F918080 so not doing it as a nested resource
+    [DestinyOffset(0x38)]
+    public DestinyHash NestedResourceClass;
+    [DestinyOffset(0x48), DestinyField(FieldType.TagHash64)]
+    public Tag Unk48;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_B15F8080> CinematicEntities;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x78)]
+public struct D2Class_B15F8080
+{
+    [DestinyOffset(0x18), DestinyField(FieldType.TagHash)]
+    public Tag Unk18;  // some kind of index table
+    [DestinyOffset(0x30)] 
+    public DestinyHash Unk30;
+    public int Unk34;
+    [DestinyOffset(0x40), DestinyField(FieldType.TagHash64, disableLoad:false)]
+    public Entity CinematicEntityModel;
+    [DestinyField(FieldType.TagHash64)] 
+    public Tag Unk50;
+    [DestinyField(FieldType.TagHash64, disableLoad:false)]
+    public Entity CinematicEntityAnimations;
+    public int Unk70;
+}
+
+#endregion

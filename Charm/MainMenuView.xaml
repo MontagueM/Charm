@@ -17,7 +17,7 @@
             <ColumnDefinition Width="100*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50*" />
+            <RowDefinition Height="20*" />
             <RowDefinition Height="100*" />
             <RowDefinition Height="0*" />
         </Grid.RowDefinitions>
@@ -38,8 +38,8 @@
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AnimationsButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,40" Padding="20, 20, 20, 20" >
                 <TextBlock Text="ANIMATIONS" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="SkeletonButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,40" Padding="20, 20, 20, 20" >
-                <TextBlock Text="SKELETON" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
+            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="CinematicsButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,40" Padding="20, 20, 20, 20" >
+                <TextBlock Text="CINEMATICS" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
         </StackPanel>
         

@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Field.Entities;
 using Field.General;
 using Field.Strings;
 
@@ -126,7 +127,31 @@ public struct D2Class_898E8080
     [DestinyField(FieldType.ResourcePointer)]
     public dynamic? Unk10;  // 46938080 has dialogue table, 45938080 unk, 19978080 unk
     [DestinyField(FieldType.TagHash)]
-    public Tag Unk14;  // D2Class_898E8080 entity script stuff
+    public Tag<D2Class_BE8E8080> Unk18;  // D2Class_898E8080 entity script stuff
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_BE8E8080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_42898080> EntityResources;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 4)]
+public struct D2Class_42898080
+{
+    [DestinyField(FieldType.TagHash)]
+    public Tag<D2Class_43898080> EntityResourceParent;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+public struct D2Class_43898080
+{
+    public long FileSize;
+    public DestinyHash Unk08;
+    [DestinyOffset(0x20), DestinyField(FieldType.TagHash)]
+    public EntityResource EntityResource;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x58)]

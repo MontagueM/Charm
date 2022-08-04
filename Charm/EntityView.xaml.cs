@@ -70,6 +70,8 @@ public partial class EntityView : UserControl
     private void AddEntity(Entity entity, ELOD detailLevel, FbxHandler fbxHandler, Animation animation=null)
     {
         var dynamicParts = entity.Load(detailLevel);
+        if (dynamicParts.Count == 0)
+            return;
         ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
         dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
         if (animation != null)
@@ -148,38 +150,7 @@ public partial class EntityView : UserControl
         // to load an animation into the viewer, we need to save the fbx then load
         fbxHandler.Clear();
 
-        // player skeleton + necklace and hands
-        Entity playerBase = PackageHandler.GetTag(typeof(Entity), new TagHash("0000670F342E9595")); // 64 bit more permanent 
-        fbxHandler.AddEntityToScene(playerBase, playerBase.Load(ELOD.MostDetail), ELOD.MostDetail);
 
-        // Add model
-        uint sunbracers = 3787517196;
-        uint contraverse = 1906093346;
-        uint astrocyte = 866590993;
-        uint chromatic = 3488362706;
-        uint phoenix = 3488362707;
-        uint transversive = 138282166;
-        uint wise_bond = 1016461220;
-        var helm = astrocyte;
-        var chest = phoenix;
-        var arms = sunbracers;
-        var legs = transversive;
-        var classitem = wise_bond;
-        List<uint> models = new List<uint>
-        {
-            helm,
-            chest,
-            arms,
-            legs,
-            classitem
-        };
-        foreach (var model in models)
-        {
-            var entities = InvestmentHandler.GetEntitiesFromHash(new DestinyHash(model));
-            var entity = entities[0];
-            var parts = entity.Load(ELOD.MostDetail);
-            fbxHandler.AddEntityToScene(entity, parts, ELOD.MostDetail);
-        }
 
         // Add animation
         animation.Load();

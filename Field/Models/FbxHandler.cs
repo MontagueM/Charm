@@ -197,7 +197,7 @@ public class FbxHandler
                 boneNode.DefaultObjectSpaceTransform.Translation.ToFbxVector4(),
                 boneNode.DefaultObjectSpaceTransform.QuaternionRotation.ToFbxQuaternion(),
                 new FbxVector4(boneNode.DefaultObjectSpaceTransform.Scale, boneNode.DefaultObjectSpaceTransform.Scale, boneNode.DefaultObjectSpaceTransform.Scale)
-                );
+            );
             pose.Add(node, bindMatrix);
         }
         
@@ -309,6 +309,42 @@ public class FbxHandler
         mesh.GetLayer(0).SetSmoothing(smoothingLayer);
         
         mesh.SetMeshSmoothness(FbxMesh.ESmoothness.eFine);
+    }
+
+    public void AddPlayerSkeletonAndMesh()
+    {
+        // player skeleton + necklace and hands
+        Entity playerBase = PackageHandler.GetTag(typeof(Entity), new TagHash("0000670F342E9595")); // 64 bit more permanent 
+        AddEntityToScene(playerBase, playerBase.Load(ELOD.MostDetail), ELOD.MostDetail);
+
+        // Add model
+        uint sunbracers = 3787517196;
+        uint contraverse = 1906093346;
+        uint astrocyte = 866590993;
+        uint chromatic = 3488362706;
+        uint phoenix = 3488362707;
+        uint transversive = 138282166;
+        uint wise_bond = 1016461220;
+        var helm = astrocyte;
+        var chest = phoenix;
+        var arms = sunbracers;
+        var legs = transversive;
+        var classitem = wise_bond;
+        List<uint> models = new List<uint>
+        {
+            helm,
+            chest,
+            arms,
+            legs,
+            classitem
+        };
+        foreach (var model in models)
+        {
+            var entities = InvestmentHandler.GetEntitiesFromHash(new DestinyHash(model));
+            var entity = entities[0];
+            var parts = entity.Load(ELOD.MostDetail);
+            AddEntityToScene(entity, parts, ELOD.MostDetail);
+        }
     }
 
     public List<FbxNode> AddSkeleton(List<BoneNode> boneNodes)
@@ -532,6 +568,11 @@ public class FbxHandler
         }
     }
 
+    public void AddAnimationToEntity(Animation animation)
+    {
+        AddAnimationToEntity(animation, _globalSkeletonNodes);
+    }
+
     public void Clear()
     {
         _scene.Clear();
@@ -547,6 +588,34 @@ public class FbxHandler
             _manager.Destroy();
         }
         InfoHandler.Dispose();
+    }
+    
+    public void AddStaticInstancesToScene(List<Part> parts, List<D2Class_406D8080> instances, string meshName)
+    {
+        for (int i = 0; i < parts.Count; i++)
+        {
+            FbxMesh mesh = CreateMeshPart(parts[i], i, meshName);
+            for (int j = 0; j < instances.Count; j++)
+            {
+                FbxNode node;
+                lock (_fbxLock)
+                {
+                    node = FbxNode.Create(_manager, $"{meshName}_{i}_{j}");
+                }
+                node.SetNodeAttribute(mesh);
+                Vector4 quatRot = new Vector4(instances[j].Rotation.X, instances[j].Rotation.Y, instances[j].Rotation.Z, instances[j].Rotation.W);
+                Vector3 eulerRot = quatRot.QuaternionToEulerAnglesZYX();
+                
+                node.LclTranslation.Set(new FbxDouble3(instances[j].Position.X, instances[j].Position.Y, instances[j].Position.Z));
+                node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
+                node.LclScaling.Set(new FbxDouble3(instances[j].Scale.X, instances[j].Scale.X, instances[j].Scale.X));
+                
+                lock (_fbxLock)
+                {
+                    _scene.GetRootNode().AddChild(node);
+                }
+            }
+        }
     }
 
     public void SetGlobalSkeleton(TagHash tagHash)

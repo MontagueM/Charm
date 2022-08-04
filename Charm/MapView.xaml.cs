@@ -107,6 +107,30 @@ public partial class MapView : UserControl
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
     }
+    
+        public static void ExportMinimalMap(StaticMapData staticMapData)
+    {
+        FbxHandler fbxHandler = new FbxHandler();
+        string meshName = staticMapData.Hash.GetHashString();
+        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        if (ConfigHandler.GetSingleFolderMapsEnabled())
+        {
+            savePath = ConfigHandler.GetExportSavePath() + "/Maps";
+        }
+        fbxHandler.InfoHandler.SetMeshName(meshName);
+        Directory.CreateDirectory(savePath);
+        // Extract all
+
+        Parallel.ForEach(staticMapData.Header.InstanceCounts, c =>
+        {
+            var s = staticMapData.Header.Statics[c.StaticIndex].Static;
+            var parts = s.Load(ELOD.MostDetail);
+            fbxHandler.AddStaticInstancesToScene(parts, staticMapData.Header.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), s.Hash);
+        });
+        
+        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+        fbxHandler.Dispose();
+    }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap, ELOD detailLevel)
     {
