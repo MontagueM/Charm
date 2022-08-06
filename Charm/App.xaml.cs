@@ -25,17 +25,16 @@ namespace Charm
             if (args.Length > 0)
             {
                 uint apiHash = 0;
-                
                 int c = 0;
                 while (c < args.Length)
                 {
-                    if (args[c] == "-a")
+                    if (args[c] == "--api")
                     {
                         apiHash = Convert.ToUInt32(args[c + 1]);
+                        break;
                     }
-                    c += 2;
+                    c++;
                 }
-
                 if (apiHash != 0)
                 {
                     // Initialise FNV handler -- must be first bc my code is shit
@@ -73,6 +72,7 @@ namespace Charm
                     }
                     fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
                     Console.WriteLine($"[Charm] Saved all data to {savePath}.");
+                    //Shutdown();
                 }
             }
         }
