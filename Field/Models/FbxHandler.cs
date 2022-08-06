@@ -2,6 +2,7 @@
 using Field.General;
 using Field.Statics;
 using Internal.Fbx;
+using SharpDX;
 
 namespace Field.Models;
 
@@ -386,5 +387,73 @@ public class FbxHandler
             _manager.Destroy();
         }
         InfoHandler.Dispose();
+    }
+
+    public void AddStaticInstancesToScene(List<Part> parts, List<D2Class_406D8080> instances, string meshName)
+    {
+        for (int i = 0; i < parts.Count; i++)
+        {
+            FbxMesh mesh = CreateMeshPart(parts[i], i, meshName);
+            for (int j = 0; j < instances.Count; j++)
+            {
+                FbxNode node;
+                lock (_fbxLock)
+                {
+                    node = FbxNode.Create(_manager, $"{meshName}_{i}_{j}");
+                }
+                node.SetNodeAttribute(mesh);
+                Quaternion quatRot = new Quaternion(instances[j].Rotation.X, instances[j].Rotation.Y, instances[j].Rotation.Z, instances[j].Rotation.W);
+                System.Numerics.Vector3 eulerRot = QuaternionToEulerAngles(quatRot);
+                
+                node.LclTranslation.Set(new FbxDouble3(instances[j].Position.X, instances[j].Position.Y, instances[j].Position.Z));
+                node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
+                node.LclScaling.Set(new FbxDouble3(instances[j].Scale.X, instances[j].Scale.X, instances[j].Scale.X));
+                
+                lock (_fbxLock)
+                {
+                    _scene.GetRootNode().AddChild(node);
+                }
+            }
+        }
+    }
+    
+    // From https://github.com/OwlGamingCommunity/V/blob/492d0cb3e89a97112ac39bf88de39da57a3a1fbf/Source/owl_core/Server/MapLoader.cs
+    private static System.Numerics.Vector3 QuaternionToEulerAngles(Quaternion q)
+    {
+        System.Numerics.Vector3 retVal = new System.Numerics.Vector3();
+
+        // roll (x-axis rotation)
+        double sinr_cosp = +2.0 * (q.W * q.X + q.Y * q.Z);
+        double cosr_cosp = +1.0 - 2.0 * (q.X * q.X + q.Y * q.Y);
+        retVal.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+        // pitch (y-axis rotation)
+        double sinp = +2.0 * (q.W * q.Y - q.Z * q.X);
+        double absSinP = Math.Abs(sinp);
+        bool bSinPOutOfRage = absSinP >= 1.0;
+        if (bSinPOutOfRage)
+        {
+            retVal.Y = 90.0f; // use 90 degrees if out of range
+        }
+        else
+        {
+            retVal.Y = (float)Math.Asin(sinp);
+        }
+
+        // yaw (z-axis rotation)
+        double siny_cosp = +2.0 * (q.W * q.Z + q.X * q.Y);
+        double cosy_cosp = +1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z);
+        retVal.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+        // Rad to Deg
+        retVal.X *= (float)(180.0f / Math.PI);
+
+        if (!bSinPOutOfRage) // only mult if within range
+        {
+            retVal.Y *= (float)(180.0f / Math.PI);
+        }
+        retVal.Z *= (float)(180.0f / Math.PI);
+
+        return retVal;
     }
 }
