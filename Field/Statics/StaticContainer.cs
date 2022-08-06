@@ -72,37 +72,44 @@ public struct PartUnmanaged
         UIntVector3[] indices = new UIntVector3[Indices.dataSize];
         PackageHandler.Copy(Indices.dataPtr, indices, 0, Indices.dataSize);
         outPart.Indices = indices.ToList();
+        Marshal.FreeHGlobal(Indices.dataPtr);
 
         // VertexIndices
         uint[] vertexIndices = new uint[VertexIndices.dataSize];
         PackageHandler.Copy(VertexIndices.dataPtr, vertexIndices, 0, VertexIndices.dataSize);
         outPart.VertexIndices = vertexIndices.ToList();
-        
+        Marshal.FreeHGlobal(VertexIndices.dataPtr);
+
         // VertexPositions
         Vector4[] vertexPositions = new Vector4[VertexPositions.dataSize];
         PackageHandler.Copy(VertexPositions.dataPtr, vertexPositions, 0, VertexPositions.dataSize);
         outPart.VertexPositions = vertexPositions.ToList();
-        
+        Marshal.FreeHGlobal(VertexPositions.dataPtr);
+
         // VertexTexcoords
         Vector2[] vertexTexcoords = new Vector2[VertexTexcoords.dataSize];
         PackageHandler.Copy(VertexTexcoords.dataPtr, vertexTexcoords, 0, VertexTexcoords.dataSize);
         outPart.VertexTexcoords = vertexTexcoords.ToList();
-        
+        Marshal.FreeHGlobal(VertexTexcoords.dataPtr);
+
         // VertexNormals
         Vector4[] vertexNormals = new Vector4[VertexNormals.dataSize];
         PackageHandler.Copy(VertexNormals.dataPtr, vertexNormals, 0, VertexNormals.dataSize);
         outPart.VertexNormals = vertexNormals.ToList();
-        
+        Marshal.FreeHGlobal(VertexNormals.dataPtr);
+
         // VertexTangents
         Vector4[] vertexTangents = new Vector4[VertexTangents.dataSize];
         PackageHandler.Copy(VertexTangents.dataPtr, vertexTangents, 0, VertexTangents.dataSize);
         outPart.VertexTangents = vertexTangents.ToList();
-        
+        Marshal.FreeHGlobal(VertexTangents.dataPtr);
+
         // VertexColours
         Vector4[] vertexColours = new Vector4[VertexColours.dataSize];
         PackageHandler.Copy(VertexColours.dataPtr, vertexColours, 0, VertexColours.dataSize);
         outPart.VertexColours = vertexColours.ToList();
-        
+        Marshal.FreeHGlobal(VertexColours.dataPtr);
+
         return outPart;
     }
 }

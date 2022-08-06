@@ -89,7 +89,7 @@ public enum FieldType
     ResourceInTablePointer,  // a pointer that points to a resource in a specified table so has a constant type
     String, // u32 container + u32 key
     String64, // u64 container + u32 key
-    StringNoContainer, // u32 key no container
+    // StringNoContainer, // u32 key no container (deprecated, moved to DestinyHash)
 }
 
 public class Tag : DestinyFile
@@ -120,19 +120,19 @@ public class Tag : DestinyFile
         return null;
     }
 
-    protected virtual T ReadHeader<T>() where T : struct
+    protected virtual T ReadHeader<T>(StringContainer? sc = null) where T : struct
     {
         HeaderType = typeof(T);
         if (!IsStructureValid(typeof(T).FullName)) throw new Exception("Structure failed to validate, likely some changes to the game.");
         dynamic ret;
         using (var handle = GetHandle())
         {
-            ret = ReadStruct(typeof(T), handle);
+            ret = ReadStruct(typeof(T), handle, sc);
         }
         return ret;
     }
 
-    public dynamic ReadStruct(Type T, BinaryReader handle)
+    public dynamic ReadStruct(Type T, BinaryReader handle, StringContainer? sc = null)
     {
         long startOffset = handle.BaseStream.Position;
         object result = Activator.CreateInstance(T);
@@ -163,11 +163,11 @@ public class Tag : DestinyFile
                 }
                 else if (field.FieldType.FullName.Contains("D2Class_"))
                 {
-                    field.SetValue(result, ReadStruct(field.FieldType, handle));
+                    field.SetValue(result, ReadStruct(field.FieldType, handle, sc));
                 }
                 else if (field.FieldType == typeof(DestinyHash))
                 {
-                    field.SetValue(result, new DestinyHash(handle.ReadUInt32()));
+                    field.SetValue(result, new DestinyHash(handle.ReadUInt32(), sc));
                 }
                 else if (field.FieldType == typeof(TagHash))
                 {
@@ -209,7 +209,7 @@ public class Tag : DestinyFile
                             if (field.FieldType.FullName.Contains("D2Class_")) // array of classes, overriding arrays if pure class hashes
                             {
                                 handle.BaseStream.Seek(tableOffset + j*type.StructLayoutAttribute.Size, SeekOrigin.Begin);
-                                value = ReadStruct(type, handle);
+                                value = ReadStruct(type, handle, sc);
                             }
                             else
                             {
@@ -217,7 +217,7 @@ public class Tag : DestinyFile
                                 uint hash = handle.ReadUInt32();
                                 if (type == typeof(DestinyHash))
                                 {
-                                    value = new DestinyHash(hash);
+                                    value = new DestinyHash(hash, sc);
                                 }
                                 else
                                 {
@@ -275,13 +275,14 @@ public class Tag : DestinyFile
                         Type innerType = Type.GetType($"Field.D2Class_{Endian.U32ToString(resourceClass)}, Field, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
                         if (innerType == null)
                         {
-                            if (T == typeof(D2Class_069B8080) || T == typeof(D2Class_85988080))  // If entity resource or map data resource, don't bother reading if we don't know it (too many types)
+                            if (T == typeof(D2Class_069B8080) || T == typeof(D2Class_85988080) || T == typeof(D2Class_F1918080))  // If entity resource or map data resource, don't bother reading if we don't know it (too many types)
                             {
+                                handle.BaseStream.Seek(fieldOffset + 8, SeekOrigin.Begin);  // return back to keep reading
                                 return result;
                             }
                             throw new NotImplementedException($"[RESOURCE POINTER] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
                         }
-                        dynamic resource = ReadStruct(innerType, handle);
+                        dynamic resource = ReadStruct(innerType, handle, sc);
                         handle.BaseStream.Seek(fieldOffset + 8, SeekOrigin.Begin);  // return back to keep reading
                         field.SetValue(result, resource);
                     }
@@ -294,7 +295,7 @@ public class Tag : DestinyFile
                     {
                         throw new NotImplementedException($"[RESOURCE] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
                     }
-                    dynamic resource = ReadStruct(innerType, handle);
+                    dynamic resource = ReadStruct(innerType, handle, sc);
                     field.SetValue(result, resource);
                 }
                 else if (fieldType == FieldType.ResourcePointerWithClass)
@@ -311,7 +312,7 @@ public class Tag : DestinyFile
                     long resourcePointer = handle.ReadInt64();
                     handle.BaseStream.Seek(resourcePointer-8, SeekOrigin.Current);
                     Type innerType = field.FieldType;
-                    dynamic resource = ReadStruct(innerType, handle);
+                    dynamic resource = ReadStruct(innerType, handle, sc);
                     handle.BaseStream.Seek(fieldOffset + 8, SeekOrigin.Begin);  // return back to keep reading
                     field.SetValue(result, resource);
                 }
@@ -367,7 +368,7 @@ public class Tag : DestinyFile
                 {
                     uint indexOrHash = handle.ReadUInt32();
                     TagHash tagHash = new TagHash(indexOrHash);
-                    DestinyHash key = new DestinyHash(handle.ReadUInt32());
+                    DestinyHash key = new DestinyHash(handle.ReadUInt32(), sc);
                     if (tagHash.IsValid())
                     {
                         StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash, disableLoad);
@@ -397,7 +398,7 @@ public class Tag : DestinyFile
                     if (tagHash.IsValid())
                     {
                         StringContainer tag = PackageHandler.GetTag(typeof(StringContainer), tagHash, disableLoad);
-                        DestinyHash key = new DestinyHash(handle.ReadUInt32());
+                        DestinyHash key = new DestinyHash(handle.ReadUInt32(), sc);
                         string resStr = tag.GetStringFromHash(ELanguage.English, key);
                         field.SetValue(result, resStr);
                     }
@@ -406,13 +407,13 @@ public class Tag : DestinyFile
                         field.SetValue(result, "%%FAIL%%");
                     }
                 }
-                else if (fieldType == FieldType.StringNoContainer)
-                {
-                    // We need to use the cached 02218080 string classes
-                    DestinyHash key = new DestinyHash(handle.ReadUInt32());
-                    string globalString = PackageHandler.GetGlobalString(key);
-                    field.SetValue(result, globalString);
-                }
+                // else if (fieldType == FieldType.StringNoContainer)
+                // {
+                //     // We need to use the cached 02218080 string classes
+                //     DestinyHash key = new DestinyHash(handle.ReadUInt32(), sc);
+                //     string globalString = PackageHandler.GetGlobalString(key);
+                //     field.SetValue(result, globalString);
+                // }
                 else
                 {
                     throw new NotImplementedException();

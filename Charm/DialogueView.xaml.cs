@@ -69,12 +69,7 @@ public partial class DialogueView : UserControl
     private void PlayWem_OnClick(object sender, RoutedEventArgs e)
     {
         VoicelineItem item = (VoicelineItem) (sender as Button).DataContext;
-        PlayWem(item.Wem);
-    }
-
-    public void PlayWem(Wem wem)
-    {
-        MusicPlayer.SetWem(wem);
+        MusicPlayer.SetWem(item.Wem);
         MusicPlayer.Play();
     }
 }

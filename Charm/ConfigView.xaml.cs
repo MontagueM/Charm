@@ -48,11 +48,19 @@ public partial class ConfigView : UserControl
         
         // Enable UE5 interop
         ConfigSettingControl cii = new ConfigSettingControl();
-        cii.SettingName = "Generate unreal engine importing files";
+        cii.SettingName = "Generate Unreal Engine importing files";
         bool bval = ConfigHandler.GetUnrealInteropEnabled();
         cii.SettingValue = bval.ToString();
         cii.ChangeButton.Click += UnrealInteropEnabled_OnClick;
         ConfigPanel.Children.Add(cii);
+
+        // Enable Blender interop
+        ConfigSettingControl cbe = new ConfigSettingControl();
+        cbe.SettingName = "Generate Blender importing script";
+        bool bval2 = ConfigHandler.GetBlenderInteropEnabled();
+        cbe.SettingValue = bval2.ToString();
+        cbe.ChangeButton.Click += BlenderInteropEnabled_OnClick;
+        ConfigPanel.Children.Add(cbe);
         
         // Enable combined extraction folder for maps
         ConfigSettingControl cef = new ConfigSettingControl();
@@ -68,8 +76,15 @@ public partial class ConfigView : UserControl
         ETextureFormat etfval = ConfigHandler.GetOutputTextureFormat();
         ctf.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems<ETextureFormat>();
         ctf.SettingsCombobox.SelectedIndex = (int)etfval;
-        ctf.ChangeButton.Click += OutputTextureFormat_OnClick;
+        ctf.SettingsCombobox.SelectionChanged += OutputTextureFormat_OnSelectionChanged;
+        ctf.ChangeButton.Visibility = Visibility.Hidden;
         ConfigPanel.Children.Add(ctf);
+
+        TextBlock lbl = new TextBlock();
+        lbl.Text = "(Use PNG or TGA in Blender)";
+        lbl.FontSize = 15;
+        ConfigPanel.Children.Add(lbl);
+
     }
 
     private List<ComboBoxItem> MakeEnumComboBoxItems<T>() where T : Enum
@@ -121,6 +136,16 @@ public partial class ConfigView : UserControl
         ConfigHandler.SetUnrealInteropEnabled(!ConfigHandler.GetUnrealInteropEnabled());
         PopulateConfigPanel();
     }
+
+    private void BlenderInteropEnabled_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (!ConfigHandler.GetBlenderInteropEnabled())
+        {
+            MessageBox.Show("Blender will NOT import shaders. Please have moderate Blender shader knowledge.");
+        }
+        ConfigHandler.SetBlenderInteropEnabled(!ConfigHandler.GetBlenderInteropEnabled());
+        PopulateConfigPanel();
+    }
     
     private void SingleFolderMapsEnabled_OnClick(object sender, RoutedEventArgs e)
     {
@@ -128,10 +153,9 @@ public partial class ConfigView : UserControl
         PopulateConfigPanel();
     }
     
-    private void OutputTextureFormat_OnClick(object sender, RoutedEventArgs e)
+    private void OutputTextureFormat_OnSelectionChanged(object sender, RoutedEventArgs e)
     {
-        // ConfigHandler.SetOutputTextureFormat();
-        var index = ((sender as Button).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
+        var index = ((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;
         ConfigHandler.SetOutputTextureFormat((ETextureFormat)index);
         TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
         PopulateConfigPanel();    

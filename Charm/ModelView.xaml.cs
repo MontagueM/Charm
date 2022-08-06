@@ -38,8 +38,14 @@ public partial class ModelView : UserControl
 
     public int GetSelectedGroupIndex()
     {
-        int selected = GroupsCombobox.SelectedIndex;
-        return selected;
+        if (GroupsCombobox.SelectedItem == null)
+            return -1;
+        string selected = (GroupsCombobox.SelectedItem as ComboBoxItem).Content as string;
+        if (selected == String.Empty)
+            return -1;
+        string i = selected.Split("Group ")[1].Split("/")[0];
+        int index = int.Parse(i);
+        return index - 1;
     }
 
     private Action _loadModelFunc = null;
@@ -78,13 +84,13 @@ public partial class ModelView : UserControl
         GroupsCombobox.Items.Clear();
         var l = hashSet.ToList();
         l.Sort();
-        
+        int max = l.Last();
         foreach (var i in l)
         {
             GroupsCombobox.Items.Add(new ComboBoxItem
             {
-                Content = $"Group {i+1}/{l.Count}",
-                IsSelected = i == l.Last()
+                Content = $"Group {i+1}/{max+1}",
+                IsSelected = i == l.First()
             });
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Runtime.InteropServices;
+using Field.Strings;
 
 namespace Field.General;
 
@@ -33,27 +34,63 @@ public static class Endian
         return retval;
     }
 }
-    
+
+/// <summary>
+/// DestinyHash represents a dev name that has been hashed via FNV. The dev name can sometimes have a real string
+/// bound to it, and can also have a string container prefix. I don't use the string container version here and count
+/// it as its own data type. This hash is solely used for a 32 bit FNV value.
+/// </summary>
 [StructLayout(LayoutKind.Sequential, Size = 4)]
 public class DestinyHash : IComparable<DestinyHash>
 {
-    public uint Hash;
-    private string _string;
-     
+    public uint Hash = 0x811c9dc5;
+    private string _devString = String.Empty;
+    private string _containerString = String.Empty;
+
+    private void SetDevString()
+    {
+        _devString = FnvHandler.GetStringFromHash(Hash);
+    }
+    
+    private void SetContainerString(StringContainer container)
+    {
+        if (container == null)
+        {
+            _containerString = PackageHandler.GetGlobalString(this);
+        }
+        else
+        {
+            _containerString = container.GetStringFromHash(ELanguage.English, this);
+        }
+    }
+
+    public string GetDevString()
+    {
+        return _devString;
+    }
+    
+    public string GetContainerString()
+    {
+        return _containerString;
+    }
+    
     public DestinyHash(string hash, bool bBigEndianString = false)
     {
-        Hash = uint.Parse(hash, NumberStyles.HexNumber);
-        if (hash.EndsWith("80") || bBigEndianString)
+        bool parsed = uint.TryParse(hash, NumberStyles.HexNumber, null, out Hash);
+        if (parsed)
         {
-            Hash = Endian.SwapU32(Hash);
+            if (hash.EndsWith("80") || bBigEndianString)
+            {
+                Hash = Endian.SwapU32(Hash);
+            }
         }
-        _string = FnvHandler.GetStringFromHash(Hash);
     }
         
-    public DestinyHash(uint hash)
+    public DestinyHash(uint hash, StringContainer container = null)
     {
         Hash = hash;
-        _string = FnvHandler.GetStringFromHash(Hash);
+        SetDevString();
+        SetContainerString(container);
     }
 
     public DestinyHash()
@@ -73,19 +110,44 @@ public class DestinyHash : IComparable<DestinyHash>
     {
         return (int)((Hash >> 0xD) & 0x3ff);
     }
-        
+    
+    public int GetEntryIndex()
+    {
+        return (int)(Hash % 8192);
+    }
+
     public string GetHashString()
     {
         return Endian.U32ToString(Hash);
     }
 
-    
+    /// <summary>
+    /// We prefer the container string as long as it's valid, then we try the dev FNV string, otherwise just the hash.
+    /// </summary>
     public override string ToString()
     {
-        if (_string != "") return _string;
+        if (HasValidContainerString()) 
+            return GetContainerString();
+        if (HasValidDevString()) 
+            return GetDevString();
         return GetHashString();
     }
-        
+
+    public bool Contains(string str)
+    {
+        return ToString().Contains(str);
+    }
+    
+    public bool HasValidContainerString()
+    {
+        return _containerString != String.Empty && !_containerString.Contains("%%");
+    }
+    
+    public bool HasValidDevString()
+    {
+        return _devString != String.Empty;
+    }
+
     public override int GetHashCode()
     {
         return (int)Hash;
@@ -123,7 +185,8 @@ public class DestinyHash : IComparable<DestinyHash>
     }
     
     public static implicit operator uint(DestinyHash d) => d.Hash;
-    public static implicit operator string(DestinyHash d) => d.GetHashString();
+    // public static implicit operator string(DestinyHash d) => d.GetHashString();
+    public static implicit operator string(DestinyHash d) => d.ToString();
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 4)]
@@ -133,7 +196,7 @@ public class TagHash : DestinyHash
     {
     }
     
-    public TagHash(DestinyHash hash) : base(hash)
+    public TagHash(DestinyHash hash) : base(hash.Hash)
     {
     }
         

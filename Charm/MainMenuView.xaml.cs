@@ -48,7 +48,7 @@ public partial class MainMenuView : UserControl
     {
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.EntityList);
-        _mainWindow.MakeNewTab("entities", tagListView);
+        _mainWindow.MakeNewTab("dynamics", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
 
@@ -65,6 +65,14 @@ public partial class MainMenuView : UserControl
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.StaticsList);
         _mainWindow.MakeNewTab("statics", tagListView);
+        _mainWindow.SetNewestTabSelected();    
+    }
+    
+    private void WeaponAudioViewButton_Click(object sender, RoutedEventArgs e)
+    {
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.WeaponAudioGroupList);
+        _mainWindow.MakeNewTab("weapon audio", tagListView);
         _mainWindow.SetNewestTabSelected();    
     }
 
@@ -89,6 +97,6 @@ public partial class MainMenuView : UserControl
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.TextureList);
         _mainWindow.MakeNewTab("textures", tagListView);
-        _mainWindow.SetNewestTabSelected();    
+        _mainWindow.SetNewestTabSelected();
     }
 }

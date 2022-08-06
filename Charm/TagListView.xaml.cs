@@ -86,6 +86,14 @@ public enum ETagListType
     MusicList,
     [Description("Music [Final]")]
     Music,
+    [Description("Weapon Audio Group List")]
+    WeaponAudioGroupList,
+    [Description("Weapon Audio Group [Final]")]
+    WeaponAudioGroup,
+    [Description("Weapon Audio List")]
+    WeaponAudioList,
+    [Description("Weapon Audio [Final]")]
+    WeaponAudio,
 }
 
 /// <summary>
@@ -246,6 +254,18 @@ public partial class TagListView : UserControl
                 case ETagListType.Music:
                     LoadMusic(contentValue);
                     break;
+                case ETagListType.WeaponAudioGroupList:
+                    LoadWeaponAudioGroupList();
+                    break;
+                case ETagListType.WeaponAudioGroup:
+                    LoadWeaponAudioGroup(contentValue);
+                    break;
+                case ETagListType.WeaponAudioList:
+                    LoadWeaponAudioList(contentValue);
+                    break;
+                case ETagListType.WeaponAudio:
+                    LoadWeaponAudio(contentValue);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -351,7 +371,8 @@ public partial class TagListView : UserControl
             // bool bWasTrimmed = name != item.Name;
             if (name.ToLower().Contains(searchStr) 
                 || item.Hash.GetHashString().ToLower().Contains(searchStr) 
-                || item.Hash.Hash.ToString().Contains(searchStr))
+                || item.Hash.Hash.ToString().Contains(searchStr)
+                || item.Subname.ToLower().Contains(searchStr))
             {
                 displayItems.Add(new TagItem
                 {
@@ -541,6 +562,93 @@ public partial class TagListView : UserControl
         var viewer = GetViewer();
         viewer.SetViewer(eViewerType);
     }
+    
+    private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_selectedIndex == -1)
+            return;
+        if (TagList.SelectedIndex > _selectedIndex)
+        {
+            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
+            if (currentButton == null)
+                return;
+            currentButton.IsChecked = false;
+            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex+1));
+            if (nextButton == null)
+                return;
+            nextButton.IsChecked = true;
+            _selectedIndex++;
+            TagItem_OnClick(nextButton, null);
+        }
+        
+        else if (TagList.SelectedIndex < _selectedIndex)
+        {
+            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
+            if (currentButton == null)
+                return;
+            currentButton.IsChecked = false;
+            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex-1));
+            if (nextButton == null)
+                return;
+            nextButton.IsChecked = true;
+            _selectedIndex--;
+            TagItem_OnClick(nextButton, null);   
+            
+        }
+    }
+
+    public void ShowBulkExportButton()
+    {
+        BulkExportButton.Visibility = Visibility.Visible;
+    }
+    
+    public void SetBulkGroup(string group)
+    {
+        var tab = ((Parent as Grid).Parent as TagListViewerView).Parent as TabItem;
+        BulkExportButton.Tag = $"{group}_{tab.Header}";
+    }
+
+    private async void BulkExport_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (BulkExportButton.Tag == null)
+        {
+            return;
+        }
+
+        var groupName = BulkExportButton.Tag as string;
+        var viewer = GetViewer();
+        bool bStaticShowing = viewer.StaticControl.Visibility == Visibility.Visible;
+        bool bEntityShowing = viewer.EntityControl.Visibility == Visibility.Visible;
+        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Hidden : viewer.StaticControl.Visibility;
+        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Hidden : viewer.EntityControl.Visibility;
+        
+        // Iterate over all buttons and export it
+        var items = TagList.ItemsSource.Cast<TagItem>();
+        var exportItems = items.Where(x => x.TagType != ETagListType.Back && x.TagType != ETagListType.Package).ToList();
+        if (exportItems.Count == 0)
+        {
+            MessageBox.Show("No tags to export.");
+            return;
+        }
+        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i+1}/{exportItems.Count}: {x.Hash}").ToList());
+        await Task.Run(() =>
+        {
+            foreach (var tagItem in exportItems)
+            {
+                var name = tagItem.Name == String.Empty ? tagItem.Hash.GetHashString() : tagItem.Name;
+                var exportInfo = new ExportInfo
+                {
+                    Hash = tagItem.Hash,
+                    Name = $"/Bulk_{groupName}/{name}",
+                    ExportType = EExportType.Minimal
+                };
+                viewer.ExportControl.RoutedFunction(exportInfo);
+                MainWindow.Progress.CompleteStage();
+            }
+        });
+        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Visible : viewer.StaticControl.Visibility;
+        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Visible : viewer.EntityControl.Visibility;
+    }
 
     #region Destination Global Tag Bag
 
@@ -643,7 +751,7 @@ public partial class TagListView : UserControl
     private void ExportEntity(ExportInfo info)
     {
         var viewer = GetViewer();
-        Entity entity = new Entity(new TagHash(info.Hash));
+        Entity entity = PackageHandler.GetTag(typeof(Entity), new TagHash(info.Hash));
         viewer.EntityControl.Export(new List<Entity> {entity}, info.Name, info.ExportType);
     }
     
@@ -836,21 +944,33 @@ public partial class TagListView : UserControl
     #region Activity
 
     /// <summary>
-    /// Type 0x80808e8e.
+    /// Type 0x80808e8e, but we use a child of it (0x80808e8b) so we can get the location.
     /// </summary>
     private void LoadActivityList()
     {
         _allTagItems = new ConcurrentBag<TagItem>();
+
+        // Getting names
+        var valsChild = PackageHandler.GetAllTagsWithReference(0x80808e8b);
+        ConcurrentDictionary<string, string> names = new ConcurrentDictionary<string, string>();
+        Parallel.ForEach(valsChild, val =>
+        {
+            Tag<D2Class_8B8E8080> tag = PackageHandler.GetTag<D2Class_8B8E8080>(val);
+            foreach (var entry in tag.Header.Activities)
+            {
+                names.TryAdd(entry.ActivityName, tag.Header.LocationName);
+            }
+        });
+        
         var vals = PackageHandler.GetAllTagsWithReference(0x80808e8e);
         Parallel.ForEach(vals, val =>
         {
             var activityName = PackageHandler.GetActivityName(val);
-            // if (activityName == "crucible" || activityName == "iron_banner" || activityName == "trials")
-            //     activityName = PackageHandler.GetPackageName(val.GetPkgId());
             _allTagItems.Add(new TagItem 
             { 
                 Hash = val,
                 Name = activityName,
+                Subname = names.ContainsKey(activityName) && !names[activityName].StartsWith("%%NOGLOBALSTRING") ? names[activityName] : "",
                 TagType = ETagListType.Activity
             });
         });
@@ -1273,7 +1393,8 @@ public partial class TagListView : UserControl
             Parallel.ForEach(vals, hash =>
             {
                 Wem wem = PackageHandler.GetTag(typeof(Wem), hash);
-                
+                if (wem.GetData().Length == 1)
+                    return;
                 _allTagItems.Add(new TagItem
                 {
                     Name = PackageHandler.GetEntryReference(hash),
@@ -1291,10 +1412,22 @@ public partial class TagListView : UserControl
     private void LoadSound(TagHash tagHash)
     {
         var viewer = GetViewer();
-        viewer.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), tagHash));
-        viewer.MusicPlayer.Play();
+        if (viewer.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), tagHash)))
+        {
+            viewer.MusicPlayer.Play();
+            SetExportFunction(ExportSound);
+            viewer.ExportControl.SetExportInfo(tagHash);
+        }
     }
     
+    private void ExportSound(ExportInfo info)
+    {
+        WwiseSound sound = PackageHandler.GetTag(typeof(WwiseSound), new TagHash(info.Hash));
+        string savePath = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}.wav";
+        Directory.CreateDirectory(ConfigHandler.GetExportSavePath() + "/Sound/");
+        sound.ExportSound(savePath);
+    }
+
     #endregion
 
     #region Music
@@ -1350,92 +1483,185 @@ public partial class TagListView : UserControl
 
     #endregion
     
-    private void TagList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    #region Weapon Audio
+    
+    private void LoadWeaponAudioGroupList()
     {
-        if (_selectedIndex == -1)
-            return;
-        if (TagList.SelectedIndex > _selectedIndex)
+        _allTagItems = new ConcurrentBag<TagItem>();
+        Parallel.ForEach(InvestmentHandler.InventoryItems, kvp =>
         {
-            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
-            if (currentButton == null)
+            if (kvp.Value.GetWeaponPatternIndex() == -1) 
                 return;
-            currentButton.IsChecked = false;
-            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex+1));
-            if (nextButton == null)
+            string name = InvestmentHandler.GetItemName(kvp.Value);
+            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
+            if (type == "Vehicle" || type == "Ship")
                 return;
-            nextButton.IsChecked = true;
-            _selectedIndex++;
-            TagItem_OnClick(nextButton, null);
-        }
-        
-        else if (TagList.SelectedIndex < _selectedIndex)
-        {
-            var currentButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex));
-            if (currentButton == null)
-                return;
-            currentButton.IsChecked = false;
-            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex-1));
-            if (nextButton == null)
-                return;
-            nextButton.IsChecked = true;
-            _selectedIndex--;
-            TagItem_OnClick(nextButton, null);   
-            
-        }
-    }
-
-    public void ShowBulkExportButton()
-    {
-        BulkExportButton.Visibility = Visibility.Visible;
+            _allTagItems.Add(new TagItem 
+            {
+                Hash = kvp.Key,
+                Name = name,
+                Type = type.Trim(),
+                TagType = ETagListType.WeaponAudioGroup
+            });
+        });
     }
     
-    public void SetBulkGroup(string group)
+    private void LoadWeaponAudioGroup(TagHash tagHash)
     {
-        var tab = ((Parent as Grid).Parent as TagListViewerView).Parent as TabItem;
-        BulkExportButton.Tag = $"{group}_{tab.Header}";
+        var viewer = GetViewer();
+        SetViewer(TagView.EViewerType.TagList);
+        viewer.TagListControl.LoadContent(ETagListType.WeaponAudioList, tagHash, true);
+        viewer.MusicPlayer.Visibility = Visibility.Visible;
+    }
+    
+    private void LoadWeaponAudioList(DestinyHash apiHash)
+    {
+        _allTagItems = new ConcurrentBag<TagItem>();
+        var val = InvestmentHandler.GetPatternEntityFromHash(apiHash);
+        if (val == null || (val.PatternAudio == null && val.PatternAudioUnnamed == null))
+        {
+            RefreshItemList();
+            return;
+        }
+
+        var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.Header.Unk18;
+        var resource = (D2Class_6E358080)val.PatternAudio.Header.Unk18;
+        var item = InvestmentHandler.GetInventoryItem(apiHash);
+        var weaponContentGroupHash = InvestmentHandler.GetWeaponContentGroupHash(item);
+        // Named
+        foreach (var entry in resource.PatternAudioGroups)
+        {
+            if (entry.WeaponContentGroup1Hash.Equals(weaponContentGroupHash) && entry.AudioGroup != null)
+            {
+                var audioGroup = PackageHandler.GetTag<D2Class_0D8C8080>(entry.AudioGroup.Header.EntityData);
+                audioGroup.Header.Audio.ForEach(audio =>
+                {
+                    foreach (var s in audio.Sounds)
+                    {
+                        if (s.Sound == null)
+                            continue;
+                    
+                        _allTagItems.Add(new TagItem
+                        {
+                            Hash = s.Sound.Hash,
+                            Name = s.WwiseEventName,
+                            Subname = audio.WwiseEventHash,
+                            TagType = ETagListType.WeaponAudio
+                        });
+                    }
+                });
+            }
+        }
+        // Unnamed
+        var sounds = GetWeaponUnnamedSounds(resourceUnnamed, weaponContentGroupHash);
+        foreach (var s in sounds)
+        {
+            if (s == null)
+                continue;
+                    
+            _allTagItems.Add(new TagItem
+            {
+                Hash = s.Hash,
+                Subname = s.Hash,
+                TagType = ETagListType.WeaponAudio
+            });
+        }
+        
+        RefreshItemList();
     }
 
-    private async void BulkExport_OnClick(object sender, RoutedEventArgs e)
+    public List<WwiseSound> GetWeaponUnnamedSounds(D2Class_F42C8080 resource, DestinyHash weaponContentGroupHash)
     {
-        if (BulkExportButton.Tag == null)
+        List<WwiseSound> sounds = new List<WwiseSound>();
+        resource.PatternAudioGroups.ForEach(entry =>
         {
-            return;
-        }
-
-        var groupName = BulkExportButton.Tag as string;
-        var viewer = GetViewer();
-        bool bStaticShowing = viewer.StaticControl.Visibility == Visibility.Visible;
-        bool bEntityShowing = viewer.EntityControl.Visibility == Visibility.Visible;
-        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Hidden : viewer.StaticControl.Visibility;
-        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Hidden : viewer.EntityControl.Visibility;
-        
-        // Iterate over all buttons and export it
-        var items = TagList.ItemsSource.Cast<TagItem>();
-        var exportItems = items.Where(x => x.TagType != ETagListType.Back && x.TagType != ETagListType.Package).ToList();
-        if (exportItems.Count == 0)
-        {
-            MessageBox.Show("No tags to export.");
-            return;
-        }
-        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i+1}/{exportItems.Count}: {x.Hash}").ToList());
-        await Task.Run(() =>
-        {
-            foreach (var tagItem in exportItems)
+            if (!entry.WeaponContentGroupHash.Equals(weaponContentGroupHash))
+                return;
+            
+            List<Tag> entitiesParents = new List<Tag> {entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248};
+            List<Entity> entities = new List<Entity>();
+            foreach (var tag in entitiesParents)
             {
-                var name = tagItem.Name == String.Empty ? tagItem.Hash.GetHashString() : tagItem.Name;
-                var exportInfo = new ExportInfo
+                if (tag == null)
+                    continue;
+                var reference = PackageHandler.GetEntryReference(tag.Hash);
+                if (reference == 0x80806fa3)
                 {
-                    Hash = tagItem.Hash,
-                    Name = $"/Bulk_{groupName}/{name}",
-                    ExportType = EExportTypeFlag.Minimal
-                };
-                viewer.ExportControl.RoutedFunction(exportInfo);
-                MainWindow.Progress.CompleteStage();
+                    var entityData = PackageHandler.GetTag<D2Class_A36F8080>(tag.Hash).Header.EntityData;
+                    var reference2 = PackageHandler.GetEntryReference(entityData);
+                    if (reference2 == 0x80802d09)
+                    {
+                        var tagInner = PackageHandler.GetTag<D2Class_2D098080>(entityData);
+                        if (tagInner.Header.Unk18 != null)
+                            entities.Add(tagInner.Header.Unk18);
+                        if (tagInner.Header.Unk30 != null)
+                            entities.Add(tagInner.Header.Unk30);
+                        if (tagInner.Header.Unk48 != null)
+                            entities.Add(tagInner.Header.Unk48);
+                        if (tagInner.Header.Unk60 != null)
+                            entities.Add(tagInner.Header.Unk60);
+                        if (tagInner.Header.Unk78 != null)
+                            entities.Add(tagInner.Header.Unk78);
+                        if (tagInner.Header.Unk90 != null)
+                            entities.Add(tagInner.Header.Unk90);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
+                else if (reference == 0x80809ad8)
+                {
+                    entities.Add(PackageHandler.GetTag(typeof(Entity), tag.Hash));
+                }
+                else if (reference != 0x8080325a)  // 0x8080325a materials, 
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            foreach (var entity in entities)
+            {
+                foreach (var e in entity.Header.EntityResources)
+                {
+                    if (e.ResourceHash.Header.Unk18 is D2Class_79818080 a)
+                    {
+                        foreach (var d2ClassF1918080 in a.WwiseSounds1)
+                        {
+                            if (d2ClassF1918080.Unk10 is D2Class_40668080 b)
+                            {
+                                sounds.Add(b.Sound);
+                            }
+                        }
+                        foreach (var d2ClassF1918080 in a.WwiseSounds2)
+                        {
+                            if (d2ClassF1918080.Unk10 is D2Class_40668080 b)
+                            {
+                                sounds.Add(b.Sound);
+                            }
+                        }
+                    }
+                }
             }
         });
-        viewer.StaticControl.Visibility = bStaticShowing ? Visibility.Visible : viewer.StaticControl.Visibility;
-        viewer.EntityControl.Visibility = bEntityShowing ? Visibility.Visible : viewer.EntityControl.Visibility;
+        return sounds;
     }
+    
+    private async void LoadWeaponAudio(TagHash tagHash)
+    {
+        var viewer = GetViewer();
+        WwiseSound tag = PackageHandler.GetTag(typeof(WwiseSound), tagHash);
+        if (tag.Header.Unk20.Count == 0)
+            return;
+        await viewer.MusicPlayer.SetSound(tag);
+        SetExportFunction(ExportSound);
+        // bit of a cheat but works
+        var tagItem = _previouslySelected.DataContext as TagItem;
+        viewer.ExportControl.SetExportInfo(tagItem.Name == "" ? tagItem.Subname : $"{tagItem.Subname}_{tagItem.Name}", tagHash);
+        viewer.MusicPlayer.Play();
+    }
+
+    #endregion
+
 }
 
 public class TagItem
@@ -1448,7 +1674,7 @@ public class TagItem
         get => _name; set => _name = value;
     }
 
-    public string Subname { get; set; }
+    public string Subname { get; set; } = String.Empty;
     
     public DestinyHash Hash { get; set; }
 
@@ -1466,7 +1692,7 @@ public class TagItem
         }
     }
 
-    public int FontSize { get; set; }
+    public int FontSize { get; set; } = 16;
 
     public string Type
     {

@@ -62,4 +62,10 @@ public partial class ActivityView : UserControl
 
         MapControl.Visibility = Visibility.Visible;
     }
+
+    public void Dispose()
+    {
+        MapControl.Dispose();
+        MusicControl.TagList.TagView.MusicControl.WemsControl.MusicPlayer.Dispose();
+    }
 }

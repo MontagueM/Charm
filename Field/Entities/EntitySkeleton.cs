@@ -5,7 +5,7 @@ namespace Field.Entities;
 
 public class EntitySkeleton : EntityResource
 {
-    public EntitySkeleton(EntityResource resource) : base(resource)
+    public EntitySkeleton(TagHash resource) : base(resource)
     {
     }
 

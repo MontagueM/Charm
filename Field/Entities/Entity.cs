@@ -15,6 +15,8 @@ public class Entity : Tag
     public EntityModel Model = null;
     public EntityResource ModelParentResource = null;
     public EntityModel PhysicsModel = null;
+    public EntityResource PatternAudio = null;
+    public EntityResource PatternAudioUnnamed = null;
     public EntityControlRig ControlRig = null;
     
     public Entity(TagHash hash) : base(hash)
@@ -43,11 +45,17 @@ public class Entity : Tag
                 case D2Class_5B6D8080:  // Entity physics model
                     PhysicsModel = ((D2Class_6C6D8080)resource.ResourceHash.Header.Unk18).PhysicsModel;
                     break;
-                case D2Class_DD818080:  // Entity skeleton
-                    Skeleton = new EntitySkeleton(resource.ResourceHash);
+                case D2Class_DD818080:  // Entity skeleton FK
+                    Skeleton = PackageHandler.GetTag(typeof(EntitySkeleton), resource.ResourceHash.Hash);
                     break;
-                case D2Class_668B8080:  // Entity skeleton
-                    ControlRig = new EntityControlRig(resource.ResourceHash);
+                case D2Class_668B8080:  // Entity skeleton IK
+                    ControlRig = PackageHandler.GetTag(typeof(EntityControlRig), resource.ResourceHash.Hash);
+                    break;
+                case D2Class_97318080:
+                    PatternAudio = resource.ResourceHash;
+                    break;
+                case D2Class_F62C8080:
+                    PatternAudioUnnamed = resource.ResourceHash;
                     break;
                 default:
                     // throw new NotImplementedException($"Implement parsing for {resource.ResourceHash.Header.Unk08}");

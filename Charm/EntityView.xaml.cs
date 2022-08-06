@@ -31,7 +31,7 @@ public partial class EntityView : UserControl
     public bool LoadEntity(TagHash entityHash, FbxHandler fbxHandler)
     {
         fbxHandler.Clear();
-        Entity entity = new Entity(entityHash);
+        Entity entity = PackageHandler.GetTag(typeof(Entity), entityHash);
         AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
         return LoadUI(fbxHandler);
     }
@@ -100,6 +100,8 @@ public partial class EntityView : UserControl
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
                 AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                //AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+
             }
         }
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");

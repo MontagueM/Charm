@@ -13,7 +13,7 @@ namespace Field.Entities;
 /// </summary>
 public class EntityControlRig : EntityResource
 {
-    public EntityControlRig(EntityResource resource) : base(resource)
+    public EntityControlRig(TagHash resource) : base(resource)
     {
         // WriteDebugObj();
     }

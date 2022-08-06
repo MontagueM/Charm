@@ -66,7 +66,7 @@ public struct D2Class_33978080
     public DestinyHash Unk08;
     public DestinyHash Unk0C;
     [DestinyOffset(0x18), DestinyField(FieldType.TagHash64)]
-    public WwiseLoop Sound1;
+    public WwiseSound Sound1;
     [DestinyField(FieldType.String64)]
     public string Unk28;
     [DestinyOffset(0x40)] 
@@ -74,7 +74,7 @@ public struct D2Class_33978080
     [DestinyField(FieldType.TagHash)]
     public Tag Unk44;
     [DestinyOffset(0x48), DestinyField(FieldType.TagHash64)]
-    public WwiseLoop Sound2;
+    public WwiseSound Sound2;
     [DestinyField(FieldType.String64)]
     public string Unk58;
     [DestinyOffset(0x70)] 
@@ -82,8 +82,7 @@ public struct D2Class_33978080
     [DestinyField(FieldType.TagHash)]
     public Tag Unk74;
     public DestinyHash Unk78;
-    [DestinyField(FieldType.StringNoContainer)]
-    public string NarratorString;
+    public DestinyHash NarratorString;
     public float Unk80;
 }
 

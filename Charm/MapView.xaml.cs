@@ -53,12 +53,19 @@ public partial class MapView : UserControl
             MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
             MVM.SetChildren(displayParts);
         });
+        displayParts.Clear();
     }
 
     public void Clear()
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         MVM.Clear();
+    }
+
+    public void Dispose()
+    {
+        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        MVM.Dispose();
     }
     
     public static void ExportFullMap(Tag<D2Class_07878080> map)
@@ -80,6 +87,12 @@ public partial class MapView : UserControl
             fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
             AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
         }
+        if (ConfigHandler.GetBlenderInteropEnabled())
+        {
+            //Only gonna export a blender py for maps (for now)
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+        }
+
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
     }

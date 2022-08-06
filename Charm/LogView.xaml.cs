@@ -38,7 +38,7 @@ public class LogHandler
         if (File.Exists("charm.log"))
             File.Delete("charm.log");
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("charm.log", outputTemplate: outputTemplate)
+            .WriteTo.File("charm.log", outputTemplate: outputTemplate, shared: true)
             .WriteTo.RichTextBox(logView.LogBox,
                 theme: RichTextBoxConsoleTheme.Colored,
                 outputTemplate: outputTemplate)
@@ -51,14 +51,9 @@ public class LogHandler
     static void CatchUnhandledException
         (object sender, UnhandledExceptionEventArgs e)
     {
-        Exception ex;
         try
         {
-            ex = (Exception)e.ExceptionObject;
-            
-            Log.Fatal("\n### Crash ###\n" + ex.Source + ex.InnerException + ex + ex.Message + ex.StackTrace);
-            Log.Fatal("Config file:\n" + File.ReadAllText("Charm.exe.config"));
-            Log.CloseAndFlush();
+            LogException((Exception)e.ExceptionObject);
         }
         finally
         {
@@ -69,18 +64,25 @@ public class LogHandler
     static void DispatcherUnhandledException
         (object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        Exception ex;
         try
         {
-            ex = (Exception)e.Exception;
-            
-            Log.Fatal("\n### Crash ###\n" + ex.Source + ex.InnerException + ex + ex.Message + ex.StackTrace);
-            Log.Fatal("Config file:\n" + File.ReadAllText("Charm.exe.config"));
-            Log.CloseAndFlush();
+            LogException(e.Exception);
         }
         finally
         {
             Application.Current.Shutdown();
         }
+    }
+    
+    public static void LogException(Exception ex)
+    {
+        Log.Fatal("\n### Crash ###\n" + ex.Source + ex.InnerException + ex + ex.Message + ex.StackTrace);
+        Log.Fatal("Config file:\n" + File.ReadAllText("Charm.exe.config"));
+        if (ConfigHandler.GetPackagesPath() != String.Empty)
+            Log.Fatal("Number of packages:\n" + Directory.GetFiles(ConfigHandler.GetPackagesPath()).Length);
+        if (ConfigHandler.GetExportSavePath() != String.Empty)
+            Log.Fatal("Exported directory:\n" + string.Join("\n", Directory.GetFiles(ConfigHandler.GetExportSavePath()))
+            + "\n" + string.Join("\n", Directory.GetDirectories(ConfigHandler.GetExportSavePath())));
+        Log.CloseAndFlush();
     }
 }
