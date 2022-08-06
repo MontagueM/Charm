@@ -640,7 +640,7 @@ public partial class TagListView : UserControl
                 {
                     Hash = tagItem.Hash,
                     Name = $"/Bulk_{groupName}/{name}",
-                    ExportType = EExportType.Minimal
+                    ExportType = EExportTypeFlag.Minimal
                 };
                 viewer.ExportControl.RoutedFunction(exportInfo);
                 MainWindow.Progress.CompleteStage();
@@ -743,7 +743,7 @@ public partial class TagListView : UserControl
             _tagListLogger.Error($"UI failed to load entity for hash {tagHash}. You can still try to export the full model instead.");
             _mainWindow.SetLoggerSelected();
         }
-        SetExportFunction(ExportEntity);
+        SetExportFunction(ExportEntity, (int)EExportTypeFlag.Full | (int)EExportTypeFlag.Minimal);
         viewer.ExportControl.SetExportInfo(tagHash);
         viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntity(tagHash, _globalFbxHandler));
     }
@@ -920,16 +920,16 @@ public partial class TagListView : UserControl
         viewer.EntityControl.LoadEntityFromApi(apiHash, _globalFbxHandler);
         Dispatcher.Invoke(() =>
         {
-            SetExportFunction(ExportApiEntityFull);
+            SetExportFunction(ExportApiEntityFull, (int)EExportTypeFlag.Full | (int)EExportTypeFlag.Minimal);
             viewer.ExportControl.SetExportInfo(apiHash);
             viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntityFromApi(apiHash, _globalFbxHandler));
         });
     }
 
-    private void SetExportFunction(Action<ExportInfo> function)
+    private void SetExportFunction(Action<ExportInfo> function, int exportTypeFlags)
     {
         var viewer = GetViewer();
-        viewer.ExportControl.SetExportFunction(function);
+        viewer.ExportControl.SetExportFunction(function, exportTypeFlags);
         ShowBulkExportButton();
     }
     
@@ -1033,7 +1033,7 @@ public partial class TagListView : UserControl
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Static);
         viewer.StaticControl.LoadStatic(tagHash, viewer.StaticControl.ModelView.GetSelectedLod());
-        SetExportFunction(ExportStatic);
+        SetExportFunction(ExportStatic, (int)EExportTypeFlag.Full | (int)EExportTypeFlag.Minimal);
         viewer.ExportControl.SetExportInfo(tagHash);
         viewer.StaticControl.ModelView.SetModelFunction(() => viewer.StaticControl.LoadStatic(tagHash, viewer.StaticControl.ModelView.GetSelectedLod()));
     }
@@ -1150,7 +1150,7 @@ public partial class TagListView : UserControl
             SetViewer(TagView.EViewerType.Texture1D);
             viewer.TextureControl.LoadTexture(textureHeader);
         }
-        SetExportFunction(ExportTexture);
+        SetExportFunction(ExportTexture, (int)EExportTypeFlag.Full);
         viewer.ExportControl.SetExportInfo(tagHash);
     }
     
@@ -1415,7 +1415,7 @@ public partial class TagListView : UserControl
         if (viewer.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), tagHash)))
         {
             viewer.MusicPlayer.Play();
-            SetExportFunction(ExportSound);
+            SetExportFunction(ExportSound, (int)EExportTypeFlag.Full);
             viewer.ExportControl.SetExportInfo(tagHash);
         }
     }
@@ -1423,9 +1423,9 @@ public partial class TagListView : UserControl
     private void ExportSound(ExportInfo info)
     {
         WwiseSound sound = PackageHandler.GetTag(typeof(WwiseSound), new TagHash(info.Hash));
-        string savePath = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}.wav";
-        Directory.CreateDirectory(ConfigHandler.GetExportSavePath() + "/Sound/");
-        sound.ExportSound(savePath);
+        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
+        Directory.CreateDirectory(saveDirectory);
+        sound.ExportSound(saveDirectory);
     }
 
     #endregion
@@ -1653,7 +1653,7 @@ public partial class TagListView : UserControl
         if (tag.Header.Unk20.Count == 0)
             return;
         await viewer.MusicPlayer.SetSound(tag);
-        SetExportFunction(ExportSound);
+        SetExportFunction(ExportSound, (int)EExportTypeFlag.Full);
         // bit of a cheat but works
         var tagItem = _previouslySelected.DataContext as TagItem;
         viewer.ExportControl.SetExportInfo(tagItem.Name == "" ? tagItem.Subname : $"{tagItem.Subname}_{tagItem.Name}", tagHash);

@@ -26,7 +26,7 @@ public partial class ActivityMapView : UserControl
     public void LoadUI(Activity activity)
     {
         MapList.ItemsSource = GetMapList(activity);
-        ExportControl.SetExportFunction(ExportFull, true, (int)EExportTypeFlag.Full | (int)EExportTypeFlag.Minimal | (int)EExportTypeFlag.ArrangedMap | (int)EExportTypeFlag.TerrainOnly);
+        ExportControl.SetExportFunction(ExportFull, (int)EExportTypeFlag.Full | (int)EExportTypeFlag.Minimal | (int)EExportTypeFlag.ArrangedMap | (int)EExportTypeFlag.TerrainOnly, true);
         ExportControl.SetExportInfo(activity.Hash);
     }
 

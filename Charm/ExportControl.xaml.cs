@@ -39,7 +39,7 @@ public partial class ExportControl : UserControl
     //     ExportName.Text = $"Exporting: {name}";
     // }
 
-    public void SetExportFunction(Action<ExportInfo> function, bool disableLoadingBar=false, int exportTypeFlags=(int)EExportTypeFlag.Full | (int)EExportTypeFlag.Minimal)
+    public void SetExportFunction(Action<ExportInfo> function, int exportTypeFlags, bool disableLoadingBar=false)
     {
         _disableLoadingBar = disableLoadingBar;
         if (_bExportFunctionSet) 
