@@ -21,6 +21,12 @@ public struct Vector2
         X = x;
         Y = y;
     }
+    
+    public Vector2(double x, double y)
+    {
+        X = (float)x;
+        Y = (float)y;
+    }
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 8)]

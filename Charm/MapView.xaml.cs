@@ -73,7 +73,7 @@ public partial class MapView : UserControl
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
 
-        ExtractDataTables(map, savePath, fbxHandler, false);
+        ExtractDataTables(map, savePath, fbxHandler, EExportTypeFlag.Full);
 
         if (ConfigHandler.GetUnrealInteropEnabled())
         {
@@ -84,7 +84,7 @@ public partial class MapView : UserControl
         fbxHandler.Dispose();
     }
     
-    public static void ExportMinimalMap(Tag<D2Class_07878080> map)
+    public static void ExportMinimalMap(Tag<D2Class_07878080> map, EExportTypeFlag exportTypeFlag)
     {
         FbxHandler fbxHandler = new FbxHandler();
         string meshName = map.Hash.GetHashString();
@@ -93,16 +93,20 @@ public partial class MapView : UserControl
         {
             savePath = ConfigHandler.GetExportSavePath() + "/Maps";
         }
+        if (ConfigHandler.GetUnrealInteropEnabled())
+        {
+            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+        }
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
 
-        ExtractDataTables(map, savePath, fbxHandler, true);
+        ExtractDataTables(map, savePath, fbxHandler, exportTypeFlag);
 
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
     }
     
-    private static void ExtractDataTables(Tag<D2Class_07878080> map, string savePath, FbxHandler fbxHandler, bool bMinimal=false)
+    private static void ExtractDataTables(Tag<D2Class_07878080> map, string savePath, FbxHandler fbxHandler, EExportTypeFlag exportTypeFlag)
     {
         Parallel.ForEach(map.Header.DataTables, data =>
         {
@@ -110,11 +114,11 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
                 {
-                    if (bMinimal)
+                    if (exportTypeFlag == EExportTypeFlag.Minimal)
                     {
-                        // staticMapResource.StaticMapParent.Header.StaticMap.LoadArrangedIntoFbxScene(fbxHandler);
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadArrangedIntoFbxScene(fbxHandler);
                     }
-                    else
+                    else if (exportTypeFlag == EExportTypeFlag.Full)
                     {
                         staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
                     }

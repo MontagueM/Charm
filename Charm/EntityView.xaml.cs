@@ -70,13 +70,13 @@ public partial class EntityView : UserControl
         return loaded;
     }
 
-    public void Export(List<Entity> entities, string name, EExportType exportType)
+    public void Export(List<Entity> entities, string name, EExportTypeFlag exportType)
     {
-        FbxHandler fbxHandler = new FbxHandler(exportType == EExportType.Full);
+        FbxHandler fbxHandler = new FbxHandler(exportType == EExportTypeFlag.Full);
         _entityLog.Debug($"Exporting entity model name: {name}");
         string savePath = ConfigHandler.GetExportSavePath();
         string meshName = name;
-        if (exportType == EExportType.Full)
+        if (exportType == EExportTypeFlag.Full)
         {
             savePath += $"/{meshName}";
         }
@@ -86,14 +86,14 @@ public partial class EntityView : UserControl
         {
             var dynamicParts = entity.Load(ELOD.MostDetail);
             fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
-            if (exportType == EExportType.Full)
+            if (exportType == EExportTypeFlag.Full)
             {
                 entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled());
                 entity.SaveTexturePlates(savePath);
             }
         }
 
-        if (exportType == EExportType.Full)
+        if (exportType == EExportTypeFlag.Full)
         {
             fbxHandler.InfoHandler.SetMeshName(meshName);
             if (ConfigHandler.GetUnrealInteropEnabled())

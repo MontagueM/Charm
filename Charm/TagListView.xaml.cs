@@ -1427,7 +1427,7 @@ public partial class TagListView : UserControl
                 {
                     Hash = tagItem.Hash,
                     Name = $"/Bulk_{groupName}/{name}",
-                    ExportType = EExportType.Minimal
+                    ExportType = EExportTypeFlag.Minimal
                 };
                 viewer.ExportControl.RoutedFunction(exportInfo);
                 MainWindow.Progress.CompleteStage();

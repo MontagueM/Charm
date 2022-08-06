@@ -33,12 +33,12 @@ public partial class StaticView : UserControl
         MVM.Title = hash.GetHashString();
     }
 
-    public void ExportStatic(TagHash hash, string name, EExportType exportType)
+    public void ExportStatic(TagHash hash, string name, EExportTypeFlag exportType)
     {
-        FbxHandler fbxHandler = new FbxHandler(exportType == EExportType.Full);
+        FbxHandler fbxHandler = new FbxHandler(exportType == EExportTypeFlag.Full);
         string savePath = ConfigHandler.GetExportSavePath();
         string meshName = hash.GetHashString();
-        if (exportType == EExportType.Full)
+        if (exportType == EExportTypeFlag.Full)
         {
             savePath += $"/{name}";
         }
@@ -46,7 +46,7 @@ public partial class StaticView : UserControl
         List<Part> parts = container.Load(ELOD.MostDetail);
         fbxHandler.AddStaticToScene(parts, meshName);
         Directory.CreateDirectory(savePath);
-        if (exportType == EExportType.Full)
+        if (exportType == EExportTypeFlag.Full)
         {
             container.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled());
             fbxHandler.InfoHandler.SetMeshName(meshName);

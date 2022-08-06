@@ -18,7 +18,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="100*"/>
             </Grid.RowDefinitions>
-            <TextBlock x:Name="ExportName" VerticalAlignment="Center" Grid.Column="0" TextAlignment="Center" Text="Exporting: NONE"/>
+            <ComboBox HorizontalAlignment="Center" x:Name="ExportComboBox">
+            </ComboBox>
             <Button Grid.Column="1" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton"/>
         </Grid>
     </Grid>

@@ -26,7 +26,7 @@ public partial class ActivityMapView : UserControl
     public void LoadUI(Activity activity)
     {
         MapList.ItemsSource = GetMapList(activity);
-        ExportControl.SetExportFunction(ExportFull, true);
+        ExportControl.SetExportFunction(ExportFull, true, (int)EExportTypeFlag.Full | (int)EExportTypeFlag.Minimal | (int)EExportTypeFlag.ArrangedMap | (int)EExportTypeFlag.TerrainOnly);
         ExportControl.SetExportInfo(activity.Hash);
     }
 
@@ -118,8 +118,11 @@ public partial class ActivityMapView : UserControl
         // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
         Parallel.ForEach(maps, map =>
         {
-            // MapView.ExportFullMap(map);
-            MapView.ExportMinimalMap(map);
+            if (info.ExportType == EExportTypeFlag.Full)
+                MapView.ExportFullMap(map);
+            else
+                MapView.ExportMinimalMap(map, info.ExportType);
+            
             MainWindow.Progress.CompleteStage();
         });
         // MapView.ExportFullMap(staticMapData);
