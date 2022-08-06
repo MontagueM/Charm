@@ -1413,9 +1413,21 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         if (viewer.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), tagHash)))
+        {
             viewer.MusicPlayer.Play();
+            SetExportFunction(ExportSound);
+            viewer.ExportControl.SetExportInfo(tagHash);
+        }
     }
     
+    private void ExportSound(ExportInfo info)
+    {
+        WwiseSound sound = PackageHandler.GetTag(typeof(WwiseSound), new TagHash(info.Hash));
+        string savePath = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}.wav";
+        Directory.CreateDirectory(ConfigHandler.GetExportSavePath() + "/Sound/");
+        sound.ExportSound(savePath);
+    }
+
     #endregion
 
     #region Music
@@ -1641,6 +1653,10 @@ public partial class TagListView : UserControl
         if (tag.Header.Unk20.Count == 0)
             return;
         await viewer.MusicPlayer.SetSound(tag);
+        SetExportFunction(ExportSound);
+        // bit of a cheat but works
+        var tagItem = _previouslySelected.DataContext as TagItem;
+        viewer.ExportControl.SetExportInfo(tagItem.Name == "" ? tagItem.Subname : $"{tagItem.Subname}_{tagItem.Name}", tagHash);
         viewer.MusicPlayer.Play();
     }
 

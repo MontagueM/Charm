@@ -80,4 +80,13 @@ public class WwiseSound : Tag
         waveChannel.PadWithZeroes = false;
         return waveChannel;
     }
+
+    public void ExportSound(string savePath)
+    {
+        CheckLoaded();
+        var soundStream = new MemoryStream();
+        WaveFileWriter.WriteWavFileToStream(soundStream, MakeWaveChannel());
+        soundStream.Position = 0;
+        File.WriteAllBytes(savePath, soundStream.ToArray());
+    }
 }
