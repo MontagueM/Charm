@@ -43,7 +43,7 @@
       </Content>
       <Content Include="..\ThirdParty\Symmetry.dll">
         <Link>Symmetry.dll</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
 
