@@ -19,6 +19,6 @@
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
         <!-- 36FEA180 DEE9A180 -->
-        <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Center" FontSize="96" Text="2A00AA80" KeyDown="TagHashBoxKeydown" x:Name="TagHashBox"/>
+        <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Center" FontSize="96" Text="38c0a380" KeyDown="TagHashBoxKeydown" x:Name="TagHashBox"/>
     </Grid>
 </UserControl>

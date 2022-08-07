@@ -108,6 +108,11 @@ public struct Vector3
         return new Vector3(x.X - y.X, x.Y - y.Y, x.Z - y.Z);
     }
     
+    public static Vector3 operator +(Vector3 x, Vector3 y)
+    {
+        return new Vector3(x.X + y.X, x.Y + y.Y, x.Z + y.Z);
+    }
+    
     public float this[int index]
     {
         get

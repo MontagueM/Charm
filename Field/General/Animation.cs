@@ -1,5 +1,7 @@
 ﻿using System.Runtime.InteropServices;
+using Field.Entities;
 using Field.General;
+using Field.Models;
 using Newtonsoft.Json;
 using SharpDX;
 using Vector3 = Field.Models.Vector3;
@@ -51,13 +53,26 @@ public class Animation : Tag
     /// </summary>
     public void Load()
     {
-        if (_nodes != null)
-            return;
+        // if (_nodes != null)
+        // {
+        //     _Debug_ExtractFirstFrameToObj();
+        //     return;
+        // }
         MakeAnimationNodes();
         ParseStaticData();
-        ParseAnimatedData();
+        // ParseAnimatedData();
         MakeAnimationTracks();
+        // _Debug_ExtractFirstFrameToObj();
         var a = 0;
+    }
+
+    private void _Debug_ExtractFirstFrameToObj()
+    {
+        Entity playerBase = PackageHandler.GetTag(typeof(Entity), new TagHash("0000670F342E9595")); // 64 bit more permanent 
+        var nodes = playerBase.Skeleton.GetBoneNodes();
+        ObjExtractor.SaveFromVertices(Tracks.Select(x => x.TrackTranslations.First() + nodes[x.TrackIndex].DefaultObjectSpaceTransform.Translation).ToList(), $"C:/T/AnimationDebug/{Hash}.obj");
+        // ObjExtractor.SaveFromVertices(Tracks[1].TrackTranslations.ToList(), $"C:/T/AnimationDebug/{Hash}.obj");
+        SaveToFile($"C:/T/AnimationDebug/{Hash}.json");
     }
 
     private void MakeAnimationTracks()
@@ -221,7 +236,7 @@ public class Animation : Tag
             }
             foreach (var index in Header.StaticRotationControlMap)
             {
-                var rot = stream.ReadQuantisedFloat4(new FloatQuantise { Minimum = 2, Extent = -1 });
+                var rot = stream.ReadQuantisedFloat4(new FloatQuantise { Extent = 2, Minimum = -1 });
                 _nodes[index.Value].RotationStream.Add(rot);
             }
             foreach (var index in Header.StaticTranslationControlMap)
@@ -272,7 +287,8 @@ public class Animation : Tag
         
         JsonSerializer serializer = new JsonSerializer();
         serializer.Formatting = Formatting.Indented;
-        serializer.Serialize(new StreamWriter(savePath), obj);
+        using (var sw = new StreamWriter(savePath))
+            serializer.Serialize(sw, obj);
     }
 
     private struct AnimationHeaderJson
@@ -359,7 +375,7 @@ public struct AnimationTrack
         }
         else if (animationNode.ScaleStream.Count == 0)
         {
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
         else
         {
@@ -372,7 +388,7 @@ public struct AnimationTrack
         }
         else if (animationNode.RotationStream.Count == 0)
         {
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
         else
         {
@@ -389,7 +405,7 @@ public struct AnimationTrack
         }
         else if (animationNode.TranslationStream.Count == 0)
         {
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
         else
         {
@@ -445,9 +461,9 @@ public class AnimationStream : IDisposable
     {
         var vec = ReadFloat3();
         var corrected = new Vector3(
-            vec.X * quantisation.Minimum.X + quantisation.Extent.X,
-            vec.Y * quantisation.Minimum.Y + quantisation.Extent.Y,
-            vec.Z * quantisation.Minimum.Z + quantisation.Extent.Z);
+            vec.X * quantisation.Extent.X + quantisation.Minimum.X,
+            vec.Y * quantisation.Extent.Y + quantisation.Minimum.Y,
+            vec.Z * quantisation.Extent.Z + quantisation.Minimum.Z);
         return corrected;
     }
 
@@ -455,10 +471,10 @@ public class AnimationStream : IDisposable
     {
         var vec = ReadFloat4();
         var corrected = new Vector4(
-            vec.X * quantisation.Minimum + quantisation.Extent,
-            vec.Y * quantisation.Minimum + quantisation.Extent,
-            vec.Z * quantisation.Minimum + quantisation.Extent,
-            vec.W * quantisation.Minimum + quantisation.Extent);
+            vec.X * quantisation.Extent + quantisation.Minimum,
+            vec.Y * quantisation.Extent + quantisation.Minimum,
+            vec.Z * quantisation.Extent + quantisation.Minimum,
+            vec.W * quantisation.Extent + quantisation.Minimum);
         return corrected;
     }
     
@@ -466,10 +482,10 @@ public class AnimationStream : IDisposable
     {
         var vec = ReadFloat4();
         var corrected = new Vector4(
-            vec.X * quantisation.Minimum.X + quantisation.Extent.X,
-            vec.Y * quantisation.Minimum.Y + quantisation.Extent.Y,
-            vec.Z * quantisation.Minimum.Z + quantisation.Extent.Z,
-            vec.W * quantisation.Minimum.W + quantisation.Extent.W);
+            vec.X * quantisation.Extent.X + quantisation.Minimum.X,
+            vec.Y * quantisation.Extent.Y + quantisation.Minimum.Y,
+            vec.Z * quantisation.Extent.Z + quantisation.Minimum.Z,
+            vec.W * quantisation.Extent.W + quantisation.Minimum.W);
         if (Math.Round(corrected.Magnitude, 4) != 1)
             throw new Exception("Quaternion magnitude is not 1");
         return corrected;
@@ -548,22 +564,22 @@ public enum AnimationCodecType : short
 [StructLayout(LayoutKind.Sequential, Size = 0x8)]
 public struct FloatQuantise
 {
-    public float Minimum;
     public float Extent;
+    public float Minimum;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
 public struct Float3Quantise
 {
-    public Vector3 Minimum;
     public Vector3 Extent;
+    public Vector3 Minimum;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x20)]
 public struct Float4Quantise
 {
-    public Vector4 Minimum;
     public Vector4 Extent;
+    public Vector4 Minimum;
 }
 
 /// <summary>
@@ -599,9 +615,9 @@ public struct D2Class_428B8080
     [DestinyOffset(0x18), DestinyField(FieldType.TablePointer)]
     public List<D2Class_0A008080> StreamData;
     [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_0F008080> SRTQuantisationMinimums;
-    [DestinyField(FieldType.TablePointer)]
     public List<D2Class_0F008080> SRTQuantisationExtents;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_0F008080> SRTQuantisationMinimums;
 }
 
 /// <summary>

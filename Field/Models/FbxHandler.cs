@@ -545,20 +545,29 @@ public class FbxHandler
                 {
                     float frameTime = track.TrackTimes[i];
                     time.SetSecondDouble(frameTime);
-                    
-                    var scaleKeyIndex = scale[d].KeyAdd(time);
-                    scale[d].KeySetValue(scaleKeyIndex, track.TrackScales[i]);
-                    scale[d].KeySetInterpolation(scaleKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
-                    
-                    var rotDim = Array.FindIndex(dims, x => x == animation.rotXYZ[d]);
-                    var rotationKeyIndex = rotation[d].KeyAdd(time);
-                    rotation[d].KeySetValue(rotationKeyIndex, (animation.flipRot[d] == 1 ? -1 : 1) * track.TrackRotations[i][rotDim] + animation.rot[d]);
-                    rotation[d].KeySetInterpolation(rotationKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
-                    
-                    var traDim = Array.FindIndex(dims, x => x == animation.traXYZ[d]);
-                    var translationKeyIndex = translation[d].KeyAdd(time);
-                    translation[d].KeySetValue(translationKeyIndex, (animation.flipTra[d] == 1 ? -1 : 1) * track.TrackTranslations[i][traDim] + animation.tra[d]);
-                    translation[d].KeySetInterpolation(translationKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
+
+                    if (track.TrackScales.Count > 0)
+                    {
+                        var scaleKeyIndex = scale[d].KeyAdd(time);
+                        scale[d].KeySetValue(scaleKeyIndex, track.TrackScales[i]);
+                        scale[d].KeySetInterpolation(scaleKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
+                    }
+
+                    if (track.TrackRotations.Count > 0)
+                    {
+                        var rotDim = Array.FindIndex(dims, x => x == animation.rotXYZ[d]);
+                        var rotationKeyIndex = rotation[d].KeyAdd(time);
+                        rotation[d].KeySetValue(rotationKeyIndex, (animation.flipRot[d] == 1 ? -1 : 1) * track.TrackRotations[i][rotDim] + animation.rot[d]);
+                        rotation[d].KeySetInterpolation(rotationKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
+                    }
+
+                    if (track.TrackTranslations.Count > 0)
+                    {
+                        var traDim = Array.FindIndex(dims, x => x == animation.traXYZ[d]);
+                        var translationKeyIndex = translation[d].KeyAdd(time);
+                        translation[d].KeySetValue(translationKeyIndex, (animation.flipTra[d] == 1 ? -1 : 1) * track.TrackTranslations[i][traDim] + animation.tra[d]);
+                        translation[d].KeySetInterpolation(translationKeyIndex, FbxAnimCurveDef.EInterpolationType.eInterpolationLinear);
+                    }
                 } 
             }
 

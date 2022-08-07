@@ -1694,6 +1694,7 @@ public partial class TagListView : UserControl
                 int nodeCount;
                 int frameCount;
                 string typeName;
+                string debugTypeName;
                 using (var handle = new Tag(new TagHash(val)).GetHandle())
                 {
                     handle.BaseStream.Seek(0x18, SeekOrigin.Begin);
@@ -1704,6 +1705,11 @@ public partial class TagListView : UserControl
                     handle.BaseStream.Seek(0x140, SeekOrigin.Begin);
                     frameCount = handle.ReadInt16();
                     nodeCount = handle.ReadInt16();
+                    handle.BaseStream.Seek(0x20, SeekOrigin.Begin);
+                    int offset2 = handle.ReadInt32();
+                    handle.BaseStream.Seek(offset2-8, SeekOrigin.Current);
+                    classType = handle.ReadUInt32();
+                    debugTypeName = Endian.U32ToString(classType);
                 }
 
                 if (nodeCount == 72)
@@ -1711,7 +1717,7 @@ public partial class TagListView : UserControl
                     _allTagItems.Add(new TagItem
                     {
                         Hash = val,
-                        Name = $"{typeName}",
+                        Name = $"Frames: {frameCount}, Joints: {nodeCount}, Length: {Math.Round((float)frameCount / Animation.FrameRate, 2)} seconds, Compressed: {typeName != "428B8080"} DebugType: {debugTypeName} [{typeName ?? "NONE"}]",
                         TagType = ETagListType.AnimationFromPackages
                     });  
                 }

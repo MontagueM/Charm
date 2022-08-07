@@ -150,7 +150,7 @@ public partial class EntityView : UserControl
         // to load an animation into the viewer, we need to save the fbx then load
         fbxHandler.Clear();
 
-
+        fbxHandler.AddPlayerSkeletonAndMesh();
 
         // Add animation
         animation.Load();
