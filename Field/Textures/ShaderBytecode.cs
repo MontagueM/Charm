@@ -1,6 +1,6 @@
 ﻿using Field.General;
 
-namespace Field.Textures;
+namespace Field;
 
 public class ShaderBytecode : Tag
 {

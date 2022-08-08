@@ -4,7 +4,7 @@ using DirectXTex;
 using DirectXTexNet;
 using Field.General;
 
-namespace Field.Textures;
+namespace Field;
 
 public class TextureHeader : Tag
 {

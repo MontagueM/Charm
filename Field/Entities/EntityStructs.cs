@@ -3,7 +3,6 @@ using DirectXTexNet;
 using Field.Entities;
 using Field.General;
 using Field.Models;
-using Field.Textures;
 using Vector2 = System.Numerics.Vector2;
 using Vector4 = System.Numerics.Vector4;
 
