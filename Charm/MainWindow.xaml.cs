@@ -125,6 +125,7 @@ public partial class MainWindow
     {
         Progress.SetProgressStages(new List<string>
         {
+            "packages cache",
             "fonts",
             "fnv hashes",
             "hash 64",
@@ -132,6 +133,10 @@ public partial class MainWindow
             "global string cache",
             "activity names",
         });
+        // to check if we need to update caches
+        PackageHandler.Initialise();
+        Progress.CompleteStage();
+
         // Load all the fonts
         await Task.Run(() =>
         {

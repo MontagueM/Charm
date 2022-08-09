@@ -37,6 +37,9 @@ namespace Charm
                 }
                 if (apiHash != 0)
                 {
+                    // to check if we need to update caches
+                    PackageHandler.Initialise();
+                    
                     // Initialise FNV handler -- must be first bc my code is shit
                     FnvHandler.Initialise();
 

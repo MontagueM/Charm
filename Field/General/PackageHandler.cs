@@ -12,6 +12,11 @@ public class PackageHandler
     private static Dictionary<TagHash, string> ActivityNames = new Dictionary<TagHash, string>();
     public static ConcurrentDictionary<TagHash, byte[]> BytesCache = new ConcurrentDictionary<TagHash, byte[]>();
 
+    public static void Initialise()
+    {
+        DllInit();
+    }
+    
     public static uint MakeHash(int pkgId, int entryId)
     {
         return (uint) (0x80800000 + (pkgId << 0xD) + entryId);
@@ -154,6 +159,9 @@ public class PackageHandler
     
         return $"%%NOGLOBALSTRING[{Endian.U32ToString(key.Hash)}]%%";
     }
+    
+    [DllImport("Symmetry.dll", EntryPoint = "DllInit", CallingConvention = CallingConvention.StdCall)]
+    public extern static void DllInit();
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllEntriesOfReference", CallingConvention = CallingConvention.StdCall)]
     public extern static DestinyFile.UnmanagedData DllGetAllEntriesOfReference(uint hash, uint reference);
