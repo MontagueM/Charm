@@ -278,7 +278,7 @@ public partial class MainWindow
 
     private void MenuTab_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton == MouseButton.Middle)
+        if (e.ChangedButton == MouseButton.Middle && e.Source is TabItem)
         {
             TabItem tab = (TabItem)sender;
             MainTabControl.Items.Remove(tab);
