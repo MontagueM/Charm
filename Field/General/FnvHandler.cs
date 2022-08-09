@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Text.Json;
+using Field.Textures;
 
 namespace Field.General;
 
@@ -79,6 +81,8 @@ public class FnvHandler
         {
             _fnvMap.TryAdd(key, value);
         }
+        
+        CacheNamesFromTags();
     }
 
     public static string GetStringFromHash(uint fnvHash)
@@ -101,4 +105,132 @@ public class FnvHandler
         }
         return value;
     }
+    
+    /// <summary>
+    /// We can:
+    /// 1. add the dev strings to the fnv map
+    /// 2. add names to the TagHash so we can get some names
+    ///
+    /// to add to TagHash we cheat a bit by adding the tag hash to _fnvMap instead of the actual fnv hash
+    /// </summary>
+    private static void CacheNamesFromTags()
+    {
+        Cache085D8080();
+    }
+
+    private static void Cache085D8080()
+    {
+        var vals = PackageHandler.GetAllTagsWithReference(0x80805d08);    
+        PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
+        foreach (var tagHash in vals)
+        {
+            Tag<D2Class_085D8080> tag = PackageHandler.GetTag<D2Class_085D8080>(tagHash);
+            Parallel.ForEach(tag.Header.Unk10, entry =>
+            {
+                if (entry.Tag == null)
+                    return;
+                if (entry.TagName.Contains("localized_strings.tft"))
+                {
+                    _fnvMap.TryAdd(entry.Tag.Hash.Hash, entry.TagName);
+                }
+                else if (entry.TagName.Contains("master_strings.tft"))
+                { 
+                    _fnvMap.TryAdd(entry.Tag.Hash.Hash, entry.TagName);
+                    
+                    Tag<D2Class_F27B8080> tag = PackageHandler.GetTag<D2Class_F27B8080>(entry.Tag.Hash);
+                    _fnvMap.TryAdd(tag.Header.StringContainer.Hash.Hash, entry.TagName);
+                }
+                else if (entry.TagName.Contains("ui_icon.tft"))
+                {
+                    // We want to label both this tag + the texture below it
+                    _fnvMap.TryAdd(entry.Tag.Hash.Hash, entry.TagName);
+                    
+                    Tag<D2Class_B83E8080> textureTag = PackageHandler.GetTag<D2Class_B83E8080>(entry.Tag.Hash);
+                    var tex = ((D2Class_CD3E8080) textureTag.Header.Tag.Header.Unk10).Unk00[0].Unk00[0].Icon;
+                    _fnvMap.TryAdd(tex.Hash.Hash, entry.TagName);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            });
+
+
+
+        }
+    }
+}
+
+[StructLayout(LayoutKind.Sequential, Size=0x20)]
+public struct D2Class_085D8080
+{
+    public long FileSize;
+    public DestinyHash TagName;  // usually the name of the localized string
+    [DestinyOffset(0x10), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_0A5D8080> Unk10;
+}
+
+[StructLayout(LayoutKind.Sequential, Size=0xE8)]
+public struct D2Class_0A5D8080
+{
+    // public DestinyHash Unk00;
+    // public DestinyHash Unk04;
+    // public DestinyHash Unk08;
+    // public uint Unk0C;
+    [DestinyOffset(0x10), DestinyField(FieldType.RelativePointer)]
+    public string TagName;
+    [DestinyField(FieldType.TagHash64)] 
+    public Tag Tag;
+    // public DestinyHash Unk28;
+    // public DestinyHash Unk2C;
+    // [DestinyOffset(0x38), DestinyField(FieldType.TagHash64)]
+    // public Tag Unk38;
+    
+}
+
+[StructLayout(LayoutKind.Sequential, Size=0x80)]
+public struct D2Class_B83E8080
+{
+    public long FileSize;
+    [DestinyOffset(0x10)]
+    public DestinyHash Unk10;
+    [DestinyField(FieldType.TagHash)]
+    public Tag<D2Class_CF3E8080> Tag;
+}
+
+[StructLayout(LayoutKind.Sequential, Size=0x18)]
+public struct D2Class_CF3E8080
+{
+    public long FileSize;
+    [DestinyOffset(0x10), DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk10;  // cd3e8080
+}
+
+[StructLayout(LayoutKind.Sequential, Size=0x20)]
+public struct D2Class_CD3E8080
+{
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_D23E8080> Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size=0x10)]
+public struct D2Class_D23E8080
+{
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_D53E8080> Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size=4)]
+public struct D2Class_D53E8080
+{
+    public TextureHeader Icon;
+}
+
+[StructLayout(LayoutKind.Sequential, Size=0x28)]
+public struct D2Class_F27B8080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TagHash)]
+    public Tag StringContainer;
+    // unk list here
 }

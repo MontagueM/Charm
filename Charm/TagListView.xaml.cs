@@ -347,8 +347,7 @@ public partial class TagListView : UserControl
             {
                 return;
             }
-            
-            if (!TagItem.GetEnumDescription(_tagListType).Contains("List"))
+            if (!TagItem.GetEnumDescription(_tagListType).Contains("Package") && !TagItem.GetEnumDescription(_tagListType).Contains("List"))
             {
                 if (displayItems.Count > 50) return;
 
@@ -1288,10 +1287,14 @@ public partial class TagListView : UserControl
 
             Parallel.ForEach(vals, val =>
             {
+                if (val.Hash == 2158184576)
+                {
+                    var b = 0;
+                }
                 _allTagItems.Add(new TagItem
                 {
                     Hash = val,
-                    Name = $"{val}",
+                    Name = val.GetDevString() == "" ? "" : val.GetDevString(),
                     TagType = ETagListType.StringContainer
                 });
             });
@@ -1688,7 +1691,7 @@ public class TagItem
                 return $"[{Hash.Hash}]";
             if (TagType == ETagListType.Package)
                 return $"[{Hash.GetPkgId():X4}]";
-            return $"[{Hash:X8}]";
+            return $"[{Hash.GetHashString():X8}]";
         }
     }
 

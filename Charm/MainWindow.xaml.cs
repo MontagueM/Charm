@@ -139,12 +139,12 @@ public partial class MainWindow
         });
         Progress.CompleteStage();
 
-        // Initialise FNV handler -- must be first bc my code is shit
-        await Task.Run(FnvHandler.Initialise);
-        Progress.CompleteStage();
-
         // Get all hash64 -- must be before InvestmentHandler
         await Task.Run(TagHash64Handler.Initialise);
+        Progress.CompleteStage();
+        
+        // Initialise FNV handler
+        await Task.Run(FnvHandler.Initialise);
         Progress.CompleteStage();
 
         // Initialise investment
