@@ -64,12 +64,20 @@ public class FnvHandler
     
     public static void Initialise()
     {
-        string fileName = "fnv_charm.json";
-        string jsonData = System.IO.File.ReadAllText(fileName);
-        _fnvMap = JsonSerializer.Deserialize<ConcurrentDictionary<uint, string>>(jsonData);
+        string fileName1 = "fnv_charm.json";
+        string fileName2 = "fnv_dict.json";
+        string jsonData1 = File.ReadAllText(fileName1);
+        string jsonData2 = File.ReadAllText(fileName2);
+
+        _fnvMap = JsonSerializer.Deserialize<ConcurrentDictionary<uint, string>>(jsonData1);
         foreach (var customString in _customStrings)
         {
             _fnvMap.TryAdd(Fnv(customString), customString);
+        }
+
+        foreach (var (key, value) in JsonSerializer.Deserialize<ConcurrentDictionary<uint, string>>(jsonData2))
+        {
+            _fnvMap.TryAdd(key, value);
         }
     }
 
