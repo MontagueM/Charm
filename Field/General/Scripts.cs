@@ -347,3 +347,67 @@ public struct D2Class_99438080
     public Vector4 Unk00;
     public Vector4 Unk10;
 }
+
+public class ScriptBSES : Tag
+{
+    public D2Class_00008080 Header;
+
+    public ScriptBSES(TagHash hash) : base(hash)
+    {
+    }
+
+    protected override void ParseStructs()
+    {
+        Header = ReadHeader<D2Class_12928080>();
+    }
+
+    public string ConvertToString()
+    {
+        var sb = new StringBuilder();
+        
+        foreach (var script in Header.Unk08)
+        {
+            Decompile(script.Unk08, sb, 1);
+        }
+        
+        return sb.ToString();
+    }
+
+    private void Decompile(dynamic? resource, StringBuilder sb, int indentation)
+    {
+    }
+    
+    private void AppendLine(StringBuilder sb, int indentation, string line)
+    {
+        sb.AppendLine(new string('\t', indentation * 2) + line);
+    }
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+public struct D2Class_00008080
+{
+    public long FileSize;
+    public DestinyHash Unk08;
+    [DestinyOffset(0x10), DestinyField(FieldType.TagHash)] 
+    public Tag Unk10;
+    public uint Unk14;
+    public byte Unk18;
+    public byte Unk19;
+    public short Unk1A;
+    public short Unk1C;
+    public byte Unk1E;
+    public byte Unk1F;
+    public uint Unk20;
+    [DestinyOffset(0x28), DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk28;
+    [DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk30;
+    [DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk38;
+    [DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk40;
+    [DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk48;
+    [DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk50;
+}
