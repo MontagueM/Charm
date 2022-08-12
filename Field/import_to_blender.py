@@ -5,6 +5,7 @@ import os
 #MAYBE TO DO: Add color sampling so non-color textures that arent normals dont connect to the normal node?
 #https://www.geeksforgeeks.org/find-most-used-colors-in-image-using-python/
 
+#!!!DO NOT MANUALLY IMPORT THE FBX, THE SCRIPT WILL DO IT FOR YOU!!!
 
 #Adapted from Monteven's UE5 import script
 
@@ -25,7 +26,7 @@ config = json.load(open(Filepath + f"\\{info_name}"))
 FileName = Filepath + "\\" + Name + ".fbx" 
 #
 
-original_statics = {} #original static objects
+static_names = {} #original static objects
 
 def assemble_map():
     print("Starting import on map: " + Name)
@@ -43,11 +44,9 @@ def assemble_map():
             newobjects.remove(ob) #Removes every object from the list that wasnt imported (makes things not instance multiple times?)
 
     print("Imported map: " + Name)
-    print("Instancing...")
 
-    static_names = {}
     for x in newobjects:
-        if len(config["Instances"].items()) == 1: #Fix for error that occurs when theres only 1 object in the fbx
+        if len(config["Instances"].items()) == 1 and len(config["Parts"].items()) <= 1: #Fix for error that occurs when theres only 1 object in the fbx
             for newname, value in config["Instances"].items():
                 x[1].name = newname
 
@@ -55,6 +54,9 @@ def assemble_map():
         if obj_name not in static_names.keys():
             static_names[obj_name] = []
         static_names[obj_name].append(x)
+
+    assign_map_materials()
+    print("Instancing...")
 
     for static, instances in config["Instances"].items():
         try:  # fix this
@@ -78,25 +80,14 @@ def assemble_map():
                 ob_copy.scale = [instance["Scale"]]*3
   
     add_to_collection()
-    print("Assigning materials...")
-    assign_map_materials()
+    
 
 def assign_map_materials():
+    print("Assigning materials...")
     materials = bpy.data.materials
-    
-    static_names = {}
-    for x in objects: #find the original static objects and add them to static_names
-        part = x.name.rpartition('.')
-        obj_name = part[0]
-        if obj_name not in static_names.keys():
-            static_names[obj_name] = []
-            original_statics[obj_name] = []
 
-        static_names[obj_name].append(x)
-        original_statics[obj_name].append(x)
-        
     for staticname, matname in config["Parts"].items(): #assign the objects matching material from the config file
-        if staticname in static_names.keys():
+        if staticname[:8] in static_names.keys():
             obj = bpy.data.objects[str(staticname)]
             for slt in obj.material_slots:
                 if matname in materials.keys():
@@ -147,7 +138,7 @@ def assign_map_materials():
                 if texture:
                     texnode.label = texture.name
                     texture.colorspace_settings.name = colorspace
-                    texture.alpha_mode = "CHANNEL_PACKED"
+                    #texture.alpha_mode = "CHANNEL_PACKED"
                     texnode.image = texture      #Assign the texture to the node
 
                     #assign a texture to material's diffuse and normal just to help a little 
@@ -218,10 +209,11 @@ def link_normal(material, num = 0):
                      
 def cleanup():
     print(f"Cleaning up...")
-    #Delete all the objects in original_statics
-    for x in objects:
-        if x.name in original_statics.keys():
-            bpy.data.objects.remove(x)
+    #Delete all the objects in static_names
+    for x, list in static_names.items():
+        for y, name in list:
+            bpy.data.objects.remove(name)
+        
 
     #Removes unused data such as duplicate images, materials, etc.
     for block in bpy.data.meshes:

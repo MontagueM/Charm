@@ -193,7 +193,7 @@ public class TexturePlate : Tag
             {
                 maxDimension = transform.Translation.X + transform.Scale.X;
             }
-            else if (transform.Translation.Y + transform.Scale.Y > maxDimension)
+            if (transform.Translation.Y + transform.Scale.Y > maxDimension)
             {
                 maxDimension = transform.Translation.Y + transform.Scale.Y;
             }
