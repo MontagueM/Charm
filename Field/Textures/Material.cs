@@ -158,7 +158,7 @@ public class Material : Tag
             foreach (var e in Header.PSTextures)
             {
                 //Console.WriteLine("Saving texture " + e.Texture.Hash + " " + e.TextureIndex + " " + e.Texture.IsSrgb().ToString());
-                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/PS_" + $"{e.TextureIndex}_{e.Texture.Hash}.png");
+                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/PS_" + $"{e.TextureIndex}_{e.Texture.Hash}.png\"");
             }
             vmat.AppendLine("}");
             File.WriteAllText($"{saveDirectory}/{Hash}.vmat", vmat.ToString());

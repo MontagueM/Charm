@@ -375,7 +375,7 @@ PS
                 }
                 //vfx.AppendLine($"   {texture.Type} {texture.Variable},");
                 vfx.AppendLine($"   CreateInputTexture2D( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/10\", Default3( 1.0, 1.0, 1.0 ));" );
-                vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_T{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; \n");
+                vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; \n");
             }
 
             vfx.AppendLine("    PixelOutput MainPs( PixelInput i ) {");
@@ -450,7 +450,7 @@ PS
                 // todo add load, levelofdetail, o0.w, discard
                 else if (line.Contains("discard"))
                 {
-                    vfx.AppendLine(line.Replace("discard", "{ output.Opacity = 0; return output; }"));
+                    vfx.AppendLine(line.Replace("discard", "{ output.Opacity = 0; }"));
                 }
                 else
                 {
@@ -469,7 +469,9 @@ PS
         // Normal
         float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
         float normal_length = length(biased_normal);
-        //float3 normal_in_world_space = biased_normal / normal_length;
+        float3 normal_in_world_space = biased_normal / normal_length;
+        float3 normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
+
         //output.Normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
 		//output.Normal = Material_Texture2D_2.SampleLevel(Material_Texture2D_0Sampler, v3.xy, 0).xyz;
         //output.Normal.z = sqrt(1.0 - saturate(dot(output.Normal.xy, output.Normal.xy)));
@@ -477,17 +479,20 @@ PS
 
         float smoothness = saturate(8 * (normal_length - 0.375));
         
-        output = ToMaterial(i, float4(o0.xyz, 1), float4(Tex2DS(g_t2, TextureFiltering, tx).xyz, 1), float4(1 - smoothness, o2.x, o2.y * 2, 1));
+        float4 temp_normal = {normal};
+        output = ToMaterial(i, float4(o0.xyz, 1), temp_normal, float4(1 - smoothness, o2.x, o2.y * 2, 1));
 
-        output.Emission = (o2.y - 0.5) * 2 * 5 * output.Albedo;  // the *5 is a scale to make it look good
+        //output.Emission = (o2.y - 0.5) * 2 * 5 * output.Albedo; 
         output.Opacity = 1;
+        //output.Normal.z = sqrt(1.0 - saturate(dot(output.Normal.xy, output.Normal.xy)));
 
-        ShadingModelValveStandard sm;
+        //ShadingModelValveStandard sm;
 		
-        return FinalizePixelMaterial( i, output, sm );
+        return FinalizePixelMaterial( i, output );
     }
 }";
-        vfx.AppendLine(outputString);
+        string tex2d = $"float4(Tex2DS(g_t{textures.Count-1}, TextureFiltering, tx).xyz, 1);";
+        vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count >= 2 ? tex2d : "float4(0.5, 0.5, 1, 1)" )}"));
     }
 
     private void WriteFooter(bool bIsVertexShader)
