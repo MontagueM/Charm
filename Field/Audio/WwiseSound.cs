@@ -13,7 +13,6 @@ public class WwiseSound : Tag
     
     public WwiseSound(TagHash hash) : base(hash)
     {
-        
     }
 
     public void Reset()
@@ -79,5 +78,18 @@ public class WwiseSound : Tag
         var waveChannel = new WaveChannel32(_soundReader);
         waveChannel.PadWithZeroes = false;
         return waveChannel;
+    }
+
+    /// <summary>
+    /// The playing combines all the audio, the exporting does all as separate.
+    /// </summary>
+    public void ExportSound(string saveDirectory)
+    {
+        CheckLoaded();
+        Header.Unk20.ForEach(wem =>
+        {
+            wem.SaveToFile($"{saveDirectory}/{wem.Hash}_{PackageHandler.GetEntryReference(wem.Hash)}.wav");
+        });
+
     }
 }

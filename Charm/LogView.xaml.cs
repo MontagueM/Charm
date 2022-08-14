@@ -38,7 +38,7 @@ public class LogHandler
         if (File.Exists("charm.log"))
             File.Delete("charm.log");
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("charm.log", outputTemplate: outputTemplate)
+            .WriteTo.File("charm.log", outputTemplate: outputTemplate, shared: true)
             .WriteTo.RichTextBox(logView.LogBox,
                 theme: RichTextBoxConsoleTheme.Colored,
                 outputTemplate: outputTemplate)

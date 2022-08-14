@@ -79,4 +79,11 @@ public class Wem : Tag
         _wemStream?.Dispose();
         _bDisposed = true;
     }
+
+    public void SaveToFile(string savePath)
+    {
+        CheckLoaded();
+        _wemReader.Position = 0;
+        WaveFileWriter.CreateWaveFile(savePath, _wemReader);
+    }
 }
