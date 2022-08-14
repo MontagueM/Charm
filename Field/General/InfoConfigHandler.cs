@@ -89,29 +89,37 @@ public class InfoConfigHandler
         public float Scale;
     }
 
+    public void AddInstance(string modelHash, float scale, Vector4 quatRotation, Vector3 translation)
+    {
+        if (!_config["Instances"].ContainsKey(modelHash))
+        {
+            _config["Instances"][modelHash] = new ConcurrentBag<JsonInstance>();
+        }
+        _config["Instances"][modelHash].Add(new JsonInstance
+        {
+            Translation = new [] { translation.X, translation.Y, translation.Z },
+            Rotation = new [] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
+            Scale = scale
+        });
+    }
+
     public void AddStaticInstances(List<D2Class_406D8080> instances, string staticMesh)
     {
-        ConcurrentBag<JsonInstance> jsonInstances = new ConcurrentBag<JsonInstance>();
         foreach (var instance in instances)
         {
-            jsonInstances.Add(new JsonInstance
-            {
-                Translation = new [] {instance.Position.X, instance.Position.Y, instance.Position.Z},
-                Rotation = new [] {instance.Rotation.X, instance.Rotation.Y, instance.Rotation.Z, instance.Rotation.W},
-                Scale = instance.Scale.X,
-            });
+            AddInstance(staticMesh, instance.Scale.X, instance.Rotation, instance.Position);
         }
-        if (_config["Instances"].ContainsKey(staticMesh))
+    }
+    
+    public void AddCustomTexture(string material, int index, TextureHeader texture)
+    {
+        if (!_config["Materials"].ContainsKey(material))
         {
-            foreach (var jsonInstance in jsonInstances)
-            {
-                _config["Instances"][staticMesh].Add(jsonInstance);
-            }
+            var textures = new Dictionary<string, Dictionary<int, TexInfo>>();
+            textures.Add("PS",  new Dictionary<int, TexInfo>());
+            _config["Materials"][material] = textures;
         }
-        else
-        {
-            _config["Instances"].TryAdd(staticMesh, jsonInstances);
-        }
+        _config["Materials"][material]["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb()});
     }
     
     public void WriteToFile(string path)

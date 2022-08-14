@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Forms;
 using Field.Textures;
 using MessageBox = System.Windows.Forms.MessageBox;
 
@@ -90,17 +91,21 @@ public class ConfigHandler
             bool success = false;
             while (!success)
             {
-                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-                if (result == System.Windows.Forms.DialogResult.OK)
+                DialogResult result = dialog.ShowDialog();
+                if (result is DialogResult.OK)
                 {
-                    if (dialog.SelectedPath.Contains(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))
+                    string exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    if (dialog.SelectedPath.Contains(exeDirectory + "\\") || dialog.SelectedPath == exeDirectory)
                     {
                         MessageBox.Show("You cannot export to the same directory as the executable.");
                         continue;
                     }
                     success = TrySetExportSavePath(dialog.SelectedPath);
                 }
-
+                else if (result is DialogResult.Cancel or DialogResult.Abort)
+                {
+                    return;
+                }
                 if (!success)
                 {
                     MessageBox.Show("Directory selected is invalid, please select the correct directory.");

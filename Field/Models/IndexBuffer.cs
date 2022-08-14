@@ -79,7 +79,17 @@ public class IndexBuffer : Tag
                     while (handle.BaseStream.Position + 4 - start < count * 2)  // + 4 from reading the first two previous
                     {
                         uint i1 = handle.ReadUInt16();
+                        if (i1 == 0xFF_FF)
+                        {
+                            triCount = 0;
+                            continue;
+                        }
                         uint i2 = handle.ReadUInt16();
+                        if (i2 == 0xFF_FF)
+                        {
+                            triCount = 0;
+                            continue;
+                        }
                         uint i3 = handle.ReadUInt16();
                         if (i3 == 0xFF_FF)
                         {

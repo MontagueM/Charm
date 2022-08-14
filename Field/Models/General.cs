@@ -21,6 +21,12 @@ public struct Vector2
         X = x;
         Y = y;
     }
+    
+    public Vector2(double x, double y)
+    {
+        X = (float)x;
+        Y = (float)y;
+    }
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 8)]
@@ -135,6 +141,14 @@ public struct Vector4
         Z = z;
         W = 0;
     }
+    
+    public Vector4(double x, double y, double z, double w)
+    {
+        X = (float)x;
+        Y = (float)y;
+        Z = (float)z;
+        W = (float)w;
+    }
         
     public Vector4(int x, int y, int z)
     {
@@ -159,6 +173,27 @@ public struct Vector4
             Y = y / 32_767.0f;
             Z = z / 32_767.0f;
             W = w / 32_767.0f;  
+        }
+    }
+    
+    /// <summary>
+    /// Terrain specific to ease computation.
+    /// </summary>
+    public Vector4(ushort x, ushort y, short z, ushort w, bool bIsVector3 = false)
+    {
+        if (bIsVector3)
+        {
+            X = x / 65_535.0f;
+            Y = y / 65_535.0f;
+            Z = z / 32_767.0f;
+            W = w;
+        }
+        else
+        {
+            X = x / 65_535.0f;
+            Y = y / 65_535.0f;
+            Z = z / 32_767.0f;
+            W = w / 65_535.0f;  
         }
     }
 

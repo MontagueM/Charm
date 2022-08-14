@@ -95,7 +95,7 @@ public partial class MainWindow
 
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("1.1.4");
+        var currentVersion = new ApplicationVersion("1.2.0");
         var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         versionChecker.LatestVersionName = "version";
         try
@@ -125,6 +125,7 @@ public partial class MainWindow
     {
         Progress.SetProgressStages(new List<string>
         {
+            "packages cache",
             "fonts",
             "fnv hashes",
             "hash 64",
@@ -132,6 +133,10 @@ public partial class MainWindow
             "global string cache",
             "activity names",
         });
+        // to check if we need to update caches
+        PackageHandler.Initialise();
+        Progress.CompleteStage();
+
         // Load all the fonts
         await Task.Run(() =>
         {
@@ -278,7 +283,7 @@ public partial class MainWindow
 
     private void MenuTab_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton == MouseButton.Middle)
+        if (e.ChangedButton == MouseButton.Middle && e.Source is TabItem)
         {
             TabItem tab = (TabItem)sender;
             MainTabControl.Items.Remove(tab);
