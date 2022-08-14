@@ -385,7 +385,7 @@ PS
 
             //vfx.AppendLine($"   float2 tx)");
 
-            vfx.AppendLine("        Material output = ToMaterial( i, float4(0,0,0,0), float4(0,0,0,0), float4(0,0,0,0) );");
+            //vfx.AppendLine("        Material output = ToMaterial( i, float4(0,0,0,0), float4(0,0,0,0), float4(0,0,0,0) );");
             // Output render targets, todo support vertex shader
             vfx.AppendLine("        float4 o0,o1,o2;");
             vfx.AppendLine("        float alpha = 1;");
@@ -498,6 +498,7 @@ PS
         float smoothness = saturate(8 * (normal_length - 0.375));
         
         float4 temp_normal = {normal}
+        temp_normal.y = 1 - temp_normal.y;
         Material mat = ToMaterial(i, float4(o0.xyz, 1), temp_normal, float4(1 - smoothness, o2.x, o2.y * 2, 1));
         mat.Opacity = alpha;
         //mat.Emission = (o2.y - 0.5) * 2 * 5 * mat.Albedo; 

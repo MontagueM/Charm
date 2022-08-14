@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Text;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -70,6 +71,7 @@ public partial class MapView : UserControl
     public static void ExportFullMap(StaticMapData staticMapData)
     {
         FbxHandler fbxHandler = new FbxHandler();
+        bool exportStatics = true;
         string meshName = staticMapData.Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
@@ -78,6 +80,8 @@ public partial class MapView : UserControl
         }
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
+        Directory.CreateDirectory(savePath + "/Statics");
+        //Directory.CreateDirectory($"{savePath}/Source2/Models");
         // Extract all
         List<D2Class_BD938080> extractedStatics = staticMapData.Header.Statics.DistinctBy(x => x.Static.Hash).ToList();
         // foreach (var s in extractedStatics)
@@ -86,6 +90,38 @@ public partial class MapView : UserControl
             var parts = s.Static.Load(ELOD.MostDetail);
             fbxHandler.AddStaticToScene(parts, s.Static.Hash);
             s.Static.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled());
+
+            if(exportStatics)
+            {
+                string staticMeshName = s.Static.Hash.GetHashString();
+                FbxHandler staticHandler = new FbxHandler();
+                staticHandler.InfoHandler.SetMeshName(staticMeshName);
+                staticHandler.AddStaticToScene(parts, s.Static.Hash);
+
+                //
+                File.Copy("template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/Statics/{staticMeshName}.vmdl");
+                StringBuilder mats = new StringBuilder();
+                int i = 0;
+                foreach (Part part in parts)
+                {
+                    mats.AppendLine("{");
+                    mats.AppendLine($"    from = \"{staticMeshName}_Group{part.GroupIndex}_{i}_{i}.vmat\"");
+                    mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
+                    mats.AppendLine("},\n");
+                    i++;
+                }
+                text = text.Replace("%MATERIALS%", mats.ToString());
+                text = text.Replace("%FILENAME%", $"models/{staticMeshName}.fbx");
+                text = text.Replace("%MESHNAME%", staticMeshName);
+
+                File.WriteAllText($"{savePath}/Statics/{staticMeshName}.vmdl", text);
+                //
+
+                staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
+                staticHandler.Dispose();
+
+            }
         });
 
         Parallel.ForEach(staticMapData.Header.InstanceCounts, c =>
