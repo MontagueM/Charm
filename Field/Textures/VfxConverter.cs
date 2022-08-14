@@ -48,6 +48,8 @@ public class VfxConverter
     private List<Cbuffer> cbuffers = new List<Cbuffer>();
     private List<Input> inputs = new List<Input>();
     private List<Output> outputs = new List<Output>();
+
+    //private List<Texture> sortedTextures = new List<Texture>();
     
 
     public string vfxStructure = @"HEADER
@@ -378,13 +380,15 @@ PS
                 vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; \n");
             }
 
-            vfx.AppendLine("    PixelOutput MainPs( PixelInput i ) {");
+            vfx.AppendLine("    PixelOutput MainPs( PixelInput i )");
+            vfx.AppendLine("    {");
 
             //vfx.AppendLine($"   float2 tx)");
 
             vfx.AppendLine("        Material output = ToMaterial( i, float4(0,0,0,0), float4(0,0,0,0), float4(0,0,0,0) );");
             // Output render targets, todo support vertex shader
             vfx.AppendLine("        float4 o0,o1,o2;");
+            vfx.AppendLine("        float alpha = 1;");
             vfx.AppendLine("        float2 tx = i.vTextureCoords;");
             foreach (var i in inputs)
             {
@@ -407,11 +411,16 @@ PS
     private bool ConvertInstructions()
     {
         Dictionary<int, Texture> texDict = new Dictionary<int, Texture>();
+
         foreach (var texture in textures)
         {
+            //Console.WriteLine($"Texture Variable {texture.Variable}");
+            //Console.WriteLine($"Texture Type {texture.Type}");
+            //Console.WriteLine($"Texture Index {texture.Index}");
             texDict.Add(texture.Index, texture);
         }
         List<int> sortedIndices = texDict.Keys.OrderBy(x => x).ToList();
+        List<Texture> sortedTextures = texDict.Values.OrderBy(x => x.Variable).ToList();
         string line = hlsl.ReadLine();
         if (line == null)
         {
@@ -445,17 +454,18 @@ PS
                     var sampleUv = line.Split(", ")[1].Split(")")[0];
                     var dotAfter = line.Split(").")[1];
                     // todo add dimension
-                    vfx.AppendLine($"   {equal}= Tex2DS(g_t{sortedIndices.IndexOf(texIndex)}, TextureFiltering, {sampleUv}).{dotAfter}");
+                    vfx.AppendLine($"       {equal}= Tex2DS(g_t{texIndex}, TextureFiltering, {sampleUv}).{dotAfter}");
                 }
                 // todo add load, levelofdetail, o0.w, discard
                 else if (line.Contains("discard"))
                 {
-                    vfx.AppendLine(line.Replace("discard", "{ output.Opacity = 0; }"));
+                    vfx.AppendLine(line.Replace("discard", "        { alpha = 0; }"));
                 }
                 else
                 {
-                    vfx.AppendLine(line);
+                    vfx.AppendLine($"       {line}");
                 }
+                vfx.Replace("∞", "1.#INF");
             }
         } while (line != null);
 
@@ -464,6 +474,14 @@ PS
 
     private void AddOutputs()
     {
+        Dictionary<int, Texture> texDict = new Dictionary<int, Texture>();
+
+        foreach (var texture in textures)
+        {
+            texDict.Add(texture.Index, texture);
+        }
+        List<Texture> sortedTextures = texDict.Values.OrderBy(x => x.Variable).ToList();
+
         string outputString = @"
 
         // Normal
@@ -472,27 +490,46 @@ PS
         float3 normal_in_world_space = biased_normal / normal_length;
         float3 normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
 
-        //output.Normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
-		//output.Normal = Material_Texture2D_2.SampleLevel(Material_Texture2D_0Sampler, v3.xy, 0).xyz;
-        //output.Normal.z = sqrt(1.0 - saturate(dot(output.Normal.xy, output.Normal.xy)));
-        //output.Normal = normalize(output.Normal);
+        //mat.Normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
+		//mat.Normal = Material_Texture2D_2.SampleLevel(Material_Texture2D_0Sampler, v3.xy, 0).xyz;
+        //mat.Normal.z = sqrt(1.0 - saturate(dot(mat.Normal.xy, mat.Normal.xy)));
+        //mat.Normal = normalize(mat.Normal);
 
         float smoothness = saturate(8 * (normal_length - 0.375));
         
-        float4 temp_normal = {normal};
-        output = ToMaterial(i, float4(o0.xyz, 1), temp_normal, float4(1 - smoothness, o2.x, o2.y * 2, 1));
+        float4 temp_normal = {normal}
+        Material mat = ToMaterial(i, float4(o0.xyz, 1), temp_normal, float4(1 - smoothness, o2.x, o2.y * 2, 1));
+        mat.Opacity = alpha;
+        //mat.Emission = (o2.y - 0.5) * 2 * 5 * mat.Albedo; 
+        //mat.Normal.z = sqrt(1.0 - saturate(dot(mat.Normal.xy, mat.Normal.xy)));
 
-        //output.Emission = (o2.y - 0.5) * 2 * 5 * output.Albedo; 
-        output.Opacity = 1;
-        //output.Normal.z = sqrt(1.0 - saturate(dot(output.Normal.xy, output.Normal.xy)));
-
-        //ShadingModelValveStandard sm;
+        ShadingModelValveStandard sm;
 		
-        return FinalizePixelMaterial( i, output );
+        return FinalizePixelMaterial( i, mat, sm );
     }
 }";
-        string tex2d = $"float4(Tex2DS(g_t{textures.Count-1}, TextureFiltering, tx).xyz, 1);";
-        vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count >= 2 ? tex2d : "float4(0.5, 0.5, 1, 1)" )}"));
+        // for (var i = 0; i < sortedTextures.Count; i++)
+        // {
+        //     Console.WriteLine($"{i} Texture Variable {sortedTextures[i].Variable}");
+        // }
+        
+        if (textures.Count > 2)
+        {
+            string texIndex = sortedTextures[textures.Count-2].Variable;
+            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx).xyz, 1);";
+            vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count > 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
+        }
+        if (textures.Count == 2)
+        {
+            string texIndex = sortedTextures[textures.Count-1].Variable;
+            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx).xyz, 1);";
+            vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count >= 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
+        }
+        if (textures.Count < 2)
+        {
+            //string tex2d = $"float4(Tex2DS(g_t{sortedTextures[textures.Count-1]}, TextureFiltering, tx).xyz, 1);";
+            vfx.AppendLine(outputString.Replace("{normal}", $"float4(0.5, 0.5, 1, 1);" ));
+        }
     }
 
     private void WriteFooter(bool bIsVertexShader)

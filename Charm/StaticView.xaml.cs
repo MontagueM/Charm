@@ -90,7 +90,7 @@ public partial class StaticView : UserControl
 
         if(lodexport)
         {
-            List<Part> lodparts = container.Load(ELOD.All);
+            List<Part> lodparts = container.Load(ELOD.LeastDetail);
             Directory.CreateDirectory(savePath + "/LOD");
 
             foreach (Part lodpart in lodparts)
