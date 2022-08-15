@@ -160,11 +160,17 @@ public class Material : Tag
             vmat.AppendLine($"   shader \"ps_{Hash}.vfx\"");
             foreach (var e in Header.PSTextures)
             {
+                if (e.Texture == null)
+                {
+                    continue;
+                }
                 //Console.WriteLine("Saving texture " + e.Texture.Hash + " " + e.TextureIndex + " " + e.Texture.IsSrgb().ToString());
                 vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/PS_" + $"{e.TextureIndex}_{e.Texture.Hash}.png\"");
             }
             vmat.AppendLine("}");
-            File.WriteAllText($"{saveDirectory}/Source2/materials/{Hash}.vmat", vmat.ToString());
+            
+            if(!File.Exists($"{saveDirectory}/Source2/materials/{Hash}.vmat"))
+                File.WriteAllText($"{saveDirectory}/Source2/materials/{Hash}.vmat", vmat.ToString());
         }
     }
     

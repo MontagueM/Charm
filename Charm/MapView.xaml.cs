@@ -202,7 +202,6 @@ public partial class MapView : UserControl
                         foreach (var part in parts)
                         {
                             string staticMeshName = part.Static.Hash.GetHashString();
-
                             FbxHandler staticHandler = new FbxHandler();
                             staticHandler.InfoHandler.SetMeshName(staticMeshName);
 

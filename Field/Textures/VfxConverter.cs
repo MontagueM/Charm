@@ -366,18 +366,22 @@ PS
         {
             foreach (var e in material.Header.PSTextures)
             {
-                string type;
-                if(e.Texture.IsSrgb())
+                string type = "Srgb";
+                if (e.Texture != null)
                 {
-                    type = "Srgb";
+                    if (e.Texture.IsSrgb())
+                    {
+                        type = "Srgb";
+                    }
+                    else
+                    {
+                        type = "Linear";
+                    }
+
+                    //vfx.AppendLine($"   {texture.Type} {texture.Variable},");
+                    vfx.AppendLine($"   CreateInputTexture2D( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/10\", Default3( 1.0, 1.0, 1.0 ));");
+                    vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; \n");
                 }
-                else
-                {
-                    type = "Linear";
-                }
-                //vfx.AppendLine($"   {texture.Type} {texture.Variable},");
-                vfx.AppendLine($"   CreateInputTexture2D( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/10\", Default3( 1.0, 1.0, 1.0 ));" );
-                vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; \n");
             }
 
             vfx.AppendLine("    PixelOutput MainPs( PixelInput i )");
