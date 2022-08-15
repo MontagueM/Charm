@@ -22,6 +22,11 @@ public partial class MapView : UserControl
 
     private static MainWindow _mainWindow = null;
 
+    private static bool source2Models = ConfigHandler.GetS2VMDLExportEnabled();
+    private static bool source2Mats = ConfigHandler.GetS2VMATExportEnabled();
+    private static bool exportStatics = ConfigHandler.GetIndvidualStaticsEnabled();
+
+
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
@@ -68,11 +73,11 @@ public partial class MapView : UserControl
         MVM.Dispose();
     }
     
-    public static void ExportFullMap(StaticMapData staticMapData)
+    public static void ExportFullMap(Tag<D2Class_07878080> map)
     {
         FbxHandler fbxHandler = new FbxHandler();
-        bool exportStatics = true;
-        string meshName = staticMapData.Hash.GetHashString();
+       
+        string meshName = map.Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
@@ -81,54 +86,12 @@ public partial class MapView : UserControl
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
         Directory.CreateDirectory(savePath + "/Statics");
-        //Directory.CreateDirectory($"{savePath}/Source2/Models");
-        // Extract all
-        List<D2Class_BD938080> extractedStatics = staticMapData.Header.Statics.DistinctBy(x => x.Static.Hash).ToList();
-        // foreach (var s in extractedStatics)
-        Parallel.ForEach(extractedStatics, s =>
-        {
-            var parts = s.Static.Load(ELOD.MostDetail);
-            fbxHandler.AddStaticToScene(parts, s.Static.Hash);
-            s.Static.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled());
+    
+        if(exportStatics)
+            ExportStatics(exportStatics, savePath, map);
 
-            if(exportStatics)
-            {
-                string staticMeshName = s.Static.Hash.GetHashString();
-                FbxHandler staticHandler = new FbxHandler();
-                staticHandler.InfoHandler.SetMeshName(staticMeshName);
-                staticHandler.AddStaticToScene(parts, s.Static.Hash);
+        ExtractDataTables(map, savePath, fbxHandler, EExportTypeFlag.Full);
 
-                //
-                File.Copy("template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/Statics/{staticMeshName}.vmdl");
-                StringBuilder mats = new StringBuilder();
-                int i = 0;
-                foreach (Part part in parts)
-                {
-                    mats.AppendLine("{");
-                    mats.AppendLine($"    from = \"{staticMeshName}_Group{part.GroupIndex}_{i}_{i}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
-                    mats.AppendLine("},\n");
-                    i++;
-                }
-                text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"models/{staticMeshName}.fbx");
-                text = text.Replace("%MESHNAME%", staticMeshName);
-
-                File.WriteAllText($"{savePath}/Statics/{staticMeshName}.vmdl", text);
-                //
-
-                staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
-                staticHandler.Dispose();
-
-            }
-        });
-
-        Parallel.ForEach(staticMapData.Header.InstanceCounts, c =>
-        {
-            var model = staticMapData.Header.Statics[c.StaticIndex].Static;
-            fbxHandler.InfoHandler.AddStaticInstances(staticMapData.Header.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), model.Hash);
-        });
         if (ConfigHandler.GetUnrealInteropEnabled())
         {
             fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
@@ -142,6 +105,162 @@ public partial class MapView : UserControl
 
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
+    }
+
+    public static void ExportMinimalMap(Tag<D2Class_07878080> map, EExportTypeFlag exportTypeFlag)
+    {
+        FbxHandler fbxHandler = new FbxHandler();
+        string meshName = map.Hash.GetHashString();
+        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        if (ConfigHandler.GetSingleFolderMapsEnabled())
+        {
+            savePath = ConfigHandler.GetExportSavePath() + "/Maps";
+        }
+        if (ConfigHandler.GetUnrealInteropEnabled())
+        {
+            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+        }
+        fbxHandler.InfoHandler.SetMeshName(meshName);
+        Directory.CreateDirectory(savePath);
+
+        ExtractDataTables(map, savePath, fbxHandler, exportTypeFlag);
+
+        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+        fbxHandler.Dispose();
+    }
+
+    public static void ExportTerrainMap(Tag<D2Class_07878080> map)
+    {
+        FbxHandler fbxHandler = new FbxHandler();
+        string meshName = map.Hash.GetHashString();
+        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        if (ConfigHandler.GetSingleFolderMapsEnabled())
+        {
+            savePath = ConfigHandler.GetExportSavePath() + "/Maps";
+        }
+        if (ConfigHandler.GetUnrealInteropEnabled())
+        {
+            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+        }
+        fbxHandler.InfoHandler.SetMeshName(meshName);
+        Directory.CreateDirectory(savePath);
+
+        Parallel.ForEach(map.Header.DataTables, data =>
+        {
+            data.DataTable.Header.DataEntries.ForEach(entry =>
+            {
+                if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
+                {
+                    //entry.Rotation.SetW(1);
+                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
+                }
+            });
+        });
+
+        fbxHandler.ExportScene($"{savePath}/{meshName}_Terrain.fbx");
+        fbxHandler.Dispose();
+    }
+    
+    private static void ExtractDataTables(Tag<D2Class_07878080> map, string savePath, FbxHandler fbxHandler, EExportTypeFlag exportTypeFlag)
+    {
+        Parallel.ForEach(map.Header.DataTables, data =>
+        {
+            data.DataTable.Header.DataEntries.ForEach(entry =>
+            {
+                if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
+                {
+                    if (exportTypeFlag == EExportTypeFlag.Minimal)
+                    {
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadArrangedIntoFbxScene(fbxHandler);
+                    }
+                    else if (exportTypeFlag == EExportTypeFlag.Full)
+                    {
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
+                    }
+                }
+                else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
+                {
+                    //entry.Rotation.SetW(1);
+                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
+                }
+            });
+        });
+    }
+
+    private static void ExportStatics(bool exportStatics, string savePath, Tag<D2Class_07878080> map)
+    {
+        if (exportStatics) //Export individual statics
+        {
+            Parallel.ForEach(map.Header.DataTables, data =>
+            {    
+                data.DataTable.Header.DataEntries.ForEach(entry =>
+                {
+                    if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
+                    {
+                        var parts = staticMapResource.StaticMapParent.Header.StaticMap.Header.Statics;
+                        //staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
+                        foreach (var part in parts)
+                        {
+                            string staticMeshName = part.Static.Hash.GetHashString();
+
+                            FbxHandler staticHandler = new FbxHandler();
+                            staticHandler.InfoHandler.SetMeshName(staticMeshName);
+
+                            var staticmesh = part.Static.Load(ELOD.MostDetail);
+                            staticHandler.AddStaticToScene(staticmesh, part.Static.Hash);
+                            
+                            if(source2Models)
+                            {
+                                //Source 2 shit
+                                File.Copy("template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
+                                string text = File.ReadAllText($"{savePath}/Statics/{staticMeshName}.vmdl");
+                            
+                                StringBuilder mats = new StringBuilder();
+
+                                int i = 0;
+                                foreach (Part staticpart in staticmesh)
+                                {
+                                    mats.AppendLine("{");
+                                    mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_{i}_{i}.vmat\"");
+                                    mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
+                                    mats.AppendLine("},\n");
+                                    i++;
+                                }
+
+                                text = text.Replace("%MATERIALS%", mats.ToString());
+                                text = text.Replace("%FILENAME%", $"models/{staticMeshName}.fbx");
+                                text = text.Replace("%MESHNAME%", staticMeshName);
+                                
+                                File.WriteAllText($"{savePath}/Statics/{staticMeshName}.vmdl", text);
+                                //
+                            }
+
+                            staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
+                            staticHandler.Dispose();
+                        }
+                    }
+                    // Dont see a reason to export terrain itself as its own fbx
+                    // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
+                    // {
+                    //     var parts = terrainArrangement.Terrain.Header.MeshParts;
+                    //     terrainArrangement.Terrain.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
+                    
+                    //     int i = 0;
+                    //     foreach (var part in parts)
+                    //     {
+                    //         mats.AppendLine("{");
+                    //         mats.AppendLine($"    from = \"{staticMeshName}_Group{part.GroupIndex}_{i}_{i}.vmat\"");
+                    //         mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
+                    //         mats.AppendLine("},\n");
+                    //         i++;
+                    //     }
+                    
+                    // }
+                    
+                    //        
+                });
+            });
+        }
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap, ELOD detailLevel)

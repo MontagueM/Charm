@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Field.General;
+using Field.Textures;
 using Field.Models;
 using Field.Statics;
 
@@ -35,14 +36,15 @@ public partial class StaticView : UserControl
         MVM.Title = hash.GetHashString();
     }
 
-    public void ExportStatic(TagHash hash, string name, EExportType exportType)
+    public void ExportStatic(TagHash hash, string name, EExportTypeFlag exportType)
     {
         bool lodexport = false;
-        FbxHandler fbxHandler = new FbxHandler(exportType == EExportType.Full);
-        FbxHandler lodfbxHandler = new FbxHandler(exportType == EExportType.Full);
+        bool source2Models = ConfigHandler.GetS2VMDLExportEnabled();
+        FbxHandler fbxHandler = new FbxHandler(exportType == EExportTypeFlag.Full);
+        FbxHandler lodfbxHandler = new FbxHandler(exportType == EExportTypeFlag.Full);
         string savePath = ConfigHandler.GetExportSavePath();
         string meshName = hash.GetHashString();
-        if (exportType == EExportType.Full)
+        if (exportType == EExportTypeFlag.Full)
         {
             savePath += $"/{name}";
         }
@@ -50,7 +52,7 @@ public partial class StaticView : UserControl
         List<Part> parts = container.Load(ELOD.MostDetail);
         fbxHandler.AddStaticToScene(parts, meshName);
         Directory.CreateDirectory(savePath);
-        if (exportType == EExportType.Full)
+        if (exportType == EExportTypeFlag.Full)
         {
             container.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled());
             fbxHandler.InfoHandler.SetMeshName(meshName);
@@ -62,30 +64,32 @@ public partial class StaticView : UserControl
 
             }
 
-            //copy the template .vmdl file
-            File.Copy("template.vmdl", $"{savePath}/{meshName}.vmdl", true);
-            string text = File.ReadAllText($"{savePath}/{meshName}.vmdl");
-            StringBuilder mats = new StringBuilder();
-
-
-            // {
-            //     from = ""
-            //     to = "materials/"
-            // },
-            foreach (Part part in parts)
+            if(source2Models)
             {
-                mats.AppendLine("{");
-                mats.AppendLine($"    from = \"{part.Material.Hash}.vmat\"");
-                mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
-                mats.AppendLine("},\n");
-            }
-            text = text.Replace("%MATERIALS%", mats.ToString());
-            text = text.Replace("%FILENAME%", $"models/{meshName}.fbx");
-            text = text.Replace("%MESHNAME%", meshName);
+                File.Copy("template.vmdl", $"{savePath}/{meshName}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{meshName}.vmdl");
+                StringBuilder mats = new StringBuilder();
 
-            File.WriteAllText($"{savePath}/{meshName}.vmdl", text);
+                // {
+                //     from = ""
+                //     to = "materials/"
+                // },
+                foreach (Part part in parts)
+                {
+                    mats.AppendLine("{");
+                    mats.AppendLine($"    from = \"{part.Material.Hash}.vmat\"");
+                    mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
+                    mats.AppendLine("},\n");
+                }
+                text = text.Replace("%MATERIALS%", mats.ToString());
+                text = text.Replace("%FILENAME%", $"models/{meshName}.fbx");
+                text = text.Replace("%MESHNAME%", meshName);
+
+                File.WriteAllText($"{savePath}/{meshName}.vmdl", text);
+            }
             
         }
+
         fbxHandler.ExportScene($"{savePath}/{name}.fbx");
 
         if(lodexport)

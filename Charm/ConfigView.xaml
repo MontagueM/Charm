@@ -5,9 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Charm"
              mc:Ignorable="d"
-             Loaded="OnControlLoaded"
              d:DesignHeight="1080" d:DesignWidth="1920">
     <Grid>
-        <StackPanel x:Name="ConfigPanel" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="200,200,200,200"/>
+        <TabControl x:Name="ConfigTabControl">
+            <TabItem Header="GENERAL" x:Name="ConfigTab">
+                <local:GeneralConfigView x:Name="ConfigControl"/>
+            </TabItem>
+            <TabItem Header="SOURCE 2" x:Name="Source2Tab">
+                <local:Source2ConfigView x:Name="Source2Control"/>
+            </TabItem>
+            <TabItem Header="UNREAL ENGINE" x:Name="UnrealTab">
+                <local:UnrealConfigView x:Name="UnrealControl"/>
+            </TabItem>
+            
+        </TabControl>
     </Grid>
 </UserControl>
