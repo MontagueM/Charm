@@ -85,10 +85,12 @@ public partial class MapView : UserControl
         }
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
-        Directory.CreateDirectory(savePath + "/Statics");
     
         if(exportStatics)
+        {
+            Directory.CreateDirectory(savePath + "/Statics");
             ExportStatics(exportStatics, savePath, map);
+        }
 
         ExtractDataTables(map, savePath, fbxHandler, EExportTypeFlag.Full);
 
@@ -120,8 +122,19 @@ public partial class MapView : UserControl
         {
             fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
         }
+         if (ConfigHandler.GetBlenderInteropEnabled())
+        {
+            //Only gonna export a blender py for maps (for now)
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+        }
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
+
+        if(exportStatics)
+        {
+            Directory.CreateDirectory(savePath + "/Statics");
+            ExportStatics(exportStatics, savePath, map);
+        }
 
         ExtractDataTables(map, savePath, fbxHandler, exportTypeFlag);
 
@@ -142,7 +155,8 @@ public partial class MapView : UserControl
         {
             fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
         }
-        fbxHandler.InfoHandler.SetMeshName(meshName);
+        
+        fbxHandler.InfoHandler.SetMeshName(meshName+"_Terrain");
         Directory.CreateDirectory(savePath);
 
         Parallel.ForEach(map.Header.DataTables, data =>
@@ -156,6 +170,12 @@ public partial class MapView : UserControl
                 }
             });
         });
+
+        if (ConfigHandler.GetBlenderInteropEnabled())
+        {
+            //Only gonna export a blender py for maps (for now)
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+        }
 
         fbxHandler.ExportScene($"{savePath}/{meshName}_Terrain.fbx");
         fbxHandler.Dispose();
@@ -178,7 +198,7 @@ public partial class MapView : UserControl
                         staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
                     }
                 }
-                else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
+                else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain
                 {
                     //entry.Rotation.SetW(1);
                     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
