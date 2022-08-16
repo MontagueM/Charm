@@ -52,7 +52,7 @@ Not yet implemented:
 - Generates .vfx shader files for semi-accurate game shaders (similar to UE5 shaders)
 - Generates .vmat (material) and .vmdl (model) files for statics and maps
 
-(CS:GO support is planned once that is released and if it supports custom content similar to S&Box)
+(CS:GO Source 2 support is planned once that is released and if it supports custom content similar to S&Box)
 
 Copy files from shaders/source2 to your addons "Shaders" folder, and the .vmat, textures, and .vmdl files to "materials", "materials/textures", and "models" respectively.
 
