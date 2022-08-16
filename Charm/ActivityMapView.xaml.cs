@@ -123,6 +123,8 @@ public partial class ActivityMapView : UserControl
                 MapView.ExportFullMap(map);
             if (info.ExportType == EExportTypeFlag.TerrainOnly)
                 MapView.ExportTerrainMap(map);
+            if (info.ExportType == EExportTypeFlag.Minimal)
+                MapView.ExportMinimalMap(map, info.ExportType);
             else
                 MapView.ExportMinimalMap(map, info.ExportType);
             

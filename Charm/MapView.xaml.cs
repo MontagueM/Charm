@@ -112,31 +112,34 @@ public partial class MapView : UserControl
     public static void ExportMinimalMap(Tag<D2Class_07878080> map, EExportTypeFlag exportTypeFlag)
     {
         FbxHandler fbxHandler = new FbxHandler();
+       
         string meshName = map.Hash.GetHashString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
             savePath = ConfigHandler.GetExportSavePath() + "/Maps";
         }
-        if (ConfigHandler.GetUnrealInteropEnabled())
-        {
-            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-        }
-         if (ConfigHandler.GetBlenderInteropEnabled())
-        {
-            //Only gonna export a blender py for maps (for now)
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
-        }
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
-
+    
         if(exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
             ExportStatics(exportStatics, savePath, map);
         }
 
-        ExtractDataTables(map, savePath, fbxHandler, exportTypeFlag);
+        ExtractDataTables(map, savePath, fbxHandler, EExportTypeFlag.Minimal);
+
+        if (ConfigHandler.GetUnrealInteropEnabled())
+        {
+            fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+        }
+        if (ConfigHandler.GetBlenderInteropEnabled())
+        {
+            //Only gonna export a blender py for maps (for now)
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+        }
 
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
@@ -173,7 +176,6 @@ public partial class MapView : UserControl
 
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            //Only gonna export a blender py for maps (for now)
             AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
         }
 
@@ -189,16 +191,16 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
                 {
-                    if (exportTypeFlag == EExportTypeFlag.Minimal)
+                    if (exportTypeFlag == EExportTypeFlag.ArrangedMap)
                     {
-                        staticMapResource.StaticMapParent.Header.StaticMap.LoadArrangedIntoFbxScene(fbxHandler);
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadArrangedIntoFbxScene(fbxHandler); //Arranged because...arranged
                     }
-                    else if (exportTypeFlag == EExportTypeFlag.Full)
+                    else if (exportTypeFlag == EExportTypeFlag.Full || exportTypeFlag == EExportTypeFlag.Minimal) //No terrain on a minimal rip makes sense right?
                     {
                         staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
                     }
                 }
-                else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain
+                else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
                 {
                     //entry.Rotation.SetW(1);
                     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
