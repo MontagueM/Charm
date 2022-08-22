@@ -79,11 +79,13 @@ COMMON
 
 struct VertexInput
 {
+    float4 vColorBlendValues : TEXCOORD4 < Semantic( color ); >;
 	#include ""common/vertexinput.hlsl""
 };
 
 struct PixelInput
 {
+    float4 vBlendValues		 : TEXCOORD14;
 	#include ""common/pixelinput.hlsl""
 };
 
@@ -93,6 +95,8 @@ VS
 	PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )
 	{
 		PixelInput o = ProcessVertex( i );
+        o.vBlendValues = i.vColorBlendValues;
+		o.vBlendValues.a = i.vColorBlendValues.a;
 		return FinalizeVertex( o );
 	}
 }
@@ -105,7 +109,7 @@ PS
 
     public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader)
     {
-        Console.WriteLine("Material: " + material.Hash);
+        //Console.WriteLine("Material: " + material.Hash);
         hlsl = new StringReader(hlslText);
         vfx = new StringBuilder();
         vfx.AppendLine(vfxStructure);
@@ -393,7 +397,17 @@ PS
             // Output render targets, todo support vertex shader
             vfx.AppendLine("        float4 o0,o1,o2;");
             vfx.AppendLine("        float alpha = 1;");
-            vfx.AppendLine("        float2 tx = i.vTextureCoords;");
+            vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 0, 0);");
+            vfx.AppendLine("        v4 = i.vBlendValues.rgba;");
+            vfx.AppendLine("        float4 v0 = {1,1,1,1};");
+            vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};");
+            vfx.AppendLine("        float4 v2 = {i.vTextureCoords, 1, 1};");
+            vfx.AppendLine("        float4 v3 = {1,1,1,1};");
+            vfx.AppendLine("        float4 v4 = i.vBlendValues;");
+            vfx.AppendLine("        float4 v5 = {1,1,1,1};");
+            vfx.AppendLine("        uint v6 = 1;");
+
+
             foreach (var i in inputs)
             {
                 if (i.Type == "float4")
@@ -402,7 +416,7 @@ PS
                 }
                 else if (i.Type == "float3")
                 {
-                    vfx.AppendLine($"       {i.Variable}.xyz = {i.Variable}.xyz * tx.xyx;");
+                    vfx.AppendLine($"       {i.Variable}.xyz = {i.Variable}.xyz * tx.xyz;");
                 }
                 else if (i.Type == "uint")
                 {
@@ -492,12 +506,9 @@ PS
         float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
+        normal_in_world_space.z = sqrt(1.0 - saturate(dot(normal_in_world_space.xy, normal_in_world_space.xy)));
         float3 normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
-
-        //mat.Normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
-		//mat.Normal = Material_Texture2D_2.SampleLevel(Material_Texture2D_0Sampler, v3.xy, 0).xyz;
-        //mat.Normal.z = sqrt(1.0 - saturate(dot(mat.Normal.xy, mat.Normal.xy)));
-        //mat.Normal = normalize(mat.Normal);
+        float3 worldNormal = normalize(mul(normal, g_matViewToProjection));
 
         float smoothness = saturate(8 * (normal_length - 0.375));
         
@@ -521,13 +532,13 @@ PS
         if (textures.Count > 2)
         {
             string texIndex = sortedTextures[textures.Count-2].Variable;
-            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx).xyz, 1);";
+            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
             vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count > 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
         }
         if (textures.Count == 2)
         {
             string texIndex = sortedTextures[textures.Count-1].Variable;
-            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx).xyz, 1);";
+            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
             vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count >= 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
         }
         if (textures.Count < 2)

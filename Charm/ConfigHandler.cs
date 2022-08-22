@@ -193,13 +193,13 @@ public class ConfigHandler
 
     public static void SetS2VMDLExportEnabled(bool bS2VMDLExportEnabled)
     {
-        if (_config.AppSettings.Settings["s2VDLExportEnabled"] == null)
+        if (_config.AppSettings.Settings["s2VMDLExportEnabled"] == null)
         {
-            _config.AppSettings.Settings.Add("s2VDLExportEnabled", bS2VMDLExportEnabled.ToString());
+            _config.AppSettings.Settings.Add("s2VMDLExportEnabled", bS2VMDLExportEnabled.ToString());
         }
         else
         {
-            _config.AppSettings.Settings["s2VDLExportEnabled"].Value = bS2VMDLExportEnabled.ToString();
+            _config.AppSettings.Settings["s2VMDLExportEnabled"].Value = bS2VMDLExportEnabled.ToString();
         }
 
         Save();
@@ -207,11 +207,11 @@ public class ConfigHandler
 
     public static bool GetS2VMDLExportEnabled()
     {
-        if (_config.AppSettings.Settings["s2VDLExportEnabled"] == null)
+        if (_config.AppSettings.Settings["s2VMDLExportEnabled"] == null)
         {
             return false;
         }
-        return _config.AppSettings.Settings["s2VDLExportEnabled"].Value == "True";
+        return _config.AppSettings.Settings["s2VMDLExportEnabled"].Value == "True";
     }
     
     #endregion
@@ -418,7 +418,6 @@ public class ConfigHandler
         {
             _config.AppSettings.Settings["indvidualStaticsEnabled"].Value = bIndvidualStaticsEnabled.ToString();
         }
-
         Save();
     }
 

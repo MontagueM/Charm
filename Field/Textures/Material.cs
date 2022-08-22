@@ -77,10 +77,12 @@ public class Material : Tag
         // }
         // // Marshal.FreeHGlobal(pHlslText);
         // return hlsl;
-        //type = "ps";
+    
         string directory = "hlsl_temp";
-        string binPath = $"{directory}/{type}{Hash}.bin";
-        string hlslPath = $"{directory}/{type}{Hash}.hlsl";
+        string binPath = $"{directory}/ps{Hash}.bin";
+        string hlslPath = $"{directory}/ps{Hash}.hlsl";
+
+      
 
         if (!Directory.Exists(directory))
         {
@@ -170,7 +172,15 @@ public class Material : Tag
             vmat.AppendLine("}");
             
             if(!File.Exists($"{saveDirectory}/Source2/materials/{Hash}.vmat"))
-                File.WriteAllText($"{saveDirectory}/Source2/materials/{Hash}.vmat", vmat.ToString());
+            {
+                try
+                {
+                    File.WriteAllText($"{saveDirectory}/Source2/materials/{Hash}.vmat", vmat.ToString());
+                }
+                catch (IOException)  
+                {
+                }
+            }
         }
     }
     

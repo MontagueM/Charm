@@ -83,15 +83,18 @@ public partial class ModelView : UserControl
         
         GroupsCombobox.Items.Clear();
         var l = hashSet.ToList();
-        l.Sort();
-        int max = l.Last();
-        foreach (var i in l)
+        if (l != null)
         {
-            GroupsCombobox.Items.Add(new ComboBoxItem
+            l.Sort();
+            int max = l.Last();
+            foreach (var i in l)
             {
-                Content = $"Group {i+1}/{max+1}",
-                IsSelected = i == l.First()
-            });
+                GroupsCombobox.Items.Add(new ComboBoxItem
+                {
+                    Content = $"Group {i + 1}/{max + 1}",
+                    IsSelected = i == l.First()
+                });
+            }
         }
     }
 }

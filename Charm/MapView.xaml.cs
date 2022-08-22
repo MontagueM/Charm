@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,6 +11,7 @@ using System.Windows.Controls;
 using Field;
 using Field.General;
 using Field.Models;
+using Field.Entities;
 using Field.Statics;
 using Serilog;
 
@@ -121,6 +123,7 @@ public partial class MapView : UserControl
         }
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
+        Directory.CreateDirectory(savePath + "/Dynamics");
     
         if(exportStatics)
         {
@@ -185,10 +188,13 @@ public partial class MapView : UserControl
     
     private static void ExtractDataTables(Tag<D2Class_07878080> map, string savePath, FbxHandler fbxHandler, EExportTypeFlag exportTypeFlag)
     {
+        FbxHandler dynamicHandler = new FbxHandler(false);
+        //dynamicHandler.InfoHandler.SetMeshName(map.Hash.GetHashString()+"_DynamicPoints");
         Parallel.ForEach(map.Header.DataTables, data =>
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
             {
+                //Console.WriteLine($"{entry.DataResource}");
                 if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
                 {
                     if (exportTypeFlag == EExportTypeFlag.ArrangedMap)
@@ -200,6 +206,10 @@ public partial class MapView : UserControl
                         staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
                     }
                 }
+                else if(entry is D2Class_85988080 dynamicResource)
+                {    
+                    dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
+                }
                 else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
                 {
                     //entry.Rotation.SetW(1);
@@ -207,6 +217,8 @@ public partial class MapView : UserControl
                 }
             });
         });
+        dynamicHandler.ExportScene($"{savePath}/{map.Hash.GetHashString()}_DynamicPoints.fbx");
+        dynamicHandler.Dispose();
     }
 
     private static void ExportStatics(bool exportStatics, string savePath, Tag<D2Class_07878080> map)

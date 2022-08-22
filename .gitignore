@@ -272,3 +272,5 @@ FakesAssemblies/
 # Include libreborb dll and hlsl exe
 !/ThirdParty/*.dll
 !/ThirdParty/*.exe
+.vscode/tasks.json
+.vscode/launch.json

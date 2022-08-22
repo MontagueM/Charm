@@ -42,12 +42,6 @@ public partial class UnrealConfigView : UserControl
         cii.SettingValue = bval.ToString();
         cii.ChangeButton.Click += UnrealInteropEnabled_OnClick;
         UnrealConfigPanel.Children.Add(cii);
-
-        TextBlock lbl = new TextBlock();
-        lbl.Text = "(Use PNG or TGA in Blender)";
-        lbl.FontSize = 15;
-        UnrealConfigPanel.Children.Add(lbl);
-
     }
 
     private List<ComboBoxItem> MakeEnumComboBoxItems<T>() where T : Enum
