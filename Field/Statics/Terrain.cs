@@ -46,6 +46,9 @@ public class Terrain : Tag
                 z.AddRange(part.VertexPositions.Select(a => a.Z));
                 // Material
                 if (partEntry.Material == null) continue;
+                if(!Directory.Exists($"{saveDirectory}/Textures/"))
+                    Directory.CreateDirectory($"{saveDirectory}/Textures/");
+
                 partEntry.Material.SaveAllTextures($"{saveDirectory}/Textures/");
                 part.Material = partEntry.Material;
                 // dynamicPart.Material.SaveVertexShader(saveDirectory);

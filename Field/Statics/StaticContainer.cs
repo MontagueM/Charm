@@ -25,6 +25,7 @@ public class StaticContainer
             if (bSaveShaders)
             {
                 part.Material.SavePixelShader($"{saveDirectory}/Shaders");
+                part.Material.SaveVertexShader($"{saveDirectory}/Shaders");
             }
         }
     }

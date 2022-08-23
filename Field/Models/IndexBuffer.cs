@@ -48,25 +48,32 @@ public class IndexBuffer : Tag
                     handle.BaseStream.Seek(offset * 4, SeekOrigin.Begin);
                     while (true)
                     {
-                        uint i1 = handle.ReadUInt32();
-                        uint i2 = handle.ReadUInt32();
-                        uint i3 = handle.ReadUInt32();
-                        if (i3 == 0xFF_FF_FF_FF)
+                        try
                         {
-                            triCount = 0;
-                            continue;
+                            uint i1 = handle.ReadUInt32();
+                            uint i2 = handle.ReadUInt32();
+                            uint i3 = handle.ReadUInt32();
+                            if (i3 == 0xFF_FF_FF_FF)
+                            {
+                                triCount = 0;
+                                continue;
+                            }
+                            if (triCount % 2 == 0)
+                            {
+                                indices.Add(new UIntVector3(i1, i2, i3));
+                            }
+                            else
+                            {
+                                indices.Add(new UIntVector3(i2, i1, i3));
+                            }
+                            handle.BaseStream.Seek(-8, SeekOrigin.Current);
+                            triCount++;
+                            if (indices.Count == count)
+                            {
+                                break;
+                            }
                         }
-                        if (triCount % 2 == 0)
-                        {
-                            indices.Add(new UIntVector3(i1, i2, i3));
-                        }
-                        else
-                        {
-                            indices.Add(new UIntVector3(i2, i1, i3));
-                        }
-                        handle.BaseStream.Seek(-8, SeekOrigin.Current);
-                        triCount++;
-                        if (indices.Count == count)
+                        catch (EndOfStreamException)
                         {
                             break;
                         }

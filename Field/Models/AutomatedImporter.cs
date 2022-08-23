@@ -54,13 +54,20 @@ public class AutomatedImporter
         //     text = text.Replace("importer.import_entity()", "importer.import_static()");
         //     File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
         // }
-        if (importType == EImportType.Map)
-        {
-            string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-            text = text.Replace("MAP_HASH", $"{meshName}");
-            text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
-            File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
-        }
+        // if (importType == EImportType.Map || importType == EImportType.Entity)
+        // {
+        //     string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
+        //     text = text.Replace("MAP_HASH", $"{meshName}");
+        //     text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
+        //     File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
+        // }
+        //Lets just make a py for all exports now because why not
+        string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
+        text = text.Replace("MAP_HASH", $"{meshName}");
+        text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
+        text = text.Replace("IMPORT_TYPE", $"{importType.ToString().Replace("EImportType.", "")}");
+        File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
+
         // change extension
         string textExtensions = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
         switch (textureFormat)

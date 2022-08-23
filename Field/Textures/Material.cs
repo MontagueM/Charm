@@ -59,7 +59,7 @@ public class Material : Tag
     //     out int pHlslTextLength
     // );
 
-    public string Decompile(byte[] shaderBytecode)
+    public string Decompile(byte[] shaderBytecode, string? type = "ps")
     {
         // tried doing it via dll pinvoke but seemed to cause way too many problems so doing it via exe instead
         // string hlsl;
@@ -77,9 +77,12 @@ public class Material : Tag
         // }
         // // Marshal.FreeHGlobal(pHlslText);
         // return hlsl;
+    
         string directory = "hlsl_temp";
         string binPath = $"{directory}/ps{Hash}.bin";
         string hlslPath = $"{directory}/ps{Hash}.hlsl";
+
+      
 
         if (!Directory.Exists(directory))
         {
@@ -137,13 +140,44 @@ public class Material : Tag
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-            if (usf != String.Empty)
+            string vfx = new VfxConverter().HlslToVfx(this, hlsl, false);
+            
+            Directory.CreateDirectory($"{saveDirectory}/Source2");
+            Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
+            StringBuilder vmat = new StringBuilder();
+            if (usf != String.Empty || vfx != String.Empty)
             {
                 try
                 {
                     File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
+                    File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.vfx", vfx);
+                    Console.WriteLine($"Saved pixel shader {Hash}");
                 }
                 catch (IOException)  // threading error
+                {
+                }
+            }
+            
+            vmat.AppendLine("Layer0 \n{");
+            vmat.AppendLine($"   shader \"ps_{Hash}.vfx\"");
+            foreach (var e in Header.PSTextures)
+            {
+                if (e.Texture == null)
+                {
+                    continue;
+                }
+                //Console.WriteLine("Saving texture " + e.Texture.Hash + " " + e.TextureIndex + " " + e.Texture.IsSrgb().ToString());
+                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/PS_" + $"{e.TextureIndex}_{e.Texture.Hash}.png\"");
+            }
+            vmat.AppendLine("}");
+            
+            if(!File.Exists($"{saveDirectory}/Source2/materials/{Hash}.vmat"))
+            {
+                try
+                {
+                    File.WriteAllText($"{saveDirectory}/Source2/materials/{Hash}.vmat", vmat.ToString());
+                }
+                catch (IOException)  
                 {
                 }
             }
@@ -154,11 +188,18 @@ public class Material : Tag
     {
         if (Header.VertexShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
         {
-            string hlsl = Decompile(Header.VertexShader.GetBytecode());
+            string hlsl = Decompile(Header.VertexShader.GetBytecode(), "vs");
             string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
             if (usf != String.Empty)
             {
-                File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
+                try
+                {
+                    File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
+                    Console.WriteLine($"Saved vertex shader {Hash}");
+                }
+                catch (IOException)  // threading error
+                {
+                }
             }
         }
     }

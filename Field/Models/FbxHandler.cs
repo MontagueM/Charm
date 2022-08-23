@@ -13,7 +13,6 @@ public class FbxHandler
     private FbxScene _scene;
     public InfoConfigHandler InfoHandler;
     private static object _fbxLock = new object();
-
     public FbxHandler(bool bMakeInfoHandler=true)
     {
         lock (_fbxLock) // bc fbx is not thread-safe
@@ -386,7 +385,8 @@ public class FbxHandler
             _scene.Destroy();
             _manager.Destroy();
         }
-        InfoHandler.Dispose();
+        if(InfoHandler != null)
+            InfoHandler.Dispose();
     }
 
     public void AddStaticInstancesToScene(List<Part> parts, List<D2Class_406D8080> instances, string meshName)
@@ -415,6 +415,35 @@ public class FbxHandler
                 }
             }
         }
+    }
+    //find hello world.
+    
+    public void AddDynamicPointsToScene(D2Class_85988080 points, string meshName, FbxHandler dynamicHandler)
+    { 
+        Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
+        if(entity.Model != null)
+        {
+            meshName += "_Model";
+            //Console.WriteLine($"{meshName} has geometry");
+            //dynamicHandler.AddEntityToScene(entity, entity.Model.Load(ELOD.MostDetail, points.Entity.ModelParentResource), ELOD.MostDetail);
+        }
+        
+        FbxNode node;   
+        lock (_fbxLock)
+        {
+            node = FbxNode.Create(_manager, $"{meshName}");
+        }
+        Quaternion quatRot = new Quaternion(points.Rotation.X, points.Rotation.Y, points.Rotation.Z, points.Rotation.W);
+        System.Numerics.Vector3 eulerRot = QuaternionToEulerAngles(quatRot);
+        
+        node.LclTranslation.Set(new FbxDouble3(points.Translation.X*100, points.Translation.Y*100, points.Translation.Z*100));
+        node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
+        node.LclScaling.Set(new FbxDouble3(100,100,100));
+        
+        lock (_fbxLock)
+        {
+            _scene.GetRootNode().AddChild(node);
+        }        
     }
     
     // From https://github.com/OwlGamingCommunity/V/blob/492d0cb3e89a97112ac39bf88de39da57a3a1fbf/Source/owl_core/Server/MapLoader.cs
