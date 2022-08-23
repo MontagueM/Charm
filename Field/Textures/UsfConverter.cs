@@ -333,6 +333,7 @@ public class UsfConverter
                 {
                     usf.AppendLine($"    {i.Variable}.x = {i.Variable}.x * tx.x;");
                 }
+                usf.Replace("v0.xyzw = v0.xyzw * tx.xyxy;", "v0.xyzw = v0.xyzw;");
             }
         }
     }
@@ -406,7 +407,7 @@ public class UsfConverter
         // Normal
         float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
         float normal_length = length(biased_normal);
-        float3 normal_in_world_space = biased_normal / normal_length
+        float3 normal_in_world_space = biased_normal / normal_length;
         normal_in_world_space.z = sqrt(1.0 - saturate(dot(normal_in_world_space.xy, normal_in_world_space.xy)));
         output.Normal = normalize((normal_in_world_space * 2 - 1.5)*0.5 + 0.5);
 
