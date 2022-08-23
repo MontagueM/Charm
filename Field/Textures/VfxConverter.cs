@@ -397,22 +397,22 @@ PS
             // Output render targets, todo support vertex shader
             vfx.AppendLine("        float4 o0,o1,o2;");
             vfx.AppendLine("        float alpha = 1;");
-            vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 0, 0);");
-            vfx.AppendLine("        v4 = i.vBlendValues.rgba;");
-            vfx.AppendLine("        float4 v0 = {1,1,1,1};");
+            vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 1, 1);");
+
+            //vfx.AppendLine("        float4 v0 = {1,1,1,1};");
             vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};");
             vfx.AppendLine("        float4 v2 = {i.vTextureCoords, 1, 1};");
-            vfx.AppendLine("        float4 v3 = {1,1,1,1};");
+            //vfx.AppendLine("        float4 v3 = {1,1,1,1};");
             vfx.AppendLine("        float4 v4 = i.vBlendValues;");
-            vfx.AppendLine("        float4 v5 = {1,1,1,1};");
-            vfx.AppendLine("        uint v6 = 1;");
+            //vfx.AppendLine("        float4 v5 = {1,1,1,1};");
+            //vfx.AppendLine("        uint v6 = 1;");
 
 
             foreach (var i in inputs)
             {
                 if (i.Type == "float4")
                 {
-                    vfx.AppendLine($"       {i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyxy;");
+                    vfx.AppendLine($"       {i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyzw;");
                 }
                 else if (i.Type == "float3")
                 {
@@ -423,6 +423,7 @@ PS
                     vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x * tx.x;");
                 }
             }
+            vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
         }
     }
 
@@ -507,13 +508,19 @@ PS
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
         normal_in_world_space.z = sqrt(1.0 - saturate(dot(normal_in_world_space.xy, normal_in_world_space.xy)));
-        float3 normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
-        float3 worldNormal = normalize(mul(normal, g_matViewToProjection));
+        float3 normal = normalize((normal_in_world_space*2 - 1.5)*0.5 + 0.5);
 
         float smoothness = saturate(8 * (normal_length - 0.375));
         
-        float4 temp_normal = {normal}
+        //Detail normal blending (needs values replaced manually)
+        // float3 n1 = Tex2DS(g_t3, TextureFiltering, v3.xy * cb0[0].xy + cb0[0].zw).xyz;
+		// float3 n2 = Tex2DS(g_t2, TextureFiltering, tx.xy).xyz;
+		// float3 r  = n1 < 0.5 ? 2*n1*n2 : 1 - 2*(1 - n1)*(1 - n2);
+		// r = normalize(r*2 - 1)*0.5 + 0.5;
+
+        float4 temp_normal = normal; //{normal}
         temp_normal.y = 1 - temp_normal.y;
+
         Material mat = ToMaterial(i, float4(o0.xyz, 1), temp_normal, float4(1 - smoothness, o2.x, o2.y * 2, 1));
         mat.Opacity = alpha;
         //mat.Emission = (o2.y - 0.5) * 2 * 5 * mat.Albedo; 
