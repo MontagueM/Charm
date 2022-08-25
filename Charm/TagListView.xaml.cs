@@ -1415,7 +1415,7 @@ public partial class TagListView : UserControl
         if (viewer.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), tagHash)))
         {
             viewer.MusicPlayer.Play();
-            SetExportFunction(ExportSound, (int)EExportTypeFlag.Full);
+            SetExportFunction(ExportWem, (int)EExportTypeFlag.Full);
             viewer.ExportControl.SetExportInfo(tagHash);
         }
     }
@@ -1426,6 +1426,14 @@ public partial class TagListView : UserControl
         string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         sound.ExportSound(saveDirectory);
+    }
+    
+    private void ExportWem(ExportInfo info)
+    {
+        Wem wem = PackageHandler.GetTag(typeof(Wem), new TagHash(info.Hash));
+        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
+        Directory.CreateDirectory(saveDirectory);
+        wem.SaveToFile($"{saveDirectory}/{info.Name}.wem");
     }
 
     #endregion
