@@ -61,10 +61,12 @@ public struct PartUnmanaged
     public DestinyFile.UnmanagedData VertexTangents;
     public DestinyFile.UnmanagedData VertexColours;
     public uint MaterialHash;
+    public int DetailLevel;
 
     public Part Decode()
     {
         Part outPart = new Part();
+        outPart.DetailLevel = DetailLevel;
         outPart.IndexOffset = IndexOffset;
         outPart.IndexCount = IndexCount;
         outPart.PrimitiveType = (EPrimitiveType)PrimitiveType;
