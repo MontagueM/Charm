@@ -409,16 +409,16 @@ public class UsfConverter
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
         normal_in_world_space.z = sqrt(1.0 - saturate(dot(normal_in_world_space.xy, normal_in_world_space.xy)));
-        output.Normal = normalize((normal_in_world_space * 2 - 1.5)*0.5 + 0.5);
+        output.Normal = normalize((normal_in_world_space * 2 - 1.35)*0.5 + 0.5);
 
         // Roughness
         float smoothness = saturate(8 * (normal_length - 0.375));
         output.Roughness = 1 - smoothness;
  
         ///RT2
-        output.Metallic = o2.x;
-        output.EmissiveColor = (o2.y - 0.5) * 2 * 5 * output.BaseColor;  // the *5 is a scale to make it look good
-        output.AmbientOcclusion = o2.y * 2; // Texture AO
+        output.Metallic = saturate(o2.x);
+        output.EmissiveColor = clamp((o2.y - 0.5) * 2 * 5 * output.BaseColor, 0, 100);  // the *5 is a scale to make it look good
+        output.AmbientOcclusion = saturate(o2.y * 2); // Texture AO
 
         output.OpacityMask = 1;
 

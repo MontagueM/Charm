@@ -160,6 +160,7 @@ public class Material : Tag
             
             vmat.AppendLine("Layer0 \n{");
             vmat.AppendLine($"   shader \"ps_{Hash}.vfx\"");
+            vmat.AppendLine("F_ALPHA_TEST 1");
             foreach (var e in Header.PSTextures)
             {
                 if (e.Texture == null)

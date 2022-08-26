@@ -61,6 +61,7 @@ public class VfxConverter
 FEATURES
 {
     #include ""common/features.hlsl""
+    //alphatest
 }
 
 MODES
@@ -75,6 +76,7 @@ MODES
 COMMON
 {
 	#include ""common/shared.hlsl""
+    //translucent
 }
 
 struct VertexInput
@@ -112,13 +114,21 @@ PS
         //Console.WriteLine("Material: " + material.Hash);
         hlsl = new StringReader(hlslText);
         vfx = new StringBuilder();
-        vfx.AppendLine(vfxStructure);
+       
         bOpacityEnabled = false;
         ProcessHlslData();
         if (bOpacityEnabled)
         {
             vfx.AppendLine("// masked");
+            StringBuilder replace = new StringBuilder();
+            replace.AppendLine(@"Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
+            replace.AppendLine(@"   Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
+        
+            vfxStructure = vfxStructure.Replace("//alphatest", replace.ToString());
+            vfxStructure = vfxStructure.Replace("//translucent", "#define S_TRANSLUCENT 1");
+            
         }
+        vfx.AppendLine(vfxStructure);
         // WriteTextureComments(material, bIsVertexShader);
         WriteCbuffers(material, bIsVertexShader);
         WriteFunctionDefinition(material, bIsVertexShader);
@@ -388,6 +398,12 @@ PS
                 }
             }
 
+            if(bOpacityEnabled)
+            {
+                vfx.AppendLine("    StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
+	            vfx.AppendLine("    StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
+            }
+
             vfx.AppendLine("    PixelOutput MainPs( PixelInput i )");
             vfx.AppendLine("    {");
 
@@ -401,7 +417,7 @@ PS
 
             //vfx.AppendLine("        float4 v0 = {1,1,1,1};");
             vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};");
-            vfx.AppendLine("        float4 v2 = {i.vTextureCoords, 1, 1};");
+            //vfx.AppendLine("        float4 v2 = {i.vTextureCoords, 1, 1};");
             //vfx.AppendLine("        float4 v3 = {1,1,1,1};");
             vfx.AppendLine("        float4 v4 = i.vBlendValues;");
             //vfx.AppendLine("        float4 v5 = {1,1,1,1};");
@@ -424,6 +440,7 @@ PS
                 }
             }
             vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
+            vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = v2.xyzw;");
         }
     }
 
@@ -507,24 +524,16 @@ PS
         float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
-        normal_in_world_space.z = sqrt(1.0 - saturate(dot(normal_in_world_space.xy, normal_in_world_space.xy)));
-        float3 normal = normalize((normal_in_world_space*2 - 1.5)*0.5 + 0.5);
-
+ 
+        float4 normal = float4(normalize((normal_in_world_space*2 - 1.3)*0.5 + 0.5).xyz, 1);
+        normal.y = 1 - normal.y;
+        normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
+        
         float smoothness = saturate(8 * (normal_length - 0.375));
         
-        //Detail normal blending (needs values replaced manually)
-        // float3 n1 = Tex2DS(g_t3, TextureFiltering, v3.xy * cb0[0].xy + cb0[0].zw).xyz;
-		// float3 n2 = Tex2DS(g_t2, TextureFiltering, tx.xy).xyz;
-		// float3 r  = n1 < 0.5 ? 2*n1*n2 : 1 - 2*(1 - n1)*(1 - n2);
-		// r = normalize(r*2 - 1)*0.5 + 0.5;
-
-        float4 temp_normal = normal; //{normal}
-        temp_normal.y = 1 - temp_normal.y;
-
-        Material mat = ToMaterial(i, float4(o0.xyz, 1), temp_normal, float4(1 - smoothness, o2.x, o2.y * 2, 1));
+        Material mat = ToMaterial(i, float4(o0.xyz, 1), normal, float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
         mat.Opacity = alpha;
-        //mat.Emission = (o2.y - 0.5) * 2 * 5 * mat.Albedo; 
-        //mat.Normal.z = sqrt(1.0 - saturate(dot(mat.Normal.xy, mat.Normal.xy)));
+        mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100);
 
         ShadingModelValveStandard sm;
 		

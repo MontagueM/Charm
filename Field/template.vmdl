@@ -26,6 +26,7 @@
 				[
 					{
 						_class = "RenderMeshFile"
+						name = "%MESHNAME%"
 						filename = "%FILENAME%"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
