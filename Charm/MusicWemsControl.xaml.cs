@@ -59,6 +59,8 @@ public partial class MusicWemsControl : UserControl
     
     public async void Load(D2Class_F7458080 res)
     {
+        if (res.AmbientMusicSet == null)
+            return;
         // ambient_music_set instead of wwise_loop
         MainWindow.Progress.SetProgressStages(res.AmbientMusicSet.Header.Unk08.Select((x,i) => $"Loading ambient music {i+1}/{res.AmbientMusicSet.Header.Unk08.Count}").ToList());
         

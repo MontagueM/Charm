@@ -48,7 +48,8 @@ public partial class MapView : UserControl
 
     private void GetStaticMapData(TagHash tagHash, ELOD detailLevel)
     {
-        StaticMapData staticMapData = PackageHandler.GetTag(typeof(StaticMapData), tagHash);
+        Tag<D2Class_07878080> tag = PackageHandler.GetTag<D2Class_07878080>(tagHash);
+        StaticMapData staticMapData = ((D2Class_C96C8080)tag.Header.DataTables[1].DataTable.Header.DataEntries[0].DataResource).StaticMapParent.Header.StaticMap;
         SetMapUI(staticMapData, detailLevel);
     }
 
