@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Concurrent;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Field.Strings;
 
@@ -12,9 +13,15 @@ public class PackageHandler
     private static Dictionary<TagHash, string> ActivityNames = new Dictionary<TagHash, string>();
     public static ConcurrentDictionary<TagHash, byte[]> BytesCache = new ConcurrentDictionary<TagHash, byte[]>();
 
+    public static IntPtr GetExecutionDirectoryPtr()
+    {
+        // todo make this const or smth, it only needs to be calculated once at beginning
+        return Marshal.StringToHGlobalAnsi(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+    }
+    
     public static void Initialise()
     {
-        DllInit();
+        DllInit(GetExecutionDirectoryPtr());
     }
     
     public static uint MakeHash(int pkgId, int entryId)
@@ -55,7 +62,7 @@ public class PackageHandler
     public static void CacheHashDataList(uint[] hashes)
     {
         GCHandle handle = GCHandle.Alloc(hashes, GCHandleType.Pinned);
-        DestinyFile.UnmanagedDictionary ud = DllGetDataMany(new DestinyFile.UnmanagedData {dataPtr = handle.AddrOfPinnedObject(), dataSize = hashes.Length});
+        DestinyFile.UnmanagedDictionary ud = DllGetDataMany(new DestinyFile.UnmanagedData {dataPtr = handle.AddrOfPinnedObject(), dataSize = hashes.Length}, GetExecutionDirectoryPtr());
         uint[] keys = new uint[ud.Keys.dataSize];
         Copy(ud.Keys.dataPtr, keys, 0, ud.Keys.dataSize);
         DestinyFile.UnmanagedData[] vals = new DestinyFile.UnmanagedData[ud.Values.dataSize];
@@ -70,7 +77,7 @@ public class PackageHandler
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetDataMany", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedDictionary DllGetDataMany(DestinyFile.UnmanagedData pHashes);
+    public extern static DestinyFile.UnmanagedDictionary DllGetDataMany(DestinyFile.UnmanagedData pHashes, IntPtr executionDirectoryPtr);
 
     
     public static dynamic GetTag(Type type, TagHash hash, bool disableLoad=false)
@@ -161,45 +168,45 @@ public class PackageHandler
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllInit", CallingConvention = CallingConvention.StdCall)]
-    public extern static void DllInit();
+    public extern static void DllInit(IntPtr executionDirectoryPtr);
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllEntriesOfReference", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData DllGetAllEntriesOfReference(uint hash, uint reference);
+    public extern static DestinyFile.UnmanagedData DllGetAllEntriesOfReference(uint hash, uint reference, IntPtr executionDirectoryPtr);
 
     public static List<uint> GetAllEntriesOfReference(int pkgId, uint reference)
     {
-        var pAllEntries = DllGetAllEntriesOfReference(MakeHash(pkgId, 0), reference);
+        var pAllEntries = DllGetAllEntriesOfReference(MakeHash(pkgId, 0), reference, GetExecutionDirectoryPtr());
         int[] vals = new int[pAllEntries.dataSize];
         Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
         return vals.Select(x => MakeHash(pkgId, x)).ToList();
     }
 
     [DllImport("Symmetry.dll", EntryPoint = "DllGetEntryReference", CallingConvention = CallingConvention.StdCall)]
-    public extern static uint DllGetEntryReference(uint hash);
+    public extern static uint DllGetEntryReference(uint hash, IntPtr executionDirectoryPtr);
 
     [DllImport("Symmetry.dll", EntryPoint = "DllGetEntryTypes", CallingConvention = CallingConvention.StdCall)]
-    public extern static int DllGetEntryTypes(uint hash);
+    public extern static int DllGetEntryTypes(uint hash, IntPtr executionDirectoryPtr);
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllActivityNames", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData DllGetAllActivityNames();
+    public extern static DestinyFile.UnmanagedData DllGetAllActivityNames(IntPtr executionDirectoryPtr);
 
     
     public static TagHash GetEntryReference(TagHash hash)
     {
-        uint refHash = DllGetEntryReference(hash.Hash);
+        uint refHash = DllGetEntryReference(hash.Hash, GetExecutionDirectoryPtr());
         return new TagHash(refHash);
     }
 
     public static void GetEntryTypes(uint hash, out int hType, out int hSubtype)
     {
-        int combinedTypes = DllGetEntryTypes(hash);
+        int combinedTypes = DllGetEntryTypes(hash, GetExecutionDirectoryPtr());
         hType = (combinedTypes >> 16) & 0xFFFF;
         hSubtype = combinedTypes & 0xFFFF;
     }
     
     public static void GetAllActivityNames()
     {
-        DestinyFile.UnmanagedData unmanagedData = DllGetAllActivityNames();
+        DestinyFile.UnmanagedData unmanagedData = DllGetAllActivityNames(GetExecutionDirectoryPtr());
         D2Class_C59E8080_Out[] managedArray = new D2Class_C59E8080_Out[unmanagedData.dataSize];
         Copy(unmanagedData.dataPtr, managedArray, 0, unmanagedData.dataSize);
         for (var i = 0; i < managedArray.Length; i++)
@@ -231,33 +238,33 @@ public class PackageHandler
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllTagsWithReference", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData DllGetAllTagsWithReference(uint reference);
+    public extern static DestinyFile.UnmanagedData DllGetAllTagsWithReference(uint reference, IntPtr executionDirectoryPtr);
 
     public static List<TagHash> GetAllTagsWithReference(uint reference)
     {
-        DestinyFile.UnmanagedData pAllEntries = DllGetAllTagsWithReference(reference);
+        DestinyFile.UnmanagedData pAllEntries = DllGetAllTagsWithReference(reference, GetExecutionDirectoryPtr());
         uint[] vals = new uint[pAllEntries.dataSize];
         Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
         return vals.Select(x => new TagHash(x)).ToList();
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllTagsWithTypes", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData DllGetAllTagsWithTypes(int type, int subType);
+    public extern static DestinyFile.UnmanagedData DllGetAllTagsWithTypes(int type, int subType, IntPtr executionDirectoryPtr);
 
     public static List<TagHash> GetAllTagsWithTypes(int type, int subType)
     {
-        DestinyFile.UnmanagedData pAllEntries = DllGetAllTagsWithTypes(type, subType);
+        DestinyFile.UnmanagedData pAllEntries = DllGetAllTagsWithTypes(type, subType, GetExecutionDirectoryPtr());
         uint[] vals = new uint[pAllEntries.dataSize];
         Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
         return vals.Select(x => new TagHash(x)).ToList();
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetTagsWithTypes", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData DllGetTagsWithTypes(int pkgId, int type, int subType);
+    public extern static DestinyFile.UnmanagedData DllGetTagsWithTypes(int pkgId, int type, int subType, IntPtr executionDirectoryPtr);
 
     public static List<TagHash> GetTagsWithTypes(int pkgId, int type, int subType)
     {
-        DestinyFile.UnmanagedData pAllEntries = DllGetTagsWithTypes(pkgId, type, subType);
+        DestinyFile.UnmanagedData pAllEntries = DllGetTagsWithTypes(pkgId, type, subType, GetExecutionDirectoryPtr());
         uint[] vals = new uint[pAllEntries.dataSize];
         Copy(pAllEntries.dataPtr, vals, 0, pAllEntries.dataSize);
         return vals.Select(x => new TagHash(x)).ToList();
@@ -299,11 +306,11 @@ public class PackageHandler
     }
 
     [DllImport("Symmetry.dll", EntryPoint = "DllGetPackageName", CallingConvention = CallingConvention.StdCall)]
-    public extern static IntPtr DllGetPackageName(int packageId);
+    public extern static IntPtr DllGetPackageName(int packageId, IntPtr executionDirectoryPtr);
 
     public static string GetPackageName(int pkgId)
     {
-        IntPtr pStr = DllGetPackageName(pkgId);
+        IntPtr pStr = DllGetPackageName(pkgId, GetExecutionDirectoryPtr());
         return Marshal.PtrToStringAnsi(pStr);
     }
 }

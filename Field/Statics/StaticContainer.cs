@@ -31,11 +31,11 @@ public class StaticContainer
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllLoadStaticContainer", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData DllLoadStaticContainer(uint staticContainerHash, ELOD detailLevel);
+    public extern static DestinyFile.UnmanagedData DllLoadStaticContainer(uint staticContainerHash, ELOD detailLevel, IntPtr executionDirectoryPtr);
 
     public List<Part> Load(ELOD detailLevel)
     {
-        DestinyFile.UnmanagedData unmanagedData = DllLoadStaticContainer(Hash.Hash, detailLevel);
+        DestinyFile.UnmanagedData unmanagedData = DllLoadStaticContainer(Hash.Hash, detailLevel, PackageHandler.GetExecutionDirectoryPtr());
         List<Part> outPart = new List<Part>();
         outPart.EnsureCapacity(unmanagedData.dataSize);
         for (int i = 0; i < unmanagedData.dataSize; i++)
