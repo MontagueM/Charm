@@ -28,18 +28,15 @@ public class ConfigHandler
         {
             dialog.Description = "Select the folder where your D2-WQ packages (*.pkg) are located";
             bool success = false;
-            while (!success)
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
             {
-                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-                if (result == System.Windows.Forms.DialogResult.OK)
-                {
-                    success = TrySetPackagePath(dialog.SelectedPath);
-                }
+                success = TrySetPackagePath(dialog.SelectedPath);
+            }
 
-                if (!success)
-                {
-                    MessageBox.Show("Directory selected is invalid, please select the correct packages directory.");
-                }
+            if (!success)
+            {
+                MessageBox.Show("Directory selected is invalid, please select the correct packages directory.");
             }
         }
     }

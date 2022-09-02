@@ -428,7 +428,7 @@ public struct D2Class_318A8080
     public int Unk28;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
 public struct D2Class_FA458080
 {
     public DestinyHash Unk00;
@@ -436,6 +436,7 @@ public struct D2Class_FA458080
     public string EventName;
 
     public DestinyHash Unk10;  // eventhash? idk
+    public DestinyHash Unk14;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x20)]

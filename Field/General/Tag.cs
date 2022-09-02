@@ -123,7 +123,7 @@ public class Tag : DestinyFile
     protected virtual T ReadHeader<T>(StringContainer? sc = null) where T : struct
     {
         HeaderType = typeof(T);
-        if (!IsStructureValid(typeof(T).FullName)) throw new Exception("Structure failed to validate, likely some changes to the game.");
+        if (!IsStructureValid(typeof(T).FullName, PackageHandler.GetExecutionDirectoryPtr())) throw new Exception("Structure failed to validate, likely some changes to the game.");
         dynamic ret;
         using (var handle = GetHandle())
         {
@@ -431,10 +431,10 @@ public class Tag : DestinyFile
         
                 
     [DllImport("Symmetry.dll", EntryPoint = "DllVerifyFieldLocation", CallingConvention = CallingConvention.StdCall)]
-    public extern static int VerifyFieldLocation([MarshalAs(UnmanagedType.LPStr)] string structureType, long fieldOffset);
+    public extern static int VerifyFieldLocation([MarshalAs(UnmanagedType.LPStr)] string structureType, long fieldOffset, IntPtr executionDirectoryPtr);
         
     [DllImport("Symmetry.dll", EntryPoint = "DllIsStructureValid", CallingConvention = CallingConvention.StdCall)]
-    public extern static bool IsStructureValid([MarshalAs(UnmanagedType.LPStr)] string structureType);
+    public extern static bool IsStructureValid([MarshalAs(UnmanagedType.LPStr)] string structureType, IntPtr executionDirectoryPtr);
         
     // protected object ReadResource()
     // {

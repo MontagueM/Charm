@@ -667,7 +667,7 @@ public partial class TagListView : UserControl
             _allTagItems.Add(new TagItem 
             { 
                 Hash = dgtbParent.Header.DestinationGlobalTagBag,
-                Name = dgtbParent.Header.DestinationGlobalTagBagName,
+                // Name = dgtbParent.Header.DestinationGlobalTagBagName,
                 TagType = ETagListType.DestinationGlobalTagBag
             });
         });
