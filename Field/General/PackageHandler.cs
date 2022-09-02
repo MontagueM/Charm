@@ -16,7 +16,7 @@ public class PackageHandler
     public static IntPtr GetExecutionDirectoryPtr()
     {
         // todo make this const or smth, it only needs to be calculated once at beginning
-        return Marshal.StringToHGlobalAnsi(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+        return Marshal.StringToHGlobalAnsi(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location).Replace("\\", "/") + "/");
     }
     
     public static void Initialise()
