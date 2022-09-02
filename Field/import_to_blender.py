@@ -55,7 +55,8 @@ def assemble_map():
                 bpy.ops.object.select_all(action='DESELECT')
                 tmp.append(obj.name[:8])
 
-            for x in range(0, 3):
+            #merge static parts into one object
+            for x in range(0, 3): #For some reason one pass doesnt work, this slows the import down a bit
                 for obj in tmp:
                     bpy.ops.object.select_all(action='DESELECT')
                     #print(obj)
@@ -74,7 +75,7 @@ def assemble_map():
 
         if len(config["Instances"].items()) <= 1 and len(config["Parts"].items()) <= 1: #Fix for error that occurs when theres only 1 object in the fbx
             for newname, value in config["Instances"].items():
-                x[1].name = newname
+                x.name = newname
 
         obj_name = x.name[:8]
         if obj_name not in static_names.keys():
@@ -125,6 +126,10 @@ def assign_map_materials():
         for mats in materials:
             if mats.name == staticname:
                 mats.name = matname
+            else:
+                if len(config["Parts"].items()) <= 1:
+                    for name, mat in config["Parts"].items():
+                        bpy.data.objects[name].active_material.name = mat
 
     for obj in bpy.data.objects: #remove any duplicate materials that may have been created
         for slt in obj.material_slots:

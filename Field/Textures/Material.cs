@@ -79,8 +79,8 @@ public class Material : Tag
         // return hlsl;
     
         string directory = "hlsl_temp";
-        string binPath = $"{directory}/ps{Hash}.bin";
-        string hlslPath = $"{directory}/ps{Hash}.hlsl";
+        string binPath = $"{directory}/{type}{Hash}.bin";
+        string hlslPath = $"{directory}/{type}{Hash}.hlsl";
 
       
 
@@ -197,6 +197,26 @@ public class Material : Tag
                 {
                     File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
                     Console.WriteLine($"Saved vertex shader {Hash}");
+                }
+                catch (IOException)  // threading error
+                {
+                }
+            }
+        }
+    }
+
+    public void SaveComputeShader(string saveDirectory)
+    {
+        if (Header.ComputeShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
+        {
+            string hlsl = Decompile(Header.ComputeShader.GetBytecode());
+            string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
+            if (usf != String.Empty)
+            {
+                try
+                {
+                    File.WriteAllText($"{saveDirectory}/CS_{Hash}.usf", usf);
+                    Console.WriteLine($"Saved compute shader {Hash}");
                 }
                 catch (IOException)  // threading error
                 {

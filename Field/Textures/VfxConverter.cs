@@ -106,7 +106,8 @@ VS
 PS
 {
     #include ""common/pixel.hlsl""
-    #define cmp -";
+    #define cmp -
+    RenderState(CullMode, F_RENDER_BACKFACES? NONE : DEFAULT );";
 
 
     public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader)
@@ -400,8 +401,8 @@ PS
 
             if(bOpacityEnabled)
             {
-                vfx.AppendLine("    StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
-	            vfx.AppendLine("    StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
+                 vfx.AppendLine("    StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
+	             vfx.AppendLine("    StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
             }
 
             vfx.AppendLine("    PixelOutput MainPs( PixelInput i )");
@@ -415,13 +416,13 @@ PS
             vfx.AppendLine("        float alpha = 1;");
             vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 1, 1);");
 
-            //vfx.AppendLine("        float4 v0 = {1,1,1,1};");
-            vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};");
-            //vfx.AppendLine("        float4 v2 = {i.vTextureCoords, 1, 1};");
-            //vfx.AppendLine("        float4 v3 = {1,1,1,1};");
-            vfx.AppendLine("        float4 v4 = i.vBlendValues;");
-            //vfx.AppendLine("        float4 v5 = {1,1,1,1};");
-            //vfx.AppendLine("        uint v6 = 1;");
+            //vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals.
+            vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals
+            vfx.AppendLine("        float4 v2 = {i.vTextureCoords, 1, 1};"); //?? Seems to only be used for normals.
+            //vfx.AppendLine("        float4 v3 = {1,1,1,1};"); //No clue what this is.
+            vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Not sure if this is VC or not
+            vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //seems like this is always the same as v4/only used if shader uses VC alpha
+            //vfx.AppendLine("        uint v6 = 1;"); //no idea
 
 
             foreach (var i in inputs)
@@ -440,7 +441,9 @@ PS
                 }
             }
             vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
-            vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = v2.xyzw;");
+            vfx.Replace("v1.xyzw = v1.xyzw * tx.xyzw;", "v1.xyzw = normalize(v1.xyzw);");
+            vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = normalize(v2.xyzw);");
+            vfx.Replace("v5.xyzw = v5.xyzw * tx.xyzw;", "v5.xyzw = v5.xyzw;");
         }
     }
 
@@ -450,9 +453,6 @@ PS
 
         foreach (var texture in textures)
         {
-            //Console.WriteLine($"Texture Variable {texture.Variable}");
-            //Console.WriteLine($"Texture Type {texture.Type}");
-            //Console.WriteLine($"Texture Index {texture.Index}");
             texDict.Add(texture.Index, texture);
         }
         List<int> sortedIndices = texDict.Keys.OrderBy(x => x).ToList();
@@ -525,26 +525,28 @@ PS
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
  
-        float4 normal = float4(normalize((normal_in_world_space*2 - 1.3)*0.5 + 0.5).xyz, 1);
+        float4 normal = float4(normalize(saturate((normal_in_world_space*2 - 1.4)*0.6 + 0.5)).xyz, 1);
         normal.y = 1 - normal.y;
         normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
         
         float smoothness = saturate(8 * (normal_length - 0.375));
         
-        Material mat = ToMaterial(i, float4(o0.xyz, 1), normal, float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
+        Material mat = ToMaterial(i, float4(o0.xyz, 1), saturate(normal), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
         mat.Opacity = alpha;
         mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100);
 
-        ShadingModelValveStandard sm;
+        //ShadingModelValveStandard sm;
+        ShadingModelStandard sm;
 		
         return FinalizePixelMaterial( i, mat, sm );
     }
 }";
-        // for (var i = 0; i < sortedTextures.Count; i++)
-        // {
-        //     Console.WriteLine($"{i} Texture Variable {sortedTextures[i].Variable}");
-        // }
-        
+ 
+        if(bOpacityEnabled)
+        {
+            vfx.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
+        }
+
         if (textures.Count > 2)
         {
             string texIndex = sortedTextures[textures.Count-2].Variable;

@@ -48,7 +48,8 @@ public partial class MapView : UserControl
 
     private void GetStaticMapData(TagHash tagHash, ELOD detailLevel)
     {
-        StaticMapData staticMapData = PackageHandler.GetTag(typeof(StaticMapData), tagHash);
+        Tag<D2Class_07878080> tag = PackageHandler.GetTag<D2Class_07878080>(tagHash);
+        StaticMapData staticMapData = ((D2Class_C96C8080)tag.Header.DataTables[1].DataTable.Header.DataEntries[0].DataResource).StaticMapParent.Header.StaticMap;
         SetMapUI(staticMapData, detailLevel);
     }
 
@@ -128,6 +129,7 @@ public partial class MapView : UserControl
         if(exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
+            Directory.CreateDirectory(savePath + "/Statics/LOD");
             ExportStatics(exportStatics, savePath, map);
         }
 
@@ -233,15 +235,43 @@ public partial class MapView : UserControl
                     {
                         var parts = staticMapResource.StaticMapParent.Header.StaticMap.Header.Statics;
                         //staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
-                        foreach (var part in parts)
+                        //Parallel.ForEach(parts, part =>
+                        foreach(var part in parts)
                         {
                             string staticMeshName = part.Static.Hash.GetHashString();
                             FbxHandler staticHandler = new FbxHandler();
-                            staticHandler.InfoHandler.SetMeshName(staticMeshName);
-
-                            var staticmesh = part.Static.Load(ELOD.MostDetail);
-                            staticHandler.AddStaticToScene(staticmesh, part.Static.Hash);
                             
+                            staticHandler.InfoHandler.SetMeshName(staticMeshName);
+                            var staticmesh = part.Static.Load(ELOD.MostDetail);
+
+                            bool exportLODs = false;
+                            if(exportLODs)
+                            {
+                                int lodDetailLevel = 0;
+                                var staticmeshLOD = part.Static.Load(ELOD.All);
+                                FbxHandler lodHandler = new FbxHandler(false);
+                                List<Part> lodMeshes = new List<Part>();
+                                Parallel.ForEach(staticmeshLOD, lod =>
+                                {
+                                    Console.WriteLine($"{part.Static.Hash} LOD {lod.DetailLevel}");
+                                    if (lod.DetailLevel != 10)
+                                    {
+                                        lodDetailLevel = lod.DetailLevel;
+                                        lodMeshes.Add(lod);
+                                    }
+                                });
+                                if(lodMeshes.Count > 0)
+                                {
+                                    lodHandler.AddStaticToScene(lodMeshes, part.Static.Hash + $"_LOD{lodDetailLevel}");
+                                    lodHandler.ExportScene($"{savePath}/Statics/LOD/{staticMeshName}_LOD{lodDetailLevel}.fbx");
+                                    Console.WriteLine($"Exported {part.Static.Hash} LOD {lodDetailLevel}");
+                                    lodHandler.Dispose();
+                                }
+                            }
+                            
+
+                            staticHandler.AddStaticToScene(staticmesh, part.Static.Hash);
+
                             if(source2Models)
                             {
                                 //Source 2 shit
@@ -270,7 +300,7 @@ public partial class MapView : UserControl
 
                             staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
                             staticHandler.Dispose();
-                        }
+                        }//);
                     }
                     // Dont see a reason to export terrain itself as its own fbx
                     // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
