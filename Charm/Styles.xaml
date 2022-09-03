@@ -6,7 +6,9 @@
     <!-- https://material.io/design/color/dark-theme.html#ui-application -->
 
     <!-- Numbers come from the luminance -->
+    <Image x:Key="WQIcon" Source="/Resources/wqicon.png"/>
     <Brush x:Key="BackgroundColour7">#121212</Brush>
+    <!--<ImageBrush x:Key="BackgroundColour7" ImageSource="../widezavala.jpg" Stretch="UniformToFill"/> -->
     <Color x:Key="BackgroundColour7C">#121212</Color>
     <Brush x:Key="BackgroundColour14">#242424</Brush>
     <Color x:Key="BackgroundColour10C">#1a1a1a</Color>

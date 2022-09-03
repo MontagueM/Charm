@@ -55,6 +55,8 @@ public class Terrain : Tag
                 if (bSaveShaders)
                 {
                     partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/");
+                    partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/Vertex/");
+                    partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
                 }
             }
         }

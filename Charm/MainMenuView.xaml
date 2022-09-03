@@ -7,7 +7,26 @@
              Loaded="OnControlLoaded"
              mc:Ignorable="d"
              d:DesignHeight="1080" d:DesignWidth="1920">
-    <Grid>
+    <UserControl.Resources>
+        <Storyboard x:Key="storyboard1">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="radial1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)" RepeatBehavior="Forever">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="00:02:30" Value="360"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="radial2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)" RepeatBehavior="Forever">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="00:01:45" Value="-360"/>
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="radial3" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)" RepeatBehavior="Forever">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="0"/>
+                <EasingDoubleKeyFrame KeyTime="00:01:00" Value="360"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </UserControl.Resources>
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OpacityMask="Black">
+        <Grid.Background>
+            <ImageBrush ImageSource="/Resources/background.png" Stretch="UniformToFill" Opacity="1"/>
+        </Grid.Background>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*"/>
             <ColumnDefinition Width="100*"/>
@@ -21,8 +40,42 @@
             <RowDefinition Height="100*" />
             <RowDefinition Height="50*" />
         </Grid.RowDefinitions>
-        <!-- AB8FA380 variks -->
-        <!-- 3b00ab80 atraks -->
+
+        <ToggleButton x:Name="ThemeButton" Content="{StaticResource WQIcon}" Click="SolidColorOnLoad" Grid.Row="2" Panel.ZIndex="1" Margin="0,196,232,0" Background="{x:Null}" BorderBrush="{x:Null}" />
+           
+
+        <Rectangle x:Name="SolidColor" Grid.ColumnSpan="6" HorizontalAlignment="Left" Height="1156" Stroke="Black" VerticalAlignment="Bottom" Width="2022" Fill="{DynamicResource BackgroundColour7}" Loaded="SolidColorOnLoad" Grid.RowSpan="3" Margin="-42,0,0,-51" d:IsHidden="True"/>
+
+        <Image x:Name="radial1" Grid.ColumnSpan="6" Margin="54,-364,54,-364" Source="/Resources/radial1.png" Stretch="UniformToFill" Grid.RowSpan="3" RenderTransformOrigin="0.5,0.5" Loaded="OnLoad" Panel.ZIndex="-1">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <Image x:Name="radial2" Grid.ColumnSpan="6" Margin="88,-320,90,-346" Grid.RowSpan="3" Source="/Resources/radial3.png" Stretch="UniformToFill" RenderTransformOrigin="0.5,0.5" Loaded="OnLoad" Panel.ZIndex="-1">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <Image x:Name="radial3" Grid.Column="1" Grid.ColumnSpan="4" Margin="152,65,152,41" Grid.RowSpan="3" Source="/Resources/radial4.png" Stretch="UniformToFill" Loaded="OnLoad" RenderTransformOrigin="0.5,0.5" Panel.ZIndex="-1">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
         <!-- 4901ab80 taniks normal, 100bb780 abomination -->
         <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
             <TextBlock Text="Dynamic" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
@@ -36,7 +89,7 @@
                 <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
         </StackPanel>
-        
+
         <StackPanel Grid.Row="1" Grid.Column="2" Margin="10,0,0,0">
             <TextBlock Text="Static" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllStaticsViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
@@ -53,7 +106,7 @@
                 <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
         </StackPanel>
-        
+
         <StackPanel Grid.Row="1" Grid.Column="4" Margin="10,0,0,0">
             <TextBlock Text="Other" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="ActivitiesViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">

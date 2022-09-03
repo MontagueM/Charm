@@ -34,7 +34,7 @@ public class FbxHandler
             node = FbxNode.Create(_manager, mesh.GetName());
         }
         node.SetNodeAttribute(mesh);
-
+        
         if (part.VertexNormals.Count > 0)
         {
             AddNormalsToMesh(mesh, part);
@@ -70,6 +70,7 @@ public class FbxHandler
         {
             _scene.GetRootNode().AddChild(node);
         }
+        
         return mesh;
     }
 

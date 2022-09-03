@@ -187,6 +187,7 @@ public class Material : Tag
     
     public void SaveVertexShader(string saveDirectory)
     {
+        Directory.CreateDirectory($"{saveDirectory}");
         if (Header.VertexShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
         {
             string hlsl = Decompile(Header.VertexShader.GetBytecode(), "vs");
@@ -207,9 +208,10 @@ public class Material : Tag
 
     public void SaveComputeShader(string saveDirectory)
     {
-        if (Header.ComputeShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
+        Directory.CreateDirectory($"{saveDirectory}");
+        if (Header.ComputeShader != null && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
         {
-            string hlsl = Decompile(Header.ComputeShader.GetBytecode());
+            string hlsl = Decompile(Header.ComputeShader.GetBytecode(), "cs");
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
             if (usf != String.Empty)
             {

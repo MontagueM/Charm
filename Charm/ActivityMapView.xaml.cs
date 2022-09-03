@@ -4,12 +4,14 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO.Packaging;
 using System.Linq;
+using System;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Field;
 using Field.General;
+using Field.Entities;
 using Serilog;
 
 namespace Charm;
@@ -54,6 +56,23 @@ public partial class ActivityMapView : UserControl
         PopulateStaticList(bubbleMaps);
     }
 
+    private void StaticMapPart_OnCheck(object sender, RoutedEventArgs e)
+    {
+        TagHash hash = new TagHash((sender as CheckBox).Tag as string);
+        Tag<D2Class_07878080> map = PackageHandler.GetTag<D2Class_07878080>(hash);
+        
+        foreach (DisplayStaticMap item in StaticList.Items)
+        {
+            if(item.Name == "Select all")
+                continue;
+
+            // if (item.Selected)
+            // {
+            //     PopulateDynamicsList(map);
+            // }  
+        }
+    }
+
     private void PopulateStaticList(Tag<D2Class_01878080> bubbleMaps)
     {
         ConcurrentBag<DisplayStaticMap> items = new ConcurrentBag<DisplayStaticMap>();
@@ -69,7 +88,7 @@ public partial class ActivityMapView : UserControl
                         Hash = m.MapResource.Hash,
                         Name = $"{m.MapResource.Hash}: {tag.Header.Instances.Count} instances, {tag.Header.Statics.Count} uniques",
                         Instances = tag.Header.Instances.Count
-                    });
+                    });     
                 }
             }
         });
@@ -80,6 +99,48 @@ public partial class ActivityMapView : UserControl
             Name = "Select all"
         });
         StaticList.ItemsSource = sortedItems;
+    }
+
+    private void PopulateDynamicsList(Tag<D2Class_07878080> map)//(Tag<D2Class_01878080> bubbleMaps)
+    {
+        
+        ConcurrentBag<DisplayDynamicMap> items = new ConcurrentBag<DisplayDynamicMap>();
+        Parallel.ForEach(map.Header.DataTables, data =>
+        {
+            data.DataTable.Header.DataEntries.ForEach(entry =>
+            {
+                if(entry is D2Class_85988080 dynamicResource)
+                {    
+                    Entity entity = PackageHandler.GetTag(typeof(Entity), dynamicResource.Entity.Hash);
+
+                    if(entity.Model != null)
+                    {
+                        items.Add(new DisplayDynamicMap
+                        {
+                            Hash = dynamicResource.Entity.Hash,
+                            Name = $"{dynamicResource.Entity.Hash}: {entity.Model.Header.Meshes.Count} meshes",
+                            Models = entity.Model.Header.Meshes.Count
+                        });
+                    }
+                    else
+                    {
+                        items.Add(new DisplayDynamicMap
+                        {
+                            Hash = dynamicResource.Entity.Hash,
+                            Name = $"{dynamicResource.Entity.Hash}: 0 meshes",
+                            Models = 0
+                        });
+                    }
+                }
+            });
+        });
+        var sortedItems = new List<DisplayDynamicMap>(items);
+        sortedItems.Sort((a, b) => b.Models.CompareTo(a.Models));
+        sortedItems.Insert(0, new DisplayDynamicMap
+        {
+            Name = "Select all"
+        });
+        DynamicsList.ItemsSource = sortedItems;
     }
 
     public async void ExportFull(ExportInfo info)
@@ -201,6 +262,15 @@ public class DisplayStaticMap
     public string Name { get; set; }
     public string Hash { get; set; }
     public int Instances { get; set; }
+    
+    public bool Selected { get; set; }
+}
+
+public class DisplayDynamicMap
+{
+    public string Name { get; set; }
+    public string Hash { get; set; }
+    public int Models { get; set; }
     
     public bool Selected { get; set; }
 }
