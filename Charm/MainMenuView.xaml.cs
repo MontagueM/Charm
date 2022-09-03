@@ -14,7 +14,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Field.General;
 using Field.Models;
-using Field.Textures;
+using Field;
 using SharpDX.Toolkit.Graphics;
 
 namespace Charm;

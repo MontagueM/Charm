@@ -5,7 +5,7 @@ using Field.Entities;
 using Field.General;
 using File = System.IO.File;
 
-namespace Field.Textures;
+namespace Field;
 
 public class Material : Tag
 {
