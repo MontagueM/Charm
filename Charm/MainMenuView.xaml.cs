@@ -104,6 +104,14 @@ public partial class MainMenuView : UserControl
         _mainWindow.MakeNewTab("textures", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
+    
+    private void AllScriptsViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.ScriptContainersList);
+        _mainWindow.MakeNewTab("scripts", tagListView);
+        _mainWindow.SetNewestTabSelected();      
+    }
 
     private void OnLoad(object sender, RoutedEventArgs e)
     {

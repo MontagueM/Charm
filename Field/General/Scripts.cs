@@ -62,8 +62,8 @@ public class Script : Tag
                 AppendLine(sb, indentation, $"if (UNK[{condcd.Unk00}]):");
             else if (condition.Unk08 is D2Class_D3428080 condd3)
                 AppendLine(sb, indentation, $"if (UNK[{condd3.Unk00}]):");
-            else
-                throw new NotImplementedException();
+            //else
+                //throw new NotImplementedException();
             
             foreach (var entry in rb8.Unk30)
             {
@@ -76,9 +76,12 @@ public class Script : Tag
         }
         else if (resource is D2Class_BE438080 rbe)  // multi-line if statement/if else/if else if?
         {
-            foreach (var entry in rbe.Unk10)
+            if (rbe.Unk10 != null)
             {
-                Decompile(entry.Unk08, sb, indentation);
+                foreach (var entry in rbe.Unk10)
+                {
+                    Decompile(entry.Unk08, sb, indentation);
+                }
             }
         }
         else if (resource is D2Class_B6438080 rb6)
@@ -124,10 +127,11 @@ public class Script : Tag
                 Decompile(entry.Unk08, sb, indentation + 1);
             }
         }
-        else
-        {
-            throw new NotImplementedException();
-        }
+        //else
+        //{
+            //continue;
+            //throw new NotImplementedException();
+        //}
         var a = 0;
     }
     
@@ -348,40 +352,40 @@ public struct D2Class_99438080
     public Vector4 Unk10;
 }
 
-public class ScriptBSES : Tag
-{
-    public D2Class_00008080 Header;
+// public class ScriptBSES : Tag
+// {
+//     public D2Class_00008080 Header;
 
-    public ScriptBSES(TagHash hash) : base(hash)
-    {
-    }
+//     public ScriptBSES(TagHash hash) : base(hash)
+//     {
+//     }
 
-    protected override void ParseStructs()
-    {
-        Header = ReadHeader<D2Class_12928080>();
-    }
+//     protected override void ParseStructs()
+//     {
+//         Header = ReadHeader<D2Class_00008080>();
+//     }
 
-    public string ConvertToString()
-    {
-        var sb = new StringBuilder();
+//     public string ConvertToString()
+//     {
+//         var sb = new StringBuilder();
         
-        foreach (var script in Header.Unk08)
-        {
-            Decompile(script.Unk08, sb, 1);
-        }
+//         foreach (var script in Header.Unk08)
+//         {
+//             Decompile(script.Unk08, sb, 1);
+//         }
         
-        return sb.ToString();
-    }
+//         return sb.ToString();
+//     }
 
-    private void Decompile(dynamic? resource, StringBuilder sb, int indentation)
-    {
-    }
+//     private void Decompile(dynamic? resource, StringBuilder sb, int indentation)
+//     {
+//     }
     
-    private void AppendLine(StringBuilder sb, int indentation, string line)
-    {
-        sb.AppendLine(new string('\t', indentation * 2) + line);
-    }
-}
+//     private void AppendLine(StringBuilder sb, int indentation, string line)
+//     {
+//         sb.AppendLine(new string('\t', indentation * 2) + line);
+//     }
+// }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x58)]
 public struct D2Class_00008080
