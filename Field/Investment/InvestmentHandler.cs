@@ -285,7 +285,11 @@ public class InvestmentHandler
                 foreach (var assignment in entryMultipleEntityAssignment.EntityAssignmentResource.EntityAssignments)
                 {
                     if (assignment.EntityAssignmentHash.IsValid())
-                        entities.Add(GetEntityFromAssignmentHash(assignment.EntityAssignmentHash));
+                    {
+                        var assignmentEntity = GetEntityFromAssignmentHash(assignment.EntityAssignmentHash);
+                        if (assignmentEntity != null)
+                            entities.Add(assignmentEntity);
+                    }
                 }
             }
         }
@@ -299,13 +303,58 @@ public class InvestmentHandler
         // var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
         // var index = _entityAssignmentsMap.Header.EntityArrangementMap.BinarySearch(x, new D2Class_454F8080());
         Tag<D2Class_A36F8080> tag = PackageHandler.GetTag<D2Class_A36F8080>(_sortedArrangementHashmap[assignmentHash]);
-        return PackageHandler.GetTag(typeof(Entity), tag.Header.EntityData);
+        if (tag.Header.EntityData is null)
+            return null;
+        // if entity
+        if (PackageHandler.GetEntryReference(tag.Header.EntityData) == 0x80809ad8)
+        {
+            return PackageHandler.GetTag(typeof(Entity), tag.Header.EntityData);
+        }
+        return null;
         // return new Entity(_entityAssignmentsMap.Header.EntityArrangementMap[index].EntityParent.Header.Entity);
         // return null;
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllInvestmentTags", CallingConvention = CallingConvention.StdCall)]
     public extern static DestinyFile.UnmanagedDictionary DllGetAllInvestmentTags(IntPtr executionDirectoryPtr);
+
+    #if DEBUG
+    public static void DebugAllInvestmentEntities()
+    {
+        Dictionary<string, Dictionary<dynamic, DestinyHash>> data = new Dictionary<string, Dictionary<dynamic, DestinyHash>>();
+        for (int i = (int)_entityAssignmentTag.Header.ArtArrangementEntityAssignments.Count-1; i >= 0; i--)
+        {
+            List<Entity> entities = GetEntitiesFromArrangementIndex(i);
+            foreach (var entity in entities)
+            {
+                bool bAllValid = true;
+                if (entity is null || entity.Model is null)
+                    continue;
+                foreach (var entry in entity.Model.Header.Meshes[0].Parts)
+                {
+                    foreach (var field in typeof(D2Class_CB6E8080).GetFields())
+                    {
+                        if (!data.ContainsKey(field.Name))
+                        {
+                            data.Add(field.Name, new Dictionary<dynamic, DestinyHash>());
+                        }
+                        dynamic fieldValue = field.GetValue(entry);
+                        if (fieldValue is not null && !data[field.Name].ContainsKey(fieldValue) && data[field.Name].Count < 10)
+                        {
+                            data[field.Name].Add(fieldValue, _entityAssignmentTag.Header.ArtArrangementEntityAssignments.ElementAt(i).ArtArrangementHash);
+                        }
+
+                        bAllValid &= data[field.Name].Count > 1;
+                    }
+                }
+                if (bAllValid)
+                {
+                    var a = 0;
+                }
+            }
+        }
+    }
+    #endif
 }
 
 

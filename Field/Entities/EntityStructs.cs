@@ -448,11 +448,11 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     public uint Unk10;  // might be number of strips?
     public short Unk14;
     public short Unk16;  // some kind of index
-    public int Unk18;  // sbyte gear_dye_change_color_index
-    public sbyte Unk1C;
-    public sbyte DetailLevel;
-    public sbyte Unk1E;
-    public sbyte Unk1F;
+    public int Flags;  // sbyte gear_dye_change_color_index
+    public byte GearDyeSlot;
+    public byte DetailLevel;
+    public byte Unk1E;
+    public byte Unk1F;
     public int Unk20;
 }
 
@@ -1155,6 +1155,14 @@ public struct VertexWeight
 {
     public IntVector4 WeightValues;
     public IntVector4 WeightIndices;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_44318080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TagHash64)]
+    public Entity? Entity;
 }
 
 #region Named entities
