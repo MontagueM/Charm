@@ -173,6 +173,10 @@ public class Tag : DestinyFile
                 {
                     field.SetValue(result, new TagHash(handle.ReadUInt32()));
                 }
+                else if (field.FieldType.BaseType == typeof(Enum))
+                {
+                    field.SetValue(result, Enum.ToObject(field.FieldType, handle.ReadByte()));
+                }
                 else
                 {
                     dynamic value = StructConverter.ToStructure(handle.ReadBytes(Marshal.SizeOf(field.FieldType)), field.FieldType);

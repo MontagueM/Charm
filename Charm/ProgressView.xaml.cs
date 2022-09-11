@@ -12,6 +12,8 @@ public partial class ProgressView : UserControl
     private Queue<string> _progressStages;
     private int TotalStageCount;
     private ILogger _progressLog;
+    private bool bLogProgress = true;
+    private bool bUseFullBar = false;
 
     public ProgressView()
     {
@@ -36,8 +38,10 @@ public partial class ProgressView : UserControl
         ProgressText.Text = GetCurrentStageName();
     }
 
-    public void SetProgressStages(List<string> progressStages)
+    public void SetProgressStages(List<string> progressStages, bool bLogProgress = true, bool bUseFullBar = false)
     {
+        this.bLogProgress = bLogProgress;
+        this.bUseFullBar = bUseFullBar;
         _progressLog = Log.Logger.ForContext<ProgressView>();
         Dispatcher.Invoke(() =>
         {
@@ -58,7 +62,8 @@ public partial class ProgressView : UserControl
         Dispatcher.Invoke(() =>
         {
             string removed = _progressStages.Dequeue();
-            _progressLog.Debug($"Completed loading stage: {removed}");
+            if (bLogProgress)
+                _progressLog.Debug($"Completed loading stage: {removed}");
             UpdateProgress();
             if (_progressStages.Count == 0)
             {
@@ -72,7 +77,8 @@ public partial class ProgressView : UserControl
         if (_progressStages.Count > 0)
         {
             var stage = _progressStages.Peek();
-            _progressLog.Debug($"Starting loading stage: {stage}");
+            if (bLogProgress)
+                _progressLog.Debug($"Starting loading stage: {stage}");
             return stage;
         }
         return "Loading";
@@ -81,6 +87,9 @@ public partial class ProgressView : UserControl
     public int GetProgressPercentage()
     {
         // We want to artificially make it more meaningful, so we pad by 15% on each side
-        return 95 - 90 * _progressStages.Count / TotalStageCount;
+        if (bUseFullBar)
+            return 100 - 100 * _progressStages.Count / TotalStageCount;
+        else
+            return 95 - 90 * _progressStages.Count / TotalStageCount;
     }
 }

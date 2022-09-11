@@ -66,7 +66,7 @@ public struct PartUnmanaged
     public Part Decode()
     {
         Part outPart = new Part();
-        outPart.DetailLevel = DetailLevel;
+        outPart.LodCategory = (ELodCategory)DetailLevel;
         outPart.IndexOffset = IndexOffset;
         outPart.IndexCount = IndexCount;
         outPart.PrimitiveType = (EPrimitiveType)PrimitiveType;

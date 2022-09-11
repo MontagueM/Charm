@@ -37,7 +37,7 @@ namespace Charm
                 }
                 if (apiHash != 0)
                 {
-                    // return;
+                    return;
                     // to check if we need to update caches
                     PackageHandler.Initialise();
                     
@@ -51,6 +51,8 @@ namespace Charm
                     InvestmentHandler.Initialise();
                     
                     // InvestmentHandler.DebugAllInvestmentEntities();
+                    // InvestmentHandler.DebugAPIRequestAllInfo();
+                    // InvestmentHandler.DebugAPIRenderMetadata();
                     
                     FbxHandler fbxHandler = new FbxHandler();
 

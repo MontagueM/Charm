@@ -4,8 +4,10 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using DirectXTexNet;
 using Field.Entities;
 using Field.Strings;
+using Field.Textures;
 using Newtonsoft.Json;
 
 namespace Field.General;
@@ -31,6 +33,7 @@ public class InvestmentHandler
     private static Tag<D2Class_095A8080> _stringContainerIndexTag = null;
     private static Dictionary<int, TagHash> _stringContainerIndexmap = null;
     public static ConcurrentDictionary<DestinyHash, InventoryItem> InventoryItems = null;
+    private static Tag<D2Class_015A8080> _inventoryItemIconTag = null;
 
     public static void Initialise()
     {
@@ -46,7 +49,21 @@ public class InvestmentHandler
     {
         return InventoryItemStringThings[GetItemIndex(hash)].Header.ItemName;
     }
+    
+    public static Tag<D2Class_B83E8080>? GetItemIconContainer(InventoryItem item)
+    {
+        return GetItemIconContainer(item.Header.InventoryItemHash);
+    }
 
+    public static Tag<D2Class_B83E8080>? GetItemIconContainer(DestinyHash hash)
+    {
+        int iconIndex = InventoryItemStringThings[GetItemIndex(hash)].Header.IconIndex;
+        if (iconIndex == -1)
+            return null;
+        return _inventoryItemIconTag.Header.InventoryItemIconsMap.ElementAt(iconIndex).IconContainer;
+    }
+
+    
     public static int GetItemIndex(DestinyHash hash)
     {
         return InventoryItemIndexmap[hash];
@@ -92,6 +109,9 @@ public class InvestmentHandler
                     break;
                 case 0x808052aa: // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
                     _sandboxPatternGlobalTagIdTag = new Tag<D2Class_AA528080>(new TagHash(keys[i]));
+                    break;
+                case 0x80805a01:
+                    _inventoryItemIconTag = new Tag<D2Class_015A8080>(new TagHash(keys[i]));
                     break;
             }
         });
@@ -183,7 +203,7 @@ public class InvestmentHandler
         }
         br.Close();
     }
-    
+
     public static Entity? GetPatternEntityFromHash(DestinyHash hash)
     {
         var item = GetInventoryItem(hash);
@@ -354,6 +374,133 @@ public class InvestmentHandler
             }
         }
     }
+    
+    private static Random rng = new Random();
+
+    public static void DebugAPIRequestAllInfo()
+    {
+        // get all inventory item hashes
+        
+        // var itemHash = 138282166;
+        var l = InventoryItemIndexmap.Keys.ToList();
+        var shuffled = l.OrderBy(a => rng.Next()).ToList();
+        foreach (var itemHash in shuffled)
+        {
+            if (itemHash != 731561450)
+                continue;
+            ManifestData? itemDef;
+            byte[] tgxm;
+            try
+            {
+                itemDef = MakeGetRequestManifestData($"https://www.light.gg/db/items/{itemHash.Hash}/?raw=2");
+                // ManifestData? itemDef = MakeGetRequestManifestData($"https://lowlidev.com.au/destiny/api/gearasset/{itemHash.Hash}?destiny2");
+                if (itemDef is null || itemDef.gearAsset is null || itemDef.gearAsset.content.Length == 0 || itemDef.gearAsset.content[0].geometry is null || itemDef.gearAsset.content[0].geometry.Length == 0)
+                    continue;
+                tgxm = MakeGetRequest(
+                    $"https://www.bungie.net/common/destiny2_content/geometry/platform/mobile/geometry/{itemDef.gearAsset.content[0].geometry[0]}");
+            }
+            catch (Exception e)
+            {
+                continue;
+            }
+
+            // Read TGXM
+            // File.WriteAllBytes("C:/T/geometry.tgxm", tgxm);
+            var br = new BinaryReader(new MemoryStream(tgxm));
+            // br.BaseStream.Seek(8, SeekOrigin.Begin);
+            var magic = br.ReadBytes(4);
+            if (magic.Equals(new byte [] {0x54, 0x47, 0x58, 0x4d}))
+            {
+                continue;
+            }
+            var version = br.ReadUInt32();
+            var fileOffset = br.ReadInt32();
+            var fileCount = br.ReadInt32();
+            for (int i = 0; i < fileCount; i++)
+            {
+                br.BaseStream.Seek(fileOffset+0x110*i, SeekOrigin.Begin);
+                var fileName = Encoding.ASCII.GetString(br.ReadBytes(0x100)).TrimEnd('\0');
+                var offset = br.ReadInt32();
+                var type = br.ReadInt32();
+                var size = br.ReadInt32();
+                if (fileName.Contains(".js"))
+                {
+                    byte[] fileData;
+                    Array.Copy(tgxm, offset, fileData = new byte[size], 0, size);
+                    File.WriteAllBytes($"C:/T/geom/{itemHash.Hash}_{fileName}", fileData);
+                }
+            }
+        }
+    }
+
+    public static void DebugAPIRenderMetadata()
+    {
+        
+        var files = Directory.GetFiles("C:/T/geom");
+        foreach (var file in files)
+        {
+            dynamic json = JsonConvert.DeserializeObject(File.ReadAllText(file));
+            var data = json["render_model"]["render_meshes"];
+            var a = 0;
+        }
+    }
+
+    private static ManifestData MakeGetRequestManifestData(string url)
+    {
+        using (var client = new HttpClient())
+        {
+            client.Timeout = TimeSpan.FromSeconds(2);
+            var response = client.GetAsync(url).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            if (content.Contains("\"gearAsset\": false"))
+            {
+                return null;
+            }
+            ManifestData item = System.Text.Json.JsonSerializer.Deserialize<ManifestData>(content);
+            return item;
+        }
+    }
+    
+    private static byte[] MakeGetRequest(string url)
+    {
+        using (var client = new HttpClient())
+        {
+            client.Timeout = TimeSpan.FromSeconds(2);
+            var response = client.GetAsync(url).Result;
+            var content = response.Content.ReadAsByteArrayAsync().Result;
+            return content;
+        }
+    }
+    
+    private class ManifestData
+    {
+        public dynamic requestedId { get; set; }
+        public DestinyGearAssetsDefinition gearAsset { get; set; }
+        public dynamic definition { get; set; }
+    }
+    
+    private class DestinyGearAssetsDefinition
+    {
+        public string[] gear { get; set; }
+        public ContentDefinition[] content { get; set; }
+    }
+    
+    private class ContentDefinition
+    {
+        public string platform { get; set; }
+        public string[] geometry { get; set; }
+        public string[] textures { get; set; }
+        public IndexSet male_index_set { get; set; }
+        public IndexSet female_index_set { get; set; }
+        public IndexSet dye_index_set { get; set; }
+        public Dictionary<string, IndexSet[]> region_index_sets { get; set; }
+    }
+    
+    private class IndexSet
+    {
+        public int[] textures { get; set; }
+        public int[] geometry { get; set; }
+    }
     #endif
 }
 
@@ -389,5 +536,48 @@ public class InventoryItem : Tag
                 return entry.WeaponPatternIndex;
         }
         return -1;
+    }
+
+    private TextureHeader? GetTexture(Tag<D2Class_CF3E8080> iconSecondaryContainer)
+    {
+        var prim = iconSecondaryContainer.Header.Unk10;
+        if (prim is D2Class_CD3E8080 structCD3E8080)
+        {
+            // TextureList[0] is default, others are for colourblind modes
+            return structCD3E8080.Unk00[0].TextureList[0].IconTexture;
+        }
+        if (prim is D2Class_CB3E8080 structCB3E8080)
+        {
+            return structCB3E8080.Unk00[0].TextureList[0].IconTexture;
+        }
+
+        return null;
+    }
+
+    public UnmanagedMemoryStream? GetIconBackgroundStream()
+    {
+        Tag<D2Class_B83E8080>? iconContainer = InvestmentHandler.GetItemIconContainer(this);
+        if (iconContainer == null || iconContainer.Header.IconBackgroundContainer == null)
+            return null;
+        var backgroundIcon = GetTexture(iconContainer.Header.IconBackgroundContainer);
+        return backgroundIcon.GetTexture();
+    }
+    
+    public UnmanagedMemoryStream? GetIconPrimaryStream()
+    {
+        Tag<D2Class_B83E8080>? iconContainer = InvestmentHandler.GetItemIconContainer(this);
+        if (iconContainer == null || iconContainer.Header.IconPrimaryContainer == null)
+            return null;
+        var primaryIcon = GetTexture(iconContainer.Header.IconPrimaryContainer);
+        return primaryIcon.GetTexture();
+    }
+    
+    public UnmanagedMemoryStream? GetIconOverlayStream()
+    {
+        Tag<D2Class_B83E8080>? iconContainer = InvestmentHandler.GetItemIconContainer(this);
+        if (iconContainer == null || iconContainer.Header.IconOverlayContainer == null)
+            return null;
+        var overlayIcon = GetTexture(iconContainer.Header.IconOverlayContainer);
+        return overlayIcon.GetTexture();
     }
 }

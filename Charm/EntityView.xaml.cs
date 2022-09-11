@@ -70,10 +70,10 @@ public partial class EntityView : UserControl
         return loaded;
     }
 
-    public void Export(List<Entity> entities, string name, EExportTypeFlag exportType)
+    public static void Export(List<Entity> entities, string name, EExportTypeFlag exportType)
     {
         FbxHandler fbxHandler = new FbxHandler(exportType == EExportTypeFlag.Full);
-        _entityLog.Debug($"Exporting entity model name: {name}");
+        Log.Debug($"Exporting entity model name: {name}");
         string savePath = ConfigHandler.GetExportSavePath();
         string meshName = name;
         if (exportType == EExportTypeFlag.Full)
@@ -106,6 +106,6 @@ public partial class EntityView : UserControl
         }
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
-        _entityLog.Information($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
+        Log.Information($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 }
