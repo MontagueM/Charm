@@ -6,6 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using DirectXTexNet;
 using Field.Entities;
+using Field.Investment;
 using Field.Strings;
 using Field.Textures;
 using Newtonsoft.Json;
@@ -29,12 +30,14 @@ public class InvestmentHandler
     public static ConcurrentDictionary<int, Tag<D2Class_9F548080>> InventoryItemStringThings = null;
     public static Dictionary<DestinyHash, int> InventoryItemIndexmap = null;
     private static Dictionary<DestinyHash, TagHash> _sortedArrangementHashmap = null;
-    private static Dictionary<DestinyHash, TagHash> _sortedPatternGlobalTagIdAssignments = null;
+    // private static Dictionary<DestinyHash, TagHash> _sortedPatternGlobalTagIdAssignments = null;
     private static Tag<D2Class_095A8080> _stringContainerIndexTag = null;
     private static Dictionary<int, TagHash> _stringContainerIndexmap = null;
     public static ConcurrentDictionary<DestinyHash, InventoryItem> InventoryItems = null;
     private static Tag<D2Class_015A8080> _inventoryItemIconTag = null;
-
+    // private static Tag<D2Class_8C978080> _dyeManifestTag = null;
+    private static Tag<D2Class_C2558080> _artDyeReferenceTag = null;
+    private static Tag<D2Class_F2518080> _dyeChannelTag = null;
     public static void Initialise()
     {
         GetAllInvestmentTags();
@@ -113,6 +116,12 @@ public class InvestmentHandler
                 case 0x80805a01:
                     _inventoryItemIconTag = new Tag<D2Class_015A8080>(new TagHash(keys[i]));
                     break;
+                case 0x808055c2:
+                    _artDyeReferenceTag = new Tag<D2Class_C2558080>(new TagHash(keys[i]));
+                    break;
+                case 0x808051f2:
+                    _dyeChannelTag = new Tag<D2Class_F2518080>(new TagHash(keys[i]));
+                    break;
             }
         });
         GetContainerIndexDict(); // must be before GetInventoryItemStringThings
@@ -123,7 +132,7 @@ public class InvestmentHandler
             Task.Run(GetInventoryItemDict),
             Task.Run(GetInventoryItemStringThings),
             Task.Run(GetEntityAssignmentDict),
-            Task.Run(GetSandboxPatternAssignmentsDict),
+            // Task.Run(GetSandboxPatternAssignmentsDict),
         });
     }
 
@@ -187,22 +196,22 @@ public class InvestmentHandler
         br.Close();
     }
     
-    private static void GetSandboxPatternAssignmentsDict()
-    {
-        int size = (int)_sandboxPatternAssignmentsTag.Header.AssingmentBSL.Count;
-        _sortedPatternGlobalTagIdAssignments = new Dictionary<DestinyHash, TagHash>(size);
-        var br = _sandboxPatternAssignmentsTag.Header.AssingmentBSL.ParentTag.GetHandle();
-        
-        br.BaseStream.Seek(_sandboxPatternAssignmentsTag.Header.AssingmentBSL.Offset, SeekOrigin.Begin);
-        for (int i = 0; i < size; i++)
-        {
-            // skips art dye refs, theyre not tag64
-            var h = new DestinyHash(br.ReadUInt32());
-            br.BaseStream.Seek(0xC, SeekOrigin.Current);
-            _sortedPatternGlobalTagIdAssignments.Add(h, new TagHash(br.ReadUInt64()));
-        }
-        br.Close();
-    }
+    // private static void GetSandboxPatternAssignmentsDict()
+    // {
+    //     int size = (int)_sandboxPatternAssignmentsTag.Header.AssignmentBSL.Count;
+    //     _sortedPatternGlobalTagIdAssignments = new Dictionary<DestinyHash, TagHash>(size);
+    //     var br = _sandboxPatternAssignmentsTag.Header.AssignmentBSL.ParentTag.GetHandle();
+    //     
+    //     br.BaseStream.Seek(_sandboxPatternAssignmentsTag.Header.AssignmentBSL.Offset, SeekOrigin.Begin);
+    //     for (int i = 0; i < size; i++)
+    //     {
+    //         // skips art dye refs, theyre not tag64
+    //         var h = new DestinyHash(br.ReadUInt32());
+    //         br.BaseStream.Seek(0xC, SeekOrigin.Current);
+    //         _sortedPatternGlobalTagIdAssignments.Add(h, new TagHash(br.ReadUInt64()));
+    //     }
+    //     br.Close();
+    // }
 
     public static Entity? GetPatternEntityFromHash(DestinyHash hash)
     {
@@ -211,10 +220,13 @@ public class InvestmentHandler
             return null;
         
         var patternGlobalId = GetPatternGlobalTagId(item);
-        var patternData = _sortedPatternGlobalTagIdAssignments[patternGlobalId];
-        if (PackageHandler.GetEntryReference(patternData) == 0x80809ad8)
+        var patternData = _sandboxPatternAssignmentsTag.Header.AssignmentBSL.BinarySearch(patternGlobalId);
+        if (patternData.HasValue)
         {
-            return PackageHandler.GetTag(typeof(Entity), patternData);
+            if (PackageHandler.GetEntryReference(patternData.Value.EntityRelationHash) == 0x80809ad8)
+            {
+                return PackageHandler.GetTag(typeof(Entity), patternData.Value.EntityRelationHash);
+            }
         }
         return null;
     }
@@ -227,6 +239,26 @@ public class InvestmentHandler
     public static DestinyHash GetWeaponContentGroupHash(InventoryItem item)
     {
         return _sandboxPatternGlobalTagIdTag.Header.SandboxPatternGlobalTagId[item.GetWeaponPatternIndex()].WeaponContentGroupHash;
+    }
+
+    public static DestinyHash GetChannelHashFromIndex(short index)
+    {
+        return _dyeChannelTag.Header.ChannelHashes[index].ChannelHash;
+    }
+    
+    public static Dye? GetDyeFromIndex(short index)
+    {
+         var artEntry = _artDyeReferenceTag.Header.ArtDyeReferences.ElementAt(index);
+
+         var dyeEntry = _sandboxPatternAssignmentsTag.Header.AssignmentBSL.BinarySearch(artEntry.DyeManifestHash);
+         if (dyeEntry.HasValue)
+         {
+             if (PackageHandler.GetEntryReference(dyeEntry.Value.EntityRelationHash) == 0x80806fa3)
+             {
+                 return PackageHandler.GetTag<D2Class_E36C8080>(PackageHandler.GetTag<D2Class_A36F8080>(dyeEntry.Value.EntityRelationHash).Header.EntityData).Header.Dye;
+             }
+         }
+         return null;
     }
 
     public static InventoryItem GetInventoryItem(DestinyHash hash)

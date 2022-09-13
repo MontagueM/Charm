@@ -46,6 +46,23 @@ public class TextureExtractor
         scratchImage.Dispose();
         return true;
     }
+
+    public static string GetExtension(ETextureFormat format)
+    {
+        switch (format)
+        {
+            case ETextureFormat.DDS_BGRA_UNCOMP_DX10:
+            case ETextureFormat.DDS_BGRA_BC7_DX10:
+            case ETextureFormat.DDS_BGRA_UNCOMP:
+                return "dds";
+            case ETextureFormat.PNG:
+                return "png";
+            case ETextureFormat.TGA:
+                return "tga";
+        }
+
+        return String.Empty;
+    }
 }
 
 public enum ETextureFormat

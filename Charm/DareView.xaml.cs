@@ -173,8 +173,9 @@ public partial class DareView : UserControl
         {
             Parallel.ForEach(_selectedItems, item =>
             {
-                EntityView.Export(InvestmentHandler.GetEntitiesFromHash(item.Item.Header.InventoryItemHash),
-                    $"{item.Item.Header.InventoryItemHash.Hash}_{item.ItemName}", EExportTypeFlag.Full);
+                EntityView.ExportInventoryItem(item);
+                // EntityView.ExportShader();
+
                 MainWindow.Progress.CompleteStage();
             });
         });

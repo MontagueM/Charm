@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Field.Entities;
 using Field.General;
+using Field.Investment;
 using Field.Strings;
 using Field.Textures;
 
@@ -141,6 +142,8 @@ public struct D2Class_77738080
 {
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_7D738080> Arrangements;  // "arrangements" from API
+    [DestinyOffset(0x38), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_7B738080> DefaultDyes;  // "defaultDyes" from API
     [DestinyOffset(0x48), DestinyField(FieldType.TablePointer)]
     public List<D2Class_7B738080> LockedDyes;  // "lockedDyes" from API
     public short WeaponPatternIndex;  // "weaponPatternHash" from API
@@ -432,7 +435,7 @@ public struct D2Class_8C978080
 {
     public long FileSize;
     [DestinyField(FieldType.TablePointer)]
-    public IndexAccessList<D2Class_0F878080> AssingmentBSL;
+    public IndexAccessList<D2Class_0F878080> AssignmentBSL;
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_0B008080> Unk18;
 }
@@ -441,7 +444,7 @@ public struct D2Class_8C978080
 public struct D2Class_0F878080 : IComparer<D2Class_0F878080>
 {
     public DestinyHash ApiHash;
-    [DestinyField(FieldType.TagHash64)]
+    [DestinyOffset(0x8), DestinyField(FieldType.TagHash64)]
     public TagHash EntityRelationHash;  // can be entity or smth else, if SandboxPattern is entity if ArtDyeReference idk
     
     public int Compare(D2Class_0F878080 x, D2Class_0F878080 y)
@@ -584,6 +587,49 @@ public struct D2Class_D43E8080
 {
     [DestinyField(FieldType.TagHash)]
     public TextureHeader IconTexture;
+}
+
+
+#endregion
+
+#region Dyes
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_C2558080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public IndexAccessList<D2Class_C6558080> ArtDyeReferences;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_C6558080
+{
+    public DestinyHash ArtDyeHash;
+    public DestinyHash DyeManifestHash;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_E36C8080
+{
+    public long FileSize;
+    [DestinyOffset(0x0C), DestinyField(FieldType.TagHash)]
+    public Dye Dye;
+    // same thing + some unknown flags and info
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_F2518080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)] 
+    public List<D2Class_2C4F8080> ChannelHashes;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 4)]
+public struct D2Class_2C4F8080
+{
+    public DestinyHash ChannelHash;
 }
 
 
