@@ -141,7 +141,9 @@ public class Material : Tag
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
             string vfx = new VfxConverter().HlslToVfx(this, hlsl, false);
-            
+            string bpy = new NodeConverter().HlslToBpy(this, hlsl, false);
+
+            Directory.CreateDirectory($"{saveDirectory}/BPY");
             Directory.CreateDirectory($"{saveDirectory}/Source2");
             Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
             StringBuilder vmat = new StringBuilder();
@@ -151,6 +153,7 @@ public class Material : Tag
                 {
                     File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
                     File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.vfx", vfx);
+                    File.WriteAllText($"{saveDirectory}/BPY/PS_{Hash}.py", bpy);
                     Console.WriteLine($"Saved pixel shader {Hash}");
                 }
                 catch (IOException)  // threading error
@@ -190,11 +193,14 @@ public class Material : Tag
         {
             string hlsl = Decompile(Header.VertexShader.GetBytecode(), "vs");
             string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
+            string bpy = new NodeConverter().HlslToBpy(this, hlsl, true);
+            Directory.CreateDirectory($"{saveDirectory}/BPY");
             if (usf != String.Empty)
             {
                 try
                 {
                     File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
+                    File.WriteAllText($"{saveDirectory}/BPY/VS_{Hash}.py", bpy);
                     Console.WriteLine($"Saved vertex shader {Hash}");
                 }
                 catch (IOException)  // threading error
