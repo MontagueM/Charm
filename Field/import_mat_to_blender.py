@@ -75,6 +75,8 @@ def assemble_mat():
         link(variable_dict['o0.x'], combineRGB.inputs[0])
         link(variable_dict['o0.y'], combineRGB.inputs[1])
         link(variable_dict['o0.z'], combineRGB.inputs[2])
+        variable_dict['output_rgb_albedo'] = combineRGB.outputs[0]
+        
         link(combineRGB.outputs[0], principled_node.inputs[0])
         
     if True:        #Normal
@@ -159,9 +161,56 @@ def assemble_mat():
         link(normal_post_2.outputs[0], normal_post_norm.inputs[0])
         
         link(normal_post_norm.outputs[0], principled_node.inputs[23])
+    
+    if True:        #Roughness
+        smoothness_subtract = matnodes.new("ShaderNodeMath")
+        smoothness_subtract.operation = 'SUBTRACT'
+        link(variable_dict['o2.y'], smoothness_subtract.inputs[0])
+        smoothness_subtract.inputs[1].default_value = 0.375
         
-    if True:
+        smoothness_multiply = matnodes.new("ShaderNodeMath")
+        smoothness_multiply.operation = 'MULTIPLY'
+        link(smoothness_subtract.outputs[0], smoothness_multiply.inputs[0])
+        smoothness_multiply.inputs[1].default_value = 8
+        
+        rough_saturate = matnodes.new("ShaderNodeClamp")
+        #existing defaults are fine
+        link(smoothness_multiply.outputs[0], rough_saturate.inputs[0])
+        
+        smoothness_invert = matnodes.new("ShaderNodeMath")
+        smoothness_invert.operation = 'SUBTRACT'
+        link(rough_saturate.outputs[0], smoothness_invert.inputs[1])
+        smoothness_invert.inputs[0].default_value = 1
+        
+        link(smoothness_subtract.outputs[0], principled_node.inputs[9])
+        
+        
+    if True:        #RT2
         link(variable_dict['o2.x'], principled_node.inputs[6])
+        
+        emissive_subtract = matnodes.new("ShaderNodeMath")
+        emissive_subtract.operation = 'SUBTRACT'
+        link(variable_dict['o2.y'], emissive_subtract.inputs[1])
+        emissive_subtract.inputs[1].default_value = 0.5
+        
+        emissive_multiply = matnodes.new("ShaderNodeMath")
+        emissive_multiply.operation = 'MULTIPLY'
+        link(emissive_subtract.outputs[0], emissive_multiply.inputs[0])
+        emissive_multiply.inputs[1].default_value = 10
+        
+        emissive_scale= matnodes("ShaderNodeVectorMath")
+        emissive_scale.operation = 'SCALE'
+        link(variable_dict['output_rgb_albedo'], emissive_scale.inputs[0])
+        link(emissive_multiply.outputs[0], emissive_scale.inputs[1])
+        
+        link(emissive_scale.outputs[0], principled_node.inputs[20])
+        
+        #AO is ignored single blender does that on its own
+        
+def setupEngine():
+    bpy.context.scene.render.engine = 'BLENDER_EEVEE'
+    bpy.context.scene.eevee.use_gtao = True
+
 
 def ShowMessageBox(message = "", title = "Message Box", icon = 'INFO'):
 
@@ -175,6 +224,7 @@ if __name__ == "__main__":
     ShowMessageBox("Importing Material {Name}", "This might take some time! (Especially on multiple imports)", 'ERROR')
     
     #To give the message box a chance to show up
+    setupEngine()
     bpy.app.timers.register(assemble_mat, first_interval=0.3)
     
     #Deselect all objects just in case 
