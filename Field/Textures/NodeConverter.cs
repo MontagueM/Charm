@@ -394,38 +394,39 @@ public class NodeConverter
                     string dimensions = variable.Split('.')[1];
                     string[] outputLines = new string[dimensions.Length];
 
-                    if (!Regex.IsMatch(adaptedLine, @"(\w+)\((.+)\)\.?([x|y|z|w]{0,4})"))
+                    if (dimensions.Length > 1 && !Regex.IsMatch(adaptedLine, @"(\w+)\((.+)\)\.?([x|y|z|w]{0,4})"))
                     {
-                        if (dimensions.Length > 1)
+                        //No functions in line
+                        string[] ops = equalExp.Split(' ');
+                        for (int i = 0; i < dimensions.Length; i++)
                         {
-                            string[] ops = equalExp.Split(' ');
-                            for (int i = 0; i < dimensions.Length; i++)
+                            string[] splitVar = variable.Split('.');
+                            string output = $"{splitVar[0]}.{splitVar[1].ElementAt(i)} = ";
+                            foreach (string op in ops)
                             {
-                                string[] splitVar = variable.Split('.');
-                                string output = $"{splitVar[0]}.{splitVar[1].ElementAt(i)} = ";
-                                foreach (string op in ops)
+                                if (Regex.IsMatch(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})"))
                                 {
-                                    if (Regex.IsMatch(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})"))
-                                    {
-                                        Match match = Regex.Match(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})");
-                                        char relevantDim = match.Groups[2].Value.ElementAt(i);
-                                        output += $" {match.Groups[1].Value}.{relevantDim}";
-                                    }
-                                    else
-                                    {
-                                        output += $" {op}";
-                                    }
+                                    Match match = Regex.Match(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})");
+                                    char relevantDim = match.Groups[2].Value.ElementAt(i);
+                                    output += $" {match.Groups[1].Value}.{relevantDim}";
                                 }
-                                bpy.AppendLine(output);
+                                else
+                                {
+                                    output += $" {op}";
+                                }
                             }
+                            bpy.AppendLine(output);
                         }
-                        else
-                        {
-                            bpy.AppendLine(adaptedLine);
-                        }
+                    }
+                    else if (dimensions.Length == 0)
+                    {
+                        //Single dimension in line, leave it be
+                        bpy.AppendLine(adaptedLine);
                     }
                     else
                     {
+                        //There's a function in the line, gotta deal with that
+                        //For now just lets it through
                         bpy.AppendLine(adaptedLine);
                     }
 
