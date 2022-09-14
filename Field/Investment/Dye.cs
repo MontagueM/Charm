@@ -125,7 +125,7 @@ public struct DyeInfo
     public Vector4 SecondaryWornAlbedoTint;
     [Description("SeconWearMap")]
     public Vector4 SecondaryWearRemap;
-    [Description("SecondWornRoughMap")]
+    [Description("SeconWornRoughMap")]
     public Vector4 SecondaryWornRoughnessRemap;
     [Description("SeconWornMatParams")]
     public Vector4 SecondaryWornMaterialParameters;

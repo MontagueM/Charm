@@ -7,6 +7,7 @@ using System.Text;
 using DirectXTexNet;
 using Field.Entities;
 using Field.Investment;
+using Field.Models;
 using Field.Strings;
 using Field.Textures;
 using Newtonsoft.Json;
@@ -246,7 +247,7 @@ public class InvestmentHandler
         return _dyeChannelTag.Header.ChannelHashes[index].ChannelHash;
     }
     
-    public static Dye? GetDyeFromIndex(short index)
+    public static Dye GetDyeFromIndex(short index)
     {
          var artEntry = _artDyeReferenceTag.Header.ArtDyeReferences.ElementAt(index);
 
@@ -534,6 +535,38 @@ public class InvestmentHandler
         public int[] geometry { get; set; }
     }
     #endif
+    public static void ExportShader(InventoryItem item, string savePath, string name, ETextureFormat outputTextureFormat)
+    {
+        Dictionary<string, Dye> dyes = new Dictionary<string, Dye>();
+        
+        // export all the customDyes
+        if (item.Header.Unk90 is D2Class_77738080 translationBlock)
+        {
+            foreach (var dyeEntry in translationBlock.CustomDyes)
+            {
+                Dye dye = GetDyeFromIndex(dyeEntry.DyeIndex);
+                dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
+                dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
+            }
+        }
+        
+
+        
+        // armour
+        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["ArmorPlate"],dyes["ArmorSuit"],dyes["ArmorCloth"]}, "_armour");
+
+        // ghost
+        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["GhostMain"],dyes["GhostHighlights"],dyes["GhostDecals"]}, "_ghost");
+
+        // ship
+        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["ShipUpper"],dyes["ShipDecals"],dyes["ShipLower"]}, "_ship");
+
+        // sparrow
+        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["SparrowUpper"],dyes["SparrowEngine"],dyes["SparrowLower"]}, "_sparrow");
+
+        // weapon
+        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["Weapon1"],dyes["Weapon2"],dyes["Weapon3"]}, "_weapon");
+    }
 }
 
 

@@ -150,6 +150,6 @@ public partial class EntityView : UserControl
         string meshName = name;
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
-        AutomatedImporter.SaveBlenderApiFile(savePath, item.ItemName, ConfigHandler.GetOutputTextureFormat(), dyes);
+        AutomatedImporter.SaveBlenderApiFile(savePath, item.ItemName, ConfigHandler.GetOutputTextureFormat(), dyes.Values.ToList());
     }
 }

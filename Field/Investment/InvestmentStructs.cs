@@ -142,9 +142,11 @@ public struct D2Class_77738080
 {
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_7D738080> Arrangements;  // "arrangements" from API
-    [DestinyOffset(0x38), DestinyField(FieldType.TablePointer)]
+    [DestinyOffset(0x28), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_7B738080> CustomDyes;  // "customDyes" from API
+    [DestinyField(FieldType.TablePointer)]
     public List<D2Class_7B738080> DefaultDyes;  // "defaultDyes" from API
-    [DestinyOffset(0x48), DestinyField(FieldType.TablePointer)]
+    [DestinyField(FieldType.TablePointer)]
     public List<D2Class_7B738080> LockedDyes;  // "lockedDyes" from API
     public short WeaponPatternIndex;  // "weaponPatternHash" from API
 }

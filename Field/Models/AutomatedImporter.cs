@@ -88,15 +88,15 @@ public class AutomatedImporter
     }
 
     
-    public static void SaveBlenderApiFile(string saveDirectory, string meshName, ETextureFormat outputTextureFormat, Dictionary<DestinyHash, Dye> dyes)
+    public static void SaveBlenderApiFile(string saveDirectory, string meshName, ETextureFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
     {
-        File.Copy($"blender_api_template.py", $"{saveDirectory}/{meshName}_blender_api.py", true);
-        string text = File.ReadAllText($"{saveDirectory}/{meshName}_blender_api.py");
+        File.Copy($"blender_api_template.py", $"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", true);
+        string text = File.ReadAllText($"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py");
 
         string[] components = {"X", "Y", "Z", "W"};
         
         int dyeIndex = 1;
-        foreach (var (channelHash, dye) in dyes)
+        foreach (var dye in dyes)
         {
             dye.ExportTextures($"{saveDirectory}/Textures", outputTextureFormat);
             var dyeInfo = dye.GetDyeInfo();
@@ -121,7 +121,7 @@ public class AutomatedImporter
         }
 
         text = text.Replace("OUTPUTPATH", $"Textures");
-        text = text.Replace("SHADERNAMEENUM", meshName);
-        File.WriteAllText($"{saveDirectory}/{meshName}_blender_api.py", text);
+        text = text.Replace("SHADERNAMEENUM", $"{meshName}{fileSuffix}");
+        File.WriteAllText($"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", text);
     }
 }

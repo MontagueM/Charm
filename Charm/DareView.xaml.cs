@@ -69,10 +69,10 @@ public partial class DareView : UserControl
                 MainWindow.Progress.CompleteStage();
                 return;
             }
-            if (kvp.Value.GetArtArrangementIndex() != -1)
+            string name = InvestmentHandler.GetItemName(kvp.Value);
+            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
+            if (kvp.Value.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
             {
-                string name = InvestmentHandler.GetItemName(kvp.Value);
-                string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
                 
                 if (!type.Contains("Finisher") && !type.Contains("Emote")) // they point to Animation instead of Entity
                 {
@@ -173,7 +173,21 @@ public partial class DareView : UserControl
         {
             Parallel.ForEach(_selectedItems, item =>
             {
-                EntityView.ExportInventoryItem(item);
+                if (item.Item.GetArtArrangementIndex() != -1)
+                {
+                    // if has a model
+                    EntityView.ExportInventoryItem(item);
+                }
+                else
+                {
+                    // shader
+                    string savePath = ConfigHandler.GetExportSavePath();
+                    string meshName = item.ItemName;
+                    savePath += $"/{meshName}";
+                    Directory.CreateDirectory(savePath);
+                    Directory.CreateDirectory(savePath + "/Textures");
+                    InvestmentHandler.ExportShader(item.Item, savePath, meshName, ConfigHandler.GetOutputTextureFormat());
+                }
                 // EntityView.ExportShader();
 
                 MainWindow.Progress.CompleteStage();
