@@ -4,7 +4,7 @@ import mathutils
 import os
 
 def assemble_mat():
-    #key = name (str), value = most recent node
+    #key = name (str), value = most recent node output
     variable_dict = {}
     
     material = bpy.data.materials.new(name="{Name}")
@@ -12,30 +12,43 @@ def assemble_mat():
     matnodes = material.node_tree.nodes
     link = material.node_tree.links.new
     
-    def updateVariable(variable, newNode, inputIdx, outputIdx):
-        link(variable_dict[variable].outputs[outputIdx], newNode[inputIdx])
+    def updateVariable(variable, newNode, inputIdx):
+        link(variable_dict[variable], newNode.inputs[inputIdx])
         variable_dict[variable] = newNode
     
     #cbuffer helpers
+    i = 0
+    
+    def registerFloat(var_name, x):
+        nonlocal i
+        varNode = matnodes.new("ShaderNodeValue")
+        varNode.location = (-370.0, 200.0 + (float(i)*-1.1)*50)
+        varNode.label = var_name
+        varNode.outputs[0].default_value = x
+        varNode.hide = True
+        i += 1
+        #print(var_name)
+        variable_dict[var_name] = varNode.outputs[0]
+        
     def addFloat4(var_name, x, y, z, w):
-        variable_dict[var_name + ".x"] = x
-        variable_dict[var_name + ".y"] = y
-        variable_dict[var_name + ".z"] = z
-        variable_dict[var_name + ".w"] = w
+        registerFloat(var_name + ".x", x)
+        registerFloat(var_name + ".y", y)
+        registerFloat(var_name + ".z", z)
+        registerFloat(var_name + ".w", w)
     
     def addFloat3(var_name, x, y, z):
-        variable_dict[var_name + ".x"] = x
-        variable_dict[var_name + ".y"] = y
-        variable_dict[var_name + ".z"] = z
+        registerFloat(var_name + ".x", x)
+        registerFloat(var_name + ".y", y)
+        registerFloat(var_name + ".z", z)
     
     def addFloat2(var_name, x, y):
-        variable_dict[var_name + ".x"] = x
-        variable_dict[var_name + ".y"] = y
+        registerFloat(var_name + ".x", x)
+        registerFloat(var_name + ".y", y)
     
     def addFloat(var_name, x):
-        variable_dict[var_name + ".x"] = x
-        
-    principled_node = matnodes.get('Principled BDSF')
+        registerFloat(var_name + ".x", x)  
+    
+    principled_node = matnodes.get('Principled BSDF')
     
     #Texture: ShaderNodeTexImage
     #Color (4dim vector): ShaderNodeRGB
@@ -43,19 +56,17 @@ def assemble_mat():
     #Math: ShaderNodeMath
     #Clamp: ShaderNodeClamp
     #Value: ShaderNodeValue
-    
-    ### REPLACE WITH STATIC VARIABLES ###
-    
-    i = 0
-    for var in variable_dict.keys():
-        varNode = matnodes.new("ShaderNodeValue")
-        varNode.location = (-370.0, 200.0 + (float(i)*-1.1)*50)
-        varNode.label = var
-        varNode.outputs[0].default_value = variable_dict[var]
-        varNode.hide = True
-        variable_dict[var] = varNode
-        i += 1
-        print(var)
+    if True:
+        #using this to keep the variables here in their own scope
+        print("setting up texcoord")
+        texcoord = matnodes.new("ShaderNodeTexCoord")
+        texcoord.location = (-700, 180)
+        splitNode = matnodes.new("ShaderNodeSeparateXYZ")
+        splitNode.location = (-550, 205)
+        link(texcoord.outputs[2], splitNode.inputs[0])        
+        variable_dict['tx.x'] = splitNode.outputs[0]
+        variable_dict['tx.y'] = splitNode.outputs[1]
+        
 
     #### REPLACE WITH SCRIPT ####
     

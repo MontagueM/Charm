@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -246,18 +247,26 @@ public class NodeConverter
             bpy.AppendLine("### v[n] vars ###");
             foreach (var i in inputs)
             {
-                if (i.Type == "float4")
+                if (i.Variable == "v0")
                 {
-                    
-                    bpy.AppendLine($"addFloat4('{i.Variable}', 1.0, 1.0, 1.0, 1.0)\n");
+                    bpy.AppendLine($"addFloat4('v0', 1.0, 1.0, 1.0, 1.0)\n");
+                }
+                else if (i.Type == "float4")
+                {                    
+                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.w'] = variable_dict['tx.y']\n");
                 }
                 else if (i.Type == "float3")
                 {
-                    bpy.AppendLine($"addFloat3('{i.Variable}', 1.0, 1.0, 1.0)\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']\n");
                 }
                 else if (i.Type == "uint")
                 {
-                    bpy.AppendLine($"addFloat('{i.Variable}', 1.0)\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']\n");
                 }
             }
         }
@@ -303,23 +312,24 @@ public class NodeConverter
             //bpy.AppendLine("{").AppendLine("    FMaterialAttributes output;");
             // Output render targets, todo support vertex shader
             //bpy.AppendLine("    float4 o0,o1,o2;");
-            foreach (var i in inputs)
-            {
-                if (i.Type == "float4")
-                {
-                    raw_hlsl = $"{i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyxy;" + raw_hlsl;
-                }
-                else if (i.Type == "float3")
-                {
-                    raw_hlsl = $"{i.Variable}.xyz = {i.Variable}.xyz * tx.xyx;" + raw_hlsl;
-                }
-                else if (i.Type == "uint")
-                {
-                    raw_hlsl = $"{i.Variable}.x = {i.Variable}.x * tx.x;" + raw_hlsl;
-                }
-                raw_hlsl.Replace("v0.xyzw = v0.xyzw * tx.xyxy;", "v0.xyzw = v0.xyzw;");
-                //bpy.Replace("v0.xyzw = v0.xyzw * tx.xyxy;", "v0.xyzw = v0.xyzw;");
-            }
+            //foreach (var i in inputs)
+            //{
+            //    //Not sure if this is needed for blender tbh, but add it to the top of the hlsl just to be safe
+            //    if (i.Type == "float4")
+            //    {
+            //        raw_hlsl = $"{i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyxy;" + raw_hlsl;
+            //    }
+            //    else if (i.Type == "float3")
+            //    {
+            //        raw_hlsl = $"{i.Variable}.xyz = {i.Variable}.xyz * tx.xyx;" + raw_hlsl;
+            //    }
+            //    else if (i.Type == "uint")
+            //    {
+            //        raw_hlsl = $"{i.Variable}.x = {i.Variable}.x * tx.x;" + raw_hlsl;
+            //    }
+            //    raw_hlsl.Replace("v0.xyzw = v0.xyzw * tx.xyxy;", "v0.xyzw = v0.xyzw;");
+            //    //bpy.Replace("v0.xyzw = v0.xyzw * tx.xyxy;", "v0.xyzw = v0.xyzw;");
+            //}
         }
     }
 
@@ -347,8 +357,7 @@ public class NodeConverter
             }
         }
         hlsl.ReadLine();
-        StringBuilder splitScript = new StringBuilder();
-        Regex matchFunction = new Regex("\\).{0,1}[w,x,y,z]{0,4};");
+        StringBuilder splitScript = new StringBuilder();        
         do
         {
             line = hlsl.ReadLine().Trim();
@@ -369,15 +378,82 @@ public class NodeConverter
                     // todo add dimension
                     bpy.AppendLine($"{equal}= sample({sortedIndices.IndexOf(texIndex)}, {sampleUv}).{dotAfter}");
                 }
-                else if (matchFunction.IsMatch(line))
-                {
-                    //Function of some sort
-                    bpy.AppendLine(line + " // FUNCTION");
+                else if (line.Contains("if") || line.Contains("else") || line.Contains("{") || line.Contains("}")) {
+                    bpy.AppendLine(line);
+                    Console.WriteLine("IF/ELSE");
                 }
-                //Not a function
-                else if (line.Contains("="))
+                else if (line.Contains(" = "))
                 {
-                    bpy.AppendLine(line + " // NOT FUNCTION");
+                    line = line.Trim();
+                    //Turn conditionals to mix(val1, val2, fac)
+                    string adaptedLine = Regex.Replace(line, "(\\S+) \\? (\\S+) \\: (\\S+)", "mix($2, $3, $1)");
+
+                    //Split sections to evaluate
+                    string variable = line.Split(" = ")[0];
+                    string equalExp = line.Split(" = ")[1];
+                    string dimensions = variable.Split('.')[1];
+                    string[] outputLines = new string[dimensions.Length];
+
+                    if (!Regex.IsMatch(adaptedLine, @"(\w+)\((.+)\)\.?([x|y|z|w]{0,4})"))
+                    {
+                        if (dimensions.Length > 1)
+                        {
+                            string[] ops = equalExp.Split(' ');
+                            for (int i = 0; i < dimensions.Length; i++)
+                            {
+                                string[] splitVar = variable.Split('.');
+                                string output = $"{splitVar[0]}.{splitVar[1].ElementAt(i)} = ";
+                                foreach (string op in ops)
+                                {
+                                    if (Regex.IsMatch(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})"))
+                                    {
+                                        Match match = Regex.Match(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})");
+                                        char relevantDim = match.Groups[2].Value.ElementAt(i);
+                                        output += $" {match.Groups[1].Value}.{relevantDim}";
+                                    }
+                                    else
+                                    {
+                                        output += $" {op}";
+                                    }
+                                }
+                                bpy.AppendLine(output);
+                            }
+                        }
+                        else
+                        {
+                            bpy.AppendLine(adaptedLine);
+                        }
+                    }
+                    else
+                    {
+                        bpy.AppendLine(adaptedLine);
+                    }
+
+                    //void evaluateLine()
+                    //{
+                    //    MatchCollection matches = Regex.Matches(line, "(\\w+)\\((.+)\\)\\.?([x|y|z|w]{0,4})");
+                    //    if (matches.Count == 0)
+                    //    {
+                    //        if (line.Contains(", "))
+                    //        {
+                    //            //Parameters of a function
+                    //        }
+                    //        else
+                    //        {
+                    //            //No function weirdness, just math
+                    //            MatchCollection operations = Regex.Matches(line, " (\\+|\\-|\\*|\\/|\\%|\\<|\\>|\\<\\=|\\>\\=) ");
+                    //            string[] expressions = Regex.Split(line, " (\\+|\\-|\\*|\\/|\\%|\\<|\\>|\\<\\=|\\>\\=) ");
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //        foreach (Match match in matches)
+                    //        {
+                    //            string body = match.Groups[1].Value;
+                    //        }
+                    //    }
+                    //}
+                    //bpy.AppendLine(adaptedLine);
                 }
             }
         } while (line != null);
