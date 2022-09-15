@@ -35,13 +35,64 @@ namespace Field.Textures
         public string parseEquationFull(string equation, string inputVar)
         {
             IToken tree = parseEquation(equation);
-            Tuple<string, string> traversal = traverse(tree);
+            string[] splitVar = inputVar.Split('.');
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine(traversal.Item1);
-            stringBuilder.AppendLine($"variable_dict['{inputVar}'] = {traversal.Item2}");
+            for (int i = 0; i < splitVar[1].Length; i++)
+            {
+                char dimension = splitVar[1][i];
+                //Process tree to only have one dimension
+                IToken dimTree = getDimension(tree, i, splitVar[1].Length);
+                Tuple<string, string> traversal = traverse(tree);
+                stringBuilder.AppendLine(traversal.Item1);
+                stringBuilder.AppendLine($"variable_dict['{inputVar}'] = {traversal.Item2}");
+            }
+            
             return stringBuilder.ToString();
         }
-
+        private IToken getDimension(IToken tree, int i, int totalDims)
+        {
+            if (tree == null)
+            {
+                return null;
+            }
+            else if (tree is OperatorToken)
+            {
+                ///Operator or Function
+                //Function
+                if (tree is FunctionOperatorToken)
+                {
+                    FunctionOperatorToken t = (FunctionOperatorToken)tree;
+                    if (t.FunctionName.StartsWith("float"))
+                    {
+                        return t.children[i];
+                    }
+                    t.Dimensions = t.Dimensions?[i].ToString();
+                    //TODO: Handle function parameters
+                }
+                else
+                {
+                    OperatorToken t = (OperatorToken)tree;
+                    for (int c = 0; c < t.children.Count(); c++)
+                    {
+                        t.children[c] = getDimension(t.children[c], i, totalDims);
+                    }
+                }
+            }
+            else
+            {
+                ///Value
+                if (tree is VarValueToken)
+                {
+                    VarValueToken t = (VarValueToken)tree;
+                    t.Dimensions = t.Dimensions?[i].ToString();
+                }
+                else
+                {
+                    //Numbers can go right through
+                    return tree;
+                }
+            }
+        }
         private Tuple<string, string> traverse(IToken tree)
         {
             StringBuilder outputString = new StringBuilder();

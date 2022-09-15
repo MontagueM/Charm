@@ -92,7 +92,7 @@ namespace Field.Textures
         }
         public class BasicValueToken : IValueToken
         {
-            string Value;
+            public string Value;
             public BasicValueToken(string value)
             {
                 Value = value;
@@ -105,7 +105,7 @@ namespace Field.Textures
         }
         public class FloatValueToken : IValueToken
         {
-            float Value;
+            public float Value;
             public FloatValueToken(float value)
             {
                 Value = value;
@@ -118,8 +118,8 @@ namespace Field.Textures
         }
         public class VarValueToken : IValueToken
         {
-            string Value;
-            string? Dimensions;
+            public string Value;
+            public string? Dimensions;
             public VarValueToken(string value, string dimensions = null)
             {
                 Value = value;
