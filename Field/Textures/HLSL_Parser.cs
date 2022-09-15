@@ -51,10 +51,6 @@ namespace Field.Textures
         }
         private IToken getDimension(IToken tree, int i, int totalDims)
         {
-            if (totalDims == 0 || totalDims == 1)
-            {
-                return tree;
-            }
             string[] dimMap = new string[] { "x", "y", "z", "w" };
             if (tree == null)
             {
@@ -86,20 +82,12 @@ namespace Field.Textures
                     //Example Cases:
                     ///Scalar function used across dimensions
                     //r0.xy = abs(v3.zy);
-                    ///Multi-dimension function used to assign multiple different dimensions
-                    //o0.xyz = sample(0, r0.xy).xyz
-
-                    //Assume the shader is made intelligenty (big assumption)
-                    if (hasDims)
-                    {
-
-                    }
-                    else
-                    {
-                        //If it doesnt have dimensions, the function's values directly map to the input
-
-
-                    }
+                    ///Multi-dimension function used to implicitly assign multiple different dimensions
+                    //o0.xyz = sample(0, r0.xy)
+                    ///Multi-dimension function explicitly assigns dimensions
+                    //v3.y = cross(r0.xy, cb0[3].yz).x
+                    
+                    
                     return t;
                 }
                 else
@@ -409,7 +397,19 @@ namespace Field.Textures
                             ///Variable
                             Match match = Regex.Match(s, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})");
                             VarValueToken var = new VarValueToken(match.Groups[1].Value, match.Groups[2].Value);
-                            outputStack.Add(var);
+                            if (var.Dimensions?.Length > 1)
+                            {
+                                FunctionOperatorToken combine = new FunctionOperatorToken($"combine{var.Dimensions.Length}",dimensions:var.Dimensions);
+                                foreach (char p in var.Dimensions.ToCharArray())
+                                {
+                                    combine.children.Add(new VarValueToken(var.Value, p.ToString()));
+                                }
+                                outputStack.Add(combine);
+                            }
+                            else
+                            {
+                                outputStack.Add(var);
+                            }                            
                         }
                         else
                         {

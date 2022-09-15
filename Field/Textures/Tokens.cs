@@ -10,7 +10,7 @@ namespace Field.Textures
     {
         public interface IToken
         {
-
+            
         }
         public class OperatorToken : IToken
         {
@@ -42,7 +42,6 @@ namespace Field.Textures
             {
                 this.operation = operation;
             }
-
             public bool isEndingOperator()
             {
                 foreach (IToken token in children)
