@@ -32,16 +32,16 @@ namespace Field.Textures
         {
             this.line_id = line_id;
         }
-        public string parseEquationFull(string equation, string inputVar)
+        public string parseEquationFull(string equation, string variable, string dimensions)
         {
             IToken tree = parseEquation(equation);
-            string[] splitVar = inputVar.Split('.');
+            string inputVar = $"{variable}.{dimensions}";
             StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0; i < splitVar[1].Length; i++)
+            for (int i = 0; i < dimensions.Length; i++)
             {
-                char dimension = splitVar[1][i];
+                char dimension = dimensions[i];
                 //Process tree to only have one dimension
-                IToken dimTree = getDimension(tree, i, splitVar[1].Length);
+                IToken dimTree = getDimension(tree, i, dimensions.Length);
                 Tuple<string, string> traversal = traverse(tree);
                 stringBuilder.AppendLine(traversal.Item1);
                 stringBuilder.AppendLine($"variable_dict['{inputVar}'] = {traversal.Item2}");
@@ -51,6 +51,11 @@ namespace Field.Textures
         }
         private IToken getDimension(IToken tree, int i, int totalDims)
         {
+            if (totalDims == 0 || totalDims == 1)
+            {
+                return tree;
+            }
+            string[] dimMap = new string[] { "x", "y", "z", "w" };
             if (tree == null)
             {
                 return null;
@@ -66,8 +71,36 @@ namespace Field.Textures
                     {
                         return t.children[i];
                     }
-                    t.Dimensions = t.Dimensions?[i].ToString();
+                    bool hasDims = t.Dimensions != null;
+                    ///With how this is handled, each function gets duplicated for each dimension
+                    ///This is good for single-dimension functions but will mean that things like textures will be copied unnessasarily                    
+                    if (!hasDims)
+                    {
+                        //t.Dimensions = dimMap[i];
+                    }
+                    else
+                    {
+                        t.Dimensions = t.Dimensions?[i].ToString();
+                    }
                     //TODO: Handle function parameters
+                    //Example Cases:
+                    ///Scalar function used across dimensions
+                    //r0.xy = abs(v3.zy);
+                    ///Multi-dimension function used to assign multiple different dimensions
+                    //o0.xyz = sample(0, r0.xy).xyz
+
+                    //Assume the shader is made intelligenty (big assumption)
+                    if (hasDims)
+                    {
+
+                    }
+                    else
+                    {
+                        //If it doesnt have dimensions, the function's values directly map to the input
+
+
+                    }
+                    return t;
                 }
                 else
                 {
