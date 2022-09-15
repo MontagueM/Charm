@@ -46,10 +46,10 @@ public class NodeConverter
 
         if (!bIsVertexShader)
         {
-            AddOutputs();
+            //AddOutputs();
         }
 
-        WriteFooter(bIsVertexShader);
+        //WriteFooter(bIsVertexShader);
         return bpy.ToString();
     }
 
@@ -253,20 +253,20 @@ public class NodeConverter
                 }
                 else if (i.Type == "float4")
                 {                    
-                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']\n");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']\n");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']\n");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.w'] = variable_dict['tx.y']\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.w'] = variable_dict['tx.y']");
                 }
                 else if (i.Type == "float3")
                 {
-                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']\n");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']\n");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']");
                 }
                 else if (i.Type == "uint")
                 {
-                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']\n");
+                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
                 }
             }
         }
@@ -357,9 +357,11 @@ public class NodeConverter
             }
         }
         hlsl.ReadLine();
-        StringBuilder splitScript = new StringBuilder();        
+        StringBuilder splitScript = new StringBuilder();
+        int lineNumber = 0;
         do
         {
+            lineNumber++;
             line = hlsl.ReadLine().Trim();
             if (line != null)
             {
@@ -401,7 +403,7 @@ public class NodeConverter
                         for (int i = 0; i < dimensions.Length; i++)
                         {
                             string[] splitVar = variable.Split('.');
-                            string output = $"{splitVar[0]}.{splitVar[1].ElementAt(i)} = ";
+                            string output = $"{splitVar[0]}.{splitVar[1].ElementAt(i)} =";
                             foreach (string op in ops)
                             {
                                 if (Regex.IsMatch(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})"))
@@ -418,7 +420,7 @@ public class NodeConverter
                             bpy.AppendLine(output);
                         }
                     }
-                    else if (dimensions.Length == 0)
+                    else if (dimensions.Length == 1 || dimensions.Length == 0)
                     {
                         //Single dimension in line, leave it be
                         bpy.AppendLine(adaptedLine);
@@ -427,34 +429,13 @@ public class NodeConverter
                     {
                         //There's a function in the line, gotta deal with that
                         //For now just lets it through
+                        MatchCollection matches = Regex.Matches(adaptedLine, @"(\w+)\((.+)\)\.?([x|y|z|w]{0,4})");
+                        foreach (Match match in matches)
+                        {
+                            string name = match.Groups[1].Value;
+                        }
                         bpy.AppendLine(adaptedLine);
                     }
-
-                    //void evaluateLine()
-                    //{
-                    //    MatchCollection matches = Regex.Matches(line, "(\\w+)\\((.+)\\)\\.?([x|y|z|w]{0,4})");
-                    //    if (matches.Count == 0)
-                    //    {
-                    //        if (line.Contains(", "))
-                    //        {
-                    //            //Parameters of a function
-                    //        }
-                    //        else
-                    //        {
-                    //            //No function weirdness, just math
-                    //            MatchCollection operations = Regex.Matches(line, " (\\+|\\-|\\*|\\/|\\%|\\<|\\>|\\<\\=|\\>\\=) ");
-                    //            string[] expressions = Regex.Split(line, " (\\+|\\-|\\*|\\/|\\%|\\<|\\>|\\<\\=|\\>\\=) ");
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //        foreach (Match match in matches)
-                    //        {
-                    //            string body = match.Groups[1].Value;
-                    //        }
-                    //    }
-                    //}
-                    //bpy.AppendLine(adaptedLine);
                 }
             }
         } while (line != null);
