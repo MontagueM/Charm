@@ -107,10 +107,6 @@ public partial class Source2ConfigView : UserControl
 
     private void S2ShaderExportEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        // if (!ConfigHandler.GetS2ShaderExportEnabled())
-        // {
-        //     MessageBox.Show("Blender will NOT import shaders. Please have moderate Blender shader knowledge.");
-        // }
         ConfigHandler.SetS2ShaderExportEnabled(!ConfigHandler.GetS2ShaderExportEnabled());
         PopulateConfigPanel();
     }

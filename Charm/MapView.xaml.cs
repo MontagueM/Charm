@@ -205,7 +205,7 @@ public partial class MapView : UserControl
                     }
                     else if (exportTypeFlag == EExportTypeFlag.Full || exportTypeFlag == EExportTypeFlag.Minimal) //No terrain on a minimal rip makes sense right?
                     {
-                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
                     }
                 }
                 else if(entry is D2Class_85988080 dynamicResource)
@@ -215,7 +215,7 @@ public partial class MapView : UserControl
                 else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
                 {
                     //entry.Rotation.SetW(1);
-                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
+                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement);
                 }
             });
         });
@@ -238,8 +238,10 @@ public partial class MapView : UserControl
                         //Parallel.ForEach(parts, part =>
                         foreach(var part in parts)
                         {
+                            if(File.Exists($"{savePath}/Statics/{part.Static.Hash.GetHashString()}.fbx")) continue;
+                            
                             string staticMeshName = part.Static.Hash.GetHashString();
-                            FbxHandler staticHandler = new FbxHandler();
+                            FbxHandler staticHandler = new FbxHandler(false);
                             
                             staticHandler.InfoHandler.SetMeshName(staticMeshName);
                             var staticmesh = part.Static.Load(ELOD.MostDetail);
@@ -300,7 +302,7 @@ public partial class MapView : UserControl
 
                             staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
                             staticHandler.Dispose();
-                        }//);
+                    }//);
                     }
                     // Dont see a reason to export terrain itself as its own fbx
                     // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain

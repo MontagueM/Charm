@@ -26,11 +26,12 @@ public partial class DevView : UserControl
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
         _fbxHandler = new FbxHandler(false);
+        HashLocation.Text = $"PKG:\nPKG ID:\nEntry Index:";
     }
     
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R && e.Key != Key.E)
+        if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R && e.Key != Key.E && e.Key != Key.L)
         {
             return;
         }
@@ -51,9 +52,12 @@ public partial class DevView : UserControl
             TagHashBox.Text = "INVALID HASH";
             return;
         }
-
+        //uint to int
         switch (e.Key)
         {
+            case Key.L:
+                HashLocation.Text = $"PKG: {PackageHandler.GetPackageName(hash.GetPkgId())} \nPKG ID: {hash.GetPkgId()} \nEntry Index: {hash.GetEntryIndex()} \n{hash.GetDevString()}";
+                break;
             case Key.Return:
                 AddWindow(hash);
                 break;

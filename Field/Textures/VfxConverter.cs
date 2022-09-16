@@ -54,7 +54,7 @@ public class VfxConverter
 
     public string vfxStructure = @"HEADER
 {
-    CompileTargets = ( IS_SM_50 && ( PC || VULKAN ) );
+    //CompileTargets = ( IS_SM_50 && ( PC || VULKAN ) );
 	Description = ""Charm Auto-Generated Source 2 Shader""; 
 }
 
@@ -122,7 +122,7 @@ PS
         {
             vfx.AppendLine("// masked");
             StringBuilder replace = new StringBuilder();
-            replace.AppendLine(@"Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
+            replace.AppendLine(@"   Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
             replace.AppendLine(@"   Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
         
             vfxStructure = vfxStructure.Replace("//alphatest", replace.ToString());
@@ -408,18 +408,15 @@ PS
             vfx.AppendLine("    PixelOutput MainPs( PixelInput i )");
             vfx.AppendLine("    {");
 
-            //vfx.AppendLine($"   float2 tx)");
-
-            //vfx.AppendLine("        Material output = ToMaterial( i, float4(0,0,0,0), float4(0,0,0,0), float4(0,0,0,0) );");
             // Output render targets, todo support vertex shader
             vfx.AppendLine("        float4 o0,o1,o2;");
             vfx.AppendLine("        float alpha = 1;");
             vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 1, 1);");
 
-            //vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals.
+            vfx.AppendLine("        float4 v0 = {0.5,0.5,1,1};"); //Seems to only be used for normals.
             vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals
-            vfx.AppendLine("        float4 v2 = {i.vTextureCoords, 1, 1};"); //?? Seems to only be used for normals.
-            //vfx.AppendLine("        float4 v3 = {1,1,1,1};"); //No clue what this is.
+            vfx.AppendLine("        float4 v2 = {i.vTangentUWs, 1};"); //Tangent? Seems to only be used for normals.
+            //vfx.AppendLine("        float4 v3 = {1,1,1,1};"); //No clue what this is. seems only used as texture coords
             vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Not sure if this is VC or not
             vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //seems like this is always the same as v4/only used if shader uses VC alpha
             //vfx.AppendLine("        uint v6 = 1;"); //no idea
@@ -441,8 +438,8 @@ PS
                 }
             }
             vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
-            vfx.Replace("v1.xyzw = v1.xyzw * tx.xyzw;", "v1.xyzw = normalize(v1.xyzw);");
-            vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = normalize(v2.xyzw);");
+            vfx.Replace("v1.xyzw = v1.xyzw * tx.xyzw;", "v1.xyzw = v1.xyzw;");
+            vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = v2.xyzw;");
             vfx.Replace("v5.xyzw = v5.xyzw * tx.xyzw;", "v5.xyzw = v5.xyzw;");
         }
     }
@@ -525,7 +522,7 @@ PS
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
  
-        float4 normal = float4(normalize(saturate((normal_in_world_space*2 - 1.4)*0.6 + 0.5)).xyz, 1);
+        float4 normal = float4(normal_in_world_space,1);
         normal.y = 1 - normal.y;
         normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
         
@@ -534,9 +531,8 @@ PS
         Material mat = ToMaterial(i, float4(o0.xyz, 1), saturate(normal), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
         mat.Opacity = alpha;
         mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100);
-
-        //ShadingModelValveStandard sm;
-        ShadingModelStandard sm;
+        
+        ShadingModelValveStandard sm;
 		
         return FinalizePixelMaterial( i, mat, sm );
     }
@@ -546,24 +542,24 @@ PS
         {
             vfx.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
         }
-
-        if (textures.Count > 2)
-        {
-            string texIndex = sortedTextures[textures.Count-2].Variable;
-            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
-            vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count > 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
-        }
-        if (textures.Count == 2)
-        {
-            string texIndex = sortedTextures[textures.Count-1].Variable;
-            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
-            vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count >= 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
-        }
-        if (textures.Count < 2)
-        {
-            //string tex2d = $"float4(Tex2DS(g_t{sortedTextures[textures.Count-1]}, TextureFiltering, tx).xyz, 1);";
-            vfx.AppendLine(outputString.Replace("{normal}", $"float4(0.5, 0.5, 1, 1);" ));
-        }
+        vfx.AppendLine(outputString);
+        // if (textures.Count > 2)
+        // {
+        //     string texIndex = sortedTextures[textures.Count-2].Variable;
+        //     string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
+        //     vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count > 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
+        // }
+        // if (textures.Count == 2)
+        // {
+        //     string texIndex = sortedTextures[textures.Count-1].Variable;
+        //     string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
+        //     vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count >= 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
+        // }
+        // if (textures.Count < 2)
+        // {
+        //     //string tex2d = $"float4(Tex2DS(g_t{sortedTextures[textures.Count-1]}, TextureFiltering, tx).xyz, 1);";
+        //     vfx.AppendLine(outputString.Replace("{normal}", $"float4(0.5, 0.5, 1, 1);" ));
+        // }
     }
 
     private void WriteFooter(bool bIsVertexShader)
