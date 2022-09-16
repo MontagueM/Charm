@@ -378,64 +378,70 @@ public class NodeConverter
                     var sampleUv = line.Split(", ")[1].Split(")")[0];
                     var dotAfter = line.Split(").")[1];
                     // todo add dimension
-                    bpy.AppendLine($"{equal}= sample({sortedIndices.IndexOf(texIndex)}, {sampleUv}).{dotAfter}");
+                    line = $"{equal}= sample({sortedIndices.IndexOf(texIndex)}, {sampleUv}).{dotAfter}";
                 }
                 else if (line.Contains("if") || line.Contains("else") || line.Contains("{") || line.Contains("}")) {
                     bpy.AppendLine(line);
                     Console.WriteLine("IF/ELSE");
+                    continue;
                 }
-                else if (line.Contains(" = "))
-                {
+                if (line.Contains(" = "))
+                {                    
                     line = line.Trim();
+                    line = line.Substring(0, line.Length - 1);
                     //Turn conditionals to mix(val1, val2, fac)
                     string adaptedLine = Regex.Replace(line, "(\\S+) \\? (\\S+) \\: (\\S+)", "mix($2, $3, $1)");
 
                     //Split sections to evaluate
                     string variable = line.Split(" = ")[0];
                     string equalExp = line.Split(" = ")[1];
-                    string dimensions = variable.Split('.')[1];
-                    string[] outputLines = new string[dimensions.Length];
+                    string[] variableSplit = variable.Split('.');
+                    //string[] outputLines = new string[dimensions.Length];
 
-                    if (dimensions.Length > 1 && !Regex.IsMatch(adaptedLine, @"(\w+)\((.+)\)\.?([x|y|z|w]{0,4})"))
-                    {
-                        //No functions in line
-                        string[] ops = equalExp.Split(' ');
-                        for (int i = 0; i < dimensions.Length; i++)
-                        {
-                            string[] splitVar = variable.Split('.');
-                            string output = $"{splitVar[0]}.{splitVar[1].ElementAt(i)} =";
-                            foreach (string op in ops)
-                            {
-                                if (Regex.IsMatch(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})"))
-                                {
-                                    Match match = Regex.Match(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})");
-                                    char relevantDim = match.Groups[2].Value.ElementAt(i);
-                                    output += $" {match.Groups[1].Value}.{relevantDim}";
-                                }
-                                else
-                                {
-                                    output += $" {op}";
-                                }
-                            }
-                            bpy.AppendLine(output);
-                        }
-                    }
-                    else if (dimensions.Length == 1 || dimensions.Length == 0)
-                    {
-                        //Single dimension in line, leave it be
-                        bpy.AppendLine(adaptedLine);
-                    }
-                    else
-                    {
-                        //There's a function in the line, gotta deal with that
-                        //For now just lets it through
-                        MatchCollection matches = Regex.Matches(adaptedLine, @"(\w+)\((.+)\)\.?([x|y|z|w]{0,4})");
-                        foreach (Match match in matches)
-                        {
-                            string name = match.Groups[1].Value;
-                        }
-                        bpy.AppendLine(adaptedLine);
-                    }
+                    HLSLParser parser = new HLSLParser(lineNumber.ToString());
+                    bpy.AppendLine($"\n#LINE {lineNumber}: {line}");
+                    bpy.Append(parser.parseEquationFull(equalExp, variableSplit[0], variableSplit[1]));
+
+                    //if (dimensions.Length > 1 && !Regex.IsMatch(adaptedLine, @"(\w+)\((.+)\)\.?([x|y|z|w]{0,4})"))
+                    //{
+                    //    //No functions in line
+                    //    string[] ops = equalExp.Split(' ');
+                    //    for (int i = 0; i < dimensions.Length; i++)
+                    //    {
+                    //        string[] splitVar = variable.Split('.');
+                    //        string output = $"{splitVar[0]}.{splitVar[1].ElementAt(i)} =";
+                    //        foreach (string op in ops)
+                    //        {
+                    //            if (Regex.IsMatch(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})"))
+                    //            {
+                    //                Match match = Regex.Match(op, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})");
+                    //                char relevantDim = match.Groups[2].Value.ElementAt(i);
+                    //                output += $" {match.Groups[1].Value}.{relevantDim}";
+                    //            }
+                    //            else
+                    //            {
+                    //                output += $" {op}";
+                    //            }
+                    //        }
+                    //        bpy.AppendLine(output);
+                    //    }
+                    //}
+                    //else if (dimensions.Length == 1 || dimensions.Length == 0)
+                    //{
+                    //    //Single dimension in line, leave it be
+                    //    bpy.AppendLine(adaptedLine);
+                    //}
+                    //else
+                    //{
+                    //    //There's a function in the line, gotta deal with that
+                    //    //For now just lets it through
+                    //    MatchCollection matches = Regex.Matches(adaptedLine, @"(\w+)\((.+)\)\.?([x|y|z|w]{0,4})");
+                    //    foreach (Match match in matches)
+                    //    {
+                    //        string name = match.Groups[1].Value;
+                    //    }
+                    //    bpy.AppendLine(adaptedLine);
+                    //}
                 }
             }
         } while (line != null);

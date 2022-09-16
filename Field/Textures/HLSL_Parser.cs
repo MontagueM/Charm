@@ -35,16 +35,15 @@ namespace Field.Textures
         public string parseEquationFull(string equation, string variable, string dimensions)
         {
             IToken tree = parseEquation(equation);
-            string inputVar = $"{variable}.{dimensions}";
+            //string inputVar = $"{variable}.{dimensions}";
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < dimensions.Length; i++)
             {
-                char dimension = dimensions[i];
                 //Process tree to only have one dimension
                 IToken dimTree = getDimension(tree, i, dimensions.Length);
-                Tuple<string, string> traversal = traverse(tree);
+                Tuple<string, string> traversal = traverse(dimTree);
                 stringBuilder.AppendLine(traversal.Item1);
-                stringBuilder.AppendLine($"variable_dict['{inputVar}'] = {traversal.Item2}");
+                stringBuilder.AppendLine($"variable_dict['{variable}.{dimensions[i]}'] = {traversal.Item2}");
             }
             
             return stringBuilder.ToString();
@@ -67,7 +66,7 @@ namespace Field.Textures
                     {
                         return t.children[i];
                     }
-                    bool hasDims = t.Dimensions != null;
+                    bool hasDims = t.Dimensions != null && t.Dimensions?.Length != 0;
                     ///With how this is handled, each function gets duplicated for each dimension
                     ///This is good for single-dimension functions but will mean that things like textures will be copied unnessasarily                    
                     if (!hasDims)
@@ -76,7 +75,7 @@ namespace Field.Textures
                     }
                     else
                     {
-                        t.Dimensions = t.Dimensions?[i].ToString();
+                        t.Dimensions = t.Dimensions?[i % t.Dimensions.Length].ToString();
                     }
                     //TODO: Handle function parameters
                     //Example Cases:
@@ -97,6 +96,7 @@ namespace Field.Textures
                     {
                         t.children[c] = getDimension(t.children[c], i, totalDims);
                     }
+                    return t;
                 }
             }
             else
@@ -106,6 +106,7 @@ namespace Field.Textures
                 {
                     VarValueToken t = (VarValueToken)tree;
                     t.Dimensions = t.Dimensions?[i].ToString();
+                    return t;
                 }
                 else
                 {
@@ -367,10 +368,10 @@ namespace Field.Textures
                         );
                         if (op.ParameterBody != null)
                         {
-                            foreach (string p in splitParams(op.ParameterBody, ", "))
+                            foreach (string p in splitParams(op.ParameterBody, ","))
                             {
                                 //TODO: Recursively generate node trees
-                                op.children.Add(parseEquation(p));
+                                op.children.Add(parseEquation(p.Trim()));
                             }
                         }
                         ///Function is complete; treat as value
