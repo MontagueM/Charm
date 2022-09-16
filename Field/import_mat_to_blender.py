@@ -68,16 +68,17 @@ def assemble_mat():
         variable_dict['tx.y'] = splitNode.outputs[1]
         
 
-    #### REPLACE WITH SCRIPT ####
-    
+    ### REPLACE WITH SCRIPT ###
+
     if True:        #Base Color (Albedo)
-        combineRGB = matnodes.new("ShaderNodecombineColor")
+        combineRGB = matnodes.new("ShaderNodeCombineColor")
         link(variable_dict['o0.x'], combineRGB.inputs[0])
         link(variable_dict['o0.y'], combineRGB.inputs[1])
         link(variable_dict['o0.z'], combineRGB.inputs[2])
         variable_dict['output_rgb_albedo'] = combineRGB.outputs[0]
-        
+        print("rgb")
         link(combineRGB.outputs[0], principled_node.inputs[0])
+        link(combineRGB.outputs[0], principled_node.inputs[19])
         
     if True:        #Normal
         biasSubtract1 = matnodes.new("ShaderNodeMath")
@@ -121,7 +122,7 @@ def assemble_mat():
         link(resplit.outputs[0], recombine.inputs[0])
         link(resplit.outputs[1], recombine.inputs[1])
         
-        normal_dot = matnodes.new("ShaderNodeVectorMath")l
+        normal_dot = matnodes.new("ShaderNodeVectorMath")
         normal_dot.operation = 'DOT_PRODUCT'
         link(recombine.outputs[0], normal_dot.inputs[0])
         link(recombine.outputs[0], normal_dot.inputs[1])
@@ -144,23 +145,23 @@ def assemble_mat():
         link(resplit.outputs[1], full_recombine.inputs[1])
         link(normal_sqrt.outputs[0], full_recombine.inputs[2])
         
-        normal_post_1 = matnodes.new("ShaderNodeVectorMath")l
+        normal_post_1 = matnodes.new("ShaderNodeVectorMath")
         normal_post_1.operation = 'MULTIPLY_ADD'
         link(full_recombine.outputs[0], normal_post_1.inputs[0])
         normal_post_1.inputs[1].default_value = [2.0, 2.0, 2.0]
         normal_post_1.inputs[2].default_value = [-1.5, -1.5, -1.5]
         
-        normal_post_2 = matnodes.new("ShaderNodeVectorMath")l
+        normal_post_2 = matnodes.new("ShaderNodeVectorMath")
         normal_post_2.operation = 'MULTIPLY_ADD'
         link(normal_post_1.outputs[0], normal_post_2.inputs[0])
         normal_post_2.inputs[1].default_value = [0.5, 0.5, 0.5]
         normal_post_2.inputs[2].default_value = [0.5, 0.5, 0.5]
         
-        normal_post_norm = matnodes.new("ShaderNodeVectorMath")l
+        normal_post_norm = matnodes.new("ShaderNodeVectorMath")
         normal_post_norm.operation = 'NORMALIZE'
         link(normal_post_2.outputs[0], normal_post_norm.inputs[0])
-        
-        link(normal_post_norm.outputs[0], principled_node.inputs[23])
+        print("normal")
+        link(normal_post_norm.outputs[0], principled_node.inputs[22])
     
     if True:        #Roughness
         smoothness_subtract = matnodes.new("ShaderNodeMath")
@@ -181,7 +182,7 @@ def assemble_mat():
         smoothness_invert.operation = 'SUBTRACT'
         link(rough_saturate.outputs[0], smoothness_invert.inputs[1])
         smoothness_invert.inputs[0].default_value = 1
-        
+        print("smoothness")
         link(smoothness_subtract.outputs[0], principled_node.inputs[9])
         
         
@@ -198,11 +199,11 @@ def assemble_mat():
         link(emissive_subtract.outputs[0], emissive_multiply.inputs[0])
         emissive_multiply.inputs[1].default_value = 10
         
-        emissive_scale= matnodes("ShaderNodeVectorMath")
+        emissive_scale= matnodes.new("ShaderNodeVectorMath")
         emissive_scale.operation = 'SCALE'
         link(variable_dict['output_rgb_albedo'], emissive_scale.inputs[0])
         link(emissive_multiply.outputs[0], emissive_scale.inputs[1])
-        
+        print("emissive")
         link(emissive_scale.outputs[0], principled_node.inputs[20])
         
         #AO is ignored single blender does that on its own

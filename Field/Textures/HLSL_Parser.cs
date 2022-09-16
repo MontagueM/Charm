@@ -16,7 +16,7 @@ namespace Field.Textures
         private string createIdentifier()
         {
             var_index++;
-            return $"{line_id}_{var_index}";
+            return $"NODE_{line_id}_{var_index}";
         }
         //private static void Main(string[] args)
         //{
