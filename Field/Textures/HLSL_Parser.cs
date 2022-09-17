@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Field.General;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Field.Textures
     {
         public string line_id;
         private int var_index = 0;
+        private string hash;
         private string createIdentifier()
         {
             var_index++;
@@ -28,12 +30,17 @@ namespace Field.Textures
         //    Console.WriteLine(traversal.Item1);
         //    Console.WriteLine($"variable_dict['{inputVar}'] = {traversal.Item2}");
         //}
-        public HLSLParser(string line_id)
+        public HLSLParser(string line_id, string hash)
         {
             this.line_id = line_id;
+            this.hash = hash;            
         }
         public string parseEquationFull(string equation, string variable, string dimensions)
         {
+            if (equation.Contains("sample"))
+            {
+                Console.WriteLine("SAMPLE!");
+            }
             IToken tree = parseEquation(equation);
             //string inputVar = $"{variable}.{dimensions}";
             StringBuilder stringBuilder = new StringBuilder();
@@ -246,14 +253,14 @@ namespace Field.Textures
                     break;
                 case "max":
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
-                    outputScript.AppendLine($@"{name}.operation = 'MAX'");
+                    outputScript.AppendLine($@"{name}.operation = 'MAXIMUM'");
                     outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
                     outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
                     outputConnector = $@"{name}.outputs[0]";
                     break;
                 case "min":
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
-                    outputScript.AppendLine($@"{name}.operation = 'MIN'");
+                    outputScript.AppendLine($@"{name}.operation = 'MINIMUM'");
                     outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
                     outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
                     outputConnector = $@"{name}.outputs[0]";
@@ -297,6 +304,40 @@ namespace Field.Textures
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
                     outputScript.AppendLine($@"{name}.operation = 'ABSOLUTE'");
                     outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "combine2":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeCombineXYZ"")");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "combine3":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeCombineXYZ"")");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
+                    outputScript.AppendLine($@"link({paramConnectors[2]}, {name}.inputs[2])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                //case "combine4":
+                case "dot":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeVectorMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'DOT_PRODUCT'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "sample":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeTexImage"")");
+                    outputScript.AppendLine($@"{name}_texregister = bpy.data.images.get(f""PS_{{{paramConnectors[0]}.default_value}}_{hash}_<<REPLACE_TEX_EXT>>"")");
+                    outputScript.AppendLine($@"if {name}_texregister:");
+                    outputScript.AppendLine($"\t{name}.label = {name}_texregister.name");
+                    //TODO(?): Assign color space (it may just work without it so idk)
+                    outputScript.AppendLine($"\t{name}.alpha_mode = \"CHANNEL_PACKED\"");
+                    outputScript.AppendLine($"\t{name}.image = {name}_texregister");
+                    outputScript.AppendLine($@"else:");
+                    outputScript.AppendLine($"\t{name}.label = f\"{{{paramConnectors[0]}.default_value}}\"");
+                    outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[0])");
                     outputConnector = $@"{name}.outputs[0]";
                     break;
                 default:

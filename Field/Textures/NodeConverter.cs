@@ -17,6 +17,7 @@ public class NodeConverter
     private StringReader hlsl;
     private StringBuilder bpy;
     private bool bOpacityEnabled = false;
+    private string Hash;
     private List<Texture> textures = new List<Texture>();
     private List<int> samplers = new List<int>();
     private List<Cbuffer> cbuffers = new List<Cbuffer>();
@@ -26,6 +27,7 @@ public class NodeConverter
     public string HlslToBpy(Material material, string hlslText, bool bIsVertexShader)
     {
         this.raw_hlsl = hlslText;
+        this.Hash = material.Hash;
         hlsl = new StringReader(hlslText);
         bpy = new StringBuilder();
         bOpacityEnabled = false;
@@ -398,7 +400,7 @@ public class NodeConverter
                     string[] variableSplit = variable.Split('.');
                     //string[] outputLines = new string[dimensions.Length];
 
-                    HLSLParser parser = new HLSLParser(lineNumber.ToString());
+                    HLSLParser parser = new HLSLParser(lineNumber.ToString(), Hash);
                     bpy.AppendLine($"\n#LINE {lineNumber}: {line}");
                     bpy.Append(parser.parseEquationFull(equalExp, variableSplit[0], variableSplit[1]));
 
