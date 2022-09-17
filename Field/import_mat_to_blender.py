@@ -115,10 +115,10 @@ def assemble_mat():
         variable_dict['v4.z'] = splitattr.outputs[2]
         variable_dict['v4.w'] = splitattr.outputs[0] #probably wrong
         
-        variable_dict['v5.x'] = attribute.outputs[3]
+        variable_dict['v5.x'] = attribute.outputs[3] #probably wrong
         variable_dict['v5.y'] = attribute.outputs[3] #probably wrong
         variable_dict['v5.z'] = attribute.outputs[3] #probably wrong
-        variable_dict['v5.w'] = attribute.outputs[3] #probably wrong
+        variable_dict['v5.w'] = attribute.outputs[3]
         
     ### REPLACE WITH SCRIPT ###
 
