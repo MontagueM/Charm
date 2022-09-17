@@ -374,11 +374,14 @@ public class Part
     public List<uint> VertexIndices = new List<uint>();
     public List<Vector4> VertexPositions = new List<Vector4>();
     public List<Vector2> VertexTexcoords = new List<Vector2>();
+    public List<Vector2> VertexTexcoords1 = new List<Vector2>();
     public List<Vector4> VertexNormals = new List<Vector4>();
     public List<Vector4> VertexTangents = new List<Vector4>();
     public List<Vector4> VertexColours = new List<Vector4>();
+    public List<Vector4> VertexColourSlots = new List<Vector4>();
     public Material Material;
     public int GroupIndex = 0;
+    public bool bAlphaClip;
 
     public Part()
     {

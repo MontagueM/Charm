@@ -114,7 +114,7 @@ public partial class EntityView : UserControl
         }
         
         // Scale and rotate
-        fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
+        // fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
         
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
@@ -127,6 +127,16 @@ public partial class EntityView : UserControl
         // Export the model
         // todo bad, should be replaced
         EntitySkeleton overrideSkeleton = new EntitySkeleton(new TagHash("BC38AB80"));
+        var val = InvestmentHandler.GetPatternEntityFromHash(item.Item.Header.InventoryItemHash);
+        // var resource = (D2Class_6E358080)val.PatternAudio.Header.Unk18;
+        // if (resource.PatternAudioGroups[0].WeaponSkeletonEntity != null)
+        // {
+            // overrideSkeleton = resource.PatternAudioGroups[0].WeaponSkeletonEntity.Skeleton;
+        // }
+        if (val != null && val.Skeleton != null)
+        {
+            overrideSkeleton = val.Skeleton;
+        }
         EntityView.Export(InvestmentHandler.GetEntitiesFromHash(item.Item.Header.InventoryItemHash),
             name, EExportTypeFlag.Full, overrideSkeleton);
         
