@@ -38,7 +38,7 @@ public class NodeConverter
         }
         // WriteTextureComments(material, bIsVertexShader);
         WriteCbuffers(material, bIsVertexShader);
-        WriteFunctionDefinition(bIsVertexShader);
+        //WriteFunctionDefinition(bIsVertexShader);
         hlsl = new StringReader(hlslText);
         bool success = ConvertInstructions();
         if (!success)
@@ -247,8 +247,8 @@ public class NodeConverter
         if (!bIsVertexShader)
         {
             bpy.AppendLine("### v[n] vars ###");
-            foreach (var i in inputs)
-            {
+            //foreach (var i in inputs)
+            //{
                 //if (i.Variable == "v0")
                 //{
                 //    bpy.AppendLine($"addFloat4('v0', 1.0, 1.0, 1.0, 1.0)\n");
@@ -270,7 +270,7 @@ public class NodeConverter
                 //{
                 //    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
                 //}
-            }
+            //}
         }
         //bpy.AppendLine("#define cmp -").AppendLine("struct shader {");
 
