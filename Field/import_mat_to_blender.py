@@ -30,23 +30,23 @@ def assemble_mat():
         #print(var_name)
         variable_dict[var_name] = varNode.outputs[0]
         
-    def addFloat4(var_name, x, y, z, w):
-        registerFloat(var_name + ".x", x)
-        registerFloat(var_name + ".y", y)
-        registerFloat(var_name + ".z", z)
-        registerFloat(var_name + ".w", w)
-    
-    def addFloat3(var_name, x, y, z):
-        registerFloat(var_name + ".x", x)
-        registerFloat(var_name + ".y", y)
-        registerFloat(var_name + ".z", z)
-    
-    def addFloat2(var_name, x, y):
-        registerFloat(var_name + ".x", x)
-        registerFloat(var_name + ".y", y)
-    
-    def addFloat(var_name, x):
-        registerFloat(var_name + ".x", x)  
+#    def addFloat4(var_name, x, y, z, w):
+#        registerFloat(var_name + ".x", x)
+#        registerFloat(var_name + ".y", y)
+#        registerFloat(var_name + ".z", z)
+#        registerFloat(var_name + ".w", w)
+#    
+#    def addFloat3(var_name, x, y, z):
+#        registerFloat(var_name + ".x", x)
+#        registerFloat(var_name + ".y", y)
+#        registerFloat(var_name + ".z", z)
+#    
+#    def addFloat2(var_name, x, y):
+#        registerFloat(var_name + ".x", x)
+#        registerFloat(var_name + ".y", y)
+#    
+#    def addFloat(var_name, x):
+#        registerFloat(var_name + ".x", x)  
     
     principled_node = matnodes.get('Principled BSDF')
     
@@ -58,16 +58,68 @@ def assemble_mat():
     #Value: ShaderNodeValue
     if True:
         #using this to keep the variables here in their own scope
-        print("setting up texcoord")
+        print("setting up v3")
         texcoord = matnodes.new("ShaderNodeTexCoord")
         texcoord.location = (-700, 180)
         splitNode = matnodes.new("ShaderNodeSeparateXYZ")
         splitNode.location = (-550, 205)
         link(texcoord.outputs[2], splitNode.inputs[0])        
-        variable_dict['tx.x'] = splitNode.outputs[0]
-        variable_dict['tx.y'] = splitNode.outputs[1]
+        variable_dict['v3.x'] = splitNode.outputs[0]
+        variable_dict['v3.y'] = splitNode.outputs[1]
+        variable_dict['v3.z'] = splitNode.outputs[0]
+        variable_dict['v3.w'] = splitNode.outputs[1]
+    
+    if True:
+        print("setting up v0, v1, v2, v6")
+        geo = matnodes.new("ShaderNodeNewGeometry")
+        geo.location = (-700, -120)
+        splitpos = matnodes.new("ShaderNodeSeparateXYZ")
+        link(geo.outputs[0], splitpos.inputs[0])
+        variable_dict['v0.x'] = splitpos.outputs[0]
+        variable_dict['v0.y'] = splitpos.outputs[1]
+        variable_dict['v0.z'] = splitpos.outputs[2]
+        variable_dict['v0.w'] = splitpos.outputs[0] #probably wrong
         
+        splitnorm = matnodes.new("ShaderNodeSeparateXYZ")
+        link(geo.outputs[1], splitpos.inputs[0])
+        variable_dict['v1.x'] = splitnorm.outputs[0]
+        variable_dict['v1.y'] = splitnorm.outputs[1]
+        variable_dict['v1.z'] = splitnorm.outputs[2]
+        variable_dict['v1.w'] = splitnorm.outputs[0] #probably wrong
 
+        splittang = matnodes.new("ShaderNodeSeparateXYZ")
+        link(geo.outputs[2], splitpos.inputs[0])
+        variable_dict['v2.x'] = splittang.outputs[0]
+        variable_dict['v2.y'] = splittang.outputs[1]
+        variable_dict['v2.z'] = splittang.outputs[2]
+        variable_dict['v2.w'] = splittang.outputs[0] #probably wrong
+        
+        invback = matnodes.new("ShaderNodeMath")
+        invback.operation = 'SUBTRACT'
+        invback.inputs[0].default_value = 1
+        link(geo.outputs[6], invback.inputs[1])
+        variable_dict['v6.x'] = invback.outputs[0]
+        variable_dict['v6.y'] = invback.outputs[0] #probably wrong
+        variable_dict['v6.z'] = invback.outputs[0] #probably wrong
+        variable_dict['v6.w'] = invback.outputs[0] #probably wrong
+    
+    if True:
+        print("setting up v4, v5")
+        attribute = matnodes.new("ShaderNodeAttribute")
+        attribute.attribute_name = 'colourLayerName'
+        
+        splitattr = matnodes.new("ShaderNodeSeparateXYZ")
+        link(attribute.outputs[1], splitattr.inputs[0])
+        variable_dict['v4.x'] = splitattr.outputs[0]
+        variable_dict['v4.y'] = splitattr.outputs[1]
+        variable_dict['v4.z'] = splitattr.outputs[2]
+        variable_dict['v4.w'] = splitattr.outputs[0] #probably wrong
+        
+        variable_dict['v5.x'] = attribute.outputs[3]
+        variable_dict['v5.y'] = attribute.outputs[3] #probably wrong
+        variable_dict['v5.z'] = attribute.outputs[3] #probably wrong
+        variable_dict['v5.w'] = attribute.outputs[3] #probably wrong
+        
     ### REPLACE WITH SCRIPT ###
 
     if True:        #Base Color (Albedo)

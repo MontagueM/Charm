@@ -249,27 +249,27 @@ public class NodeConverter
             bpy.AppendLine("### v[n] vars ###");
             foreach (var i in inputs)
             {
-                if (i.Variable == "v0")
-                {
-                    bpy.AppendLine($"addFloat4('v0', 1.0, 1.0, 1.0, 1.0)\n");
-                }
-                else if (i.Type == "float4")
-                {                    
-                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.w'] = variable_dict['tx.y']");
-                }
-                else if (i.Type == "float3")
-                {
-                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']");
-                    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']");
-                }
-                else if (i.Type == "uint")
-                {
-                    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
-                }
+                //if (i.Variable == "v0")
+                //{
+                //    bpy.AppendLine($"addFloat4('v0', 1.0, 1.0, 1.0, 1.0)\n");
+                //}
+                //else if (i.Type == "float4")
+                //{                    
+                //    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
+                //    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']");
+                //    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']");
+                //    bpy.AppendLine($"variable_dict['{i.Variable}.w'] = variable_dict['tx.y']");
+                //}
+                //else if (i.Type == "float3")
+                //{
+                //    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
+                //    bpy.AppendLine($"variable_dict['{i.Variable}.y'] = variable_dict['tx.y']");
+                //    bpy.AppendLine($"variable_dict['{i.Variable}.z'] = variable_dict['tx.x']");
+                //}
+                //else if (i.Type == "uint")
+                //{
+                //    bpy.AppendLine($"variable_dict['{i.Variable}.x'] = variable_dict['tx.x']");
+                //}
             }
         }
         //bpy.AppendLine("#define cmp -").AppendLine("struct shader {");
