@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -112,7 +113,7 @@ namespace Field.Textures
 
             public override string ToString()
             {
-                return Value.ToString();
+                return Value.ToString(CultureInfo.InvariantCulture);
             }
         }
         public class VarValueToken : IValueToken
