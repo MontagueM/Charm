@@ -37,10 +37,10 @@ namespace Field.Textures
         }
         public string parseEquationFull(string equation, string variable, string dimensions)
         {
-            if (equation.Contains("sample"))
-            {
-                Console.WriteLine("SAMPLE!");
-            }
+            //if (equation.Contains("?"))
+            //{
+            //    Console.WriteLine("MIX!");
+            //}
             IToken tree = parseEquation(equation);
             //string inputVar = $"{variable}.{dimensions}";
             StringBuilder stringBuilder = new StringBuilder();
@@ -227,8 +227,10 @@ namespace Field.Textures
                     break;
                 case "mix":
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMixRGB"")");
+                    outputScript.AppendLine($@"{name}.blend_type = 'VALUE'");
                     outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
                     outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
+                    outputScript.AppendLine($@"link({paramConnectors[2]}, {name}.inputs[2])");
                     outputConnector = $@"{name}.outputs[0]";
                     break;
                 //case "ddx_coarse":
@@ -352,6 +354,18 @@ namespace Field.Textures
             List<IToken> outputStack = new List<IToken>();
             Stack<OperatorToken> operatorStack = new Stack<OperatorToken>();
 
+            //Check for inline condition
+            if (Regex.IsMatch(inputExp, "(\\S+) \\? (\\S+) \\: (\\S+)"))
+            {
+                Match match = Regex.Match(inputExp, "(\\S+) \\? (\\S+) \\: (\\S+)");
+                FunctionOperatorToken op = new FunctionOperatorToken("mix");
+                op.children.Add(parseEquation(match.Groups[1].Value));
+                op.children.Add(parseEquation(match.Groups[2].Value));
+                op.children.Add(parseEquation(match.Groups[3].Value));
+                outputStack.Add(op);
+                return eqToTree(outputStack);
+            }
+
             foreach (string _s in splitParams(inputExp, " "))
             {
                 string s = _s;
@@ -417,7 +431,7 @@ namespace Field.Textures
                         }
                         ///Function is complete; treat as value
                         outputStack.Add(op);
-                    }
+                    }                    
                     else
                     {
                         ///Number
