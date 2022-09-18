@@ -52,7 +52,9 @@ public class NodeConverter
         }
 
         //WriteFooter(bIsVertexShader);
-        return bpy.ToString();
+        string template = File.ReadAllText("import_mat_to_blender.py");
+        
+        return template.Replace("<<<REPLACE WITH SCRIPT>>>", "\t" + bpy.ToString().Replace("\n", "\n\t"));
     }
 
     private void ProcessHlslData()
