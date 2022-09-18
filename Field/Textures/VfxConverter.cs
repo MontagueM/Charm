@@ -334,24 +334,24 @@ PS
     
     private void WriteFunctionDefinition(Material material, bool bIsVertexShader)
     {
-        if (!bIsVertexShader)
-        {
-            foreach (var i in inputs)
-            {
-                if (i.Type == "float4")
-                {
-                    vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "{1, 1, 1, 1};\n");
-                }
-                else if (i.Type == "float3")
-                {
-                    vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "{1, 1, 1};\n");
-                }
-                else if (i.Type == "uint")
-                {
-                    vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "1;\n");
-                }
-            }
-        }
+        // if (!bIsVertexShader)
+        // {
+        //     foreach (var i in inputs)
+        //     {
+        //         if (i.Type == "float4")
+        //         {
+        //             vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "{1, 1, 1, 1};\n");
+        //         }
+        //         else if (i.Type == "float3")
+        //         {
+        //             vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "{1, 1, 1};\n");
+        //         }
+        //         else if (i.Type == "uint")
+        //         {
+        //             vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "1;\n");
+        //         }
+        //     }
+        // }
 
         if (bIsVertexShader)
         {
@@ -416,31 +416,31 @@ PS
             vfx.AppendLine("        float4 v0 = {0.5,0.5,1,1};"); //Seems to only be used for normals.
             vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals
             vfx.AppendLine("        float4 v2 = {i.vTangentUWs, 1};"); //Tangent? Seems to only be used for normals.
-            //vfx.AppendLine("        float4 v3 = {1,1,1,1};"); //No clue what this is. seems only used as texture coords
+            vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //seems only used as texture coords
             vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Not sure if this is VC or not
             vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //seems like this is always the same as v4/only used if shader uses VC alpha
             //vfx.AppendLine("        uint v6 = 1;"); //no idea
 
 
-            foreach (var i in inputs)
-            {
-                if (i.Type == "float4")
-                {
-                    vfx.AppendLine($"       {i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyzw;");
-                }
-                else if (i.Type == "float3")
-                {
-                    vfx.AppendLine($"       {i.Variable}.xyz = {i.Variable}.xyz * tx.xyz;");
-                }
-                else if (i.Type == "uint")
-                {
-                    vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x * tx.x;");
-                }
-            }
-            vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
-            vfx.Replace("v1.xyzw = v1.xyzw * tx.xyzw;", "v1.xyzw = v1.xyzw;");
-            vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = v2.xyzw;");
-            vfx.Replace("v5.xyzw = v5.xyzw * tx.xyzw;", "v5.xyzw = v5.xyzw;");
+            // foreach (var i in inputs)
+            // {
+            //     if (i.Type == "float4")
+            //     {
+            //         vfx.AppendLine($"       {i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyzw;");
+            //     }
+            //     else if (i.Type == "float3")
+            //     {
+            //         vfx.AppendLine($"       {i.Variable}.xyz = {i.Variable}.xyz * tx.xyz;");
+            //     }
+            //     else if (i.Type == "uint")
+            //     {
+            //         vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x * tx.x;");
+            //     }
+            // }
+            // vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
+            // vfx.Replace("v1.xyzw = v1.xyzw * tx.xyzw;", "v1.xyzw = v1.xyzw;");
+            // vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = v2.xyzw;");
+            // vfx.Replace("v5.xyzw = v5.xyzw * tx.xyzw;", "v5.xyzw = v5.xyzw;");
         }
     }
 
@@ -543,31 +543,5 @@ PS
             vfx.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
         }
         vfx.AppendLine(outputString);
-        // if (textures.Count > 2)
-        // {
-        //     string texIndex = sortedTextures[textures.Count-2].Variable;
-        //     string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
-        //     vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count > 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
-        // }
-        // if (textures.Count == 2)
-        // {
-        //     string texIndex = sortedTextures[textures.Count-1].Variable;
-        //     string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
-        //     vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count >= 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
-        // }
-        // if (textures.Count < 2)
-        // {
-        //     //string tex2d = $"float4(Tex2DS(g_t{sortedTextures[textures.Count-1]}, TextureFiltering, tx).xyz, 1);";
-        //     vfx.AppendLine(outputString.Replace("{normal}", $"float4(0.5, 0.5, 1, 1);" ));
-        // }
-    }
-
-    private void WriteFooter(bool bIsVertexShader)
-    {
-        vfx.AppendLine("}").AppendLine("};");
-        if (!bIsVertexShader)
-        {
-            vfx.AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},tx);");
-        }
     }
 }
