@@ -10,8 +10,8 @@ namespace Field.Textures;
 
 public struct ExportSettings { public bool Raw, Unreal, Blender, Source2; }
 
-public class Material : Tag
-{
+public class Material : Tag {
+    
     public D2Class_AA6D8080 Header;
     
     private static readonly object Lock = new();
@@ -28,15 +28,9 @@ public class Material : Tag
         var matPath = $"{savePath}/Materials";
         Directory.CreateDirectory(matPath);
         SaveAllTextures(texturePath, Header.PSTextures, Header.VSTextures, Header.CSTextures);
-        if (!File.Exists($"{matPath}/{Hash}_meta.json"))
-        {
-            //Sometimes this gets run twice at the exact same time and tries to write the file at the same time as another thread, despite checking for the file existing
-            //May the best thread win.
-            try
-            {
-                File.WriteAllText($"{matPath}/{Hash}_meta.json", CreateTextureManifest().ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
-            }
-            catch (IOException ignored) {}
+        if (!File.Exists($"{matPath}/{Hash}_meta.json")) {
+            try { File.WriteAllText($"{matPath}/{Hash}_meta.json", CreateTextureManifest().ToJsonString(new JsonSerializerOptions { WriteIndented = true })); }
+            catch(IOException ignored) { }
         }
         if(settings.Raw) {
             var rawPath = $"{matPath}/Raw";
@@ -96,13 +90,11 @@ public class Material : Tag
                 exeProcess?.WaitForExit();
             }
 
-            if (!File.Exists(hlslFile) && allowretry) {
-                if (File.Exists(binFile))
-                {
-                    //If the binfile already existed but is incorrect for some reason, retry
+            if(!File.Exists(hlslFile)) {
+                if(allowretry && File.Exists(binFile)) {
                     File.Delete(binFile);
                     return Decompile(type, false);
-                }                
+                }
                 throw new FileNotFoundException($"Decompilation failed for {Hash}");
             }
         }
@@ -134,23 +126,25 @@ public class Material : Tag
         var root = new JsonObject();
         var textureMeta = new JsonObject();
         if(Header.PixelShader != null) {
-            root["pixelShader"] = new JsonObject { ["indices"] = CreateShaderIndices(Header.PSTextures) };
+            var i = CreateShaderIndices(Header.PSTextures);
+            if(i.Count > 0)
+                root["pixelShader"] = new JsonObject { ["indices"] = i };
             GetShaderTextureMeta(textureMeta, Header.PSTextures);
         }
         if(Header.VertexShader != null) {
-            root["vertexShader"] = new JsonObject { ["indices"] = CreateShaderIndices(Header.VSTextures) };
+            var i = CreateShaderIndices(Header.VSTextures);
+            if(i.Count > 0)
+                root["vertexShader"] = new JsonObject { ["indices"] = i };
             GetShaderTextureMeta(textureMeta, Header.VSTextures);
         }
         if(Header.ComputeShader != null) {
-            root["computeShader"] = new JsonObject { ["indices"] = CreateShaderIndices(Header.CSTextures) };
+            var i = CreateShaderIndices(Header.CSTextures);
+            if(i.Count > 0)
+                root["computeShader"] = new JsonObject { ["indices"] = i };
             GetShaderTextureMeta(textureMeta, Header.CSTextures);
         }
         root["textures"] = textureMeta;
-        root["format"] = TextureExtractor.Format switch {
-            ETextureFormat.PNG => ".png",
-            ETextureFormat.TGA => ".tga",
-            _ => ".dds"
-        };
+        root["format"] = GetTextureExtension(TextureExtractor.Format);
         return root;
     }
     
@@ -201,8 +195,7 @@ public class Material : Tag
         // TODO: Create a proper import script, assuming textures are bound and loaded
         if(Header.PixelShader != null) {
             var bpy = new NodeConverter().HlslToBpy(this, Decompile(ShaderType.Pixel), false);
-            if(bpy != string.Empty)
-            {
+            if(bpy != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.py", bpy); }
                 catch (IOException ignored) { }
                 Console.WriteLine($"Exported Blender PixelShader {Hash}.");
@@ -210,8 +203,7 @@ public class Material : Tag
         }
         if(Header.VertexShader != null) {
             var bpy = new NodeConverter().HlslToBpy(this, Decompile(ShaderType.Vertex), true);
-            if(bpy != string.Empty)
-            {
+            if(bpy != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.py", bpy); }
                 catch (IOException ignored) { }
                 Console.WriteLine($"Exported Blender VertexShader {Hash}.");
@@ -223,8 +215,7 @@ public class Material : Tag
     private void ExportMaterialUnreal(string path) {
         if(Header.PixelShader != null) {
             var usf = new UsfConverter().HlslToUsf(this, Decompile(ShaderType.Pixel), false);
-            if(usf != string.Empty)
-            {
+            if(usf != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.usf", usf); }
                 catch (IOException ignored) { }
                 Console.WriteLine($"Exported Unreal PixelShader {Hash}.");
@@ -232,8 +223,7 @@ public class Material : Tag
         }
         if(Header.VertexShader != null) {
             var usf = new UsfConverter().HlslToUsf(this, Decompile(ShaderType.Vertex), true);
-            if(usf != string.Empty)
-            {
+            if(usf != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.usf", usf); }
                 catch (IOException ignored) { }
                 Console.WriteLine($"Exported Unreal VertexShader {Hash}.");
@@ -244,13 +234,11 @@ public class Material : Tag
     private void ExportMaterialSource2(string path) {
         if(Header.PixelShader != null) {
             var vfx = new VfxConverter().HlslToVfx(this, Decompile(ShaderType.Pixel), false);
-            if(vfx != string.Empty)
-            {
+            if(vfx != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.vfx", vfx); }
                 catch (IOException ignored) { }
                 Console.WriteLine($"Exported Source 2 PixelShader {Hash}.");
             }
-
             var materialBuilder = new StringBuilder("Layer0 \n{");
             materialBuilder.AppendLine($"\n\tshader \"{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.vfx\"");
             materialBuilder.AppendLine("\tF_ALPHA_TEST 1");
