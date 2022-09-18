@@ -331,14 +331,10 @@ namespace Field.Textures
                     break;
                 case "sample":
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeTexImage"")");
-                    outputScript.AppendLine($@"{name}_texregister = bpy.data.images.get(f""PS_{{{paramConnectors[0]}.default_value}}_{hash}_<<REPLACE_TEX_EXT>>"")");
-                    outputScript.AppendLine($@"if {name}_texregister:");
-                    outputScript.AppendLine($"\t{name}.label = {name}_texregister.name");
+                    outputScript.AppendLine($"{name}.label = texture_dict[{paramConnectors[0]}.default_value].name");
                     //TODO(?): Assign color space (it may just work without it so idk)
-                    outputScript.AppendLine($"\t{name}.alpha_mode = \"CHANNEL_PACKED\"");
-                    outputScript.AppendLine($"\t{name}.image = {name}_texregister");
-                    outputScript.AppendLine($@"else:");
-                    outputScript.AppendLine($"\t{name}.label = f\"{{{paramConnectors[0]}.default_value}}\"");
+                    outputScript.AppendLine($"{name}.alpha_mode = \"CHANNEL_PACKED\"");
+                    outputScript.AppendLine($"{name}.image = texture_dict[{paramConnectors[0]}.default_value]");
                     outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[0])");
                     outputConnector = $@"{name}.outputs[0]";
                     break;

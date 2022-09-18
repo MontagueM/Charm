@@ -28,7 +28,10 @@ public class Material : Tag
         var matPath = $"{savePath}/Materials";
         Directory.CreateDirectory(matPath);
         SaveAllTextures(texturePath, Header.PSTextures, Header.VSTextures, Header.CSTextures);
-        File.WriteAllText($"{matPath}/{Hash}_meta.json", CreateTextureManifest().ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+        if (!File.Exists($"{matPath}/{Hash}_meta.json"))
+        {
+            File.WriteAllText($"{matPath}/{Hash}_meta.json", CreateTextureManifest().ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+        }
         if(settings.Raw) {
             var rawPath = $"{matPath}/Raw";
             Directory.CreateDirectory(rawPath);

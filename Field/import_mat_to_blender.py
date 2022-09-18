@@ -2,11 +2,19 @@ import bpy
 import json
 import mathutils
 import os
+#key = name (str), value = most recent node output
+variable_dict = {}
 
-def assemble_mat():
-    #key = name (str), value = most recent node output
-    variable_dict = {}
-    
+shader_metadata = {}
+texture_dict = {}
+
+def load_meta(exportpath, shaderhash):
+    shader_metadata = json.load(open(f'{exportpath}\\Materials\\{shaderhash}_meta.json'))
+    for tex in shader_metadata['textures'].keys():
+        img = bpy.data.images.load(exportpath + "/Textures/" + f"/{tex}{shader_metadata['format']}", check_existing = True)  #might be an outdated/deprecated way of loading textures? 
+        #TODO: actually put img into texture_dict with the correct index
+
+def assemble_mat():  
     material = bpy.data.materials.new(name="{Name}")
     material.use_nodes = True
     matnodes = material.node_tree.nodes
