@@ -43,17 +43,19 @@ namespace Field.Textures
             //}
             IToken tree = parseEquation(equation);
             //string inputVar = $"{variable}.{dimensions}";
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder nodeBody = new StringBuilder();
+            StringBuilder varAssignments = new StringBuilder();
             for (int i = 0; i < dimensions.Length; i++)
             {
                 //Process tree to only have one dimension
                 IToken dimTree = getDimension(tree, i, dimensions.Length);
                 Tuple<string, string> traversal = traverse(dimTree);
-                stringBuilder.AppendLine(traversal.Item1);
-                stringBuilder.AppendLine($"variable_dict['{variable}.{dimensions[i]}'] = {traversal.Item2}");
+                nodeBody.AppendLine(traversal.Item1);
+                varAssignments.AppendLine($"variable_dict['{variable}.{dimensions[i]}'] = {traversal.Item2}");
             }
-            
-            return stringBuilder.ToString();
+            //Variable assignments come afterward to avoid interference
+            nodeBody.AppendLine(varAssignments.ToString());
+            return nodeBody.ToString();
         }
         private IToken getDimension(IToken tree, int i, int totalDims)
         {

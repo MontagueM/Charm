@@ -30,7 +30,13 @@ public class Material : Tag
         SaveAllTextures(texturePath, Header.PSTextures, Header.VSTextures, Header.CSTextures);
         if (!File.Exists($"{matPath}/{Hash}_meta.json"))
         {
-            File.WriteAllText($"{matPath}/{Hash}_meta.json", CreateTextureManifest().ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+            //Sometimes this gets run twice at the exact same time and tries to write the file at the same time as another thread, despite checking for the file existing
+            //May the best thread win.
+            try
+            {
+                File.WriteAllText($"{matPath}/{Hash}_meta.json", CreateTextureManifest().ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+            }
+            catch (IOException ignored) {}
         }
         if(settings.Raw) {
             var rawPath = $"{matPath}/Raw";
@@ -58,10 +64,11 @@ public class Material : Tag
         }
     }
     
-    private string Decompile(ShaderType type) {
+    private string Decompile(ShaderType type, bool allowretry = true) {
         var directory = "hlsl_temp";
         Directory.CreateDirectory(directory);
-        var fileName = $"{directory}/{GetShaderPrefix(type)}_{Hash}";
+        directory = Path.GetFullPath(directory);
+        var fileName = $"{directory}\\{GetShaderPrefix(type)}_{Hash}";
         var binFile = $"{fileName}.bin";
         var hlslFile = $"{fileName}.hlsl";
         
@@ -89,7 +96,13 @@ public class Material : Tag
                 exeProcess?.WaitForExit();
             }
 
-            if (!File.Exists(hlslFile)) {
+            if (!File.Exists(hlslFile) && allowretry) {
+                if (File.Exists(binFile))
+                {
+                    //If the binfile already existed but is incorrect for some reason, retry
+                    File.Delete(binFile);
+                    return Decompile(type, false);
+                }                
                 throw new FileNotFoundException($"Decompilation failed for {Hash}");
             }
         }
