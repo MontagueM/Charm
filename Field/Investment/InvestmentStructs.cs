@@ -1,7 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using Field.Entities;
 using Field.General;
+using Field.Investment;
 using Field.Strings;
+using Field.Textures;
 
 namespace Field;
 
@@ -140,7 +142,11 @@ public struct D2Class_77738080
 {
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_7D738080> Arrangements;  // "arrangements" from API
-    [DestinyOffset(0x48), DestinyField(FieldType.TablePointer)]
+    [DestinyOffset(0x28), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_7B738080> CustomDyes;  // "customDyes" from API
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_7B738080> DefaultDyes;  // "defaultDyes" from API
+    [DestinyField(FieldType.TablePointer)]
     public List<D2Class_7B738080> LockedDyes;  // "lockedDyes" from API
     public short WeaponPatternIndex;  // "weaponPatternHash" from API
 }
@@ -207,7 +213,7 @@ public struct D2Class_9F548080
     // public dynamic? Unk78;  // D2Class_B4548080
 
     [DestinyOffset(0x88)]
-    public short Unk88;
+    public short IconIndex;
     public short Unk8A;
     [DestinyField(FieldType.String)]
     public string ItemName;  // "displayProperties" -> "name"
@@ -431,7 +437,7 @@ public struct D2Class_8C978080
 {
     public long FileSize;
     [DestinyField(FieldType.TablePointer)]
-    public IndexAccessList<D2Class_0F878080> AssingmentBSL;
+    public IndexAccessList<D2Class_0F878080> AssignmentBSL;
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_0B008080> Unk18;
 }
@@ -440,7 +446,7 @@ public struct D2Class_8C978080
 public struct D2Class_0F878080 : IComparer<D2Class_0F878080>
 {
     public DestinyHash ApiHash;
-    [DestinyField(FieldType.TagHash64)]
+    [DestinyOffset(0x8), DestinyField(FieldType.TagHash64)]
     public TagHash EntityRelationHash;  // can be entity or smth else, if SandboxPattern is entity if ArtDyeReference idk
     
     public int Compare(D2Class_0F878080 x, D2Class_0F878080 y)
@@ -499,6 +505,135 @@ public struct D2Class_96798080
     public DestinyHash ApiHash;
     public int HashIndex;
 }
+
+#endregion
+
+#region InventoryItem Icons
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_015A8080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public IndexAccessList<D2Class_075A8080> InventoryItemIconsMap;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_075A8080
+{
+    public DestinyHash InventoryItemHash;
+    [DestinyOffset(0x10), DestinyField(FieldType.TagHash64)]
+    public Tag<D2Class_B83E8080> IconContainer;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x80)]
+public struct D2Class_B83E8080
+{
+    public long FileSize;
+    [DestinyOffset(0x10)]
+    public DestinyHash Unk10;
+    [DestinyField(FieldType.TagHash)] 
+    public Tag<D2Class_CF3E8080> IconPrimaryContainer;
+    [DestinyOffset(0x20), DestinyField(FieldType.TagHash)] 
+    public Tag<D2Class_CF3E8080> IconBackgroundContainer;
+    [DestinyField(FieldType.TagHash)] 
+    public Tag<D2Class_CF3E8080> IconOverlayContainer;
+}
+
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_CF3E8080
+{
+    public long FileSize;
+    [DestinyOffset(0x10), DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk10;  // cd3e8080, cb3e8080
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_CD3E8080
+{
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_D23E8080> Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_CB3E8080
+{
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_D03E8080> Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+public struct D2Class_D23E8080
+{
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_D53E8080> TextureList;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+public struct D2Class_D03E8080
+{
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_D43E8080> TextureList;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 4)]
+public struct D2Class_D53E8080
+{
+    [DestinyField(FieldType.TagHash)]
+    public TextureHeader IconTexture;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 4)]
+public struct D2Class_D43E8080
+{
+    [DestinyField(FieldType.TagHash)]
+    public TextureHeader IconTexture;
+}
+
+
+#endregion
+
+#region Dyes
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_C2558080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)]
+    public IndexAccessList<D2Class_C6558080> ArtDyeReferences;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_C6558080
+{
+    public DestinyHash ArtDyeHash;
+    public DestinyHash DyeManifestHash;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_E36C8080
+{
+    public long FileSize;
+    [DestinyOffset(0x0C), DestinyField(FieldType.TagHash)]
+    public Dye Dye;
+    // same thing + some unknown flags and info
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_F2518080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TablePointer)] 
+    public List<D2Class_2C4F8080> ChannelHashes;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 4)]
+public struct D2Class_2C4F8080
+{
+    public DestinyHash ChannelHash;
+}
+
 
 #endregion
 

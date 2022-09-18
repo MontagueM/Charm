@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="Charm.DareView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm"
+             mc:Ignorable="d"
+             d:DesignHeight="1080" d:DesignWidth="1920">
+    <UserControl.Resources>
+        <DataTemplate x:Key="ItemTemplate">
+            <Button Click="DareItemControl_OnClick" Height="96" Width="288" Margin="0">
+                <local:DareItemControl/>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="50*" />
+            <RowDefinition Height="40*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80*" />
+            <ColumnDefinition Width="20*" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BackgroundColour20}"> 
+            <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Center"
+                     Width="600" Background="{StaticResource BackgroundColour30}"
+                     TextWrapping="Wrap" VerticalAlignment="Center" FontSize="30"
+                     FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36" />
+        </Border>
+        <StackPanel HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Background="{StaticResource BackgroundColour7}" Orientation="Horizontal">
+            <Button VerticalAlignment="Center" Height="50" Width="90" Margin="5,0,5,0" Click="ClearQueue_OnClick">
+                <TextBlock Text="Clear Queue" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Button>
+            <Button VerticalAlignment="Center" Height="50" Width="110" Margin="5,0,5,0" Click="OpenOutputFolder_OnClick">
+                <TextBlock Text="Open Output Folder" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Button>
+            <Button VerticalAlignment="Center" Height="50" Width="90" Margin="5,0,5,0" Click="ExecuteQueue_OnClick">
+                <TextBlock Text="Execute Queue" TextWrapping="Wrap" TextAlignment="Center"/>
+            </Button>
+        </StackPanel>
+        <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" Background="{StaticResource BackgroundColour30}"/>
+        
+        <!-- <ListView Grid.Row="1" Grid.RowSpan="2" -->
+        <!--           Name="DareListView" -->
+        <!--           ItemTemplate="{StaticResource ItemTemplate}"> -->
+        <!--     <ListView.ItemsPanel> -->
+        <!--         <ItemsPanelTemplate> -->
+        <!--             <UniformGrid Rows="7" /> -->
+        <!--         </ItemsPanelTemplate> -->
+        <!--     </ListView.ItemsPanel> -->
+        <!-- </ListView> -->
+        
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Visible" >
+            <ItemsControl Name="DareListView" ItemTemplate="{StaticResource ItemTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="7"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <ListView x:Name="SelectedItemView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Button Click="DareItemControl_OnClick" Height="96" Width="288" Margin="0">
+                        <local:DareItemControl/>
+                    </Button>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        
+    </Grid>
+</UserControl>

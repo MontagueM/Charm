@@ -60,6 +60,9 @@
       <None Update="template.vmdl">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="blender_api_template.py">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>
