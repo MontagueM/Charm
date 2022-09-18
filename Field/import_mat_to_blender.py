@@ -30,23 +30,23 @@ def assemble_mat():
         #print(var_name)
         variable_dict[var_name] = varNode.outputs[0]
         
-#    def addFloat4(var_name, x, y, z, w):
-#        registerFloat(var_name + ".x", x)
-#        registerFloat(var_name + ".y", y)
-#        registerFloat(var_name + ".z", z)
-#        registerFloat(var_name + ".w", w)
-#    
-#    def addFloat3(var_name, x, y, z):
-#        registerFloat(var_name + ".x", x)
-#        registerFloat(var_name + ".y", y)
-#        registerFloat(var_name + ".z", z)
-#    
-#    def addFloat2(var_name, x, y):
-#        registerFloat(var_name + ".x", x)
-#        registerFloat(var_name + ".y", y)
-#    
-#    def addFloat(var_name, x):
-#        registerFloat(var_name + ".x", x)  
+    def addFloat4(var_name, x, y, z, w):
+        registerFloat(var_name + ".x", x)
+        registerFloat(var_name + ".y", y)
+        registerFloat(var_name + ".z", z)
+        registerFloat(var_name + ".w", w)
+    
+    def addFloat3(var_name, x, y, z):
+        registerFloat(var_name + ".x", x)
+        registerFloat(var_name + ".y", y)
+        registerFloat(var_name + ".z", z)
+    
+    def addFloat2(var_name, x, y):
+        registerFloat(var_name + ".x", x)
+        registerFloat(var_name + ".y", y)
+    
+    def addFloat(var_name, x):
+        registerFloat(var_name + ".x", x)  
     
     principled_node = matnodes.get('Principled BSDF')
     
