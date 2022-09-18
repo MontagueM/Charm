@@ -1,4 +1,7 @@
-﻿namespace Field.Models;
+﻿using Field.General;
+using Field.Investment;
+using Field.Textures;
+namespace Field.Models;
 using System.Configuration;
 using System.IO;
 
@@ -82,5 +85,43 @@ public class AutomatedImporter
                 break;
         }
         File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", textExtensions);
+    }
+
+    
+    public static void SaveBlenderApiFile(string saveDirectory, string meshName, ETextureFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
+    {
+        File.Copy($"blender_api_template.py", $"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", true);
+        string text = File.ReadAllText($"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py");
+
+        string[] components = {"X", "Y", "Z", "W"};
+        
+        int dyeIndex = 1;
+        foreach (var dye in dyes)
+        {
+            dye.ExportTextures($"{saveDirectory}/Textures", outputTextureFormat);
+            var dyeInfo = dye.GetDyeInfo();
+            foreach (var fieldInfo in dyeInfo.GetType().GetFields())
+            {
+                Vector4 value = (Vector4)fieldInfo.GetValue(dyeInfo);
+                if (!fieldInfo.CustomAttributes.Any())
+                    continue;
+                string valueName = fieldInfo.CustomAttributes.First().ConstructorArguments[0].Value.ToString();
+                for (int i = 0; i < 4; i++)
+                {
+                    text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i]}");
+                }
+            }
+
+            var diff = dye.Header.DyeTextures[0];
+            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}_{diff.TextureIndex}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            var norm = dye.Header.DyeTextures[1];
+            text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}_{norm.TextureIndex}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+
+            dyeIndex++;
+        }
+
+        text = text.Replace("OUTPUTPATH", $"Textures");
+        text = text.Replace("SHADERNAMEENUM", $"{meshName}{fileSuffix}");
+        File.WriteAllText($"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", text);
     }
 }

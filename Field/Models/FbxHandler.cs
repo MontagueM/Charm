@@ -65,7 +65,7 @@ public class FbxHandler
 
         AddMaterial(mesh, node, index);
         AddSmoothing(mesh);
-
+        
         lock (_fbxLock)
         {
             _scene.GetRootNode().AddChild(node);
@@ -80,7 +80,7 @@ public class FbxHandler
         FbxMesh mesh;
         lock (_fbxLock)
         {
-            mesh = FbxMesh.Create(_manager, $"{meshName}_Group{part.GroupIndex}_{index}");
+            mesh = FbxMesh.Create(_manager, $"{meshName}_Group{part.GroupIndex}_Index{part.Index}_{index}_{part.LodCategory}");
         }
 
         // Conversion lookup table
@@ -342,10 +342,14 @@ public class FbxHandler
 
     }
 
-    public void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel)
+    public void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel, List<FbxNode> skeletonNodes = null)
     {
+        if (skeletonNodes == null)
+        {
+            skeletonNodes = new List<FbxNode>();
+        }
         // _scene.GetRootNode().LclRotation.Set(new FbxDouble3(90, 0, 0));
-        List<FbxNode> skeletonNodes = new List<FbxNode>();
+        // List<FbxNode> skeletonNodes = new List<FbxNode>();
         if (entity.Skeleton != null)
         {
             skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
@@ -417,7 +421,6 @@ public class FbxHandler
             }
         }
     }
-    //find hello world.
     
     public void AddDynamicPointsToScene(D2Class_85988080 points, string meshName, FbxHandler dynamicHandler)
     { 
@@ -485,5 +488,18 @@ public class FbxHandler
         retVal.Z *= (float)(180.0f / Math.PI);
 
         return retVal;
+    }
+
+    public void ScaleAndRotateForBlender(FbxNode node)
+    {
+        for (int i = 0; i < _scene.GetRootNode().GetChildCount(); i++)
+        {
+            FbxNode child = _scene.GetRootNode().GetChild(i);
+            if (child.GetNodeAttribute().GetNode().GetSkeleton() == null)
+            {
+                // child.LclScaling.Set(new FbxDouble3(100, 100, 100));
+                child.LclRotation.Set(new FbxDouble3(0, 0, -90));
+            }
+        }
     }
 }

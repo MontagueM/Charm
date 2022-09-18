@@ -173,6 +173,10 @@ public class Tag : DestinyFile
                 {
                     field.SetValue(result, new TagHash(handle.ReadUInt32()));
                 }
+                else if (field.FieldType.BaseType == typeof(Enum))
+                {
+                    field.SetValue(result, Enum.ToObject(field.FieldType, handle.ReadByte()));
+                }
                 else
                 {
                     dynamic value = StructConverter.ToStructure(handle.ReadBytes(Marshal.SizeOf(field.FieldType)), field.FieldType);
@@ -529,6 +533,42 @@ public class IndexAccessList<T> : IEnumerable<T> where T : struct
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    /// <summary>
+    /// We assume the list is sorted via a position 0 DestinyHash uint32.
+    /// </summary>
+    /// <param name="hash">Hash to find if it exists.</param>
+    /// <returns>The entry of the list if found, otherwise null.</returns>
+    public T? BinarySearch(DestinyHash hash)
+    {
+        using (var handle = ParentTag.GetHandle())
+        {
+            uint compareValue = hash.Hash;
+            int min = 0;
+            int max = (int)Count - 1;
+            int structureSize = typeof(T).StructLayoutAttribute.Size;
+            while (min <= max)
+            {
+                int mid = (min + max) / 2;
+                handle.BaseStream.Seek(Offset + mid * structureSize, SeekOrigin.Begin);
+                uint midValue = handle.ReadUInt32();
+                if (midValue == compareValue)
+                {
+                    return ElementAt(mid, handle);
+                }
+                if (midValue < compareValue)
+                {
+                    min = mid + 1;
+                }
+                else
+                {
+                    max = mid - 1;
+                }
+            }
+        }
+
+        return null;
     }
 }
 

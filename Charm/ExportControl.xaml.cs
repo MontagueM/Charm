@@ -19,7 +19,7 @@ public enum EExportTypeFlag
     [Description("Terrain only")]
     TerrainOnly = 4,
     [Description("Pre-arranged map")]
-    ArrangedMap = 8,    
+    ArrangedMap = 8,
 }
 
 public partial class ExportControl : UserControl

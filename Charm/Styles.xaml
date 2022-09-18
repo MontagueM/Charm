@@ -187,6 +187,115 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+
+    <ControlTemplate x:Key="VerticalScrollBar"
+                     TargetType="{x:Type ScrollBar}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition MaxHeight="18" />
+                <RowDefinition Height="0.00001*" />
+                <RowDefinition MaxHeight="18" />
+            </Grid.RowDefinitions>
+            <Border Grid.RowSpan="3"
+                    CornerRadius="2"
+                    Background="{StaticResource BackgroundColour30}" />
+            <Track x:Name="PART_Track"
+                   Grid.Row="1"
+                   IsDirectionReversed="true">
+                <Track.Thumb>
+                    <Thumb Style="{StaticResource ScrollBarThumb}"
+                           Margin="1,0,1,0">
+                        <Thumb.BorderBrush>
+
+                            <LinearGradientBrush StartPoint="0,0"
+                                                 EndPoint="1,0">
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStopCollection>
+                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
+                                                      Offset="0.0" />
+                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
+                                                      Offset="1.0" />
+                                    </GradientStopCollection>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+
+                        </Thumb.BorderBrush>
+                        <Thumb.Background>
+
+                            <LinearGradientBrush StartPoint="0,0"
+                                                 EndPoint="1,0">
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStopCollection>
+                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
+                                                      Offset="0.0" />
+                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
+                                                      Offset="1.0" />
+                                    </GradientStopCollection>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+
+                        </Thumb.Background>
+                    </Thumb>
+                </Track.Thumb>
+            </Track>
+        </Grid>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="HorizontalScrollBar"
+                     TargetType="{x:Type ScrollBar}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MaxWidth="18" />
+                <ColumnDefinition Width="0.00001*" />
+                <ColumnDefinition MaxWidth="18" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.ColumnSpan="3"
+                    CornerRadius="2"
+                    Background="{StaticResource BackgroundColour30}" />
+            <Track x:Name="PART_Track"
+                   Grid.Column="1"
+                   IsDirectionReversed="False">
+                <Track.Thumb>
+                    <Thumb Style="{StaticResource ScrollBarThumb}"
+                           Margin="0,1,0,1">
+
+                        <Thumb.BorderBrush>
+
+                            <LinearGradientBrush StartPoint="0,0"
+                                                 EndPoint="1,0">
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStopCollection>
+                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
+                                                      Offset="0.0" />
+                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
+                                                      Offset="1.0" />
+                                    </GradientStopCollection>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+
+                        </Thumb.BorderBrush>
+                        <Thumb.Background>
+
+                            <LinearGradientBrush StartPoint="0,0"
+                                                 EndPoint="0,1">
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStopCollection>
+                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
+                                                      Offset="0.0" />
+                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
+                                                      Offset="1.0" />
+                                    </GradientStopCollection>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+
+                        </Thumb.Background>
+                    </Thumb>
+                </Track.Thumb>
+            </Track>
+        </Grid>
+    </ControlTemplate>
+
     <Style TargetType="{x:Type ScrollBar}">
         <Setter Property="Background" Value="{StaticResource BackgroundColour30}" />
         <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false" />
@@ -208,6 +317,26 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation"
+                     Value="Horizontal">
+                <Setter Property="Width"
+                        Value="Auto" />
+                <Setter Property="Height"
+                        Value="18" />
+                <Setter Property="Template"
+                        Value="{StaticResource HorizontalScrollBar}" />
+            </Trigger>
+            <Trigger Property="Orientation"
+                     Value="Vertical">
+                <Setter Property="Width"
+                        Value="18" />
+                <Setter Property="Height"
+                        Value="Auto" />
+                <Setter Property="Template"
+                        Value="{StaticResource VerticalScrollBar}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="Menu">
@@ -391,7 +520,7 @@
                     </BulletDecorator>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="false">
-                            <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="{x:Null}">
                             <Setter TargetName="CheckMark" Property="Data" Value="M 0 7 L 7 0" />

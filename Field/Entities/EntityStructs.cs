@@ -432,7 +432,20 @@ public struct D2Class_C56E8080
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_CB6E8080> Parts;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 37)]
-    public short[] PartGroups;
+    public short[] StagePartOffsets;
+}
+
+public enum ELodCategory : byte
+{
+    _lod_category_0 = 0, // main geometry lod0
+    _lod_category_01 = 1,  // grip/stock lod0
+    _lod_category_012 = 2,  // stickers lod0
+    _lod_category_0123 = 3,  // internal geom lod0
+    _lod_category_1 = 4,  // low poly geom lod1
+    _lod_category_2 = 7,  // low poly geom lod2
+    _lod_category_23 = 8,  // grip/stock/scope lod2
+    _lod_category_3 = 9,  // low poly geom lod3
+    _lod_category_detail = 10 // detail lod0
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x24)]
@@ -440,19 +453,19 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
 {
     [DestinyField(FieldType.TagHash)]
     public Material Material;  // AA6D8080
-    public short ExternalMaterialIndex;
+    public short VariantShaderIndex;  // variant_shader_index
     public short PrimitiveType;
     public uint IndexOffset;
     public uint IndexCount;
     public uint Unk10;  // might be number of strips?
-    public short Unk14;
+    public short ExternalIdentifier;  // external_identifier
     public short Unk16;  // some kind of index
-    public int Unk18;  // sbyte gear_dye_change_color_index
-    public sbyte Unk1C;
-    public sbyte DetailLevel;
-    public sbyte Unk1E;
-    public sbyte Unk1F;
-    public int Unk20;
+    public int Flags;
+    public byte GearDyeChangeColorIndex;   // sbyte gear_dye_change_color_index
+    public ELodCategory LodCategory;
+    public byte Unk1E;
+    public byte LodRun;  // lod_run
+    public int Unk20; // variant_shader_index?
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x320)]
@@ -1154,6 +1167,14 @@ public struct VertexWeight
 {
     public IntVector4 WeightValues;
     public IntVector4 WeightIndices;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_44318080
+{
+    public long FileSize;
+    [DestinyField(FieldType.TagHash64)]
+    public Entity? Entity;
 }
 
 #region Named entities

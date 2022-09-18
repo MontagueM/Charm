@@ -106,6 +106,9 @@
       </Page>
       <Page Update="ScriptView.xaml">
         <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <Page Update="DareItemControl.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>DareView.xaml</DependentUpon>
       </Page>
     </ItemGroup>
 

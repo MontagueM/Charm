@@ -770,7 +770,7 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         Entity entity = PackageHandler.GetTag(typeof(Entity), new TagHash(info.Hash));
-        viewer.EntityControl.Export(new List<Entity> {entity}, info.Name, info.ExportType);
+        EntityView.Export(new List<Entity> {entity}, info.Name, info.ExportType);
     }
     
     /// <summary>
@@ -954,7 +954,7 @@ public partial class TagListView : UserControl
     private void ExportApiEntityFull(ExportInfo info)
     {
         var viewer = GetViewer();
-        viewer.EntityControl.Export(InvestmentHandler.GetEntitiesFromHash(info.Hash), info.Name, info.ExportType);
+        EntityView.Export(InvestmentHandler.GetEntitiesFromHash(info.Hash), info.Name, info.ExportType);
     }
 
     #endregion

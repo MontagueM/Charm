@@ -364,10 +364,11 @@ public enum ELOD : sbyte
 
 public class Part
 {
+    public int Index;
     public uint IndexOffset;
     public uint IndexCount;
     public EPrimitiveType PrimitiveType;
-    public int DetailLevel;
+    public ELodCategory LodCategory;
     public List<UIntVector3> Indices = new List<UIntVector3>();
     public List<uint> VertexIndices = new List<uint>();
     public List<Vector4> VertexPositions = new List<Vector4>();

@@ -28,9 +28,9 @@ public class EntityModel : Tag
     
     /// <summary>
     /// There are two flags that we use as selection criteria.
-    /// First is DetailLevel, second is DetailGroup.
+    /// First is LodCategory, second is DetailGroup.
     /// DetailGroup groups together objects that belong to the same geometry representation.
-    /// DetailLevel is a scale 0-A (usually 0,4,7,9) that determines how detailed (0 is highest).
+    /// LodCategory is a scale 0-A (usually 0,4,7,9) that determines how detailed (0 is highest).
     /// The criteria for selection for highest detail is:
     /// - detail level closest to 0 within the whole group.
     /// - OR parts that have a material right there as I'm still unsure about external material table stuff AND same detail level.
@@ -50,11 +50,15 @@ public class EntityModel : Tag
             }
             else
             {
-                if (eDetailLevel == ELOD.MostDetail && (part.DetailLevel == 0 || part.DetailLevel == 1 || part.DetailLevel == 2 || part.DetailLevel == 3 || part.DetailLevel == 10))
+                if (eDetailLevel == ELOD.MostDetail && (part.LodCategory == ELodCategory._lod_category_0 ||
+                                                        part.LodCategory == ELodCategory._lod_category_01 ||
+                                                        part.LodCategory == ELodCategory._lod_category_012 ||
+                                                        part.LodCategory == ELodCategory._lod_category_0123 ||
+                                                        part.LodCategory == ELodCategory._lod_category_detail))
                 {
                     parts.Add(i, part);
                 }
-                else if (eDetailLevel == ELOD.LeastDetail && part.DetailLevel == 9)
+                else if (eDetailLevel == ELOD.LeastDetail && part.LodCategory == ELodCategory._lod_category_3)
                 {
                     parts.Add(i, part);
                 }
@@ -73,7 +77,7 @@ public class EntityModel : Tag
         
         // Make part group map
         Dictionary<int, int> partGroups = new Dictionary<int, int>();
-        HashSet<short> groups = new HashSet<short>(mesh.PartGroups.AsEnumerable());
+        HashSet<short> groups = new HashSet<short>(mesh.StagePartOffsets.AsEnumerable());
         var groupList = groups.ToList();
         groupList.Remove(0x707);
         groupList.Sort();
@@ -88,8 +92,9 @@ public class EntityModel : Tag
         foreach (var (i, part) in dynamicParts)
         {
             DynamicPart dynamicPart = new DynamicPart(part, parentResource);
+            dynamicPart.Index = i;
             dynamicPart.GroupIndex = partGroups[i];
-            dynamicPart.DetailLevel = part.DetailLevel;
+            dynamicPart.LodCategory = part.LodCategory;
             dynamicPart.GetAllData(mesh, Header);
             parts.Add(dynamicPart);
         }
@@ -107,13 +112,13 @@ public class DynamicPart : Part
         IndexOffset = part.IndexOffset;
         IndexCount = part.IndexCount;
         PrimitiveType = (EPrimitiveType)part.PrimitiveType;
-        if (part.ExternalMaterialIndex == -1)
+        if (part.VariantShaderIndex == -1)
         {
             Material = part.Material;
         }
         else
         {
-            Material = GetMaterialFromExternalMaterial(part.ExternalMaterialIndex, parentResource);
+            Material = GetMaterialFromExternalMaterial(part.VariantShaderIndex, parentResource);
         }
     }
     
