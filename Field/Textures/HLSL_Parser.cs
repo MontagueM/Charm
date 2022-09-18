@@ -14,7 +14,6 @@ namespace Field.Textures
     {
         public string line_id;
         private int var_index = 0;
-        private string hash;
         private string createIdentifier()
         {
             var_index++;
@@ -33,7 +32,7 @@ namespace Field.Textures
         public HLSLParser(string line_id, string hash)
         {
             this.line_id = line_id;
-            this.hash = hash;            
+            //this.hash = hash;
         }
         public string parseEquationFull(string equation, string variable, string dimensions)
         {
@@ -48,7 +47,7 @@ namespace Field.Textures
             for (int i = 0; i < dimensions.Length; i++)
             {
                 //Process tree to only have one dimension
-                IToken dimTree = getDimension(tree, i, dimensions.Length);
+                IToken dimTree = getDimension(tree.Clone(), i, dimensions);
                 Tuple<string, string> traversal = traverse(dimTree);
                 nodeBody.AppendLine(traversal.Item1);
                 varAssignments.AppendLine($"variable_dict['{variable}.{dimensions[i]}'] = {traversal.Item2}");
@@ -57,7 +56,7 @@ namespace Field.Textures
             nodeBody.AppendLine(varAssignments.ToString());
             return nodeBody.ToString();
         }
-        private IToken getDimension(IToken tree, int i, int totalDims)
+        private IToken getDimension(IToken tree, int i, string dims)
         {
             string[] dimMap = new string[] { "x", "y", "z", "w" };
             if (tree == null)
@@ -73,7 +72,7 @@ namespace Field.Textures
                     FunctionOperatorToken t = (FunctionOperatorToken)tree;
                     if (t.FunctionName.StartsWith("float"))
                     {
-                        return t.children[i];
+                        return t.children[i % t.children.Count];
                     }
                     bool hasDims = t.Dimensions != null && t.Dimensions?.Length != 0;
                     ///With how this is handled, each function gets duplicated for each dimension
@@ -88,22 +87,75 @@ namespace Field.Textures
                     }
                     //TODO: Handle function parameters
                     //Example Cases:
+                    ///Scalar function used in a single dimension
+                    //r0.x = sqrt(r0.x)
                     ///Scalar function used across dimensions
                     //r0.xy = abs(v3.zy);
                     ///Multi-dimension function used to implicitly assign multiple different dimensions
                     //o0.xyz = sample(0, r0.xy)
                     ///Multi-dimension function explicitly assigns dimensions
                     //v3.y = cross(r0.xy, cb0[3].yz).x
-                    
-                    
+
+                    for (int idx = 0; idx < t.children.Count; idx++)
+                    {
+                        IToken child = t.children[idx];
+                        //If parameter is 1-dimensional, split dimension
+                        if (isOperation1D(t.FunctionName, idx))
+                        {
+                            if (child is FunctionOperatorToken)
+                            {
+                                FunctionOperatorToken f = (FunctionOperatorToken)child;
+                                if (f.FunctionName.StartsWith("combine"))
+                                {
+                                    t.children[idx] = f.children[i % f.children.Count];
+                                }
+                                else
+                                {
+                                    t.children[idx] = getDimension(f, i, dims);
+                                }
+                            }
+                            else {
+                                t.children[idx] = getDimension(child, i, dims);
+                            }                        
+                        }
+                        //Else parameter should match dimension exactly
+                        else
+                        {
+                            t.children[idx] = getDimension(child, i, dims);
+                        }
+                    }
                     return t;
                 }
                 else
                 {
                     OperatorToken t = (OperatorToken)tree;
-                    for (int c = 0; c < t.children.Count(); c++)
+                    for (int idx = 0; idx < t.children.Count(); idx++)
                     {
-                        t.children[c] = getDimension(t.children[c], i, totalDims);
+                        IToken child = t.children[idx];
+                        if (isOperation1D(t.operation, idx))
+                        {
+                            if (child is FunctionOperatorToken)
+                            {
+                                FunctionOperatorToken f = (FunctionOperatorToken)child;
+                                if (f.FunctionName.StartsWith("combine"))
+                                {
+                                    t.children[idx] = f.children[i % f.children.Count];
+                                }
+                                else
+                                {
+                                    t.children[idx] = getDimension(f, i, dims);
+                                }
+                            }
+                            else
+                            {
+                                t.children[idx] = getDimension(child, i, dims);
+                            }
+                        }
+                        //Else parameter should match dimension exactly
+                        else
+                        {
+                            t.children[idx] = getDimension(child, i, dims);
+                        }
                     }
                     return t;
                 }
@@ -112,9 +164,16 @@ namespace Field.Textures
             {
                 ///Value
                 if (tree is VarValueToken)
-                {
+                {                    
                     VarValueToken t = (VarValueToken)tree;
-                    t.Dimensions = t.Dimensions?[i].ToString();
+                    if (i < t.Dimensions?.Length)
+                    {
+                        t.Dimensions = t.Dimensions?[i].ToString();
+                    }
+                    else
+                    {
+                        t.Dimensions = t.Dimensions?[i % t.Dimensions.Length].ToString();
+                    }                    
                     return t;
                 }
                 else
@@ -124,8 +183,51 @@ namespace Field.Textures
                 }
             }
         }
+
+        private bool isOperation1D(string operation, int param) {
+            if (operation.StartsWith("ddx") || operation.StartsWith("ddy"))
+            {
+                return param switch
+                {
+                    -1 => true,
+                    0 => false
+                };
+            }
+            switch (operation)
+            {
+                case "sample":
+                    return param switch
+                    {
+                        -1 => false,
+                        0 => true, //Should never actually be anything other than a float anyway
+                        1 => false
+                    };
+                case "dot":
+                    return param switch
+                    {
+                        -1 => true,
+                        0 => false,
+                        1 => false
+                    };
+                case "cross":
+                    return param switch
+                    {
+                        -1 => false,
+                        0 => false,
+                        1 => false
+                    };
+                default:
+                    return true;
+            }
+        }
         private Tuple<string, string> traverse(IToken tree)
         {
+            Dictionary<string, int> dimIdx = new Dictionary<string, int>() {
+                { "x", 0 },
+                { "y", 1 },
+                { "z", 2 },
+                { "w", 3 },
+            };
             StringBuilder outputString = new StringBuilder();
             string outputConnector = "";
             if (tree == null)
@@ -145,7 +247,24 @@ namespace Field.Textures
                         outputString.AppendLine(tuple.Item1);
                     paramConnectors.Add(tuple.Item2);
                 }
-                Tuple<string, string> operatorNodeS = operatorNode(operatorToken.operation == "function" ? ((FunctionOperatorToken)operatorToken).FunctionName : operatorToken.operation, paramConnectors.ToArray());
+                Tuple<string, string> operatorNodeS;
+                if (operatorToken is FunctionOperatorToken)
+                {
+                    FunctionOperatorToken functionOperatorToken = (FunctionOperatorToken)operatorToken;
+                    if (functionOperatorToken.FunctionName == "sample") {
+                        operatorNodeS = operatorNode(functionOperatorToken.FunctionName, paramConnectors.ToArray(), 
+                            functionOperatorToken.Dimensions?.Length == 0 ? -1 : dimIdx[functionOperatorToken.Dimensions.Substring(0, 1)]);
+                    }
+                    else
+                    {
+                        operatorNodeS = operatorNode(functionOperatorToken.FunctionName, paramConnectors.ToArray());
+                    }
+                }
+                else
+                {
+                    operatorNodeS = operatorNode(operatorToken.operation, paramConnectors.ToArray());
+                }
+                
                 if (operatorNodeS.Item1 != "")
                     outputString.AppendLine(operatorNodeS.Item1);
                 outputConnector = operatorNodeS.Item2;
@@ -169,21 +288,24 @@ namespace Field.Textures
             }
             return new Tuple<string, string>(outputString.ToString(), outputConnector);
         }
-        private Tuple<string, string> operatorNode(string operation, string[] paramConnectors)
+        private Tuple<string, string> operatorNode(string operation, string[] paramConnectors, int dim = -1)
         {
             StringBuilder outputScript = new StringBuilder();
             string outputConnector = "";
             string name = createIdentifier();
             switch (operation)
             {
-                case "~":
+                ///https://github.com/bo3b/3Dmigoto/blob/88633bcef119bde3a4c23c31fadb6fa05dbb66ea/HLSLDecompiler/DecompileHLSL.cpp#L2769
+                ///cmp returns -1 if the boolean inside is true, otherwise 0
+                case "cmp":
+                case "~": //Unary -
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
                     outputScript.AppendLine($@"{name}.operation = 'MULTIPLY'");
                     outputScript.AppendLine($@"{name}.inputs[0].default_value = -1.0");
                     outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[1])");
                     outputConnector = $@"{name}.outputs[0]";
-                    break;
-                case "`":
+                    break;                
+                case "`": //Unary +
                     outputConnector = paramConnectors[0];
                     break;
                 case "*":
@@ -333,12 +455,18 @@ namespace Field.Textures
                     break;
                 case "sample":
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeTexImage"")");
-                    outputScript.AppendLine($"{name}.label = texture_dict[{paramConnectors[0]}.default_value].name");
-                    //TODO(?): Assign color space (it may just work without it so idk)
-                    outputScript.AppendLine($"{name}.alpha_mode = \"CHANNEL_PACKED\"");
-                    outputScript.AppendLine($"{name}.image = texture_dict[{paramConnectors[0]}.default_value]");
+                    outputScript.AppendLine($"{name}.label = get_tex_name({paramConnectors[0]}.default_value)");
+                    outputScript.AppendLine($"{name}.image = get_texture({paramConnectors[0]}.default_value)");               
                     outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[0])");
-                    outputConnector = $@"{name}.outputs[0]";
+                    if (dim > 2) // 3
+                    {
+                        outputConnector = $@"{name}.outputs[1]";
+                    }
+                    else if (dim > -1) { //0 - 2
+                        outputScript.AppendLine($@"{name}_split = matnodes.new(""ShaderNodeSeparateColor"")");
+                        outputScript.AppendLine($@"link({name}.outputs[0], {name}_split.inputs[0])");
+                        outputConnector = $@"{name}.outputs[{dim}]";
+                    }                                        
                     break;
                 default:
                     Console.WriteLine($"#DON'T KNOW HOW DO TO OPERATION {operation}");

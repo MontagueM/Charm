@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace Field.Textures
     {
         public interface IToken
         {
-            
+            public IToken Clone();
         }
         public class OperatorToken : IToken
         {
@@ -63,6 +64,16 @@ namespace Field.Textures
             {
                 return $"OperatorToken({operation})";
             }
+
+            public IToken Clone()
+            {
+                List<IToken> children = new List<IToken>();
+                foreach (var token in this.children)
+                {
+                    children.Add(token.Clone());
+                }
+                return new OperatorToken(operation, children);
+            }
         }
         public class FunctionOperatorToken : OperatorToken, IValueToken
         {
@@ -85,6 +96,15 @@ namespace Field.Textures
             {
                 return $"{operation}_{FunctionName}";
             }
+            public new IToken Clone()
+            {
+                List<IToken> children = new List<IToken>();
+                foreach (IToken token in this.children)
+                {
+                    children.Add(token.Clone());
+                }
+                return new FunctionOperatorToken(FunctionName, children, ParameterBody, Dimensions);
+            }
         }
         public interface IValueToken : IToken
         {
@@ -102,6 +122,10 @@ namespace Field.Textures
             {
                 return Value;
             }
+            public IToken Clone()
+            {
+                return new BasicValueToken(Value);
+            }
         }
         public class FloatValueToken : IValueToken
         {
@@ -114,6 +138,10 @@ namespace Field.Textures
             public override string ToString()
             {
                 return Value.ToString(CultureInfo.InvariantCulture);
+            }
+            public IToken Clone()
+            {
+                return new FloatValueToken(Value);
             }
         }
         public class VarValueToken : IValueToken
@@ -129,6 +157,10 @@ namespace Field.Textures
             public override string ToString()
             {
                 return $"{Value}.{Dimensions}";
+            }
+            public IToken Clone()
+            {
+                return new VarValueToken(Value, Dimensions);
             }
         }
     }

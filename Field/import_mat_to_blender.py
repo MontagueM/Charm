@@ -2,20 +2,44 @@ import bpy
 import json
 import mathutils
 import os
+
+INPUT_mat_name = "<<<MAT_NAME>>>"
+INPUT_export_path = "<<<EXPORT_PATH>>>"
+INPUT_shader_type = "<<<SHADER_TYPE>>>"
+
 #key = name (str), value = most recent node output
 variable_dict = {}
 
 shader_metadata = {}
 texture_dict = {}
 
-def load_meta(exportpath, shaderhash):
-    shader_metadata = json.load(open(f'{exportpath}\\Materials\\{shaderhash}_meta.json'))
+def load_meta():
+    shader_metadata = json.load(open(f'{INPUT_export_path}\\Materials\\{INPUT_mat_name}_meta.json'))
     for tex in shader_metadata['textures'].keys():
-        img = bpy.data.images.load(exportpath + "/Textures/" + f"/{tex}{shader_metadata['format']}", check_existing = True)  #might be an outdated/deprecated way of loading textures? 
+        img = bpy.data.images.load(INPUT_export_path + "/Textures/" + f"/{tex}{shader_metadata['format']}", check_existing = True)
         #TODO: actually put img into texture_dict with the correct index
 
+def get_tex_name(tex_index):
+    return shader_metadata[INPUT_shader_type][str(tex_index)]
+def get_texture(tex_index):
+    texname = get_tex_name(tex_index)
+    texmeta = get_tex_meta(tex_index)
+    #loads existing data if already
+    img = bpy.data.images.load(INPUT_export_path + "/Textures/" + f"/{texname}{shader_metadata['format']}", check_existing = True)
+    img.alpha_mode = "CHANNEL_PACKED"
+    if texmeta['srgb']:
+        img.colorspace.name = "sRGB"
+    else:
+        img.colorspace.name = "Non-Color"
+    return img
+#this will start crying and screaming if you get anything wrong, so don't get anything wrong
+#or else
+def get_tex_meta(tex_index):
+    texname = get_tex_name(tex_index)    
+    return shader_metadata['textures'][texname]
+
 def assemble_mat():  
-    material = bpy.data.materials.new(name="{Name}")
+    material = bpy.data.materials.new(name=INPUT_mat_name)
     material.use_nodes = True
     matnodes = material.node_tree.nodes
     link = material.node_tree.links.new
@@ -128,7 +152,7 @@ def assemble_mat():
         variable_dict['v5.z'] = attribute.outputs[3] #probably wrong
         variable_dict['v5.w'] = attribute.outputs[3]
         
-    ### REPLACE WITH SCRIPT ###
+    <<<REPLACE WITH SCRIPT>>>
 
     if True:        #Base Color (Albedo)
         combineRGB = matnodes.new("ShaderNodeCombineColor")
@@ -280,9 +304,9 @@ def ShowMessageBox(message = "", title = "Message Box", icon = 'INFO'):
 
     bpy.context.window_manager.popup_menu(draw, title = title, icon = icon)
 
-if __name__ == "__main__":
+def start_import():
     #Shows a message box with a message, custom title, and a specific icon
-    ShowMessageBox("Importing Material {Name}", "This might take some time! (Especially on multiple imports)", 'ERROR')
+    ShowMessageBox(f"Importing Material {INPUT_mat_name}", "This might take some time! (Especially on multiple imports)", 'ERROR')
     
     #To give the message box a chance to show up
     setupEngine()
@@ -290,3 +314,6 @@ if __name__ == "__main__":
     
     #Deselect all objects just in case 
     bpy.ops.object.select_all(action='DESELECT')
+if __name__ == "__main__":
+    start_import()
+    
