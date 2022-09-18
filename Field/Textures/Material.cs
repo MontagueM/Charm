@@ -50,7 +50,7 @@ public class Material : Tag
         if(settings.Source2) {
             var s2Path = $"{matPath}/Source2";
             Directory.CreateDirectory(s2Path);
-            ExportMaterialSauce2(s2Path);
+            ExportMaterialSource2(s2Path);
             Console.WriteLine($"Successfully exported Source2 Material {Hash}.");
         }
     }
@@ -185,15 +185,21 @@ public class Material : Tag
         // TODO: Create a proper import script, assuming textures are bound and loaded
         if(Header.PixelShader != null) {
             var bpy = new NodeConverter().HlslToBpy(this, Decompile(ShaderType.Pixel), false);
-            try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.py", bpy); }
-            catch (IOException ignored) { }
-            Console.WriteLine($"Exported Blender PixelShader {Hash}.");
+            if(bpy != string.Empty)
+            {
+                try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.py", bpy); }
+                catch (IOException ignored) { }
+                Console.WriteLine($"Exported Blender PixelShader {Hash}.");
+            }
         }
         if(Header.VertexShader != null) {
             var bpy = new NodeConverter().HlslToBpy(this, Decompile(ShaderType.Vertex), true);
-            try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.py", bpy); }
-            catch (IOException ignored) { }
-            Console.WriteLine($"Exported Blender VertexShader {Hash}.");
+            if(bpy != string.Empty)
+            {
+                try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.py", bpy); }
+                catch (IOException ignored) { }
+                Console.WriteLine($"Exported Blender VertexShader {Hash}.");
+            }
         }
         // I don't think Blender can even handle compute shaders, so I'll leave that out. If it can, it's the same as above.
     }
@@ -201,26 +207,37 @@ public class Material : Tag
     private void ExportMaterialUnreal(string path) {
         if(Header.PixelShader != null) {
             var usf = new UsfConverter().HlslToUsf(this, Decompile(ShaderType.Pixel), false);
-            try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.usf", usf); }
-            catch (IOException ignored) { }
-            Console.WriteLine($"Exported Unreal PixelShader {Hash}.");
+            if(usf != string.Empty)
+            {
+                try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.usf", usf); }
+                catch (IOException ignored) { }
+                Console.WriteLine($"Exported Unreal PixelShader {Hash}.");
+            }
         }
         if(Header.VertexShader != null) {
             var usf = new UsfConverter().HlslToUsf(this, Decompile(ShaderType.Vertex), true);
-            try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.usf", usf); }
-            catch (IOException ignored) { }
-            Console.WriteLine($"Exported Unreal VertexShader {Hash}.");
+            if(usf != string.Empty)
+            {
+                try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.usf", usf); }
+                catch (IOException ignored) { }
+                Console.WriteLine($"Exported Unreal VertexShader {Hash}.");
+            }
         }
     }
 
-    private void ExportMaterialSauce2(string path) {
-        // I have no fuggin clue how source2 works, so you might have to do some work here @Delta.
+    private void ExportMaterialSource2(string path) {
         if(Header.PixelShader != null) {
             var vfx = new VfxConverter().HlslToVfx(this, Decompile(ShaderType.Pixel), false);
-            try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.vfx", vfx); }
-            catch (IOException ignored) { }
-            var materialBuilder = new StringBuilder("Layer0 {");
-            materialBuilder.AppendLine($"\tshader \"{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.vfx\"");
+            if(vfx != string.Empty)
+            {
+                try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.vfx", vfx); }
+                catch (IOException ignored) { }
+                Console.WriteLine($"Exported Source 2 PixelShader {Hash}.");
+            }
+
+            var materialBuilder = new StringBuilder("Layer0 \n{");
+            materialBuilder.AppendLine($"\n\tshader \"{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.vfx\"");
+            materialBuilder.AppendLine("\tF_ALPHA_TEST 1");
             foreach(var e in Header.PSTextures.Where(e => e.Texture != null))
                 materialBuilder.AppendLine($"\tTextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}{GetTextureExtension(TextureExtractor.Format)}\"");
             materialBuilder.AppendLine("}");
