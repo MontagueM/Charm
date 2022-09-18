@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using Field.Entities;
 using Field.General;
 using Field.Models;
+using Field.Textures;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using Serilog;
 using File = System.IO.File;
@@ -88,7 +89,13 @@ public partial class EntityView : UserControl
             fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
             if (exportType == EExportTypeFlag.Full)
             {
-                entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled());
+                var settings = new ExportSettings() {
+                    Unreal = ConfigHandler.GetUnrealInteropEnabled(),
+                    Blender = ConfigHandler.GetBlenderInteropEnabled(),
+                    Source2 = true,
+                    Raw = true
+                };
+                entity.SaveMaterialsFromParts(savePath, dynamicParts, settings);
                 entity.SaveTexturePlates(savePath);
             }
         }

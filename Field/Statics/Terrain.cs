@@ -21,7 +21,7 @@ public class Terrain : Tag
     }
     
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource)
+    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, ExportSettings settings, D2Class_7D6C8080 parentResource)
     {
         // Directory.CreateDirectory(saveDirectory + "/Textures/Terrain/");
         // Directory.CreateDirectory(saveDirectory + "/Shaders/Terrain/");
@@ -46,16 +46,7 @@ public class Terrain : Tag
                 z.AddRange(part.VertexPositions.Select(a => a.Z));
                 // Material
                 if (partEntry.Material == null) continue;
-                if(!Directory.Exists($"{saveDirectory}/Textures/"))
-                    Directory.CreateDirectory($"{saveDirectory}/Textures/");
-
-                partEntry.Material.SaveAllTextures($"{saveDirectory}/Textures/");
-                part.Material = partEntry.Material;
-                // dynamicPart.Material.SaveVertexShader(saveDirectory);
-                if (bSaveShaders)
-                {
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/");
-                }
+                partEntry.Material.Export(saveDirectory, settings);
             }
         }
         var globalOffset = new Vector3(

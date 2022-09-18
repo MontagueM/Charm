@@ -13,6 +13,7 @@ using Field.General;
 using Field.Models;
 using Field.Entities;
 using Field.Statics;
+using Field.Textures;
 using Serilog;
 
 namespace Charm;
@@ -172,8 +173,14 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
                 {
+                    var settings = new ExportSettings() {
+                        Unreal = ConfigHandler.GetUnrealInteropEnabled(),
+                        Blender = ConfigHandler.GetBlenderInteropEnabled(),
+                        Source2 = true,
+                        Raw = true
+                    };
                     //entry.Rotation.SetW(1);
-                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
+                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, settings, terrainArrangement);
                 }
             });
         });
@@ -195,6 +202,12 @@ public partial class MapView : UserControl
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
             {
+                var settings = new ExportSettings() {
+                    Unreal = ConfigHandler.GetUnrealInteropEnabled(),
+                    Blender = ConfigHandler.GetBlenderInteropEnabled(),
+                    Source2 = true,
+                    Raw = true
+                };
                 //Console.WriteLine($"{entry.DataResource}");
                 if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
                 {
@@ -204,7 +217,7 @@ public partial class MapView : UserControl
                     }
                     else if (exportTypeFlag == EExportTypeFlag.Full || exportTypeFlag == EExportTypeFlag.Minimal) //No terrain on a minimal rip makes sense right?
                     {
-                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, settings);
                     }
                 }
                 else if(entry is D2Class_85988080 dynamicResource)
@@ -214,7 +227,7 @@ public partial class MapView : UserControl
                 else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
                 {
                     //entry.Rotation.SetW(1);
-                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
+                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, settings, terrainArrangement);
                 }
             });
         });
