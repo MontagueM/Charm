@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -26,6 +27,7 @@ public class NodeConverter
     
     public string HlslToBpy(Material material, string hlslText, bool bIsVertexShader)
     {
+        Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         this.raw_hlsl = hlslText;
         this.Hash = material.Hash;
         hlsl = new StringReader(hlslText);
