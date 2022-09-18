@@ -72,6 +72,10 @@
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>MusicView.xaml</DependentUpon>
       </Page>
+      <Page Update="DareItemControl.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <DependentUpon>DareView.xaml</DependentUpon>
+      </Page>
     </ItemGroup>
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
