@@ -96,8 +96,8 @@ public class Material : Tag
                 exeProcess?.WaitForExit();
             }
 
-            if (!File.Exists(hlslFile) && allowretry) {
-                if (File.Exists(binFile))
+            if (!File.Exists(hlslFile)) {
+                if (File.Exists(binFile) && allowretry)
                 {
                     //If the binfile already existed but is incorrect for some reason, retry
                     File.Delete(binFile);
