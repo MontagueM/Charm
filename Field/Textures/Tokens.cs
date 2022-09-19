@@ -101,7 +101,8 @@ namespace Field.Textures
                 List<IToken> children = new List<IToken>();
                 foreach (IToken token in this.children)
                 {
-                    children.Add(token.Clone());
+                    if (token != null)
+                        children.Add(token.Clone());
                 }
                 return new FunctionOperatorToken(FunctionName, children, ParameterBody, Dimensions);
             }

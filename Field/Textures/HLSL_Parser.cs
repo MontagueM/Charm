@@ -343,6 +343,22 @@ namespace Field.Textures
                     outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
                     outputConnector = $@"{name}.outputs[0]";
                     break;
+                case ">":
+                case ">=":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'GREATER_THAN'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "<":
+                case "<=":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'LESS_THAN'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
                 case "saturate":
                     //Clamp defaults are fine
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeClamp"")");
@@ -468,6 +484,18 @@ namespace Field.Textures
                         outputConnector = $@"{name}_split.outputs[{dim}]";
                     }                                        
                     break;
+                case "rsqrt":
+                    outputScript.AppendLine($@"{name}_root = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}_root.operation = 'SQRT'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}_root.inputs[0])");
+
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'DIVIDE'");
+                    outputScript.AppendLine($@"{name}.inputs[0].default_value = 1.0");
+                    outputScript.AppendLine($@"link({name}_root.outputs[0], {name}.inputs[1])");
+
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
                 default:
                     Console.WriteLine($"#DON'T KNOW HOW DO TO OPERATION {operation}");
                     outputConnector = paramConnectors[0];
@@ -577,7 +605,7 @@ namespace Field.Textures
                         else if (Regex.IsMatch(s, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})"))
                         {
                             ///Variable
-                            Match match = Regex.Match(s, @"([\w|\[|\]}]+)\.([x|y|z|w]{0,4})");
+                            Match match = Regex.Match(s, @"([a-zA-Z][\w|\[|\]}]+)\.([x|y|z|w]{0,4})");
                             VarValueToken var = new VarValueToken(match.Groups[1].Value, match.Groups[2].Value);
                             if (var.Dimensions?.Length > 1)
                             {

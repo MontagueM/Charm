@@ -392,6 +392,7 @@ public class NodeConverter
                 {                    
                     line = line.Trim();
                     line = line.Substring(0, line.Length - 1);
+                    line = line.Replace("cmp", "-");
                     //Turn conditionals to mix(val1, val2, fac)
                     string adaptedLine = Regex.Replace(line, "(\\S+) \\? (\\S+) \\: (\\S+)", "mix($2, $3, $1)");
 
