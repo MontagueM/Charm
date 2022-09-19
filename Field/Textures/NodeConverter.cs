@@ -1,9 +1,4 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
+﻿using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Field.General;
@@ -25,7 +20,7 @@ public class NodeConverter
     private List<Input> inputs = new List<Input>();
     private List<Output> outputs = new List<Output>();
     
-    public string HlslToBpy(Material material, string hlslText, bool bIsVertexShader)
+    public string HlslToBpy(Material material, string saveDir, string hlslText, bool bIsVertexShader)
     {
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         this.raw_hlsl = hlslText;
@@ -54,9 +49,11 @@ public class NodeConverter
         }
 
         //WriteFooter(bIsVertexShader);
-        string template = File.ReadAllText("import_mat_to_blender.py");
-        
-        return template.Replace("<<<REPLACE WITH SCRIPT>>>", "\t" + bpy.ToString().Replace("\n", "\n\t"));
+        var template = File.ReadAllText("import_mat_to_blender.py");
+        template = template.Replace("<<<MAT_NAME>>>", material.Hash);
+        template = template.Replace("<<<SHADER_TYPE>>>", bIsVertexShader ? "vertexShader" : "pixelShader");
+        template = template.Replace("<<<EXPORT_PATH>>>", saveDir);
+        return template.Replace("# <<<REPLACE WITH SCRIPT>>>", "\t" + bpy.ToString().Replace("\n", "\n        "));
     }
 
     private void ProcessHlslData()
@@ -206,7 +203,7 @@ public class NodeConverter
                 {
                     case "float4":
                         if (data == null) { 
-                            bpy.AppendLine($"addFloat4('{cbuffer.Variable}[{i}]', 0.0, 0.0, 0.0, 0.0)"); 
+                            bpy.AppendLine($"add_float4('{cbuffer.Variable}[{i}]', 0.0, 0.0, 0.0, 0.0)"); 
                         }
                         else
                         {
@@ -214,27 +211,27 @@ public class NodeConverter
                             {
                                 if (data[i] is Vector4)
                                 {
-                                    bpy.AppendLine($"addFloat4('{cbuffer.Variable}[{i}]', {data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W})");
+                                    bpy.AppendLine($"add_float4('{cbuffer.Variable}[{i}]', {data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W})");
                                 }
                                 else
                                 {
                                     var x = data[i].Unk00.X; // really bad but required
-                                    bpy.AppendLine($"addFloat4('{cbuffer.Variable}[{i}]', {x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W})");
+                                    bpy.AppendLine($"add_float4('{cbuffer.Variable}[{i}]', {x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W})");
                                 }
                             }
                             catch (Exception e)  // figure out whats up here, taniks breaks it
                             {
-                                bpy.AppendLine($"addFloat4('{cbuffer.Variable}[{i}]', 0.0, 0.0, 0.0, 0.0)");
+                                bpy.AppendLine($"add_float4('{cbuffer.Variable}[{i}]', 0.0, 0.0, 0.0, 0.0)");
                             }
                         }
                         break;
                     case "float3":
-                        if (data == null) bpy.AppendLine($"addFloat3('{cbuffer.Variable}[{i}]', 0.0, 0.0, 0.0),");
-                        else bpy.AppendLine($"addFloat3('{cbuffer.Variable}[{i}]', {data[i].Unk00.X}, {data[i].Unk00.Y}, {data[i].Unk00.Z}),");
+                        if (data == null) bpy.AppendLine($"add_float3('{cbuffer.Variable}[{i}]', 0.0, 0.0, 0.0),");
+                        else bpy.AppendLine($"add_float3('{cbuffer.Variable}[{i}]', {data[i].Unk00.X}, {data[i].Unk00.Y}, {data[i].Unk00.Z}),");
                         break;
                     case "float":
-                        if (data == null) bpy.AppendLine($"addFloat('{cbuffer.Variable}[{i}]', 0.0)");
-                        else bpy.AppendLine($"addFloat4('{cbuffer.Variable}[{i}]', {data[i].Unk00}, 0.0, 0.0, 0.0)");
+                        if (data == null) bpy.AppendLine($"add_float('{cbuffer.Variable}[{i}]', 0.0)");
+                        else bpy.AppendLine($"add_float4('{cbuffer.Variable}[{i}]', {data[i].Unk00}, 0.0, 0.0, 0.0)");
                         break;
                     default:
                         throw new NotImplementedException();
