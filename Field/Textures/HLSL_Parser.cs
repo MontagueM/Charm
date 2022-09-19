@@ -36,10 +36,6 @@ namespace Field.Textures
         }
         public string parseEquationFull(string equation, string variable, string dimensions)
         {
-            //if (equation.Contains("?"))
-            //{
-            //    Console.WriteLine("MIX!");
-            //}
             IToken tree = parseEquation(equation);
             //string inputVar = $"{variable}.{dimensions}";
             StringBuilder nodeBody = new StringBuilder();
@@ -70,7 +66,7 @@ namespace Field.Textures
                 if (tree is FunctionOperatorToken)
                 {
                     FunctionOperatorToken t = (FunctionOperatorToken)tree;
-                    if (t.FunctionName.StartsWith("float"))
+                    if (t.FunctionName.StartsWith("float") || t.FunctionName.StartsWith("combine"))
                     {
                         return t.children[i % t.children.Count];
                     }
