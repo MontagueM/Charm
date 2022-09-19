@@ -108,13 +108,16 @@ public partial class EntityView : UserControl
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
                 AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+            }
+            if(ConfigHandler.GetBlenderInteropEnabled())
+            {
                 AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
-
             }
         }
         
         // Scale and rotate
-        fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
+        if(boneNodes != null)
+            fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
         
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();

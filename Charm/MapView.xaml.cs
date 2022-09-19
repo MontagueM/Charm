@@ -246,32 +246,6 @@ public partial class MapView : UserControl
                             staticHandler.InfoHandler.SetMeshName(staticMeshName);
                             var staticmesh = part.Static.Load(ELOD.MostDetail);
 
-                            bool exportLODs = false;
-                            if(exportLODs)
-                            {
-                                int lodDetailLevel = 0;
-                                var staticmeshLOD = part.Static.Load(ELOD.All);
-                                FbxHandler lodHandler = new FbxHandler(false);
-                                List<Part> lodMeshes = new List<Part>();
-                                Parallel.ForEach(staticmeshLOD, lod =>
-                                {
-                                    Console.WriteLine($"{part.Static.Hash} LOD {lod.DetailLevel}");
-                                    if (lod.DetailLevel != 10)
-                                    {
-                                        lodDetailLevel = lod.DetailLevel;
-                                        lodMeshes.Add(lod);
-                                    }
-                                });
-                                if(lodMeshes.Count > 0)
-                                {
-                                    lodHandler.AddStaticToScene(lodMeshes, part.Static.Hash + $"_LOD{lodDetailLevel}");
-                                    lodHandler.ExportScene($"{savePath}/Statics/LOD/{staticMeshName}_LOD{lodDetailLevel}.fbx");
-                                    Console.WriteLine($"Exported {part.Static.Hash} LOD {lodDetailLevel}");
-                                    lodHandler.Dispose();
-                                }
-                            }
-                            
-
                             staticHandler.AddStaticToScene(staticmesh, part.Static.Hash);
 
                             if(source2Models)
