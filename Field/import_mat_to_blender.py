@@ -166,87 +166,65 @@ def assemble_mat():
         link(combineRGB.outputs[0], principled_node.inputs[19])
 
     if True:  # Normal
-        biasSubtract1 = matnodes.new("ShaderNodeMath")
-        biasSubtract2 = matnodes.new("ShaderNodeMath")
-        biasSubtract3 = matnodes.new("ShaderNodeMath")
-        biasSubtract1.operation = 'SUBTRACT'
-        biasSubtract2.operation = 'SUBTRACT'
-        biasSubtract3.operation = 'SUBTRACT'
+        # Biased Normal
+        o1Node = matnodes.new("ShaderNodeCombineXYZ")
+        link(variable_dict['o1.x'], o1Node.inputs[0])
+        link(variable_dict['o1.y'], o1Node.inputs[1])
+        link(variable_dict['o1.z'], o1Node.inputs[2])
 
-        link(variable_dict['o1.x'], biasSubtract1.inputs[0])
-        link(variable_dict['o1.y'], biasSubtract2.inputs[0])
-        link(variable_dict['o1.z'], biasSubtract3.inputs[0])
+        biasedNormalNode = matnodes.new("ShaderNodeVectorMath")
+        biasedNormalNode.operation = 'SUBTRACT'
+        link(o1Node.outputs[0], biasedNormalNode.inputs[0])
+        biasedNormalNode.inputs[1].default_value = 0.5, 0.5, 0.5
 
-        biasSubtract1.inputs[1].default_value = 0.5
-        biasSubtract2.inputs[1].default_value = 0.5
-        biasSubtract3.inputs[1].default_value = 0.5
+        # World-Space Normal
+        biasedNormalLengthNode = matnodes.new("ShaderNodeVectorMath")
+        biasedNormalLengthNode.operation = 'LENGTH'
+        link(biasedNormalNode.outputs[0], biasedNormalLengthNode.inputs[0])
 
-        combineNormal = matnodes.new("ShaderNodeCombineXYZ")
-        link(biasSubtract1.outputs[0], combineNormal.inputs[0])
-        link(biasSubtract2.outputs[0], combineNormal.inputs[1])
-        link(biasSubtract3.outputs[0], combineNormal.inputs[2])
+        worldSpaceNormalNode = matnodes.new("ShaderNodeVectorMath")
+        worldSpaceNormalNode.operation = 'DIVIDE'
+        link(biasedNormalNode.outputs[0], worldSpaceNormalNode.inputs[0])
+        link(biasedNormalLengthNode.outputs[0], worldSpaceNormalNode.inputs[1])
 
-        normalLengthNode = matnodes.new("ShaderNodeVectorMath")
-        normalLengthNode.operation = 'LENGTH'
-        link(combineNormal.outputs[0], normalLengthNode.inputs[0])
-        variable_dict['normal_length_output'] = normalLengthNode.outputs[0]
+        # Adjust Individual Values
+        separateNormalNode = matnodes.new("ShaderNodeSeparateXYZ")
+        link(worldSpaceNormalNode.outputs[0], separateNormalNode.inputs[0])
 
-        normalLengthInvert = matnodes.new("ShaderNodeMath")
-        normalLengthInvert.operation = 'DIVIDE'
-        normalLengthInvert.inputs[0].default_value = 1.0
-        link(normalLengthNode.outputs[0], normalLengthInvert.inputs[1])
+        normalYNode = matnodes.new("ShaderNodeMath")
+        normalYNode.operation = 'SUBTRACT'
+        normalYNode.inputs[0].default_value = 1
+        link(separateNormalNode.outputs[1], normalYNode.inputs[1])
 
-        normal_in_world_space = matnodes.new("ShaderNodeVectorMath")
-        normal_in_world_space.operation = 'SCALE'
-        link(combineNormal.outputs[0], normal_in_world_space.inputs[0])
-        link(normalLengthInvert.outputs[0], normal_in_world_space.inputs[1])
+        normalXYNode = matnodes.new('ShaderNodeCombineXYZ')
+        link(separateNormalNode.outputs[0], normalXYNode.inputs[0])
+        link(separateNormalNode.outputs[1], normalXYNode.inputs[1])
 
-        resplit = matnodes.new("ShaderNodeSeparateXYZ")
-        link(normal_in_world_space.outputs[0], resplit.inputs[0])
-        recombine = matnodes.new("ShaderNodeCombineXYZ")
-        link(resplit.outputs[0], recombine.inputs[0])
-        link(resplit.outputs[1], recombine.inputs[1])
+        normalZDotProductNode = matnodes.new("ShaderNodeVectorMath")
+        normalZDotProductNode.operation = 'DOT_PRODUCT'
+        link(normalXYNode.outputs[0], normalZDotProductNode.inputs[0])
+        link(normalXYNode.outputs[0], normalZDotProductNode.inputs[1])
 
-        normal_dot = matnodes.new("ShaderNodeVectorMath")
-        normal_dot.operation = 'DOT_PRODUCT'
-        link(recombine.outputs[0], normal_dot.inputs[0])
-        link(recombine.outputs[0], normal_dot.inputs[1])
+        normalZSaturateNode = matnodes.new("ShaderNodeClamp")
+        link(normalZDotProductNode.outputs[0], normalZSaturateNode.inputs[0])
 
-        normal_saturate = matnodes.new("ShaderNodeClamp")
-        # existing defaults are fine
-        link(normal_dot.outputs[0], normal_saturate.inputs[0])
+        normalZSubtractNode = matnodes.new("ShaderNodeMath")
+        normalZSubtractNode.operation = 'SUBTRACT'
+        normalZSubtractNode.inputs[0].default_value = 1
+        link(normalZSaturateNode.outputs[0], normalZSubtractNode.inputs[1])
 
-        normal_inverse = matnodes.new("ShaderNodeMath")
-        normal_inverse.operation = 'SUBTRACT'
-        normal_inverse.inputs[0].default_value = 1
-        link(normal_saturate.outputs[0], normal_inverse.inputs[1])
+        normalZNode = matnodes.new("ShaderNodeMath")
+        normalZNode.operation = 'SQRT'
+        link(normalZSubtractNode.outputs[0], normalZNode.inputs[0])
 
-        normal_sqrt = matnodes.new("ShaderNodeMath")
-        normal_sqrt.operation = 'SQRT'
-        link(normal_inverse.outputs[0], normal_sqrt.inputs[0])
+        # Final Assembly
+        finalNormalNode = matnodes.new("ShaderNodeCombineXYZ")
+        link(separateNormalNode.outputs[0], finalNormalNode.inputs[0])
+        link(normalYNode.outputs[0], finalNormalNode.inputs[1])
+        link(normalZNode.outputs[0], finalNormalNode.inputs[2])
 
-        full_recombine = matnodes.new("ShaderNodeCombineXYZ")
-        link(resplit.outputs[0], full_recombine.inputs[0])
-        link(resplit.outputs[1], full_recombine.inputs[1])
-        link(normal_sqrt.outputs[0], full_recombine.inputs[2])
-
-        normal_post_1 = matnodes.new("ShaderNodeVectorMath")
-        normal_post_1.operation = 'MULTIPLY_ADD'
-        link(full_recombine.outputs[0], normal_post_1.inputs[0])
-        normal_post_1.inputs[1].default_value = [2.0, 2.0, 2.0]
-        normal_post_1.inputs[2].default_value = [-1.5, -1.5, -1.5]
-
-        normal_post_2 = matnodes.new("ShaderNodeVectorMath")
-        normal_post_2.operation = 'MULTIPLY_ADD'
-        link(normal_post_1.outputs[0], normal_post_2.inputs[0])
-        normal_post_2.inputs[1].default_value = [0.5, 0.5, 0.5]
-        normal_post_2.inputs[2].default_value = [0.5, 0.5, 0.5]
-
-        normal_post_norm = matnodes.new("ShaderNodeVectorMath")
-        normal_post_norm.operation = 'NORMALIZE'
-        link(normal_post_2.outputs[0], normal_post_norm.inputs[0])
-        print("normal")
-        link(normal_post_norm.outputs[0], principled_node.inputs[22])
+        link(finalNormalNode.outputs[0], principled_node.inputs[22])
+        print("Normal")
 
     if True:  # Roughness
         smoothness_subtract = matnodes.new("ShaderNodeMath")
