@@ -266,7 +266,7 @@ def assemble_mat():
         link(variable_dict['output_rgb_albedo'], emissive_scale.inputs[0])
         link(emissive_multiply.outputs[0], emissive_scale.inputs[1])
         print("emissive")
-        link(emissive_scale.outputs[0], principled_node.inputs[20])
+        link(emissive_scale.outputs[0], principled_node.inputs[19])
 
         # AO is ignored single blender does that on its own
 
