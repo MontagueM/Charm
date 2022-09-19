@@ -465,7 +465,7 @@ namespace Field.Textures
                     else if (dim > -1) { //0 - 2
                         outputScript.AppendLine($@"{name}_split = matnodes.new(""ShaderNodeSeparateColor"")");
                         outputScript.AppendLine($@"link({name}.outputs[0], {name}_split.inputs[0])");
-                        outputConnector = $@"{name}.outputs[{dim}]";
+                        outputConnector = $@"{name}_split.outputs[{dim}]";
                     }                                        
                     break;
                 default:

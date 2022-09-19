@@ -52,7 +52,7 @@ public class NodeConverter
         var template = File.ReadAllText("import_mat_to_blender.py");
         template = template.Replace("<<<MAT_NAME>>>", material.Hash);
         template = template.Replace("<<<SHADER_TYPE>>>", bIsVertexShader ? "vertexShader" : "pixelShader");
-        template = template.Replace("<<<EXPORT_PATH>>>", saveDir);
+        template = template.Replace("<<<EXPORT_PATH>>>", saveDir.Replace("\\", "\\\\"));
         return template.Replace("# <<<REPLACE WITH SCRIPT>>>", "\t" + bpy.ToString().Replace("\n", "\n        "));
     }
 
