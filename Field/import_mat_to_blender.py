@@ -181,11 +181,16 @@ def assemble_mat():
         biasedNormalLengthNode = matnodes.new("ShaderNodeVectorMath")
         biasedNormalLengthNode.operation = 'LENGTH'
         link(biasedNormalNode.outputs[0], biasedNormalLengthNode.inputs[0])
-
+        
+        invert_biasedNormalLengthNode = matnodes.new("ShaderNodeMath")
+        invert_biasedNormalLengthNode.operation = 'DIVIDE'
+        invert_biasedNormalLengthNode.inputs[0].default_value = 1
+        link(biasedNormalLengthNode.outputs[0], invert_biasedNormalLengthNode.inputs[1])
+        
         worldSpaceNormalNode = matnodes.new("ShaderNodeVectorMath")
-        worldSpaceNormalNode.operation = 'DIVIDE'
+        worldSpaceNormalNode.operation = 'SCALE'
         link(biasedNormalNode.outputs[0], worldSpaceNormalNode.inputs[0])
-        link(biasedNormalLengthNode.outputs[0], worldSpaceNormalNode.inputs[1])
+        link(invert_biasedNormalLengthNode.outputs[0], worldSpaceNormalNode.inputs[1])
 
         # Adjust Individual Values
         separateNormalNode = matnodes.new("ShaderNodeSeparateXYZ")
@@ -246,7 +251,7 @@ def assemble_mat():
         link(rough_saturate.outputs[0], smoothness_invert.inputs[1])
         smoothness_invert.inputs[0].default_value = 1
         print("smoothness")
-        link(smoothness_subtract.outputs[0], principled_node.inputs[9])
+        link(smoothness_invert.outputs[0], principled_node.inputs[9])
 
     if True:  # RT2
         link(variable_dict['o2.x'], principled_node.inputs[6])
