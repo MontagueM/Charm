@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Text;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -56,7 +57,14 @@ public partial class DevView : UserControl
         switch (e.Key)
         {
             case Key.L:
-                HashLocation.Text = $"PKG: {PackageHandler.GetPackageName(hash.GetPkgId())} \nPKG ID: {hash.GetPkgId()} \nEntry Index: {hash.GetEntryIndex()} \n{hash.GetDevString()}";
+                StringBuilder data = new StringBuilder();
+                data.AppendLine($"PKG: {PackageHandler.GetPackageName(hash.GetPkgId())}");
+                data.AppendLine($"PKG ID: {hash.GetPkgId()}");
+                data.AppendLine($"Entry Index: {hash.GetEntryIndex() }");
+                data.AppendLine($"Dev String: {hash.GetDevString() ?? hash.GetContainerString() ?? "NULL"}");
+                data.AppendLine($"Reference Hash: {hash.Hash}");
+
+                HashLocation.Text = data.ToString();
                 break;
             case Key.Return:
                 AddWindow(hash);

@@ -445,7 +445,7 @@ public class FbxHandler
         node.LclScaling.Set(new FbxDouble3(100,100,100));
         
         // Scale and rotate
-        ScaleAndRotateForBlender(node);
+        //ScaleAndRotateForBlender(node);
 
         lock (_fbxLock)
         {

@@ -243,7 +243,7 @@ public partial class MapView : UserControl
                             string staticMeshName = part.Static.Hash.GetHashString();
                             FbxHandler staticHandler = new FbxHandler(false);
                             
-                            staticHandler.InfoHandler.SetMeshName(staticMeshName);
+                            //staticHandler.InfoHandler.SetMeshName(staticMeshName);
                             var staticmesh = part.Static.Load(ELOD.MostDetail);
 
                             staticHandler.AddStaticToScene(staticmesh, part.Static.Hash);
@@ -260,7 +260,7 @@ public partial class MapView : UserControl
                                 foreach (Part staticpart in staticmesh)
                                 {
                                     mats.AppendLine("{");
-                                    mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_{i}_{i}.vmat\"");
+                                    mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{staticpart.LodCategory}_{i}.vmat\"");
                                     mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
                                     mats.AppendLine("},\n");
                                     i++;
