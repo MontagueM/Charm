@@ -212,6 +212,19 @@ namespace Field.Textures
                         0 => false,
                         1 => false
                     };
+                case "dst":
+                    return param switch
+                    {
+                        -1 => false,
+                        0 => false,
+                        1 => false
+                    };
+                case "length":
+                    return param switch
+                    {
+                        -1 => true,
+                        0 => false
+                    };
                 default:
                     return true;
             }
@@ -377,6 +390,12 @@ namespace Field.Textures
                     outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
                     outputConnector = $@"{name}.outputs[0]";
                     break;
+                case "ceil":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'CEIL'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
                 case "floor":
                     outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
                     outputScript.AppendLine($@"{name}.operation = 'FLOOR'");
@@ -490,6 +509,92 @@ namespace Field.Textures
                     outputScript.AppendLine($@"{name}.inputs[0].default_value = 1.0");
                     outputScript.AppendLine($@"link({name}_root.outputs[0], {name}.inputs[1])");
 
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "sin":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'SINE'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "cos":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'COSINE'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "tan":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'TANGENT'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "asin":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'ARCSINE'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "acos":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'ARCCOSINE'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "atan":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'ARCTANGENT'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "atan2":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'ARCTAN2'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "sinh":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'SINH'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "cosh":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'COSH'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "tanh":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'TANH'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "degrees":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'DEGREES'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "radians":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'RADIANS'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "dst":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeVectorMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'DISTANCE'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
+                    outputScript.AppendLine($@"link({paramConnectors[1]}, {name}.inputs[1])");
+                    outputConnector = $@"{name}.outputs[0]";
+                    break;
+                case "length":
+                    outputScript.AppendLine($@"{name} = matnodes.new(""ShaderNodeVectorMath"")");
+                    outputScript.AppendLine($@"{name}.operation = 'LENGTH'");
+                    outputScript.AppendLine($@"link({paramConnectors[0]}, {name}.inputs[0])");
                     outputConnector = $@"{name}.outputs[0]";
                     break;
                 default:
