@@ -121,7 +121,8 @@ public partial class EntityView : UserControl
         }
         
         // Scale and rotate
-        fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
+        if(boneNodes != null && boneNodes.Count > 0)
+            fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
         
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
