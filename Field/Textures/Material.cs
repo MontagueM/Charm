@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Field.General;
+using Field.Utils;
 using File = System.IO.File;
 
 namespace Field.Textures;
@@ -57,25 +58,37 @@ public class Material : Tag {
             Console.WriteLine($"Successfully exported Source2 Material {Hash}.");
         }
     }
+
+    private byte[] GetBytecode(ShaderType type) {
+        var path = GetTempPath(type);
+        lock (Lock) {
+            if (!File.Exists(path)) {
+                var bytecode = type switch {
+                    ShaderType.Pixel => Header.PixelShader.GetBytecode(),
+                    ShaderType.Vertex => Header.VertexShader.GetBytecode(),
+                    _ => Header.ComputeShader.GetBytecode()
+                };
+                Directory.GetParent(path)?.Create();
+                File.WriteAllBytes(path, bytecode);
+                return bytecode;
+            }
+            return File.ReadAllBytes(path);
+        }
+    }
+    
+    private string Disassemble(ShaderType type) {
+        var fileName = GetTempPath(type, ".asm");
+        if (!File.Exists(fileName)) {
+            var data = DirectX.DisassembleDXBC(GetBytecode(type));
+            File.WriteAllText(fileName, data);
+            return data;
+        }
+        return File.ReadAllText(fileName);
+    }
     
     private string Decompile(ShaderType type, bool allowretry = true) {
-        var directory = "hlsl_temp";
-        Directory.CreateDirectory(directory);
-        directory = Path.GetFullPath(directory);
-        var fileName = $"{directory}\\{GetShaderPrefix(type)}_{Hash}";
-        var binFile = $"{fileName}.bin";
-        var hlslFile = $"{fileName}.hlsl";
-        
-        var bytecode = type switch {
-            ShaderType.Pixel => Header.PixelShader.GetBytecode(),
-            ShaderType.Vertex => Header.VertexShader.GetBytecode(),
-            _ => Header.ComputeShader.GetBytecode()
-        };
-        
-        lock (Lock) {
-            if (!File.Exists(binFile))
-                File.WriteAllBytes(binFile, bytecode);
-        }
+        var binFile = GetTempPath(type);
+        var hlslFile = GetTempPath(type, ".hlsl");
 
         if (!File.Exists(hlslFile)) {
             var startInfo = new ProcessStartInfo {
@@ -85,29 +98,29 @@ public class Material : Tag {
                 WindowStyle = ProcessWindowStyle.Hidden,
                 Arguments = $"-D {binFile}"
             };
-            
+
             using (var exeProcess = Process.Start(startInfo)) {
                 exeProcess?.WaitForExit();
             }
 
-            if(!File.Exists(hlslFile)) {
-                if(allowretry && File.Exists(binFile)) {
+            if (!File.Exists(hlslFile)) {
+                if (allowretry && File.Exists(binFile)) {
                     File.Delete(binFile);
+                    GetBytecode(type);
                     return Decompile(type, false);
                 }
                 throw new FileNotFoundException($"Decompilation failed for {Hash}");
             }
         }
-
-        var hlsl = "";
+        
         lock (Lock) {
+            var hlsl = "";
             while (hlsl == "") {
                 try { hlsl = File.ReadAllText(hlslFile); }
                 catch (IOException) { Thread.Sleep(100); }
             }
+            return hlsl;
         }
-        
-        return hlsl;
     }
     
     private static void SaveAllTextures(string saveDirectory, params List<D2Class_CF6D8080>[] shaderTextures) {
@@ -175,17 +188,23 @@ public class Material : Tag {
     private void ExportMaterialRaw(string path) {
         if(Header.PixelShader != null) {
             try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.hlsl", Decompile(ShaderType.Pixel)); }
-            catch (IOException ignored) { }
+            catch (IOException) { }
+            try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.asm", Disassemble(ShaderType.Pixel)); }
+            catch (IOException) { }
             Console.WriteLine($"Exported raw PixelShader for Material {Hash}.");
         }
         if(Header.VertexShader != null) {
             try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.hlsl", Decompile(ShaderType.Vertex)); }
-            catch (IOException ignored) { }
+            catch (IOException) { }
+            try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.asm", Disassemble(ShaderType.Vertex)); }
+            catch (IOException) { }
             Console.WriteLine($"Exported raw VertexShader for Material {Hash}.");
         }
         if(Header.ComputeShader != null) {
             try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Compute)}_{Hash}.hlsl", Decompile(ShaderType.Compute)); }
-            catch (IOException ignored) { }
+            catch (IOException) { }
+            try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Compute)}_{Hash}.asm", Disassemble(ShaderType.Compute)); }
+            catch (IOException) { }
             Console.WriteLine($"Exported raw ComputeShader for Material {Hash}.");
         }
     }
@@ -197,7 +216,7 @@ public class Material : Tag {
             var bpy = new NodeConverter().HlslToBpy(this, $"{path}/../..", Decompile(ShaderType.Pixel), false);
             if(bpy != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.py", bpy); }
-                catch (IOException ignored) { }
+                catch (IOException) { }
                 Console.WriteLine($"Exported Blender PixelShader {Hash}.");
             }
         }
@@ -205,7 +224,7 @@ public class Material : Tag {
             var bpy = new NodeConverter().HlslToBpy(this, $"{path}/../..", Decompile(ShaderType.Vertex), true);
             if(bpy != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.py", bpy); }
-                catch (IOException ignored) { }
+                catch (IOException) { }
                 Console.WriteLine($"Exported Blender VertexShader {Hash}.");
             }
         }
@@ -217,7 +236,7 @@ public class Material : Tag {
             var usf = new UsfConverter().HlslToUsf(this, Decompile(ShaderType.Pixel), false);
             if(usf != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.usf", usf); }
-                catch (IOException ignored) { }
+                catch (IOException) { }
                 Console.WriteLine($"Exported Unreal PixelShader {Hash}.");
             }
         }
@@ -225,7 +244,7 @@ public class Material : Tag {
             var usf = new UsfConverter().HlslToUsf(this, Decompile(ShaderType.Vertex), true);
             if(usf != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Vertex)}_{Hash}.usf", usf); }
-                catch (IOException ignored) { }
+                catch (IOException) { }
                 Console.WriteLine($"Exported Unreal VertexShader {Hash}.");
             }
         }
@@ -236,7 +255,7 @@ public class Material : Tag {
             var vfx = new VfxConverter().HlslToVfx(this, Decompile(ShaderType.Pixel), false);
             if(vfx != string.Empty) {
                 try { File.WriteAllText($"{path}/{GetShaderPrefix(ShaderType.Pixel)}_{Hash}.vfx", vfx); }
-                catch (IOException ignored) { }
+                catch (IOException) { }
                 Console.WriteLine($"Exported Source 2 PixelShader {Hash}.");
             }
             var materialBuilder = new StringBuilder("Layer0 \n{");
@@ -247,7 +266,7 @@ public class Material : Tag {
             materialBuilder.AppendLine("}");
             Directory.CreateDirectory($"{path}/materials");
             try { File.WriteAllText($"{path}/materials/{Hash}.vmat", materialBuilder.ToString()); }
-            catch (IOException ignored) { }
+            catch (IOException) { }
         }
     }
     
@@ -269,6 +288,14 @@ public class Material : Tag {
             ShaderType.Vertex => "VS",
             _ => "PS"
         };
+    }
+    
+    private string GetTempPath(ShaderType type, string extension = ".bin") {
+        var dir = $"{Path.GetTempPath()}/CharmCache/Shaders";
+        var path = $"{dir}/{GetShaderPrefix(type)}_{Hash}{extension}";
+        if(!File.Exists(dir))
+            Directory.CreateDirectory(dir);
+        return path;
     }
 
     private enum ShaderType { Pixel, Vertex, Compute }
