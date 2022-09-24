@@ -48,6 +48,15 @@ Not yet implemented:
 - better crash management https://github.com/MontagueM/Charm/issues/43
 - animations https://github.com/MontagueM/Charm/issues/45
 
+### Source 2: !!Only supports S&Box at the moment!!
+- Generates .vfx shader files for semi-accurate game shaders (similar to UE5 shaders)
+- Generates .vmat (material) and .vmdl (model) files for statics and maps
+
+(CS:GO Source 2 support is planned once that is released and if it supports custom content similar to S&Box)
+
+Copy files from shaders/source2 to your addons "Shaders" folder, and the .vmat, textures, and .vmdl files to "materials", "materials/textures", and "models" respectively.
+
+Run "mat_compileshaders PS_" in the console to compile the new shaders (WILL TAKE A LONG TIME)
 
 ### Some tricks
 

@@ -258,6 +258,6 @@ public partial class MusicPlayerControl : UserControl
         _output?.Stop();
         _waveProvider?.Dispose();
         _output?.Dispose();
-        _wem.Dispose();
+        _wem?.Dispose();
     }
 }

@@ -84,6 +84,14 @@ public partial class DevView : UserControl
                 break;
         }
     }
+    
+    private void ExportWem(ExportInfo info)
+    {
+        Wem wem = PackageHandler.GetTag(typeof(Wem), new TagHash(info.Hash));
+        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
+        Directory.CreateDirectory(saveDirectory);
+        wem.SaveToFile($"{saveDirectory}/{info.Name}.wem");
+    }
 
     private void AddWindow(TagHash hash)
     {
@@ -98,6 +106,8 @@ public partial class DevView : UserControl
             audioView.SetViewer(TagView.EViewerType.TagList);
             audioView.MusicPlayer.SetWem(PackageHandler.GetTag(typeof(Wem), hash));
             audioView.MusicPlayer.Play();
+            audioView.ExportControl.SetExportFunction(ExportWem, (int)EExportTypeFlag.Full);
+            audioView.ExportControl.SetExportInfo(new DestinyHash("A798A580"));
             _mainWindow.MakeNewTab(hash, audioView);
             _mainWindow.SetNewestTabSelected();
         }

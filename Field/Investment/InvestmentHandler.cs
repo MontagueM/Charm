@@ -55,7 +55,7 @@ public class InvestmentHandler
     private static async void GetAllInvestmentTags()
     {
         // Iterate over all investment pkgs until we find all the tags we need
-        var unmanagedDictionary = DllGetAllInvestmentTags();
+        var unmanagedDictionary = DllGetAllInvestmentTags(PackageHandler.GetExecutionDirectoryPtr());
         uint[] keys = new uint[unmanagedDictionary.Keys.dataSize];
         PackageHandler.Copy(unmanagedDictionary.Keys.dataPtr, keys, 0, unmanagedDictionary.Keys.dataSize);
         uint[] vals = new uint[unmanagedDictionary.Values.dataSize];
@@ -305,7 +305,7 @@ public class InvestmentHandler
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetAllInvestmentTags", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedDictionary DllGetAllInvestmentTags();
+    public extern static DestinyFile.UnmanagedDictionary DllGetAllInvestmentTags(IntPtr executionDirectoryPtr);
 }
 
 

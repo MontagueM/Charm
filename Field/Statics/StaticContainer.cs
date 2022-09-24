@@ -24,16 +24,17 @@ public class StaticContainer
             if (bSaveShaders)
             {
                 part.Material.SavePixelShader($"{saveDirectory}/Shaders");
+                part.Material.SaveVertexShader($"{saveDirectory}/Shaders");
             }
         }
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllLoadStaticContainer", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedData DllLoadStaticContainer(uint staticContainerHash, ELOD detailLevel);
+    public extern static DestinyFile.UnmanagedData DllLoadStaticContainer(uint staticContainerHash, ELOD detailLevel, IntPtr executionDirectoryPtr);
 
     public List<Part> Load(ELOD detailLevel)
     {
-        DestinyFile.UnmanagedData unmanagedData = DllLoadStaticContainer(Hash.Hash, detailLevel);
+        DestinyFile.UnmanagedData unmanagedData = DllLoadStaticContainer(Hash.Hash, detailLevel, PackageHandler.GetExecutionDirectoryPtr());
         List<Part> outPart = new List<Part>();
         outPart.EnsureCapacity(unmanagedData.dataSize);
         for (int i = 0; i < unmanagedData.dataSize; i++)
@@ -59,10 +60,12 @@ public struct PartUnmanaged
     public DestinyFile.UnmanagedData VertexTangents;
     public DestinyFile.UnmanagedData VertexColours;
     public uint MaterialHash;
+    public int DetailLevel;
 
     public Part Decode()
     {
         Part outPart = new Part();
+        outPart.DetailLevel = DetailLevel;
         outPart.IndexOffset = IndexOffset;
         outPart.IndexCount = IndexCount;
         outPart.PrimitiveType = (EPrimitiveType)PrimitiveType;

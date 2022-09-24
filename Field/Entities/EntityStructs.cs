@@ -1162,14 +1162,14 @@ public struct VertexWeight
 public struct D2Class_75988080
 {
     public long FileSize;
-    [DestinyField(FieldType.RelativePointer)]
-    public string DestinationGlobalTagBagName;
+    // [DestinyField(FieldType.RelativePointer)]
+    // public string DestinationGlobalTagBagName;
     public TagHash DestinationGlobalTagBag;
-    [DestinyOffset(0x20)] 
-    public TagHash PatrolTable1;
-    [DestinyOffset(0x28), DestinyField(FieldType.RelativePointer)] 
-    public string PatrolTableName;
-    public TagHash PatrolTable2;
+    // [DestinyOffset(0x20)] 
+    // public TagHash PatrolTable1;
+    // [DestinyOffset(0x28), DestinyField(FieldType.RelativePointer)] 
+    // public string PatrolTableName;
+    // public TagHash PatrolTable2;
 }
 
 #endregion

@@ -333,6 +333,7 @@ public class UsfConverter
                 {
                     usf.AppendLine($"    {i.Variable}.x = {i.Variable}.x * tx.x;");
                 }
+                usf.Replace("v0.xyzw = v0.xyzw * tx.xyxy;", "v0.xyzw = v0.xyzw;");
             }
         }
     }
@@ -407,10 +408,8 @@ public class UsfConverter
         float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
-        output.Normal = float3(1-normal_in_world_space.x, normal_in_world_space.y, normal_in_world_space.z);
-		//output.Normal = Material_Texture2D_2.SampleLevel(Material_Texture2D_0Sampler, v3.xy, 0).xyz;
-        //output.Normal.z = sqrt(1.0 - saturate(dot(output.Normal.xy, output.Normal.xy)));
-        //output.Normal = normalize(output.Normal);
+        normal_in_world_space.z = sqrt(1.0 - saturate(dot(normal_in_world_space.xy, normal_in_world_space.xy)));
+        output.Normal = normalize((normal_in_world_space * 2 - 1.5)*0.5 + 0.5);
 
         // Roughness
         float smoothness = saturate(8 * (normal_length - 0.375));

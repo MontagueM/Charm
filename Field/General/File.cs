@@ -52,7 +52,7 @@ public class DestinyFile
             }
             else
             {
-                UnmanagedData unmanagedData = DllGetData(Hash);
+                UnmanagedData unmanagedData = DllGetData(Hash, PackageHandler.GetExecutionDirectoryPtr());
                 byte[] managedArray = new byte[unmanagedData.dataSize];
                 PackageHandler.Copy(unmanagedData.dataPtr, managedArray, 0, unmanagedData.dataSize);
                 PackageHandler.BytesCache.TryAdd(Hash, managedArray);
@@ -64,5 +64,5 @@ public class DestinyFile
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllGetData", CallingConvention = CallingConvention.StdCall)]
-    public static extern UnmanagedData DllGetData(uint hash);
+    public static extern UnmanagedData DllGetData(uint hash, IntPtr executionDirectoryPtr);
 }

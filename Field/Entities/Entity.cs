@@ -90,6 +90,7 @@ public class Entity : Tag
             if (bSaveShaders)
             {
                 dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
+                dynamicPart.Material.SaveVertexShader($"{saveDirectory}/Shaders");
             }
             // Environment.Exit(5);
         }

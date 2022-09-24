@@ -12,14 +12,14 @@ namespace Charm;
 
 public enum EExportTypeFlag
 {
-    [Description("everything")]
+    [Description("Everything")]
     Full = 1,
-    [Description("minimal")]
+    [Description("Minimal (no terrain)")]
     Minimal = 2,
-    [Description("terrain only map")]
+    [Description("Terrain only")]
     TerrainOnly = 4,
-    [Description("pre-arranged map")]
-    ArrangedMap = 8,
+    [Description("Pre-arranged map")]
+    ArrangedMap = 8,    
 }
 
 public partial class ExportControl : UserControl

@@ -50,7 +50,7 @@ public class TagHash64Handler
 
     public static void Initialise()
     {
-        DestinyFile.UnmanagedDictionary unmanagedDictionary = DllInitialiseTH64H();
+        DestinyFile.UnmanagedDictionary unmanagedDictionary = DllInitialiseTH64H(PackageHandler.GetExecutionDirectoryPtr());
         long[] keys = new long[unmanagedDictionary.Keys.dataSize];
         PackageHandler.Copy(unmanagedDictionary.Keys.dataPtr, keys, 0, unmanagedDictionary.Keys.dataSize);
         int[] vals = new int[unmanagedDictionary.Values.dataSize];
@@ -62,5 +62,5 @@ public class TagHash64Handler
     }
 
     [DllImport("Symmetry.dll", EntryPoint = "DllInitialiseTH64H", CallingConvention = CallingConvention.StdCall)]
-    public extern static DestinyFile.UnmanagedDictionary DllInitialiseTH64H();
+    public extern static DestinyFile.UnmanagedDictionary DllInitialiseTH64H(IntPtr executionDirectoryPtr);
 }
