@@ -55,7 +55,7 @@ public class FbxHandler
             AddColoursToMesh(mesh, part);
         }
         
-        if (part.VertexColourSlots.Count > 0)  // api item, so do slots and uv1
+        if (part.VertexColourSlots.Count > 0 || part.GearDyeChangeColorIndex != 0xFF)  // api item, so do slots and uv1
         {
             AddSlotColoursToMesh(mesh, part);
             AddTexcoords1ToMesh(mesh, part);
@@ -208,10 +208,22 @@ public class FbxHandler
         }
         colLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         colLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
-        foreach (var colour in part.VertexColourSlots)
+        if (part.PrimitiveType == EPrimitiveType.Triangles)
         {
-            colLayer.GetDirectArray().Add(new FbxColor(colour.X, colour.Y, colour.Z, colour.W));
+            VertexBuffer.AddSlotInfo(part, part.GearDyeChangeColorIndex);
+            for (var i = 0; i < part.VertexPositions.Count; i++)
+            {
+                colLayer.GetDirectArray().Add(new FbxColor(part.VertexColourSlots[0].X, part.VertexColourSlots[0].Y, part.VertexColourSlots[0].Z, part.VertexColourSlots[0].W));
+            }  
         }
+        else
+        {
+            foreach (var colour in part.VertexColourSlots)
+            {
+                colLayer.GetDirectArray().Add(new FbxColor(colour.X, colour.Y, colour.Z, colour.W));
+            }  
+        }
+
         if (mesh.GetLayer(1) == null)
             mesh.CreateLayer();
         mesh.GetLayer(1).SetVertexColors(colLayer);

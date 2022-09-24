@@ -382,6 +382,7 @@ public class Part
     public Material Material;
     public int GroupIndex = 0;
     public bool bAlphaClip;
+    public byte GearDyeChangeColorIndex = 0xFF;
 
     public Part()
     {

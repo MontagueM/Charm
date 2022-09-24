@@ -126,7 +126,7 @@ public class VertexBuffer : Tag
         return true;
     }
     
-    private void AddSlotInfo(Part part, short w)
+    public static void AddSlotInfo(Part part, short w)
     {
         // slots
         Vector4 vc = Vector4.Zero;

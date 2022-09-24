@@ -97,6 +97,7 @@ public class EntityModel : Tag
             dynamicPart.GroupIndex = partGroups[i];
             dynamicPart.LodCategory = part.LodCategory;
             dynamicPart.bAlphaClip = (part.Flags & 0x8) != 0;
+            dynamicPart.GearDyeChangeColorIndex = part.GearDyeChangeColorIndex;
             dynamicPart.GetAllData(mesh, Header);
             parts.Add(dynamicPart);
         }
