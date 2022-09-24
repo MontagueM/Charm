@@ -348,38 +348,17 @@ public struct D2Class_99438080
     public Vector4 Unk10;
 }
 
-public class ScriptBSES : Tag
+public class ScriptBS : Tag
 {
     public D2Class_00008080 Header;
 
-    public ScriptBSES(TagHash hash) : base(hash)
+    public ScriptBS(TagHash hash) : base(hash)
     {
     }
 
     protected override void ParseStructs()
     {
-        Header = ReadHeader<D2Class_12928080>();
-    }
-
-    public string ConvertToString()
-    {
-        var sb = new StringBuilder();
-        
-        foreach (var script in Header.Unk08)
-        {
-            Decompile(script.Unk08, sb, 1);
-        }
-        
-        return sb.ToString();
-    }
-
-    private void Decompile(dynamic? resource, StringBuilder sb, int indentation)
-    {
-    }
-    
-    private void AppendLine(StringBuilder sb, int indentation, string line)
-    {
-        sb.AppendLine(new string('\t', indentation * 2) + line);
+        Header = ReadHeader<D2Class_00008080>();
     }
 }
 
