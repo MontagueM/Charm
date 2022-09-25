@@ -54,6 +54,12 @@ public class FbxHandler
         {
             AddColoursToMesh(mesh, part);
         }
+        
+        if (part.VertexColourSlots.Count > 0 || part.GearDyeChangeColorIndex != 0xFF)  // api item, so do slots and uv1
+        {
+            AddSlotColoursToMesh(mesh, part);
+            AddTexcoords1ToMesh(mesh, part);
+        }
 
         // for importing to other engines
         if (InfoHandler != null && part.Material != null) // todo consider why some materials are null
@@ -147,7 +153,7 @@ public class FbxHandler
         FbxLayerElementUV uvLayer;
         lock (_fbxLock)
         {
-            uvLayer = FbxLayerElementUV.Create(mesh, "uvLayerName");
+            uvLayer = FbxLayerElementUV.Create(mesh, "uv0");
         }
         uvLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         uvLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
@@ -158,6 +164,24 @@ public class FbxHandler
         mesh.GetLayer(0).SetUVs(uvLayer);
     }
     
+    private void AddTexcoords1ToMesh(FbxMesh mesh, Part part)
+    {
+        FbxLayerElementUV uvLayer;
+        lock (_fbxLock)
+        {
+            uvLayer = FbxLayerElementUV.Create(mesh, "uv1");
+        }
+        uvLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
+        uvLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+        foreach (var tx in part.VertexTexcoords1)
+        {
+            uvLayer.GetDirectArray().Add(new FbxVector2(tx.X, tx.Y));
+        }
+        if (mesh.GetLayer(1) == null)
+            mesh.CreateLayer();
+        mesh.GetLayer(1).SetUVs(uvLayer);
+    }
+
     
     private void AddColoursToMesh(FbxMesh mesh, Part part)
     {
@@ -175,6 +199,35 @@ public class FbxHandler
         mesh.GetLayer(0).SetVertexColors(colLayer);
     }
 
+    private void AddSlotColoursToMesh(FbxMesh mesh, Part part)
+    {
+        FbxLayerElementVertexColor colLayer;
+        lock (_fbxLock)
+        {
+            colLayer = FbxLayerElementVertexColor.Create(mesh, "slots");
+        }
+        colLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
+        colLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+        if (part.PrimitiveType == EPrimitiveType.Triangles)
+        {
+            VertexBuffer.AddSlotInfo(part, part.GearDyeChangeColorIndex);
+            for (var i = 0; i < part.VertexPositions.Count; i++)
+            {
+                colLayer.GetDirectArray().Add(new FbxColor(part.VertexColourSlots[0].X, part.VertexColourSlots[0].Y, part.VertexColourSlots[0].Z, part.VertexColourSlots[0].W));
+            }  
+        }
+        else
+        {
+            foreach (var colour in part.VertexColourSlots)
+            {
+                colLayer.GetDirectArray().Add(new FbxColor(colour.X, colour.Y, colour.Z, colour.W));
+            }  
+        }
+
+        if (mesh.GetLayer(1) == null)
+            mesh.CreateLayer();
+        mesh.GetLayer(1).SetVertexColors(colLayer);
+    }
 
     private void AddWeightsToMesh(FbxMesh mesh, DynamicPart part, List<FbxNode> skeletonNodes)
     {
@@ -306,7 +359,6 @@ public class FbxHandler
         }
 
         _scene.GetRootNode().AddChild(rootNode);
-        // rootNode.LclRotation.Set(new FbxDouble3(-90, 0, 0));
         return skeletonNodes;
     }
 
@@ -487,18 +539,5 @@ public class FbxHandler
         retVal.Z *= (float)(180.0f / Math.PI);
 
         return retVal;
-    }
-
-    public void ScaleAndRotateForBlender(FbxNode node)
-    {
-        for (int i = 0; i < _scene.GetRootNode().GetChildCount(); i++)
-        {
-            FbxNode child = _scene.GetRootNode().GetChild(i);
-            if (child.GetNodeAttribute().GetNode().GetSkeleton() == null)
-            {
-                // child.LclScaling.Set(new FbxDouble3(100, 100, 100));
-                child.LclRotation.Set(new FbxDouble3(0, 0, -90));
-            }
-        }
     }
 }

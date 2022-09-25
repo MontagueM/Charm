@@ -96,6 +96,8 @@ public class EntityModel : Tag
             dynamicPart.Index = i;
             dynamicPart.GroupIndex = partGroups[i];
             dynamicPart.LodCategory = part.LodCategory;
+            dynamicPart.bAlphaClip = (part.Flags & 0x8) != 0;
+            dynamicPart.GearDyeChangeColorIndex = part.GearDyeChangeColorIndex;
             dynamicPart.GetAllData(mesh, Header);
             parts.Add(dynamicPart);
         }
@@ -163,10 +165,15 @@ public class DynamicPart : Part
     {
         for (int i = 0; i < VertexTexcoords.Count; i++)
         {
+            var tx = VertexTexcoords[i];
             VertexTexcoords[i] = new Vector2(
-                VertexTexcoords[i].X * header.TexcoordScale.X + header.TexcoordTranslation.X,
-                VertexTexcoords[i].Y * -header.TexcoordScale.Y + 1 - header.TexcoordTranslation.Y
+                tx.X * header.TexcoordScale.X + header.TexcoordTranslation.X,
+                tx.Y * -header.TexcoordScale.Y + 1 - header.TexcoordTranslation.Y
             );
+            VertexTexcoords1.Add(new Vector2(
+                tx.X * header.TexcoordScale.X * 5 + header.TexcoordTranslation.X * 5,
+                tx.Y * -header.TexcoordScale.Y * 5 + 1 - header.TexcoordTranslation.Y * 5
+            ));
         }
     }
 

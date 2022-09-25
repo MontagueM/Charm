@@ -8043,7 +8043,7 @@ class NODE_OT_TEST(bpy.types.Operator):
         # BIOS Change Nodegroup name dependent on name of shader ripped from API
         custom_node_name = "SHADERNAMEENUM"
         global RIP_LOCATION
-        my_group = create_test_group(self, context, custom_node_name, RIP_LOCATION)
+        my_group = create_test_group(self, context, custom_node_name, RIP_LOCATION+"/../")
         test_node = context.view_layer.objects.active.active_material.node_tree.nodes.new('ShaderNodeGroup')
         test_node.node_tree = bpy.data.node_groups[my_group.name]
         test_node.use_custom_color = True

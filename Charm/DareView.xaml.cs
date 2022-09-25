@@ -46,8 +46,9 @@ public partial class DareView : UserControl
                 items.Add(pair.Value);
             }
         });
-            
-        DareListView.ItemsSource = items;
+        var sortedItems = new List<ApiItem>(items);
+        sortedItems.Sort((a, b) => b.Item.Hash.CompareTo(a.Item.Hash));
+        DareListView.ItemsSource = sortedItems;
     }
 
     public async void LoadContent()
@@ -64,11 +65,11 @@ public partial class DareView : UserControl
         MainWindow.Progress.SetProgressStages(mapStages, false, true);
         Parallel.ForEach(InvestmentHandler.InventoryItems, kvp =>
         {
-            if (_allItems.Count > 500)
-            {
-                MainWindow.Progress.CompleteStage();
-                return;
-            }
+            // if (_allItems.Count > 500)
+            // {
+            //     MainWindow.Progress.CompleteStage();
+            //     return;
+            // }
             string name = InvestmentHandler.GetItemName(kvp.Value);
             string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
             if (kvp.Value.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
@@ -197,7 +198,7 @@ public partial class DareView : UserControl
 
     private void OpenOutputFolder_OnClick(object sender, RoutedEventArgs e)
     {
-        Process.Start(ConfigHandler.GetExportSavePath());
+        Process.Start("explorer.exe", ConfigHandler.GetExportSavePath());
     }
 }
 
