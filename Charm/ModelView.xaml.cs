@@ -78,7 +78,7 @@ public partial class ModelView : UserControl
 
     public void SetGroupIndices(HashSet<int> hashSet)
     {
-        if (_bFromSelectionChange)
+        if (_bFromSelectionChange || hashSet.Count == 0)
             return;
         
         GroupsCombobox.Items.Clear();

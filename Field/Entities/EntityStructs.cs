@@ -328,14 +328,12 @@ public struct D2Class_4F9F8080
     public Field.Models.Vector4 Translation;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x10)]  // technically its actually 0x8, but they do dumb stuff so we'll just ignore it
+[StructLayout(LayoutKind.Sequential, Size = 8)]
 public struct D2Class_40868080
 {
     public ushort Unk00;
     public ushort Unk02;
-    public ushort Unk04;
-    [DestinyOffset(0xC), DestinyField(FieldType.Resource)]
-    public dynamic? Unk0C;
+    public uint Unk04;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x108)]
@@ -1214,6 +1212,8 @@ public struct D2Class_9B318080
     public TagHash StringContainer;  // idk why but i presume debug strings
     public DestinyHash WeaponContentGroup2Hash;  // "weaponContentGroupHash" from API
     // theres other stringcontainer stuff but skipping it
+    [DestinyOffset(0xA0), DestinyField(FieldType.TagHash64)]
+    public Entity? WeaponSkeletonEntity;
     [DestinyOffset(0xD0), DestinyField(FieldType.TagHash64)]
     public Tag<D2Class_A36F8080> AudioGroup;
     public float UnkE0;

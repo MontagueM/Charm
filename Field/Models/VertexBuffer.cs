@@ -109,9 +109,11 @@ public class VertexBuffer : Tag
                 (part as DynamicPart).VertexWeights.Add(vw);
                 break;
             case 0x18:  // normals and tangents are euler
+                short w;
                 part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
-                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), w = handle.ReadInt16(), true));
                 part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                AddSlotInfo(part, w);
                 break;
             case 0x30: // physics, normals and tangents are euler
                 part.VertexPositions.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle()));
@@ -122,6 +124,36 @@ public class VertexBuffer : Tag
                 return false;
         }
         return true;
+    }
+    
+    public static void AddSlotInfo(Part part, short w)
+    {
+        // slots
+        Vector4 vc = Vector4.Zero;
+        switch (w & 0x7)
+        {
+            case 0:
+                vc.X = 0.333f;
+                break;
+            case 1:
+                vc.X = 0.666f;
+                break;
+            case 2:
+                vc.X = 0.999f;
+                break;
+            case 3:
+                vc.Y = 0.333f;
+                break;
+            case 4:
+                vc.Y = 0.666f;
+                break;
+            case 5:
+                vc.Y = 0.999f;
+                break;
+        }
+        if (part.bAlphaClip)
+            vc.Z = 0.25f;
+        part.VertexColourSlots.Add(vc);
     }
     
     private bool ReadVertexDataType5(Part part, BinaryReader handle)
