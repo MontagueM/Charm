@@ -352,42 +352,22 @@ public struct D2Class_99438080
     public Vector4 Unk10;
 }
 
-// public class ScriptBSES : Tag
-// {
-//     public D2Class_00008080 Header;
+public class ScriptBS : Tag
+{
+    public D2Class_00008080 Header;
 
-//     public ScriptBSES(TagHash hash) : base(hash)
-//     {
-//     }
+    public ScriptBS(TagHash hash) : base(hash)
+    {
+    }
 
-//     protected override void ParseStructs()
-//     {
-//         Header = ReadHeader<D2Class_00008080>();
-//     }
+    protected override void ParseStructs()
+    {
+        Header = ReadHeader<D2Class_00008080>();
+    }
+}
 
-//     public string ConvertToString()
-//     {
-//         var sb = new StringBuilder();
-        
-//         foreach (var script in Header.Unk08)
-//         {
-//             Decompile(script.Unk08, sb, 1);
-//         }
-        
-//         return sb.ToString();
-//     }
-
-//     private void Decompile(dynamic? resource, StringBuilder sb, int indentation)
-//     {
-//     }
-    
-//     private void AppendLine(StringBuilder sb, int indentation, string line)
-//     {
-//         sb.AppendLine(new string('\t', indentation * 2) + line);
-//     }
-// }
-
-[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+// The size is actually 0x58, so any "extra" stuff I've added is marked as EX
+[StructLayout(LayoutKind.Sequential, Size = 0x60)]
 public struct D2Class_00008080
 {
     public long FileSize;
@@ -403,15 +383,152 @@ public struct D2Class_00008080
     public byte Unk1F;
     public uint Unk20;
     [DestinyOffset(0x28), DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk28;
+    public dynamic? Unk28; // ef008080
     [DestinyField(FieldType.ResourcePointer)]
     public dynamic? Unk30;
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk38;
+    public dynamic? Unk38; // E1008080 codegen
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk40;
+    public dynamic? Unk40; // codegen
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk48;
+    public dynamic? Unk48; // codegen
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk50;
+    public dynamic? Unk50; // 2f018080
+    [DestinyOffset(0x5C), DestinyField(FieldType.Resource)]
+    public dynamic? Unk5C_EX; // 5f9b8080
+}
+
+// The size is actually 0x10, so any "extra" stuff I've added is marked as EX
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_5F9B8080
+{
+    [DestinyField(FieldType.RelativePointer)]
+    public string Unk0x0;
+    public long Unk0x8;
+    [DestinyOffset(0x14), DestinyField(FieldType.Resource)]
+    public dynamic? Unk14_EX; // 8b008080
+}
+
+// The size is actually 0x18, so any "extra" stuff I've added is marked as EX
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_8B008080
+{
+    public byte Unk0x0;
+    [DestinyOffset(0x8), DestinyField(FieldType.RelativePointer)]
+    public string Unk0x8;
+    public uint Unk0x10;
+    [DestinyOffset(0x1C), DestinyField(FieldType.Resource)]
+    public dynamic? Unk1C_EX; // 609b8080
+}
+
+// The size is actually 8, so any "extra" stuff I've added is marked as EX
+[StructLayout(LayoutKind.Sequential, Size = 0xC)]
+public struct D2Class_609B8080
+{
+    [DestinyField(FieldType.RelativePointer)]
+    public string Unk0x0;
+    [DestinyOffset(8), DestinyField(FieldType.Resource)]
+    public dynamic? Unk08_EX; // 90898080
+}
+
+// The size is actually 4, so any "extra" stuff I've added is marked as EX
+[StructLayout(LayoutKind.Sequential, Size = 0xC)]
+public struct D2Class_90898080
+{
+    public DestinyHash Unk0x0;
+    [DestinyOffset(8), DestinyField(FieldType.Resource)]
+    public dynamic? Unk08_EX; // 619B8080
+}
+
+// The size is actually 8, so any "extra" stuff I've added is marked as EX
+[StructLayout(LayoutKind.Sequential, Size = 0xC)]
+public struct D2Class_619B8080
+{
+    [DestinyField(FieldType.RelativePointer)]
+    public string Unk0x0;
+    [DestinyOffset(8), DestinyField(FieldType.Resource)]
+    public dynamic? Unk08_EX; // 649B8080
+}
+
+// The size is actually 4, so any "extra" stuff I've added is marked as EX
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_649B8080
+{
+    [DestinyField(FieldType.RelativePointer)]
+    public Tag Unk0x0; // 00008080
+    [DestinyOffset(4), DestinyField(FieldType.Resource)]
+    public dynamic? Unk04_EX; // 41018080
+}
+
+// The size is actually 4, so any "extra" stuff I've added is marked as EX
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_41018080
+{
+    public byte Unk0x0;
+    public byte Unk0x1;
+    public bool Unk0x2;
+    public bool Unk0x3;
+    [DestinyOffset(4), DestinyField(FieldType.Resource)]
+    public dynamic? Unk04_EX; // 50008080
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0)]
+public struct D2Class_50008080
+{
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+public struct D2Class_EF008080
+{
+    [DestinyField(FieldType.RelativePointer)]
+    public string Unk0x0;
+    public uint Unk0x8;
+    public uint Unk0xC;
+    public uint Unk0x10;
+    public uint Unk0x14;
+    public byte Unk0x18;
+    public byte Unk0x19;
+    public byte Unk0x1A;
+    public byte Unk0x1B;
+    public byte Unk0x1C;
+    public byte Unk0x1D;
+    public byte Unk0x1E;
+    public byte Unk0x1F;
+    public uint Unk0x20;
+    [DestinyOffset(0x28), DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk0x28;  // 0f018080
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_0F018080
+{
+    public ulong Unk0x0;
+    public uint Unk0x8;
+    public uint Unk0xC;
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk0x10;  // 00008080
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 8)]
+public struct D2Class_E1008080
+{
+    public ulong Unk00;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+public struct D2Class_2F018080
+{
+    public ulong Unk0x0;
+    public D2Class_2E018080 Unk0x8;
+    [DestinyOffset(0x14)]
+    public uint Unk0x14;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0xC)]
+public struct D2Class_2E018080
+{
+    public DestinyHash Unk0x0;
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk0x4;  // 00008080
+    public uint Unk0x8;
 }

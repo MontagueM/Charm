@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Field;
+using Field.Textures;
 
 namespace Charm;
 
