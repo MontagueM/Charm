@@ -104,8 +104,7 @@ public partial class MapView : UserControl
         }
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            //Only gonna export a blender py for maps (for now)
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
@@ -142,8 +141,7 @@ public partial class MapView : UserControl
         }
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            //Only gonna export a blender py for maps (for now)
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
@@ -181,7 +179,7 @@ public partial class MapView : UserControl
 
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Terrain, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.ExportScene($"{savePath}/{meshName}_Terrain.fbx");
@@ -212,11 +210,11 @@ public partial class MapView : UserControl
                 {    
                     dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
                 }
-                else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
-                {
-                    //entry.Rotation.SetW(1);
-                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement);
-                }
+                // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
+                // {
+                //     //entry.Rotation.SetW(1);
+                //     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement);
+                // }
             });
         });
         dynamicHandler.ExportScene($"{savePath}/{map.Hash.GetHashString()}_DynamicPoints.fbx");

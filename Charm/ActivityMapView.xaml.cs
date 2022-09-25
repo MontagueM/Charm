@@ -182,6 +182,7 @@ public partial class ActivityMapView : UserControl
         {
             if (info.ExportType == EExportTypeFlag.Full)
                 MapView.ExportFullMap(map);
+                MapView.ExportTerrainMap(map);
             if (info.ExportType == EExportTypeFlag.TerrainOnly)
                 MapView.ExportTerrainMap(map);
             if (info.ExportType == EExportTypeFlag.Minimal)
