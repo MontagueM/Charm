@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Media;
 using Field.General;
 using Field.Models;
+using Field.Textures;
 
 namespace Charm
 {
@@ -67,7 +68,13 @@ namespace Charm
                     {
                         var dynamicParts = entity.Load(ELOD.MostDetail);
                         fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
-                        entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+                        var settings = new ExportSettings() {
+                            Unreal = ConfigHandler.GetUnrealInteropEnabled(),
+                            Blender = ConfigHandler.GetBlenderInteropEnabled(),
+                            Source2 = true,
+                            Raw = true
+                        };
+                        entity.SaveMaterialsFromParts(savePath, dynamicParts, settings);
                         entity.SaveTexturePlates(savePath);
                     }
 

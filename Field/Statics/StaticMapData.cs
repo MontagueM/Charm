@@ -4,6 +4,7 @@ using Field.Entities;
 using Field.General;
 using Field.Models;
 using Field.Statics;
+using Field.Textures;
 
 namespace Field;
 
@@ -30,7 +31,7 @@ public class StaticMapData : Tag
         });
     }
 
-    public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, bool bSaveShaders)
+    public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, ExportSettings settings)
     {
         List<D2Class_BD938080> extractedStatics = Header.Statics.DistinctBy(x => x.Static.Hash).ToList();
 
@@ -38,7 +39,7 @@ public class StaticMapData : Tag
         {
             var parts = s.Static.Load(ELOD.MostDetail);
             fbxHandler.AddStaticToScene(parts, s.Static.Hash);
-            s.Static.SaveMaterialsFromParts(savePath, parts, bSaveShaders);
+            s.Static.SaveMaterialsFromParts(savePath, parts, settings);
         });
 
         Parallel.ForEach(Header.InstanceCounts, c =>

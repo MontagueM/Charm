@@ -52,9 +52,14 @@ public partial class StaticView : UserControl
         List<Part> parts = container.Load(ELOD.MostDetail);
         fbxHandler.AddStaticToScene(parts, meshName);
         Directory.CreateDirectory(savePath);
-        if (exportType == EExportTypeFlag.Full)
-        {
-            container.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+        if (exportType == EExportTypeFlag.Full) {
+            var settings = new ExportSettings {
+                Unreal = ConfigHandler.GetUnrealInteropEnabled(),
+                Blender = ConfigHandler.GetBlenderInteropEnabled(),
+                Source2 = true,
+                Raw = true
+            };
+            container.SaveMaterialsFromParts(savePath, parts, settings);
             fbxHandler.InfoHandler.SetMeshName(meshName);
             if (ConfigHandler.GetUnrealInteropEnabled())
             {

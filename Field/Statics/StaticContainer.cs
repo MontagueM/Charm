@@ -13,21 +13,9 @@ public class StaticContainer
         Hash = hash;
     }
     
-    public void SaveMaterialsFromParts(string saveDirectory, List<Part> parts, bool bSaveShaders)
-    {
-        Directory.CreateDirectory($"{saveDirectory}/Textures");
-        Directory.CreateDirectory($"{saveDirectory}/Shaders");
-        foreach (var part in parts)
-        {
-            if (part.Material == null || !part.Material.Hash.IsValid()) continue;
-            part.Material.SaveAllTextures($"{saveDirectory}/Textures");
-            if (bSaveShaders)
-            {
-                part.Material.SavePixelShader($"{saveDirectory}/Shaders");
-                part.Material.SaveVertexShader($"{saveDirectory}/Shaders");
-                part.Material.SaveComputeShader($"{saveDirectory}/Shaders");
-            }
-        }
+    public void SaveMaterialsFromParts(string saveDirectory, List<Part> parts, ExportSettings settings) {
+        foreach(var part in parts.Where(part => part.Material != null && part.Material.Hash.IsValid()))
+            part.Material.Export(saveDirectory, settings);
     }
     
     [DllImport("Symmetry.dll", EntryPoint = "DllLoadStaticContainer", CallingConvention = CallingConvention.StdCall)]

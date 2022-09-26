@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Field.General;
 using Field.Models;
+using Field.Textures;
 
 namespace Field;
 
@@ -48,9 +49,6 @@ public class VfxConverter
     private List<Cbuffer> cbuffers = new List<Cbuffer>();
     private List<Input> inputs = new List<Input>();
     private List<Output> outputs = new List<Output>();
-
-    //private List<Texture> sortedTextures = new List<Texture>();
-    
 
     public string vfxStructure = @"HEADER
 {

@@ -2,6 +2,7 @@
 using Field;
 using Field.General;
 using Field.Models;
+using Field.Textures;
 
 namespace Field.Entities;
 
@@ -78,21 +79,12 @@ public class Entity : Tag
         return dynamicParts;
     }
 
-    public void SaveMaterialsFromParts(string saveDirectory, List<DynamicPart> dynamicParts, bool bSaveShaders)
+    public void SaveMaterialsFromParts(string saveDirectory, List<DynamicPart> dynamicParts, ExportSettings settings)
     {
-        Directory.CreateDirectory($"{saveDirectory}/Textures");
-        Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var dynamicPart in dynamicParts)
         {
             if (dynamicPart.Material == null) continue;
-            dynamicPart.Material.SaveAllTextures($"{saveDirectory}/Textures");
-            // dynamicPart.Material.SaveVertexShader(saveDirectory);
-            if (bSaveShaders)
-            {
-                dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
-                dynamicPart.Material.SaveVertexShader($"{saveDirectory}/Shaders");
-            }
-            // Environment.Exit(5);
+            dynamicPart.Material.Export(saveDirectory, settings);
         }
     }
 

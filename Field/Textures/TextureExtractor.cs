@@ -3,13 +3,12 @@ using DirectXTexNet;
 
 namespace Field;
 
-public class TextureExtractor
-{
-    private static ETextureFormat _format = ETextureFormat.DDS_BGRA_UNCOMP_DX10;
+public class TextureExtractor {
+
+    public static ETextureFormat Format { get; private set; }
     
-    public static void SetTextureFormat(ETextureFormat textureFormat)
-    {
-        _format = textureFormat;
+    public static void SetTextureFormat(ETextureFormat textureFormat) {
+        Format = textureFormat;
     }
 
     public static bool SaveTextureToFile(string savePath, ScratchImage scratchImage)
@@ -19,7 +18,7 @@ public class TextureExtractor
             return false;
         }
 
-        switch (_format)
+        switch (Format)
         {
             case ETextureFormat.DDS_BGRA_UNCOMP_DX10:
                 scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath + ".dds");

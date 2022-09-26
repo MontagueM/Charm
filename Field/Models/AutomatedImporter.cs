@@ -75,6 +75,12 @@ public class AutomatedImporter
                 break;
         }
         File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", textExtensions);
+
+        var betterScriptPath = $"{saveDirectory}/{meshName}_import_blender.py";
+        File.Copy("import_blender.py", betterScriptPath, true);
+        var betterScript = File.ReadAllText(betterScriptPath);
+        betterScript = betterScript.Replace("<<REPLACE_HASH>>", $"{meshName}");
+        File.WriteAllText(betterScriptPath, betterScript);
     }
 
     
