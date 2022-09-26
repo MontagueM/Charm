@@ -284,7 +284,8 @@ public class Tag : DestinyFile
                                 handle.BaseStream.Seek(fieldOffset + 8, SeekOrigin.Begin);  // return back to keep reading
                                 return result;
                             }
-                            throw new NotImplementedException($"[RESOURCE POINTER] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
+                            continue;
+                            //throw new NotImplementedException($"[RESOURCE POINTER] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
                         }
                         dynamic resource = ReadStruct(innerType, handle, sc);
                         handle.BaseStream.Seek(fieldOffset + 8, SeekOrigin.Begin);  // return back to keep reading
@@ -297,7 +298,8 @@ public class Tag : DestinyFile
                     Type innerType = Type.GetType($"Field.D2Class_{Endian.U32ToString(resourceClass)}, Field, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
                     if (innerType == null)
                     {
-                        throw new NotImplementedException($"[RESOURCE] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
+                        continue;
+                        //throw new NotImplementedException($"[RESOURCE] Unable to find type for resource class {Endian.U32ToString(resourceClass)}. Parent is {T.FullName}, in tag {Hash}, field is {field.Name}");
                     }
                     dynamic resource = ReadStruct(innerType, handle, sc);
                     field.SetValue(result, resource);
@@ -308,7 +310,8 @@ public class Tag : DestinyFile
                     uint resourceClass = handle.ReadUInt32();
                     if (resourcePointer > 0)
                     {
-                        throw new NotImplementedException();
+                        continue;
+                        //throw new NotImplementedException();
                     }
                 }
                 else if (fieldType == FieldType.ResourceInTablePointer)
@@ -420,7 +423,8 @@ public class Tag : DestinyFile
                 // }
                 else
                 {
-                    throw new NotImplementedException();
+                    continue;
+                    //throw new NotImplementedException();
                 }
             }
 

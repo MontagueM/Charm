@@ -26,5 +26,6 @@
         <local:TagListView Visibility="Hidden" x:Name="TagListControl" Grid.ColumnSpan="2"/>
         <local:ExportControl x:Name="ExportControl" Visibility="Hidden" Grid.Column="1" Grid.Row="1"/>
         <local:MusicPlayerControl x:Name="MusicPlayer" Visibility="Hidden" Grid.Column="0" Grid.Row="1"/>
+        <local:ScriptView Visibility="Hidden" x:Name="ScriptControl" Grid.ColumnSpan="2"/>
     </Grid>
 </UserControl>

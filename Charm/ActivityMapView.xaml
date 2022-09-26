@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:Charm"
              mc:Ignorable="d"
              d:DesignHeight="1000" d:DesignWidth="1900">
+
     <UserControl.Resources>
         <ControlTemplate x:Key="bubbleTemplate">
             <Grid Height="50">
@@ -16,8 +17,26 @@
                 <TextBlock Grid.Column="0" HorizontalAlignment="Left" Text="{Binding Name}"/>
                 <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding Hash}" Click="GetBubbleContentsButton_OnClick" Content="View contents"/>
             </Grid>
-        </ControlTemplate>  
+        </ControlTemplate>
+
         <ControlTemplate x:Key="staticTemplate">
+            <Grid Height="20" Margin="0,1,0,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80*" />
+                    <ColumnDefinition Width="20*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.ColumnSpan="2" BorderBrush="{StaticResource BackgroundColour30}"
+                        BorderThickness="1" Panel.ZIndex="1" />
+                <CheckBox Grid.Column="0" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Tag="{Binding Hash}" IsChecked="{Binding Selected}" Checked ="StaticMapPart_OnCheck">
+                    <TextBlock TextAlignment="Center" Text="{Binding Name}"/>
+                </CheckBox>
+                <Button Grid.Column="1" Click="StaticMap_OnClick" HorizontalAlignment="Right">
+                    <TextBlock TextAlignment="Center" Text="View"/>
+                </Button>
+            </Grid>
+        </ControlTemplate> 
+
+        <ControlTemplate x:Key="dynamicTemplate">
             <Grid Height="20" Margin="0,1,0,1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80*" />
@@ -28,12 +47,13 @@
                 <CheckBox Grid.Column="0" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Tag="{Binding Hash}" IsChecked="{Binding Selected}">
                     <TextBlock TextAlignment="Center" Text="{Binding Name}"/>
                 </CheckBox>
-                <Button Grid.Column="1" Click="StaticMap_OnClick" HorizontalAlignment="Right">
-                    <TextBlock TextAlignment="Center" Text="View"/>
+                <Button Grid.Column="1" HorizontalAlignment="Right">
+                    <TextBlock TextAlignment="Center" Text="Export"/>
                 </Button>
             </Grid>
         </ControlTemplate>  
     </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*" />
@@ -75,8 +95,20 @@
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
             </ListView>
-            <TextBlock Grid.Row="1" Grid.Column="1" FontSize="32">Dynamic stuff here</TextBlock>
             <local:ExportControl Grid.Row="2" Grid.ColumnSpan="2" x:Name="ExportControl"/>
+            <ListView Grid.Row="1" Grid.Column="1" x:Name="DynamicsList">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="OverridesDefaultStyle" Value="True"/>
+                        <Setter Property="Template" Value="{StaticResource dynamicTemplate}"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+            </ListView>
         </Grid>
         <local:MapView Grid.Column="1" x:Name="MapControl"/>
     </Grid>

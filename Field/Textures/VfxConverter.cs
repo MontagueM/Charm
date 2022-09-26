@@ -7,6 +7,38 @@ using Field.Textures;
 
 namespace Field;
 
+// public struct Texture
+// {
+//     public string Dimension;
+//     public string Type;
+//     public string Variable;
+//     public int Index;
+// }
+
+// public struct Cbuffer
+// {
+//     public string Variable;
+//     public string Type;
+//     public int Count;
+//     public int Index;
+// }
+
+// public struct Input
+// {
+//     public string Variable;
+//     public string Type;
+//     public int Index;
+//     public string Semantic;
+// }
+
+// public struct Output
+// {
+//     public string Variable;
+//     public string Type;
+//     public int Index;
+//     public string Semantic; 
+// }
+
 public class VfxConverter
 {
     private StringReader hlsl;

@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using Field.General;
 using Field.Models;
-using Field.Textures;
+using Field;
 
 namespace Field.Investment;
 
@@ -45,31 +45,6 @@ public class Dye : Tag
         {373026850, "GhostDecals"},
     };
 
-    private static List<string> ShaderDataNames = new List<string>()
-    {
-        "\"detail_diffuse_transform\"",
-        "\"detail_normal_transform\"",
-        "\"spec_aa_transform\"",
-        "\"primary_albedo_tint\"",
-        "\"primary_emissive_tint_color_and_intensity_bias\"",
-        "\"primary_material_params\"",
-        "\"primary_material_advanced_params\"",
-        "\"primary_roughness_remap\"",
-        "\"primary_worn_albedo_tint\"",
-        "\"primary_wear_remap\"",
-        "\"primary_worn_roughness_remap\"",
-        "\"primary_worn_material_parameters\"",
-        "\"secondary_albedo_tint\"",
-        "\"secondary_emissive_tint_color_and_intensity_bias\"",
-        "\"secondary_material_params\"",
-        "\"secondary_material_advanced_params\"",
-        "\"secondary_roughness_remap\"",
-        "\"secondary_worn_albedo_tint\"",
-        "\"secondary_wear_remap\"",
-        "\"secondary_worn_roughness_remap\"",
-        "\"secondary_worn_material_parameters\"",
-    };
-    
     public static string GetChannelName(DestinyHash channelHash)
     {
         return ChannelNames[channelHash];

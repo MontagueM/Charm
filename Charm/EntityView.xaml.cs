@@ -96,7 +96,6 @@ public partial class EntityView : UserControl
             var dynamicParts = entity.Load(ELOD.MostDetail);
             fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail, boneNodes);
             if (exportType == EExportTypeFlag.Full)
-            {
                 var settings = new ExportSettings() {
                     Unreal = ConfigHandler.GetUnrealInteropEnabled(),
                     Blender = ConfigHandler.GetBlenderInteropEnabled(),
@@ -115,8 +114,10 @@ public partial class EntityView : UserControl
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
                 AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+            }
+            if(ConfigHandler.GetBlenderInteropEnabled())
+            {
                 AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
-
             }
         }
         
@@ -135,6 +136,16 @@ public partial class EntityView : UserControl
         // Export the model
         // todo bad, should be replaced
         EntitySkeleton overrideSkeleton = new EntitySkeleton(new TagHash("BC38AB80"));
+        var val = InvestmentHandler.GetPatternEntityFromHash(item.Item.Header.InventoryItemHash);
+        // var resource = (D2Class_6E358080)val.PatternAudio.Header.Unk18;
+        // if (resource.PatternAudioGroups[0].WeaponSkeletonEntity != null)
+        // {
+            // overrideSkeleton = resource.PatternAudioGroups[0].WeaponSkeletonEntity.Skeleton;
+        // }
+        if (val != null && val.Skeleton != null)
+        {
+            overrideSkeleton = val.Skeleton;
+        }
         EntityView.Export(InvestmentHandler.GetEntitiesFromHash(item.Item.Header.InventoryItemHash),
             name, EExportTypeFlag.Full, overrideSkeleton);
         

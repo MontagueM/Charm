@@ -7,7 +7,7 @@ using Field.General;
 using Field.Utils;
 using File = System.IO.File;
 
-namespace Field.Textures;
+namespace Field;
 
 public struct ExportSettings { public bool Raw, Unreal, Blender, Source2; }
 
