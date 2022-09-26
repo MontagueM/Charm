@@ -18,9 +18,10 @@
             <RowDefinition Height="30*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
+        <TextBlock x:Name="HashLocation" Grid.Column="1" HorizontalAlignment="Left" Height="280" Margin="0,10,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="950" FontSize="36"/>
+        <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Center" FontSize="96" Text="94D8AB80" KeyDown="TagHashBoxKeydown" x:Name="TagHashBox"/>
         <!-- AB8FA380 variks -->
         <!-- 3b00ab80 atraks -->
         <!-- 4901ab80 taniks normal, 100bb780 abomination -->
-        <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Center" FontSize="96" Text="0E80AE80" KeyDown="TagHashBoxKeydown" x:Name="TagHashBox"/>
     </Grid>
 </UserControl>

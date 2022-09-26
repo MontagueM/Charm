@@ -1,6 +1,6 @@
 ﻿using Field.General;
 using Field.Investment;
-using Field.Textures;
+using Field;
 namespace Field.Models;
 using System.Configuration;
 using System.IO;
@@ -11,7 +11,9 @@ public class AutomatedImporter
     {
         Static,
         Entity,
-        Map
+        Map,
+        Terrain,
+        API
     }
     
     public static void SaveInteropUnrealPythonFile(string saveDirectory, string meshName, EImportType importType, ETextureFormat textureFormat, bool bSingleFolder = true)
@@ -45,27 +47,15 @@ public class AutomatedImporter
         File.WriteAllText($"{saveDirectory}/{meshName}_import_to_ue5.py", textExtensions);
     }
 
-    public static void SaveInteropBlenderPythonFile(string saveDirectory, string meshName, EImportType importType, ETextureFormat textureFormat, bool bSingleFolder = true)
+    public static void SaveInteropBlenderPythonFile(string saveDirectory, string meshName, EImportType importType, ETextureFormat textureFormat)
     {
         // Copy and rename file
         saveDirectory = saveDirectory.Replace("\\", "/");
         File.Copy("import_to_blender.py", $"{saveDirectory}/{meshName}_import_to_blender.py", true);
-        // if (importType == EImportType.Static) TODO?
-        // {
-        //     string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        //     text = text.Replace("importer.import_entity()", "importer.import_static()");
-        //     File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
-        // }
-        // if (importType == EImportType.Map || importType == EImportType.Entity)
-        // {
-        //     string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        //     text = text.Replace("MAP_HASH", $"{meshName}");
-        //     text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
-        //     File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
-        // }
+       
         //Lets just make a py for all exports now because why not
         string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        text = text.Replace("MAP_HASH", $"{meshName}");
+        text = text.Replace("HASH", $"{meshName}");
         text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
         text = text.Replace("IMPORT_TYPE", $"{importType.ToString().Replace("EImportType.", "")}");
         File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
@@ -85,6 +75,12 @@ public class AutomatedImporter
                 break;
         }
         File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", textExtensions);
+
+        var betterScriptPath = $"{saveDirectory}/{meshName}_import_blender.py";
+        File.Copy("import_blender.py", betterScriptPath, true);
+        var betterScript = File.ReadAllText(betterScriptPath);
+        betterScript = betterScript.Replace("<<REPLACE_HASH>>", $"{meshName}");
+        File.WriteAllText(betterScriptPath, betterScript);
     }
 
     

@@ -274,3 +274,4 @@ FakesAssemblies/
 !/ThirdParty/*.exe
 .vscode/tasks.json
 .vscode/launch.json
+*.bak

@@ -13,6 +13,8 @@
       <PackageReference Include="DirectXTexNet" Version="1.0.3" />
       <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta1" />
+      <PackageReference Include="SharpDX" Version="4.2.0" />
+      <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
       <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
     </ItemGroup>
 
@@ -51,10 +53,16 @@
       <None Update="fnv_charm.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="import_mat_to_blender.py">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="import_to_ue5.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="import_to_blender.py">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="import_blender.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="template.vmdl">

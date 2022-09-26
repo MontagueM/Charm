@@ -14,6 +14,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Resources\background.png" />
+      <None Remove="Resources\radial1.png" />
+      <None Remove="Resources\radial2.png" />
+      <None Remove="Resources\radial3.png" />
+      <None Remove="Resources\radial4.png" />
+      <None Remove="Resources\radial5.png" />
+      <None Remove="Resources\wqicon.png" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
       <PackageReference Include="HelixToolkit.SharpDX.Assimp" Version="2.21.1" />
       <PackageReference Include="HelixToolkit.SharpDX.Core.Wpf" Version="2.21.1" />
@@ -29,6 +39,28 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Field\Field.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Resource Include="Resources\background.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Resources\radial1.png">
+        <CopyToOutputDirectory></CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Resources\radial2.png">
+        <CopyToOutputDirectory></CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Resources\radial3.png">
+        <CopyToOutputDirectory></CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Resources\radial4.png">
+        <CopyToOutputDirectory></CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Resources\radial5.png">
+        <CopyToOutputDirectory></CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Resources\wqicon.png" />
     </ItemGroup>
 
     <ItemGroup>
@@ -72,6 +104,7 @@
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>MusicView.xaml</DependentUpon>
       </Page>
+
       <Page Update="DareItemControl.xaml">
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>DareView.xaml</DependentUpon>

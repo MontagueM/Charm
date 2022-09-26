@@ -13,6 +13,7 @@ using Field.Entities;
 using Field.General;
 using Field.Investment;
 using Field.Models;
+using Field.Textures;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using Internal.Fbx;
 using Serilog;
@@ -95,8 +96,13 @@ public partial class EntityView : UserControl
             var dynamicParts = entity.Load(ELOD.MostDetail);
             fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail, boneNodes);
             if (exportType == EExportTypeFlag.Full)
-            {
-                entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled());
+                var settings = new ExportSettings() {
+                    Unreal = ConfigHandler.GetUnrealInteropEnabled(),
+                    Blender = ConfigHandler.GetBlenderInteropEnabled(),
+                    Source2 = true,
+                    Raw = true
+                };
+                entity.SaveMaterialsFromParts(savePath, dynamicParts, settings);
                 entity.SaveTexturePlates(savePath);
             }
         }
@@ -108,13 +114,16 @@ public partial class EntityView : UserControl
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
                 AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+            }
+            if(ConfigHandler.GetBlenderInteropEnabled())
+            {
                 AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
-
             }
         }
         
         // Scale and rotate
-        // fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
+        if(boneNodes != null && boneNodes.Count > 0)
+            fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
         
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();

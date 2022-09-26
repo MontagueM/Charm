@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using Field;
 using Field.General;
-using Field.Textures;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.Wpf.SharpDX;
 
