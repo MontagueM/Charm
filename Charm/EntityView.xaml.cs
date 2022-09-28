@@ -83,7 +83,7 @@ public partial class EntityView : UserControl
         
         Log.Debug($"Exporting entity model name: {name}");
         string savePath = ConfigHandler.GetExportSavePath();
-        var meshName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
+        string meshName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
         if (exportType == EExportTypeFlag.Full)
         {
             savePath += $"/{meshName}";
