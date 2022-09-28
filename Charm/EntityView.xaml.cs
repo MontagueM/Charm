@@ -83,7 +83,7 @@ public partial class EntityView : UserControl
         
         Log.Debug($"Exporting entity model name: {name}");
         string savePath = ConfigHandler.GetExportSavePath();
-        string meshName = name;
+        var meshName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
         if (exportType == EExportTypeFlag.Full)
         {
             savePath += $"/{meshName}";
@@ -123,7 +123,8 @@ public partial class EntityView : UserControl
 
     public static void ExportInventoryItem(ApiItem item)
     {
-        string name = $"{item.Item.Header.InventoryItemHash.Hash}_{item.ItemName}";
+        string name = string.Join("_", $"{item.Item.Header.InventoryItemHash.Hash}_{item.ItemName}"
+            .Split(Path.GetInvalidFileNameChars()));
         // Export the model
         // todo bad, should be replaced
         EntitySkeleton overrideSkeleton = new EntitySkeleton(new TagHash("BC38AB80"));
@@ -160,6 +161,7 @@ public partial class EntityView : UserControl
         string meshName = name;
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
-        AutomatedImporter.SaveBlenderApiFile(savePath, item.ItemName, ConfigHandler.GetOutputTextureFormat(), dyes.Values.ToList());
+        AutomatedImporter.SaveBlenderApiFile(savePath, string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())),
+            ConfigHandler.GetOutputTextureFormat(), dyes.Values.ToList());
     }
 }
