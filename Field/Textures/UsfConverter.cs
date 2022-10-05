@@ -4,7 +4,7 @@ using System.Text;
 using Field.General;
 using Field.Models;
 
-namespace Field;
+namespace Field.Textures;
 
 public struct Texture
 {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using DirectXTexNet;
 
-namespace Field;
+namespace Field.Textures;
 
 public class TextureExtractor
 {

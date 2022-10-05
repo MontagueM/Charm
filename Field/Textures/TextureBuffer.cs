@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Field.General;
-namespace Field;
+namespace Field.Textures;
 
 public class TextureBuffer : Tag
 {
