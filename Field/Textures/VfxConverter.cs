@@ -3,40 +3,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Field.General;
 using Field.Models;
+//using Field.Textures;
 
 namespace Field;
-
-// public struct Texture
-// {
-//     public string Dimension;
-//     public string Type;
-//     public string Variable;
-//     public int Index;
-// }
-
-// public struct Cbuffer
-// {
-//     public string Variable;
-//     public string Type;
-//     public int Count;
-//     public int Index;
-// }
-
-// public struct Input
-// {
-//     public string Variable;
-//     public string Type;
-//     public int Index;
-//     public string Semantic;
-// }
-
-// public struct Output
-// {
-//     public string Variable;
-//     public string Type;
-//     public int Index;
-//     public string Semantic; 
-// }
 
 public class VfxConverter
 {
@@ -49,12 +18,16 @@ public class VfxConverter
     private List<Input> inputs = new List<Input>();
     private List<Output> outputs = new List<Output>();
 
-    //private List<Texture> sortedTextures = new List<Texture>();
+    private readonly string[] sampleStates = {
+        "SamplerState g_sWrap < Filter( ANISOTROPIC ); AddressU( WRAP ); AddressV( WRAP ); >;",
+        "SamplerState g_sClamp < Filter( ANISOTROPIC ); AddressU( CLAMP ); AddressV( CLAMP ); >;",
+        "SamplerState g_sMirror < Filter( ANISOTROPIC ); AddressU( MIRROR ); AddressV( MIRROR ); >;",
+        "SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;}",
+    };
     
 
     public string vfxStructure = @"HEADER
 {
-    //CompileTargets = ( IS_SM_50 && ( PC || VULKAN ) );
 	Description = ""Charm Auto-Generated Source 2 Shader""; 
 }
 
@@ -107,6 +80,12 @@ PS
 {
     #include ""common/pixel.hlsl""
     #define cmp -
+    //#define CUSTOM_TEXTURE_FILTERING // uncomment to use custom texture filtering
+    //SamplerState g_sWrap < Filter( ANISOTROPIC ); AddressU( WRAP ); AddressV( WRAP ); >;
+    //SamplerState g_sClamp < Filter( ANISOTROPIC ); AddressU( CLAMP ); AddressV( CLAMP ); >;
+    //SamplerState g_sMirror < Filter( ANISOTROPIC ); AddressU( MIRROR ); AddressV( MIRROR ); >;
+    //SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;
+
     RenderState(CullMode, F_RENDER_BACKFACES? NONE : DEFAULT );";
 
 
@@ -126,11 +105,11 @@ PS
             replace.AppendLine(@"   Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
         
             vfxStructure = vfxStructure.Replace("//alphatest", replace.ToString());
-            vfxStructure = vfxStructure.Replace("//translucent", "#define S_TRANSLUCENT 1");
-            
+            //vfxStructure = vfxStructure.Replace("//translucent", "#define S_TRANSLUCENT 1");
+            //Turns out I dont need S_TRANSLUCENT to use alpha test
         }
         vfx.AppendLine(vfxStructure);
-        // WriteTextureComments(material, bIsVertexShader);
+
         WriteCbuffers(material, bIsVertexShader);
         WriteFunctionDefinition(material, bIsVertexShader);
         hlsl = new StringReader(hlslText);
@@ -334,24 +313,24 @@ PS
     
     private void WriteFunctionDefinition(Material material, bool bIsVertexShader)
     {
-        // if (!bIsVertexShader)
-        // {
-        //     foreach (var i in inputs)
-        //     {
-        //         if (i.Type == "float4")
-        //         {
-        //             vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "{1, 1, 1, 1};\n");
-        //         }
-        //         else if (i.Type == "float3")
-        //         {
-        //             vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "{1, 1, 1};\n");
-        //         }
-        //         else if (i.Type == "uint")
-        //         {
-        //             vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "1;\n");
-        //         }
-        //     }
-        // }
+        if (!bIsVertexShader)
+        {
+            foreach (var i in inputs)
+            {
+                if (i.Type == "float4")
+                {
+                    vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "{1, 1, 1, 1};\n");
+                }
+                else if (i.Type == "float3")
+                {
+                    vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "{1, 1, 1};\n");
+                }
+                else if (i.Type == "uint")
+                {
+                    vfx.AppendLine($"   static {i.Type} {i.Variable} = " + "1;\n");
+                }
+            }
+        }
 
         if (bIsVertexShader)
         {
@@ -360,22 +339,7 @@ PS
                 vfx.AppendLine($"{output.Type} {output.Variable};");
             }
 
-            vfx.AppendLine().AppendLine("PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )");
-            // foreach (var texture in textures)
-            // {
-            //     vfx.AppendLine($"   {texture.Type} {texture.Variable},");
-            // }
-            // for (var i = 0; i < inputs.Count; i++)
-            // {
-            //     if (i == inputs.Count - 1)
-            //     {
-            //         vfx.AppendLine($"   {inputs[i].Type} {inputs[i].Variable}) // {inputs[i].Semantic}");
-            //     }
-            //     else
-            //     {
-            //         vfx.AppendLine($"   {inputs[i].Type} {inputs[i].Variable}, // {inputs[i].Semantic}");
-            //     }
-            // }
+            //vfx.AppendLine().AppendLine("PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )");
         }
         else
         {
@@ -405,7 +369,7 @@ PS
 	             vfx.AppendLine("    StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
             }
 
-            vfx.AppendLine("    PixelOutput MainPs( PixelInput i )");
+            vfx.AppendLine("    float4 MainPs( PixelInput i ) : SV_Target0");
             vfx.AppendLine("    {");
 
             // Output render targets, todo support vertex shader
@@ -413,7 +377,7 @@ PS
             vfx.AppendLine("        float alpha = 1;");
             vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 1, 1);");
 
-            vfx.AppendLine("        float4 v0 = {0.5,0.5,1,1};"); //Seems to only be used for normals.
+            vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals.
             vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals
             vfx.AppendLine("        float4 v2 = {i.vTangentUWs, 1};"); //Tangent? Seems to only be used for normals.
             vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //seems only used as texture coords
@@ -421,22 +385,13 @@ PS
             vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //seems like this is always the same as v4/only used if shader uses VC alpha
             //vfx.AppendLine("        uint v6 = 1;"); //no idea
 
-
-            // foreach (var i in inputs)
-            // {
-            //     if (i.Type == "float4")
-            //     {
-            //         vfx.AppendLine($"       {i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyzw;");
-            //     }
-            //     else if (i.Type == "float3")
-            //     {
-            //         vfx.AppendLine($"       {i.Variable}.xyz = {i.Variable}.xyz * tx.xyz;");
-            //     }
-            //     else if (i.Type == "uint")
-            //     {
-            //         vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x * tx.x;");
-            //     }
-            // }
+            foreach (var i in inputs)
+            {
+                if (i.Type == "uint")
+                {
+                    vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x * tx.x;");
+                }
+            }
             // vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
             // vfx.Replace("v1.xyzw = v1.xyzw * tx.xyzw;", "v1.xyzw = v1.xyzw;");
             // vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = v2.xyzw;");
@@ -530,7 +485,7 @@ PS
         
         Material mat = ToMaterial(i, float4(o0.xyz, 1), saturate(normal), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
         mat.Opacity = alpha;
-        mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100);
+        mat.Emission = clamp((o2.y - 0.5) * 2 * 8 * mat.Albedo, 0, 100);
         
         ShadingModelValveStandard sm;
 		

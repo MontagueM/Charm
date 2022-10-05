@@ -73,7 +73,7 @@ public class Terrain : Tag
             var partEntry = Header.MeshGroups[i];
             if (partEntry.Dyemap != null)
             {
-                partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/PS_{terrainTextureIndex}_{partEntry.Dyemap.Hash}");
+                partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/{partEntry.Dyemap.Hash}");
             }
         }
         localOffset = new Vector3((x.Max() + x.Min())/2, (y.Max() + y.Min())/2, (z.Max() + z.Min())/2);

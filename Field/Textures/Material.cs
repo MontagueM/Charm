@@ -44,7 +44,7 @@ public class Material : Tag
                 continue;
             }
             // todo change to 64 bit hash?
-            string path = $"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}";
+            string path = $"{saveDirectory}/{e.Texture.Hash}";
             if (!File.Exists(path + ".dds") && !File.Exists(path + ".png") && !File.Exists(path + ".tga"))
             {
                 e.Texture.SavetoFile(path); 
@@ -168,7 +168,7 @@ public class Material : Tag
                     continue;
                 }
                 //Console.WriteLine("Saving texture " + e.Texture.Hash + " " + e.TextureIndex + " " + e.Texture.IsSrgb().ToString());
-                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/PS_" + $"{e.TextureIndex}_{e.Texture.Hash}.png\"");
+                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
             }
             vmat.AppendLine("}");
             
