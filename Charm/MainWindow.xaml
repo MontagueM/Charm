@@ -7,11 +7,8 @@
         mc:Ignorable="d"
         Loaded="OnControlLoaded"
         PreviewKeyDown="MainWindow_PreviewKeyDown"
-        Title="Charm" Height="1080" Width="1920" Background="White">
-    <Window.Resources>
-        <Storyboard x:Key="Storyboard1"/>
-    </Window.Resources>
-    <Grid Background="{DynamicResource BackgroundColour7}">
+        Title="Charm" Height="1080" Width="1920">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*"/>
         </Grid.ColumnDefinitions>
@@ -21,15 +18,15 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
             <MenuItem Header="Settings">
-                <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick" d:IsHidden="True"/>
-                <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick" d:IsHidden="True"/>
+                <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick"/>
+                <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/>
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1" x:Name="MainTabControl">
             <TabItem Header="MAIN MENU" x:Name="MainMenuTab">
-                <local:MainMenuView BorderBrush="Black" OpacityMask="Black" Background="{DynamicResource BackgroundColour7}"/>
+                <local:MainMenuView/>
             </TabItem>
         </TabControl>
-        <local:ProgressView x:Name="ProgressView" Grid.Row="0" Grid.RowSpan="2" Height="1080" Width="1920" d:IsHidden="True" Background="{DynamicResource BackgroundColour7}" BorderBrush="{DynamicResource BackgroundColour7}"/>
+        <local:ProgressView x:Name="ProgressView" Grid.Row="0" Grid.RowSpan="2" Height="1080" Width="1920"/>
     </Grid>
 </Window>

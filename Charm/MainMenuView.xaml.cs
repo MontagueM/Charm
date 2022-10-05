@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using System.Net.Mime;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Packaging;
@@ -9,9 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 using Field.General;
 using Field.Models;
 using Field;
@@ -114,33 +109,4 @@ public partial class MainMenuView : UserControl
         _mainWindow.MakeNewTab("scripts", tagListView);
         _mainWindow.SetNewestTabSelected();      
     }
-
-    private void OnLoad(object sender, RoutedEventArgs e)
-    {
-       
-        Storyboard storyboard = new Storyboard();
-        storyboard = (Storyboard)FindResource("storyboard1");
-        radial1.BeginStoryboard(storyboard);
-        radial2.BeginStoryboard(storyboard);
-        radial3.BeginStoryboard(storyboard);
-
-    }
-
-    private void SolidColorOnLoad(object sender, RoutedEventArgs e)
-    {
-        if((bool)ThemeButton.IsChecked)
-        {
-            radial1.Visibility = Visibility.Visible;
-            radial2.Visibility = Visibility.Visible;
-            radial3.Visibility = Visibility.Visible;
-            SolidColor.Visibility = Visibility.Hidden;
-        }
-        if (!(bool)ThemeButton.IsChecked)
-        {
-            radial1.Visibility = Visibility.Hidden;
-            radial2.Visibility = Visibility.Hidden;
-            radial3.Visibility = Visibility.Hidden;
-            SolidColor.Visibility = Visibility.Visible;
-        }
-    }     
 }
