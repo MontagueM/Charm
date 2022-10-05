@@ -181,11 +181,6 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
                     break;
-                case 0x80809212:
-                    Script script = PackageHandler.GetTag(typeof(Script), hash);
-                    string decompile = script.ConvertToString();
-                    File.WriteAllText($"C:/T/export/Scripts/{hash}.txt", decompile);
-                    break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
                     break;
