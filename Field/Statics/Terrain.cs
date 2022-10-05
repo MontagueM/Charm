@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Field.General;
 using Field.Models;
-using Field.Textures;
 
 namespace Field;
 
@@ -55,6 +54,8 @@ public class Terrain : Tag
                 if (bSaveShaders)
                 {
                     partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/");
+                    partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/Vertex/");
+                    partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
                 }
             }
         }
@@ -72,7 +73,7 @@ public class Terrain : Tag
             var partEntry = Header.MeshGroups[i];
             if (partEntry.Dyemap != null)
             {
-                partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/PS_{terrainTextureIndex}_{partEntry.Dyemap.Hash}");
+                partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/{partEntry.Dyemap.Hash}");
             }
         }
         localOffset = new Vector3((x.Max() + x.Min())/2, (y.Max() + y.Min())/2, (z.Max() + z.Min())/2);

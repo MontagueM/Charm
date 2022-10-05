@@ -5,7 +5,7 @@ using Field.Entities;
 using Field.General;
 using File = System.IO.File;
 
-namespace Field.Textures;
+namespace Field;
 
 public class Material : Tag
 {
@@ -44,7 +44,7 @@ public class Material : Tag
                 continue;
             }
             // todo change to 64 bit hash?
-            string path = $"{saveDirectory}/PS_{e.TextureIndex}_{e.Texture.Hash}";
+            string path = $"{saveDirectory}/{e.Texture.Hash}";
             if (!File.Exists(path + ".dds") && !File.Exists(path + ".png") && !File.Exists(path + ".tga"))
             {
                 e.Texture.SavetoFile(path); 
@@ -79,8 +79,8 @@ public class Material : Tag
         // return hlsl;
     
         string directory = "hlsl_temp";
-        string binPath = $"{directory}/ps{Hash}.bin";
-        string hlslPath = $"{directory}/ps{Hash}.hlsl";
+        string binPath = $"{directory}/{type}{Hash}.bin";
+        string hlslPath = $"{directory}/{type}{Hash}.hlsl";
 
       
 
@@ -159,7 +159,8 @@ public class Material : Tag
             }
             
             vmat.AppendLine("Layer0 \n{");
-            vmat.AppendLine($"   shader \"ps_{Hash}.vfx\"");
+            vmat.AppendLine($"  shader \"ps_{Hash}.vfx\"");
+            vmat.AppendLine("   F_ALPHA_TEST 1");
             foreach (var e in Header.PSTextures)
             {
                 if (e.Texture == null)
@@ -167,7 +168,7 @@ public class Material : Tag
                     continue;
                 }
                 //Console.WriteLine("Saving texture " + e.Texture.Hash + " " + e.TextureIndex + " " + e.Texture.IsSrgb().ToString());
-                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/PS_" + $"{e.TextureIndex}_{e.Texture.Hash}.png\"");
+                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
             }
             vmat.AppendLine("}");
             
@@ -186,6 +187,7 @@ public class Material : Tag
     
     public void SaveVertexShader(string saveDirectory)
     {
+        Directory.CreateDirectory($"{saveDirectory}");
         if (Header.VertexShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
         {
             string hlsl = Decompile(Header.VertexShader.GetBytecode(), "vs");
@@ -196,6 +198,27 @@ public class Material : Tag
                 {
                     File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
                     Console.WriteLine($"Saved vertex shader {Hash}");
+                }
+                catch (IOException)  // threading error
+                {
+                }
+            }
+        }
+    }
+
+    public void SaveComputeShader(string saveDirectory)
+    {
+        Directory.CreateDirectory($"{saveDirectory}");
+        if (Header.ComputeShader != null && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
+        {
+            string hlsl = Decompile(Header.ComputeShader.GetBytecode(), "cs");
+            string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
+            if (usf != String.Empty)
+            {
+                try
+                {
+                    File.WriteAllText($"{saveDirectory}/CS_{Hash}.usf", usf);
+                    Console.WriteLine($"Saved compute shader {Hash}");
                 }
                 catch (IOException)  // threading error
                 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Text;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -9,7 +10,6 @@ using Field;
 using Field.Entities;
 using Field.General;
 using Field.Models;
-using Field.Textures;
 
 namespace Charm;
 
@@ -27,11 +27,12 @@ public partial class DevView : UserControl
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
         _fbxHandler = new FbxHandler(false);
+        HashLocation.Text = $"PKG:\nPKG ID:\nEntry Index:";
     }
     
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R && e.Key != Key.E)
+        if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R && e.Key != Key.E && e.Key != Key.L)
         {
             return;
         }
@@ -52,9 +53,19 @@ public partial class DevView : UserControl
             TagHashBox.Text = "INVALID HASH";
             return;
         }
-
+        //uint to int
         switch (e.Key)
         {
+            case Key.L:
+                StringBuilder data = new StringBuilder();
+                data.AppendLine($"PKG: {PackageHandler.GetPackageName(hash.GetPkgId())}");
+                data.AppendLine($"PKG ID: {hash.GetPkgId()}");
+                data.AppendLine($"Entry Index: {hash.GetEntryIndex() }");
+                data.AppendLine($"Dev String: {hash.GetDevString() ?? hash.GetContainerString() ?? "NULL"}");
+                data.AppendLine($"Reference Hash: {hash.Hash}");
+
+                HashLocation.Text = data.ToString();
+                break;
             case Key.Return:
                 AddWindow(hash);
                 break;
@@ -169,6 +180,11 @@ public partial class DevView : UserControl
                     dialogueView.Load(hash);
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
+                    break;
+                case 0x80809212:
+                    Script script = PackageHandler.GetTag(typeof(Script), hash);
+                    string decompile = script.ConvertToString();
+                    File.WriteAllText($"C:/T/export/Scripts/{hash}.txt", decompile);
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));

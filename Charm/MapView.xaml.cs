@@ -104,8 +104,7 @@ public partial class MapView : UserControl
         }
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            //Only gonna export a blender py for maps (for now)
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
@@ -129,6 +128,7 @@ public partial class MapView : UserControl
         if(exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
+            Directory.CreateDirectory(savePath + "/Statics/LOD");
             ExportStatics(exportStatics, savePath, map);
         }
 
@@ -141,8 +141,7 @@ public partial class MapView : UserControl
         }
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            //Only gonna export a blender py for maps (for now)
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
@@ -180,7 +179,7 @@ public partial class MapView : UserControl
 
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Terrain, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.ExportScene($"{savePath}/{meshName}_Terrain.fbx");
@@ -204,18 +203,18 @@ public partial class MapView : UserControl
                     }
                     else if (exportTypeFlag == EExportTypeFlag.Full || exportTypeFlag == EExportTypeFlag.Minimal) //No terrain on a minimal rip makes sense right?
                     {
-                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
                     }
                 }
                 else if(entry is D2Class_85988080 dynamicResource)
                 {    
                     dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
                 }
-                else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
-                {
-                    //entry.Rotation.SetW(1);
-                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
-                }
+                // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
+                // {
+                //     //entry.Rotation.SetW(1);
+                //     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement);
+                // }
             });
         });
         dynamicHandler.ExportScene($"{savePath}/{map.Hash.GetHashString()}_DynamicPoints.fbx");
@@ -234,15 +233,19 @@ public partial class MapView : UserControl
                     {
                         var parts = staticMapResource.StaticMapParent.Header.StaticMap.Header.Statics;
                         //staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
-                        foreach (var part in parts)
+                        //Parallel.ForEach(parts, part =>
+                        foreach(var part in parts)
                         {
-                            string staticMeshName = part.Static.Hash.GetHashString();
-                            FbxHandler staticHandler = new FbxHandler();
-                            staticHandler.InfoHandler.SetMeshName(staticMeshName);
-
-                            var staticmesh = part.Static.Load(ELOD.MostDetail);
-                            staticHandler.AddStaticToScene(staticmesh, part.Static.Hash);
+                            if(File.Exists($"{savePath}/Statics/{part.Static.Hash.GetHashString()}.fbx")) continue;
                             
+                            string staticMeshName = part.Static.Hash.GetHashString();
+                            FbxHandler staticHandler = new FbxHandler(false);
+                            
+                            //staticHandler.InfoHandler.SetMeshName(staticMeshName);
+                            var staticmesh = part.Static.Load(ELOD.MostDetail);
+
+                            staticHandler.AddStaticToScene(staticmesh, part.Static.Hash);
+
                             if(source2Models)
                             {
                                 //Source 2 shit
@@ -255,7 +258,7 @@ public partial class MapView : UserControl
                                 foreach (Part staticpart in staticmesh)
                                 {
                                     mats.AppendLine("{");
-                                    mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_{i}_{i}.vmat\"");
+                                    mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{staticpart.LodCategory}_{i}.vmat\"");
                                     mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
                                     mats.AppendLine("},\n");
                                     i++;
@@ -271,7 +274,7 @@ public partial class MapView : UserControl
 
                             staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
                             staticHandler.Dispose();
-                        }
+                    }//);
                     }
                     // Dont see a reason to export terrain itself as its own fbx
                     // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain

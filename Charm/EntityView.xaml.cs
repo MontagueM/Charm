@@ -96,7 +96,7 @@ public partial class EntityView : UserControl
             fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail, boneNodes);
             if (exportType == EExportTypeFlag.Full)
             {
-                entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled());
+                entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
                 entity.SaveTexturePlates(savePath);
             }
         }
@@ -108,8 +108,10 @@ public partial class EntityView : UserControl
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
                 AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+            }
+            if(ConfigHandler.GetBlenderInteropEnabled())
+            {
                 AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
-
             }
         }
         

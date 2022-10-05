@@ -67,7 +67,7 @@ namespace Charm
                     {
                         var dynamicParts = entity.Load(ELOD.MostDetail);
                         fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail);
-                        entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled());
+                        entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
                         entity.SaveTexturePlates(savePath);
                     }
 

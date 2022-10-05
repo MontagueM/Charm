@@ -3,40 +3,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Field.General;
 using Field.Models;
+//using Field.Textures;
 
-namespace Field.Textures;
-
-// public struct Texture
-// {
-//     public string Dimension;
-//     public string Type;
-//     public string Variable;
-//     public int Index;
-// }
-
-// public struct Cbuffer
-// {
-//     public string Variable;
-//     public string Type;
-//     public int Count;
-//     public int Index;
-// }
-
-// public struct Input
-// {
-//     public string Variable;
-//     public string Type;
-//     public int Index;
-//     public string Semantic;
-// }
-
-// public struct Output
-// {
-//     public string Variable;
-//     public string Type;
-//     public int Index;
-//     public string Semantic; 
-// }
+namespace Field;
 
 public class VfxConverter
 {
@@ -49,18 +18,23 @@ public class VfxConverter
     private List<Input> inputs = new List<Input>();
     private List<Output> outputs = new List<Output>();
 
-    //private List<Texture> sortedTextures = new List<Texture>();
+    private readonly string[] sampleStates = {
+        "SamplerState g_sWrap < Filter( ANISOTROPIC ); AddressU( WRAP ); AddressV( WRAP ); >;",
+        "SamplerState g_sClamp < Filter( ANISOTROPIC ); AddressU( CLAMP ); AddressV( CLAMP ); >;",
+        "SamplerState g_sMirror < Filter( ANISOTROPIC ); AddressU( MIRROR ); AddressV( MIRROR ); >;",
+        "SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;}",
+    };
     
 
     public string vfxStructure = @"HEADER
 {
-    CompileTargets = ( IS_SM_50 && ( PC || VULKAN ) );
 	Description = ""Charm Auto-Generated Source 2 Shader""; 
 }
 
 FEATURES
 {
     #include ""common/features.hlsl""
+    //alphatest
 }
 
 MODES
@@ -75,6 +49,7 @@ MODES
 COMMON
 {
 	#include ""common/shared.hlsl""
+    //translucent
 }
 
 struct VertexInput
@@ -104,7 +79,14 @@ VS
 PS
 {
     #include ""common/pixel.hlsl""
-    #define cmp -";
+    #define cmp -
+    //#define CUSTOM_TEXTURE_FILTERING // uncomment to use custom texture filtering
+    //SamplerState g_sWrap < Filter( ANISOTROPIC ); AddressU( WRAP ); AddressV( WRAP ); >;
+    //SamplerState g_sClamp < Filter( ANISOTROPIC ); AddressU( CLAMP ); AddressV( CLAMP ); >;
+    //SamplerState g_sMirror < Filter( ANISOTROPIC ); AddressU( MIRROR ); AddressV( MIRROR ); >;
+    //SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;
+
+    RenderState(CullMode, F_RENDER_BACKFACES? NONE : DEFAULT );";
 
 
     public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader)
@@ -112,14 +94,22 @@ PS
         //Console.WriteLine("Material: " + material.Hash);
         hlsl = new StringReader(hlslText);
         vfx = new StringBuilder();
-        vfx.AppendLine(vfxStructure);
+       
         bOpacityEnabled = false;
         ProcessHlslData();
         if (bOpacityEnabled)
         {
             vfx.AppendLine("// masked");
+            StringBuilder replace = new StringBuilder();
+            replace.AppendLine(@"   Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
+            replace.AppendLine(@"   Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
+        
+            vfxStructure = vfxStructure.Replace("//alphatest", replace.ToString());
+            //vfxStructure = vfxStructure.Replace("//translucent", "#define S_TRANSLUCENT 1");
+            //Turns out I dont need S_TRANSLUCENT to use alpha test
         }
-        // WriteTextureComments(material, bIsVertexShader);
+        vfx.AppendLine(vfxStructure);
+
         WriteCbuffers(material, bIsVertexShader);
         WriteFunctionDefinition(material, bIsVertexShader);
         hlsl = new StringReader(hlslText);
@@ -349,22 +339,7 @@ PS
                 vfx.AppendLine($"{output.Type} {output.Variable};");
             }
 
-            vfx.AppendLine().AppendLine("PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )");
-            // foreach (var texture in textures)
-            // {
-            //     vfx.AppendLine($"   {texture.Type} {texture.Variable},");
-            // }
-            // for (var i = 0; i < inputs.Count; i++)
-            // {
-            //     if (i == inputs.Count - 1)
-            //     {
-            //         vfx.AppendLine($"   {inputs[i].Type} {inputs[i].Variable}) // {inputs[i].Semantic}");
-            //     }
-            //     else
-            //     {
-            //         vfx.AppendLine($"   {inputs[i].Type} {inputs[i].Variable}, // {inputs[i].Semantic}");
-            //     }
-            // }
+            //vfx.AppendLine().AppendLine("PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )");
         }
         else
         {
@@ -383,47 +358,44 @@ PS
                     }
 
                     //vfx.AppendLine($"   {texture.Type} {texture.Variable},");
-                    vfx.AppendLine($"   CreateInputTexture2D( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/10\", Default3( 1.0, 1.0, 1.0 ));");
+                    vfx.AppendLine($"   CreateInputTexture2D( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/{e.TextureIndex}\", Default3( 1.0, 1.0, 1.0 ));");
                     vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; \n");
                 }
             }
 
-            vfx.AppendLine("    PixelOutput MainPs( PixelInput i )");
+            if(bOpacityEnabled)
+            {
+                 vfx.AppendLine("    StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
+	             vfx.AppendLine("    StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
+            }
+
+            vfx.AppendLine("    float4 MainPs( PixelInput i ) : SV_Target0");
             vfx.AppendLine("    {");
 
-            //vfx.AppendLine($"   float2 tx)");
-
-            //vfx.AppendLine("        Material output = ToMaterial( i, float4(0,0,0,0), float4(0,0,0,0), float4(0,0,0,0) );");
             // Output render targets, todo support vertex shader
             vfx.AppendLine("        float4 o0,o1,o2;");
             vfx.AppendLine("        float alpha = 1;");
             vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 1, 1);");
 
-            //vfx.AppendLine("        float4 v0 = {1,1,1,1};");
-            vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};");
-            vfx.AppendLine("        float4 v2 = {i.vTextureCoords, 1, 1};");
-            //vfx.AppendLine("        float4 v3 = {1,1,1,1};");
-            vfx.AppendLine("        float4 v4 = i.vBlendValues;");
-            //vfx.AppendLine("        float4 v5 = {1,1,1,1};");
-            //vfx.AppendLine("        uint v6 = 1;");
-
+            vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals.
+            vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals
+            vfx.AppendLine("        float4 v2 = {i.vTangentUWs, 1};"); //Tangent? Seems to only be used for normals.
+            vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //seems only used as texture coords
+            vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Not sure if this is VC or not
+            vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //seems like this is always the same as v4/only used if shader uses VC alpha
+            //vfx.AppendLine("        uint v6 = 1;"); //no idea
 
             foreach (var i in inputs)
             {
-                if (i.Type == "float4")
-                {
-                    vfx.AppendLine($"       {i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyzw;");
-                }
-                else if (i.Type == "float3")
-                {
-                    vfx.AppendLine($"       {i.Variable}.xyz = {i.Variable}.xyz * tx.xyz;");
-                }
-                else if (i.Type == "uint")
+                if (i.Type == "uint")
                 {
                     vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x * tx.x;");
                 }
             }
-            vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
+            // vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
+            // vfx.Replace("v1.xyzw = v1.xyzw * tx.xyzw;", "v1.xyzw = v1.xyzw;");
+            // vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = v2.xyzw;");
+            // vfx.Replace("v5.xyzw = v5.xyzw * tx.xyzw;", "v5.xyzw = v5.xyzw;");
         }
     }
 
@@ -433,9 +405,6 @@ PS
 
         foreach (var texture in textures)
         {
-            //Console.WriteLine($"Texture Variable {texture.Variable}");
-            //Console.WriteLine($"Texture Type {texture.Type}");
-            //Console.WriteLine($"Texture Index {texture.Index}");
             texDict.Add(texture.Index, texture);
         }
         List<int> sortedIndices = texDict.Keys.OrderBy(x => x).ToList();
@@ -507,60 +476,27 @@ PS
         float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
-        normal_in_world_space.z = sqrt(1.0 - saturate(dot(normal_in_world_space.xy, normal_in_world_space.xy)));
-        float3 normal = normalize((normal_in_world_space*2 - 1.5)*0.5 + 0.5);
-
+ 
+        float4 normal = float4(normal_in_world_space,1);
+        normal.y = 1 - normal.y;
+        normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
+        
         float smoothness = saturate(8 * (normal_length - 0.375));
         
-        //Detail normal blending (needs values replaced manually)
-        // float3 n1 = Tex2DS(g_t3, TextureFiltering, v3.xy * cb0[0].xy + cb0[0].zw).xyz;
-		// float3 n2 = Tex2DS(g_t2, TextureFiltering, tx.xy).xyz;
-		// float3 r  = n1 < 0.5 ? 2*n1*n2 : 1 - 2*(1 - n1)*(1 - n2);
-		// r = normalize(r*2 - 1)*0.5 + 0.5;
-
-        float4 temp_normal = normal; //{normal}
-        temp_normal.y = 1 - temp_normal.y;
-
-        Material mat = ToMaterial(i, float4(o0.xyz, 1), temp_normal, float4(1 - smoothness, o2.x, o2.y * 2, 1));
+        Material mat = ToMaterial(i, float4(o0.xyz, 1), saturate(normal), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
         mat.Opacity = alpha;
-        //mat.Emission = (o2.y - 0.5) * 2 * 5 * mat.Albedo; 
-        //mat.Normal.z = sqrt(1.0 - saturate(dot(mat.Normal.xy, mat.Normal.xy)));
-
+        mat.Emission = clamp((o2.y - 0.5) * 2 * 8 * mat.Albedo, 0, 100);
+        
         ShadingModelValveStandard sm;
 		
         return FinalizePixelMaterial( i, mat, sm );
     }
 }";
-        // for (var i = 0; i < sortedTextures.Count; i++)
-        // {
-        //     Console.WriteLine($"{i} Texture Variable {sortedTextures[i].Variable}");
-        // }
-        
-        if (textures.Count > 2)
+ 
+        if(bOpacityEnabled)
         {
-            string texIndex = sortedTextures[textures.Count-2].Variable;
-            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
-            vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count > 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
+            vfx.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
         }
-        if (textures.Count == 2)
-        {
-            string texIndex = sortedTextures[textures.Count-1].Variable;
-            string tex2d = $"float4(Tex2DS(g_t{texIndex[1]}, TextureFiltering, tx.xy).xyz, 1);";
-            vfx.AppendLine(outputString.Replace("{normal}", $"{(textures.Count >= 2 ? tex2d : "float4(0.5, 0.5, 1, 1);" )}"));
-        }
-        if (textures.Count < 2)
-        {
-            //string tex2d = $"float4(Tex2DS(g_t{sortedTextures[textures.Count-1]}, TextureFiltering, tx).xyz, 1);";
-            vfx.AppendLine(outputString.Replace("{normal}", $"float4(0.5, 0.5, 1, 1);" ));
-        }
-    }
-
-    private void WriteFooter(bool bIsVertexShader)
-    {
-        vfx.AppendLine("}").AppendLine("};");
-        if (!bIsVertexShader)
-        {
-            vfx.AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},tx);");
-        }
+        vfx.AppendLine(outputString);
     }
 }

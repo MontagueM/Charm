@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using Field.General;
 using Field.Models;
-using Field.Textures;
 
 namespace Field.Statics;
 
@@ -26,6 +25,7 @@ public class StaticContainer
             {
                 part.Material.SavePixelShader($"{saveDirectory}/Shaders");
                 part.Material.SaveVertexShader($"{saveDirectory}/Shaders");
+                part.Material.SaveComputeShader($"{saveDirectory}/Shaders");
             }
         }
     }

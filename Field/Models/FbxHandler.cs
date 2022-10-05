@@ -34,7 +34,7 @@ public class FbxHandler
             node = FbxNode.Create(_manager, mesh.GetName());
         }
         node.SetNodeAttribute(mesh);
-
+        
         if (part.VertexNormals.Count > 0)
         {
             AddNormalsToMesh(mesh, part);
@@ -76,6 +76,7 @@ public class FbxHandler
         {
             _scene.GetRootNode().AddChild(node);
         }
+        
         return mesh;
     }
 
@@ -495,6 +496,9 @@ public class FbxHandler
         node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
         node.LclScaling.Set(new FbxDouble3(100,100,100));
         
+        // Scale and rotate
+        //ScaleAndRotateForBlender(node);
+
         lock (_fbxLock)
         {
             _scene.GetRootNode().AddChild(node);

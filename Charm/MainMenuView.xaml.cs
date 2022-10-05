@@ -9,7 +9,7 @@ using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using Field.General;
 using Field.Models;
-using Field.Textures;
+using Field;
 using SharpDX.Toolkit.Graphics;
 
 namespace Charm;
