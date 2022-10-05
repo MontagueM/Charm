@@ -94,12 +94,6 @@ public enum ETagListType
     WeaponAudioList,
     [Description("Weapon Audio [Final]")]
     WeaponAudio,
-    [Description("Script Containers List [Packages]")]
-    ScriptContainersList,
-    [Description("Script Container [Final]")]
-    ScriptContainer,
-    [Description("Scripts")]
-    Scripts,
 }
 
 /// <summary>
@@ -272,18 +266,6 @@ public partial class TagListView : UserControl
                 case ETagListType.WeaponAudio:
                     LoadWeaponAudio(contentValue);
                     break;
-                case ETagListType.ScriptContainersList:
-                    await LoadScriptContainersList();
-                    break;
-                case ETagListType.ScriptContainer:
-                    LoadScriptContainer(contentValue);
-                    break;
-                case ETagListType.Scripts:
-                    LoadScripts(contentValue);
-                    break;
-                // case ETagListType.Script:
-                //     //LoadScript(contentValue);
-                //     break;
                 default:
                     throw new NotImplementedException();
             }
@@ -1347,84 +1329,6 @@ public partial class TagListView : UserControl
 
     #endregion
     
-    #region Scripts
-    private async Task LoadScriptContainersList()
-    {
-        // If there are packages, we don't want to reload the view as very poor for performance.
-        if (_allTagItems != null)
-            return;
-        
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            "caching script tags",
-            "load script list",
-        });
-        
-        await Task.Run(() =>
-        {
-            _allTagItems = new ConcurrentBag<TagItem>();
-            var vals = PackageHandler.GetAllTagsWithReference(0x80809212);
-            //PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
-            MainWindow.Progress.CompleteStage();
-
-            Parallel.ForEach(vals, val =>
-            {
-                _allTagItems.Add(new TagItem
-                {
-                    Hash = val,
-                    Name = $"{val.Hash}",
-                    TagType = ETagListType.ScriptContainer
-                });
-            });
-            MainWindow.Progress.CompleteStage();
-
-            MakePackageTagItems();
-        });
-
-        RefreshItemList();  // bc of async stuff
-    }
-
-    private void LoadScriptContainer(TagHash tagHash)
-    { 
-        LoadContent(ETagListType.Scripts, tagHash, true);
-    }
-    
-    private void LoadScripts(TagHash tagHash)
-    {
-        _allTagItems = new ConcurrentBag<TagItem>();
-        if(tagHash.Hash == null)
-            return;
-
-        Script script = PackageHandler.GetTag(typeof(Script), tagHash);
-        // Parallel.ForEach(script.Header.Unk08, hash =>
-        // {
-        //     _allTagItems.Add(new TagItem
-        //     {
-        //         Name = script.ConvertToString(),
-        //         Hash = hash.Unk00,
-        //         TagType = ETagListType.Script
-        //     });
-        // });
-        
-        SetViewer(TagView.EViewerType.Script);
-        var viewer = GetViewer();
-        viewer.ScriptControl.Load(tagHash);
-
-        SetExportFunction(ExportScript, (int)EExportTypeFlag.Full);
-        viewer.ExportControl.SetExportInfo(tagHash);
-
-    }
-    private void ExportScript(ExportInfo info)
-    {
-        Script script = PackageHandler.GetTag(typeof(Script), info.Hash as TagHash);
-        string scriptString = script.ConvertToString();
-        string fileName = $"{info.Hash}.txt";
-        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Scripts/{info.Hash}_{info.Name}/";
-        Directory.CreateDirectory(saveDirectory);
-        File.WriteAllText(saveDirectory + fileName, scriptString);
-    }
-    #endregion
-
     #region Sound
     
     private async Task LoadSoundsPackagesList()

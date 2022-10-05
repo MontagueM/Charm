@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Field.General;
-using Field;
+using Field.Textures;
 using Field.Models;
 using Field.Statics;
 

@@ -54,7 +54,7 @@
             </Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="4" Margin="10,0,0,24" Grid.RowSpan="2">
+        <StackPanel Grid.Row="1" Grid.Column="4" Margin="10,0,0,0">
             <TextBlock Text="Other" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="ActivitiesViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
                 <TextBlock Text="ACTIVITIES" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
@@ -64,9 +64,6 @@
             </Button>
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllTexturesViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
                 <TextBlock Text="TEXTURES" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllScriptsViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="SCRIPTS" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
         </StackPanel>
     </Grid>
