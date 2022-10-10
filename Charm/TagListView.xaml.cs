@@ -1041,7 +1041,7 @@ public partial class TagListView : UserControl
     private void ExportStatic(ExportInfo info)
     {
         var viewer = GetViewer();
-        viewer.StaticControl.ExportStatic(new TagHash(info.Hash), info.Name, info.ExportType);
+        StaticView.ExportStatic(new TagHash(info.Hash), info.Name, info.ExportType);
     }
 
     #endregion

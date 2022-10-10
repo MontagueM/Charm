@@ -36,13 +36,13 @@ public partial class StaticView : UserControl
         MVM.Title = hash.GetHashString();
     }
 
-    public void ExportStatic(TagHash hash, string name, EExportTypeFlag exportType)
+    public static void ExportStatic(TagHash hash, string name, EExportTypeFlag exportType, string extraPath = "")
     {
         bool lodexport = false;
         bool source2Models = ConfigHandler.GetS2VMDLExportEnabled();
         FbxHandler fbxHandler = new FbxHandler(exportType == EExportTypeFlag.Full);
         FbxHandler lodfbxHandler = new FbxHandler(exportType == EExportTypeFlag.Full);
-        string savePath = ConfigHandler.GetExportSavePath();
+        string savePath = ConfigHandler.GetExportSavePath() + "/" + extraPath + "/";
         string meshName = hash.GetHashString();
         if (exportType == EExportTypeFlag.Full)
         {

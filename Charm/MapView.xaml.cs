@@ -132,7 +132,7 @@ public partial class MapView : UserControl
             ExportStatics(exportStatics, savePath, map);
         }
 
-        ExtractDataTables(map, savePath, fbxHandler, EExportTypeFlag.Minimal);
+        ExtractDataTables(map, savePath, fbxHandler, exportTypeFlag);
 
         if (ConfigHandler.GetUnrealInteropEnabled())
         {

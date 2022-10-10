@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -10,6 +11,7 @@ using Field;
 using Field.Entities;
 using Field.General;
 using Field.Models;
+using Field.Statics;
 
 namespace Charm;
 
@@ -215,5 +217,29 @@ public partial class DevView : UserControl
                 UseShellExecute = true
             }
         }.Start();
+    }
+
+    private void ExportDevMapButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        // Not actually a map, but a list of assets that are good for testing
+        // The assets are assembled in UE5 so just have to rip the list
+        var assets = new List<string>()
+        {
+            "6C24BB80",
+            "a237be80",
+            "b540be80",
+            "68a8b480",
+            "fba4b480",
+            "e1c5b280",
+            "0F3CBE80",
+            "A229BE80",
+            "B63BBE80",
+            "CB32BE80",
+        };
+
+        foreach (var asset in assets)
+        {
+            StaticView.ExportStatic(new TagHash(asset), asset, EExportTypeFlag.Full, "devmap");
+        }
     }
 }

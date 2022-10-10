@@ -69,11 +69,12 @@ public class FbxHandler
         }
 
 
-        AddMaterial(mesh, node, index);
+        AddMaterial(mesh, node, index, part.Material);
         AddSmoothing(mesh);
         
         lock (_fbxLock)
         {
+            node.LclRotation.Set(new FbxDouble3(-90, 0, 0));
             _scene.GetRootNode().AddChild(node);
         }
         
@@ -285,13 +286,13 @@ public class FbxHandler
         mesh.AddDeformer(skin);
     }
 
-    private void AddMaterial(FbxMesh mesh, FbxNode node, int index)
+    private void AddMaterial(FbxMesh mesh, FbxNode node, int index, Material material)
     {
         FbxSurfacePhong fbxMaterial;
         FbxLayerElementMaterial materialLayer;
         lock (_fbxLock)
         {
-            fbxMaterial = FbxSurfacePhong.Create(_scene, $"{node.GetName()}_{index}");
+            fbxMaterial = FbxSurfacePhong.Create(_scene, material.Hash);
             materialLayer = FbxLayerElementMaterial.Create(mesh, $"matlayer_{node.GetName()}_{index}");
         }
         fbxMaterial.DiffuseFactor.Set(1);
