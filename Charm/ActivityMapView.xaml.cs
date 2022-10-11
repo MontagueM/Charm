@@ -181,14 +181,22 @@ public partial class ActivityMapView : UserControl
         Parallel.ForEach(maps, map =>
         {
             if (info.ExportType == EExportTypeFlag.Full)
+            {
                 MapView.ExportFullMap(map);
                 MapView.ExportTerrainMap(map);
-            if (info.ExportType == EExportTypeFlag.TerrainOnly)
+            }
+            else if (info.ExportType == EExportTypeFlag.TerrainOnly)
+            {
                 MapView.ExportTerrainMap(map);
-            if (info.ExportType == EExportTypeFlag.Minimal)
+            }
+            else if (info.ExportType == EExportTypeFlag.Minimal)
+            {
                 MapView.ExportMinimalMap(map, info.ExportType);
+            }
             else
+            {
                 MapView.ExportMinimalMap(map, info.ExportType);
+            }
             
             MainWindow.Progress.CompleteStage();
         });
