@@ -258,7 +258,7 @@ public partial class MapView : UserControl
                                 foreach (Part staticpart in staticmesh)
                                 {
                                     mats.AppendLine("{");
-                                    mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{staticpart.LodCategory}_{i}.vmat\"");
+                                    mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
                                     mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
                                     mats.AppendLine("},\n");
                                     i++;

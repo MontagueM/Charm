@@ -53,7 +53,7 @@ public class Terrain : Tag
                 // dynamicPart.Material.SaveVertexShader(saveDirectory);
                 if (bSaveShaders)
                 {
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/");
+                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/", true);
                     partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/Vertex/");
                     partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
                 }
