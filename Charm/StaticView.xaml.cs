@@ -77,7 +77,8 @@ public partial class StaticView : UserControl
                 foreach (Part staticpart in parts)
                 {
                     mats.AppendLine("{");
-                    mats.AppendLine($"    from = \"{meshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
+                    //mats.AppendLine($"    from = \"{meshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
+                    mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
                     mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
                     mats.AppendLine("},\n");
                     i++;
