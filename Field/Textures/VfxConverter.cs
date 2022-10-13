@@ -17,7 +17,8 @@ public class VfxConverter
     private List<Cbuffer> cbuffers = new List<Cbuffer>();
     private List<Input> inputs = new List<Input>();
     private List<Output> outputs = new List<Output>();
-
+    private bool isTerrain = false;
+    
     private readonly string[] sampleStates = {
         "SamplerState g_sWrap < Filter( ANISOTROPIC ); AddressU( WRAP ); AddressV( WRAP ); >;",
         "SamplerState g_sClamp < Filter( ANISOTROPIC ); AddressU( CLAMP ); AddressV( CLAMP ); >;",
@@ -90,18 +91,16 @@ PS
     RenderState(CullMode, F_RENDER_BACKFACES? NONE : DEFAULT );";
 
 
-    public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader)
+    public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader, bool bIsTerrain = false)
     {
         //Console.WriteLine("Material: " + material.Hash);
         hlsl = new StringReader(hlslText);
         vfx = new StringBuilder();
-       
+        isTerrain = bIsTerrain;
         bOpacityEnabled = false;
         ProcessHlslData();
         if (bOpacityEnabled)
         {
-            vfx.AppendLine("// alpha test");
-        
             vfxStructure = vfxStructure.Replace(@"//Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );", @"Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );");
             vfxStructure = vfxStructure.Replace(@"//Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );", @"Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );");
             
@@ -332,16 +331,7 @@ PS
             }
         }
 
-        if (bIsVertexShader)
-        {
-            foreach (var output in outputs)
-            {
-                vfx.AppendLine($"{output.Type} {output.Variable};");
-            }
-
-            //vfx.AppendLine().AppendLine("PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )");
-        }
-        else
+        if (!bIsVertexShader)
         {
             foreach (var e in material.Header.PSTextures)
             {
@@ -363,6 +353,15 @@ PS
                     vfx.AppendLine($"   TextureAttribute(g_t{e.TextureIndex}, g_t{e.TextureIndex});\n"); //Prevents some inputs not appearing for some reason
                 }
             }
+            
+            if(isTerrain)
+            {
+                vfx.AppendLine($"   CreateInputTexture2D( TextureT14, Linear, 8, \"\", \"\",  \"Textures,10/14\", Default3( 1.0, 1.0, 1.0 ));");
+                vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t14 )  < Channel( RGBA,  Box( TextureT14 ), Linear ); OutputFormat( BC7 ); SrgbRead( False ); >; ");
+                vfx.AppendLine($"   TextureAttribute(g_t14, g_t14);\n");
+            }
+
+            
             
             vfx.AppendLine("    //StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
 	        vfx.AppendLine("    //StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
@@ -499,7 +498,7 @@ PS
  
         if(bOpacityEnabled)
         {
-            vfx.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
+            outputString = outputString.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
         }
         vfx.AppendLine(outputString);
     }

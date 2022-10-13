@@ -140,7 +140,7 @@ public class Material : Tag
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-            string vfx = new VfxConverter().HlslToVfx(this, hlsl, false);
+            string vfx = new VfxConverter().HlslToVfx(this, hlsl, false, isTerrain);
             
             Directory.CreateDirectory($"{saveDirectory}/Source2");
             Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
