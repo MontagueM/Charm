@@ -89,12 +89,12 @@ public class Terrain : Tag
         fbxHandler.InfoHandler.AddInstance(Hash, 1, Vector4.Zero, globalOffset);
         
         // We need to add these textures after the static is initialised
-       foreach (var part in parts)
+        foreach (var part in parts)
         {
             if (Header.MeshGroups[part.GroupIndex].Dyemap != null)
             {
                 fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, Header.MeshGroups[part.GroupIndex].Dyemap);
-
+                
                 if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat"))
                 {
                     //Get the last line of the vmat file

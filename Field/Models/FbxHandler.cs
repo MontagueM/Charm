@@ -74,7 +74,7 @@ public class FbxHandler
         
         lock (_fbxLock)
         {
-            node.LclRotation.Set(new FbxDouble3(-90, 0, 0));
+            //node.LclRotation.Set(new FbxDouble3(-90, 0, 0)); //This is fucking up the source 2 map import for whatever reason and I cant be bothered to suffer through that again
             _scene.GetRootNode().AddChild(node);
         }
         
