@@ -48,7 +48,8 @@ Not yet implemented:
 - better crash management https://github.com/MontagueM/Charm/issues/43
 - animations https://github.com/MontagueM/Charm/issues/45
 
-### Source 2: !!Only supports S&Box at the moment!!
+
+### Source 2: **Only supports S&Box at the moment**
 - Generates .vfx shader files for semi-accurate game shaders (similar to UE5 shaders)
 - Generates .vmat (material) and .vmdl (model) files for statics and maps
 
@@ -56,7 +57,11 @@ Not yet implemented:
 
 Copy files from shaders/source2 to your addons "Shaders" folder, and the .vmat, textures, and .vmdl files to "materials", "materials/textures", and "models" respectively.
 
-Run "mat_compileshaders PS_" in the console to compile the new shaders (WILL TAKE A LONG TIME)
+**To compile shaders:** 
+Drag and drop all the .vfx files into your addons shaders folder while you have S&Box open, this should automatically trigger the compile process. (Not Recommended though).
+The better option is to locate all your .vfx files and drag/drop them onto vfxcompile.exe in your "Steam\steamapps\common\sbox\bin\win64" folder, this should compile the shaders without having the game open, saving system resources. **THIS WILL TAKE A LONG TIME TO DO, DUE TO COMPILE SPEEDS**
+
+
 
 ### Some tricks
 
