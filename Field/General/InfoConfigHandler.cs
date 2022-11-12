@@ -13,7 +13,7 @@ public class InfoConfigHandler
 
     public InfoConfigHandler()
     {
-        ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>> mats = new ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>>();
+        ConcurrentDictionary<string, dynamic> mats = new ConcurrentDictionary<string, dynamic>();
         _config.TryAdd("Materials", mats);
         ConcurrentDictionary<string, string> parts = new ConcurrentDictionary<string, string>();
         _config.TryAdd("Parts", parts);
@@ -37,29 +37,69 @@ public class InfoConfigHandler
         {
             return;
         }
-        Dictionary<string, Dictionary<int, TexInfo>> textures = new Dictionary<string, Dictionary<int, TexInfo>>();
-        if (!_config["Materials"].TryAdd(material.Hash, textures))
-        {
-            return;
-        }
-        Dictionary<int, TexInfo> vstex = new Dictionary<int, TexInfo>();
-        textures.Add("VS", vstex);
+
+        // Vertex shader
+        Dictionary<int, TexInfo> vsTextures = new Dictionary<int, TexInfo>();
         foreach (var vst in material.Header.VSTextures)
         {
             if (vst.Texture != null)
             {
-                vstex.Add((int)vst.TextureIndex, new TexInfo {Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
+                vsTextures.Add((int)vst.TextureIndex, new TexInfo {Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
             }
         }
-        Dictionary<int, TexInfo> pstex = new Dictionary<int, TexInfo>();
-        textures.Add("PS", pstex);
+        Dictionary<int, List<JsonVector4>> vsConstantBuffers = new Dictionary<int, List<JsonVector4>>();
+        // vsConstantBuffers.Add(material.Header.Unk90);  bytes
+        if (material.Header.VSVector4Container.IsValid())
+        {
+            var vsContainerData = Material.GetDataFromContainer(material.Header.VSVector4Container).Select(x => new JsonVector4(x)).ToList();
+            vsConstantBuffers.Add(vsContainerData.Count, vsContainerData);
+        }
+        if (material.Header.UnkA0.Count > 0 && !vsConstantBuffers.ContainsKey(material.Header.UnkA0.Count))
+            vsConstantBuffers.Add(material.Header.UnkA0.Count, material.Header.UnkA0.Select(x => new JsonVector4(x.Unk00)).ToList());
+        if (material.Header.UnkC0.Count > 0 && !vsConstantBuffers.ContainsKey(material.Header.UnkC0.Count))
+            vsConstantBuffers.Add(material.Header.UnkC0.Count, material.Header.UnkC0.Select(x => new JsonVector4(x.Unk00)).ToList());
+
+
+
+            // Pixel shader
+        Dictionary<int, TexInfo> psTextures = new Dictionary<int, TexInfo>();
         foreach (var pst in material.Header.PSTextures)
         {
             if (pst.Texture != null)
             {
-                pstex.Add((int)pst.TextureIndex, new TexInfo {Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
+                psTextures.Add((int)pst.TextureIndex, new TexInfo {Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
             }
         }
+        Dictionary<int, List<JsonVector4>> psConstantBuffers = new Dictionary<int, List<JsonVector4>>();
+        if (material.Header.PSVector4Container.IsValid())
+        {
+            var psContainerData = Material.GetDataFromContainer(material.Header.PSVector4Container).Select(x => new JsonVector4(x)).ToList();
+            psConstantBuffers.Add(psContainerData.Count, psContainerData);
+        }
+        if (material.Header.Unk2E0.Count > 0 && !vsConstantBuffers.ContainsKey(material.Header.Unk2E0.Count))
+            psConstantBuffers.Add(material.Header.Unk2E0.Count, material.Header.Unk2E0.Select(x => new JsonVector4(x.Unk00)).ToList());
+        if (material.Header.Unk300.Count > 0 && !vsConstantBuffers.ContainsKey(material.Header.Unk300.Count))
+            psConstantBuffers.Add(material.Header.Unk300.Count, material.Header.Unk300.Select(x => new JsonVector4(x.Unk00)).ToList());
+
+        
+        // Add to config
+        
+        Dictionary<string, dynamic> template = new Dictionary<string, dynamic>
+        {
+            {"VS", new Dictionary<string, dynamic>
+                {
+                    {"Textures", vsTextures},
+                    {"ConstantBuffers", vsConstantBuffers}
+                }
+            },
+            {"PS", new Dictionary<string, dynamic>
+                {
+                    {"Textures", psTextures},
+                    {"ConstantBuffers", psConstantBuffers}
+                }
+            },
+        };
+        _config["Materials"].TryAdd(material.Hash, template);
     }
     
     public void AddPart(Part part, string partName)
@@ -165,4 +205,21 @@ public struct TexInfo
 {
     public string Hash  { get; set; }
     public bool SRGB  { get; set; }
+}
+
+
+public struct JsonVector4
+{
+    public JsonVector4(Vector4 inVec4)
+    {
+        X = inVec4.X;
+        Y = inVec4.Y;
+        Z = inVec4.Z;
+        W = inVec4.W;
+    }
+
+    public float X  { get; set; }
+    public float Y  { get; set; }
+    public float Z  { get; set; }
+    public float W  { get; set; }
 }

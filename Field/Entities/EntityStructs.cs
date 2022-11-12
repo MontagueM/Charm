@@ -324,8 +324,8 @@ public struct D2Class_DC818080
 [StructLayout(LayoutKind.Sequential, Size = 0x20)]
 public struct D2Class_4F9F8080
 {
-    public Field.Models.Vector4 Rotation;
-    public Field.Models.Vector4 Translation;
+    public Vector4 Rotation;
+    public Vector4 Translation;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 8)]

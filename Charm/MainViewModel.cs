@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Field;
 using Field.Entities;
 using Field.Models;
 using HelixToolkit.SharpDX.Core;
@@ -16,8 +17,8 @@ using HelixToolkit.Wpf;
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Toolkit.Mvvm.Input;
 using SharpDX;
-using Vector3 = Field.Models.Vector3;
-using Vector4 = Field.Models.Vector4;
+using Vector3 = Field.Vector3;
+using Vector4 = Field.Vector4;
 
 using Media3D = System.Windows.Media.Media3D;
 using Point3D = System.Windows.Media.Media3D.Point3D;

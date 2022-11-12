@@ -139,6 +139,7 @@ public class Material : Tag
         if (Header.PixelShader != null && !File.Exists($"{saveDirectory}/PS_{Hash}.usf"))
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
+            File.WriteAllText($"{saveDirectory}/PS_{Hash}.hlsl", hlsl);
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
             string vfx = new VfxConverter().HlslToVfx(this, hlsl, false);
             
@@ -191,6 +192,7 @@ public class Material : Tag
         if (Header.VertexShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
         {
             string hlsl = Decompile(Header.VertexShader.GetBytecode(), "vs");
+            File.WriteAllText($"{saveDirectory}/VS_{Hash}.hlsl", hlsl);
             string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
             if (usf != String.Empty)
             {
@@ -212,6 +214,7 @@ public class Material : Tag
         if (Header.ComputeShader != null && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
         {
             string hlsl = Decompile(Header.ComputeShader.GetBytecode(), "cs");
+            File.WriteAllText($"{saveDirectory}/CS_{Hash}.hlsl", hlsl);
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
             if (usf != String.Empty)
             {
@@ -225,6 +228,21 @@ public class Material : Tag
                 }
             }
         }
+    }
+
+    public static List<Vector4> GetDataFromContainer(TagHash containerHash)
+    {
+        DestinyFile container = new DestinyFile(PackageHandler.GetEntryReference(containerHash));
+        byte[] containerData = container.GetData();
+        int num = containerData.Length / 16;
+        
+        List<Vector4> float4s = new List<Vector4>();
+        for (int i = 0; i < containerData.Length / 16; i++)
+        {
+            float4s.Add(StructConverter.ToStructure<Vector4>(containerData.Skip(i*16).Take(16).ToArray()));
+        }
+
+        return float4s;
     }
 }
 
@@ -248,6 +266,8 @@ public struct D2Class_AA6D8080
     public List<D2Class_3F018080> UnkB0;
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_90008080> UnkC0;
+    [DestinyOffset(0xE4)] 
+    public TagHash VSVector4Container;
     
     [DestinyOffset(0x2B0), DestinyField(FieldType.TagHash)]
     public ShaderHeader PixelShader;

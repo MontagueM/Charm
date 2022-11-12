@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Field.General;
 
-namespace Field.Models;
+namespace Field;
 
 [StructLayout(LayoutKind.Sequential, Size = 8)]
 public struct Vector2
