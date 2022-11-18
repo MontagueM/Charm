@@ -92,7 +92,7 @@ public partial class StaticView : UserControl
             }
             
         }
-
+        fbxHandler.InfoHandler.AddType("Static");
         fbxHandler.ExportScene($"{savePath}/{name}.fbx");
 
         if(lodexport)

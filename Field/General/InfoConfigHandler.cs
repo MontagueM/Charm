@@ -67,6 +67,11 @@ public class InfoConfigHandler
         _config["Parts"].TryAdd(partName, part.Material.Hash.GetHashString());
     }
 
+    public void AddType(string type)
+    {
+        _config["Type"] = type;
+    }
+
     public void SetMeshName(string meshName)
     {
         _config["MeshName"] = meshName;

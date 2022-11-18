@@ -107,6 +107,7 @@ public partial class MapView : UserControl
             AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
+        fbxHandler.InfoHandler.AddType("Map");
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
     }
@@ -144,6 +145,7 @@ public partial class MapView : UserControl
             AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
+        fbxHandler.InfoHandler.AddType("Map");
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
     }
@@ -182,6 +184,7 @@ public partial class MapView : UserControl
             AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Terrain, ConfigHandler.GetOutputTextureFormat());
         }
 
+        fbxHandler.InfoHandler.AddType("Terrain");
         fbxHandler.ExportScene($"{savePath}/{meshName}_Terrain.fbx");
         fbxHandler.Dispose();
     }
