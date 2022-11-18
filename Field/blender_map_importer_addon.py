@@ -30,10 +30,6 @@ class ImportD2Map(Operator, ImportHelper):
     def poll(self, context):
         return context.mode == 'OBJECT'
 
-    #Globally gets all the objects in the scene
-    objects = bpy.data.objects
-    scene = bpy.context.scene
-
     #.cfg specific variables
     config = None
     FilePath = None
@@ -392,7 +388,7 @@ def ShowMessageBox(message = "", title = "Message Box", icon = 'INFO'):
 def menu_func_import(self, context):
     self.layout.operator(ImportD2Map.bl_idname, text="Destiny 2 Map Importer (.cfg)")
 
-def register_importer():
+def register():
     bpy.utils.register_class(ImportD2Map)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
@@ -400,8 +396,8 @@ def unregister():
     bpy.utils.unregister_class(ImportD2Map)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
 
-
+    
 # This allows you to run the script directly from Blender's Text editor
 # to test the add-on without having to install it.
 if __name__ == "__main__":
-    register_importer()
+    register()
