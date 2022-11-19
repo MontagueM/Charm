@@ -107,6 +107,7 @@ public partial class MapView : UserControl
             AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
+        fbxHandler.InfoHandler.AddType("Map");
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
     }
@@ -144,6 +145,7 @@ public partial class MapView : UserControl
             AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
+        fbxHandler.InfoHandler.AddType("Map");
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
     }
@@ -182,6 +184,7 @@ public partial class MapView : UserControl
             AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Terrain, ConfigHandler.GetOutputTextureFormat());
         }
 
+        fbxHandler.InfoHandler.AddType("Terrain");
         fbxHandler.ExportScene($"{savePath}/{meshName}_Terrain.fbx");
         fbxHandler.Dispose();
     }
@@ -258,7 +261,8 @@ public partial class MapView : UserControl
                                 foreach (Part staticpart in staticmesh)
                                 {
                                     mats.AppendLine("{");
-                                    mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{staticpart.LodCategory}_{i}.vmat\"");
+                                    //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
+                                    mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
                                     mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
                                     mats.AppendLine("},\n");
                                     i++;

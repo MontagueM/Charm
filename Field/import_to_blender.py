@@ -51,17 +51,28 @@ def assemble_map():
             tmp.append(obj.name[:8])
 
         #merge static parts into one object
-        for x in range(0, 4): #For some reason one pass doesnt work, this slows the import down a bit, idk a better fix
-            for obj in tmp:
-                bpy.ops.object.select_all(action='DESELECT')
-                #print(obj)
-                for obj2 in newobjects:
-                    if obj2.name[:8] == obj and obj in tmp:
-                        tmp.remove(obj)
-                        obj2.select_set(True)
-                        bpy.context.view_layer.objects.active = obj2
-                bpy.ops.object.join()
-                bpy.ops.outliner.orphans_purge()
+        for obj in tmp:
+            bpy.ops.object.select_all(action='DESELECT')
+            for meshes, mats in config["Parts"].items():
+                if meshes[:8] == obj and meshes in bpy.context.view_layer.objects:
+                    print(meshes + " belongs to " + obj)
+                    bpy.data.objects[meshes].select_set(True)
+                    bpy.context.view_layer.objects.active = bpy.data.objects[meshes]
+            bpy.ops.object.join()
+        bpy.ops.outliner.orphans_purge()
+
+        #merge static parts into one object, Old method
+        # for x in range(0, 4): #For some reason one pass doesnt work, this slows the import down a bit, idk a better fix
+        #     for obj in tmp:
+        #         bpy.ops.object.select_all(action='DESELECT')
+        #         #print(obj)
+        #         for obj2 in newobjects:
+        #             if obj2.name[:8] == obj and obj in tmp:
+        #                 tmp.remove(obj)
+        #                 obj2.select_set(True)
+        #                 bpy.context.view_layer.objects.active = obj2
+        #         bpy.ops.object.join()
+        #         bpy.ops.outliner.orphans_purge()
 
         newobjects = [] #Clears the list just in case
         newobjects = bpy.data.collections[str(Name)].objects #Readds the objects in the collection to the list
@@ -88,7 +99,7 @@ def assemble_map():
             for part in parts:
                 for instance in instances:
                     ob_copy = bpy.data.objects[part].copy()
-                    bpy.context.collection.objects.link(ob_copy) #makes the instances?
+                    bpy.context.collection.objects.link(ob_copy) #makes the instances
 
                     location = [instance["Translation"][0], instance["Translation"][1], instance["Translation"][2]]
                     #Reminder that blender uses WXYZ, the order in the confing file is XYZW, so W is always first
@@ -164,7 +175,7 @@ def assign_materials():
 
                 texnode = matnodes.new('ShaderNodeTexImage')
                 texnode.hide = True
-                texnode.location = (-370.0, 200.0 + (float(n)*-1.1)*50) #shitty offsetting
+                texnode.location = (-370.0, 200.0 + (float(tex_num)*-1.1)*50) #shitty offsetting
 
                 texture = bpy.data.images.get(current_image)
                 if texture:

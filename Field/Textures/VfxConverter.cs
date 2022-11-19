@@ -17,7 +17,8 @@ public class VfxConverter
     private List<Cbuffer> cbuffers = new List<Cbuffer>();
     private List<Input> inputs = new List<Input>();
     private List<Output> outputs = new List<Output>();
-
+    private bool isTerrain = false;
+    
     private readonly string[] sampleStates = {
         "SamplerState g_sWrap < Filter( ANISOTROPIC ); AddressU( WRAP ); AddressV( WRAP ); >;",
         "SamplerState g_sClamp < Filter( ANISOTROPIC ); AddressU( CLAMP ); AddressV( CLAMP ); >;",
@@ -34,7 +35,8 @@ public class VfxConverter
 FEATURES
 {
     #include ""common/features.hlsl""
-    //alphatest
+    //Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );
+    //Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );
 }
 
 MODES
@@ -89,22 +91,19 @@ PS
     RenderState(CullMode, F_RENDER_BACKFACES? NONE : DEFAULT );";
 
 
-    public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader)
+    public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader, bool bIsTerrain = false)
     {
         //Console.WriteLine("Material: " + material.Hash);
         hlsl = new StringReader(hlslText);
         vfx = new StringBuilder();
-       
+        isTerrain = bIsTerrain;
         bOpacityEnabled = false;
         ProcessHlslData();
         if (bOpacityEnabled)
         {
-            vfx.AppendLine("// masked");
-            StringBuilder replace = new StringBuilder();
-            replace.AppendLine(@"   Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
-            replace.AppendLine(@"   Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );").ToString();
-        
-            vfxStructure = vfxStructure.Replace("//alphatest", replace.ToString());
+            vfxStructure = vfxStructure.Replace(@"//Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );", @"Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );");
+            vfxStructure = vfxStructure.Replace(@"//Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );", @"Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );");
+            
             //vfxStructure = vfxStructure.Replace("//translucent", "#define S_TRANSLUCENT 1");
             //Turns out I dont need S_TRANSLUCENT to use alpha test
         }
@@ -273,34 +272,34 @@ PS
                 switch (cbuffer.Type)
                 {
                     case "float4":
-                        if (data == null) vfx.AppendLine("      float4(0.0, 0.0, 0.0, 0.0),");
+                        if (data == null) vfx.AppendLine("      float4(0.0, 0.0, 0.0, 0.0), //null"+i);
                         else
                         {
                             try
                             {
                                 if (data[i] is Vector4)
                                 {
-                                    vfx.AppendLine($"       float4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}),");
+                                    vfx.AppendLine($"       float4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}), //"+i);
                                 }
                                 else
                                 {
                                     var x = data[i].Unk00.X; // really bad but required
-                                    vfx.AppendLine($"       float4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}),");
+                                    vfx.AppendLine($"       float4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}), //"+i);
                                 }
                             }
                             catch (Exception e)  // figure out whats up here, taniks breaks it
                             {
-                                vfx.AppendLine("        float4(0.0, 0.0, 0.0, 0.0),");
+                                vfx.AppendLine("        float4(0.0, 0.0, 0.0, 0.0), //Exception"+i);
                             }
                         }
                         break;
                     case "float3":
-                        if (data == null) vfx.AppendLine("      float3(0.0, 0.0, 0.0),");
-                        else vfx.AppendLine($"      float3({data[i].Unk00.X}, {data[i].Unk00.Y}, {data[i].Unk00.Z}),");
+                        if (data == null) vfx.AppendLine("      float3(0.0, 0.0, 0.0), //null"+i);
+                        else vfx.AppendLine($"      float3({data[i].Unk00.X}, {data[i].Unk00.Y}, {data[i].Unk00.Z}), //"+i);
                         break;
                     case "float":
-                        if (data == null) vfx.AppendLine("    float(0.0),");
-                        else vfx.AppendLine($"      float4({data[i].Unk00}),");
+                        if (data == null) vfx.AppendLine("    float(0.0), //null"+i);
+                        else vfx.AppendLine($"      float4({data[i].Unk00}), //"+i);
                         break;
                     default:
                         throw new NotImplementedException();
@@ -332,16 +331,7 @@ PS
             }
         }
 
-        if (bIsVertexShader)
-        {
-            foreach (var output in outputs)
-            {
-                vfx.AppendLine($"{output.Type} {output.Variable};");
-            }
-
-            //vfx.AppendLine().AppendLine("PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )");
-        }
-        else
+        if (!bIsVertexShader)
         {
             foreach (var e in material.Header.PSTextures)
             {
@@ -359,14 +349,27 @@ PS
 
                     //vfx.AppendLine($"   {texture.Type} {texture.Variable},");
                     vfx.AppendLine($"   CreateInputTexture2D( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/{e.TextureIndex}\", Default3( 1.0, 1.0, 1.0 ));");
-                    vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; \n");
+                    vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; ");
+                    vfx.AppendLine($"   TextureAttribute(g_t{e.TextureIndex}, g_t{e.TextureIndex});\n"); //Prevents some inputs not appearing for some reason
                 }
             }
+            
+            if(isTerrain)
+            {
+                vfx.AppendLine($"   CreateInputTexture2D( TextureT14, Linear, 8, \"\", \"\",  \"Textures,10/14\", Default3( 1.0, 1.0, 1.0 ));");
+                vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t14 )  < Channel( RGBA,  Box( TextureT14 ), Linear ); OutputFormat( BC7 ); SrgbRead( False ); >; ");
+                vfx.AppendLine($"   TextureAttribute(g_t14, g_t14);\n");
+            }
+
+            
+            
+            vfx.AppendLine("    //StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
+	        vfx.AppendLine("    //StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
 
             if(bOpacityEnabled)
             {
-                 vfx.AppendLine("    StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
-	             vfx.AppendLine("    StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
+                vfx.Replace("//StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );", "StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
+                vfx.Replace("//StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );", "StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
             }
 
             vfx.AppendLine("    float4 MainPs( PixelInput i ) : SV_Target0");
@@ -495,7 +498,7 @@ PS
  
         if(bOpacityEnabled)
         {
-            vfx.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
+            outputString = outputString.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
         }
         vfx.AppendLine(outputString);
     }

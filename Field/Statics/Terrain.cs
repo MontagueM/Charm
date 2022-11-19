@@ -53,7 +53,7 @@ public class Terrain : Tag
                 // dynamicPart.Material.SaveVertexShader(saveDirectory);
                 if (bSaveShaders)
                 {
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/");
+                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/", true);
                     partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/Vertex/");
                     partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
                 }
@@ -94,6 +94,19 @@ public class Terrain : Tag
             if (Header.MeshGroups[part.GroupIndex].Dyemap != null)
             {
                 fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, Header.MeshGroups[part.GroupIndex].Dyemap);
+                
+                if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat"))
+                {
+                    //Get the last line of the vmat file
+                    var vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat");
+                    var lastLine = vmat[vmat.Length - 1];
+
+                    //Insert a new line before the last line
+                    var newVmat = vmat.Take(vmat.Length - 1).ToList();
+                    newVmat.Add($"  TextureT14 " + $"\"{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
+                    newVmat.Add(lastLine);
+                    File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
+                }
             }
         }
     }

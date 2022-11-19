@@ -48,6 +48,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="blender_map_importer_addon.py">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="fnv_charm.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

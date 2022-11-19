@@ -43,13 +43,13 @@ public partial class GeneralConfigView : UserControl
         csp.ChangeButton.Click += ExportSavePath_OnClick;
         GeneralConfigPanel.Children.Add(csp);
 
-        // Enable Blender interop
-        ConfigSettingControl cbe = new ConfigSettingControl();
-        cbe.SettingName = "Generate Blender importing script";
-        bool bval2 = ConfigHandler.GetBlenderInteropEnabled();
-        cbe.SettingValue = bval2.ToString();
-        cbe.ChangeButton.Click += BlenderInteropEnabled_OnClick;
-        GeneralConfigPanel.Children.Add(cbe);
+        // Enable Blender interop //force people to use the addon now >:)
+        //ConfigSettingControl cbe = new ConfigSettingControl();
+        //cbe.SettingName = "Generate Blender importing script";
+        //bool bval2 = ConfigHandler.GetBlenderInteropEnabled();
+        //cbe.SettingValue = bval2.ToString();
+        //cbe.ChangeButton.Click += BlenderInteropEnabled_OnClick;
+        //GeneralConfigPanel.Children.Add(cbe);
         
         // Enable combined extraction folder for maps
         ConfigSettingControl cef = new ConfigSettingControl();

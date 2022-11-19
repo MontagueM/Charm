@@ -117,7 +117,7 @@ public partial class EntityView : UserControl
         
         // Scale and rotate
         // fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
-        
+        fbxHandler.InfoHandler.AddType("Entity");
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
         Log.Information($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");

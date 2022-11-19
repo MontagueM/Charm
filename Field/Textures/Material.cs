@@ -133,14 +133,14 @@ public class Material : Tag
         }
         return hlsl;
     }
-
-    public void SavePixelShader(string saveDirectory)
+    
+    public void SavePixelShader(string saveDirectory, bool isTerrain = false)
     {
-        if (Header.PixelShader != null && !File.Exists($"{saveDirectory}/PS_{Hash}.usf"))
+        if (Header.PixelShader != null)
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-            string vfx = new VfxConverter().HlslToVfx(this, hlsl, false);
+            string vfx = new VfxConverter().HlslToVfx(this, hlsl, false, isTerrain);
             
             Directory.CreateDirectory($"{saveDirectory}/Source2");
             Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
@@ -149,8 +149,15 @@ public class Material : Tag
             {
                 try
                 {
-                    File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
-                    File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.vfx", vfx);
+                    if(!File.Exists($"{saveDirectory}/PS_{Hash}.usf"))
+                    {
+                        File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
+                    }
+                    if (!File.Exists($"{saveDirectory}/Source2/PS_{Hash}.vfx"))
+                    {
+                        File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.vfx", vfx);
+                    }
+
                     Console.WriteLine($"Saved pixel shader {Hash}");
                 }
                 catch (IOException)  // threading error
@@ -170,6 +177,10 @@ public class Material : Tag
                 //Console.WriteLine("Saving texture " + e.Texture.Hash + " " + e.TextureIndex + " " + e.Texture.IsSrgb().ToString());
                 vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
             }
+            // if(isTerrain)
+            // {
+            //     vmat.AppendLine($"  TextureT14 \"materials/Textures/{partEntry.Dyemap.Hash}.png\"");
+            // }
             vmat.AppendLine("}");
             
             if(!File.Exists($"{saveDirectory}/Source2/materials/{Hash}.vmat"))

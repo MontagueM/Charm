@@ -49,32 +49,34 @@ public class AutomatedImporter
 
     public static void SaveInteropBlenderPythonFile(string saveDirectory, string meshName, EImportType importType, ETextureFormat textureFormat)
     {
-        // Copy and rename file
-        saveDirectory = saveDirectory.Replace("\\", "/");
-        File.Copy("import_to_blender.py", $"{saveDirectory}/{meshName}_import_to_blender.py", true);
-       
-        //Lets just make a py for all exports now because why not
-        string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        text = text.Replace("HASH", $"{meshName}");
-        text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
-        text = text.Replace("IMPORT_TYPE", $"{importType.ToString().Replace("EImportType.", "")}");
-        File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
+        //Not gonna delete just in case
 
-        // change extension
-        string textExtensions = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        switch (textureFormat)
-        {
-            case ETextureFormat.PNG:
-                textExtensions = textExtensions.Replace("TEX_EXT", ".png");
-                break;
-            case ETextureFormat.TGA:
-                textExtensions = textExtensions.Replace("TEX_EXT", ".tga");
-                break;
-            default:
-                textExtensions = textExtensions.Replace("TEX_EXT", ".dds");
-                break;
-        }
-        File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", textExtensions);
+        //// Copy and rename file
+        //saveDirectory = saveDirectory.Replace("\\", "/");
+        //File.Copy("import_to_blender.py", $"{saveDirectory}/{meshName}_import_to_blender.py", true);
+       
+        ////Lets just make a py for all exports now because why not
+        //string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
+        //text = text.Replace("HASH", $"{meshName}");
+        //text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
+        //text = text.Replace("IMPORT_TYPE", $"{importType.ToString().Replace("EImportType.", "")}");
+        //File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
+
+        //// change extension
+        //string textExtensions = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
+        //switch (textureFormat)
+        //{
+        //    case ETextureFormat.PNG:
+        //        textExtensions = textExtensions.Replace("TEX_EXT", ".png");
+        //        break;
+        //    case ETextureFormat.TGA:
+        //        textExtensions = textExtensions.Replace("TEX_EXT", ".tga");
+        //        break;
+        //    default:
+        //        textExtensions = textExtensions.Replace("TEX_EXT", ".dds");
+        //        break;
+        //}
+        //File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", textExtensions);
     }
 
     
