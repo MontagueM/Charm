@@ -56,7 +56,7 @@ COMMON
 
 struct VertexInput
 {
-    float4 vColorBlendValues : TEXCOORD4 < Semantic( color ); >;
+    float4 vColorBlendValues : Color0 < Semantic( Color ); >;
 	#include ""common/vertexinput.hlsl""
 };
 
