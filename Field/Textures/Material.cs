@@ -153,9 +153,9 @@ public class Material : Tag
                     {
                         File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
                     }
-                    if (!File.Exists($"{saveDirectory}/Source2/PS_{Hash}.vfx"))
+                    if (!File.Exists($"{saveDirectory}/Source2/PS_{Hash}.shader"))
                     {
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.vfx", vfx);
+                        File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.shader", vfx);
                     }
 
                     Console.WriteLine($"Saved pixel shader {Hash}");
@@ -166,7 +166,7 @@ public class Material : Tag
             }
             
             vmat.AppendLine("Layer0 \n{");
-            vmat.AppendLine($"  shader \"ps_{Hash}.vfx\"");
+            vmat.AppendLine($"  shader \"ps_{Hash}.shader\"");
             vmat.AppendLine("   F_ALPHA_TEST 1");
             foreach (var e in Header.PSTextures)
             {

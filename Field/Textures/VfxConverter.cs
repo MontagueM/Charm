@@ -32,25 +32,35 @@ public class VfxConverter
 	Description = ""Charm Auto-Generated Source 2 Shader""; 
 }
 
+MODES
+{
+    VrForward();
+
+	Depth( ""vr_depth_only.vfx"" ); 
+
+	ToolsVis( S_MODE_TOOLS_VIS );
+	ToolsWireframe( ""vr_tools_wireframe.vfx"" );
+	ToolsShadingComplexity( ""vr_tools_shading_complexity.vfx"" );
+
+	Reflection( ""high_quality_reflections.vfx"" );
+}
+
 FEATURES
 {
     #include ""common/features.hlsl""
     //Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );
     //Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );
-}
 
-MODES
-{
-    VrForward();													
-    Depth( ""vr_depth_only.vfx"" );
-    ToolsVis( S_MODE_TOOLS_VIS ); 									
-    ToolsWireframe( ""vr_tools_wireframe.vfx"" );
-	ToolsShadingComplexity( ""vr_tools_shading_complexity.vfx"" );
+    Feature( F_HIGH_QUALITY_REFLECTIONS, 0..1, ""Rendering"" );
 }
 
 COMMON
 {
 	#include ""common/shared.hlsl""
+    #define USES_HIGH_QUALITY_REFLECTIONS
+    //#define S_GGX_SHADING 1
+	//#define S_SPECULAR_CUBE_MAP 1
+    #define D_NO_MODEL_TINT 1
     //translucent
 }
 
@@ -69,6 +79,9 @@ struct PixelInput
 VS
 {
 	#include ""common/vertex.hlsl""
+
+    BoolAttribute( UsesHighQualityReflections, ( F_HIGH_QUALITY_REFLECTIONS > 0 ) );
+
 	PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )
 	{
 		PixelInput o = ProcessVertex( i );
