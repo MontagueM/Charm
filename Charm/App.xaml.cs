@@ -11,6 +11,7 @@ using System.Windows.Media;
 using Field;
 using Field.General;
 using Field.Models;
+using Field.Textures;
 
 namespace Charm
 {
@@ -25,6 +26,14 @@ namespace Charm
             var args = e.Args;
             if (args.Length > 0)
             {
+                if (args[0].Contains("-run="))
+                {
+                    // todo improve this for other cmdlets
+                    ShaderLearningCommandlet cmdlet = new ShaderLearningCommandlet();
+                    cmdlet.Main(args);
+                    return;
+                }
+                
                 uint apiHash = 0;
                 int c = 0;
                 while (c < args.Length)

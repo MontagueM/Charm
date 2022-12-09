@@ -77,8 +77,8 @@ public class InfoConfigHandler
             psConstantBuffers.Add(psContainerData.Count, psContainerData);
         }
         if (material.Header.Unk2E0.Count > 0 && !vsConstantBuffers.ContainsKey(material.Header.Unk2E0.Count))
-            psConstantBuffers.Add(material.Header.Unk2E0.Count, material.Header.Unk2E0.Select(x => new JsonVector4(x.Unk00)).ToList());
-        if (material.Header.Unk300.Count > 0 && !vsConstantBuffers.ContainsKey(material.Header.Unk300.Count))
+            vsConstantBuffers.Add(material.Header.Unk2E0.Count, material.Header.Unk2E0.Select(x => new JsonVector4(x.Unk00)).ToList());
+        if (material.Header.Unk300.Count > 0 && !psConstantBuffers.ContainsKey(material.Header.Unk300.Count))
             psConstantBuffers.Add(material.Header.Unk300.Count, material.Header.Unk300.Select(x => new JsonVector4(x.Unk00)).ToList());
 
         

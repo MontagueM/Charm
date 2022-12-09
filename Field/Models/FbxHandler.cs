@@ -469,6 +469,7 @@ public class FbxHandler
                 
                 lock (_fbxLock)
                 {
+                    node.LclRotation.Set(new FbxDouble3(-90, 0, 0));
                     _scene.GetRootNode().AddChild(node);
                 }
             }

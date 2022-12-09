@@ -59,26 +59,8 @@ public class Material : Tag
     //     out int pHlslTextLength
     // );
 
-    public string Decompile(byte[] shaderBytecode, string? type = "ps")
+    public string Decompile(byte[] shaderBytecode, string? type = "ps", string directory = "hlsl_temp")
     {
-        // tried doing it via dll pinvoke but seemed to cause way too many problems so doing it via exe instead
-        // string hlsl;
-        // lock (_lock)
-        // {
-        //     GCHandle gcHandle = GCHandle.Alloc(shaderBytecode, GCHandleType.Pinned);
-        //     IntPtr pShaderBytecode = gcHandle.AddrOfPinnedObject();
-        //     IntPtr pHlslText = Marshal.AllocHGlobal(5000);
-        //     int len;
-        //     pHlslText = DecompileHLSL(pShaderBytecode, shaderBytecode.Length, out int pHlslTextLength);
-        //     // len = Marshal.ReadInt32(pHlslTextLength);
-        //     len = pHlslTextLength;
-        //     hlsl = Marshal.PtrToStringUTF8(pHlslText);
-        //     gcHandle.Free();
-        // }
-        // // Marshal.FreeHGlobal(pHlslText);
-        // return hlsl;
-    
-        string directory = "hlsl_temp";
         string binPath = $"{directory}/{type}{Hash}.bin";
         string hlslPath = $"{directory}/{type}{Hash}.hlsl";
 
@@ -86,7 +68,7 @@ public class Material : Tag
 
         if (!Directory.Exists(directory))
         {
-            Directory.CreateDirectory("hlsl_temp/");
+            Directory.CreateDirectory(directory);
         }
 
         lock (_lock)
@@ -133,10 +115,42 @@ public class Material : Tag
         }
         return hlsl;
     }
+    
+    public static void Decompile(byte[] shaderBytecode, TagHash hash, string? type = "ps", string directory = "hlsl_temp")
+    {
+        string binPath = $"{directory}/{type}{hash}.bin";
+        string hlslPath = $"{directory}/{type}{hash}.hlsl";
+
+        if (File.Exists(hlslPath) || File.Exists(binPath))
+        {
+            return;
+        }
+
+        File.WriteAllBytes(binPath, shaderBytecode);
+
+        ProcessStartInfo startInfo = new ProcessStartInfo();
+        startInfo.CreateNoWindow = false;
+        startInfo.UseShellExecute = false;
+        startInfo.FileName = "3dmigoto_shader_decomp.exe";
+        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        startInfo.Arguments = $"-D {binPath}";
+        startInfo.RedirectStandardOutput = false;
+        using (Process exeProcess = Process.Start(startInfo))
+        {
+            exeProcess.WaitForExit();
+        }
+
+        if (!File.Exists(hlslPath))
+        {
+            throw new FileNotFoundException($"Decompilation failed for {hash}");
+        }
+        
+        File.Delete(binPath);
+    }
 
     public void SavePixelShader(string saveDirectory)
     {
-        if (Header.PixelShader != null && !File.Exists($"{saveDirectory}/PS_{Hash}.usf"))
+        if (Header.PixelShader != null && !File.Exists($"{saveDirectory}/PS_{Hash}.usf") && !File.Exists($"{saveDirectory}/PS_{Hash}.hlsl"))
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
             File.WriteAllText($"{saveDirectory}/PS_{Hash}.hlsl", hlsl);
@@ -189,7 +203,7 @@ public class Material : Tag
     public void SaveVertexShader(string saveDirectory)
     {
         Directory.CreateDirectory($"{saveDirectory}");
-        if (Header.VertexShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
+        if (Header.VertexShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf") && !File.Exists($"{saveDirectory}/VS_{Hash}.hlsl"))
         {
             string hlsl = Decompile(Header.VertexShader.GetBytecode(), "vs");
             File.WriteAllText($"{saveDirectory}/VS_{Hash}.hlsl", hlsl);
