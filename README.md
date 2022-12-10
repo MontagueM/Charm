@@ -58,8 +58,8 @@ Not yet implemented:
  Copy files from shaders/source2 to your addons "Shaders" folder, and the .vmat, textures, and .vmdl files to "materials", "materials/textures", and "models" respectively.
 
  **To compile shaders:** 
- Drag and drop all the .vfx files into your addons shaders folder while you have S&Box open, this should automatically trigger the compile process. (Not Recommended though).
- The better option is to locate all your .vfx files and drag/drop them onto vfxcompile.exe in your "Steam\steamapps\common\sbox\bin\win64" folder, this should compile the shaders without having the game open, saving system resources. **THIS WILL TAKE A LONG TIME TO DO, DUE TO COMPILE SPEEDS**
+ Drag and drop all the .shader files into your addons shaders folder while you have S&Box open, this should automatically trigger the compile process. (Not Recommended though).
+ The better option is to locate all your .shader files and drag/drop them onto vfxcompile.exe in your "Steam\steamapps\common\sbox\bin\win64" folder, this should compile the shaders without having the game open, saving system resources. **THIS WILL TAKE A LONG TIME TO DO, DUE TO COMPILE SPEEDS**
 
 
 
