@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -49,7 +50,20 @@ public partial class DevView : UserControl
             TagHashBox.Text = "INVALID HASH";
             return;
         }
-        TagHash hash = new TagHash(strHash);
+
+        TagHash hash;
+        if (strHash.Contains("-"))
+        {
+            var s = strHash.Split("-");
+            var pkgid = Int32.Parse(s[0], NumberStyles.HexNumber);
+            var entryindex = Int32.Parse(s[1], NumberStyles.HexNumber);
+            hash = new TagHash(PackageHandler.MakeHash(pkgid, entryindex));
+        }
+        else
+        {
+            hash = new TagHash(strHash);
+        }
+        
         if (!hash.IsValid())
         {
             TagHashBox.Text = "INVALID HASH";

@@ -67,6 +67,13 @@ public struct D2Class_8B8E8080
     public List<D2Class_2E898080> Activities;
 }
 
+[StructLayout(LayoutKind.Sequential, Size = 4)]
+public struct D2Class_DE448080
+{
+    [DestinyField(FieldType.TagHash)]
+    public Tag Unk00;
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
 public struct D2Class_2E898080
 {
@@ -78,7 +85,7 @@ public struct D2Class_2E898080
     public string ActivityName;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x90)]
+[StructLayout(LayoutKind.Sequential, Size = 0x58)]
 public struct D2Class_26898080
 {
     public DestinyHash LocationName;
@@ -94,16 +101,8 @@ public struct D2Class_26898080
     public DestinyHash Unk28;
     [DestinyOffset(0x30)]
     public int Unk30;
-    [DestinyOffset(0x48)]
-    public DestinyHash Unk48;
-    [DestinyOffset(0x50)]
-    public DestinyHash Unk50;
-    public DestinyHash Unk54;
-    public DestinyHash Unk58;
-    [DestinyOffset(0x6A)] 
-    public short Unk6A;
-    [DestinyOffset(0x70), DestinyField(FieldType.TablePointer)]
-    public List<D2Class_48898080> Unk70;
+    [DestinyOffset(0x38), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_48898080> Unk38;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
@@ -246,12 +245,36 @@ public struct D2Class_24898080
     public DestinyHash ActivityName;
     public DestinyHash BubbleName;
     [DestinyOffset(0x10), DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk10;  // 0F978080
+    public dynamic? Unk10;  // 0F978080, 53418080
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_48898080> Unk18;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_1D898080> MapReferences;
+}
 
+[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+public struct D2Class_1D898080
+{
     [DestinyField(FieldType.TagHash64)]
     public Tag<D2Class_1E898080> MapReference;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct D2Class_53418080
+{
+    public DestinyHash Unk00;
+    public DestinyHash Unk04;
+    [DestinyOffset(0xC)]
+    public int Unk0C;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x40)]
+public struct D2Class_54418080
+{
+    public DestinyHash Unk00;
+    public DestinyHash Unk04;
+    [DestinyOffset(0xC)]
+    public int Unk0C;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x40)]

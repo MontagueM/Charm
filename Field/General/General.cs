@@ -79,7 +79,7 @@ public class DestinyHash : IComparable<DestinyHash>
         bool parsed = uint.TryParse(hash, NumberStyles.HexNumber, null, out Hash);
         if (parsed)
         {
-            if (hash.EndsWith("80") || bBigEndianString)
+            if (hash.EndsWith("80") || hash.EndsWith("81") || bBigEndianString)
             {
                 Hash = Endian.SwapU32(Hash);
             }
@@ -108,7 +108,11 @@ public class DestinyHash : IComparable<DestinyHash>
 
     public int GetPkgId()
     {
-        return (int)((Hash >> 0xD) & 0x3ff);
+        if ((Hash & 0x01_00_00_00) != 0)
+        {
+            return (int) ((Hash >> 0xD) & 0x3FF) | 0x400;
+        }
+        return (int) ((Hash >> 0xD) & 0x3FF);
     }
     
     public int GetEntryIndex()
@@ -215,7 +219,7 @@ public class TagHash : DestinyHash
     
     public override bool IsValid()
     {
-        if (Hash < 0x80a00000 || Hash > 0x80ffffff)
+        if (Hash < 0x80a00000 || Hash > 0x81ffffff)
         {
             return false;
         }
