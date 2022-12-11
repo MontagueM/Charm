@@ -49,7 +49,7 @@ public struct D2Class_8E8E8080
     public Tag UnkActivity68;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+[StructLayout(LayoutKind.Sequential, Size = 0x78)]
 public struct D2Class_8B8E8080
 {
     public long FileSize;
@@ -59,12 +59,16 @@ public struct D2Class_8B8E8080
     [DestinyField(FieldType.TagHash)] 
     public Tag Events;
     [DestinyField(FieldType.TagHash)] 
-    public Tag TagBags;
-    public uint Unk18;
+    public Tag Patrols;
+    public uint Unk28;
     [DestinyField(FieldType.TagHash)]
-    public Tag Unk1C;
+    public Tag Unk2C;
     [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_DE448080> TagBags;
+    [DestinyOffset(0x48), DestinyField(FieldType.TablePointer)]
     public List<D2Class_2E898080> Activities;
+    [DestinyField(FieldType.RelativePointer)]
+    public string DestinationName;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 4)]
