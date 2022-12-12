@@ -317,16 +317,6 @@ public struct D2Class_6A988080
     public DestinyHash Unk24;
     [DestinyOffset(0x2C), DestinyField(FieldType.TagHash)]
     public Tag<D2Class_EB458080> Music;
-
-    [DestinyOffset(0x50), DestinyField(FieldType.TagHash64)]
-    public Tag<D2Class_D89A8080> Unk50;
-    public long Unk60;
-    [DestinyField(FieldType.TagHash64)]
-    public Tag<D2Class_D89A8080> Unk68;
-    public int Unk78;
-    [DestinyField(FieldType.TagHash)]
-    public Tag Unk7C;
-    public DestinyHash Unk80;
 }
 
 /// <summary>
