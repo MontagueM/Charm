@@ -26,6 +26,18 @@
 				[
 					{
 						_class = "RenderMeshFile"
+						children = 
+						[
+							{
+								_class = "RenderMeshMarkup"
+								material_search_path = ""
+								use_expensive_tangents = true
+								high_high_precision_texcoords = false
+								calc_per_vertex_curvature = false
+								prefer_high_density_tris_in_uv_density_calc = false
+								cpu_access = false
+							},
+						]
 						name = "%MESHNAME%"
 						filename = "%FILENAME%"
 						import_translation = [ 0.0, 0.0, 0.0 ]

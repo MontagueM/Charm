@@ -153,9 +153,9 @@ public class Material : Tag
                     {
                         File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
                     }
-                    if (!File.Exists($"{saveDirectory}/Source2/PS_{Hash}.vfx"))
+                    if (!File.Exists($"{saveDirectory}/Source2/PS_{Hash}.shader"))
                     {
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.vfx", vfx);
+                        File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.shader", vfx);
                     }
 
                     Console.WriteLine($"Saved pixel shader {Hash}");
@@ -166,17 +166,34 @@ public class Material : Tag
             }
             
             vmat.AppendLine("Layer0 \n{");
-            vmat.AppendLine($"  shader \"ps_{Hash}.vfx\"");
-            vmat.AppendLine("   F_ALPHA_TEST 1");
+            
+            //If the shader doesnt exist, just use the default complex.shader
+            if (!File.Exists($"{saveDirectory}/Source2/PS_{Hash}.shader"))
+            {
+                vmat.AppendLine($"  shader \"complex.shader\"");
+
+                //Use just the first texture for the diffuse
+                if (Header.PSTextures.Count > 0)
+                {
+                    vmat.AppendLine($"  TextureColor \"materials/Textures/{Header.PSTextures[0].Texture.Hash}.png\"");
+                }
+            }
+            else
+            {
+                vmat.AppendLine($"  shader \"ps_{Hash}.shader\"");
+                vmat.AppendLine("   F_ALPHA_TEST 1");
+            }
+
             foreach (var e in Header.PSTextures)
             {
                 if (e.Texture == null)
                 {
                     continue;
                 }
-                //Console.WriteLine("Saving texture " + e.Texture.Hash + " " + e.TextureIndex + " " + e.Texture.IsSrgb().ToString());
+               
                 vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
             }
+
             // if(isTerrain)
             // {
             //     vmat.AppendLine($"  TextureT14 \"materials/Textures/{partEntry.Dyemap.Hash}.png\"");

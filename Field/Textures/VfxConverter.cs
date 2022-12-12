@@ -32,31 +32,41 @@ public class VfxConverter
 	Description = ""Charm Auto-Generated Source 2 Shader""; 
 }
 
+MODES
+{
+    VrForward();
+
+	Depth( ""vr_depth_only.vfx"" ); 
+
+	ToolsVis( S_MODE_TOOLS_VIS );
+	ToolsWireframe( ""vr_tools_wireframe.vfx"" );
+	ToolsShadingComplexity( ""vr_tools_shading_complexity.vfx"" );
+
+	Reflection( ""high_quality_reflections.vfx"" );
+}
+
 FEATURES
 {
     #include ""common/features.hlsl""
     //Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );
     //Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );
-}
 
-MODES
-{
-    VrForward();													
-    Depth( ""vr_depth_only.vfx"" );
-    ToolsVis( S_MODE_TOOLS_VIS ); 									
-    ToolsWireframe( ""vr_tools_wireframe.vfx"" );
-	ToolsShadingComplexity( ""vr_tools_shading_complexity.vfx"" );
+    Feature( F_HIGH_QUALITY_REFLECTIONS, 0..1, ""Rendering"" );
 }
 
 COMMON
 {
 	#include ""common/shared.hlsl""
+    #define USES_HIGH_QUALITY_REFLECTIONS
+    //#define S_GGX_SHADING 1
+	//#define S_SPECULAR_CUBE_MAP 1
+    #define D_NO_MODEL_TINT 1
     //translucent
 }
 
 struct VertexInput
 {
-    float4 vColorBlendValues : TEXCOORD4 < Semantic( color ); >;
+    float4 vColorBlendValues : Color0 < Semantic( Color ); >;
 	#include ""common/vertexinput.hlsl""
 };
 
@@ -69,6 +79,9 @@ struct PixelInput
 VS
 {
 	#include ""common/vertex.hlsl""
+
+    BoolAttribute( UsesHighQualityReflections, ( F_HIGH_QUALITY_REFLECTIONS > 0 ) );
+
 	PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )
 	{
 		PixelInput o = ProcessVertex( i );
@@ -380,12 +393,12 @@ PS
             vfx.AppendLine("        float alpha = 1;");
             vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 1, 1);");
 
-            vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals.
+            vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals. No idea what it is.
             vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals
             vfx.AppendLine("        float4 v2 = {i.vTangentUWs, 1};"); //Tangent? Seems to only be used for normals.
-            vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //seems only used as texture coords
-            vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Not sure if this is VC or not
-            vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //seems like this is always the same as v4/only used if shader uses VC alpha
+            vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //99.9% sure this is always UVs
+            vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Mostly seen on materials with parallax. Some kind of view vector or matrix?
+            vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //seems to always be vertex color/vertex color alpha
             //vfx.AppendLine("        uint v6 = 1;"); //no idea
 
             foreach (var i in inputs)
@@ -395,10 +408,6 @@ PS
                     vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x * tx.x;");
                 }
             }
-            // vfx.Replace("v0.xyzw = v0.xyzw * tx.xyzw;", "v0.xyzw = v0.xyzw;");
-            // vfx.Replace("v1.xyzw = v1.xyzw * tx.xyzw;", "v1.xyzw = v1.xyzw;");
-            // vfx.Replace("v2.xyzw = v2.xyzw * tx.xyzw;", "v2.xyzw = v2.xyzw;");
-            // vfx.Replace("v5.xyzw = v5.xyzw * tx.xyzw;", "v5.xyzw = v5.xyzw;");
         }
     }
 

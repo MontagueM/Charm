@@ -21,6 +21,7 @@ using Field.Strings;
 using Field;
 using Microsoft.Toolkit.Mvvm.Input;
 using Serilog;
+using System.Text;
 
 namespace Charm;
 
@@ -1313,6 +1314,7 @@ public partial class TagListView : UserControl
     // Would be nice to do something with colour formatting.
     private void LoadStrings(TagHash tagHash)
     {
+        var viewer = GetViewer();
         _allTagItems = new ConcurrentBag<TagItem>();
         StringContainer stringContainer = PackageHandler.GetTag(typeof(StringContainer), tagHash);
         Parallel.ForEach(stringContainer.Header.StringHashTable, hash =>
@@ -1325,12 +1327,32 @@ public partial class TagListView : UserControl
             });
         });
         RefreshItemList();
+        SetExportFunction(ExportString, (int)EExportTypeFlag.Full);
+        viewer.ExportControl.SetExportInfo(tagHash);
+    }
+
+    private void ExportString(ExportInfo info)
+    {
+
+        StringContainer stringContainer = PackageHandler.GetTag(typeof(StringContainer), new TagHash(info.Hash));
+        StringBuilder text = new StringBuilder();
+        
+        Parallel.ForEach(stringContainer.Header.StringHashTable, hash =>
+        {
+            text.Append($"{hash} : {stringContainer.GetStringFromHash(ELanguage.English, hash)} \n");
+        });
+
+        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Strings/{info.Hash}_{info.Name}/";
+        Directory.CreateDirectory(saveDirectory);
+
+        File.WriteAllText(saveDirectory + "strings.txt", text.ToString());
+
     }
 
     #endregion
-    
+
     #region Sound
-    
+
     private async Task LoadSoundsPackagesList()
     {
         // If there are packages, we don't want to reload the view as very poor for performance.

@@ -3,6 +3,7 @@ using System.Text.Json;
 using Field.Models;
 using Field.Statics;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Field.General;
 
@@ -128,15 +129,6 @@ public class InfoConfigHandler
     
     public void WriteToFile(string path)
     {
-        List<string> s2 = new List<string>();
-        foreach (var material in _config["Materials"])
-        {
-            s2.Add($"ps_{material.Key}.vfx");
-        }
-        if(!Directory.Exists($"{path}/Shaders/Source2/"))
-            Directory.CreateDirectory($"{path}/Shaders/Source2/");
-        
-        File.WriteAllLines($"{path}/Shaders/Source2/_S2BuildList.txt", s2);
 
         // If theres only 1 part, we need to rename it + the instance to the name of the mesh (unreal imports to fbx name if only 1 mesh inside)
         if (_config["Parts"].Count == 1)
@@ -152,6 +144,32 @@ public class InfoConfigHandler
             _config["Parts"] = new ConcurrentDictionary<string, string>();
             _config["Parts"][_config["MeshName"]] = part;
         }
+
+        
+        //im not smart enough to have done this, so i made an ai do it lol
+        //this just sorts the "instances" part of the cfg so its ordered by scale
+        //makes it easier for instancing models in Hammer/S&Box
+
+        var sortedDict = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
+
+        // Use LINQ's OrderBy method to sort the values in each array
+        // based on the "Scale" key. The lambda expression specifies that
+        // the "Scale" property should be used as the key for the order.
+        foreach (var keyValuePair in (ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>)_config["Instances"])
+        {
+            var array = keyValuePair.Value;
+            var sortedArray = array.OrderBy(x => x.Scale);
+
+            // Convert the sorted array to a ConcurrentBag
+            var sortedBag = new ConcurrentBag<JsonInstance>(sortedArray);
+
+            // Add the sorted bag to the dictionary
+            sortedDict.TryAdd(keyValuePair.Key, sortedBag);
+        }
+
+        // Finally, update the _config["Instances"] object with the sorted values
+        _config["Instances"] = sortedDict;
+
         
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
         if (_config.ContainsKey("MeshName"))
