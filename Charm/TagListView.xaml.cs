@@ -1177,8 +1177,11 @@ public partial class TagListView : UserControl
         if (activity.Header.Unk18 is D2Class_6A988080)
         {
             var entry = (D2Class_6A988080) activity.Header.Unk18;
-            if (entry.DialogueTable != null)
-                dialogueTables.Add(entry.DialogueTable.Hash);
+            foreach (var dirtable in entry.DialogueTables)
+            {
+                if (dirtable.DialogueTable != null)
+                    dialogueTables.Add(dirtable.DialogueTable.Hash);
+            }
         }
         Parallel.ForEach(activity.Header.Unk50, val =>
         {
@@ -1227,7 +1230,7 @@ public partial class TagListView : UserControl
         if (activity.Header.Unk18 is D2Class_6A988080)
         {
             var directiveTables =
-                ((D2Class_6A988080) activity.Header.Unk18).DirectiveTables.Select(x => x.DialogueTable.Hash);
+                ((D2Class_6A988080) activity.Header.Unk18).DirectiveTables.Select(x => x.DirectiveTable.Hash);
             
             Parallel.ForEach(directiveTables, hash =>
             {
@@ -1242,7 +1245,7 @@ public partial class TagListView : UserControl
         else if (activity.Header.Unk18 is D2Class_20978080)
         {
             var directiveTables =
-                ((D2Class_20978080) activity.Header.Unk18).PEDirectiveTables.Select(x => x.DialogueTable.Hash);
+                ((D2Class_20978080) activity.Header.Unk18).PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
             
             Parallel.ForEach(directiveTables, hash =>
             {

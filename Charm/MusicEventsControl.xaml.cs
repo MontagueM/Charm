@@ -39,7 +39,7 @@ public partial class MusicEventsControl : UserControl
 
         return items;
     }
-    
+
     private ConcurrentBag<EventItem> GetEventItems(List<D2Class_FA458080> array)
     {
         var items = new ConcurrentBag<EventItem>();

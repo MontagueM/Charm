@@ -64,12 +64,12 @@ public class Dialogue : Tag
     private List<dynamic?> Collapse2D97(D2Class_2D978080 entry)
     {
         List<dynamic?> sounds = new List<dynamic?>();
-        foreach (var e in entry.Unk18)
+        foreach (var e in entry.Unk20)
         {
-            switch (e.Unk00)
+            switch (e.Unk20)
             {
                 case D2Class_2A978080:
-                    List<dynamic?> result = Collapse2A97(e.Unk00);
+                    List<dynamic?> result = Collapse2A97(e.Unk20);
                     if (result.Count > 1)
                     {
                         sounds.Add(result);
@@ -80,7 +80,7 @@ public class Dialogue : Tag
                     }
                     break;
                 case D2Class_33978080:
-                    sounds.Add(e.Unk00);
+                    sounds.Add(e.Unk20);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -93,7 +93,7 @@ public class Dialogue : Tag
     private List<dynamic?> Collapse2A97(D2Class_2A978080 entry)
     {
         List<dynamic?> sounds = new List<dynamic?>();
-        foreach (var e in entry.Unk20)
+        foreach (var e in entry.Unk28)
         {
             switch (e.Unk40)
             {
