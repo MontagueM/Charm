@@ -156,8 +156,7 @@ public partial class MainWindow
         Progress.CompleteStage();
 
         // Initialise global string cache
-        // await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
-        PackageHandler.GenerateGlobalStringContainerCache();
+        await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
         Progress.CompleteStage();
 
         // Get all activity names

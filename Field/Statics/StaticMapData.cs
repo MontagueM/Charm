@@ -86,7 +86,7 @@ public struct D2Class_B3938080
     public DestinyHash Unk20;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+[StructLayout(LayoutKind.Sequential, Size = 0x40)]
 public struct D2Class_406D8080
 {
     public Vector4 Rotation;
