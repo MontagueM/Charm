@@ -25,32 +25,34 @@ public partial class MusicEventsControl : UserControl
         EventList.ItemsSource = GetEventItems(res.Unk18);
     }
     
-    private ConcurrentBag<EventItem> GetEventItems(List<D2Class_FB458080> array)
+    // both of these are lists to maintain the original order
+
+    private List<EventItem> GetEventItems(List<D2Class_FB458080> array)
     {
-        var items = new ConcurrentBag<EventItem>();
-        Parallel.ForEach(array, entry =>
+        var items = new List<EventItem>();
+        foreach (var entry in array)
         {
             items.Add(new EventItem
             {
                 Name = entry.EventName,
                 Hash = entry.EventHash,
             });
-        });
+        }
 
         return items;
     }
-    
-    private ConcurrentBag<EventItem> GetEventItems(List<D2Class_FA458080> array)
+
+    private List<EventItem> GetEventItems(List<D2Class_FA458080> array)
     {
-        var items = new ConcurrentBag<EventItem>();
-        Parallel.ForEach(array, entry =>
+        var items = new List<EventItem>();
+        foreach (var entry in array)
         {
             items.Add(new EventItem
             {
                 Name = entry.EventName,
                 Hash = $"{entry.Unk00}/{entry.Unk10}",
             });
-        });
+        }
 
         return items;
     }

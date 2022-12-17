@@ -33,19 +33,20 @@ public struct D2Class_29978080
 [StructLayout(LayoutKind.Sequential, Size = 0x48)]
 public struct D2Class_2F978080
 {
-    [DestinyOffset(0x1C)] 
-    public DestinyHash Unk1C;
+    [DestinyOffset(0x10), DestinyField(FieldType.TagHash64)]
+    public Tag Unk10;
+    //[DestinyOffset(0x1C)] 
     public DestinyHash Unk20;
     public DestinyHash Unk24;
     public DestinyHash Unk28;
     public DestinyHash Unk2C;
-    [DestinyOffset(0x38)] 
+    [DestinyOffset(0x38)]
     public float Unk38;
-    [DestinyOffset(0x40), DestinyField(FieldType.ResourcePointer)] 
-    public dynamic? Unk40;
+    [DestinyOffset(0x40), DestinyField(FieldType.ResourcePointer)]
+    public dynamic? Unk40; // 2A978080, 2D978080
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+[StructLayout(LayoutKind.Sequential, Size = 0x38)]
 public struct D2Class_2A978080
 {
     public DestinyHash Unk00;
@@ -54,8 +55,9 @@ public struct D2Class_2A978080
     public DestinyHash Unk0C;
     public long Unk10;
     public long Unk18;
-    [DestinyField(FieldType.TablePointer)]
-    public List<D2Class_2F978080> Unk20;
+    public DestinyHash Unk20;
+    [DestinyOffset(0x28), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_2F978080> Unk28;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x88)]
@@ -86,7 +88,7 @@ public struct D2Class_33978080
     public float Unk80;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+[StructLayout(LayoutKind.Sequential, Size = 0x30)]
 public struct D2Class_2D978080
 {
     public DestinyHash Unk00;
@@ -95,15 +97,23 @@ public struct D2Class_2D978080
     public Tag Unk08;
     public DestinyHash Unk0C;
     public float Unk10;
-    [DestinyOffset(0x18), DestinyField(FieldType.TablePointer)]
-    public List<D2Class_30978080> Unk18;
+    [DestinyOffset(0x18)]
+    public DestinyHash Unk18;
+    [DestinyOffset(0x20), DestinyField(FieldType.TablePointer)]
+    public List<D2Class_30978080> Unk20;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 8)]
+[StructLayout(LayoutKind.Sequential, Size = 0x28)]
 public struct D2Class_30978080
 {
+    [DestinyField(FieldType.TagHash64)]
+    public Tag Unk00;
+    public DestinyHash Unk10;
+    public DestinyHash Unk14;
+    public DestinyHash Unk18;
+    public DestinyHash Unk1C;
     [DestinyField(FieldType.ResourcePointer)]
-    public dynamic? Unk00;
+    public dynamic? Unk20; //33978080 or 2A978080
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x38)]

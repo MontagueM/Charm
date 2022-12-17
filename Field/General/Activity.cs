@@ -306,18 +306,17 @@ public struct D2Class_DD978080
 /// <summary>
 /// Directive table + audio links for activity directives.
 /// </summary>
-[StructLayout(LayoutKind.Sequential, Size = 0x88)]
+[StructLayout(LayoutKind.Sequential, Size = 0x84)]
 public struct D2Class_6A988080
 {
     [DestinyField(FieldType.TablePointer)]
     public List<D2Class_28898080> DirectiveTables;
-    [DestinyField(FieldType.TagHash64)] 
-    public Tag DialogueTable;
+    [DestinyField(FieldType.TablePointer)]
+    public List<D2Class_B7978080> DialogueTables;
     public DestinyHash StartingBubbleName;
     public DestinyHash Unk24;
     [DestinyOffset(0x2C), DestinyField(FieldType.TagHash)]
     public Tag<D2Class_EB458080> Music;
-    
 }
 
 /// <summary>
@@ -336,7 +335,14 @@ public struct D2Class_20978080
 public struct D2Class_28898080
 {
     [DestinyField(FieldType.TagHash)]
-    public Tag<D2Class_C78E8080> DialogueTable;
+    public Tag<D2Class_C78E8080> DirectiveTable;
+}
+
+[StructLayout(LayoutKind.Sequential, Size = 0x14)]
+public struct D2Class_B7978080
+{
+    [DestinyField(FieldType.TagHash64)]
+    public Tag<D2Class_B8978080> DialogueTable;
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
@@ -474,6 +480,7 @@ public struct D2Class_FB458080
     public string EventName;
 
     public int Unk10;
+    public int Unk14;
     public DestinyHash EventHash;
 }
 
