@@ -727,11 +727,9 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(budgetSet.Header.Unk28, val =>
         {
-            //foreach (var val in budgetSet.Header.Unk28)
-            //{
-            if (val.Tag == null)
+            if (!val.Tag.Hash.IsValid())
             {
-                Log.Error($"BudgetSet {budgetSetHeader.Header.Unk00.Hash.GetHashString()} has a null tag.");
+                Log.Error($"BudgetSet {budgetSetHeader.Header.Unk00.Hash.GetHashString()} has an invalid tag hash.");
                 return;
             }
             _allTagItems.Add(new TagItem
@@ -740,7 +738,6 @@ public partial class TagListView : UserControl
                 Name = val.TagPath,
                 TagType = ETagListType.Entity,
             });
-            //}
         });
     }
     
