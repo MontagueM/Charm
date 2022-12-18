@@ -654,23 +654,29 @@ public partial class TagListView : UserControl
     #region Destination Global Tag Bag
 
     /// <summary>
-    /// Type 0x80809830/0x80809875 and only in sr_globals_010a.
+    /// Type 0x8080471D and only in sr_destination_metadata_010a?
     /// </summary>
     private void LoadDestinationGlobalTagBagList()
     {
         _allTagItems = new ConcurrentBag<TagItem>();
-        var vals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80809875);
+        var vals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x8080471D);
         Parallel.ForEach(vals, val =>
         {
-            Tag<D2Class_75988080> dgtbParent = PackageHandler.GetTag<D2Class_75988080>(val);
-            if (!dgtbParent.Header.DestinationGlobalTagBag.IsValid())
+            Tag<D2Class_1D478080> dgtbParent = PackageHandler.GetTag<D2Class_1D478080>(val);
+            if (dgtbParent.Header.DestinationGlobalTagBags.Count < 1)
                 return;
-            _allTagItems.Add(new TagItem 
-            { 
-                Hash = dgtbParent.Header.DestinationGlobalTagBag,
-                // Name = dgtbParent.Header.DestinationGlobalTagBagName,
-                TagType = ETagListType.DestinationGlobalTagBag
-            });
+            foreach (D2Class_D3598080 destinationGlobalTagBag in dgtbParent.Header.DestinationGlobalTagBags)
+            {
+                if (!destinationGlobalTagBag.DestinationGlobalTagBag.IsValid())
+                    continue;
+                
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = destinationGlobalTagBag.DestinationGlobalTagBag,
+                    Name = destinationGlobalTagBag.DestinationGlobalTagBagName,
+                    TagType = ETagListType.DestinationGlobalTagBag
+                });
+            }
         });
     }
     
@@ -721,8 +727,13 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(budgetSet.Header.Unk28, val =>
         {
-            _allTagItems.Add(new TagItem 
-            { 
+            if (!val.Tag.Hash.IsValid())
+            {
+                Log.Error($"BudgetSet {budgetSetHeader.Header.Unk00.Hash.GetHashString()} has an invalid tag hash.");
+                return;
+            }
+            _allTagItems.Add(new TagItem
+            {
                 Hash = val.Tag.Hash,
                 Name = val.TagPath,
                 TagType = ETagListType.Entity,
