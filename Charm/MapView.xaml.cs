@@ -174,7 +174,7 @@ public partial class MapView : UserControl
                 if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
                 {
                     //entry.Rotation.SetW(1);
-                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
+                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement);
                 }
             });
         });
@@ -278,27 +278,8 @@ public partial class MapView : UserControl
 
                             staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
                             staticHandler.Dispose();
-                    }//);
+                        }//);
                     }
-                    // Dont see a reason to export terrain itself as its own fbx
-                    // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
-                    // {
-                    //     var parts = terrainArrangement.Terrain.Header.MeshParts;
-                    //     terrainArrangement.Terrain.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
-                    
-                    //     int i = 0;
-                    //     foreach (var part in parts)
-                    //     {
-                    //         mats.AppendLine("{");
-                    //         mats.AppendLine($"    from = \"{staticMeshName}_Group{part.GroupIndex}_{i}_{i}.vmat\"");
-                    //         mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
-                    //         mats.AppendLine("},\n");
-                    //         i++;
-                    //     }
-                    
-                    // }
-                    
-                    //        
                 });
             });
         }

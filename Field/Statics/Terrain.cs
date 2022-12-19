@@ -54,7 +54,7 @@ public class Terrain : Tag
                 if (bSaveShaders)
                 {
                     partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/", true);
-                    partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/Vertex/");
+                    partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/");
                     partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
                 }
             }
@@ -103,7 +103,7 @@ public class Terrain : Tag
 
                     //Insert a new line before the last line
                     var newVmat = vmat.Take(vmat.Length - 1).ToList();
-                    newVmat.Add($"  TextureT14 " + $"\"{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
+                    newVmat.Add($"  TextureT14 " + $"\"materials/Textures/{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
                     newVmat.Add(lastLine);
                     File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
                 }

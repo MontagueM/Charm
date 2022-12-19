@@ -388,24 +388,39 @@ PS
             vfx.AppendLine("    float4 MainPs( PixelInput i ) : SV_Target0");
             vfx.AppendLine("    {");
 
+            vfx.AppendLine(@"       // compute derivations of the world position
+        float3 p_dx = ddx(i.vPositionWithOffsetWs);
+        float3 p_dy = ddy(i.vPositionWithOffsetWs);
+        // compute derivations of the texture coordinate
+        float2 tc_dx = ddx(i.vTextureCoords.xy);
+        float2 tc_dy = ddy(i.vTextureCoords.xy);
+        // compute initial tangent and bi-tangent
+        float3 tangent = normalize( tc_dy.y * p_dx - tc_dx.y * p_dy );
+        float3 bitangent = normalize( tc_dy.x * p_dx - tc_dx.x * p_dy ); // sign inversion
+        // get new tangent from a given mesh normal
+        float3 n = normalize(i.vNormalWs);
+        float3 x = cross(n, tangent);
+        tangent = cross(x, n);
+        tangent = normalize(tangent);
+        "); //Reconstruct tangent space map for normal maps, this seems like a bit of a hack but it works
+
             // Output render targets, todo support vertex shader
             vfx.AppendLine("        float4 o0,o1,o2;");
             vfx.AppendLine("        float alpha = 1;");
-            vfx.AppendLine("        float4 tx = float4(i.vTextureCoords, 1, 1);");
 
             vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals. No idea what it is.
-            vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals
-            vfx.AppendLine("        float4 v2 = {i.vTangentUWs, 1};"); //Tangent? Seems to only be used for normals.
-            vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //99.9% sure this is always UVs
-            vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Mostly seen on materials with parallax. Some kind of view vector or matrix?
-            vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //seems to always be vertex color/vertex color alpha
-            //vfx.AppendLine("        uint v6 = 1;"); //no idea
+            vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals.
+            vfx.AppendLine("        float4 v2 = {tangent, 1};"); //Tangent? Seems to only be used for normals.
+            vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //99.9% sure this is always UVs.
+            vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Might be i.vPositionSs, Mostly seen on materials with parallax. Some kind of view vector or matrix?
+            vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Seems to always be vertex color/vertex color alpha.
+            //vfx.AppendLine("        uint v6 = 1;"); //no idea, FrontFace maybe?
 
             foreach (var i in inputs)
             {
                 if (i.Type == "uint")
                 {
-                    vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x * tx.x;");
+                    vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x");
                 }
             }
         }
@@ -442,6 +457,14 @@ PS
             line = hlsl.ReadLine();
             if (line != null)
             {
+                if (line.Contains("cb12[7].xyz + -v4.xyz"))
+                {
+                    vfx.AppendLine(line.Replace("-v4", "-i.vPositionSs")); //-v4 seems to be screen space or viewdir of some type, but not always? Sometimes its just v4 which is something else?
+                }
+                if (line.Contains("while (true)"))
+                {
+                    vfx.AppendLine(line.Replace("while (true)", "       [unroll(10)] while (true)"));
+                }
                 if (line.Contains("return;"))
                 {
                     break;
@@ -456,10 +479,20 @@ PS
                     // todo add dimension
                     vfx.AppendLine($"       {equal}= Tex2DS(g_t{texIndex}, TextureFiltering, {sampleUv}).{dotAfter}");
                 }
+                if (line.Contains("CalculateLevelOfDetail"))
+                {
+                    var equal = line.Split("=")[0];
+                    var texIndex = Int32.Parse(line.Split(".CalculateLevelOfDetail")[0].Split("t")[1]);
+                    var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
+                    var sampleUv = line.Split(", ")[1].Split(")")[0];
+                    
+                    vfx.AppendLine($"       {equal}= g_t{texIndex}.CalculateLevelOfDetail(TextureFiltering, {sampleUv})");
+                }
+                
                 // todo add load, levelofdetail, o0.w, discard
                 else if (line.Contains("discard"))
                 {
-                    vfx.AppendLine(line.Replace("discard", "        { alpha = 0; }"));
+                    vfx.AppendLine(line.Replace("discard", "        { alpha = 0; }")); //sometimes o0.w is used for alpha instead on some shaders
                 }
                 else
                 {
@@ -485,20 +518,24 @@ PS
         string outputString = @"
 
         // Normal
-        float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
+        float3 biased_normal = o1.xyz - float3(0.5,0.5,0.5);
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
  
-        float4 normal = float4(normal_in_world_space,1);
-        normal.y = 1 - normal.y;
-        normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
+        float3 normal = float3(PsToSs(float4(normal_in_world_space,1)), 1); //Convert to screen space (I think?), makes it look like an actual normal map
+        normal = SrgbLinearToGamma(normal.xyz); 
+        normal.y = 1 - normal.y; 
+        normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy))); 
         
-        float smoothness = saturate(8 * (normal_length - 0.375));
+        float smoothness = saturate(8 * (normal_length - 0.375)); 
         
-        Material mat = ToMaterial(i, float4(o0.xyz, 1), saturate(normal), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
-        mat.Opacity = alpha;
-        mat.Emission = clamp((o2.y - 0.5) * 2 * 8 * mat.Albedo, 0, 100);
+        //Diffuse, normal, roughness, metal, AO
+        Material mat = ToMaterial(i, float4(o0.xyz, 1), float4(normal.xyz, 1), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
         
+        mat.Opacity = alpha; //sometimes o0.w is used for alpha instead on some shaders
+        mat.Emission = clamp((o2.y - 0.5) * 2 * 8 * mat.Albedo, 0, 100); 
+        mat.Transmission = o2.z; 
+
         ShadingModelValveStandard sm;
 		
         return FinalizePixelMaterial( i, mat, sm );

@@ -288,6 +288,9 @@ public class FbxHandler
 
     private void AddMaterial(FbxMesh mesh, FbxNode node, int index, Material material)
     {
+        if (material == null)
+            return;
+        
         FbxSurfacePhong fbxMaterial;
         FbxLayerElementMaterial materialLayer;
         lock (_fbxLock)
