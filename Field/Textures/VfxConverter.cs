@@ -465,11 +465,11 @@ PS
                 {
                     vfx.AppendLine(line.Replace("while (true)", "       [unroll(10)] while (true)"));
                 }
-                if (line.Contains("return;"))
+                else if (line.Contains("return;"))
                 {
                     break;
                 }
-                if (line.Contains("Sample"))
+                else if (line.Contains("Sample"))
                 {
                     var equal = line.Split("=")[0];
                     var texIndex = Int32.Parse(line.Split(".Sample")[0].Split("t")[1]);
