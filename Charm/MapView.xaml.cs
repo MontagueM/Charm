@@ -129,7 +129,6 @@ public partial class MapView : UserControl
         if(exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
-            Directory.CreateDirectory(savePath + "/Statics/LOD");
             ExportStatics(exportStatics, savePath, map);
         }
 
@@ -251,29 +250,32 @@ public partial class MapView : UserControl
 
                             if(source2Models)
                             {
-                                //Source 2 shit
-                                File.Copy("template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
-                                string text = File.ReadAllText($"{savePath}/Statics/{staticMeshName}.vmdl");
-                            
-                                StringBuilder mats = new StringBuilder();
-
-                                int i = 0;
-                                foreach (Part staticpart in staticmesh)
+                                if (!File.Exists($"{savePath}/Statics/{staticMeshName}.vmdl"))
                                 {
-                                    mats.AppendLine("{");
-                                    //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
-                                    mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
-                                    mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
-                                    mats.AppendLine("},\n");
-                                    i++;
-                                }
+                                    //Source 2 shit
+                                    File.Copy("template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
+                                    string text = File.ReadAllText($"{savePath}/Statics/{staticMeshName}.vmdl");
 
-                                text = text.Replace("%MATERIALS%", mats.ToString());
-                                text = text.Replace("%FILENAME%", $"models/{staticMeshName}.fbx");
-                                text = text.Replace("%MESHNAME%", staticMeshName);
-                                
-                                File.WriteAllText($"{savePath}/Statics/{staticMeshName}.vmdl", text);
-                                //
+                                    StringBuilder mats = new StringBuilder();
+
+                                    int i = 0;
+                                    foreach (Part staticpart in staticmesh)
+                                    {
+                                        mats.AppendLine("{");
+                                        //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
+                                        mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
+                                        mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
+                                        mats.AppendLine("},\n");
+                                        i++;
+                                    }
+
+                                    text = text.Replace("%MATERIALS%", mats.ToString());
+                                    text = text.Replace("%FILENAME%", $"models/{staticMeshName}.fbx");
+                                    text = text.Replace("%MESHNAME%", staticMeshName);
+
+                                    File.WriteAllText($"{savePath}/Statics/{staticMeshName}.vmdl", text);
+                                    //
+                                }
                             }
 
                             staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");

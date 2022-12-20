@@ -420,7 +420,7 @@ PS
             {
                 if (i.Type == "uint")
                 {
-                    vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x");
+                    vfx.AppendLine($"       {i.Variable}.x = {i.Variable}.x;");
                 }
             }
         }
@@ -461,7 +461,7 @@ PS
                 {
                     vfx.AppendLine(line.Replace("-v4", "-i.vPositionSs")); //-v4 seems to be screen space or viewdir of some type, but not always? Sometimes its just v4 which is something else?
                 }
-                if (line.Contains("while (true)"))
+                else if (line.Contains("while (true)"))
                 {
                     vfx.AppendLine(line.Replace("while (true)", "       [unroll(10)] while (true)"));
                 }
@@ -479,16 +479,16 @@ PS
                     // todo add dimension
                     vfx.AppendLine($"       {equal}= Tex2DS(g_t{texIndex}, TextureFiltering, {sampleUv}).{dotAfter}");
                 }
-                if (line.Contains("CalculateLevelOfDetail"))
+                else if (line.Contains("CalculateLevelOfDetail"))
                 {
                     var equal = line.Split("=")[0];
                     var texIndex = Int32.Parse(line.Split(".CalculateLevelOfDetail")[0].Split("t")[1]);
                     var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
                     var sampleUv = line.Split(", ")[1].Split(")")[0];
-                    
+
                     vfx.AppendLine($"       {equal}= g_t{texIndex}.CalculateLevelOfDetail(TextureFiltering, {sampleUv})");
                 }
-                
+
                 // todo add load, levelofdetail, o0.w, discard
                 else if (line.Contains("discard"))
                 {
