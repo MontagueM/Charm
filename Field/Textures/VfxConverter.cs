@@ -488,6 +488,14 @@ PS
 
                     vfx.AppendLine($"       {equal}= g_t{texIndex}.CalculateLevelOfDetail(TextureFiltering, {sampleUv})");
                 }
+                else if (line.Contains("Load"))
+                {
+                    var equal = line.Split("=")[0];
+                    var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]); 
+                    var sampleUv = line.Split(", ")[1].Split(")")[0];
+
+                    vfx.AppendLine($"       {equal}= g_t{texIndex}.Load({sampleUv})");
+                }
 
                 // todo add load, levelofdetail, o0.w, discard
                 else if (line.Contains("discard"))
