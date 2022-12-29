@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Field", "Field\Field.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevorbStd", "ThirdParty\revorbstd\RevorbStd.csproj", "{C3130ECE-02D9-4BE6-9883-75351822E7DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Symmetry", "Symmetry\Symmetry.csproj", "{B4A072B0-25F7-4203-B8FD-A29952DD1277}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tomograph", "Tomograph\Tomograph.csproj", "{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +31,14 @@ Global
 		{C3130ECE-02D9-4BE6-9883-75351822E7DE}.Debug|x64.Build.0 = Debug|Any CPU
 		{C3130ECE-02D9-4BE6-9883-75351822E7DE}.Release|x64.ActiveCfg = Release|Any CPU
 		{C3130ECE-02D9-4BE6-9883-75351822E7DE}.Release|x64.Build.0 = Release|Any CPU
+		{B4A072B0-25F7-4203-B8FD-A29952DD1277}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B4A072B0-25F7-4203-B8FD-A29952DD1277}.Debug|x64.Build.0 = Debug|Any CPU
+		{B4A072B0-25F7-4203-B8FD-A29952DD1277}.Release|x64.ActiveCfg = Release|Any CPU
+		{B4A072B0-25F7-4203-B8FD-A29952DD1277}.Release|x64.Build.0 = Release|Any CPU
+		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Debug|x64.Build.0 = Debug|Any CPU
+		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Release|x64.ActiveCfg = Release|Any CPU
+		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

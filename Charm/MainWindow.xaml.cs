@@ -94,7 +94,7 @@ public partial class MainWindow
 
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("1.3.1");
+        var currentVersion = new ApplicationVersion("1.3.2");
         var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         versionChecker.LatestVersionName = "version";
         try
@@ -156,11 +156,11 @@ public partial class MainWindow
         Progress.CompleteStage();
 
         // Initialise global string cache
-        await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
+        // await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
         Progress.CompleteStage();
 
         // Get all activity names
-        await Task.Run(PackageHandler.GetAllActivityNames);
+        // await Task.Run(PackageHandler.GetAllActivityNames);
         Progress.CompleteStage();
 
         // Set texture format
