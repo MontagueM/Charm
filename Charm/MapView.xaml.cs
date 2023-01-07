@@ -174,6 +174,17 @@ public partial class MapView : UserControl
                 {
                     //entry.Rotation.SetW(1);
                     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement);
+                    if(exportStatics)
+                    {
+                        if (source2Models)
+                        {
+                            File.Copy("template.vmdl", $"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.vmdl", true);
+                        }
+                        FbxHandler staticHandler = new FbxHandler(false);
+                        terrainArrangement.Terrain.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement, true);
+                        staticHandler.ExportScene($"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.fbx");
+                        staticHandler.Dispose();
+                    }
                 }
             });
         });

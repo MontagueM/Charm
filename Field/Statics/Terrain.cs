@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 using Field.General;
 using Field.Models;
 
@@ -20,7 +21,7 @@ public class Terrain : Tag
     }
     
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource)
+    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource, bool exportStatic = false)
     {
         // Directory.CreateDirectory(saveDirectory + "/Textures/Terrain/");
         // Directory.CreateDirectory(saveDirectory + "/Shaders/Terrain/");
@@ -86,14 +87,20 @@ public class Terrain : Tag
         
         fbxHandler.AddStaticToScene(parts, Hash);
         // For now we pre-transform it
-        fbxHandler.InfoHandler.AddInstance(Hash, 1, Vector4.Zero, globalOffset);
+        if (!exportStatic)
+        {
+            fbxHandler.InfoHandler.AddInstance(Hash, 1, Vector4.Zero, globalOffset);
+        }
         
         // We need to add these textures after the static is initialised
         foreach (var part in parts)
         {
             if (Header.MeshGroups[part.GroupIndex].Dyemap != null)
             {
-                fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, Header.MeshGroups[part.GroupIndex].Dyemap);
+                if (!exportStatic)
+                {
+                    fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, Header.MeshGroups[part.GroupIndex].Dyemap);
+                }
                 
                 if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat"))
                 {
@@ -108,6 +115,36 @@ public class Terrain : Tag
                     File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
                 }
             }
+        }
+
+        //Source 2
+        if (File.Exists($"{saveDirectory}/Statics/{Hash}_Terrain.vmdl"))
+        {
+            //Source 2 shit
+            string text = File.ReadAllText($"{saveDirectory}/Statics/{Hash}_Terrain.vmdl");
+
+            StringBuilder mats = new StringBuilder();
+
+            int i = 0;
+            foreach (var staticpart in parts)
+            {
+                if (Header.MeshGroups[staticpart.GroupIndex].Dyemap != null)
+                {
+                    mats.AppendLine("{");
+                    //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
+                    mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
+                    mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
+                    mats.AppendLine("},\n");
+                    i++;
+                }
+            }
+
+            text = text.Replace("%MATERIALS%", mats.ToString());
+            text = text.Replace("%FILENAME%", $"models/{Hash}_Terrain.fbx");
+            text = text.Replace("%MESHNAME%", Hash);
+
+            File.WriteAllText($"{saveDirectory}/Statics/{Hash}_Terrain.vmdl", text);
+            //
         }
     }
 
