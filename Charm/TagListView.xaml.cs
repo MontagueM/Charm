@@ -123,6 +123,7 @@ public partial class TagListView : UserControl
     private ToggleButton _previouslySelected = null;
     private int _selectedIndex = -1;
     private FbxHandler _globalFbxHandler = null;
+    private string _weaponItemName = null;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -1459,7 +1460,7 @@ public partial class TagListView : UserControl
     private void ExportSound(ExportInfo info)
     {
         WwiseSound sound = PackageHandler.GetTag(typeof(WwiseSound), new TagHash(info.Hash));
-        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
+        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{(_weaponItemName == null ?  "" : $"{_weaponItemName}/")}{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         sound.ExportSound(saveDirectory);
     }
@@ -1567,7 +1568,7 @@ public partial class TagListView : UserControl
             RefreshItemList();
             return;
         }
-
+        _weaponItemName = InvestmentHandler.GetItemName(InvestmentHandler.GetInventoryItem(apiHash));
         var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.Header.Unk18;
         var resource = (D2Class_6E358080)val.PatternAudio.Header.Unk18;
         var item = InvestmentHandler.GetInventoryItem(apiHash);
