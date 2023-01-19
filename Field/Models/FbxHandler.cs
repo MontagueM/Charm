@@ -481,12 +481,15 @@ public class FbxHandler
     public void AddDynamicPointsToScene(D2Class_85988080 points, string meshName, FbxHandler dynamicHandler)
     { 
         Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
+        //var parts = entity.Load(ELOD.All);
+
         if(entity.Model != null)
         {
             meshName += "_Model";
-            //Console.WriteLine($"{meshName} has geometry");
-            //dynamicHandler.AddEntityToScene(entity, entity.Model.Load(ELOD.MostDetail, points.Entity.ModelParentResource), ELOD.MostDetail);
+            //Console.WriteLine($"{entity.Hash.GetHashString()} has geometry");
+            //dynamicHandler.AddEntityToScene(entity, entity.Load(ELOD.MostDetail), ELOD.MostDetail);
         }
+        //parts = null;
         
         FbxNode node;   
         lock (_fbxLock)

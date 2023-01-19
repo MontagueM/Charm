@@ -28,7 +28,6 @@ public partial class MapView : UserControl
     private static bool source2Mats = ConfigHandler.GetS2VMATExportEnabled();
     private static bool exportStatics = ConfigHandler.GetIndvidualStaticsEnabled();
 
-
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;

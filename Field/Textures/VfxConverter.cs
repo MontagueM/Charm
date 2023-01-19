@@ -412,7 +412,7 @@ PS
             vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals.
             vfx.AppendLine("        float4 v2 = {tangent, 1};"); //Tangent? Seems to only be used for normals.
             vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //99.9% sure this is always UVs.
-            vfx.AppendLine("        float4 v4 = i.vBlendValues;"); //Might be i.vPositionSs, Mostly seen on materials with parallax. Some kind of view vector or matrix?
+            vfx.AppendLine("        float4 v4 = {1,1,1,1};"); //Might be i.vPositionSs, Mostly seen on materials with parallax. Some kind of view vector or matrix?
             vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Seems to always be vertex color/vertex color alpha.
             //vfx.AppendLine("        uint v6 = 1;"); //no idea, FrontFace maybe?
 
@@ -486,15 +486,15 @@ PS
                     var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
                     var sampleUv = line.Split(", ")[1].Split(")")[0];
 
-                    vfx.AppendLine($"       {equal}= g_t{texIndex}.CalculateLevelOfDetail(TextureFiltering, {sampleUv})");
+                    vfx.AppendLine($"       {equal}= g_t{texIndex}.CalculateLevelOfDetail(TextureFiltering, {sampleUv});");
                 }
                 else if (line.Contains("Load"))
                 {
                     var equal = line.Split("=")[0];
                     var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]); 
-                    var sampleUv = line.Split(", ")[1].Split(")")[0];
+                    var sampleUv = line.Split("(")[1].Split(")")[0];
 
-                    vfx.AppendLine($"       {equal}= g_t{texIndex}.Load({sampleUv})");
+                    vfx.AppendLine($"       {equal}= g_t{texIndex}.Load({sampleUv});");
                 }
 
                 // todo add load, levelofdetail, o0.w, discard
