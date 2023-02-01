@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,6 +26,7 @@ public partial class EntityView : UserControl
     public TagHash Hash;
     private string Name;
     private readonly ILogger _entityLog = Log.ForContext<EntityView>();
+    private static bool source2Models = ConfigHandler.GetS2VMDLExportEnabled();
 
     public EntityView()
     {
@@ -114,7 +116,41 @@ public partial class EntityView : UserControl
                 AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
             }
         }
-        
+
+        if (source2Models)
+        {
+            if (!File.Exists($"{savePath}/{meshName}.vmdl"))
+            {
+                //Source 2 shit
+                File.Copy("template.vmdl", $"{savePath}/{meshName}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{meshName}.vmdl");
+
+                StringBuilder mats = new StringBuilder();
+
+                int i = 0;
+                foreach (var entity in entities)
+                {
+                    var dynamicParts = entity.Load(ELOD.MostDetail);
+                    foreach (Part staticpart in dynamicParts)
+                    {
+                        mats.AppendLine("{");
+                        //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
+                        mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
+                        mats.AppendLine("},\n");
+                        i++;
+                    }
+                }
+
+                text = text.Replace("%MATERIALS%", mats.ToString());
+                text = text.Replace("%FILENAME%", $"models/{meshName}.fbx");
+                text = text.Replace("%MESHNAME%", meshName);
+
+                File.WriteAllText($"{savePath}/{meshName}.vmdl", text);
+                //
+            }
+        }
+
         // Scale and rotate
         // fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
         fbxHandler.InfoHandler.AddType("Entity");

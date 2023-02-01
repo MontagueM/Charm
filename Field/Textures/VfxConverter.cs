@@ -34,15 +34,15 @@ public class VfxConverter
 
 MODES
 {
-    VrForward();
+	VrForward();
 
-	Depth( ""vr_depth_only.vfx"" ); 
+	Depth( ""depth_only.shader"" ); 
 
 	ToolsVis( S_MODE_TOOLS_VIS );
-	ToolsWireframe( ""vr_tools_wireframe.vfx"" );
-	ToolsShadingComplexity( ""vr_tools_shading_complexity.vfx"" );
+	ToolsWireframe( ""vr_tools_wireframe.shader"" );
+	ToolsShadingComplexity( ""tools_shading_complexity.shader"" );
 
-	Reflection( ""high_quality_reflections.vfx"" );
+	Reflection( ""high_quality_reflections.shader"" );
 }
 
 FEATURES
@@ -58,10 +58,6 @@ COMMON
 {
 	#include ""common/shared.hlsl""
     #define USES_HIGH_QUALITY_REFLECTIONS
-    //#define S_GGX_SHADING 1
-	//#define S_SPECULAR_CUBE_MAP 1
-    #define D_NO_MODEL_TINT 1
-    //translucent
 }
 
 struct VertexInput
@@ -156,7 +152,7 @@ PS
 
                 if (bFindOpacity)
                 {
-                    if (line.Contains("discard"))
+                    if (line.Contains("discard") || line.Contains("o0.w = r"))
                     {
                         bOpacityEnabled = true;
                         break;
@@ -496,8 +492,11 @@ PS
 
                     vfx.AppendLine($"       {equal}= g_t{texIndex}.Load({sampleUv});");
                 }
-
-                // todo add load, levelofdetail, o0.w, discard
+                else if (line.Contains("o0.w = r")) //o0.w = r(?)
+                {
+                    vfx.AppendLine($"       {line}");
+                    vfx.AppendLine($"       alpha = 1 - o0.w;");
+                }
                 else if (line.Contains("discard"))
                 {
                     vfx.AppendLine(line.Replace("discard", "        { alpha = 0; }")); //sometimes o0.w is used for alpha instead on some shaders
@@ -523,10 +522,10 @@ PS
         }
         List<Texture> sortedTextures = texDict.Values.OrderBy(x => x.Variable).ToList();
 
-        string outputString = @"
+        string outputString = @$"
 
         // Normal
-        float3 biased_normal = o1.xyz - float3(0.5,0.5,0.5);
+        float3 biased_normal = o1.xyz{(bOpacityEnabled ? "" : " - float3(0.5, 0.5, 0.5)")};
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
  
@@ -547,13 +546,13 @@ PS
         ShadingModelValveStandard sm;
 		
         return FinalizePixelMaterial( i, mat, sm );
-    }
-}";
+    }}
+}}";
  
-        if(bOpacityEnabled)
-        {
-            outputString = outputString.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
-        }
+        //if(bOpacityEnabled)
+        //{
+        //    outputString = outputString.Replace("float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);", "float3 biased_normal = o1.xyz;");
+        //}
         vfx.AppendLine(outputString);
     }
 }
