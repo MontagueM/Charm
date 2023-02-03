@@ -1,4 +1,4 @@
-﻿namespace Symmetry;
+﻿namespace TigerResourcer;
 
 public class TagResourcer
 {

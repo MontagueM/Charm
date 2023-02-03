@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Field\Field.csproj" />
+      <ProjectReference Include="..\Tiger\Tiger.csproj" />
     </ItemGroup>
 
     <ItemGroup>

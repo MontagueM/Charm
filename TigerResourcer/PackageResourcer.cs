@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Symmetry;
+namespace TigerResourcer;
 
 /// <summary>
 /// Handles everything to do with package .pkg files. Creates handles for them, and manages them to prioritise

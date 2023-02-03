@@ -17,55 +17,22 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\ThirdParty\3dmigoto_shader_decomp.exe">
-        <Link>3dmigoto_shader_decomp.exe</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\ThirdParty\d3dcompiler_46.dll">
-        <Link>d3dcompiler_46.dll</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\ThirdParty\FbxWrapperNative.dll">
-        <Link>FbxWrapperNative.dll</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\ThirdParty\librevorb.dll">
-        <Link>librevorb.dll</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\ThirdParty\oo2core_9_win64.dll">
-        <Link>oo2core_9_win64.dll</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\ThirdParty\packed_codebooks_aoTuV_603.bin">
-        <Link>packed_codebooks_aoTuV_603.bin</Link>
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <Content Include="..\ThirdParty\Symmetry.dll">
-        <Link>Symmetry.dll</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
       <None Update="blender_map_importer_addon.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="fnv_charm.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="import_to_ue5.py">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="import_to_blender.py">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="template.vmdl">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="blender_api_template.py">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+      <None Remove="blender_api_template.py" />
+      <None Remove="Audio\**" />
+      <None Remove="import_to_ue5.py" />
+      <None Remove="Strings\**" />
+      <None Remove="template.vmdl" />
+      <None Remove="Statics\**" />
+      <None Remove="Textures\**" />
+      <None Remove="Models\**" />
+      <None Remove="import_to_blender.py" />
+      <None Remove="fnv_charm.json" />
+      <None Remove="Entities\**" />
+      <None Remove="General\**" />
+      <None Remove="Investment\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -1647,6 +1614,14 @@
       <Compile Include="..\ThirdParty\fbx\SWIGTYPE_p_wchar_t.cs">
         <Link>fbx\SWIGTYPE_p_wchar_t.cs</Link>
       </Compile>
+      <Compile Remove="Audio\**" />
+      <Compile Remove="Strings\**" />
+      <Compile Remove="Statics\**" />
+      <Compile Remove="Textures\**" />
+      <Compile Remove="Models\**" />
+      <Compile Remove="Entities\**" />
+      <Compile Remove="General\**" />
+      <Compile Remove="Investment\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -1660,6 +1635,17 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ThirdParty\revorbstd\RevorbStd.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Audio\**" />
+      <EmbeddedResource Remove="Strings\**" />
+      <EmbeddedResource Remove="Statics\**" />
+      <EmbeddedResource Remove="Textures\**" />
+      <EmbeddedResource Remove="Models\**" />
+      <EmbeddedResource Remove="Entities\**" />
+      <EmbeddedResource Remove="General\**" />
+      <EmbeddedResource Remove="Investment\**" />
     </ItemGroup>
 
 </Project>
