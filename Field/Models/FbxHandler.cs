@@ -482,12 +482,16 @@ public class FbxHandler
     { 
         Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
         //var parts = entity.Load(ELOD.All);
-
-        if(entity.Model != null)
+        //Console.WriteLine($"{entity.Hash}: {Entity.HasGeometry(entity)}");
+        if(Entity.HasGeometry(entity))
         {
             meshName += "_Model";
             //Console.WriteLine($"{entity.Hash.GetHashString()} has geometry");
             //dynamicHandler.AddEntityToScene(entity, entity.Load(ELOD.MostDetail), ELOD.MostDetail);
+        }
+        else
+        { 
+            return; 
         }
         //parts = null;
         
@@ -498,8 +502,8 @@ public class FbxHandler
         }
         Quaternion quatRot = new Quaternion(points.Rotation.X, points.Rotation.Y, points.Rotation.Z, points.Rotation.W);
         System.Numerics.Vector3 eulerRot = QuaternionToEulerAngles(quatRot);
-        
-        node.LclTranslation.Set(new FbxDouble3(points.Translation.X*100, points.Translation.Y*100, points.Translation.Z*100));
+
+        node.LclTranslation.Set(new FbxDouble3(points.Translation.X*100, points.Translation.Z*100, -points.Translation.Y*100));
         node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
         node.LclScaling.Set(new FbxDouble3(100,100,100));
         

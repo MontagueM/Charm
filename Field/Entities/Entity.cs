@@ -109,4 +109,35 @@ public class Entity : Tag
         rsrc.GStackPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_gstack");
         rsrc.DyemapPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_dyemap");
     }
+
+    public static bool HasGeometry(Entity ent) //yoinked from LoadEntityList in TagListView
+    { 
+        // Check the entity has geometry
+        bool bHasGeometry = false;
+        using (var handle = ent.GetHandle())//new Tag(PackageHandler.GetTag(typeof(Entity), ent.Hash)).GetHandle())
+        {
+            handle.BaseStream.Seek(8, SeekOrigin.Begin);
+            int resourceCount = handle.ReadInt32();
+            if (resourceCount > 2)
+            {
+                handle.BaseStream.Seek(0x10, SeekOrigin.Begin);
+                int resourcesOffset = handle.ReadInt32() + 0x20;
+                for (int i = 0; i < 2; i++)
+                {
+                    handle.BaseStream.Seek(resourcesOffset + i * 0xC, SeekOrigin.Begin);
+                    using (var handle2 = new Tag(new TagHash(handle.ReadUInt32())).GetHandle())
+                    {
+                        handle2.BaseStream.Seek(0x10, SeekOrigin.Begin);
+                        int checkOffset = handle2.ReadInt32() + 0x10 - 4;
+                        handle2.BaseStream.Seek(checkOffset, SeekOrigin.Begin);
+                        if (handle2.ReadUInt32() == 0x80806d8a)
+                        {
+                            bHasGeometry = true;
+                        }
+                    }
+                }
+            }
+        }
+        return bHasGeometry;
+    }
 }

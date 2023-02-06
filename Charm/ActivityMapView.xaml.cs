@@ -69,10 +69,10 @@ public partial class ActivityMapView : UserControl
             if(item.Name == "Select all")
                 continue;
 
-            // if (item.Selected)
-            // {
-            //     PopulateDynamicsList(map);
-            // }  
+            if (item.Selected)
+            {
+                //PopulateDynamicsList(map);
+            }
         }
     }
 
@@ -108,6 +108,7 @@ public partial class ActivityMapView : UserControl
     {
         
         ConcurrentBag<DisplayDynamicMap> items = new ConcurrentBag<DisplayDynamicMap>();
+        items.Clear();
         Parallel.ForEach(map.Header.DataTables, data =>
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
@@ -115,25 +116,29 @@ public partial class ActivityMapView : UserControl
                 if(entry is D2Class_85988080 dynamicResource)
                 {    
                     Entity entity = PackageHandler.GetTag(typeof(Entity), dynamicResource.Entity.Hash);
-
-                    if(entity.Model != null)
+                    
+                    if (!items.Any(i => i.Hash == dynamicResource.Entity.Hash))
                     {
-                        items.Add(new DisplayDynamicMap
+                        if (entity.Load(Field.Models.ELOD.MostDetail).Count > 0)
                         {
-                            Hash = dynamicResource.Entity.Hash,
-                            Name = $"{dynamicResource.Entity.Hash}: {entity.Model.Header.Meshes.Count} meshes",
-                            Models = entity.Model.Header.Meshes.Count
-                        });
-                    }
-                    else
-                    {
-                        items.Add(new DisplayDynamicMap
+                            items.Add(new DisplayDynamicMap
+                            {
+                                Hash = dynamicResource.Entity.Hash,
+                                Name = $"{dynamicResource.Entity.Hash}: {entity.Model.Header.Meshes.Count} meshes",
+                                Models = entity.Model.Header.Meshes.Count
+                            });
+                        }
+                        else
                         {
-                            Hash = dynamicResource.Entity.Hash,
-                            Name = $"{dynamicResource.Entity.Hash}: 0 meshes",
-                            Models = 0
-                        });
+                            items.Add(new DisplayDynamicMap
+                            {
+                                Hash = dynamicResource.Entity.Hash,
+                                Name = $"{dynamicResource.Entity.Hash}: 0 meshes",
+                                Models = 0
+                            });
+                        }
                     }
+                    entity = null;
                 }
             });
         });

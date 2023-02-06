@@ -219,7 +219,8 @@ public partial class MapView : UserControl
                     }
                 }
                 else if(entry is D2Class_85988080 dynamicResource)
-                {    
+                {
+                    //Console.WriteLine(dynamicResource.Entity.Model?.Header.Meshes.Count);
                     dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
                 }
                 // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
