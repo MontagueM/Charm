@@ -501,6 +501,10 @@ PS
                 {
                     vfx.AppendLine(line.Replace("discard", "        { alpha = 0; }")); //sometimes o0.w is used for alpha instead on some shaders
                 }
+                else if (line.Contains("o1.xyzw = float4(0,0,0,0);"))
+                {
+                    vfx.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "        o1.xyzw = float4(1,1,1,0);")); //sometimes o0.w is used for alpha instead on some shaders
+                }
                 else
                 {
                     vfx.AppendLine($"       {line}");
