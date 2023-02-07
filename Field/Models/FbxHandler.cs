@@ -2,7 +2,7 @@
 using Field.General;
 using Field.Statics;
 using Internal.Fbx;
-using SharpDX;
+using System.Numerics;
 
 namespace Field.Models;
 
@@ -406,6 +406,7 @@ public class FbxHandler
         }
         // _scene.GetRootNode().LclRotation.Set(new FbxDouble3(90, 0, 0));
         // List<FbxNode> skeletonNodes = new List<FbxNode>();
+        
         if (entity.Skeleton != null)
         {
             skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
@@ -424,6 +425,7 @@ public class FbxHandler
             }
         }
     }
+
 
     public void AddStaticToScene(List<Part> parts, string meshName)
     {
@@ -478,24 +480,62 @@ public class FbxHandler
         }
     }
     
-    public void AddDynamicPointsToScene(D2Class_85988080 points, string meshName, FbxHandler dynamicHandler)
+    public void AddDynamicToScene(D2Class_85988080 points, string meshName, FbxHandler dynamicHandler, string savePath)
     { 
         Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
-        //var parts = entity.Load(ELOD.All);
-        //Console.WriteLine($"{entity.Hash}: {Entity.HasGeometry(entity)}");
-        if(Entity.HasGeometry(entity))
+
+        if(!Entity.HasGeometry(entity))
+        {
+            return;
+        }
+
+        InfoHandler.AddInstance(entity.Hash, 1.0f, points.Rotation, points.Translation.ToVec3());
+
+        List<FbxNode> skeletonNodes = new List<FbxNode>();
+        List<DynamicPart> dynamicParts = entity.Load(ELOD.MostDetail);
+
+        entity.SaveMaterialsFromParts(savePath, dynamicParts, true);
+
+        if (entity.Skeleton != null)
+        {
+            skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
+        }
+        for (int i = 0; i < dynamicParts.Count; i++)
+        {
+            var dynamicPart = dynamicParts[i];
+
+            if (dynamicPart.Material.Header.PSTextures.Count == 0) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+            {
+                continue;
+            }
+
+            FbxMesh mesh = AddMeshPartToScene(dynamicPart, i, entity.Hash);
+
+            if (dynamicPart.VertexWeights.Count > 0)
+            {
+                if (skeletonNodes.Count > 0)
+                {
+                    AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
+                }
+            }
+        }
+        //Console.WriteLine($"{entity.Hash} at {points.Translation.X * 100}, {points.Translation.Z * 100}, {-points.Translation.Y * 100}");
+    }
+
+    public void AddDynamicPointsToScene(D2Class_85988080 points, string meshName, FbxHandler dynamicHandler)
+    {
+        Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
+
+        if (Entity.HasGeometry(entity))
         {
             meshName += "_Model";
-            //Console.WriteLine($"{entity.Hash.GetHashString()} has geometry");
-            //dynamicHandler.AddEntityToScene(entity, entity.Load(ELOD.MostDetail), ELOD.MostDetail);
         }
         else
-        { 
-            return; 
+        {
+            return;
         }
-        //parts = null;
-        
-        FbxNode node;   
+
+        FbxNode node;
         lock (_fbxLock)
         {
             node = FbxNode.Create(_manager, $"{meshName}");
@@ -503,19 +543,19 @@ public class FbxHandler
         Quaternion quatRot = new Quaternion(points.Rotation.X, points.Rotation.Y, points.Rotation.Z, points.Rotation.W);
         System.Numerics.Vector3 eulerRot = QuaternionToEulerAngles(quatRot);
 
-        node.LclTranslation.Set(new FbxDouble3(points.Translation.X*100, points.Translation.Z*100, -points.Translation.Y*100));
+        node.LclTranslation.Set(new FbxDouble3(points.Translation.X * 100, points.Translation.Z * 100, -points.Translation.Y * 100));
         node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
-        node.LclScaling.Set(new FbxDouble3(100,100,100));
-        
+        node.LclScaling.Set(new FbxDouble3(100, 100, 100));
+
         // Scale and rotate
         //ScaleAndRotateForBlender(node);
 
         lock (_fbxLock)
         {
             _scene.GetRootNode().AddChild(node);
-        }        
+        }
     }
-    
+
     // From https://github.com/OwlGamingCommunity/V/blob/492d0cb3e89a97112ac39bf88de39da57a3a1fbf/Source/owl_core/Server/MapLoader.cs
     private static System.Numerics.Vector3 QuaternionToEulerAngles(Quaternion q)
     {

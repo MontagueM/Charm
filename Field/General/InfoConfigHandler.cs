@@ -20,6 +20,8 @@ public class InfoConfigHandler
         _config.TryAdd("Parts", parts);
         ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> instances = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
         _config.TryAdd("Instances", instances);
+        ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> dynamics = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
+        _config.TryAdd("Dynamics", dynamics);
         bOpen = true;
     }
 
@@ -115,7 +117,7 @@ public class InfoConfigHandler
             AddInstance(staticMesh, instance.Scale.X, instance.Rotation, instance.Position);
         }
     }
-    
+
     public void AddCustomTexture(string material, int index, TextureHeader texture)
     {
         if (!_config["Materials"].ContainsKey(material))

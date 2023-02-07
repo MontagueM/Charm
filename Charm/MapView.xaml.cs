@@ -14,6 +14,7 @@ using Field.Models;
 using Field.Entities;
 using Field.Statics;
 using Serilog;
+using HelixToolkit.SharpDX.Core.Model.Scene;
 
 namespace Charm;
 
@@ -200,8 +201,9 @@ public partial class MapView : UserControl
     
     private static void ExtractDataTables(Tag<D2Class_07878080> map, string savePath, FbxHandler fbxHandler, EExportTypeFlag exportTypeFlag)
     {
-        FbxHandler dynamicHandler = new FbxHandler(false);
-        //dynamicHandler.InfoHandler.SetMeshName(map.Hash.GetHashString()+"_DynamicPoints");
+        FbxHandler dynamicHandler = new FbxHandler();
+        dynamicHandler.InfoHandler.SetMeshName($"{map.Hash.GetHashString()}_Dynamics");
+        dynamicHandler.InfoHandler.AddType("Dynamics");
         Parallel.ForEach(map.Header.DataTables, data =>
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
@@ -220,17 +222,12 @@ public partial class MapView : UserControl
                 }
                 else if(entry is D2Class_85988080 dynamicResource)
                 {
-                    //Console.WriteLine(dynamicResource.Entity.Model?.Header.Meshes.Count);
-                    dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
+                    //dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
+                    dynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler, savePath);
                 }
-                // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == EExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
-                // {
-                //     //entry.Rotation.SetW(1);
-                //     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement);
-                // }
             });
         });
-        dynamicHandler.ExportScene($"{savePath}/{map.Hash.GetHashString()}_DynamicPoints.fbx");
+        dynamicHandler.ExportScene($"{savePath}/{map.Hash.GetHashString()}_Dynamics.fbx");
         dynamicHandler.Dispose();
     }
 
