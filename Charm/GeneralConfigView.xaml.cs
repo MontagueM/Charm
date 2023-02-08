@@ -66,7 +66,15 @@ public partial class GeneralConfigView : UserControl
         cfe.SettingValue = bval.ToString();
         cfe.ChangeButton.Click += IndvidualStaticsEnabled_OnClick;
         GeneralConfigPanel.Children.Add(cfe);
-        
+
+        // Enable individual entity extraction with maps
+        ConfigSettingControl ents = new ConfigSettingControl();
+        ents.SettingName = "Export individual entities with maps";
+        bval = ConfigHandler.GetIndvidualEntitiesEnabled();
+        ents.SettingValue = bval.ToString();
+        ents.ChangeButton.Click += IndvidualEntitiesEnabled_OnClick;
+        GeneralConfigPanel.Children.Add(ents);
+
         // Output texture format
         ConfigSettingComboControl ctf = new ConfigSettingComboControl();
         ctf.SettingName = "Output texture format";
@@ -129,7 +137,7 @@ public partial class GeneralConfigView : UserControl
     
     private void SingleFolderMapsEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.SetSingleFolderMapsEnabled(!ConfigHandler.GetIndvidualStaticsEnabled());
+        ConfigHandler.SetSingleFolderMapsEnabled(!ConfigHandler.GetSingleFolderMapsEnabled());
         PopulateConfigPanel();
     }
 
@@ -138,7 +146,13 @@ public partial class GeneralConfigView : UserControl
         ConfigHandler.SetIndvidualStaticsEnabled(!ConfigHandler.GetIndvidualStaticsEnabled());
         PopulateConfigPanel();
     }
-    
+
+    private void IndvidualEntitiesEnabled_OnClick(object sender, RoutedEventArgs e)
+    {
+        ConfigHandler.SetIndvidualEntitiesEnabled(!ConfigHandler.GetIndvidualEntitiesEnabled());
+        PopulateConfigPanel();
+    }
+
     private void OutputTextureFormat_OnSelectionChanged(object sender, RoutedEventArgs e)
     {
         var index = ((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedIndex;

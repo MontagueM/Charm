@@ -29,7 +29,7 @@ public partial class Source2ConfigView : UserControl
         S2ConfigPanel.Children.Add(header);
 
         TextBlock lbl = new TextBlock();
-        lbl.Text = "Currently, only S&Box is supported";
+        lbl.Text = "Only S&Box is supported";
         lbl.FontSize = 10;
         S2ConfigPanel.Children.Add(lbl);
 
@@ -48,7 +48,7 @@ public partial class Source2ConfigView : UserControl
         
         // Enable source 2 shader generation
         ConfigSettingControl cbe = new ConfigSettingControl();
-        cbe.SettingName = "Generate shaders (vfx)";
+        cbe.SettingName = "Generate shaders (.shader)";
         bool bval2 = ConfigHandler.GetS2ShaderExportEnabled();
         cbe.SettingValue = bval2.ToString();
         cbe.ChangeButton.Click += S2ShaderExportEnabled_OnClick;
@@ -65,7 +65,7 @@ public partial class Source2ConfigView : UserControl
 
         // Enable vmdl model generation
         ConfigSettingControl cfe = new ConfigSettingControl();
-        cfe.SettingName = "Generate models (vmdl)";
+        cfe.SettingName = "Generate models (.vmdl)";
         bool bval = ConfigHandler.GetS2VMDLExportEnabled();
         cfe.SettingValue = bval.ToString();
         cfe.ChangeButton.Click += S2VMDLExportEnabled_OnClick;

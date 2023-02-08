@@ -479,43 +479,49 @@ public class FbxHandler
             }
         }
     }
-    
-    public void AddDynamicToScene(D2Class_85988080 points, string meshName, FbxHandler dynamicHandler, string savePath)
-    { 
+
+    public void AddDynamicToScene(D2Class_85988080 points, string meshName, string savePath)
+    {
         Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
 
-        if(!Entity.HasGeometry(entity))
+        if (!Entity.HasGeometry(entity))
         {
             return;
         }
 
-        InfoHandler.AddInstance(entity.Hash, 1.0f, points.Rotation, points.Translation.ToVec3());
+        List<Entity> addedEntities = new List<Entity>();
+        
+        if (InfoHandler != null)
+            InfoHandler.AddInstance(entity.Hash, 1.0f, points.Rotation, points.Translation.ToVec3());
 
-        List<FbxNode> skeletonNodes = new List<FbxNode>();
-        List<DynamicPart> dynamicParts = entity.Load(ELOD.MostDetail);
-
-        entity.SaveMaterialsFromParts(savePath, dynamicParts, true);
-
-        if (entity.Skeleton != null)
+        if (!addedEntities.Contains(entity))
         {
-            skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
-        }
-        for (int i = 0; i < dynamicParts.Count; i++)
-        {
-            var dynamicPart = dynamicParts[i];
+            addedEntities.Add(entity);
+            List<FbxNode> skeletonNodes = new List<FbxNode>();
+            List<DynamicPart> dynamicParts = entity.Load(ELOD.MostDetail, true);
+            entity.SaveMaterialsFromParts(savePath, dynamicParts, true);
 
-            if (dynamicPart.Material.Header.PSTextures.Count == 0) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+            if (entity.Skeleton != null)
             {
-                continue;
+                skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
             }
-
-            FbxMesh mesh = AddMeshPartToScene(dynamicPart, i, entity.Hash);
-
-            if (dynamicPart.VertexWeights.Count > 0)
+            for (int i = 0; i < dynamicParts.Count; i++)
             {
-                if (skeletonNodes.Count > 0)
+                var dynamicPart = dynamicParts[i];
+
+                if (dynamicPart.Material.Header.PSTextures.Count == 0) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
                 {
-                    AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
+                    continue;
+                }
+
+                FbxMesh mesh = AddMeshPartToScene(dynamicPart, i, entity.Hash);
+
+                if (dynamicPart.VertexWeights.Count > 0)
+                {
+                    if (skeletonNodes.Count > 0)
+                    {
+                        AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
+                    }
                 }
             }
         }

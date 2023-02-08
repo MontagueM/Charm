@@ -28,6 +28,7 @@ public partial class MapView : UserControl
     private static bool source2Models = ConfigHandler.GetS2VMDLExportEnabled();
     private static bool source2Mats = ConfigHandler.GetS2VMATExportEnabled();
     private static bool exportStatics = ConfigHandler.GetIndvidualStaticsEnabled();
+    private static bool exportEntities = ConfigHandler.GetIndvidualEntitiesEnabled();
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -107,9 +108,16 @@ public partial class MapView : UserControl
             AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
+        if(exportEntities)
+        {
+            Directory.CreateDirectory(savePath + "/Dynamics");
+            ExportDynamics(savePath, map);
+        }
+        
         fbxHandler.InfoHandler.AddType("Map");
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
+
     }
 
     public static void ExportMinimalMap(Tag<D2Class_07878080> map, EExportTypeFlag exportTypeFlag)
@@ -223,7 +231,7 @@ public partial class MapView : UserControl
                 else if(entry is D2Class_85988080 dynamicResource)
                 {
                     //dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
-                    dynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler, savePath);
+                    dynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath);
                 }
             });
         });
@@ -289,10 +297,31 @@ public partial class MapView : UserControl
                             staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
                             staticHandler.Dispose();
                         }//);
-                    }
+                    } 
                 });
             });
         }
+    }
+
+    private static void ExportDynamics(string savePath, Tag<D2Class_07878080> map)
+    {
+        Parallel.ForEach(map.Header.DataTables, data =>
+        {
+            data.DataTable.Header.DataEntries.ForEach(entry =>
+            {
+                if (entry is D2Class_85988080 dynamicResource)
+                {
+                    if (Entity.HasGeometry(dynamicResource.Entity))
+                    {
+                        FbxHandler singleDynamicHandler = new FbxHandler(false);
+                        //dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
+                        singleDynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath);
+                        singleDynamicHandler.ExportScene($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.fbx");
+                        singleDynamicHandler.Dispose();
+                    }
+                }
+            });
+        });
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap, ELOD detailLevel)

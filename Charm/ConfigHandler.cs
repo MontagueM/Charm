@@ -426,7 +426,29 @@ public class ConfigHandler
         }
         return _config.AppSettings.Settings["indvidualStaticsEnabled"].Value == "True";
     }
-    
+
+    public static void SetIndvidualEntitiesEnabled(bool bIndvidualEntitiesEnabled)
+    {
+        if (_config.AppSettings.Settings["indvidualEntitiesEnabled"] == null)
+        {
+            _config.AppSettings.Settings.Add("indvidualEntitiesEnabled", bIndvidualEntitiesEnabled.ToString());
+        }
+        else
+        {
+            _config.AppSettings.Settings["indvidualEntitiesEnabled"].Value = bIndvidualEntitiesEnabled.ToString();
+        }
+        Save();
+    }
+
+    public static bool GetIndvidualEntitiesEnabled()
+    {
+        if (_config.AppSettings.Settings["indvidualEntitiesEnabled"] == null)
+        {
+            return true;
+        }
+        return _config.AppSettings.Settings["indvidualEntitiesEnabled"].Value == "True";
+    }
+
     #region outputTextureFormat
 
     public static void SetOutputTextureFormat(ETextureFormat outputTextureFormat)

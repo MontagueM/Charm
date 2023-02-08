@@ -64,8 +64,14 @@ public class Entity : Tag
         }
     }
 
-    public List<DynamicPart> Load(ELOD detailLevel)
+    public List<DynamicPart> Load(ELOD detailLevel, bool forceLoad = false)
     {
+        if(forceLoad) //force the entity to re-parse its data because it's dumb
+        {
+            ParseStructs(); 
+            ParseData();
+        }
+
         var dynamicParts = new List<DynamicPart>();
         if (Model != null)
         {
