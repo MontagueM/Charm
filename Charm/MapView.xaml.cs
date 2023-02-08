@@ -316,6 +316,35 @@ public partial class MapView : UserControl
                         FbxHandler singleDynamicHandler = new FbxHandler(false);
                         //dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
                         singleDynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath);
+
+                        if (source2Models)
+                        {
+                            if (!File.Exists($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl"))
+                            {
+                                File.Copy("template.vmdl", $"{savePath}/Statics/{dynamicResource.Entity.Hash}.vmdl", true);
+                                string text = File.ReadAllText($"{savePath}/Statics/{dynamicResource.Entity.Hash}.vmdl");
+
+                                StringBuilder mats = new StringBuilder();
+
+                                int i = 0;
+                                foreach (var part in dynamicResource.Entity.Load(ELOD.MostDetail, true))
+                                {
+                                    mats.AppendLine("{");
+                                    mats.AppendLine($"    from = \"{part.Material.Hash}.vmat\"");
+                                    mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
+                                    mats.AppendLine("},\n");
+                                    i++;
+                                }
+
+                                text = text.Replace("%MATERIALS%", mats.ToString());
+                                text = text.Replace("%FILENAME%", $"models/{dynamicResource.Entity.Hash}.fbx");
+                                text = text.Replace("%MESHNAME%", dynamicResource.Entity.Hash);
+
+                                File.WriteAllText($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl", text);
+                                //
+                            }
+                        }
+
                         singleDynamicHandler.ExportScene($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.fbx");
                         singleDynamicHandler.Dispose();
                     }
