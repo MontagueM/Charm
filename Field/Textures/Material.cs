@@ -158,7 +158,7 @@ public class Material : Tag
                         File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.shader", vfx);
                     }
 
-                    Console.WriteLine($"Saved pixel shader {Hash}");
+                    //Console.WriteLine($"Saved pixel shader {Hash}");
                 }
                 catch (IOException)  // threading error
                 {

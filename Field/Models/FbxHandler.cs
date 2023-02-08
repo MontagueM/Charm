@@ -12,6 +12,7 @@ public class FbxHandler
     private FbxManager _manager;
     private FbxScene _scene;
     public InfoConfigHandler InfoHandler;
+    List<TagHash> addedEntities = new List<TagHash>();
     private static object _fbxLock = new object();
     public FbxHandler(bool bMakeInfoHandler=true)
     {
@@ -488,15 +489,14 @@ public class FbxHandler
         {
             return;
         }
-
-        List<Entity> addedEntities = new List<Entity>();
-        
+     
         if (InfoHandler != null)
             InfoHandler.AddInstance(entity.Hash, 1.0f, points.Rotation, points.Translation.ToVec3());
 
-        if (!addedEntities.Contains(entity))
+        if (!addedEntities.Contains(entity.Hash))
         {
-            addedEntities.Add(entity);
+            addedEntities.Add(entity.Hash);
+            //Console.WriteLine($"Added {entity.Hash}");
             List<FbxNode> skeletonNodes = new List<FbxNode>();
             List<DynamicPart> dynamicParts = entity.Load(ELOD.MostDetail, true);
             entity.SaveMaterialsFromParts(savePath, dynamicParts, true);
