@@ -238,6 +238,15 @@
                 </Button>
             </StackPanel>
             <TextBlock
+                Grid.Row="0"
+                Width="339"
+                Height="53"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                FontSize="45"
+                Text="CHARM"
+                TextAlignment="Center" />
+            <TextBlock
                 Grid.Row="5"
                 Width="318"
                 Height="54"
@@ -283,7 +292,7 @@
             <ToggleButton
                 x:Name="MainMenuImage"
                 Grid.RowSpan="2"
-                Margin="52,58,52,58"
+                Margin="0,58,0,58"
                 Click="MainMenuImage_OnClick"
                 Style="{StaticResource EmptyToggleButton}">
                 <Image x:Name="Image" />
