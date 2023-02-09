@@ -11,23 +11,27 @@ using Field.General;
 using Field.Models;
 using Field;
 using SharpDX.Toolkit.Graphics;
+using VersionChecker;
 
 namespace Charm;
 
 public partial class MainMenuView : UserControl
 {
     private static MainWindow _mainWindow = null;
-        
+    public string GameVersion { get; set; }
+
     public MainMenuView()
     {
         InitializeComponent();
     }
-        
+
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
+        DataContext = this;
+        GameVersion = $"Game Version:\n{_mainWindow.CheckGameVersion()}";
     }
-    
+
     private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
     {
         // TagListViewerView apiView = new TagListViewerView();

@@ -1,70 +1,256 @@
-﻿<UserControl x:Class="Charm.MainMenuView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Charm"
-             Loaded="OnControlLoaded"
-             mc:Ignorable="d"
-             d:DesignHeight="1080" d:DesignWidth="1920">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100*"/>
-            <ColumnDefinition Width="100*"/>
-            <ColumnDefinition Width="100*"/>
-            <ColumnDefinition Width="100*"/>
-            <ColumnDefinition Width="100*"/>
-            <ColumnDefinition Width="100*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50*" />
-            <RowDefinition Height="100*" />
-            <RowDefinition Height="50*" />
-        </Grid.RowDefinitions>
-        <!-- AB8FA380 variks -->
-        <!-- 3b00ab80 atraks -->
-        <!-- 4901ab80 taniks normal, 100bb780 abomination -->
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
-            <TextBlock Text="Dynamic" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="ApiViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="API" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-            <Button Height="75" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="NamedEntitiesBagsViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,40" Padding="20, 20, 20, 20" >
-                <TextBlock Text="NAMED BAGS" VerticalAlignment="Center" FontSize="36" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllEntitiesViewButton_OnClick" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}" FontSize="64" Margin="20,0,20,40" Padding="20, 20, 20, 20" >
-                <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-        </StackPanel>
-        
-        <StackPanel Grid.Row="1" Grid.Column="2" Margin="10,0,0,0">
-            <TextBlock Text="Static" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllStaticsViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="40" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-        </StackPanel>
+﻿<UserControl
+    x:Class="Charm.MainMenuView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="1080"
+    d:DesignWidth="1920"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+    <Border BorderBrush="{DynamicResource BackgroundColour10}" BorderThickness="2">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="97*" />
+                <ColumnDefinition Width="382*" />
 
-        <StackPanel Grid.Row="1" Grid.Column="3" Margin="10,0,0,0">
-            <TextBlock Text="Audio" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="WeaponAudioViewButton_Click" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="WEAPONS" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllAudioViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-        </StackPanel>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100*" />
+                <RowDefinition Height="100*" />
+                <RowDefinition Height="100*" />
+                <RowDefinition Height="100*" />
+                <RowDefinition Height="100*" />
+                <RowDefinition Height="100*" />
 
-        <StackPanel Grid.Row="1" Grid.Column="4" Margin="10,0,0,0">
-            <TextBlock Text="Other" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="ActivitiesViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="ACTIVITIES" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllStringsViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="STRINGS" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllTexturesViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20">
-                <TextBlock Text="TEXTURES" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
-            </Button>
-        </StackPanel>
-    </Grid>
+            </Grid.RowDefinitions>
+            <!--  AB8FA380 variks  -->
+            <!--  3b00ab80 atraks  -->
+            <!--  4901ab80 taniks normal, 100bb780 abomination  -->
+            <StackPanel
+                Grid.RowSpan="6"
+                Margin="0,0,60,0"
+                Background="{DynamicResource BackgroundColour10}" />
+            <StackPanel
+                Grid.Row="1"
+                Grid.Column="1"
+                Height="180"
+                VerticalAlignment="Top"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="300"
+                    VerticalAlignment="Center"
+                    FontSize="64"
+                    Text="Dynamic" />
+
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="ApiViewButton_OnClick">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="42"
+                        Text="API" />
+                </Button>
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="NamedEntitiesBagsViewButton_OnClick"
+                    FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                    FontSize="64">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="36"
+                        Text="NAMED BAGS" />
+                </Button>
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="AllEntitiesViewButton_OnClick"
+                    FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                    FontSize="64">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="42"
+                        Text="LIST" />
+                </Button>
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="1"
+                Height="180"
+                VerticalAlignment="Top"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="300"
+                    VerticalAlignment="Center"
+                    FontSize="64"
+                    Text="Static" />
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="AllStaticsViewButton_OnClick">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="40"
+                        Text="LIST" />
+                </Button>
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="3"
+                Grid.Column="1"
+                Height="180"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="300"
+                    VerticalAlignment="Center"
+                    FontSize="64"
+                    Text="Audio" />
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="WeaponAudioViewButton_Click">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="42"
+                        Text="WEAPONS" />
+                </Button>
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="AllAudioViewButton_OnClick">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="42"
+                        Text="LIST" />
+                </Button>
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="4"
+                Grid.Column="1"
+                Height="180"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                    Width="300"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontSize="64"
+                    Text="Other" />
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="ActivitiesViewButton_OnClick">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="42"
+                        Text="ACTIVITIES" />
+                </Button>
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="AllStringsViewButton_OnClick">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="42"
+                        Text="STRINGS" />
+                </Button>
+                <Button
+                    Width="300"
+                    Height="75"
+                    Margin="10,0,10,0"
+                    Padding="10,0,10,0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Click="AllTexturesViewButton_OnClick">
+                    <TextBlock
+                        Padding="0,10,0,10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"
+                        FontSize="42"
+                        Text="TEXTURES" />
+                </Button>
+            </StackPanel>
+            <TextBlock
+                Grid.Row="5"
+                Width="318"
+                Height="54"
+                Margin="10,0,0,10"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                FontSize="16"
+                Text="{Binding GameVersion}" />
+            <TextBlock
+                Grid.Row="5"
+                Width="318"
+                Height="54"
+                Margin="10,0,0,69"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                FontSize="16"
+                Text="{Binding ToolVersion}" />
+        </Grid>
+    </Border>
 </UserControl>
