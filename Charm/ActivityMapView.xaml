@@ -34,7 +34,7 @@
                     <TextBlock TextAlignment="Center" Text="View"/>
                 </Button>
             </Grid>
-        </ControlTemplate> 
+        </ControlTemplate>
 
         <ControlTemplate x:Key="dynamicTemplate">
             <Grid Height="20" Margin="0,1,0,1">
@@ -47,11 +47,11 @@
                 <CheckBox Grid.Column="0" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Tag="{Binding Hash}" IsChecked="{Binding Selected}">
                     <TextBlock TextAlignment="Center" Text="{Binding Name}"/>
                 </CheckBox>
-                <Button Grid.Column="1" HorizontalAlignment="Right">
+                <Button Grid.Column="1" Click="Entity_OnClick" HorizontalAlignment="Right">
                     <TextBlock TextAlignment="Center" Text="Export"/>
                 </Button>
             </Grid>
-        </ControlTemplate>  
+        </ControlTemplate>
     </UserControl.Resources>
 
     <Grid>
@@ -96,7 +96,7 @@
                 </ListView.ItemsPanel>
             </ListView>
             <local:ExportControl Grid.Row="2" Grid.ColumnSpan="2" x:Name="ExportControl"/>
-            <ListView Grid.Row="1" Grid.Column="1" x:Name="DynamicsList">
+            <ListView Grid.Row="1" Grid.Column="1" x:Name="DynamicsList" Margin="0,50,0,0">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListViewItem}">
                         <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -109,6 +109,7 @@
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
             </ListView>
+            <TextBlock Name="ActiveEnts" Grid.Column="1" HorizontalAlignment="Center" Height="50" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="475" FontSize="36" TextAlignment="Center" Foreground="#FFCCCCCC"/>
         </Grid>
         <local:MapView Grid.Column="1" x:Name="MapControl"/>
     </Grid>

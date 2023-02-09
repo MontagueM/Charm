@@ -404,13 +404,25 @@ PS
             vfx.AppendLine("        float4 o0,o1,o2;");
             vfx.AppendLine("        float alpha = 1;");
 
-            vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals. No idea what it is.
-            vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals.
-            vfx.AppendLine("        float4 v2 = {tangent, 1};"); //Tangent? Seems to only be used for normals.
-            vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //99.9% sure this is always UVs.
-            vfx.AppendLine("        float4 v4 = {1,1,1,1};"); //Might be i.vPositionSs, Mostly seen on materials with parallax. Some kind of view vector or matrix?
-            vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Seems to always be vertex color/vertex color alpha.
-            //vfx.AppendLine("        uint v6 = 1;"); //no idea, FrontFace maybe?
+            if(isTerrain) //variables are different for terrain for whatever reason, kinda have to guess
+            {
+                vfx.AppendLine("        float4 v0 = {i.vTextureCoords*5, 1,1};"); //Detail uv?
+                vfx.AppendLine("        float4 v1 = {i.vTextureCoords, 1,1};"); //Main uv?
+                vfx.AppendLine("        float4 v2 = {1,1,1,1};"); //no clue yet
+                vfx.AppendLine("        float4 v3 = {i.vNormalWs, 1};"); //Guessing
+                vfx.AppendLine("        float4 v4 = {tangent, 1};"); //Guessing
+                vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Havent seen v5 used on terrain yet
+            }
+            else
+            {
+                vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals. No idea what it is.
+                vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals.
+                vfx.AppendLine("        float4 v2 = {tangent, 1};"); //Tangent? Seems to only be used for normals.
+                vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //99.9% sure this is always UVs.
+                vfx.AppendLine("        float4 v4 = {1,1,1,1};"); //Might be i.vPositionSs, Mostly seen on materials with parallax. Some kind of view vector or matrix?
+                vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Seems to always be vertex color/vertex color alpha.
+                //vfx.AppendLine("        uint v6 = 1;"); //no idea, FrontFace maybe?
+            }
 
             foreach (var i in inputs)
             {
@@ -453,9 +465,10 @@ PS
             line = hlsl.ReadLine();
             if (line != null)
             {
-                if (line.Contains("cb12[7].xyz + -v4.xyz"))
+                if (line.Contains("cb12[7].xyz + -v4.xyz")) //cb12[7] might actually be a viewdir cbuffer or something
                 {
-                    vfx.AppendLine(line.Replace("-v4", "-i.vPositionSs")); //-v4 seems to be screen space or viewdir of some type, but not always? Sometimes its just v4 which is something else?
+                    //vfx.AppendLine(line.Replace("-v4", "-i.vPositionSs"));
+                    vfx.AppendLine(line.Replace("-v4", "-v3"));
                 }
                 else if (line.Contains("while (true)"))
                 {
@@ -503,7 +516,7 @@ PS
                 }
                 else if (line.Contains("o1.xyzw = float4(0,0,0,0);"))
                 {
-                    vfx.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "        o1.xyzw = float4(1,1,1,0);")); //sometimes o0.w is used for alpha instead on some shaders
+                    vfx.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "        o1.xyzw = float4(1,1,1,0);")); //decals(?) have 0 normals sometimes, dont want that
                 }
                 else
                 {

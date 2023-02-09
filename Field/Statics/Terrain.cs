@@ -106,13 +106,16 @@ public class Terrain : Tag
                 {
                     //Get the last line of the vmat file
                     var vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat");
-                    var lastLine = vmat[vmat.Length - 1];
+                    if (!vmat.Contains($"TextureT{terrainTextureIndex}"))
+                    {
+                        var lastLine = vmat[vmat.Length - 1];
 
-                    //Insert a new line before the last line
-                    var newVmat = vmat.Take(vmat.Length - 1).ToList();
-                    newVmat.Add($"  TextureT14 " + $"\"materials/Textures/{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
-                    newVmat.Add(lastLine);
-                    File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
+                        //Insert a new line before the last line
+                        var newVmat = vmat.Take(vmat.Length - 1).ToList();
+                        newVmat.Add($"  TextureT{terrainTextureIndex} " + $"\"materials/Textures/{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
+                        newVmat.Add(lastLine);
+                        File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
+                    }
                 }
             }
         }

@@ -13,6 +13,12 @@ using Field;
 using Field.General;
 using Field.Entities;
 using Serilog;
+using Assimp.Unmanaged;
+using static Internal.Fbx.FbxAccumulatorEntry;
+using Field.Models;
+using System.IO;
+using System.Xml.Linq;
+using Internal.Fbx;
 
 namespace Charm;
 
@@ -71,7 +77,8 @@ public partial class ActivityMapView : UserControl
 
             if (item.Selected)
             {
-                //PopulateDynamicsList(map);
+                PopulateDynamicsList(map);
+                ActiveEnts.Text = $"{map.Hash} Entities";
             }
         }
     }
@@ -106,39 +113,33 @@ public partial class ActivityMapView : UserControl
 
     private void PopulateDynamicsList(Tag<D2Class_07878080> map)//(Tag<D2Class_01878080> bubbleMaps)
     {
-        
-        ConcurrentBag<DisplayDynamicMap> items = new ConcurrentBag<DisplayDynamicMap>();
-        items.Clear();
+        ConcurrentBag<DisplayDynamicMap> items = new ConcurrentBag<DisplayDynamicMap>();   
         Parallel.ForEach(map.Header.DataTables, data =>
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
             {
                 if(entry is D2Class_85988080 dynamicResource)
                 {    
-                    Entity entity = PackageHandler.GetTag(typeof(Entity), dynamicResource.Entity.Hash);
-                    
-                    if (!items.Any(i => i.Hash == dynamicResource.Entity.Hash))
+                    if (!items.Contains(new DisplayDynamicMap { Hash = dynamicResource.Entity.Hash }))
                     {
-                        if (entity.Load(Field.Models.ELOD.MostDetail).Count > 0)
+                        if (Entity.HasGeometry(dynamicResource.Entity))
                         {
                             items.Add(new DisplayDynamicMap
                             {
-                                Hash = dynamicResource.Entity.Hash,
-                                Name = $"{dynamicResource.Entity.Hash}: {entity.Model.Header.Meshes.Count} meshes",
-                                Models = entity.Model.Header.Meshes.Count
+                                Name = $"Entity {dynamicResource.Entity.Hash}",
+                                Hash = dynamicResource.Entity.Hash
                             });
                         }
-                        else
-                        {
-                            items.Add(new DisplayDynamicMap
-                            {
-                                Hash = dynamicResource.Entity.Hash,
-                                Name = $"{dynamicResource.Entity.Hash}: 0 meshes",
-                                Models = 0
-                            });
-                        }
+                        //else
+                        //{
+                        //    items.Add(new DisplayDynamicMap
+                        //    {
+                        //        Hash = dynamicResource.Entity.Hash,
+                        //        Name = $"{dynamicResource.Entity.Hash}: 0 meshes",
+                        //        Models = 0
+                        //    });
+                        //}
                     }
-                    entity = null;
                 }
             });
         });
@@ -255,13 +256,117 @@ public partial class ActivityMapView : UserControl
             // MapControl.ModelView.SetModelFunction(() => MapControl.LoadMap(tagHash, MapControl.ModelView.GetSelectedLod()));
             await Task.Run(() =>
             {
-                MapControl.LoadMap(tagHash, lod);
+                MapControl.LoadMap(tagHash, lod); 
                 MainWindow.Progress.CompleteStage();
             });
         }
         MapControl.Visibility = Visibility.Visible;
     }
-    
+
+    private async void Entity_OnClick(object sender, RoutedEventArgs e)
+    {
+        var s = sender as Button;
+        var dc = s.DataContext as DisplayDynamicMap;
+        Dispatcher.Invoke(() =>
+        {
+            MapControl.Visibility = Visibility.Hidden;
+        });
+
+        if (dc.Name == "Select all")
+        {
+            var items = DynamicsList.Items.Cast<DisplayDynamicMap>().Where(x => x.Name != "Select all");
+            List<string> entStages = items.Select(x => $"exporting entity: {x.Hash}").ToList();
+            if (entStages.Count == 0)
+            {
+                _activityLog.Error("No entities selected for export.");
+                MessageBox.Show("No entities selected for export.");
+                return;
+            }
+            MainWindow.Progress.SetProgressStages(entStages);
+            await Task.Run(() =>
+            {
+                foreach (DisplayDynamicMap item in items)
+                {
+                    Entity ent = new Entity(new TagHash(item.Hash));
+                    FbxHandler entHandler = new FbxHandler();
+                    entHandler.InfoHandler.SetMeshName(ent.Hash.GetHashString());
+
+                    List<FbxNode> skeletonNodes = new List<FbxNode>();
+                    if (ent.Skeleton != null)
+                    {
+                        skeletonNodes = entHandler.AddSkeleton(ent.Skeleton.GetBoneNodes());
+                    }
+
+                    Log.Debug($"Exporting entity model name: {ent.Hash}");
+                    string savePath = ConfigHandler.GetExportSavePath();
+                    string meshName = string.Join("_", ent.Hash.ToString().Split(Path.GetInvalidFileNameChars()));
+                    
+                    savePath += $"/{meshName}";
+                    
+                    Directory.CreateDirectory(savePath);
+
+                   
+                    var dynamicParts = ent.Load(ELOD.MostDetail, true);
+                    entHandler.AddEntityToScene(ent, dynamicParts, ELOD.MostDetail, skeletonNodes);
+
+                    ent.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+                    ent.SaveTexturePlates(savePath);
+
+                    entHandler.InfoHandler.AddType("Entity");
+                    entHandler.ExportScene($"{savePath}/{meshName}.fbx");
+                    entHandler.Dispose();
+                    Log.Information($"Exported entity model {ent.Hash} to {savePath.Replace('\\', '/')}/");
+
+                    MainWindow.Progress.CompleteStage();
+                }
+            });
+        }
+        else
+        {
+            var tagHash = new TagHash(dc.Hash);
+            MainWindow.Progress.SetProgressStages(new List<string> { $"exporting entity: {tagHash}" });
+            // cant do this rn bc of lod problems with dupes
+            // MapControl.ModelView.SetModelFunction(() => MapControl.LoadMap(tagHash, MapControl.ModelView.GetSelectedLod()));
+            await Task.Run(() =>
+            {
+                Entity ent = new Entity(new TagHash(dc.Hash));
+                FbxHandler entHandler = new FbxHandler();
+                entHandler.InfoHandler.SetMeshName(ent.Hash.GetHashString());
+
+                List<FbxNode> skeletonNodes = new List<FbxNode>();
+                if (ent.Skeleton != null)
+                {
+                    skeletonNodes = entHandler.AddSkeleton(ent.Skeleton.GetBoneNodes());
+                }
+
+                Log.Debug($"Exporting entity model name: {ent.Hash}");
+                string savePath = ConfigHandler.GetExportSavePath();
+                string meshName = string.Join("_", ent.Hash.ToString().Split(Path.GetInvalidFileNameChars()));
+
+                savePath += $"/{meshName}";
+
+                Directory.CreateDirectory(savePath);
+
+                var dynamicParts = ent.Load(ELOD.MostDetail, true);
+                entHandler.AddEntityToScene(ent, dynamicParts, ELOD.MostDetail, skeletonNodes);
+
+                ent.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+                ent.SaveTexturePlates(savePath);
+
+                entHandler.InfoHandler.AddType("Entity");
+                entHandler.ExportScene($"{savePath}/{meshName}.fbx");
+                entHandler.Dispose();
+                Log.Information($"Exported entity model {ent.Hash} to {savePath.Replace('\\', '/')}/");
+
+                MainWindow.Progress.CompleteStage();
+            });
+        }
+        Dispatcher.Invoke(() =>
+        {
+            MapControl.Visibility = Visibility.Visible;
+        });
+    }
+
     public void Dispose()
     {
         MapControl.Dispose();
@@ -290,4 +395,15 @@ public class DisplayDynamicMap
     public int Models { get; set; }
     
     public bool Selected { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        var other = obj as DisplayDynamicMap;
+        return other != null && Hash == other.Hash;
+    }
+
+    public override int GetHashCode()
+    {
+        return Hash?.GetHashCode() ?? 0;
+    }
 }
