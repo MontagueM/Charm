@@ -246,15 +246,6 @@
                 VerticalAlignment="Top"
                 FontSize="16"
                 Text="{Binding GameVersion}" />
-            <TextBlock
-                Grid.Row="5"
-                Width="318"
-                Height="54"
-                Margin="0,56,0,0"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                FontSize="16"
-                Text="{Binding ToolVersion}" />
             <Button
                 Grid.Row="2"
                 Width="300"
@@ -262,7 +253,6 @@
                 Margin="14,0,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                BorderBrush="Red"
                 Click="GithubButton_OnClick"
                 RenderTransformOrigin="0.5,0.5">
                 <TextBlock
@@ -290,10 +280,14 @@
                     FontSize="42"
                     Text="DISCORD" />
             </Button>
-            <Image
-                x:Name="Image"
+            <ToggleButton
+                x:Name="MainMenuImage"
                 Grid.RowSpan="2"
-                Margin="52,58,52,58" />
+                Margin="52,58,52,58"
+                Click="MainMenuImage_OnClick"
+                Style="{StaticResource EmptyToggleButton}">
+                <Image x:Name="Image" />
+            </ToggleButton>
         </Grid>
     </Border>
 </UserControl>

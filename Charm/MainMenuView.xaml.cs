@@ -20,9 +20,9 @@ public partial class MainMenuView : UserControl
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
-        LoadTexture(new TextureHeader(new Field.General.TagHash("6A20A080")));
         DataContext = this;
         GameVersion = $"Game Version:\n{_mainWindow.CheckGameVersion()}";
+        LoadTexture(new TextureHeader(new Field.General.TagHash("6A20A080")));
     }
 
     private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
@@ -107,6 +107,14 @@ public partial class MainMenuView : UserControl
     private void DiscordButton_OnClick(object sender, RoutedEventArgs e)
     {
         Process.Start(new ProcessStartInfo { FileName = "https://discord.com/invite/destinymodelrips", UseShellExecute = true });
+    }
+
+    private void MainMenuImage_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (MainMenuImage.IsChecked == true)
+            LoadTexture(new TextureHeader(new Field.General.TagHash("9E20A080")));
+        else
+            LoadTexture(new TextureHeader(new Field.General.TagHash("6A20A080")));
     }
 
     public void LoadTexture(TextureHeader textureHeader)
