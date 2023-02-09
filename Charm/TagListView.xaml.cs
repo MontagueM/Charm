@@ -124,6 +124,7 @@ public partial class TagListView : UserControl
     private int _selectedIndex = -1;
     private FbxHandler _globalFbxHandler = null;
     private string _weaponItemName = null;
+    private string _currentPKG = null;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -281,10 +282,10 @@ public partial class TagListView : UserControl
             {
                 SearchBox.Text = "";
             }
-        
+            
             RefreshItemList();
         }
-
+        
         _tagListLogger.Debug(
             $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
     }
@@ -409,9 +410,11 @@ public partial class TagListView : UserControl
         // If we have a parent, add a TagItem that is actually a back button as first
         if (_parentStack.Count > 0)
         {
+            _currentPKG = String.Join('_', PackageHandler.GetPackageName(_currentHash.GetPkgId()).Split('_').Skip(1).SkipLast(1)).ToUpper();
             tagItems.Insert(0, new TagItem
             {
-                Name = "BACK",
+                Name = $"BACK",
+                Subname = $"{_currentPKG}",
                 TagType = ETagListType.Back,
                 FontSize = 24
             });
