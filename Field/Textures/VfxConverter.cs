@@ -538,11 +538,11 @@ PS
             texDict.Add(texture.Index, texture);
         }
         List<Texture> sortedTextures = texDict.Values.OrderBy(x => x.Variable).ToList();
-
+        //{(bOpacityEnabled ? "" : " - float3(0.5, 0.5, 0.5)")}; Guess "- float3(0.5, 0.5, 0.5)" is actually always needed regardless of transparency? Messes with roughness otherwise
         string outputString = @$"
 
         // Normal
-        float3 biased_normal = o1.xyz{(bOpacityEnabled ? "" : " - float3(0.5, 0.5, 0.5)")};
+        float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5); 
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
  
