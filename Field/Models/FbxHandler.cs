@@ -491,7 +491,7 @@ public class FbxHandler
         }
      
         if (InfoHandler != null)
-            InfoHandler.AddInstance(entity.Hash, 1.0f, points.Rotation, points.Translation.ToVec3());
+            InfoHandler.AddInstance(entity.Hash, points.Translation.W, points.Rotation, points.Translation.ToVec3());
 
         if (!addedEntities.Contains(entity.Hash))
         {
@@ -500,7 +500,7 @@ public class FbxHandler
             List<FbxNode> skeletonNodes = new List<FbxNode>();
             List<DynamicPart> dynamicParts = entity.Load(ELOD.MostDetail, true);
             entity.SaveMaterialsFromParts(savePath, dynamicParts, true);
-
+            //Console.WriteLine($"{points.Entity.Hash} {points.Translation.X} {points.Translation.Y} {points.Translation.Z} {points.Translation.W}");
             if (entity.Skeleton != null)
             {
                 skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
