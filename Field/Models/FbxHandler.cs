@@ -509,6 +509,9 @@ public class FbxHandler
             {
                 var dynamicPart = dynamicParts[i];
 
+                if (dynamicPart.Material == null)
+                    continue;
+
                 if (dynamicPart.Material.Header.PSTextures.Count == 0) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
                 {
                     continue;

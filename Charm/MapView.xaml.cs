@@ -329,6 +329,9 @@ public partial class MapView : UserControl
                                 int i = 0;
                                 foreach (var part in dynamicResource.Entity.Load(ELOD.MostDetail, true))
                                 {
+                                    if (part.Material == null)
+                                        continue;
+
                                     mats.AppendLine("{");
                                     mats.AppendLine($"    from = \"{part.Material.Hash}.vmat\"");
                                     mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
