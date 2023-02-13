@@ -95,10 +95,7 @@ PS
     //SamplerState g_sWrap < Filter( ANISOTROPIC ); AddressU( WRAP ); AddressV( WRAP ); >;
     //SamplerState g_sClamp < Filter( ANISOTROPIC ); AddressU( CLAMP ); AddressV( CLAMP ); >;
     //SamplerState g_sMirror < Filter( ANISOTROPIC ); AddressU( MIRROR ); AddressV( MIRROR ); >;
-    //SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;
-
-    RenderState(CullMode, F_RENDER_BACKFACES? NONE : DEFAULT );";
-
+    //SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;";
 
     public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader, bool bIsTerrain = false)
     {
