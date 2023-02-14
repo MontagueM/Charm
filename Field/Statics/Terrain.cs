@@ -101,19 +101,19 @@ public class Terrain : Tag
                 {
                     fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, Header.MeshGroups[part.GroupIndex].Dyemap);
                 }
-                
+
                 if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat"))
                 {
-                    //Get the last line of the vmat file
-                    var vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat");
-                    if (!vmat.Contains($"TextureT{terrainTextureIndex}"))
+                    string[] vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat");
+                    int lastBraceIndex = Array.FindLastIndex(vmat, line => line.Trim().Equals("}"));
+                    bool textureFound = Array.Exists(vmat, line => line.Trim().StartsWith("TextureT14"));
+                    if (!textureFound && lastBraceIndex != -1)
                     {
-                        var lastLine = vmat[vmat.Length - 1];
-
-                        //Insert a new line before the last line
-                        var newVmat = vmat.Take(vmat.Length - 1).ToList();
-                        newVmat.Add($"  TextureT{terrainTextureIndex} " + $"\"materials/Textures/{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
-                        newVmat.Add(lastLine);
+                        var newVmat = vmat.Take(lastBraceIndex).ToList();
+                        newVmat.Add($"  TextureT{terrainTextureIndex} " +
+                                     $"\"materials/Textures/{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
+                        newVmat.AddRange(vmat.Skip(lastBraceIndex));
+                        //Console.WriteLine($"Added T14 {Header.MeshGroups[part.GroupIndex].Dyemap.Hash} to {part.Material.Hash}");
                         File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
                     }
                 }
@@ -123,7 +123,6 @@ public class Terrain : Tag
         //Source 2
         if (File.Exists($"{saveDirectory}/Statics/{Hash}_Terrain.vmdl"))
         {
-            //Source 2 shit
             string text = File.ReadAllText($"{saveDirectory}/Statics/{Hash}_Terrain.vmdl");
 
             StringBuilder mats = new StringBuilder();
