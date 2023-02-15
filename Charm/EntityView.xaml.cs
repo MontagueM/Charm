@@ -75,7 +75,7 @@ public partial class EntityView : UserControl
         return loaded;
     }
 
-    public static void Export(List<Entity> entities, string name, EExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null)
+    public static void Export(List<Entity> entities, string name, EExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null, bool skipBlanks = false)
     {
         FbxHandler fbxHandler = new FbxHandler(exportType == EExportTypeFlag.Full);
 
@@ -95,7 +95,7 @@ public partial class EntityView : UserControl
         foreach (var entity in entities)
         {
             var dynamicParts = entity.Load(ELOD.MostDetail);
-            fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail, boneNodes);
+            fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail, boneNodes, skipBlanks);
             if (exportType == EExportTypeFlag.Full)
             {
                 entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());

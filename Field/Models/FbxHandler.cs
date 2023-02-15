@@ -399,7 +399,7 @@ public class FbxHandler
 
     }
 
-    public void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel, List<FbxNode> skeletonNodes = null)
+    public void AddEntityToScene(Entity entity, List<DynamicPart> dynamicParts, ELOD detailLevel, List<FbxNode> skeletonNodes = null, bool skipBlanks = false)
     {
         if (skeletonNodes == null)
         {
@@ -415,6 +415,18 @@ public class FbxHandler
         for( int i = 0; i < dynamicParts.Count; i++)
         {
             var dynamicPart = dynamicParts[i];
+
+            if (dynamicPart.Material == null)
+                continue;
+
+            if (skipBlanks)
+            {
+                if (dynamicPart.Material.Header.PSTextures.Count == 0) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                {
+                    continue;
+                }
+            }
+
             FbxMesh mesh = AddMeshPartToScene(dynamicPart, i, entity.Hash);
             
             if (dynamicPart.VertexWeights.Count > 0)
@@ -539,11 +551,7 @@ public class FbxHandler
         {
             meshName += "_Model";
         }
-        else
-        {
-            return;
-        }
-
+ 
         FbxNode node;
         lock (_fbxLock)
         {
@@ -555,9 +563,6 @@ public class FbxHandler
         node.LclTranslation.Set(new FbxDouble3(points.Translation.X * 100, points.Translation.Z * 100, -points.Translation.Y * 100));
         node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
         node.LclScaling.Set(new FbxDouble3(100, 100, 100));
-
-        // Scale and rotate
-        //ScaleAndRotateForBlender(node);
 
         lock (_fbxLock)
         {

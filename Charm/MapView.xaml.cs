@@ -212,6 +212,8 @@ public partial class MapView : UserControl
         FbxHandler dynamicHandler = new FbxHandler();
         dynamicHandler.InfoHandler.SetMeshName($"{map.Hash.GetHashString()}_Dynamics");
         dynamicHandler.InfoHandler.AddType("Dynamics");
+        //FbxHandler dynamicPoints = new FbxHandler(false); testing
+       
         Parallel.ForEach(map.Header.DataTables, data =>
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
@@ -232,11 +234,15 @@ public partial class MapView : UserControl
                 {
                     //dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
                     dynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath);
+                    //dynamicPoints.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicPoints);
                 }
             });
         });
         dynamicHandler.ExportScene($"{savePath}/{map.Hash.GetHashString()}_Dynamics.fbx");
         dynamicHandler.Dispose();
+
+        //dynamicPoints.ExportScene($"{savePath}/{map.Hash.GetHashString()}_DynamicPOINTS.fbx");
+        //dynamicPoints.Dispose();
     }
 
     private static void ExportStatics(bool exportStatics, string savePath, Tag<D2Class_07878080> map)
@@ -309,12 +315,13 @@ public partial class MapView : UserControl
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
             {
+                //Console.WriteLine($"{entry} {entry.DataResource}"); 
                 if (entry is D2Class_85988080 dynamicResource)
                 {
+                    Console.WriteLine(entry.Entity.Hash.ToString());
                     if (Entity.HasGeometry(dynamicResource.Entity))
                     {
                         FbxHandler singleDynamicHandler = new FbxHandler(false);
-                        //dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
                         singleDynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath);
 
                         if (source2Models)

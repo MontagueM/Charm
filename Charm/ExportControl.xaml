@@ -1,26 +1,51 @@
-﻿<UserControl x:Class="Charm.ExportControl"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Charm"
-             mc:Ignorable="d"
-             d:DesignHeight="100" d:DesignWidth="1000">
+﻿<UserControl
+    x:Class="Charm.ExportControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="100"
+    d:DesignWidth="1000"
+    mc:Ignorable="d">
     <Grid>
-        <!-- If exporting is not allowed, we hide the options with this red error quad -->
-        <Rectangle x:Name="DisabledOverlay" Visibility="Hidden" IsHitTestVisible="True" Fill="Red" Opacity="0.5" Panel.ZIndex="100"/>
-        <Border BorderBrush="{StaticResource BackgroundColour30}" BorderThickness="1" Panel.ZIndex="1"/>
+        <!--  If exporting is not allowed, we hide the options with this red error quad  -->
+        <Rectangle
+            x:Name="DisabledOverlay"
+            Panel.ZIndex="100"
+            Fill="Red"
+            IsHitTestVisible="True"
+            Opacity="0.5"
+            Visibility="Hidden" />
+        <Border
+            Panel.ZIndex="1"
+            BorderBrush="{StaticResource BackgroundColour30}"
+            BorderThickness="1" />
         <Grid VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="125*" />
                 <ColumnDefinition Width="100*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="100*"/>
+                <RowDefinition Height="100*" />
             </Grid.RowDefinitions>
-            <ComboBox HorizontalAlignment="Center" x:Name="ExportComboBox">
-            </ComboBox>
-            <Button Grid.Column="1" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton"/>
+            <ComboBox x:Name="ExportComboBox" HorizontalAlignment="Center" />
+            <CheckBox
+                x:Name="SkipBlankMatsCheckbox"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                IsChecked="False"
+                Visibility="Hidden">
+                Skip Blank Materials
+            </CheckBox>
+            <Button
+                x:Name="ExportButton"
+                Grid.Column="2"
+                Padding="5,5,5,5"
+                HorizontalAlignment="Center"
+                Content="EXPORT" />
         </Grid>
     </Grid>
 </UserControl>

@@ -754,12 +754,13 @@ public partial class TagListView : UserControl
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Entity);
         bool bLoadedSuccessfully = viewer.EntityControl.LoadEntity(tagHash, _globalFbxHandler);
+        viewer.ExportControl.SkipBlankMatsCheckbox.Visibility = Visibility.Visible;
         if (!bLoadedSuccessfully)
         {
             _tagListLogger.Error($"UI failed to load entity for hash {tagHash}. You can still try to export the full model instead.");
             _mainWindow.SetLoggerSelected();
         }
-        SetExportFunction(ExportEntity, (int)EExportTypeFlag.Full | (int)EExportTypeFlag.Minimal);
+        SetExportFunction(ExportEntity, (int)EExportTypeFlag.Full);
         viewer.ExportControl.SetExportInfo(tagHash);
         viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntity(tagHash, _globalFbxHandler));
     }
@@ -767,8 +768,9 @@ public partial class TagListView : UserControl
     private void ExportEntity(ExportInfo info)
     {
         var viewer = GetViewer();
-        Entity entity = PackageHandler.GetTag(typeof(Entity), new TagHash(info.Hash));
-        EntityView.Export(new List<Entity> {entity}, info.Name, info.ExportType);
+        bool skipCheck = Dispatcher.Invoke(() => (bool)viewer.ExportControl.SkipBlankMatsCheckbox.IsChecked);
+        Entity entity = PackageHandler.GetTag(typeof(Entity), new TagHash(info.Hash));  
+        EntityView.Export(new List<Entity> { entity }, info.Name, info.ExportType, null, skipCheck);
     }
     
     /// <summary>
