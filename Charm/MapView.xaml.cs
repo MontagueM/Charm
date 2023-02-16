@@ -218,7 +218,6 @@ public partial class MapView : UserControl
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
             {
-                //Console.WriteLine($"{entry.DataResource}");
                 if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
                 {
                     if (exportTypeFlag == EExportTypeFlag.ArrangedMap)
@@ -232,7 +231,6 @@ public partial class MapView : UserControl
                 }
                 else if(entry is D2Class_85988080 dynamicResource)
                 {
-                    //dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
                     dynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath);
                     //dynamicPoints.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicPoints);
                 }
@@ -315,10 +313,8 @@ public partial class MapView : UserControl
         {
             data.DataTable.Header.DataEntries.ForEach(entry =>
             {
-                //Console.WriteLine($"{entry} {entry.DataResource}"); 
                 if (entry is D2Class_85988080 dynamicResource)
                 {
-                    Console.WriteLine(entry.Entity.Hash.ToString());
                     if (Entity.HasGeometry(dynamicResource.Entity))
                     {
                         FbxHandler singleDynamicHandler = new FbxHandler(false);
