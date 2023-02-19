@@ -1,0 +1,57 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Charm.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:Charm.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Charm.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Charm"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+>
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+    
+    <Panel>
+        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="1" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*" />
+                <RowDefinition Height="100*" />
+            </Grid.RowDefinitions>
+            <Menu Grid.Row="0">
+                <MenuItem Header="Settings">
+                    <!-- <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick"/> -->
+                    <!-- <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/> -->
+                </MenuItem>
+            </Menu>
+            <TabControl Grid.Row="1" x:Name="MainTabControl">
+                <TabItem Header="MAIN MENU" x:Name="MainMenuTab">
+                    <views:MainMenuView/>
+                </TabItem>
+            </TabControl>
+            <!-- <local:ProgressView x:Name="ProgressView" Grid.Row="0" Grid.RowSpan="2"/> -->
+            </Grid>
+
+    </Panel>
+    
+</Window>

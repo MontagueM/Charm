@@ -1,86 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <UseWPF>true</UseWPF>
-		<UseWindowsForms>true</UseWindowsForms>
-		<Configurations>Release;Debug;</Configurations>
-		<Platforms>x64</Platforms>
-		<IsPackable>false</IsPackable>
-		<Authors />
-		<Company>MontagueM</Company>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
-      <PackageReference Include="HelixToolkit.SharpDX.Assimp" Version="2.21.1" />
-      <PackageReference Include="HelixToolkit.SharpDX.Core.Wpf" Version="2.21.1" />
-      <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
-      <PackageReference Include="NAudio" Version="2.1.0" />
-      <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
-      <PackageReference Include="Serilog" Version="2.11.1-dev-01397" />
-      <PackageReference Include="Serilog.Expressions" Version="3.4.0" />
-      <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00947" />
-      <PackageReference Include="Serilog.Sinks.RichTextBox.Wpf" Version="1.1.0" />
-      <PackageReference Include="VersionChecker" Version="1.1.0" />
+        <Folder Include="Models\" />
+        <AvaloniaResource Include="Assets\**" />
+        <None Remove=".gitignore" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Tiger\Tiger.csproj" />
+        <TrimmerRootDescriptor Include="Roots.xml" />
     </ItemGroup>
 
     <ItemGroup>
-      <Page Update="ConfigSettingControl.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>ConfigView.xaml</DependentUpon>
-      </Page>
-      <Page Update="ActivityMapView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>ActivityView.xaml</DependentUpon>
-      </Page>
-      <Page Update="ActivityDialogueView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>ActivityView.xaml</DependentUpon>
-      </Page>
-      <Page Update="ActivityDirectiveView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>ActivityView.xaml</DependentUpon>
-      </Page>
-      <Page Update="ActivityMusicView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>ActivityView.xaml</DependentUpon>
-      </Page>
-      <Page Update="TagListView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>TagListViewerView.xaml</DependentUpon>
-      </Page>
-      <Page Update="ConfigSettingComboControl.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>ConfigView.xaml</DependentUpon>
-      </Page>
-      <Page Update="TagView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>TagListViewerView.xaml</DependentUpon>
-      </Page>
-      <Page Update="MusicWemsControl.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>MusicView.xaml</DependentUpon>
-      </Page>
-      <Page Update="MusicEventsControl.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>MusicView.xaml</DependentUpon>
-      </Page>
-
-      <Page Update="DareItemControl.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>DareView.xaml</DependentUpon>
-      </Page>
+        <PackageReference Include="Avalonia" Version="0.10.18" />
+        <PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.18" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
+        <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
     </ItemGroup>
 
-    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-      <Exec Command="xcopy &quot;$(SolutionDir)ThirdParty\librevorb.dll&quot; &quot;$(SolutionDir)ThirdParty\revorbstd&quot; /y" />
-    </Target>
-
+    <ItemGroup>
+      <ProjectReference Include="..\Resourcer\Resourcer.csproj" />
+    </ItemGroup>
 </Project>

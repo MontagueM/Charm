@@ -12,6 +12,22 @@ public class TigerSchema : Attribute
 
     public TigerSchema(int size)
     {
-        _val = d2Offset;
+        // _val = d2Offset;
+    }
+}
+
+[AttributeUsage(AttributeTargets.Field)]
+public class StrategyMetadata : Attribute
+{
+    internal string _packagePrefix;
+    
+    public string PackagePrefix
+    {
+        get { return _packagePrefix; }
+    }
+    
+    public StrategyMetadata(string packagePrefix)
+    {
+        _packagePrefix = packagePrefix;
     }
 }

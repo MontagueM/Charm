@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charm", "Charm\Charm.csproj", "{0E5B6D09-E7C2-4EE9-A8F1-5B0801A5FC06}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tiger", "Tiger\Tiger.csproj", "{33040C46-022F-43E5-981F-03BD68C1587D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevorbStd", "ThirdParty\revorbstd\RevorbStd.csproj", "{C3130ECE-02D9-4BE6-9883-75351822E7DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TigerResourcer", "TigerResourcer\TigerResourcer.csproj", "{B4A072B0-25F7-4203-B8FD-A29952DD1277}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resourcer", "Resourcer\Resourcer.csproj", "{B4A072B0-25F7-4203-B8FD-A29952DD1277}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tomograph", "Tomograph\Tomograph.csproj", "{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm", "Charm\Charm.csproj", "{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +19,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0E5B6D09-E7C2-4EE9-A8F1-5B0801A5FC06}.Debug|x64.ActiveCfg = Debug|x64
-		{0E5B6D09-E7C2-4EE9-A8F1-5B0801A5FC06}.Debug|x64.Build.0 = Debug|x64
-		{0E5B6D09-E7C2-4EE9-A8F1-5B0801A5FC06}.Release|x64.ActiveCfg = Release|x64
-		{0E5B6D09-E7C2-4EE9-A8F1-5B0801A5FC06}.Release|x64.Build.0 = Release|x64
 		{33040C46-022F-43E5-981F-03BD68C1587D}.Debug|x64.ActiveCfg = Debug|x64
 		{33040C46-022F-43E5-981F-03BD68C1587D}.Debug|x64.Build.0 = Debug|x64
 		{33040C46-022F-43E5-981F-03BD68C1587D}.Release|x64.ActiveCfg = Release|x64
@@ -39,6 +35,10 @@ Global
 		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Debug|x64.Build.0 = Debug|Any CPU
 		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Release|x64.ActiveCfg = Release|Any CPU
 		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Release|x64.Build.0 = Release|Any CPU
+		{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}.Debug|x64.Build.0 = Debug|Any CPU
+		{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}.Release|x64.ActiveCfg = Release|Any CPU
+		{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
