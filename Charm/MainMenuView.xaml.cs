@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using Field;
 using System.Windows.Media.Imaging;
+using System.IO;
+using System.Reflection;
 
 namespace Charm;
 
@@ -21,8 +23,11 @@ public partial class MainMenuView : UserControl
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
         DataContext = this;
-        GameVersion = $"Game Version:\n{_mainWindow.CheckGameVersion()}";
-        LoadTexture(new TextureHeader(new Field.General.TagHash("6A20A080")));
+        if(ConfigHandler.GetPackagesPath() != "" && File.Exists(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/paths.cache"))
+        {
+            GameVersion = $"Game Version:\n{_mainWindow.CheckGameVersion()}";
+            LoadTexture(new TextureHeader(new Field.General.TagHash("6A20A080")));
+        }
     }
 
     private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
