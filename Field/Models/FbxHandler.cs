@@ -493,7 +493,7 @@ public class FbxHandler
         }
     }
 
-    public void AddDynamicToScene(D2Class_85988080 points, string meshName, string savePath)
+    public void AddDynamicToScene(D2Class_85988080 points, string meshName, string savePath, bool bSaveShaders = false, bool bSaveCBuffers = false)
     {
         Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
 
@@ -511,7 +511,7 @@ public class FbxHandler
             //Console.WriteLine($"Added {entity.Hash}");
             List<FbxNode> skeletonNodes = new List<FbxNode>();
             List<DynamicPart> dynamicParts = entity.Load(ELOD.MostDetail, true);
-            entity.SaveMaterialsFromParts(savePath, dynamicParts, true);
+            entity.SaveMaterialsFromParts(savePath, dynamicParts, bSaveShaders, bSaveCBuffers);
             //Console.WriteLine($"{points.Entity.Hash} {points.Translation.X} {points.Translation.Y} {points.Translation.Z} {points.Translation.W}");
             if (entity.Skeleton != null)
             {

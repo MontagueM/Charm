@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Field.Entities;
 using Field.General;
+using Field.Models;
 using File = System.IO.File;
 
 namespace Field;
@@ -134,16 +136,20 @@ public class Material : Tag
         return hlsl;
     }
     
-    public void SavePixelShader(string saveDirectory, bool isTerrain = false)
+    public void SavePixelShader(string saveDirectory, bool isTerrain = false, bool saveCBuffers = false)
     {
         if (Header.PixelShader != null)
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
             string vfx = new VfxConverter().HlslToVfx(this, hlsl, false, isTerrain);
-            
+
             Directory.CreateDirectory($"{saveDirectory}/Source2");
             Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
+
+            if(saveCBuffers)
+                SaveCbuffers(this, false, hlsl, saveDirectory);
+
             StringBuilder vmat = new StringBuilder();
             if (usf != String.Empty || vfx != String.Empty)
             {
@@ -213,24 +219,27 @@ public class Material : Tag
         }
     }
     
-    public void SaveVertexShader(string saveDirectory)
+    public void SaveVertexShader(string saveDirectory, bool saveCBuffers = false)
     {
         Directory.CreateDirectory($"{saveDirectory}");
-        if (Header.VertexShader != null && !File.Exists($"{saveDirectory}/VS_{Hash}.usf"))
+        if (Header.VertexShader != null)
         {
             string hlsl = Decompile(Header.VertexShader.GetBytecode(), "vs");
-            string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
-            if (usf != String.Empty)
-            {
-                try
-                {
-                    File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
-                    Console.WriteLine($"Saved vertex shader {Hash}");
-                }
-                catch (IOException)  // threading error
-                {
-                }
-            }
+
+            if (saveCBuffers)
+                SaveCbuffers(this, true, hlsl, saveDirectory);
+            //string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
+            //if (usf != String.Empty)
+            //{
+            //    try
+            //    {
+            //        File.WriteAllText($"{saveDirectory}/VS_{Hash}.usf", usf);
+            //        Console.WriteLine($"Saved vertex shader {Hash}");
+            //    }
+            //    catch (IOException)  // threading error
+            //    {
+            //    }
+            //}
         }
     }
 
@@ -251,6 +260,157 @@ public class Material : Tag
                 catch (IOException)  // threading error
                 {
                 }
+            }
+        }
+    }
+
+    private void SaveCbuffers(Material material, bool bIsVertexShader, string hlsltest, string saveDirectory)
+    {
+        Directory.CreateDirectory($"{saveDirectory}/CBuffers");
+
+        List<Cbuffer> cbuffers = new List<Cbuffer>();
+        StringBuilder buffers = new StringBuilder();
+        StringReader hlsl;
+        hlsl = new StringReader(hlsltest);
+
+        string line = string.Empty;
+        do
+        {
+            line = hlsl.ReadLine();
+            if (line != null)
+            {
+                if (line.Contains("cbuffer"))
+                {
+                    hlsl.ReadLine();
+                    line = hlsl.ReadLine();
+                    Cbuffer cbuffer = new Cbuffer();
+                    cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
+                    cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
+                    cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
+                    cbuffer.Type = line.Split("cb")[0].Trim();
+                    cbuffers.Add(cbuffer);
+                }
+            }
+
+        } while (line != null);
+
+        foreach (var cbuffer in cbuffers)
+        {
+            buffers.AppendLine($"static {cbuffer.Type} {cbuffer.Variable}[{cbuffer.Count}] = ").AppendLine("{");
+
+            dynamic data = null;
+            if (bIsVertexShader)
+            {
+                if (cbuffer.Count == material.Header.Unk90.Count)
+                {
+                    data = material.Header.Unk90;
+                }
+                else if (cbuffer.Count == material.Header.UnkA0.Count)
+                {
+                    data = material.Header.UnkA0;
+                }
+                else if (cbuffer.Count == material.Header.UnkB0.Count)
+                {
+                    data = material.Header.UnkB0;
+                }
+                else if (cbuffer.Count == material.Header.UnkC0.Count)
+                {
+                    data = material.Header.UnkC0;
+                }
+            }
+            else
+            {
+                if (cbuffer.Count == material.Header.Unk2D0.Count)
+                {
+                    data = material.Header.Unk2D0;
+                }
+                else if (cbuffer.Count == material.Header.Unk2E0.Count)
+                {
+                    data = material.Header.Unk2E0;
+                }
+                else if (cbuffer.Count == material.Header.Unk2F0.Count)
+                {
+                    data = material.Header.Unk2F0;
+                }
+                else if (cbuffer.Count == material.Header.Unk300.Count)
+                {
+                    data = material.Header.Unk300;
+                }
+                else
+                {
+                    if (material.Header.PSVector4Container.Hash != 0xffff_ffff)
+                    {
+                        // Try the Vector4 storage file
+                        DestinyFile container = new DestinyFile(PackageHandler.GetEntryReference(material.Header.PSVector4Container));
+                        byte[] containerData = container.GetData();
+                        int num = containerData.Length / 16;
+                        if (cbuffer.Count == num)
+                        {
+                            List<Vector4> float4s = new List<Vector4>();
+                            for (int i = 0; i < containerData.Length / 16; i++)
+                            {
+                                float4s.Add(StructConverter.ToStructure<Vector4>(containerData.Skip(i * 16).Take(16).ToArray()));
+                            }
+
+                            data = float4s;
+                        }
+                    }
+
+                }
+            }
+
+
+            for (int i = 0; i < cbuffer.Count; i++)
+            {
+                switch (cbuffer.Type)
+                {
+                    case "float4":
+                        if (data == null) buffers.AppendLine("  float4(0.0, 0.0, 0.0, 0.0), //null" + i);
+                        else
+                        {
+                            try
+                            {
+                                if (data[i] is Vector4)
+                                {
+                                    buffers.AppendLine($"   float4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}), //" + i);
+                                }
+                                else
+                                {
+                                    var x = data[i].Unk00.X; // really bad but required
+                                    buffers.AppendLine($"   float4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}), //" + i);
+                                }
+                            }
+                            catch (Exception e)  // figure out whats up here, taniks breaks it
+                            {
+                                buffers.AppendLine("    float4(0.0, 0.0, 0.0, 0.0), //Exception" + i);
+                            }
+                        }
+                        break;
+                    case "float3":
+                        if (data == null) buffers.AppendLine("  float3(0.0, 0.0, 0.0), //null" + i);
+                        else buffers.AppendLine($"  float3({data[i].Unk00.X}, {data[i].Unk00.Y}, {data[i].Unk00.Z}), //" + i);
+                        break;
+                    case "float":
+                        if (data == null) buffers.AppendLine("  float(0.0), //null" + i);
+                        else buffers.AppendLine($"  float4({data[i].Unk00}), //" + i);
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+
+            buffers.AppendLine("};");
+        }
+
+        if (buffers.ToString() != String.Empty)
+        {
+            try
+            {
+                File.WriteAllText($"{saveDirectory}/CBuffers/{(bIsVertexShader ? "CB_VS" : "CB_PS")}_{Hash}.txt", buffers.ToString());
+                Console.WriteLine($"Saved CBuffers for material {Hash}");
+            }
+            catch (IOException)  // threading error
+            {
             }
         }
     }

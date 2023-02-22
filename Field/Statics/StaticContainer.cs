@@ -13,7 +13,7 @@ public class StaticContainer
         Hash = hash;
     }
     
-    public void SaveMaterialsFromParts(string saveDirectory, List<Part> parts, bool bSaveShaders)
+    public void SaveMaterialsFromParts(string saveDirectory, List<Part> parts, bool bSaveShaders, bool bSaveCBuffers)
     {
         Directory.CreateDirectory($"{saveDirectory}/Textures");
         Directory.CreateDirectory($"{saveDirectory}/Shaders");
@@ -23,8 +23,8 @@ public class StaticContainer
             part.Material.SaveAllTextures($"{saveDirectory}/Textures");
             if (bSaveShaders)
             {
-                part.Material.SavePixelShader($"{saveDirectory}/Shaders");
-                part.Material.SaveVertexShader($"{saveDirectory}/Shaders");
+                part.Material.SavePixelShader($"{saveDirectory}/Shaders", false, bSaveCBuffers);
+                part.Material.SaveVertexShader($"{saveDirectory}/Shaders", bSaveCBuffers);
                 part.Material.SaveComputeShader($"{saveDirectory}/Shaders");
             }
         }

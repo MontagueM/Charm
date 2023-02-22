@@ -405,6 +405,8 @@ public class ConfigHandler
 
     #endregion
 
+    #region IndvidualStaticsEnabled
+
     public static void SetIndvidualStaticsEnabled(bool bIndvidualStaticsEnabled)
     {
         if (_config.AppSettings.Settings["indvidualStaticsEnabled"] == null)
@@ -427,6 +429,10 @@ public class ConfigHandler
         return _config.AppSettings.Settings["indvidualStaticsEnabled"].Value == "True";
     }
 
+    #endregion
+
+    #region IndvidualEntitiesEnabled
+
     public static void SetIndvidualEntitiesEnabled(bool bIndvidualEntitiesEnabled)
     {
         if (_config.AppSettings.Settings["indvidualEntitiesEnabled"] == null)
@@ -448,6 +454,34 @@ public class ConfigHandler
         }
         return _config.AppSettings.Settings["indvidualEntitiesEnabled"].Value == "True";
     }
+
+    #endregion
+
+    #region SaveCBuffersEnabled
+
+    public static void SetSaveCBuffersEnabled(bool bSaveCBuffersEnabled)
+    {
+        if (_config.AppSettings.Settings["saveCBuffersEnabled"] == null)
+        {
+            _config.AppSettings.Settings.Add("saveCBuffersEnabled", bSaveCBuffersEnabled.ToString());
+        }
+        else
+        {
+            _config.AppSettings.Settings["saveCBuffersEnabled"].Value = bSaveCBuffersEnabled.ToString();
+        }
+        Save();
+    }
+
+    public static bool GetSaveCBuffersEnabled()
+    {
+        if (_config.AppSettings.Settings["saveCBuffersEnabled"] == null)
+        {
+            return false;
+        }
+        return _config.AppSettings.Settings["saveCBuffersEnabled"].Value == "True";
+    }
+
+    #endregion
 
     #region outputTextureFormat
 

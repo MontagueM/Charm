@@ -75,6 +75,14 @@ public partial class GeneralConfigView : UserControl
         ents.ChangeButton.Click += IndvidualEntitiesEnabled_OnClick;
         GeneralConfigPanel.Children.Add(ents);
 
+        // Enable CBuffer export to own txt
+        ConfigSettingControl cbuffers = new ConfigSettingControl();
+        cbuffers.SettingName = "Save CBuffers";
+        bval = ConfigHandler.GetSaveCBuffersEnabled();
+        cbuffers.SettingValue = bval.ToString();
+        cbuffers.ChangeButton.Click += SaveCBuffersEnabled_OnClick;
+        GeneralConfigPanel.Children.Add(cbuffers);
+
         // Output texture format
         ConfigSettingComboControl ctf = new ConfigSettingComboControl();
         ctf.SettingName = "Output texture format";
@@ -150,6 +158,12 @@ public partial class GeneralConfigView : UserControl
     private void IndvidualEntitiesEnabled_OnClick(object sender, RoutedEventArgs e)
     {
         ConfigHandler.SetIndvidualEntitiesEnabled(!ConfigHandler.GetIndvidualEntitiesEnabled());
+        PopulateConfigPanel();
+    }
+
+    private void SaveCBuffersEnabled_OnClick(object sender, RoutedEventArgs e)
+    {
+        ConfigHandler.SetSaveCBuffersEnabled(!ConfigHandler.GetSaveCBuffersEnabled());
         PopulateConfigPanel();
     }
 

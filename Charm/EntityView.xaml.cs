@@ -98,7 +98,7 @@ public partial class EntityView : UserControl
             fbxHandler.AddEntityToScene(entity, dynamicParts, ELOD.MostDetail, boneNodes, skipBlanks);
             if (exportType == EExportTypeFlag.Full)
             {
-                entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+                entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), ConfigHandler.GetSaveCBuffersEnabled());
                 entity.SaveTexturePlates(savePath);
             }
         }

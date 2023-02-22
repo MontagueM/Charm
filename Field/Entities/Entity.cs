@@ -84,7 +84,7 @@ public class Entity : Tag
         return dynamicParts;
     }
 
-    public void SaveMaterialsFromParts(string saveDirectory, List<DynamicPart> dynamicParts, bool bSaveShaders)
+    public void SaveMaterialsFromParts(string saveDirectory, List<DynamicPart> dynamicParts, bool bSaveShaders, bool bSaveCBuffers)
     {
         Directory.CreateDirectory($"{saveDirectory}/Textures");
         Directory.CreateDirectory($"{saveDirectory}/Shaders");
@@ -95,8 +95,8 @@ public class Entity : Tag
             // dynamicPart.Material.SaveVertexShader(saveDirectory);
             if (bSaveShaders)
             {
-                dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
-                dynamicPart.Material.SaveVertexShader($"{saveDirectory}/Shaders");
+                dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders", false, bSaveCBuffers);
+                dynamicPart.Material.SaveVertexShader($"{saveDirectory}/Shaders", bSaveCBuffers);
             }
             // Environment.Exit(5);
         }

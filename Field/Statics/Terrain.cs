@@ -21,7 +21,7 @@ public class Terrain : Tag
     }
     
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource, bool exportStatic = false)
+    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource, bool bSaveCBuffers, bool exportStatic = false)
     {
         // Directory.CreateDirectory(saveDirectory + "/Textures/Terrain/");
         // Directory.CreateDirectory(saveDirectory + "/Shaders/Terrain/");
@@ -54,7 +54,7 @@ public class Terrain : Tag
                 // dynamicPart.Material.SaveVertexShader(saveDirectory);
                 if (bSaveShaders)
                 {
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/", true);
+                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/", true, bSaveCBuffers);
                     partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/");
                     partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
                 }

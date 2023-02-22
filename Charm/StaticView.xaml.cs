@@ -54,7 +54,7 @@ public partial class StaticView : UserControl
         Directory.CreateDirectory(savePath);
         if (exportType == EExportTypeFlag.Full)
         {
-            container.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+            container.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), ConfigHandler.GetSaveCBuffersEnabled());
             fbxHandler.InfoHandler.SetMeshName(meshName);
             if (ConfigHandler.GetUnrealInteropEnabled())
             {

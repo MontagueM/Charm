@@ -181,7 +181,7 @@ public partial class MapView : UserControl
                 if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
                 {
                     //entry.Rotation.SetW(1);
-                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement);
+                    terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement, ConfigHandler.GetSaveCBuffersEnabled());
                     if(exportStatics)
                     {
                         if (source2Models)
@@ -189,7 +189,7 @@ public partial class MapView : UserControl
                             File.Copy("template.vmdl", $"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.vmdl", true);
                         }
                         FbxHandler staticHandler = new FbxHandler(false);
-                        terrainArrangement.Terrain.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement, true);
+                        terrainArrangement.Terrain.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement, ConfigHandler.GetSaveCBuffersEnabled(), true);
                         staticHandler.ExportScene($"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.fbx");
                         staticHandler.Dispose();
                     }
@@ -226,12 +226,12 @@ public partial class MapView : UserControl
                     }
                     else if (exportTypeFlag == EExportTypeFlag.Full || exportTypeFlag == EExportTypeFlag.Minimal) //No terrain on a minimal rip makes sense right?
                     {
-                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+                        staticMapResource.StaticMapParent.Header.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), ConfigHandler.GetSaveCBuffersEnabled());
                     }
                 }
                 else if(entry is D2Class_85988080 dynamicResource)
                 {
-                    dynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath);
+                    dynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), ConfigHandler.GetSaveCBuffersEnabled());
                     //dynamicPoints.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicPoints);
                 }
             });
@@ -318,7 +318,7 @@ public partial class MapView : UserControl
                     if (Entity.HasGeometry(dynamicResource.Entity))
                     {
                         FbxHandler singleDynamicHandler = new FbxHandler(false);
-                        singleDynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath);
+                        singleDynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), ConfigHandler.GetSaveCBuffersEnabled());
 
                         if (source2Models)
                         {
