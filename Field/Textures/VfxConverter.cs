@@ -12,6 +12,7 @@ public class VfxConverter
     private StringReader hlsl;
     private StringBuilder vfx;
     private bool bOpacityEnabled = false;
+    private bool bFixRoughness = false;
     private List<Texture> textures = new List<Texture>();
     private List<int> samplers = new List<int>();
     private List<Cbuffer> cbuffers = new List<Cbuffer>();
@@ -514,6 +515,7 @@ PS
                 else if (line.Contains("o1.xyzw = float4(0,0,0,0);"))
                 {
                     vfx.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "        o1.xyzw = float4(1,1,1,0);")); //decals(?) have 0 normals sometimes, dont want that
+                    bFixRoughness = true;
                 }
                 else
                 {
@@ -548,7 +550,7 @@ PS
         normal.y = 1 - normal.y; 
         normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy))); 
         
-        float smoothness = saturate(8 * (normal_length - 0.375)); 
+        float smoothness = saturate(8 * ({(bFixRoughness ? "normal_length" : "0")} - 0.375)); 
         
         //Diffuse, normal, roughness, metal, AO
         Material mat = ToMaterial(i, float4(o0.xyz, 1), float4(normal.xyz, 1), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
