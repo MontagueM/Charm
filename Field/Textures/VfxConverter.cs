@@ -550,7 +550,7 @@ PS
         normal.y = 1 - normal.y; 
         normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy))); 
         
-        float smoothness = saturate(8 * ({(bFixRoughness ? "normal_length" : "0")} - 0.375)); 
+        float smoothness = saturate(8 * ({(bFixRoughness ? "0" : "normal_length")} - 0.375)); 
         
         //Diffuse, normal, roughness, metal, AO
         Material mat = ToMaterial(i, float4(o0.xyz, 1), float4(normal.xyz, 1), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
