@@ -257,17 +257,17 @@ public class D2Package : IPackage
             List<D2BlockEntry> blocks = BlockEntries.GetRange(fileEntry.StartingBlockOffset, blockCount);
             foreach (D2BlockEntry block in blocks)
             {
-                BinaryReader pkgHandle;
+                BinaryReader pkgHandle = null;
                 if (pkgHandles.ContainsKey(block.PatchID))
                 {
                     pkgHandle = pkgHandles[block.PatchID];
                 }
                 else
                 {
-                    pkgHandle = new BinaryReader(new FileStream(
-                        Path.Combine(PkgPath.Substring(0, PkgPath.Length - 5) + block.PatchID.ToString("D") + ".pkg"),
-                        FileMode.Open, FileAccess.Read, FileShare.Read));
-                    pkgHandles.Add(block.PatchID, pkgHandle);
+                    // pkgHandle = new BinaryReader(new FileStream(
+                        // Path.Combine(PkgPath.Substring(0, PkgPath.Length - 5) + block.PatchID.ToString("D") + ".pkg"),
+                        // FileMode.Open, FileAccess.Read, FileShare.Read));
+                    // pkgHandles.Add(block.PatchID, pkgHandle);
                 }
 
                 // Read block data
@@ -300,20 +300,20 @@ public class D2Package : IPackage
                     int copySize;
                     if (currentBlockID == blockCount)
                     {
-                        copySize = entry.FileSize;
+                        copySize = fileEntry.FileSize;
                     }
                     else
                     {
-                        copySize = 0x40_000 - entry.StartingBlockOffset;
+                        copySize = 0x40_000 - fileEntry.StartingBlockOffset;
                     }
 
-                    Array.Copy(decompressedBuffer, entry.StartingBlockOffset, buffer, 0, copySize);
+                    Array.Copy(decompressedBuffer, fileEntry.StartingBlockOffset, buffer, 0, copySize);
                     currentBufferOffset += copySize;
                 }
                 else if (currentBlockID == blockCount)
                 {
                     Array.Copy(decompressedBuffer, 0, buffer, currentBufferOffset,
-                        entry.FileSize - currentBufferOffset);
+                        fileEntry.FileSize - currentBufferOffset);
                 }
                 else
                 {
@@ -331,8 +331,8 @@ public class D2Package : IPackage
     public byte[] GenerateIV()
     {
         byte[] nonce = {0x84, 0xEA, 0x11, 0xC0, 0xAC, 0xAB, 0xFA, 0x20, 0x33, 0x11, 0x26, 0x99};
-        nonce[0] ^= (byte) ((Header.PkgID >> 8) & 0xFF);
-        nonce[11] ^= (byte) (Header.PkgID & 0xFF);
+        nonce[0] ^= (byte) ((Header.PackageId >> 8) & 0xFF);
+        nonce[11] ^= (byte) (Header.PackageId & 0xFF);
         nonce[5] ^= Header.Timestamp < 1675098707 ? (byte) 0 : (byte) 1;
         return nonce;
     }

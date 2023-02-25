@@ -3,10 +3,11 @@ using Resourcer;
 
 namespace Tomograph;
 
+
 [TestClass]
 public class PackageResourcerTests
 {
-    private static readonly string D2Latest_ValidPackageDirectory = @"I:\SteamLibrary\steamapps\common\Destiny 2\packages";
+    private static readonly string D2Latest_ValidPackageDirectory = @"C:\Users\monta\Desktop\Destiny 2\packages";
     private static readonly string D1PS4_ValidPackageDirectory = @"M:\D1_PS4";
     
     private void D2Latest_SetupValidState()

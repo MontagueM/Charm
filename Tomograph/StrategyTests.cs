@@ -5,7 +5,7 @@ namespace Tomograph;
 [TestClass]
 public class StrategyTests
 {
-    private static readonly string D2Latest_ValidPackagesDirectory = @"I:\SteamLibrary\steamapps\common\Destiny 2\packages";
+    private static readonly string D2Latest_ValidPackagesDirectory = @"C:\Users\monta\Desktop\Destiny 2\packages";
     private static readonly string D1PS4_ValidPackagesDirectory = @"M:\D1_PS4";
 
     [TestMethod]
