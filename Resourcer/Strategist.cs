@@ -39,6 +39,12 @@ public abstract class StrategistSingleton<T> where T : StrategistSingleton<T>
 
     private static void OnStrategyChanged(UpdateStrategyEventArgs e)
     {
+        if (e.NewStrategy == TigerStrategy.NONE)
+        {
+            _instance = null;
+            return;
+        }
+        
         if (!_strategyInstances.ContainsKey(e.NewStrategy))
         {
             AddNewStrategyInstance(e.NewStrategy);
@@ -49,6 +55,7 @@ public abstract class StrategistSingleton<T> where T : StrategistSingleton<T>
 
 public enum TigerStrategy
 {
+    NONE,
     [StrategyMetadata("ps4")]
     DESTINY1_PS4,
     [StrategyMetadata("w64")]
@@ -66,7 +73,7 @@ public static class Strategy
 {
     private static readonly Dictionary<TigerStrategy, StrategyConfiguration> _strategyConfigurations = new();
 
-    private static readonly TigerStrategy _defaultStrategy = TigerStrategy.DESTINY2_LATEST;
+    private static readonly TigerStrategy _defaultStrategy = TigerStrategy.NONE;
     private static TigerStrategy _currentStrategy = _defaultStrategy;
     public static TigerStrategy CurrentStrategy
     {
@@ -101,6 +108,10 @@ public static class Strategy
             PackagesDirectory = packagesDirectory
         };
         _strategyConfigurations.Add(strategy, config);
+        if (_currentStrategy == _defaultStrategy)
+        {
+            SetStrategy(strategy);
+        }
     }
     
     private static void CheckValidPackagesDirectory(TigerStrategy strategy, string packagesDirectory)

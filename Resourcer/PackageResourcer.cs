@@ -20,14 +20,6 @@ public class PackageResourcer : StrategistSingleton<PackageResourcer>
         
     }
 
-    public struct FileMetadata
-    {
-        public ushort PkgId;
-        public int FileId;
-        public TigerHash Hash;
-        public int Size;
-    }
-    
     private ConcurrentQueue<PackageQueueItem> _packageQueue = new ConcurrentQueue<PackageQueueItem>();
     private Dictionary<ushort, IPackage> _packages = new Dictionary<ushort, IPackage>();
     public string PackagesDirectory { get; private set; }

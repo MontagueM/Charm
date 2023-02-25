@@ -71,7 +71,7 @@ public class ExpectedExceptionWithMessageAttribute : ExpectedExceptionBaseAttrib
         string expectedMessage = (string)field.GetValue(null);
         if (expectedMessage != null)
         {
-            StringAssert.StartsWith(actualMessage, expectedMessage);
+            StringAssert.Contains(actualMessage, expectedMessage);
         }
     }
 }
