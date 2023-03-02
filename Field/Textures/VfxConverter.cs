@@ -559,7 +559,7 @@ PS
         Material mat = ToMaterial(i, float4(o0.xyz, 1), float4(normal.xyz, 1), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
         
         mat.Opacity = alpha; //sometimes o0.w is used for alpha instead on some shaders
-        mat.Emission = clamp((o2.y - 0.5) * 2 * 8 * mat.Albedo, 0, 100); 
+        mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100); 
         mat.Transmission = o2.z; 
 
         ShadingModelValveStandard sm;
