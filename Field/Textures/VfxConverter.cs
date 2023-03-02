@@ -465,8 +465,11 @@ PS
             {
                 if (line.Contains("cb12[7].xyz + -v4.xyz")) //cb12[7] might actually be a viewdir cbuffer or something
                 {
-                    //vfx.AppendLine(line.Replace("-v4", "-i.vPositionSs"));
-                    vfx.AppendLine(line.Replace("-v4", "-v3"));
+                    vfx.AppendLine(line.Replace("-v4", "-g_vCameraPositionWs")); //dont know what v4 is when used like this
+                }
+                else if (line.Contains("v4.xy * cb")) //might be a detail uv or something when v4 is used like this, idk
+                {
+                    vfx.AppendLine(line.Replace("v4", "(v3.xy*5)"));
                 }
                 else if (line.Contains("while (true)"))
                 {
