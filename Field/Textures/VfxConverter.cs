@@ -51,13 +51,13 @@ FEATURES
     #include ""common/features.hlsl""
     //Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );
     //Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );
-
     Feature( F_HIGH_QUALITY_REFLECTIONS, 0..1, ""Rendering"" );
 }
 
 COMMON
 {
 	#include ""common/shared.hlsl""
+    //translucent
     #define USES_HIGH_QUALITY_REFLECTIONS
 }
 
@@ -111,8 +111,7 @@ PS
             vfxStructure = vfxStructure.Replace(@"//Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );", @"Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );");
             vfxStructure = vfxStructure.Replace(@"//Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );", @"Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );");
             
-            //vfxStructure = vfxStructure.Replace("//translucent", "#define S_TRANSLUCENT 1");
-            //Turns out I dont need S_TRANSLUCENT to use alpha test
+            vfxStructure = vfxStructure.Replace("//translucent", "#define S_TRANSLUCENT 1");
         }
         vfx.AppendLine(vfxStructure);
 
