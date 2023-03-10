@@ -3,57 +3,59 @@ using Resourcer;
 
 namespace Tomograph;
 
+public interface IPackageResourcerTests {
+    void Get_ValidSingletonObject();
+    void Get_CorrectStrategyChange();
+    void SinglePackage_ValidPackageObject_ValidId();
+    void SinglePackage_InvalidPackageObject_InvalidId();
+}
 
 [TestClass]
-public class PackageResourcerTests
+[TestCategory("D2WQ")]
+public class D2WQ_PackageResourcerTests : IPackageResourcerTests
 {
-    private static readonly string D2Latest_ValidPackageDirectory = @"C:\Users\monta\Desktop\Destiny 2\packages";
-    private static readonly string D1PS4_ValidPackageDirectory = @"M:\D1_PS4";
-    
-    private void D2Latest_SetupValidState()
-    {
-        Strategy.Reset();
-        Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LATEST, D2Latest_ValidPackageDirectory);
-        Strategy.CurrentStrategy = TigerStrategy.DESTINY2_LATEST;
-    }
+    private static readonly string ValidPackagesDirectory = @"C:\Users\monta\Desktop\Destiny 2\packages";
+    private static readonly string D1PS4_ValidPackageDirectory = @"../../../Packages/D1PS4/";
+
+    [TestInitialize]
+    public void Initialize() { Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LATEST, ValidPackagesDirectory); }
+
+    [TestCleanup]
+    public void Cleanup() { Strategy.Reset(); }
 
     [TestMethod]
     public void Get_ValidSingletonObject()
     {
-        D2Latest_SetupValidState();
         PackageResourcer resourcer = PackageResourcer.Get();
         Assert.IsNotNull(resourcer);
-        Assert.AreEqual(D2Latest_ValidPackageDirectory, resourcer.PackagesDirectory);
+        Assert.AreEqual(ValidPackagesDirectory, resourcer.PackagesDirectory);
     }
-    
+
     [TestMethod]
     public void Get_CorrectStrategyChange()
     {
-        D2Latest_SetupValidState();
-        Assert.AreEqual(D2Latest_ValidPackageDirectory, PackageResourcer.Get().PackagesDirectory);
-        
+        Assert.AreEqual(ValidPackagesDirectory, PackageResourcer.Get().PackagesDirectory);
+
         Strategy.AddNewStrategy(TigerStrategy.DESTINY1_PS4, D1PS4_ValidPackageDirectory);
         Strategy.CurrentStrategy = TigerStrategy.DESTINY1_PS4;
-        
+
         Assert.AreEqual(D1PS4_ValidPackageDirectory, PackageResourcer.Get().PackagesDirectory);
     }
 
     [TestMethod]
-    public void Resourcer_SinglePackage_CorrectPackageObject_ValidId()
+    public void SinglePackage_ValidPackageObject_ValidId()
     {
-        D2Latest_SetupValidState();
-        IPackage package = PackageResourcer.Get().GetPackage(0x100);
-        if (package.GetType().IsInstanceOfType(typeof(D2Package)))
-        {
-            
-        }
+        ushort expectedPackageId = 0x100;
+        IPackage package = PackageResourcer.Get().GetPackage(expectedPackageId);
+        Assert.IsInstanceOfType(package, typeof(D2Package));
+        PackageMetadata actualPackageMetadata = package.GetPackageMetadata();
+        Assert.AreEqual(expectedPackageId, actualPackageMetadata.PackageId);
     }
-    
+
     [TestMethod]
     [ExpectedExceptionWithMessage(typeof(ArgumentException), typeof(PackageResourcer), "PackageIdInvalidMessage")]
-    public void Resourcer_SinglePackage_CorrectPackageObject_InvalidId()
+    public void SinglePackage_InvalidPackageObject_InvalidId()
     {
-        D2Latest_SetupValidState();
         IPackage package = PackageResourcer.Get().GetPackage(0x100);
         Assert.IsNull(package);
     }

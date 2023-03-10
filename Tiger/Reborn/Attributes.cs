@@ -6,9 +6,10 @@ public class TigerSchema : Attribute
     internal int _val;
     public int Offset
     {
-        get { return _val; }
+        get {
+            return _val;
+        }
     }
-
 
     public TigerSchema(int size)
     {
@@ -20,14 +21,15 @@ public class TigerSchema : Attribute
 public class StrategyMetadata : Attribute
 {
     internal string _packagePrefix;
-    
-    public string PackagePrefix
-    {
-        get { return _packagePrefix; }
-    }
-    
-    public StrategyMetadata(string packagePrefix)
+    internal Type _packageType;
+
+    public string PackagePrefix => _packagePrefix;
+
+    public Type PackageType => _packageType;
+
+    public StrategyMetadata(string packagePrefix, Type packageType)
     {
         _packagePrefix = packagePrefix;
+        _packageType = packageType;
     }
 }

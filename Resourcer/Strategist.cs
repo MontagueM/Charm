@@ -8,12 +8,13 @@ public class UpdateStrategyEventArgs : EventArgs
     public TigerStrategy NewStrategy { get; set; }
 }
 
-public abstract class StrategistSingleton<T> where T : StrategistSingleton<T>
+public abstract class StrategistSingleton<T>
+    where T : StrategistSingleton<T>
 {
     private static Dictionary<TigerStrategy, T> _strategyInstances = new();
-    
+
     private static T? _instance = null;
-    
+
     public static T Get()
     {
         if (_instance == null)
@@ -21,21 +22,17 @@ public abstract class StrategistSingleton<T> where T : StrategistSingleton<T>
             AddNewStrategyInstance(Strategy.CurrentStrategy);
             _instance = _strategyInstances[Strategy.CurrentStrategy];
         }
-        
+
         return _instance;
     }
 
     private static void AddNewStrategyInstance(TigerStrategy strategy)
     {
-        _instance = (T) Activator.CreateInstance(typeof(T),
-            Strategy.GetStrategyConfiguration(strategy));
+        _instance = (T) Activator.CreateInstance(typeof(T), Strategy.GetStrategyConfiguration(strategy));
         _strategyInstances.Add(strategy, _instance);
     }
 
-    static StrategistSingleton()
-    {
-        Strategy.OnStrategyChanged += OnStrategyChanged;
-    }
+    static StrategistSingleton() { Strategy.OnStrategyChanged += OnStrategyChanged; }
 
     private static void OnStrategyChanged(UpdateStrategyEventArgs e)
     {
@@ -44,7 +41,7 @@ public abstract class StrategistSingleton<T> where T : StrategistSingleton<T>
             _instance = null;
             return;
         }
-        
+
         if (!_strategyInstances.ContainsKey(e.NewStrategy))
         {
             AddNewStrategyInstance(e.NewStrategy);
@@ -53,15 +50,11 @@ public abstract class StrategistSingleton<T> where T : StrategistSingleton<T>
     }
 }
 
-public enum TigerStrategy
-{
+public enum TigerStrategy {
     NONE,
-    [StrategyMetadata("ps4")]
-    DESTINY1_PS4,
-    [StrategyMetadata("w64")]
-    DESTINY2_LATEST,
-    [StrategyMetadata("w64")]
-    DESTINY2_111894,
+    [StrategyMetadata("ps4", typeof(IPackage))] DESTINY1_PS4,
+    [StrategyMetadata("w64", typeof(D2Package))] DESTINY2_LATEST,
+    [StrategyMetadata("w64", typeof(D2Package))] DESTINY2_111894,
 }
 
 public struct StrategyConfiguration
@@ -82,38 +75,34 @@ public static class Strategy
     }
 
     public delegate void UpdateStrategyEventHandler(UpdateStrategyEventArgs e);
-    public static event UpdateStrategyEventHandler OnStrategyChanged = delegate { };
+    public static event UpdateStrategyEventHandler OnStrategyChanged = delegate {};
 
-    static Strategy()
-    {
-        SetStrategy(_defaultStrategy);
-    }
-    
+    static Strategy() { SetStrategy(_defaultStrategy); }
+
     private static void SetStrategy(TigerStrategy strategy)
     {
         _currentStrategy = strategy;
-        OnStrategyChanged.Invoke(new UpdateStrategyEventArgs{NewStrategy = _currentStrategy});
+        OnStrategyChanged.Invoke(new UpdateStrategyEventArgs { NewStrategy = _currentStrategy });
     }
-    
-    public static StrategyConfiguration GetStrategyConfiguration(TigerStrategy strategy)
-    {
-        return _strategyConfigurations[strategy];
-    }
-    
+
+    public static StrategyConfiguration GetStrategyConfiguration(TigerStrategy strategy) { return _strategyConfigurations[strategy]; }
+
     public static void AddNewStrategy(TigerStrategy strategy, string packagesDirectory)
     {
         CheckValidPackagesDirectory(strategy, packagesDirectory);
-        var config = new StrategyConfiguration
-        {
-            PackagesDirectory = packagesDirectory
-        };
+        var config = new StrategyConfiguration { PackagesDirectory = packagesDirectory };
         _strategyConfigurations.Add(strategy, config);
         if (_currentStrategy == _defaultStrategy)
         {
             SetStrategy(strategy);
         }
     }
-    
+
+    public static void CheckValidPackagesDirectory(string packagesDirectory)
+    {
+        CheckValidPackagesDirectory(CurrentStrategy, packagesDirectory);
+    }
+
     private static void CheckValidPackagesDirectory(TigerStrategy strategy, string packagesDirectory)
     {
         CheckPackagesDirectoryExists(packagesDirectory);
@@ -121,7 +110,7 @@ public static class Strategy
         CheckPackagesDirectoryValidPrefix(strategy, packagesDirectory);
         CheckPackagesDirectoryValidExtension(packagesDirectory);
     }
-    
+
     private static readonly string PackagesDirectoryDoesNotExistMessage = "The packages directory does not exist: ";
     private static void CheckPackagesDirectoryExists(string packagesDirectory)
     {
@@ -130,7 +119,7 @@ public static class Strategy
             throw new DirectoryNotFoundException(PackagesDirectoryDoesNotExistMessage + packagesDirectory);
         }
     }
-    
+
     private static readonly string PackagesDirectoryEmptyMessage = "The packages directory is empty: ";
     private static void CheckPackagesDirectoryEmpty(string packagesDirectory)
     {
@@ -139,20 +128,22 @@ public static class Strategy
             throw new ArgumentException(PackagesDirectoryEmptyMessage + packagesDirectory);
         }
     }
-    
-    private static readonly string PackagesDirectoryInvalidPrefixMessage = "The packages directory does not contain a package with the correct prefix: ";
+
+    private static readonly string PackagesDirectoryInvalidPrefixMessage =
+        "The packages directory does not contain a package with the correct prefix: ";
     private static void CheckPackagesDirectoryValidPrefix(TigerStrategy strategy, string packagesDirectory)
     {
         string packagePath = Directory.EnumerateFiles(packagesDirectory).First();
         string prefix = GetStrategyPackagePrefix(strategy);
-        
+
         if (!packagePath.Contains(prefix + "_"))
         {
             throw new ArgumentException(PackagesDirectoryInvalidPrefixMessage + packagesDirectory + ", " + prefix);
         }
     }
 
-    private static readonly string PackagesDirectoryInvalidExtensionMessage = "The packages directory does not contain a package with the extension .pkg.: ";
+    private static readonly string PackagesDirectoryInvalidExtensionMessage =
+        "The packages directory does not contain a package with the extension .pkg.: ";
     private static void CheckPackagesDirectoryValidExtension(string packagesDirectory)
     {
         if (!Directory.EnumerateFiles(packagesDirectory).First().EndsWith(".pkg"))
@@ -170,7 +161,14 @@ public static class Strategy
     public static string GetStrategyPackagePrefix(TigerStrategy strategy)
     {
         var member = typeof(TigerStrategy).GetMember(strategy.ToString());
-        StrategyMetadata attribute = (StrategyMetadata)member[0].GetCustomAttribute(typeof(StrategyMetadata), false);
+        StrategyMetadata attribute = (StrategyMetadata) member[0].GetCustomAttribute(typeof(StrategyMetadata), false);
         return attribute.PackagePrefix;
+    }
+
+    public static Type GetPackageType()
+    {
+        var member = typeof(TigerStrategy).GetMember(_currentStrategy.ToString());
+        StrategyMetadata attribute = (StrategyMetadata) member[0].GetCustomAttribute(typeof(StrategyMetadata), false);
+        return attribute.PackageType;
     }
 }

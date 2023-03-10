@@ -17,7 +17,7 @@ public struct FileMetadata
     public FileHash Hash;
     public TigerHash Reference;
     public int Size;
-    
+
     public FileMetadata(FileHash fileHash, D2FileEntry fileEntry)
     {
         Hash = fileHash;
@@ -26,13 +26,12 @@ public struct FileMetadata
     }
 }
 
-
-public interface IPackage
-{
+public interface IPackage {
     public string PackagePath { get; }
-    
+
     PackageMetadata GetPackageMetadata();
-    
+
+    FileMetadata GetFileMetadata(ushort fileId);
     FileMetadata GetFileMetadata(FileHash fileId);
 
     byte[] GetFileBytes(FileHash fileId);
@@ -41,17 +40,28 @@ public interface IPackage
 [StructLayout(LayoutKind.Explicit)]
 public struct D2PackageHeader
 {
-    [FieldOffset(0x10)] public ushort PackageId;
-    [FieldOffset(0x20)] public uint Timestamp;
-    [FieldOffset(0x30)] public ushort PatchId;
-    [FieldOffset(0x60)] public uint FileEntryTableCount;
-    [FieldOffset(0x44)] public uint FileEntryTableOffset;
-    [FieldOffset(0x68)] public uint BlockEntryTableCount;
-    [FieldOffset(0x6C)] public uint BlockEntryTableOffset;
-    [FieldOffset(0x78)] public uint ActivityTableCount;
-    [FieldOffset(0x7C)] public uint ActivityTableOffset;
-    [FieldOffset(0xB8)] public uint Hash64TableSize;
-    [FieldOffset(0xBC)] public uint Hash64TableOffset;
+    [FieldOffset(0x10)]
+    public ushort PackageId;
+    [FieldOffset(0x20)]
+    public uint Timestamp;
+    [FieldOffset(0x30)]
+    public ushort PatchId;
+    [FieldOffset(0x60)]
+    public uint FileEntryTableCount;
+    [FieldOffset(0x44)]
+    public uint FileEntryTableOffset;
+    [FieldOffset(0x68)]
+    public uint BlockEntryTableCount;
+    [FieldOffset(0x6C)]
+    public uint BlockEntryTableOffset;
+    [FieldOffset(0x78)]
+    public uint ActivityTableCount;
+    [FieldOffset(0x7C)]
+    public uint ActivityTableOffset;
+    [FieldOffset(0xB8)]
+    public uint Hash64TableSize;
+    [FieldOffset(0xBC)]
+    public uint Hash64TableOffset;
 };
 
 public struct D2FileEntry
@@ -59,7 +69,7 @@ public struct D2FileEntry
     public TigerHash Reference;
     public sbyte NumType;
     public sbyte NumSubType;
-    public int StartingBlock;
+    public int StartingBlockIndex;
     public int StartingBlockOffset;
     public int FileSize;
 
@@ -73,7 +83,7 @@ public struct D2FileEntry
         NumSubType = (sbyte) ((entryBitpacked.EntryB >> 6) & 0x7);
 
         // EntryC
-        StartingBlock = (int) (entryBitpacked.EntryC & 0x3FFF);
+        StartingBlockIndex = (int) (entryBitpacked.EntryC & 0x3FFF);
         StartingBlockOffset = (int) (((entryBitpacked.EntryC >> 14) & 0x3FFF) << 4);
 
         // EntryD
@@ -95,7 +105,7 @@ public unsafe struct D2BlockEntry
 {
     public uint Offset;
     public uint Size;
-    public ushort PatchID;
+    public ushort PatchId;
     public ushort BitFlag;
     public fixed byte SHA1[0x14];
     public fixed byte GCMTag[0x10];
@@ -107,20 +117,20 @@ public class D2Package : IPackage
     public string PackagePath { get; }
     private BinaryReader _reader;
     private D2PackageHeader Header;
-    public List<D2FileEntry> FileEntries;
-    public List<D2BlockEntry> BlockEntries;
-    
-    private static readonly byte[] AesKey0 =
-        {0xD6, 0x2A, 0xB2, 0xC1, 0x0C, 0xC0, 0x1B, 0xC5, 0x35, 0xDB, 0x7B, 0x86, 0x55, 0xC7, 0xDC, 0x3B};
+    private List<D2FileEntry> FileEntries;
+    private List<D2BlockEntry> BlockEntries;
+    private Dictionary<int, BinaryReader> _packageHandles = new();
 
-    private static readonly byte[] AesKey1 =
-        {0x3A, 0x4A, 0x5D, 0x36, 0x73, 0xA6, 0x60, 0x58, 0x7E, 0x63, 0xE6, 0x76, 0xE4, 0x08, 0x92, 0xB5};
+    private static readonly byte[] AesKey0 = { 0xD6, 0x2A, 0xB2, 0xC1, 0x0C, 0xC0, 0x1B, 0xC5, 0x35, 0xDB, 0x7B, 0x86, 0x55, 0xC7, 0xDC,
+        0x3B };
+
+    private static readonly byte[] AesKey1 = { 0x3A, 0x4A, 0x5D, 0x36, 0x73, 0xA6, 0x60, 0x58, 0x7E, 0x63, 0xE6, 0x76, 0xE4, 0x08, 0x92,
+        0xB5 };
 
     [DllImport("oo2core_9_win64.dll", EntryPoint = "OodleLZ_Decompress")]
-    public static extern bool OodleLZ_Decompress(byte[] buffer, int bufferSize, byte[] outputBuffer,
-        int outputBufferSize, int a, int b, int c, IntPtr d, IntPtr e, IntPtr f, IntPtr g, IntPtr h, IntPtr i,
-        int threadModule);
-    
+    public static extern bool OodleLZ_Decompress(byte[] buffer, int bufferSize, byte[] outputBuffer, int outputBufferSize, int a, int b,
+        int c, IntPtr d, IntPtr e, IntPtr f, IntPtr g, IntPtr h, IntPtr i, int threadModule);
+
     public D2Package(string packagePath)
     {
         CheckValidPackagePath(packagePath);
@@ -131,14 +141,14 @@ public class D2Package : IPackage
         ReadBlockEntries();
         CloseReader();
     }
-    
+
     private static void CheckValidPackagePath(string packagePath)
     {
         CheckPackagePathExists(packagePath);
         CheckPackagePathValidPrefix(packagePath);
         CheckPackagePathValidExtension(packagePath);
     }
-    
+
     private static readonly string PackagePathDoesNotExistMessage = "The package path does not exist: ";
     private static void CheckPackagePathExists(string packagePath)
     {
@@ -166,28 +176,19 @@ public class D2Package : IPackage
             throw new ArgumentException(PackagePathInvalidExtensionMessage + packagePath);
         }
     }
-    
-    private static string SanitisePackagePath(string packagePath)
-    {
-        return packagePath.Replace("\\", "/");
-    }
-    
-    private void GetReader()
-    {
-        _reader = new BinaryReader(File.Open(PackagePath, FileMode.Open));
-    }
-    
-    private void CloseReader()
-    {
-        _reader.Close();
-    }
+
+    private static string SanitisePackagePath(string packagePath) { return packagePath.Replace("\\", "/"); }
+
+    private void GetReader() { _reader = new BinaryReader(File.Open(PackagePath, FileMode.Open)); }
+
+    private void CloseReader() { _reader.Close(); }
 
     private void ReadHeader()
     {
         _reader.BaseStream.Seek(0, SeekOrigin.Begin);
         Header = _reader.ReadBytes(0x100).ToStructure<D2PackageHeader>();
     }
-    
+
     private void ReadFileEntries()
     {
         _reader.BaseStream.Seek(Header.FileEntryTableOffset, SeekOrigin.Begin);
@@ -200,7 +201,7 @@ public class D2Package : IPackage
             FileEntries.Add(new D2FileEntry(fileEntryBitpacked));
         }
     }
-    
+
     private void ReadBlockEntries()
     {
         _reader.BaseStream.Seek(Header.BlockEntryTableOffset, SeekOrigin.Begin);
@@ -211,9 +212,9 @@ public class D2Package : IPackage
         {
             D2BlockEntry blockEntry = _reader.ReadBytes(d2BlockEntrySize).ToStructure<D2BlockEntry>();
             BlockEntries.Add(blockEntry);
-        }    
+        }
     }
-    
+
     public PackageMetadata GetPackageMetadata()
     {
         PackageMetadata packageMetadata = new PackageMetadata();
@@ -230,11 +231,11 @@ public class D2Package : IPackage
     {
         if (fileHash.GetPackageId() != Header.PackageId)
         {
-            throw new ArgumentException(FileMetadataInvalidPackageIdMessage  + fileHash.GetPackageId());
+            throw new ArgumentException(FileMetadataInvalidPackageIdMessage + fileHash.GetPackageId());
         }
         return GetFileMetadata(fileHash.GetFileIndex());
     }
-    
+
     private static readonly string FileMetadataFileIndexOutOfRangeMessage = "The provided file hash has an out-of-range file index: ";
     public FileMetadata GetFileMetadata(ushort fileIndex)
     {
@@ -245,102 +246,139 @@ public class D2Package : IPackage
         return new FileMetadata(new FileHash(Header.PackageId, fileIndex), FileEntries[fileIndex]);
     }
 
+    private List<D2BlockEntry> GetBlockEntries(int blockIndex, int blockCount) { return BlockEntries.GetRange(blockIndex, blockCount); }
+
+    /// <summary>
+    /// Find what blocks the file is made out of. For most small files this is a single block since blocks are
+    /// 262144 bytes long, but larger files will span multiple blocks.
+    /// ( = block start, [ = file start, ] = file end, ) = block end, - = data
+    /// If a file is made of a single block, we just need to identify which patch file the block is located in and copy from the given block
+    /// offset -> offset + fileSize:
+    /// (----[--]--)
+    ///
+    /// If a file is made of multiple blocks, it often looks like this:
+    /// (----[-----) (----------) (---]------)
+    /// The first block is be copied from offset -> end of block.
+    /// The middling blocks are copied entirely.
+    /// The final block is copied from start -> fileSize - bytes already copied
+    /// </summary>
     public byte[] GetFileBytes(FileHash fileId)
     {
         D2FileEntry fileEntry = FileEntries[fileId.GetFileIndex()];
-                    int blockCount =
-                (int) Math.Floor((double) (fileEntry.StartingBlockOffset + fileEntry.FileSize - 1) / (double) BlockSize);
-            byte[] buffer = new byte[fileEntry.FileSize];
-            int currentBufferOffset = 0;
-            int currentBlockID = 0;
-            Dictionary<int, BinaryReader> pkgHandles = new Dictionary<int, BinaryReader>();
-            List<D2BlockEntry> blocks = BlockEntries.GetRange(fileEntry.StartingBlockOffset, blockCount);
-            foreach (D2BlockEntry block in blocks)
+        byte[] finalFileBuffer = new byte[fileEntry.FileSize];
+        int blockCount = GetBlockCount(fileEntry);
+        int currentBufferOffset = 0;
+        int currentBlockId = 0;
+
+        List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
+        foreach (D2BlockEntry blockEntry in blocks)
+        {
+            BinaryReader packageHandle = GetPackageHandle(blockEntry.PatchId);
+
+            byte[] blockBuffer = ReadBlockBuffer(packageHandle, blockEntry);
+            blockBuffer = DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
+
+            bool isFirstBlock = currentBlockId == 0;
+            bool isLastBlock = currentBlockId == blockCount - 1;
+            bool isOnlyOneBlock = blockCount == 1;
+            if (isOnlyOneBlock)
             {
-                BinaryReader pkgHandle = null;
-                if (pkgHandles.ContainsKey(block.PatchID))
-                {
-                    pkgHandle = pkgHandles[block.PatchID];
-                }
-                else
-                {
-                    // pkgHandle = new BinaryReader(new FileStream(
-                        // Path.Combine(PkgPath.Substring(0, PkgPath.Length - 5) + block.PatchID.ToString("D") + ".pkg"),
-                        // FileMode.Open, FileAccess.Read, FileShare.Read));
-                    // pkgHandles.Add(block.PatchID, pkgHandle);
-                }
-
-                // Read block data
-                pkgHandle.BaseStream.Seek(block.Offset, SeekOrigin.Begin);
-                byte[] blockBuffer = pkgHandle.ReadBytes((int) block.Size);
-
-                // Deobfuscate
-                byte[] decryptedBuffer;
-                if ((block.BitFlag & 0x2) == 2)
-                {
-                    decryptedBuffer = DecryptBuffer(blockBuffer, block);
-                }
-                else
-                {
-                    decryptedBuffer = blockBuffer;
-                }
-
-                byte[] decompressedBuffer;
-                if ((block.BitFlag & 0x1) == 1)
-                {
-                    decompressedBuffer = DecompressBuffer(decryptedBuffer, block);
-                }
-                else
-                {
-                    decompressedBuffer = decryptedBuffer;
-                }
-
-                if (currentBlockID == 0)
-                {
-                    int copySize;
-                    if (currentBlockID == blockCount)
-                    {
-                        copySize = fileEntry.FileSize;
-                    }
-                    else
-                    {
-                        copySize = 0x40_000 - fileEntry.StartingBlockOffset;
-                    }
-
-                    Array.Copy(decompressedBuffer, fileEntry.StartingBlockOffset, buffer, 0, copySize);
-                    currentBufferOffset += copySize;
-                }
-                else if (currentBlockID == blockCount)
-                {
-                    Array.Copy(decompressedBuffer, 0, buffer, currentBufferOffset,
-                        fileEntry.FileSize - currentBufferOffset);
-                }
-                else
-                {
-                    Array.Copy(decompressedBuffer, 0, buffer, currentBufferOffset, BlockSize);
-                    currentBufferOffset += BlockSize;
-                }
-
-                currentBlockID++;
-
+                int copySize = fileEntry.FileSize;
+                Array.Copy(blockBuffer, fileEntry.StartingBlockOffset, finalFileBuffer, 0, copySize);
+            }
+            else if (isFirstBlock)
+            {
+                int copySize = BlockSize - fileEntry.StartingBlockOffset;
+                Array.Copy(blockBuffer, fileEntry.StartingBlockOffset, finalFileBuffer, 0, copySize);
+                currentBufferOffset += copySize;
+            }
+            else if (isLastBlock)
+            {
+                int copySize = fileEntry.FileSize - currentBufferOffset;
+                Array.Copy(blockBuffer, 0, finalFileBuffer, currentBufferOffset, copySize);
+            }
+            else
+            {
+                const int copySize = BlockSize;
+                Array.Copy(blockBuffer, 0, finalFileBuffer, currentBufferOffset, copySize);
+                currentBufferOffset += BlockSize;
             }
 
-            return buffer;
+            currentBlockId++;
+        }
+
+        return finalFileBuffer;
     }
-    
-    public byte[] GenerateIV()
+
+    private int GetBlockCount(D2FileEntry fileEntry)
     {
-        byte[] nonce = {0x84, 0xEA, 0x11, 0xC0, 0xAC, 0xAB, 0xFA, 0x20, 0x33, 0x11, 0x26, 0x99};
+        return 1 + (int) Math.Floor((double) (fileEntry.StartingBlockOffset + fileEntry.FileSize - 1) / BlockSize);
+    }
+
+    private BinaryReader GetPackageHandle(ushort patchId)
+    {
+        if (!_packageHandles.TryGetValue(patchId, out BinaryReader packageHandle))
+        {
+            packageHandle =
+                new BinaryReader(new FileStream(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read, FileShare.Read));
+            _packageHandles.Add(patchId, packageHandle);
+        }
+        return packageHandle;
+    }
+
+    // This only supports patchIds that are from 0-9.
+    private string GetSpecificPackagePatchPath(ushort patchId)
+    {
+        string packagePatchAndExtension = "0.pkg";
+        string pathWithNoPatchAndExtension = PackagePath.Substring(0, PackagePath.Length - packagePatchAndExtension.Length);
+
+        return Path.Combine(pathWithNoPatchAndExtension + patchId.ToString("D") + ".pkg");
+    }
+
+    private byte[] ReadBlockBuffer(BinaryReader packageHandle, D2BlockEntry blockEntry)
+    {
+        packageHandle.BaseStream.Seek(blockEntry.Offset, SeekOrigin.Begin);
+        byte[] blockBuffer = packageHandle.ReadBytes((int) blockEntry.Size);
+        return blockBuffer;
+    }
+
+    private byte[] DecryptAndDecompressBlockBufferIfRequired(byte[] blockBuffer, D2BlockEntry blockEntry)
+    {
+        byte[] decryptedBuffer;
+        if ((blockEntry.BitFlag & 0x2) == 2)
+        {
+            decryptedBuffer = DecryptBuffer(blockBuffer, blockEntry);
+        }
+        else
+        {
+            decryptedBuffer = blockBuffer;
+        }
+
+        byte[] decompressedBuffer;
+        if ((blockEntry.BitFlag & 0x1) == 1)
+        {
+            decompressedBuffer = DecompressBuffer(decryptedBuffer, blockEntry);
+        }
+        else
+        {
+            decompressedBuffer = decryptedBuffer;
+        }
+
+        return decompressedBuffer;
+    }
+
+    private byte[] GenerateNonce()
+    {
+        byte[] nonce = { 0x84, 0xEA, 0x11, 0xC0, 0xAC, 0xAB, 0xFA, 0x20, 0x33, 0x11, 0x26, 0x99 };
         nonce[0] ^= (byte) ((Header.PackageId >> 8) & 0xFF);
         nonce[11] ^= (byte) (Header.PackageId & 0xFF);
-        nonce[5] ^= Header.Timestamp < 1675098707 ? (byte) 0 : (byte) 1;
         return nonce;
     }
 
-    public unsafe byte[] DecryptBuffer(byte[] buffer, D2BlockEntry block)
+    private unsafe byte[] DecryptBuffer(byte[] buffer, D2BlockEntry block)
     {
         byte[] decryptedBuffer = new byte[buffer.Length];
-        byte[] key = new byte[0x10];
+        byte[] key;
         if ((block.BitFlag & 0x4) == 4)
         {
             key = AesKey1;
@@ -350,19 +388,18 @@ public class D2Package : IPackage
             key = AesKey0;
         }
 
-        byte[] iv = GenerateIV();
+        byte[] iv = GenerateNonce();
         using var aes = new AesGcm(key);
         byte[] tag = new byte[0x10];
-        Marshal.Copy((IntPtr) block.GCMTag, tag, Header.Timestamp < 1675098903 ? (byte) 0 : (byte) 1, 0x10);
+        Marshal.Copy((IntPtr) block.GCMTag, tag, 0, 0x10);
         aes.Decrypt(iv, buffer, tag, decryptedBuffer);
         return decryptedBuffer;
     }
 
-    public byte[] DecompressBuffer(byte[] buffer, D2BlockEntry block)
+    private byte[] DecompressBuffer(byte[] buffer, D2BlockEntry block)
     {
-        byte[] decompressedBuffer = new byte[0x40_000];
-        OodleLZ_Decompress(buffer, (int) block.Size, decompressedBuffer, BlockSize,
-            0, 0, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero,
+        byte[] decompressedBuffer = new byte[BlockSize];
+        OodleLZ_Decompress(buffer, (int) block.Size, decompressedBuffer, BlockSize, 0, 0, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero,
             IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 3);
 
         return decompressedBuffer;
