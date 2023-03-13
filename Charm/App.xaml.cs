@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using Field;
 using Field.General;
 using Field.Models;
 
@@ -40,12 +41,12 @@ namespace Charm
                 if (apiHash != 0)
                 {
                     return;
-                    // to check if we need to update caches
-                    PackageHandler.Initialise();
-                    
-                    // Initialise FNV handler -- must be first bc my code is shit
-                    FnvHandler.Initialise();
+					// Initialise FNV handler -- must be first bc my code is shit
+					FnvHandler.Initialise();
 
+					// to check if we need to update caches
+					PackageHandler.Initialise();
+                    
                     // Get all hash64 -- must be before InvestmentHandler
                     TagHash64Handler.Initialise();
 
