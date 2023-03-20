@@ -87,8 +87,8 @@ public class TextureHeader : Tag
             }
             else if (TexHelper.Instance.IsSRGB(format))
             {
-                scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SRGB, 0);
-            }
+				scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0);
+			}
             else
             {
                 scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
@@ -103,7 +103,7 @@ public class TextureHeader : Tag
         {
             try
             {
-                scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
+                scratchImage = scratchImage.Decompress(format);
                 return scratchImage;
             }
             catch (AccessViolationException)

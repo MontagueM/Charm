@@ -168,7 +168,7 @@ public class TexturePlate : Tag
         {
             ScratchImage original = transform.Texture.GetScratchImage();
             ScratchImage resizedOriginal = original.Resize(transform.Scale.X, transform.Scale.Y, 0);
-            TexHelper.Instance.CopyRectangle(resizedOriginal.GetImage(0, 0, 0), 0, 0, transform.Scale.X, transform.Scale.Y, outputPlate.GetImage(0, 0, 0), bSrgb ? TEX_FILTER_FLAGS.SRGB : 0, transform.Translation.X, transform.Translation.Y);
+            TexHelper.Instance.CopyRectangle(resizedOriginal.GetImage(0, 0, 0), 0, 0, transform.Scale.X, transform.Scale.Y, outputPlate.GetImage(0, 0, 0), bSrgb ? TEX_FILTER_FLAGS.SEPARATE_ALPHA : 0, transform.Translation.X, transform.Translation.Y);
             original.Dispose();
             resizedOriginal.Dispose();
         }
