@@ -15,6 +15,7 @@ using Field.Entities;
 using Field.Statics;
 using Serilog;
 using HelixToolkit.SharpDX.Core.Model.Scene;
+using SharpDX.Direct3D9;
 
 namespace Charm;
 
@@ -77,15 +78,17 @@ public partial class MapView : UserControl
         MVM.Dispose();
     }
     
-    public static void ExportFullMap(Tag<D2Class_07878080> map)
+    public static void ExportFullMap(Tag<D2Class_07878080> map, Activity activity, string bubbleName)
     {
-        FbxHandler fbxHandler = new FbxHandler();
+        //Console.WriteLine($"{map.Hash} : {PackageHandler.GetActivityName(activity.Hash)} : {activity.Header.LocationName} : {activity.Hash}");
+		//_activityLog.Debug($"Exporting activity data name: {PackageHandler.GetActivityName(activity.Hash)}, hash: {activity.Hash}");
+		FbxHandler fbxHandler = new FbxHandler();
        
         string meshName = map.Hash.GetHashString();
-        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        string savePath = ConfigHandler.GetExportSavePath() + $"/Maps/{activity.Header.LocationName}/";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
-            savePath = ConfigHandler.GetExportSavePath() + "/Maps";
+            savePath = ConfigHandler.GetExportSavePath() + $"/Maps/{activity.Header.LocationName}/{bubbleName}/";
         }
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
@@ -120,17 +123,18 @@ public partial class MapView : UserControl
 
     }
 
-    public static void ExportMinimalMap(Tag<D2Class_07878080> map, EExportTypeFlag exportTypeFlag)
+
+	public static void ExportMinimalMap(Tag<D2Class_07878080> map, EExportTypeFlag exportTypeFlag, Activity activity, string bubbleName)
     {
         FbxHandler fbxHandler = new FbxHandler();
-       
-        string meshName = map.Hash.GetHashString();
-        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
-        if (ConfigHandler.GetSingleFolderMapsEnabled())
-        {
-            savePath = ConfigHandler.GetExportSavePath() + "/Maps";
-        }
-        fbxHandler.InfoHandler.SetMeshName(meshName);
+
+		string meshName = map.Hash.GetHashString();
+		string savePath = ConfigHandler.GetExportSavePath() + $"/Maps/{activity.Header.LocationName}/";
+		if (ConfigHandler.GetSingleFolderMapsEnabled())
+		{
+			savePath = ConfigHandler.GetExportSavePath() + $"/Maps/{activity.Header.LocationName}/{bubbleName}/";
+		}
+		fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
         Directory.CreateDirectory(savePath + "/Dynamics");
     
@@ -157,14 +161,14 @@ public partial class MapView : UserControl
         fbxHandler.Dispose();
     }
 
-    public static void ExportTerrainMap(Tag<D2Class_07878080> map)
+    public static void ExportTerrainMap(Tag<D2Class_07878080> map, Activity activity, string bubbleName)
     {
         FbxHandler fbxHandler = new FbxHandler();
         string meshName = map.Hash.GetHashString();
-        string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
+        string savePath = ConfigHandler.GetExportSavePath() + $"/Maps/{activity.Header.LocationName}/";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
-            savePath = ConfigHandler.GetExportSavePath() + "/Maps";
+            savePath = ConfigHandler.GetExportSavePath() + $"/Maps/{activity.Header.LocationName}/{bubbleName}/";
         }
         if (ConfigHandler.GetUnrealInteropEnabled())
         {

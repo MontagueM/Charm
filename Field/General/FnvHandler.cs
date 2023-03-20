@@ -136,33 +136,18 @@ public class FnvHandler
 
 	private static void Cache085D8080()
 	{
-		
-		//var vals2 = PackageHandler.GetAllTagsWithReference(0x80809ad8);
-		//PackageHandler.CacheHashDataList(vals2.Select(x => x.Hash).ToArray());
-
-		//foreach (var tagHash in vals2)
+		//var dgtbVals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80808930);
+		//Parallel.ForEach(dgtbVals, val =>
 		//{
-		//	Tag<D2Class_D89A8080> tag = PackageHandler.GetTag<D2Class_D89A8080>(tagHash);
-		//	//public DestinyHash Unk38;
-		//	//public DestinyHash Unk80;
-		//	//public DestinyHash Unk84;
-		//	//public DestinyHash Unk88;
-		//	Console.WriteLine("Unk80 " + tag.Header.Unk80);
-		//	Console.WriteLine("Unk84 " + tag.Header.Unk84);
-		//	Console.WriteLine("Unk88 " + tag.Header.Unk88.ToString());
-		//	Console.WriteLine("Unk38 " + tag.Header.Unk38.ToString());
-
-		//	Parallel.ForEach(tag.Header.EntityResources, entry =>
+		//	Tag<D2Class_30898080> dgtb = PackageHandler.GetTag<D2Class_30898080>(val);
+		//	foreach (var entry in dgtb.Header.Unk18)
 		//	{
-		//		//Console.WriteLine("Unk18 " + entry.ResourceHash.Header.Unk80);
-				
-		//		//if(entry.ResourceHash.Header.Unk18 is D2Class_79818080)
-		//		//{
-		//		//	Console.WriteLine(entry.ResourceHash.Header.Unk18.WwiseSounds1.Unk10);
-		//		//}
-		//	});
-
-		//}
+		//		if (entry.Tag == null)
+		//			continue;
+		//		Console.WriteLine(entry.TagPath);
+		//		Console.WriteLine(entry.TagNote);
+		//	}
+		//});
 
 		var vals = PackageHandler.GetAllTagsWithReference(0x80805d08);
 		PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());

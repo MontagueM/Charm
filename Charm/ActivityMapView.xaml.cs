@@ -25,6 +25,7 @@ namespace Charm;
 public partial class ActivityMapView : UserControl
 {
     private readonly ILogger _activityLog = Log.ForContext<ActivityMapView>();
+    private string _activeBubble = "";
 
     public ActivityMapView()
     {
@@ -51,7 +52,7 @@ public partial class ActivityMapView : UserControl
                     continue;
                 DisplayBubble displayMap = new DisplayBubble();
                 displayMap.Name = $"{mapEntry.BubbleName} ({mapEntry.LocationName})";  // assuming Unk10 is 0F978080 or 0B978080
-                displayMap.Hash = mapReferences.MapReference.Header.ChildMapReference.Hash;
+                displayMap.Hash = $"{mapReferences.MapReference.Header.ChildMapReference.Hash}|{mapEntry.BubbleName}";
                 maps.Add(displayMap);   
             }
         }
@@ -60,10 +61,16 @@ public partial class ActivityMapView : UserControl
 
     private void GetBubbleContentsButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagHash hash = new TagHash((sender as Button).Tag as string);
-        Tag<D2Class_01878080> bubbleMaps = PackageHandler.GetTag<D2Class_01878080>(hash);
-        PopulateStaticList(bubbleMaps);
-    }
+		string tag = (sender as Button).Tag as string;
+		string[] values = tag.Split('|'); //very hacky way of getting both the hash and bubble name from the button tag, tried doing some Tag<> stuff but couldnt figure it out
+		string hash = values[0];
+		string name = values[1];
+
+        _activeBubble = name;
+
+		Tag<D2Class_01878080> bubbleMaps = PackageHandler.GetTag<D2Class_01878080>(new TagHash(hash));
+		PopulateStaticList(bubbleMaps);
+	}
 
     private void StaticMapPart_OnCheck(object sender, RoutedEventArgs e)
     {
@@ -191,20 +198,20 @@ public partial class ActivityMapView : UserControl
         {
             if (info.ExportType == EExportTypeFlag.Full)
             {
-                MapView.ExportFullMap(map);
-                MapView.ExportTerrainMap(map);
+                MapView.ExportFullMap(map, activity, _activeBubble);
+                MapView.ExportTerrainMap(map, activity, _activeBubble);
             }
             else if (info.ExportType == EExportTypeFlag.TerrainOnly)
             {
-                MapView.ExportTerrainMap(map);
+                MapView.ExportTerrainMap(map, activity, _activeBubble);
             }
             else if (info.ExportType == EExportTypeFlag.Minimal)
             {
-                MapView.ExportMinimalMap(map, info.ExportType);
+                MapView.ExportMinimalMap(map, info.ExportType, activity, _activeBubble);
             }
             else
             {
-                MapView.ExportMinimalMap(map, info.ExportType);
+                MapView.ExportMinimalMap(map, info.ExportType, activity, _activeBubble);
             }
             
             MainWindow.Progress.CompleteStage();
