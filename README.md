@@ -50,18 +50,11 @@ Not yet implemented:
 
 
 ## Source 2: **Only supports S&Box at the moment**
- - Generates .vfx shader files for semi-accurate game shaders (similar to UE5 shaders)
+ - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/Source-2-Importing)
+ - Generates .shader files for semi-accurate game shaders (similar to UE5 shaders)
  - Generates .vmat (material) and .vmdl (model) files for statics and maps
 
- ~~(CS:GO Source 2 support is planned once that is released and if it supports custom content similar to S&Box)~~ (Unlikely)
-
- Copy files from shaders/source2 to your addons "Shaders" folder, and the .vmat, textures, and .vmdl files to "materials", "materials/textures", and "models" respectively.
-
- **To compile shaders:** 
- Drag and drop all the .shader files into your addons shaders folder while you have S&Box open, this should automatically trigger the compile process. (Not Recommended though).
- The better option is to locate all your .shader files and drag/drop them onto vfxcompile.exe in your "Steam\steamapps\common\sbox\bin\win64" folder, this should compile the shaders without having the game open, saving system resources. **THIS WILL TAKE A LONG TIME TO DO, DUE TO COMPILE SPEEDS**
-
-
+***
 
 ### Some tricks
 
