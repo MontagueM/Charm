@@ -8,8 +8,8 @@ public struct PackageMetadata
     public string PackagePath;
     public string PackageName;
     public int PackageId;
-    public int PatchId;
-    public int Timestamp;
+    public int PackagePatchId;
+    public uint PackageTimestamp;
 }
 
 public struct FileMetadata
@@ -35,6 +35,7 @@ public interface IPackage {
     FileMetadata GetFileMetadata(FileHash fileId);
 
     byte[] GetFileBytes(FileHash fileId);
+    HashSet<int> GetRequiredPatches();
 }
 
 [StructLayout(LayoutKind.Explicit)]
@@ -142,7 +143,7 @@ public class D2Package : IPackage
         CloseReader();
     }
 
-    private static void CheckValidPackagePath(string packagePath)
+    public static void CheckValidPackagePath(string packagePath)
     {
         CheckPackagePathExists(packagePath);
         CheckPackagePathValidPrefix(packagePath);
@@ -221,8 +222,8 @@ public class D2Package : IPackage
         packageMetadata.PackagePath = PackagePath;
         packageMetadata.PackageName = PackagePath.Split('/').Last();
         packageMetadata.PackageId = Header.PackageId;
-        packageMetadata.PatchId = Header.PatchId;
-        packageMetadata.Timestamp = (int) Header.Timestamp;
+        packageMetadata.PackagePatchId = Header.PatchId;
+        packageMetadata.PackageTimestamp = Header.Timestamp;
         return packageMetadata;
     }
 
@@ -247,6 +248,8 @@ public class D2Package : IPackage
     }
 
     private List<D2BlockEntry> GetBlockEntries(int blockIndex, int blockCount) { return BlockEntries.GetRange(blockIndex, blockCount); }
+
+    private D2BlockEntry GetBlockEntry(int blockIndex) { return BlockEntries[blockIndex]; }
 
     /// <summary>
     /// Find what blocks the file is made out of. For most small files this is a single block since blocks are
@@ -403,5 +406,21 @@ public class D2Package : IPackage
             IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 3);
 
         return decompressedBuffer;
+    }
+
+    public HashSet<int> GetRequiredPatches()
+    {
+        HashSet<int> requiredPatches = new HashSet<int>();
+        foreach (D2FileEntry fileEntry in FileEntries)
+        {
+            int blockCount = GetBlockCount(fileEntry);
+            List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
+            foreach (D2BlockEntry blockEntry in blocks)
+            {
+                requiredPatches.Add(blockEntry.PatchId);
+            }
+        }
+        
+        return requiredPatches;
     }
 }

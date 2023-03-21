@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tomograph", "Tomograph\Tomo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm", "Charm\Charm.csproj", "{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomographData", "TomographData\TomographData.csproj", "{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}.Debug|x64.Build.0 = Debug|Any CPU
 		{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}.Release|x64.ActiveCfg = Release|Any CPU
 		{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}.Release|x64.Build.0 = Release|Any CPU
+		{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}.Debug|x64.Build.0 = Debug|Any CPU
+		{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}.Release|x64.ActiveCfg = Release|Any CPU
+		{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

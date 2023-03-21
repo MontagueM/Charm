@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Reflection;
 using Avalonia.Controls;
 using Resourcer;
 
@@ -12,11 +15,12 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LATEST, ValidD2LatestPackageDirectory);
+        // Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LATEST, ValidD2LatestPackageDirectory);
         // SchemaHandle.Initialise();
-        var a = PackageResourcer.Get().PackagesDirectory;
-        Strategy.AddNewStrategy(TigerStrategy.DESTINY1_PS4, ValidD1Ps4LatestPackageDirectory);
-        var b = PackageResourcer.Get().PackagesDirectory;
+        // var a = PackageResourcer.Get().PackagesDirectory;
+        // Strategy.AddNewStrategy(TigerStrategy.DESTINY1_PS4, ValidD1Ps4LatestPackageDirectory);
+        // var b = PackageResourcer.Get().PackagesDirectory;
+        CharmSubsystem.InitialiseSubsystems();
         var c = 0;
     }
 }

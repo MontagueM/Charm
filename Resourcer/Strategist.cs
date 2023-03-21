@@ -52,9 +52,12 @@ public abstract class StrategistSingleton<T>
 
 public enum TigerStrategy {
     NONE,
-    [StrategyMetadata("ps4", typeof(IPackage))] DESTINY1_PS4,
-    [StrategyMetadata("w64", typeof(D2Package))] DESTINY2_LATEST,
-    [StrategyMetadata("w64", typeof(D2Package))] DESTINY2_111894,
+    [StrategyMetadata("ps4", typeof(IPackage))] 
+    DESTINY1_PS4,
+    [StrategyMetadata("w64", typeof(D2Package), 1085660, 1085661, 6051526863119423207, 1085662, 1078048403901153652)]
+    DESTINY2_WITCHQUEEN_6307,
+    [StrategyMetadata("w64", typeof(D2Package), 1085660, 1085661, 3093985834785608855, 1085662, 3093985834785608855)]
+    DESTINY2_LIGHTFALL_7003,
 }
 
 public struct StrategyConfiguration
@@ -62,11 +65,13 @@ public struct StrategyConfiguration
     public string PackagesDirectory;
 }
 
-public static class Strategy
+public class Strategy
 {
     private static readonly Dictionary<TigerStrategy, StrategyConfiguration> _strategyConfigurations = new();
 
     private static readonly TigerStrategy _defaultStrategy = TigerStrategy.NONE;
+
+    [ConfigProperty]
     private static TigerStrategy _currentStrategy = _defaultStrategy;
     public static TigerStrategy CurrentStrategy
     {
@@ -165,10 +170,22 @@ public static class Strategy
         return attribute.PackagePrefix;
     }
 
+
+
     public static Type GetPackageType()
     {
         var member = typeof(TigerStrategy).GetMember(_currentStrategy.ToString());
         StrategyMetadata attribute = (StrategyMetadata) member[0].GetCustomAttribute(typeof(StrategyMetadata), false);
         return attribute.PackageType;
+    }
+}
+
+public static class StrategyExtensions
+{
+    public static StrategyMetadata GetStrategyMetadata(this TigerStrategy strategy)
+    {
+        var member = typeof(TigerStrategy).GetMember(strategy.ToString());
+        StrategyMetadata attribute = (StrategyMetadata) member[0].GetCustomAttribute(typeof(StrategyMetadata), false);
+        return attribute;
     }
 }
