@@ -20,7 +20,7 @@ public partial class MainWindow : Window
         // var a = PackageResourcer.Get().PackagesDirectory;
         // Strategy.AddNewStrategy(TigerStrategy.DESTINY1_PS4, ValidD1Ps4LatestPackageDirectory);
         // var b = PackageResourcer.Get().PackagesDirectory;
-        CharmSubsystem.InitialiseSubsystems();
+        CharmInstance.InitialiseSubsystems();
         var c = 0;
     }
 }

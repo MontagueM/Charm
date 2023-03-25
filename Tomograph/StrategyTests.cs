@@ -16,7 +16,7 @@ public class StrategyTests
     }
     
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(DirectoryNotFoundException), typeof(Strategy), "PackagesDirectoryDoesNotExistMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(DirectoryNotFoundException), typeof(Strategy), "PackagesDirectoryDoesNotExistMessage")]
     public void Strategy_D2Latest_InvalidPackagesDirectory_NotExist()
     {
         Strategy.Reset();
@@ -24,7 +24,7 @@ public class StrategyTests
     }
     
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentException), typeof(Strategy), "PackagesDirectoryEmptyMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(Strategy), "PackagesDirectoryEmptyMessage")]
     public void Strategy_D2Latest_InvalidPackagesDirectory_Empty()
     {
         Strategy.Reset();
@@ -32,7 +32,7 @@ public class StrategyTests
     }
     
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentException), typeof(Strategy), "PackagesDirectoryInvalidPrefixMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(Strategy), "PackagesDirectoryInvalidPrefixMessage")]
     public void Strategy_D2Latest_InvalidPackagesDirectory_InvalidD2Win64Prefix()
     {
         Strategy.Reset();
@@ -40,7 +40,7 @@ public class StrategyTests
     }
     
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentException), typeof(Strategy), "PackagesDirectoryInvalidExtensionMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(Strategy), "PackagesDirectoryInvalidExtensionMessage")]
     public void Strategy_D2Latest_InvalidPackagesDirectory_InvalidExtension()
     {
         Strategy.Reset();

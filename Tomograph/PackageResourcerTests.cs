@@ -56,7 +56,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests,
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentException), typeof(PackageResourcer), "PackageIdInvalidMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(PackageResourcer), "PackageIdInvalidMessage")]
     public void SinglePackage_InvalidPackageObject_InvalidId()
     {
         IPackage package = PackageResourcer.Get().GetPackage(0x100);

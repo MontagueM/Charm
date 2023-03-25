@@ -67,11 +67,15 @@ public struct StrategyConfiguration
 
 public class Strategy
 {
-    private static readonly Dictionary<TigerStrategy, StrategyConfiguration> _strategyConfigurations = new();
+    [ConfigField("StrategyConfigurations")]
+    private static Dictionary<TigerStrategy, StrategyConfiguration> _strategyConfigurations = new()
+        {
+            {TigerStrategy.DESTINY1_PS4, new StrategyConfiguration{PackagesDirectory = "somepackagedirectory"}}
+        };
 
     private static readonly TigerStrategy _defaultStrategy = TigerStrategy.NONE;
 
-    [ConfigProperty]
+    [ConfigField("CurrentStrategy")]
     private static TigerStrategy _currentStrategy = _defaultStrategy;
     public static TigerStrategy CurrentStrategy
     {

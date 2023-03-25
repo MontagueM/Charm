@@ -80,17 +80,17 @@ public class DESTINY2_WITCHQUEEN_6307_PackageTests : CharmPackageTests, IPackage
 
     private static readonly TestPackage InvalidPackagePath_DoesNotExist = new("w64_sr_audio_063c_0.pkg");
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(FileNotFoundException), typeof(D2Package), "PackagePathDoesNotExistMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(FileNotFoundException), typeof(D2Package), "PackagePathDoesNotExistMessage")]
     public void Package_PathDoesNotExist() { D2Package package = new D2Package(InvalidPackagePath_DoesNotExist.PackagePath); }
 
     private static readonly string InvalidPackagePath_InvalidPrefix = @"../../../TestData/D2InvalidPrefix/ps4_test.pkg";
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentException), typeof(D2Package), "PackagePathInvalidPrefixMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(D2Package), "PackagePathInvalidPrefixMessage")]
     public void Package_PathInvalidPrefix() { D2Package package = new D2Package(InvalidPackagePath_InvalidPrefix); }
 
     private static readonly string InvalidPackagePath_InvalidExtension = @"../../../TestData/D2InvalidExtension/w64_test.bin";
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentException), typeof(D2Package), "PackagePathInvalidExtensionMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(D2Package), "PackagePathInvalidExtensionMessage")]
     public void Package_PathInvalidExtension() { D2Package package = new D2Package(InvalidPackagePath_InvalidExtension); }
 
     static string NormalizePath(string path)
@@ -169,7 +169,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageTests : CharmPackageTests, IPackage
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentException), typeof(D2Package), "FileMetadataInvalidPackageIdMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(D2Package), "FileMetadataInvalidPackageIdMessage")]
     public void FileMetadata_InvalidPackageId()
     {
         D2Package package = new D2Package(ValidPatchLast.PackagePath);
@@ -177,33 +177,20 @@ public class DESTINY2_WITCHQUEEN_6307_PackageTests : CharmPackageTests, IPackage
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentOutOfRangeException), typeof(D2Package), "FileMetadataFileIndexOutOfRangeMessage")]
+    [ExpectedExceptionWithMessageVariable(typeof(ArgumentOutOfRangeException), typeof(D2Package), "FileMetadataFileIndexOutOfRangeMessage")]
     public void FileMetadata_FileIndexOutOfRange()
     {
         D2Package package = new D2Package(ValidPatchLast.PackagePath);
         package.GetFileMetadata(0x2000);
     }
 
-    private T CallPrivatePackageMethod<T>(D2Package packageInstance, string methodName, params object[] parameters)
-        where T : struct
-    {
-        MethodInfo dynMethod = packageInstance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
-        return (T) dynMethod.Invoke(packageInstance, parameters);
-    }
-
-    private void CallPrivatePackageMethod(D2Package packageInstance, string methodName, object[] parameters)
-    {
-        MethodInfo dynMethod = packageInstance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
-        dynMethod.Invoke(packageInstance, parameters);
-    }
-
     [TestMethod]
     public void FileBytes_ValidDecryptedAndDecompressedSamePatch_Block()
     {
         D2Package package = new D2Package(ValidPatchLast.PackagePath);
-        D2BlockEntry blockEntry = CallPrivatePackageMethod<D2BlockEntry>(package, "GetBlockEntry", 253);
+        D2BlockEntry blockEntry = Helpers.CallNonPublicMethod<D2BlockEntry>(package, "GetBlockEntry", 253);
         byte[] encryptedAndCompressedBlockBuffer = File.ReadAllBytes(ValidPatchLast.PackagePath).Skip(0x41800).Take(0xDD4).ToArray();
-        CallPrivatePackageMethod(
+        Helpers.CallNonPublicMethod(
             package, "DecryptAndDecompressBlockBufferIfRequired", new object[] { encryptedAndCompressedBlockBuffer, blockEntry });
     }
     

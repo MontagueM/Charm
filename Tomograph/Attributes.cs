@@ -14,18 +14,18 @@ public class TestStrategyAttribute : Attribute
     }
 }
 
-public class ExpectedExceptionWithMessageAttribute : ExpectedExceptionBaseAttribute
+public class ExpectedExceptionWithMessageVariableAttribute : ExpectedExceptionBaseAttribute
 {
     public Type ExceptionType { get; set; }
     public Type ClassWithMessage { get; set; }
     public string ExpectedMessageVariable { get; set; }
 
-    public ExpectedExceptionWithMessageAttribute(Type exceptionType)
+    public ExpectedExceptionWithMessageVariableAttribute(Type exceptionType)
     {
         ExceptionType = exceptionType;
     }
 
-    public ExpectedExceptionWithMessageAttribute(Type exceptionType, Type classWithMessage, string expectedMessageVariable)
+    public ExpectedExceptionWithMessageVariableAttribute(Type exceptionType, Type classWithMessage, string expectedMessageVariable)
     {
         ExceptionType = exceptionType;
         ClassWithMessage = classWithMessage;
@@ -54,5 +54,34 @@ public class ExpectedExceptionWithMessageAttribute : ExpectedExceptionBaseAttrib
         {
             StringAssert.Contains(actualMessage, expectedMessage);
         }
+    }
+}
+
+public class ExpectedExceptionWithMessageAttribute : ExpectedExceptionBaseAttribute
+{
+    public Type ExceptionType { get; set; }
+    public string ExpectedMessage { get; set; }
+
+    public ExpectedExceptionWithMessageAttribute(Type exceptionType)
+    {
+        ExceptionType = exceptionType;
+    }
+
+    public ExpectedExceptionWithMessageAttribute(Type exceptionType, string expectedMessage)
+    {
+        ExceptionType = exceptionType;
+        ExpectedMessage = expectedMessage;
+    }
+
+    protected override void Verify(Exception e)
+    {
+        if (e.GetType() != ExceptionType)
+        {
+            Assert.Fail($"Expected exception type: {ExceptionType.FullName}. " +
+                        $"Actual exception type: {e.GetType().FullName}. Exception message: {e.Message}");
+        }
+
+        var actualMessage = e.Message.Trim();
+        StringAssert.Contains(actualMessage, ExpectedMessage);
     }
 }
