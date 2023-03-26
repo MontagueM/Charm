@@ -403,7 +403,7 @@ PS
 
             if(isTerrain) //variables are different for terrain for whatever reason, kinda have to guess
             {
-                vfx.AppendLine("        float4 v0 = {i.vTextureCoords*5, 1,1};"); //Detail uv?
+                vfx.AppendLine("        float4 v0 = {i.vTextureCoords*7, 1,1};"); //Detail uv? x5? x10? no clue
                 vfx.AppendLine("        float4 v1 = {i.vTextureCoords, 1,1};"); //Main uv?
                 vfx.AppendLine("        float4 v2 = {1,1,1,1};"); //no clue yet
                 vfx.AppendLine("        float4 v3 = {i.vNormalWs, 1};"); //Guessing
@@ -464,15 +464,16 @@ PS
             {
                 if (line.Contains("cb12[7].xyz + -v4.xyz")) //cb12[7] might actually be a viewdir cbuffer or something
                 {
-                    vfx.AppendLine(line.Replace("-v4", "-g_vCameraPositionWs")); //dont know what v4 is when used like this
-                }
+					//vfx.AppendLine(line.Replace("-v4", "-g_vCameraPositionWs")); //dont know what v4 is when used like this
+					vfx.AppendLine(line.Replace("-v4.xyz", "float3(0,0,1)")); //I have no clue what this actually is at this point
+				}
                 else if (line.Contains("v4.xy * cb")) //might be a detail uv or something when v4 is used like this, idk
                 {
                     vfx.AppendLine(line.Replace("v4", "(v3.xy*5)"));
                 }
                 else if (line.Contains("while (true)"))
                 {
-                    vfx.AppendLine(line.Replace("while (true)", "       [unroll(10)] while (true)"));
+                    vfx.AppendLine(line.Replace("while (true)", "       [unroll(20)] while (true)"));
                 }
                 else if (line.Contains("return;"))
                 {
@@ -503,7 +504,7 @@ PS
                     var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]); 
                     var sampleUv = line.Split("(")[1].Split(")")[0];
 
-                    vfx.AppendLine($"       {equal}= g_t{texIndex}.Load({sampleUv});");
+                    vfx.AppendLine($"       {equal}= g_t{(int)texIndex+1}.Load({sampleUv});"); //Usually seen in decals, the texture isnt actually valid though?
                 }
                 else if (line.Contains("o0.w = r")) //o0.w = r(?)
                 {
