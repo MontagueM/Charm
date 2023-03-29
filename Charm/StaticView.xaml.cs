@@ -92,7 +92,10 @@ public partial class StaticView : UserControl
             }
             
         }
-        fbxHandler.InfoHandler.AddType("Static");
+        if (exportType == EExportTypeFlag.Full)
+        {
+            fbxHandler.InfoHandler.AddType("Static");
+        }
         fbxHandler.ExportScene($"{savePath}/{name}.fbx");
 
         if(lodexport)

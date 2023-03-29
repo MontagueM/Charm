@@ -96,7 +96,18 @@ PS
     //SamplerState g_sWrap < Filter( ANISOTROPIC ); AddressU( WRAP ); AddressV( WRAP ); >;
     //SamplerState g_sClamp < Filter( ANISOTROPIC ); AddressU( CLAMP ); AddressV( CLAMP ); >;
     //SamplerState g_sMirror < Filter( ANISOTROPIC ); AddressU( MIRROR ); AddressV( MIRROR ); >;
-    //SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;";
+    //SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;
+
+    //ParallaxPass(-0.1, v3.xy, viewDir)
+    float2 ParallaxPass(float strength, float2 uvmap, float3 viewDir)
+	{    
+		float3 uvOut;
+		
+        uvOut.x = ((viewDir.x/viewDir.z) * strength) + uvmap.x;
+        uvOut.y = ((viewDir.y/viewDir.z) * strength) - uvmap.y;
+		
+		return float3(uvOut.x, (1-uvOut.y) - 1, 0);
+	}";
 
     public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader, bool bIsTerrain = false)
     {
@@ -343,18 +354,11 @@ PS
             {
                 string type = "Srgb";
                 if (e.Texture != null)
-                {
-                    if (e.Texture.IsSrgb())
-                    {
-                        type = "Srgb";
-                    }
-                    else
-                    {
-                        type = "Linear";
-                    }
+                {    
+                    type = e.Texture.IsSrgb() ? "Srgb" : "Linear";
 
-                    //vfx.AppendLine($"   {texture.Type} {texture.Variable},");
-                    vfx.AppendLine($"   CreateInputTexture2D( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/{e.TextureIndex}\", Default3( 1.0, 1.0, 1.0 ));");
+					//vfx.AppendLine($"   {texture.Type} {texture.Variable},");
+					vfx.AppendLine($"   CreateInputTexture2D( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/{e.TextureIndex}\", Default3( 1.0, 1.0, 1.0 ));");
                     vfx.AppendLine($"   CreateTexture2DWithoutSampler( g_t{e.TextureIndex} )  < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; ");
                     vfx.AppendLine($"   TextureAttribute(g_t{e.TextureIndex}, g_t{e.TextureIndex});\n"); //Prevents some inputs not appearing for some reason
                 }
@@ -395,6 +399,22 @@ PS
         float3 x = cross(n, tangent);
         tangent = cross(x, n);
         tangent = normalize(tangent);
+
+        // get updated bi-tangent
+		x = cross(bitangent, n);
+		bitangent = cross(n, x);
+		bitangent = normalize(bitangent);
+		float3x3 tbn = float3x3(tangent, bitangent, n);
+		
+        // View ray in World Space
+		float3 vPositionWs = i.vPositionWithOffsetWs.xyz + g_vCameraPositionWs.xyz;
+        
+        uint nViewId = 0;
+        #if( D_MULTIVIEW_INSTANCING )
+            nViewId = i.nView;
+        #endif
+        float3 viewDir = normalize(CalculatePositionToCameraDirWsMultiview( nViewId, vPositionWs ));
+		viewDir = mul(tbn, viewDir);
         "); //Reconstruct tangent space map for normal maps, this seems like a bit of a hack but it works
 
             // Output render targets, todo support vertex shader
@@ -466,6 +486,7 @@ PS
                 {
 					//vfx.AppendLine(line.Replace("-v4", "-g_vCameraPositionWs")); //dont know what v4 is when used like this
 					vfx.AppendLine(line.Replace("-v4.xyz", "float3(0,0,1)")); //I have no clue what this actually is at this point
+					vfx.AppendLine("//Possible Parallax. Use ParallaxPass(-0.1, v3.xy, viewDir) for the textures uv");
 				}
                 else if (line.Contains("v4.xy * cb")) //might be a detail uv or something when v4 is used like this, idk
                 {
