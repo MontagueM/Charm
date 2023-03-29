@@ -486,7 +486,8 @@ PS
                 {
 					//vfx.AppendLine(line.Replace("-v4", "-g_vCameraPositionWs")); //dont know what v4 is when used like this
 					vfx.AppendLine(line.Replace("-v4.xyz", "float3(0,0,1)")); //I have no clue what this actually is at this point
-					vfx.AppendLine("//Possible Parallax. Use ParallaxPass(-0.1, v3.xy, viewDir) for the textures uv");
+					vfx.AppendLine("//Possible Parallax. Use ParallaxPass(-0.1, v3.xy, viewDir) for the textures uv. Values may need adjusted manually.");
+                    vfx.AppendLine($"//Find the texture that uses {line.Split('=')[0].Trim()} for its texcoord ");
 				}
                 else if (line.Contains("v4.xy * cb")) //might be a detail uv or something when v4 is used like this, idk
                 {
