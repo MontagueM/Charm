@@ -582,7 +582,7 @@ PS
  
         float3 normal = PackNormal3D(normal_in_world_space);
         normal.y = 1 - normal.y; 
-        normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy))); 
+        //normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy))); 
         
         float smoothness = saturate(8 * ({(bFixRoughness ? "0" : "normal_length")} - 0.375)); 
         
