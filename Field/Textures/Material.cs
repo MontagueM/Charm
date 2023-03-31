@@ -200,6 +200,8 @@ public class Material : Tag
                 vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
             }
 
+            vmat.AppendLine($"Attributes\r\n\t{{\r\n\t\tDebug_Diffuse \"false\"\r\n\t\tDebug_Rough \"false\"\r\n\t\tDebug_Metal \"false\"\r\n\t\tDebug_Normal \"false\"\r\n\t\tDebug_AO \"false\"\r\n\t\tDebug_Emit \"false\"\r\n\t\tDebug_Alpha \"false\"\r\n\t}}");
+
             // if(isTerrain)
             // {
             //     vmat.AppendLine($"  TextureT14 \"materials/Textures/{partEntry.Dyemap.Hash}.png\"");

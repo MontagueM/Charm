@@ -98,6 +98,15 @@ PS
     //SamplerState g_sMirror < Filter( ANISOTROPIC ); AddressU( MIRROR ); AddressV( MIRROR ); >;
     //SamplerState g_sBorder < Filter( ANISOTROPIC ); AddressU( BORDER ); AddressV( BORDER ); >;
 
+    //Debugs
+    bool g_bDiffuse < Attribute( ""Debug_Diffuse"" ); >;
+    bool g_bRough < Attribute( ""Debug_Rough"" ); >;
+    bool g_bMetal < Attribute( ""Debug_Metal"" ); >;
+    bool g_bNorm < Attribute( ""Debug_Normal"" ); >;
+    bool g_bAO < Attribute( ""Debug_AO"" ); >;
+    bool g_bEmit < Attribute( ""Debug_Emit"" ); >;
+    bool g_bAlpha < Attribute( ""Debug_Alpha"" ); >;
+
     //ParallaxPass(-0.1, v3.xy, viewDir)
     float2 ParallaxPass(float strength, float2 uvmap, float3 viewDir)
 	{    
@@ -425,16 +434,16 @@ PS
             {
                 vfx.AppendLine("        float4 v0 = {i.vTextureCoords*7, 1,1};"); //Detail uv? x5? x10? no clue
                 vfx.AppendLine("        float4 v1 = {i.vTextureCoords, 1,1};"); //Main uv?
-                vfx.AppendLine("        float4 v2 = {1,1,1,1};"); //no clue yet
-                vfx.AppendLine("        float4 v3 = {i.vNormalWs, 1};"); //Guessing
-                vfx.AppendLine("        float4 v4 = {tangent, 1};"); //Guessing
+                vfx.AppendLine("        float4 v2 = {0,0,1,1};"); //no clue yet
+                vfx.AppendLine("        float4 v3 = {1,0,0,1};"); //Guessing
+                vfx.AppendLine("        float4 v4 = {0,1,0,1};"); //Guessing
                 vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Havent seen v5 used on terrain yet
             }
             else
             {
-                vfx.AppendLine("        float4 v0 = {1,1,1,1};"); //Seems to only be used for normals. No idea what it is.
-                vfx.AppendLine("        float4 v1 = {i.vNormalWs, 1};"); //Pretty sure this is mesh normals.
-                vfx.AppendLine("        float4 v2 = {tangent, 1};"); //Tangent? Seems to only be used for normals.
+                vfx.AppendLine("        float4 v0 = {0,0,1,1};"); //Seems to only be used for normals. No idea what it is.
+                vfx.AppendLine("        float4 v1 = {1,0,0,1};"); //Pretty sure this is mesh normals.
+                vfx.AppendLine("        float4 v2 = {0,1,0,1};"); //Tangent? Seems to only be used for normals.
                 vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //99.9% sure this is always UVs.
                 vfx.AppendLine("        float4 v4 = {1,1,1,1};"); //Might be i.vPositionSs, Mostly seen on materials with parallax. Some kind of view vector or matrix?
                 vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Seems to always be vertex color/vertex color alpha.
@@ -485,9 +494,10 @@ PS
                 if (line.Contains("cb12[7].xyz + -v4.xyz")) //cb12[7] might actually be a viewdir cbuffer or something
                 {
 					//vfx.AppendLine(line.Replace("-v4", "-g_vCameraPositionWs")); //dont know what v4 is when used like this
-					vfx.AppendLine(line.Replace("-v4.xyz", "float3(0,0,1)")); //I have no clue what this actually is at this point
-					vfx.AppendLine("//Possible Parallax. Use ParallaxPass(-0.1, v3.xy, viewDir) for the textures uv. Values may need adjusted manually.");
-                    vfx.AppendLine($"//Find the texture that uses {line.Split('=')[0].Trim()} for its texcoord ");
+					vfx.AppendLine(line.Replace("-v4.xyz", "viewDir")); //I have no clue what this actually is at this point
+                    vfx.AppendLine("//Possible Parallax");
+					//vfx.AppendLine("//Possible Parallax. Use ParallaxPass(-0.1, v3.xy + float2(0,0), viewDir) for the textures uv. (strenghth, uv + randomness, viewDir)");
+					//vfx.AppendLine($"//Find the texture that uses {line.Split('=')[0].Trim()} for its texcoord ");
 				}
                 else if (line.Contains("v4.xy * cb")) //might be a detail uv or something when v4 is used like this, idk
                 {
@@ -570,10 +580,9 @@ PS
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
  
-        float3 normal = float3(PsToSs(float4(normal_in_world_space,1)), 1); //Convert to screen space (I think?), makes it look like an actual normal map
-        normal = SrgbLinearToGamma(normal.xyz); 
+        float3 normal = PackNormal3D(normal_in_world_space);
         normal.y = 1 - normal.y; 
-        normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy))); 
+        normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));; 
         
         float smoothness = saturate(8 * ({(bFixRoughness ? "0" : "normal_length")} - 0.375)); 
         
@@ -583,6 +592,35 @@ PS
         mat.Opacity = alpha; //sometimes o0.w is used for alpha instead on some shaders
         mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100); 
         mat.Transmission = o2.z; 
+        
+        if(g_bDiffuse)
+        {{
+            mat.Emission = o0.xyz;
+        }}
+        if(g_bRough)
+        {{
+            mat.Emission = 1 - smoothness;
+        }}
+        if(g_bMetal)
+        {{
+            mat.Emission = saturate(o2.x);
+        }}
+        if(g_bNorm)
+        {{
+            mat.Emission = SrgbGammaToLinear(PackNormal3D(mat.Normal));
+        }}
+        if(g_bAO)
+        {{
+            mat.Emission = saturate(o2.y * 2);
+        }}
+        if(g_bEmit)
+        {{
+            mat.Emission = (o2.y - 0.5);
+        }}
+        if(g_bAlpha)
+        {{
+            mat.Emission = alpha;
+        }}
 
         ShadingModelValveStandard sm;
 		
