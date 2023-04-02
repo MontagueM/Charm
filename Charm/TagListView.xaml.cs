@@ -1194,12 +1194,9 @@ public partial class TagListView : UserControl
         if (activity.Header.Unk18 is D2Class_6A988080)
         {
             var entry = (D2Class_6A988080) activity.Header.Unk18;
-            foreach (var dirtable in entry.DialogueTables)
-            {
-                if (dirtable.DialogueTable != null)
-                    dialogueTables.Add(dirtable.DialogueTable.Hash);
-            }
-        }
+			if (entry.DialogueTable != null)
+				dialogueTables.Add(entry.DialogueTable.Hash);
+		}
         Parallel.ForEach(activity.Header.Unk50, val =>
         {
             foreach (var d2Class48898080 in val.Unk18)
