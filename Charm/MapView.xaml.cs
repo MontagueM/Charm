@@ -188,9 +188,10 @@ public partial class MapView : UserControl
                     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement, ConfigHandler.GetSaveCBuffersEnabled());
                     if(exportStatics)
                     {
-                        if (source2Models)
+						Directory.CreateDirectory($"{savePath}/Statics/");
+						if (source2Models)
                         {
-                            File.Copy("template.vmdl", $"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.vmdl", true);
+							File.Copy("template.vmdl", $"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.vmdl", true);
                         }
                         FbxHandler staticHandler = new FbxHandler(false);
                         terrainArrangement.Terrain.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), terrainArrangement, ConfigHandler.GetSaveCBuffersEnabled(), true);

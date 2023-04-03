@@ -270,8 +270,10 @@ public partial class TagListView : UserControl
                     LoadWeaponAudio(contentValue);
                     break;
                 default:
-                    throw new NotImplementedException();
-            }
+					MessageBox.Show("Not Implemented");
+                    break;
+					//throw new NotImplementedException();
+			}
         }
 
         if (!TagItem.GetEnumDescription(tagListType).Contains("[Final]"))
