@@ -217,7 +217,7 @@ public partial class MapView : UserControl
         FbxHandler dynamicHandler = new FbxHandler();
         dynamicHandler.InfoHandler.SetMeshName($"{map.Hash.GetHashString()}_Dynamics");
         dynamicHandler.InfoHandler.AddType("Dynamics");
-        //FbxHandler dynamicPoints = new FbxHandler(false); testing
+        //FbxHandler dynamicPoints = new FbxHandler(false);
        
         Parallel.ForEach(map.Header.DataTables, data =>
         {
@@ -244,7 +244,7 @@ public partial class MapView : UserControl
         dynamicHandler.ExportScene($"{savePath}/{map.Hash.GetHashString()}_Dynamics.fbx");
         dynamicHandler.Dispose();
 
-        //dynamicPoints.ExportScene($"{savePath}/{map.Hash.GetHashString()}_DynamicPOINTS.fbx");
+        //dynamicPoints.ExportScene($"{savePath}/{map.Hash.GetHashString()}_DynamicPoints.fbx");
         //dynamicPoints.Dispose();
     }
 
@@ -329,8 +329,8 @@ public partial class MapView : UserControl
                         {
                             if (!File.Exists($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl"))
                             {
-                                File.Copy("template.vmdl", $"{savePath}/Statics/{dynamicResource.Entity.Hash}.vmdl", true);
-                                string text = File.ReadAllText($"{savePath}/Statics/{dynamicResource.Entity.Hash}.vmdl");
+                                File.Copy("template.vmdl", $"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl", true);
+                                string text = File.ReadAllText($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl");
 
                                 StringBuilder mats = new StringBuilder();
 
