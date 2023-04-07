@@ -30,7 +30,7 @@
         </ControlTemplate>
 
         <ControlTemplate x:Key="staticTemplate">
-            <Grid Height="20" Margin="0,1,0,1">
+            <Grid Height="27" Margin="0,1,0,1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80*" />
                     <ColumnDefinition Width="20*" />
@@ -42,12 +42,17 @@
                     BorderThickness="1" />
                 <CheckBox
                     Grid.Column="0"
+                    Margin="5,0,0,0"
                     HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
                     HorizontalContentAlignment="Left"
                     Checked="StaticMapPart_OnCheck"
                     IsChecked="{Binding Selected}"
                     Tag="{Binding Hash}">
-                    <TextBlock Text="{Binding Name}" TextAlignment="Center" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="{Binding Name}"
+                        TextAlignment="Center" />
                 </CheckBox>
                 <Button
                     Grid.Column="1"
@@ -59,10 +64,10 @@
         </ControlTemplate>
 
         <ControlTemplate x:Key="dynamicTemplate">
-            <Grid Height="20" Margin="0,1,0,1">
+            <Grid Height="27" Margin="0,1,0,1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80*" />
-                    <ColumnDefinition Width="20*" />
+                    <ColumnDefinition Width="10*" />
                 </Grid.ColumnDefinitions>
                 <Border
                     Grid.ColumnSpan="2"
@@ -71,12 +76,20 @@
                     BorderThickness="1" />
                 <CheckBox
                     Grid.Column="0"
+                    Margin="5,0,0,0"
                     HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
                     HorizontalContentAlignment="Left"
                     IsChecked="{Binding Selected}"
                     Tag="{Binding Hash}">
                     <TextBlock Text="{Binding Name}" TextAlignment="Center" />
                 </CheckBox>
+                <Button
+                    Grid.Column="0"
+                    HorizontalAlignment="Right"
+                    Click="EntityView_OnClick">
+                    <TextBlock Text="View" TextAlignment="Center" />
+                </Button>
                 <Button
                     Grid.Column="1"
                     HorizontalAlignment="Right"

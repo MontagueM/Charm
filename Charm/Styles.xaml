@@ -118,29 +118,41 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ButtonBackground" Property="Background" Value="{StaticResource BackgroundColour30}" />
-                            <Setter TargetName="ButtonBackground" Property="BorderBrush" Value="{StaticResource AccentColour}" />
+                            <Setter TargetName="ButtonBackground" Property="BorderThickness" Value="2" />
 
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <ColorAnimation
                                             Storyboard.TargetName="ButtonBackground"
-                                            Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                            From="{StaticResource BackgroundColour30C}"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            From="{StaticResource BackgroundColour10C}"
                                             To="{StaticResource AccentColourC}"
-                                            Duration="0:0:0.2" />
+                                            Duration="0:0:0.1" />
 
+                                        <ThicknessAnimation
+                                            Storyboard.TargetName="ButtonBackground"
+                                            Storyboard.TargetProperty="BorderThickness"
+                                            To="2"
+                                            Duration="0:0:0.2" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
+
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <ColorAnimation
                                             Storyboard.TargetName="ButtonBackground"
-                                            Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
                                             From="{StaticResource AccentColourC}"
-                                            To="{StaticResource BackgroundColour30C}"
+                                            To="{StaticResource BackgroundColour10C}"
+                                            Duration="0:0:0.1" />
+
+                                        <ThicknessAnimation
+                                            Storyboard.TargetName="ButtonBackground"
+                                            Storyboard.TargetProperty="BorderThickness"
+                                            To="2"
                                             Duration="0:0:0.2" />
                                     </Storyboard>
                                 </BeginStoryboard>
@@ -529,10 +541,11 @@
                                     x:Name="CheckMark"
                                     Width="7"
                                     Height="7"
-                                    Data="M 0 0 L 7 7 M 0 7 L 7 0"
+                                    Data="M 1,1 L 1,6 L 6,6 L 6,1 Z"
+                                    Fill="{StaticResource ForegroundColour90}"
                                     SnapsToDevicePixels="False"
                                     Stroke="{StaticResource ForegroundColour90}"
-                                    StrokeThickness="2" />
+                                    StrokeThickness="3" />
                             </Border>
                         </BulletDecorator.Bullet>
                         <ContentPresenter

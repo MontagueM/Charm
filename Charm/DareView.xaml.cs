@@ -72,7 +72,8 @@ public partial class DareView : UserControl
             // }
             string name = InvestmentHandler.GetItemName(kvp.Value);
             string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemType;
-            if (kvp.Value.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
+			string flavorText = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].Header.ItemFlavourText;
+			if (kvp.Value.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
             {
                 
                 if (!type.Contains("Finisher") && !type.Contains("Emote")) // they point to Animation instead of Entity
@@ -110,6 +111,7 @@ public partial class DareView : UserControl
                         {
                             ItemName = name,
                             ItemType = type,
+                            ItemFlavorText = flavorText,
                             ImageSource = dw,
                             ImageHeight = 96,
                             ImageWidth = 96,
@@ -206,7 +208,8 @@ public class ApiItem
 {
     public string ItemName { get; set; }
     public string ItemType { get; set; }
-    public double ImageWidth { get; set; }
+    public string ItemFlavorText { get; set; }
+	public double ImageWidth { get; set; }
     public double ImageHeight { get; set; }
     public System.Windows.Media.ImageSource ImageSource { get; set; }
     

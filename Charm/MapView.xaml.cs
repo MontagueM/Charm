@@ -48,7 +48,7 @@ public partial class MapView : UserControl
         // _mainWindow.SetNewestTabSelected();
     }
 
-    private void GetStaticMapData(TagHash tagHash, ELOD detailLevel)
+	private void GetStaticMapData(TagHash tagHash, ELOD detailLevel)
     {
         Tag<D2Class_07878080> tag = PackageHandler.GetTag<D2Class_07878080>(tagHash);
         StaticMapData staticMapData = ((D2Class_C96C8080)tag.Header.DataTables[1].DataTable.Header.DataEntries[0].DataResource).StaticMapParent.Header.StaticMap;
@@ -66,7 +66,32 @@ public partial class MapView : UserControl
         displayParts.Clear();
     }
 
-    public void Clear()
+	public void LoadEntity(Entity entity, FbxHandler fbxHandler)
+	{
+		fbxHandler.Clear();
+		AddEntity(entity, ELOD.MostDetail, fbxHandler);
+	}
+
+	private void AddEntity(Entity entity, ELOD detailLevel, FbxHandler fbxHandler)
+	{
+		var dynamicParts = entity.Load(detailLevel);
+		//ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
+		//dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
+		fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
+		LoadUI(fbxHandler);
+	}
+
+	private bool LoadUI(FbxHandler fbxHandler)
+	{
+		MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+		string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
+		fbxHandler.ExportScene(filePath);
+		bool loaded = MVM.LoadEntityFromFbx(filePath);
+		fbxHandler.Clear();
+		return loaded;
+	}
+
+	public void Clear()
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         MVM.Clear();
@@ -340,7 +365,10 @@ public partial class MapView : UserControl
                                     if (part.Material == null)
                                         continue;
 
-                                    mats.AppendLine("{");
+									if (part.Material.Header.PSTextures.Count == 0)
+										continue;
+
+									mats.AppendLine("{");
                                     mats.AppendLine($"    from = \"{part.Material.Hash}.vmat\"");
                                     mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
                                     mats.AppendLine("},\n");

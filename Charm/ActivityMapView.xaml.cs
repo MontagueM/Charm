@@ -26,11 +26,13 @@ public partial class ActivityMapView : UserControl
 {
     private readonly ILogger _activityLog = Log.ForContext<ActivityMapView>();
     private string _activeBubble = "";
+	private FbxHandler _globalFbxHandler = null;
 
-    public ActivityMapView()
+	public ActivityMapView()
     {
         InitializeComponent();
-    } 
+		_globalFbxHandler = new FbxHandler(false);
+	} 
     
     public void LoadUI(Activity activity)
     {
@@ -374,7 +376,51 @@ public partial class ActivityMapView : UserControl
         });
     }
 
-    public void Dispose()
+	private async void EntityView_OnClick(object sender, RoutedEventArgs e)
+	{
+		var s = sender as Button;
+		var dc = s.DataContext as DisplayDynamicMap;
+		MapControl.Clear();
+		_activityLog.Debug($"Loading UI for entity: {dc.Name}");
+		MapControl.Visibility = Visibility.Hidden;
+		var lod = MapControl.ModelView.GetSelectedLod();
+		if (dc.Name == "Select all")
+		{
+			//var items = StaticList.Items.Cast<DisplayStaticMap>().Where(x => x.Name != "Select all");
+			//List<string> mapStages = items.Select(x => $"loading to ui: {x.Hash}").ToList();
+			//if (mapStages.Count == 0)
+			//{
+			//	_activityLog.Error("No maps selected for export.");
+			//	MessageBox.Show("No maps selected for export.");
+			//	return;
+			//}
+			//MainWindow.Progress.SetProgressStages(mapStages);
+			//await Task.Run(() =>
+			//{
+			//	foreach (DisplayStaticMap item in items)
+			//	{
+			//		MapControl.LoadMap(new TagHash(item.Hash), lod);
+			//		MainWindow.Progress.CompleteStage();
+			//	}
+			//});
+		}
+		else
+		{
+			var tagHash = new TagHash(dc.Hash);
+			MainWindow.Progress.SetProgressStages(new List<string> { tagHash });
+			// cant do this rn bc of lod problems with dupes
+			// MapControl.ModelView.SetModelFunction(() => MapControl.LoadMap(tagHash, MapControl.ModelView.GetSelectedLod()));
+			await Task.Run(() =>
+			{
+				Entity ent = new Entity(new TagHash(dc.Hash));
+				MapControl.LoadEntity(ent, _globalFbxHandler);
+				MainWindow.Progress.CompleteStage();
+			});
+		}
+		MapControl.Visibility = Visibility.Visible;
+	}
+
+	public void Dispose()
     {
         MapControl.Dispose();
     }
