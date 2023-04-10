@@ -141,84 +141,38 @@ public class Material : Tag
         if (Header.PixelShader != null)
         {
             string hlsl = Decompile(Header.PixelShader.GetBytecode());
-            string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-            string vfx = new VfxConverter().HlslToVfx(this, hlsl, false, isTerrain);
+            string usf = FieldConfigHandler.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, false) : "";
+            string vfx = Source2Handler.source2Shaders ? new VfxConverter().HlslToVfx(this, hlsl, false, isTerrain) : "";
 
-            Directory.CreateDirectory($"{saveDirectory}/Source2");
-            Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
 
-            if(saveCBuffers)
+			if (Source2Handler.source2Shaders)
+            {
+				Directory.CreateDirectory($"{saveDirectory}/Source2");
+				Directory.CreateDirectory($"{saveDirectory}/Source2/materials");   
+			}
+
+			if (saveCBuffers)
                 SaveCbuffers(this, false, hlsl, saveDirectory);
 
-            StringBuilder vmat = new StringBuilder();
-            if (usf != String.Empty || vfx != String.Empty)
+            try
             {
-                try
+                if(usf != String.Empty && !File.Exists($"{saveDirectory}/PS_{Hash}.usf"))
                 {
-                    if(!File.Exists($"{saveDirectory}/PS_{Hash}.usf"))
-                    {
-                        File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
-                    }
-                    if (!File.Exists($"{saveDirectory}/Source2/PS_{Hash}.shader"))
-                    {
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.shader", vfx);
-                    }
-
-                    //Console.WriteLine($"Saved pixel shader {Hash}");
+                    File.WriteAllText($"{saveDirectory}/PS_{Hash}.usf", usf);
                 }
-                catch (IOException)  // threading error
+                if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{Hash}.shader"))
                 {
+                    File.WriteAllText($"{saveDirectory}/Source2/PS_{Hash}.shader", vfx);
                 }
+            }
+            catch (IOException)  // threading error
+            {
             }
             
-            vmat.AppendLine("Layer0 \n{");
-            
-            //If the shader doesnt exist, just use the default complex.shader
-            if (!File.Exists($"{saveDirectory}/Source2/PS_{Hash}.shader"))
-            {
-                vmat.AppendLine($"  shader \"complex.shader\"");
-
-                //Use just the first texture for the diffuse
-                if (Header.PSTextures.Count > 0)
-                {
-                    vmat.AppendLine($"  TextureColor \"materials/Textures/{Header.PSTextures[0].Texture.Hash}.png\"");
-                }
-            }
-            else
-            {
-                vmat.AppendLine($"  shader \"ps_{Hash}.shader\"");
-                vmat.AppendLine("   F_ALPHA_TEST 1");
-            }
-
-            foreach (var e in Header.PSTextures)
-            {
-                if (e.Texture == null)
-                {
-                    continue;
-                }
-               
-                vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
-            }
-
-            vmat.AppendLine($"Attributes\r\n\t{{\r\n\t\tDebug_Diffuse \"false\"\r\n\t\tDebug_Rough \"false\"\r\n\t\tDebug_Metal \"false\"\r\n\t\tDebug_Normal \"false\"\r\n\t\tDebug_AO \"false\"\r\n\t\tDebug_Emit \"false\"\r\n\t\tDebug_Alpha \"false\"\r\n\t}}");
-
-            // if(isTerrain)
-            // {
-            //     vmat.AppendLine($"  TextureT14 \"materials/Textures/{partEntry.Dyemap.Hash}.png\"");
-            // }
-            vmat.AppendLine("}");
-            
-            if(!File.Exists($"{saveDirectory}/Source2/materials/{Hash}.vmat"))
-            {
-                try
-                {
-                    File.WriteAllText($"{saveDirectory}/Source2/materials/{Hash}.vmat", vmat.ToString());
-                }
-                catch (IOException)  
-                {
-                }
-            }
-        }
+            //Need to save material after shader has be exported, to check if it exists
+			if (Source2Handler.source2Shaders)
+				Source2Handler.SaveVMAT(saveDirectory, Hash, Header);
+		}
     }
     
     public void SaveVertexShader(string saveDirectory, bool saveCBuffers = false)

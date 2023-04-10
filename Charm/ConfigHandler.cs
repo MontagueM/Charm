@@ -526,5 +526,6 @@ public class ConfigHandler
     {
         _config.Save(ConfigurationSaveMode.Modified);
         ConfigurationManager.RefreshSection("appSettings");
-    }
+		FieldConfigHandler.Refresh();
+	}
 }

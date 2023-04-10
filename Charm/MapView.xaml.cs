@@ -300,32 +300,7 @@ public partial class MapView : UserControl
 
                             if(source2Models)
                             {
-                                if (!File.Exists($"{savePath}/Statics/{staticMeshName}.vmdl"))
-                                {
-                                    //Source 2 shit
-                                    File.Copy("template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
-                                    string text = File.ReadAllText($"{savePath}/Statics/{staticMeshName}.vmdl");
-
-                                    StringBuilder mats = new StringBuilder();
-
-                                    int i = 0;
-                                    foreach (Part staticpart in staticmesh)
-                                    {
-                                        mats.AppendLine("{");
-                                        //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
-                                        mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
-                                        mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
-                                        mats.AppendLine("},\n");
-                                        i++;
-                                    }
-
-                                    text = text.Replace("%MATERIALS%", mats.ToString());
-                                    text = text.Replace("%FILENAME%", $"models/{staticMeshName}.fbx");
-                                    text = text.Replace("%MESHNAME%", staticMeshName);
-
-                                    File.WriteAllText($"{savePath}/Statics/{staticMeshName}.vmdl", text);
-                                    //
-                                }
+                                Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
                             }
 
                             staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
@@ -352,37 +327,8 @@ public partial class MapView : UserControl
 
                         if (source2Models)
                         {
-                            if (!File.Exists($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl"))
-                            {
-                                File.Copy("template.vmdl", $"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl", true);
-                                string text = File.ReadAllText($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl");
-
-                                StringBuilder mats = new StringBuilder();
-
-                                int i = 0;
-                                foreach (var part in dynamicResource.Entity.Load(ELOD.MostDetail, true))
-                                {
-                                    if (part.Material == null)
-                                        continue;
-
-									if (part.Material.Header.PSTextures.Count == 0)
-										continue;
-
-									mats.AppendLine("{");
-                                    mats.AppendLine($"    from = \"{part.Material.Hash}.vmat\"");
-                                    mats.AppendLine($"    to = \"materials/{part.Material.Hash}.vmat\"");
-                                    mats.AppendLine("},\n");
-                                    i++;
-                                }
-
-                                text = text.Replace("%MATERIALS%", mats.ToString());
-                                text = text.Replace("%FILENAME%", $"models/{dynamicResource.Entity.Hash}.fbx");
-                                text = text.Replace("%MESHNAME%", dynamicResource.Entity.Hash);
-
-                                File.WriteAllText($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.vmdl", text);
-                                //
-                            }
-                        }
+                            Source2Handler.SaveEntityVMDL($"{savePath}/Dynamics", dynamicResource.Entity);
+						}
 
                         singleDynamicHandler.ExportScene($"{savePath}/Dynamics/{dynamicResource.Entity.Hash}.fbx");
                         singleDynamicHandler.Dispose();

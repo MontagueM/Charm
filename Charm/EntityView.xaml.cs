@@ -101,7 +101,11 @@ public partial class EntityView : UserControl
                 entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), ConfigHandler.GetSaveCBuffersEnabled());
                 entity.SaveTexturePlates(savePath);
             }
-        }
+            if (source2Models)
+            {
+                Source2Handler.SaveEntityVMDL($"{savePath}", entity);
+            }
+		}
 
         if (exportType == EExportTypeFlag.Full)
         {
@@ -114,40 +118,6 @@ public partial class EntityView : UserControl
             if(ConfigHandler.GetBlenderInteropEnabled())
             {
                 AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
-            }
-        }
-
-        if (source2Models)
-        {
-            if (!File.Exists($"{savePath}/{meshName}.vmdl"))
-            {
-                //Source 2 shit
-                File.Copy("template.vmdl", $"{savePath}/{meshName}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{meshName}.vmdl");
-
-                StringBuilder mats = new StringBuilder();
-
-                int i = 0;
-                foreach (var entity in entities)
-                {
-                    var dynamicParts = entity.Load(ELOD.MostDetail);
-                    foreach (Part staticpart in dynamicParts)
-                    {
-                        mats.AppendLine("{");
-                        //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
-                        mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
-                        mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
-                        mats.AppendLine("},\n");
-                        i++;
-                    }
-                }
-
-                text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"models/{meshName}.fbx");
-                text = text.Replace("%MESHNAME%", meshName);
-
-                File.WriteAllText($"{savePath}/{meshName}.vmdl", text);
-                //
             }
         }
 

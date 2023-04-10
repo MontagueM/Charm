@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using Field.General;
 using Field.Models;
@@ -102,53 +103,31 @@ public class Terrain : Tag
                     fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, Header.MeshGroups[part.GroupIndex].Dyemap);
                 }
 
-                if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat"))
-                {
-                    string[] vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat");
-                    int lastBraceIndex = Array.FindLastIndex(vmat, line => line.Trim().Equals("}"));
-                    bool textureFound = Array.Exists(vmat, line => line.Trim().StartsWith("TextureT14"));
-                    if (!textureFound && lastBraceIndex != -1)
+                if (FieldConfigHandler.GetS2VMATExportEnabled())
+                { 
+                    if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat"))
                     {
-                        var newVmat = vmat.Take(lastBraceIndex).ToList();
-                        newVmat.Add($"  TextureT{terrainTextureIndex} " +
-                                     $"\"materials/Textures/{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
-                        newVmat.AddRange(vmat.Skip(lastBraceIndex));
-                        //Console.WriteLine($"Added T14 {Header.MeshGroups[part.GroupIndex].Dyemap.Hash} to {part.Material.Hash}");
-                        File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
+                        string[] vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat");
+                        int lastBraceIndex = Array.FindLastIndex(vmat, line => line.Trim().Equals("}"));
+                        bool textureFound = Array.Exists(vmat, line => line.Trim().StartsWith("TextureT14"));
+                        if (!textureFound && lastBraceIndex != -1)
+                        {
+                            var newVmat = vmat.Take(lastBraceIndex).ToList();
+                            newVmat.Add($"  TextureT{terrainTextureIndex} " +
+                                         $"\"materials/Textures/{Header.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
+                            newVmat.AddRange(vmat.Skip(lastBraceIndex));
+                            //Console.WriteLine($"Added T14 {Header.MeshGroups[part.GroupIndex].Dyemap.Hash} to {part.Material.Hash}");
+                            File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
+                        }
                     }
                 }
             }
         }
 
-        //Source 2
-        if (File.Exists($"{saveDirectory}/Statics/{Hash}_Terrain.vmdl"))
-        {
-            string text = File.ReadAllText($"{saveDirectory}/Statics/{Hash}_Terrain.vmdl");
-
-            StringBuilder mats = new StringBuilder();
-
-            int i = 0;
-            foreach (var staticpart in parts)
-            {
-                if (Header.MeshGroups[staticpart.GroupIndex].Dyemap != null)
-                {
-                    mats.AppendLine("{");
-                    //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
-                    mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
-                    mats.AppendLine("},\n");
-                    i++;
-                }
-            }
-
-            text = text.Replace("%MATERIALS%", mats.ToString());
-            text = text.Replace("%FILENAME%", $"models/{Hash}_Terrain.fbx");
-            text = text.Replace("%MESHNAME%", Hash);
-
-            File.WriteAllText($"{saveDirectory}/Statics/{Hash}_Terrain.vmdl", text);
-            //
-        }
-    }
+		//Source 2
+		if (FieldConfigHandler.GetS2VMDLExportEnabled())
+			Source2Handler.SaveTerrainVMDL(saveDirectory, (string)Hash, parts, Header);
+	}
 
     public Part MakePart(D2Class_846C8080 entry)
     {
