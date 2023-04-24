@@ -320,7 +320,7 @@ public partial class MapView : UserControl
             {
                 if (entry is D2Class_85988080 dynamicResource)
                 {
-                    if (Entity.HasGeometry(dynamicResource.Entity))
+                    if (dynamicResource.Entity.HasGeometry())
                     {
                         FbxHandler singleDynamicHandler = new FbxHandler(false);
                         singleDynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.Entity.Hash, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled(), ConfigHandler.GetSaveCBuffersEnabled());

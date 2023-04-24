@@ -69,6 +69,7 @@ public partial class ActivityMapView : UserControl
 		string name = values[1];
 
         _activeBubble = name;
+        ActiveBubble.Text = $"{_activeBubble}";
 
 		Tag<D2Class_01878080> bubbleMaps = PackageHandler.GetTag<D2Class_01878080>(new TagHash(hash));
 		PopulateStaticList(bubbleMaps);
@@ -86,7 +87,10 @@ public partial class ActivityMapView : UserControl
 
             if (item.Selected)
             {
-                PopulateDynamicsList(map);
+				if (map == null)
+					continue;
+
+				PopulateDynamicsList(map);
                 ActiveEnts.Text = $"{map.Hash} Entities";
             }
         }
@@ -131,7 +135,7 @@ public partial class ActivityMapView : UserControl
                 {    
                     if (!items.Contains(new DisplayDynamicMap { Hash = dynamicResource.Entity.Hash }))
                     {
-                        if (Entity.HasGeometry(dynamicResource.Entity))
+                        if (dynamicResource.Entity.HasGeometry())
                         {
                             items.Add(new DisplayDynamicMap
                             {

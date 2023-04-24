@@ -116,11 +116,11 @@ public class Entity : Tag
         rsrc.DyemapPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_dyemap");
     }
 
-    public static bool HasGeometry(Entity ent) //yoinked from LoadEntityList in TagListView
+    public bool HasGeometry() //yoinked from LoadEntityList in TagListView
     { 
         // Check the entity has geometry
         bool bHasGeometry = false;
-        using (var handle = ent.GetHandle())//new Tag(PackageHandler.GetTag(typeof(Entity), ent.Hash)).GetHandle())
+        using (var handle = GetHandle())//new Tag(PackageHandler.GetTag(typeof(Entity), ent.Hash)).GetHandle())
         {
             handle.BaseStream.Seek(8, SeekOrigin.Begin);
             int resourceCount = handle.ReadInt32();

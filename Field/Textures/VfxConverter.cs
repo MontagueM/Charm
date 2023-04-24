@@ -232,26 +232,7 @@ PS
             vfx.AppendLine($"   static {cbuffer.Type} {cbuffer.Variable}[{cbuffer.Count}] = ").AppendLine(" {");
             
             dynamic data = null;
-            if (bIsVertexShader)
-            {
-                if (cbuffer.Count == material.Header.Unk90.Count)
-                {
-                    data = material.Header.Unk90;
-                }
-                else if (cbuffer.Count == material.Header.UnkA0.Count)
-                {
-                    data = material.Header.UnkA0;
-                }
-                else if (cbuffer.Count == material.Header.UnkB0.Count)
-                {
-                    data = material.Header.UnkB0;
-                }
-                else if (cbuffer.Count == material.Header.UnkC0.Count)
-                {
-                    data = material.Header.UnkC0;
-                }
-            }
-            else
+            if (!bIsVertexShader)
             {
                 if (cbuffer.Count == material.Header.Unk2D0.Count)
                 {
@@ -397,12 +378,15 @@ PS
             vfx.AppendLine(@"       // compute derivations of the world position
         float3 p_dx = ddx(i.vPositionWithOffsetWs);
         float3 p_dy = ddy(i.vPositionWithOffsetWs);
+
         // compute derivations of the texture coordinate
         float2 tc_dx = ddx(i.vTextureCoords.xy);
         float2 tc_dy = ddy(i.vTextureCoords.xy);
+
         // compute initial tangent and bi-tangent
         float3 tangent = normalize( tc_dy.y * p_dx - tc_dx.y * p_dy );
         float3 bitangent = normalize( tc_dy.x * p_dx - tc_dx.x * p_dy ); // sign inversion
+        
         // get new tangent from a given mesh normal
         float3 n = normalize(i.vNormalWs);
         float3 x = cross(n, tangent);
@@ -586,13 +570,17 @@ PS
         
         float smoothness = saturate(8 * ({(bFixRoughness ? "0" : "normal_length")} - 0.375)); 
         
-        //Diffuse, normal, roughness, metal, AO
-        Material mat = ToMaterial(i, float4(o0.xyz, 1), float4(normal.xyz, 1), float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1));
-        
-        mat.Opacity = alpha; //sometimes o0.w is used for alpha instead on some shaders
-        mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100); 
-        mat.Transmission = o2.z; 
-        
+        Material mat;
+        mat.Albedo = o0.xyz;
+        mat.Normal = TransformNormal( i, DecodeNormal( normal.xyz ) );
+        mat.Roughness = 1 - smoothness;
+        mat.Metalness = saturate(o2.x);
+        mat.AmbientOcclusion = saturate(o2.y * 2);
+        mat.TintMask = 1;
+        mat.Opacity = alpha;
+        mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100);
+        mat.Transmission = o2.z;
+
         if(g_bDiffuse)
         {{
             mat.Emission = o0.xyz;

@@ -46,7 +46,7 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Left"
-                    Checked="StaticMapPart_OnCheck"
+                    Click="StaticMapPart_OnCheck"
                     IsChecked="{Binding Selected}"
                     Tag="{Binding Hash}">
                     <TextBlock
@@ -67,7 +67,7 @@
             <Grid Height="27" Margin="0,1,0,1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80*" />
-                    <ColumnDefinition Width="10*" />
+                    <ColumnDefinition Width="12*" />
                 </Grid.ColumnDefinitions>
                 <Border
                     Grid.ColumnSpan="2"
@@ -134,7 +134,8 @@
             <ListView
                 x:Name="StaticList"
                 Grid.Row="1"
-                Grid.Column="0">
+                Grid.Column="0"
+                Margin="0,50,0,0">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -168,19 +169,40 @@
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
             </ListView>
-            <TextBlock
-                Name="ActiveEnts"
+            <Border
                 Grid.Row="1"
                 Grid.Column="1"
-                Width="475"
                 Height="50"
-                HorizontalAlignment="Center"
+                Padding="0"
+                HorizontalAlignment="Stretch"
                 VerticalAlignment="Top"
-                FontSize="36"
-                Foreground="#FFCCCCCC"
-                Text=""
-                TextAlignment="Center"
-                TextWrapping="Wrap" />
+                BorderBrush="{StaticResource BackgroundColour20}"
+                BorderThickness="1">
+                <TextBlock
+                    Name="ActiveEnts"
+                    FontSize="36"
+                    Foreground="#FFCCCCCC"
+                    Text=""
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Border>
+            <Border
+                Grid.Row="1"
+                Grid.Column="0"
+                Height="50"
+                Padding="0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="top"
+                BorderBrush="{StaticResource BackgroundColour20}"
+                BorderThickness="1">
+                <TextBlock
+                    Name="ActiveBubble"
+                    FontSize="36"
+                    Foreground="#FFCCCCCC"
+                    Text=""
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Border>
         </Grid>
         <local:MapView x:Name="MapControl" Grid.Column="1" />
     </Grid>

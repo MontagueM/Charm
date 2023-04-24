@@ -497,7 +497,7 @@ public class FbxHandler
     {
         Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
 
-        if (!Entity.HasGeometry(entity))
+        if (!entity.HasGeometry())
         {
             return;
         }
@@ -547,7 +547,7 @@ public class FbxHandler
     {
         Entity entity = PackageHandler.GetTag(typeof(Entity), points.Entity.Hash);
 
-        if (Entity.HasGeometry(entity))
+        if (entity.HasGeometry())
         {
             meshName += "_Model";
         }
