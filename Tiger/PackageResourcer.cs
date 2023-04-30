@@ -9,7 +9,7 @@ namespace Tiger;
 public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 {
     private PackagePathsCache? _packagePathsCache = null;
-    private Dictionary<ushort, IPackage> _packagesCache = new Dictionary<ushort, IPackage>();
+    private readonly Dictionary<ushort, IPackage> _packagesCache = new Dictionary<ushort, IPackage>();
     public string PackagesDirectory { get; }
 
     public PackageResourcer(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)
@@ -29,8 +29,13 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         }
 
         return LoadPackageIntoCacheFromDisk(packageId);
-        // return Get().GetPackage(packageId);
-        return null;
+    }
+
+    // this method is used by PackagePathsCache, so cannot use itself
+    public IPackage GetPackage(string packagePath)
+    {
+        // Don't add to cache as we're getting multiple packages from the same id, in order to identify their patch.
+        return LoadPackageFromDisk(packagePath);
     }
 
     // todo this needs to be a producer-consumer style queue thing to avoid locking maybe
@@ -40,18 +45,6 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         string packagePath = GetPackagePathsCache().GetPackagePathFromId(packageId);
         return LoadPackageIntoCacheFromDisk(packageId, packagePath);
-    }
-
-    // this method is used by PackagePathsCache, so cannot use itself
-    public IPackage GetPackage(string packagePath)
-    {
-        // if (_packagesCache.TryGetValue(packageId, out IPackage package))
-        // {
-            // return package;
-        // }
-
-        // Don't add to cache as we're getting multiple packages from the same id, in order to identify their patch.
-        return LoadPackageFromDisk(packagePath);
     }
 
     /// <summary>
