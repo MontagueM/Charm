@@ -9,7 +9,7 @@ namespace Tiger;
 public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 {
     private PackagePathsCache? _packagePathsCache = null;
-    private readonly Dictionary<ushort, IPackage> _packagesCache = new Dictionary<ushort, IPackage>();
+    private readonly Dictionary<ushort, Package> _packagesCache = new Dictionary<ushort, Package>();
     public string PackagesDirectory { get; }
 
     public PackageResourcer(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)
@@ -23,7 +23,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     /// <returns>IPackage object, type determined by the selected strategy.</returns>
     public IPackage GetPackage(ushort packageId)
     {
-        if (_packagesCache.TryGetValue(packageId, out IPackage package))
+        if (_packagesCache.TryGetValue(packageId, out Package package))
         {
             return package;
         }
@@ -51,19 +51,20 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     /// Creates an IPackage of the type determined by the selected strategy, and adds it to the package cache.
     /// </summary>
     /// <exception cref="Exception">Package is null or failed to add to concurrent dictionary as already added.</exception>
-    private IPackage LoadPackageIntoCacheFromDisk(ushort packageId, string packagePath)
+    private Package LoadPackageIntoCacheFromDisk(ushort packageId, string packagePath)
     {
-        IPackage? package = (IPackage?) Activator.CreateInstance(_strategy.GetPackageType(), packagePath);
+        Package? package = (Package?)Activator.CreateInstance(_strategy.GetPackageType(), packagePath);
 
-        if (package == null || !_packagesCache.TryAdd(packageId, package))   {
+        if (package == null || !_packagesCache.TryAdd(packageId, package))
+        {
             throw new Exception($"Failed to add package to package cache: '{packageId}', '{packagePath}'");
         }
         return package;
     }
 
-    private IPackage LoadPackageFromDisk(string packagePath)
+    private Package LoadPackageFromDisk(string packagePath)
     {
-        IPackage? package = (IPackage?) Activator.CreateInstance(_strategy.GetPackageType(), packagePath);
+        Package? package = (Package?)Activator.CreateInstance(_strategy.GetPackageType(), packagePath);
         if (package == null)
         {
             throw new Exception($"Failed to get package: '{packagePath}'");
@@ -71,10 +72,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return package;
     }
 
-    public byte[] GetFileData(FileHash fileHash)
-    {
-        return GetPackage(fileHash.PackageId).GetFileBytes(fileHash);
-    }
+    public byte[] GetFileData(FileHash fileHash) { return GetPackage(fileHash.PackageId).GetFileBytes(fileHash); }
 
     private PackagePathsCache GetPackagePathsCache()
     {
@@ -95,13 +93,14 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return packageIds;
     }
 
-    public void GetAllFilesOfTypes()
+    public List<T> GetAllTags<T>() where T : TigerFile
     {
-        throw new NotImplementedException();
-    }
-
-    public List<T> GetAllTags<T>() where T : class
-    {
-        return null;
+        GetAllPackages();
+        List<T> tags = new();
+        foreach (Package package in _packagesCache.Values)
+        {
+            tags.AddRange(package.GetAllTags<T>());
+        }
+        return tags;
     }
 }

@@ -5,7 +5,7 @@ namespace Tomograph;
 class TestSubsystem : Subsystem
 {
     public static bool ReturnBool { get; set; } = true;
-    
+
     protected override bool Initialise()
     {
         return ReturnBool;
@@ -38,7 +38,7 @@ public class SubsystemTests
         Assert.IsNotNull(subsystem);
         Assert.IsTrue(CharmInstance.HasSubsystem<TestSubsystem>());
     }
-    
+
     [TestMethod, ExpectedExceptionWithMessage(typeof(Exception), "Failed to initialise subsystem")]
     public void GetSubsystem_CreateNew_FailInit()
     {
@@ -46,7 +46,7 @@ public class SubsystemTests
         TestSubsystem.ReturnBool = false;
         TestSubsystem subsystem = CharmInstance.GetSubsystem<TestSubsystem>();
     }
-    
+
     [TestMethod]
     public void GetSubsystem_CreateNew_ChildInheritance()
     {
@@ -55,7 +55,7 @@ public class SubsystemTests
         Assert.IsNotNull(subsystem);
         Assert.IsTrue(CharmInstance.HasSubsystem<ChildTestSubsystem>());
     }
-    
+
     [TestMethod]
     public void GetSubsystem_CreateNew_InitAll()
     {

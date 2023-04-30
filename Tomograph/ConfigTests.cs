@@ -10,7 +10,7 @@ namespace Tomograph;
 public class ConfigTests
 {
     private static string _configPath;
-    
+
     [TestInitialize]
     public void Setup()
     {
@@ -25,7 +25,7 @@ public class ConfigTests
         File.Delete(_configPath);
         CharmInstance.ClearSubsystems();
     }
-    
+
     [TestMethod]
     public void Initialise_Create()
     {
@@ -33,11 +33,11 @@ public class ConfigTests
         ConfigSubsystem config = new ConfigSubsystem();
         Helpers.CallNonPublicMethod(config, "Initialise");
         Assert.IsTrue(File.Exists(_configPath));
-        
+
         // Open to check valid format
         Helpers.CallNonPublicMethod(config, "Initialise");
     }
-    
+
     [TestMethod]
     public void Initialise_Open()
     {
@@ -54,16 +54,16 @@ public class ConfigTests
     {
         // Set some new value
         Helpers.SetNonPublicStaticField(typeof(Strategy), "_currentStrategy", TigerStrategy.DESTINY2_WITCHQUEEN_6307);
-        
+
         // Create the most up-to-date copy
         ConfigSubsystem config = new ConfigSubsystem();
         Helpers.CallNonPublicMethod(config, "Initialise");
-        
+
         // Set a different value
         Helpers.SetNonPublicStaticField(typeof(Strategy), "_currentStrategy", TigerStrategy.NONE);
 
         Helpers.CallNonPublicMethod(config, "Initialise");
-        
+
         // Check the value is set correctly
         Assert.AreEqual(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Helpers.GetNonPublicStaticField(typeof(Strategy), "_currentStrategy"));
     }
@@ -73,12 +73,12 @@ public class ConfigTests
     {
         ConfigSubsystem config = new ConfigSubsystem();
         Helpers.CallNonPublicMethod(config, "Initialise");
-        
+
         // Modify to an invalid format
         string configData = File.ReadAllText(_configPath);
         configData = configData.Replace("}", "");
         File.WriteAllText(_configPath, configData);
-        
+
         // Open to check invalid format
         Helpers.CallNonPublicMethod(config, "Initialise");
     }

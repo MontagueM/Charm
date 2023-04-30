@@ -11,14 +11,14 @@ namespace Charm.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     public ICommand ExportMapToAtlas { get; }
-    public ReactiveCommand<Unit, Unit> OpenHash { get;  }
+    public ReactiveCommand<Unit, Unit> OpenHash { get; }
     public string Hash { get; set; } = "A405A080";
 
     public MainWindowViewModel()
     {
         ExportMapToAtlas = ReactiveCommand.CreateFromTask(async () =>
         {
-            
+
         });
 
         OpenHash = ReactiveCommand.CreateFromTask(async () =>
@@ -37,7 +37,7 @@ public class MainWindowViewModel : ViewModelBase
                 }
             }.Start();
         });
-        
+
         OpenHash.ThrownExceptions.Subscribe(new Action<object>(ex =>
         {
             Console.WriteLine(ex);
@@ -45,5 +45,5 @@ public class MainWindowViewModel : ViewModelBase
             var a = 0;
         }));
     }
-    
+
 }

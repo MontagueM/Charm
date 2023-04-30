@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Tiger;
 using Interop;
+using Tiger;
 
 namespace Charm;
 
 public abstract class Commandlet
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <returns>true if a commandlet was run.</returns>
     public static bool RunCommandlet()
@@ -47,7 +47,7 @@ public abstract class Commandlet
             throw new Exception($"Could not find commandlet with name {commandletName}");
         }
 
-        ICommandlet commandlet = (ICommandlet) Activator.CreateInstance(commandletType);
+        ICommandlet commandlet = (ICommandlet)Activator.CreateInstance(commandletType);
         commandlet.Run(CharmInstance.Args);
     }
 

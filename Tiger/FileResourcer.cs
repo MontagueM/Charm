@@ -4,49 +4,49 @@ namespace Tiger;
 
 public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
 {
-    private ConcurrentDictionary<uint, dynamic> _fileCache = new();
+    private readonly ConcurrentDictionary<uint, dynamic> _fileCache = new();
 
     public FileResourcer(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)
     {
     }
-    
-    public T GetTag<T>(string fileHash, bool shouldLoad=true) where T : class
+
+    public T GetTag<T>(string fileHash, bool shouldLoad = true) where T : class
     {
         return GetTag<T>(new FileHash(fileHash), shouldLoad);
     }
-    
-    public T GetTag<T>(FileHash fileHash, bool shouldLoad=true) where T : class
+
+    public T GetTag<T>(FileHash fileHash, bool shouldLoad = true) where T : class
     {
         return GetFile(typeof(T), fileHash, shouldLoad);
     }
-    
-    public Tag<T> GetSchemaTag<T>(string fileHash, bool shouldLoad=true) where T : struct
+
+    public Tag<T> GetSchemaTag<T>(string fileHash, bool shouldLoad = true) where T : struct
     {
         return GetSchemaTag<T>(new FileHash(fileHash), shouldLoad);
     }
-    
-    public Tag<T> GetSchemaTag<T>(FileHash fileHash, bool shouldLoad=true) where T : struct
+
+    public Tag<T> GetSchemaTag<T>(FileHash fileHash, bool shouldLoad = true) where T : struct
     {
         return GetFile(typeof(T), fileHash, shouldLoad);
     }
-    
-    public FileHash GetFile(string fileHash, bool shouldLoad=true)
+
+    public FileHash GetFile(string fileHash, bool shouldLoad = true)
     {
         return GetFile(new FileHash(fileHash), shouldLoad);
     }
-    
-    public FileHash GetFile(FileHash fileHash, bool shouldLoad=true)
+
+    public FileHash GetFile(FileHash fileHash, bool shouldLoad = true)
     {
         return GetFile(typeof(FileHash), fileHash, shouldLoad);
     }
 
-    public dynamic? GetFile(Type type, FileHash hash, bool shouldLoad=true)
+    public dynamic? GetFile(Type type, FileHash hash, bool shouldLoad = true)
     {
         if (!hash.IsValid())
         {
             return null;
         }
-        
+
         if (_fileCache.ContainsKey(hash.Hash32))
         {
             // checks that the type of the cached file is the same as the type we're looking for
@@ -54,7 +54,7 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
             {
                 return _fileCache[hash.Hash32];
             }
-            
+
             // want a Tag<T>
             if (type.IsValueType)
             {
@@ -63,10 +63,10 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
                     return _fileCache[hash.Hash32];
                 }
             }
-            
+
             _fileCache.TryRemove(hash.Hash32, out dynamic? r);
         }
-        
+
         // want a Tag<T>
         if (type.IsValueType)
         {
@@ -74,7 +74,7 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         }
 
         dynamic? file;
-        if (shouldLoad == false)
+        if (!shouldLoad)
         {
             file = Activator.CreateInstance(type, hash, shouldLoad);
         }

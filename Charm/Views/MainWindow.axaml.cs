@@ -11,8 +11,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        
-        CharmInstance.InitialiseSubsystems();
+
         Strategy.SetStrategy(TigerStrategy.DESTINY2_SHADOWKEEP_2601);
     }
 }

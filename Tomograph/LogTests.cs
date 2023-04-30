@@ -10,7 +10,7 @@ public class LogTests
     {
         Log.Clear();
     }
-    
+
     [TestMethod]
     public void FileSink()
     {
@@ -27,9 +27,9 @@ public class LogTests
 
         string logFileName = Helpers.GetNonPublicStaticField(typeof(FileSink), "_filePath");
         string[] logFileContents = File.ReadAllLines(logFileName);
-        
+
         Assert.AreEqual(messages.Count, logFileContents.Length);
-        
+
         for (int i = 0; i < logFileContents.Length; i++)
         {
             StringAssert.EndsWith(logFileContents[i], messages[i]);

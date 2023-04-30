@@ -12,12 +12,12 @@ public class TigerFile
 {
     public FileHash Hash;
     private byte[]? _data = null;
-    
+
     public TigerFile(FileHash hash)
     {
         Hash = hash;
     }
-    
+
     public TigerReader GetReader()
     {
         return new TigerReader(GetStream());

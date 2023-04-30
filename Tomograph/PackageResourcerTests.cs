@@ -5,7 +5,8 @@ using WQPackage = Tiger.DESTINY2_WITCHQUEEN_6307.Package;
 
 namespace Tomograph;
 
-public interface IPackageResourcerTests {
+public interface IPackageResourcerTests
+{
     void Get_ValidSingletonObject();
     void Get_CorrectStrategyChange();
     void SinglePackage_ValidPackageObject_ValidId();
@@ -41,10 +42,10 @@ public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests,
     public void Get_CorrectStrategyChange()
     {
         // Assert.AreEqual(ValidPackagesDirectory, PackageResourcer.Get().PackagesDirectory);
-        
+
         // Strategy.AddNewStrategy(TigerStrategy.DESTINY1_PS4);
         // Strategy.CurrentStrategy = TigerStrategy.DESTINY1_PS4;
-        
+
         // Assert.AreEqual(D1PS4_ValidPackageDirectory, PackageResourcer.Get().PackagesDirectory);
     }
 

@@ -7,7 +7,7 @@ public static class DirectoryAssert
         // check name
         Assert.AreEqual(SanitisePath(expected), SanitisePath(actual));
     }
-    
+
     private static string SanitisePath(string path)
     {
         return Path.GetFullPath(path).Replace('\\', '/').Trim('/');

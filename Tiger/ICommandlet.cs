@@ -13,7 +13,7 @@ public class CharmArgs
     {
         _args = Environment.GetCommandLineArgs();
     }
-    
+
     public CharmArgs(string[] args)
     {
         _args = args;
@@ -24,12 +24,12 @@ public class CharmArgs
         value = GetArgValue(argName);
         return value != null;
     }
-    
+
     public bool IsArgPresent(string argName)
     {
         return _args.Any(x => x.StartsWith($"-{argName}", StringComparison.InvariantCultureIgnoreCase));
     }
-    
+
     public string? GetArgValue(string argName)
     {
         for (int i = 0; i < _args.Length; i++)

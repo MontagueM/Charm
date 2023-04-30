@@ -13,15 +13,16 @@ public class UpdateStrategyEventArgs : EventArgs
 
 // Order matters; Tag definitions are processed top to bottom so if you only provide a tag definition for WQ and not LF,
 // the code will presume that LF is the same as WQ. If this is not the case it will throw an exception.
-public enum TigerStrategy {
+public enum TigerStrategy
+{
     NONE,
-    // [StrategyMetadata("ps4", typeof(IPackage))] 
+    // [StrategyMetadata("ps4", typeof(IPackage))]
     // DESTINY1_PS4,
     [StrategyMetadata("w64", 1085660, 1085661, 7002268313830901797, 1085662, 2399965969279284756)]
     DESTINY2_SHADOWKEEP_2601,
-    [StrategyMetadata( "w64", 1085660, 1085661, 6051526863119423207, 1085662, 1078048403901153652)]
+    [StrategyMetadata("w64", 1085660, 1085661, 6051526863119423207, 1085662, 1078048403901153652)]
     DESTINY2_WITCHQUEEN_6307,
-    [StrategyMetadata( "w64", 1085660, 1085661, 3093985834785608855, 1085662, 3093985834785608855)]
+    [StrategyMetadata("w64", 1085660, 1085661, 3093985834785608855, 1085662, 3093985834785608855)]
     DESTINY2_LIGHTFALL_7003,
 }
 
@@ -34,23 +35,23 @@ public class Strategy
 {
     [ConfigField("StrategyConfigurations")]
     private static Dictionary<TigerStrategy, StrategyConfiguration> _strategyConfigurations = new();
-    
-    public static IEnumerable<TigerStrategy> GetAllStrategies() => _strategyConfigurations.Keys; 
+
+    public static IEnumerable<TigerStrategy> GetAllStrategies() => _strategyConfigurations.Keys;
 
     private static readonly TigerStrategy _defaultStrategy = TigerStrategy.NONE;
 
     [ConfigField("CurrentStrategy")]
     private static TigerStrategy _currentStrategy = _defaultStrategy;
-    
+
     // Using this is not recommended, as most classes shouldn't modify behaviour internally based on the strategy.
     // Instead, you should use StrategistSingleton to abstract the strategy away.
     public static TigerStrategy CurrentStrategy { get => _currentStrategy; }
 
     public delegate void UpdateStrategyEventHandler(UpdateStrategyEventArgs e);
-    public static event UpdateStrategyEventHandler OnStrategyChanged = delegate {};
+    public static event UpdateStrategyEventHandler OnStrategyChanged = delegate { };
 
     static Strategy() { SetStrategy(_defaultStrategy); }
-    
+
     /// <exception cref="ArgumentException">'strategyString' does not exist.</exception>
     public static void SetStrategy(string strategyString)
     {
@@ -61,7 +62,7 @@ public class Strategy
         }
         SetStrategy(strategy);
     }
-    
+
     /// <exception cref="ArgumentException">'strategy' does not exist.</exception>
     public static void SetStrategy(TigerStrategy strategy)
     {
@@ -83,7 +84,7 @@ public class Strategy
         }
         return configuration;
     }
-    
+
     /// <summary>
     /// Add a new strategy to the list of available strategies.
     /// </summary>
@@ -99,9 +100,9 @@ public class Strategy
         {
             throw new ArgumentException($"Game strategy cannot re-use an existing packages path '{packagesDirectory}'");
         }
-        
+
         CheckValidPackagesDirectory(strategy, packagesDirectory);
-        
+
         var config = new StrategyConfiguration { PackagesDirectory = packagesDirectory };
         _strategyConfigurations.Add(strategy, config);
         if (_currentStrategy == _defaultStrategy)
@@ -141,12 +142,12 @@ public class Strategy
             throw new ArgumentException($"The packages directory contains a package without the correct extension '.pkg': {packagesDirectory}");
         }
     }
-    
+
     private static bool PackagesDirectoryDoesNotExist(string packagesDirectory)
     {
         return !Directory.Exists(packagesDirectory);
     }
-    
+
     private static bool PackagesDirectoryEmpty(string packagesDirectory)
     {
         return !Directory.EnumerateFiles(packagesDirectory).Any();
@@ -175,17 +176,21 @@ public class Strategy
     public static string GetStrategyPackagePrefix(TigerStrategy strategy)
     {
         var member = typeof(TigerStrategy).GetMember(strategy.ToString());
-        StrategyMetadataAttribute attribute = (StrategyMetadataAttribute) member[0].GetCustomAttribute(typeof(StrategyMetadataAttribute), false);
+        StrategyMetadataAttribute? attribute = (StrategyMetadataAttribute?)member[0].GetCustomAttribute(typeof(StrategyMetadataAttribute), false);
+        if (attribute == null)
+        {
+            throw new ArgumentException($"Strategy '{strategy}' does not have a metadata attribute");
+        }
         return attribute.PackagePrefix;
     }
-    
+
     public abstract class StrategistSingleton<T>
         where T : StrategistSingleton<T>
     {
         private static Dictionary<TigerStrategy, T> _strategyInstances = new();
 
         private static T? _instance = null;
-    
+
         protected TigerStrategy _strategy;
 
         public static T Get()
@@ -201,13 +206,13 @@ public class Strategy
 
         private static void AddNewStrategyInstance(TigerStrategy strategy)
         {
-            if (typeof(T).GetConstructor(new[] {typeof(TigerStrategy)}) != null)
+            if (typeof(T).GetConstructor(new[] { typeof(TigerStrategy) }) != null)
             {
-                _instance = (T) Activator.CreateInstance(typeof(T), strategy);
+                _instance = (T)Activator.CreateInstance(typeof(T), strategy);
             }
-            else if (typeof(T).GetConstructor(new[] { typeof(TigerStrategy), typeof(StrategyConfiguration) })!= null)
+            else if (typeof(T).GetConstructor(new[] { typeof(TigerStrategy), typeof(StrategyConfiguration) }) != null)
             {
-                _instance = (T) Activator.CreateInstance(typeof(T), strategy, Strategy.GetStrategyConfiguration(strategy));
+                _instance = (T)Activator.CreateInstance(typeof(T), strategy, Strategy.GetStrategyConfiguration(strategy));
             }
             else
             {
@@ -218,7 +223,7 @@ public class Strategy
         }
 
         static StrategistSingleton() { Strategy.OnStrategyChanged += OnStrategyChanged; }
-    
+
         protected StrategistSingleton(TigerStrategy strategy) { _strategy = strategy; }
 
         private static void OnStrategyChanged(UpdateStrategyEventArgs e)
@@ -243,10 +248,10 @@ public static class StrategyExtensions
     public static StrategyMetadataAttribute GetStrategyMetadata(this TigerStrategy strategy)
     {
         var member = typeof(TigerStrategy).GetMember(strategy.ToString());
-        StrategyMetadataAttribute attribute = (StrategyMetadataAttribute) member[0].GetCustomAttribute(typeof(StrategyMetadataAttribute), false);
+        StrategyMetadataAttribute attribute = (StrategyMetadataAttribute)member[0].GetCustomAttribute(typeof(StrategyMetadataAttribute), false);
         return attribute;
     }
-    
+
     public static StrategyConfiguration GetStrategyConfiguration(this TigerStrategy strategy)
     {
         var member = typeof(TigerStrategy).GetMember(strategy.ToString());

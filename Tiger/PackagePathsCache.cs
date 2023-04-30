@@ -10,7 +10,7 @@ namespace Tiger;
 
 public class PackagePathsCache
 {
-    private ConcurrentDictionary<ushort, string> PackageIdToPathMap = new();
+    private readonly ConcurrentDictionary<ushort, string> PackageIdToPathMap = new();
     private PackagePathCacheData _cacheData;
     private readonly string _cacheFilePath;
     private readonly string _packagesDirectory;
@@ -23,13 +23,13 @@ public class PackagePathsCache
         public string PackageDirectory;
         public Dictionary<ushort, string> PackageIdToNameMap;
     }
-    
+
     struct PackagePathCacheVersion
     {
         public byte CacheVersion;
         public uint GameVersionHash;
     }
-    
+
     public static void ClearCacheFiles()
     {
         Log.Info("Clearing package paths cache files.");
@@ -51,7 +51,7 @@ public class PackagePathsCache
         _cacheFilePath = MakeCacheFileName(strategy);
         FillCache();
     }
-    
+
     private string MakeCacheFileName(TigerStrategy strategy)
     {
         return Path.Join(CacheDirectory, $"{strategy}_cache.json");
@@ -68,7 +68,7 @@ public class PackagePathsCache
         Log.Info($"Loading package paths cache from cache file {_cacheFilePath}.");
         FillCacheFromCacheFile();
     }
-    
+
     private bool IsCacheFileInvalid()
     {
         if (!File.Exists(_cacheFilePath))
@@ -76,7 +76,7 @@ public class PackagePathsCache
             Log.Info($"Cache file '{_cacheFilePath}' does not exist.");
             return true;
         }
-        
+
         _cacheData = JsonConvert.DeserializeObject<PackagePathCacheData>(File.ReadAllText(_cacheFilePath));
 
         if (CacheVersion != _cacheData.Version.CacheVersion)
@@ -98,7 +98,7 @@ public class PackagePathsCache
             Log.Info($"Cache file '{_cacheFilePath}' has different number of packages '{_cacheData.PackageIdToNameMap.Count}' (current is {currentPackageCount}.");
             return true;
         }
-        
+
         return false;
     }
 
@@ -121,7 +121,7 @@ public class PackagePathsCache
             return 0;
         }
         byte[] encoded = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(version));
-        var value = BitConverter.ToUInt32(encoded, 0); 
+        var value = BitConverter.ToUInt32(encoded, 0);
         return value;
     }
 
@@ -133,7 +133,7 @@ public class PackagePathsCache
             PackageIdToPathMap.TryAdd(entry.Key, Path.Combine(data.PackageDirectory, entry.Value));
         }
     }
-    
+
     private void SaveCacheToFile()
     {
         string? cacheFileDirectory = Path.GetDirectoryName(_cacheFilePath);
@@ -141,7 +141,7 @@ public class PackagePathsCache
         {
             Directory.CreateDirectory(cacheFileDirectory);
         }
-        
+
         PackagePathCacheData cacheData = new()
         {
             Version = new PackagePathCacheVersion
@@ -183,7 +183,7 @@ public class PackagePathsCache
                 }
             }
         }
-        
+
         return highestName;
     }
 
@@ -195,7 +195,7 @@ public class PackagePathsCache
         }
         throw new ArgumentException($"The package id '{packageId}' is not in the package paths cache");
     }
-    
+
     private static readonly string PackageStringNotInPackagePathsCacheMessage = "The package string is not in the package paths cache: ";
     public ushort GetPackageIdFromPath(string packagePath)
     {
@@ -207,7 +207,7 @@ public class PackagePathsCache
         }
         throw new ArgumentException(PackageStringNotInPackagePathsCacheMessage + packageId);
     }
-    
+
     public List<ushort> GetPackageIds()
     {
         return PackageIdToPathMap.Keys.ToList();

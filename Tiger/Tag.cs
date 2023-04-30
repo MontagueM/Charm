@@ -12,9 +12,9 @@ namespace Tiger;
 public class Tag<T> : TigerFile where T : struct
 {
     protected T _tag;
-    
+
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash reference
-    public Tag(FileHash tagHash, bool shouldParse=true) : base(tagHash)
+    public Tag(FileHash tagHash, bool shouldParse = true) : base(tagHash)
     {
         if (tagHash.IsValid() && shouldParse)
         {
@@ -25,7 +25,7 @@ public class Tag<T> : TigerFile where T : struct
             _tag = default;
         }
     }
-    
+
     private void Deserialize()
     {
         using (TigerReader reader = GetReader())
@@ -38,5 +38,5 @@ public class Tag<T> : TigerFile where T : struct
 [SchemaType(0x10)]
 public class Tag64<T> : Tag<T> where T : struct
 {
-    public Tag64(FileHash tagHash, bool shouldParse=true) : base(tagHash, shouldParse) { }
+    public Tag64(FileHash tagHash, bool shouldParse = true) : base(tagHash, shouldParse) { }
 }

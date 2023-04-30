@@ -7,18 +7,18 @@ public class DepotDownloader
 {
     struct DDCredentials
     {
-        public string Username { get;}
-        public string Password { get;}
-        
+        public string Username { get; }
+        public string Password { get; }
+
         public DDCredentials(string username, string password)
         {
             Username = username;
             Password = password;
         }
     }
-    
+
     private DDCredentials Credentials { get; set; }
-    
+
     public async Task Download(DepotManifestVersion depotManifestVersion, string meaningfulOutputName, List<string> fileList)
     {
         string outputDirectory = Path.Join("../../../../", $"Tomograph/TestData/{meaningfulOutputName}/");
@@ -44,17 +44,17 @@ public class DepotDownloader
         {
             throw new FileNotFoundException($"DepotDownloader.dll does not exist in {depotDownloaderDirectory}");
         }
-        
+
         await RunProcessAsync("dotnet", depotDownloaderDirectory, arguments);
     }
-    
+
     static Task<int> RunProcessAsync(string fileName, string workingDirectory, List<string> argumentList)
     {
         var tcs = new TaskCompletionSource<int>();
 
         var process = new Process
         {
-            StartInfo = { FileName = fileName, Arguments = string.Join(" ", argumentList), WorkingDirectory = workingDirectory},
+            StartInfo = { FileName = fileName, Arguments = string.Join(" ", argumentList), WorkingDirectory = workingDirectory },
             EnableRaisingEvents = true
         };
 
@@ -65,7 +65,7 @@ public class DepotDownloader
         };
 
         process.Start();
-        
+
         return tcs.Task;
     }
 

@@ -9,7 +9,7 @@ public struct SQLColumn
     public string Name { get; }
     public string Type { get; }
     public FieldInfo Field { get; }
-    
+
     private static readonly Dictionary<Type, string> _typeToSqlTypeMap = new()
     {
         {typeof(sbyte), "INTEGER"},
@@ -27,7 +27,7 @@ public struct SQLColumn
         Type = _typeToSqlTypeMap[field.FieldType];
         Field = field;
     }
-    
+
     public override string ToString()
     {
         return $"{Name} {Type}";
@@ -47,7 +47,7 @@ public struct SQLTable<T> where T : struct
             .Select(f => new SQLColumn(f))
             .ToArray();
     }
-    
+
     public SQLTable(string tableName)
     {
         TableName = tableName;
@@ -55,7 +55,7 @@ public struct SQLTable<T> where T : struct
             .Select(f => new SQLColumn(f))
             .ToArray();
     }
-    
+
     public void CreateTable(SQLiteConnection connection)
     {
         string columns = string.Join(", ", Columns);
@@ -64,7 +64,7 @@ public struct SQLTable<T> where T : struct
             command.ExecuteNonQuery();
         }
     }
-    
+
     public void InsertValues(SQLiteConnection connection, List<T> valuesList)
     {
         string columns = string.Join(", ", Columns.Select(c => c.Name));
@@ -84,7 +84,7 @@ public struct SQLTable<T> where T : struct
             transaction.Commit();
         }
     }
-    
+
     public void InsertValues(SQLiteConnection connection, T valuesObj)
     {
         string columns = string.Join(", ", Columns.Select(c => c.Name));

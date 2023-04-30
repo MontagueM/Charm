@@ -8,7 +8,7 @@ public abstract class StrategyAttribute : Attribute
     {
         Strategy = TigerStrategy.NONE;
     }
-    
+
     public StrategyAttribute(TigerStrategy strategy)
     {
         Strategy = strategy;
@@ -24,7 +24,7 @@ public class SchemaFieldAttribute : StrategyAttribute
     {
         Offset = offset;
     }
-    
+
     public SchemaFieldAttribute(int offset, TigerStrategy strategy) : base(strategy)
     {
         Offset = offset;
@@ -42,7 +42,7 @@ public class SchemaStructAttribute : StrategyAttribute
         ClassHash = classHash;
         SerializedSize = serializedSize;
     }
-    
+
     public SchemaStructAttribute(TigerStrategy strategy, string classHash, int serializedSize) : base(strategy)
     {
         ClassHash = classHash;
@@ -74,7 +74,7 @@ public struct DepotManifestVersion
     public uint AppId;
     public uint DepotId;
     public ulong ManifestId;
-    
+
     public DepotManifestVersion(uint appId, uint depotId, ulong manifestId)
     {
         AppId = appId;

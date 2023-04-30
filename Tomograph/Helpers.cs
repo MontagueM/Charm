@@ -10,18 +10,18 @@ public class Helpers
         TestStrategyAttribute? attribute = (TestStrategyAttribute)T.GetCustomAttribute(typeof(TestStrategyAttribute), false);
         return attribute?.Strategy ?? TigerStrategy.NONE;
     }
-    
+
     public static string GetTestClassDataDirectory(Type T)
     {
         return Path.Join("../../..", "TestData", GetTestClassStrategy(T).ToString());
     }
-    
+
     public static T CallNonPublicMethod<T>(dynamic? instance, string methodName, params object[] parameters)
     {
         MethodInfo dynMethod = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
         try
         {
-            return (T) dynMethod.Invoke(instance, parameters);
+            return (T)dynMethod.Invoke(instance, parameters);
         }
         catch (Exception e)
         {
@@ -29,7 +29,7 @@ public class Helpers
         }
     }
 
-    public static void CallNonPublicMethod(dynamic? instance, string methodName, object[] parameters=null)
+    public static void CallNonPublicMethod(dynamic? instance, string methodName, object[] parameters = null)
     {
         MethodInfo dynMethod = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
         try
@@ -46,7 +46,7 @@ public class Helpers
     {
         objectType.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static).SetValue(null, newFieldValue);
     }
-    
+
     public static dynamic? GetNonPublicStaticField(Type objectType, string fieldName)
     {
         return objectType.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);

@@ -34,22 +34,22 @@ public static class ResourcerStrategyExtensions
             }
         }
     }
-    
+
     private static bool ImplementsIPackage(this Type classType)
     {
         return classType.FindInterfaces((type, _) => type == typeof(IPackage), null).Length > 0;
     }
-    
+
     private static HashSet<TigerStrategy> GetStrategiesFromType(Type type)
     {
         HashSet<TigerStrategy> strategies = new HashSet<TigerStrategy>();
 
         GetStrategyFromNamespace(type, ref strategies);
-        
+
         type.GetCustomAttributes(typeof(StrategyClassAttribute), true)
             .Select(x => ((StrategyClassAttribute)x).Strategy)
             .ToList().ForEach(x => strategies.Add(x));
-        
+
         return strategies;
     }
 

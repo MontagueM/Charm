@@ -6,16 +6,16 @@ using TomographData;
 public class Program
 {
     private static DepotDownloader depotDownloader = new DepotDownloader();
-    
+
     public static int Main(string[] args)
     {
         SetDepotDownloaderCredentials(args);
-        
+
         var charmTestsType = typeof(CharmPackageTests);
         var types = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(s => s.GetTypes())
             .Where(p => charmTestsType.IsAssignableFrom(p));
-        
+
         foreach (Type type in types)
         {
             TestStrategyAttribute? attribute = (TestStrategyAttribute)type.GetCustomAttribute(typeof(TestStrategyAttribute), false);
@@ -25,13 +25,13 @@ public class Program
                 continue;
             }
             StrategyMetadataAttribute strategyMetadata = attribute.Strategy.GetStrategyMetadata();
-                
+
             if (!strategyMetadata.DepotManifestVersionMain.HasValue || !strategyMetadata.DepotManifestVersionAudio.HasValue)
             {
                 Console.WriteLine($"TestClass Strategy {strategyMetadata} has no DepotManifestVersionMain and DepotManifestVersionAudio, skipping test data initialization.");
                 continue;
             }
-            
+
             GetTestData(type, attribute.Strategy, strategyMetadata);
         }
 
@@ -49,7 +49,7 @@ public class Program
         HashSet<string> allPackagePaths = GetRequiredPatches(testPackages, strategy);
         List<string> fileList = allPackagePaths.Select(x => Path.Join("packages", x)).ToList();
         await depotDownloader.Download(strategyMetadata.DepotManifestVersionMain.Value, strategy.ToString(), fileList);
-        
+
         TestDataSystem.VerifyTestData(testClassType);
     }
 
@@ -66,7 +66,7 @@ public class Program
 
         return fullPackageList;
     }
-    
+
     private static IEnumerable<string> GetAllPackageIdsForPackage(string packageName)
     {
         int patchIdOfPackageName = GetPatchIdFromPackageName(packageName);
@@ -76,7 +76,7 @@ public class Program
             yield return modifiedName;
         }
     }
-    
+
     private static int GetPatchIdFromPackageName(string packageName)
     {
         string noExtension = packageName.Contains('.') ? packageName.Split('.')[0] : packageName;
@@ -84,7 +84,7 @@ public class Program
         int patchId = Convert.ToInt32(split[^1]);
         return patchId;
     }
-    
+
     private static string GetPackageNameWithDifferentPatchId(string packageName, int originalPatchId, int newPatchId)
     {
         bool hasExtension = packageName.Contains('.');

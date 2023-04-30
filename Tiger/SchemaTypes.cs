@@ -43,7 +43,7 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
     public RelativePointer Offset;
     // private byte[] _arrayData;
     protected int _elementSize;
-    
+
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash defined for array
 
     public void Deserialize(TigerReader reader)
@@ -53,11 +53,11 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
         Offset = reader.ReadSchemaType<RelativePointer>();
         Offset.AddExtraOffset(0x10);
         reader.Seek(4, SeekOrigin.Current);
-        
+
         _elementSize = SchemaDeserializer.Get().GetSchemaStructSize<T>();
         // _arrayData = reader.ReadBytes(Count * _elementSize);
     }
-    
+
     public IEnumerable<T> Enumerate(TigerReader reader)
     {
         // TigerReader reader = new TigerReader(_arrayData);
@@ -79,14 +79,14 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
         {
             throw new IndexOutOfRangeException("Index out of range");
         }
-        
+
         // TigerReader reader = new TigerReader(_arrayData);
         return ReadElement(reader, index);
     }
-    
+
     private T ReadElement(TigerReader reader, int index)
     {
-        reader.Seek(Offset.AbsoluteOffset + index*_elementSize, SeekOrigin.Begin);
+        reader.Seek(Offset.AbsoluteOffset + index * _elementSize, SeekOrigin.Begin);
         return reader.ReadSchemaStruct<T>();
     }
 }
@@ -100,22 +100,22 @@ public class SortedDynamicArray<T> : DynamicArray<T> where T : struct
 {
     public T? InterpolationSearch(TigerReader reader, TigerHash hash)
     {
-        int index = InterpolationSearchIndex(reader, 0, Count-1, hash.Hash32);
+        int index = InterpolationSearchIndex(reader, 0, Count - 1, hash.Hash32);
         return index == -1 ? null : ElementAt(reader, index);
     }
-    
+
     public int InterpolationSearchIndex(TigerReader reader, TigerHash hash)
     {
-        return InterpolationSearchIndex(reader, 0, Count-1, hash.Hash32);
+        return InterpolationSearchIndex(reader, 0, Count - 1, hash.Hash32);
     }
-    
+
     public int InterpolationSearchIndex(TigerReader reader, int lowIndex, int highIndex, uint searchValue)
     {
         reader.Seek(Offset.AbsoluteOffset + lowIndex * _elementSize, SeekOrigin.Begin);
         uint lowValue = reader.ReadUInt32();
         reader.Seek(Offset.AbsoluteOffset + highIndex * _elementSize, SeekOrigin.Begin);
         uint highValue = reader.ReadUInt32();
-     
+
         // Since array is sorted, an element present in array must be in range defined by corner
         if (lowIndex < highIndex && searchValue >= lowValue && searchValue <= highValue)
         {
@@ -123,7 +123,7 @@ public class SortedDynamicArray<T> : DynamicArray<T> where T : struct
             int testIndex = lowIndex + (int)(((double)(highIndex - lowIndex) / (highValue - lowValue)) * (searchValue - lowValue));
             reader.Seek(Offset.AbsoluteOffset + testIndex * _elementSize, SeekOrigin.Begin);
             uint testValue = reader.ReadUInt32();
-            
+
             // Condition of target found
             if (testValue == searchValue)
             {
@@ -135,7 +135,7 @@ public class SortedDynamicArray<T> : DynamicArray<T> where T : struct
             {
                 return InterpolationSearchIndex(reader, testIndex + 1, highIndex, searchValue);
             }
-         
+
             // If x is smaller, x is in left sub array
             if (testValue > searchValue)
             {
@@ -150,7 +150,7 @@ public class SortedDynamicArray<T> : DynamicArray<T> where T : struct
 public class RelativePointer : ITigerDeserialize
 {
     public long AbsoluteOffset => _basePosition + _relativeOffset + _extraOffset;
-    
+
     private long _basePosition;
     private long _relativeOffset;
     private long _extraOffset;
@@ -172,7 +172,7 @@ public class GlobalPointer<T> : ITigerDeserialize where T : struct
 {
     public int AbsoluteOffset;
     public T Value;
-    
+
     public virtual void Deserialize(TigerReader reader)
     {
         AbsoluteOffset = reader.ReadInt32();

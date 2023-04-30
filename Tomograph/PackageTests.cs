@@ -13,11 +13,12 @@ public abstract class CharmPackageTests
         Strategy.AddNewStrategy(Helpers.GetTestClassStrategy(GetType()), TestPackage.TestPackageDataDirectory);
         TestDataSystem.VerifyTestData(GetType());
     }
-    
+
     public void CleanupTest() { Strategy.Reset(); }
 }
 
-public interface IPackageTests {
+public interface IPackageTests
+{
     void Package_PathValid();
     void Package_PathDoesNotExist();
     void Package_PathInvalidPrefix();
@@ -47,7 +48,7 @@ public struct TestPackage
         Name = name;
         Timestamp = timestamp;
     }
-    
+
     public TestPackage(string name)
     {
         Name = name;
@@ -58,8 +59,6 @@ public struct TestPackage
 public class DESTINY2_SHADOWKEEP_2601_PackageTests : CharmPackageTests, IPackageTests
 {
     private static readonly TestPackage ValidNoPatch = new("w64_ui_startup_unp1_0.pkg", 1567640311);
-    private static readonly TestPackage ValidPatchFirst = new("w64_audio_01a7_0.pkg", 1499948895);
-    private static readonly TestPackage ValidPatchMid = new("w64_audio_01a7_2.pkg", 1533993223);
     private static readonly TestPackage ValidPatchLast = new("w64_audio_01a7_3.pkg", 1567664383);
     private static readonly TestPackage ValidPatch81 = new("w64_cinematics_06d6_3.pkg", 1567667820);
 
@@ -71,7 +70,7 @@ public class DESTINY2_SHADOWKEEP_2601_PackageTests : CharmPackageTests, IPackage
 
     [TestCleanup]
     public void Cleanup() { CleanupTest(); }
-    
+
     [TestMethod]
     public void Package_PathValid()
     {
@@ -178,7 +177,7 @@ public class DESTINY2_SHADOWKEEP_2601_PackageTests : CharmPackageTests, IPackage
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(SKPackage), "FileMetadataInvalidPackageIdMessage")]
+    [ExpectedExceptionWithMessage(typeof(ArgumentException), "The provided file hash has an invalid package id: {fileHash.PackageId}")]
     public void FileMetadata_InvalidPackageId()
     {
         SKPackage package = new SKPackage(ValidPatchLast.Path);
@@ -186,7 +185,7 @@ public class DESTINY2_SHADOWKEEP_2601_PackageTests : CharmPackageTests, IPackage
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessageVariable(typeof(ArgumentOutOfRangeException), typeof(SKPackage), "FileMetadataFileIndexOutOfRangeMessage")]
+    [ExpectedExceptionWithMessage(typeof(ArgumentOutOfRangeException), "The provided file hash has an out-of-range file index {fileIndex} >= {FileEntries.Count}")]
     public void FileMetadata_FileIndexOutOfRange()
     {
         SKPackage package = new SKPackage(ValidPatchLast.Path);
@@ -209,7 +208,6 @@ public class DESTINY2_WITCHQUEEN_6307_PackageTests : CharmPackageTests, IPackage
 {
     private static readonly TestPackage ValidNoPatch = new("w64_ui_startup_unp1_0.pkg", 1674714492);
     private static readonly TestPackage ValidPatchFirst = new("w64_sr_raids_011d_0.pkg", 1601620832);
-    private static readonly TestPackage ValidPatchMid = new("w64_sr_raids_011d_4.pkg", 1652365275);
     private static readonly TestPackage ValidPatchLast = new("w64_sr_raids_011d_7.pkg", 1674717874);
     private static readonly TestPackage ValidPatch81 = new("w64_sr_gear_0426_7.pkg", 1674718077);
 
@@ -326,7 +324,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageTests : CharmPackageTests, IPackage
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(WQPackage), "FileMetadataInvalidPackageIdMessage")]
+    [ExpectedExceptionWithMessage(typeof(ArgumentException), "The provided file hash has an invalid package id: {fileHash.PackageId}")]
     public void FileMetadata_InvalidPackageId()
     {
         WQPackage package = new WQPackage(ValidPatchLast.Path);
@@ -334,7 +332,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageTests : CharmPackageTests, IPackage
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessageVariable(typeof(ArgumentOutOfRangeException), typeof(WQPackage), "FileMetadataFileIndexOutOfRangeMessage")]
+    [ExpectedExceptionWithMessage(typeof(ArgumentOutOfRangeException), "The provided file hash has an out-of-range file index {fileIndex} >= {FileEntries.Count}")]
     public void FileMetadata_FileIndexOutOfRange()
     {
         WQPackage package = new WQPackage(ValidPatchLast.Path);

@@ -13,14 +13,14 @@ public class StrategyTests
         ConfigSubsystem config = new ConfigSubsystem("../../../../Tomograph/TestData/valid_test_config.json");
         Helpers.CallNonPublicMethod(config, "Initialise");
     }
-    
+
     [TestCleanup]
     public void Cleanup()
     {
         Strategy.Reset();
         CharmInstance.ClearSubsystems();
     }
-    
+
     [TestMethod]
     public void LoadConfigCorrectly()
     {
@@ -31,7 +31,7 @@ public class StrategyTests
         Assert.AreEqual(TigerStrategy.DESTINY2_WITCHQUEEN_6307, strategies[1]);
         Assert.AreEqual("../../../../Tomograph/TestData/DESTINY2_WITCHQUEEN_6307/packages/", strategies[1].GetStrategyConfiguration().PackagesDirectory);
     }
-    
+
     [TestMethod]
     public void AddPackagesDirectory_Valid()
     {
@@ -46,7 +46,7 @@ public class StrategyTests
         Strategy.SetStrategy(TigerStrategy.DESTINY2_SHADOWKEEP_2601);
         Assert.AreEqual(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Helpers.GetCurrentStrategy());
     }
-    
+
     [TestMethod]
     [ExpectedExceptionWithMessage(typeof(ArgumentException), "Game strategy does not exist")]
     public void ChangeStrategy_DoesNotExist()
@@ -54,49 +54,49 @@ public class StrategyTests
         Assert.AreEqual(TigerStrategy.NONE, Helpers.GetCurrentStrategy());
         Strategy.SetStrategy(TigerStrategy.DESTINY2_LIGHTFALL_7003);
     }
-    
+
     [TestMethod]
     [ExpectedExceptionWithMessage(typeof(ArgumentException), "Game strategy already exists")]
     public void AddPackagesDirectory_StrategyAlreadyExists()
     {
         Strategy.AddNewStrategy(TigerStrategy.NONE, "");
     }
-    
+
     [TestMethod]
     [ExpectedExceptionWithMessage(typeof(ArgumentException), "Game strategy cannot re-use an existing packages path")]
     public void AddPackagesDirectory_PackagePathAlreadySet()
     {
         Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LIGHTFALL_7003, "../../../../Tomograph/TestData/DESTINY2_SHADOWKEEP_2601/packages/");
     }
-    
+
     [TestMethod]
     [ExpectedExceptionWithMessage(typeof(DirectoryNotFoundException), "The packages directory does not exist")]
     public void AddPackagesDirectory_PackagesDirectoryDoesNotExist()
     {
         Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LIGHTFALL_7003, "../../../../Tomograph/TestData/D2InvalidDoesNotExist/");
     }
-    
+
     [TestMethod]
     [ExpectedExceptionWithMessage(typeof(ArgumentException), "The packages directory is empty")]
     public void AddPackagesDirectory_PackagesDirectoryEmpty()
     {
         Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LIGHTFALL_7003, "../../../../Tomograph/TestData/D2InvalidEmpty/");
     }
-    
+
     [TestMethod]
     [ExpectedExceptionWithMessage(typeof(ArgumentException), "The packages directory contains a package without the correct prefix")]
     public void AddPackagesDirectory_InvalidD2Win64Prefix()
     {
         Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LIGHTFALL_7003, "../../../../Tomograph/TestData/D2InvalidPrefix/");
     }
-    
+
     [TestMethod]
     [ExpectedExceptionWithMessage(typeof(ArgumentException), "The packages directory contains a package without the correct extension")]
     public void AddPackagesDirectory_InvalidExtension()
     {
         Strategy.AddNewStrategy(TigerStrategy.DESTINY2_LIGHTFALL_7003, "../../../../Tomograph/TestData/D2InvalidExtension/");
     }
-    
+
     [TestMethod]
     public void GetStrategyConfiguration_Exists()
     {
@@ -104,7 +104,7 @@ public class StrategyTests
         Assert.IsTrue(config.HasValue);
         Assert.AreEqual(Path.GetFullPath("../../../../Tomograph/TestData/DESTINY2_SHADOWKEEP_2601/packages/"), Path.GetFullPath(config?.PackagesDirectory));
     }
-    
+
     [TestMethod, ExpectedExceptionWithMessage(typeof(ArgumentException), "Game strategy does not exist")]
     public void GetStrategyConfiguration_DoesNotExist()
     {

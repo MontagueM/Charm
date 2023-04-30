@@ -7,7 +7,7 @@ namespace Tiger;
 public class ConfigFieldAttribute : Attribute
 {
     public string FieldName { get; private set; }
-    
+
     public ConfigFieldAttribute(string fieldName)
     {
         FieldName = fieldName;
@@ -21,12 +21,12 @@ public class ConfigSubsystem : Subsystem
     public ConfigSubsystem()
     {
     }
-    
+
     public ConfigSubsystem(string overrideConfigFilePath)
     {
         _configFilePath = overrideConfigFilePath;
     }
-    
+
     public void SetConfigFilePath(string configPath)
     {
         _configFilePath = configPath;
@@ -39,7 +39,7 @@ public class ConfigSubsystem : Subsystem
         {
             _configFilePath = configPath;
         }
-        
+
         if (ConfigFileExists())
         {
             bool successfullyLoadedConfig = LoadConfig();
@@ -51,7 +51,7 @@ public class ConfigSubsystem : Subsystem
 
         return WriteConfig();
     }
-    
+
     private bool ConfigFileExists()
     {
         return File.Exists(_configFilePath);
@@ -73,12 +73,12 @@ public class ConfigSubsystem : Subsystem
         {
             throw new JsonReaderException($"Failed to load config file {_configFilePath}: {e.Message}", e);
         }
-        
+
         if (deserializedSettings is null)
         {
             return false;
         }
-        
+
         bool configIsMissingField = false;
         foreach (var field in GetConfigFields())
         {
@@ -89,7 +89,7 @@ public class ConfigSubsystem : Subsystem
         {
             return WriteConfig();
         }
-        
+
         return true;
     }
 
@@ -99,11 +99,11 @@ public class ConfigSubsystem : Subsystem
             .SelectMany(a => a.GetTypes())
             .SelectMany(t => t.GetFields(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             .Where(f => Attribute.IsDefined(f, typeof(ConfigFieldAttribute)));
-        
+
         // Display warnings about fields that are 1. not static or 2. readonly
         foreach (var field in fields)
         {
-            if (field.IsStatic == false)
+            if (!field.IsStatic)
             {
                 Console.WriteLine($"WARNING: Config field {field.Name} is not static. It will not be loaded from the config.");
             }
@@ -112,9 +112,9 @@ public class ConfigSubsystem : Subsystem
                 Console.WriteLine($"WARNING: Config field {field.Name} is readonly. It will not be loaded from the config.");
             }
         }
-        
+
         // Strip out fields that are not static or readonly
-        fields = fields.Where(f => f.IsStatic && f.IsInitOnly == false);
+        fields = fields.Where(f => f.IsStatic && !f.IsInitOnly);
 
         return GetConfigFieldsDictionary(fields);
     }
@@ -153,7 +153,7 @@ public class ConfigSubsystem : Subsystem
 
         return false;
     }
-    
+
     private string GetFieldName(FieldInfo field)
     {
         return ((ConfigFieldAttribute)field.GetCustomAttributes(typeof(ConfigFieldAttribute)).First()).FieldName;
@@ -168,10 +168,10 @@ public class ConfigSubsystem : Subsystem
         {
             deserializedSettings[fieldName] = fieldInfo.GetValue(null);
         }
-        
+
         string serializedSettings = JsonConvert.SerializeObject(deserializedSettings, Formatting.Indented);
         File.WriteAllText(_configFilePath, serializedSettings);
-        
+
         return ConfigFileExists();
     }
 }

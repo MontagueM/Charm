@@ -72,7 +72,7 @@ public class ExpectedExceptionWithMessageAttribute : ExpectedExceptionBaseAttrib
         ExceptionType = exceptionType;
         ExpectedMessage = expectedMessage;
     }
-    
+
     private static List<string> GetMessageParts(string message)
     {
         List<string> parts = new();

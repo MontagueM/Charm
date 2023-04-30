@@ -10,7 +10,7 @@ public class TestDataSystem
         foreach (TestPackage testPackage in EnumerateTestPackagesFromClass(T))
         {
             bool bShouldSkipAsGarbage = testPackage.Timestamp == 0;
-            if (bShouldSkipAsGarbage) 
+            if (bShouldSkipAsGarbage)
             {
                 continue;
             }
@@ -21,9 +21,9 @@ public class TestDataSystem
 
     private static void ValidatePath(string testPackagePackagePath)
     {
-        IPackage.CheckValidPackagePath(testPackagePackagePath);
+        Package.CheckValidPackagePath(testPackagePackagePath, Strategy.CurrentStrategy);
     }
-    
+
     private static void ValidateTimestamp(TestPackage testPackage)
     {
         IPackage package = PackageResourcer.Get().GetPackage(testPackage.Path);
@@ -43,7 +43,7 @@ public class TestDataSystem
                      .GetFields(BindingFlags.Static | BindingFlags.NonPublic)
                      .Where(x => x.FieldType == typeof(TestPackage)))
         {
-            TestPackage package = (TestPackage) field.GetValue(null);
+            TestPackage package = (TestPackage)field.GetValue(null);
             yield return package;
         }
     }

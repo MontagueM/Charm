@@ -14,7 +14,7 @@ public class PackagePathsCacheTests
         Helpers.CallNonPublicMethod(config, "Initialise");
         PackagePathsCache.ClearCacheFiles();
     }
-    
+
     [TestCleanup]
     public void Cleanup()
     {

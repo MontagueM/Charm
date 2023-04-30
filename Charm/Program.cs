@@ -1,6 +1,6 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
 using Avalonia.ReactiveUI;
-using System;
 using Interop;
 using Tiger;
 
@@ -15,14 +15,15 @@ class Program
     public static void Main(string[] args)
     {
         CharmInstance.Args = new CharmArgs(args);
-        
+        CharmInstance.InitialiseSubsystems();
+
         // todo figure out how to make sure commandlets initialise all the subsystems they need
         TestInclude testInclude = new();
         if (Commandlet.RunCommandlet())
         {
             return;
         }
-        
+
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

@@ -15,12 +15,12 @@ public class StringHash : TigerHash
 {
     private protected readonly uint Hash32;
     public const uint InvalidHash32 = 0x811c9dc5;
-    
+
     public StringHash(uint hash32) : base(hash32)
     {
         Hash32 = hash32;
     }
-    
+
     public StringHash() : base(InvalidHash32)
     {
     }
@@ -42,14 +42,14 @@ public class StringHash : TigerHash
 /// </summary>
 public class TigerHash : IHash, IComparable<TigerHash>, IEquatable<TigerHash>
 {
-    public uint Hash32 = InvalidHash32;
+    public uint Hash32;
     public const uint InvalidHash32 = 0xFFFFFFFF;
 
     public TigerHash(uint hash32)
     {
         Hash32 = hash32;
     }
-    
+
     public TigerHash(string hash, bool bBigEndianString = true)
     {
         bool parsed = uint.TryParse(hash, NumberStyles.HexNumber, null, out Hash32);
@@ -86,7 +86,7 @@ public class TigerHash : IHash, IComparable<TigerHash>, IEquatable<TigerHash>
     {
         return Hash32 != InvalidHash32 && Hash32 != 0;
     }
-    
+
     public override string ToString()
     {
         return Endian.U32ToString(Hash32);
@@ -96,7 +96,7 @@ public class TigerHash : IHash, IComparable<TigerHash>, IEquatable<TigerHash>
 /// <summary>
 /// Represents a package hash, which is a combination of the EntryId and PkgId e.g. ABCD5680.
 /// </summary>
-public class FileHash : TigerHash, IHash
+public class FileHash : TigerHash
 {
     public FileHash(int packageId, uint fileIndex) : base(GetHash32(packageId, fileIndex))
     {
@@ -135,14 +135,14 @@ public class File64Hash : FileHash
     {
         Hash64 = hash64;
     }
-    
+
     public override bool IsValid()
     {
         throw new NotImplementedException();
         return Hash32 != InvalidHash32 && Hash32 != 0;
     }
-    
-    private static uint GetHash32(ulong hash64)
+
+    private static uint GetHash32()
     {
         throw new NotImplementedException();
         return InvalidHash32;
