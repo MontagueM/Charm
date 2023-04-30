@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 
-namespace Resourcer;
+namespace Tiger;
 
-public abstract class CharmSubsystem
+public abstract class Subsystem
 {
     protected internal abstract bool Initialise();
 }

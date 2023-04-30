@@ -1,7 +1,5 @@
 ﻿using System.Reflection;
-using Resourcer;
-using Tiger.Attributes;
-using Tomograph;
+using Tiger;
 
 namespace Tomograph;
 
@@ -11,27 +9,27 @@ public class TestDataSystem
     {
         foreach (TestPackage testPackage in EnumerateTestPackagesFromClass(T))
         {
-            bool bShouldSkipAsGarbage = testPackage.PackageTimestamp == 0;
+            bool bShouldSkipAsGarbage = testPackage.Timestamp == 0;
             if (bShouldSkipAsGarbage) 
             {
                 continue;
             }
-            ValidatePath(testPackage.PackagePath);
+            ValidatePath(testPackage.Path);
             ValidateTimestamp(testPackage);
         }
     }
 
     private static void ValidatePath(string testPackagePackagePath)
     {
-        D2Package.CheckValidPackagePath(testPackagePackagePath);
+        IPackage.CheckValidPackagePath(testPackagePackagePath);
     }
     
     private static void ValidateTimestamp(TestPackage testPackage)
     {
-        D2Package package = new D2Package(testPackage.PackagePath);
-        if (package.GetPackageMetadata().PackageTimestamp != testPackage.PackageTimestamp)
+        IPackage package = PackageResourcer.Get().GetPackage(testPackage.Path);
+        if (package.GetPackageMetadata().Timestamp != testPackage.Timestamp)
         {
-            throw new Exception($"Package {testPackage.PackagePath} has invalid timestamp. Expected: {package.GetPackageMetadata().PackageTimestamp}. Actual: {testPackage.PackageTimestamp}");
+            throw new Exception($"Package {testPackage.Path} has invalid timestamp. Expected: {package.GetPackageMetadata().Timestamp}. Actual: {testPackage.Timestamp}");
         }
     }
 

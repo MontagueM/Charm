@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Newtonsoft.Json;
-using Resourcer;
+using Tiger;
 
 namespace Tomograph;
 
@@ -16,6 +16,7 @@ public class ConfigTests
     {
         ConfigSubsystem config = new ConfigSubsystem();
         _configPath = (string)typeof(ConfigSubsystem).GetField("_configFilePath", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(config);
+        File.Delete(_configPath);
     }
 
     [TestCleanup]
@@ -67,7 +68,7 @@ public class ConfigTests
         Assert.AreEqual(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Helpers.GetNonPublicStaticField(typeof(Strategy), "_currentStrategy"));
     }
 
-    [TestMethod, ExpectedExceptionWithMessage(typeof(JsonSerializationException), "Failed to load config file")]
+    [TestMethod, ExpectedExceptionWithMessage(typeof(JsonReaderException), "Failed to load config file")]
     public void Initialise_Open_InvalidFormat()
     {
         ConfigSubsystem config = new ConfigSubsystem();

@@ -1,8 +1,8 @@
-﻿using Resourcer;
+﻿using Tiger;
 
 namespace Tomograph;
 
-class TestSubsystem : CharmSubsystem
+class TestSubsystem : Subsystem
 {
     public static bool ReturnBool { get; set; } = true;
     

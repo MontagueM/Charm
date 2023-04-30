@@ -1,5 +1,7 @@
 using System.Reflection;
-using Resourcer;
+using Tiger;
+using SKPackage = Tiger.DESTINY2_SHADOWKEEP_2601.Package;
+using WQPackage = Tiger.DESTINY2_WITCHQUEEN_6307.Package;
 
 namespace Tomograph;
 
@@ -18,6 +20,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests,
     [TestInitialize]
     public void Initialize()
     {
+        Strategy.Reset();
         TestPackage.TestPackageStrategy = Helpers.GetTestClassStrategy(GetType());
         Strategy.AddNewStrategy(Helpers.GetTestClassStrategy(GetType()), TestPackage.TestPackageDataDirectory);
         TestDataSystem.VerifyTestData(GetType());
@@ -31,7 +34,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests,
     {
         PackageResourcer resourcer = PackageResourcer.Get();
         Assert.IsNotNull(resourcer);
-        // Assert.AreEqual(ValidPackagesDirectory, resourcer.PackagesDirectory);
+        DirectoryAssert.DirectoryEquals(Helpers.GetCurrentStrategy().GetStrategyConfiguration().PackagesDirectory, resourcer.PackagesDirectory);
     }
 
     [TestMethod]
@@ -40,7 +43,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests,
         // Assert.AreEqual(ValidPackagesDirectory, PackageResourcer.Get().PackagesDirectory);
         
         // Strategy.AddNewStrategy(TigerStrategy.DESTINY1_PS4);
-        Strategy.CurrentStrategy = TigerStrategy.DESTINY1_PS4;
+        // Strategy.CurrentStrategy = TigerStrategy.DESTINY1_PS4;
         
         // Assert.AreEqual(D1PS4_ValidPackageDirectory, PackageResourcer.Get().PackagesDirectory);
     }
@@ -50,16 +53,16 @@ public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests,
     {
         ushort expectedPackageId = 0x100;
         IPackage package = PackageResourcer.Get().GetPackage(expectedPackageId);
-        Assert.IsInstanceOfType(package, typeof(D2Package));
+        Assert.IsInstanceOfType(package, typeof(WQPackage));
         PackageMetadata actualPackageMetadata = package.GetPackageMetadata();
-        Assert.AreEqual(expectedPackageId, actualPackageMetadata.PackageId);
+        Assert.AreEqual(expectedPackageId, actualPackageMetadata.Id);
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessageVariable(typeof(ArgumentException), typeof(PackageResourcer), "PackageIdInvalidMessage")]
+    [ExpectedExceptionWithMessage(typeof(ArgumentException), "The package id '{packageId}' is not in the package paths cache")]
     public void SinglePackage_InvalidPackageObject_InvalidId()
     {
-        IPackage package = PackageResourcer.Get().GetPackage(0x100);
+        IPackage package = PackageResourcer.Get().GetPackage(0x1);
         Assert.IsNull(package);
     }
 }

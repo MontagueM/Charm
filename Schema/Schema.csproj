@@ -4,11 +4,15 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Arithmic\Arithmic.csproj" />
+      <Folder Include="DESTINY2_SHADOWKEEP_2601\" />
+      <Folder Include="DESTINY2_WITCHQUEEN_6307\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Resourcer\Resourcer.csproj" />
       <ProjectReference Include="..\Tiger\Tiger.csproj" />
     </ItemGroup>
 

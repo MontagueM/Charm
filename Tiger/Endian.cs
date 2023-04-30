@@ -1,4 +1,4 @@
-﻿namespace Resourcer;
+﻿namespace Tiger;
 
 public static class Endian
 {

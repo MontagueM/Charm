@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Tiger.Attributes;
+using Tiger;
 
 namespace TomographData;
 

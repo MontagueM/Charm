@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Resourcer;
+using Tiger;
 
 namespace Tomograph;
 
@@ -50,5 +50,11 @@ public class Helpers
     public static dynamic? GetNonPublicStaticField(Type objectType, string fieldName)
     {
         return objectType.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+    }
+
+    public static TigerStrategy GetCurrentStrategy()
+    {
+        // return GetNonPublicStaticField(typeof(Strategy), "_currentStrategy");
+        return Strategy.CurrentStrategy;
     }
 }

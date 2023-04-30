@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
-using Resourcer;
-using Tiger.Attributes;
+using Tiger;
 using Tomograph;
 using TomographData;
 
@@ -25,7 +24,7 @@ public class Program
                 Console.WriteLine($"TestClass {type} has no TestStrategyAttribute, skipping test data initialization.");
                 continue;
             }
-            StrategyMetadata strategyMetadata = attribute.Strategy.GetStrategyMetadata();
+            StrategyMetadataAttribute strategyMetadata = attribute.Strategy.GetStrategyMetadata();
                 
             if (!strategyMetadata.DepotManifestVersionMain.HasValue || !strategyMetadata.DepotManifestVersionAudio.HasValue)
             {
@@ -44,7 +43,7 @@ public class Program
         depotDownloader.SetCredentials(args[0], args[1]);
     }
 
-    public static async void GetTestData(Type testClassType, TigerStrategy strategy, StrategyMetadata strategyMetadata)
+    public static async void GetTestData(Type testClassType, TigerStrategy strategy, StrategyMetadataAttribute strategyMetadata)
     {
         List<TestPackage> testPackages = TestDataSystem.EnumerateTestPackagesFromClass(testClassType).ToList();
         HashSet<string> allPackagePaths = GetRequiredPatches(testPackages, strategy);
@@ -59,10 +58,10 @@ public class Program
     {
         // todo replace with PackageResourcer stuff
         TestPackage.TestPackageStrategy = strategy;
-        HashSet<string> fullPackageList = testPackages.Select(x => x.PackageName).ToHashSet();
+        HashSet<string> fullPackageList = testPackages.Select(x => x.Name).ToHashSet();
         foreach (TestPackage testPackage in testPackages)
         {
-            GetAllPackageIdsForPackage(testPackage.PackageName).ToList().ForEach(x => fullPackageList.Add(x));
+            GetAllPackageIdsForPackage(testPackage.Name).ToList().ForEach(x => fullPackageList.Add(x));
         }
 
         return fullPackageList;

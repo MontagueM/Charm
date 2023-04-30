@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Newtonsoft.Json;
 
-namespace Resourcer;
+namespace Tiger;
 
 [AttributeUsage(AttributeTargets.Field)]
 public class ConfigFieldAttribute : Attribute
@@ -14,12 +14,32 @@ public class ConfigFieldAttribute : Attribute
     }
 }
 
-public class ConfigSubsystem : CharmSubsystem
+public class ConfigSubsystem : Subsystem
 {
-    private readonly string _configFilePath = "./config.json";
+    private string _configFilePath = "./config.json";
+
+    public ConfigSubsystem()
+    {
+    }
+    
+    public ConfigSubsystem(string overrideConfigFilePath)
+    {
+        _configFilePath = overrideConfigFilePath;
+    }
+    
+    public void SetConfigFilePath(string configPath)
+    {
+        _configFilePath = configPath;
+        Initialise();
+    }
 
     protected internal override bool Initialise()
     {
+        if (CharmInstance.Args.GetArgValue("config", out string configPath))
+        {
+            _configFilePath = configPath;
+        }
+        
         if (ConfigFileExists())
         {
             bool successfullyLoadedConfig = LoadConfig();
@@ -42,11 +62,16 @@ public class ConfigSubsystem : CharmSubsystem
         Dictionary<string, dynamic?>? deserializedSettings;
         try
         {
-            deserializedSettings = JsonConvert.DeserializeObject<Dictionary<string, dynamic?>>(File.ReadAllText(_configFilePath));
+            deserializedSettings =
+                JsonConvert.DeserializeObject<Dictionary<string, dynamic?>>(File.ReadAllText(_configFilePath));
         }
         catch (JsonSerializationException e)
         {
-            throw new JsonSerializationException($"Failed to load config file {_configFilePath}.", e);
+            throw new JsonSerializationException($"Failed to load config file {_configFilePath}: {e.Message}", e);
+        }
+        catch (JsonReaderException e)
+        {
+            throw new JsonReaderException($"Failed to load config file {_configFilePath}: {e.Message}", e);
         }
         
         if (deserializedSettings is null)

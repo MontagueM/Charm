@@ -21,6 +21,10 @@
         <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
         <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
         <PackageReference Include="coverlet.collector" Version="3.1.2" />
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.0.0.68202">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
@@ -29,7 +33,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Arithmic\Arithmic.csproj" />
       <ProjectReference Include="..\Resourcer\Resourcer.csproj" />
+      <ProjectReference Include="..\Schema\Schema.csproj" />
       <ProjectReference Include="..\Tiger\Tiger.csproj" />
     </ItemGroup>
 

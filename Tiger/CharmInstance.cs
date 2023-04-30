@@ -1,13 +1,15 @@
 ﻿using System.Reflection;
 
-namespace Resourcer;
+namespace Tiger;
 
 // Is alive for the entire duration of the program
-public class CharmInstance
+public static class CharmInstance
 {
-    private static Dictionary<string, CharmSubsystem> _subsystems = new();
+    private static Dictionary<string, Subsystem> _subsystems = new();
+    
+    public static CharmArgs Args { get; set; } = new CharmArgs();
 
-    public static bool HasSubsystem<T>() where T : CharmSubsystem
+    public static bool HasSubsystem<T>() where T : Subsystem
     {
         return HasSubsystem(typeof(T));
     }
@@ -17,14 +19,14 @@ public class CharmInstance
         return _subsystems.ContainsKey(type.Name);
     }
     
-    public static T GetSubsystem<T>() where T : CharmSubsystem
+    public static T GetSubsystem<T>() where T : Subsystem
     {
         return (T)GetSubsystem(typeof(T));
     }
     
     public static dynamic? GetSubsystem(Type type)
     {
-        bool found = _subsystems.TryGetValue(type.Name, out CharmSubsystem? subsystem);
+        bool found = _subsystems.TryGetValue(type.Name, out Subsystem? subsystem);
         if (!found)
         {
             subsystem = CreateSubsystem(type);
@@ -37,16 +39,16 @@ public class CharmInstance
         return subsystem;
     }
 
-    private static CharmSubsystem? CreateSubsystem<T>() where T : CharmSubsystem
+    private static Subsystem? CreateSubsystem<T>() where T : Subsystem
     {
         return CreateSubsystem(typeof(T));
     }
     
-    private static CharmSubsystem? CreateSubsystem(Type type)
+    private static Subsystem? CreateSubsystem(Type type)
     {
-        if (type.IsSubclassOf(typeof(CharmSubsystem)))
+        if (type.IsSubclassOf(typeof(Subsystem)))
         {
-            return (CharmSubsystem?) Activator.CreateInstance(type);
+            return (Subsystem?) Activator.CreateInstance(type);
         }
 
         return null;
@@ -58,7 +60,7 @@ public class CharmInstance
         _subsystems.Values.ToList().ForEach(InitialiseSubsystem);
     }
     
-    private static void InitialiseSubsystem(CharmSubsystem subsystem)
+    private static void InitialiseSubsystem(Subsystem subsystem)
     {
         bool initialisedSuccess = subsystem.Initialise();
         if (initialisedSuccess == false)
@@ -68,13 +70,13 @@ public class CharmInstance
         }
     }
 
-    private static Dictionary<string, CharmSubsystem> GetAllSubsystems()
+    private static Dictionary<string, Subsystem> GetAllSubsystems()
     {
         var subsystems = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(s => s.GetTypes())
-            .Where(t => typeof(CharmSubsystem).IsAssignableFrom(t) &&
+            .Where(t => typeof(Subsystem).IsAssignableFrom(t) &&
                         t.Attributes.HasFlag(TypeAttributes.Interface) == false && t.IsAbstract == false);
-        return subsystems.ToDictionary(type => type.Name, type => (CharmSubsystem)GetSubsystem(type));
+        return subsystems.ToDictionary(type => type.Name, type => (Subsystem)GetSubsystem(type));
     }
 
     public static void ClearSubsystems()

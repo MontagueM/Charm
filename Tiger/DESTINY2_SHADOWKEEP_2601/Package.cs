@@ -1,126 +1,183 @@
 ﻿using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace Resourcer;
+namespace Tiger.DESTINY2_SHADOWKEEP_2601;
 
-public struct PackageMetadata
+// todo change PackageHeader into a class and inherit from IPackageHeader, and instead add GetFileEntries() and GetBlockEntries() to IPackage
+
+public interface IPackageHeader
 {
-    public string PackagePath;
-    public string PackageName;
-    public int PackageId;
-    public int PackagePatchId;
-    public uint PackageTimestamp;
-}
-
-public struct FileMetadata
-{
-    public FileHash Hash;
-    public TigerHash Reference;
-    public int Size;
-
-    public FileMetadata(FileHash fileHash, D2FileEntry fileEntry)
-    {
-        Hash = fileHash;
-        Reference = fileEntry.Reference;
-        Size = fileEntry.FileSize;
-    }
-}
-
-public interface IPackage {
-    public string PackagePath { get; }
-
-    PackageMetadata GetPackageMetadata();
-
-    FileMetadata GetFileMetadata(ushort fileId);
-    FileMetadata GetFileMetadata(FileHash fileId);
-
-    byte[] GetFileBytes(FileHash fileId);
-    HashSet<int> GetRequiredPatches();
+    public ushort GetPackageId();
+    public uint GetTimestamp();
+    public ushort GetPatchId();
+    public uint GetFileCount();
+    public List<D2FileEntry> GetFileEntries(TigerReader reader);
+    public List<D2BlockEntry> GetBlockEntries(TigerReader reader);
 }
 
 [StructLayout(LayoutKind.Explicit)]
-public struct D2PackageHeader
+public struct PackageHeaderOld : IPackageHeader
 {
-    [FieldOffset(0x10)]
+    [FieldOffset(0x04)]
     public ushort PackageId;
-    [FieldOffset(0x20)]
+    [FieldOffset(0x10)]
     public uint Timestamp;
-    [FieldOffset(0x30)]
+    [FieldOffset(0x20)]
     public ushort PatchId;
-    [FieldOffset(0x60)]
+    [FieldOffset(0xB4)]
     public uint FileEntryTableCount;
-    [FieldOffset(0x44)]
-    public uint FileEntryTableOffset;
-    [FieldOffset(0x68)]
-    public uint BlockEntryTableCount;
-    [FieldOffset(0x6C)]
-    public uint BlockEntryTableOffset;
-    [FieldOffset(0x78)]
-    public uint ActivityTableCount;
-    [FieldOffset(0x7C)]
-    public uint ActivityTableOffset;
     [FieldOffset(0xB8)]
-    public uint Hash64TableSize;
-    [FieldOffset(0xBC)]
-    public uint Hash64TableOffset;
-};
+    public uint FileEntryTableOffset;
+    [FieldOffset(0xD0)]
+    public uint BlockEntryTableCount;
+    [FieldOffset(0xD4)]
+    public uint BlockEntryTableOffset;
 
-public struct D2FileEntry
-{
-    public TigerHash Reference;
-    public sbyte NumType;
-    public sbyte NumSubType;
-    public int StartingBlockIndex;
-    public int StartingBlockOffset;
-    public int FileSize;
-
-    public D2FileEntry(D2FileEntryBitpacked entryBitpacked)
+    public ushort GetPackageId()
     {
-        // EntryA
-        Reference = new TigerHash(entryBitpacked.Reference);
-
-        // EntryB
-        NumType = (sbyte) ((entryBitpacked.EntryB >> 9) & 0x7F);
-        NumSubType = (sbyte) ((entryBitpacked.EntryB >> 6) & 0x7);
-
-        // EntryC
-        StartingBlockIndex = (int) (entryBitpacked.EntryC & 0x3FFF);
-        StartingBlockOffset = (int) (((entryBitpacked.EntryC >> 14) & 0x3FFF) << 4);
-
-        // EntryD
-        FileSize = (int) ((entryBitpacked.EntryD & 0x3FFFFFF) << 4 | (entryBitpacked.EntryC >> 28) & 0xF);
+        return PackageId;
     }
-};
 
-[StructLayout(LayoutKind.Sequential)]
-public struct D2FileEntryBitpacked
-{
-    public uint Reference;
-    public uint EntryB;
-    public uint EntryC;
-    public uint EntryD;
+    public uint GetTimestamp()
+    {
+        return Timestamp;
+    }
+
+    public ushort GetPatchId()
+    {
+        return PatchId;
+    }
+
+    public uint GetFileCount()
+    {
+        return FileEntryTableCount;
+    }
+
+    public List<D2FileEntry> GetFileEntries(TigerReader reader)
+    {
+        reader.Seek(FileEntryTableOffset, SeekOrigin.Begin);
+
+        List<D2FileEntry> fileEntries = new();
+        int d2FileEntrySize = Marshal.SizeOf<D2FileEntryBitpacked>();
+        for (int i = 0; i < FileEntryTableCount; i++)
+        {
+            D2FileEntryBitpacked fileEntryBitpacked = reader.ReadBytes(d2FileEntrySize).ToType<D2FileEntryBitpacked>();
+            fileEntries.Add(new D2FileEntry(fileEntryBitpacked));
+        }
+
+        return fileEntries;
+    }
+
+    public List<D2BlockEntry> GetBlockEntries(TigerReader reader)
+    {
+        reader.Seek(BlockEntryTableOffset, SeekOrigin.Begin);
+
+        List<D2BlockEntry> blockEntries = new();
+        int d2BlockEntrySize = Marshal.SizeOf<D2BlockEntry>();
+        for (int i = 0; i < BlockEntryTableCount; i++)
+        {
+            D2BlockEntry blockEntry = reader.ReadBytes(d2BlockEntrySize).ToType<D2BlockEntry>();
+            blockEntries.Add(blockEntry);
+        }
+
+        return blockEntries;
+    }
 }
 
-[StructLayout(LayoutKind.Sequential)]
-public unsafe struct D2BlockEntry
+[StructLayout(LayoutKind.Explicit)]
+public struct PackageHeaderNew : IPackageHeader
 {
-    public uint Offset;
-    public uint Size;
+    [FieldOffset(0x04)]
+    public ushort PackageId;
+    [FieldOffset(0x10)]
+    public uint Timestamp;
+    [FieldOffset(0x20)]
     public ushort PatchId;
-    public ushort BitFlag;
-    public fixed byte SHA1[0x14];
-    public fixed byte GCMTag[0x10];
-};
+    [FieldOffset(0xF0)] 
+    public GlobalPointer<ActivityTableData> ActivityTableData;
+    [FieldOffset(0xF8)]
+    public uint ActivityTableDataSize;
+    [FieldOffset(0x110)]
+    public GlobalPointer<PackageTablesData> PackageTablesData;
+    [FieldOffset(0x118)]
+    public uint PackageTablesDataSize;
+    
+    public ushort GetPackageId()
+    {
+        return PackageId;
+    }
 
-public class D2Package : IPackage
+    public uint GetTimestamp()
+    {
+        return Timestamp;
+    }
+
+    public ushort GetPatchId()
+    {
+        return PatchId;
+    }
+
+    public uint GetFileCount()
+    {
+        return (uint) PackageTablesData.Value.FileEntries.Count;
+    }
+
+    public List<D2FileEntry> GetFileEntries(TigerReader reader)
+    {
+        List<D2FileEntry> fileEntries = new();
+        foreach (D2FileEntryBitpacked fileEntryBitpacked in PackageTablesData.Value.FileEntries.Enumerate(reader))
+        {
+            fileEntries.Add(new D2FileEntry(fileEntryBitpacked));
+        }
+
+        return fileEntries;
+    }
+
+    public List<D2BlockEntry> GetBlockEntries(TigerReader reader)
+    {
+        List<D2BlockEntry> blockEntries = new();
+        foreach (D2BlockEntry blockEntry in PackageTablesData.Value.BlockEntries.Enumerate(reader))
+        {
+            blockEntries.Add(blockEntry);
+        }
+
+        return blockEntries;
+    }
+}
+
+[StructLayout(LayoutKind.Explicit)]
+public struct ActivityTableData
+{
+    [FieldOffset(0x00)]
+    public long ThisSize;
+    [FieldOffset(0x10)]
+    public uint ActivityTableCount;
+    [FieldOffset(0x18)]
+    public uint ActivityTableOffset;
+}
+
+[StructLayout(LayoutKind.Explicit)]
+public struct PackageTablesData
+{
+    [FieldOffset(0x00)]
+    public long ThisSize;
+    [FieldOffset(0x10)]
+    public DynamicArray<D2FileEntryBitpacked> FileEntries;
+    [FieldOffset(0x20)]
+    public DynamicArray<D2BlockEntry> BlockEntries;
+}
+
+
+[StrategyClass(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+public class Package : IPackage
 {
     private const int BlockSize = 0x40_000;
     public string PackagePath { get; }
-    private BinaryReader _reader;
-    private D2PackageHeader Header;
+    private TigerReader _reader;
+    private IPackageHeader Header;
     private List<D2FileEntry> FileEntries;
     private List<D2BlockEntry> BlockEntries;
-    private Dictionary<int, BinaryReader> _packageHandles = new();
+    private Dictionary<int, TigerReader> _packageHandles = new();
 
     private static readonly byte[] AesKey0 = { 0xD6, 0x2A, 0xB2, 0xC1, 0x0C, 0xC0, 0x1B, 0xC5, 0x35, 0xDB, 0x7B, 0x86, 0x55, 0xC7, 0xDC,
         0x3B };
@@ -128,113 +185,66 @@ public class D2Package : IPackage
     private static readonly byte[] AesKey1 = { 0x3A, 0x4A, 0x5D, 0x36, 0x73, 0xA6, 0x60, 0x58, 0x7E, 0x63, 0xE6, 0x76, 0xE4, 0x08, 0x92,
         0xB5 };
 
-    [DllImport("oo2core_9_win64.dll", EntryPoint = "OodleLZ_Decompress")]
+    [DllImport("oo2core_3_win64.dll", EntryPoint = "OodleLZ_Decompress")]
     public static extern bool OodleLZ_Decompress(byte[] buffer, int bufferSize, byte[] outputBuffer, int outputBufferSize, int a, int b,
         int c, IntPtr d, IntPtr e, IntPtr f, IntPtr g, IntPtr h, IntPtr i, int threadModule);
 
-    public D2Package(string packagePath)
+    public Package(string packagePath)
     {
-        CheckValidPackagePath(packagePath);
+        IPackage.CheckValidPackagePath(packagePath);
         PackagePath = SanitisePackagePath(packagePath);
         GetReader();
         ReadHeader();
-        ReadFileEntries();
-        ReadBlockEntries();
+        FileEntries = Header.GetFileEntries(_reader);
+        BlockEntries = Header.GetBlockEntries(_reader);
         CloseReader();
-    }
-
-    public static void CheckValidPackagePath(string packagePath)
-    {
-        CheckPackagePathExists(packagePath);
-        CheckPackagePathValidPrefix(packagePath);
-        CheckPackagePathValidExtension(packagePath);
-    }
-
-    private static readonly string PackagePathDoesNotExistMessage = "The package path does not exist: ";
-    private static void CheckPackagePathExists(string packagePath)
-    {
-        if (!File.Exists(packagePath))
-        {
-            throw new FileNotFoundException(PackagePathDoesNotExistMessage + packagePath);
-        }
-    }
-
-    private static readonly string PackagePathInvalidPrefixMessage = "The package path does not have the correct prefix: ";
-    private static void CheckPackagePathValidPrefix(string packagePath)
-    {
-        string prefix = Strategy.GetStrategyPackagePrefix(Strategy.CurrentStrategy);
-        if (!packagePath.Contains(prefix + "_"))
-        {
-            throw new ArgumentException(PackagePathInvalidPrefixMessage + packagePath + ", " + prefix);
-        }
-    }
-
-    private static readonly string PackagePathInvalidExtensionMessage = "The packages directory does not have the extension .pkg.: ";
-    private static void CheckPackagePathValidExtension(string packagePath)
-    {
-        if (!packagePath.EndsWith(".pkg"))
-        {
-            throw new ArgumentException(PackagePathInvalidExtensionMessage + packagePath);
-        }
     }
 
     private static string SanitisePackagePath(string packagePath) { return packagePath.Replace("\\", "/"); }
 
-    private void GetReader() { _reader = new BinaryReader(File.Open(PackagePath, FileMode.Open)); }
+    private void GetReader() { _reader = new TigerReader(File.Open(PackagePath, FileMode.Open, FileAccess.Read, FileShare.Read)); }
 
     private void CloseReader() { _reader.Close(); }
 
     private void ReadHeader()
     {
-        _reader.BaseStream.Seek(0, SeekOrigin.Begin);
-        Header = _reader.ReadBytes(0x100).ToStructure<D2PackageHeader>();
-    }
-
-    private void ReadFileEntries()
-    {
-        _reader.BaseStream.Seek(Header.FileEntryTableOffset, SeekOrigin.Begin);
-
-        FileEntries = new List<D2FileEntry>();
-        int d2FileEntrySize = Marshal.SizeOf<D2FileEntryBitpacked>();
-        for (int i = 0; i < Header.FileEntryTableCount; i++)
+        _reader.Seek(0x8, SeekOrigin.Begin);
+        ulong buildId = _reader.ReadUInt64();
+        bool isNewHeader = buildId >= 17011569960331205102;
+        _reader.Seek(0, SeekOrigin.Begin);
+        // Header = _reader.ReadBytes(0x120).ToType<PackageHeader>();
+        if (isNewHeader)
         {
-            D2FileEntryBitpacked fileEntryBitpacked = _reader.ReadBytes(d2FileEntrySize).ToStructure<D2FileEntryBitpacked>();
-            FileEntries.Add(new D2FileEntry(fileEntryBitpacked));
+            Header = SchemaDeserializer.Get().DeserializeSchema<PackageHeaderNew>(_reader);
+        }
+        else
+        {
+            Header = SchemaDeserializer.Get().DeserializeSchema<PackageHeaderOld>(_reader);
         }
     }
 
-    private void ReadBlockEntries()
-    {
-        _reader.BaseStream.Seek(Header.BlockEntryTableOffset, SeekOrigin.Begin);
 
-        BlockEntries = new List<D2BlockEntry>();
-        int d2BlockEntrySize = Marshal.SizeOf<D2BlockEntry>();
-        for (int i = 0; i < Header.BlockEntryTableCount; i++)
-        {
-            D2BlockEntry blockEntry = _reader.ReadBytes(d2BlockEntrySize).ToStructure<D2BlockEntry>();
-            BlockEntries.Add(blockEntry);
-        }
-    }
 
     public PackageMetadata GetPackageMetadata()
     {
         PackageMetadata packageMetadata = new PackageMetadata();
-        packageMetadata.PackagePath = PackagePath;
-        packageMetadata.PackageName = PackagePath.Split('/').Last();
-        packageMetadata.PackageId = Header.PackageId;
-        packageMetadata.PackagePatchId = Header.PatchId;
-        packageMetadata.PackageTimestamp = Header.Timestamp;
+        packageMetadata.Path = PackagePath;
+        packageMetadata.Name = PackagePath.Split('/').Last();
+        packageMetadata.Id = Header.GetPackageId();
+        packageMetadata.PatchId = Header.GetPatchId();
+        packageMetadata.Timestamp = Header.GetTimestamp();
+        packageMetadata.FileCount = Header.GetFileCount();
         return packageMetadata;
     }
 
     private static readonly string FileMetadataInvalidPackageIdMessage = "The provided file hash has an invalid package id: ";
     public FileMetadata GetFileMetadata(FileHash fileHash)
     {
-        if (fileHash.GetPackageId() != Header.PackageId)
+        if (fileHash.PackageId != Header.GetPackageId())
         {
-            throw new ArgumentException(FileMetadataInvalidPackageIdMessage + fileHash.GetPackageId());
+            throw new ArgumentException(FileMetadataInvalidPackageIdMessage + fileHash.PackageId);
         }
-        return GetFileMetadata(fileHash.GetFileIndex());
+        return GetFileMetadata(fileHash.FileIndex);
     }
 
     private static readonly string FileMetadataFileIndexOutOfRangeMessage = "The provided file hash has an out-of-range file index: ";
@@ -244,7 +254,17 @@ public class D2Package : IPackage
         {
             throw new ArgumentOutOfRangeException(FileMetadataFileIndexOutOfRangeMessage + $"{fileIndex} >= {FileEntries.Count}");
         }
-        return new FileMetadata(new FileHash(Header.PackageId, fileIndex), FileEntries[fileIndex]);
+        return new FileMetadata(new FileHash(Header.GetPackageId(), fileIndex), FileEntries[fileIndex]);
+    }
+    
+    public List<FileMetadata> GetAllFileMetadata()
+    {
+        List<FileMetadata> fileMetadataList = new List<FileMetadata>();
+        for (ushort fileIndex = 0; fileIndex < FileEntries.Count; fileIndex++)
+        {
+            fileMetadataList.Add(GetFileMetadata(fileIndex));
+        }
+        return fileMetadataList;
     }
 
     private List<D2BlockEntry> GetBlockEntries(int blockIndex, int blockCount) { return BlockEntries.GetRange(blockIndex, blockCount); }
@@ -267,7 +287,7 @@ public class D2Package : IPackage
     /// </summary>
     public byte[] GetFileBytes(FileHash fileId)
     {
-        D2FileEntry fileEntry = FileEntries[fileId.GetFileIndex()];
+        D2FileEntry fileEntry = FileEntries[fileId.FileIndex];
         byte[] finalFileBuffer = new byte[fileEntry.FileSize];
         int blockCount = GetBlockCount(fileEntry);
         int currentBufferOffset = 0;
@@ -276,7 +296,7 @@ public class D2Package : IPackage
         List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
         foreach (D2BlockEntry blockEntry in blocks)
         {
-            BinaryReader packageHandle = GetPackageHandle(blockEntry.PatchId);
+            TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId);
 
             byte[] blockBuffer = ReadBlockBuffer(packageHandle, blockEntry);
             blockBuffer = DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
@@ -318,12 +338,12 @@ public class D2Package : IPackage
         return 1 + (int) Math.Floor((double) (fileEntry.StartingBlockOffset + fileEntry.FileSize - 1) / BlockSize);
     }
 
-    private BinaryReader GetPackageHandle(ushort patchId)
+    private TigerReader GetPackageHandle(ushort patchId)
     {
-        if (!_packageHandles.TryGetValue(patchId, out BinaryReader packageHandle))
+        if (!_packageHandles.TryGetValue(patchId, out TigerReader packageHandle))
         {
             packageHandle =
-                new BinaryReader(new FileStream(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read, FileShare.Read));
+                new TigerReader(new FileStream(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read, FileShare.Read));
             _packageHandles.Add(patchId, packageHandle);
         }
         return packageHandle;
@@ -338,9 +358,9 @@ public class D2Package : IPackage
         return Path.Combine(pathWithNoPatchAndExtension + patchId.ToString("D") + ".pkg");
     }
 
-    private byte[] ReadBlockBuffer(BinaryReader packageHandle, D2BlockEntry blockEntry)
+    private byte[] ReadBlockBuffer(TigerReader packageHandle, D2BlockEntry blockEntry)
     {
-        packageHandle.BaseStream.Seek(blockEntry.Offset, SeekOrigin.Begin);
+        packageHandle.Seek(blockEntry.Offset, SeekOrigin.Begin);
         byte[] blockBuffer = packageHandle.ReadBytes((int) blockEntry.Size);
         return blockBuffer;
     }
@@ -372,9 +392,10 @@ public class D2Package : IPackage
 
     private byte[] GenerateNonce()
     {
-        byte[] nonce = { 0x84, 0xEA, 0x11, 0xC0, 0xAC, 0xAB, 0xFA, 0x20, 0x33, 0x11, 0x26, 0x99 };
-        nonce[0] ^= (byte) ((Header.PackageId >> 8) & 0xFF);
-        nonce[11] ^= (byte) (Header.PackageId & 0xFF);
+        byte[] nonce = { 0x84, 0xDF, 0x11, 0xC0, 0xAC, 0xAB, 0xFA, 0x20, 0x33, 0x11, 0x26, 0x99, };
+        nonce[0] ^= (byte) ((Header.GetPackageId() >> 8) & 0xFF);
+        nonce[1] ^= 0x26;
+        nonce[11] ^= (byte) (Header.GetPackageId() & 0xFF);
         return nonce;
     }
 

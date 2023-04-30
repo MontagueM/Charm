@@ -29,10 +29,15 @@
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.18" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="9.0.0.68202">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Interop\Interop.csproj" />
       <ProjectReference Include="..\Resourcer\Resourcer.csproj" />
     </ItemGroup>
 </Project>

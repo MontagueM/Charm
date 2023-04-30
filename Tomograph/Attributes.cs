@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Resourcer;
+using Tiger;
 
 namespace Tomograph;
 
@@ -72,6 +72,49 @@ public class ExpectedExceptionWithMessageAttribute : ExpectedExceptionBaseAttrib
         ExceptionType = exceptionType;
         ExpectedMessage = expectedMessage;
     }
+    
+    private static List<string> GetMessageParts(string message)
+    {
+        List<string> parts = new();
+        int partStart = 0;
+        bool inFormat = false;
+        for (int i = 0; i < message.Length; i++)
+        {
+            char c = message[i];
+            if (c == '{')
+            {
+                if (inFormat)
+                {
+                    throw new ArgumentException("Invalid message format.");
+                }
+                inFormat = true;
+                parts.Add(message.Substring(partStart, i - partStart));
+            }
+            else if (c == '}')
+            {
+                if (!inFormat)
+                {
+                    throw new ArgumentException("Invalid message format.");
+                }
+                inFormat = false;
+                partStart = i + 1;
+            }
+            if (i == message.Length - 1)
+            {
+                if (inFormat)
+                {
+                    throw new ArgumentException("Invalid message format.");
+                }
+                parts.Add(message.Substring(partStart));
+            }
+        }
+        if (inFormat)
+        {
+            throw new ArgumentException("Invalid message format.");
+        }
+
+        return parts;
+    }
 
     protected override void Verify(Exception e)
     {
@@ -82,6 +125,23 @@ public class ExpectedExceptionWithMessageAttribute : ExpectedExceptionBaseAttrib
         }
 
         var actualMessage = e.Message.Trim();
-        StringAssert.Contains(actualMessage, ExpectedMessage);
+
+        AssertEqualFormattedMessages(ExpectedMessage, actualMessage);
+    }
+
+    private static void AssertEqualFormattedMessages(string expectedMessage, string actualMessage)
+    {
+        // get the message parts for expectedMessage and check the parts exist sequentially in actualMessage
+        List<string> expectedMessageParts = GetMessageParts(expectedMessage);
+        int actualMessageIndex = 0;
+        foreach (string expectedMessagePart in expectedMessageParts)
+        {
+            actualMessageIndex = actualMessage.IndexOf(expectedMessagePart, actualMessageIndex);
+            if (actualMessageIndex == -1)
+            {
+                Assert.Fail($"Expected exception message: {expectedMessage}. Actual exception message: {actualMessage}");
+            }
+            actualMessageIndex += expectedMessagePart.Length;
+        }
     }
 }
