@@ -26,15 +26,21 @@ public class TigerReader : BinaryReader
         t.Deserialize(this);
         return t;
     }
+
+    public void DumpToFile()
+    {
+        long pos = Position;
+        Seek(0, SeekOrigin.Begin);
+        byte[] data = ReadBytes((int)BaseStream.Length);
+        File.WriteAllBytes("dump.bin", data);
+        Seek(pos, SeekOrigin.Begin);
+    }
 }
 
 public interface ITigerDeserialize
 {
     public void Deserialize(TigerReader reader);
 }
-
-
-
 
 [SchemaType(0x10)]
 public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
@@ -65,6 +71,16 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
         {
             yield return ReadElement(reader, i);
         }
+    }
+
+    public IEnumerable<TResult> Select<TResult>(TigerReader reader, Func<T, TResult> selector)
+    {
+        return Enumerate(reader).Select(selector);
+    }
+
+    public IEnumerable<TResult> Select<TResult>(TigerReader reader, Func<T, int, TResult> selector)
+    {
+        return Enumerate(reader).Select(selector);
     }
 
     // public new T this[int index]

@@ -15,24 +15,29 @@ public static class ResourcerStrategyExtensions
 
     private static void FillPackageTypes()
     {
-        _strategyPackageTypes = new Dictionary<TigerStrategy, Type>();
+        _strategyPackageTypes = GetPackageTypesMap();
+        _strategyPackageTypes.GetFullStrategyMap();
 
-        var types = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(s => s.GetTypes())
-            .Where(t => t.ImplementsIPackage());
-
-        foreach (Type type in types)
-        {
-            HashSet<TigerStrategy> typeStrategies = GetStrategiesFromType(type);
-            foreach (TigerStrategy strategyValue in typeStrategies)
-            {
-                if (_strategyPackageTypes.TryGetValue(strategyValue, out var packageType))
-                {
-                    throw new Exception($"Multiple package types found for strategy {strategyValue}: {packageType} and {type}");
-                }
-                _strategyPackageTypes.Add(strategyValue, type);
-            }
-        }
+        // Type? packageType = null;
+        // foreach (TigerStrategy strategy in Enum.GetValues(typeof(TigerStrategy)).Cast<TigerStrategy>())
+        // {
+        //     if (strategy == TigerStrategy.NONE)
+        //     {
+        //         continue;
+        //     }
+        //
+        //     if (typeMap.TryGetValue(strategy, out Type outPackageType))
+        //     {
+        //         packageType = outPackageType;
+        //     }
+        //
+        //     if (packageType == null)
+        //     {
+        //         throw new Exception($"No package type found for strategy {strategy}");
+        //     }
+        //
+        //     _strategyPackageTypes.Add(strategy, packageType);
+        // }
     }
 
     private static bool ImplementsIPackage(this Type classType)
@@ -40,27 +45,56 @@ public static class ResourcerStrategyExtensions
         return classType.FindInterfaces((type, _) => type == typeof(IPackage), null).Length > 0;
     }
 
-    private static HashSet<TigerStrategy> GetStrategiesFromType(Type type)
+    private static Dictionary<TigerStrategy, Type> GetPackageTypesMap()
     {
-        HashSet<TigerStrategy> strategies = new HashSet<TigerStrategy>();
+        Dictionary<TigerStrategy, Type> packageTypesMap = new();
 
-        GetStrategyFromNamespace(type, ref strategies);
+        var packageTypes = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(s => s.GetTypes())
+            .Where(t => t.ImplementsIPackage());
 
-        type.GetCustomAttributes(typeof(StrategyClassAttribute), true)
-            .Select(x => ((StrategyClassAttribute)x).Strategy)
-            .ToList().ForEach(x => strategies.Add(x));
+        foreach (Type packageType in packageTypes)
+        {
+            IEnumerable<TigerStrategy> strategies = packageType
+                .GetCustomAttributes(typeof(StrategyClassAttribute), true)
+                .Select(x => ((StrategyClassAttribute)x).Strategy);
+            foreach (TigerStrategy strategy in strategies)
+            {
+                if (packageTypesMap.TryGetValue(strategy, out var existingPackageType))
+                {
+                    throw new Exception($"Multiple package types found for strategy {strategy}: {existingPackageType} and {packageType}");
+                }
 
-        return strategies;
+                packageTypesMap.Add(strategy, packageType);
+            }
+        }
+
+        return packageTypesMap;
     }
 
-    private static void GetStrategyFromNamespace(Type type, ref HashSet<TigerStrategy> strategies)
+    // Takes a map partially filled with TigerStrategy keys and fills it with all other TigerStrategy keys
+    // Assumes if it's missing, we take the value of the strategy before it
+    public static void GetFullStrategyMap<TValue>(this IDictionary<TigerStrategy, TValue> dict)
     {
-        string? typeNamespaceStrategy = type.Namespace?.Split('.').Last();
-        if (typeNamespaceStrategy != null)
+        TValue? value = default;
+        foreach (TigerStrategy strategy in Enum.GetValues(typeof(TigerStrategy)).Cast<TigerStrategy>())
         {
-            if (Enum.TryParse(typeNamespaceStrategy, out TigerStrategy strategy))
+            if (strategy == TigerStrategy.NONE)
             {
-                strategies.Add(strategy);
+                continue;
+            }
+
+            if (dict.TryGetValue(strategy, out TValue outValue))
+            {
+                value = outValue;
+            }
+            else
+            {
+                if (value == null || value.Equals(default))
+                {
+                    throw new Exception($"No type found for strategy {strategy}");
+                }
+                dict.Add(strategy, value);
             }
         }
     }

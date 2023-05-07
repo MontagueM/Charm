@@ -26,7 +26,7 @@ public class DepotDownloader
         Directory.CreateDirectory(outputDirectory);
         string depotDownloaderDirectory = Path.Join("../../../", "DepotDownloader");
         string fileListName = $"{meaningfulOutputName}_filelist.txt";
-        await File.WriteAllLinesAsync(Path.Combine(depotDownloaderDirectory, fileListName), fileList);
+        File.WriteAllLines(Path.Combine(depotDownloaderDirectory, fileListName), fileList);
         List<string> arguments = new List<string>
         {
             " DepotDownloader.dll",
@@ -45,28 +45,40 @@ public class DepotDownloader
             throw new FileNotFoundException($"DepotDownloader.dll does not exist in {depotDownloaderDirectory}");
         }
 
-        await RunProcessAsync("dotnet", depotDownloaderDirectory, arguments);
+        RunProcessAsync("dotnet", depotDownloaderDirectory, arguments);
+        Console.WriteLine($"Finished downloading {meaningfulOutputName} test data.");
     }
 
-    static Task<int> RunProcessAsync(string fileName, string workingDirectory, List<string> argumentList)
+    static void RunProcessAsync(string fileName, string workingDirectory, List<string> argumentList)
     {
-        var tcs = new TaskCompletionSource<int>();
-
         var process = new Process
         {
-            StartInfo = { FileName = fileName, Arguments = string.Join(" ", argumentList), WorkingDirectory = workingDirectory },
+            StartInfo =
+            {
+                FileName = fileName,
+                Arguments = string.Join(" ", argumentList),
+                WorkingDirectory = workingDirectory,
+                UseShellExecute = false,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+
+            },
             EnableRaisingEvents = true
         };
 
-        process.Exited += (sender, args) =>
+        process.OutputDataReceived += (s, e) =>
         {
-            tcs.SetResult(process.ExitCode);
-            process.Dispose();
+            if (e.Data != null)
+            {
+                Console.WriteLine(e.Data);
+            }
         };
 
         process.Start();
-
-        return tcs.Task;
+        process.BeginOutputReadLine();
+        process.WaitForExit();
     }
 
     public void SetCredentials(string username, string password)

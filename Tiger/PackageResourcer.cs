@@ -9,7 +9,7 @@ namespace Tiger;
 public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 {
     private PackagePathsCache? _packagePathsCache = null;
-    private readonly Dictionary<ushort, Package> _packagesCache = new Dictionary<ushort, Package>();
+    private readonly ConcurrentDictionary<ushort, Package> _packagesCache = new();
     public string PackagesDirectory { get; }
 
     public PackageResourcer(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)

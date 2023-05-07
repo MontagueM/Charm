@@ -5,22 +5,22 @@ namespace Tiger.DESTINY2_SHADOWKEEP_2601;
 
 // todo change PackageHeader into a class and inherit from IPackageHeader, and instead add GetFileEntries() and GetBlockEntries() to IPackage
 
-[StructLayout(LayoutKind.Explicit)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0xD8)]
 public struct PackageHeaderOld : IPackageHeader
 {
-    [FieldOffset(0x04)]
+    [SchemaField(0x04)]
     public ushort PackageId;
-    [FieldOffset(0x10)]
+    [SchemaField(0x10)]
     public uint Timestamp;
-    [FieldOffset(0x20)]
+    [SchemaField(0x20)]
     public ushort PatchId;
-    [FieldOffset(0xB4)]
+    [SchemaField(0xB4)]
     public uint FileEntryTableCount;
-    [FieldOffset(0xB8)]
+    [SchemaField(0xB8)]
     public uint FileEntryTableOffset;
-    [FieldOffset(0xD0)]
+    [SchemaField(0xD0)]
     public uint BlockEntryTableCount;
-    [FieldOffset(0xD4)]
+    [SchemaField(0xD4)]
     public uint BlockEntryTableOffset;
 
     public ushort GetPackageId()
@@ -74,22 +74,22 @@ public struct PackageHeaderOld : IPackageHeader
     }
 }
 
-[StructLayout(LayoutKind.Explicit)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x120)]
 public struct PackageHeaderNew : IPackageHeader
 {
-    [FieldOffset(0x04)]
+    [SchemaField(0x04)]
     public ushort PackageId;
-    [FieldOffset(0x10)]
+    [SchemaField(0x10)]
     public uint Timestamp;
-    [FieldOffset(0x20)]
+    [SchemaField(0x20)]
     public ushort PatchId;
-    [FieldOffset(0xF0)]
+    [SchemaField(0xF0)]
     public GlobalPointer<ActivityTableData> ActivityTableData;
-    [FieldOffset(0xF8)]
+    [SchemaField(0xF8)]
     public uint ActivityTableDataSize;
-    [FieldOffset(0x110)]
+    [SchemaField(0x110)]
     public GlobalPointer<PackageTablesData> PackageTablesData;
-    [FieldOffset(0x118)]
+    [SchemaField(0x118)]
     public uint PackageTablesDataSize;
 
     public ushort GetPackageId()
@@ -135,25 +135,25 @@ public struct PackageHeaderNew : IPackageHeader
     }
 }
 
-[StructLayout(LayoutKind.Explicit)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x20)]
 public struct ActivityTableData
 {
-    [FieldOffset(0x00)]
+    [SchemaField(0x00)]
     public long ThisSize;
-    [FieldOffset(0x10)]
+    [SchemaField(0x10)]
     public uint ActivityTableCount;
-    [FieldOffset(0x18)]
+    [SchemaField(0x18)]
     public uint ActivityTableOffset;
 }
 
-[StructLayout(LayoutKind.Explicit)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x30)]
 public struct PackageTablesData
 {
-    [FieldOffset(0x00)]
+    [SchemaField(0x00)]
     public long ThisSize;
-    [FieldOffset(0x10)]
+    [SchemaField(0x10)]
     public DynamicArray<D2FileEntryBitpacked> FileEntries;
-    [FieldOffset(0x20)]
+    [SchemaField(0x20)]
     public DynamicArray<D2BlockEntry> BlockEntries;
 }
 

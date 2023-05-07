@@ -43,6 +43,12 @@ public class SchemaStructAttribute : StrategyAttribute
         SerializedSize = serializedSize;
     }
 
+    public SchemaStructAttribute(TigerStrategy strategy, int serializedSize) : base(strategy)
+    {
+        ClassHash = "FFFFFFFF";
+        SerializedSize = serializedSize;
+    }
+
     public SchemaStructAttribute(TigerStrategy strategy, string classHash, int serializedSize) : base(strategy)
     {
         ClassHash = classHash;

@@ -1,4 +1,4 @@
-﻿using Schema;
+﻿using Tiger.Schema;
 using Tiger;
 
 namespace Tomograph;
@@ -66,16 +66,21 @@ public class D2WQ_LocalizedStringsTests : ILocalizedTextTests
 }
 
 [TestClass, TestCategory("DESTINY2_SHADOWKEEP_2601"), TestStrategy(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-public class D2SK_LocalizedStringTests : ILocalizedTextTests
+public class D2SK_LocalizedStringsTests : ILocalizedTextTests
 {
+    // required to be able to do SaveStringsDatabaseCommandlet
+    private static readonly TestPackage p01df = new("w64_audio_01df_3.pkg", 1567664786);
+
     [TestInitialize]
     public void Initialize()
     {
+        TestPackage.TestPackageStrategy = TigerStrategy.DESTINY2_SHADOWKEEP_2601;
         Strategy.Reset();
         CharmInstance.ClearSubsystems();
         ConfigSubsystem config = new ConfigSubsystem("../../../../Tomograph/TestData/valid_test_config.json");
         Helpers.CallNonPublicMethod(config, "Initialise");
         Strategy.SetStrategy(TigerStrategy.DESTINY2_SHADOWKEEP_2601);
+        TestDataSystem.VerifyTestData(GetType());
     }
 
     [TestCleanup]
@@ -107,6 +112,18 @@ public class D2SK_LocalizedStringTests : ILocalizedTextTests
         string noPartsStringHash = "DDBADEED";
         TigerString noPartsString = strings.GetStringFromHash(new StringHash(noPartsStringHash));
         Assert.AreEqual("", noPartsString.RawValue);
+    }
+
+    [TestMethod]
+    public void GetStrings_NonUtf8()
+    {
+        string fileHash = "67F8B480";
+        LocalizedStrings strings = FileResourcer.Get().GetTag<LocalizedStrings>(fileHash);
+        Assert.IsNotNull(strings);
+
+        string emdashStringHash = "043568E7";
+        TigerString emdashString = strings.GetStringFromHash(new StringHash(emdashStringHash));
+        Assert.AreEqual("Welcome back. This time I did make tea for you—but I seem to have drunk it all. Perhaps if you were a mite quicker. Heh.", emdashString.RawValue);
     }
 
     [TestMethod, ExpectedExceptionWithMessage(typeof(Exception), "Could not find string with hash FFFFFFFF")]

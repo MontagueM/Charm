@@ -2,7 +2,19 @@
 using System.Reflection;
 using Tiger;
 
-namespace Interop;
+namespace Tiger.Exporters;
+
+public struct SQLHandle
+{
+    public SQLiteConnection Connection { get; }
+    public SQLiteTransaction Transaction { get; }
+
+    public SQLHandle(SQLiteConnection connection, SQLiteTransaction transaction)
+    {
+        Connection = connection;
+        Transaction = transaction;
+    }
+}
 
 public struct SQLColumn
 {
@@ -19,6 +31,7 @@ public struct SQLColumn
         {typeof(string), "TEXT"},
         {typeof(FileHash), "TEXT"},
         {typeof(TigerHash), "TEXT"},
+        {typeof(StringHash), "TEXT"},
     };
 
     public SQLColumn(FieldInfo field)
@@ -65,14 +78,13 @@ public struct SQLTable<T> where T : struct
         }
     }
 
-    public void InsertValues(SQLiteConnection connection, List<T> valuesList)
+    public void InsertValues(SQLHandle handle, IEnumerable<T> valuesList)
     {
         string columns = string.Join(", ", Columns.Select(c => c.Name));
         string values = string.Join(", ", Columns.Select(c => "?"));
-        using (SQLiteCommand command = new SQLiteCommand($"INSERT INTO {TableName} ({columns}) VALUES ({values})", connection))
+        using (SQLiteCommand command = new($"INSERT INTO {TableName} ({columns}) VALUES ({values})", handle.Connection))
         {
-            SQLiteTransaction transaction = connection.BeginTransaction();
-            command.Transaction = transaction;
+            command.Transaction = handle.Transaction;
             foreach (T valuesObj in valuesList)
             {
                 foreach (SQLColumn col in Columns)
@@ -81,24 +93,21 @@ public struct SQLTable<T> where T : struct
                 }
                 command.ExecuteNonQuery();
             }
-            transaction.Commit();
         }
     }
 
-    public void InsertValues(SQLiteConnection connection, T valuesObj)
+    public void InsertValues(SQLHandle handle, T valuesObj)
     {
         string columns = string.Join(", ", Columns.Select(c => c.Name));
         string values = string.Join(", ", Columns.Select(c => "?"));
-        using (SQLiteCommand command = new SQLiteCommand($"INSERT INTO {TableName} ({columns}) VALUES ({values})", connection))
+        using (SQLiteCommand command = new SQLiteCommand($"INSERT INTO {TableName} ({columns}) VALUES ({values})", handle.Connection))
         {
-            SQLiteTransaction transaction = connection.BeginTransaction();
-            command.Transaction = transaction;
+            command.Transaction = handle.Transaction;
             foreach (SQLColumn col in Columns)
             {
                 command.Parameters.AddWithValue($"@{col.Name}", col.Field.GetValue(valuesObj));
             }
             command.ExecuteNonQuery();
-            transaction.Commit();
         }
     }
 }

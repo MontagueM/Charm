@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Tiger;
 using Tomograph;
 using TomographData;
@@ -6,22 +7,24 @@ using TomographData;
 public class Program
 {
     private static DepotDownloader depotDownloader = new DepotDownloader();
+    private static Dictionary<TigerStrategy, List<string>> fileLists = new();
+    private static List<Type> testTypes = new();
 
-    public static int Main(string[] args)
+    public static async Task Main(string[] args)
     {
         SetDepotDownloaderCredentials(args);
 
-        var charmTestsType = typeof(CharmPackageTests);
         var types = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(s => s.GetTypes())
-            .Where(p => charmTestsType.IsAssignableFrom(p));
+            .Where(a => a.FullName.StartsWith("Tomograph"))
+            .SelectMany(s => s.GetTypes());
+
 
         foreach (Type type in types)
         {
             TestStrategyAttribute? attribute = (TestStrategyAttribute)type.GetCustomAttribute(typeof(TestStrategyAttribute), false);
             if (attribute == null)
             {
-                Console.WriteLine($"TestClass {type} has no TestStrategyAttribute, skipping test data initialization.");
+                Debug.WriteLine($"TestClass {type} has no TestStrategyAttribute, skipping test data initialization.");
                 continue;
             }
             StrategyMetadataAttribute strategyMetadata = attribute.Strategy.GetStrategyMetadata();
@@ -32,10 +35,31 @@ public class Program
                 continue;
             }
 
-            GetTestData(type, attribute.Strategy, strategyMetadata);
+            Console.WriteLine($"Getting test data for strategy '{attribute.Strategy}' and type {type}.");
+            List<string> fileList = GetTestData(type, attribute.Strategy, strategyMetadata);
+            if (!fileLists.ContainsKey(attribute.Strategy))
+            {
+                fileLists.Add(attribute.Strategy, new List<string>());
+            }
+            fileLists[attribute.Strategy].AddRange(fileList);
+            testTypes.Add(type);
         }
 
-        return 0;
+        await Task.Run(Download);
+    }
+
+    private static async void Download()
+    {
+        foreach ((TigerStrategy strategy, List<string> fileList) in fileLists)
+        {
+            StrategyMetadataAttribute strategyMetadata = strategy.GetStrategyMetadata();
+            await depotDownloader.Download(strategyMetadata.DepotManifestVersionMain.Value, strategy.ToString(), fileList);
+        }
+
+        foreach (Type testType in testTypes)
+        {
+            TestDataSystem.VerifyTestData(testType);
+        }
     }
 
     private static void SetDepotDownloaderCredentials(string[] args)
@@ -43,14 +67,16 @@ public class Program
         depotDownloader.SetCredentials(args[0], args[1]);
     }
 
-    public static async void GetTestData(Type testClassType, TigerStrategy strategy, StrategyMetadataAttribute strategyMetadata)
+    public static List<string> GetTestData(Type testClassType, TigerStrategy strategy, StrategyMetadataAttribute strategyMetadata)
     {
         List<TestPackage> testPackages = TestDataSystem.EnumerateTestPackagesFromClass(testClassType).ToList();
+        if (testPackages.Count == 0)
+        {
+            Console.WriteLine($"No test packages in {testClassType}");
+            return new List<string>();
+        }
         HashSet<string> allPackagePaths = GetRequiredPatches(testPackages, strategy);
-        List<string> fileList = allPackagePaths.Select(x => Path.Join("packages", x)).ToList();
-        await depotDownloader.Download(strategyMetadata.DepotManifestVersionMain.Value, strategy.ToString(), fileList);
-
-        TestDataSystem.VerifyTestData(testClassType);
+        return allPackagePaths.Select(x => Path.Join("packages", x)).ToList();
     }
 
     // We might only want a couple of the packages to test, but we'll still need patches in-between to get the data.

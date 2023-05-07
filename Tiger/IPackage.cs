@@ -87,7 +87,15 @@ public abstract class Package : IPackage
 
         SchemaStructAttribute attribute = GetAttribute<SchemaStructAttribute>(typeof(T).BaseType.GenericTypeArguments[0]);
         TigerHash referenceHash = new(attribute.ClassHash);
-        // T tag = FileResourcer.Get().GetTag<T>(fileHash);
+
+        for (int i = 0; i < FileEntries.Count; i++)
+        {
+            if (FileEntries[i].Reference.Equals(referenceHash))
+            {
+                T tag = FileResourcer.Get().GetTag<T>(new FileHash(Header.GetPackageId(), (uint)i));
+                tags.Add(tag);
+            }
+        }
 
         return tags;
     }
