@@ -103,4 +103,9 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         }
         return tags;
     }
+
+    public FileMetadata GetFileMetadata(FileHash fileHash)
+    {
+        return GetPackage(fileHash.PackageId).GetFileMetadata(fileHash);
+    }
 }

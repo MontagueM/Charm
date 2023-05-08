@@ -12,7 +12,7 @@ public interface IHash
 /// Represents string that has been hashed via the FNV1-32 algorithm.
 /// </summary>
 [SchemaType(0x04)]
-public class StringHash : TigerHash, ITigerDeserialize
+public class StringHash : TigerHash
 {
     public const uint InvalidHash32 = 0x811c9dc5;
 
@@ -88,10 +88,17 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
         return Hash32 != InvalidHash32 && Hash32 != 0;
     }
 
+    public bool IsInvalid()
+    {
+        return !IsValid();
+    }
+
     public override string ToString()
     {
         return Endian.U32ToString(Hash32);
     }
+
+    public static implicit operator string(TigerHash hash) => hash.ToString();
 
     public virtual void Deserialize(TigerReader reader)
     {
@@ -127,6 +134,19 @@ public class FileHash : TigerHash
     public ushort FileIndex => (ushort)(Hash32 & 0x1fff);
 }
 
+public static class FileHashExtensions
+{
+    public static FileHash GetReferenceHash(this FileHash fileHash)
+    {
+        return new FileHash(fileHash.GetFileMetadata().Reference.Hash32);
+    }
+
+    public static FileMetadata GetFileMetadata(this FileHash fileHash)
+    {
+        return PackageResourcer.Get().GetFileMetadata(fileHash);
+    }
+}
+
 /// <summary>
 /// Same as FileHash, but represents a 64-bit version that is used as a hard reference to a tag. Helps to keep
 /// files more similar as FileHash's can change, but the 64-bit version will always be the same.
@@ -135,7 +155,6 @@ public class FileHash : TigerHash
 public class File64Hash : FileHash
 {
     private ulong Hash64 { get; set; }
-    private const ulong InvalidHash64 = 0xFFFFFFFF_FFFFFFFF;
     private bool IsHash32 { get; set; }
 
     public File64Hash(ulong hash64) : base(GetHash32(hash64))
@@ -149,7 +168,7 @@ public class File64Hash : FileHash
         return Hash32 != InvalidHash32 && Hash32 != 0;
     }
 
-    private static uint GetHash32(ulong hash64)
+    private static uint GetHash32()
     {
         throw new NotImplementedException();
         return InvalidHash32;

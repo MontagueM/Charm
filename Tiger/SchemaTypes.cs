@@ -1,4 +1,6 @@
-﻿namespace Tiger;
+﻿using Arithmic;
+
+namespace Tiger;
 
 // could just be BinaryReader extensions but I like renaming it and bundling the changes together
 public class TigerReader : BinaryReader
@@ -18,6 +20,11 @@ public class TigerReader : BinaryReader
     public T ReadSchemaStruct<T>() where T : struct
     {
         return SchemaDeserializer.Get().DeserializeSchema<T>(this);
+    }
+
+    public dynamic ReadSchemaStruct(Type type)
+    {
+        return SchemaDeserializer.Get().DeserializeSchema(this, type);
     }
 
     public T ReadSchemaType<T>() where T : ITigerDeserialize, new()
@@ -167,9 +174,9 @@ public class RelativePointer : ITigerDeserialize
 {
     public long AbsoluteOffset => _basePosition + _relativeOffset + _extraOffset;
 
-    private long _basePosition;
-    private long _relativeOffset;
-    private long _extraOffset;
+    protected long _basePosition;
+    protected long _relativeOffset;
+    protected long _extraOffset;
 
     public virtual void Deserialize(TigerReader reader)
     {
@@ -194,5 +201,33 @@ public class GlobalPointer<T> : ITigerDeserialize where T : struct
         AbsoluteOffset = reader.ReadInt32();
         reader.Seek(AbsoluteOffset, SeekOrigin.Begin);
         Value = reader.ReadSchemaStruct<T>();
+    }
+}
+
+public class ResourcePointer : RelativePointer
+{
+    public dynamic? Value;
+
+    public override void Deserialize(TigerReader reader)
+    {
+        base.Deserialize(reader);
+
+        if (_relativeOffset == 0)
+        {
+            Value = null;
+            return;
+        }
+
+        reader.Seek(AbsoluteOffset - 4, SeekOrigin.Begin);
+        uint resourceClassHash = reader.ReadUInt32();
+
+        if (SchemaDeserializer.Get().TryGetSchemaType(resourceClassHash, out Type schemaType))
+        {
+            Value = reader.ReadSchemaStruct(schemaType);
+        }
+        else
+        {
+            Log.Warning($"Unknown resource class hash {resourceClassHash:X8}");
+        }
     }
 }

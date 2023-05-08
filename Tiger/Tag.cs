@@ -8,15 +8,29 @@ using Tiger;
 
 namespace Tiger;
 
-[SchemaType(0x04)]
 public class Tag<T> : TigerFile where T : struct
 {
     protected T _tag;
+    // separated as it should be a red flag if we're using this
+    public T TagData => _tag;
 
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash reference
     public Tag(FileHash tagHash, bool shouldParse = true) : base(tagHash)
     {
-        if (tagHash.IsValid() && shouldParse)
+        if (shouldParse)
+        {
+            Initialise(tagHash);
+        }
+    }
+
+    public Tag(FileHash tagHash) : base(tagHash)
+    {
+        Initialise(tagHash);
+    }
+
+    private void Initialise(FileHash tagHash)
+    {
+        if (tagHash.IsValid())
         {
             Deserialize();
         }

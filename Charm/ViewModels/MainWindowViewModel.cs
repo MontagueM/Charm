@@ -12,7 +12,7 @@ public class MainWindowViewModel : ViewModelBase
 {
     public ICommand ExportMapToAtlas { get; }
     public ReactiveCommand<Unit, Unit> OpenHash { get; }
-    public string Hash { get; set; } = "A405A080";
+    public string Hash { get; set; } = "C5E3B080";
 
     public MainWindowViewModel()
     {
@@ -23,7 +23,7 @@ public class MainWindowViewModel : ViewModelBase
 
         OpenHash = ReactiveCommand.CreateFromTask(async () =>
         {
-            Strategy.SetStrategy(TigerStrategy.DESTINY2_SHADOWKEEP_2601);
+            Strategy.SetStrategy(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
             var x = PackageResourcer.Get();
             byte[] data = PackageResourcer.Get().GetFileData(new FileHash(Hash));
             string tempFilePath = $"./TempFiles/{Hash}.bin";

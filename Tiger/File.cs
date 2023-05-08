@@ -8,6 +8,7 @@
 /// We store the data in this file instead of in PackageHandler BytesCache as we expect one DestinyFile to be made
 /// per tag, never more (as long as PackageHandler GetTag is used).
 /// </summary>
+[SchemaType(0x4)]
 public class TigerFile
 {
     public FileHash Hash;
@@ -36,5 +37,55 @@ public class TigerFile
         }
 
         return _data;
+    }
+}
+
+public class TigerReferenceFile<THeader> : Tag<THeader> where THeader : struct
+{
+    protected FileHash ReferenceHash;
+
+    public TigerReferenceFile(FileHash fileHash) : base(fileHash)
+    {
+        ReferenceHash = fileHash.GetReferenceHash();
+    }
+
+    public TigerReader GetReferenceReader()
+    {
+        return new TigerReader(GetReferenceStream());
+    }
+
+    public MemoryStream GetReferenceStream()
+    {
+        return new MemoryStream(GetReferenceData());
+    }
+
+    public byte[] GetReferenceData()
+    {
+        return PackageResourcer.Get().GetFileData(ReferenceHash);
+    }
+}
+
+public class TigerReferenceFile64<THeader> : Tag64<THeader> where THeader : struct
+{
+    protected FileHash ReferenceHash;
+
+    public TigerReferenceFile64(FileHash fileHash) : base(fileHash)
+    {
+        ReferenceHash = fileHash.GetReferenceHash();
+    }
+
+    public TigerReader GetReferenceReader()
+    {
+        return new TigerReader(GetReferenceStream());
+    }
+
+    public MemoryStream GetReferenceStream()
+    {
+        return new MemoryStream(GetReferenceData());
+    }
+
+    public byte[] GetReferenceData()
+    {
+        return PackageResourcer.Get().GetFileData(ReferenceHash);
     }
 }

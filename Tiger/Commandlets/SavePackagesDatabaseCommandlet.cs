@@ -6,12 +6,31 @@ using Tiger.Exporters;
 
 namespace Tiger.Commandlets;
 
+public struct FileMetadataView
+{
+    public string PackageName;
+    public FileHash Hash;
+    public TigerHash Reference;
+    public int Size;
+    public sbyte Type;
+    public sbyte SubType;
+
+    public FileMetadataView(FileMetadata fileMetadata, string packageName)
+    {
+        PackageName = packageName;
+        Hash = fileMetadata.Hash;
+        Reference = fileMetadata.Reference;
+        Size = fileMetadata.Size;
+        Type = fileMetadata.Type;
+        SubType = fileMetadata.SubType;
+    }
+}
+
 public class SavePackagesDatabaseCommandlet : ICommandlet
 {
     private static string _databasePath = $"./PackageDatabases/{Strategy.CurrentStrategy}.db";
     private static string _connectionString = $"Data Source=\"{_databasePath}\";Version=3;";
 
-    private static SQLTable<PackageMetadata> _packageMetadataTable = new();
 
     private static ConcurrentDictionary<ushort, PackageMetadata> _packageMetadata = new();
     private static ConcurrentDictionary<ushort, List<FileMetadata>> _fileMetadata = new();
@@ -34,15 +53,21 @@ public class SavePackagesDatabaseCommandlet : ICommandlet
             SQLiteTransaction transaction = connection.BeginTransaction();
             SQLHandle handle = new(connection, transaction);
             // Add package metadata table to the database
+
+            SQLTable<PackageMetadata> _packageMetadataTable = new();
             _packageMetadataTable.CreateTable(connection);
             _packageMetadataTable.InsertValues(handle, _packageMetadata.Values);
 
+            SQLTable<FileMetadataView> _allFileMetadataTable = new();
+            _allFileMetadataTable.CreateTable(connection);
+
             foreach ((ushort key, List<FileMetadata> value) in _fileMetadata)
             {
-                SQLTable<FileMetadata> fileMetadataTable = new(_packageMetadata[key].Name.Split('.')[0]);
-                // Add file metadata to the database
-                fileMetadataTable.CreateTable(connection);
-                fileMetadataTable.InsertValues(handle, value);
+                _allFileMetadataTable.InsertValues(handle, value.Select(fileMetadata => new FileMetadataView(fileMetadata, _packageMetadata[key].Name)).ToList());
+                // SQLTable<FileMetadata> fileMetadataTable = new(_packageMetadata[key].Name.Split('.')[0]);
+                // // Add file metadata to the database
+                // fileMetadataTable.CreateTable(connection);
+                // fileMetadataTable.InsertValues(handle, value);
             }
 
             transaction.Commit();

@@ -37,6 +37,12 @@ public class SchemaStructAttribute : StrategyAttribute
     public string ClassHash { get; }
     public int SerializedSize { get; }
 
+    public SchemaStructAttribute(int serializedSize)
+    {
+        ClassHash = "";
+        SerializedSize = serializedSize;
+    }
+
     public SchemaStructAttribute(string classHash, int serializedSize)
     {
         ClassHash = classHash;

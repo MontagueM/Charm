@@ -68,7 +68,8 @@ public struct Vector3
         Z = z;
     }
 
-    public static Vector3 Zero {
+    public static Vector3 Zero
+    {
         get
         {
             Vector3 vec3 = new Vector3();
@@ -79,7 +80,8 @@ public struct Vector3
         }
     }
 
-    public static Vector3 One {
+    public static Vector3 One
+    {
         get
         {
             Vector3 vec3 = new Vector3();
@@ -211,7 +213,8 @@ public struct Vector4
         W = w / 255.0f;
     }
 
-    public static Vector4 Zero {
+    public static Vector4 Zero
+    {
         get
         {
             Vector4 vec4 = new Vector4();
@@ -228,7 +231,8 @@ public struct Vector4
         W = w / 32_767.0f;
     }
 
-    public static Vector4 Quaternion {
+    public static Vector4 Quaternion
+    {
         get
         {
             Vector4 vec4 = new Vector4();

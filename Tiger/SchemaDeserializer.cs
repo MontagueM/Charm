@@ -7,19 +7,35 @@ namespace Tiger;
 public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserializer>
 {
     // Stores both SchemaStruct and SchemaType sizes
-    private ConcurrentDictionary<Type, int> _schemaSerializedSizeMap;
+    private readonly ConcurrentDictionary<Type, int> _schemaSerializedSizeMap;
+
     // First maps the struct schema type, then the field name
-    private ConcurrentDictionary<Type, Dictionary<string, int>> _schemaFieldOffsetMap;
+    private readonly ConcurrentDictionary<Type, Dictionary<string, int>> _schemaFieldOffsetMap;
+
+    // 0x8080.... class hash to type
+    private readonly ConcurrentDictionary<uint, Type> _schemaHashTypeMap;
 
     public SchemaDeserializer(TigerStrategy strategy) : base(strategy)
     {
         _schemaSerializedSizeMap = new ConcurrentDictionary<Type, int>();
         _schemaFieldOffsetMap = new ConcurrentDictionary<Type, Dictionary<string, int>>();
+        _schemaHashTypeMap = new ConcurrentDictionary<uint, Type>();
 
         FillSchemaCaches();
     }
 
+    public bool TryGetSchemaType(uint classHash, out Type schemaType)
+    {
+        return _schemaHashTypeMap.TryGetValue(classHash, out schemaType);
+    }
+
     private void FillSchemaCaches()
+    {
+        FillSchemaTypeCaches();
+        FillTypeFieldOffsetMap();
+    }
+
+    private void FillSchemaTypeCaches()
     {
         var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes());
 
@@ -29,31 +45,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             if (schemaStructAttribute != null)
             {
                 _schemaSerializedSizeMap.TryAdd(type, schemaStructAttribute.SerializedSize);
-                _schemaFieldOffsetMap.TryAdd(type, new Dictionary<string, int>());
-
-                foreach (FieldInfo fieldInfo in type.GetFields())
-                {
-                    SchemaFieldAttribute? schemaFieldAttribute = GetAttribute<SchemaFieldAttribute>(fieldInfo);
-                    if (schemaFieldAttribute != null)
-                    {
-                        _schemaFieldOffsetMap[type].TryAdd(fieldInfo.Name, schemaFieldAttribute.Offset);
-                    }
-                    // else
-                    // {
-                    //     FieldOffsetAttribute? fieldOffsetAttribute = (FieldOffsetAttribute?)fieldInfo.GetCustomAttribute(typeof(FieldOffsetAttribute), false);
-                    //     if (fieldOffsetAttribute != null)
-                    //     {
-                    //         _schemaFieldOffsetMap[type].TryAdd(fieldInfo.Name, fieldOffsetAttribute.Value);
-                    //     }
-                    // }
-
-                    if (!fieldInfo.FieldType.IsGenericType && !_schemaSerializedSizeMap.ContainsKey(fieldInfo.FieldType))
-                    {
-                        _schemaSerializedSizeMap.TryAdd(fieldInfo.FieldType, Marshal.SizeOf(fieldInfo.FieldType));
-                        continue;
-                    }
-                }
-
+                _schemaHashTypeMap.TryAdd(new FileHash(schemaStructAttribute.ClassHash).Hash32, type);
                 return;
             }
 
@@ -62,6 +54,42 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             {
                 _schemaSerializedSizeMap.TryAdd(type, schemaTypeAttribute.SerializedSize);
                 return;
+            }
+        });
+    }
+
+    // side effect also adds some more types to the serialized size map
+    private void FillTypeFieldOffsetMap()
+    {
+        Parallel.ForEach(_schemaSerializedSizeMap
+            .Keys
+            .Where(t => GetAttribute<SchemaStructAttribute>(t) != null),
+            type =>
+        {
+            _schemaFieldOffsetMap.TryAdd(type, new Dictionary<string, int>());
+
+            foreach (FieldInfo fieldInfo in type.GetFields())
+            {
+                SchemaFieldAttribute? schemaFieldAttribute = GetAttribute<SchemaFieldAttribute>(fieldInfo);
+                if (schemaFieldAttribute != null)
+                {
+                    _schemaFieldOffsetMap[type].TryAdd(fieldInfo.Name, schemaFieldAttribute.Offset);
+                }
+                // else
+                // {
+                //     FieldOffsetAttribute? fieldOffsetAttribute = (FieldOffsetAttribute?)fieldInfo.GetCustomAttribute(typeof(FieldOffsetAttribute), false);
+                //     if (fieldOffsetAttribute != null)
+                //     {
+                //         _schemaFieldOffsetMap[type].TryAdd(fieldInfo.Name, fieldOffsetAttribute.Value);
+                //     }
+                // }
+
+                // Also add any other types we need e.g. uint, ushort, etc.
+                if (!fieldInfo.FieldType.IsGenericType && !_schemaSerializedSizeMap.ContainsKey(fieldInfo.FieldType))
+                {
+                    _schemaSerializedSizeMap.TryAdd(fieldInfo.FieldType, Marshal.SizeOf(fieldInfo.FieldType));
+                    continue;
+                }
             }
         });
     }
