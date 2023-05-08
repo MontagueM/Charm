@@ -38,7 +38,7 @@ public class SavePackagesDatabaseCommandlet : ICommandlet
     public void Run(CharmArgs args)
     {
         PackageResourcer resourcer = PackageResourcer.Get();
-        List<ushort> packageIds = resourcer.GetAllPackages();
+        List<ushort> packageIds = resourcer.GetAllPackageIds();
 
         Directory.CreateDirectory(Path.GetDirectoryName(_databasePath));
         SQLiteConnection.CreateFile(_databasePath);

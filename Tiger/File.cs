@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents the file behind the Tag, handles all the file-based processing including reading data.
 /// To make this thread-safe (particularly the MemoryStream handle) we ensure the byte[] data is cached and only ever
-/// read once, then generate a new handle each time GetHandle is called. This should only really ever be used
+/// read once, then generate a new handle each time GetReader is called. This should only really ever be used
 /// in a dispose-oriented system, as otherwise you will have many leftover streams causing leakage.
 /// We store the data in this file instead of in PackageHandler BytesCache as we expect one DestinyFile to be made
 /// per tag, never more (as long as PackageHandler GetTag is used).

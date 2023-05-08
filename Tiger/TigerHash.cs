@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Tiger.Schema;
 
 namespace Tiger;
 
@@ -168,10 +169,9 @@ public class File64Hash : FileHash
         return Hash32 != InvalidHash32 && Hash32 != 0;
     }
 
-    private static uint GetHash32()
+    private static uint GetHash32(ulong hash64)
     {
-        throw new NotImplementedException();
-        return InvalidHash32;
+        return Hash64Map.Get().GetHash32(hash64);
     }
 
     public override void Deserialize(TigerReader reader)

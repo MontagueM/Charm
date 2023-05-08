@@ -15,6 +15,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     public PackageResourcer(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)
     {
         PackagesDirectory = strategyConfiguration.PackagesDirectory;
+        LoadAllPackages();
     }
 
     /// <summary>
@@ -83,19 +84,24 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return _packagePathsCache;
     }
 
+
     /// <summary>
-    /// Loads all packages into the cache and returns list of package ids.
+    /// Gets all packages from cache and returns list of package ids.
     /// </summary>
-    public List<ushort> GetAllPackages()
+    public List<ushort> GetAllPackageIds()
     {
-        List<ushort> packageIds = GetPackagePathsCache().GetPackageIds();
+        return GetPackagePathsCache().GetPackageIds();
+    }
+
+    private void LoadAllPackages()
+    {
+        List<ushort> packageIds = GetAllPackageIds();
         Parallel.ForEach(packageIds, packageId => GetPackage(packageId));
-        return packageIds;
     }
 
     public List<T> GetAllTags<T>() where T : TigerFile
     {
-        GetAllPackages();
+        GetAllPackageIds();
         List<T> tags = new();
         foreach (Package package in _packagesCache.Values)
         {

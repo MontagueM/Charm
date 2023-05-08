@@ -88,13 +88,13 @@ public class Texture : TigerReferenceFile64<STextureHeader>
         return scratchImage;
     }
 
-    private ScratchImage DecompressScratchImage(ScratchImage scratchImage )
+    private ScratchImage DecompressScratchImage(ScratchImage scratchImage, DXGI_FORMAT format)
     {
         while (true)
         {
             try
             {
-                scratchImage = scratchImage.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
+                scratchImage = scratchImage.Decompress(format);
                 return scratchImage;
             }
             catch (AccessViolationException)

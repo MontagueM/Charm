@@ -1,8 +1,28 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Tiger.DESTINY2_WITCHQUEEN_6307;
 
 namespace Tiger;
+
+[SchemaStruct("C29E8080", 0x10)]
+[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+public struct Hash64Definition
+{
+    public ulong Hash64;
+    public uint Hash32;
+    public uint TagClass;
+}
+
+// [StructLayout(LayoutKind.Sequential, Size = 0x10)]
+// public struct Activity
+// {
+//     public uint TagHash;
+//     public uint TagClass;
+//
+//     [DestinyField(FieldType.RelativePointer)]
+//     public string ActivityName;
+// }
 
 public interface IPackageHeader
 {
@@ -12,6 +32,7 @@ public interface IPackageHeader
     public uint GetFileCount();
     public List<D2FileEntry> GetFileEntries(TigerReader reader);
     public List<D2BlockEntry> GetBlockEntries(TigerReader reader);
+    public List<Hash64Definition> GetHash64Definitions(TigerReader reader);
 }
 
 public interface IPackage
@@ -24,6 +45,7 @@ public interface IPackage
 
     byte[] GetFileBytes(FileHash fileId);
     HashSet<int> GetRequiredPatches();
+    List<Hash64Definition> GetHash64List();
 }
 
 public abstract class Package : IPackage
@@ -58,6 +80,11 @@ public abstract class Package : IPackage
         }
 
         return requiredPatches;
+    }
+
+    public List<Hash64Definition> GetHash64List()
+    {
+        return Header.GetHash64Definitions(_reader);
     }
 
     protected Package(string packagePath, TigerStrategy strategy)

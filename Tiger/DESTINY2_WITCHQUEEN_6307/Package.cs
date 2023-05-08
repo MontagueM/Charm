@@ -78,6 +78,20 @@ public struct PackageHeader : IPackageHeader
 
         return blockEntries;
     }
+
+    public List<Hash64Definition> GetHash64Definitions(TigerReader reader)
+    {
+        List<Hash64Definition> hash64List = new();
+
+        reader.Seek(Hash64TableOffset + 0x50, SeekOrigin.Begin);
+        for (int i = 0; i < Hash64TableSize; i++)
+        {
+            var entry = reader.ReadBytes(0x10).ToType<Hash64Definition>();
+            hash64List.Add(entry);
+        }
+
+        return hash64List;
+    }
 };
 
 

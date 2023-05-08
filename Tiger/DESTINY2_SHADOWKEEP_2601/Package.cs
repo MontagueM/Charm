@@ -72,6 +72,8 @@ public struct PackageHeaderOld : IPackageHeader
 
         return blockEntries;
     }
+
+    public List<Hash64Definition> GetHash64Definitions(TigerReader reader) => throw new NotImplementedException();
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x120)]
@@ -133,6 +135,8 @@ public struct PackageHeaderNew : IPackageHeader
 
         return blockEntries;
     }
+
+    public List<Hash64Definition> GetHash64Definitions(TigerReader reader) => throw new NotImplementedException();
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x20)]
