@@ -4,7 +4,7 @@ namespace Tiger.Schema;
 
 public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
 {
-    private ConcurrentDictionary<ulong, uint> _map = new();
+    private readonly ConcurrentDictionary<ulong, uint> _map = new();
 
     public Hash64Map(TigerStrategy strategy) : base(strategy)
     {

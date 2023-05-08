@@ -11,7 +11,6 @@ public interface IStaticMeshTests
 [TestClass, TestCategory("DESTINY2_WITCHQUEEN_6307"), TestStrategy(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
 public class D2WQ_StaticMeshTests : IStaticMeshTests
 {
-    private static readonly TestPackage meshPackage = new("w64_city_tower_d2_01ad_7.pkg", 1674718010);
 
     [TestInitialize]
     public void Initialize()

@@ -68,8 +68,6 @@ public class D2WQ_LocalizedStringsTests : ILocalizedTextTests
 [TestClass, TestCategory("DESTINY2_SHADOWKEEP_2601"), TestStrategy(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
 public class D2SK_LocalizedStringsTests : ILocalizedTextTests
 {
-    // required to be able to do SaveStringsDatabaseCommandlet
-    private static readonly TestPackage p01df = new("w64_audio_01df_3.pkg", 1567664786);
 
     [TestInitialize]
     public void Initialize()
