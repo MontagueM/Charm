@@ -95,7 +95,7 @@ public class PackagePathsCache
         int currentPackageCount = Directory.GetFiles(_packagesDirectory, "*.pkg", SearchOption.TopDirectoryOnly).Length;
         if (_cacheData.PackageIdToNameMap.Count != currentPackageCount)
         {
-            Log.Info($"Cache file '{_cacheFilePath}' has different number of packages '{_cacheData.PackageIdToNameMap.Count}' (current is {currentPackageCount}.");
+            Log.Info($"Cache file '{_cacheFilePath}' has different number of packages '{_cacheData.PackageIdToNameMap.Count}' (current is {currentPackageCount})");
             return true;
         }
 
@@ -208,8 +208,13 @@ public class PackagePathsCache
         throw new ArgumentException(PackageStringNotInPackagePathsCacheMessage + packageId);
     }
 
-    public List<ushort> GetPackageIds()
+    public List<ushort> GetAllPackageIds()
     {
         return PackageIdToPathMap.Keys.ToList();
+    }
+
+    public Dictionary<ushort, string> GetAllPackagesMap()
+    {
+        return new Dictionary<ushort, string>(PackageIdToPathMap);
     }
 }

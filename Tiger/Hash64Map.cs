@@ -8,11 +8,6 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
 
     public Hash64Map(TigerStrategy strategy) : base(strategy)
     {
-        // Pre-BL has no Hash64s
-        if (_strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
-        {
-            Initialise();
-        }
     }
 
     /// <summary>
@@ -23,9 +18,16 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
         return _map[tag64];
     }
 
-    private void Initialise()
+    // todo race condition where
+    protected override void Initialise()
     {
-        List<ushort> packageIds = PackageResourcer.Get().GetAllPackageIds();
+        // Pre-BL has no Hash64s
+        if (_strategy < TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            return;
+        }
+
+        List<ushort> packageIds = PackageResourcer.Get().PackagePathsCache.GetAllPackageIds();
         Parallel.ForEach(packageIds, packageId =>
         {
             IPackage package = PackageResourcer.Get().GetPackage(packageId);
@@ -34,5 +36,10 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
                 _map.TryAdd(definition.Hash64, definition.Hash32);
             }
         });
+    }
+
+    protected override void Reset()
+    {
+        _map.Clear();
     }
 }

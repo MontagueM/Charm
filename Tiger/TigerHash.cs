@@ -47,6 +47,11 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
     public uint Hash32;
     public const uint InvalidHash32 = 0xFFFFFFFF;
 
+    public TigerHash()
+    {
+        Hash32 = InvalidHash32;
+    }
+
     public TigerHash(uint hash32)
     {
         Hash32 = hash32;
@@ -113,6 +118,10 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
 [SchemaType(0x04)]
 public class FileHash : TigerHash
 {
+    public FileHash() : base()
+    {
+    }
+
     public FileHash(int packageId, uint fileIndex) : base(GetHash32(packageId, fileIndex))
     {
     }
@@ -161,12 +170,6 @@ public class File64Hash : FileHash
     public File64Hash(ulong hash64) : base(GetHash32(hash64))
     {
         Hash64 = hash64;
-    }
-
-    public override bool IsValid()
-    {
-        throw new NotImplementedException();
-        return Hash32 != InvalidHash32 && Hash32 != 0;
     }
 
     private static uint GetHash32(ulong hash64)

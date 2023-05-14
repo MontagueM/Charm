@@ -51,10 +51,7 @@ public class StaticPart : MeshPart
         // Have to call it like this b/c we don't know the format of the vertex data here
         mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices);
         mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices);
-        if (mesh.Vertices2.Hash.IsValid())
-        {
-            mesh.Vertices2.ReadVertexData(this, uniqueVertexIndices);
-        }
+        mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices);
 
         TransformPositions(container.StaticData.TagData);
         TransformUVs(container.StaticData.TagData);

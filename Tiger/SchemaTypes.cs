@@ -54,12 +54,11 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
 {
     public int Count;
     public RelativePointer Offset;
-    // private byte[] _arrayData;
     protected int _elementSize;
 
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash defined for array
 
-    public void Deserialize(TigerReader reader)
+    public virtual void Deserialize(TigerReader reader)
     {
         Count = reader.ReadInt32();
         reader.Seek(4, SeekOrigin.Current);
@@ -68,7 +67,6 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
         reader.Seek(4, SeekOrigin.Current);
 
         _elementSize = SchemaDeserializer.Get().GetSchemaStructSize<T>();
-        // _arrayData = reader.ReadBytes(Count * _elementSize);
     }
 
     public IEnumerable<T> Enumerate(TigerReader reader)
@@ -90,11 +88,22 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
         return Enumerate(reader).Select(selector);
     }
 
-    // public new T this[int index]
-    // {
-    //     get => ElementAt(index);
-    //     set => throw new NotSupportedException("DynamicArray is read-only");
-    // }
+    public new T this[int index]
+    {
+        get => throw new NotSupportedException("DynamicArray does not store data locally, use with TigerReader or change to DynamicArrayLoaded");
+        set => throw new NotSupportedException("DynamicArray is read-only");
+    }
+
+    public T this[TigerReader reader, int index]
+    {
+        get => ElementAt(reader, index);
+        set => throw new NotSupportedException("DynamicArray is read-only");
+    }
+
+    protected T OriginalIndexAccess(int index)
+    {
+        return base[index];
+    }
 
     public T ElementAt(TigerReader reader, int index)
     {
@@ -107,10 +116,30 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
         return ReadElement(reader, index);
     }
 
-    private T ReadElement(TigerReader reader, int index)
+    protected T ReadElement(TigerReader reader, int index)
     {
         reader.Seek(Offset.AbsoluteOffset + index * _elementSize, SeekOrigin.Begin);
         return reader.ReadSchemaStruct<T>();
+    }
+}
+
+public class DynamicArrayLoaded<T> : DynamicArray<T> where T : struct
+{
+    public override void Deserialize(TigerReader reader)
+    {
+        base.Deserialize(reader);
+
+        for (int i = 0; i < Count; i++)
+        {
+            reader.Seek(Offset.AbsoluteOffset + i * _elementSize, SeekOrigin.Begin);
+            Add(ReadElement(reader, i));
+        }
+    }
+
+    public new T this[int index]
+    {
+        get => OriginalIndexAccess(index);
+        set => throw new NotSupportedException("DynamicArray is read-only");
     }
 }
 

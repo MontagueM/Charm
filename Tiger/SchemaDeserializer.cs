@@ -6,22 +6,39 @@ namespace Tiger;
 
 public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserializer>
 {
+    // todo separate into different class?
+    // todo maybe coalesce into one or two dictionaries?
+
     // Stores both SchemaStruct and SchemaType sizes
-    private readonly ConcurrentDictionary<Type, int> _schemaSerializedSizeMap;
+    private readonly ConcurrentDictionary<Type, int> _schemaSerializedSizeMap = new();
 
     // First maps the struct schema type, then the field name
-    private readonly ConcurrentDictionary<Type, Dictionary<string, int>> _schemaFieldOffsetMap;
+    private readonly ConcurrentDictionary<Type, Dictionary<string, int>> _schemaFieldOffsetMap = new();
 
     // 0x8080.... class hash to type
-    private readonly ConcurrentDictionary<uint, Type> _schemaHashTypeMap;
+    private readonly ConcurrentDictionary<uint, Type> _schemaHashTypeMap = new();
+
+    // Stores SchemaType FieldInfo[] array
+    private readonly ConcurrentDictionary<Type, FieldInfo[]> _schemaTypeFieldsMap = new();
+
+    // Stores all Tag64 types
+    private readonly HashSet<Type> _tag64Types = new();
+
+    // Stores all ITagDeserialize types
+    private readonly HashSet<Type> _tagDeserializeTypes = new();
 
     public SchemaDeserializer(TigerStrategy strategy) : base(strategy)
     {
-        _schemaSerializedSizeMap = new ConcurrentDictionary<Type, int>();
-        _schemaFieldOffsetMap = new ConcurrentDictionary<Type, Dictionary<string, int>>();
-        _schemaHashTypeMap = new ConcurrentDictionary<uint, Type>();
+    }
 
+    protected override void Initialise()
+    {
         FillSchemaCaches();
+    }
+
+    protected override void Reset()
+    {
+        // we don't need to reset anything as irrelevant to any configuration changes
     }
 
     public bool TryGetSchemaType(uint classHash, out Type schemaType)
@@ -41,11 +58,24 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
         Parallel.ForEach(types, type =>
         {
+            bool isTigerDeserialize = type.FindInterfaces((t, _) => t == typeof(ITigerDeserialize), null).Length > 0;
+            if (isTigerDeserialize)
+            {
+                _tagDeserializeTypes.Add(type);
+            }
+
+            bool isTag64 = type.FindInterfaces((t, _) => t == typeof(ITag64), null).Length > 0;
+            if (isTag64)
+            {
+                _tag64Types.Add(type);
+            }
+
             SchemaStructAttribute? schemaStructAttribute = GetAttribute<SchemaStructAttribute>(type);
             if (schemaStructAttribute != null)
             {
                 _schemaSerializedSizeMap.TryAdd(type, schemaStructAttribute.SerializedSize);
                 _schemaHashTypeMap.TryAdd(new FileHash(schemaStructAttribute.ClassHash).Hash32, type);
+                _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
                 return;
             }
 
@@ -103,7 +133,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     {
         object resource = Activator.CreateInstance(schemaType);
 
-        FieldInfo[] fields = schemaType.GetFields();
+        FieldInfo[] fields = GetSchemaFields(schemaType);
         long startOffset = reader.Position;
         long fieldOffset = 0;
         foreach (FieldInfo fieldInfo in fields)
@@ -166,19 +196,39 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         return resource;
     }
 
+    private FieldInfo[] GetSchemaFields(Type schemaType)
+    {
+        if (_schemaTypeFieldsMap.TryGetValue(schemaType, out FieldInfo[]? fields))
+        {
+            return fields;
+        }
+
+        throw new Exception($"Failed to get schema fields for type {schemaType}");
+    }
+
     private bool IsTigerDeserializeType(FieldInfo fieldInfo)
     {
-        return fieldInfo.FieldType.FindInterfaces((type, _) => type == typeof(ITigerDeserialize), null).Length > 0;
+        Type fieldType = fieldInfo.FieldType;
+        if (fieldType.IsGenericType)
+        {
+            fieldType = fieldType.GetGenericTypeDefinition();
+        }
+        return _tagDeserializeTypes.Contains(fieldType);
     }
 
     private bool IsTigerFileType(FieldInfo fieldInfo)
     {
-        return fieldInfo.FieldType.IsSubclassOf(typeof(TigerFile));
+        return fieldInfo.FieldType == typeof(TigerFile) || fieldInfo.FieldType.IsSubclassOf(typeof(TigerFile));
     }
 
     private bool IsTigerFile64Type(FieldInfo fieldInfo)
     {
-        return fieldInfo.FieldType.IsSubclassOf(typeof(Tag64<>));
+        Type fieldType = fieldInfo.FieldType;
+        if (fieldType.IsGenericType)
+        {
+            fieldType = fieldType.GetGenericTypeDefinition();
+        }
+        return _tag64Types.Contains(fieldType);
     }
 
     private dynamic DeserializeTigerType(TigerReader reader, Type fieldType)

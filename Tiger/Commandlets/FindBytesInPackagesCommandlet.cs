@@ -2,13 +2,17 @@
 
 namespace Tiger.Commandlets;
 
-public class FindBytesInFilesCommandlet : ICommandlet
+public class FindBytesInPackagesCommandlet : ICommandlet
 {
     private string bytesStr;
     private byte[] bytes;
 
     public void Run(CharmArgs args)
     {
+        var config = Strategy.GetStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
+        config.PackagesDirectory = "I:/v6307/packages/";
+        Strategy.UpdateStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307, config);
+
         string packageFilter;
         if (!args.GetArgValue("packageFilter", out packageFilter))
         {
@@ -49,35 +53,26 @@ public class FindBytesInFilesCommandlet : ICommandlet
 
     private void SearchForBytes(string packageFilter)
     {
-        List<ushort> pkgIds = PackageResourcer.Get().PackagePathsCache.GetAllPackagesMap().Where(pair => pair.Value.Contains(packageFilter)).ToList().ConvertAll(pair => pair.Key);
-        Log.Info($"Searching {pkgIds.Count} packages for '{bytesStr}'");
-        foreach (ushort pkgId in pkgIds)
-        {
-            SearchPackage(pkgId);
-        }
+        List<string> packagePaths = PackageResourcer.Get().PackagePathsCache.GetAllPackagesMap().Where(pair => pair.Value.Contains(packageFilter)).ToList().ConvertAll(pair => pair.Value);
+        Log.Info($"Searching {packagePaths.Count} packages for '{bytesStr}'");
+        Parallel.ForEach(packagePaths, SearchPackage);
     }
 
-    private void SearchPackage(ushort pkgId)
+    private void SearchPackage(string packagePath)
     {
-        // todo investigate speed of parallel packages vs parallel files
-        IPackage package = PackageResourcer.Get().GetPackage(pkgId);
-
-        PackageMetadata packageMetadata = package.GetPackageMetadata();
-
-        Parallel.For(0, packageMetadata.FileCount, i =>
+        using (TigerReader reader = new(File.Open(packagePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
         {
-            ushort fileIndex = (ushort)i;
-            byte[] fileBytes = package.GetFileBytes(fileIndex);
-            using MemoryStream ms = new(fileBytes);
-            using BinaryReader br = new(ms);
-            while (ms.Position <= ms.Length - bytes.Length)
+            reader.Seek(0, SeekOrigin.End);
+            long length = reader.Position;
+            reader.Seek(0, SeekOrigin.Begin);
+            while (reader.Position <= length - bytes.Length)
             {
-                if (br.ReadBytes(bytes.Length).SequenceEqual(bytes))
+                if (reader.ReadBytes(bytes.Length).SequenceEqual(bytes))
                 {
-                    Log.Info($"Found in {new FileHash(pkgId, fileIndex)} at offset {ms.Position - bytes.Length}");
+                    Log.Info($"Found in {packagePath} at offset {reader.Position - bytes.Length}");
                     break; // stop after one instance
                 }
             }
-        });
+        }
     }
 }

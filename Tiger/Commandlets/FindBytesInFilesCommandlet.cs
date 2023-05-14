@@ -2,7 +2,7 @@
 
 namespace Tiger.Commandlets;
 
-public class FindBytesCommandlet : ICommandlet
+public class FindBytesInFilesCommandlet : ICommandlet
 {
     private string bytesStr;
     private byte[] bytes;
@@ -59,7 +59,6 @@ public class FindBytesCommandlet : ICommandlet
 
     private void SearchPackage(ushort pkgId)
     {
-        // todo investigate speed of parallel packages vs parallel files
         IPackage package = PackageResourcer.Get().GetPackage(pkgId);
 
         PackageMetadata packageMetadata = package.GetPackageMetadata();

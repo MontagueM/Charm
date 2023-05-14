@@ -237,7 +237,7 @@ public class Material : Tag<SMaterial>
     public void SaveComputeShader(string saveDirectory)
     {
         Directory.CreateDirectory($"{saveDirectory}");
-        if (_tag.ComputeShader.Hash.IsValid() && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
+        if (_tag.ComputeShader != null && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
         {
             string hlsl = Decompile(_tag.ComputeShader.GetBytecode(), "cs");
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);

@@ -8,6 +8,12 @@ public class UpdateStrategyEventArgs : EventArgs
 }
 
 
+public class ResetStrategyEventArgs : EventArgs
+{
+    public TigerStrategy StrategyToReset { get; set; }
+}
+
+
 // todo separate the metadata out, no need to put it all in one place - just gets too long and nasty
 // the package type should be done by the resourcer, the app/depot etc should be done by tomograph data
 
@@ -50,6 +56,9 @@ public class Strategy
     public delegate void UpdateStrategyEventHandler(UpdateStrategyEventArgs e);
     public static event UpdateStrategyEventHandler OnStrategyChanged = delegate { };
 
+    public delegate void ResetStrategyEventHandler(ResetStrategyEventArgs e);
+    public static event ResetStrategyEventHandler OnStrategyReset = delegate { };
+
     static Strategy() { SetStrategy(_defaultStrategy); }
 
     /// <exception cref="ArgumentException">'strategyString' does not exist.</exception>
@@ -83,6 +92,23 @@ public class Strategy
             throw new ArgumentException($"Game strategy does not exist '{strategy}'");
         }
         return configuration;
+    }
+
+    public static void UpdateStrategyConfiguration(TigerStrategy strategy, StrategyConfiguration configuration)
+    {
+        if (!_strategyConfigurations.ContainsKey(strategy))
+        {
+            throw new ArgumentException($"Game strategy does not exist '{strategy}'");
+        }
+
+        bool bResetState = _strategyConfigurations[strategy].PackagesDirectory != configuration.PackagesDirectory;
+
+        _strategyConfigurations[strategy] = configuration;
+
+        if (bResetState)
+        {
+            OnStrategyReset.Invoke(new ResetStrategyEventArgs() { StrategyToReset = strategy });
+        }
     }
 
     /// <summary>
@@ -193,6 +219,16 @@ public class Strategy
 
         protected TigerStrategy _strategy;
 
+        /// <summary>
+        /// Called after the StrategySingleton instance is created.
+        /// </summary>
+        protected abstract void Initialise();
+
+        /// <summary>
+        /// Called after a reset operation is called for this strategy, e.g. when the packages directory changes.
+        /// </summary>
+        protected abstract void Reset();
+
         public static T Get()
         {
             if (_instance == null)
@@ -220,9 +256,15 @@ public class Strategy
             }
 
             _strategyInstances.Add(strategy, _instance);
+
+            _instance.Initialise();
         }
 
-        static StrategistSingleton() { Strategy.OnStrategyChanged += OnStrategyChanged; }
+        static StrategistSingleton()
+        {
+            Strategy.OnStrategyChanged += OnStrategyChanged;
+            Strategy.OnStrategyReset += OnStrategyReset;
+        }
 
         protected StrategistSingleton(TigerStrategy strategy) { _strategy = strategy; }
 
@@ -239,6 +281,16 @@ public class Strategy
                 AddNewStrategyInstance(e.NewStrategy);
             }
             _instance = _strategyInstances[e.NewStrategy];
+        }
+
+        private static void OnStrategyReset(ResetStrategyEventArgs e)
+        {
+            if (!_strategyInstances.ContainsKey(e.StrategyToReset))
+            {
+                throw new Exception("Strategy to reset does not exist");
+            }
+            _strategyInstances[e.StrategyToReset].Reset();
+            _strategyInstances[e.StrategyToReset].Initialise();
         }
     }
 }

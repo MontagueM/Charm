@@ -8,8 +8,8 @@ public struct SStaticMesh
     public long FileSize;
     public StaticMeshData StaticData;
     [SchemaField(0x10)]
-    public DynamicArray<D2Class_14008080> Materials;
-    public DynamicArray<D2Class_2F6D8080> Decals;
+    public DynamicArrayLoaded<D2Class_14008080> Materials;
+    public DynamicArrayLoaded<D2Class_2F6D8080> Decals;
     [SchemaField(0x3C)]  // revise this, not correct. maybe correct for decals?
     public Vector3 Scale;
     [SchemaField(0x50)]
@@ -33,7 +33,7 @@ public struct D2Class_2F6D8080
     public IndexBuffer Indices;
     public VertexBuffer Vertices0;
     public VertexBuffer Vertices1;
-    public VertexBuffer Vertices2;
+    public VertexBuffer? Vertices2;
     public uint IndexOffset;
     public uint IndexCount;
     public Material MaterialHash;
@@ -43,9 +43,9 @@ public struct D2Class_2F6D8080
 public struct SStaticMeshData
 {
     public long FileSize;
-    public DynamicArray<D2Class_386D8080> MaterialAssignments;
-    public DynamicArray<D2Class_376D8080> Parts;
-    public DynamicArray<D2Class_366D8080> Meshes;
+    public DynamicArrayLoaded<D2Class_386D8080> MaterialAssignments;
+    public DynamicArrayLoaded<D2Class_376D8080> Parts;
+    public DynamicArrayLoaded<D2Class_366D8080> Meshes;
     [SchemaField(0x40)]
     public Vector4 ModelTransform;
     [SchemaField(0x50)]

@@ -43,7 +43,8 @@ public interface IPackage
     FileMetadata GetFileMetadata(FileHash fileId);
     List<FileMetadata> GetAllFileMetadata();
 
-    byte[] GetFileBytes(FileHash fileId);
+    byte[] GetFileBytes(ushort fileIndex);
+    byte[] GetFileBytes(FileHash fileHash);
     HashSet<int> GetRequiredPatches();
     List<Hash64Definition> GetHash64List();
 }
@@ -55,7 +56,6 @@ public abstract class Package : IPackage
     private List<D2BlockEntry> BlockEntries;
     protected const int BlockSize = 0x40_000;
     public string PackagePath { get; }
-    protected TigerReader _reader;
     protected IPackageHeader Header;
     private readonly Dictionary<int, TigerReader> _packageHandles = new();
     protected TigerStrategy PackageStrategy;
@@ -84,7 +84,8 @@ public abstract class Package : IPackage
 
     public List<Hash64Definition> GetHash64List()
     {
-        return Header.GetHash64Definitions(_reader);
+        using TigerReader reader = GetReader();
+        return Header.GetHash64Definitions(reader);
     }
 
     protected Package(string packagePath, TigerStrategy strategy)
@@ -97,16 +98,16 @@ public abstract class Package : IPackage
 
     private void Initialise()
     {
+        using TigerReader reader = GetReader();
         GetReader();
-        ReadHeader();
-        FileEntries = Header.GetFileEntries(_reader);
-        BlockEntries = Header.GetBlockEntries(_reader);
-        CloseReader();
+        ReadHeader(reader);
+        FileEntries = Header.GetFileEntries(reader);
+        BlockEntries = Header.GetBlockEntries(reader);
     }
 
     private static string SanitisePackagePath(string packagePath) { return packagePath.Replace("\\", "/"); }
 
-    protected abstract void ReadHeader();
+    protected abstract void ReadHeader(TigerReader reader);
 
     public List<T> GetAllTags<T>() where T : TigerFile
     {
@@ -179,9 +180,12 @@ public abstract class Package : IPackage
         }
     }
 
-    private void GetReader() { _reader = new TigerReader(File.Open(PackagePath, FileMode.Open, FileAccess.Read, FileShare.Read)); }
+    private TigerReader GetReader() { return new TigerReader(File.Open(PackagePath, FileMode.Open, FileAccess.Read, FileShare.Read)); }
 
-    private void CloseReader() { _reader.Close(); }
+    public byte[] GetFileBytes(FileHash fileHash)
+    {
+        return GetFileBytes(fileHash.FileIndex);
+    }
 
     /// <summary>
     /// Find what blocks the file is made out of. For most small files this is a single block since blocks are
@@ -197,9 +201,9 @@ public abstract class Package : IPackage
     /// The middling blocks are copied entirely.
     /// The final block is copied from start -> fileSize - bytes already copied
     /// </summary>
-    public byte[] GetFileBytes(FileHash fileId)
+    public byte[] GetFileBytes(ushort fileIndex)
     {
-        D2FileEntry fileEntry = FileEntries[fileId.FileIndex];
+        D2FileEntry fileEntry = FileEntries[fileIndex];
         byte[] finalFileBuffer = new byte[fileEntry.FileSize];
         int blockCount = GetBlockCount(fileEntry);
         int currentBufferOffset = 0;
@@ -208,9 +212,13 @@ public abstract class Package : IPackage
         List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
         foreach (D2BlockEntry blockEntry in blocks)
         {
-            TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId);
+            // TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId);
+            byte[] blockBuffer;
+            using (TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId))
+            {
+                blockBuffer = ReadBlockBuffer(packageHandle, blockEntry);
+            }
 
-            byte[] blockBuffer = ReadBlockBuffer(packageHandle, blockEntry);
             blockBuffer = DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
 
             bool isFirstBlock = currentBlockId == 0;
@@ -286,13 +294,14 @@ public abstract class Package : IPackage
 
     private TigerReader GetPackageHandle(ushort patchId)
     {
-        if (!_packageHandles.TryGetValue(patchId, out TigerReader packageHandle))
-        {
-            packageHandle =
-                new TigerReader(new FileStream(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read, FileShare.Read));
-            _packageHandles.Add(patchId, packageHandle);
-        }
-        return packageHandle;
+        // if (!_packageHandles.TryGetValue(patchId, out TigerReader packageHandle))
+        // {
+        //     packageHandle =
+        //         new TigerReader(new FileStream(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read, FileShare.Read));
+        //     _packageHandles.Add(patchId, packageHandle);
+        // }
+        return new TigerReader(new FileStream(GetSpecificPackagePatchPath(patchId), FileMode.Open, FileAccess.Read, FileShare.Read));
+        // return packageHandle;
     }
 
     // This only supports patchIds that are from 0-9.

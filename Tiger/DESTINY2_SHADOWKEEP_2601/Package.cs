@@ -73,7 +73,7 @@ public struct PackageHeaderOld : IPackageHeader
         return blockEntries;
     }
 
-    public List<Hash64Definition> GetHash64Definitions(TigerReader reader) => throw new NotImplementedException();
+    public List<Hash64Definition> GetHash64Definitions(TigerReader reader) => throw new NotSupportedException();
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x120)]
@@ -136,7 +136,7 @@ public struct PackageHeaderNew : IPackageHeader
         return blockEntries;
     }
 
-    public List<Hash64Definition> GetHash64Definitions(TigerReader reader) => throw new NotImplementedException();
+    public List<Hash64Definition> GetHash64Definitions(TigerReader reader) => throw new NotSupportedException();
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x20)]
@@ -173,19 +173,19 @@ public class Package : Tiger.Package
     {
     }
 
-    protected override void ReadHeader()
+    protected override void ReadHeader(TigerReader reader)
     {
-        _reader.Seek(0x8, SeekOrigin.Begin);
-        ulong buildId = _reader.ReadUInt64();
+        reader.Seek(0x8, SeekOrigin.Begin);
+        ulong buildId = reader.ReadUInt64();
         bool isNewHeader = buildId >= 17011569960331205102;
-        _reader.Seek(0, SeekOrigin.Begin);
+        reader.Seek(0, SeekOrigin.Begin);
         if (isNewHeader)
         {
-            Header = SchemaDeserializer.Get().DeserializeSchema<PackageHeaderNew>(_reader);
+            Header = SchemaDeserializer.Get().DeserializeSchema<PackageHeaderNew>(reader);
         }
         else
         {
-            Header = SchemaDeserializer.Get().DeserializeSchema<PackageHeaderOld>(_reader);
+            Header = SchemaDeserializer.Get().DeserializeSchema<PackageHeaderOld>(reader);
         }
     }
 

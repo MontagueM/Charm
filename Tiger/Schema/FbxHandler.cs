@@ -51,10 +51,13 @@ public class FbxHandler
             AddColoursToMesh(mesh, part);
         }
 
-        if ((part as DynamicMeshPart)?.VertexColourSlots.Count > 0 || (part as DynamicMeshPart)?.GearDyeChangeColorIndex != 0xFF)  // api item, so do slots and uv1
+        if (part is DynamicMeshPart dynamicMeshPart)  // api item, so do slots and uv1
         {
-            AddSlotColoursToMesh(mesh, part as DynamicMeshPart);
-            AddTexcoords1ToMesh(mesh, part);
+            if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
+            {
+                AddSlotColoursToMesh(mesh, dynamicMeshPart);
+                AddTexcoords1ToMesh(mesh, dynamicMeshPart);
+            }
         }
 
         // for importing to other engines
@@ -92,7 +95,7 @@ public class FbxHandler
         {
             lookup[(int)part.VertexIndices[i]] = i;
         }
-        foreach (int vertexIndex in part.VertexIndices.OfType<int>())
+        foreach (int vertexIndex in part.VertexIndices)
         {
             // todo utilise dictionary to make this control point thing better maybe?
             var pos = part.VertexPositions[lookup[vertexIndex]];
@@ -309,7 +312,7 @@ public class FbxHandler
     {
         // Make directory for file
         string directory = Path.GetDirectoryName(fileName);
-        if (!Directory.Exists(directory))
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
         }
@@ -326,7 +329,7 @@ public class FbxHandler
             _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
             _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
             var exporter = FbxExporter.Create(_manager, "");
-            exporter.Initialize(fileName, -1);  // -1 == use binary not ascii, binary is more space efficient
+            exporter.Initialize(fileName, -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient
             exporter.Export(_scene);
             exporter.Destroy();
         }

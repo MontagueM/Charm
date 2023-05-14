@@ -102,10 +102,10 @@ public class Package : Tiger.Package
     {
     }
 
-    protected override void ReadHeader()
+    protected override void ReadHeader(TigerReader reader)
     {
-        _reader.Seek(0, SeekOrigin.Begin);
-        Header = _reader.ReadType<PackageHeader>();
+        reader.Seek(0, SeekOrigin.Begin);
+        Header = reader.ReadType<PackageHeader>();
     }
 
     [DllImport("oo2core_9_win64.dll", EntryPoint = "OodleLZ_Decompress")]

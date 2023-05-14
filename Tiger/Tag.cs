@@ -49,8 +49,13 @@ public class Tag<T> : TigerFile where T : struct
     }
 }
 
+public interface ITag64
+{
+
+}
+
 [SchemaType(0x10)]
-public class Tag64<T> : Tag<T> where T : struct
+public class Tag64<T> : Tag<T>, ITag64 where T : struct
 {
     public Tag64(FileHash tagHash, bool shouldParse = true) : base(tagHash, shouldParse) { }
 }

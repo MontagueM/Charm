@@ -10,6 +10,15 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
     {
     }
 
+    protected override void Initialise()
+    {
+    }
+
+    protected override void Reset()
+    {
+        _fileCache.Clear();
+    }
+
     public T GetTag<T>(string fileHash, bool shouldLoad = true) where T : class
     {
         return GetTag<T>(new FileHash(fileHash), shouldLoad);

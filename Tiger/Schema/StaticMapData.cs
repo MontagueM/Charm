@@ -2,6 +2,13 @@
 
 namespace Tiger.Schema;
 
+public class Map : Tag<SMapContainer>
+{
+    public Map(FileHash tagHash) : base(tagHash)
+    {
+    }
+}
+
 public class StaticMapData : Tag<SStaticMapData>
 {
     public StaticMapData(FileHash hash) : base(hash)
@@ -44,11 +51,11 @@ public struct SStaticMapData
     [SchemaField(0x18)]
     public Tag<SStaticMapOcclusionBounds> ModelOcclusionBounds;
     [SchemaField(0x40)]
-    public DynamicArray<SStaticMeshInstanceTransform> Instances;
+    public DynamicArrayLoaded<SStaticMeshInstanceTransform> Instances;
     public DynamicArray<SUnknownUInt> Unk50;
     [SchemaField(0x78)]
-    public DynamicArray<D2Class_BD938080> Statics;
-    public DynamicArray<D2Class_286D8080> InstanceCounts;
+    public DynamicArrayLoaded<D2Class_BD938080> Statics;
+    public DynamicArrayLoaded<D2Class_286D8080> InstanceCounts;
     [SchemaField(0x98)]
     public TigerHash Unk98;
     [SchemaField(0xA0)]
@@ -108,10 +115,10 @@ public struct D2Class_286D8080
 /// The very top reference for all map-related things.
 /// </summary>
 [SchemaStruct("1E898080", 0x60)]
-public struct D2Class_1E898080
+public struct SBubbleParent
 {
     public long FileSize;
-    public Tag<D2Class_01878080> ChildMapReference;
+    public Tag<SBubbleDefinition> ChildMapReference;
     // [SchemaField(0x10), DestinyField(FieldType.String64)] // actually wrong, not a String64 instead StringNoContainer
     // public string MapName;
     // public int Unk1C;
@@ -136,45 +143,45 @@ public struct D2Class_1E898080
 /// First of MapResources is what I call "ambient entities", second is always the static map.
 /// </summary>
 [SchemaStruct("01878080", 0x60)]
-public struct D2Class_01878080
+public struct SBubbleDefinition
 {
     public long FileSize;
-    public DynamicArray<D2Class_03878080> MapResources;
+    public DynamicArray<SMapContainerEntry> MapResources;
 }
 
 [SchemaStruct("03878080", 0x10)]
-public struct D2Class_03878080
+public struct SMapContainerEntry
 {
-    public Tag64<D2Class_07878080> MapResource;
+    public Tag64<SMapContainer> MapContainer;
 }
 
 /// <summary>
-/// A map resource, contains all the data used to make a map.
+/// A map resource, contains data used to make a map.
 /// This is quite similar to EntityResource, but with more children.
 /// </summary>
 [SchemaStruct("07878080", 0x38)]
-public struct D2Class_07878080
+public struct SMapContainer
 {
     public long FileSize;
     public long Unk08;
     [SchemaField(0x28)]
-    public DynamicArray<D2Class_09878080> DataTables;
+    public DynamicArray<SMapDataTableEntry> MapDataTables;
 }
 
 [SchemaStruct("09878080", 4)]
-public struct D2Class_09878080
+public struct SMapDataTableEntry
 {
-    public Tag<D2Class_83988080> DataTable;
+    public Tag<SMapDataTable> MapDataTable;
 }
 
 /// <summary>
 /// A map data table, containing data entries.
 /// </summary>
 [SchemaStruct("83988080", 0x18)]
-public struct D2Class_83988080
+public struct SMapDataTable
 {
     public long FileSize;
-    public DynamicArray<D2Class_85988080> DataEntries;
+    public DynamicArray<SMapDataEntry> DataEntries;
 }
 
 
@@ -182,7 +189,7 @@ public struct D2Class_83988080
 /// A data entry. Can be static maps, entities, etc. with a defined world transform.
 /// </summary>
 [SchemaStruct("85988080", 0x90)]
-public struct D2Class_85988080
+public struct SMapDataEntry
 {
     public Vector4 Rotation;
     public Vector4 Translation;
@@ -196,7 +203,7 @@ public struct D2Class_85988080
 /// Data resource containing a static map.
 /// </summary>
 [SchemaStruct("C96C8080", 0x18)]
-public struct D2Class_C96C8080
+public struct SMapDataResource
 {
     [SchemaField(0x8)]
     public TigerHash Unk08;

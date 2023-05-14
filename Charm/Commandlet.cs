@@ -67,7 +67,7 @@ public abstract class Commandlet
         return AppDomain.CurrentDomain
             .GetAssemblies()
             .SelectMany(s => s.GetTypes())
-            .FirstOrDefault(t => t.Name == commandletName);
+            .FirstOrDefault(t => t.Name == commandletName || t.Name == $"{commandletName}Commandlet");
     }
 }
 

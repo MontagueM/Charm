@@ -8,14 +8,38 @@ namespace Tiger;
 /// </summary>
 public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 {
-    private PackagePathsCache? _packagePathsCache = null;
+    private PackagePathsCache? _packagePathsCache;
+
+    public PackagePathsCache PackagePathsCache
+    {
+        get
+        {
+            if (_packagePathsCache == null)
+            {
+                _packagePathsCache = new PackagePathsCache(_strategy);
+            }
+            return _packagePathsCache;
+        }
+    }
+
     private readonly ConcurrentDictionary<ushort, Package> _packagesCache = new();
     public string PackagesDirectory { get; }
 
     public PackageResourcer(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)
     {
         PackagesDirectory = strategyConfiguration.PackagesDirectory;
+    }
+
+    protected override void Initialise()
+    {
+        _packagePathsCache = new PackagePathsCache(_strategy);
         LoadAllPackages();
+    }
+
+    protected override void Reset()
+    {
+        _packagesCache.Clear();
+        _packagePathsCache = new PackagePathsCache(_strategy);
     }
 
     /// <summary>
@@ -44,7 +68,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     private IPackage LoadPackageIntoCacheFromDisk(ushort packageId)
     {
-        string packagePath = GetPackagePathsCache().GetPackagePathFromId(packageId);
+        string packagePath = PackagePathsCache.GetPackagePathFromId(packageId);
         return LoadPackageIntoCacheFromDisk(packageId, packagePath);
     }
 
@@ -75,33 +99,15 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     public byte[] GetFileData(FileHash fileHash) { return GetPackage(fileHash.PackageId).GetFileBytes(fileHash); }
 
-    private PackagePathsCache GetPackagePathsCache()
-    {
-        if (_packagePathsCache == null)
-        {
-            _packagePathsCache = new PackagePathsCache(_strategy);
-        }
-        return _packagePathsCache;
-    }
-
-
-    /// <summary>
-    /// Gets all packages from cache and returns list of package ids.
-    /// </summary>
-    public List<ushort> GetAllPackageIds()
-    {
-        return GetPackagePathsCache().GetPackageIds();
-    }
-
     private void LoadAllPackages()
     {
-        List<ushort> packageIds = GetAllPackageIds();
+        List<ushort> packageIds = PackagePathsCache.GetAllPackageIds();
         Parallel.ForEach(packageIds, packageId => GetPackage(packageId));
     }
 
     public List<T> GetAllTags<T>() where T : TigerFile
     {
-        GetAllPackageIds();
+        PackagePathsCache.GetAllPackageIds();
         List<T> tags = new();
         foreach (Package package in _packagesCache.Values)
         {
