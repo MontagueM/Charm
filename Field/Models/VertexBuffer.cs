@@ -238,14 +238,27 @@ public class VertexBuffer : Tag
                 }
                 else
                 {
+                    // always the first two weights valid then the second group can be one or two
                     handle.BaseStream.Seek(chunkIndex * 0x20 + (vertexIndex % 4) * 8, SeekOrigin.Begin);
-                    vw.WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte());
-                    if (vw.WeightValues.X + vw.WeightValues.Y + vw.WeightValues.Z == 255)
+                    vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
+                    vw.WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
+                    // if (vw.WeightValues.X + vw.WeightValues.Y + vw.WeightValues.Z == 255)
+                    // {
+                    //     vw.WeightValues.W = 0;
+                    // }
+                    vw.WeightIndices.Z = handle.ReadByte();
+                    vw.WeightIndices.W = handle.ReadByte();
+                    vw.WeightValues.Z = handle.ReadByte();
+                    if (vw.WeightIndices.Z == vw.WeightIndices.W)
                     {
-                        vw.WeightValues.W = 0;
+                        vw.WeightIndices.W = 0;
                     }
-                    vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte());
+                    else
+                    {
+                        vw.WeightValues.W = handle.ReadByte();
+                    }
                     dynamicPart.VertexWeights.Add(vw);
+                }
                 }
                 break;
                 // old code vvv
