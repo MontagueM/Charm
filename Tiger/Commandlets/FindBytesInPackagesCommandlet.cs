@@ -9,15 +9,15 @@ public class FindBytesInPackagesCommandlet : ICommandlet
 
     public void Run(CharmArgs args)
     {
-        var config = Strategy.GetStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
-        config.PackagesDirectory = "I:/v6307/packages/";
-        Strategy.UpdateStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307, config);
+        // var config = Strategy.GetStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
+        // config.PackagesDirectory = "I:/v6307/packages/";
+        // Strategy.UpdateStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307, config);
 
         string packageFilter;
         if (!args.GetArgValue("packageFilter", out packageFilter))
         {
             Log.Warning("No packageFilter argument provided, searching all packages");
-            return;
+            // return;
         }
 
         if (!args.GetArgValue("bytes", out bytesStr))

@@ -24,7 +24,7 @@ public class Texture : TigerReferenceFile64<STextureHeader>
     {
         DXGI_FORMAT format = (DXGI_FORMAT)_tag.Format;
         byte[] data;
-        if (_tag.LargeTextureBuffer.Hash.IsValid())
+        if (_tag.LargeTextureBuffer != null)
         {
             data = _tag.LargeTextureBuffer.GetData();
         }
@@ -127,10 +127,9 @@ public class Texture : TigerReferenceFile64<STextureHeader>
 
     public static void SavetoFile(string savePath, ScratchImage simg)
     {
-        throw new NotImplementedException();
         try
         {
-            // TextureExtractor.SaveTextureToFile(savePath, simg);
+            TextureExtractor.SaveTextureToFile(savePath, simg);
         }
         catch (FileLoadException)
         {
@@ -200,5 +199,5 @@ public struct STextureHeader
     public ushort Unk34;
 
     [SchemaField(0x3C)]
-    public TigerFile LargeTextureBuffer;
+    public TigerFile? LargeTextureBuffer;
 }

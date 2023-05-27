@@ -32,7 +32,7 @@ public class D2WQ_LocalizedStringsTests : ILocalizedTextTests
     public void GetStrings()
     {
         string fileHash = "A405A080";
-        LocalizedStrings strings = FileResourcer.Get().GetTag<LocalizedStrings>(fileHash);
+        LocalizedStrings strings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
         Assert.IsNotNull(strings);
         Assert.AreEqual(fileHash, strings.Hash.ToString());
 
@@ -57,7 +57,7 @@ public class D2WQ_LocalizedStringsTests : ILocalizedTextTests
     public void GetString_InvalidHash()
     {
         string fileHash = "A405A080";
-        LocalizedStrings strings = FileResourcer.Get().GetTag<LocalizedStrings>(fileHash);
+        LocalizedStrings strings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
         Assert.IsNotNull(strings);
 
         string invalidStringHash = "FFFFFFFF";
@@ -91,7 +91,7 @@ public class D2SK_LocalizedStringsTests : ILocalizedTextTests
     public void GetStrings()
     {
         string fileHash = "0D20A180";
-        LocalizedStrings strings = FileResourcer.Get().GetTag<LocalizedStrings>(fileHash);
+        LocalizedStrings strings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
         Assert.IsNotNull(strings);
         Assert.AreEqual(fileHash, strings.Hash.ToString());
 
@@ -116,7 +116,7 @@ public class D2SK_LocalizedStringsTests : ILocalizedTextTests
     public void GetStrings_NonUtf8()
     {
         string fileHash = "67F8B480";
-        LocalizedStrings strings = FileResourcer.Get().GetTag<LocalizedStrings>(fileHash);
+        LocalizedStrings strings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
         Assert.IsNotNull(strings);
 
         string emdashStringHash = "043568E7";
@@ -128,7 +128,7 @@ public class D2SK_LocalizedStringsTests : ILocalizedTextTests
     public void GetString_InvalidHash()
     {
         string fileHash = "0D20A180";
-        LocalizedStrings strings = FileResourcer.Get().GetTag<LocalizedStrings>(fileHash);
+        LocalizedStrings strings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
         Assert.IsNotNull(strings);
 
         string invalidStringHash = "FFFFFFFF";

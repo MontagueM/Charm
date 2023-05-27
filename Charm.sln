@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resourcer", "Resourcer\Reso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tomograph", "Tomograph\Tomograph.csproj", "{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm", "Charm\Charm.csproj", "{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm2", "Charm2\Charm2.csproj", "{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomographData", "TomographData\TomographData.csproj", "{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schema", "Schema\Schema.csproj", "{61AC1676-FF29-44BC-922C-5AD0CCE87DDA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interop", "Interop\Interop.csproj", "{84D52BF5-9E33-4285-AAED-C7C7BCCB09A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm", "Charm\Charm.csproj", "{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,10 @@ Global
 		{84D52BF5-9E33-4285-AAED-C7C7BCCB09A2}.Debug|x64.Build.0 = Debug|Any CPU
 		{84D52BF5-9E33-4285-AAED-C7C7BCCB09A2}.Release|x64.ActiveCfg = Release|Any CPU
 		{84D52BF5-9E33-4285-AAED-C7C7BCCB09A2}.Release|x64.Build.0 = Release|Any CPU
+		{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}.Debug|x64.Build.0 = Debug|Any CPU
+		{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}.Release|x64.ActiveCfg = Release|Any CPU
+		{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

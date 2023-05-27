@@ -1,0 +1,24 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:sys="using:System"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <!-- Numbers come from the luminance -->
+        <Brush x:Key="BackgroundColour7">#121212</Brush>
+        <Color x:Key="BackgroundColour7C">#121212</Color>
+        <Brush x:Key="BackgroundColour14">#242424</Brush>
+        <Color x:Key="BackgroundColour10C">#1a1a1a</Color>
+        <Color x:Key="BackgroundColour14C">#242424</Color>
+        <Brush x:Key="BackgroundColour20">#333333</Brush>
+        <Brush x:Key="BackgroundColour30">#4d4d4d</Brush>
+        <Brush x:Key="BackgroundColour50">#808080</Brush>
+        <Brush x:Key="ForegroundColour100">#ffffff</Brush>
+        <Brush x:Key="ForegroundColour90">#e6e6e6</Brush>
+        <Brush x:Key="ForegroundColour80">#cccccc</Brush>
+        <Brush x:Key="ForegroundColour75">#bfbfbf</Brush>
+        <Brush x:Key="ForegroundColour70">#b3b3b3</Brush>
+        <Brush x:Key="ForegroundColour50">#808080</Brush>
+
+        <Brush x:Key="AccentColour">#4d56fc</Brush>
+    </Styles.Resources>
+</Styles>

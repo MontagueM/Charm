@@ -2,14 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:Charm.ViewModels"
+             xmlns:views="clr-namespace:Charm.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Charm.Views.MainMenuView">
     <Panel>
         <Design.DataContext>
             <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-            <vm:MainWindowViewModel/>
+            <views:MainMenuViewModel/>
         </Design.DataContext>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -20,10 +20,9 @@
                 <RowDefinition Height="100*" />
             </Grid.RowDefinitions>
             <StackPanel Orientation="Vertical">
-                <Button Width="200" Foreground="White" Command="{Binding ExportMapToAtlas}" Content="Export Map to ATLAS"/>
                 <TextBox Text="{Binding  Hash}"/>
-                <Button Width="200" Foreground="White" Command="{Binding OpenHash}" Content="Open hash"/>
-                <Button Width="200" Margin="10" Foreground="White" Command="{Binding OpenHash}" Content="Save database"/>
+                <Button Width="200" Foreground="White" Click="OpenHash_OnClick" Content="Open hash"/>
+                <Button Width="200" Margin="10" Foreground="White" Click="SaveDatabase_OnClick" Content="Save database"/>
             </StackPanel>
         </Grid>
     </Panel>

@@ -35,6 +35,16 @@ public static class Log
         }
     }
 
+    public static void BindDelegate(Action<object?, LogEventArgs> action)
+    {
+        OnLogEvent += delegate(object? sender, LogEventArgs args) { action(sender, args); };
+
+        foreach (LogEventArgs logEvent in LogHistory)
+        {
+            action(null, logEvent);
+        }
+    }
+
     public static void Info(string message, [CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFile = "")
     {
         LogEvent(LogVerbosity.Info, message, callerMethodName, callerFile);

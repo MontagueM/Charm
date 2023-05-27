@@ -240,6 +240,17 @@ public class Strategy
             return _instance;
         }
 
+        // todo test this
+        public static T Get(TigerStrategy strategy)
+        {
+            if (_strategyInstances.TryGetValue(strategy, out var instance))
+            {
+                return instance;
+            }
+
+            throw new ArgumentException($"Strategy '{strategy}' does not exist");
+        }
+
         private static void AddNewStrategyInstance(TigerStrategy strategy)
         {
             if (typeof(T).GetConstructor(new[] { typeof(TigerStrategy) }) != null)

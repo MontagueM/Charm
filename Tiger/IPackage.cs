@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Tiger.DESTINY2_WITCHQUEEN_6307;
@@ -109,7 +110,7 @@ public abstract class Package : IPackage
 
     protected abstract void ReadHeader(TigerReader reader);
 
-    public List<T> GetAllTags<T>() where T : TigerFile
+    public List<T> GetAllFiles<T>() where T : TigerFile
     {
         List<T> tags = new();
 
@@ -120,12 +121,31 @@ public abstract class Package : IPackage
         {
             if (FileEntries[i].Reference.Equals(referenceHash))
             {
-                T tag = FileResourcer.Get().GetTag<T>(new FileHash(Header.GetPackageId(), (uint)i));
+                T tag = FileResourcer.Get().GetFile<T>(new FileHash(Header.GetPackageId(), (uint)i));
                 tags.Add(tag);
             }
         }
 
         return tags;
+    }
+
+    public IEnumerable<TigerHash> GetAllHashes<T>() where T : TigerFile
+    {
+        if (!SchemaDeserializer.Get().TryGetSchemaTypeHash<T>(out uint referenceHash))
+        {
+            throw new ArgumentException($"Type {typeof(T)} is not a schema type so cannot get hashes for it");
+        }
+
+        ConcurrentBag<FileHash> hashes = new();
+        Parallel.For(0, FileEntries.Count, i =>
+        {
+            if (FileEntries[i].Reference.Hash32 == referenceHash)
+            {
+                hashes.Add(new FileHash(Header.GetPackageId(), (uint)i));
+            }
+        });
+
+        return hashes;
     }
 
     private T? GetAttribute<T>(ICustomAttributeProvider var) where T : StrategyAttribute
@@ -450,6 +470,14 @@ public struct D2FileEntryBitpacked
     public uint EntryB;
     public uint EntryC;
     public uint EntryD;
+
+    public D2FileEntryBitpacked(uint reference, uint entryB, uint entryC, uint entryD)
+    {
+        Reference = reference;
+        EntryB = entryB;
+        EntryC = entryC;
+        EntryD = entryD;
+    }
 }
 
 [StructLayout(LayoutKind.Sequential)]

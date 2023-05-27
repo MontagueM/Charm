@@ -61,11 +61,11 @@ public class PackagePathsCache
     {
         if (IsCacheFileInvalid())
         {
-            Log.Info($"Cache file is invalid, creating new from packages directory {_packagesDirectory}.");
+            Log.Info($"Cache file is invalid, creating new from packages directory '{_packagesDirectory}'.");
             SaveCacheToFile();
         }
 
-        Log.Info($"Loading package paths cache from cache file {_cacheFilePath}.");
+        Log.Info($"Loading package paths cache from cache file '{_cacheFilePath}'.");
         FillCacheFromCacheFile();
     }
 
@@ -92,15 +92,31 @@ public class PackagePathsCache
             return true;
         }
 
-        int currentPackageCount = Directory.GetFiles(_packagesDirectory, "*.pkg", SearchOption.TopDirectoryOnly).Length;
-        if (_cacheData.PackageIdToNameMap.Count != currentPackageCount)
-        {
-            Log.Info($"Cache file '{_cacheFilePath}' has different number of packages '{_cacheData.PackageIdToNameMap.Count}' (current is {currentPackageCount})");
-            return true;
-        }
+        // var currentPackages = Directory.GetFiles(_packagesDirectory, "*.pkg", SearchOption.TopDirectoryOnly);
+        // HashSet<ushort> allIds = GetPackageIdsFromPaths(currentPackages);
+
+        // var cachedIds = new HashSet<ushort>(_cacheData.PackageIdToNameMap.Keys);
+        // allIds.UnionWith(cachedIds);
+        // if (allIds.Count != cachedIds.Count)
+        // {
+        //     Log.Info($"Cache file '{_cacheFilePath}' has different number of packages '{_cacheData.PackageIdToNameMap.Count}' (current is {currentPackages.Length})");
+        //     return true;
+        // }
 
         return false;
     }
+
+    // private HashSet<ushort> GetPackageIdsFromPaths(string[] packagePaths)
+    // {
+    //     HashSet<ushort> packageIds = new();
+    //     foreach (string packagePath in packagePaths)
+    //     {
+    //         IPackage package = PackageResourcer.Get().GetPackage(packagePath);
+    //         PackageMetadata packageMetadata = package.GetPackageMetadata();
+    //         packageIds.Add(packageMetadata.Id);
+    //     }
+    //     return packageIds;
+    // }
 
     /// <summary>
     /// If we can't get a game version, presume its static and set it to 0.
@@ -193,7 +209,7 @@ public class PackagePathsCache
         {
             return packagePath;
         }
-        throw new ArgumentException($"The package id '{packageId}' is not in the package paths cache");
+        throw new ArgumentException($"The package id '{packageId:x4}' is not in the package paths cache");
     }
 
     private static readonly string PackageStringNotInPackagePathsCacheMessage = "The package string is not in the package paths cache: ";

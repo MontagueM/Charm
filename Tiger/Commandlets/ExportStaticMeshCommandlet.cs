@@ -14,6 +14,6 @@ public class ExportStaticMeshCommandlet : ICommandlet
             Log.Error("No hash argument provided");
         }
 
-        StaticMesh mesh = FileResourcer.Get().GetTag<StaticMesh>(hash);
+        StaticMesh mesh = FileResourcer.Get().GetFile<StaticMesh>(hash);
     }
 }

@@ -57,7 +57,8 @@ public struct PackageHeader : IPackageHeader
         int d2FileEntrySize = Marshal.SizeOf<D2FileEntryBitpacked>();
         for (int i = 0; i < FileEntryTableCount; i++)
         {
-            D2FileEntryBitpacked fileEntryBitpacked = reader.ReadBytes(d2FileEntrySize).ToType<D2FileEntryBitpacked>();
+            // D2FileEntryBitpacked fileEntryBitpacked = reader.ReadBytes(d2FileEntrySize).ToType<D2FileEntryBitpacked>();
+            D2FileEntryBitpacked fileEntryBitpacked = new(reader.ReadUInt32(), reader.ReadUInt32(), reader.ReadUInt32(), reader.ReadUInt32());
             fileEntries.Add(new D2FileEntry(fileEntryBitpacked));
         }
 

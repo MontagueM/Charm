@@ -136,7 +136,7 @@ public class Material : Tag<SMaterial>
 
     public void SavePixelShader(string saveDirectory, bool isTerrain = false)
     {
-        if (_tag.PixelShader.Hash.IsValid())
+        if (_tag.PixelShader != null)
         {
             string hlsl = Decompile(_tag.PixelShader.GetBytecode());
             string usf = new UsfConverter().HlslToUsf(this, hlsl, false);

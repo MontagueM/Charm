@@ -33,6 +33,11 @@ public class ConfigSubsystem : Subsystem
         Initialise();
     }
 
+    public string GetConfigFilePath()
+    {
+        return _configFilePath;
+    }
+
     protected internal override bool Initialise()
     {
         if (CharmInstance.Args.GetArgValue("config", out string configPath))

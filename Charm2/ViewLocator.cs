@@ -1,14 +1,17 @@
-using System;
+﻿using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Charm.ViewModels;
 
 namespace Charm;
 
-public class ViewLocator : IDataTemplate
+internal class ViewLocator : IDataTemplate
 {
-    public IControl Build(object data)
+    public Control? Build(object? data)
     {
+        if (data is null)
+            return null;
+
         var name = data.GetType().FullName!.Replace("ViewModel", "View");
         var type = Type.GetType(name);
 
@@ -16,11 +19,13 @@ public class ViewLocator : IDataTemplate
         {
             return (Control)Activator.CreateInstance(type)!;
         }
-
-        return new TextBlock { Text = "Not Found: " + name };
+        else
+        {
+            return new TextBlock { Text = name };
+        }
     }
 
-    public bool Match(object data)
+    public bool Match(object? data)
     {
         return data is ViewModelBase;
     }

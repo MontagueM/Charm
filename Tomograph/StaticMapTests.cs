@@ -8,6 +8,7 @@ public interface IStaticMapTests
 
 }
 
+// todo make it so CI can run tests without needing packages
 [TestClass, TestCategory("DESTINY2_WITCHQUEEN_6307"), TestStrategy(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
 public class StaticMapTests
 {
@@ -33,12 +34,12 @@ public class StaticMapTests
     [TestMethod]
     public void GetStaticMapData()
     {
-        var config = Strategy.GetStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
-        config.PackagesDirectory = "I:/v6307/packages/";
-        Strategy.UpdateStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307, config);
+        // var config = Strategy.GetStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
+        // config.PackagesDirectory = "I:/v6307/packages/";
+        // Strategy.UpdateStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307, config);
 
         string fileHash = "17A7B580";
-        StaticMapData mapData = FileResourcer.Get().GetTag<StaticMapData>(fileHash);
+        StaticMapData mapData = FileResourcer.Get().GetFile<StaticMapData>(fileHash);
         FbxHandler handler = new();
         // mapData.LoadArrangedIntoFbxScene(handler);
         mapData.LoadIntoFbxScene(handler, "TestModels/TestMap", true);

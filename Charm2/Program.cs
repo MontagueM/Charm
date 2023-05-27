@@ -1,7 +1,7 @@
 ﻿using System;
+using Arithmic;
 using Avalonia;
-using Avalonia.ReactiveUI;
-using Interop;
+// using Avalonia.ReactiveUI;
 using Tiger;
 
 namespace Charm;
@@ -14,16 +14,23 @@ class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        Log.Info("Initialising Charm subsystems");
         CharmInstance.Args = new CharmArgs(args);
         CharmInstance.InitialiseSubsystems();
-
+        Log.Info("Initialised Charm subsystems");
         // todo figure out how to make sure commandlets initialise all the subsystems they need
-        TestInclude testInclude = new();
+
         if (Commandlet.RunCommandlet())
         {
             return;
         }
 
+        var config = Strategy.GetStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
+        config.PackagesDirectory = "I:/v6307/packages/";
+        Strategy.UpdateStrategyConfiguration(TigerStrategy.DESTINY2_WITCHQUEEN_6307, config);
+        Strategy.SetStrategy(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
+
+        Log.Info("Starting Charm UI");
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
@@ -31,6 +38,6 @@ class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
-            .LogToTrace()
-            .UseReactiveUI();
+            .LogToTrace();
+    // .UseReactiveUI();
 }

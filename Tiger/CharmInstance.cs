@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Arithmic;
 
 namespace Tiger;
 
@@ -32,7 +33,8 @@ public static class CharmInstance
             subsystem = CreateSubsystem(type);
             if (subsystem != null)
             {
-                InitialiseSubsystem(subsystem);
+                // todo reconcile subsystem initialisation
+                // InitialiseSubsystem(subsystem);
                 _subsystems.Add(type.Name, subsystem);
             }
         }
@@ -52,17 +54,20 @@ public static class CharmInstance
     public static void InitialiseSubsystems()
     {
         _subsystems = GetAllSubsystems();
+        Log.Info($"All subsystems found: {string.Join(", ", _subsystems.Keys)}");
         _subsystems.Values.ToList().ForEach(InitialiseSubsystem);
     }
 
     private static void InitialiseSubsystem(Subsystem subsystem)
     {
+        Log.Info($"Initialising subsystem {subsystem.GetType().Name}");
         bool initialisedSuccess = subsystem.Initialise();
         if (!initialisedSuccess)
         {
             _subsystems.Remove(subsystem.GetType().Name);
             throw new Exception($"Failed to initialise subsystem {subsystem.GetType().Name}");
         }
+        Log.Info($"Initialised subsystem {subsystem.GetType().Name}");
     }
 
     private static Dictionary<string, Subsystem> GetAllSubsystems()

@@ -9,6 +9,8 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     // todo separate into different class?
     // todo maybe coalesce into one or two dictionaries?
 
+    // todo source generation
+
     // Stores both SchemaStruct and SchemaType sizes
     private readonly ConcurrentDictionary<Type, int> _schemaSerializedSizeMap = new();
 
@@ -17,6 +19,9 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     // 0x8080.... class hash to type
     private readonly ConcurrentDictionary<uint, Type> _schemaHashTypeMap = new();
+
+    // type to 0x8080.... class hash
+    private readonly ConcurrentDictionary<Type, uint> _schemaTypeHashMap = new();
 
     // Stores SchemaType FieldInfo[] array
     private readonly ConcurrentDictionary<Type, FieldInfo[]> _schemaTypeFieldsMap = new();
@@ -46,6 +51,16 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         return _schemaHashTypeMap.TryGetValue(classHash, out schemaType);
     }
 
+    public bool TryGetSchemaTypeHash<T>(out uint classHash)
+    {
+        return TryGetSchemaTypeHash(typeof(T), out classHash);
+    }
+
+    public bool TryGetSchemaTypeHash(Type type, out uint classHash)
+    {
+        return _schemaTypeHashMap.TryGetValue(type, out classHash);
+    }
+
     private void FillSchemaCaches()
     {
         FillSchemaTypeCaches();
@@ -70,11 +85,25 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 _tag64Types.Add(type);
             }
 
+            // only first level of inheritance
+            if (type.IsSubclassOf(typeof(TigerFile)) && type.BaseType.IsGenericType)
+            {
+                // Type? schemaType = type.GetNestedType("Schema", BindingFlags.NonPublic);
+                Type schemaType = type.BaseType.GenericTypeArguments.First();
+
+                SchemaStructAttribute? schemaStructAttr = GetAttribute<SchemaStructAttribute>(schemaType);
+                if (schemaStructAttr != null && !string.IsNullOrEmpty(schemaStructAttr.ClassHash))
+                {
+                    _schemaTypeHashMap.TryAdd(type, new FileHash(schemaStructAttr.ClassHash).Hash32);
+                }
+            }
+
             SchemaStructAttribute? schemaStructAttribute = GetAttribute<SchemaStructAttribute>(type);
             if (schemaStructAttribute != null)
             {
                 _schemaSerializedSizeMap.TryAdd(type, schemaStructAttribute.SerializedSize);
                 _schemaHashTypeMap.TryAdd(new FileHash(schemaStructAttribute.ClassHash).Hash32, type);
+                _schemaTypeHashMap.TryAdd(type, new FileHash(schemaStructAttribute.ClassHash).Hash32);
                 _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
                 return;
             }

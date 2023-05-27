@@ -60,15 +60,16 @@ public class FbxHandler
             }
         }
 
-        // for importing to other engines
-        if (InfoHandler != null && part.Material != null) // todo consider why some materials are null
+        if (part.Material != null) // todo consider why some materials are null
         {
-            InfoHandler.AddMaterial(part.Material);
-            InfoHandler.AddPart(part, node.GetName());
+            AddMaterial(mesh, node, index, part.Material);
+            if (InfoHandler != null) // for importing to other engines
+            {
+                InfoHandler.AddMaterial(part.Material);
+                InfoHandler.AddPart(part, node.GetName());
+            }
         }
 
-
-        AddMaterial(mesh, node, index, part.Material);
         AddSmoothing(mesh);
 
         lock (_fbxLock)

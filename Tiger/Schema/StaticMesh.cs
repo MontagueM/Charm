@@ -37,7 +37,7 @@ public class MeshPart
     public List<Vector4> VertexNormals = new List<Vector4>();
     public List<Vector4> VertexTangents = new List<Vector4>();
     public List<Vector4> VertexColours = new List<Vector4>();
-    public Material Material;
+    public Material? Material;
     public int GroupIndex = 0;
 }
 
@@ -70,7 +70,10 @@ public class StaticMesh : Tag<SStaticMesh>
         Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var part in parts)
         {
-            if (part.Material.Hash.IsInvalid()) continue;
+            if (part.Material == null)
+            {
+                continue;
+            }
             part.Material.SaveAllTextures($"{saveDirectory}/Textures");
             if (bSaveShaders)
             {

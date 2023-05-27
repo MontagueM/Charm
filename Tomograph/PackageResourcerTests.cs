@@ -60,7 +60,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests,
     }
 
     [TestMethod]
-    [ExpectedExceptionWithMessage(typeof(ArgumentException), "The package id '{packageId}' is not in the package paths cache")]
+    [ExpectedExceptionWithMessage(typeof(ArgumentException), "The package id '{packageId:x4}' is not in the package paths cache")]
     public void SinglePackage_InvalidPackageObject_InvalidId()
     {
         IPackage package = PackageResourcer.Get().GetPackage(0x1);

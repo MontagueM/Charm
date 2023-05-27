@@ -15,6 +15,10 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
     /// </summary>
     public uint GetHash32(ulong tag64)
     {
+        if (!_map.ContainsKey(tag64))
+        {
+            throw new KeyNotFoundException($"Hash64 {tag64}/{Endian.U64ToString(tag64)} not found in map");
+        }
         return _map[tag64];
     }
 
@@ -33,6 +37,10 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
             IPackage package = PackageResourcer.Get().GetPackage(packageId);
             foreach (Hash64Definition definition in package.GetHash64List())
             {
+                if (definition.Hash64 == 16580767463058767872)
+                {
+                    var a = 0;
+                }
                 _map.TryAdd(definition.Hash64, definition.Hash32);
             }
         });

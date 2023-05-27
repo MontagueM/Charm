@@ -28,4 +28,13 @@ public static class Endian
             retval += b.ToString("X2");
         return retval;
     }
+
+    public static string U64ToString(ulong number)
+    {
+        byte[] bytes = BitConverter.GetBytes(number);
+        string retval = "";
+        foreach (byte b in bytes)
+            retval += b.ToString("X2");
+        return retval;
+    }
 }

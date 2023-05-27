@@ -16,7 +16,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         {
             if (_packagePathsCache == null)
             {
-                _packagePathsCache = new PackagePathsCache(_strategy);
+                throw new NullReferenceException("PackagePathsCache has not been initialized.");
             }
             return _packagePathsCache;
         }
@@ -56,11 +56,11 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return LoadPackageIntoCacheFromDisk(packageId);
     }
 
-    // this method is used by PackagePathsCache, so cannot use itself
+    // // this method is used by PackagePathsCache, so cannot use itself
     public IPackage GetPackage(string packagePath)
     {
         // Don't add to cache as we're getting multiple packages from the same id, in order to identify their patch.
-        return LoadPackageFromDisk(packagePath);
+        return LoadPackageNoCacheFromDisk(packagePath);
     }
 
     // todo this needs to be a producer-consumer style queue thing to avoid locking maybe
@@ -87,7 +87,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return package;
     }
 
-    private Package LoadPackageFromDisk(string packagePath)
+    private Package LoadPackageNoCacheFromDisk(string packagePath)
     {
         Package? package = (Package?)Activator.CreateInstance(_strategy.GetPackageType(), packagePath);
         if (package == null)
@@ -105,13 +105,13 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         Parallel.ForEach(packageIds, packageId => GetPackage(packageId));
     }
 
-    public List<T> GetAllTags<T>() where T : TigerFile
+    public List<T> GetAllFiles<T>() where T : TigerFile
     {
         PackagePathsCache.GetAllPackageIds();
         List<T> tags = new();
         foreach (Package package in _packagesCache.Values)
         {
-            tags.AddRange(package.GetAllTags<T>());
+            tags.AddRange(package.GetAllFiles<T>());
         }
         return tags;
     }
@@ -119,5 +119,16 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     public FileMetadata GetFileMetadata(FileHash fileHash)
     {
         return GetPackage(fileHash.PackageId).GetFileMetadata(fileHash);
+    }
+
+    public List<TigerHash> GetAllHashes<T>() where T : TigerFile
+    {
+        PackagePathsCache.GetAllPackageIds();
+        List<TigerHash> fileHashes = new();
+        foreach (Package package in _packagesCache.Values)
+        {
+            fileHashes.AddRange(package.GetAllHashes<T>());
+        }
+        return fileHashes;
     }
 }

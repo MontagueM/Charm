@@ -117,6 +117,7 @@ public struct PackageHeaderNew : IPackageHeader
     public List<D2FileEntry> GetFileEntries(TigerReader reader)
     {
         List<D2FileEntry> fileEntries = new();
+        // todo this goes via the full deserialization route, which is slow
         foreach (D2FileEntryBitpacked fileEntryBitpacked in PackageTablesData.Value.FileEntries.Enumerate(reader))
         {
             fileEntries.Add(new D2FileEntry(fileEntryBitpacked));

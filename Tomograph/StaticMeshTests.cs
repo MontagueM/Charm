@@ -15,7 +15,17 @@ public class D2WQ_StaticMeshTests : IStaticMeshTests
     private static readonly TestPackage meshPackage = new("w64_city_tower_d2_01ad_7.pkg", 1674718010);
     private static readonly TestPackage meshPackage2 = new("w64_city_tower_d2_02aa_7.pkg", 1674718010);
     private static readonly TestPackage meshPackage3 = new("w64_city_tower_d2_02a9_6.pkg", 1668960051);
+    // for textures
     private static readonly TestPackage meshPackage4 = new("w64_sr_environments_0110_7.pkg", 1674718365);
+    private static readonly TestPackage meshPackage5 = new("w64_sr_environments_01e9_6.pkg", 1668960415);
+    private static readonly TestPackage meshPackage6 = new("w64_sr_environments_01e6_6.pkg", 1668960415);
+    private static readonly TestPackage meshPackage7 = new("w64_sr_environments_01ea_7.pkg", 1674718365);
+    private static readonly TestPackage meshPackage8 = new("w64_sr_globals_011a_7.pkg", 1674717839);
+    private static readonly TestPackage meshPackage9 = new("w64_sr_environments_026f_7.pkg", 1674718365);
+    private static readonly TestPackage meshPackage10 = new("w64_sr_environments_0271_7.pkg", 1674718365);
+    private static readonly TestPackage meshPackage11 = new("w64_sr_environments_01e3_6.pkg", 1668960415);
+    private static readonly TestPackage meshPackage12 = new("w64_sr_fx_010c_7.pkg", 1674717892);
+    private static readonly TestPackage meshPackage13 = new("w64_sr_environments_01e2_7.pkg", 1674718365);
 #pragma warning restore S1144
 
     [TestInitialize]
@@ -48,7 +58,7 @@ public class D2WQ_StaticMeshTests : IStaticMeshTests
         // handler.ExportScene("TestModels/Test.fbx");
 
         string fileHash = "685BD580";
-        StaticMesh mesh = FileResourcer.Get().GetTag<StaticMesh>(fileHash);
+        StaticMesh mesh = FileResourcer.Get().GetFile<StaticMesh>(fileHash);
         List<StaticPart> parts = mesh.Load(ExportDetailLevel.MostDetailed);
         FbxHandler handler = new FbxHandler();
         handler.AddStaticToScene(parts, "Test");

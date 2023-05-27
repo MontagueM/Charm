@@ -19,7 +19,7 @@ public struct SMaterial
     public DynamicArrayLoaded<Vec4> UnkC0;
 
     [SchemaField(0x2B0)]
-    public ShaderBytecode PixelShader;
+    public ShaderBytecode? PixelShader;
     [SchemaField(0x2B8)]
     public DynamicArrayLoaded<TextureTag64> PSTextures;
     [SchemaField(0x2D0)]
