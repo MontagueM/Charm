@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:objects="clr-namespace:Charm.Objects"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="720"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
              Background="{DynamicResource MaterialDesignPaper}"
@@ -35,18 +36,17 @@
         <!-- </StackPanel> -->
 
 
-        <ListBox Grid.Column="0"  Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectionChanged="ListBox_OnSelectionChanged" x:Name="ItemsList">
+            <ListBox ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectionChanged="ListBox_OnSelectionChanged" x:Name="ItemsList">
             <!-- <ListBox.ItemsPanel> -->
             <!--     <ItemsPanelTemplate> -->
             <!--         <VirtualizingStackPanel Orientation="Vertical"/> -->
             <!--     </ItemsPanelTemplate> -->
             <!-- </ListBox.ItemsPanel> -->
             <ListBox.ItemTemplate>
-                <DataTemplate><!-- DataType="{x:Type views:AbstractListItem}"> -->
-                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch">
+                <DataTemplate  DataType="{x:Type objects:ListItem}">
+                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" Height="50">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="12*" />
-                            <ColumnDefinition Width="68*" />
+                            <ColumnDefinition Width="80*" />
                             <ColumnDefinition Width="20*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
@@ -54,10 +54,10 @@
                             <RowDefinition Height="30*" />
                             <RowDefinition Height="30*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="{Binding FontSize}" Text="{Binding HashString}" />
-                        <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Grid.RowSpan="3" TextWrapping="WrapWithOverflow" FontSize="{Binding FontSize}" Text="{Binding Title}" />
-                        <TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource ForegroundColour75}" Text="{Binding Subtitle}" />
-                        <TextBlock Grid.Column="2" Grid.Row="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
+                        <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="{Binding FontSize}" Text="{Binding HashString}" />
+                        <TextBlock Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" TextWrapping="WrapWithOverflow" FontSize="{Binding FontSize}" Text="{Binding Title}" />
+                        <TextBlock Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource ForegroundColour75}" Text="{Binding Subtitle}" />
+                        <TextBlock Grid.Column="1" Grid.Row="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>

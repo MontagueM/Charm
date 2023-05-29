@@ -19,12 +19,12 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         _fileCache.Clear();
     }
 
-    public T GetFile<T>(string fileHash, bool shouldLoad = true) where T : class
+    public T GetFile<T>(string fileHash, bool shouldLoad = true) where T : TigerFile
     {
         return GetFile<T>(new FileHash(fileHash), shouldLoad);
     }
 
-    public T GetFile<T>(FileHash fileHash, bool shouldLoad = true) where T : class
+    public T GetFile<T>(FileHash fileHash, bool shouldLoad = true) where T : TigerFile
     {
         return GetFile(typeof(T), fileHash, shouldLoad);
     }

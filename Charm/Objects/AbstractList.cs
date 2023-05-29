@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Data;
 using Tiger;
 
 namespace Charm.Objects;
@@ -69,24 +73,47 @@ public static class NestedTypeHelpers
     }
 }
 
+public interface IAbstractFileView<in TView, in TData>
+{
+    public abstract void LoadView(TData dataToView);
+}
+
 /// <summary>
 /// Takes some data of type <see cref="TData"/> and generates a display item for a list based on the data given.
 /// On click, it returns a routed  <see cref="TView"/> and populates it with the data.
 /// </summary>
 /// <typeparam name="TData">The type of data type to use for generating the information of this item. Must be a schema struct or class of type <see cref="Tag"/>.</typeparam>
-/// <typeparam name="TView">The type of view this item opens and populates on click. Must be of type <see cref="AbstractFileView"/>.</typeparam>
-public abstract class AbstractListItem<TData> : ListItem
+/// <typeparam name="TView">The type of view this item opens and populates on click. Must be of type <see cref="IAbstractFileView{TData}"/>.</typeparam>
+public abstract class AbstractList<TData> : BaseViewModel, IAbstractFileView<ListControl, TData>
 {
-    public abstract void Initialise(TData data);
+    private ObservableCollection<ListItem> items = new();
+
+    public ObservableCollection<ListItem> Items
+    {
+        get => items;
+        set
+        {
+            items = value;
+            OnPropertyChanged();
+        }
+    }
+    public void LoadView(TData dataToView)
+    {
+        Items = GetAllItems(dataToView);
+    }
+
+    public abstract ObservableCollection<ListItem> GetAllItems(TData data);
 
     public abstract void OnClick();
 }
 
-/// <summary>
-/// Takes some data and
-/// </summary>
-/// <typeparam name="TData"></typeparam>
-public interface AbstractFileView<TData>
+
+public class BaseViewModel : INotifyPropertyChanged
 {
-    public void Initialise(TData data);
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string memberName = "")
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
+    }
 }

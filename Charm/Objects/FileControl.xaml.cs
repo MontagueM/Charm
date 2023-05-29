@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
@@ -16,39 +18,67 @@ namespace Charm.Objects;
 /// <typeparam name="TView">The type of view that is populated after an item has been clicked.</typeparam>
 public partial class FileControl : UserControl
 {
-    private Type _listItemType;
+    // private Type _listItemType;
 
-    /// <summary>
-    /// Type must be an <see cref="AbstractListItem{TData}"/>
-    /// </summary>
-    [DefaultValue(null)]
-    public Type ListItemType
-    {
-        get { return _listItemType; }
-        set
-        {
-            // if (!IsAssignableToGenericType(value, typeof(AbstractListItem<>)))
-            // {
-            //     throw new ArgumentException("Type must be an AbstractListItem<Tag>.", nameof(value));
-            // }
+    public Type ListItemType { get; set; }
+    // {
+    //     get { return _listItemType; }
+    //     set
+    //     {
+    //         // if (!IsAssignableToGenericType(value, typeof(AbstractList<>)))
+    //         // {
+    //         //     throw new ArgumentException("Type must be an AbstractList<Tag>.", nameof(value));
+    //         // }
+    //
+    //         _listItemType = value;
+    //     }
+    // }
+    private bool _hasLoaded = false;
 
-            _listItemType = value;
-        }
-    }
+    private dynamic fileViewModel;
+
+    public Type ViewType { get; set; }
 
     public FileControl()
     {
         InitializeComponent();
     }
 
-    // If we're not already loaded, load the list items
+    // If we're not already loaded, load the list items and prepare the list view to use the file view via dependency injection.
     public void Load()
     {
-        // run the above function but with ListItemType as a generic type for Load<T>
+        if (_hasLoaded)
+        {
+            return;
+        }
+
+        _hasLoaded = true;
+
+        // Presuming ViewType is a ViewModel, we need to find what UserControl type it is
+        // Find the IAbstractFileView interface and get TView from it
+        Type typeOfControl = ViewType.GetInterfaces()
+            .First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IAbstractFileView<,>))
+            .GenericTypeArguments[0];
+
+        fileViewModel = Activator.CreateInstance(ViewType);
+
+        // todo should be UserControl not ListControl
+        ListControl fileView = (ListControl) Activator.CreateInstance(typeOfControl);
+        fileView.DataContext = fileViewModel;
+        fileView.ItemsList.DataContext = fileViewModel;
+
+        FileContentPresenter.Content = fileView;
+
+        // Load list items
         typeof(ListControl)
             .GetMethod("Load")
-            ?.MakeGenericMethod(_listItemType)
-            .Invoke(ListControl, null);
+            ?.MakeGenericMethod(ListItemType)
+            .Invoke(ListControl, new object[] { this });
+    }
+
+    public void LoadFileView<TView, TData>(TView data) where TView : ListItem where TData : TigerFile
+    {
+        fileViewModel.LoadView(FileResourcer.Get().GetFile<TData>(data.Hash));
     }
 
     public static bool IsAssignableToGenericType(Type givenType, Type genericType)

@@ -21,7 +21,7 @@
             <ColumnDefinition Width="65*" />
         </Grid.ColumnDefinitions>
         <objects:ListControl Grid.Column="0" x:Name="ListControl"/>
-        <!-- <ContentPresenter x:Name="FileContentPresenter"/> -->
+        <ContentControl Grid.Column="1" x:Name="FileContentPresenter"/>
     </Grid>
 </UserControl>
 
