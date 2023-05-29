@@ -12,6 +12,9 @@
              TextElement.FontSize="14"
              FontFamily="{materialDesign:MaterialDesignFont}"
              >
+    <UserControl.DataContext>
+        <objects:BaseListViewModel/>
+    </UserControl.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="50*" />
@@ -22,7 +25,7 @@
             <RowDefinition Height="95*" />
         </Grid.RowDefinitions>
 
-        <TextBox Grid.Row="0" Grid.Column="0" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Stretch"
+        <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"
                  TextWrapping="Wrap" VerticalAlignment="Center" FontSize="30" Padding="5,0,5,0"
                  FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36" />
 

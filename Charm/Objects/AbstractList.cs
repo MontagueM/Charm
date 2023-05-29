@@ -1,9 +1,16 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Threading;
+using Microsoft.Xaml.Behaviors.Core;
 using Tiger;
 
 namespace Charm.Objects;
@@ -84,27 +91,70 @@ public interface IAbstractFileView<in TView, in TData>
 /// </summary>
 /// <typeparam name="TData">The type of data type to use for generating the information of this item. Must be a schema struct or class of type <see cref="Tag"/>.</typeparam>
 /// <typeparam name="TView">The type of view this item opens and populates on click. Must be of type <see cref="IAbstractFileView{TData}"/>.</typeparam>
-public abstract class AbstractList<TData> : BaseViewModel, IAbstractFileView<ListControl, TData>
+public abstract class GenericListViewModel<TData> : BaseListViewModel, IAbstractFileView<ListControl, TData>
 {
-    private ObservableCollection<ListItem> items = new();
-
-    public ObservableCollection<ListItem> Items
+    public void LoadView(TData dataToView)
     {
-        get => items;
+        _allItems = GetAllItems(dataToView);
+        RefreshItemList();
+    }
+
+    public abstract HashSet<ListItem> GetAllItems(TData data);
+}
+
+
+public class BaseListViewModel : BaseViewModel
+{
+    public string _searchText = "";
+    public string SearchText
+    {
+        get
+        {
+            return _searchText;
+        }
         set
         {
-            items = value;
+            _searchText = value;
+            RefreshItemList();
+        }
+    }
+
+    public BaseListViewModel()
+    {
+    }
+
+    protected HashSet<ListItem> _allItems = new();
+    private ObservableCollection<ListItem> _items = new();
+    public ObservableCollection<ListItem> Items
+    {
+        get => _items;
+        set
+        {
+            _items = value;
             OnPropertyChanged();
         }
     }
-    public void LoadView(TData dataToView)
+
+    protected void RefreshItemList()
     {
-        Items = GetAllItems(dataToView);
+        var x = SearchText.ToLower();
+        Task.Run(() => FilterItemList(x));
     }
 
-    public abstract ObservableCollection<ListItem> GetAllItems(TData data);
-
-    public abstract void OnClick();
+    private void FilterItemList(string filter)
+    {
+        ConcurrentBag<ListItem> filteredItems = new();
+        Parallel.ForEach(_allItems, item =>
+        {
+            if (item.Title.ToLower().Contains(filter) || item.Hash.ToString().ToLower().Contains(filter))
+            {
+                filteredItems.Add(item);
+            }
+        });
+        var x = filteredItems.ToList();
+        x.Sort((x, y) => x.Hash.CompareTo(y.Hash));
+        Dispatcher.CurrentDispatcher.Invoke(() => Items = new ObservableCollection<ListItem>(x));
+    }
 }
 
 

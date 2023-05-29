@@ -19,7 +19,7 @@
             <TabItem Header="AUDIO">
             </TabItem>
             <TabItem Header="STRINGS">
-                <objects:FileControl ListItemType="{x:Type schema:LocalizedStrings}" ViewType="{x:Type objects:LocalizedStringsList}"/>
+                <objects:FileControl ListItemType="{x:Type schema:LocalizedStrings}" ViewType="{x:Type objects:LocalizedStringsListViewModel}"/>
             </TabItem>
             <TabItem Header="TEXTURES">
                 <!-- <objects:FileControl ListItemType="{x:Type objects:LocalizedStringsItem}" ListFilterType="{x:Type TextureListFilter}"/> -->

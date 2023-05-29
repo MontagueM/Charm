@@ -65,7 +65,6 @@ public partial class FileControl : UserControl
         // todo should be UserControl not ListControl
         ListControl fileView = (ListControl) Activator.CreateInstance(typeOfControl);
         fileView.DataContext = fileViewModel;
-        fileView.ItemsList.DataContext = fileViewModel;
 
         FileContentPresenter.Content = fileView;
 

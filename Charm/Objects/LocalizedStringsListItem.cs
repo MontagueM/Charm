@@ -13,11 +13,11 @@ public static class EnumerableExtensions
     }
 }
 
-public class LocalizedStringsList : AbstractList<LocalizedStrings>
+public class LocalizedStringsListViewModel : GenericListViewModel<LocalizedStrings>
 {
-    public override ObservableCollection<ListItem> GetAllItems(LocalizedStrings data)
+    public override HashSet<ListItem> GetAllItems(LocalizedStrings data)
     {
-        return data.GetAllStringViews().Select(CreateListItem).ToObservableCollection();
+        return data.GetAllStringViews().Select(CreateListItem).ToHashSet();
     }
 
     public ListItem CreateListItem(LocalizedStringView stringView)
@@ -25,7 +25,7 @@ public class LocalizedStringsList : AbstractList<LocalizedStrings>
         return new ListItem {Hash = stringView.StringHash, Title = stringView.RawString};
     }
 
-    public override void OnClick()
-    {
-    }
+    // public override void OnClick()
+    // {
+    // }
 }

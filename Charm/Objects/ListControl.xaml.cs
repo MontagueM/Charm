@@ -52,6 +52,7 @@ public partial class ListControl : UserControl
     public ListControl()
     {
         InitializeComponent();
+        DataContext = new BaseListViewModel();
     }
 
 
@@ -91,35 +92,10 @@ public partial class ListControl : UserControl
         return allHashes.Select(hash => (Activator.CreateInstance(typeof(TView), hash) as ListItem)).ToHashSet();
     }
 
+
     // public void Load()
     // {
     // }
-
-    private void RefreshItemList()
-    {
-        var x = SearchBox.Text.ToLower();
-        Task.Run(() => FilterItemList(x));
-    }
-
-    private void FilterItemList(string filter)
-    {
-        ConcurrentBag<ListItem> filteredItems = new();
-        Parallel.ForEach(_allItems, item =>
-        {
-            if (item.Hash.ToString().ToLower().Contains(filter))
-            {
-                filteredItems.Add(item);
-            }
-        });
-        var x = filteredItems.ToList();
-        x.Sort((x, y) => x.Hash.CompareTo(y.Hash));
-        Dispatcher.Invoke(() => ItemsList.ItemsSource = new ObservableCollection<ListItem>(x));
-    }
-
-    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        RefreshItemList();
-    }
 
     // todo this function should be in a routed view model command
     private void ListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
