@@ -6,14 +6,15 @@ public static class ResourcerStrategyExtensions
 
     public static Type GetPackageType(this TigerStrategy strategy)
     {
-        if (_strategyPackageTypes == null)
-        {
-            FillPackageTypes();
-        }
         return _strategyPackageTypes?[strategy] ?? throw new Exception($"No package type found for strategy {strategy}");
     }
 
-    private static void FillPackageTypes()
+    static ResourcerStrategyExtensions()
+    {
+        FillPackageTypes();
+    }
+
+    public static void FillPackageTypes()
     {
         _strategyPackageTypes = GetPackageTypesMap();
         _strategyPackageTypes.GetFullStrategyMap();

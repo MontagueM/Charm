@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
-using Charm.ViewModels;
+using System.Windows;
+using System.Windows.Controls;
 using Tiger.Schema;
 using Tiger;
 
 namespace Charm.Views;
 
-public class MainMenuViewModel : ViewModelBase
-{
-    public string Hash { get; set; } = "C5E3B080";
-}
 
 public partial class MainMenuView : UserControl
 {

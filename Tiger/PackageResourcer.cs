@@ -105,13 +105,13 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         Parallel.ForEach(packageIds, packageId => GetPackage(packageId));
     }
 
-    public List<T> GetAllFiles<T>() where T : TigerFile
+    public HashSet<T> GetAllFiles<T>() where T : TigerFile
     {
         PackagePathsCache.GetAllPackageIds();
-        List<T> tags = new();
+        HashSet<T> tags = new();
         foreach (Package package in _packagesCache.Values)
         {
-            tags.AddRange(package.GetAllFiles<T>());
+            package.GetAllFiles<T>().ForEach(t => tags.Add(t));
         }
         return tags;
     }
@@ -121,13 +121,13 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return GetPackage(fileHash.PackageId).GetFileMetadata(fileHash);
     }
 
-    public List<TigerHash> GetAllHashes<T>() where T : TigerFile
+    public HashSet<TigerHash> GetAllHashes<T>()
     {
         PackagePathsCache.GetAllPackageIds();
-        List<TigerHash> fileHashes = new();
+        HashSet<TigerHash> fileHashes = new();
         foreach (Package package in _packagesCache.Values)
         {
-            fileHashes.AddRange(package.GetAllHashes<T>());
+            fileHashes.UnionWith(package.GetAllHashes<T>());
         }
         return fileHashes;
     }

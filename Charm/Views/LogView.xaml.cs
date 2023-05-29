@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Windows.Controls;
 using Arithmic;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Tiger;
 
-namespace Charm.Views.Misc;
+namespace Charm.Views;
 
 public partial class LogView : UserControl
 {

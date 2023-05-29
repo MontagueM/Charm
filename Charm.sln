@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resourcer", "Resourcer\Reso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tomograph", "Tomograph\Tomograph.csproj", "{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm2", "Charm2\Charm2.csproj", "{95F6D0DC-FD39-44C3-A915-EEDF6A93F349}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomographData", "TomographData\TomographData.csproj", "{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arithmic", "Arithmic\Arithmic.csproj", "{F7EE1308-38FF-4803-82DD-F2CC7EED58BE}"

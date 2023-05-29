@@ -17,7 +17,7 @@ public class SaveStringsDatabaseCommandlet : ICommandlet
     public void Run(CharmArgs args)
     {
         PackageResourcer resourcer = PackageResourcer.Get();
-        List<LocalizedStrings> tags = resourcer.GetAllFiles<LocalizedStrings>();
+        HashSet<LocalizedStrings> tags = resourcer.GetAllFiles<LocalizedStrings>();
 
         Parallel.ForEach(tags, GetStringsData);
 

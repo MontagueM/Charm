@@ -54,10 +54,10 @@ public class Strategy
     public static TigerStrategy CurrentStrategy { get => _currentStrategy; }
 
     public delegate void UpdateStrategyEventHandler(UpdateStrategyEventArgs e);
-    public static event UpdateStrategyEventHandler OnStrategyChanged = delegate { };
+    public static event UpdateStrategyEventHandler OnStrategyChangedEvent = delegate { };
 
     public delegate void ResetStrategyEventHandler(ResetStrategyEventArgs e);
-    public static event ResetStrategyEventHandler OnStrategyReset = delegate { };
+    public static event ResetStrategyEventHandler OnStrategyResetEvent = delegate { };
 
     static Strategy() { SetStrategy(_defaultStrategy); }
 
@@ -80,7 +80,7 @@ public class Strategy
             throw new ArgumentException($"Game strategy does not exist '{strategy}'");
         }
         _currentStrategy = strategy;
-        OnStrategyChanged.Invoke(new UpdateStrategyEventArgs { NewStrategy = _currentStrategy });
+        OnStrategyChangedEvent.Invoke(new UpdateStrategyEventArgs { NewStrategy = _currentStrategy });
     }
 
     /// <exception cref="ArgumentException">'strategy' does not exist.</exception>
@@ -107,7 +107,7 @@ public class Strategy
 
         if (bResetState)
         {
-            OnStrategyReset.Invoke(new ResetStrategyEventArgs() { StrategyToReset = strategy });
+            OnStrategyResetEvent.Invoke(new ResetStrategyEventArgs() { StrategyToReset = strategy });
         }
     }
 
@@ -273,13 +273,20 @@ public class Strategy
 
         static StrategistSingleton()
         {
-            Strategy.OnStrategyChanged += OnStrategyChanged;
-            Strategy.OnStrategyReset += OnStrategyReset;
         }
 
-        protected StrategistSingleton(TigerStrategy strategy) { _strategy = strategy; }
+        protected StrategistSingleton(TigerStrategy strategy)
+        {
+            _strategy = strategy;
+        }
 
-        private static void OnStrategyChanged(UpdateStrategyEventArgs e)
+        private static void RegisterEvents()
+        {
+            Strategy.OnStrategyChangedEvent += OnStrategyChangedEvent;
+            Strategy.OnStrategyResetEvent += OnStrategyResetEvent;
+        }
+
+        private static void OnStrategyChangedEvent(UpdateStrategyEventArgs e)
         {
             if (e.NewStrategy == TigerStrategy.NONE)
             {
@@ -294,7 +301,7 @@ public class Strategy
             _instance = _strategyInstances[e.NewStrategy];
         }
 
-        private static void OnStrategyReset(ResetStrategyEventArgs e)
+        private static void OnStrategyResetEvent(ResetStrategyEventArgs e)
         {
             if (!_strategyInstances.ContainsKey(e.StrategyToReset))
             {

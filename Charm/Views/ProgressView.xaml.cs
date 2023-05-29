@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
 using Arithmic;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avalonia.Threading;
 
 namespace Charm.Views;
 
@@ -22,13 +20,13 @@ public partial class ProgressView : UserControl
 
     public void Hide()
     {
-        IsVisible = false;
+        Visibility = Visibility.Hidden;
     }
 
     public void Show()
     {
         // Grid.Background = new SolidColorBrush(new Color {A = 0, B = 0, G = 0, R = 0});
-        IsVisible = true;
+        Visibility = Visibility.Visible;
     }
 
     private void UpdateProgress()
@@ -41,7 +39,7 @@ public partial class ProgressView : UserControl
     {
         this.bLogProgress = bLogProgress;
         this.bUseFullBar = bUseFullBar;
-        Dispatcher.UIThread.InvokeAsync(() =>
+        Dispatcher.InvokeAsync(() =>
         {
             TotalStageCount = progressStages.Count;
             _progressStages = new Queue<string>();
@@ -57,7 +55,7 @@ public partial class ProgressView : UserControl
 
     public void CompleteStage()
     {
-        Dispatcher.UIThread.InvokeAsync(() =>
+        Dispatcher.InvokeAsync(() =>
         {
             string removed = _progressStages.Dequeue();
             if (bLogProgress)

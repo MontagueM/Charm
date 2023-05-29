@@ -2,6 +2,7 @@
 
 namespace Tiger.Schema;
 
+[InitializeAfter(typeof(PackageResourcer))]
 public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
 {
     private readonly ConcurrentDictionary<ulong, uint> _map = new();
@@ -49,5 +50,16 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
     protected override void Reset()
     {
         _map.Clear();
+    }
+}
+
+[AttributeUsage(AttributeTargets.Class)]
+public class InitializeAfterAttribute : Attribute
+{
+    public Type TypeToInitializeAfter { get; }
+
+    public InitializeAfterAttribute(Type typeToInitializeAfter)
+    {
+        TypeToInitializeAfter = typeToInitializeAfter;
     }
 }

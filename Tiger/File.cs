@@ -11,7 +11,7 @@
 [SchemaType(0x4)]
 public class TigerFile
 {
-    public FileHash Hash;
+    public readonly FileHash Hash;
     private byte[]? _data = null;
 
     public TigerFile(FileHash hash)
@@ -37,6 +37,21 @@ public class TigerFile
         }
 
         return _data;
+    }
+
+    public override int GetHashCode()
+    {
+        return (int)Hash.Hash32;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is TigerFile other)
+        {
+            return Hash == other.Hash;
+        }
+
+        return false;
     }
 }
 

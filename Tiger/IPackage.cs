@@ -129,7 +129,7 @@ public abstract class Package : IPackage
         return tags;
     }
 
-    public IEnumerable<TigerHash> GetAllHashes<T>() where T : TigerFile
+    public HashSet<FileHash> GetAllHashes<T>()
     {
         if (!SchemaDeserializer.Get().TryGetSchemaTypeHash<T>(out uint referenceHash))
         {
@@ -145,7 +145,7 @@ public abstract class Package : IPackage
             }
         });
 
-        return hashes;
+        return hashes.ToHashSet();
     }
 
     private T? GetAttribute<T>(ICustomAttributeProvider var) where T : StrategyAttribute
@@ -342,6 +342,10 @@ public abstract class Package : IPackage
 
     private byte[] DecryptAndDecompressBlockBufferIfRequired(byte[] blockBuffer, D2BlockEntry blockEntry)
     {
+        if ((blockEntry.BitFlag & 0x8) == 8)
+        {
+            return new byte[blockBuffer.Length];
+        }
         byte[] decryptedBuffer;
         if ((blockEntry.BitFlag & 0x2) == 2)
         {

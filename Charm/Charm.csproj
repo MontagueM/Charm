@@ -8,19 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Page Update="Styles\BaseResources.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <XamlRuntime>Wpf</XamlRuntime>
-        <SubType>Designer</SubType>
-      </Page>
-      <Page Update="Styles\FluentControlResources.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <XamlRuntime>Wpf</XamlRuntime>
-        <SubType>Designer</SubType>
-      </Page>
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
       <PackageReference Include="ShowMeTheXAML.MSBuild" Version="2.0.0" />
     </ItemGroup>

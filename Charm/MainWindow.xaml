@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Charm"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:views="clr-namespace:Charm.Views"
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="1080"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -20,23 +21,16 @@
             <!-- <RowDefinition Height="3*" /> -->
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <TabControl Grid.Row="0" x:Name="MainTabControl" materialDesign:RippleAssist.IsDisabled="True">
+        <views:CharmTabControl Grid.Row="0" x:Name="MainTabControl" materialDesign:RippleAssist.IsDisabled="True">
+            <TabItem Header="LISTS">
+                <views:ManyListsView/>
+            </TabItem>
             <TabItem Header="MAIN MENU" x:Name="MainMenuTab">
                 <!-- <views:MainMenuView/> -->
             </TabItem>
             <TabItem Header="ACTIVITIES">
             </TabItem>
-            <TabItem Header="STATICS">
-            </TabItem>
-            <TabItem Header="STRINGS">
-                <!-- <strings:StringsView/> -->
-            </TabItem>
-            <TabItem Header="ENTITIES">
-            </TabItem>
-            <TabItem Header="AUDIO">
-            </TabItem>
-            <TabItem Header="TEXTURES">
-            </TabItem>
+
             <TabItem Header="" x:Name="Spacer">
             </TabItem>
             <TabItem Header="CONFIG">
@@ -45,7 +39,10 @@
             <TabItem Header="LOG">
                 <!-- <misc:LogView/> -->
             </TabItem>
-        </TabControl>
+            <TabItem Header="DEV">
+                <!-- <views:ConfigView/> -->
+            </TabItem>
+        </views:CharmTabControl>
         <!-- <views:ProgressView x:Name="ProgressView" Grid.Row="0"/> -->
     </Grid>
 </Window>
