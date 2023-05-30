@@ -42,11 +42,11 @@ public enum ETagListType
 /// </summary>
 public partial class ListControl : UserControl
 {
-    HashSet<ListItem> _allItems = new HashSet<ListItem>();
-    private bool _hasLoaded = false;
-    public ObservableCollection<ListItem> Items { get; set; } = new ObservableCollection<ListItem>();
+    // HashSet<ListItem> _allItems = new HashSet<ListItem>();
+    // private bool _hasLoaded = false;
+    // public ObservableCollection<ListItem> Items { get; set; } = new ObservableCollection<ListItem>();
     // todo should be moved out into an abstraction which specifically wants to make it so clicking the button causes the file view to load.
-    private FileControl? _parentFileControl;
+    // private FileControl? _parentFileControl;
     private Type _typeOfData;
 
     public ListControl()
@@ -56,32 +56,32 @@ public partial class ListControl : UserControl
     }
 
 
-    public void Load<T>(FileControl fileControl)
-    {
-        if (_hasLoaded)
-        {
-            return;
-        }
-
-        _hasLoaded = true;
-        _parentFileControl = fileControl;
-
-        LoadAllItems<T>();
-    }
-
-    private void LoadAllItems<T>()
-    {
-        _typeOfData = typeof(T);
-        Type typeOfData = NestedTypeHelpers.FindNestedGenericType<T>();
-        // Type typeOfData = (Type)typeof(T).BaseType.GetField("TypeOfData", BindingFlags.Static | BindingFlags.Public).GetValue(null);
-
-        _allItems = (HashSet<ListItem>)typeof(ListControl)
-            .GetMethod("GetAllItems", BindingFlags.NonPublic | BindingFlags.Static)
-            ?.MakeGenericMethod(typeof(ListItem), typeOfData)
-            .Invoke(PackageResourcer.Get(), null);
-
-        ItemsList.ItemsSource = new ObservableCollection<ListItem>(_allItems);
-    }
+    // public void Load<T>(FileControl fileControl)
+    // {
+    //     if (_hasLoaded)
+    //     {
+    //         return;
+    //     }
+    //
+    //     _hasLoaded = true;
+    //     _parentFileControl = fileControl;
+    //
+    //     LoadAllItems<T>();
+    // }
+    //
+    // private void LoadAllItems<T>()
+    // {
+    //     _typeOfData = typeof(T);
+    //     Type typeOfData = NestedTypeHelpers.FindNestedGenericType<T>();
+    //     // Type typeOfData = (Type)typeof(T).BaseType.GetField("TypeOfData", BindingFlags.Static | BindingFlags.Public).GetValue(null);
+    //
+    //     _allItems = (HashSet<ListItem>)typeof(ListControl)
+    //         .GetMethod("GetAllItems", BindingFlags.NonPublic | BindingFlags.Static)
+    //         ?.MakeGenericMethod(typeof(ListItem), typeOfData)
+    //         .Invoke(PackageResourcer.Get(), null);
+    //
+    //     ItemsList.ItemsSource = new ObservableCollection<ListItem>(_allItems);
+    // }
 
     // todo make overridable in different list types
     private static HashSet<ListItem> GetAllItems<TView, TData>() where TView : ListItem
@@ -97,12 +97,9 @@ public partial class ListControl : UserControl
     // {
     // }
 
-    // todo this function should be in a routed view model command
-    private void ListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        typeof(FileControl)
-            .GetMethod("LoadFileView", BindingFlags.Public | BindingFlags.Instance)
-            ?.MakeGenericMethod(typeof(ListItem), _typeOfData)
-            .Invoke(_parentFileControl, new []{(sender as ListBox).SelectedItem});
-    }
+//     // todo this function should be in a routed view model command
+//     private void ListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+//     {
+// ;
+//     }
 }

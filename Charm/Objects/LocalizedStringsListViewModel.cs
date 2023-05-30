@@ -5,14 +5,6 @@ using Tiger.Schema;
 
 namespace Charm.Objects;
 
-public static class EnumerableExtensions
-{
-    public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> source)
-    {
-        return new ObservableCollection<T>(source);
-    }
-}
-
 public class LocalizedStringsListViewModel : GenericListViewModel<LocalizedStrings>
 {
     public override HashSet<ListItem> GetAllItems(LocalizedStrings data)
@@ -24,8 +16,9 @@ public class LocalizedStringsListViewModel : GenericListViewModel<LocalizedStrin
     {
         return new ListItem {Hash = stringView.StringHash, Title = stringView.RawString};
     }
+}
 
-    // public override void OnClick()
-    // {
-    // }
+public class DefaultListViewModel : BaseListViewModel
+{
+
 }

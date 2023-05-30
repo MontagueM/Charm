@@ -39,7 +39,7 @@
         <!-- </StackPanel> -->
 
 
-            <ListBox ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectionChanged="ListBox_OnSelectionChanged" x:Name="ItemsList">
+            <ListBox ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" x:Name="ItemsList">
             <!-- <ListBox.ItemsPanel> -->
             <!--     <ItemsPanelTemplate> -->
             <!--         <VirtualizingStackPanel Orientation="Vertical"/> -->

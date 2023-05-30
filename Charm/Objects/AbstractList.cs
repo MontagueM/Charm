@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -20,8 +21,8 @@ public class ListItem
 {
     public TigerHash Hash { get; set; }
     public string HashString { get => $"[{Hash}]"; }
-    public string Title { get; set; }
-    public string Subtitle { get; set; }
+    public string Title { get; set; } = "";
+    public string Subtitle { get; set; } = "";
 
     public ListItem()
     {
@@ -119,9 +120,6 @@ public class BaseListViewModel : BaseViewModel
         }
     }
 
-    public BaseListViewModel()
-    {
-    }
 
     protected HashSet<ListItem> _allItems = new();
     private ObservableCollection<ListItem> _items = new();
@@ -135,10 +133,51 @@ public class BaseListViewModel : BaseViewModel
         }
     }
 
+    private Type _typeOfData;
+    private ListItem? _selectedItem;
+    public ListItem SelectedItem
+    {
+        get
+        {
+            return _selectedItem;
+        }
+        set
+        {
+            _selectedItem = value;
+            if (_selectedItem != null)
+            {
+                // todo make this generic/virtual, currently just asks FileControl to LoadFileView
+                typeof(FileControl)
+                    .GetMethod("LoadFileView", BindingFlags.Public | BindingFlags.Instance)
+                    ?.MakeGenericMethod(typeof(ListItem), _typeOfData)
+                    .Invoke(_parentFileControl, new[] {_selectedItem});
+            }
+        }
+    }
+
+    private FileControl? _parentFileControl;
+
+
+    /// <summary>
+    /// Load view with nothing but a type to fill a list from.
+    /// </summary>
+    public void LoadView<TView, TData>(FileControl fileControl)
+    {
+        _typeOfData = typeof(TData);
+        _parentFileControl = fileControl;
+        _allItems = GetAllItems<TView, TData>();
+        RefreshItemList();
+    }
+
+    public HashSet<ListItem> GetAllItems<TView, TData>()
+    {
+        var allHashes = PackageResourcer.Get().GetAllHashes<TData>();
+        return allHashes.Select(hash => (Activator.CreateInstance(typeof(TView), hash) as ListItem)).ToHashSet();
+    }
+
     protected void RefreshItemList()
     {
-        var x = SearchText.ToLower();
-        Task.Run(() => FilterItemList(x));
+        Task.Run(() => FilterItemList(SearchText.ToLower()));
     }
 
     private void FilterItemList(string filter)

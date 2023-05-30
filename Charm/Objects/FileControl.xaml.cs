@@ -20,7 +20,10 @@ public partial class FileControl : UserControl
 {
     // private Type _listItemType;
 
-    public Type ListItemType { get; set; }
+    public Type ListItemType { get; set; } = typeof(ListItem);
+
+    public Type DataType { get; set; }
+
     // {
     //     get { return _listItemType; }
     //     set
@@ -68,11 +71,14 @@ public partial class FileControl : UserControl
 
         FileContentPresenter.Content = fileView;
 
+        BaseListViewModel listViewModel = new BaseListViewModel();
+        ListControl.DataContext = listViewModel;
+
         // Load list items
-        typeof(ListControl)
-            .GetMethod("Load")
-            ?.MakeGenericMethod(ListItemType)
-            .Invoke(ListControl, new object[] { this });
+        typeof(BaseListViewModel)
+            .GetMethod("LoadView", BindingFlags.Public | BindingFlags.Instance)
+            ?.MakeGenericMethod(ListItemType, DataType)
+            .Invoke(listViewModel, new object[] { this });
     }
 
     public void LoadFileView<TView, TData>(TView data) where TView : ListItem where TData : TigerFile
