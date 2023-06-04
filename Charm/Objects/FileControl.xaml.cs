@@ -20,7 +20,7 @@ public partial class FileControl : UserControl
 {
     // private Type _listItemType;
 
-    public Type ListItemType { get; set; } = typeof(ListItem);
+    public Type ListItemType { get; set; } = typeof(ListItemModel);
 
     public Type DataType { get; set; }
 
@@ -81,7 +81,7 @@ public partial class FileControl : UserControl
             .Invoke(listViewModel, new object[] { this });
     }
 
-    public void LoadFileView<TView, TData>(TView data) where TView : ListItem where TData : TigerFile
+    public void LoadFileView<TView, TData>(TView data) where TView : ListItemModel where TData : TigerFile
     {
         fileViewModel.LoadView(FileResourcer.Get().GetFile<TData>(data.Hash));
     }

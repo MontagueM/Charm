@@ -26,8 +26,16 @@
         </Grid.RowDefinitions>
 
         <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"
-                 TextWrapping="Wrap" VerticalAlignment="Center" FontSize="30" Padding="5,0,5,0"
-                 FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36" />
+                 TextWrapping="Wrap" VerticalAlignment="Center" FontSize="24" BorderBrush="{StaticResource ForegroundColour80}" BorderThickness="1"
+                 FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36"
+                 Background="{StaticResource BackgroundColour50}"
+                 materialDesign:HintAssist.Hint="Search"/>
+
+        <materialDesign:PopupBox StaysOpen="True" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0" HorizontalAlignment="Left" Background="Transparent" BorderBrush="{StaticResource ForegroundColour70}">
+            <StackPanel Orientation="Vertical">
+                <CheckBox Content=""/>
+            </StackPanel>
+        </materialDesign:PopupBox>
 
         <!-- <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,0"> -->
         <!--     <CheckBox Checked="TrimCheckbox_OnChecked" Unchecked="TrimCheckbox_OnUnchecked" x:Name="TrimCheckbox" -->
@@ -39,31 +47,12 @@
         <!-- </StackPanel> -->
 
 
-            <ListBox ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" x:Name="ItemsList">
-            <!-- <ListBox.ItemsPanel> -->
-            <!--     <ItemsPanelTemplate> -->
-            <!--         <VirtualizingStackPanel Orientation="Vertical"/> -->
-            <!--     </ItemsPanelTemplate> -->
-            <!-- </ListBox.ItemsPanel> -->
-            <ListBox.ItemTemplate>
-                <DataTemplate  DataType="{x:Type objects:ListItem}">
-                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" Height="50">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80*" />
-                            <ColumnDefinition Width="20*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="40*" />
-                            <RowDefinition Height="30*" />
-                            <RowDefinition Height="30*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="{Binding FontSize}" Text="{Binding HashString}" />
-                        <TextBlock Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" TextWrapping="WrapWithOverflow" FontSize="{Binding FontSize}" Text="{Binding Title}" />
-                        <TextBlock Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource ForegroundColour75}" Text="{Binding Subtitle}" />
-                        <TextBlock Grid.Column="1" Grid.Row="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
+            <ListBox ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" x:Name="ItemsList">
+                <!-- <ListBox.ItemTemplate> -->
+            <!--     <DataTemplate DataType="{x:Type objects:ListItemModel}> -->
+            <!-- -->
+            <!--     </DataTemplate> -->
+            <!-- </ListBox.ItemTemplate> -->
             <!-- <ListBoxItem/> -->
         </ListBox>
     </Grid>

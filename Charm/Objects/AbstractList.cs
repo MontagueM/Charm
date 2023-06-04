@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -17,18 +18,18 @@ using Tiger;
 namespace Charm.Objects;
 
 
-public class ListItem
+public class ListItemModel
 {
     public TigerHash Hash { get; set; }
     public string HashString { get => $"[{Hash}]"; }
     public string Title { get; set; } = "";
     public string Subtitle { get; set; } = "";
 
-    public ListItem()
+    public ListItemModel()
     {
     }
 
-    public ListItem(TigerHash hash)
+    public ListItemModel(TigerHash hash)
     {
         Hash = hash;
     }
@@ -100,7 +101,7 @@ public abstract class GenericListViewModel<TData> : BaseListViewModel, IAbstract
         RefreshItemList();
     }
 
-    public abstract HashSet<ListItem> GetAllItems(TData data);
+    public abstract HashSet<ListItemModel> GetAllItems(TData data);
 }
 
 
@@ -121,9 +122,9 @@ public class BaseListViewModel : BaseViewModel
     }
 
 
-    protected HashSet<ListItem> _allItems = new();
-    private ObservableCollection<ListItem> _items = new();
-    public ObservableCollection<ListItem> Items
+    protected HashSet<ListItemModel> _allItems = new();
+    private ObservableCollection<ListItemModel> _items = new();
+    public ObservableCollection<ListItemModel> Items
     {
         get => _items;
         set
@@ -134,8 +135,8 @@ public class BaseListViewModel : BaseViewModel
     }
 
     private Type _typeOfData;
-    private ListItem? _selectedItem;
-    public ListItem SelectedItem
+    private ListItemModel? _selectedItem;
+    public ListItemModel SelectedItem
     {
         get
         {
@@ -149,9 +150,17 @@ public class BaseListViewModel : BaseViewModel
                 // todo make this generic/virtual, currently just asks FileControl to LoadFileView
                 typeof(FileControl)
                     .GetMethod("LoadFileView", BindingFlags.Public | BindingFlags.Instance)
-                    ?.MakeGenericMethod(typeof(ListItem), _typeOfData)
+                    ?.MakeGenericMethod(typeof(ListItemModel), _typeOfData)
                     .Invoke(_parentFileControl, new[] {_selectedItem});
             }
+        }
+    }
+
+    public DataTemplate ItemTemplate
+    {
+        get
+        {
+            return new DefaultListItem();
         }
     }
 
@@ -169,10 +178,11 @@ public class BaseListViewModel : BaseViewModel
         RefreshItemList();
     }
 
-    public HashSet<ListItem> GetAllItems<TView, TData>()
+    public HashSet<ListItemModel> GetAllItems<TView, TData>()
     {
+        // todo packages?
         var allHashes = PackageResourcer.Get().GetAllHashes<TData>();
-        return allHashes.Select(hash => (Activator.CreateInstance(typeof(TView), hash) as ListItem)).ToHashSet();
+        return allHashes.Select(hash => (Activator.CreateInstance(typeof(TView), hash) as ListItemModel)).ToHashSet();
     }
 
     protected void RefreshItemList()
@@ -182,7 +192,7 @@ public class BaseListViewModel : BaseViewModel
 
     private void FilterItemList(string filter)
     {
-        ConcurrentBag<ListItem> filteredItems = new();
+        ConcurrentBag<ListItemModel> filteredItems = new();
         Parallel.ForEach(_allItems, item =>
         {
             if (item.Title.ToLower().Contains(filter) || item.Hash.ToString().ToLower().Contains(filter))
@@ -192,7 +202,7 @@ public class BaseListViewModel : BaseViewModel
         });
         var x = filteredItems.ToList();
         x.Sort((x, y) => x.Hash.CompareTo(y.Hash));
-        Dispatcher.CurrentDispatcher.Invoke(() => Items = new ObservableCollection<ListItem>(x));
+        Dispatcher.CurrentDispatcher.Invoke(() => Items = new ObservableCollection<ListItemModel>(x));
     }
 }
 

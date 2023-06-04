@@ -15,18 +15,18 @@
              TextElement.FontSize="14"
              FontFamily="{materialDesign:MaterialDesignFont}">
     <Grid>
-        <local:CharmTabControl>
+        <TabControl SelectionChanged="Selector_OnSelectionChanged">
             <TabItem Header="AUDIO">
             </TabItem>
             <TabItem Header="STRINGS">
-                <objects:FileControl DataType="{x:Type schema:LocalizedStrings}" ViewType="{x:Type objects:LocalizedStringsListViewModel}"/>
+                <objects:FileControl DataType="{x:Type schema:LocalizedStrings}" ViewType="{x:Type objects:LocalizedStringsListViewModel}" Padding="0,1,0,0"/>
             </TabItem>
             <TabItem Header="TEXTURES">
                 <!-- <objects:FileControl ListItemType="{x:Type objects:LocalizedStringsItem}" ListFilterType="{x:Type TextureListFilter}"/> -->
             </TabItem>
             <TabItem Header="STATICS">
             </TabItem>
-        </local:CharmTabControl>
+        </TabControl>
     </Grid>
 </UserControl>
 

@@ -56,7 +56,7 @@ namespace Charm
 
             if (Commandlet.RunCommandlet())
             {
-                return;
+                Environment.Exit(0);
             }
         }
 

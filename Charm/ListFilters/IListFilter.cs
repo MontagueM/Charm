@@ -10,7 +10,7 @@ public interface IListFilter
     /// </summary>
     /// <param name="item"></param>
     /// <returns></returns>
-    public bool ShouldAddItem(ListItem item);
+    public bool ShouldAddItem(ListItemModel item);
 
     public List<IListFilterSwitch> Switches { get; }
 }

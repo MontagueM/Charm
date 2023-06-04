@@ -7,7 +7,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:views="clr-namespace:Charm.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1080"
+        Title="Charm" Height="1080" Width="1920"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Medium"
@@ -21,7 +21,11 @@
             <!-- <RowDefinition Height="3*" /> -->
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <views:CharmTabControl Grid.Row="0" x:Name="MainTabControl" materialDesign:RippleAssist.IsDisabled="True">
+        <TabControl Grid.Row="0" x:Name="MainTabControl"
+                    materialDesign:RippleAssist.IsDisabled="True"
+                    materialDesign:ColorZoneAssist.Mode="Custom"
+                    materialDesign:ColorZoneAssist.Background="{StaticResource BackgroundColour7}"
+                    materialDesign:ColorZoneAssist.Foreground="{StaticResource ForegroundColour90}">
             <TabItem Header="LISTS">
                 <views:ManyListsView/>
             </TabItem>
@@ -42,7 +46,7 @@
             <TabItem Header="DEV">
                 <!-- <views:ConfigView/> -->
             </TabItem>
-        </views:CharmTabControl>
-        <!-- <views:ProgressView x:Name="ProgressView" Grid.Row="0"/> -->
+        </TabControl>
+           <!-- <views:ProgressView x:Name="ProgressView" Grid.Row="0"/> -->
     </Grid>
 </Window>

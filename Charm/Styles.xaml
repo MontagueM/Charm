@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime">
     <!-- Numbers come from the luminance -->
     <Brush x:Key="BackgroundColour7">#121212</Brush>
     <Color x:Key="BackgroundColour7C">#121212</Color>
@@ -17,5 +18,8 @@
     <Brush x:Key="ForegroundColour50">#808080</Brush>
 
     <Brush x:Key="AccentColour">#4d56fc</Brush>
+
+    <!-- IconSize is the size of the icons in the toolbar -->
+    <system:Double x:Key="IconSize">16</system:Double>
 </ResourceDictionary>
 

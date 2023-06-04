@@ -2,7 +2,7 @@
 
 namespace Tiger.Commandlets;
 
-public class FindBytesInFilesCommandlet : ICommandlet
+public class GenerateFileReferenceGraphCommandlet : ICommandlet
 {
     private string bytesStr;
     private byte[] bytes;
