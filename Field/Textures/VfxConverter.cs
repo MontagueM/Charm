@@ -58,6 +58,7 @@ COMMON
 {
 	#include ""common/shared.hlsl""
     //translucent
+    #define CUSTOM_MATERIAL_INPUTS
     #define USES_HIGH_QUALITY_REFLECTIONS
 }
 
@@ -570,15 +571,13 @@ PS
         
         float smoothness = saturate(8 * ({(bFixRoughness ? "0" : "normal_length")} - 0.375)); 
         
-        Material mat;
-        mat.Albedo = o0.xyz;
-        mat.Normal = TransformNormal( i, DecodeNormal( normal.xyz ) );
-        mat.Roughness = 1 - smoothness;
-        mat.Metalness = saturate(o2.x);
-        mat.AmbientOcclusion = saturate(o2.y * 2);
-        mat.TintMask = 1;
-        mat.Opacity = alpha;
-        mat.Emission = clamp((o2.y - 0.5) * 2 * 6 * mat.Albedo, 0, 100);
+        Material mat = Material::From(i, 
+                    float4(o0.xyz, alpha), 
+                    float4(normal.xyz, 1), 
+                    float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), 
+                    float3( 1.0f, 1.0f, 1.0f ), 
+                    clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100));
+
         mat.Transmission = o2.z;
 
         if(g_bDiffuse)
