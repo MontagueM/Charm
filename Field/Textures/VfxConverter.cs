@@ -610,9 +610,7 @@ PS
             mat.Emission = alpha;
         }}
 
-        ShadingModelValveStandard sm;
-		
-        return FinalizePixelMaterial( i, mat, sm );
+        return ShadingModelStandard::Shade(i, mat);
     }}
 }}";
  
