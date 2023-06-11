@@ -47,13 +47,79 @@
         <!-- </StackPanel> -->
 
 
-            <ListBox ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" x:Name="ItemsList">
-                <!-- <ListBox.ItemTemplate> -->
-            <!--     <DataTemplate DataType="{x:Type objects:ListItemModel}> -->
-            <!-- -->
-            <!--     </DataTemplate> -->
-            <!-- </ListBox.ItemTemplate> -->
-            <!-- <ListBoxItem/> -->
+        <ListBox d:DataContext="{objects:MockListControl}" ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" x:Name="ItemsList">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BackgroundColour50}"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="Padding" Value="3"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.Resources>
+                <DataTemplate DataType="{x:Type objects:HashListItemModel}">
+                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" Height="50">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80*" />
+                            <ColumnDefinition Width="20*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="70*" />
+                            <RowDefinition Height="30*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="32" Text="{Binding Hash}" />
+                        <TextBlock Grid.Column="1" Grid.Row="1" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type objects:TitleListItemModel}">
+                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" Height="50">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80*" />
+                            <ColumnDefinition Width="20*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40*" />
+                            <RowDefinition Height="30*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="{Binding FontSize}" Text="{Binding HashString}" />
+                        <TextBlock Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" TextWrapping="WrapWithOverflow" FontSize="{Binding FontSize}" Text="{Binding Title}" />
+                        <TextBlock Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource ForegroundColour75}" Text="{Binding Subtitle}" />
+                        <TextBlock Grid.Column="1" Grid.Row="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type objects:LongTextListItemModel}">
+                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" MinHeight="30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80*" />
+                            <ColumnDefinition Width="20*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="70*" />
+                            <RowDefinition Height="30*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" TextWrapping="WrapWithOverflow" FontSize="{Binding FontSize}" Text="{Binding Text}" />
+                        <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" TextAlignment="Right" Foreground="{StaticResource ForegroundColour70}" FontSize="{Binding FontSize}" Text="{Binding HashString}" />
+                        <TextBlock Grid.Column="1" Grid.Row="1" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type objects:TitleSubtitleListItemModel}">
+                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" Height="50">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80*" />
+                            <ColumnDefinition Width="20*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40*" />
+                            <RowDefinition Height="30*" />
+                            <RowDefinition Height="30*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="{Binding FontSize}" Text="{Binding HashString}" />
+                        <TextBlock Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" TextWrapping="WrapWithOverflow" FontSize="{Binding FontSize}" Text="{Binding Title}" />
+                        <TextBlock Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource ForegroundColour75}" Text="{Binding Subtitle}" />
+                        <TextBlock Grid.Column="1" Grid.Row="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.Resources>
         </ListBox>
     </Grid>
 </UserControl>

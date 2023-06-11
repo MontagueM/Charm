@@ -6,7 +6,7 @@ namespace Charm.ListFilters;
 
 public class DefaultListFilter : IListFilter
 {
-    public bool ShouldAddItem(ListItemModel item)
+    public bool ShouldAddItem(HashListItemModel item)
     {
         return true;
     }

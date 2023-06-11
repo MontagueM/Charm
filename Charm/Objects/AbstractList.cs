@@ -18,20 +18,64 @@ using Tiger;
 namespace Charm.Objects;
 
 
-public class ListItemModel
+public class HashListItemModel
 {
-    public TigerHash Hash { get; set; }
+    public TigerHash Hash { get; set; } = new();
     public string HashString { get => $"[{Hash}]"; }
-    public string Title { get; set; } = "";
-    public string Subtitle { get; set; } = "";
+    public string Type { get; set; } = "Type";
 
-    public ListItemModel()
+    public HashListItemModel()
     {
     }
 
-    public ListItemModel(TigerHash hash)
+    public HashListItemModel(TigerHash hash, string typeName)
     {
         Hash = hash;
+
+        // if multiple capital letters in typeName e.g. 'LocalizedStrings', split to 'Localized Strings'
+        if (typeName.Length > 1 && typeName.Skip(1).Any(char.IsUpper))
+        {
+            Type = string.Concat(typeName.Select(x => char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+        }
+        else
+        {
+            Type = typeName;
+        }
+    }
+
+    public virtual bool ShouldFilterKeep(string searchText)
+    {
+        return HashString.Contains(searchText, StringComparison.OrdinalIgnoreCase) || Type.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+public class TitleListItemModel : HashListItemModel
+{
+    public string Title { get; set; } = "Title";
+
+    public override bool ShouldFilterKeep(string searchText)
+    {
+        return base.ShouldFilterKeep(searchText) || Title.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+public class TitleSubtitleListItemModel : TitleListItemModel
+{
+    public string Subtitle { get; set; } = "Subtitle";
+
+    public override bool ShouldFilterKeep(string searchText)
+    {
+        return base.ShouldFilterKeep(searchText) || Subtitle.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+public class LongTextListItemModel : HashListItemModel
+{
+    public string Text { get; set; } = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris";
+
+    public override bool ShouldFilterKeep(string searchText)
+    {
+        return base.ShouldFilterKeep(searchText) || Text.Contains(searchText, StringComparison.OrdinalIgnoreCase);
     }
 }
 
@@ -101,7 +145,7 @@ public abstract class GenericListViewModel<TData> : BaseListViewModel, IAbstract
         RefreshItemList();
     }
 
-    public abstract HashSet<ListItemModel> GetAllItems(TData data);
+    public abstract HashSet<HashListItemModel> GetAllItems(TData data);
 }
 
 
@@ -122,9 +166,9 @@ public class BaseListViewModel : BaseViewModel
     }
 
 
-    protected HashSet<ListItemModel> _allItems = new();
-    private ObservableCollection<ListItemModel> _items = new();
-    public ObservableCollection<ListItemModel> Items
+    protected HashSet<HashListItemModel> _allItems = new();
+    private ObservableCollection<HashListItemModel> _items = new();
+    public ObservableCollection<HashListItemModel> Items
     {
         get => _items;
         set
@@ -135,8 +179,8 @@ public class BaseListViewModel : BaseViewModel
     }
 
     private Type _typeOfData;
-    private ListItemModel? _selectedItem;
-    public ListItemModel SelectedItem
+    private HashListItemModel? _selectedItem;
+    public HashListItemModel SelectedItem
     {
         get
         {
@@ -145,12 +189,12 @@ public class BaseListViewModel : BaseViewModel
         set
         {
             _selectedItem = value;
-            if (_selectedItem != null)
+            if (_selectedItem != null && _parentFileControl != null)
             {
                 // todo make this generic/virtual, currently just asks FileControl to LoadFileView
                 typeof(FileControl)
                     .GetMethod("LoadFileView", BindingFlags.Public | BindingFlags.Instance)
-                    ?.MakeGenericMethod(typeof(ListItemModel), _typeOfData)
+                    ?.MakeGenericMethod(typeof(HashListItemModel), _typeOfData)
                     .Invoke(_parentFileControl, new[] {_selectedItem});
             }
         }
@@ -160,8 +204,20 @@ public class BaseListViewModel : BaseViewModel
     {
         get
         {
-            return new DefaultListItem();
+            // var x = new DefaultListItem();
+            // x.DataType = typeof(HashListItemModel);
+            return ConvertUserControlToDataTemplate<DefaultListItemTemplate>();
         }
+    }
+
+    public DataTemplate ListItemTemplate { get; }
+
+    public DataTemplate ConvertUserControlToDataTemplate<T>()
+    {
+        DataTemplate dataTemplate = new() { VisualTree = new FrameworkElementFactory(typeof(T)) };
+        dataTemplate.Seal();
+
+        return dataTemplate;
     }
 
     private FileControl? _parentFileControl;
@@ -172,17 +228,51 @@ public class BaseListViewModel : BaseViewModel
     /// </summary>
     public void LoadView<TView, TData>(FileControl fileControl)
     {
-        _typeOfData = typeof(TData);
+        LoadView(fileControl, typeof(TView), typeof(TData));
+    }
+
+    public void LoadView(FileControl fileControl, Type viewType, Type dataType)
+    {
         _parentFileControl = fileControl;
-        _allItems = GetAllItems<TView, TData>();
+        LoadView(viewType, dataType);
+    }
+
+    public void LoadView(Type viewType, Type dataType)
+    {
+        _typeOfData = dataType;
+        _allItems = GetAllHashItems(viewType, dataType);
         RefreshItemList();
     }
 
-    public HashSet<ListItemModel> GetAllItems<TView, TData>()
+    public void LoadDataView(Type viewType, Type dataType)
+    {
+        _typeOfData = dataType;
+        _allItems = GetAllDataItems(viewType, dataType);
+        RefreshItemList();
+    }
+
+    /// <summary>
+    /// Gets all items only based on the hash of that item; used for viewing a list of hashes which can be clicked on to view the data.
+    /// </summary>
+    public HashSet<HashListItemModel> GetAllHashItems(Type viewType, Type dataType)
     {
         // todo packages?
-        var allHashes = PackageResourcer.Get().GetAllHashes<TData>();
-        return allHashes.Select(hash => (Activator.CreateInstance(typeof(TView), hash) as ListItemModel)).ToHashSet();
+        HashSet<TigerHash> allHashes = PackageResourcer.Get().GetAllHashes(dataType);
+        return allHashes.Select(hash => (Activator.CreateInstance(viewType, hash, dataType.Name) as HashListItemModel)).ToHashSet();
+    }
+
+    /// <summary>
+    /// Gets all the data of every hash; much slower than <see cref="GetAllHashItems"/> but allows for filtering based on the data.
+    /// </summary>
+    public HashSet<HashListItemModel> GetAllDataItems(Type viewType, Type dataType)
+    {
+        HashSet<TigerFile> allFiles = PackageResourcer.Get().GetAllFiles(dataType);
+        var allItems = allFiles
+            .Select(file =>
+                viewType.GetMethod("GetAllItems", BindingFlags.Public | BindingFlags.Instance)
+                    .Invoke(Activator.CreateInstance(viewType), new[] {file})
+            ).Cast<HashSet<HashListItemModel>>().SelectMany(x => x).ToHashSet();
+        return allItems;
     }
 
     protected void RefreshItemList()
@@ -192,17 +282,17 @@ public class BaseListViewModel : BaseViewModel
 
     private void FilterItemList(string filter)
     {
-        ConcurrentBag<ListItemModel> filteredItems = new();
+        ConcurrentBag<HashListItemModel> filteredItems = new();
         Parallel.ForEach(_allItems, item =>
         {
-            if (item.Title.ToLower().Contains(filter) || item.Hash.ToString().ToLower().Contains(filter))
+            if (item.ShouldFilterKeep(filter))
             {
                 filteredItems.Add(item);
             }
         });
         var x = filteredItems.ToList();
         x.Sort((x, y) => x.Hash.CompareTo(y.Hash));
-        Dispatcher.CurrentDispatcher.Invoke(() => Items = new ObservableCollection<ListItemModel>(x));
+        Dispatcher.CurrentDispatcher.Invoke(() => Items = new ObservableCollection<HashListItemModel>(x));
     }
 }
 

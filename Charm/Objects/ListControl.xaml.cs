@@ -32,22 +32,16 @@ public partial class ListControl : UserControl
         DataContext = new BaseListViewModel();
     }
 
-    public DataTemplate ConvertUserControlToDataTemplate1(UserControl userControl)
+    public Type DataType { get; set; }
+    public Type ListItemType { get; set; }
+
+    public void LoadView(FileControl fileControl)
     {
-        FrameworkElementFactory factory = new FrameworkElementFactory(typeof(ContentPresenter));
-        factory.SetValue(ContentPresenter.ContentProperty, new Binding());
-
-        DataTemplate dataTemplate = new DataTemplate { VisualTree = factory };
-        dataTemplate.Seal();
-
-        return dataTemplate;
+        (DataContext as BaseListViewModel).LoadView(fileControl, ListItemType, DataType);
     }
 
-    public DataTemplate ConvertUserControlToDataTemplate(UserControl userControl)
+    public void LoadDataView()
     {
-        DataTemplate dataTemplate = new() { VisualTree = new FrameworkElementFactory(userControl.GetType()) };
-        dataTemplate.Seal();
-
-        return dataTemplate;
+        (DataContext as BaseListViewModel).LoadDataView(ListItemType, DataType);
     }
 }

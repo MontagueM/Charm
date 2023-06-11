@@ -129,11 +129,35 @@ public abstract class Package : IPackage
         return tags;
     }
 
+    public List<TigerFile> GetAllFiles(Type fileType)
+    {
+        List<TigerFile> tags = new();
+
+        SchemaStructAttribute attribute = GetAttribute<SchemaStructAttribute>(fileType.BaseType.GenericTypeArguments[0]);
+        TigerHash referenceHash = new(attribute.ClassHash);
+
+        for (int i = 0; i < FileEntries.Count; i++)
+        {
+            if (FileEntries[i].Reference.Equals(referenceHash))
+            {
+                TigerFile tag = FileResourcer.Get().GetFile(fileType, new FileHash(Header.GetPackageId(), (uint)i));
+                tags.Add(tag);
+            }
+        }
+
+        return tags;
+    }
+
     public HashSet<FileHash> GetAllHashes<T>()
     {
-        if (!SchemaDeserializer.Get().TryGetSchemaTypeHash<T>(out uint referenceHash))
+        return GetAllHashes(typeof(T));
+    }
+
+    public HashSet<FileHash> GetAllHashes(Type schemaType)
+    {
+        if (!SchemaDeserializer.Get().TryGetSchemaTypeHash(schemaType, out uint referenceHash))
         {
-            throw new ArgumentException($"Type {typeof(T)} is not a schema type so cannot get hashes for it");
+            throw new ArgumentException($"Type {schemaType} is not a schema type so cannot get hashes for it");
         }
 
         ConcurrentBag<FileHash> hashes = new();

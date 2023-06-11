@@ -5,8 +5,8 @@ namespace Charm.Objects;
 
 public class MockListControl
 {
-    public ObservableCollection<ListItemModel> MockItems { get; set; } = new()
+    public ObservableCollection<HashListItemModel> Items { get; set; } = new()
     {
-        new ListItemModel(new TigerHash("ABCD0180")),
+        new HashListItemModel(new TigerHash("ABCD0180"), "typename"),
     };
 }

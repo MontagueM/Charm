@@ -7,18 +7,18 @@ namespace Charm.Objects;
 
 public class LocalizedStringsListViewModel : GenericListViewModel<LocalizedStrings>
 {
-    public override HashSet<ListItemModel> GetAllItems(LocalizedStrings data)
+    public override HashSet<HashListItemModel> GetAllItems(LocalizedStrings data)
     {
         return data.GetAllStringViews().Select(CreateListItem).ToHashSet();
     }
 
-    public ListItemModel CreateListItem(LocalizedStringView stringView)
+    public HashListItemModel CreateListItem(LocalizedStringView stringView)
     {
-        return new ListItemModel {Hash = stringView.StringHash, Title = stringView.RawString};
+        return new LongTextListItemModel {Hash = stringView.StringHash, Text = stringView.RawString, Type = "Raw Localized String"};
     }
 }
 
 public class DefaultListViewModel : BaseListViewModel
 {
-
+    public string Title { get; set; } = "Title";
 }

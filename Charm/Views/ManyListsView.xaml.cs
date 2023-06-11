@@ -11,9 +11,14 @@ public partial class ManyListsView : UserControl
         InitializeComponent();
     }
 
-    private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void FileControl_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         ((e.AddedItems[0] as TabItem)?.Content as FileControl)?.Load();
+    }
+
+    private void ListControl_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ((e.AddedItems[0] as TabItem)?.Content as ListControl)?.LoadDataView();
     }
 }
 

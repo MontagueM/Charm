@@ -15,11 +15,18 @@
              TextElement.FontSize="14"
              FontFamily="{materialDesign:MaterialDesignFont}">
     <Grid>
-        <TabControl SelectionChanged="Selector_OnSelectionChanged">
+        <TabControl SelectionChanged="FileControl_OnSelectionChanged">
             <TabItem Header="AUDIO">
             </TabItem>
             <TabItem Header="STRINGS">
-                <objects:FileControl DataType="{x:Type schema:LocalizedStrings}" ViewType="{x:Type objects:LocalizedStringsListViewModel}" Padding="0,1,0,0"/>
+                <TabControl SelectionChanged="ListControl_OnSelectionChanged">
+                    <TabItem Header="SEPARATED">
+                        <objects:FileControl DataType="{x:Type schema:LocalizedStrings}" ViewType="{x:Type objects:LocalizedStringsListViewModel}" Padding="0,1,0,0"/>
+                    </TabItem>
+                    <TabItem Header="ALL (SLOW)">
+                        <objects:ListControl DataType="{x:Type schema:LocalizedStrings}" ListItemType="{x:Type objects:LocalizedStringsListViewModel}" Padding="0,1,0,0" />
+                    </TabItem>
+                </TabControl>
             </TabItem>
             <TabItem Header="TEXTURES">
                 <!-- <objects:FileControl ListItemType="{x:Type objects:LocalizedStringsItem}" ListFilterType="{x:Type TextureListFilter}"/> -->

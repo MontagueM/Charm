@@ -20,7 +20,7 @@ public partial class FileControl : UserControl
 {
     // private Type _listItemType;
 
-    public Type ListItemType { get; set; } = typeof(ListItemModel);
+    public Type ListItemType { get; set; } = typeof(HashListItemModel);
 
     public Type DataType { get; set; }
 
@@ -71,17 +71,21 @@ public partial class FileControl : UserControl
 
         FileContentPresenter.Content = fileView;
 
-        BaseListViewModel listViewModel = new BaseListViewModel();
+        BaseListViewModel listViewModel = new();
         ListControl.DataContext = listViewModel;
+        ListControl.DataType = DataType;
+        ListControl.ListItemType = ListItemType;
+
+        ListControl.LoadView(this);
 
         // Load list items
-        typeof(BaseListViewModel)
-            .GetMethod("LoadView", BindingFlags.Public | BindingFlags.Instance)
-            ?.MakeGenericMethod(ListItemType, DataType)
-            .Invoke(listViewModel, new object[] { this });
+        // typeof(BaseListViewModel)
+        //     .GetMethod("LoadView", BindingFlags.Public | BindingFlags.Instance)
+        //     ?.MakeGenericMethod(ListItemType, DataType)
+        //     .Invoke(listViewModel, new object[] { this });
     }
 
-    public void LoadFileView<TView, TData>(TView data) where TView : ListItemModel where TData : TigerFile
+    public void LoadFileView<TView, TData>(TView data) where TView : HashListItemModel where TData : TigerFile
     {
         fileViewModel.LoadView(FileResourcer.Get().GetFile<TData>(data.Hash));
     }

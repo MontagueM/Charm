@@ -116,6 +116,17 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return tags;
     }
 
+    public HashSet<TigerFile> GetAllFiles(Type fileType)
+    {
+        PackagePathsCache.GetAllPackageIds();
+        HashSet<TigerFile> tags = new();
+        foreach (Package package in _packagesCache.Values)
+        {
+            package.GetAllFiles(fileType).ForEach(t => tags.Add(t));
+        }
+        return tags;
+    }
+
     public FileMetadata GetFileMetadata(FileHash fileHash)
     {
         return GetPackage(fileHash.PackageId).GetFileMetadata(fileHash);
@@ -123,11 +134,16 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     public HashSet<TigerHash> GetAllHashes<T>()
     {
+        return GetAllHashes(typeof(T));
+    }
+
+    public HashSet<TigerHash> GetAllHashes(Type schemaType)
+    {
         PackagePathsCache.GetAllPackageIds();
         HashSet<TigerHash> fileHashes = new();
         foreach (Package package in _packagesCache.Values)
         {
-            fileHashes.UnionWith(package.GetAllHashes<T>());
+            fileHashes.UnionWith(package.GetAllHashes(schemaType));
         }
         return fileHashes;
     }
