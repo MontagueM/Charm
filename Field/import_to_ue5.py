@@ -174,7 +174,7 @@ class CharmImporter:
         options.static_mesh_import_data.set_editor_property('convert_scene', False)
         options.static_mesh_import_data.set_editor_property('combine_meshes', False)
         options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
-        options.static_mesh_import_data.set_editor_property('auto_generate_collision', True)
+        options.static_mesh_import_data.set_editor_property('auto_generate_collision', False)
         options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
         options.static_mesh_import_data.set_editor_property("build_nanite", False)  # todo add nanite option
         task.set_editor_property("options", options)
@@ -198,7 +198,7 @@ class CharmImporter:
         options.static_mesh_import_data.set_editor_property('import_uniform_scale', 100.0)
         options.static_mesh_import_data.set_editor_property('combine_meshes', combine)
         options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
-        options.static_mesh_import_data.set_editor_property('auto_generate_collision', True)
+        options.static_mesh_import_data.set_editor_property('auto_generate_collision', False)
         options.static_mesh_import_data.set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS)
         options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
         options.static_mesh_import_data.set_editor_property("build_nanite", False)  # todo add nanite option
