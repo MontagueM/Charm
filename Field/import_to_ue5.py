@@ -57,6 +57,9 @@ class CharmImporter:
                 print(f"Failed on {static}")
             for part in parts:
                 sm = unreal.EditorAssetLibrary.load_asset(part)
+                sm.set_editor_property('complex_collision_mesh', sm) #idk how bad this is for performance
+                sm.set_editor_property('customized_collision', True)
+                sm.get_editor_property('body_setup').set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
                 for instance in instances:
                     quat = unreal.Quat(instance["Rotation"][0], instance["Rotation"][1], instance["Rotation"][2], instance["Rotation"][3])
                     euler = quat.euler()
@@ -199,6 +202,7 @@ class CharmImporter:
         options.static_mesh_import_data.set_editor_property('combine_meshes', combine)
         options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
         options.static_mesh_import_data.set_editor_property('auto_generate_collision', False)
+        options.static_mesh_import_data.set_editor_property('one_convex_hull_per_ucx', False)
         options.static_mesh_import_data.set_editor_property('normal_import_method', unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS)
         options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
         options.static_mesh_import_data.set_editor_property("build_nanite", False)  # todo add nanite option
