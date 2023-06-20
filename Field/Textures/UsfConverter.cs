@@ -43,6 +43,7 @@ public class UsfConverter
     private StringReader hlsl;
     private StringBuilder usf;
     private bool bOpacityEnabled = false;
+    private bool bFixRoughness = false;
     private List<Texture> textures = new List<Texture>();
     private List<int> samplers = new List<int>();
     private List<Cbuffer> cbuffers = new List<Cbuffer>();
@@ -383,8 +384,8 @@ public class UsfConverter
             usf.AppendLine("        float4 v1 = {1,0,0,1};");
             usf.AppendLine("        float4 v2 = {0,1,0,1};");
             usf.AppendLine("        float4 v3 = {tx.xy, 1,1};");
-            usf.AppendLine("        float4 v4 = {vc.xyz, vcw};");
-            usf.AppendLine("        float4 v5 = {1,1,1,1};");
+            usf.AppendLine("        float4 v4 = {1,1,1,1};");
+            usf.AppendLine("        float4 v5 = {vc.xyz, vcw};");
 
             foreach (var i in inputs)
             {
@@ -439,10 +440,37 @@ public class UsfConverter
                     // todo add dimension
                     usf.AppendLine($"   {equal}= Material_Texture2D_{sortedIndices.IndexOf(texIndex)}.SampleLevel(Material_Texture2D_{sampleIndex - 1}Sampler, {sampleUv}, 0).{dotAfter}");
                 }
+                else if (line.Contains("CalculateLevelOfDetail"))
+                {
+                    var equal = line.Split("=")[0];
+                    var texIndex = Int32.Parse(line.Split(".CalculateLevelOfDetail")[0].Split("t")[1]);
+                    var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
+                    var sampleUv = line.Split(", ")[1].Split(")")[0];
+
+                    usf.AppendLine($"       {equal}= Material_Texture2D_{texIndex}.CalculateLevelOfDetail(Material_Texture2D_{sampleIndex - 1}Sampler, {sampleUv});");
+                }
                 // todo add load, levelofdetail, o0.w, discard
                 else if (line.Contains("discard"))
                 {
                     usf.AppendLine(line.Replace("discard", "{ output.OpacityMask = 0; return output; }"));
+                }
+                else if (line.Contains("o0.w = r")) //o0.w = r(?)
+                {
+                    usf.AppendLine($"       {line}");
+                    usf.AppendLine("        { output.OpacityMask = 1 - o0.w; return output; }");
+                }
+                else if (line.Contains("Load"))
+                {
+                    var equal = line.Split("=")[0];
+                    var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]);
+                    var sampleUv = line.Split("(")[1].Split(")")[0];
+
+                    usf.AppendLine($"       {equal}= Material_Texture2D_{(int)texIndex + 1}.Load({sampleUv});"); //Usually seen in decals, the texture isnt actually valid though?
+                }
+                else if (line.Contains("o1.xyzw = float4(0,0,0,0);"))
+                {
+                    usf.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "        o1.xyzw = float4(1,1,1,0);")); //decals(?) have 0 normals sometimes, dont want that
+                    bFixRoughness = true;
                 }
                 else
                 {
@@ -456,7 +484,7 @@ public class UsfConverter
 
     private void AddOutputs()
     {
-        string outputString = @"
+        string outputString = @$"
         ///RT0
         output.BaseColor = o0.xyz; // Albedo
         
@@ -470,7 +498,7 @@ public class UsfConverter
         output.Normal = normal_in_world_space.xyz;
 
         // Roughness
-        float smoothness = saturate(8 * (normal_length - 0.375));
+        float smoothness = saturate(8 * ({(bFixRoughness ? "0" : "normal_length")} - 0.375)); 
         output.Roughness = 1 - smoothness;
  
         ///RT2
