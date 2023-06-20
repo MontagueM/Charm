@@ -121,8 +121,9 @@ class CharmImporter:
                 slot_name = skeletal_material.get_editor_property("material_slot_name").__str__()
                 slot_name = slot_name[:8]
                 for material in material_slot_name_dict.values():
-                    if slot_name in material.get_name():
-                        skeletal_material.set_editor_property("material_interface", material)
+                    if material is not None:
+                        if slot_name in material.get_name():
+                            skeletal_material.set_editor_property("material_interface", material)
                 new_mesh_materials.append(skeletal_material)
             mesh.set_editor_property("static_materials", new_mesh_materials)
     
