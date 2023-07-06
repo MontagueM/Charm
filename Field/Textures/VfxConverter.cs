@@ -37,7 +37,7 @@ MODES
 {
 	VrForward();
 
-	Depth( ""depth_only.shader"" ); 
+	Depth(); 
 
 	ToolsVis( S_MODE_TOOLS_VIS );
 	ToolsWireframe( ""vr_tools_wireframe.shader"" );
@@ -49,15 +49,13 @@ MODES
 FEATURES
 {
     #include ""common/features.hlsl""
-    //Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );
-    //Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );
     Feature( F_HIGH_QUALITY_REFLECTIONS, 0..1, ""Rendering"" );
 }
 
 COMMON
 {
+    //alpha
 	#include ""common/shared.hlsl""
-    //translucent
     #define CUSTOM_MATERIAL_INPUTS
     #define USES_HIGH_QUALITY_REFLECTIONS
 }
@@ -129,10 +127,7 @@ PS
         ProcessHlslData();
         if (bOpacityEnabled)
         {
-            vfxStructure = vfxStructure.Replace(@"//Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );", @"Feature( F_ALPHA_TEST, 0..1, ""Rendering"" );");
-            vfxStructure = vfxStructure.Replace(@"//Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );", @"Feature( F_PREPASS_ALPHA_TEST, 0..1, ""Rendering"" );");
-            
-            vfxStructure = vfxStructure.Replace("//translucent", "#define S_TRANSLUCENT 1");
+            vfxStructure = vfxStructure.Replace("//alpha", "#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST 1\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT 0\r\n\t#endif");
         }
         vfx.AppendLine(vfxStructure);
 
@@ -362,17 +357,6 @@ PS
                 vfx.AppendLine($"   TextureAttribute(g_t14, g_t14);\n");
             }
 
-            
-            
-            vfx.AppendLine("    //StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
-	        vfx.AppendLine("    //StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
-
-            if(bOpacityEnabled)
-            {
-                vfx.Replace("//StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );", "StaticCombo( S_ALPHA_TEST, F_ALPHA_TEST, Sys( PC ) );");
-                vfx.Replace("//StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );", "StaticCombo( S_PREPASS_ALPHA_TEST, F_PREPASS_ALPHA_TEST, Sys( PC ) );");
-            }
-
             vfx.AppendLine("    float4 MainPs( PixelInput i ) : SV_Target0");
             vfx.AppendLine("    {");
 
@@ -521,7 +505,7 @@ PS
                     var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]); 
                     var sampleUv = line.Split("(")[1].Split(")")[0];
 
-                    vfx.AppendLine($"       {equal}= g_t{(int)texIndex+1}.Load({sampleUv});"); //Usually seen in decals, the texture isnt actually valid though?
+                    vfx.AppendLine($"       {equal}= g_t{(int)texIndex+1}.Load({sampleUv});"); //Usually seen in decals, the texture isnt actually valid though? Probably from gbuffer
                 }
                 else if (line.Contains("o0.w = r")) //o0.w = r(?)
                 {
@@ -582,30 +566,37 @@ PS
 
         if(g_bDiffuse)
         {{
+            mat.Albedo = 0;
             mat.Emission = o0.xyz;
         }}
         if(g_bRough)
         {{
+            mat.Albedo = 0;
             mat.Emission = 1 - smoothness;
         }}
         if(g_bMetal)
         {{
+            mat.Albedo = 0;
             mat.Emission = saturate(o2.x);
         }}
         if(g_bNorm)
         {{
+            mat.Albedo = 0;
             mat.Emission = SrgbGammaToLinear(PackNormal3D(normal_in_world_space));
         }}
         if(g_bAO)
         {{
+            mat.Albedo = 0;
             mat.Emission = saturate(o2.y * 2);
         }}
         if(g_bEmit)
         {{
+            mat.Albedo = 0;
             mat.Emission = (o2.y - 0.5);
         }}
         if(g_bAlpha)
         {{
+            mat.Albedo = 0;
             mat.Emission = alpha;
         }}
 
