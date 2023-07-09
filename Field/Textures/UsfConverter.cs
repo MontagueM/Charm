@@ -373,6 +373,7 @@ public class UsfConverter
             }
 
             usf.AppendLine($"   float2 tx,");
+            usf.AppendLine($"   float3 viewDir,");
             usf.AppendLine($"   float3 vc,");
             usf.AppendLine($"   float vcw)"); //UE5 Vertex color node doesnt support RGBA output for some reason?
 
@@ -384,7 +385,7 @@ public class UsfConverter
             usf.AppendLine("        float4 v1 = {1,0,0,1};");
             usf.AppendLine("        float4 v2 = {0,1,0,1};");
             usf.AppendLine("        float4 v3 = {tx.xy, 1,1};");
-            usf.AppendLine("        float4 v4 = {1,1,1,1};");
+            usf.AppendLine("        float4 v4 = {viewDir.xyz,1};");
             usf.AppendLine("        float4 v5 = {vc.xyz, vcw};");
 
             foreach (var i in inputs)
@@ -518,7 +519,7 @@ public class UsfConverter
         usf.AppendLine("}").AppendLine("};");
         if (!bIsVertexShader)
         {
-            usf.AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},tx,vc,vcw);");
+            usf.AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},tx,viewDir,vc,vcw);");
         }
     }
 }

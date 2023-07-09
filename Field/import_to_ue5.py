@@ -282,8 +282,8 @@ class CharmImporter:
             inputs.append(ci)
         ci = unreal.CustomInput()
         ci.set_editor_property('input_name', 'tx')
-
         inputs.append(ci)
+
         vc = unreal.CustomInput()
         vc.set_editor_property('input_name', 'vc')
         inputs.append(vc)
@@ -292,18 +292,30 @@ class CharmImporter:
         vcw.set_editor_property('input_name', 'vcw')
         inputs.append(vcw)
 
+        viewdir = unreal.CustomInput()
+        viewdir.set_editor_property('input_name', 'viewDir')
+        inputs.append(viewdir)
+
         custom_node.set_editor_property('code', code)
         custom_node.set_editor_property('inputs', inputs)
         custom_node.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_MATERIAL_ATTRIBUTES)
 
         for i, t in texture_samples.items():
             unreal.MaterialEditingLibrary.connect_material_expressions(t, 'RGBA', custom_node, f't{i}')
-        texcoord = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTextureCoordinate, -500, 300)
+
+        texcoord = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTextureCoordinate, -500, 400)
         unreal.MaterialEditingLibrary.connect_material_expressions(texcoord, '', custom_node, 'tx')
 
-        vc = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionVertexColor, -500, 400)
+        vc = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionVertexColor, -500, 500)
         unreal.MaterialEditingLibrary.connect_material_expressions(vc, '', custom_node, 'vc')
         unreal.MaterialEditingLibrary.connect_material_expressions(vc, 'A', custom_node, 'vcw')
+
+        viewdir = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionCameraVectorWS, -500, 700)
+        vecTransform = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTransform, -500, 800)
+        vecTransform.set_editor_property('transform_source_type', unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD)
+        vecTransform.set_editor_property('transform_type', unreal.MaterialVectorCoordTransform.TRANSFORM_TANGENT) 
+        unreal.MaterialEditingLibrary.connect_material_expressions(viewdir, '', vecTransform, '')
+        unreal.MaterialEditingLibrary.connect_material_expressions(vecTransform, '', custom_node, 'viewDir')
 
         return custom_node
 
