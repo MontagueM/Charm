@@ -104,18 +104,7 @@ PS
     bool g_bNorm < Attribute( ""Debug_Normal"" ); >;
     bool g_bAO < Attribute( ""Debug_AO"" ); >;
     bool g_bEmit < Attribute( ""Debug_Emit"" ); >;
-    bool g_bAlpha < Attribute( ""Debug_Alpha"" ); >;
-
-    //ParallaxPass(-0.1, v3.xy, viewDir)
-    float2 ParallaxPass(float strength, float2 uvmap, float3 viewDir)
-	{    
-		float3 uvOut;
-		
-        uvOut.x = ((viewDir.x/viewDir.z) * strength) + uvmap.x;
-        uvOut.y = ((viewDir.y/viewDir.z) * strength) - uvmap.y;
-		
-		return float3(uvOut.x, (1-uvOut.y) - 1, 0);
-	}";
+    bool g_bAlpha < Attribute( ""Debug_Alpha"" ); >;";
 
     public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader, bool bIsTerrain = false)
     {
@@ -360,40 +349,14 @@ PS
             vfx.AppendLine("    float4 MainPs( PixelInput i ) : SV_Target0");
             vfx.AppendLine("    {");
 
-            vfx.AppendLine(@"       // compute derivations of the world position
-        float3 p_dx = ddx(i.vPositionWithOffsetWs);
-        float3 p_dy = ddy(i.vPositionWithOffsetWs);
-
-        // compute derivations of the texture coordinate
-        float2 tc_dx = ddx(i.vTextureCoords.xy);
-        float2 tc_dy = ddy(i.vTextureCoords.xy);
-
-        // compute initial tangent and bi-tangent
-        float3 tangent = normalize( tc_dy.y * p_dx - tc_dx.y * p_dy );
-        float3 bitangent = normalize( tc_dy.x * p_dx - tc_dx.x * p_dy ); // sign inversion
-        
-        // get new tangent from a given mesh normal
-        float3 n = normalize(i.vNormalWs);
-        float3 x = cross(n, tangent);
-        tangent = cross(x, n);
-        tangent = normalize(tangent);
-
-        // get updated bi-tangent
-		x = cross(bitangent, n);
-		bitangent = cross(n, x);
-		bitangent = normalize(bitangent);
-		float3x3 tbn = float3x3(tangent, bitangent, n);
-		
-        // View ray in World Space
-		float3 vPositionWs = i.vPositionWithOffsetWs.xyz + g_vCameraPositionWs.xyz;
-        
-        uint nViewId = 0;
-        #if( D_MULTIVIEW_INSTANCING )
-            nViewId = i.nView;
-        #endif
-        float3 viewDir = normalize(CalculatePositionToCameraDirWsMultiview( nViewId, vPositionWs ));
-		viewDir = mul(tbn, viewDir);
-        "); //Reconstruct tangent space map for normal maps, this seems like a bit of a hack but it works
+            vfx.AppendLine(@"       float3 vPositionWs = i.vPositionWithOffsetWs.xyz + g_vHighPrecisionLightingOffsetWs.xyz;
+        float3 vCameraToPositionDirWs = CalculateCameraToPositionDirWs( vPositionWs.xyz );
+        float3 vNormalWs = normalize( i.vNormalWs.xyz );
+        float3 vTangentUWs = i.vTangentUWs.xyz;
+        float3 vTangentVWs = i.vTangentVWs.xyz;
+        float3 vTangentViewDir = Vec3WsToTs( vCameraToPositionDirWs.xyz, vNormalWs.xyz, vTangentUWs.xyz, vTangentVWs.xyz );
+        vTangentViewDir = vTangentViewDir/-vTangentViewDir.z; //idk if really needed
+        ");
 
             // Output render targets, todo support vertex shader
             vfx.AppendLine("        float4 o0,o1,o2;");
@@ -462,11 +425,8 @@ PS
             {
                 if (line.Contains("cb12[7].xyz + -v4.xyz")) //cb12[7] might actually be a viewdir cbuffer or something
                 {
-					//vfx.AppendLine(line.Replace("-v4", "-g_vCameraPositionWs")); //dont know what v4 is when used like this
-					vfx.AppendLine(line.Replace("-v4.xyz", "viewDir")); //I have no clue what this actually is at this point
+					vfx.AppendLine(line.Replace("-v4.xyz", "vTangentViewDir")); //I have no clue what this actually is at this point
                     vfx.AppendLine("//Possible Parallax");
-					//vfx.AppendLine("//Possible Parallax. Use ParallaxPass(-0.1, v3.xy + float2(0,0), viewDir) for the textures uv. (strenghth, uv + randomness, viewDir)");
-					//vfx.AppendLine($"//Find the texture that uses {line.Split('=')[0].Trim()} for its texcoord ");
 				}
                 else if (line.Contains("v4.xy * cb")) //might be a detail uv or something when v4 is used like this, idk
                 {
