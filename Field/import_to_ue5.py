@@ -254,7 +254,13 @@ class CharmImporter:
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "Roughness", unreal.MaterialProperty.MP_ROUGHNESS)
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "EmissiveColor", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "OpacityMask", unreal.MaterialProperty.MP_OPACITY_MASK)
-        unreal.MaterialEditingLibrary.connect_material_property(mat_att, "Normal", unreal.MaterialProperty.MP_NORMAL)
+
+        normTransform = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTransform, 0, 250)
+        normTransform.set_editor_property('transform_source_type', unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD)
+        normTransform.set_editor_property('transform_type', unreal.MaterialVectorCoordTransform.TRANSFORM_TANGENT)
+        unreal.MaterialEditingLibrary.connect_material_expressions(mat_att, "Normal", normTransform, '')
+        unreal.MaterialEditingLibrary.connect_material_property(normTransform, '', unreal.MaterialProperty.MP_NORMAL)
+
         unreal.MaterialEditingLibrary.connect_material_property(mat_att, "AmbientOcclusion", unreal.MaterialProperty.MP_AMBIENT_OCCLUSION)
 
     def add_custom_node(self, material: unreal.Material, texture_samples: list, matstr: str) -> unreal.MaterialExpressionCustom:
@@ -280,21 +286,34 @@ class CharmImporter:
             ci = unreal.CustomInput()
             ci.set_editor_property('input_name', tvar)
             inputs.append(ci)
-        ci = unreal.CustomInput()
-        ci.set_editor_property('input_name', 'tx')
-        inputs.append(ci)
+
+        tx = unreal.CustomInput()
+        tx.set_editor_property('input_name', 'tx')
+        inputs.append(tx)
+
+        vertexNorm = unreal.CustomInput()
+        vertexNorm.set_editor_property('input_name', 'vertexNorm')
+        inputs.append(vertexNorm)
+
+        tangentU = unreal.CustomInput()
+        tangentU.set_editor_property('input_name', 'tangentU')
+        inputs.append(tangentU)
+
+        tangentV = unreal.CustomInput()
+        tangentV.set_editor_property('input_name', 'tangentV')
+        inputs.append(tangentV)
 
         vc = unreal.CustomInput()
         vc.set_editor_property('input_name', 'vc')
         inputs.append(vc)
 
-        vcw = unreal.CustomInput()
-        vcw.set_editor_property('input_name', 'vcw')
-        inputs.append(vcw)
-
         viewdir = unreal.CustomInput()
         viewdir.set_editor_property('input_name', 'viewDir')
         inputs.append(viewdir)
+
+        vcw = unreal.CustomInput()
+        vcw.set_editor_property('input_name', 'vcw')
+        inputs.append(vcw)
 
         custom_node.set_editor_property('code', code)
         custom_node.set_editor_property('inputs', inputs)
@@ -303,19 +322,28 @@ class CharmImporter:
         for i, t in texture_samples.items():
             unreal.MaterialEditingLibrary.connect_material_expressions(t, 'RGBA', custom_node, f't{i}')
 
-        texcoord = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTextureCoordinate, -500, 400)
+        vertexNorm = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionVertexNormalWS, -500, 600)
+        unreal.MaterialEditingLibrary.connect_material_expressions(vertexNorm, '', custom_node, 'vertexNorm')
+
+        tangentU = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionMaterialFunctionCall, -500, 700)
+        tangent_function = unreal.EditorAssetLibrary.load_asset("/Engine/Functions/Engine_MaterialFunctions02/TangentBasis.TangentBasis")
+        tangentU.set_material_function(tangent_function)
+        unreal.MaterialEditingLibrary.connect_material_expressions(tangentU, 'X U', custom_node, 'tangentU')
+        unreal.MaterialEditingLibrary.connect_material_expressions(tangentU, 'Y V', custom_node, 'tangentV')
+
+        texcoord = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTextureCoordinate, -500, 800)
         unreal.MaterialEditingLibrary.connect_material_expressions(texcoord, '', custom_node, 'tx')
 
-        vc = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionVertexColor, -500, 500)
+        vc = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionVertexColor, -500, 900)
         unreal.MaterialEditingLibrary.connect_material_expressions(vc, '', custom_node, 'vc')
         unreal.MaterialEditingLibrary.connect_material_expressions(vc, 'A', custom_node, 'vcw')
 
-        viewdir = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionCameraVectorWS, -500, 700)
-        vecTransform = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTransform, -500, 800)
-        vecTransform.set_editor_property('transform_source_type', unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD)
-        vecTransform.set_editor_property('transform_type', unreal.MaterialVectorCoordTransform.TRANSFORM_TANGENT) 
-        unreal.MaterialEditingLibrary.connect_material_expressions(viewdir, '', vecTransform, '')
-        unreal.MaterialEditingLibrary.connect_material_expressions(vecTransform, '', custom_node, 'viewDir')
+        viewdir = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionCameraVectorWS, -500, 1100)
+        #vecTransform = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTransform, -500, 1200)
+        #vecTransform.set_editor_property('transform_source_type', unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD)
+        #vecTransform.set_editor_property('transform_type', unreal.MaterialVectorCoordTransform.TRANSFORM_TANGENT) 
+        #unreal.MaterialEditingLibrary.connect_material_expressions(viewdir, '', vecTransform, '')
+        unreal.MaterialEditingLibrary.connect_material_expressions(viewdir, '', custom_node, 'viewDir')
 
         return custom_node
 

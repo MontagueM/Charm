@@ -351,11 +351,11 @@ PS
 
             vfx.AppendLine(@"       float3 vPositionWs = i.vPositionWithOffsetWs.xyz + g_vHighPrecisionLightingOffsetWs.xyz;
         float3 vCameraToPositionDirWs = CalculateCameraToPositionDirWs( vPositionWs.xyz );
-        float3 vNormalWs = normalize( i.vNormalWs.xyz );
+        float3 vNormalWs = normalize( i.vNormalWs.xyz ); 
         float3 vTangentUWs = i.vTangentUWs.xyz;
         float3 vTangentVWs = i.vTangentVWs.xyz;
-        float3 vTangentViewDir = Vec3WsToTs( vCameraToPositionDirWs.xyz, vNormalWs.xyz, vTangentUWs.xyz, vTangentVWs.xyz );
-        vTangentViewDir = vTangentViewDir/-vTangentViewDir.z; //idk if really needed
+        //float3 vTangentViewDir = Vec3WsToTs( vCameraToPositionDirWs.xyz, vNormalWs.xyz, vTangentUWs.xyz, vTangentVWs.xyz ); //Not needed anymore, keeping in case
+        vCameraToPositionDirWs = vCameraToPositionDirWs/-vCameraToPositionDirWs.z; //idk if really needed
         ");
 
             // Output render targets, todo support vertex shader
@@ -366,16 +366,20 @@ PS
             {
                 vfx.AppendLine("        float4 v0 = {i.vTextureCoords*7, 1,1};"); //Detail uv? x5? x10? no clue
                 vfx.AppendLine("        float4 v1 = {i.vTextureCoords, 1,1};"); //Main uv?
-                vfx.AppendLine("        float4 v2 = {0,0,1,1};"); //no clue yet
-                vfx.AppendLine("        float4 v3 = {1,0,0,1};"); //Guessing
-                vfx.AppendLine("        float4 v4 = {0,1,0,1};"); //Guessing
+                vfx.AppendLine("        float4 v2 = {vNormalWs,1};"); //no clue yet
+                vfx.AppendLine("        float4 v3 = {vTangentUWs,1};"); //Guessing
+                vfx.AppendLine("        float4 v4 = {vTangentVWs,1};"); //Guessing
                 vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Havent seen v5 used on terrain yet
             }
             else
             {
-                vfx.AppendLine("        float4 v0 = {0,0,1,1};"); //Seems to only be used for normals. No idea what it is.
-                vfx.AppendLine("        float4 v1 = {1,0,0,1};"); //Pretty sure this is mesh normals.
-                vfx.AppendLine("        float4 v2 = {0,1,0,1};"); //Tangent? Seems to only be used for normals.
+                //vfx.AppendLine("        float4 v0 = {0,0,1,1};"); //Seems to only be used for normals. No idea what it is.
+                //vfx.AppendLine("        float4 v1 = {1,0,0,1};"); //Pretty sure this is mesh normals.
+                //vfx.AppendLine("        float4 v2 = {0,1,0,1};"); //Tangent? Seems to only be used for normals.
+
+                vfx.AppendLine("        float4 v0 = {vNormalWs,1};");
+                vfx.AppendLine("        float4 v1 = {vTangentUWs,1};");
+                vfx.AppendLine("        float4 v2 = {vTangentVWs,1};");
                 vfx.AppendLine("        float4 v3 = {i.vTextureCoords, 1,1};"); //99.9% sure this is always UVs.
                 vfx.AppendLine("        float4 v4 = {1,1,1,1};"); //Might be i.vPositionSs, Mostly seen on materials with parallax. Some kind of view vector or matrix?
                 vfx.AppendLine("        float4 v5 = i.vBlendValues;"); //Seems to always be vertex color/vertex color alpha.
@@ -425,7 +429,7 @@ PS
             {
                 if (line.Contains("cb12[7].xyz + -v4.xyz")) //cb12[7] might actually be a viewdir cbuffer or something
                 {
-					vfx.AppendLine(line.Replace("-v4.xyz", "vTangentViewDir")); //I have no clue what this actually is at this point
+					vfx.AppendLine(line.Replace("-v4.xyz", "vCameraToPositionDirWs")); //I have no clue what this actually is at this point
                     vfx.AppendLine("//Possible Parallax");
 				}
                 else if (line.Contains("v4.xy * cb")) //might be a detail uv or something when v4 is used like this, idk
@@ -509,20 +513,17 @@ PS
         float normal_length = length(biased_normal);
         float3 normal_in_world_space = biased_normal / normal_length;
  
-        float3 normal = PackNormal3D(normal_in_world_space);
-        normal.y = 1 - normal.y; 
-        //normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy))); 
-        
         float smoothness = saturate(8 * ({(bFixRoughness ? "0" : "normal_length")} - 0.375)); 
         
         Material mat = Material::From(i, 
-                    float4(o0.xyz, alpha), 
-                    float4(normal.xyz, 1), 
-                    float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), 
-                    float3( 1.0f, 1.0f, 1.0f ), 
-                    clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100));
+                    float4(o0.xyz, alpha), //albedo, alpha
+                    float4(0.5, 0.5, 1, 1), //Normal, gets set later
+                    float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao
+                    float3( 1.0f, 1.0f, 1.0f ), //tint
+                    clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission
 
         mat.Transmission = o2.z;
+        mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From
 
         if(g_bDiffuse)
         {{
@@ -542,7 +543,7 @@ PS
         if(g_bNorm)
         {{
             mat.Albedo = 0;
-            mat.Emission = SrgbGammaToLinear(PackNormal3D(normal_in_world_space));
+            mat.Emission = SrgbGammaToLinear(PackNormal3D(Vec3WsToTs(normal_in_world_space.xyz, i.vNormalWs.xyz, vTangentUWs.xyz, vTangentVWs.xyz)));
         }}
         if(g_bAO)
         {{

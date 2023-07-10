@@ -179,27 +179,6 @@ public class UsfConverter
                 {
                     data = material.Header.UnkC0;
                 }
-                else
-                {
-
-                    // if (material.Header.VSVector4Container.Hash != 0xffff_ffff)
-                    // {
-                    //     // Try the Vector4 storage file
-                    //     DestinyFile container = new DestinyFile(PackageHandler.GetEntryReference(material.Header.VSVector4Container));
-                    //     byte[] containerData = container.GetData();
-                    //     int num = containerData.Length / 16;
-                    //     if (cbuffer.Count == num)
-                    //     {
-                    //         List<Vector4> float4s = new List<Vector4>();
-                    //         for (int i = 0; i < containerData.Length / 16; i++)
-                    //         {
-                    //             float4s.Add(StructConverter.ToStructure<Vector4>(containerData.Skip(i*16).Take(16).ToArray()));
-                    //         }
-
-                    //         data = float4s;
-                    //     }                        
-                    // }
-                }
             }
             else
             {
@@ -372,20 +351,23 @@ public class UsfConverter
                 usf.AppendLine($"   {texture.Type} {texture.Variable},");
             }
 
-            usf.AppendLine($"   float2 tx,");
-            usf.AppendLine($"   float3 viewDir,");
-            usf.AppendLine($"   float3 vc,");
+            usf.AppendLine($"   float3 vertexNorm,"); //v0
+            usf.AppendLine($"   float3 tangentU,"); //v1
+            usf.AppendLine($"   float3 tangentV,"); //v2
+            usf.AppendLine($"   float2 tx,"); //v3
+            usf.AppendLine($"   float3 viewDir,"); //v4?
+            usf.AppendLine($"   float3 vc,"); //v5
             usf.AppendLine($"   float vcw)"); //UE5 Vertex color node doesnt support RGBA output for some reason?
 
             usf.AppendLine("{").AppendLine("    FMaterialAttributes output;");
             // Output render targets, todo support vertex shader
             usf.AppendLine("    float4 o0,o1,o2;");
 
-            usf.AppendLine("        float4 v0 = {0,0,1,1};");
-            usf.AppendLine("        float4 v1 = {1,0,0,1};");
-            usf.AppendLine("        float4 v2 = {0,1,0,1};");
-            usf.AppendLine("        float4 v3 = {tx.xy, 1,1};");
-            usf.AppendLine("        float4 v4 = {viewDir.xyz,1};");
+            usf.AppendLine("        float4 v0 = {vertexNorm, 1};");
+            usf.AppendLine("        float4 v1 = {tangentU, 1};");
+            usf.AppendLine("        float4 v2 = {tangentV, 1};");
+            usf.AppendLine("        float4 v3 = {tx.xy, 1, 1};");
+            usf.AppendLine("        float4 v4 = {viewDir.xyz, 1};");
             usf.AppendLine("        float4 v5 = {vc.xyz, vcw};");
 
             foreach (var i in inputs)
@@ -458,7 +440,7 @@ public class UsfConverter
                 else if (line.Contains("o0.w = r")) //o0.w = r(?)
                 {
                     usf.AppendLine($"       {line}");
-                    usf.AppendLine("        { output.OpacityMask = 1 - o0.w; return output; }");
+                    usf.AppendLine("        { output.OpacityMask = 1 - o0.w; }");
                 }
                 else if (line.Contains("Load"))
                 {
@@ -519,7 +501,7 @@ public class UsfConverter
         usf.AppendLine("}").AppendLine("};");
         if (!bIsVertexShader)
         {
-            usf.AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},tx,viewDir,vc,vcw);");
+            usf.AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},vertexNorm,tangentU,tangentV,tx,viewDir,vc,vcw);");
         }
     }
 }
