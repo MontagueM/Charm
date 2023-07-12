@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Charm.Views.GridListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm.Views"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:objects="clr-namespace:Charm.Objects"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="720"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             Background="{DynamicResource MaterialDesignPaper}"
+             TextElement.FontWeight="Medium"
+             TextElement.FontSize="14"
+             FontFamily="{materialDesign:MaterialDesignFont}">
+    <UserControl.DataContext>
+        <objects:BaseListViewModel/>
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="35*" />
+            <ColumnDefinition Width="65*" />
+        </Grid.ColumnDefinitions>
+        <objects:GridControl Grid.Column="0" Grid.ColumnSpan="2" x:Name="GridControl"/>
+        <!-- <ContentControl Grid.Column="1" x:Name="FileContentPresenter"/> -->
+    </Grid>
+</UserControl>
+

@@ -12,17 +12,25 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Arithmic;
 using Microsoft.Xaml.Behaviors.Core;
 using Tiger;
+using Tiger.Schema;
 
 namespace Charm.Objects;
 
 
-public class HashListItemModel
+public abstract class HashListItemModel : IListItem
 {
     public TigerHash Hash { get; set; } = new();
     public string HashString { get => $"[{Hash}]"; }
-    public string Type { get; set; } = "Type";
+
+    private string _type = "Type";
+    public string Type
+    {
+        get { return _type; }
+        set { SetField(ref _type, value); }
+    }
 
     public HashListItemModel()
     {
@@ -43,11 +51,57 @@ public class HashListItemModel
         }
     }
 
+    // public abstract void Load();
+
+    // todo really this should be in viewmodel instead
+
     public virtual bool ShouldFilterKeep(string searchText)
     {
         return HashString.Contains(searchText, StringComparison.OrdinalIgnoreCase) || Type.Contains(searchText, StringComparison.OrdinalIgnoreCase);
     }
+
+    // public virtual bool GetProxyView(out dynamic? proxyView)
+    // {
+    //     proxyView = null;
+    //     return false;
+    // }
+
+    public int CompareTo(IListItem? other) => Hash.CompareTo((other as HashListItemModel)?.Hash);
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
 }
+
+// public class ControlListItemModel<TModel> : HashListItemModel where TModel : TigerFile
+// {
+//     public ControlListItemModel(TigerHash hash, string typeName) : base(hash, typeName)
+//     {
+//         TModel file = FileResourcer.Get().GetFile<TModel>(hash);
+//         if (file != null)
+//         {
+//             Control = TextureViewModel.GetView(file as Texture);
+//         }
+//     }
+//
+//     public UserControl? Control { get; set; }
+//
+//     public override bool GetProxyView(out dynamic? proxyView)
+//     {
+//         proxyView = Control;
+//         return proxyView != null;
+//     }
+// }
 
 public class TitleListItemModel : HashListItemModel
 {
@@ -131,6 +185,7 @@ public interface IAbstractFileView<in TView, in TData>
     public abstract void LoadView(TData dataToView);
 }
 
+
 /// <summary>
 /// Takes some data of type <see cref="TData"/> and generates a display item for a list based on the data given.
 /// On click, it returns a routed  <see cref="TView"/> and populates it with the data.
@@ -141,13 +196,27 @@ public abstract class GenericListViewModel<TData> : BaseListViewModel, IAbstract
 {
     public void LoadView(TData dataToView)
     {
-        _allItems = GetAllItems(dataToView);
+        // _allItems = GetAllItems(dataToView);
         RefreshItemList();
     }
 
     public abstract HashSet<HashListItemModel> GetAllItems(TData data);
 }
 
+// public abstract class GenericSingleItemViewModel<TData> : BaseItemViewModel, IAbstractFileView<SingleItemControl, TData>
+// {
+//     public void LoadView(TData dataToView)
+//     {
+//         Data = dataToView;
+//     }
+//
+//     public TData Data { get; set; } = default!;
+// }
+
+// public class BaseItemViewModel : BaseViewModel
+// {
+//
+// }
 
 public class BaseListViewModel : BaseViewModel
 {
@@ -166,9 +235,9 @@ public class BaseListViewModel : BaseViewModel
     }
 
 
-    protected HashSet<HashListItemModel> _allItems = new();
-    private ObservableCollection<HashListItemModel> _items = new();
-    public ObservableCollection<HashListItemModel> Items
+    protected HashSet<IListItem> _allItems = new();
+    private ObservableCollection<dynamic?> _items = new();
+    public ObservableCollection<dynamic?> Items
     {
         get => _items;
         set
@@ -179,8 +248,8 @@ public class BaseListViewModel : BaseViewModel
     }
 
     private Type _typeOfData;
-    private HashListItemModel? _selectedItem;
-    public HashListItemModel SelectedItem
+    private IListItem? _selectedItem;
+    public IListItem SelectedItem
     {
         get
         {
@@ -189,13 +258,22 @@ public class BaseListViewModel : BaseViewModel
         set
         {
             _selectedItem = value;
-            if (_selectedItem != null && _parentFileControl != null)
+            if (_selectedItem != null && _onListItemClicked != null)
             {
                 // todo make this generic/virtual, currently just asks FileControl to LoadFileView
-                typeof(FileControl)
-                    .GetMethod("LoadFileView", BindingFlags.Public | BindingFlags.Instance)
-                    ?.MakeGenericMethod(typeof(HashListItemModel), _typeOfData)
-                    .Invoke(_parentFileControl, new[] {_selectedItem});
+                bool processedCorrectly = _onListItemClicked.Invoke(_selectedItem);
+                if (processedCorrectly == false)
+                {
+                    Log.Error($"Failed to process click on {_selectedItem}");
+                }
+                else
+                {
+                    Log.Verbose($"Processed click on {_selectedItem}");
+                }
+                // typeof(FileControl)
+                //     .GetMethod("LoadFileView", BindingFlags.Public | BindingFlags.Instance)
+                //     ?.MakeGenericMethod(typeof(HashListItemModel), _typeOfData)
+                //     .Invoke(_parentFileControl, new[] {_selectedItem});
             }
         }
     }
@@ -222,32 +300,36 @@ public class BaseListViewModel : BaseViewModel
 
     private FileControl? _parentFileControl;
 
+    private OnListItemClicked? _onListItemClicked;
+
 
     /// <summary>
     /// Load view with nothing but a type to fill a list from.
     /// </summary>
-    public void LoadView<TView, TData>(FileControl fileControl)
+    public void LoadView<TViewModel>(OnListItemClicked onListItemClicked) where TViewModel : IViewModel
     {
-        LoadView(fileControl, typeof(TView), typeof(TData));
+        _onListItemClicked = onListItemClicked;
+        LoadView<TViewModel>();
     }
 
-    public void LoadView(FileControl fileControl, Type viewType, Type dataType)
-    {
-        _parentFileControl = fileControl;
-        LoadView(viewType, dataType);
-    }
+    // public void LoadView(FileControl fileControl, Type viewType, Type dataType)
+    // {
+    //     _parentFileControl = fileControl;
+    //     LoadView(viewType, dataType);
+    // }
 
-    public void LoadView(Type viewType, Type dataType)
+    // todo might need some method that makes _onListItemClicked null again
+
+    private void LoadView<TViewModel>() where TViewModel : IViewModel
     {
-        _typeOfData = dataType;
-        _allItems = GetAllHashItems(viewType, dataType);
+        _allItems = IViewModel.GetListItems<TViewModel>();
         RefreshItemList();
     }
 
     public void LoadDataView(Type viewType, Type dataType)
     {
-        _typeOfData = dataType;
-        _allItems = GetAllDataItems(viewType, dataType);
+        // _typeOfData = dataType;
+        // _allItems = GetAllDataItems(viewType, dataType);
         RefreshItemList();
     }
 
@@ -282,7 +364,7 @@ public class BaseListViewModel : BaseViewModel
 
     private void FilterItemList(string filter)
     {
-        ConcurrentBag<HashListItemModel> filteredItems = new();
+        ConcurrentBag<IListItem> filteredItems = new();
         Parallel.ForEach(_allItems, item =>
         {
             if (item.ShouldFilterKeep(filter))
@@ -291,8 +373,18 @@ public class BaseListViewModel : BaseViewModel
             }
         });
         var x = filteredItems.ToList();
-        x.Sort((x, y) => x.Hash.CompareTo(y.Hash));
-        Dispatcher.CurrentDispatcher.Invoke(() => Items = new ObservableCollection<HashListItemModel>(x));
+        x.Sort((x, y) => x.CompareTo(y));
+        var y = x.Cast<dynamic?>().ToList();
+        // for (var i = 0; i < y.Count; i++)
+        // {
+        //     // todo can probably be an O(1) operation as all items are the same
+        //     if (y[i].GetProxyView(out dynamic? proxyView))
+        //     {
+        //         y[i] = proxyView;
+        //     }
+        //
+        // }
+        Dispatcher.CurrentDispatcher.Invoke(() => Items = new ObservableCollection<dynamic?>(y));
     }
 }
 

@@ -24,11 +24,11 @@ namespace Charm.Objects;
 /// The current implementation of Package is limited so you cannot have nested views below a Package.
 /// For future, would be better to split the tag items up so we can cache them based on parents.
 /// </summary>
-public partial class ListControl : UserControl
+public partial class GridControl : UserControl
 {
     private readonly BaseListViewModel _viewModel;
 
-    public ListControl()
+    public GridControl()
     {
         InitializeComponent();
         _viewModel = new BaseListViewModel();
@@ -40,8 +40,19 @@ public partial class ListControl : UserControl
         DataContext = _viewModel;
     }
 
+    private void ListBoxItem_Loaded(object sender, RoutedEventArgs e)
+    {
+        Task.Run(((sender as ListBoxItem).DataContext as TextureListItemModel).Load2);
+    }
+
     public void LoadDataView<TViewModel>()
     {
         // (DataContext as BaseListViewModel).LoadDataView<TViewModel>();
+    }
+
+    private void EventSetter_OnHandler(object sender, RoutedEventArgs e)
+    {
+        // https://stackoverflow.com/questions/14282894/wpf-listbox-virtualization-creates-disconnecteditems
+        Task.Run(((sender as ListBoxItem).Tag as TextureListItemModel).Unload);
     }
 }

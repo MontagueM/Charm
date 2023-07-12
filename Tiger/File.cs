@@ -29,14 +29,21 @@ public class TigerFile
         return new MemoryStream(GetData());
     }
 
-    public byte[] GetData()
+    public byte[] GetData(bool shouldCache = true)
     {
-        if (_data == null)
+        if (shouldCache)
         {
-            _data = PackageResourcer.Get().GetFileData(Hash);
-        }
+            if (_data == null)
+            {
+                _data = PackageResourcer.Get().GetFileData(Hash);
+            }
 
-        return _data;
+            return _data;
+        }
+        else
+        {
+            return PackageResourcer.Get().GetFileData(Hash);
+        }
     }
 
     public override int GetHashCode()

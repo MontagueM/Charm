@@ -4,10 +4,11 @@ namespace Arithmic;
 
 public enum LogVerbosity
 {
-    Info,
-    Warning,
+    Fatal,
     Error,
-    Fatal
+    Warning,
+    Info,
+    Verbose
 }
 
 public class LogEventArgs : EventArgs
@@ -43,6 +44,11 @@ public static class Log
         {
             action(null, logEvent);
         }
+    }
+
+    public static void Verbose(string message, [CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFile = "")
+    {
+        LogEvent(LogVerbosity.Verbose, message, callerMethodName, callerFile);
     }
 
     public static void Info(string message, [CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFile = "")

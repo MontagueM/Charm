@@ -1,19 +1,15 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="using:Charm"
-             x:Class="Charm.App"
+             xmlns:local="using:CharmAvalon"
+             x:Class="CharmAvalon.App"
              RequestedThemeVariant="Dark"
              >
-
-  <Application.Styles>
-      <StyleInclude Source="avares://Charm/Styles/Styles.axaml" />
-  </Application.Styles>
-
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
 
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://CharmAvalon/Icons.axaml" />
     </Application.Styles>
 </Application>

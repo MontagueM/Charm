@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interop", "Interop\Interop.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm", "Charm\Charm.csproj", "{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharmAvalon", "CharmAvalon\CharmAvalon.csproj", "{4E258FCB-EB82-4A4A-8483-3E10709FB7FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -65,6 +67,10 @@ Global
 		{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}.Debug|x64.Build.0 = Debug|Any CPU
 		{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}.Release|x64.ActiveCfg = Release|Any CPU
 		{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}.Release|x64.Build.0 = Release|Any CPU
+		{4E258FCB-EB82-4A4A-8483-3E10709FB7FF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4E258FCB-EB82-4A4A-8483-3E10709FB7FF}.Debug|x64.Build.0 = Debug|Any CPU
+		{4E258FCB-EB82-4A4A-8483-3E10709FB7FF}.Release|x64.ActiveCfg = Release|Any CPU
+		{4E258FCB-EB82-4A4A-8483-3E10709FB7FF}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

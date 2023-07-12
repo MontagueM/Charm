@@ -155,7 +155,7 @@ public abstract class Package : IPackage
 
     public HashSet<FileHash> GetAllHashes(Type schemaType)
     {
-        if (!SchemaDeserializer.Get().TryGetSchemaTypeHash(schemaType, out uint referenceHash))
+        if (!SchemaDeserializer.Get().TryGetSchemaTypeIdentifier(schemaType, out TypeIdentifier typeIdentifier))
         {
             throw new ArgumentException($"Type {schemaType} is not a schema type so cannot get hashes for it");
         }
@@ -163,7 +163,7 @@ public abstract class Package : IPackage
         ConcurrentBag<FileHash> hashes = new();
         Parallel.For(0, FileEntries.Count, i =>
         {
-            if (FileEntries[i].Reference.Hash32 == referenceHash)
+            if ((FileEntries[i].Reference.Hash32 == typeIdentifier.ClassHash && (typeIdentifier.ClassHash != TigerHash.InvalidHash32)) || (FileEntries[i].NumType == typeIdentifier.Type && typeIdentifier.SubTypes.Contains(FileEntries[i].NumSubType)))
             {
                 hashes.Add(new FileHash(Header.GetPackageId(), (uint)i));
             }

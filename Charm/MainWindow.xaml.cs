@@ -52,7 +52,7 @@ namespace Charm
             CharmInstance.InitialiseSubsystems();
             Log.Info("Initialised Charm subsystems");
 
-            Strategy.SetStrategy(TigerStrategy.DESTINY2_LATEST);
+            Strategy.SetStrategy(TigerStrategy.DESTINY2_WITCHQUEEN_6307);
 
             if (Commandlet.RunCommandlet())
             {

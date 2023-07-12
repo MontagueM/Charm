@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Markup;
-using Tiger;
-using Tiger.Schema;
+using Charm.Objects;
 
-namespace Charm.Objects;
+namespace Charm.Views;
 
-public partial class FileControl<TViewModel> : FileControl, IControl where TViewModel : IViewModel
+public partial class GridListView<TViewModel> : GridListView, IControl where TViewModel : IViewModel
 {
     public void Load()
     {
@@ -19,40 +14,12 @@ public partial class FileControl<TViewModel> : FileControl, IControl where TView
     }
 }
 
-public delegate bool OnListItemClicked(IListItem listItem);
-
-/// <summary>
-///
-/// </summary>
-// /// <typeparam name="TItem">The type of item that the list presents.</typeparam>
-/// <typeparam name="TView">The type of view that is populated after an item has been clicked.</typeparam>
-public partial class FileControl : UserControl
+public partial class GridListView : UserControl
 {
-    // private Type _listItemType;
-
-    // public Type ListItemType { get; set; } = typeof(HashListItemModel);
-
+    private bool _hasLoaded = false;
     public Type ViewModelType { get; set; }
 
-    // {
-    //     get { return _listItemType; }
-    //     set
-    //     {
-    //         // if (!IsAssignableToGenericType(value, typeof(AbstractList<>)))
-    //         // {
-    //         //     throw new ArgumentException("Type must be an AbstractList<Tag>.", nameof(value));
-    //         // }
-    //
-    //         _listItemType = value;
-    //     }
-    // }
-    private bool _hasLoaded = false;
-
-    // private dynamic fileViewModel;
-
-    // public Type ViewType { get; set; }
-
-    public FileControl()
+    public GridListView()
     {
         InitializeComponent();
     }
@@ -85,12 +52,12 @@ public partial class FileControl : UserControl
         // FileContentPresenter.Content = fileView;
 
         BaseListViewModel listViewModel = new BaseListViewModel();
-        ListControl.DataContext = listViewModel;
+        GridControl.DataContext = listViewModel;
         // ListControl.DataType = DataType;
         // ListControl.ListItemType = ListItemType;
         OnListItemClicked onListItemClicked = ListItemClicked;
 
-        ListControl.LoadView<TViewModel>(onListItemClicked);
+        GridControl.LoadView<TViewModel>(onListItemClicked);
 
         // Load list items
         // typeof(BaseListViewModel)
@@ -117,31 +84,8 @@ public partial class FileControl : UserControl
             return false;
         }
 
-        FileContentPresenter.Content = viewToShow;
+        // FileContentPresenter.Content = viewToShow;
         return true;
     }
-
-    public void LoadFileView<TView, TData>(TView data) where TView : HashListItemModel where TData : TigerFile
-    {
-        // fileViewModel.LoadView(FileResourcer.Get().GetFile<TData>(data.Hash));
-    }
-
-    // public static bool IsAssignableToGenericType(Type givenType, Type genericType)
-    // {
-    //     var interfaceTypes = givenType.GetInterfaces();
-    //
-    //     foreach (var it in interfaceTypes)
-    //     {
-    //         if (it.IsGenericType && it.GetGenericTypeDefinition() == genericType)
-    //             return true;
-    //     }
-    //
-    //     if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
-    //         return true;
-    //
-    //     Type baseType = givenType.BaseType;
-    //     if (baseType == null) return false;
-    //
-    //     return IsAssignableToGenericType(baseType, genericType);
-    // }
 }
+

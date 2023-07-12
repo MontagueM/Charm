@@ -62,6 +62,67 @@ public class SchemaStructAttribute : StrategyAttribute
     }
 }
 
+/// <summary>
+/// -1 type or empty subtype represents "any"
+/// </summary>
+[AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
+public class NonSchemaStructAttribute : StrategyAttribute
+{
+    public int Type { get; } = -1;
+    public HashSet<int> SubTypes { get; } = new();
+    public int SerializedSize { get; }
+
+    public NonSchemaStructAttribute(int serializedSize)
+    {
+        SerializedSize = serializedSize;
+    }
+
+    public NonSchemaStructAttribute(int serializedSize, int type)
+    {
+        SerializedSize = serializedSize;
+        Type = type;
+    }
+
+    public NonSchemaStructAttribute(int serializedSize, int type, int subType)
+    {
+        SerializedSize = serializedSize;
+        Type = type;
+        SubTypes.Add(subType);
+    }
+
+    public NonSchemaStructAttribute(int serializedSize, int type, int[] subTypes)
+    {
+        SerializedSize = serializedSize;
+        Type = type;
+        SubTypes.UnionWith(subTypes);
+    }
+
+    public NonSchemaStructAttribute(TigerStrategy strategy, int serializedSize) : base(strategy)
+    {
+        SerializedSize = serializedSize;
+    }
+
+    public NonSchemaStructAttribute(TigerStrategy strategy, int serializedSize, int type) : base(strategy)
+    {
+        SerializedSize = serializedSize;
+        Type = type;
+    }
+
+    public NonSchemaStructAttribute(TigerStrategy strategy, int serializedSize, int type, int subType) : base(strategy)
+    {
+        SerializedSize = serializedSize;
+        Type = type;
+        SubTypes.Add(subType);
+    }
+
+    public NonSchemaStructAttribute(TigerStrategy strategy, int serializedSize, int type, int[] subTypes) : base(strategy)
+    {
+        SerializedSize = serializedSize;
+        Type = type;
+        SubTypes.UnionWith(subTypes);
+    }
+}
+
 [AttributeUsage(AttributeTargets.Class)]
 public class StrategyClassAttribute : StrategyAttribute
 {

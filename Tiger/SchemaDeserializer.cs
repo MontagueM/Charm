@@ -4,6 +4,19 @@ using System.Runtime.InteropServices;
 
 namespace Tiger;
 
+public struct TypeIdentifier
+{
+    public uint ClassHash { get; set; }
+    public int Type { get; set; }
+    public HashSet<int> SubTypes { get; set; }
+}
+
+public struct TypeSubType
+{
+    public int Type { get; set; }
+    public HashSet<int> SubTypes { get; set; }
+}
+
 public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserializer>
 {
     // todo separate into different class?
@@ -22,6 +35,9 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     // type to 0x8080.... class hash
     private readonly ConcurrentDictionary<Type, uint> _schemaTypeHashMap = new();
+
+    // type to type and subtype class hash
+    private readonly ConcurrentDictionary<Type, TypeSubType> _nonSchemaTypeMap = new();
 
     // Stores SchemaType FieldInfo[] array
     private readonly ConcurrentDictionary<Type, FieldInfo[]> _schemaTypeFieldsMap = new();
@@ -51,14 +67,29 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         return _schemaHashTypeMap.TryGetValue(classHash, out schemaType);
     }
 
-    public bool TryGetSchemaTypeHash<T>(out uint classHash)
-    {
-        return TryGetSchemaTypeHash(typeof(T), out classHash);
-    }
+    // public bool TryGetNonSchemaType(int type, int subType, out Type schemaType)
+    // {
+    //     return _schemaHashTypeMap.TryGetValue(classHash, out schemaType);
+    // }
+    //
+    // public bool TryGetNonSchemaType(int type, out Type schemaType)
+    // {
+    //     return _schemaHashTypeMap.TryGetValue(classHash, out schemaType);
+    // }
 
-    public bool TryGetSchemaTypeHash(Type type, out uint classHash)
+    public bool TryGetSchemaTypeIdentifier(Type schemaType, out TypeIdentifier typeIdentifier)
     {
-        return _schemaTypeHashMap.TryGetValue(type, out classHash);
+        _schemaTypeHashMap.TryGetValue(schemaType, out uint classHash);
+        _nonSchemaTypeMap.TryGetValue(schemaType, out TypeSubType typeSubType);
+
+        typeIdentifier = new TypeIdentifier
+        {
+            ClassHash = classHash != 0 ? classHash : TigerHash.InvalidHash32,
+            Type = typeSubType.Type != 0 ? typeSubType.Type : -1,
+            SubTypes = typeSubType.SubTypes != null ? typeSubType.SubTypes : new HashSet<int>()
+        };
+
+        return typeIdentifier.ClassHash != TigerHash.InvalidHash32 || typeIdentifier.Type != -1 || typeIdentifier.SubTypes.Any();
     }
 
     private void FillSchemaCaches()
@@ -96,6 +127,15 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 {
                     _schemaTypeHashMap.TryAdd(type, new FileHash(schemaStructAttr.ClassHash).Hash32);
                 }
+
+                NonSchemaStructAttribute? nonSchemaStructAttr = GetAttribute<NonSchemaStructAttribute>(schemaType);
+                if (nonSchemaStructAttr != null)
+                {
+                    _schemaSerializedSizeMap.TryAdd(type, nonSchemaStructAttr.SerializedSize);
+                    _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaStructAttr.Type, SubTypes = nonSchemaStructAttr.SubTypes});
+                    _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
+                    return;
+                }
             }
 
             SchemaStructAttribute? schemaStructAttribute = GetAttribute<SchemaStructAttribute>(type);
@@ -104,6 +144,15 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 _schemaSerializedSizeMap.TryAdd(type, schemaStructAttribute.SerializedSize);
                 _schemaHashTypeMap.TryAdd(new FileHash(schemaStructAttribute.ClassHash).Hash32, type);
                 _schemaTypeHashMap.TryAdd(type, new FileHash(schemaStructAttribute.ClassHash).Hash32);
+                _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
+                return;
+            }
+
+            NonSchemaStructAttribute? nonSchemaStructAttribute = GetAttribute<NonSchemaStructAttribute>(type);
+            if (nonSchemaStructAttribute != null)
+            {
+                _schemaSerializedSizeMap.TryAdd(type, nonSchemaStructAttribute.SerializedSize);
+                _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaStructAttribute.Type, SubTypes = nonSchemaStructAttribute.SubTypes});
                 _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
                 return;
             }
@@ -122,7 +171,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     {
         Parallel.ForEach(_schemaSerializedSizeMap
             .Keys
-            .Where(t => GetAttribute<SchemaStructAttribute>(t) != null),
+            .Where(t => GetAttribute<SchemaStructAttribute>(t) != null || GetAttribute<NonSchemaStructAttribute>(t) != null),
             type =>
         {
             _schemaFieldOffsetMap.TryAdd(type, new Dictionary<string, int>());

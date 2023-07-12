@@ -24,24 +24,24 @@ namespace Charm.Objects;
 /// The current implementation of Package is limited so you cannot have nested views below a Package.
 /// For future, would be better to split the tag items up so we can cache them based on parents.
 /// </summary>
-public partial class ListControl : UserControl
+public partial class SingleItemControl : UserControl
 {
-    private readonly BaseListViewModel _viewModel;
-
-    public ListControl()
+    public SingleItemControl()
     {
         InitializeComponent();
-        _viewModel = new BaseListViewModel();
+        DataContext = new BaseListViewModel();
     }
 
-    public void LoadView<TViewModel>(OnListItemClicked onListItemClicked) where TViewModel : IViewModel
+    public Type DataType { get; set; }
+    public Type ItemType { get; set; }
+
+    public void LoadView(FileControl fileControl)
     {
-        _viewModel.LoadView<TViewModel>(onListItemClicked);
-        DataContext = _viewModel;
+        // (DataContext as BaseItemViewModel).LoadView(fileControl, ItemType, DataType);
     }
 
-    public void LoadDataView<TViewModel>()
+    public void LoadDataView()
     {
-        // (DataContext as BaseListViewModel).LoadDataView<TViewModel>();
+        // (DataContext as BaseItemViewModel).LoadDataView(ItemType, DataType);
     }
 }

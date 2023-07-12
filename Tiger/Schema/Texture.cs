@@ -26,7 +26,8 @@ public class Texture : TigerReferenceFile64<STextureHeader>
         byte[] data;
         if (_tag.LargeTextureBuffer != null)
         {
-            data = _tag.LargeTextureBuffer.GetData();
+            // todo we shouldnt cache this
+            data = _tag.LargeTextureBuffer.GetData(false);
         }
         else
         {
@@ -175,7 +176,7 @@ public class Texture : TigerReferenceFile64<STextureHeader>
     }
 }
 
-[SchemaStruct(0x40)]
+[NonSchemaStruct(0x40, 32, new []{1, 2, 3})]
 public struct STextureHeader
 {
     public uint DataSize;
@@ -191,7 +192,7 @@ public struct STextureHeader
     public ushort Height;
     public ushort Depth;
     public ushort ArraySize;
-    public ushort MipLevels; // not mip levels ig
+    public ushort MipLevels; // not mip levels idk what this is
     public ushort Unk2C;
     public ushort Unk2E;
     public ushort Unk30;
