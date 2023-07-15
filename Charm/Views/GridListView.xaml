@@ -20,11 +20,11 @@
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="35*" />
             <ColumnDefinition Width="65*" />
+            <ColumnDefinition Width="35*" />
         </Grid.ColumnDefinitions>
-        <objects:GridControl Grid.Column="0" Grid.ColumnSpan="2" x:Name="GridControl"/>
-        <!-- <ContentControl Grid.Column="1" x:Name="FileContentPresenter"/> -->
+        <objects:GridControl Grid.Column="0" Grid.ColumnSpan="1" x:Name="GridControl" BorderThickness="0,0,2,0" BorderBrush="{StaticResource BackgroundColour50}"/>
+        <ContentControl Grid.Column="1" x:Name="FileContentPresenter"/>
     </Grid>
 </UserControl>
 

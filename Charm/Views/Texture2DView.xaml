@@ -7,23 +7,38 @@
              xmlns:objects="clr-namespace:Charm.Objects"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
-             Loaded="Texture2DView_OnLoaded"
-             Unloaded="Texture2DView_OnUnloaded">
+             >
     <UserControl.DataContext>
         <objects:TextureListItemModel/>
     </UserControl.DataContext>
     <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="70*" />
-            <ColumnDefinition Width="30*" />
+            <ColumnDefinition Width="100*" />
+            <!-- <ColumnDefinition Width="30*" /> -->
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <!-- <RowDefinition Height="10*" /> -->
             <RowDefinition Height="80*" />
-            <RowDefinition Height="20*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
-        <Image Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Source="{Binding ImageSource}"/>
+        <!-- <StackPanel Orientation="Horizontal"> -->
+        <!--     <Button Background="DarkRed"> -->
+        <!--         <TextBlock Text="R" Foreground="{StaticResource ForegroundColour100}"/> -->
+        <!--     </Button> -->
+        <!--     <Button Background="Green"> -->
+        <!--         <TextBlock Text="G" Foreground="{StaticResource ForegroundColour100}"/> -->
+        <!--     </Button> -->
+        <!--     <Button Background="DarkBlue"> -->
+        <!--         <TextBlock Text="B" Foreground="{StaticResource ForegroundColour100}"/> -->
+        <!--     </Button> -->
+        <!--     <Button Background="DimGray" Click="ButtonBase_OnClick"> -->
+        <!--         <TextBlock Text="A" Foreground="{StaticResource ForegroundColour100}"/> -->
+        <!--     </Button> -->
+        <!-- </StackPanel> -->
+        <Image Grid.Column="0" Grid.Row="1" Source="{Binding ImageSource}"/>
         <TextBlock Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="32" Text="{Binding Hash}" />
-        <TextBlock Grid.Column="1" Grid.Row="1" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
+        <TextBlock Grid.Column="0" Grid.Row="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Left" TextAlignment="Left" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
     </Grid>
 </UserControl>
 

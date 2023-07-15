@@ -20,7 +20,7 @@ using Tiger.Schema;
 namespace Charm.Objects;
 
 
-public abstract class HashListItemModel : IListItem
+public class HashListItemModel : BaseViewModel, IListItem
 {
     public TigerHash Hash { get; set; } = new();
     public string HashString { get => $"[{Hash}]"; }
@@ -67,19 +67,31 @@ public abstract class HashListItemModel : IListItem
     // }
 
     public int CompareTo(IListItem? other) => Hash.CompareTo((other as HashListItemModel)?.Hash);
-    public event PropertyChangedEventHandler? PropertyChanged;
+    // public event PropertyChangedEventHandler PropertyChanged;
+    //
+    // protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    // {
+    //     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    // }
+    //
+    // protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    // {
+    //     if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+    //     field = value;
+    //     OnPropertyChanged(propertyName);
+    //     return true;
+    // }
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    public virtual void Load(dynamic? data = null, UserControl? control = null)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    // protected virtual void Load<T>(T data)
+    // {
+    // }
+
+    public virtual void Unload()
     {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }
 
@@ -396,5 +408,13 @@ public class BaseViewModel : INotifyPropertyChanged
     protected void OnPropertyChanged([CallerMemberName] string memberName = "")
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 }

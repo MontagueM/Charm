@@ -23,6 +23,8 @@ public interface IViewModel<TData> : IViewModel
     /// </summary>
     /// <returns>the view that best represents this view model.</returns>
     public static abstract UserControl GetView(TData data);
+
+    public static abstract UserControl? DefaultView { get; }
 }
 
 public interface IViewModel
@@ -45,7 +47,7 @@ public interface IViewModel
     {
         HashSet<TigerHash> allHashes = PackageResourcer.Get().GetAllHashes<TData>();
         return allHashes
-            .Take(10000)
+            // .Take(10000)
             .Select(hash => (Activator.CreateInstance(typeof(TModel), hash, typeof(TData).Name)))
             .Cast<IListItem>()
             .ToHashSet();
@@ -63,7 +65,7 @@ public interface IModel<TData> where TData : TigerFile
     }
 }
 
-public interface IListItem : INotifyPropertyChanged
+public interface IListItem
 {
     public bool ShouldFilterKeep(string searchText);
 

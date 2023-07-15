@@ -30,7 +30,7 @@
                 <views:ManyListsView/>
             </TabItem>
             <TabItem Header="MAIN MENU" x:Name="MainMenuTab">
-                <!-- <views:MainMenuView/> -->
+                <views:MainMenuView/>
             </TabItem>
             <TabItem Header="ACTIVITIES">
             </TabItem>

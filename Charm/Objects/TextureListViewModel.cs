@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -46,6 +49,8 @@ public class TextureViewModel : GenericListViewModel<Texture>, IViewModel<Textur
         return view;
     }
 
+    public static UserControl? DefaultView { get; } = null;
+
     public static HashSet<IListItem> GetListItems(short packageId) => IViewModel.GetListItemsInternal<TextureListItemModel, Texture>(packageId);
 }
 
@@ -58,50 +63,53 @@ public class TextureListItemModel : HashListItemModel
         set { SetField(ref _imageSource, value); }
     }
 
+    private CancellationToken _cancellationToken = CancellationToken.None;
+
+    private Stream _stream;
+
     // todo make this async call
     // todo remove typeName
     public TextureListItemModel(FileHash textureHash, string typeName) : base(textureHash, typeName)
     {
-        Task.Run(() =>
-        {
-            // Texture texture = FileResourcer.Get().GetFile<Texture>(textureHash);
-            // Load2(texture);
-        });
     }
 
     public TextureListItemModel(Texture texture) : base(texture.Hash, "Texture")
     {
-        // Task.Run(() => Load2(texture));
     }
 
     public TextureListItemModel()
     {
     }
 
-    public void Load2()
+    public override void Load(dynamic? data = null, UserControl? control = null)
     {
+        if (Hash.IsInvalid())
+        {
+            return;
+        }
         Texture texture = FileResourcer.Get().GetFile<Texture>(Hash);
-        Load2(texture);
+        Load(texture);
     }
 
-    ~TextureListItemModel()
-    {
-        Unload();
-    }
-
-    public void Load2(Texture texture)
+    private void Load(Texture texture)
     {
         BitmapImage bitmapImage = new();
-        bitmapImage.BeginInit();
-        bitmapImage.StreamSource = texture.GetTexture();
-        bitmapImage.CacheOption = BitmapCacheOption.OnDemand;
 
-        bitmapImage.DecodePixelWidth = texture.TagData.Width;
-        bitmapImage.DecodePixelHeight = texture.TagData.Height;
-        bitmapImage.EndInit();
+        using (UnmanagedMemoryStream stream = texture.GetTexture())
+        {
+            bitmapImage.BeginInit();
+
+            bitmapImage.StreamSource = stream;
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+
+            bitmapImage.DecodePixelWidth = texture.TagData.Width;
+            bitmapImage.DecodePixelHeight = texture.TagData.Height;
+
+            bitmapImage.EndInit();
+        }
+
         bitmapImage.Freeze();
 
-        // dispatcher invoke?
         ImageSource = bitmapImage;
 
         string srgb = texture.IsSrgb() ? "sRGB" : "Linear";
@@ -117,8 +125,9 @@ public class TextureListItemModel : HashListItemModel
         Type = $"{texture.TagData.Width}x{texture.TagData.Height}, {((DirectXTexUtility.DXGIFormat)texture.TagData.Format).ToString()}, {srgb}, {type}";
     }
 
-    public void Unload()
+    public override void Unload()
     {
-        ImageSource?.StreamSource.Dispose();
+        ImageSource = null;
+        // GC.Collect();
     }
 }

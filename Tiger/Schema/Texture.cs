@@ -46,6 +46,7 @@ public class Texture : TigerReferenceFile64<STextureHeader>
         IntPtr pixelPtr = gcHandle.AddrOfPinnedObject();
         var scratchImage = TexHelper.Instance.LoadFromDDSMemory(pixelPtr, final.Length, DDS_FLAGS.NONE);
         gcHandle.Free();
+
         if (IsCubemap())
         {
             if (TexHelper.Instance.IsCompressed(format))
@@ -86,6 +87,9 @@ public class Texture : TigerReferenceFile64<STextureHeader>
                 scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
             }
         }
+
+        // scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, TEX_FILTER_FLAGS.RGB_COPY_RED, 0);
+
         return scratchImage;
     }
 
@@ -112,6 +116,7 @@ public class Texture : TigerReferenceFile64<STextureHeader>
     public UnmanagedMemoryStream GetTexture()
     {
         ScratchImage scratchImage = GetScratchImage();
+
         UnmanagedMemoryStream ms;
         if (IsCubemap())
         {
@@ -123,6 +128,7 @@ public class Texture : TigerReferenceFile64<STextureHeader>
             ms = scratchImage.SaveToWICMemory(0, WIC_FLAGS.NONE, guid);
         }
         scratchImage.Dispose();
+        // ms.Dispose();
         return ms;
     }
 

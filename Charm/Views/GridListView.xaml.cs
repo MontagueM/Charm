@@ -59,11 +59,23 @@ public partial class GridListView : UserControl
 
         GridControl.LoadView<TViewModel>(onListItemClicked);
 
+        LoadDefaultView();
+
         // Load list items
         // typeof(BaseListViewModel)
         //     .GetMethod("LoadView", BindingFlags.Public | BindingFlags.Instance)
         //     ?.MakeGenericMethod(ListItemType, DataType)
         //     .Invoke(listViewModel, new object[] { this });
+    }
+
+    private void LoadDefaultView()
+    {
+        UserControl? defaultView = (UserControl?)ViewModelType
+            .GetFields(BindingFlags.NonPublic | BindingFlags.Static)
+            .First(f => f.Name.Contains("DefaultView"))
+            .GetValue(null);
+
+        FileContentPresenter.Content = defaultView;
     }
 
     public bool ListItemClicked(IListItem listItem)
@@ -84,7 +96,20 @@ public partial class GridListView : UserControl
             return false;
         }
 
-        // FileContentPresenter.Content = viewToShow;
+        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Unload();
+        // (viewToShow.DataContext as HashListItemModel)?.Load(itemData);
+
+        // todo coalesce with FileControl
+        // todo can improve this so it doesnt create UserControl every time
+        // todo one viewmodel, just put in the model (itemData)
+        if (FileContentPresenter.Content == null || viewToShow.GetType() != FileContentPresenter.Content.GetType())
+        {
+            // (FileContentPresenter.Content as UserControl).DataContext = viewToShow.DataContext;
+            FileContentPresenter.Content = viewToShow;
+        }
+
+        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Load(itemData, FileContentPresenter.Content as UserControl);
+
         return true;
     }
 }

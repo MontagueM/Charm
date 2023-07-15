@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:objects="clr-namespace:Charm.Objects"
+             xmlns:views="clr-namespace:Charm.Views"
+             xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="720"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
              Background="{DynamicResource MaterialDesignPaper}"
@@ -50,24 +52,24 @@
         <ListBox d:DataContext="{objects:MockListControl}" ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" x:Name="ItemsList">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <objects:UniformGridPanel Columns="5"/>
+                    <objects:UniformGridPanel Columns="7" Rows="7"/>
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource BackgroundColour50}"/>
+                    <!-- <Setter Property="BorderBrush" Value="{StaticResource BackgroundColour50}"/> -->
                     <Setter Property="BorderThickness" Value="0,0,0,1"/>
                     <Setter Property="Padding" Value="3"/>
-                    <Setter Property="Height" Value="300"/>
-                    <Setter Property="Width" Value="300"/>
+                    <!-- <Setter Property="Height" Value="300"/> -->
+                    <!-- <Setter Property="Width" Value="300"/> -->
                     <EventSetter Event="Loaded" Handler="ListBoxItem_Loaded"/>
                     <EventSetter Event="Unloaded" Handler="EventSetter_OnHandler"/>
                     <!-- https://stackoverflow.com/questions/14282894/wpf-listbox-virtualization-creates-disconnecteditems -->
                     <Setter Property="Tag" Value="{Binding}"/>
-                    <!-- <Setter Property="HorizontalAlignment" Value="Stretch"/> -->
-                    <!-- <Setter Property="VerticalAlignment" Value="Stretch"/> -->
-                    <!-- <Setter Property="VerticalContentAlignment" Value="Stretch"/> -->
+                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
                 </Style>
             </ListBox.ItemContainerStyle>
             <ListBox.Resources>
@@ -86,20 +88,17 @@
                     </Grid>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type objects:TextureListItemModel}">
-                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="70*" />
-                            <ColumnDefinition Width="30*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="80*" />
-                            <RowDefinition Height="20*" />
-                        </Grid.RowDefinitions>
-                        <Image Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Source="{Binding ImageSource}"/>
-                        <TextBlock Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="32" Text="{Binding Hash}" />
-                        <TextBlock Grid.Column="1" Grid.Row="1" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
+                    <Grid Background="Transparent" Tag="{Binding Hash}">
+                        <Image Grid.Column="0" Grid.Row="0" Source="{Binding ImageSource}"/>
+                    </Grid>
+                    <!-- <views:Texture2DView DataContext="{Binding}"/> -->
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type objects:StaticListItemModel}">
+                    <Grid Background="Transparent" Tag="{Binding Hash}">
+                        <Image Grid.Column="0" Grid.Row="0" Source="{Binding ThumbnailImageSource}"/>
                     </Grid>
                 </DataTemplate>
+                    <!-- <views:Texture2DView DataContext="{Binding}"/> -->
             </ListBox.Resources>
             <!--     <DataTemplate DataType="{x:Type objects:TitleListItemModel}"> -->
             <!--         <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" Height="50"> -->

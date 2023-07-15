@@ -14,13 +14,21 @@ public partial class Texture2DView : UserControl
         InitializeComponent();
     }
 
-    private void Texture2DView_OnLoaded(object sender, RoutedEventArgs e)
-    {
-        Task.Run((DataContext as TextureListItemModel).Load2);
-    }
+    // todo reconcile with the other copies of this code
+    // private void Texture2DView_OnLoaded(object sender, RoutedEventArgs e)
+    // {
+    //     Task.Run((DataContext as HashListItemModel).Load);
+    // }
+    //
+    // private void Texture2DView_OnUnloaded(object sender, RoutedEventArgs e)
+    // {
+    //     Task.Run((DataContext as HashListItemModel).Unload);
+    // }
 
-    private void Texture2DView_OnUnloaded(object sender, RoutedEventArgs e)
+
+
+    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
-        Debug.WriteLine($"Texture2DView_OnUnloaded {(DataContext as TextureListItemModel).Hash}");
+
     }
 }

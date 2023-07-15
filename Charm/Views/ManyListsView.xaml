@@ -16,19 +16,25 @@
              FontFamily="{materialDesign:MaterialDesignFont}">
     <Grid>
         <TabControl SelectionChanged="FileControl_OnSelectionChanged">
-            <TabItem Header="TEXTURES">
+            <TabItem Header="STATICS">
                 <TabControl SelectionChanged="ListControl_OnSelectionChanged">
                     <TabItem Header="SEPARATED">
-                        <!-- <objects:FileControl DataType="{x:Type schema:Texture}" ViewType="{x:Type objects:TextureViewModel}" Padding="0,1,0,0"/> -->
-                        <local:TextureSingleView/>
+                        <local:StaticSingleView/>
                     </TabItem>
                     <TabItem Header="ALL (SLOW)">
-                        <!-- <objects:FileControl DataType="{x:Type schema:Texture}" ViewType="{x:Type objects:TextureViewModel}" Padding="0,1,0,0" /> -->
-                        <local:TextureGridView/>
+                        <local:StaticGridView/>
                     </TabItem>
                 </TabControl>
             </TabItem>
-            <TabItem Header="STATICS">
+            <TabItem Header="TEXTURES">
+                <TabControl SelectionChanged="ListControl_OnSelectionChanged">
+                    <TabItem Header="SEPARATED">
+                        <local:TextureSingleView/>
+                    </TabItem>
+                    <TabItem Header="ALL (SLOW)">
+                        <local:TextureGridView/>
+                    </TabItem>
+                </TabControl>
             </TabItem>
             <TabItem Header="AUDIO">
             </TabItem>

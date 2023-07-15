@@ -3,7 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450">
-    Static
+             xmlns:views="clr-namespace:Charm.Views"
+             xmlns:objects="clr-namespace:Charm.Objects"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             >
+    <UserControl.DataContext>
+        <objects:StaticListItemModel/>
+    </UserControl.DataContext>
+    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+        <views:ModelView x:Name="ModelView"/>
+    </Grid>
 </UserControl>
 

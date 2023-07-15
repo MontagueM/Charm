@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
+using Charm.Views;
 using Tiger;
 using Tiger.Schema;
 
@@ -117,7 +118,19 @@ public partial class FileControl : UserControl
             return false;
         }
 
-        FileContentPresenter.Content = viewToShow;
+        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Unload();
+        // (viewToShow.DataContext as HashListItemModel)?.Load(itemData);
+
+        // todo can improve this so it doesnt create UserControl every time
+        // todo one viewmodel, just put in the model (itemData)
+        if (FileContentPresenter.Content == null || viewToShow.GetType() != FileContentPresenter.Content.GetType())
+        {
+            // (FileContentPresenter.Content as UserControl).DataContext = viewToShow.DataContext;
+            FileContentPresenter.Content = viewToShow;
+        }
+
+        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Load(itemData, FileContentPresenter.Content as UserControl);
+
         return true;
     }
 

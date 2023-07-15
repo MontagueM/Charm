@@ -11,7 +11,7 @@ namespace Charm.Views;
 
 public partial class MainMenuView : UserControl
 {
-    public string Hash { get; set; } = "C5E3B080";
+    public string Hash { get; set; } = "2E24C680";
 
     public MainMenuView()
     {
