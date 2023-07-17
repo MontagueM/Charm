@@ -118,7 +118,7 @@ public partial class FileControl : UserControl
             return false;
         }
 
-        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Unload();
+        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Unload(LoadType.Full);
         // (viewToShow.DataContext as HashListItemModel)?.Load(itemData);
 
         // todo can improve this so it doesnt create UserControl every time
@@ -129,7 +129,7 @@ public partial class FileControl : UserControl
             FileContentPresenter.Content = viewToShow;
         }
 
-        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Load(itemData, FileContentPresenter.Content as UserControl);
+        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Load(LoadType.Full, itemData);
 
         return true;
     }

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using Charm.Objects;
+using ConcurrentCollections;
 using Tiger;
 
 namespace Charm;
@@ -24,7 +26,7 @@ public interface IViewModel<TData> : IViewModel
     /// <returns>the view that best represents this view model.</returns>
     public static abstract UserControl GetView(TData data);
 
-    public static abstract UserControl? DefaultView { get; }
+    // public static abstract UserControl? DefaultView { get; }
 }
 
 public interface IViewModel
@@ -33,21 +35,22 @@ public interface IViewModel
     /// Get all the list items represented by TData.
     /// </summary>
     /// <returns></returns>
-    public static HashSet<IListItem> GetListItems<TViewModel>(short packageId = -1) where TViewModel : IViewModel
+    public static async Task<HashSet<IListItem>> GetListItems<TViewModel>(short packageId = -1) where TViewModel : IViewModel
     {
         // All IViewModel implementations should have a static method that returns all the list items.
-        return (HashSet<IListItem>)typeof(TViewModel)
+        return await (Task<HashSet<IListItem>>)typeof(TViewModel)
             .GetMethod(nameof(GetListItems), BindingFlags.Static | BindingFlags.Public)
             !.Invoke(null, new object[] { packageId })!;
     }
 
-    protected static abstract HashSet<IListItem> GetListItems(short packageId);
+    protected static abstract Task<HashSet<IListItem>> GetListItems(short packageId);
 
-    public static HashSet<IListItem> GetListItemsInternal<TModel, TData>(short packageId)
+    public static async Task<HashSet<IListItem>> GetListItemsInternal<TModel, TData>(short packageId)
     {
-        HashSet<TigerHash> allHashes = PackageResourcer.Get().GetAllHashes<TData>();
+        ConcurrentHashSet<TigerHash> allHashes = await PackageResourcer.Get().GetAllHashes<TData>();
         return allHashes
             // .Take(10000)
+            .AsParallel()
             .Select(hash => (Activator.CreateInstance(typeof(TModel), hash, typeof(TData).Name)))
             .Cast<IListItem>()
             .ToHashSet();

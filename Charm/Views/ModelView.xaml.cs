@@ -14,7 +14,7 @@ public partial class ModelView : UserControl
         InitializeComponent();
 
         // todo improve this
-        StaticListItemModel.Viewport = Viewport;
+        // StaticListItemModel.Viewport = Viewport;
     }
 
     // public ELOD GetSelectedLod()

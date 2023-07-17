@@ -23,21 +23,21 @@
             <ColumnDefinition Width="50*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="5*" />
-            <RowDefinition Height="95*" />
+            <!-- <RowDefinition Height="5*" /> -->
+            <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
 
-        <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"
-                 TextWrapping="Wrap" VerticalAlignment="Center" FontSize="24" BorderBrush="{StaticResource ForegroundColour80}" BorderThickness="1"
-                 FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36"
-                 Background="{StaticResource BackgroundColour50}"
-                 materialDesign:HintAssist.Hint="Search"/>
+        <!-- <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" -->
+        <!--          TextWrapping="Wrap" VerticalAlignment="Center" FontSize="24" BorderBrush="{StaticResource ForegroundColour80}" BorderThickness="1" -->
+        <!--          FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36" -->
+        <!--          Background="{StaticResource BackgroundColour50}" -->
+        <!--          materialDesign:HintAssist.Hint="Search"/> -->
 
-        <materialDesign:PopupBox StaysOpen="True" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0" HorizontalAlignment="Left" Background="Transparent" BorderBrush="{StaticResource ForegroundColour70}">
-            <StackPanel Orientation="Vertical">
-                <CheckBox Content=""/>
-            </StackPanel>
-        </materialDesign:PopupBox>
+        <!-- <materialDesign:PopupBox StaysOpen="True" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,0,0" HorizontalAlignment="Left" Background="Transparent" BorderBrush="{StaticResource ForegroundColour70}"> -->
+        <!--     <StackPanel Orientation="Vertical"> -->
+        <!--         <CheckBox Content=""/> -->
+        <!--     </StackPanel> -->
+        <!-- </materialDesign:PopupBox> -->
 
         <!-- <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,0"> -->
         <!--     <CheckBox Checked="TrimCheckbox_OnChecked" Unchecked="TrimCheckbox_OnUnchecked" x:Name="TrimCheckbox" -->
@@ -49,7 +49,7 @@
         <!-- </StackPanel> -->
 
 
-        <ListBox d:DataContext="{objects:MockListControl}" ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" SelectionMode="Single" SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" x:Name="ItemsList">
+        <ListBox d:DataContext="{objects:MockListControl}" ItemsSource="{Binding Items}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" SelectionMode="Single" SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}" x:Name="ItemsList">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <objects:UniformGridPanel Columns="7" Rows="7"/>
@@ -73,20 +73,6 @@
                 </Style>
             </ListBox.ItemContainerStyle>
             <ListBox.Resources>
-                <DataTemplate DataType="{x:Type objects:HashListItemModel}">
-                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" Height="50">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80*" />
-                            <ColumnDefinition Width="20*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="70*" />
-                            <RowDefinition Height="30*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="32" Text="{Binding Hash}" />
-                        <TextBlock Grid.Column="1" Grid.Row="1" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Right" TextAlignment="Right" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
-                    </Grid>
-                </DataTemplate>
                 <DataTemplate DataType="{x:Type objects:TextureListItemModel}">
                     <Grid Background="Transparent" Tag="{Binding Hash}">
                         <Image Grid.Column="0" Grid.Row="0" Source="{Binding ImageSource}"/>
@@ -94,8 +80,18 @@
                     <!-- <views:Texture2DView DataContext="{Binding}"/> -->
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type objects:StaticListItemModel}">
-                    <Grid Background="Transparent" Tag="{Binding Hash}">
-                        <Image Grid.Column="0" Grid.Row="0" Source="{Binding ThumbnailImageSource}"/>
+                    <Grid Background="Transparent" Tag="{Binding Hash}" HorizontalAlignment="Stretch" Margin="20, 10, 20, 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="33*" />
+                            <RowDefinition Height="33*" />
+                            <RowDefinition Height="33*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="24" Text="{Binding TriangleCount}" />
+                        <TextBlock Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="24" Text="{Binding MaterialCount}" />
+                        <TextBlock Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="24" Text="{Binding PartCount}" />
                     </Grid>
                 </DataTemplate>
                     <!-- <views:Texture2DView DataContext="{Binding}"/> -->

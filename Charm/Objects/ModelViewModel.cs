@@ -25,7 +25,21 @@ using Matrix = System.Windows.Media.Matrix;
 using MeshGeometry3D = HelixToolkit.SharpDX.Core.MeshGeometry3D;
 using PerspectiveCamera = HelixToolkit.Wpf.SharpDX.PerspectiveCamera;
 
+
 namespace Charm.Objects;
+
+public struct DisplayPart
+{
+    public MeshPart BasePart;
+    public List<Tiger.Schema.Vector3> Translations = new();
+    public List<Tiger.Schema.Vector4> Rotations = new();
+    public List<Tiger.Schema.Vector3> Scales = new();
+
+    public DisplayPart(MeshPart basePart)
+    {
+        BasePart = basePart;
+    }
+}
 
 // need a nice way of storing <Texture> while keeping it type safe (just make it one type to inherit from)
 public class ModelViewModel : HashListItemModel
@@ -141,7 +155,7 @@ public class ModelViewModel : HashListItemModel
     }
 
         // https://stackoverflow.com/questions/33374434/improve-wpf-rendering-performance-using-helix-toolkit
-    public void DrawParts(IEnumerable<MeshPart> parts)
+    public void AddPartsToViewport(IEnumerable<DisplayPart> parts)
     {
         // if (!_initialised)
         // {
@@ -151,7 +165,6 @@ public class ModelViewModel : HashListItemModel
         {
             MeshNode model = new();
             MeshGeometry3D Model = new();
-            // Matrix[] ModelInstances = new Matrix[part.Translations.Count];
             PhongMaterial ModelMaterial = new();
 
             MeshGeometry3D mesh = new();
@@ -160,28 +173,29 @@ public class ModelViewModel : HashListItemModel
             Vector3Collection normals = new();
             Vector2Collection textureCoordinates = new();
             mesh.SetAsTransient();
-            if (part.Indices.Count > 0)
+            if (part.BasePart.Indices.Count > 0)
             {
                 // Conversion lookup table
                 Dictionary<int, int> lookup = new();
-                for (int i = 0; i < part.VertexIndices.Count; i++)
+                for (int i = 0; i < part.BasePart.VertexIndices.Count; i++)
                 {
-                    lookup[(int)part.VertexIndices[i]] = i;
+                    lookup[(int)part.BasePart.VertexIndices[i]] = i;
                 }
-                foreach (var vertexIndex in part.VertexIndices)
+                foreach (var vertexIndex in part.BasePart.VertexIndices)
                 {
-                    var v4p = part.VertexPositions[lookup[(int)vertexIndex]];
+                    var v4p = part.BasePart.VertexPositions[lookup[(int)vertexIndex]];
                     SharpDX.Vector3 p = new(v4p.X, v4p.Y, v4p.Z);
                     positions.Add(p);
                     // We need to check if the normal is Euler or Quaternion
-                    var v4n = part.VertexNormals[lookup[(int)vertexIndex]];
-                    SharpDX.Vector3 n = new(v4n.X, v4n.Y, v4n.Z);
+                    var v4n = part.BasePart.VertexNormals[lookup[(int)vertexIndex]];
+                    var v3n = ConsiderQuatToEulerConvert(v4n);
+                    SharpDX.Vector3 n = new(v3n.X, v3n.Y, v3n.Z);
                     normals.Add(n);
-                    var v2t = part.VertexTexcoords0[lookup[(int)vertexIndex]];
+                    var v2t = part.BasePart.VertexTexcoords0[lookup[(int)vertexIndex]];
                     SharpDX.Vector2 t = new(v2t.X, v2t.Y);
                     textureCoordinates.Add(t);
                 }
-                foreach (UIntVector3 face in part.Indices)
+                foreach (UIntVector3 face in part.BasePart.Indices)
                 {
                     triangleIndices.Add(lookup[(int)face.X]);
                     triangleIndices.Add(lookup[(int)face.Y]);
@@ -199,137 +213,45 @@ public class ModelViewModel : HashListItemModel
                 {
                     DiffuseColor = new Color4(0.7f, 0.7f, 0.7f, 1.0f)
                 };
-            // List<Matrix> instances = new List<Matrix>();
-            //
-            // for (int i = 0; i < part.Translations.Count; i++)
-            // {
-            //     SharpDX.Vector3 scale = new SharpDX.Vector3(part.Scales[i].X, part.Scales[i].Y, part.Scales[i].Z);
-            //     SharpDX.Quaternion rotation = new SharpDX.Quaternion(part.Rotations[i].X, part.Rotations[i].Y, part.Rotations[i].Z, part.Rotations[i].W);
-            //     SharpDX.Vector3 translation = new SharpDX.Vector3(part.Translations[i].X, part.Translations[i].Y, part.Translations[i].Z);
-            //     SharpDX.Matrix matrix = new SharpDX.Matrix();
-            //     SharpDX.Vector3 scalingOrigin = SharpDX.Vector3.Zero;
-            //     matrix = SharpDX.Matrix.Transformation(scalingOrigin, SharpDX.Quaternion.Identity, scale, SharpDX.Vector3.Zero, rotation, translation);
-            //     // Transform Y-up to Z-up
-            //     // instances.Add(matrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2));
-            //     instances.Add(matrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2));
-            //
-            // }
-            // ModelInstances = instances.ToArray();
-            List<SharpDX.Matrix> instances = new() {SharpDX.Matrix.Identity};
-            model.Instances = instances.ToArray();
-            // model.Instances = ModelInstances;
+            List<SharpDX.Matrix> instances = new();
+
+            for (int i = 0; i < part.Translations.Count; i++)
+            {
+                SharpDX.Vector3 scale = new(part.Scales[i].X, part.Scales[i].Y, part.Scales[i].Z);
+                SharpDX.Quaternion rotation = new(part.Rotations[i].X, part.Rotations[i].Y, part.Rotations[i].Z, part.Rotations[i].W);
+                SharpDX.Vector3 translation = new(part.Translations[i].X, part.Translations[i].Y, part.Translations[i].Z);
+                SharpDX.Matrix matrix = new();
+                SharpDX.Vector3 scalingOrigin = SharpDX.Vector3.Zero;
+                matrix = SharpDX.Matrix.Transformation(scalingOrigin, SharpDX.Quaternion.Identity, scale, SharpDX.Vector3.Zero, rotation, translation);
+                // Transform Y-up to Z-up
+                // instances.Add(matrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2));
+                instances.Add(matrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2));
+
+            }
+
+            model.Instances = instances;
             ModelGroup.AddNode(model);
         }
     }
 
-    public void DrawPartsToRemoteViewport(IEnumerable<MeshPart> parts, Viewport3DX viewport)
+    private Tiger.Schema.Vector3 ConsiderQuatToEulerConvert(Tiger.Schema.Vector4 v4N)
     {
-        // if (!_initialised)
-        // {
-        //     Initialise();
-        // }
-        foreach (var part in parts)
+        Tiger.Schema.Vector3 res = new();
+        if (Math.Abs(v4N.Magnitude - 1) < 0.01)  // Quaternion
         {
-            MeshNode model = new();
-            MeshGeometry3D Model = new();
-            // Matrix[] ModelInstances = new Matrix[part.Translations.Count];
-            PhongMaterial ModelMaterial = new();
-
-            MeshGeometry3D mesh = new();
-            IntCollection triangleIndices = new();
-            Vector3Collection positions = new();
-            Vector3Collection normals = new();
-            Vector2Collection textureCoordinates = new();
-            mesh.SetAsTransient();
-            if (part.Indices.Count > 0)
-            {
-                // Conversion lookup table
-                Dictionary<int, int> lookup = new();
-                for (int i = 0; i < part.VertexIndices.Count; i++)
-                {
-                    lookup[(int)part.VertexIndices[i]] = i;
-                }
-                foreach (var vertexIndex in part.VertexIndices)
-                {
-                    var v4p = part.VertexPositions[lookup[(int)vertexIndex]];
-                    SharpDX.Vector3 p = new(v4p.X, v4p.Y, v4p.Z);
-                    positions.Add(p);
-                    // We need to check if the normal is Euler or Quaternion
-                    var v4n = part.VertexNormals[lookup[(int)vertexIndex]];
-                    SharpDX.Vector3 n = new(v4n.X, v4n.Y, v4n.Z);
-                    normals.Add(n);
-                    var v2t = part.VertexTexcoords0[lookup[(int)vertexIndex]];
-                    SharpDX.Vector2 t = new(v2t.X, v2t.Y);
-                    textureCoordinates.Add(t);
-                }
-                foreach (UIntVector3 face in part.Indices)
-                {
-                    triangleIndices.Add(lookup[(int)face.X]);
-                    triangleIndices.Add(lookup[(int)face.Y]);
-                    triangleIndices.Add(lookup[(int)face.Z]);
-                }
-            }
-
-            mesh.Positions = positions;
-            mesh.Normals = normals;
-            mesh.TextureCoordinates = textureCoordinates;
-            mesh.TriangleIndices = triangleIndices;
-            model.Geometry = mesh;
-            model.Material =
-                new HelixToolkit.Wpf.SharpDX.DiffuseMaterial
-                {
-                    DiffuseColor = new Color4(0.7f, 0.7f, 0.7f, 1.0f)
-                };
-            // List<Matrix> instances = new List<Matrix>();
-            //
-            // for (int i = 0; i < part.Translations.Count; i++)
-            // {
-            //     SharpDX.Vector3 scale = new SharpDX.Vector3(part.Scales[i].X, part.Scales[i].Y, part.Scales[i].Z);
-            //     SharpDX.Quaternion rotation = new SharpDX.Quaternion(part.Rotations[i].X, part.Rotations[i].Y, part.Rotations[i].Z, part.Rotations[i].W);
-            //     SharpDX.Vector3 translation = new SharpDX.Vector3(part.Translations[i].X, part.Translations[i].Y, part.Translations[i].Z);
-            //     SharpDX.Matrix matrix = new SharpDX.Matrix();
-            //     SharpDX.Vector3 scalingOrigin = SharpDX.Vector3.Zero;
-            //     matrix = SharpDX.Matrix.Transformation(scalingOrigin, SharpDX.Quaternion.Identity, scale, SharpDX.Vector3.Zero, rotation, translation);
-            //     // Transform Y-up to Z-up
-            //     // instances.Add(matrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2));
-            //     instances.Add(matrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2));
-            //
-            // }
-            // ModelInstances = instances.ToArray();
-            List<SharpDX.Matrix> instances = new() {SharpDX.Matrix.Identity};
-            model.Instances = instances.ToArray();
-            // model.Instances = ModelInstances;
-
-            SceneNodeGroupModel3D modelGroup =
-                ((SceneNodeGroupModel3D?)((Element3DPresenter?)viewport.Items.First(x =>
-                    x.GetType() == typeof(Element3DPresenter)))?.Content);
-            modelGroup?.AddNode(model);
+            var quat = new SharpDX.Quaternion(v4N.X, v4N.Y, v4N.Z, v4N.W);
+            var a = new SharpDX.Vector3(1, 0, 0);
+            var result = SharpDX.Vector3.Transform(a, quat);
+            res.X = result.X;
+            res.Y = result.Y;
+            res.Z = result.Z;
         }
-    }
-
-    public void ClearRemoteViewport(Viewport3DX viewport)
-    {
-        SceneNodeGroupModel3D? modelGroup =
-            ((SceneNodeGroupModel3D?)((Element3DPresenter?)viewport.Items.First(x =>
-                x.GetType() == typeof(Element3DPresenter)))?.Content);
-        // need to iterate over everything to wipe the arrays
-        Parallel.ForEach(modelGroup.GroupNode.Items, node =>
+        else
         {
-            if (node is MeshNode mn)
-            {
-                MeshGeometry3D mesh = mn.Geometry as MeshGeometry3D;
-                mn.Instances = null;
-                mesh.ClearAllGeometryData();
-                var q = mesh as IDisposable;
-                Disposer.RemoveAndDispose(ref q);
-                mn.Material = null;
-            }
-            node.Detach();
-            node.Dispose();
-            var n = node as IDisposable;
-            Disposer.RemoveAndDispose(ref n);
-        });
-        modelGroup.Clear();
-        GC.Collect();
+            res.X = v4N.X;
+            res.Y = v4N.Y;
+            res.Z = v4N.Z;
+        }
+        return res;
     }
 }

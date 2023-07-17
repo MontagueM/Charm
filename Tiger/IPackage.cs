@@ -148,10 +148,10 @@ public abstract class Package : IPackage
         return tags;
     }
 
-    public HashSet<FileHash> GetAllHashes<T>()
-    {
-        return GetAllHashes(typeof(T));
-    }
+    // public HashSet<FileHash> GetAllHashes<T>()
+    // {
+    //     return GetAllHashes(typeof(T));
+    // }
 
     public HashSet<FileHash> GetAllHashes(Type schemaType)
     {

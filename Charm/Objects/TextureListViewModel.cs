@@ -49,9 +49,9 @@ public class TextureViewModel : GenericListViewModel<Texture>, IViewModel<Textur
         return view;
     }
 
-    public static UserControl? DefaultView { get; } = null;
+    // public static UserControl? DefaultView { get; } = null;
 
-    public static HashSet<IListItem> GetListItems(short packageId) => IViewModel.GetListItemsInternal<TextureListItemModel, Texture>(packageId);
+    public static async Task<HashSet<IListItem>> GetListItems(short packageId) => await IViewModel.GetListItemsInternal<TextureListItemModel, Texture>(packageId);
 }
 
 public class TextureListItemModel : HashListItemModel
@@ -81,17 +81,26 @@ public class TextureListItemModel : HashListItemModel
     {
     }
 
-    public override void Load(dynamic? data = null, UserControl? control = null)
+    public override void Load(LoadType loadType, dynamic? data = null)
     {
-        if (Hash.IsInvalid())
+        Texture texture;
+        if (data == null || data is not Texture)
         {
-            return;
+            if (Hash.IsInvalid())
+            {
+                return;
+            }
+            texture = FileResourcer.Get().GetFile<Texture>(Hash);
         }
-        Texture texture = FileResourcer.Get().GetFile<Texture>(Hash);
-        Load(texture);
+        else
+        {
+            texture = data;
+        }
+
+        Load(texture, loadType);
     }
 
-    private void Load(Texture texture)
+    private void Load(Texture texture, LoadType loadType)
     {
         BitmapImage bitmapImage = new();
 
@@ -125,9 +134,10 @@ public class TextureListItemModel : HashListItemModel
         Type = $"{texture.TagData.Width}x{texture.TagData.Height}, {((DirectXTexUtility.DXGIFormat)texture.TagData.Format).ToString()}, {srgb}, {type}";
     }
 
-    public override void Unload()
+    public override void Unload(LoadType loadType)
     {
         ImageSource = null;
+
         // GC.Collect();
     }
 }

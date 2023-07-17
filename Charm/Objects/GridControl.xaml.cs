@@ -42,7 +42,7 @@ public partial class GridControl : UserControl
 
     private void ListBoxItem_Loaded(object sender, RoutedEventArgs e)
     {
-        ((sender as ListBoxItem)?.DataContext as HashListItemModel)?.Load();
+        ((sender as ListBoxItem)?.DataContext as HashListItemModel)?.Load(LoadType.Minimal);
         // Task.Run(() => ((sender as ListBoxItem).DataContext as HashListItemModel).Load());
     }
 
@@ -54,6 +54,6 @@ public partial class GridControl : UserControl
     private void EventSetter_OnHandler(object sender, RoutedEventArgs e)
     {
         // https://stackoverflow.com/questions/14282894/wpf-listbox-virtualization-creates-disconnecteditems
-        Task.Run(((sender as ListBoxItem).Tag as HashListItemModel).Unload);
+        ((sender as ListBoxItem).Tag as HashListItemModel).Unload(LoadType.Minimal);
     }
 }

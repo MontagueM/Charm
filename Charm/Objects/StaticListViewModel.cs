@@ -13,6 +13,7 @@ using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using Charm.Views;
 using CommunityToolkit.Mvvm.Input;
+using ConcurrentCollections;
 using DirectXTex;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Assimp;
@@ -23,8 +24,16 @@ using Tiger;
 using Tiger.Schema;
 using MeshGeometry3D = HelixToolkit.SharpDX.Core.MeshGeometry3D;
 using PerspectiveCamera = HelixToolkit.Wpf.SharpDX.PerspectiveCamera;
+using Vector3 = Tiger.Schema.Vector3;
+using Vector4 = Tiger.Schema.Vector4;
 
 namespace Charm.Objects;
+
+public enum LoadType
+{
+    Minimal,
+    Full
+}
 
 // need a nice way of storing <Texture> while keeping it type safe (just make it one type to inherit from)
 public class StaticViewModel : GenericListViewModel<StaticMesh>, IViewModel<StaticMesh>, IModel<StaticMesh>
@@ -43,22 +52,55 @@ public class StaticViewModel : GenericListViewModel<StaticMesh>, IViewModel<Stat
         return view;
     }
 
-    public static UserControl? DefaultView { get; } = new ModelView();
+    // public static UserControl? DefaultView { get; } = new ModelView();
 
 
-    public static HashSet<IListItem> GetListItems(short packageId) => IViewModel.GetListItemsInternal<StaticListItemModel, StaticMesh>(packageId);
+    public static async Task<HashSet<IListItem>> GetListItems(short packageId) => await IViewModel.GetListItemsInternal<StaticListItemModel, StaticMesh>(packageId);
 }
 
 public class StaticListItemModel : ModelViewModel
 {
-    private BitmapImage? _thumbnailImageSource;
-    public BitmapImage? ThumbnailImageSource
+    private string _triangleCount;
+    public string TriangleCount
     {
-        get { return _thumbnailImageSource; }
-        set { SetField(ref _thumbnailImageSource, value); }
+        get
+        {
+            return _triangleCount;
+        }
+
+        private set
+        {
+            SetField(ref _triangleCount, value);
+        }
     }
 
-    public static Viewport3DX? Viewport { get; set; }
+    private string _materialCount;
+    public string MaterialCount
+    {
+        get
+        {
+            return _materialCount;
+        }
+
+        private set
+        {
+            SetField(ref _materialCount, value);
+        }
+    }
+
+    private string _partCount;
+    public string PartCount
+    {
+        get
+        {
+            return _partCount;
+        }
+
+        private set
+        {
+            SetField(ref _partCount, value);
+        }
+    }
 
     // todo make this async call
     // todo remove typeName
@@ -77,7 +119,7 @@ public class StaticListItemModel : ModelViewModel
     }
 
     // todo need to support optional difference between grid and list view, eg thumbnail generation
-    public override void Load(dynamic? data = null, UserControl? control = null)
+    public override void Load(LoadType loadType, dynamic? data = null)
     {
         StaticMesh staticMesh;
         if (data == null || data is not StaticMesh)
@@ -93,32 +135,58 @@ public class StaticListItemModel : ModelViewModel
             staticMesh = data;
         }
 
-        Load(staticMesh, (control as ModelView)?.Viewport);
+        Load(staticMesh, loadType);
     }
 
-    private void Load(StaticMesh staticMesh, Viewport3DX viewport)
+    private async void Load(StaticMesh staticMesh, LoadType loadType)
     {
         // List<StaticPart> staticParts = staticMesh.Load(ExportDetailLevel.MostDetailed);
         // Element3DPresenter element3DPresenter = new();
         // SceneNodeGroupModel3D sceneNodeGroupModel3D = DrawParts(staticParts);
         // element3DPresenter.Content = sceneNodeGroupModel3D;
         // viewport.Items.Add(element3DPresenter);
-        Viewport.Width = 512;
-        Viewport.Height = 512;
-        ClearRemoteViewport(Viewport);
-        List<StaticPart> staticParts = staticMesh.Load(ExportDetailLevel.MostDetailed);
-        DrawPartsToRemoteViewport(staticParts, Viewport);
-        BitmapSource? bitmapSource = Viewport?.RenderBitmap();
-        ThumbnailImageSource = bitmapSource as BitmapImage;
-        return;
+        // Viewport.Width = 512;
+        // Viewport.Height = 512;
+        // ClearRemoteViewport(Viewport);
         // List<StaticPart> staticParts = staticMesh.Load(ExportDetailLevel.MostDetailed);
-        // DrawParts(staticParts);
-        // Title = staticMesh.Hash;
-        // SubTitle = staticParts.Select(part => part.Indices.Count).Sum() + " triangles";
+        // DrawPartsToRemoteViewport(staticParts, Viewport);
+        // BitmapSource? bitmapSource = Viewport?.RenderBitmap();
+        // ThumbnailImageSource = bitmapSource as BitmapImage;
+        // return;
+        List<StaticPart> staticParts = await staticMesh.LoadAsync(ExportDetailLevel.MostDetailed);
+
+        if (loadType == LoadType.Full)
+        {
+            AddPartsToViewport(MakeDisplayParts(staticParts));
+        }
+
+        TriangleCount = $"{staticParts.Select(part => part.Indices.Count).Sum()} triangles";
+        MaterialCount = $"{staticParts.Select(part => part.Material).Distinct().Count()} materials";
+        PartCount = $"{staticParts.Count} parts";
+        Title = staticMesh.Hash;
+
+        SubTitle = TriangleCount;
     }
 
-    public override void Unload()
+    public override void Unload(LoadType loadType)
     {
-        Clear();
+        if (loadType == LoadType.Full)
+        {
+            Clear();
+        }
+    }
+
+    private List<DisplayPart> MakeDisplayParts(List<StaticPart> meshParts)
+    {
+        List<DisplayPart> displayParts = new();
+        foreach (StaticPart part in meshParts)
+        {
+            DisplayPart displayPart = new(part);
+            displayPart.Translations.Add(Vector3.Zero);
+            displayPart.Rotations.Add(Vector4.Quaternion);
+            displayPart.Scales.Add(Vector3.One);
+            displayParts.Add(displayPart);
+        }
+        return displayParts;
     }
 }

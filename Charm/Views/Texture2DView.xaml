@@ -36,7 +36,7 @@
         <!--         <TextBlock Text="A" Foreground="{StaticResource ForegroundColour100}"/> -->
         <!--     </Button> -->
         <!-- </StackPanel> -->
-        <Image Grid.Column="0" Grid.Row="1" Source="{Binding ImageSource}"/>
+        <Image Grid.Column="0" Grid.Row="0" Source="{Binding ImageSource}"/>
         <TextBlock Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{StaticResource ForegroundColour70}" FontSize="32" Text="{Binding Hash}" />
         <TextBlock Grid.Column="0" Grid.Row="2" FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" VerticalAlignment="Top" HorizontalAlignment="Left" TextAlignment="Left" FontSize="14" Text="{Binding Type}" Foreground="{StaticResource ForegroundColour75}" />
     </Grid>

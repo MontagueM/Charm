@@ -92,6 +92,11 @@ public class StaticMesh : Tag<SStaticMesh>
         return mainParts;
     }
 
+    public Task<List<StaticPart>> LoadAsync(ExportDetailLevel detailLevel)
+    {
+        return Task.Run(() => Load(detailLevel));
+    }
+
     private List<StaticPart> LoadDecals(ExportDetailLevel detailLevel)
     {
         List<StaticPart> parts = new List<StaticPart>();

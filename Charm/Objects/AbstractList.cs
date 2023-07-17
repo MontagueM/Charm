@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Arithmic;
+using ConcurrentCollections;
 using Microsoft.Xaml.Behaviors.Core;
 using Tiger;
 using Tiger.Schema;
@@ -82,7 +83,7 @@ public class HashListItemModel : BaseViewModel, IListItem
     //     return true;
     // }
 
-    public virtual void Load(dynamic? data = null, UserControl? control = null)
+    public virtual void Load(LoadType loadType, dynamic? data = null)
     {
     }
 
@@ -90,7 +91,7 @@ public class HashListItemModel : BaseViewModel, IListItem
     // {
     // }
 
-    public virtual void Unload()
+    public virtual void Unload(LoadType loadType)
     {
     }
 }
@@ -332,9 +333,9 @@ public class BaseListViewModel : BaseViewModel
 
     // todo might need some method that makes _onListItemClicked null again
 
-    private void LoadView<TViewModel>() where TViewModel : IViewModel
+    private async void LoadView<TViewModel>() where TViewModel : IViewModel
     {
-        _allItems = IViewModel.GetListItems<TViewModel>();
+        _allItems = await IViewModel.GetListItems<TViewModel>();
         RefreshItemList();
     }
 
@@ -348,10 +349,10 @@ public class BaseListViewModel : BaseViewModel
     /// <summary>
     /// Gets all items only based on the hash of that item; used for viewing a list of hashes which can be clicked on to view the data.
     /// </summary>
-    public HashSet<HashListItemModel> GetAllHashItems(Type viewType, Type dataType)
+    public async Task<HashSet<HashListItemModel>> GetAllHashItems(Type viewType, Type dataType)
     {
         // todo packages?
-        HashSet<TigerHash> allHashes = PackageResourcer.Get().GetAllHashes(dataType);
+        ConcurrentHashSet<TigerHash> allHashes = await PackageResourcer.Get().GetAllHashes(dataType);
         return allHashes.Select(hash => (Activator.CreateInstance(viewType, hash, dataType.Name) as HashListItemModel)).ToHashSet();
     }
 

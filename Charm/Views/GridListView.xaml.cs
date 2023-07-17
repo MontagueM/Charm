@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using Charm.Objects;
 
@@ -59,7 +60,7 @@ public partial class GridListView : UserControl
 
         GridControl.LoadView<TViewModel>(onListItemClicked);
 
-        LoadDefaultView();
+        // LoadDefaultView();
 
         // Load list items
         // typeof(BaseListViewModel)
@@ -68,15 +69,15 @@ public partial class GridListView : UserControl
         //     .Invoke(listViewModel, new object[] { this });
     }
 
-    private void LoadDefaultView()
-    {
-        UserControl? defaultView = (UserControl?)ViewModelType
-            .GetFields(BindingFlags.NonPublic | BindingFlags.Static)
-            .First(f => f.Name.Contains("DefaultView"))
-            .GetValue(null);
-
-        FileContentPresenter.Content = defaultView;
-    }
+    // private void LoadDefaultView()
+    // {
+    //     UserControl? defaultView = (UserControl?)ViewModelType
+    //         .GetFields(BindingFlags.NonPublic | BindingFlags.Static)
+    //         .First(f => f.Name.Contains("DefaultView"))
+    //         .GetValue(null);
+    //
+    //     FileContentPresenter.Content = defaultView;
+    // }
 
     public bool ListItemClicked(IListItem listItem)
     {
@@ -96,8 +97,8 @@ public partial class GridListView : UserControl
             return false;
         }
 
-        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Unload();
-        // (viewToShow.DataContext as HashListItemModel)?.Load(itemData);
+        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Unload(LoadType.Full);
+        // (viewToShow.DataContext as HashListItemModel)?.Load(LoadType.Full, itemData);
 
         // todo coalesce with FileControl
         // todo can improve this so it doesnt create UserControl every time
@@ -108,7 +109,8 @@ public partial class GridListView : UserControl
             FileContentPresenter.Content = viewToShow;
         }
 
-        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Load(itemData, FileContentPresenter.Content as UserControl);
+        ((FileContentPresenter.Content as UserControl)?.DataContext as HashListItemModel)?.Load(LoadType.Full,
+            itemData);
 
         return true;
     }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using ConcurrentCollections;
 
 namespace Tiger;
 
@@ -132,19 +133,33 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return GetPackage(fileHash.PackageId).GetFileMetadata(fileHash);
     }
 
-    public HashSet<TigerHash> GetAllHashes<T>()
+    public Task<ConcurrentHashSet<TigerHash>> GetAllHashes<T>()
     {
         return GetAllHashes(typeof(T));
     }
 
-    public HashSet<TigerHash> GetAllHashes(Type schemaType)
+    public async Task<ConcurrentHashSet<TigerHash>> GetAllHashes(Type schemaType)
     {
         PackagePathsCache.GetAllPackageIds();
-        HashSet<TigerHash> fileHashes = new();
-        foreach (Package package in _packagesCache.Values)
+        ConcurrentHashSet<TigerHash> fileHashes = new();
+
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
         {
-            fileHashes.UnionWith(package.GetAllHashes(schemaType));
-        }
+            fileHashes.UnionWith(await Task.Run(() => package.GetAllHashes(schemaType), ct));
+        });
+
         return fileHashes;
+    }
+}
+
+public static class ConcurrentHashSetExtensions
+{
+    public static void UnionWith<T>(this ConcurrentHashSet<T> set, IEnumerable<T> items)
+    {
+        foreach (T item in items)
+        {
+            set.Add(item);
+        }
     }
 }

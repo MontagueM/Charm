@@ -95,4 +95,9 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         _fileCache.TryAdd(hash.Hash32, file);
         return file;
     }
+
+    public async Task<T> GetFileAsync<T>(TigerHash hash) where T : TigerFile
+    {
+        return await Task.Run(() => GetFile<T>(hash));
+    }
 }
