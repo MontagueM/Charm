@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Arithmic;
+using Serilog;
 
 namespace Tiger.Commandlets;
 
@@ -21,7 +21,7 @@ public class PerfTestCommandlet : ICommandlet
 
     private void RunSerialAllTest(List<ushort> packageIds)
     {
-        Log.Info("Running serial test");
+        Log.Information("Running serial test");
         foreach (ushort packageId in packageIds)
         {
             IPackage pkg = PackageResourcer.Get().GetPackage(packageId);
@@ -36,7 +36,7 @@ public class PerfTestCommandlet : ICommandlet
 
     private void RunParallelAllTest(List<ushort> packageIds)
     {
-        Log.Info("Running parallel test");
+        Log.Information("Running parallel test");
         Parallel.ForEach(packageIds, packageId =>
         {
             IPackage pkg = PackageResourcer.Get().GetPackage(packageId);
@@ -70,7 +70,7 @@ public class PerfTestCommandlet : ICommandlet
         Stopwatch sw = Stopwatch.StartNew();
         testFunc(pkg, fileCount);
         sw.Stop();
-        Log.Info($"{testFunc.Method.Name}: Generated {fileCount} reads in {sw.ElapsedMilliseconds}ms");
+        Log.Information($"{testFunc.Method.Name}: Generated {fileCount} reads in {sw.ElapsedMilliseconds}ms");
         return sw.ElapsedMilliseconds;
     }
 
@@ -83,7 +83,7 @@ public class PerfTestCommandlet : ICommandlet
         }
 
         (double mean, double stdDeviation) = MathNet.Numerics.Statistics.Statistics.MeanStandardDeviation(results);
-        Log.Info($"{testFunc.Method.Name}: took {mean} pm {stdDeviation} ms over {testCount} runs");
+        Log.Information($"{testFunc.Method.Name}: took {mean} pm {stdDeviation} ms over {testCount} runs");
     }
 
     private void RunSerialTest(IPackage pkg, ushort fileCount)

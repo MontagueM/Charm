@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="Charm.MusicView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm"
+             mc:Ignorable="d"
+             d:DesignHeight="1080" d:DesignWidth="1920">
+    <Grid>
+
+        <TabControl x:Name="MusicTabControl">
+            <TabItem Header="WEMS">
+                <local:MusicWemsControl x:Name="WemsControl"/>
+            </TabItem>
+            <TabItem Header="EVENTS">
+                <local:MusicEventsControl x:Name="EventsControl"/>
+            </TabItem>
+        </TabControl>
+        <TextBlock x:Name="SoundbankHash" Text="" HorizontalAlignment="Center"/>
+    </Grid>
+</UserControl>

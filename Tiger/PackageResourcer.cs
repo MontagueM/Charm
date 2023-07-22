@@ -133,20 +133,35 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return GetPackage(fileHash.PackageId).GetFileMetadata(fileHash);
     }
 
-    public Task<ConcurrentHashSet<TigerHash>> GetAllHashes<T>()
+    public Task<ConcurrentHashSet<FileHash>> GetAllHashes<T>()
     {
         return GetAllHashes(typeof(T));
     }
 
-    public async Task<ConcurrentHashSet<TigerHash>> GetAllHashes(Type schemaType)
+    public async Task<ConcurrentHashSet<FileHash>> GetAllHashes(Type schemaType)
     {
         PackagePathsCache.GetAllPackageIds();
-        ConcurrentHashSet<TigerHash> fileHashes = new();
+        ConcurrentHashSet<FileHash> fileHashes = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
         await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
         {
             fileHashes.UnionWith(await Task.Run(() => package.GetAllHashes(schemaType), ct));
+        });
+
+        return fileHashes;
+    }
+
+    public async Task<ConcurrentHashSet<FileHash>> GetAllHashes(Func<string, bool> packageFilterFunc)
+    {
+        PackagePathsCache.GetAllPackageIds();
+        ConcurrentHashSet<FileHash> fileHashes = new();
+
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        IEnumerable<Package> packages = _packagesCache.Values.Where(package => packageFilterFunc(package.PackagePath));
+        await Parallel.ForEachAsync(packages, parallelOptions, async (package, ct) =>
+        {
+            fileHashes.UnionWith(await Task.Run(package.GetAllHashes, ct));
         });
 
         return fileHashes;

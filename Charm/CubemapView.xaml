@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="Charm.CubemapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm"
+             xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+             mc:Ignorable="d"
+             x:Name="CubemapV"
+             d:DesignHeight="1080" d:DesignWidth="960">
+    <UserControl.Resources>
+        <local:MainViewModel x:Key="MVM"/>
+        <hx:RenderTechniqueConverter x:Key="RenderTechniqueConverter"/>
+    </UserControl.Resources>
+    <UserControl.DataContext>
+        <Binding Source="{StaticResource MVM}"/>
+    </UserControl.DataContext>
+    <Grid>
+        <hx:Viewport3DX x:Name="CubemapViewport"
+                        EffectsManager="{Binding EffectsManager}"
+                        EnableDesignModeRendering="True"
+                        EnableSwapChainRendering="True"
+                        IsShadowMappingEnabled="False"
+                        ShowCoordinateSystem="True"
+                        EnableDeferredRendering="False" EnableRenderFrustum="True"
+                        Title="{Binding Title}"
+                        TextBrush="{StaticResource ForegroundColour75}"
+                        ShowViewCube="False"
+                        SubTitle="{Binding SubTitle}"
+                        InfoForeground="{StaticResource ForegroundColour75}"
+                        InfoBackground="{StaticResource BackgroundColour14}"
+                        >
+            <hx:Viewport3DX.Camera>
+                <hx:PerspectiveCamera Position="0,0,5"/>
+            </hx:Viewport3DX.Camera> 
+        </hx:Viewport3DX>
+    </Grid>
+</UserControl>

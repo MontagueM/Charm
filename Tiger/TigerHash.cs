@@ -39,7 +39,7 @@ public class StringHash : TigerHash
 /// <summary>
 /// A TigerHash represents any hash that is used to identify something within Tiger.
 /// These are all implemented as a 32-bit hash.
-/// See "FileHash", "File64Hash", and "TagClassHash" for children of this class.
+/// See "FileHash", "FileHash64", and "TagClassHash" for children of this class.
 /// </summary>
 [SchemaType(0x04)]
 public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEquatable<TigerHash>
@@ -162,12 +162,12 @@ public static class FileHashExtensions
 /// files more similar as FileHash's can change, but the 64-bit version will always be the same.
 /// </summary>
 [SchemaType(0x10)]
-public class File64Hash : FileHash
+public class FileHash64 : FileHash
 {
     private ulong Hash64 { get; set; }
     private bool IsHash32 { get; set; }
 
-    public File64Hash(ulong hash64) : base(GetHash32(hash64))
+    public FileHash64(ulong hash64) : base(GetHash32(hash64))
     {
         Hash64 = hash64;
     }

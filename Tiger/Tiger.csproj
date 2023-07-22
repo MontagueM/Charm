@@ -15,6 +15,7 @@
       <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
       <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Serilog" Version="2.11.1-dev-01397" />
       <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
       <PackageReference Include="SonarAnalyzer.CSharp" Version="9.0.0.68202">
         <PrivateAssets>all</PrivateAssets>
@@ -1653,6 +1654,11 @@
       <EmbeddedResource Remove="Entities\**" />
       <EmbeddedResource Remove="General\**" />
       <EmbeddedResource Remove="Investment\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Schema\Activity\" />
+      <Folder Include="Schema\Audio\" />
     </ItemGroup>
 
 </Project>

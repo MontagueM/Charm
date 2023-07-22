@@ -18,7 +18,7 @@ public struct Hash64Definition
 // [StructLayout(LayoutKind.Sequential, Size = 0x10)]
 // public struct Activity
 // {
-//     public uint TagHash;
+//     public uint FileHash;
 //     public uint TagClass;
 //
 //     [DestinyField(FieldType.RelativePointer)]
@@ -152,6 +152,17 @@ public abstract class Package : IPackage
     // {
     //     return GetAllHashes(typeof(T));
     // }
+
+    public HashSet<FileHash> GetAllHashes()
+    {
+        ConcurrentBag<FileHash> hashes = new();
+        Parallel.For(0, FileEntries.Count, i =>
+        {
+            hashes.Add(new FileHash(Header.GetPackageId(), (uint)i));
+        });
+
+        return hashes.ToHashSet();
+    }
 
     public HashSet<FileHash> GetAllHashes(Type schemaType)
     {
@@ -326,8 +337,6 @@ public abstract class Package : IPackage
         }
         return new FileMetadata(new FileHash(Header.GetPackageId(), fileIndex), FileEntries[fileIndex]);
     }
-
-
 
     private List<D2BlockEntry> GetBlockEntries(int blockIndex, int blockCount) { return BlockEntries.GetRange(blockIndex, blockCount); }
 

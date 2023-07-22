@@ -1,4 +1,6 @@
-﻿using Arithmic;
+﻿using System.Text;
+using Serilog;
+using Tiger.Schema;
 
 namespace Tiger;
 
@@ -34,6 +36,17 @@ public class TigerReader : BinaryReader
         return t;
     }
 
+    public dynamic? ReadSchemaType(Type type)
+    {
+        if (!SchemaDeserializer.Get().IsTigerDeserializeType(type))
+        {
+            return null;
+        }
+        ITigerDeserialize t = (ITigerDeserialize)Activator.CreateInstance(type);
+        t.Deserialize(this);
+        return t;
+    }
+
     public void DumpToFile()
     {
         long pos = Position;
@@ -50,7 +63,7 @@ public interface ITigerDeserialize
 }
 
 [SchemaType(0x10)]
-public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
+public class DynamicArray<T> : List<T>, ITigerDeserialize
 {
     public int Count;
     public RelativePointer Offset;
@@ -119,7 +132,18 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize where T : struct
     protected T ReadElement(TigerReader reader, int index)
     {
         reader.Seek(Offset.AbsoluteOffset + index * _elementSize, SeekOrigin.Begin);
-        return reader.ReadSchemaStruct<T>();
+        if (typeof(T).IsValueType) // if T is a struct
+        {
+            return reader.ReadSchemaStruct(typeof(T));
+        }
+        else if (SchemaDeserializer.Get().IsTigerDeserializeType(typeof(T)))
+        {
+            return (T)reader.ReadSchemaType(typeof(T));
+        }
+        else
+        {
+            throw new NotSupportedException("T must be a struct or a type that implements ITigerDeserialize");
+        }
     }
 }
 
@@ -258,5 +282,84 @@ public class ResourcePointer : RelativePointer
         {
             Log.Warning($"Unknown resource class hash {resourceClassHash:X8}");
         }
+    }
+}
+
+/// <summary>
+/// A string that is serialized at the end of the file and referenced by a relative 64-bit pointer.
+/// </summary>
+public class StringPointer : RelativePointer
+{
+    public string? Value;
+
+    public override void Deserialize(TigerReader reader)
+    {
+        base.Deserialize(reader);
+
+        if (_relativeOffset == 0)
+        {
+            Value = null;
+            return;
+        }
+
+        reader.Seek(AbsoluteOffset, SeekOrigin.Begin);
+        StringBuilder sb = new();
+        while (true)
+        {
+            char c = reader.ReadChar();
+            if (c == '\0')
+            {
+                break;
+            }
+            sb.Append(c);
+        }
+        Value = sb.ToString();
+    }
+}
+
+/// <summary>
+/// References a 32-bit <see cref="Tiger.Schema.LocalizedStrings"/> and a 32-bit string hash.
+/// </summary>
+public class StringReference : ITigerDeserialize
+{
+    public TigerString Value;
+
+    public void Deserialize(TigerReader reader)
+    {
+        FileHash fileHash = new(reader.ReadUInt32());
+        LocalizedStrings localizedStrings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
+        StringHash stringHash = new(reader.ReadUInt32());
+        Value = localizedStrings.GetStringFromHash(stringHash);
+    }
+}
+
+
+/// <summary>
+/// References a 64-bit <see cref="Tiger.Schema.LocalizedStrings"/> and a 32-bit string hash.
+/// </summary>
+public class StringReference64 : ITigerDeserialize
+{
+    public TigerString Value;
+
+    public void Deserialize(TigerReader reader)
+    {
+        LocalizedStrings localizedStrings = SchemaDeserializer.DeserializeTag64<LocalizedStrings>(reader);
+        StringHash stringHash = new(reader.ReadUInt32());
+        Value = localizedStrings.GetStringFromHash(stringHash);
+    }
+}
+
+/// <summary>
+///  A pointer to a resource in a specified table (has a constant type)
+/// </summary>
+public class ResourceInTablePointer<T> : ITigerDeserialize where T : struct
+{
+    public T Value;
+
+    public void Deserialize(TigerReader reader)
+    {
+        long resourcePointer = reader.ReadInt64();
+        reader.Seek(resourcePointer-8, SeekOrigin.Current);
+        Value = reader.ReadSchemaStruct<T>();
     }
 }

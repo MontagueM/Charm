@@ -1,5 +1,9 @@
 ﻿namespace Tiger;
 
+public class Tag64Attribute : Attribute
+{
+}
+
 public abstract class StrategyAttribute : Attribute
 {
     public TigerStrategy Strategy { get; }

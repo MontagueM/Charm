@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Arithmic;
+using Serilog;
 using Tiger;
 
 namespace Charm;
@@ -16,8 +16,6 @@ public abstract class Commandlet
     /// <returns>true if a commandlet was run.</returns>
     public static bool RunCommandlet()
     {
-        Log.AddSink<ConsoleSink>();
-        Log.AddSink<FileSink>();
         if (CharmInstance.Args.GetArgValue("commandlet", out string commandletName))
         {
             Stopwatch stopwatch = new();
@@ -27,7 +25,7 @@ public abstract class Commandlet
             RunCommandletFromClassName(commandletName);
 
             stopwatch.Stop();
-            Log.Info($"Commandlet '{commandletName}' complete. Duration: {stopwatch.Elapsed.TotalSeconds} seconds");
+            Log.Information($"Commandlet '{commandletName}' complete. Duration: {stopwatch.Elapsed.TotalSeconds} seconds");
 
             return true;
         }

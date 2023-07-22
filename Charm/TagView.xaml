@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Charm.TagView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm"
+             mc:Ignorable="d"
+             d:DesignHeight="1000" d:DesignWidth="960">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="95*" />
+            <RowDefinition Height="5*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+        <local:EntityView Visibility="Hidden" x:Name="EntityControl" Grid.ColumnSpan="2"/>
+        <local:StaticView Visibility="Hidden" x:Name="StaticControl" Grid.ColumnSpan="2"/>
+        <!-- <local:ActivityView Visibility="Hidden" x:Name="ActivityControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" /> -->
+        <local:TextureView Visibility="Hidden" x:Name="TextureControl" Grid.ColumnSpan="2"/>
+        <local:CubemapView Visibility="Hidden" x:Name="CubemapControl" Grid.ColumnSpan="2"/>
+        <local:DialogueView Visibility="Hidden" x:Name="DialogueControl" Grid.ColumnSpan="2"/>
+        <local:DirectiveView Visibility="Hidden" x:Name="DirectiveControl" Grid.ColumnSpan="2"/>
+        <local:MusicView Visibility="Hidden" x:Name="MusicControl" Grid.ColumnSpan="2"/>
+        <local:TagListView Visibility="Hidden" x:Name="TagListControl" Grid.ColumnSpan="2"/>
+        <local:ExportControl x:Name="ExportControl" Visibility="Hidden" Grid.Column="1" Grid.Row="1"/>
+        <local:MusicPlayerControl x:Name="MusicPlayer" Visibility="Hidden" Grid.Column="0" Grid.Row="1"/>
+    </Grid>
+</UserControl>

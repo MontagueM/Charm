@@ -42,9 +42,6 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     // Stores SchemaType FieldInfo[] array
     private readonly ConcurrentDictionary<Type, FieldInfo[]> _schemaTypeFieldsMap = new();
 
-    // Stores all Tag64 types
-    private readonly HashSet<Type> _tag64Types = new();
-
     // Stores all ITagDeserialize types
     private readonly HashSet<Type> _tagDeserializeTypes = new();
 
@@ -108,12 +105,6 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             if (isTigerDeserialize)
             {
                 _tagDeserializeTypes.Add(type);
-            }
-
-            bool isTag64 = type.FindInterfaces((t, _) => t == typeof(ITag64), null).Length > 0;
-            if (isTag64)
-            {
-                _tag64Types.Add(type);
             }
 
             // only first level of inheritance
@@ -202,6 +193,30 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         });
     }
 
+    public static T DeserializeTag64<T>(TigerReader reader) where T : TigerFile
+    {
+        return (T)DeserializeTag64(reader, typeof(T));
+    }
+
+    public static TigerFile DeserializeTag64(TigerReader reader, Type fieldType)
+    {
+        uint u32 = reader.ReadUInt32();
+        int bIs32Bit = reader.ReadInt32();
+        ulong u64 = reader.ReadUInt64();
+        if (bIs32Bit == 1)
+        {
+            return FileResourcer.Get().GetFile(fieldType, new FileHash(u32));
+        }
+        else if (bIs32Bit == 0)
+        {
+            return FileResourcer.Get().GetFile(fieldType, new FileHash64(u64));
+        }
+        else
+        {
+            throw new Exception("Invalid bIs32Bit value");
+        }
+    }
+
     public T DeserializeSchema<T>(TigerReader reader) where T : struct
     {
         return DeserializeSchema(reader, typeof(T));
@@ -225,29 +240,14 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
             long fieldSize = -1;
             dynamic? fieldValue;
-            if (IsTigerDeserializeType(fieldInfo))
+            if (IsTigerDeserializeType(fieldInfo.FieldType))
             {
                 fieldValue = DeserializeTigerType(reader, fieldInfo.FieldType);
                 fieldSize = GetSchemaTypeSize(fieldInfo.FieldType);
             }
             else if (IsTigerFile64Type(fieldInfo))
             {
-                uint u32 = reader.ReadUInt32();
-                int bIs32Bit = reader.ReadInt32();
-                ulong u64 = reader.ReadUInt64();
-                if (bIs32Bit == 1)
-                {
-                    fieldValue = FileResourcer.Get().GetFile(fieldInfo.FieldType, new FileHash(u32));
-                }
-                else if (bIs32Bit == 0)
-                {
-                    fieldValue = FileResourcer.Get().GetFile(fieldInfo.FieldType, new File64Hash(u64));
-                }
-                else
-                {
-                    throw new Exception("Invalid bIs32Bit value");
-                }
-
+                fieldValue = DeserializeTag64(reader, fieldInfo.FieldType);
                 fieldSize = GetSchemaTypeSize(fieldInfo.FieldType);
             }
             else if (IsTigerFileType(fieldInfo))
@@ -284,14 +284,13 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         throw new Exception($"Failed to get schema fields for type {schemaType}");
     }
 
-    private bool IsTigerDeserializeType(FieldInfo fieldInfo)
+    public bool IsTigerDeserializeType(Type type)
     {
-        Type fieldType = fieldInfo.FieldType;
-        if (fieldType.IsGenericType)
+        if (type.IsGenericType)
         {
-            fieldType = fieldType.GetGenericTypeDefinition();
+            type = type.GetGenericTypeDefinition();
         }
-        return _tagDeserializeTypes.Contains(fieldType);
+        return _tagDeserializeTypes.Contains(type);
     }
 
     private bool IsTigerFileType(FieldInfo fieldInfo)
@@ -301,12 +300,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     private bool IsTigerFile64Type(FieldInfo fieldInfo)
     {
-        Type fieldType = fieldInfo.FieldType;
-        if (fieldType.IsGenericType)
-        {
-            fieldType = fieldType.GetGenericTypeDefinition();
-        }
-        return _tag64Types.Contains(fieldType);
+        return GetFirstAttribute<Tag64Attribute>(fieldInfo) != null;
     }
 
     private dynamic DeserializeTigerType(TigerReader reader, Type fieldType)
@@ -326,7 +320,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         return reader.ReadType(fieldType);
     }
 
-    public int GetSchemaStructSize<T>() where T : struct
+    public int GetSchemaStructSize<T>()
     {
         return GetSchemaStructSize(typeof(T));
     }
@@ -389,6 +383,17 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     //     offset = attribute.Value;
     //     return true;
     // }
+
+    private T? GetFirstAttribute<T>(ICustomAttributeProvider var) where T : Attribute
+    {
+        T[] attributes = var.GetCustomAttributes(typeof(T), false).Cast<T>().ToArray();
+        if (!attributes.Any())
+        {
+            // we still want to be able to get size of non-schema types
+            return null;
+        }
+        return attributes.First();
+    }
 
     private T? GetAttribute<T>(ICustomAttributeProvider var) where T : StrategyAttribute
     {

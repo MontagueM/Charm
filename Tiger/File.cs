@@ -12,6 +12,7 @@
 public class TigerFile
 {
     public readonly FileHash Hash;
+    public readonly TigerHash ReferenceHash;
     private byte[]? _data = null;
 
     public TigerFile(FileHash hash)
@@ -67,31 +68,6 @@ public class TigerReferenceFile<THeader> : Tag<THeader> where THeader : struct
     protected FileHash ReferenceHash;
 
     public TigerReferenceFile(FileHash fileHash) : base(fileHash)
-    {
-        ReferenceHash = fileHash.GetReferenceHash();
-    }
-
-    public TigerReader GetReferenceReader()
-    {
-        return new TigerReader(GetReferenceStream());
-    }
-
-    public MemoryStream GetReferenceStream()
-    {
-        return new MemoryStream(GetReferenceData());
-    }
-
-    public byte[] GetReferenceData()
-    {
-        return PackageResourcer.Get().GetFileData(ReferenceHash);
-    }
-}
-
-public class TigerReferenceFile64<THeader> : Tag64<THeader> where THeader : struct
-{
-    protected FileHash ReferenceHash;
-
-    public TigerReferenceFile64(FileHash fileHash) : base(fileHash)
     {
         ReferenceHash = fileHash.GetReferenceHash();
     }

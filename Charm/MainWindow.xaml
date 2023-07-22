@@ -4,49 +4,29 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Charm"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:views="clr-namespace:Charm.Views"
         mc:Ignorable="d"
-        Title="Charm" Height="1080" Width="1920"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.FontWeight="Medium"
-        TextElement.FontSize="14"
-        FontFamily="{materialDesign:MaterialDesignFont}">
+        Loaded="OnControlLoaded"
+        PreviewKeyDown="MainWindow_PreviewKeyDown"
+        Title="Charm" Height="1080" Width="1920">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <!-- <RowDefinition Height="3*" /> -->
+            <RowDefinition Height="3*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <TabControl Grid.Row="0" x:Name="MainTabControl"
-                    materialDesign:RippleAssist.IsDisabled="True"
-                    materialDesign:ColorZoneAssist.Mode="Custom"
-                    materialDesign:ColorZoneAssist.Background="{StaticResource BackgroundColour7}"
-                    materialDesign:ColorZoneAssist.Foreground="{StaticResource ForegroundColour90}">
-            <TabItem Header="LISTS">
-                <views:ManyListsView/>
-            </TabItem>
+        <Menu Grid.Row="0">
+            <MenuItem Header="Settings">
+                <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick"/>
+                <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/>
+            </MenuItem>
+        </Menu>
+        <TabControl Grid.Row="1" x:Name="MainTabControl">
             <TabItem Header="MAIN MENU" x:Name="MainMenuTab">
-                <views:MainMenuView/>
-            </TabItem>
-            <TabItem Header="ACTIVITIES">
-            </TabItem>
-
-            <TabItem Header="" x:Name="Spacer">
-            </TabItem>
-            <TabItem Header="CONFIG">
-                <!-- <views:ConfigView/> -->
-            </TabItem>
-            <TabItem Header="LOG">
-                <!-- <misc:LogView/> -->
-            </TabItem>
-            <TabItem Header="DEV">
-                <!-- <views:ConfigView/> -->
+                <local:MainMenuView/>
             </TabItem>
         </TabControl>
-           <!-- <views:ProgressView x:Name="ProgressView" Grid.Row="0"/> -->
+        <local:ProgressView x:Name="ProgressView" Grid.Row="0" Grid.RowSpan="2" Height="1080" Width="1920"/>
     </Grid>
 </Window>

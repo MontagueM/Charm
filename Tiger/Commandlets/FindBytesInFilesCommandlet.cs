@@ -1,4 +1,4 @@
-﻿using Arithmic;
+﻿using Serilog;
 
 namespace Tiger.Commandlets;
 
@@ -51,7 +51,7 @@ public class FindBytesInFilesCommandlet : ICommandlet
     {
         // todo also search for a hash64 of the hash32 if available
         List<ushort> pkgIds = PackageResourcer.Get().PackagePathsCache.GetAllPackagesMap().Where(pair => pair.Value.Contains(packageFilter)).ToList().ConvertAll(pair => pair.Key);
-        Log.Info($"Searching {pkgIds.Count} packages for '{bytesStr}'");
+        Log.Information($"Searching {pkgIds.Count} packages for '{bytesStr}'");
         foreach (ushort pkgId in pkgIds)
         {
             SearchPackage(pkgId);
@@ -79,7 +79,7 @@ public class FindBytesInFilesCommandlet : ICommandlet
             {
                 if (br.ReadBytes(bytes.Length).SequenceEqual(bytes))
                 {
-                    Log.Info($"Found in {new FileHash(pkgId, fileIndex)} at offset {ms.Position - bytes.Length}");
+                    Log.Information($"Found in {new FileHash(pkgId, fileIndex)} at offset {ms.Position - bytes.Length}");
                     break; // stop after one instance
                 }
             }

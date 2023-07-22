@@ -52,7 +52,7 @@ public class D2WQ_StaticMeshTests : IStaticMeshTests
     {
         // string fileHash = "62A2B580";
         // StaticMesh mesh = FileResourcer.Get().GetTag<StaticMesh>(fileHash);
-        // List<StaticPart> parts = mesh.Load(ExportDetailLevel.MostDetailed);
+        // List<StaticPart> parts = mesh.Load(ExportDetailLevel.MostDetaileded);
         // FbxHandler handler = new FbxHandler();
         // handler.AddStaticToScene(parts, "Test");
         // handler.ExportScene("TestModels/Test.fbx");

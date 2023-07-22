@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using Arithmic;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace Tiger;
 
@@ -32,7 +32,7 @@ public class PackagePathsCache
 
     public static void ClearCacheFiles()
     {
-        Log.Info("Clearing package paths cache files.");
+        Log.Information("Clearing package paths cache files.");
         foreach (string cacheFilePath in Directory.GetFiles(CacheDirectory))
         {
             File.Delete(cacheFilePath);
@@ -61,11 +61,11 @@ public class PackagePathsCache
     {
         if (IsCacheFileInvalid())
         {
-            Log.Info($"Cache file is invalid, creating new from packages directory '{_packagesDirectory}'.");
+            Log.Information($"Cache file is invalid, creating new from packages directory '{_packagesDirectory}'.");
             SaveCacheToFile();
         }
 
-        Log.Info($"Loading package paths cache from cache file '{_cacheFilePath}'.");
+        Log.Information($"Loading package paths cache from cache file '{_cacheFilePath}'.");
         FillCacheFromCacheFile();
     }
 
@@ -73,7 +73,7 @@ public class PackagePathsCache
     {
         if (!File.Exists(_cacheFilePath))
         {
-            Log.Info($"Cache file '{_cacheFilePath}' does not exist.");
+            Log.Information($"Cache file '{_cacheFilePath}' does not exist.");
             return true;
         }
 
@@ -81,14 +81,14 @@ public class PackagePathsCache
 
         if (CacheVersion != _cacheData.Version.CacheVersion)
         {
-            Log.Info($"Cache file '{_cacheFilePath}' has old version '{_cacheData.Version.CacheVersion}' (current is {CacheVersion}).");
+            Log.Information($"Cache file '{_cacheFilePath}' has old version '{_cacheData.Version.CacheVersion}' (current is {CacheVersion}).");
             return true;
         }
 
         uint gameVersionHash = GetGameVersionHash();
         if (_cacheData.Version.GameVersionHash != gameVersionHash)
         {
-            Log.Info($"Cache file '{_cacheFilePath}' has old game version hash '{_cacheData.Version.GameVersionHash}' (current is {gameVersionHash}.");
+            Log.Information($"Cache file '{_cacheFilePath}' has old game version hash '{_cacheData.Version.GameVersionHash}' (current is {gameVersionHash}.");
             return true;
         }
 
@@ -99,7 +99,7 @@ public class PackagePathsCache
         // allIds.UnionWith(cachedIds);
         // if (allIds.Count != cachedIds.Count)
         // {
-        //     Log.Info($"Cache file '{_cacheFilePath}' has different number of packages '{_cacheData.PackageIdToNameMap.Count}' (current is {currentPackages.Length})");
+        //     Log.Information($"Cache file '{_cacheFilePath}' has different number of packages '{_cacheData.PackageIdToNameMap.Count}' (current is {currentPackages.Length})");
         //     return true;
         // }
 

@@ -201,9 +201,9 @@ public class Package : Tiger.Package
     protected override byte[] GenerateNonce()
     {
         byte[] nonce = { 0x84, 0xDF, 0x11, 0xC0, 0xAC, 0xAB, 0xFA, 0x20, 0x33, 0x11, 0x26, 0x99, };
-        nonce[0] ^= (byte)((Header.GetPackageId() >> 8) & 0xFF);
+        nonce[0] ^= (byte)((_tag.GetPackageId() >> 8) & 0xFF);
         nonce[1] ^= 0x26;
-        nonce[11] ^= (byte)(Header.GetPackageId() & 0xFF);
+        nonce[11] ^= (byte)(_tag.GetPackageId() & 0xFF);
         return nonce;
     }
 }

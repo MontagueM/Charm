@@ -1,0 +1,26 @@
+﻿<UserControl x:Class="Charm.DareItemControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Charm"
+             mc:Ignorable="d"
+             d:DesignHeight="96"
+             d:DesignWidth="288">
+    <Grid Margin="0" Height="96" Background="{Binding GridBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="48" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="96" />
+            <ColumnDefinition Width="192" />
+        </Grid.ColumnDefinitions>
+
+        <Image HorizontalAlignment="Left" Grid.RowSpan="2" Panel.ZIndex="1" Source="{Binding ImageSource}" Width="{Binding ImageWidth}" Height="{Binding ImageHeight}"/>
+        <TextBlock TextAlignment="Left" HorizontalAlignment="Left" TextWrapping="Wrap" Panel.ZIndex="1"  Margin="20, 0, 0, 0" Grid.Column="1" Grid.Row="0" Text="{Binding ItemName}" VerticalAlignment="Bottom" FontSize="14"
+                   FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Display Pro 75 Bold}" Foreground="{StaticResource ForegroundColour100 }"/>
+        <TextBlock TextAlignment="Left" HorizontalAlignment="Left" TextWrapping="Wrap" Panel.ZIndex="1"  Margin="20, 0, 0, 0" Grid.Column="1" Grid.Row="1" Text="{Binding ItemType}" FontSize="12"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}" Foreground="{StaticResource ForegroundColour100 }"/>
+    </Grid>
+</UserControl>

@@ -8,29 +8,31 @@ using Tiger;
 
 namespace Tiger;
 
+// Tag has a custom deserialiser that discards the inherited SchemaType attribute, as can be Tag32 or Tag64
 public class Tag<T> : TigerFile where T : struct
 {
     protected T _tag;
     // separated as it should be a red flag if we're using this
+    [Obsolete("Use TagData sparingly as it breaks the Law of Demeter; instead isolate code in owning structures.")]
     public T TagData => _tag;
 
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash reference
-    public Tag(FileHash tagHash, bool shouldParse = true) : base(tagHash)
+    protected Tag(FileHash fileHash, bool shouldParse = true) : base(fileHash)
     {
         if (shouldParse)
         {
-            Initialise(tagHash);
+            Initialise(fileHash);
         }
     }
 
-    public Tag(FileHash tagHash) : base(tagHash)
+    protected Tag(FileHash fileHash) : base(fileHash)
     {
-        Initialise(tagHash);
+        Initialise(fileHash);
     }
 
-    private void Initialise(FileHash tagHash)
+    private void Initialise(FileHash fileHash)
     {
-        if (tagHash.IsValid())
+        if (fileHash.IsValid())
         {
             Deserialize();
         }
@@ -49,13 +51,12 @@ public class Tag<T> : TigerFile where T : struct
     }
 }
 
-public interface ITag64
+/// <summary>
+///  A stub-type of <see cref="Tag{T}"/> that simply represents we know a file is there, but we don't care about it.
+/// </summary>
+public class Tag : TigerFile
 {
-
-}
-
-[SchemaType(0x10)]
-public class Tag64<T> : Tag<T>, ITag64 where T : struct
-{
-    public Tag64(FileHash tagHash, bool shouldParse = true) : base(tagHash, shouldParse) { }
+    public Tag(FileHash fileHash) : base(fileHash)
+    {
+    }
 }
