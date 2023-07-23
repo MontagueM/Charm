@@ -1,4 +1,4 @@
-﻿namespace Tiger.Audio;
+﻿namespace Tiger.Schema.Audio;
 
 public class Dialogue : Tag<D2Class_B8978080>
 {

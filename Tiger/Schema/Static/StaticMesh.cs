@@ -27,7 +27,7 @@ public class MeshPart
     public int Index;
     public uint IndexOffset;
     public uint IndexCount;
-    public EPrimitiveType PrimitiveType;
+    public PrimitiveType PrimitiveType;
     public ELodCategory LodCategory;
     public List<UIntVector3> Indices = new List<UIntVector3>();
     public List<uint> VertexIndices = new List<uint>();

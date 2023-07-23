@@ -231,13 +231,18 @@ public class Strategy
 
         public static T Get()
         {
-            if (_instance == null)
+            if (_instance == null) // todo make this maybe work? disallowed due to thread safety concerns
             {
-                AddNewStrategyInstance(_currentStrategy);
-                _instance = _strategyInstances[_currentStrategy];
+                throw new InvalidOperationException("Strategy instance has not been created");
             }
 
             return _instance;
+        }
+
+        public static void Setup() 
+        {
+            AddNewStrategyInstance(_currentStrategy);
+            _instance = _strategyInstances[_currentStrategy];
         }
 
         // todo test this

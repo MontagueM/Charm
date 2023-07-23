@@ -1643,6 +1643,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Arithmic\Arithmic.csproj" />
+      <ProjectReference Include="..\ThirdParty\revorbstd\RevorbStd.csproj" />
     </ItemGroup>
 
     <ItemGroup>

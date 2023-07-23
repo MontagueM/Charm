@@ -49,7 +49,7 @@ public struct SStaticMapData
 {
     public long FileSize;
     [SchemaField(0x18)]
-    public Tag<SStaticMapOcclusionBounds> ModelOcclusionBounds;
+    public Tag<SOcclusionBounds> ModelOcclusionBounds;
     [SchemaField(0x40)]
     public DynamicArrayLoaded<SStaticMeshInstanceTransform> Instances;
     public DynamicArray<SUnknownUInt> Unk50;
@@ -71,7 +71,7 @@ public struct SUnknownUInt
 
 
 [SchemaStruct("B1938080", 0x18)]
-public struct SStaticMapOcclusionBounds
+public struct SOcclusionBounds
 {
     public long FileSize;
     public DynamicArray<SMeshInstanceOcclusionBounds> InstanceBounds;
@@ -119,24 +119,24 @@ public struct SBubbleParent
 {
     public long FileSize;
     public Tag<SBubbleDefinition> ChildMapReference;
-    // [SchemaField(0x10), DestinyField(FieldType.String64)] // actually wrong, not a String64 instead StringNoContainer
-    // public string MapName;
-    // public int Unk1C;
-    // [SchemaField(0x40)]
-    // public DynamicArray<D2Class_C9968080> Unk40;
-    // [DestinyField(FieldType.TagHash64)]
-    // public Tag Unk50;  // some kind of parent thing, very strange weird idk
+    [SchemaField(0x10)]
+    public StringHash MapName;
+    public int Unk1C;
+    [SchemaField(0x40)]
+    public DynamicArray<D2Class_C9968080> Unk40;
+    [Tag64]
+    public Tag Unk50;  // some kind of parent thing, very strange weird idk
 }
 
-// /// <summary>
-// /// Basically same table as in the child tag, but in a weird format. Never understood what its for.
-// /// </summary>
-// [SchemaStruct("C9968080", 0x10)]
-// public struct D2Class_C9968080
-// {
-//     [DestinyField(FieldType.TagHash64)]
-//     public Tag Unk00;
-// }
+/// <summary>
+/// Basically same table as in the child tag, but in a weird format. Never understood what its for.
+/// </summary>
+[SchemaStruct("C9968080", 0x10)]
+public struct D2Class_C9968080
+{
+    [Tag64]
+    public Tag Unk00;
+}
 
 /// <summary>
 /// The one below the top reference, actually contains useful information.
@@ -194,8 +194,8 @@ public struct SMapDataEntry
 {
     public Vector4 Rotation;
     public Vector4 Translation;
-    // [SchemaField(0x28), DestinyField(FieldType.TagHash64, true)]
-    // public Entity Entity;
+    [SchemaField(0x28), Tag64]
+    public Entity.Entity Entity;
     [SchemaField(0x78)]
     public ResourcePointer DataResource;
 }

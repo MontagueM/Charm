@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Serilog;
 using Tiger.Schema;
 
@@ -84,7 +85,6 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
 
     public IEnumerable<T> Enumerate(TigerReader reader)
     {
-        // TigerReader reader = new TigerReader(_arrayData);
         for (int i = 0; i < Count; i++)
         {
             yield return ReadElement(reader, i);
@@ -144,6 +144,69 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
         {
             throw new NotSupportedException("T must be a struct or a type that implements ITigerDeserialize");
         }
+    }
+
+    /// <summary>
+    /// We assume the list is sorted via a position 0 DestinyHash uint32.
+    /// </summary>
+    /// <param name="hash">Hash to find if it exists.</param>
+    /// <returns>The entry of the list if found, otherwise null.</returns>
+    public Optional<T> BinarySearch(TigerReader reader, TigerHash hash)
+    {
+        uint compareValue = hash.Hash32;
+        int min = 0;
+        int max = Count - 1;
+        while (min <= max)
+        {
+            int mid = (min + max) / 2;
+            reader.Seek(Offset.AbsoluteOffset + mid * _elementSize, SeekOrigin.Begin);
+            uint midValue = reader.ReadUInt32();
+            if (midValue == compareValue)
+            {
+                return ElementAt(reader, mid);
+            }
+            if (midValue < compareValue)
+            {
+                min = mid + 1;
+            }
+            else
+            {
+                max = mid - 1;
+            }
+        }
+        return Optional<T>.CreateEmpty();
+    }
+}
+
+public class Optional<T>
+{
+    public T? Value { get; private set; }
+    public bool HasValue { get; private set; }
+
+    private Optional()
+    {
+        HasValue = false;
+    }
+
+    private Optional(T data)
+    {
+        HasValue = true;
+        Value = data;
+    }
+
+    public static implicit operator Optional<T>(T data)
+    {
+        return new Optional<T>(data);
+    }
+
+    public static Optional<T> Create(T value)
+    {
+        return new Optional<T>(value);
+    }
+
+    public static Optional<T> CreateEmpty()
+    {
+        return new Optional<T>();
     }
 }
 
@@ -257,9 +320,13 @@ public class GlobalPointer<T> : ITigerDeserialize where T : struct
     }
 }
 
+/// <summary>
+/// A relative pointer that points to a resource, and the class of resource is specified
+/// </summary>
 public class ResourcePointer : RelativePointer
 {
     public dynamic? Value;
+    public uint ResourceClassHash;
 
     public override void Deserialize(TigerReader reader)
     {
@@ -272,15 +339,15 @@ public class ResourcePointer : RelativePointer
         }
 
         reader.Seek(AbsoluteOffset - 4, SeekOrigin.Begin);
-        uint resourceClassHash = reader.ReadUInt32();
+        ResourceClassHash = reader.ReadUInt32();
 
-        if (SchemaDeserializer.Get().TryGetSchemaType(resourceClassHash, out Type schemaType))
+        if (SchemaDeserializer.Get().TryGetSchemaType(ResourceClassHash, out Type schemaType))
         {
             Value = reader.ReadSchemaStruct(schemaType);
         }
         else
         {
-            Log.Warning($"Unknown resource class hash {resourceClassHash:X8}");
+            Log.Warning($"Unknown resource class hash {ResourceClassHash:X8}");
         }
     }
 }
@@ -315,11 +382,14 @@ public class StringPointer : RelativePointer
         }
         Value = sb.ToString();
     }
+
+    public static implicit operator string?(StringPointer stringPointer) => stringPointer.Value;
 }
 
 /// <summary>
 /// References a 32-bit <see cref="Tiger.Schema.LocalizedStrings"/> and a 32-bit string hash.
 /// </summary>
+[SchemaType(0x08)]
 public class StringReference : ITigerDeserialize
 {
     public TigerString Value;
@@ -337,6 +407,7 @@ public class StringReference : ITigerDeserialize
 /// <summary>
 /// References a 64-bit <see cref="Tiger.Schema.LocalizedStrings"/> and a 32-bit string hash.
 /// </summary>
+[SchemaType(0x14)]
 public class StringReference64 : ITigerDeserialize
 {
     public TigerString Value;
@@ -352,6 +423,7 @@ public class StringReference64 : ITigerDeserialize
 /// <summary>
 ///  A pointer to a resource in a specified table (has a constant type)
 /// </summary>
+[SchemaType(0x08)]
 public class ResourceInTablePointer<T> : ITigerDeserialize where T : struct
 {
     public T Value;
@@ -361,5 +433,42 @@ public class ResourceInTablePointer<T> : ITigerDeserialize where T : struct
         long resourcePointer = reader.ReadInt64();
         reader.Seek(resourcePointer-8, SeekOrigin.Current);
         Value = reader.ReadSchemaStruct<T>();
+    }
+}
+
+/// <summary>
+/// A pointer to a resource in a specified tag
+/// </summary>
+[SchemaType(0x10)]
+public class ResourceInTagPointer : ITigerDeserialize
+{
+    public void Deserialize(TigerReader reader)
+    {
+    }
+}
+
+/// <summary>
+/// The weird one of above todo improve this comment
+/// </summary>
+[SchemaType(0x18)]
+public class ResourceInTagWeirdPointer: ITigerDeserialize
+{
+    public void Deserialize(TigerReader reader)
+    {
+    }
+}
+
+/// <summary>
+///  A relative pointer that points to a resource, and the class of resource is specified
+/// </summary>
+[SchemaType(0x0C)]
+public class ResourcePointerWithClass : ResourcePointer
+{
+    // todo check this actually works, i cant remember the layout it might not actually have the original class hash?
+    public override void Deserialize(TigerReader reader)
+    {
+        base.Deserialize(reader);
+        uint extraResourceClassHash = reader.ReadUInt32();
+        Debug.Assert(extraResourceClassHash == ResourceClassHash);
     }
 }

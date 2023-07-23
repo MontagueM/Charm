@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using Tiger;
-using Tiger.General;
+using Tiger.Schema.Activity;
 
 namespace Charm;
 
@@ -18,7 +18,7 @@ public partial class DirectiveView : UserControl
 
     public void Load(FileHash hash)
     {
-        Tag<D2Class_C78E8080> directive = FileResourcer.Get().GetFile<D2Class_C78E8080>(hash);
+        Tag<D2Class_C78E8080> directive = FileResourcer.Get().GetSchemaTag<D2Class_C78E8080>(hash);
 
         ListView.ItemsSource = GetDirectiveItems(directive.TagData.DirectiveTable);
     }
@@ -32,10 +32,10 @@ public partial class DirectiveView : UserControl
         {
             items.Add(new DirectiveItem
             {
-                Name = directive.NameString,
-                Description = directive.DescriptionString,
+                Name = directive.NameString.Value.ToString(),
+                Description = directive.DescriptionString.Value.ToString(),
                 Objective = $"{directive.ObjectiveString} 0/{directive.ObjectiveTargetCount}",
-                Unknown = directive.Unk58,
+                Unknown = directive.Unk58.Value.ToString(),
                 Hash = directive.Hash
             });
         }

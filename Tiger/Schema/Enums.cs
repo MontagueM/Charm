@@ -1,6 +1,6 @@
 ﻿namespace Tiger.Schema;
 
-public enum EPrimitiveType  // name comes from bungie
+public enum PrimitiveType  // name comes from bungie
 {
     Triangles = 3,
     TriangleStrip = 5,

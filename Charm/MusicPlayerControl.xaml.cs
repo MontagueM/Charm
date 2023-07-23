@@ -5,9 +5,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using Tiger;
 using NAudio.Wave;
 using Serilog;
+using Tiger.Schema.Audio;
 
 namespace Charm;
 

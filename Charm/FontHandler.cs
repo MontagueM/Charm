@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Tiger;
-using Tiger.General;
+using Tiger.Schema.Other;
 using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Charm;
@@ -22,11 +22,12 @@ public class FontHandler
         return LoadAllFonts();
     }
 
-    private static void SaveAllFonts()
+    private static async void SaveAllFonts()
     {
         // 0x80a00000 represents 0100 package
-        var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
-        Tag<D2Class_0F3C8080> fontsContainer = FileResourcer.Get().GetFile<D2Class_0F3C8080>(vals[0]);
+        // var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
+        var vals = await PackageResourcer.Get().GetAllHashes<D2Class_0F3C8080>();
+        Tag<D2Class_0F3C8080> fontsContainer = FileResourcer.Get().GetSchemaTag<D2Class_0F3C8080>(vals.First());
         // Check if the font exists in the Fonts/ folder, if not extract it
         if (!Directory.Exists("fonts/"))
         {
@@ -38,9 +39,9 @@ public class FontHandler
             var fontName = f.FontParent.TagData.FontName;
             if (!File.Exists($"fonts/{fontName}"))
             {
-                using (var handle = ff.GetHandle())
+                using (TigerReader reader = ff.GetReader())
                 {
-                    var bytes = handle.ReadBytes((int)f.FontParent.TagData.FontFileSize);
+                    var bytes = reader.ReadBytes((int)f.FontParent.TagData.FontFileSize);
                     File.WriteAllBytes($"fonts/{fontName}", bytes);
                 }
             }
@@ -82,16 +83,16 @@ public class FontHandler
             }
 
 
-            var nameTableRecord = StructConverter.ReadStructure<OtfNameTableRecord>(br);
+            var nameTableRecord = br.ReadType<OtfNameTableRecord>();
 
             br.BaseStream.Seek(nameTableRecord.Offset, SeekOrigin.Begin);
 
-            var namingTableVer0 = StructConverter.ReadStructure<OtfNamingTableVersion0>(br);
+            var namingTableVer0 = br.ReadType<OtfNamingTableVersion0>();
 
-            List<OtfNameRecord> nameRecords = new List<OtfNameRecord>(namingTableVer0.Count);
+            List<OtfNameRecord> nameRecords = new(namingTableVer0.Count);
             for (int i = 0; i < namingTableVer0.Count; i++)
             {
-                nameRecords.Add(StructConverter.ReadStructure<OtfNameRecord>(br));
+                nameRecords.Add(br.ReadType<OtfNameRecord>());
             }
 
             OtfNameRecord familyRecord;
@@ -180,4 +181,37 @@ struct OtfNameRecord
     public ushort NameId;
     public ushort Length;
     public ushort StringOffset;
+}
+
+public class BinaryReaderBE : BinaryReader {
+    public BinaryReaderBE(Stream stream)  : base(stream) { }
+
+    public override int ReadInt32()
+    {
+        var data = base.ReadBytes(4);
+        Array.Reverse(data);
+        return BitConverter.ToInt32(data, 0);
+    }
+
+    public override Int16 ReadInt16()
+    {
+        var data = base.ReadBytes(2);
+        Array.Reverse(data);
+        return BitConverter.ToInt16(data, 0);
+    }
+
+    public override Int64 ReadInt64()
+    {
+        var data = base.ReadBytes(8);
+        Array.Reverse(data);
+        return BitConverter.ToInt64(data, 0);
+    }
+
+    public override UInt32 ReadUInt32()
+    {
+        var data = base.ReadBytes(4);
+        Array.Reverse(data);
+        return BitConverter.ToUInt32(data, 0);
+    }
+
 }

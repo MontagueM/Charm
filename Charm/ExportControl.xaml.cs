@@ -106,7 +106,7 @@ public partial class ExportControl : UserControl
     {
         if (_bExportFunctionSet && DisabledOverlay.Visibility == Visibility.Visible)
             DisabledOverlay.Visibility = Visibility.Hidden;
-        ExportInfo info = new ExportInfo {Name = name, Hash = hash};
+        ExportInfo info = new() {Name = name, Hash = hash};
         // SetExportName(name);
         ExportButton.Tag = info;
     }

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Tiger;
+using Tiger.Schema.Audio;
+using Tiger.Schema.Activity;
 
 namespace Charm;
 
@@ -23,7 +25,7 @@ public partial class MusicWemsControl : UserControl
             items.Add(new WemItem
             {
                 Name = wem.Hash,
-                Hash = PackageHandler.GetEntryReference(wem.Hash),
+                Hash = wem.Hash.GetReferenceHash(),
                 Duration = wem.Duration,
                 Wem = wem,
             });

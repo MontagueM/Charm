@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using ConcurrentCollections;
 
 namespace Tiger;
 
@@ -28,7 +29,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     private readonly ConcurrentDictionary<Type, int> _schemaSerializedSizeMap = new();
 
     // First maps the struct schema type, then the field name
-    private readonly ConcurrentDictionary<Type, Dictionary<string, int>> _schemaFieldOffsetMap = new();
+    private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, int>> _schemaFieldOffsetMap = new();
 
     // 0x8080.... class hash to type
     private readonly ConcurrentDictionary<uint, Type> _schemaHashTypeMap = new();
@@ -43,7 +44,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     private readonly ConcurrentDictionary<Type, FieldInfo[]> _schemaTypeFieldsMap = new();
 
     // Stores all ITagDeserialize types
-    private readonly HashSet<Type> _tagDeserializeTypes = new();
+    private readonly ConcurrentHashSet<Type> _tagDeserializeTypes = new();
 
     public SchemaDeserializer(TigerStrategy strategy) : base(strategy)
     {
@@ -165,7 +166,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             .Where(t => GetAttribute<SchemaStructAttribute>(t) != null || GetAttribute<NonSchemaStructAttribute>(t) != null),
             type =>
         {
-            _schemaFieldOffsetMap.TryAdd(type, new Dictionary<string, int>());
+            _schemaFieldOffsetMap.TryAdd(type, new ConcurrentDictionary<string, int>());
 
             foreach (FieldInfo fieldInfo in type.GetFields())
             {
@@ -184,7 +185,12 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 // }
 
                 // Also add any other types we need e.g. uint, ushort, etc.
-                if (!fieldInfo.FieldType.IsGenericType && !_schemaSerializedSizeMap.ContainsKey(fieldInfo.FieldType))
+                if (fieldInfo.FieldType.IsEnum)
+                {
+                    _schemaSerializedSizeMap.TryAdd(fieldInfo.FieldType, Marshal.SizeOf(Enum.GetUnderlyingType(fieldInfo.FieldType)));
+                    continue;
+                }
+                if (fieldInfo.FieldType is {IsGenericType: false, IsArray: false} && !_schemaSerializedSizeMap.ContainsKey(fieldInfo.FieldType))
                 {
                     _schemaSerializedSizeMap.TryAdd(fieldInfo.FieldType, Marshal.SizeOf(fieldInfo.FieldType));
                     continue;

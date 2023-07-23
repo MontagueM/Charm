@@ -13,7 +13,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Tiger.General;
+using Tiger;
+using Tiger.Schema.Investment;
 using Bitmap = SharpDX.Direct2D1.Bitmap;
 using Point = System.Drawing.Point;
 
@@ -71,7 +72,7 @@ public partial class DareView : UserControl
             //     return;
             // }
             string name = InvestmentHandler.GetItemName(kvp.Value);
-            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].TagData.ItemType;
+            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].TagData.ItemType.Value;
             if (kvp.Value.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
             {
 

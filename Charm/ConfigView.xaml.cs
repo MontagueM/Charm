@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Tiger;
-using Tiger.General;
 using Serilog;
+using Tiger.Schema.Activity;
 
 namespace Charm;
 

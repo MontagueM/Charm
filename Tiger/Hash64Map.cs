@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Globalization;
 
 namespace Tiger.Schema;
 
@@ -21,6 +22,12 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
             throw new KeyNotFoundException($"Hash64 {tag64}/{Endian.U64ToString(tag64)} not found in map");
         }
         return _map[tag64];
+    }
+
+    public static string GetHash32(string strHash)
+    {
+        ulong tagHash64 = Endian.SwapU64(UInt64.Parse(strHash, NumberStyles.HexNumber));
+        return GetHash32(strHash);
     }
 
     // todo race condition where

@@ -1,5 +1,5 @@
 ﻿
-namespace Tiger.Audio;
+namespace Tiger.Schema.Audio;
 
 public class BKHD : Tag
 {

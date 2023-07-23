@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Tiger;
-using Tiger.General;
+using Tiger.Schema;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.Wpf.SharpDX;
 
@@ -15,7 +15,7 @@ public partial class CubemapView : UserControl
         InitializeComponent();
     }
 
-    public void LoadCubemap(TextureHeader textureHeader)
+    public void LoadCubemap(Texture textureHeader)
     {
         CubemapViewport.Items.Clear();
         CubemapViewport.Items.Add(new EnvironmentMap3D

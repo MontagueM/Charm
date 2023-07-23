@@ -1,8 +1,7 @@
-﻿using NAudio.Vorbis;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
-namespace Tiger.Audio;
+namespace Tiger.Schema.Audio;
 
 public class WwiseSound : TigerReferenceFile<D2Class_38978080>
 {

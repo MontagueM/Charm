@@ -106,7 +106,7 @@ public class DynamicPart : MeshPart
     {
         IndexOffset = part.IndexOffset;
         IndexCount = part.IndexCount;
-        PrimitiveType = (EPrimitiveType)part.PrimitiveType;
+        PrimitiveType = (PrimitiveType)part.PrimitiveType;
         if (part.VariantShaderIndex == -1)
         {
             Material = part.Material;
@@ -123,7 +123,7 @@ public class DynamicPart : MeshPart
 
     public void GetAllData(D2Class_C56E8080 mesh, D2Class_076F8080 model)
     {
-        Indices = mesh.Indices.Buffer.ParseBuffer(PrimitiveType, IndexOffset, IndexCount);
+        Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
         foreach (UIntVector3 index in Indices)
@@ -134,19 +134,19 @@ public class DynamicPart : MeshPart
         }
         VertexIndices = uniqueVertexIndices.ToList();
         // Have to call it like this b/c we don't know the format of the vertex data here
-        mesh.Vertices1.Buffer.ParseBuffer(this, uniqueVertexIndices);
-        mesh.Vertices2.Buffer.ParseBuffer(this, uniqueVertexIndices);
+        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices);
+        mesh.Vertices2.ReadVertexData(this, uniqueVertexIndices);
         if (mesh.OldWeights != null)
         {
-            mesh.OldWeights.Buffer.ParseBuffer(this, uniqueVertexIndices);
+            mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices);
         }
         if (mesh.VertexColour != null)
         {
-            mesh.VertexColour.Buffer.ParseBuffer(this, uniqueVertexIndices);
+            mesh.VertexColour.ReadVertexData(this, uniqueVertexIndices);
         }
         if (mesh.SinglePassSkinningBuffer != null)
         {
-            mesh.SinglePassSkinningBuffer.Buffer.ParseBuffer(this, uniqueVertexIndices);
+            mesh.SinglePassSkinningBuffer.ReadVertexData(this, uniqueVertexIndices);
         }
 
         TransformPositions(model);

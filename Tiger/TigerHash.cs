@@ -106,6 +106,8 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
 
     public static implicit operator string(TigerHash hash) => hash.ToString();
 
+    public static implicit operator uint(TigerHash hash) => hash.Hash32;
+
     public virtual void Deserialize(TigerReader reader)
     {
         Hash32 = reader.ReadUInt32();

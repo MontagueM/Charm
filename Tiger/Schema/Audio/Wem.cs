@@ -1,8 +1,8 @@
 ﻿using NAudio.Vorbis;
 using NAudio.Wave;
-using Tiger.Audio.ThirdParty;
+using Tiger.Schema.Audio.ThirdParty;
 
-namespace Tiger.Audio;
+namespace Tiger.Schema.Audio;
 
 /// <summary>
 /// Used for efficient loading of RIFF tags.

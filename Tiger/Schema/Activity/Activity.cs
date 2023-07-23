@@ -1,8 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.VisualBasic.FileIO;
-using Tiger;
+﻿using Tiger.Schema.Audio;
 
-namespace Tiger.Schema;
+namespace Tiger.Schema.Activity;
 
 public class Activity : Tag<SActivity>
 {
@@ -24,7 +22,7 @@ public class Activity : Tag<SActivity>
     // }
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x78)]
+[SchemaStruct("8E8E8080", 0x78)]
 public struct SActivity
 {
     public long FileSize;
@@ -42,13 +40,13 @@ public struct SActivity
     public FileHash64 UnkActivity68;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x78)]
+[SchemaStruct("8B8E8080", 0x78)]
 public struct D2Class_8B8E8080
 {
     public long FileSize;
     public TigerHash LocationName;
-    [SchemaField(0x10), DestinyField(FieldType.TagHash64)]
-    public StringContainer StringContainer;
+    [SchemaField(0x10), Tag64]
+    public LocalizedStrings StringContainer;
     public FileHash Events;
     public FileHash Patrols;
     public uint Unk28;
@@ -59,13 +57,13 @@ public struct D2Class_8B8E8080
     public StringPointer DestinationName;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 4)]
+[SchemaStruct("DE448080", 4)]
 public struct D2Class_DE448080
 {
     public Tag Unk00;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+[SchemaStruct("2E898080", 0x18)]
 public struct D2Class_2E898080
 {
     public TigerHash ShortActivityName;
@@ -75,7 +73,7 @@ public struct D2Class_2E898080
     public StringPointer ActivityName;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+[SchemaStruct("26898080", 0x58)]
 public struct D2Class_26898080
 {
     public TigerHash LocationName;
@@ -95,7 +93,7 @@ public struct D2Class_26898080
     public DynamicArray<D2Class_48898080> Unk38;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+[SchemaStruct("48898080", 0x18)]
 public struct D2Class_48898080
 {
     public TigerHash LocationName;
@@ -106,7 +104,7 @@ public struct D2Class_48898080
     public Tag<D2Class_898E8080> UnkEntityReference;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+[SchemaStruct("898E8080", 0x30)]
 public struct D2Class_898E8080
 {
     public long FileSize;
@@ -115,7 +113,7 @@ public struct D2Class_898E8080
     public Tag Unk14;  // D2Class_898E8080 entity script stuff
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+[SchemaStruct("46938080", 0x58)]
 public struct D2Class_46938080
 {
     [Tag64]
@@ -125,7 +123,7 @@ public struct D2Class_46938080
     public float Unk40;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+[SchemaStruct("19978080", 0x20)]
 public struct D2Class_19978080
 {
     [Tag64]
@@ -133,7 +131,7 @@ public struct D2Class_19978080
     public TigerHash Unk10;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+[SchemaStruct("18978080", 0x20)]
 public struct D2Class_18978080
 {
     [Tag64]
@@ -144,7 +142,7 @@ public struct D2Class_18978080
     public int Unk1C;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+[SchemaStruct("17978080", 0x20)]
 public struct D2Class_17978080
 {
     [Tag64]
@@ -155,7 +153,7 @@ public struct D2Class_17978080
     public int Unk1C;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+[SchemaStruct("45938080", 0x58)]
 public struct D2Class_45938080
 {
     [Tag64]
@@ -167,7 +165,7 @@ public struct D2Class_45938080
     public float Unk40;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x58)]
+[SchemaStruct("44938080", 0x58)]
 public struct D2Class_44938080
 {
     [Tag64]
@@ -185,7 +183,7 @@ public struct D2Class_44938080
 /// <summary>
 /// Generally used in ambients to provide dialogue and music together.
 /// </summary>
-[StructLayout(LayoutKind.Sequential, Size = 0x50)]
+[SchemaStruct("D5908080", 0x50)]
 public struct D2Class_D5908080
 {
     [Tag64]
@@ -197,7 +195,7 @@ public struct D2Class_D5908080
     public TigerHash Unk44;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+[SchemaStruct("28998080", 0x10)]
 public struct D2Class_28998080
 {
     public TigerHash Unk00;
@@ -205,14 +203,14 @@ public struct D2Class_28998080
     public TigerHash Unk08;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+[SchemaStruct("1A978080", 0x18)]
 public struct D2Class_1A978080
 {
     [Tag64]
     public Tag Unk00;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+[SchemaStruct("478F8080", 0x18)]
 public struct D2Class_478F8080
 {
     [Tag64]
@@ -222,7 +220,7 @@ public struct D2Class_478F8080
 /// <summary>
 /// Stores static map data for activities
 /// </summary>
-[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+[SchemaStruct("24898080", 0x38)]
 public struct D2Class_24898080
 {
     public TigerHash LocationName;
@@ -234,14 +232,14 @@ public struct D2Class_24898080
     public DynamicArray<D2Class_1D898080> MapReferences;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+[SchemaStruct("1D898080", 0x10)]
 public struct D2Class_1D898080
 {
     [Tag64]
-    public Tag<D2Class_1E898080> MapReference;
+    public Tag<SBubbleParent> MapReference;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+[SchemaStruct("53418080", 0x20)]
 public struct D2Class_53418080
 {
     public TigerHash Unk00;
@@ -250,7 +248,7 @@ public struct D2Class_53418080
     public int Unk0C;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x40)]
+[SchemaStruct("54418080", 0x40)]
 public struct D2Class_54418080
 {
     public TigerHash Unk00;
@@ -259,7 +257,7 @@ public struct D2Class_54418080
     public int Unk0C;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x40)]
+[SchemaStruct("0F978080", 0x40)]
 public struct D2Class_0F978080
 {
     public StringPointer BubbleName;
@@ -271,7 +269,7 @@ public struct D2Class_0F978080
     public DynamicArray<D2Class_DD978080> Unk30;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+[SchemaStruct("DD978080", 0x10)]
 public struct D2Class_DD978080
 {
     public TigerHash Unk00;
@@ -282,7 +280,7 @@ public struct D2Class_DD978080
 /// <summary>
 /// Directive table + audio links for activity directives.
 /// </summary>
-[StructLayout(LayoutKind.Sequential, Size = 0x84)]
+[SchemaStruct("6A988080", 0x84)]
 public struct D2Class_6A988080
 {
     public DynamicArray<D2Class_28898080> DirectiveTables;
@@ -296,7 +294,7 @@ public struct D2Class_6A988080
 /// <summary>
 /// Directive table for public events so no audio linked.
 /// </summary>
-[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+[SchemaStruct("20978080", 0x38)]
 public struct D2Class_20978080
 {
     public DynamicArray<D2Class_28898080> PEDirectiveTables;
@@ -304,27 +302,27 @@ public struct D2Class_20978080
     public TigerHash StartingBubbleName;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 4)]
+[SchemaStruct("28898080", 4)]
 public struct D2Class_28898080
 {
     public Tag<D2Class_C78E8080> DirectiveTable;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x14)]
+[SchemaStruct("B7978080", 0x14)]
 public struct D2Class_B7978080
 {
     [Tag64]
     public Tag<D2Class_B8978080> DialogueTable;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x18)]
+[SchemaStruct("C78E8080", 0x18)]
 public struct D2Class_C78E8080
 {
     public long FileSize;
     public DynamicArray<D2Class_C98E8080> DirectiveTable;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x80)]
+[SchemaStruct("C98E8080", 0x80)]
 public struct D2Class_C98E8080
 {
     public TigerHash Hash;
@@ -342,7 +340,7 @@ public struct D2Class_C98E8080
     public int ObjectiveTargetCount;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+[SchemaStruct("0B978080", 0x38)]
 public struct D2Class_0B978080
 {
     public StringPointer BubbleName;
@@ -353,7 +351,7 @@ public struct D2Class_0B978080
     public DynamicArray<D2Class_0C008080> Unk40;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 8)]
+[SchemaStruct("0C008080", 8)]
 public struct D2Class_0C008080
 {
     public TigerHash Unk00;
@@ -362,7 +360,7 @@ public struct D2Class_0C008080
 
 #region Audio
 
-[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+[SchemaStruct("EB458080", 0x38)]
 public struct D2Class_EB458080
 {
     public long FileSize;
@@ -374,13 +372,13 @@ public struct D2Class_EB458080
     public DynamicArray<D2Class_ED458080> Unk28;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 8)]
+[SchemaStruct("ED458080", 8)]
 public struct D2Class_ED458080
 {
     public ResourcePointer Unk00;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+[SchemaStruct("F5458080", 0x30)]
 public struct D2Class_F5458080
 {
     public StringPointer WwiseMusicLoopName;
@@ -390,7 +388,7 @@ public struct D2Class_F5458080
     public TigerHash Unk28;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+[SchemaStruct("F7458080", 0x28)]
 public struct D2Class_F7458080
 {
     public StringPointer AmbientMusicSetName;
@@ -399,7 +397,7 @@ public struct D2Class_F7458080
     public DynamicArray<D2Class_FA458080> Unk18;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+[SchemaStruct("50968080", 0x20)]
 public struct D2Class_50968080
 {
     public long FileSize;
@@ -407,7 +405,7 @@ public struct D2Class_50968080
     public TigerHash Unk18;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+[SchemaStruct("318A8080", 0x30)]
 public struct D2Class_318A8080
 {
     [Tag64]
@@ -421,7 +419,7 @@ public struct D2Class_318A8080
     public int Unk28;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+[SchemaStruct("FA458080", 0x20)]
 public struct D2Class_FA458080
 {
     public TigerHash Unk00;
@@ -432,7 +430,7 @@ public struct D2Class_FA458080
     public TigerHash Unk14;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+[SchemaStruct("FB458080", 0x20)]
 public struct D2Class_FB458080
 {
     public TigerHash Unk00;
@@ -444,7 +442,7 @@ public struct D2Class_FB458080
     public TigerHash EventHash;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+[SchemaStruct("F0458080", 0x28)]
 public struct D2Class_F0458080
 {
     public long FileSize;

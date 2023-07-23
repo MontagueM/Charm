@@ -11,6 +11,9 @@ using System.Windows;
 using System.Windows.Controls;
 using Tiger;
 using Serilog;
+using Tiger.Schema;
+using Tiger.Schema.Activity;
+using Tiger.Schema.Entity;
 
 namespace Charm;
 
@@ -53,14 +56,14 @@ public partial class ActivityMapView : UserControl
     private void GetBubbleContentsButton_OnClick(object sender, RoutedEventArgs e)
     {
         FileHash hash = new FileHash((sender as Button).Tag as string);
-        Tag<D2Class_01878080> bubbleMaps = FileResourcer.Get().GetFile<D2Class_01878080>(hash);
+        Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
         PopulateStaticList(bubbleMaps);
     }
 
     private void StaticMapPart_OnCheck(object sender, RoutedEventArgs e)
     {
         FileHash hash = new FileHash((sender as CheckBox).Tag as string);
-        Tag<D2Class_07878080> map = FileResourcer.Get().GetFile<D2Class_07878080>(hash);
+        Tag<SMapContainer> map = FileResourcer.Get().GetSchemaTag<SMapContainer>(hash);
 
         foreach (DisplayStaticMap item in StaticList.Items)
         {
@@ -74,20 +77,20 @@ public partial class ActivityMapView : UserControl
         }
     }
 
-    private void PopulateStaticList(Tag<D2Class_01878080> bubbleMaps)
+    private void PopulateStaticList(Tag<SBubbleDefinition> bubbleMaps)
     {
         ConcurrentBag<DisplayStaticMap> items = new ConcurrentBag<DisplayStaticMap>();
         Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
         {
-            if (m.MapResource.TagData.DataTables.Count > 1)
+            if (m.MapContainer.TagData.MapDataTables.Count > 1)
             {
-                if (m.MapResource.TagData.DataTables[1].DataTable.TagData.DataEntries.Count > 0)
+                if (m.MapContainer.TagData.MapDataTables[1].MapDataTable.TagData.DataEntries.Count > 0)
                 {
-                    StaticMapData tag = m.MapResource.TagData.DataTables[1].DataTable.TagData.DataEntries[0].DataResource.StaticMapParent.TagData.StaticMap;
+                    StaticMapData tag = m.MapContainer.TagData.MapDataTables[1].MapDataTable.TagData.DataEntries[0].DataResource.Value.StaticMapParent.TagData.StaticMap;
                     items.Add(new DisplayStaticMap
                     {
-                        Hash = m.MapResource.Hash,
-                        Name = $"{m.MapResource.Hash}: {tag.TagData.Instances.Count} instances, {tag.TagData.Statics.Count} uniques",
+                        Hash = m.MapContainer.Hash,
+                        Name = $"{m.MapContainer.Hash}: {tag.TagData.Instances.Count} instances, {tag.TagData.Statics.Count} uniques",
                         Instances = tag.TagData.Instances.Count
                     });
                 }
@@ -102,15 +105,15 @@ public partial class ActivityMapView : UserControl
         StaticList.ItemsSource = sortedItems;
     }
 
-    private void PopulateDynamicsList(Tag<D2Class_07878080> map)//(Tag<D2Class_01878080> bubbleMaps)
+    private void PopulateDynamicsList(Tag<SMapContainer> map)//(Tag<SBubbleDefinition> bubbleMaps)
     {
 
         ConcurrentBag<DisplayDynamicMap> items = new ConcurrentBag<DisplayDynamicMap>();
-        Parallel.ForEach(map.TagData.DataTables, data =>
+        Parallel.ForEach(map.TagData.MapDataTables, data =>
         {
-            data.DataTable.TagData.DataEntries.ForEach(entry =>
+            data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
-                if(entry is D2Class_85988080 dynamicResource)
+                if(entry is SMapDataEntry dynamicResource)
                 {
                     Entity entity = FileResourcer.Get().GetFile(typeof(Entity), dynamicResource.Entity.Hash);
 
@@ -146,13 +149,13 @@ public partial class ActivityMapView : UserControl
 
     public async void ExportFull(ExportInfo info)
     {
-        Activity activity = FileResourcer.Get().GetFile(typeof(Activity), new FileHash(info.Hash));
-        _activityLog.Debug($"Exporting activity data name: {PackageHandler.GetActivityName(activity.Hash)}, hash: {activity.Hash}");
+        Activity activity = FileResourcer.Get().GetFile<Activity>(info.Hash);
+        _activityLog.Debug($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.Hash)}, hash: {activity.Hash}");
         Dispatcher.Invoke(() =>
         {
             MapControl.Visibility = Visibility.Hidden;
         });
-        var maps = new List<Tag<D2Class_07878080>>();
+        var maps = new List<Tag<SMapContainer>>();
         bool bSelectAll = false;
         foreach (DisplayStaticMap item in StaticList.Items)
         {
@@ -164,7 +167,7 @@ public partial class ActivityMapView : UserControl
             {
                 if (item.Selected || bSelectAll)
                 {
-                    maps.Add(FileResourcer.Get().GetFile<D2Class_07878080>(new FileHash(item.Hash)));
+                    maps.Add(FileResourcer.Get().GetSchemaTag<SMapContainer>(item.Hash));
                 }
             }
         }
@@ -208,7 +211,7 @@ public partial class ActivityMapView : UserControl
         {
             MapControl.Visibility = Visibility.Visible;
         });
-        _activityLog.Information($"Exported activity data name: {PackageHandler.GetActivityName(activity.Hash)}, hash: {activity.Hash}");
+        _activityLog.Information($"Exported activity data name: {PackageResourcer.Get().GetActivityName(activity.Hash)}, hash: {activity.Hash}");
         MessageBox.Show("Activity map data exported completed.");
     }
 

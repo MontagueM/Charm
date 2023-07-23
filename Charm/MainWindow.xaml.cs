@@ -151,11 +151,11 @@ public partial class MainWindow
 
     private void InitialiseSubsystems()
     {
-        Log.Info("Initialising Charm subsystems");
+        Log.Information("Initialising Charm subsystems");
         string[] args = Environment.GetCommandLineArgs();
         CharmInstance.Args = new CharmArgs(args);
         CharmInstance.InitialiseSubsystems();
-        Log.Info("Initialised Charm subsystems");
+        Log.Information("Initialised Charm subsystems");
 
     }
 
@@ -204,46 +204,46 @@ public partial class MainWindow
 
     private async void InitialiseHandlers()
     {
-        Progress.SetProgressStages(new List<string>
-        {
-            "packages cache",
-            "fonts",
-            "fnv hashes",
-            "hash 64",
-            "investment",
-            "global string cache",
-            "activity names",
-        });
+        // Progress.SetProgressStages(new List<string>
+        // {
+        //     "packages cache",
+        //     "fonts",
+        //     "fnv hashes",
+        //     "hash 64",
+        //     "investment",
+        //     "global string cache",
+        //     "activity names",
+        // });
         // to check if we need to update caches
-        PackageHandler.Initialise();
-        Progress.CompleteStage();
+        // PackageHandler.Initialise();
+        // Progress.CompleteStage();
 
         // Load all the fonts
-        await Task.Run(() =>
-        {
-            RegisterFonts(FontHandler.Initialise());
-        });
-        Progress.CompleteStage();
+        // await Task.Run(() =>
+        // {
+        //     RegisterFonts(FontHandler.Initialise());
+        // });
+        // Progress.CompleteStage();
 
-        // Initialise FNV handler -- must be first bc my code is shit
-        await Task.Run(FnvHandler.Initialise);
-        Progress.CompleteStage();
-
-        // Get all hash64 -- must be before InvestmentHandler
-        await Task.Run(TagHash64Handler.Initialise);
-        Progress.CompleteStage();
-
-        // Initialise investment
-        await Task.Run(InvestmentHandler.Initialise);
-        Progress.CompleteStage();
-
-        // Initialise global string cache
-        await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
-        Progress.CompleteStage();
-
-        // Get all activity names
-        await Task.Run(PackageHandler.GetAllActivityNames);
-        Progress.CompleteStage();
+        // // Initialise FNV handler -- must be first bc my code is shit
+        // await Task.Run(FnvHandler.Initialise);
+        // Progress.CompleteStage();
+        //
+        // // Get all hash64 -- must be before InvestmentHandler
+        // await Task.Run(TagHash64Handler.Initialise);
+        // Progress.CompleteStage();
+        //
+        // // Initialise investment
+        // await Task.Run(InvestmentHandler.Initialise);
+        // Progress.CompleteStage();
+        //
+        // // Initialise global string cache
+        // await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
+        // Progress.CompleteStage();
+        //
+        // // Get all activity names
+        // await Task.Run(PackageHandler.GetAllActivityNames);
+        // Progress.CompleteStage();
 
         // Set texture format
         TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());

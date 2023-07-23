@@ -10,6 +10,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Tiger;
 using Tiger.Schema;
+using Tiger.Schema.Audio;
+using Tiger.Schema.Entity;
 
 namespace Charm;
 
@@ -40,7 +42,7 @@ public partial class DevView : UserControl
         strHash = Regex.Replace(strHash, @"(\s+|r|h)", "");
         if (strHash.Length == 16)
         {
-            strHash = TagHash64Handler.GetTagHash64(strHash);
+            strHash = Hash64Map.GetHash32(strHash);
         }
         if (strHash == "")
         {
@@ -54,7 +56,7 @@ public partial class DevView : UserControl
             var s = strHash.Split("-");
             var pkgid = Int32.Parse(s[0], NumberStyles.HexNumber);
             var entryindex = Int32.Parse(s[1], NumberStyles.HexNumber);
-            hash = new FileHash(PackageHandler.MakeHash(pkgid, entryindex));
+            hash = new FileHash(pkgid, (uint)entryindex);  // fix to int/uint stuff here
         }
         else
         {
@@ -70,12 +72,12 @@ public partial class DevView : UserControl
         switch (e.Key)
         {
             case Key.L:
-                StringBuilder data = new StringBuilder();
-                data.AppendLine($"PKG: {PackageHandler.GetPackageName(hash.GetPkgId())}");
-                data.AppendLine($"PKG ID: {hash.GetPkgId()}");
-                data.AppendLine($"Entry Index: {hash.GetEntryIndex() }");
-                data.AppendLine($"Dev String: {hash.GetDevString() ?? hash.GetContainerString() ?? "NULL"}");
-                data.AppendLine($"Reference Hash: {hash.Hash}");
+                StringBuilder data = new();
+                data.AppendLine($"PKG: {PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId(hash.PackageId)})");
+                data.AppendLine($"PKG ID: {hash.PackageId}");
+                data.AppendLine($"Entry Index: {hash.FileIndex }");
+                // data.AppendLine($"Dev String: {hash.GetDevString() ?? hash.GetContainerString() ?? "NULL"}");
+                data.AppendLine($"Reference Hash: {hash.GetReferenceHash()}");
 
                 HashLocation.Text = data.ToString();
                 break;
@@ -86,8 +88,8 @@ public partial class DevView : UserControl
                 OpenHxD(hash);
                 break;
             case Key.R:
-                FileHash refHash = PackageHandler.GetEntryReference(hash);
-                if (!refHash.GetHashString().EndsWith("8080"))
+                FileHash refHash = hash.GetReferenceHash();
+                if (!refHash.ToString().EndsWith("8080"))
                 {
                     OpenHxD(refHash);
                 }
@@ -112,7 +114,7 @@ public partial class DevView : UserControl
 
     private void ExportWem(ExportInfo info)
     {
-        Wem wem = FileResourcer.Get().GetFile(typeof(Wem), new FileHash(info.Hash));
+        Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash as FileHash);
         string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         wem.SaveToFile($"{saveDirectory}/{info.Name}.wav");
@@ -122,10 +124,9 @@ public partial class DevView : UserControl
     {
         _fbxHandler.Clear();
         // Adds a new tab to the tab control
-        TigerHash reference = PackageHandler.GetEntryReference(hash);
-        int hType, hSubtype;
-        PackageHandler.GetEntryTypes(hash, out hType, out hSubtype);
-        if (hType == 26 && hSubtype == 7)
+        TigerHash reference = hash.GetReferenceHash();
+        FileMetadata fileMetadata = PackageResourcer.Get().GetFileMetadata(hash);
+        if (fileMetadata.Type == 26 && fileMetadata.SubType == 7)
         {
             var audioView = new TagView();
             audioView.SetViewer(TagView.EViewerType.TagList);
@@ -136,9 +137,9 @@ public partial class DevView : UserControl
             _mainWindow.MakeNewTab(hash, audioView);
             _mainWindow.SetNewestTabSelected();
         }
-        else if (hType == 32)
+        else if (fileMetadata.Type == 32)
         {
-            TextureHeader textureHeader = FileResourcer.Get().GetFile(typeof(TextureHeader), new FileHash(hash));
+            Texture textureHeader = FileResourcer.Get().GetFile<Texture>(hash);
             if (textureHeader.IsCubemap())
             {
                 var cubemapView = new CubemapView();
@@ -153,9 +154,9 @@ public partial class DevView : UserControl
             }
             _mainWindow.SetNewestTabSelected();
         }
-        else if ((hType == 8 || hType == 16) && hSubtype == 0)
+        else if ((fileMetadata.Type == 8 || fileMetadata.Type == 16) && fileMetadata.SubType == 0)
         {
-            switch (reference.Hash)
+            switch (reference.Hash32)
             {
                 case 0x80809AD8:
                     EntityView entityView = new EntityView();
@@ -212,12 +213,12 @@ public partial class DevView : UserControl
         {
             Directory.CreateDirectory(savePath);
         }
-        string path = $"{savePath}/{hash.GetPkgId().ToString("x4")}_{PackageHandler.GetEntryReference(hash)}_{hash}.bin";
+        string path = $"{savePath}/{hash.PackageId:x4}_{hash.GetReferenceHash()}_{hash}.bin";
         using (var fileStream = new FileStream(path, FileMode.Create))
         {
             using (var writer = new BinaryWriter(fileStream))
             {
-                byte[] data = new DestinyFile(hash).GetData();
+                byte[] data = FileResourcer.Get().GetFile(hash).GetData();
                 writer.Write(data);
             }
         }

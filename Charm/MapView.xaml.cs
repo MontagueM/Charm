@@ -10,6 +10,8 @@ using System.Windows;
 using System.Windows.Controls;
 using Tiger;
 using Serilog;
+using Tiger.Schema;
+using Tiger.Schema.Static;
 
 namespace Charm;
 
@@ -44,8 +46,8 @@ public partial class MapView : UserControl
 
     private void GetStaticMapData(FileHash fileHash, ExportDetailLevel detailLevel)
     {
-        Tag<D2Class_07878080> tag = FileResourcer.Get().GetFile<D2Class_07878080>(fileHash);
-        StaticMapData staticMapData = ((D2Class_C96C8080)tag.TagData.DataTables[1].DataTable.TagData.DataEntries[0].DataResource).StaticMapParent.TagData.StaticMap;
+        Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(fileHash);
+        StaticMapData staticMapData = ((SMapDataResource)tag.TagData.MapDataTables[1].MapDataTable.TagData.DataEntries[0].DataResource.Value).StaticMapParent.TagData.StaticMap;
         SetMapUI(staticMapData, detailLevel);
     }
 
@@ -72,11 +74,11 @@ public partial class MapView : UserControl
         MVM.Dispose();
     }
 
-    public static void ExportFullMap(Tag<D2Class_07878080> map)
+    public static void ExportFullMap(Tag<SMapContainer> map)
     {
         FbxHandler fbxHandler = new FbxHandler();
 
-        string meshName = map.Hash.GetHashString();
+        string meshName = map.Hash.ToString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
@@ -96,11 +98,11 @@ public partial class MapView : UserControl
         if (ConfigHandler.GetUnrealInteropEnabled())
         {
             fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
         }
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.InfoHandler.AddType("Map");
@@ -108,11 +110,11 @@ public partial class MapView : UserControl
         fbxHandler.Dispose();
     }
 
-    public static void ExportMinimalMap(Tag<D2Class_07878080> map, ExportTypeFlag exportTypeFlag)
+    public static void ExportMinimalMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
     {
         FbxHandler fbxHandler = new FbxHandler();
 
-        string meshName = map.Hash.GetHashString();
+        string meshName = map.Hash.ToString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
@@ -134,11 +136,11 @@ public partial class MapView : UserControl
         if (ConfigHandler.GetUnrealInteropEnabled())
         {
             fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
+            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Map, ConfigHandler.GetOutputTextureFormat(), ConfigHandler.GetSingleFolderMapsEnabled());
         }
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Map, ConfigHandler.GetOutputTextureFormat());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Map, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.InfoHandler.AddType("Map");
@@ -146,10 +148,10 @@ public partial class MapView : UserControl
         fbxHandler.Dispose();
     }
 
-    public static void ExportTerrainMap(Tag<D2Class_07878080> map)
+    public static void ExportTerrainMap(Tag<SMapContainer> map)
     {
         FbxHandler fbxHandler = new FbxHandler();
-        string meshName = map.Hash.GetHashString();
+        string meshName = map.Hash.ToString();
         string savePath = ConfigHandler.GetExportSavePath() + $"/{meshName}";
         if (ConfigHandler.GetSingleFolderMapsEnabled())
         {
@@ -163,11 +165,11 @@ public partial class MapView : UserControl
         fbxHandler.InfoHandler.SetMeshName(meshName+"_Terrain");
         Directory.CreateDirectory(savePath);
 
-        Parallel.ForEach(map.TagData.DataTables, data =>
+        Parallel.ForEach(map.TagData.MapDataTables, data =>
         {
-            data.DataTable.TagData.DataEntries.ForEach(entry =>
+            data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
-                if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain
+                if (entry.DataResource.Value is D2Class_7D6C8080 terrainArrangement)  // Terrain
                 {
                     //entry.Rotation.SetW(1);
                     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled(), terrainArrangement);
@@ -177,7 +179,7 @@ public partial class MapView : UserControl
 
         if (ConfigHandler.GetBlenderInteropEnabled())
         {
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.EImportType.Terrain, ConfigHandler.GetOutputTextureFormat());
+            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.ImportType.Terrain, ConfigHandler.GetOutputTextureFormat());
         }
 
         fbxHandler.InfoHandler.AddType("Terrain");
@@ -185,16 +187,16 @@ public partial class MapView : UserControl
         fbxHandler.Dispose();
     }
 
-    private static void ExtractDataTables(Tag<D2Class_07878080> map, string savePath, FbxHandler fbxHandler, ExportTypeFlag exportTypeFlag)
+    private static void ExtractDataTables(Tag<SMapContainer> map, string savePath, FbxHandler fbxHandler, ExportTypeFlag exportTypeFlag)
     {
         FbxHandler dynamicHandler = new FbxHandler(false);
         //dynamicHandler.InfoHandler.SetMeshName(map.Hash.GetHashString()+"_DynamicPoints");
-        Parallel.ForEach(map.TagData.DataTables, data =>
+        Parallel.ForEach(map.TagData.MapDataTables, data =>
         {
-            data.DataTable.TagData.DataEntries.ForEach(entry =>
+            data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
                 //Console.WriteLine($"{entry.DataResource}");
-                if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
+                if (entry.DataResource.Value is SMapDataResource staticMapResource)  // Static map
                 {
                     if (exportTypeFlag == ExportTypeFlag.ArrangedMap)
                     {
@@ -205,7 +207,7 @@ public partial class MapView : UserControl
                         staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
                     }
                 }
-                else if(entry is D2Class_85988080 dynamicResource)
+                else if(entry is SMapDataEntry dynamicResource)
                 {
                     dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
                 }
@@ -216,28 +218,28 @@ public partial class MapView : UserControl
                 // }
             });
         });
-        dynamicHandler.ExportScene($"{savePath}/{map.Hash.GetHashString()}_DynamicPoints.fbx");
+        dynamicHandler.ExportScene($"{savePath}/{map.Hash}_DynamicPoints.fbx");
         dynamicHandler.Dispose();
     }
 
-    private static void ExportStatics(bool exportStatics, string savePath, Tag<D2Class_07878080> map)
+    private static void ExportStatics(bool exportStatics, string savePath, Tag<SMapContainer> map)
     {
         if (exportStatics) //Export individual statics
         {
-            Parallel.ForEach(map.TagData.DataTables, data =>
+            Parallel.ForEach(map.TagData.MapDataTables, data =>
             {
-                data.DataTable.TagData.DataEntries.ForEach(entry =>
+                data.MapDataTable.TagData.DataEntries.ForEach(entry =>
                 {
-                    if (entry.DataResource is D2Class_C96C8080 staticMapResource)  // Static map
+                    if (entry.DataResource.Value is SMapDataResource staticMapResource)  // Static map
                     {
                         var parts = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.Statics;
                         //staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoFbxScene(staticHandler, savePath, ConfigHandler.GetUnrealInteropEnabled());
                         //Parallel.ForEach(parts, part =>
                         foreach(var part in parts)
                         {
-                            if(File.Exists($"{savePath}/Statics/{part.Static.Hash.GetHashString()}.fbx")) continue;
+                            if(File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
 
-                            string staticMeshName = part.Static.Hash.GetHashString();
+                            string staticMeshName = part.Static.Hash.ToString();
                             FbxHandler staticHandler = new FbxHandler(false);
 
                             //staticHandler.InfoHandler.SetMeshName(staticMeshName);
@@ -254,7 +256,7 @@ public partial class MapView : UserControl
                                 StringBuilder mats = new StringBuilder();
 
                                 int i = 0;
-                                foreach (Part staticpart in staticmesh)
+                                foreach (StaticPart staticpart in staticmesh)
                                 {
                                     mats.AppendLine("{");
                                     //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");

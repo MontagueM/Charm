@@ -9,6 +9,8 @@ using System.Windows.Controls;
 using Tiger;
 using NAudio.Vorbis;
 using NAudio.Wave;
+using Tiger.Schema;
+using Tiger.Schema.Activity;
 
 namespace Charm;
 
@@ -21,7 +23,7 @@ public partial class MusicView : UserControl
 
     public async void Load(FileHash fileHash)
     {
-        Tag<D2Class_EB458080> music = FileResourcer.Get().GetFile<D2Class_EB458080>(fileHash);
+        Tag<D2Class_EB458080> music = FileResourcer.Get().GetSchemaTag<D2Class_EB458080>(fileHash);
 
         if (music == null)
             return;
@@ -30,24 +32,22 @@ public partial class MusicView : UserControl
             throw new NotImplementedException();
         }
 
-        var resource = music.TagData.Unk28[0].Unk00;
-        if (resource is D2Class_F5458080)
+        var resource = music.TagData.Unk28[0].Unk00.Value;
+        if (resource is D2Class_F5458080 f5458080)
         {
-            var res = (D2Class_F5458080) resource;
-            WemsControl.Load(res);
-            EventsControl.Load(res);
-            var sbhash = res.MusicLoopSound.TagData.Unk18.TagData.SoundBank.Hash;
-            SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.GetPkgId().ToString("X4")}-{sbhash.GetEntryIndex().ToString("X4")}";
+            WemsControl.Load(f5458080);
+            EventsControl.Load(f5458080);
+            var sbhash = f5458080.MusicLoopSound.TagData.Unk18.TagData.SoundBank.Hash;
+            SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.PackageId:X4}-{sbhash.FileIndex:X4}";
         }
-        else if (resource is D2Class_F7458080)
+        else if (resource is D2Class_F7458080 res)
         {
-            var res = (D2Class_F7458080) resource;
             WemsControl.Load(res);
             EventsControl.Load(res);
             if (res.AmbientMusicSet != null)
             {
                 var sbhash = res.AmbientMusicSet.TagData.Unk08[0].MusicLoopSound.TagData.Unk18.TagData.SoundBank.Hash;
-                SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.GetPkgId().ToString("X4")}-{sbhash.GetEntryIndex().ToString("X4")}";
+                SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.PackageId:X4}-{sbhash.FileIndex:X4}";
             }
         }
         else

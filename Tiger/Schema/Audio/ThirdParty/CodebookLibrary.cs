@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using Field;
+﻿
 
 namespace DataTool.ConvertLogic {
     public class CodebookLibrary {

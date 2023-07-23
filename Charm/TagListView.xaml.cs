@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,14 +13,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using ConcurrentCollections;
 using Tiger;
-using Tiger.Entities;
-using Tiger.General;
-using Tiger.Models;
-using Tiger.Strings;
-using Tiger;
-using Microsoft.Toolkit.Mvvm.Input;
 using Serilog;
 using System.Text;
+using Tiger.Schema;
+using Tiger.Schema.Audio;
+using Tiger.Schema.Activity;
+using Tiger.Schema.Entity;
+using Tiger.Schema.Investment;
 
 namespace Charm;
 
@@ -295,9 +293,9 @@ public partial class TagListView : UserControl
     /// <param name="packageId">Package ID for this package to load data for.</param>
     private void LoadPackage(FileHash pkgHash)
     {
-        int pkgId = pkgHash.GetPkgId();
+        int pkgId = pkgHash.PackageId;
         SetBulkGroup(pkgId.ToString("x4"));
-        _allTagItems = new ConcurrentBag<TagItem>(_allTagItems.Where(x => x.Hash.GetPkgId() == pkgId && x.TagType != ETagListType.Package));
+        _allTagItems = new ConcurrentBag<TagItem>(_allTagItems.Where(x => (x.Hash as FileHash).PackageId == pkgId && x.TagType != ETagListType.Package));
     }
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -371,8 +369,8 @@ public partial class TagListView : UserControl
             }
             // bool bWasTrimmed = name != item.Name;
             if (name.ToLower().Contains(searchStr)
-                || item.Hash.GetHashString().ToLower().Contains(searchStr)
-                || item.Hash.Hash.ToString().Contains(searchStr)
+                || item.Hash.ToString().ToLower().Contains(searchStr)
+                || item.Hash.Hash32.ToString().Contains(searchStr)
                 || item.Subname.ToLower().Contains(searchStr))
             {
                 displayItems.Add(new TagItem
@@ -434,7 +432,7 @@ public partial class TagListView : UserControl
                 bBroken = true;
                 state.Break();
             }
-            packageIds.Add(item.Hash.GetPkgId());
+            packageIds.Add((item.Hash as FileHash).PackageId);  // todo fix this garbage as call
         });
 
         if (bBroken)
@@ -444,8 +442,8 @@ public partial class TagListView : UserControl
         {
             _allTagItems.Add(new TagItem
             {
-                Name = String.Join('_', PackageHandler.GetPackageName(pkgId).Split('_').Skip(1).SkipLast(1)),
-                Hash = new FileHash(PackageHandler.MakeHash(pkgId, 0)),
+                Name = string.Join('_', PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId((ushort)pkgId).Split('_').Skip(1).SkipLast(1)),
+                Hash = new FileHash(pkgId, 0),
                 TagType = ETagListType.Package
             });
         });
@@ -468,7 +466,7 @@ public partial class TagListView : UserControl
     {
         var btn = sender as ToggleButton;
         TagItem tagItem = btn.DataContext as TagItem;
-        FileHash fileHash = tagItem.Hash == null ? null : new FileHash(tagItem.Hash);
+        FileHash fileHash = tagItem.Hash as FileHash;
         if (_previouslySelected != null)
             _previouslySelected.IsChecked = false;
         _selectedIndex = TagList.Items.IndexOf(tagItem);
@@ -636,10 +634,10 @@ public partial class TagListView : UserControl
         {
             foreach (var tagItem in exportItems)
             {
-                var name = tagItem.Name == String.Empty ? tagItem.Hash.GetHashString() : tagItem.Name;
+                var name = tagItem.Name == String.Empty ? tagItem.Hash : tagItem.Name;
                 var exportInfo = new ExportInfo
                 {
-                    Hash = tagItem.Hash,
+                    Hash = tagItem.Hash as FileHash,
                     Name = $"/Bulk_{groupName}/{name}",
                     ExportType = ExportTypeFlag.Minimal
                 };
@@ -656,13 +654,13 @@ public partial class TagListView : UserControl
     /// <summary>
     /// Type 0x8080471D and only in sr_destination_metadata_010a?
     /// </summary>
-    private void LoadDestinationGlobalTagBagList()
+    private async void LoadDestinationGlobalTagBagList()
     {
         _allTagItems = new ConcurrentBag<TagItem>();
-        var vals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x8080471D);
+        var vals = await PackageResourcer.Get().GetAllHashes<D2Class_1D478080>();
         Parallel.ForEach(vals, val =>
         {
-            Tag<D2Class_1D478080> dgtbParent = FileResourcer.Get().GetFile<D2Class_1D478080>(val);
+            Tag<D2Class_1D478080> dgtbParent = FileResourcer.Get().GetSchemaTag<D2Class_1D478080>(val);
             if (dgtbParent.TagData.DestinationGlobalTagBags.Count < 1)
                 return;
             foreach (D2Class_D3598080 destinationGlobalTagBag in dgtbParent.TagData.DestinationGlobalTagBags)
@@ -682,17 +680,17 @@ public partial class TagListView : UserControl
 
     private void LoadDestinationGlobalTagBag(FileHash hash)
     {
-        Tag<D2Class_30898080> destinationGlobalTagBag = FileResourcer.Get().GetFile<D2Class_30898080>(hash);
+        Tag<D2Class_30898080> destinationGlobalTagBag = FileResourcer.Get().GetSchemaTag<D2Class_30898080>(hash);
 
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(destinationGlobalTagBag.TagData.Unk18, val =>
         {
             if (val.Tag == null)
                 return;
-            FileHash reference = PackageHandler.GetEntryReference(val.Tag.Hash);
+            FileHash reference = val.Tag.Hash.GetReferenceHash();
             ETagListType tagType;
             string overrideType = String.Empty;
-            switch (reference.Hash)
+            switch (reference.Hash32)
             {
                 case 0x8080987e:
                     tagType = ETagListType.BudgetSet;
@@ -702,7 +700,7 @@ public partial class TagListView : UserControl
                     break;
                 default:
                     tagType = ETagListType.None;
-                    overrideType = reference.GetHashString();
+                    overrideType = reference;
                     break;
             }
             _allTagItems.Add(new TagItem
@@ -722,14 +720,14 @@ public partial class TagListView : UserControl
 
     private void LoadBudgetSet(FileHash hash)
     {
-        Tag<D2Class_7E988080> budgetSetHeader = FileResourcer.Get().GetFile<D2Class_7E988080>(hash);
-        Tag<D2Class_ED9E8080> budgetSet = FileResourcer.Get().GetFile<D2Class_ED9E8080>(budgetSetHeader.TagData.Unk00.Hash);
+        Tag<D2Class_7E988080> budgetSetHeader = FileResourcer.Get().GetSchemaTag<D2Class_7E988080>(hash);
+        Tag<D2Class_ED9E8080> budgetSet = FileResourcer.Get().GetSchemaTag<D2Class_ED9E8080>(budgetSetHeader.TagData.Unk00.Hash);
         _allTagItems = new ConcurrentBag<TagItem>();
         Parallel.ForEach(budgetSet.TagData.Unk28, val =>
         {
             if (!val.Tag.Hash.IsValid())
             {
-                Log.Error($"BudgetSet {budgetSetHeader.TagData.Unk00.Hash.GetHashString()} has an invalid tag hash.");
+                Log.Error($"BudgetSet {budgetSetHeader.TagData.Unk00.Hash} has an invalid tag hash.");
                 return;
             }
             _allTagItems.Add(new TagItem
@@ -762,8 +760,7 @@ public partial class TagListView : UserControl
 
     private void ExportEntity(ExportInfo info)
     {
-        var viewer = GetViewer();
-        Entity entity = FileResourcer.Get().GetFile(typeof(Entity), new FileHash(info.Hash));
+        Entity entity = FileResourcer.Get().GetFile<Entity>(info.Hash);
         EntityView.Export(new List<Entity> {entity}, info.Name, info.ExportType);
     }
 
@@ -785,118 +782,120 @@ public partial class TagListView : UserControl
         if (_allTagItems != null)
             return;
 
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            "loading global tag bags",
-            "loading budget sets",
-            "caching entity tags",
-            "loading entities"
-        });
+        // todo fix this, the concept no longer works cross-version
 
-        await Task.Run(() =>
-        {
-            _allTagItems = new ConcurrentBag<TagItem>();
-            // only in 010a
-            var dgtbVals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80808930);
-            // only in the sr_globals, not best but it works
-            var bsVals = PackageHandler.GetAllEntriesOfReference(0x010f, 0x80809eed);
-            bsVals.AddRange(PackageHandler.GetAllEntriesOfReference(0x011a, 0x80809eed));
-            bsVals.AddRange( PackageHandler.GetAllEntriesOfReference(0x0312, 0x80809eed));
-            // everywhere
-            var eVals = PackageHandler.GetAllTagsWithReference(0x80809ad8);
-            ConcurrentHashSet<uint> existingEntities = new ConcurrentHashSet<uint>();
-            Parallel.ForEach(dgtbVals, val =>
-            {
-                Tag<D2Class_30898080> dgtb = FileResourcer.Get().GetFile<D2Class_30898080>(val);
-                foreach (var entry in dgtb.TagData.Unk18)
-                {
-                    if (entry.Tag == null)
-                        continue;
-                    if (entry.TagPath.Contains(".pattern.tft"))
-                    {
-                        _allTagItems.Add(new TagItem
-                        {
-                            Hash = entry.Tag.Hash,
-                            Name = entry.TagPath,
-                            Subname = entry.TagNote,
-                            TagType = ETagListType.Entity
-                        });
-                        existingEntities.Add(entry.Tag.Hash);
-                    }
-                }
-            });
-            MainWindow.Progress.CompleteStage();
-
-            Parallel.ForEach(bsVals, val =>
-            {
-                Tag<D2Class_ED9E8080> bs = FileResourcer.Get().GetFile<D2Class_ED9E8080>(val);
-                foreach (var entry in bs.TagData.Unk28)
-                {
-                    if (entry.TagPath.Contains(".pattern.tft"))
-                    {
-                        _allTagItems.Add(new TagItem
-                        {
-                            Hash = entry.Tag.Hash,
-                            Name = entry.TagPath,
-                            TagType = ETagListType.Entity
-                        });
-                        existingEntities.Add(entry.Tag.Hash);
-                    }
-                }
-            });
-            MainWindow.Progress.CompleteStage();
-
-            // We could also cache all the entity resources for an extra speed-up, but should be careful of memory there
-            PackageHandler.CacheHashDataList(eVals.Select(x => x.Hash).ToArray());
-            var erVals = PackageHandler.GetAllTagsWithReference(0x80809b06);
-            PackageHandler.CacheHashDataList(erVals.Select(x => x.Hash).ToArray());
-            MainWindow.Progress.CompleteStage();
-
-
-            Parallel.ForEach(eVals, val =>
-            {
-                if (existingEntities.Contains(val)) // O(1) check
-                    return;
-
-                // Check the entity has geometry
-                bool bHasGeometry = false;
-                using (var handle = new Tag(val).GetHandle())
-                {
-                    handle.BaseStream.Seek(8, SeekOrigin.Begin);
-                    int resourceCount = handle.ReadInt32();
-                    if (resourceCount > 2)
-                    {
-                        handle.BaseStream.Seek(0x10, SeekOrigin.Begin);
-                        int resourcesOffset = handle.ReadInt32() + 0x20;
-                        for (int i = 0; i < 2; i++)
-                        {
-                            handle.BaseStream.Seek(resourcesOffset + i * 0xC, SeekOrigin.Begin);
-                            using (var handle2 = new Tag(new FileHash(handle.ReadUInt32())).GetHandle())
-                            {
-                                handle2.BaseStream.Seek(0x10, SeekOrigin.Begin);
-                                int checkOffset = handle2.ReadInt32() + 0x10 - 4;
-                                handle2.BaseStream.Seek(checkOffset, SeekOrigin.Begin);
-                                if (handle2.ReadUInt32() == 0x80806d8a)
-                                {
-                                    bHasGeometry = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!bHasGeometry)
-                    return;
-
-                _allTagItems.Add(new TagItem
-                {
-                    Hash = val,
-                    TagType = ETagListType.Entity
-                });
-            });
-            MainWindow.Progress.CompleteStage();
-            MakePackageTagItems();
-        });
+        // MainWindow.Progress.SetProgressStages(new List<string>
+        // {
+        //     "loading global tag bags",
+        //     "loading budget sets",
+        //     "caching entity tags",
+        //     "loading entities"
+        // });
+        //
+        // await Task.Run(() =>
+        // {
+        //     _allTagItems = new ConcurrentBag<TagItem>();
+        //     // only in 010a
+        //     var dgtbVals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80808930);
+        //     // only in the sr_globals, not best but it works
+        //     var bsVals = PackageHandler.GetAllEntriesOfReference(0x010f, 0x80809eed);
+        //     bsVals.AddRange(PackageHandler.GetAllEntriesOfReference(0x011a, 0x80809eed));
+        //     bsVals.AddRange( PackageHandler.GetAllEntriesOfReference(0x0312, 0x80809eed));
+        //     // everywhere
+        //     var eVals = PackageHandler.GetAllTagsWithReference(0x80809ad8);
+        //     ConcurrentHashSet<uint> existingEntities = new ConcurrentHashSet<uint>();
+        //     Parallel.ForEach(dgtbVals, val =>
+        //     {
+        //         Tag<D2Class_30898080> dgtb = FileResourcer.Get().GetSchemaTag<D2Class_30898080>(val);
+        //         foreach (var entry in dgtb.TagData.Unk18)
+        //         {
+        //             if (entry.Tag == null)
+        //                 continue;
+        //             if (entry.TagPath.Value.Contains(".pattern.tft"))
+        //             {
+        //                 _allTagItems.Add(new TagItem
+        //                 {
+        //                     Hash = entry.Tag.Hash,
+        //                     Name = entry.TagPath,
+        //                     Subname = entry.TagNote,
+        //                     TagType = ETagListType.Entity
+        //                 });
+        //                 existingEntities.Add(entry.Tag.Hash);
+        //             }
+        //         }
+        //     });
+        //     MainWindow.Progress.CompleteStage();
+        //
+        //     Parallel.ForEach(bsVals, val =>
+        //     {
+        //         Tag<D2Class_ED9E8080> bs = FileResourcer.Get().GetSchemaTag<D2Class_ED9E8080>(val);
+        //         foreach (var entry in bs.TagData.Unk28)
+        //         {
+        //             if (entry.TagPath.Value.Contains(".pattern.tft"))
+        //             {
+        //                 _allTagItems.Add(new TagItem
+        //                 {
+        //                     Hash = entry.Tag.Hash,
+        //                     Name = entry.TagPath,
+        //                     TagType = ETagListType.Entity
+        //                 });
+        //                 existingEntities.Add(entry.Tag.Hash);
+        //             }
+        //         }
+        //     });
+        //     MainWindow.Progress.CompleteStage();
+        //
+        //     // We could also cache all the entity resources for an extra speed-up, but should be careful of memory there
+        //     PackageHandler.CacheHashDataList(eVals.Select(x => x.Hash).ToArray());
+        //     var erVals = PackageHandler.GetAllTagsWithReference(0x80809b06);
+        //     PackageHandler.CacheHashDataList(erVals.Select(x => x.Hash).ToArray());
+        //     MainWindow.Progress.CompleteStage();
+        //
+        //
+        //     Parallel.ForEach(eVals, val =>
+        //     {
+        //         if (existingEntities.Contains(val)) // O(1) check
+        //             return;
+        //
+        //         // Check the entity has geometry
+        //         bool bHasGeometry = false;
+        //         using (var handle = new Tag(val).GetHandle())
+        //         {
+        //             handle.BaseStream.Seek(8, SeekOrigin.Begin);
+        //             int resourceCount = handle.ReadInt32();
+        //             if (resourceCount > 2)
+        //             {
+        //                 handle.BaseStream.Seek(0x10, SeekOrigin.Begin);
+        //                 int resourcesOffset = handle.ReadInt32() + 0x20;
+        //                 for (int i = 0; i < 2; i++)
+        //                 {
+        //                     handle.BaseStream.Seek(resourcesOffset + i * 0xC, SeekOrigin.Begin);
+        //                     using (var handle2 = new Tag(new FileHash(handle.ReadUInt32())).GetHandle())
+        //                     {
+        //                         handle2.BaseStream.Seek(0x10, SeekOrigin.Begin);
+        //                         int checkOffset = handle2.ReadInt32() + 0x10 - 4;
+        //                         handle2.BaseStream.Seek(checkOffset, SeekOrigin.Begin);
+        //                         if (handle2.ReadUInt32() == 0x80806d8a)
+        //                         {
+        //                             bHasGeometry = true;
+        //                             break;
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //         if (!bHasGeometry)
+        //             return;
+        //
+        //         _allTagItems.Add(new TagItem
+        //         {
+        //             Hash = val,
+        //             TagType = ETagListType.Entity
+        //         });
+        //     });
+        //     MainWindow.Progress.CompleteStage();
+        //     MakePackageTagItems();
+        // });
 
         RefreshItemList();  // bc of async stuff
     }
@@ -912,7 +911,7 @@ public partial class TagListView : UserControl
         {
             if (kvp.Value.GetArtArrangementIndex() == -1) return;
             string name = InvestmentHandler.GetItemName(kvp.Value);
-            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].TagData.ItemType;
+            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].TagData.ItemType.Value;
             if (type == "Finisher" || type.Contains("Emote"))
                 return;  // they point to Animation instead of Entity
             _allTagItems.Add(new TagItem
@@ -958,26 +957,28 @@ public partial class TagListView : UserControl
     /// <summary>
     /// Type 0x80808e8e, but we use a child of it (0x80808e8b) so we can get the location.
     /// </summary>
-    private void LoadActivityList()
+    private async void LoadActivityList()
     {
         _allTagItems = new ConcurrentBag<TagItem>();
 
         // Getting names
-        var valsChild = PackageHandler.GetAllTagsWithReference(0x80808e8b);
+        var valsChild = await PackageResourcer.Get().GetAllHashes<D2Class_8B8E8080>();
+
         ConcurrentDictionary<string, string> names = new ConcurrentDictionary<string, string>();
         Parallel.ForEach(valsChild, val =>
         {
-            Tag<D2Class_8B8E8080> tag = FileResourcer.Get().GetFile<D2Class_8B8E8080>(val);
+            Tag<D2Class_8B8E8080> tag = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(val);
             foreach (var entry in tag.TagData.Activities)
             {
-                names.TryAdd(entry.ActivityName, tag.TagData.LocationName);
+                names.TryAdd(entry.ActivityName, tag.TagData.LocationName);  // todo no longer a name, instead a hash
             }
         });
 
-        var vals = PackageHandler.GetAllTagsWithReference(0x80808e8e);
+        var vals = await PackageResourcer.Get().GetAllHashes<Activity>();
+
         Parallel.ForEach(vals, val =>
         {
-            var activityName = PackageHandler.GetActivityName(val);
+            var activityName = PackageResourcer.Get().GetActivityName(val);
             _allTagItems.Add(new TagItem
             {
                 Hash = val,
@@ -991,7 +992,7 @@ public partial class TagListView : UserControl
     private void LoadActivity(FileHash fileHash)
     {
         ActivityView activityView = new ActivityView();
-        _mainWindow.MakeNewTab(PackageHandler.GetActivityName(fileHash), activityView);
+        _mainWindow.MakeNewTab(PackageResourcer.Get().GetActivityName(fileHash), activityView);
         activityView.LoadActivity(fileHash);
         _mainWindow.SetNewestTabSelected();
         // ExportControl.SetExportFunction(ExportActivityMapFull);
@@ -1020,10 +1021,10 @@ public partial class TagListView : UserControl
             $"loading static list",
         });
 
-        await Task.Run(() =>
+        await Task.Run(async () =>
         {
             _allTagItems = new ConcurrentBag<TagItem>();
-            var eVals = PackageHandler.GetAllTagsWithReference(0x80806d44);
+            var eVals = await PackageResourcer.Get().GetAllHashes<SStaticMesh>();
             Parallel.ForEach(eVals, val =>
             {
                 _allTagItems.Add(new TagItem
@@ -1053,7 +1054,7 @@ public partial class TagListView : UserControl
     private void ExportStatic(ExportInfo info)
     {
         var viewer = GetViewer();
-        StaticView.ExportStatic(new FileHash(info.Hash), info.Name, info.ExportType);
+        StaticView.ExportStatic(info.Hash as FileHash, info.Name, info.ExportType);
     }
 
     #endregion
@@ -1068,69 +1069,41 @@ public partial class TagListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "caching textures 1d",
-            "caching textures 2d",
-            "caching textures 3d",
-            "adding textures to ui 1d",
-            "adding textures to ui 2d",
-            "adding textures to ui 3d",
+            "caching textures",
+            "adding textures to ui",
         });
 
         await Task.Run(() =>
         {
             _allTagItems = new ConcurrentBag<TagItem>();
-            var tex1d = PackageHandler.GetAllTagsWithTypes(32, 1);
-            var tex2d = PackageHandler.GetAllTagsWithTypes(32, 2);
-            var tex3d = PackageHandler.GetAllTagsWithTypes(32, 3);
-            PackageHandler.CacheHashDataList(tex1d.Select(x => x.Hash).ToArray());
-            MainWindow.Progress.CompleteStage();
-            PackageHandler.CacheHashDataList(tex2d.Select(x => x.Hash).ToArray());
-            MainWindow.Progress.CompleteStage();
-            PackageHandler.CacheHashDataList(tex3d.Select(x => x.Hash).ToArray());
-            MainWindow.Progress.CompleteStage();
+            // var tex1d = PackageHandler.GetAllTagsWithTypes(32, 1);
+            // var tex2d = PackageHandler.GetAllTagsWithTypes(32, 2);
+            // var tex3d = PackageHandler.GetAllTagsWithTypes(32, 3);
+            var tex = PackageResourcer.Get().GetAllFiles<Texture>();
 
-            Parallel.ForEach(tex1d, val =>
-            {
-                using (var handle = new Tag(val).GetHandle())
-                {
-                    handle.BaseStream.Seek(0x22, SeekOrigin.Begin);
-                    _allTagItems.Add(new TagItem
-                    {
-                        Hash = val,
-                        Name = $"Texture 1D {handle.ReadUInt16()} x {handle.ReadUInt16()}",
-                        TagType = ETagListType.Texture
-                    });
-                }
-            });
+            // PackageHandler.CacheHashDataList(tex1d.Select(x => x.Hash).ToArray());
             MainWindow.Progress.CompleteStage();
+            // PackageHandler.CacheHashDataList(tex2d.Select(x => x.Hash).ToArray());
+            // MainWindow.Progress.CompleteStage();
+            // PackageHandler.CacheHashDataList(tex3d.Select(x => x.Hash).ToArray());
+            // MainWindow.Progress.CompleteStage();
 
-            Parallel.ForEach(tex2d, val =>
+            Parallel.ForEach(tex, val =>
             {
-                using (var handle = new Tag(val).GetHandle())
-                {
-                    handle.BaseStream.Seek(0x22, SeekOrigin.Begin);
-                    _allTagItems.Add(new TagItem
-                    {
-                        Hash = val,
-                        Name = $"Texture 2D {handle.ReadUInt16()} x {handle.ReadUInt16()}",
-                        TagType = ETagListType.Texture
-                    });
-                }
-            });
-            MainWindow.Progress.CompleteStage();
+                string dimension;
+                if (val.IsCubemap())
+                    dimension = "Cube";
+                else if (val.IsVolume())
+                    dimension = "Volume";
+                else
+                    dimension = "2D";
 
-            Parallel.ForEach(tex3d, val =>
-            {
-                using (var handle = new Tag(val).GetHandle())
+                _allTagItems.Add(new TagItem
                 {
-                    handle.BaseStream.Seek(0x22, SeekOrigin.Begin);
-                    _allTagItems.Add(new TagItem
-                    {
-                        Hash = val,
-                        Name = $"Texture 3D {handle.ReadUInt16()} x {handle.ReadUInt16()}",
-                        TagType = ETagListType.Texture
-                    });
-                }
+                    Hash = val.Hash,
+                    Name = $"Texture {dimension} {val.TagData.Width} x {val.TagData.Height}",
+                    TagType = ETagListType.Texture
+                });
             });
             MainWindow.Progress.CompleteStage();
 
@@ -1146,7 +1119,7 @@ public partial class TagListView : UserControl
     private void LoadTexture(FileHash fileHash)
     {
         var viewer = GetViewer();
-        TextureHeader textureHeader = FileResourcer.Get().GetFile(typeof(TextureHeader), fileHash);
+        Texture textureHeader = FileResourcer.Get().GetFile<Texture>(fileHash);
         if (textureHeader.IsCubemap())
         {
             SetViewer(TagView.EViewerType.Texture2D);
@@ -1168,7 +1141,7 @@ public partial class TagListView : UserControl
 
     private void ExportTexture(ExportInfo info)
     {
-        TextureView.ExportTexture(new FileHash(info.Hash));
+        TextureView.ExportTexture(info.Hash as FileHash);
     }
 
     #endregion
@@ -1180,14 +1153,13 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadDialogueList(FileHash fileHash)
     {
-        Field.Activity activity = FileResourcer.Get().GetFile(typeof(Field.Activity), fileHash);
+        Activity activity = FileResourcer.Get().GetFile<Activity>(fileHash);
         _allTagItems = new ConcurrentBag<TagItem>();
 
         // Dialogue tables can be in the 0x80808948 entries
         ConcurrentBag<FileHash> dialogueTables = new ConcurrentBag<FileHash>();
-        if (activity.TagData.Unk18 is D2Class_6A988080)
+        if (activity.TagData.Unk18.Value is D2Class_6A988080 entry)
         {
-            var entry = (D2Class_6A988080) activity.TagData.Unk18;
             foreach (var dirtable in entry.DialogueTables)
             {
                 if (dirtable.DialogueTable != null)
@@ -1196,13 +1168,13 @@ public partial class TagListView : UserControl
         }
         Parallel.ForEach(activity.TagData.Unk50, val =>
         {
-            foreach (var d2Class48898080 in val.Unk18)
+            foreach (var d2Class48898080 in val.Unk18.Enumerate(activity.GetReader()))
             {
-                var resource = d2Class48898080.UnkEntityReference.TagData.Unk10;
+                var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.Value;
                 if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
                     resource is D2Class_18978080 || resource is D2Class_19978080)
                 {
-                    if (resource.DialogueTable != null)
+                    if (resource.Value.DialogueTable != null)
                         dialogueTables.Add(resource.DialogueTable.Hash);
                 }
             }
@@ -1234,14 +1206,13 @@ public partial class TagListView : UserControl
 
     private void LoadDirectiveList(FileHash fileHash)
     {
-        Field.Activity activity = FileResourcer.Get().GetFile(typeof(Field.Activity), fileHash);
+        Activity activity = FileResourcer.Get().GetFile<Activity>(fileHash);
         _allTagItems = new ConcurrentBag<TagItem>();
 
         // Dialogue tables can be in the 0x80808948 entries
-        if (activity.TagData.Unk18 is D2Class_6A988080)
+        if (activity.TagData.Unk18.Value is D2Class_6A988080 a988080)
         {
-            var directiveTables =
-                ((D2Class_6A988080) activity.TagData.Unk18).DirectiveTables.Select(x => x.DirectiveTable.Hash);
+            var directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
 
             Parallel.ForEach(directiveTables, hash =>
             {
@@ -1253,10 +1224,9 @@ public partial class TagListView : UserControl
                 });
             });
         }
-        else if (activity.TagData.Unk18 is D2Class_20978080)
+        else if (activity.TagData.Unk18.Value is D2Class_20978080 class20978080)
         {
-            var directiveTables =
-                ((D2Class_20978080) activity.TagData.Unk18).PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
+            var directiveTables = class20978080.PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
 
             Parallel.ForEach(directiveTables, hash =>
             {
@@ -1294,10 +1264,10 @@ public partial class TagListView : UserControl
             "load string list",
         });
 
-        await Task.Run(() =>
+        await Task.Run(async () =>
         {
             _allTagItems = new ConcurrentBag<TagItem>();
-            var vals = PackageHandler.GetAllTagsWithReference(0x808099ef);
+            var vals = await PackageResourcer.Get().GetAllHashes<LocalizedStrings>();
             // PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
             MainWindow.Progress.CompleteStage();
 
@@ -1330,16 +1300,18 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         _allTagItems = new ConcurrentBag<TagItem>();
-        StringContainer stringContainer = FileResourcer.Get().GetFile(typeof(StringContainer), fileHash);
-        Parallel.ForEach(stringContainer.TagData.StringHashTable, hash =>
+        LocalizedStrings localizedStrings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
+
+        localizedStrings.GetAllStringViews().ForEach(view =>
         {
             _allTagItems.Add(new TagItem
             {
-                Name = stringContainer.GetStringFromHash(ELanguage.English, hash),
-                Hash = hash,
+                Name = view.RawString,
+                Hash = view.StringHash,
                 TagType = ETagListType.String
             });
         });
+
         RefreshItemList();
         SetExportFunction(ExportString, (int)ExportTypeFlag.Full);
         viewer.ExportControl.SetExportInfo(fileHash);
@@ -1347,13 +1319,12 @@ public partial class TagListView : UserControl
 
     private void ExportString(ExportInfo info)
     {
+        LocalizedStrings localizedStrings = FileResourcer.Get().GetFile<LocalizedStrings>(info.Hash);
+        StringBuilder text = new();
 
-        StringContainer stringContainer = FileResourcer.Get().GetFile(typeof(StringContainer), new FileHash(info.Hash));
-        StringBuilder text = new StringBuilder();
-
-        Parallel.ForEach(stringContainer.TagData.StringHashTable, hash =>
+        localizedStrings.GetAllStringViews().ForEach(view =>
         {
-            text.Append($"{hash} : {stringContainer.GetStringFromHash(ELanguage.English, hash)} \n");
+            text.Append($"{view.StringHash} : {view.RawString} \n");
         });
 
         string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Strings/{info.Hash}_{info.Name}/";
@@ -1379,28 +1350,29 @@ public partial class TagListView : UserControl
             "load sound packages list",
         });
 
-        await Task.Run(() =>
-        {
-            _allTagItems = new ConcurrentBag<TagItem>();
-            var vals = PackageHandler.GetAllTagsWithTypes(26, 7);
-            MainWindow.Progress.CompleteStage();
-
-            ConcurrentHashSet<int> packageIds = new ConcurrentHashSet<int>();
-            Parallel.ForEach(vals, hash =>
-            {
-                packageIds.Add(hash.GetPkgId());
-            });
-
-            Parallel.ForEach(packageIds, pkgId =>
-            {
-                _allTagItems.Add(new TagItem
-                {
-                    Name = String.Join('_', PackageHandler.GetPackageName(pkgId).Split('_').Skip(1).SkipLast(1)),
-                    Hash = new FileHash(PackageHandler.MakeHash(pkgId, 0)),
-                    TagType = ETagListType.SoundsPackage
-                });
-            });
-        });
+        // todo fix
+        // await Task.Run(() =>
+        // {
+        //     _allTagItems = new ConcurrentBag<TagItem>();
+        //     var vals = PackageHandler.GetAllTagsWithTypes(26, 7);
+        //     MainWindow.Progress.CompleteStage();
+        //
+        //     ConcurrentHashSet<int> packageIds = new ConcurrentHashSet<int>();
+        //     Parallel.ForEach(vals, hash =>
+        //     {
+        //         packageIds.Add(hash.GetPkgId());
+        //     });
+        //
+        //     Parallel.ForEach(packageIds, pkgId =>
+        //     {
+        //         _allTagItems.Add(new TagItem
+        //         {
+        //             Name = string.Join('_', PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId((ushort)pkgId).Split('_').Skip(1).SkipLast(1)),
+        //             Hash = new FileHash(pkgId, 0),
+        //             TagType = ETagListType.SoundsPackage
+        //         });
+        //     });
+        // });
 
         MainWindow.Progress.CompleteStage();
         RefreshItemList();  // bc of async stuff
@@ -1421,25 +1393,26 @@ public partial class TagListView : UserControl
             "loading sounds",
         });
 
-        await Task.Run(() =>
-        {
-            var vals = FileResourcer.Get().GetFilesWithTypes(fileHash.GetPkgId(), 26, 7);
-            PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
-            _allTagItems = new ConcurrentBag<TagItem>();
-            Parallel.ForEach(vals, hash =>
-            {
-                Wem wem = FileResourcer.Get().GetFile(typeof(Wem), hash);
-                if (wem.GetData().Length == 1)
-                    return;
-                _allTagItems.Add(new TagItem
-                {
-                    Name = PackageHandler.GetEntryReference(hash),
-                    Hash = hash,
-                    Subname = wem.Duration,
-                    TagType = ETagListType.Sound
-                });
-            });
-        });
+        // todo fix
+        // await Task.Run(() =>
+        // {
+        //     var vals = FileResourcer.Get().GetFilesWithTypes(fileHash.PackageId, 26, 7);
+        //     PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
+        //     _allTagItems = new ConcurrentBag<TagItem>();
+        //     Parallel.ForEach(vals, hash =>
+        //     {
+        //         Wem wem = FileResourcer.Get().GetFile<Wem>(hash);
+        //         if (wem.GetData().Length == 1)
+        //             return;
+        //         _allTagItems.Add(new TagItem
+        //         {
+        //             Name = hash,
+        //             Hash = hash,
+        //             Subname = wem.Duration,
+        //             TagType = ETagListType.Sound
+        //         });
+        //     });
+        // });
 
         MainWindow.Progress.CompleteStage();
         RefreshItemList();
@@ -1448,7 +1421,7 @@ public partial class TagListView : UserControl
     private void LoadSound(FileHash fileHash)
     {
         var viewer = GetViewer();
-        if (viewer.MusicPlayer.SetWem(FileResourcer.Get().GetFile(typeof(Wem), fileHash)))
+        if (viewer.MusicPlayer.SetWem(FileResourcer.Get().GetFile<Wem>(fileHash)))
         {
             viewer.MusicPlayer.Play();
             SetExportFunction(ExportWem, (int)ExportTypeFlag.Full);
@@ -1458,7 +1431,7 @@ public partial class TagListView : UserControl
 
     private void ExportSound(ExportInfo info)
     {
-        WwiseSound sound = FileResourcer.Get().GetFile(typeof(WwiseSound), new FileHash(info.Hash));
+        WwiseSound sound = FileResourcer.Get().GetFile<WwiseSound>(info.Hash);
         string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         sound.ExportSound(saveDirectory);
@@ -1466,7 +1439,7 @@ public partial class TagListView : UserControl
 
     private void ExportWem(ExportInfo info)
     {
-        Wem wem = FileResourcer.Get().GetFile(typeof(Wem), new FileHash(info.Hash));
+        Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash);
         string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         wem.SaveToFile($"{saveDirectory}/{info.Name}.wem");
@@ -1481,15 +1454,15 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadMusicList(FileHash fileHash)
     {
-        Field.Activity activity = FileResourcer.Get().GetFile(typeof(Field.Activity), fileHash);
+        Activity activity = FileResourcer.Get().GetFile<Activity>(fileHash);
         _allTagItems = new ConcurrentBag<TagItem>();
 
-        ConcurrentBag<FileHash> musics = new ConcurrentBag<FileHash>();
+        ConcurrentBag<FileHash> musics = new();
         Parallel.ForEach(activity.TagData.Unk50, val =>
         {
             foreach (var d2Class48898080 in val.Unk18)
             {
-                var resource = d2Class48898080.UnkEntityReference.TagData.Unk10;
+                var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.Value;
                 if (resource is D2Class_D5908080)
                 {
                     var res = (D2Class_D5908080)resource;
@@ -1503,8 +1476,8 @@ public partial class TagListView : UserControl
 
         if (activity.TagData.Unk18 is D2Class_6A988080)
         {
-            if (((D2Class_6A988080) activity.TagData.Unk18).Music != null)
-                musics.Add(((D2Class_6A988080) activity.TagData.Unk18).Music.Hash);
+            if (((D2Class_6A988080) activity.TagData.Unk18.Value).Music != null)
+                musics.Add(((D2Class_6A988080) activity.TagData.Unk18.Value).Music.Hash);
         }
 
         Parallel.ForEach(musics, hash =>
@@ -1537,7 +1510,7 @@ public partial class TagListView : UserControl
             if (kvp.Value.GetWeaponPatternIndex() == -1)
                 return;
             string name = InvestmentHandler.GetItemName(kvp.Value);
-            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].TagData.ItemType;
+            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].TagData.ItemType.Value;
             if (type == "Vehicle" || type == "Ship")
                 return;
             _allTagItems.Add(new TagItem
@@ -1568,8 +1541,8 @@ public partial class TagListView : UserControl
             return;
         }
 
-        var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.TagData.Unk18;
-        var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18;
+        var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.TagData.Unk18.Value;
+        var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18.Value;
         var item = InvestmentHandler.GetInventoryItem(apiHash);
         var weaponContentGroupHash = InvestmentHandler.GetWeaponContentGroupHash(item);
         // Named
@@ -1577,7 +1550,7 @@ public partial class TagListView : UserControl
         {
             if (entry.WeaponContentGroup1Hash.Equals(weaponContentGroupHash) && entry.AudioGroup != null)
             {
-                var audioGroup = FileResourcer.Get().GetFile<D2Class_0D8C8080>(entry.AudioGroup.TagData.EntityData);
+                var audioGroup = FileResourcer.Get().GetSchemaTag<D2Class_0D8C8080>(entry.AudioGroup.TagData.EntityData);
                 audioGroup.TagData.Audio.ForEach(audio =>
                 {
                     foreach (var s in audio.Sounds)
@@ -1622,20 +1595,20 @@ public partial class TagListView : UserControl
             if (!entry.WeaponContentGroupHash.Equals(weaponContentGroupHash))
                 return;
 
-            List<Tag> entitiesParents = new List<Tag> {entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248};
-            List<Entity> entities = new List<Entity>();
+            List<TigerFile> entitiesParents = new() {entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248};
+            List<Entity> entities = new();
             foreach (var tag in entitiesParents)
             {
                 if (tag == null)
                     continue;
-                var reference = PackageHandler.GetEntryReference(tag.Hash);
+                var reference = tag.Hash.GetReferenceHash();
                 if (reference == 0x80806fa3)
                 {
-                    var entityData = FileResourcer.Get().GetFile<D2Class_A36F8080>(tag.Hash).TagData.EntityData;
-                    var reference2 = PackageHandler.GetEntryReference(entityData);
+                    var entityData = FileResourcer.Get().GetSchemaTag<D2Class_A36F8080>(tag.Hash).TagData.EntityData;
+                    var reference2 = entityData.GetReferenceHash();
                     if (reference2 == 0x80802d09)
                     {
-                        var tagInner = FileResourcer.Get().GetFile<D2Class_2D098080>(entityData);
+                        var tagInner = FileResourcer.Get().GetSchemaTag<D2Class_2D098080>(entityData);
                         if (tagInner.TagData.Unk18 != null)
                             entities.Add(tagInner.TagData.Unk18);
                         if (tagInner.TagData.Unk30 != null)
@@ -1656,7 +1629,7 @@ public partial class TagListView : UserControl
                 }
                 else if (reference == 0x80809ad8)
                 {
-                    entities.Add(FileResourcer.Get().GetFile(typeof(Entity), tag.Hash));
+                    entities.Add(FileResourcer.Get().GetFile<Entity>(tag.Hash));
                 }
                 else if (reference != 0x8080325a)  // 0x8080325a materials,
                 {
@@ -1667,18 +1640,18 @@ public partial class TagListView : UserControl
             {
                 foreach (var e in entity.TagData.EntityResources)
                 {
-                    if (e.ResourceHash.TagData.Unk18 is D2Class_79818080 a)
+                    if (e.ResourceHash.TagData.Unk18.Value is D2Class_79818080 a)
                     {
                         foreach (var d2ClassF1918080 in a.WwiseSounds1)
                         {
-                            if (d2ClassF1918080.Unk10 is D2Class_40668080 b)
+                            if (d2ClassF1918080.Unk10.Value is D2Class_40668080 b)
                             {
                                 sounds.Add(b.Sound);
                             }
                         }
                         foreach (var d2ClassF1918080 in a.WwiseSounds2)
                         {
-                            if (d2ClassF1918080.Unk10 is D2Class_40668080 b)
+                            if (d2ClassF1918080.Unk10.Value is D2Class_40668080 b)
                             {
                                 sounds.Add(b.Sound);
                             }
@@ -1693,7 +1666,7 @@ public partial class TagListView : UserControl
     private async void LoadWeaponAudio(FileHash fileHash)
     {
         var viewer = GetViewer();
-        WwiseSound tag = FileResourcer.Get().GetFile(typeof(WwiseSound), fileHash);
+        WwiseSound tag = FileResourcer.Get().GetFile<WwiseSound>(fileHash);
         if (tag.TagData.Unk20.Count == 0)
             return;
         await viewer.MusicPlayer.SetSound(tag);
@@ -1729,9 +1702,9 @@ public class TagItem
             if (Name == "BACK")
                 return "";
             if (TagType == ETagListType.ApiEntity)
-                return $"[{Hash.Hash}]";
+                return $"[{Hash}]";
             if (TagType == ETagListType.Package)
-                return $"[{Hash.GetPkgId():X4}]";
+                return $"[{(Hash as FileHash).PackageId:X4}]";
             return $"[{Hash:X8}]";
         }
     }

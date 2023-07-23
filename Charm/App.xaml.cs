@@ -8,8 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using Tiger.General;
-using Tiger.Models;
 
 namespace Charm
 {
@@ -39,48 +37,48 @@ namespace Charm
                 {
                     return;
                     // to check if we need to update caches
-                    PackageHandler.Initialise();
-
-                    // Initialise FNV handler -- must be first bc my code is shit
-                    FnvHandler.Initialise();
-
-                    // Get all hash64 -- must be before InvestmentHandler
-                    TagHash64Handler.Initialise();
-
-                    // Initialise investment
-                    InvestmentHandler.Initialise();
-
-                    // InvestmentHandler.DebugAllInvestmentEntities();
-                    // InvestmentHandler.DebugAPIRequestAllInfo();
-                    // InvestmentHandler.DebugAPIRenderMetadata();
-
-                    FbxHandler fbxHandler = new FbxHandler();
-
-                    TigerHash hash = new TigerHash(apiHash);
-
-                    var entities = InvestmentHandler.GetEntitiesFromHash(hash);
-                    string meshName = hash;
-                    string savePath = ConfigHandler.GetExportSavePath() + $"/API_{meshName}";
-                    Directory.CreateDirectory(savePath);
-
-                    foreach (var entity in entities)
-                    {
-                        var dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
-                        fbxHandler.AddEntityToScene(entity, dynamicParts, ExportDetailLevel.MostDetailed);
-                        entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
-                        entity.SaveTexturePlates(savePath);
-                    }
-
-                    fbxHandler.InfoHandler.SetMeshName(meshName);
-                    if (ConfigHandler.GetUnrealInteropEnabled())
-                    {
-                        fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-                        AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
-                        //AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigHandler.GetOutputTextureFormat());
-                    }
-                    fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
-                    Console.WriteLine($"[Charm] Saved all data to {savePath}.");
-                    //Shutdown();
+                    // PackageHandler.Initialise();
+                    //
+                    // // Initialise FNV handler -- must be first bc my code is shit
+                    // FnvHandler.Initialise();
+                    //
+                    // // Get all hash64 -- must be before InvestmentHandler
+                    // TagHash64Handler.Initialise();
+                    //
+                    // // Initialise investment
+                    // InvestmentHandler.Initialise();
+                    //
+                    // // InvestmentHandler.DebugAllInvestmentEntities();
+                    // // InvestmentHandler.DebugAPIRequestAllInfo();
+                    // // InvestmentHandler.DebugAPIRenderMetadata();
+                    //
+                    // FbxHandler fbxHandler = new FbxHandler();
+                    //
+                    // TigerHash hash = new TigerHash(apiHash);
+                    //
+                    // var entities = InvestmentHandler.GetEntitiesFromHash(hash);
+                    // string meshName = hash;
+                    // string savePath = ConfigHandler.GetExportSavePath() + $"/API_{meshName}";
+                    // Directory.CreateDirectory(savePath);
+                    //
+                    // foreach (var entity in entities)
+                    // {
+                    //     var dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
+                    //     fbxHandler.AddEntityToScene(entity, dynamicParts, ExportDetailLevel.MostDetailed);
+                    //     entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+                    //     entity.SaveTexturePlates(savePath);
+                    // }
+                    //
+                    // fbxHandler.InfoHandler.SetMeshName(meshName);
+                    // if (ConfigHandler.GetUnrealInteropEnabled())
+                    // {
+                    //     fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
+                    //     AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                    //     //AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                    // }
+                    // fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+                    // Console.WriteLine($"[Charm] Saved all data to {savePath}.");
+                    // //Shutdown();
                 }
             }
         }

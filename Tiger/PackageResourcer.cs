@@ -166,6 +166,11 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
         return fileHashes;
     }
+
+    public string GetActivityName(FileHash fileHash)
+    {
+        return "todo get activity name";
+    }
 }
 
 public static class ConcurrentHashSetExtensions

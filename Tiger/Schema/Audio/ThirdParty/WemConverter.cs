@@ -1,6 +1,6 @@
 ﻿using DataTool.ConvertLogic;
 
-namespace Tiger.Audio.ThirdParty;
+namespace Tiger.Schema.Audio.ThirdParty;
 
 // DataTool.ConvertLogic.Sound class: https://github.com/overtools/OWLib/blob/develop/DataTool/ConvertLogic/OWSound.cs
 // Modified RevorbStd: https://github.com/xyx0826/revorbstd/tree/big-enough

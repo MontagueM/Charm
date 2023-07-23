@@ -20,6 +20,7 @@ using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Tiger;
+using Tiger.Schema;
 
 namespace Charm;
 

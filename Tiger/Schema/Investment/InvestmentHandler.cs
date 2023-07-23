@@ -1,17 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using ConcurrentCollections;
-using DirectXTexNet;
-using Field;
 using Newtonsoft.Json;
-using Tiger.Schema;
 using Tiger.Schema.Entity;
 
-namespace Tiger.Investment;
+namespace Tiger.Schema.Investment;
 
 /// <summary>
 /// Keeps track of the investment tags.
@@ -29,10 +22,10 @@ public class InvestmentHandler
     private static Tag<D2Class_AA528080> _sandboxPatternGlobalTagIdTag = null;
     public static ConcurrentDictionary<int, Tag<D2Class_9F548080>> InventoryItemStringThings = null;
     public static Dictionary<TigerHash, int> InventoryItemIndexmap = null;
-    private static Dictionary<TigerHash, FileHash> _sortedArrangementHashmap = null;
+    private static Dictionary<TigerHash, Tag<D2Class_A36F8080>> _sortedArrangementHashmap = null;
     // private static Dictionary<TigerHash, FileHash> _sortedPatternGlobalTagIdAssignments = null;
-    private static Tag<D2Class_095A8080> _stringContainerIndexTag = null;
-    private static Dictionary<int, FileHash> _stringContainerIndexmap = null;
+    private static Tag<D2Class_095A8080> _localizedStringsIndexTag = null;
+    private static Dictionary<int, LocalizedStrings> _localizedStringsIndexMap = null;
     public static ConcurrentDictionary<TigerHash, InventoryItem> InventoryItems = null;
     private static Tag<D2Class_015A8080> _inventoryItemIconTag = null;
     // private static Tag<D2Class_8C978080> _dyeManifestTag = null;
@@ -98,7 +91,7 @@ public class InvestmentHandler
                     _inventoryItemIndexDictTag = FileResourcer.Get().GetSchemaTag<D2Class_8C798080>(val);
                     break;
                 case 0x80805a09:
-                    _stringContainerIndexTag = FileResourcer.Get().GetSchemaTag<D2Class_095A8080>(val);
+                    _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<D2Class_095A8080>(val);
                     break;
                 case 0x80804ea4: // points to parent of the sandbox pattern ref list thing + entity assignment map
                     var parent = FileResourcer.Get().GetSchemaTag<D2Class_A44E8080>(val);
@@ -138,46 +131,31 @@ public class InvestmentHandler
         InventoryItemStringThings = new ConcurrentDictionary<int, Tag<D2Class_9F548080>>();
         for (int i = 0; i < _inventoryItemStringThing.TagData.StringThings.Count; i++)
         {
-            InventoryItemStringThings.TryAdd(i, _inventoryItemStringThing.TagData.StringThings[i].StringThing);
+            InventoryItemStringThings.TryAdd(i, _inventoryItemStringThing.TagData.StringThings[_inventoryItemStringThing.GetReader(), i].StringThing);
         }
     }
 
     private static void GetContainerIndexDict()
     {
-        int size = (int)_stringContainerIndexTag.TagData.StringContainerMap.Count;
-        _stringContainerIndexmap = new Dictionary<int, FileHash>(size);
-        var br = _stringContainerIndexTag.TagData.StringContainerMap.ParentTag.GetHandle();
-
-        br.BaseStream.Seek(_stringContainerIndexTag.TagData.StringContainerMap.Offset, SeekOrigin.Begin);
-        for (int i = 0; i < size; i++)
+        _localizedStringsIndexMap = new Dictionary<int, LocalizedStrings>(_inventoryItemStringThing.TagData.StringThings.Count);
+        for (int i = 0; i < _inventoryItemStringThing.TagData.StringThings.Count; i++)
         {
-            br.BaseStream.Seek(0x10, SeekOrigin.Current);
-            _stringContainerIndexmap.Add(i, new FileHash(br.ReadUInt64()));
+            _localizedStringsIndexMap.Add(i, _localizedStringsIndexTag.TagData.StringContainerMap[_entityAssignmentsMap.GetReader(), i].StringContainer);
         }
-
-        // This cache helps the StringThing stuff to be faster
-        PackageHandler.CacheHashDataList(_stringContainerIndexmap.Values.Where(x => x.IsValid()).Select(x => x.Hash).ToArray());
-
-        br.Close();
     }
 
-    public static FileHash GetStringContainerFromIndex(uint index)
+    public static LocalizedStrings GetLocalizedStringsFromIndex(uint index)
     {
-        return _stringContainerIndexmap[(int) index];
+        return _localizedStringsIndexMap[(int) index];
     }
 
     private static void GetEntityAssignmentDict()
     {
-        int size = (int)_entityAssignmentsMap.TagData.EntityArrangementMap.Count;
-        _sortedArrangementHashmap = new Dictionary<TigerHash, FileHash>(size);
-        var br = _entityAssignmentsMap.TagData.EntityArrangementMap.ParentTag.GetHandle();
-
-        br.BaseStream.Seek(_entityAssignmentsMap.TagData.EntityArrangementMap.Offset, SeekOrigin.Begin);
-        for (int i = 0; i < size; i++)
+        _sortedArrangementHashmap = new Dictionary<TigerHash, Tag<D2Class_A36F8080>>(_entityAssignmentsMap.TagData.EntityArrangementMap.Count);
+        foreach (var e in _entityAssignmentsMap.TagData.EntityArrangementMap.Enumerate(_entityAssignmentsMap.GetReader()))
         {
-            _sortedArrangementHashmap.Add(new TigerHash(br.ReadUInt32()), new FileHash(br.ReadUInt32()));
+            _sortedArrangementHashmap.Add(e.AssignmentHash, e.EntityParent);
         }
-        br.Close();
     }
 
     // private static void GetSandboxPatternAssignmentsDict()
@@ -197,20 +175,17 @@ public class InvestmentHandler
     //     br.Close();
     // }
 
-    public static Entity? GetPatternEntityFromHash(TigerHash hash)
+    public static Entity.Entity? GetPatternEntityFromHash(TigerHash hash)
     {
         var item = GetInventoryItem(hash);
         if (item.GetWeaponPatternIndex() == -1)
             return null;
 
         var patternGlobalId = GetPatternGlobalTagId(item);
-        var patternData = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(patternGlobalId);
-        if (patternData.HasValue)
+        var patternData = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(_sandboxPatternAssignmentsTag.GetReader(), patternGlobalId);
+        if (patternData.HasValue && patternData.Value.EntityRelationHash.GetReferenceHash() == 0x80809ad8)
         {
-            if (PackageHandler.GetEntryReference(patternData.Value.EntityRelationHash) == 0x80809ad8)
-            {
-                return PackageHandler.GetTag(typeof(Entity), patternData.Value.EntityRelationHash);
-            }
+            return FileResourcer.Get().GetFile<Entity.Entity>(patternData.Value.EntityRelationHash);
         }
         return null;
     }
@@ -230,17 +205,14 @@ public class InvestmentHandler
         return _dyeChannelTag.TagData.ChannelHashes[index].ChannelHash;
     }
 
-    public static Dye GetDyeFromIndex(short index)
+    public static Dye? GetDyeFromIndex(short index)
     {
          var artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(index);
 
-         var dyeEntry = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(artEntry.DyeManifestHash);
-         if (dyeEntry.HasValue)
+         var dyeEntry = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(_sandboxPatternAssignmentsTag.GetReader(), artEntry.DyeManifestHash);
+         if (dyeEntry.HasValue && dyeEntry.Value.EntityRelationHash.GetReferenceHash() == 0x80806fa3)
          {
-             if (PackageHandler.GetEntryReference(dyeEntry.Value.EntityRelationHash) == 0x80806fa3)
-             {
-                 return PackageHandler.GetTag<D2Class_E36C8080>(PackageHandler.GetTag<D2Class_A36F8080>(dyeEntry.Value.EntityRelationHash).TagData.EntityData).TagData.Dye;
-             }
+             return FileResourcer.Get().GetSchemaTag<D2Class_E36C8080>(FileResourcer.Get().GetSchemaTag<D2Class_A36F8080>(dyeEntry.Value.EntityRelationHash).TagData.EntityData).TagData.Dye;
          }
          return null;
     }
@@ -252,56 +224,36 @@ public class InvestmentHandler
 
     public static InventoryItem GetInventoryItem(int index)
     {
-        InventoryItem item = new InventoryItem(_inventoryItemMap.TagData.InventoryItemDefinitionEntries.ElementAt(index).InventoryItem);
-        return item;
+        return _inventoryItemMap.TagData.InventoryItemDefinitionEntries.ElementAt(index).InventoryItem;
     }
 
     public static void GetInventoryItemDict()
     {
         InventoryItemIndexmap = new Dictionary<TigerHash, int>();
         InventoryItems = new ConcurrentDictionary<TigerHash, InventoryItem>();
-        // Read all hashes and tags synchronously
-        Dictionary<TigerHash, FileHash> temp = new Dictionary<TigerHash, FileHash>();
-        var br = _inventoryItemMap.TagData.InventoryItemDefinitionEntries.ParentTag.GetHandle();
-        br.BaseStream.Seek(_inventoryItemMap.TagData.InventoryItemDefinitionEntries.Offset, SeekOrigin.Begin);
-        int size = (int)_inventoryItemMap.TagData.InventoryItemDefinitionEntries.Count;
-        for (int i = 0; i < size; i++)
+
+        foreach (var e in _inventoryItemMap.TagData.InventoryItemDefinitionEntries.Enumerate(_inventoryItemMap.GetReader()))
         {
-            var dh = new TigerHash(br.ReadUInt32());
-            br.BaseStream.Seek(0xC, SeekOrigin.Current);
-            temp.Add(dh, new FileHash(br.ReadUInt32()));
-            InventoryItemIndexmap.Add(dh, i);
-            br.BaseStream.Seek(0xC, SeekOrigin.Current);
+            InventoryItems.TryAdd(e.InventoryItemHash, e.InventoryItem);
         }
-        br.Close();
-        // Now we can use parallel code as not reading from a single file
-
-        // try the many many instead
-        PackageHandler.CacheHashDataList(temp.Values.Select(x => x.Hash).ToArray());
-
-        Parallel.ForEach(temp, kvp =>
-        {
-            InventoryItems.TryAdd(kvp.Key, PackageHandler.GetTag(typeof(InventoryItem), kvp.Value));
-        });
     }
-
 
     public static TigerHash GetArtArrangementHash(InventoryItem item)
     {
         return _artArrangementMap.TagData.ArtArrangementHashes.ElementAt(item.GetArtArrangementIndex()).ArtArrangementHash;
     }
 
-    public static List<Entity> GetEntitiesFromHash(TigerHash hash)
+    public static List<Entity.Entity> GetEntitiesFromHash(TigerHash hash)
     {
         var item = GetInventoryItem(hash);
         var index = item.GetArtArrangementIndex();
-        List<Entity> entities = GetEntitiesFromArrangementIndex(index);
+        List<Entity.Entity> entities = GetEntitiesFromArrangementIndex(index);
         return entities;
     }
 
-    private static List<Entity> GetEntitiesFromArrangementIndex(int index)
+    private static List<Entity.Entity> GetEntitiesFromArrangementIndex(int index)
     {
-        List<Entity> entities = new List<Entity>();
+        List<Entity.Entity> entities = new();
         var entry = _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.ElementAt(index);
         if (entry.MultipleEntityAssignments.Count == 0)  // single
         {
@@ -318,7 +270,7 @@ public class InvestmentHandler
         {
             foreach (var entryMultipleEntityAssignment in entry.MultipleEntityAssignments)
             {
-                foreach (var assignment in entryMultipleEntityAssignment.EntityAssignmentResource.EntityAssignments)
+                foreach (var assignment in entryMultipleEntityAssignment.EntityAssignmentResource.Value.EntityAssignments)
                 {
                     if (assignment.EntityAssignmentHash.IsValid())
                     {
@@ -333,18 +285,18 @@ public class InvestmentHandler
         return entities;
     }
 
-    private static Entity GetEntityFromAssignmentHash(TigerHash assignmentHash)
+    private static Entity.Entity GetEntityFromAssignmentHash(TigerHash assignmentHash)
     {
         // We can binary search here as the list is sorted.
         // var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
         // var index = _entityAssignmentsMap.TagData.EntityArrangementMap.BinarySearch(x, new D2Class_454F8080());
-        Tag<D2Class_A36F8080> tag = PackageHandler.GetTag<D2Class_A36F8080>(_sortedArrangementHashmap[assignmentHash]);
+        Tag<D2Class_A36F8080> tag = _sortedArrangementHashmap[assignmentHash];
         if (tag.TagData.EntityData is null)
             return null;
         // if entity
-        if (PackageHandler.GetEntryReference(tag.TagData.EntityData) == 0x80809ad8)
+        if (tag.TagData.EntityData.GetReferenceHash() == 0x80809ad8)
         {
-            return PackageHandler.GetTag(typeof(Entity), tag.TagData.EntityData);
+            return FileResourcer.Get().GetFile<Entity.Entity>(tag.TagData.EntityData);
         }
         return null;
         // return new Entity(_entityAssignmentsMap.TagData.EntityArrangementMap[index].EntityParent.TagData.Entity);
@@ -357,7 +309,7 @@ public class InvestmentHandler
         Dictionary<string, Dictionary<dynamic, TigerHash>> data = new();
         for (int i = (int)_entityAssignmentTag.TagData.ArtArrangementEntityAssignments.Count-1; i >= 0; i--)
         {
-            List<Entity> entities = GetEntitiesFromArrangementIndex(i);
+            List<Entity.Entity> entities = GetEntitiesFromArrangementIndex(i);
             foreach (var entity in entities)
             {
                 bool bAllValid = true;

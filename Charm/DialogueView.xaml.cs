@@ -9,9 +9,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Tiger;
-using Tiger.General;
 using NAudio.Vorbis;
 using NAudio.Wave;
+using Tiger.Schema.Audio;
 
 namespace Charm;
 
@@ -55,7 +55,7 @@ public partial class DialogueView : UserControl
                 result.Add(new VoicelineItem
                     {
                         Narrator = a.NarratorString,
-                        Voiceline = a.Unk28,
+                        Voiceline = a.Unk28.Value.ToString(),
                         Wem = a.Sound1.TagData.Unk20[0],
                         RecursionDepth = recursionDepth,
                         Duration = a.Sound1.TagData.Unk20[0].Duration

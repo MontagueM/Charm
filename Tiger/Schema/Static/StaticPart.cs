@@ -1,19 +1,28 @@
-﻿namespace Tiger.Schema;
+﻿using Tiger.Schema.Static;
+
+namespace Tiger.Schema;
 
 public class StaticPart : MeshPart
 {
+    public StaticPart(D2Class_846C8080 terrainPartEntry) : base()
+    {
+        IndexOffset = terrainPartEntry.IndexOffset;
+        IndexCount = terrainPartEntry.IndexCount;
+        PrimitiveType = PrimitiveType.TriangleStrip;
+    }
+
     public StaticPart(D2Class_376D8080 staticPartEntry) : base()
     {
         IndexOffset = staticPartEntry.IndexOffset;
         IndexCount = staticPartEntry.IndexCount;
-        PrimitiveType = (EPrimitiveType)staticPartEntry.PrimitiveType;
+        PrimitiveType = (PrimitiveType)staticPartEntry.PrimitiveType;
     }
 
     public StaticPart(D2Class_2F6D8080 decalPartEntry) : base()
     {
         IndexOffset = decalPartEntry.IndexOffset;
         IndexCount = decalPartEntry.IndexCount;
-        PrimitiveType = (EPrimitiveType)decalPartEntry.PrimitiveType;
+        PrimitiveType = (PrimitiveType)decalPartEntry.PrimitiveType;
     }
 
     public void GetAllData(D2Class_366D8080 mesh, SStaticMesh container)

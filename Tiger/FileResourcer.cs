@@ -39,12 +39,12 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         return GetFile(typeof(T), fileHash, shouldLoad);
     }
 
-    public FileHash GetFile(string fileHash, bool shouldLoad = true)
+    public TigerFile GetFile(string fileHash, bool shouldLoad = true)
     {
         return GetFile(new FileHash(fileHash), shouldLoad);
     }
 
-    public FileHash GetFile(FileHash fileHash, bool shouldLoad = true)
+    public TigerFile GetFile(FileHash fileHash, bool shouldLoad = true)
     {
         return GetFile(typeof(FileHash), fileHash, shouldLoad);
     }

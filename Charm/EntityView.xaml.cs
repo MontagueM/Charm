@@ -9,13 +9,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Tiger;
-using Tiger.Entities;
-using Tiger.General;
-using Tiger.Investment;
-using Tiger.Models;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using Internal.Fbx;
 using Serilog;
+using Tiger.Schema;
+using Tiger.Schema.Entity;
+using Tiger.Schema.Investment;
 using File = System.IO.File;
 
 namespace Charm;
@@ -107,11 +106,11 @@ public partial class EntityView : UserControl
             if (ConfigHandler.GetUnrealInteropEnabled())
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigHandler.GetOutputTextureFormat());
             }
             if(ConfigHandler.GetBlenderInteropEnabled())
             {
-                AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigHandler.GetOutputTextureFormat());
             }
         }
 
@@ -125,7 +124,7 @@ public partial class EntityView : UserControl
 
     public static void ExportInventoryItem(ApiItem item)
     {
-        string name = string.Join("_", $"{item.Item.TagData.InventoryItemHash.Hash}_{item.ItemName}"
+        string name = string.Join("_", $"{item.Item.TagData.InventoryItemHash}_{item.ItemName}"
             .Split(Path.GetInvalidFileNameChars()));
         // Export the model
         // todo bad, should be replaced
@@ -145,7 +144,7 @@ public partial class EntityView : UserControl
 
         // Export the dye info
         Dictionary<TigerHash, Dye> dyes = new Dictionary<TigerHash, Dye>();
-        if (item.Item.TagData.Unk90 is D2Class_77738080 translationBlock)
+        if (item.Item.TagData.Unk90.Value is D2Class_77738080 translationBlock)
         {
             foreach (var dyeEntry in translationBlock.DefaultDyes)
             {

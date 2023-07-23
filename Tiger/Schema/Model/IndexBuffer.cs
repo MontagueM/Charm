@@ -10,15 +10,15 @@ public class IndexBuffer : TigerReferenceFile<SIndexHeader>
     {
     }
 
-    public List<UIntVector3> GetIndexData(EPrimitiveType indexFormat, uint offset, uint count)
+    public List<UIntVector3> GetIndexData(PrimitiveType indexFormat, uint offset, uint count)
     {
         using (TigerReader handle = GetReferenceReader())
         {
-            if (indexFormat == EPrimitiveType.Triangles)
+            if (indexFormat == PrimitiveType.Triangles)
             {
                 return ReadTriangles(handle, offset, count);
             }
-            else if (indexFormat == EPrimitiveType.TriangleStrip)
+            else if (indexFormat == PrimitiveType.TriangleStrip)
             {
                 return ReadTriangleStrip(handle, offset, count);
             }

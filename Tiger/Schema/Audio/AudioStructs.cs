@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Tiger.Audio;
+namespace Tiger.Schema.Audio;
 
-[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+[SchemaStruct("B8978080", 0x28)]
 public struct D2Class_B8978080
 {
     public long FileSize;
@@ -10,13 +10,13 @@ public struct D2Class_B8978080
     public DynamicArray<D2Class_29978080> Unk18;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 8)]
+[SchemaStruct("28978080", 8)]
 public struct D2Class_28978080
 {
     public TigerHash Unk00;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x10)]
+[SchemaStruct("29978080", 0x10)]
 public struct D2Class_29978080
 {
     public TigerHash Unk00;
@@ -27,7 +27,7 @@ public struct D2Class_29978080
 /// <summary>
 /// Group of D2Class_33978080, used for accessing random sounds to play out of a bundle.
 /// </summary>
-[StructLayout(LayoutKind.Sequential, Size = 0x48)]
+[SchemaStruct("2F978080", 0x48)]
 public struct D2Class_2F978080
 {
     [SchemaField(0x10), Tag64]
@@ -43,7 +43,7 @@ public struct D2Class_2F978080
     public ResourcePointer Unk40; // 2A978080, 2D978080
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+[SchemaStruct("2A978080", 0x38)]
 public struct D2Class_2A978080
 {
     public TigerHash Unk00;
@@ -57,7 +57,7 @@ public struct D2Class_2A978080
     public DynamicArray<D2Class_2F978080> Unk28;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x88)]
+[SchemaStruct("33978080", 0x88)]
 public struct D2Class_33978080
 {
     public TigerHash Unk00;
@@ -81,7 +81,7 @@ public struct D2Class_33978080
     public float Unk80;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x30)]
+[SchemaStruct("2D978080", 0x30)]
 public struct D2Class_2D978080
 {
     public TigerHash Unk00;
@@ -95,7 +95,7 @@ public struct D2Class_2D978080
     public DynamicArray<D2Class_30978080> Unk20;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+[SchemaStruct("30978080", 0x28)]
 public struct D2Class_30978080
 {
     [Tag64]
@@ -107,7 +107,7 @@ public struct D2Class_30978080
     public ResourcePointer Unk20; //33978080 or 2A978080
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+[SchemaStruct("38978080", 0x38)]
 public struct D2Class_38978080
 {
     public long FileSize;
@@ -118,24 +118,24 @@ public struct D2Class_38978080
     public Tag<D2Class_418A8080> Unk14;
     public Tag<D2Class_63838080> Unk18;
     [SchemaField(0x20)]
-    public DynamicArray<FileHash> Unk20;
+    public DynamicArray<Wem> Unk20;
     public Tag<D2Class_438A8080> Unk30;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x38)]
+[SchemaStruct("418A8080", 0x38)]
 public struct D2Class_418A8080
 {
     public long Unk00;
     public float Unk08;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 4)]
+[SchemaStruct("63838080", 4)]
 public struct D2Class_63838080
 {
     public BKHD SoundBank;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 0x28)]
+[SchemaStruct("438A8080", 0x28)]
 public struct D2Class_438A8080
 {
     public long FileSize;

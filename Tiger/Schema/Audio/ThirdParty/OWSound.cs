@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using Tiger;
 
 namespace DataTool.ConvertLogic {
     public static class OWSound {
@@ -1283,7 +1284,7 @@ namespace DataTool.ConvertLogic {
                     Chunks = new List<WwiseBankChunkHeader>();
 
                     while (reader.BaseStream.Position < reader.BaseStream.Length) {
-                        WwiseBankChunkHeader chunk = StructConverter.ToStructure<WwiseBankChunkHeader>(reader.ReadBytes(Marshal.SizeOf(typeof(WwiseBankChunkHeader))));
+                        WwiseBankChunkHeader chunk = reader.ReadBytes(Marshal.SizeOf(typeof(WwiseBankChunkHeader))).ToType<WwiseBankChunkHeader>();
                         Chunks.Add(chunk);
                         ChunkPositions[chunk] = reader.BaseStream.Position;
                         reader.BaseStream.Position += chunk.ChunkLength;
@@ -1299,7 +1300,7 @@ namespace DataTool.ConvertLogic {
                         WemDefs = new WwiseBankWemDef[didxHeader.ChunkLength / 12];
                         WemData = new byte[didxHeader.ChunkLength / 12][];
                         for (int i = 0; i < didxHeader.ChunkLength / 12; i++) {
-                            WemDefs[i] = StructConverter.ToStructure<WwiseBankWemDef>(reader.ReadBytes(Marshal.SizeOf(typeof(WwiseBankWemDef))));
+                            WemDefs[i] = reader.ReadBytes(Marshal.SizeOf(typeof(WwiseBankWemDef))).ToType<WwiseBankWemDef>();
 
                             long temp = reader.BaseStream.Position;
 
