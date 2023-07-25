@@ -18,7 +18,7 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
             <MenuItem Header="Settings">
-                <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick"/>
+                <MenuItem Header="ConfigSubsystem panel" Click="OpenConfigPanel_OnClick"/>
                 <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/>
             </MenuItem>
         </Menu>

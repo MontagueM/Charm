@@ -12,6 +12,7 @@ public partial class Source2ConfigView : UserControl
     public Source2ConfigView()
     {
         InitializeComponent();
+        _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
     }
 
     public void OnControlLoaded(object sender, RoutedEventArgs e)
@@ -19,9 +20,12 @@ public partial class Source2ConfigView : UserControl
         PopulateConfigPanel();
     }
 
+    private ConfigSubsystem _config;
+
     private void PopulateConfigPanel()
     {
         S2ConfigPanel.Children.Clear();
+
 
         TextBlock header = new TextBlock();
         header.Text = "Source 2 Settings";
@@ -36,7 +40,7 @@ public partial class Source2ConfigView : UserControl
         // Packages path
         ConfigSettingControl cpp = new ConfigSettingControl();
         cpp.SettingName = "Source 2 tools path";
-        var val = ConfigHandler.GetSource2Path();
+        var val = _config.GetSource2Path();
         cpp.SettingValue = val == "" ? "Not set" : val;
         cpp.ChangeButton.Click += Source2Path_OnClick;
         S2ConfigPanel.Children.Add(cpp);
@@ -49,7 +53,7 @@ public partial class Source2ConfigView : UserControl
         // Enable source 2 shader generation
         ConfigSettingControl cbe = new ConfigSettingControl();
         cbe.SettingName = "Generate shaders (vfx)";
-        bool bval2 = ConfigHandler.GetS2ShaderExportEnabled();
+        bool bval2 = _config.GetS2ShaderExportEnabled();
         cbe.SettingValue = bval2.ToString();
         cbe.ChangeButton.Click += S2ShaderExportEnabled_OnClick;
         S2ConfigPanel.Children.Add(cbe);
@@ -58,7 +62,7 @@ public partial class Source2ConfigView : UserControl
         // ### Might as well just make vmats by default
         // ConfigSettingControl cef = new ConfigSettingControl();
         // cef.SettingName = "Generate materials (vmat)";
-        // bool bval = ConfigHandler.GetS2VMATExportEnabled();
+        // bool bval = ConfigSubsystem.GetS2VMATExportEnabled();
         // cef.SettingValue = bval.ToString();
         // cef.ChangeButton.Click += S2VMATExportEnabled_OnClick;
         // S2ConfigPanel.Children.Add(cef);
@@ -66,60 +70,57 @@ public partial class Source2ConfigView : UserControl
         // Enable vmdl model generation
         ConfigSettingControl cfe = new ConfigSettingControl();
         cfe.SettingName = "Generate models (vmdl)";
-        bool bval = ConfigHandler.GetS2VMDLExportEnabled();
+        bool bval = _config.GetS2VMDLExportEnabled();
         cfe.SettingValue = bval.ToString();
         cfe.ChangeButton.Click += S2VMDLExportEnabled_OnClick;
         S2ConfigPanel.Children.Add(cfe);
     }
 
-    private List<ComboBoxItem> MakeEnumComboBoxItems<T>() where T : Enum
-    {
-        List<ComboBoxItem> items = new List<ComboBoxItem>();
-        foreach (T val in Enum.GetValues(typeof(T)))
-        {
-            items.Add(new ComboBoxItem { Content = TagItem.GetEnumDescription(val) });
-        }
-        return items;
-    }
-
-    private void ConsiderShowingMainMenu()
-    {
-        if (ConfigHandler.DoesPathKeyExist("packagesPath") && ConfigHandler.DoesPathKeyExist("exportSavePath"))
-        {
-            var _mainWindow = Window.GetWindow(this) as MainWindow;
-            _mainWindow.ShowMainMenu();
-        }
-    }
-
     private void Source2Path_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.OpenSource2PathDialog();
+        OpenSource2PathDialog();
         PopulateConfigPanel();
-        ConsiderShowingMainMenu();
     }
 
-    private void ExportSavePath_OnClick(object sender, RoutedEventArgs e)
+    public void OpenSource2PathDialog()
     {
-        ConfigHandler.OpenExportSavePathDialog();
-        PopulateConfigPanel();
-        ConsiderShowingMainMenu();
+        using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+        {
+            // Steam\steamapps\common\sbox\bin\win64
+            dialog.Description = "Select the folder where your S&Box installation is located";
+            bool success = false;
+            while (!success)
+            {
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    success = _config.TrySetSource2Path(dialog.SelectedPath);
+                }
+
+                if (!success)
+                {
+                    MessageBox.Show(
+                        "Directory selected is invalid, please select the correct directory. (Steam/steamapps/common/sbox/bin/win64)");
+                }
+            }
+        }
     }
 
     private void S2ShaderExportEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.SetS2ShaderExportEnabled(!ConfigHandler.GetS2ShaderExportEnabled());
+        _config.SetS2ShaderExportEnabled(!_config.GetS2ShaderExportEnabled());
         PopulateConfigPanel();
     }
 
     private void S2VMATExportEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.SetS2VMATExportEnabled(!ConfigHandler.GetS2VMATExportEnabled());
+        _config.SetS2VMATExportEnabled(!_config.GetS2VMATExportEnabled());
         PopulateConfigPanel();
     }
 
      private void S2VMDLExportEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.SetS2VMDLExportEnabled(!ConfigHandler.GetS2VMDLExportEnabled());
+        _config.SetS2VMDLExportEnabled(!_config.GetS2VMDLExportEnabled());
         PopulateConfigPanel();
     }
 }

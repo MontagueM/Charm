@@ -36,10 +36,11 @@ public partial class StaticView : UserControl
     public static void ExportStatic(FileHash hash, string name, ExportTypeFlag exportType, string extraPath = "")
     {
         bool lodexport = false;
-        bool source2Models = ConfigHandler.GetS2VMDLExportEnabled();
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        bool source2Models = config.GetS2VMDLExportEnabled();
         FbxHandler fbxHandler = new FbxHandler(exportType == ExportTypeFlag.Full);
         FbxHandler lodfbxHandler = new FbxHandler(exportType == ExportTypeFlag.Full);
-        string savePath = ConfigHandler.GetExportSavePath() + "/" + extraPath + "/";
+        string savePath = config.GetExportSavePath() + "/" + extraPath + "/";
         string meshName = hash;
         if (exportType == ExportTypeFlag.Full)
         {
@@ -52,13 +53,13 @@ public partial class StaticView : UserControl
         Directory.CreateDirectory(savePath);
         if (exportType == ExportTypeFlag.Full)
         {
-            staticMesh.SaveMaterialsFromParts(savePath, parts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+            staticMesh.SaveMaterialsFromParts(savePath, parts, config.GetUnrealInteropEnabled() || config.GetS2ShaderExportEnabled());
             fbxHandler.InfoHandler.SetMeshName(meshName);
-            if (ConfigHandler.GetUnrealInteropEnabled())
+            if (config.GetUnrealInteropEnabled())
             {
-                fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Static, ConfigHandler.GetOutputTextureFormat());
-                AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Static, ConfigHandler.GetOutputTextureFormat());
+                fbxHandler.InfoHandler.SetUnrealInteropPath(config.GetUnrealInteropPath());
+                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Static, config.GetOutputTextureFormat());
+                AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Static, config.GetOutputTextureFormat());
             }
 
             if(source2Models)

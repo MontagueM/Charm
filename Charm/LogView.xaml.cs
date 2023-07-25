@@ -10,6 +10,7 @@ using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.RichTextBox.Themes;
 using Serilog.Templates;
+using Tiger;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace Charm;
@@ -27,7 +28,7 @@ public class LogHandler
     public static void Initialise(LogView logView)
     {
         InitLogger(logView);
-        
+
         // Application.Current.DispatcherUnhandledException += DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += CatchUnhandledException;
     }
@@ -47,7 +48,7 @@ public class LogHandler
             .CreateLogger();
         Log.Information("Logger initialised");
     }
-    
+
     static void CatchUnhandledException
         (object sender, UnhandledExceptionEventArgs e)
     {
@@ -60,7 +61,7 @@ public class LogHandler
             Application.Current.Shutdown();
         }
     }
-    
+
     static void DispatcherUnhandledException
         (object sender, DispatcherUnhandledExceptionEventArgs e)
     {
@@ -73,16 +74,17 @@ public class LogHandler
             Application.Current.Shutdown();
         }
     }
-    
+
     public static void LogException(Exception ex)
     {
         Log.Fatal("\n### Crash ###\n" + ex.Source + ex.InnerException + ex + ex.Message + ex.StackTrace);
-        Log.Fatal("Config file:\n" + File.ReadAllText("Charm.exe.config"));
-        if (ConfigHandler.GetPackagesPath() != String.Empty)
-            Log.Fatal("Number of packages:\n" + Directory.GetFiles(ConfigHandler.GetPackagesPath()).Length);
-        if (ConfigHandler.GetExportSavePath() != String.Empty)
-            Log.Fatal("Exported directory:\n" + string.Join("\n", Directory.GetFiles(ConfigHandler.GetExportSavePath()))
-            + "\n" + string.Join("\n", Directory.GetDirectories(ConfigHandler.GetExportSavePath())));
+        Log.Fatal("ConfigSubsystem file:\n" + File.ReadAllText("Charm.exe.config"));
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        if (config.GetPackagesPath(config.GetCurrentStrategy()) != String.Empty)
+            Log.Fatal("Number of packages:\n" + Directory.GetFiles(config.GetPackagesPath(config.GetCurrentStrategy())).Length);
+        if (config.GetExportSavePath() != String.Empty)
+            Log.Fatal("Exported directory:\n" + string.Join("\n", Directory.GetFiles(config.GetExportSavePath()))
+            + "\n" + string.Join("\n", Directory.GetDirectories(config.GetExportSavePath())));
         Log.CloseAndFlush();
     }
 }

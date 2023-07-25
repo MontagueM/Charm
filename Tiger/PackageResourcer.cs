@@ -143,7 +143,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         PackagePathsCache.GetAllPackageIds();
         ConcurrentHashSet<FileHash> fileHashes = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 16, CancellationToken = CancellationToken.None };
         await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
         {
             fileHashes.UnionWith(await Task.Run(() => package.GetAllHashes(schemaType), ct));

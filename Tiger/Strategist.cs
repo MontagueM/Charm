@@ -239,7 +239,7 @@ public class Strategy
             return _instance;
         }
 
-        public static void Setup() 
+        public static void Setup()
         {
             AddNewStrategyInstance(_currentStrategy);
             _instance = _strategyInstances[_currentStrategy];
@@ -315,6 +315,11 @@ public class Strategy
             _strategyInstances[e.StrategyToReset].Reset();
             _strategyInstances[e.StrategyToReset].Initialise();
         }
+    }
+
+    public static bool HasConfiguration(TigerStrategy strategy)
+    {
+        return strategy == TigerStrategy.NONE || _strategyConfigurations.ContainsKey(strategy);
     }
 }
 

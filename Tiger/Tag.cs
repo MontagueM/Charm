@@ -17,7 +17,7 @@ public class Tag<T> : TigerFile where T : struct
     public T TagData => _tag;
 
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash reference
-    protected Tag(FileHash fileHash, bool shouldParse = true) : base(fileHash)
+    public  Tag(FileHash fileHash, bool shouldParse = true) : base(fileHash)
     {
         if (shouldParse)
         {
@@ -25,7 +25,7 @@ public class Tag<T> : TigerFile where T : struct
         }
     }
 
-    protected Tag(FileHash fileHash) : base(fileHash)
+    public Tag(FileHash fileHash) : base(fileHash)
     {
         Initialise(fileHash);
     }

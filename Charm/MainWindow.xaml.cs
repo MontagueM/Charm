@@ -55,8 +55,9 @@ public partial class MainWindow
         HideMainMenu();
 
         // Check if packages path exists in config
-        // ConfigHandler.CheckPackagesPathIsValid();
-        if (ConfigHandler.DoesPathKeyExist("packagesPath") && ConfigHandler.DoesPathKeyExist("exportSavePath"))
+        // ConfigSubsystem.CheckPackagesPathIsValid();
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        if (config.GetPackagesPath(Strategy.CurrentStrategy) != "" && config.GetExportSavePath() != "")
         {
             MainMenuTab.Visibility = Visibility.Visible;
         }
@@ -163,7 +164,8 @@ public partial class MainWindow
     {
         try
         {
-            var path = ConfigHandler.GetPackagesPath().Split("packages")[0] + "destiny2.exe";
+            ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+            var path = config.GetPackagesPath(Strategy.CurrentStrategy).Split("packages")[0] + "destiny2.exe";
             var versionInfo = FileVersionInfo.GetVersionInfo(path);
             string version = versionInfo.FileVersion;
             Log.Information("Game version: " + version);
@@ -246,7 +248,8 @@ public partial class MainWindow
         // Progress.CompleteStage();
 
         // Set texture format
-        TextureExtractor.SetTextureFormat(ConfigHandler.GetOutputTextureFormat());
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        TextureExtractor.SetTextureFormat(config.GetOutputTextureFormat());
     }
 
     private void RegisterFonts(ConcurrentDictionary<FontHandler.FontInfo, FontFamily> initialise)

@@ -41,8 +41,10 @@ public partial class TextureView : UserControl
 
     public static void ExportTexture(FileHash fileHash)
     {
-        string savePath = ConfigHandler.GetExportSavePath() + $"/Textures/{fileHash}";
-        Directory.CreateDirectory(ConfigHandler.GetExportSavePath() + "/Textures/");
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+
+        string savePath = config.GetExportSavePath() + $"/Textures/{fileHash}";
+        Directory.CreateDirectory(config.GetExportSavePath() + "/Textures/");
 
         Texture texture = FileResourcer.Get().GetFile<Texture>(fileHash);
         texture.SavetoFile(savePath);

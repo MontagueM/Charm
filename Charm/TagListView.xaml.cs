@@ -1258,11 +1258,11 @@ public partial class TagListView : UserControl
         if (_allTagItems != null)
             return;
 
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            "caching string tags",
-            "load string list",
-        });
+        // MainWindow.Progress.SetProgressStages(new List<string>
+        // {
+        //     "caching string tags",
+        //     "load string list",
+        // });
 
         await Task.Run(async () =>
         {
@@ -1327,7 +1327,8 @@ public partial class TagListView : UserControl
             text.Append($"{view.StringHash} : {view.RawString} \n");
         });
 
-        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Strings/{info.Hash}_{info.Name}/";
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        string saveDirectory = config.GetExportSavePath() + $"/Strings/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
 
         File.WriteAllText(saveDirectory + "strings.txt", text.ToString());
@@ -1431,16 +1432,20 @@ public partial class TagListView : UserControl
 
     private void ExportSound(ExportInfo info)
     {
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+
         WwiseSound sound = FileResourcer.Get().GetFile<WwiseSound>(info.Hash);
-        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
+        string saveDirectory = config.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         sound.ExportSound(saveDirectory);
     }
 
     private void ExportWem(ExportInfo info)
     {
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+
         Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash);
-        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
+        string saveDirectory = config.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         wem.SaveToFile($"{saveDirectory}/{info.Name}.wem");
     }

@@ -168,6 +168,11 @@ public class FileHash64 : FileHash
 {
     private ulong Hash64 { get; set; }
     private bool IsHash32 { get; set; }
+    private uint FallbackHash32 { get; set; }
+
+    public FileHash64() : base()
+    {
+    }
 
     public FileHash64(ulong hash64) : base(GetHash32(hash64))
     {
@@ -181,9 +186,10 @@ public class FileHash64 : FileHash
 
     public override void Deserialize(TigerReader reader)
     {
-        Hash32 = reader.ReadUInt32();
+        FallbackHash32 = reader.ReadUInt32();
         IsHash32 = reader.ReadUInt32() == 1;
         Hash64 = reader.ReadUInt64();
+        Hash32 = IsHash32 ? FallbackHash32 : GetHash32(Hash64);
     }
 }
 

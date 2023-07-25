@@ -115,7 +115,8 @@ public partial class DevView : UserControl
     private void ExportWem(ExportInfo info)
     {
         Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash as FileHash);
-        string saveDirectory = ConfigHandler.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        string saveDirectory = config.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         wem.SaveToFile($"{saveDirectory}/{info.Name}.wav");
     }
@@ -208,7 +209,8 @@ public partial class DevView : UserControl
 
     private void OpenHxD(FileHash hash)
     {
-        string savePath = ConfigHandler.GetExportSavePath() + "/temp";
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        string savePath = config.GetExportSavePath() + "/temp";
         if (!Directory.Exists(savePath))
         {
             Directory.CreateDirectory(savePath);

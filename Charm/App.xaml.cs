@@ -58,23 +58,23 @@ namespace Charm
                     //
                     // var entities = InvestmentHandler.GetEntitiesFromHash(hash);
                     // string meshName = hash;
-                    // string savePath = ConfigHandler.GetExportSavePath() + $"/API_{meshName}";
+                    // string savePath = ConfigSubsystem.GetExportSavePath() + $"/API_{meshName}";
                     // Directory.CreateDirectory(savePath);
                     //
                     // foreach (var entity in entities)
                     // {
                     //     var dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
                     //     fbxHandler.AddEntityToScene(entity, dynamicParts, ExportDetailLevel.MostDetailed);
-                    //     entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+                    //     entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigSubsystem.GetUnrealInteropEnabled() || ConfigSubsystem.GetS2ShaderExportEnabled());
                     //     entity.SaveTexturePlates(savePath);
                     // }
                     //
                     // fbxHandler.InfoHandler.SetMeshName(meshName);
-                    // if (ConfigHandler.GetUnrealInteropEnabled())
+                    // if (ConfigSubsystem.GetUnrealInteropEnabled())
                     // {
-                    //     fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-                    //     AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigHandler.GetOutputTextureFormat());
-                    //     //AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                    //     fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigSubsystem.GetUnrealInteropPath());
+                    //     AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigSubsystem.GetOutputTextureFormat());
+                    //     //AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigSubsystem.GetOutputTextureFormat());
                     // }
                     // fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
                     // Console.WriteLine($"[Charm] Saved all data to {savePath}.");

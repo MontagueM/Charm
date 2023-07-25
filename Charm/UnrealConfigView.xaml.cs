@@ -11,7 +11,11 @@ public partial class UnrealConfigView : UserControl
     public UnrealConfigView()
     {
         InitializeComponent();
+        _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
     }
+
+    private ConfigSubsystem _config;
+
 
     public void OnControlLoaded(object sender, RoutedEventArgs e)
     {
@@ -30,7 +34,7 @@ public partial class UnrealConfigView : UserControl
         // Unreal interop path
         ConfigSettingControl cui = new ConfigSettingControl();
         cui.SettingName = "Unreal content path";
-        var val = ConfigHandler.GetUnrealInteropPath();
+        var val = _config.GetUnrealInteropPath();
         cui.SettingValue = val == "" ? "Not set" : val;
         cui.ChangeButton.Click += UnrealInteropPath_OnClick;
         UnrealConfigPanel.Children.Add(cui);
@@ -38,45 +42,43 @@ public partial class UnrealConfigView : UserControl
         // Enable UE5 interop
         ConfigSettingControl cii = new ConfigSettingControl();
         cii.SettingName = "Generate Unreal Engine importing files";
-        bool bval = ConfigHandler.GetUnrealInteropEnabled();
+        bool bval = _config.GetUnrealInteropEnabled();
         cii.SettingValue = bval.ToString();
         cii.ChangeButton.Click += UnrealInteropEnabled_OnClick;
         UnrealConfigPanel.Children.Add(cii);
     }
 
-    private List<ComboBoxItem> MakeEnumComboBoxItems<T>() where T : Enum
-    {
-        List<ComboBoxItem> items = new List<ComboBoxItem>();
-        foreach (T val in Enum.GetValues(typeof(T)))
-        {
-            items.Add(new ComboBoxItem { Content = TagItem.GetEnumDescription(val) });
-        }
-        return items;
-    }
-
-    private void ConsiderShowingMainMenu()
-    {
-        if (ConfigHandler.DoesPathKeyExist("packagesPath") && ConfigHandler.DoesPathKeyExist("exportSavePath"))
-        {
-            var _mainWindow = Window.GetWindow(this) as MainWindow;
-            _mainWindow.ShowMainMenu();
-        }
-    }
-
     private void UnrealInteropPath_OnClick(object sender, RoutedEventArgs e)
     {
-        ConfigHandler.OpenUnrealInteropPathDialog();
+        OpenUnrealInteropPathDialog();
         PopulateConfigPanel();
+    }
+
+    public void OpenUnrealInteropPathDialog()
+    {
+        using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+        {
+            bool success = false;
+            while (!success)
+            {
+                dialog.Description = "Select the folder where you want to import to unreal engine (eg Content folder)";
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    success = _config.TrySetUnrealInteropPath(dialog.SelectedPath);
+                }
+            }
+        }
     }
 
     private void UnrealInteropEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        if (!ConfigHandler.DoesPathKeyExist("unrealInteropPath"))
+        if (_config.GetUnrealInteropPath() == "")
         {
             MessageBox.Show("Please set the path to the Unreal Engine content folder first.");
             return;
         }
-        ConfigHandler.SetUnrealInteropEnabled(!ConfigHandler.GetUnrealInteropEnabled());
+        _config.SetUnrealInteropEnabled(!_config.GetUnrealInteropEnabled());
         PopulateConfigPanel();
     }
 }

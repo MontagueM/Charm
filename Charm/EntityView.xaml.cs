@@ -65,7 +65,8 @@ public partial class EntityView : UserControl
     private bool LoadUI(FbxHandler fbxHandler)
     {
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-        string filePath = $"{ConfigHandler.GetExportSavePath()}/temp.fbx";
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        string filePath = $"{config.GetExportSavePath()}/temp.fbx";
         fbxHandler.ExportScene(filePath);
         bool loaded = MVM.LoadEntityFromFbx(filePath);
         fbxHandler.Clear();
@@ -75,13 +76,14 @@ public partial class EntityView : UserControl
     public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null)
     {
         FbxHandler fbxHandler = new FbxHandler(exportType == ExportTypeFlag.Full);
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
         List<FbxNode> boneNodes = null;
         if (overrideSkeleton != null)
             boneNodes = fbxHandler.AddSkeleton(overrideSkeleton.GetBoneNodes());
 
         Log.Debug($"Exporting entity model name: {name}");
-        string savePath = ConfigHandler.GetExportSavePath();
+        string savePath = config.GetExportSavePath();
         string meshName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
         if (exportType == ExportTypeFlag.Full)
         {
@@ -95,7 +97,7 @@ public partial class EntityView : UserControl
             fbxHandler.AddEntityToScene(entity, dynamicParts, ExportDetailLevel.MostDetailed, boneNodes);
             if (exportType == ExportTypeFlag.Full)
             {
-                entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigHandler.GetUnrealInteropEnabled() || ConfigHandler.GetS2ShaderExportEnabled());
+                entity.SaveMaterialsFromParts(savePath, dynamicParts, config.GetUnrealInteropEnabled() || config.GetS2ShaderExportEnabled());
                 entity.SaveTexturePlates(savePath);
             }
         }
@@ -103,14 +105,14 @@ public partial class EntityView : UserControl
         if (exportType == ExportTypeFlag.Full)
         {
             fbxHandler.InfoHandler.SetMeshName(meshName);
-            if (ConfigHandler.GetUnrealInteropEnabled())
+            if (config.GetUnrealInteropEnabled())
             {
-                fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigHandler.GetUnrealInteropPath());
-                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                fbxHandler.InfoHandler.SetUnrealInteropPath(config.GetUnrealInteropPath());
+                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
-            if(ConfigHandler.GetBlenderInteropEnabled())
+            if(config.GetBlenderInteropEnabled())
             {
-                AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigHandler.GetOutputTextureFormat());
+                AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
         }
 
@@ -158,11 +160,12 @@ public partial class EntityView : UserControl
             }
         }
 
-        string savePath = ConfigHandler.GetExportSavePath();
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        string savePath = config.GetExportSavePath();
         string meshName = name;
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
         AutomatedImporter.SaveBlenderApiFile(savePath, string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())),
-            ConfigHandler.GetOutputTextureFormat(), dyes.Values.ToList());
+            config.GetOutputTextureFormat(), dyes.Values.ToList());
     }
 }

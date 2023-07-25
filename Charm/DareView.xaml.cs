@@ -183,12 +183,13 @@ public partial class DareView : UserControl
                 else
                 {
                     // shader
-                    string savePath = ConfigHandler.GetExportSavePath();
+                    ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+                    string savePath = config.GetExportSavePath();
                     string meshName = item.ItemName;
                     savePath += $"/{meshName}";
                     Directory.CreateDirectory(savePath);
                     Directory.CreateDirectory(savePath + "/Textures");
-                    InvestmentHandler.ExportShader(item.Item, savePath, meshName, ConfigHandler.GetOutputTextureFormat());
+                    InvestmentHandler.ExportShader(item.Item, savePath, meshName, config.GetOutputTextureFormat());
                 }
                 // EntityView.ExportShader();
 
@@ -199,7 +200,8 @@ public partial class DareView : UserControl
 
     private void OpenOutputFolder_OnClick(object sender, RoutedEventArgs e)
     {
-        Process.Start("explorer.exe", ConfigHandler.GetExportSavePath());
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        Process.Start("explorer.exe", config.GetExportSavePath());
     }
 }
 
