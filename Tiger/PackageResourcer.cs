@@ -10,6 +10,7 @@ namespace Tiger;
 public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 {
     private PackagePathsCache? _packagePathsCache;
+    private Dictionary<uint, string> _activityNames = new();
 
     public PackagePathsCache PackagePathsCache
     {
@@ -35,6 +36,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         _packagePathsCache = new PackagePathsCache(_strategy);
         LoadAllPackages();
+        CacheAllActivityNames();
     }
 
     protected override void Reset()
@@ -47,7 +49,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     /// Gets a package which represents a .pkg disk file. Blocking call.
     /// </summary>
     /// <returns>IPackage object, type determined by the selected strategy.</returns>
-    public IPackage GetPackage(ushort packageId)
+    public Package GetPackage(ushort packageId)
     {
         if (_packagesCache.TryGetValue(packageId, out Package package))
         {
@@ -58,7 +60,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     }
 
     // // this method is used by PackagePathsCache, so cannot use itself
-    public IPackage GetPackage(string packagePath)
+    public Package GetPackage(string packagePath)
     {
         // Don't add to cache as we're getting multiple packages from the same id, in order to identify their patch.
         return LoadPackageNoCacheFromDisk(packagePath);
@@ -67,7 +69,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     // todo this needs to be a producer-consumer style queue thing to avoid locking maybe
     // could try it this way first then compare performance with a queue approach
 
-    private IPackage LoadPackageIntoCacheFromDisk(ushort packageId)
+    private Package LoadPackageIntoCacheFromDisk(ushort packageId)
     {
         string packagePath = PackagePathsCache.GetPackagePathFromId(packageId);
         return LoadPackageIntoCacheFromDisk(packageId, packagePath);
@@ -108,7 +110,6 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     public HashSet<T> GetAllFiles<T>() where T : TigerFile
     {
-        PackagePathsCache.GetAllPackageIds();
         HashSet<T> tags = new();
         foreach (Package package in _packagesCache.Values)
         {
@@ -119,7 +120,6 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     public HashSet<TigerFile> GetAllFiles(Type fileType)
     {
-        PackagePathsCache.GetAllPackageIds();
         HashSet<TigerFile> tags = new();
         foreach (Package package in _packagesCache.Values)
         {
@@ -140,7 +140,6 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     public async Task<ConcurrentHashSet<FileHash>> GetAllHashes(Type schemaType)
     {
-        PackagePathsCache.GetAllPackageIds();
         ConcurrentHashSet<FileHash> fileHashes = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 16, CancellationToken = CancellationToken.None };
@@ -154,7 +153,6 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     public async Task<ConcurrentHashSet<FileHash>> GetAllHashes(Func<string, bool> packageFilterFunc)
     {
-        PackagePathsCache.GetAllPackageIds();
         ConcurrentHashSet<FileHash> fileHashes = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
@@ -169,7 +167,26 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     public string GetActivityName(FileHash fileHash)
     {
-        return "todo get activity name";
+        if (_activityNames.TryGetValue(fileHash.Hash32, out string activityName))
+        {
+            return activityName;
+        }
+        return "Activity name not found.";
+    }
+
+    private async void CacheAllActivityNames()
+    {
+        ConcurrentHashSet<SPackageActivityEntry> activityEntries = new();
+
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
+        {
+            activityEntries.UnionWith(package.GetAllActivities());
+        });
+
+        _activityNames = activityEntries
+            .DistinctBy(entry => entry.TagHash.Hash32)
+            .ToDictionary(entry => entry.TagHash.Hash32, entry => entry.Name.Value)!;
     }
 }
 

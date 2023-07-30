@@ -1,4 +1,5 @@
-﻿using Internal.Fbx;
+﻿using System.Diagnostics;
+using Internal.Fbx;
 using SharpDX;
 using Tiger.Schema.Entity;
 
@@ -232,7 +233,7 @@ public class FbxHandler
         mesh.GetLayer(1).SetVertexColors(colLayer);
     }
 
-    private void AddWeightsToMesh(FbxMesh mesh, DynamicPart part, List<FbxNode> skeletonNodes)
+    private void AddWeightsToMesh(FbxMesh mesh, DynamicMeshPart meshPart, List<FbxNode> skeletonNodes)
     {
         FbxSkin skin;
         lock (_fbxLock)
@@ -256,16 +257,16 @@ public class FbxHandler
             weightClusters.Add(weightCluster);
         }
 
-        // for (int i = 0; i < part.VertexWeights.Count; i++)
+        // for (int i = 0; i < meshPart.VertexWeights.Count; i++)
         // Conversion lookup table
         Dictionary<int, int> lookup = new Dictionary<int, int>();
-        for (int i = 0; i < part.VertexIndices.Count; i++)
+        for (int i = 0; i < meshPart.VertexIndices.Count; i++)
         {
-            lookup[(int)part.VertexIndices[i]] = i;
+            lookup[(int)meshPart.VertexIndices[i]] = i;
         }
-        foreach (int v in part.VertexIndices)
+        foreach (int v in meshPart.VertexIndices)
         {
-            VertexWeight vw = part.VertexWeights[lookup[v]];
+            VertexWeight vw = meshPart.VertexWeights[lookup[v]];
             for (int j = 0; j < 4; j++)
             {
                 if (vw.WeightValues[j] != 0)
@@ -396,7 +397,7 @@ public class FbxHandler
 
     }
 
-    public void AddEntityToScene(Entity.Entity entity, List<DynamicPart> dynamicParts, ExportDetailLevel detailLevel, List<FbxNode> skeletonNodes = null)
+    public void AddEntityToScene(Entity.Entity entity, List<DynamicMeshPart> dynamicParts, ExportDetailLevel detailLevel, List<FbxNode> skeletonNodes = null)
     {
         if (skeletonNodes == null)
         {
@@ -415,6 +416,7 @@ public class FbxHandler
 
             if (dynamicPart.VertexWeights.Count > 0)
             {
+                Debug.Assert(dynamicPart.VertexWeights.Count == dynamicPart.VertexPositions.Count);
                 if (skeletonNodes.Count > 0)
                 {
                     AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);

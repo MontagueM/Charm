@@ -6,7 +6,7 @@ using Tiger.Schema.Investment;
 
 namespace Tiger.Schema.Entity;
 
-[SchemaStruct("C96C8080", 0x98)]
+[SchemaStruct("D89A8080", 0x98)]
 public struct D2Class_D89A8080  // Entity
 {
     public long FileSize;
@@ -25,7 +25,7 @@ public struct D2Class_D89A8080  // Entity
     public TigerHash Unk88;
 }
 
-[SchemaStruct("C96C8080", 8)]
+[SchemaStruct("F09A8080", 8)]
 public struct D2Class_F09A8080
 {
     public TigerHash Unk00;
@@ -33,7 +33,7 @@ public struct D2Class_F09A8080
     public ushort Unk06;
 }
 
-[SchemaStruct("C96C8080", 0x28)]
+[SchemaStruct("ED9A8080", 0x28)]
 public struct D2Class_ED9A8080
 {
     public short Unk00;
@@ -48,7 +48,7 @@ public struct D2Class_ED9A8080
     // public Tag Unk20;
 }
 
-[SchemaStruct("C96C8080", 0x18)]
+[SchemaStruct("EB9A8080", 0x18)]
 public struct D2Class_EB9A8080
 {
     public ResourceInTagPointer Resource00;
@@ -56,19 +56,19 @@ public struct D2Class_EB9A8080
     public long Unk10;
 }
 
-[SchemaStruct("C96C8080", 2)]
+[SchemaStruct("06008080", 2)]
 public struct D2Class_06008080
 {
     public short Unk0;
 }
 
-[SchemaStruct("C96C8080", 0xC)]
+[SchemaStruct("CD9A8080", 0xC)]
 public struct D2Class_CD9A8080  // entity resource entry
 {
-    public EntityResource ResourceHash;
+    public EntityResource Resource;
 }
 
-[SchemaStruct("C96C8080", 0xA0)]
+[SchemaStruct("069B8080", 0xA0)]
 public struct D2Class_069B8080  // Entity resource
 {
     public long FileSize;
@@ -89,7 +89,7 @@ public struct D2Class_069B8080  // Entity resource
     // Rest is unknown
 }
 
-[SchemaStruct("C96C8080", 0x10)]
+[SchemaStruct("7C908080", 0x10)]
 public struct D2Class_7C908080
 {
     public ResourcePointerWithClass ResourcePointer00;
@@ -98,7 +98,7 @@ public struct D2Class_7C908080
     public short Unk0E;
 }
 
-[SchemaStruct("C96C8080", 8)]
+[SchemaStruct("6E908080", 8)]
 public struct D2Class_6E908080
 {
     public RelativePointer RelativePointer00;
@@ -108,7 +108,7 @@ public struct D2Class_6E908080
  * The external material map provides the mapping of external material index -> material tag
  * could be these external materials are dynamic themselves - we'll extract them all but select the first
  */
-[SchemaStruct("C96C8080", 0x450)]
+[SchemaStruct("8F6D8080", 0x450)]
 public struct D2Class_8F6D8080
 {
     [SchemaField(0x224)]
@@ -122,7 +122,7 @@ public struct D2Class_8F6D8080
 }
 
 #region Texture Plates
-
+// todo move this
 public class TexturePlate : Tag<D2Class_919E8080>
 {
     public TexturePlate(FileHash hash) : base(hash)
@@ -137,10 +137,11 @@ public class TexturePlate : Tag<D2Class_919E8080>
             return null;
         }
 
-        bool bSrgb = _tag.PlateTransforms[0].Texture.IsSrgb();
+        using TigerReader reader = GetReader();
+        bool bSrgb = _tag.PlateTransforms[reader, 0].Texture.IsSrgb();
         ScratchImage outputPlate = TexHelper.Instance.Initialize2D(bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM, dimension.X, dimension.Y, 1, 0, 0);
 
-        foreach (var transform in _tag.PlateTransforms)
+        foreach (var transform in _tag.PlateTransforms.Enumerate(reader))
         {
             ScratchImage original = transform.Texture.GetScratchImage();
             ScratchImage resizedOriginal = original.Resize(transform.Scale.X, transform.Scale.Y, 0);
@@ -148,7 +149,7 @@ public class TexturePlate : Tag<D2Class_919E8080>
             original.Dispose();
             resizedOriginal.Dispose();
         }
-
+        reader.Close();
         return outputPlate;
     }
 
@@ -540,7 +541,7 @@ public struct D2Class_F8258080
     public ResourceInTagPointer Unk00;
     // lots of array stuff
     [SchemaField(0xA8), MarshalAs(UnmanagedType.ByValArray, SizeConst = 33)]
-    public Tag[] UnkA8;
+    public FileHash[] UnkA8;
 }
 
 [SchemaStruct("41268080", 0xBA0)]

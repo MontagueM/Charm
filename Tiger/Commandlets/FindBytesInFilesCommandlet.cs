@@ -68,7 +68,7 @@ public class FindBytesInFilesCommandlet : ICommandlet
 
         IEnumerable<ushort> fileIndices = package
             .GetAllFileMetadata()
-            // .Where(f => (f.Type == 8 || f.Type == 16) && f.SubType == 0)
+            .Where(f => (f.Type == 8 || f.Type == 16) && f.SubType == 0)
             .Select(f => f.FileIndex);
         Parallel.ForEach(fileIndices, fileIndex =>
         {

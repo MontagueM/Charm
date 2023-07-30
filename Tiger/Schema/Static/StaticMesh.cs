@@ -41,14 +41,6 @@ public class MeshPart
     public int GroupIndex = 0;
 }
 
-public class DynamicMeshPart : MeshPart
-{
-    public List<VertexWeight>? VertexWeights;
-    public List<Vector4> VertexColourSlots = new List<Vector4>();
-    public bool bAlphaClip;
-    public byte GearDyeChangeColorIndex = 0xFF;
-}
-
 public struct VertexWeight
 {
     public IntVector4 WeightValues;

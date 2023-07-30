@@ -11,12 +11,12 @@ public class Activity : Tag<SActivity>
     // protected override void ParseStructs()
     // {
     //     // Getting the string container
-    //     StringContainer sc;
+    //     LocalizedStrings sc;
     //     using (var handle = GetHandle())
     //     {
     //         handle.BaseStream.Seek(0x28, SeekOrigin.Begin);
     //         var tag = PackageHandler.GetTag<D2Class_8B8E8080>(new FileHash(handle.ReadUInt64()));
-    //         sc = tag._tag.StringContainer;
+    //         sc = tag._tag.LocalizedStrings;
     //     }
     //     Header = ReadHeader<D2Class_8E8E8080>(sc);
     // }

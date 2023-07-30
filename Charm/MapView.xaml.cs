@@ -49,7 +49,8 @@ public partial class MapView : UserControl
     private void GetStaticMapData(FileHash fileHash, ExportDetailLevel detailLevel)
     {
         Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(fileHash);
-        StaticMapData staticMapData = ((SMapDataResource)tag.TagData.MapDataTables[1].MapDataTable.TagData.DataEntries[0].DataResource.Value).StaticMapParent.TagData.StaticMap;
+        Tag<SMapDataTable> mapDataTable = tag.TagData.MapDataTables[tag.GetReader(), 1].MapDataTable;
+        StaticMapData staticMapData = ((SMapDataResource)mapDataTable.TagData.DataEntries[mapDataTable.GetReader(), 0].DataResource.GetValue(mapDataTable.GetReader())).StaticMapParent.TagData.StaticMap;
         SetMapUI(staticMapData, detailLevel);
     }
 
@@ -171,7 +172,7 @@ public partial class MapView : UserControl
         {
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
-                if (entry.DataResource.Value is D2Class_7D6C8080 terrainArrangement)  // Terrain
+                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is D2Class_7D6C8080 terrainArrangement)  // Terrain
                 {
                     //entry.Rotation.SetW(1);
                     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, _config.GetUnrealInteropEnabled(), terrainArrangement);
@@ -198,7 +199,7 @@ public partial class MapView : UserControl
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
                 //Console.WriteLine($"{entry.DataResource}");
-                if (entry.DataResource.Value is SMapDataResource staticMapResource)  // Static map
+                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
                     if (exportTypeFlag == ExportTypeFlag.ArrangedMap)
                     {
@@ -232,7 +233,7 @@ public partial class MapView : UserControl
             {
                 data.MapDataTable.TagData.DataEntries.ForEach(entry =>
                 {
-                    if (entry.DataResource.Value is SMapDataResource staticMapResource)  // Static map
+                    if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                     {
                         var parts = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.Statics;
                         //staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoFbxScene(staticHandler, savePath, _config.GetUnrealInteropEnabled());

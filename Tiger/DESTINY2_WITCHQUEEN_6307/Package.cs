@@ -93,8 +93,23 @@ public struct PackageHeader : IPackageHeader
 
         return hash64List;
     }
-};
 
+    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader)
+    {
+        List<SPackageActivityEntry> activityEntries = new();
+
+        // todo this can be better if we had the package using schema deserialization properly
+        // 0x30 is due to the indirection table which we skip
+        for (int i = 0; i < ActivityTableCount; i++)
+        {
+            reader.Seek(ActivityTableOffset+0x30+0x10*i, SeekOrigin.Begin);
+            SPackageActivityEntry entry = SchemaDeserializer.Get().DeserializeSchema<SPackageActivityEntry>(reader);
+            activityEntries.Add(entry);
+        }
+
+        return activityEntries;
+    }
+};
 
 [StrategyClass(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
 public class Package : Tiger.Package

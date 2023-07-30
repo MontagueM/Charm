@@ -99,11 +99,12 @@ public class AutomatedImporter
                 }
             }
 
-            var diff = dye.TagData.DyeTextures[0];
+            TigerReader reader = dye.GetReader();
+            var diff = dye.TagData.DyeTextures[reader, 0];
             text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}_{diff.TextureIndex}.{TextureExtractor.GetExtension(outputTextureFormat)}");
-            var norm = dye.TagData.DyeTextures[1];
+            var norm = dye.TagData.DyeTextures[reader, 1];
             text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}_{norm.TextureIndex}.{TextureExtractor.GetExtension(outputTextureFormat)}");
-
+            reader.Close();
             dyeIndex++;
         }
 

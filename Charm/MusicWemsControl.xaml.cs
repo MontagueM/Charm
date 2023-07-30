@@ -20,7 +20,7 @@ public partial class MusicWemsControl : UserControl
     private ConcurrentBag<WemItem> GetWemItems(WwiseSound tag)
     {
         var items = new ConcurrentBag<WemItem>();
-        Parallel.ForEach(tag.TagData.Unk20, wem =>
+        Parallel.ForEach(tag.TagData.Wems, wem =>
         {
             items.Add(new WemItem
             {

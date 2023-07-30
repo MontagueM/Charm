@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Serilog;
 
 namespace Tiger.Schema;
 
@@ -9,6 +10,12 @@ public struct TigerString
 
     public static TigerString Empty => new(new StringHash(), "");
 
+    public TigerString(string value)
+    {
+        Hash = StringHash.Invalid;
+        RawValue = value;
+    }
+
     public TigerString(StringHash hash, string value)
     {
         Hash = hash;
@@ -18,6 +25,11 @@ public struct TigerString
     public override string ToString()
     {
         return RawValue;
+    }
+
+    public static implicit operator string(TigerString tigerString)
+    {
+        return tigerString.RawValue;
     }
 }
 
@@ -39,14 +51,16 @@ public class LocalizedStrings : Tag<SLocalizedStrings>
         int index = FindIndexOfStringHash(hash);
         if (index == -1)
         {
-            throw new Exception($"Could not find string with hash {hash}");
+            Log.Error($"Could not find string with hash {hash}");
+            return new TigerString("NotFound");
         }
         return new TigerString(hash, _tag.EnglishStringsData.GetStringFromIndex(index));
     }
 
     private int FindIndexOfStringHash(StringHash hash)
     {
-        using (TigerReader reader = GetReader()) { return _tag.StringHashes.InterpolationSearchIndex(reader, hash); }
+        using TigerReader reader = GetReader();
+        return _tag.StringHashes.InterpolationSearchIndex(reader, hash);
     }
 
     public List<LocalizedStringView> GetAllStringViews()

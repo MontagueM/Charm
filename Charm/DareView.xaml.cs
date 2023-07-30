@@ -62,20 +62,24 @@ public partial class DareView : UserControl
 
     private void LoadApiList()
     {
-        List<string> mapStages = InvestmentHandler.InventoryItems.Select((_, i) => $"loading {i+1}/{InvestmentHandler.InventoryItems.Count}").ToList();
+        List<string> mapStages = Investment.Get().InventoryItems.Select((_, i) => $"loading {i+1}/{Investment.Get().InventoryItems.Count}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages, false, true);
-        Parallel.ForEach(InvestmentHandler.InventoryItems, kvp =>
+        Parallel.ForEach(Investment.Get().InventoryItems, kvp =>
         {
             // if (_allItems.Count > 500)
             // {
             //     MainWindow.Progress.CompleteStage();
             //     return;
             // }
-            string name = InvestmentHandler.GetItemName(kvp.Value);
-            string type = InvestmentHandler.InventoryItemStringThings[InvestmentHandler.GetItemIndex(kvp.Key)].TagData.ItemType.Value;
+            string name = Investment.Get().GetItemName(kvp.Value);
+            string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(kvp.Key)].TagData.ItemType.Value;
+            // todo not sure why the type can now be null, be whatever
+            if (type == null)
+            {
+                type = "";
+            }
             if (kvp.Value.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
             {
-
                 if (!type.Contains("Finisher") && !type.Contains("Emote")) // they point to Animation instead of Entity
                 {
                     // icon bg
@@ -117,7 +121,7 @@ public partial class DareView : UserControl
                             GridBackground = brush,
                             Item = kvp.Value
                         };
-                        _allItems.TryAdd(kvp.Key, newItem);
+                        _allItems.TryAdd(new TigerHash(kvp.Key), newItem);
                     }
                 }
             }
@@ -189,7 +193,7 @@ public partial class DareView : UserControl
                     savePath += $"/{meshName}";
                     Directory.CreateDirectory(savePath);
                     Directory.CreateDirectory(savePath + "/Textures");
-                    InvestmentHandler.ExportShader(item.Item, savePath, meshName, config.GetOutputTextureFormat());
+                    Investment.Get().ExportShader(item.Item, savePath, meshName, config.GetOutputTextureFormat());
                 }
                 // EntityView.ExportShader();
 

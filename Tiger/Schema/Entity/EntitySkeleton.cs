@@ -9,24 +9,25 @@ public class EntitySkeleton : EntityResource
 
     public List<BoneNode> GetBoneNodes()
     {
+        using TigerReader reader = GetReader();
         var nodes = new List<BoneNode>();
-        D2Class_DE818080 skelInfo = (D2Class_DE818080)_tag.Unk18.Value;
+        D2Class_DE818080 skelInfo = (D2Class_DE818080)_tag.Unk18.GetValue(reader);
         for (int i = 0; i < skelInfo.NodeHierarchy.Count; i++)
         {
-            BoneNode node = new BoneNode();
-            node.ParentNodeIndex = skelInfo.NodeHierarchy[i].ParentNodeIndex;
-            node.Hash = skelInfo.NodeHierarchy[i].NodeHash;
+            BoneNode node = new();
+            node.ParentNodeIndex = skelInfo.NodeHierarchy[reader, i].ParentNodeIndex;
+            node.Hash = skelInfo.NodeHierarchy[reader, i].NodeHash;
             node.DefaultObjectSpaceTransform = new ObjectSpaceTransform
             {
-                QuaternionRotation = skelInfo.DefaultObjectSpaceTransforms[i].Rotation,
-                Translation = skelInfo.DefaultObjectSpaceTransforms[i].Translation.ToVec3(),
-                Scale = skelInfo.DefaultObjectSpaceTransforms[i].Translation.W
+                QuaternionRotation = skelInfo.DefaultObjectSpaceTransforms[reader, i].Rotation,
+                Translation = skelInfo.DefaultObjectSpaceTransforms[reader, i].Translation.ToVec3(),
+                Scale = skelInfo.DefaultObjectSpaceTransforms[reader, i].Translation.W
             };
             node.DefaultInverseObjectSpaceTransform = new ObjectSpaceTransform
             {
-                QuaternionRotation = skelInfo.DefaultInverseObjectSpaceTransforms[i].Rotation,
-                Translation = skelInfo.DefaultInverseObjectSpaceTransforms[i].Translation.ToVec3(),
-                Scale = skelInfo.DefaultInverseObjectSpaceTransforms[i].Translation.W
+                QuaternionRotation = skelInfo.DefaultInverseObjectSpaceTransforms[reader, i].Rotation,
+                Translation = skelInfo.DefaultInverseObjectSpaceTransforms[reader, i].Translation.ToVec3(),
+                Scale = skelInfo.DefaultInverseObjectSpaceTransforms[reader, i].Translation.W
             };
             nodes.Add(node);
         }

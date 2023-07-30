@@ -3,17 +3,17 @@ namespace Tiger.Schema.Entity;
 
 public class EntityModel : Tag<D2Class_076F8080>
 {
-    protected EntityModel(FileHash hash) : base(hash)
+    public EntityModel(FileHash hash) : base(hash)
     {
     }
 
     /*
      * We need the parent resource to get access to the external materials
      */
-    public List<DynamicPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource)
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource)
     {
         Dictionary<int, D2Class_CB6E8080> dynamicParts = GetPartsOfDetailLevel(detailLevel);
-        List<DynamicPart> parts = GenerateParts(dynamicParts, parentResource);
+        List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource);
         return parts;
     }
 
@@ -32,9 +32,11 @@ public class EntityModel : Tag<D2Class_076F8080>
     {
         Dictionary<int, D2Class_CB6E8080> parts = new Dictionary<int, D2Class_CB6E8080>();
 
-        for (var i = 0; i < _tag.Meshes[0].Parts.Count; i++)
+        using TigerReader reader = GetReader();
+        D2Class_C56E8080 mesh = _tag.Meshes[reader, 0];
+        for (var i = 0; i < mesh.Parts.Count; i++)
         {
-            D2Class_CB6E8080 part = _tag.Meshes[0].Parts[i];
+            D2Class_CB6E8080 part = mesh.Parts[reader, i];
             if (eDetailLevel == ExportDetailLevel.AllLevels)
             {
                 parts.Add(i, part);
@@ -55,16 +57,16 @@ public class EntityModel : Tag<D2Class_076F8080>
                 }
             }
         }
-
+        reader.Close();
         return parts;
     }
 
-    private List<DynamicPart> GenerateParts(Dictionary<int, D2Class_CB6E8080> dynamicParts, EntityResource parentResource)
+    private List<DynamicMeshPart> GenerateParts(Dictionary<int, D2Class_CB6E8080> dynamicParts, EntityResource parentResource)
     {
-        List<DynamicPart> parts = new List<DynamicPart>();
+        List<DynamicMeshPart> parts = new List<DynamicMeshPart>();
         if (_tag.Meshes.Count > 1) throw new Exception("Multiple meshes not supported");
-        if (_tag.Meshes.Count == 0) return new List<DynamicPart>();
-        D2Class_C56E8080 mesh = _tag.Meshes[0];
+        if (_tag.Meshes.Count == 0) return new List<DynamicMeshPart>();
+        D2Class_C56E8080 mesh = _tag.Meshes[GetReader(), 0];
 
         // Make part group map
         Dictionary<int, int> partGroups = new Dictionary<int, int>();
@@ -82,27 +84,32 @@ public class EntityModel : Tag<D2Class_076F8080>
 
         foreach (var (i, part) in dynamicParts)
         {
-            DynamicPart dynamicPart = new(part, parentResource);
-            dynamicPart.Index = i;
-            dynamicPart.GroupIndex = partGroups[i];
-            dynamicPart.LodCategory = part.LodCategory;
-            dynamicPart.bAlphaClip = (part.Flags & 0x8) != 0;
-            dynamicPart.GearDyeChangeColorIndex = part.GearDyeChangeColorIndex;
-            dynamicPart.GetAllData(mesh, _tag);
-            parts.Add(dynamicPart);
+            DynamicMeshPart dynamicMeshPart = new(part, parentResource);
+            dynamicMeshPart.Index = i;
+            dynamicMeshPart.GroupIndex = partGroups[i];
+            dynamicMeshPart.LodCategory = part.LodCategory;
+            dynamicMeshPart.bAlphaClip = (part.Flags & 0x8) != 0;
+            dynamicMeshPart.GearDyeChangeColorIndex = part.GearDyeChangeColorIndex;
+            dynamicMeshPart.GetAllData(mesh, _tag);
+            parts.Add(dynamicMeshPart);
         }
         return parts;
     }
 
 }
 
-public class DynamicPart : MeshPart
+public class DynamicMeshPart : MeshPart
 {
     public List<VertexWeight> VertexWeights = new List<VertexWeight>();
+
+    // used for single-pass skin buffer, where we want to find the position vec from a global index
+    public Dictionary<uint, int> VertexIndexMap = new Dictionary<uint, int>();
+
+    public List<Vector4> VertexColourSlots = new List<Vector4>();
     public bool bAlphaClip;
     public byte GearDyeChangeColorIndex = 0xFF;
 
-    public DynamicPart(D2Class_CB6E8080 part, EntityResource parentResource) : base()
+    public DynamicMeshPart(D2Class_CB6E8080 part, EntityResource parentResource) : base()
     {
         IndexOffset = part.IndexOffset;
         IndexCount = part.IndexCount;
@@ -117,13 +124,14 @@ public class DynamicPart : MeshPart
         }
     }
 
-    public DynamicPart() : base()
+    public DynamicMeshPart() : base()
     {
     }
 
     public void GetAllData(D2Class_C56E8080 mesh, D2Class_076F8080 model)
     {
         Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
+
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
         foreach (UIntVector3 index in Indices)
@@ -133,6 +141,12 @@ public class DynamicPart : MeshPart
             uniqueVertexIndices.Add(index.Z);
         }
         VertexIndices = uniqueVertexIndices.ToList();
+
+        for (int i = 0; i < VertexIndices.Count; i++)
+        {
+            VertexIndexMap.Add(VertexIndices[i], i);
+        }
+
         // Have to call it like this b/c we don't know the format of the vertex data here
         mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices);
         mesh.Vertices2.ReadVertexData(this, uniqueVertexIndices);
@@ -184,22 +198,25 @@ public class DynamicPart : MeshPart
 
     private Material GetMaterialFromExternalMaterial(short externalMaterialIndex, EntityResource parentResource)
     {
-        var map = ((D2Class_8F6D8080) parentResource.TagData.Unk18.Value).ExternalMaterialsMap;
-        var mats = ((D2Class_8F6D8080) parentResource.TagData.Unk18.Value).ExternalMaterials;
+        TigerReader reader = parentResource.GetReader();
+
+        var map = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
+        var mats = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
         if (map.Count == 0 || mats.Count == 0)
         {
             return null;
         }
         if (externalMaterialIndex >= map.Count)
             return null; // todo this is actually wrong ig...
-        var mapEntry = map[externalMaterialIndex];
+
+        var mapEntry = map[reader, externalMaterialIndex];
         // For now we'll just set as the first material in the array
         List<Material> materials = new List<Material>();
         for (int i = mapEntry.MaterialStartIndex; i < mapEntry.MaterialStartIndex + mapEntry.MaterialCount; i++)
         {
-            materials.Add(mats[i].Material);
+            materials.Add(mats[reader, i].Material);
         }
-
+        reader.Close();
         return materials[0];
     }
 }

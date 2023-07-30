@@ -46,7 +46,7 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
 
     public TigerFile GetFile(FileHash fileHash, bool shouldLoad = true)
     {
-        return GetFile(typeof(FileHash), fileHash, shouldLoad);
+        return GetFile<TigerFile>(fileHash, shouldLoad);
     }
 
     public dynamic? GetFile(Type type, FileHash hash, bool shouldLoad = true)
@@ -56,24 +56,25 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
             return null;
         }
 
-        if (_fileCache.ContainsKey(hash.Hash32))
+        if (_fileCache.TryGetValue(hash.Hash32, out dynamic? cachedFile))
         {
             // checks that the type of the cached file is the same as the type we're looking for
-            if (_fileCache[hash.Hash32].GetType() == type)
+            if (cachedFile.GetType() == type)
             {
-                return _fileCache[hash.Hash32];
+                return cachedFile;
             }
 
             // want a Tag<T>
             if (type.IsValueType)
             {
-                if (_fileCache[hash.Hash32].GetType().GenericTypeArguments.Length > 0 && _fileCache[hash.Hash32].GetType().GenericTypeArguments[0].UnderlyingSystemType == type)
+                if (cachedFile.GetType().GenericTypeArguments.Length > 0 && cachedFile.GetType().GenericTypeArguments[0].UnderlyingSystemType == type)
                 {
-                    return _fileCache[hash.Hash32];
+                    return cachedFile;
                 }
             }
 
-            _fileCache.TryRemove(hash.Hash32, out dynamic? r);
+            // todo causes thread safety issues
+            // _fileCache.TryRemove(hash.Hash32, out dynamic? r);
         }
 
         // want a Tag<T>

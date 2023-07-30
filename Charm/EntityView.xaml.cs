@@ -41,7 +41,7 @@ public partial class EntityView : UserControl
     public async void LoadEntityFromApi(TigerHash apiHash, FbxHandler fbxHandler)
     {
         fbxHandler.Clear();
-        List<Entity> entities = InvestmentHandler.GetEntitiesFromHash(apiHash);
+        List<Entity> entities = Investment.Get().GetEntitiesFromHash(apiHash);
         foreach (var entity in entities)
         {
             // todo find out why sometimes this is null
@@ -131,7 +131,7 @@ public partial class EntityView : UserControl
         // Export the model
         // todo bad, should be replaced
         EntitySkeleton overrideSkeleton = new EntitySkeleton(new FileHash("BC38AB80"));
-        var val = InvestmentHandler.GetPatternEntityFromHash(item.Item.TagData.InventoryItemHash);
+        var val = Investment.Get().GetPatternEntityFromHash(item.Item.TagData.InventoryItemHash);
         // var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18;
         // if (resource.PatternAudioGroups[0].WeaponSkeletonEntity != null)
         // {
@@ -141,22 +141,22 @@ public partial class EntityView : UserControl
         {
             overrideSkeleton = val.Skeleton;
         }
-        EntityView.Export(InvestmentHandler.GetEntitiesFromHash(item.Item.TagData.InventoryItemHash),
+        EntityView.Export(Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash),
             name, ExportTypeFlag.Full, overrideSkeleton);
 
         // Export the dye info
         Dictionary<TigerHash, Dye> dyes = new Dictionary<TigerHash, Dye>();
-        if (item.Item.TagData.Unk90.Value is D2Class_77738080 translationBlock)
+        if (item.Item.TagData.Unk90.GetValue(item.Item.GetReader()) is D2Class_77738080 translationBlock)
         {
             foreach (var dyeEntry in translationBlock.DefaultDyes)
             {
-                Dye dye = InvestmentHandler.GetDyeFromIndex(dyeEntry.DyeIndex);
-                dyes.Add(InvestmentHandler.GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
+                dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
             }
             foreach (var dyeEntry in translationBlock.LockedDyes)
             {
-                Dye dye = InvestmentHandler.GetDyeFromIndex(dyeEntry.DyeIndex);
-                dyes.Add(InvestmentHandler.GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
+                dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
             }
         }
 

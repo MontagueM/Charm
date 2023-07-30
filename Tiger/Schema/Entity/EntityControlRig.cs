@@ -18,24 +18,26 @@ public class EntityControlRig : EntityResource
 
     private void WriteDebugObj()
     {
+        using TigerReader reader = GetReader();
+
         StringBuilder sb = new StringBuilder();
-        D2Class_5F8B8080 skelInfo = (D2Class_5F8B8080)_tag.Unk18.Value;
+        D2Class_5F8B8080 skelInfo = (D2Class_5F8B8080)_tag.Unk18.GetValue(reader);
         var ikTransforms = skelInfo.UnkC8;
         var ikDescriptors = skelInfo.UnkB8;
         for (int i = 0; i < ikDescriptors.Count; i++)
         {
-            string name = ikDescriptors[i].Unk00.ToString();
+            string name = ikDescriptors[reader, i].Unk00.ToString();
             // if (!(name.Contains("thigh") || name.Contains("thigh"))) continue;;
-            var rotation = ikTransforms[i].Rotation;
-            var translation = ikTransforms[i].Translation.ToVec3();
+            var rotation = ikTransforms[reader, i].Rotation;
+            var translation = ikTransforms[reader, i].Translation.ToVec3();
             // if parent id == 1, we actually set it to == 2
-            int parentIndex = ikDescriptors[i].Unk04;
+            int parentIndex = ikDescriptors[reader, i].Unk04;
             if (parentIndex == 1) parentIndex = 2;
             if (parentIndex != i && parentIndex != -1) // if it has a parent
             {
                 // account for the parent's translation
                 // rotate the parent's translation
-                Schema.Vector3 parentTranslation = ikTransforms[parentIndex].Translation.ToVec3();
+                Schema.Vector3 parentTranslation = ikTransforms[reader, parentIndex].Translation.ToVec3();
                 var quat = new SharpDX.Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W);
                 var a = new SharpDX.Vector3(parentTranslation.X, parentTranslation.Y, parentTranslation.Z);
                 var result = SharpDX.Vector3.Transform(a, quat);
@@ -46,5 +48,6 @@ public class EntityControlRig : EntityResource
             sb.AppendLine($"v {translation.X} {translation.Y} {translation.Z}");
         }
         System.IO.File.WriteAllText("C:/T/test_control_rig.obj", sb.ToString());
+        reader.Close();
     }
 }

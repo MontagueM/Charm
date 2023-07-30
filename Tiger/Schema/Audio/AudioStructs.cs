@@ -118,7 +118,7 @@ public struct D2Class_38978080
     public Tag<D2Class_418A8080> Unk14;
     public Tag<D2Class_63838080> Unk18;
     [SchemaField(0x20)]
-    public DynamicArray<Wem> Unk20;
+    public DynamicArray<Wem> Wems;
     public Tag<D2Class_438A8080> Unk30;
 }
 

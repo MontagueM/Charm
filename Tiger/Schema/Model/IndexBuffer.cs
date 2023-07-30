@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace Tiger.Schema;
@@ -61,7 +62,8 @@ public class IndexBuffer : TigerReferenceFile<SIndexHeader>
         if (_tag.Is32Bit)
         {
             handle.BaseStream.Seek(offset * 4, SeekOrigin.Begin);
-            while (true)
+            long start = handle.BaseStream.Position;
+            while (handle.BaseStream.Position + 8 - start < count * 4)  // + 4 from reading the first two previous
             {
                 uint i1 = handle.ReadUInt32();
                 uint i2 = handle.ReadUInt32();

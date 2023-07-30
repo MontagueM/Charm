@@ -14,7 +14,7 @@ public class Dialogue : Tag<D2Class_B8978080>
     public List<dynamic?> Load()
     {
         List<dynamic?> result = new();
-        foreach (var entry in _tag.Unk18.Select(GetReader(), u => u.Unk08.Value))
+        foreach (var entry in _tag.Unk18.Select(GetReader(), u => u.Unk08.GetValue(GetReader())))
         {
 
             switch (entry)
@@ -54,7 +54,7 @@ public class Dialogue : Tag<D2Class_B8978080>
     private List<dynamic?> Collapse2D97(D2Class_2D978080 entry)
     {
         List<dynamic?> sounds = new();
-        foreach (dynamic? e in entry.Unk20.Select(GetReader(), u => u.Unk20.Value))
+        foreach (dynamic? e in entry.Unk20.Select(GetReader(), u => u.Unk20.GetValue(GetReader())))
         {
             switch (e)
             {
@@ -83,7 +83,10 @@ public class Dialogue : Tag<D2Class_B8978080>
     private List<dynamic?> Collapse2A97(D2Class_2A978080 entry)
     {
         List<dynamic?> sounds = new();
-        foreach (var e in entry.Unk28.Select(GetReader(), u => u.Unk40.Value))
+
+        // todo GetReader() here is wrong
+        // todo do a performance comparison of using the manual GetReader vs loading automatically and ignoring it
+        foreach (var e in entry.Unk28.Select(GetReader(), u => u.Unk40.GetValue(GetReader())))
         {
             switch (e)
             {

@@ -10,62 +10,75 @@ namespace Tiger.Schema.Investment;
 /// Keeps track of the investment tags.
 /// Finds them on launch from their tag class instead of hash.
 /// </summary>
-public class InvestmentHandler
+[InitializeAfter(typeof(PackageResourcer))]
+public class Investment : Strategy.StrategistSingleton<Investment>
 {
-    private static Tag<D2Class_8C798080> _inventoryItemIndexDictTag = null;
-    private static Tag<D2Class_97798080> _inventoryItemMap = null;
-    private static Tag<D2Class_F2708080> _artArrangementMap = null;
-    private static Tag<D2Class_CE558080> _entityAssignmentTag = null;
-    private static Tag<D2Class_434F8080> _entityAssignmentsMap = null;
-    private static Tag<D2Class_99548080> _inventoryItemStringThing = null;
-    private static Tag<D2Class_8C978080> _sandboxPatternAssignmentsTag = null;
-    private static Tag<D2Class_AA528080> _sandboxPatternGlobalTagIdTag = null;
-    public static ConcurrentDictionary<int, Tag<D2Class_9F548080>> InventoryItemStringThings = null;
-    public static Dictionary<TigerHash, int> InventoryItemIndexmap = null;
-    private static Dictionary<TigerHash, Tag<D2Class_A36F8080>> _sortedArrangementHashmap = null;
-    // private static Dictionary<TigerHash, FileHash> _sortedPatternGlobalTagIdAssignments = null;
-    private static Tag<D2Class_095A8080> _localizedStringsIndexTag = null;
-    private static Dictionary<int, LocalizedStrings> _localizedStringsIndexMap = null;
-    public static ConcurrentDictionary<TigerHash, InventoryItem> InventoryItems = null;
-    private static Tag<D2Class_015A8080> _inventoryItemIconTag = null;
-    // private static Tag<D2Class_8C978080> _dyeManifestTag = null;
-    private static Tag<D2Class_C2558080> _artDyeReferenceTag = null;
-    private static Tag<D2Class_F2518080> _dyeChannelTag = null;
-    public static void Initialise()
+    private Tag<D2Class_8C798080> _inventoryItemIndexDictTag = null;
+    private Tag<D2Class_97798080> _inventoryItemMap = null;
+    private Tag<D2Class_F2708080> _artArrangementMap = null;
+    private Tag<D2Class_CE558080> _entityAssignmentTag = null;
+    private Tag<D2Class_434F8080> _entityAssignmentsMap = null;
+    private Tag<D2Class_99548080> _inventoryItemStringThing = null;
+    private Tag<D2Class_8C978080> _sandboxPatternAssignmentsTag = null;
+    private Tag<D2Class_AA528080> _sandboxPatternGlobalTagIdTag = null;
+    public ConcurrentDictionary<int, Tag<D2Class_9F548080>> InventoryItemStringThings = null;
+    private Dictionary<uint, int> _inventoryItemIndexmap = null;
+    private Dictionary<uint, Tag<D2Class_A36F8080>> _sortedArrangementHashmap = null;
+    // private Dictionary<TigerHash, FileHash> _sortedPatternGlobalTagIdAssignments = null;
+    private Tag<D2Class_095A8080> _localizedStringsIndexTag = null;
+    private Dictionary<int, LocalizedStrings> _localizedStringsIndexMap = null;
+    public ConcurrentDictionary<uint, InventoryItem> InventoryItems = null;
+    private Tag<D2Class_015A8080> _inventoryItemIconTag = null;
+    // private Tag<D2Class_8C978080> _dyeManifestTag = null;
+    private Tag<D2Class_C2558080> _artDyeReferenceTag = null;
+    private Tag<D2Class_F2518080> _dyeChannelTag = null;
+
+    public Investment(TigerStrategy strategy) : base(strategy)
+    {
+    }
+
+    protected override void Reset() => throw new NotImplementedException();
+
+    protected override void Initialise()
     {
         GetAllInvestmentTags();
     }
 
-    public static string GetItemName(InventoryItem item)
+    public string GetItemName(InventoryItem item)
     {
         return GetItemName(item.TagData.InventoryItemHash);
     }
 
-    public static string GetItemName(TigerHash hash)
+    public string GetItemName(TigerHash hash)
     {
-        return InventoryItemStringThings[GetItemIndex(hash)].TagData.ItemName.Value;
+        return InventoryItemStringThings[GetItemIndex(hash)].TagData.ItemName.Value.ToString();
     }
 
-    public static Tag<D2Class_B83E8080>? GetItemIconContainer(InventoryItem item)
+    public Tag<D2Class_B83E8080>? GetItemIconContainer(InventoryItem item)
     {
         return GetItemIconContainer(item.TagData.InventoryItemHash);
     }
 
-    public static Tag<D2Class_B83E8080>? GetItemIconContainer(TigerHash hash)
+    public Tag<D2Class_B83E8080>? GetItemIconContainer(TigerHash hash)
     {
         int iconIndex = InventoryItemStringThings[GetItemIndex(hash)].TagData.IconIndex;
         if (iconIndex == -1)
             return null;
-        return _inventoryItemIconTag.TagData.InventoryItemIconsMap.ElementAt(iconIndex).IconContainer;
+        return _inventoryItemIconTag.TagData.InventoryItemIconsMap.ElementAt(_inventoryItemIconTag.GetReader(), iconIndex).IconContainer;
     }
 
 
-    public static int GetItemIndex(TigerHash hash)
+    public int GetItemIndex(TigerHash hash)
     {
-        return InventoryItemIndexmap[hash];
+        return _inventoryItemIndexmap[hash.Hash32];
     }
 
-    private static async void GetAllInvestmentTags()
+    public int GetItemIndex(uint hash32)
+    {
+        return _inventoryItemIndexmap[hash32];
+    }
+
+    private async void GetAllInvestmentTags()
     {
         // Iterate over all investment pkgs until we find all the tags we need
         bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup");
@@ -114,7 +127,7 @@ public class InvestmentHandler
                     break;
             }
         });
-        GetContainerIndexDict(); // must be before GetInventoryItemStringThings
+        GetLocalizedStringsIndexDict(); // must be before GetInventoryItemStringThings
 
 
         Task.WaitAll(new []
@@ -126,7 +139,7 @@ public class InvestmentHandler
         });
     }
 
-    private static void GetInventoryItemStringThings()
+    private void GetInventoryItemStringThings()
     {
         InventoryItemStringThings = new ConcurrentDictionary<int, Tag<D2Class_9F548080>>();
         for (int i = 0; i < _inventoryItemStringThing.TagData.StringThings.Count; i++)
@@ -135,30 +148,30 @@ public class InvestmentHandler
         }
     }
 
-    private static void GetContainerIndexDict()
+    private void GetLocalizedStringsIndexDict()
     {
-        _localizedStringsIndexMap = new Dictionary<int, LocalizedStrings>(_inventoryItemStringThing.TagData.StringThings.Count);
-        for (int i = 0; i < _inventoryItemStringThing.TagData.StringThings.Count; i++)
+        _localizedStringsIndexMap = new Dictionary<int, LocalizedStrings>(_localizedStringsIndexTag.TagData.StringContainerMap.Count);
+        for (int i = 0; i < _localizedStringsIndexTag.TagData.StringContainerMap.Count; i++)
         {
-            _localizedStringsIndexMap.Add(i, _localizedStringsIndexTag.TagData.StringContainerMap[_entityAssignmentsMap.GetReader(), i].StringContainer);
+            _localizedStringsIndexMap.Add(i, _localizedStringsIndexTag.TagData.StringContainerMap[_localizedStringsIndexTag.GetReader(), i].LocalizedStrings);
         }
     }
 
-    public static LocalizedStrings GetLocalizedStringsFromIndex(uint index)
+    public LocalizedStrings GetLocalizedStringsFromIndex(int index)
     {
-        return _localizedStringsIndexMap[(int) index];
+        return _localizedStringsIndexMap[index];
     }
 
-    private static void GetEntityAssignmentDict()
+    private void GetEntityAssignmentDict()
     {
-        _sortedArrangementHashmap = new Dictionary<TigerHash, Tag<D2Class_A36F8080>>(_entityAssignmentsMap.TagData.EntityArrangementMap.Count);
+        _sortedArrangementHashmap = new Dictionary<uint, Tag<D2Class_A36F8080>>(_entityAssignmentsMap.TagData.EntityArrangementMap.Count);
         foreach (var e in _entityAssignmentsMap.TagData.EntityArrangementMap.Enumerate(_entityAssignmentsMap.GetReader()))
         {
             _sortedArrangementHashmap.Add(e.AssignmentHash, e.EntityParent);
         }
     }
 
-    // private static void GetSandboxPatternAssignmentsDict()
+    // private void GetSandboxPatternAssignmentsDict()
     // {
     //     int size = (int)_sandboxPatternAssignmentsTag.TagData.AssignmentBSL.Count;
     //     _sortedPatternGlobalTagIdAssignments = new Dictionary<TigerHash, FileHash>(size);
@@ -175,7 +188,7 @@ public class InvestmentHandler
     //     br.Close();
     // }
 
-    public static Entity.Entity? GetPatternEntityFromHash(TigerHash hash)
+    public Entity.Entity? GetPatternEntityFromHash(TigerHash hash)
     {
         var item = GetInventoryItem(hash);
         if (item.GetWeaponPatternIndex() == -1)
@@ -190,24 +203,24 @@ public class InvestmentHandler
         return null;
     }
 
-    public static TigerHash GetPatternGlobalTagId(InventoryItem item)
+    public TigerHash GetPatternGlobalTagId(InventoryItem item)
     {
-        return _sandboxPatternGlobalTagIdTag.TagData.SandboxPatternGlobalTagId[item.GetWeaponPatternIndex()].PatternGlobalTagIdHash;
+        return _sandboxPatternGlobalTagIdTag.TagData.SandboxPatternGlobalTagId[_sandboxPatternGlobalTagIdTag.GetReader(), item.GetWeaponPatternIndex()].PatternGlobalTagIdHash;
     }
 
-    public static TigerHash GetWeaponContentGroupHash(InventoryItem item)
+    public TigerHash GetWeaponContentGroupHash(InventoryItem item)
     {
-        return _sandboxPatternGlobalTagIdTag.TagData.SandboxPatternGlobalTagId[item.GetWeaponPatternIndex()].WeaponContentGroupHash;
+        return _sandboxPatternGlobalTagIdTag.TagData.SandboxPatternGlobalTagId[_sandboxPatternGlobalTagIdTag.GetReader(), item.GetWeaponPatternIndex()].WeaponContentGroupHash;
     }
 
-    public static TigerHash GetChannelHashFromIndex(short index)
+    public TigerHash GetChannelHashFromIndex(short index)
     {
-        return _dyeChannelTag.TagData.ChannelHashes[index].ChannelHash;
+        return _dyeChannelTag.TagData.ChannelHashes[_dyeChannelTag.GetReader(), index].ChannelHash;
     }
 
-    public static Dye? GetDyeFromIndex(short index)
+    public Dye? GetDyeFromIndex(short index)
     {
-         var artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(index);
+         var artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(_sandboxPatternAssignmentsTag.GetReader(), index);
 
          var dyeEntry = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(_sandboxPatternAssignmentsTag.GetReader(), artEntry.DyeManifestHash);
          if (dyeEntry.HasValue && dyeEntry.Value.EntityRelationHash.GetReferenceHash() == 0x80806fa3)
@@ -217,33 +230,35 @@ public class InvestmentHandler
          return null;
     }
 
-    public static InventoryItem GetInventoryItem(TigerHash hash)
+    public InventoryItem GetInventoryItem(TigerHash hash)
     {
-        return GetInventoryItem(InventoryItemIndexmap[hash]);
+        return GetInventoryItem(_inventoryItemIndexmap[hash]);
     }
 
-    public static InventoryItem GetInventoryItem(int index)
+    public InventoryItem GetInventoryItem(int index)
     {
-        return _inventoryItemMap.TagData.InventoryItemDefinitionEntries.ElementAt(index).InventoryItem;
+        return _inventoryItemMap.TagData.InventoryItemDefinitionEntries.ElementAt(_inventoryItemMap.GetReader(), index).InventoryItem;
     }
 
-    public static void GetInventoryItemDict()
+    public void GetInventoryItemDict()
     {
-        InventoryItemIndexmap = new Dictionary<TigerHash, int>();
-        InventoryItems = new ConcurrentDictionary<TigerHash, InventoryItem>();
+        _inventoryItemIndexmap = new Dictionary<uint, int>();
+        InventoryItems = new ConcurrentDictionary<uint, InventoryItem>();
 
-        foreach (var e in _inventoryItemMap.TagData.InventoryItemDefinitionEntries.Enumerate(_inventoryItemMap.GetReader()))
+        for (int i = 0; i < _inventoryItemMap.TagData.InventoryItemDefinitionEntries.Count; i++)
         {
-            InventoryItems.TryAdd(e.InventoryItemHash, e.InventoryItem);
+            D2Class_9B798080 entry = _inventoryItemMap.TagData.InventoryItemDefinitionEntries[_inventoryItemMap.GetReader(), i];
+            _inventoryItemIndexmap.Add(entry.InventoryItemHash, i);
+            InventoryItems.TryAdd(entry.InventoryItemHash, entry.InventoryItem);
         }
     }
 
-    public static TigerHash GetArtArrangementHash(InventoryItem item)
+    public TigerHash GetArtArrangementHash(InventoryItem item)
     {
-        return _artArrangementMap.TagData.ArtArrangementHashes.ElementAt(item.GetArtArrangementIndex()).ArtArrangementHash;
+        return _artArrangementMap.TagData.ArtArrangementHashes.ElementAt(_artArrangementMap.GetReader(), item.GetArtArrangementIndex()).ArtArrangementHash;
     }
 
-    public static List<Entity.Entity> GetEntitiesFromHash(TigerHash hash)
+    public List<Entity.Entity> GetEntitiesFromHash(TigerHash hash)
     {
         var item = GetInventoryItem(hash);
         var index = item.GetArtArrangementIndex();
@@ -251,10 +266,10 @@ public class InvestmentHandler
         return entities;
     }
 
-    private static List<Entity.Entity> GetEntitiesFromArrangementIndex(int index)
+    private List<Entity.Entity> GetEntitiesFromArrangementIndex(int index)
     {
         List<Entity.Entity> entities = new();
-        var entry = _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.ElementAt(index);
+        var entry = _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.ElementAt(_entityAssignmentTag.GetReader(), index);
         if (entry.MultipleEntityAssignments.Count == 0)  // single
         {
             if (entry.FeminineSingleEntityAssignment.IsValid())
@@ -285,7 +300,7 @@ public class InvestmentHandler
         return entities;
     }
 
-    private static Entity.Entity GetEntityFromAssignmentHash(TigerHash assignmentHash)
+    private Entity.Entity GetEntityFromAssignmentHash(TigerHash assignmentHash)
     {
         // We can binary search here as the list is sorted.
         // var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
@@ -304,7 +319,7 @@ public class InvestmentHandler
     }
 
 #if DEBUG
-    public static void DebugAllInvestmentEntities()
+    public void DebugAllInvestmentEntities()
     {
         Dictionary<string, Dictionary<dynamic, TigerHash>> data = new();
         for (int i = (int)_entityAssignmentTag.TagData.ArtArrangementEntityAssignments.Count-1; i >= 0; i--)
@@ -315,7 +330,7 @@ public class InvestmentHandler
                 bool bAllValid = true;
                 if (entity is null || entity.Model is null)
                     continue;
-                foreach (var entry in entity.Model.TagData.Meshes[0].Parts)
+                foreach (var entry in entity.Model.TagData.Meshes[entity.Model.GetReader(), 0].Parts)
                 {
                     foreach (var field in typeof(D2Class_CB6E8080).GetFields())
                     {
@@ -326,7 +341,7 @@ public class InvestmentHandler
                         dynamic fieldValue = field.GetValue(entry);
                         if (fieldValue is not null && !data[field.Name].ContainsKey(fieldValue) && data[field.Name].Count < 10)
                         {
-                            data[field.Name].Add(fieldValue, _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.ElementAt(i).ArtArrangementHash);
+                            data[field.Name].Add(fieldValue, _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.ElementAt(_entityAssignmentTag.GetReader(), i).ArtArrangementHash);
                         }
 
                         bAllValid &= data[field.Name].Count > 1;
@@ -342,22 +357,22 @@ public class InvestmentHandler
 
     private static Random rng = new Random();
 
-    public static void DebugAPIRequestAllInfo()
+    public void DebugAPIRequestAllInfo()
     {
         // get all inventory item hashes
 
         // var itemHash = 138282166;
-        var l = InventoryItemIndexmap.Keys.ToList();
+        var l = _inventoryItemIndexmap.Keys.ToList();
         var shuffled = l.OrderBy(a => rng.Next()).ToList();
         foreach (var itemHash in shuffled)
         {
-            if (itemHash.Hash32 != 731561450)
+            if (itemHash != 731561450)
                 continue;
             ManifestData? itemDef;
             byte[] tgxm;
             try
             {
-                itemDef = MakeGetRequestManifestData($"https://www.light.gg/db/items/{itemHash.Hash32}/?raw=2");
+                itemDef = MakeGetRequestManifestData($"https://www.light.gg/db/items/{itemHash}/?raw=2");
                 // ManifestData? itemDef = MakeGetRequestManifestData($"https://lowlidev.com.au/destiny/api/gearasset/{itemHash.Hash}?destiny2");
                 if (itemDef is null || itemDef.gearAsset is null || itemDef.gearAsset.content.Length == 0 || itemDef.gearAsset.content[0].geometry is null || itemDef.gearAsset.content[0].geometry.Length == 0)
                     continue;
@@ -392,13 +407,13 @@ public class InvestmentHandler
                 {
                     byte[] fileData;
                     Array.Copy(tgxm, offset, fileData = new byte[size], 0, size);
-                    File.WriteAllBytes($"C:/T/geom/{itemHash.Hash32}_{fileName}", fileData);
+                    File.WriteAllBytes($"C:/T/geom/{itemHash}_{fileName}", fileData);
                 }
             }
         }
     }
 
-    public static void DebugAPIRenderMetadata()
+    public void DebugAPIRenderMetadata()
     {
 
         var files = Directory.GetFiles("C:/T/geom");
@@ -410,7 +425,7 @@ public class InvestmentHandler
         }
     }
 
-    private static ManifestData MakeGetRequestManifestData(string url)
+    private ManifestData MakeGetRequestManifestData(string url)
     {
         using (var client = new HttpClient())
         {
@@ -426,7 +441,7 @@ public class InvestmentHandler
         }
     }
 
-    private static byte[] MakeGetRequest(string url)
+    private byte[] MakeGetRequest(string url)
     {
         using (var client = new HttpClient())
         {
@@ -467,12 +482,12 @@ public class InvestmentHandler
         public int[] geometry { get; set; }
     }
     #endif
-    public static void ExportShader(InventoryItem item, string savePath, string name, TextureExportFormat outputTextureFormat)
+    public void ExportShader(InventoryItem item, string savePath, string name, TextureExportFormat outputTextureFormat)
     {
         Dictionary<string, Dye> dyes = new();
 
         // export all the customDyes
-        if (item.TagData.Unk90.Value is D2Class_77738080 translationBlock)
+        if (item.TagData.Unk90.GetValue(item.GetReader()) is D2Class_77738080 translationBlock)
         {
             foreach (var dyeEntry in translationBlock.CustomDyes)
             {
@@ -510,17 +525,17 @@ public class InventoryItem : Tag<D2Class_9D798080>
 
     public int GetArtArrangementIndex()
     {
-        if (_tag.Unk90.Value is D2Class_77738080 entry)
+        if (_tag.Unk90.GetValue(GetReader()) is D2Class_77738080 entry)
         {
             if (entry.Arrangements.Count > 0)
-                return entry.Arrangements[0].ArtArrangementHash;
+                return entry.Arrangements[GetReader(), 0].ArtArrangementHash;
         }
         return -1;
     }
 
     public int GetWeaponPatternIndex()
     {
-        if (_tag.Unk90.Value is D2Class_77738080 entry)
+        if (_tag.Unk90.GetValue(GetReader()) is D2Class_77738080 entry)
         {
             if (entry.WeaponPatternIndex > 0)
                 return entry.WeaponPatternIndex;
@@ -530,23 +545,24 @@ public class InventoryItem : Tag<D2Class_9D798080>
 
     private Texture? GetTexture(Tag<D2Class_CF3E8080> iconSecondaryContainer)
     {
-        dynamic? prim = iconSecondaryContainer.TagData.Unk10.Value;
+        TigerReader reader = iconSecondaryContainer.GetReader();
+        dynamic? prim = iconSecondaryContainer.TagData.Unk10.GetValue(reader);
         if (prim is D2Class_CD3E8080 structCD3E8080)
         {
             // TextureList[0] is default, others are for colourblind modes
-            return structCD3E8080.Unk00[0].TextureList[0].IconTexture;
+            return structCD3E8080.Unk00[reader, 0].TextureList[reader, 0].IconTexture;
         }
         if (prim is D2Class_CB3E8080 structCB3E8080)
         {
-            return structCB3E8080.Unk00[0].TextureList[0].IconTexture;
+            return structCB3E8080.Unk00[reader, 0].TextureList[reader, 0].IconTexture;
         }
-
+        reader.Close();
         return null;
     }
 
     public UnmanagedMemoryStream? GetIconBackgroundStream()
     {
-        Tag<D2Class_B83E8080>? iconContainer = InvestmentHandler.GetItemIconContainer(this);
+        Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconBackgroundContainer == null)
             return null;
         var backgroundIcon = GetTexture(iconContainer.TagData.IconBackgroundContainer);
@@ -555,7 +571,7 @@ public class InventoryItem : Tag<D2Class_9D798080>
 
     public UnmanagedMemoryStream? GetIconPrimaryStream()
     {
-        Tag<D2Class_B83E8080>? iconContainer = InvestmentHandler.GetItemIconContainer(this);
+        Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
         var primaryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
@@ -564,7 +580,7 @@ public class InventoryItem : Tag<D2Class_9D798080>
 
     public UnmanagedMemoryStream? GetIconOverlayStream()
     {
-        Tag<D2Class_B83E8080>? iconContainer = InvestmentHandler.GetItemIconContainer(this);
+        Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconOverlayContainer == null)
             return null;
         var overlayIcon = GetTexture(iconContainer.TagData.IconOverlayContainer);

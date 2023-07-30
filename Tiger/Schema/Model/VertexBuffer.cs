@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Tiger.Schema.Entity;
 
 namespace Tiger.Schema;
 
@@ -197,7 +198,6 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
 
     private bool ReadVertexDataType6(TigerReader handle, DynamicMeshPart dynamicPart, uint vertexIndex)
     {
-        dynamicPart.VertexWeights = new();
         switch (_tag.Stride)
         {
             case 0x4:
@@ -224,7 +224,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
 
                 // new code vvv
                 VertexWeight vw = new();
-                short w = (short)dynamicPart.VertexPositions[dynamicPart.VertexIndices.IndexOf(vertexIndex)].W;
+                short w = (short)dynamicPart.VertexPositions[dynamicPart.VertexIndexMap[vertexIndex]].W;
                 if (w >= 0 && w < 0x800)
                 {
                     vw.WeightIndices = new IntVector4(w, 0, 0, 0);

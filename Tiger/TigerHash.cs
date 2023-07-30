@@ -30,6 +30,8 @@ public class StringHash : TigerHash
     {
     }
 
+    public static StringHash Invalid => new(0x811c9dc5);
+
     public override bool IsValid()
     {
         return Hash32 != InvalidHash32 && Hash32 != 0;
@@ -199,6 +201,10 @@ public class FileHash64 : FileHash
 /// </summary>
 public class TagClassHash : TigerHash
 {
+    public TagClassHash() : base()
+    {
+    }
+
     public TagClassHash(uint hash32) : base(hash32)
     {
     }

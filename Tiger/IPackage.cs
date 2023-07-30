@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Serilog;
 using Tiger.DESTINY2_WITCHQUEEN_6307;
 
 namespace Tiger;
@@ -34,6 +35,8 @@ public interface IPackageHeader
     public List<D2FileEntry> GetFileEntries(TigerReader reader);
     public List<D2BlockEntry> GetBlockEntries(TigerReader reader);
     public List<Hash64Definition> GetHash64Definitions(TigerReader reader);
+
+    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader);
 }
 
 public interface IPackage
@@ -48,6 +51,16 @@ public interface IPackage
     byte[] GetFileBytes(FileHash fileHash);
     HashSet<int> GetRequiredPatches();
     List<Hash64Definition> GetHash64List();
+
+    public List<SPackageActivityEntry> GetAllActivities();
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C59E8080", 0x10)]
+public struct SPackageActivityEntry
+{
+    public FileHash TagHash;
+    public TagClassHash TagClassHash;
+    public StringPointer Name;
 }
 
 public abstract class Package : IPackage
@@ -114,17 +127,45 @@ public abstract class Package : IPackage
     {
         List<T> tags = new();
 
-        SchemaStructAttribute attribute = GetAttribute<SchemaStructAttribute>(typeof(T).BaseType.GenericTypeArguments[0]);
-        TigerHash referenceHash = new(attribute.ClassHash);
 
-        for (int i = 0; i < FileEntries.Count; i++)
+        Type type = typeof(T);
+        if (type.IsGenericType)
         {
-            if (FileEntries[i].Reference.Equals(referenceHash))
+            type = type.BaseType.GenericTypeArguments[0];
+        }
+
+        SchemaDeserializer.Get().TryGetSchemaTypeIdentifier(type, out TypeIdentifier typeIdentifier);
+
+        if (typeIdentifier.HasClassHash())
+        {
+            for (int i = 0; i < FileEntries.Count; i++)
             {
-                T tag = FileResourcer.Get().GetFile<T>(new FileHash(Header.GetPackageId(), (uint)i));
-                tags.Add(tag);
+                if (FileEntries[i].Reference.Hash32 == typeIdentifier.ClassHash)
+                {
+                    T tag = FileResourcer.Get().GetFile<T>(new FileHash(Header.GetPackageId(), (uint)i));
+                    tags.Add(tag);
+                }
             }
         }
+        else
+        {
+            if (typeIdentifier.HasTypeSubType())
+            {
+                for (int i = 0; i < FileEntries.Count; i++)
+                {
+                    if (FileEntries[i].NumType == typeIdentifier.Type && typeIdentifier.SubTypes.Contains(FileEntries[i].NumSubType))
+                    {
+                        T tag = FileResourcer.Get().GetFile<T>(new FileHash(Header.GetPackageId(), (uint)i));
+                        tags.Add(tag);
+                    }
+                }
+            }
+            else
+            {
+                Log.Warning($"Tried to get all files of type {typeof(T).Name} but it has no schema or non-schema attribute.");
+            }
+        }
+
 
         return tags;
     }
@@ -440,6 +481,12 @@ public abstract class Package : IPackage
             fileMetadataList.Add(GetFileMetadata(fileIndex));
         }
         return fileMetadataList;
+    }
+
+    public List<SPackageActivityEntry> GetAllActivities()
+    {
+        using TigerReader reader = GetReader();
+        return Header.GetAllActivities(reader);
     }
 }
 

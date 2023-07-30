@@ -115,7 +115,7 @@ public struct SStringPartDefinition
 //     [DestinyField(FieldType.TagHash64)]
 //     public Tag Unk00;
 //     [DestinyField(FieldType.TagHash64)]
-//     public StringContainer Unk10;  // this can be a string container
+//     public LocalizedStrings Unk10;  // this can be a string container
 // }
 //
 // [StructLayout(LayoutKind.Sequential, Size = 0x50)]

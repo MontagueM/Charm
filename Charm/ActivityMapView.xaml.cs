@@ -36,9 +36,9 @@ public partial class ActivityMapView : UserControl
     private ObservableCollection<DisplayBubble> GetMapList(Activity activity)
     {
         var maps = new ObservableCollection<DisplayBubble>();
-        foreach (var mapEntry in activity.TagData.Unk50)
+        foreach (var mapEntry in activity.TagData.Unk50.Enumerate(activity.GetReader()))
         {
-            foreach (var mapReferences in mapEntry.MapReferences)
+            foreach (var mapReferences in mapEntry.MapReferences.Enumerate(activity.GetReader()))
             {
                 // idk why this can happen but it can, some weird stuff with h64
                 // for the child map reference, ive only seen it once so far but the hash for it was just FFFFFFFF in the map reference file
@@ -84,9 +84,10 @@ public partial class ActivityMapView : UserControl
         {
             if (m.MapContainer.TagData.MapDataTables.Count > 1)
             {
-                if (m.MapContainer.TagData.MapDataTables[1].MapDataTable.TagData.DataEntries.Count > 0)
+                Tag<SMapDataTable> mapDataTable = m.MapContainer.TagData.MapDataTables[m.MapContainer.GetReader(), 1].MapDataTable;
+                if (mapDataTable.TagData.DataEntries.Count > 0)
                 {
-                    StaticMapData tag = m.MapContainer.TagData.MapDataTables[1].MapDataTable.TagData.DataEntries[0].DataResource.Value.StaticMapParent.TagData.StaticMap;
+                    StaticMapData tag = mapDataTable.TagData.DataEntries[m.MapContainer.GetReader(), 0].DataResource.GetValue(mapDataTable.GetReader()).StaticMapParent.TagData.StaticMap;
                     items.Add(new DisplayStaticMap
                     {
                         Hash = m.MapContainer.Hash,

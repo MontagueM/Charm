@@ -200,11 +200,11 @@ public struct D2Class_9F548080
     [SchemaField(0x88)]
     public short IconIndex;
     public short Unk8A;
-    public StringPointer ItemName;  // "displayProperties" -> "name"
+    public StringIndexReference ItemName;  // "displayProperties" -> "name"
     [SchemaField(0x98)]
-    public StringPointer ItemType;  // "itemTypeDisplayName"
+    public StringIndexReference ItemType;  // "itemTypeDisplayName"
     [SchemaField(0xB0)]
-    public StringPointer ItemFlavourText;  // "flavorText"
+    public StringIndexReference ItemFlavourText;  // "flavorText"
     public DynamicArray<D2Class_F1598080> UnkB8;
 
     public TigerHash UnkC8;  // "bucketTypeHash" / "equipmentSlotTypeHash"
@@ -239,7 +239,7 @@ public struct D2Class_59238080
 [SchemaStruct("EF548080", 0x1C)]
 public struct D2Class_EF548080
 {
-    public StringPointer DestructionTerm;
+    public StringIndexReference DestructionTerm;
     // some other terms, integers
 }
 
@@ -296,7 +296,7 @@ public struct D2Class_B4548080
     public TigerHash Unk00;
     public TigerHash Unk04;
     [SchemaField(0x0C)]
-    public StringPointer InspectionTerm;
+    public StringIndexReference InspectionTerm;
     public int Unk14;
 }
 
@@ -609,7 +609,7 @@ public struct D2Class_0E5A8080
 {
     public TigerHash BankFnvHash;  // some kind of name for the bank
     [SchemaField(0x8), Tag64]
-    public LocalizedStrings StringContainer;
+    public LocalizedStrings LocalizedStrings;
 }
 
 #endregion

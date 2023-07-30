@@ -32,7 +32,7 @@ public partial class MusicView : UserControl
             throw new NotImplementedException();
         }
 
-        var resource = music.TagData.Unk28[0].Unk00.Value;
+        var resource = music.TagData.Unk28[music.GetReader(), 0].Unk00.GetValue(music.GetReader());
         if (resource is D2Class_F5458080 f5458080)
         {
             WemsControl.Load(f5458080);
@@ -46,7 +46,7 @@ public partial class MusicView : UserControl
             EventsControl.Load(res);
             if (res.AmbientMusicSet != null)
             {
-                var sbhash = res.AmbientMusicSet.TagData.Unk08[0].MusicLoopSound.TagData.Unk18.TagData.SoundBank.Hash;
+                var sbhash = res.AmbientMusicSet.TagData.Unk08[res.AmbientMusicSet.GetReader(), 0].MusicLoopSound.TagData.Unk18.TagData.SoundBank.Hash;
                 SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.PackageId:X4}-{sbhash.FileIndex:X4}";
             }
         }

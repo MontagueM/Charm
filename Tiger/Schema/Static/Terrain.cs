@@ -57,11 +57,12 @@ public class Terrain : Tag<D2Class_816C8080>
 
         Vector3 localOffset;
         int terrainTextureIndex = 14;
+        using TigerReader reader = GetReader();
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
             // Part part = MakePart(partEntry);
             // parts.Add(part);
-            var partEntry = _tag.MeshGroups[i];
+            var partEntry = _tag.MeshGroups[reader, i];
             if (partEntry.Dyemap != null)
             {
                 partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/{partEntry.Dyemap.Hash}");
@@ -82,9 +83,10 @@ public class Terrain : Tag<D2Class_816C8080>
         // We need to add these textures after the static is initialised
         foreach (var part in parts)
         {
-            if (_tag.MeshGroups[part.GroupIndex].Dyemap != null)
+            Texture dyemap = _tag.MeshGroups[reader, part.GroupIndex].Dyemap;
+            if (dyemap != null)
             {
-                fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, _tag.MeshGroups[part.GroupIndex].Dyemap);
+                fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, dyemap);
 
                 if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat"))
                 {
@@ -94,12 +96,13 @@ public class Terrain : Tag<D2Class_816C8080>
 
                     //Insert a new line before the last line
                     var newVmat = vmat.Take(vmat.Length - 1).ToList();
-                    newVmat.Add($"  TextureT14 " + $"\"{_tag.MeshGroups[part.GroupIndex].Dyemap.Hash}.png\"");
+                    newVmat.Add($"  TextureT14 " + $"\"{dyemap.Hash}.png\"");
                     newVmat.Add(lastLine);
                     File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
                 }
             }
         }
+        reader.Close();
     }
 
     public StaticPart MakePart(D2Class_846C8080 entry)
@@ -140,12 +143,15 @@ public class Terrain : Tag<D2Class_816C8080>
     private void TransformTexcoords(StaticPart part)
     {
         double scaleX, scaleY, translateX, translateY;
-        if (_tag.MeshGroups[part.GroupIndex].Unk20.Z == 0.0078125)
+
+        Vector4 vec = _tag.MeshGroups[GetReader(), part.GroupIndex].Unk20;
+
+        if (vec.Z == 0.0078125)
         {
             scaleX = 1 / 0.4375 * 2.28571428571 * 2;
             translateX = 0.333333; // 0 if no 2 * 2.285
         }
-        else if (_tag.MeshGroups[part.GroupIndex].Unk20.Z == -0.9765625)
+        else if (vec.Z == -0.9765625)
         {
             scaleX = 32;
             translateX = -14;
@@ -154,12 +160,12 @@ public class Terrain : Tag<D2Class_816C8080>
         {
             throw new Exception("Unknown terrain uv scale x");
         }
-        if (_tag.MeshGroups[part.GroupIndex].Unk20.W == 0.0078125)
+        if (vec.W == 0.0078125)
         {
             scaleY = -1 / 0.4375 * 2.28571428571 * 2;
             translateY = 0.333333;
         }
-        else if (_tag.MeshGroups[part.GroupIndex].Unk20.W == -0.9765625)
+        else if (vec.W == -0.9765625)
         {
             scaleY = -32;
             translateY = -14;

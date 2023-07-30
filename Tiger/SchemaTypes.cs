@@ -2,6 +2,7 @@
 using System.Text;
 using Serilog;
 using Tiger.Schema;
+using Tiger.Schema.Investment;
 
 namespace Tiger;
 
@@ -69,6 +70,7 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
     public int Count;
     public RelativePointer Offset;
     protected int _elementSize;
+    private bool _loaded = false;
 
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash defined for array
 
@@ -91,6 +93,16 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
         }
     }
 
+    public void Load(TigerReader reader)
+    {
+        if (Count != 0)
+        {
+            return;
+        }
+        _loaded = true;
+        AddRange(Enumerate(reader));
+    }
+
     public IEnumerable<TResult> Select<TResult>(TigerReader reader, Func<T, TResult> selector)
     {
         return Enumerate(reader).Select(selector);
@@ -103,8 +115,32 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
 
     public new T this[int index]
     {
-        get => throw new NotSupportedException("DynamicArray does not store data locally, use with TigerReader or change to DynamicArrayLoaded");
+        get
+        {
+            if (_loaded)
+            {
+                return OriginalIndexAccess(index);
+            }
+            else
+            {
+                throw new NotSupportedException(
+                    "DynamicArray does not store data locally, use with TigerReader or change to DynamicArrayLoaded");
+            }
+        }
         set => throw new NotSupportedException("DynamicArray is read-only");
+    }
+
+    public new Enumerator GetEnumerator()
+    {
+        if (_loaded)
+        {
+            return base.GetEnumerator();
+        }
+        else
+        {
+            throw new NotSupportedException(
+                "DynamicArray does not store data locally, use with TigerReader or change to DynamicArrayLoaded");
+        }
     }
 
     public T this[TigerReader reader, int index]
@@ -116,6 +152,19 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
     protected T OriginalIndexAccess(int index)
     {
         return base[index];
+    }
+
+    public new T ElementAt(int index)
+    {
+        if (_loaded)
+        {
+            return OriginalIndexAccess(index);
+        }
+        else
+        {
+            throw new NotSupportedException(
+                "DynamicArray does not store data locally, use with TigerReader or change to DynamicArrayLoaded");
+        }
     }
 
     public T ElementAt(TigerReader reader, int index)
@@ -131,6 +180,7 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
 
     protected T ReadElement(TigerReader reader, int index)
     {
+        // todo consolidate with SchemaDeserializer
         reader.Seek(Offset.AbsoluteOffset + index * _elementSize, SeekOrigin.Begin);
         if (typeof(T).IsValueType) // if T is a struct
         {
@@ -139,6 +189,11 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
         else if (SchemaDeserializer.Get().IsTigerDeserializeType(typeof(T)))
         {
             return (T)reader.ReadSchemaType(typeof(T));
+        }
+        else if (SchemaDeserializer.Get().IsTigerFileType(typeof(T)))
+        {
+            FileHash fileHash = new(reader.ReadUInt32());
+            return FileResourcer.Get().GetFile(typeof(T), fileHash);
         }
         else
         {
@@ -228,6 +283,9 @@ public class DynamicArrayLoaded<T> : DynamicArray<T> where T : struct
         get => OriginalIndexAccess(index);
         set => throw new NotSupportedException("DynamicArray is read-only");
     }
+
+    public new Enumerator GetEnumerator()
+        => new();
 }
 
 /// <summary>
@@ -254,6 +312,15 @@ public class SortedDynamicArray<T> : DynamicArray<T> where T : struct
         uint lowValue = reader.ReadUInt32();
         reader.Seek(Offset.AbsoluteOffset + highIndex * _elementSize, SeekOrigin.Begin);
         uint highValue = reader.ReadUInt32();
+
+        if (searchValue == lowValue)
+        {
+            return lowIndex;
+        }
+        else if (searchValue == highValue)
+        {
+            return highIndex;
+        }
 
         // Since array is sorted, an element present in array must be in range defined by corner
         if (lowIndex < highIndex && searchValue >= lowValue && searchValue <= highValue)
@@ -325,8 +392,28 @@ public class GlobalPointer<T> : ITigerDeserialize where T : struct
 /// </summary>
 public class ResourcePointer : RelativePointer
 {
-    public dynamic? Value;
-    public uint ResourceClassHash;
+    // public dynamic? Value
+    public uint ResourceClassHash = TigerHash.InvalidHash32;
+
+    // not ideal, but it stops the recursive deserialization. in future should make some kind of ref system
+    // and use that instead
+    public dynamic? GetValue(TigerReader reader)
+    {
+        if (ResourceClassHash == TigerHash.InvalidHash32)
+        {
+            return null;
+        }
+        if (SchemaDeserializer.Get().TryGetSchemaType(ResourceClassHash, out Type schemaType))
+        {
+            reader.Seek(AbsoluteOffset, SeekOrigin.Begin);
+            return reader.ReadSchemaStruct(schemaType);
+        }
+        else
+        {
+            Log.Warning($"Unknown resource class hash {ResourceClassHash:X8}");
+            return null;
+        }
+    }
 
     public override void Deserialize(TigerReader reader)
     {
@@ -334,20 +421,15 @@ public class ResourcePointer : RelativePointer
 
         if (_relativeOffset == 0)
         {
-            Value = null;
             return;
         }
 
         reader.Seek(AbsoluteOffset - 4, SeekOrigin.Begin);
         ResourceClassHash = reader.ReadUInt32();
-
-        if (SchemaDeserializer.Get().TryGetSchemaType(ResourceClassHash, out Type schemaType))
+        if (ResourceClassHash == 0)
         {
-            Value = reader.ReadSchemaStruct(schemaType);
-        }
-        else
-        {
-            Log.Warning($"Unknown resource class hash {ResourceClassHash:X8}");
+            Debug.Fail("Resource class hash is 0");
+            ResourceClassHash = TigerHash.InvalidHash32;
         }
     }
 }
@@ -403,6 +485,26 @@ public class StringReference : ITigerDeserialize
     }
 }
 
+/// <summary>
+/// References a 32-bit index, pointing to a <see cref="Tiger.Schema.LocalizedStrings"/>, and a 32-bit string hash.
+/// </summary>
+[SchemaType(0x08)]
+public class StringIndexReference : ITigerDeserialize
+{
+    public TigerString? Value;
+
+    public void Deserialize(TigerReader reader)
+    {
+        int index = reader.ReadInt32();
+        if (index == 0xFF_FF)
+        {
+            return;
+        }
+        LocalizedStrings localizedStrings = Investment.Get().GetLocalizedStringsFromIndex(index);
+        StringHash stringHash = new(reader.ReadUInt32());
+        Value = localizedStrings.GetStringFromHash(stringHash);
+    }
+}
 
 /// <summary>
 /// References a 64-bit <see cref="Tiger.Schema.LocalizedStrings"/> and a 32-bit string hash.

@@ -76,7 +76,7 @@ public partial class MusicPlayerControl : UserControl
         if (_output != null)
             _output.Dispose();
         _sound = sound;
-        if (sound.TagData.Unk20.Count > 10)
+        if (sound.TagData.Wems.Count > 10)
         {
             MainWindow.Progress.SetProgressStages(new List<string>
             {

@@ -16,6 +16,7 @@ using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Toolkit.Mvvm.Input;
 using SharpDX;
 using Tiger.Schema;
+using Tiger.Schema.Entity;
 using Vector3 = Tiger.Schema.Vector3;
 using Vector4 = Tiger.Schema.Vector4;
 

@@ -28,8 +28,8 @@ public class WwiseSound : TigerReferenceFile<D2Class_38978080>
 
     private MixingSampleProvider MakeProvider()
     {
-        MixingSampleProvider provider = new(_tag.Unk20[0].MakeWaveChannel()?.WaveFormat);
-        Parallel.ForEach(_tag.Unk20, wem =>
+        MixingSampleProvider provider = new(_tag.Wems[GetReader(), 0].MakeWaveChannel()?.WaveFormat);
+        Parallel.ForEach(_tag.Wems, wem =>
         {
             provider.AddMixerInput(wem.MakeWaveChannel());
         });
@@ -78,7 +78,7 @@ public class WwiseSound : TigerReferenceFile<D2Class_38978080>
     public void ExportSound(string saveDirectory)
     {
         CheckLoaded();
-        _tag.Unk20.ForEach(wem =>
+        _tag.Wems.ForEach(wem =>
         {
             wem.SaveToFile($"{saveDirectory}/{wem.Hash}_{ReferenceHash}.wav");
         });

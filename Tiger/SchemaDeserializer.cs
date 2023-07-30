@@ -10,6 +10,16 @@ public struct TypeIdentifier
     public uint ClassHash { get; set; }
     public int Type { get; set; }
     public HashSet<int> SubTypes { get; set; }
+
+    public bool HasClassHash()
+    {
+        return ClassHash != TigerHash.InvalidHash32;
+    }
+
+    public bool HasTypeSubType()
+    {
+        return Type != -1 && SubTypes.Count > 0;
+    }
 }
 
 public struct TypeSubType
@@ -149,6 +159,13 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 return;
             }
 
+            NonSchemaTypeAttribute? nonSchemaTypeAttr = GetFirstAttribute<NonSchemaTypeAttribute>(type);
+            if (nonSchemaTypeAttr != null)
+            {
+                _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaTypeAttr.Type, SubTypes = nonSchemaTypeAttr.SubTypes});
+                return;
+            }
+
             SchemaTypeAttribute? schemaTypeAttribute = (SchemaTypeAttribute?)type.GetCustomAttribute(typeof(SchemaTypeAttribute), true);
             if (schemaTypeAttribute != null)
             {
@@ -254,13 +271,46 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             else if (IsTigerFile64Type(fieldInfo))
             {
                 fieldValue = DeserializeTag64(reader, fieldInfo.FieldType);
-                fieldSize = GetSchemaTypeSize(fieldInfo.FieldType);
+                fieldSize = 0x10;
             }
-            else if (IsTigerFileType(fieldInfo))
+            else if (IsTigerFileType(fieldInfo.FieldType))
             {
-                FileHash fileHash = new FileHash(reader.ReadUInt32());
+                FileHash fileHash = new(reader.ReadUInt32());
                 fieldValue = FileResourcer.Get().GetFile(fieldInfo.FieldType, fileHash);
                 fieldSize = GetSchemaTypeSize(fieldInfo.FieldType);
+            }
+            else if (fieldInfo.FieldType.IsEnum)
+            {
+                fieldValue = Enum.ToObject(fieldInfo.FieldType, reader.ReadByte());
+                fieldSize = 1;
+            }
+            else if (fieldInfo.FieldType.IsArray)
+            {
+                int arraySize = ((MarshalAsAttribute)fieldInfo.GetCustomAttribute(typeof(MarshalAsAttribute), true)).SizeConst;
+                fieldValue = Activator.CreateInstance(fieldInfo.FieldType, arraySize);
+                for (int i = 0; i < arraySize; i++)
+                {
+                    dynamic value;
+                    if (IsTigerDeserializeType(fieldInfo.FieldType))
+                    {
+                        value =  DeserializeTigerType(reader, fieldInfo.FieldType.GetElementType());
+                    }
+                    else
+                    {
+                        value =  DeserializeMarshalType(reader, fieldInfo.FieldType.GetElementType());
+                    }
+                    // assume it's a tiger deserialize type
+                    fieldValue[i] = value;
+                }
+
+                if (IsTigerDeserializeType(fieldInfo.FieldType))
+                {
+                    fieldSize = GetSchemaTypeSize(fieldInfo.FieldType.GetElementType()) * arraySize;
+                }
+                else
+                {
+                    fieldSize = Marshal.SizeOf(fieldInfo.FieldType.GetElementType()) * arraySize;
+                }
             }
             else
             {
@@ -299,9 +349,9 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         return _tagDeserializeTypes.Contains(type);
     }
 
-    private bool IsTigerFileType(FieldInfo fieldInfo)
+    public bool IsTigerFileType(Type fieldType)
     {
-        return fieldInfo.FieldType == typeof(TigerFile) || fieldInfo.FieldType.IsSubclassOf(typeof(TigerFile));
+        return fieldType == typeof(TigerFile) || fieldType.IsSubclassOf(typeof(TigerFile));
     }
 
     private bool IsTigerFile64Type(FieldInfo fieldInfo)
@@ -339,7 +389,15 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         }
         else
         {
-            return Marshal.SizeOf(type);
+            // todo make this recursive
+            if (_schemaSerializedSizeMap.TryGetValue(type.BaseType, out size))
+            {
+                return size;
+            }
+            else
+            {
+                return Marshal.SizeOf(type);
+            }
         }
     }
 
