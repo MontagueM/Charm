@@ -155,7 +155,6 @@ public class Investment : Strategy.StrategistSingleton<Investment>
     {
         _localizedStringsIndexMap = new Dictionary<int, LocalizedStrings>(_localizedStringsIndexTag.TagData.StringContainerMap.Count);
         using TigerReader reader = _localizedStringsIndexTag.GetReader();
-        _localizedStringsIndexTag.TempDump();
         for (int i = 0; i < _localizedStringsIndexTag.TagData.StringContainerMap.Count; i++)
         {
             _localizedStringsIndexMap.Add(i, _localizedStringsIndexTag.TagData.StringContainerMap[reader, i].LocalizedStrings);

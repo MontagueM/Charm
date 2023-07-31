@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharmAvalon", "CharmAvalon\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevorbStd", "ThirdParty\revorbstd\RevorbStd.csproj", "{C407B28F-077C-41C2-8C16-277CB9681E92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharmAvalonia", "CharmAvalonia\CharmAvalonia.csproj", "{C7351B8C-6334-447F-8B19-C57FB9B6406A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -77,6 +79,10 @@ Global
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Debug|x64.Build.0 = Debug|Any CPU
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Release|x64.ActiveCfg = Release|Any CPU
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Release|x64.Build.0 = Release|Any CPU
+		{C7351B8C-6334-447F-8B19-C57FB9B6406A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C7351B8C-6334-447F-8B19-C57FB9B6406A}.Debug|x64.Build.0 = Debug|Any CPU
+		{C7351B8C-6334-447F-8B19-C57FB9B6406A}.Release|x64.ActiveCfg = Release|Any CPU
+		{C7351B8C-6334-447F-8B19-C57FB9B6406A}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

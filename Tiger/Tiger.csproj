@@ -16,11 +16,11 @@
       <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="9.0.0.68202">
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="9.6.0.74858">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="System.Data.SQLite.Core" Version="1.0.117" />
+      <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
     </ItemGroup>
 
     <ItemGroup>
