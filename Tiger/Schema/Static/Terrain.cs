@@ -57,12 +57,11 @@ public class Terrain : Tag<D2Class_816C8080>
 
         Vector3 localOffset;
         int terrainTextureIndex = 14;
-        using TigerReader reader = GetReader();
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
             // Part part = MakePart(partEntry);
             // parts.Add(part);
-            var partEntry = _tag.MeshGroups[reader, i];
+            var partEntry = _tag.MeshGroups[i];
             if (partEntry.Dyemap != null)
             {
                 partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/{partEntry.Dyemap.Hash}");
@@ -83,7 +82,7 @@ public class Terrain : Tag<D2Class_816C8080>
         // We need to add these textures after the static is initialised
         foreach (var part in parts)
         {
-            Texture dyemap = _tag.MeshGroups[reader, part.GroupIndex].Dyemap;
+            Texture dyemap = _tag.MeshGroups[part.GroupIndex].Dyemap;
             if (dyemap != null)
             {
                 fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, dyemap);
@@ -102,7 +101,6 @@ public class Terrain : Tag<D2Class_816C8080>
                 }
             }
         }
-        reader.Close();
     }
 
     public StaticPart MakePart(D2Class_846C8080 entry)
@@ -144,7 +142,7 @@ public class Terrain : Tag<D2Class_816C8080>
     {
         double scaleX, scaleY, translateX, translateY;
 
-        Vector4 vec = _tag.MeshGroups[GetReader(), part.GroupIndex].Unk20;
+        Vector4 vec = _tag.MeshGroups[part.GroupIndex].Unk20;
 
         if (vec.Z == 0.0078125)
         {

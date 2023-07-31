@@ -429,7 +429,7 @@ public class ConfigSubsystem : Subsystem
 
          foreach ((TigerStrategy strategy, string packagesPath) in _settings.Common.PackagesPath)
          {
-             Strategy.AddNewStrategy(strategy, packagesPath);
+             Strategy.AddNewStrategy(strategy, packagesPath, false);
          }
          Strategy.SetStrategy(_settings.Common.CurrentStrategy);
 

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Tiger;
-using Serilog;
+using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Static;
 
@@ -49,8 +49,8 @@ public partial class MapView : UserControl
     private void GetStaticMapData(FileHash fileHash, ExportDetailLevel detailLevel)
     {
         Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(fileHash);
-        Tag<SMapDataTable> mapDataTable = tag.TagData.MapDataTables[tag.GetReader(), 1].MapDataTable;
-        StaticMapData staticMapData = ((SMapDataResource)mapDataTable.TagData.DataEntries[mapDataTable.GetReader(), 0].DataResource.GetValue(mapDataTable.GetReader())).StaticMapParent.TagData.StaticMap;
+        Tag<SMapDataTable> mapDataTable = tag.TagData.MapDataTables[1].MapDataTable;
+        StaticMapData staticMapData = ((SMapDataResource)mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())).StaticMapParent.TagData.StaticMap;
         SetMapUI(staticMapData, detailLevel);
     }
 
@@ -101,11 +101,11 @@ public partial class MapView : UserControl
         if (_config.GetUnrealInteropEnabled())
         {
             fbxHandler.InfoHandler.SetUnrealInteropPath(_config.GetUnrealInteropPath());
-            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
+            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
         }
         if (_config.GetBlenderInteropEnabled())
         {
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Map, _config.GetOutputTextureFormat());
+            AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat());
         }
 
         fbxHandler.InfoHandler.AddType("Map");
@@ -139,11 +139,11 @@ public partial class MapView : UserControl
         if (_config.GetUnrealInteropEnabled())
         {
             fbxHandler.InfoHandler.SetUnrealInteropPath(_config.GetUnrealInteropPath());
-            AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
+            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
         }
         if (_config.GetBlenderInteropEnabled())
         {
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Map, _config.GetOutputTextureFormat());
+            AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat());
         }
 
         fbxHandler.InfoHandler.AddType("Map");
@@ -182,7 +182,7 @@ public partial class MapView : UserControl
 
         if (_config.GetBlenderInteropEnabled())
         {
-            AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedImporter.ImportType.Terrain, _config.GetOutputTextureFormat());
+            AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName + "_Terrain", AutomatedExporter.ImportType.Terrain, _config.GetOutputTextureFormat());
         }
 
         fbxHandler.InfoHandler.AddType("Terrain");
@@ -253,7 +253,7 @@ public partial class MapView : UserControl
                             if(source2Models)
                             {
                                 //Source 2 shit
-                                File.Copy("template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
+                                File.Copy("Exporters/template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
                                 string text = File.ReadAllText($"{savePath}/Statics/{staticMeshName}.vmdl");
 
                                 StringBuilder mats = new StringBuilder();

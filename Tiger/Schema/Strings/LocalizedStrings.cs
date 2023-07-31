@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using Serilog;
+using Arithmic;
 
-namespace Tiger.Schema;
+namespace Tiger.Schema.Strings;
 
 public struct TigerString
 {
@@ -46,12 +46,14 @@ public class LocalizedStrings : Tag<SLocalizedStrings>
 {
     public LocalizedStrings(FileHash hash) : base(hash) { }
 
+    public LocalizedStrings(FileHash hash, bool shouldLoad) : base(hash, shouldLoad) { }
+
     public TigerString GetStringFromHash(StringHash hash)
     {
         int index = FindIndexOfStringHash(hash);
         if (index == -1)
         {
-            Log.Error($"Could not find string with hash {hash}");
+            // Log.Error($"Could not find string with hash {hash}");
             return new TigerString("NotFound");
         }
         return new TigerString(hash, _tag.EnglishStringsData.GetStringFromIndex(index));

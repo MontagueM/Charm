@@ -8,14 +8,14 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Arithmic;
 using Tiger;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using Internal.Fbx;
-using Serilog;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
-using File = System.IO.File;
+using Tiger.Exporters;
 
 namespace Charm;
 
@@ -23,7 +23,6 @@ public partial class EntityView : UserControl
 {
     public FileHash Hash;
     private string Name;
-    private readonly ILogger _entityLog = Log.ForContext<EntityView>();
 
     public EntityView()
     {
@@ -33,7 +32,7 @@ public partial class EntityView : UserControl
     public bool LoadEntity(FileHash entityHash, FbxHandler fbxHandler)
     {
         fbxHandler.Clear();
-        Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash);
+        Entity entity = FileResourcer.Get().GetFile<Entity>(entityHash);
         AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
         return LoadUI(fbxHandler);
     }
@@ -82,7 +81,7 @@ public partial class EntityView : UserControl
         if (overrideSkeleton != null)
             boneNodes = fbxHandler.AddSkeleton(overrideSkeleton.GetBoneNodes());
 
-        Log.Debug($"Exporting entity model name: {name}");
+        Log.Verbose($"Exporting entity model name: {name}");
         string savePath = config.GetExportSavePath();
         string meshName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
         if (exportType == ExportTypeFlag.Full)
@@ -108,11 +107,11 @@ public partial class EntityView : UserControl
             if (config.GetUnrealInteropEnabled())
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(config.GetUnrealInteropPath());
-                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, config.GetOutputTextureFormat());
+                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
             if(config.GetBlenderInteropEnabled())
             {
-                AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, config.GetOutputTextureFormat());
+                AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
         }
 
@@ -121,7 +120,7 @@ public partial class EntityView : UserControl
         fbxHandler.InfoHandler.AddType("Entity");
         fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
         fbxHandler.Dispose();
-        Log.Information($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
+        Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 
     public static void ExportInventoryItem(ApiItem item)
@@ -130,7 +129,16 @@ public partial class EntityView : UserControl
             .Split(Path.GetInvalidFileNameChars()));
         // Export the model
         // todo bad, should be replaced
-        EntitySkeleton overrideSkeleton = new EntitySkeleton(new FileHash("BC38AB80"));
+        EntitySkeleton overrideSkeleton;
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            overrideSkeleton = new EntitySkeleton(new FileHash("BC38AB80"));
+        }
+        // todo do DESTINY2_LATEST
+        else
+        {
+            overrideSkeleton = null;
+        }
         var val = Investment.Get().GetPatternEntityFromHash(item.Item.TagData.InventoryItemHash);
         // var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18;
         // if (resource.PatternAudioGroups[0].WeaponSkeletonEntity != null)
@@ -165,7 +173,7 @@ public partial class EntityView : UserControl
         string meshName = name;
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
-        AutomatedImporter.SaveBlenderApiFile(savePath, string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())),
+        AutomatedExporter.SaveBlenderApiFile(savePath, string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())),
             config.GetOutputTextureFormat(), dyes.Values.ToList());
     }
 }

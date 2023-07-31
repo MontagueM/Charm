@@ -1,4 +1,4 @@
-﻿using Serilog;
+﻿using Arithmic;
 
 namespace Tiger.Commandlets;
 
@@ -54,7 +54,7 @@ public class FindBytesInPackagesCommandlet : ICommandlet
     private void SearchForBytes(string packageFilter)
     {
         List<string> packagePaths = PackageResourcer.Get().PackagePathsCache.GetAllPackagesMap().Where(pair => pair.Value.Contains(packageFilter)).ToList().ConvertAll(pair => pair.Value);
-        Log.Information($"Searching {packagePaths.Count} packages for '{bytesStr}'");
+        Log.Info($"Searching {packagePaths.Count} packages for '{bytesStr}'");
         Parallel.ForEach(packagePaths, SearchPackage);
     }
 
@@ -69,7 +69,7 @@ public class FindBytesInPackagesCommandlet : ICommandlet
             {
                 if (reader.ReadBytes(bytes.Length).SequenceEqual(bytes))
                 {
-                    Log.Information($"Found in {packagePath} at offset {reader.Position - bytes.Length}");
+                    Log.Info($"Found in {packagePath} at offset {reader.Position - bytes.Length}");
                     break; // stop after one instance
                 }
             }

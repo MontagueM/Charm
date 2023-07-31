@@ -4,13 +4,14 @@ using System.Runtime.InteropServices;
 namespace Tiger.Schema;
 
 
-public class Dye : TigerReferenceFile<SDye>
+public class Dye : Tag<SDye>
 {
     public Dye(FileHash hash) : base(hash) { }
 
     public DyeInfo GetDyeInfo()
     {
-        return GetReferenceData().ToType<DyeInfo>();
+        TigerFile tag = FileResourcer.Get().GetFile(_tag.DyeInfoHeader.GetReferenceHash());
+        return tag.GetData().ToType<DyeInfo>();
     }
 
     private static Dictionary<uint, string> ChannelNames = new()
@@ -102,7 +103,7 @@ public struct SDye
     public long Unk10;
 
     [SchemaField(0x48)]
-    public DynamicArray<TextureTag64> DyeTextures;
+    public DynamicArray<STextureTag64> DyeTextures;
     public TigerHash Unk58;
     public TigerHash Unk5C;
 

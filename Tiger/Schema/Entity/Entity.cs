@@ -15,19 +15,24 @@ public class Entity : Tag<D2Class_D89A8080>
     public EntityResource? PatternAudioUnnamed { get; private set; }
     public EntityControlRig? ControlRig { get; private set; }
 
-    private bool _bLoaded = false;
+    private bool _loaded = false;
 
     public Entity(FileHash hash) : base(hash)
     {
+        Load();
     }
 
     public Entity(FileHash hash, bool shouldParse = true) : base(hash, shouldParse)
     {
+        if (shouldParse)
+        {
+            Load();
+        }
     }
 
     public void Load()
     {
-        _bLoaded = true;
+        _loaded = true;
         foreach (var resource in _tag.EntityResources.Select(GetReader(), r => r.Resource))
         {
             switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
@@ -60,6 +65,10 @@ public class Entity : Tag<D2Class_D89A8080>
 
     public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel)
     {
+        if (!_loaded)
+        {
+            Load();
+        }
         var dynamicParts = new List<DynamicMeshPart>();
         if (Model != null)
         {
@@ -106,7 +115,7 @@ public class Entity : Tag<D2Class_D89A8080>
 
     public bool HasGeometry()
     {
-        if (!_bLoaded)
+        if (!_loaded)
         {
             Load();
         }

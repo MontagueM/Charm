@@ -35,6 +35,11 @@ public class SchemaFieldAttribute : StrategyAttribute
     }
 }
 
+[AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+public class NoLoadAttribute : Attribute
+{
+}
+
 [AttributeUsage(AttributeTargets.Struct, AllowMultiple = true)]
 public class SchemaStructAttribute : StrategyAttribute
 {

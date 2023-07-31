@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Tiger;
-using Serilog;
 using Tiger.Schema.Activity;
 
 namespace Charm;
@@ -12,8 +11,6 @@ namespace Charm;
 public partial class ActivityView : UserControl
 {
     private Activity _activity;
-
-    private readonly ILogger _activityLog = Log.ForContext<ActivityView>();
 
     public ActivityView()
     {
@@ -34,7 +31,7 @@ public partial class ActivityView : UserControl
         _activity = null;
         await Task.Run(() =>
         {
-            _activity = FileResourcer.Get().GetFile(typeof(Activity), hash);
+            _activity = FileResourcer.Get().GetFile<Activity>(hash);
         });
         MainWindow.Progress.CompleteStage();
         await Task.Run(() =>

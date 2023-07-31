@@ -19,7 +19,7 @@
         <TextBlock Text="PLAYING: " TextAlignment="Left" Margin="10, 0, 0, 0" VerticalAlignment="Center" x:Name="PlayingText"/>
         <!-- TODO replace this with images, eg using C# Path with SVG https://jxnblk.github.io/paths/?d=M20%2016%20L20%2048%20L44%2032%20Z -->
         <Button Grid.Column="1" Margin="5,5,5,5" Click="PlayPause_OnClick" x:Name="PlayPause">
-            <TextBlock Text="PLAY" TextAlignment="Center" VerticalAlignment="Center"/>
+            <TextBlock Text="PLAY" TextAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"/>
         </Button>
         <Slider Grid.Column="2" VerticalAlignment="Center" Margin="20,0,20,0" Value="0.7" x:Name="VolumeBar"
                 ValueChanged="VolumeBar_OnValueChanged" IsMoveToPointEnabled="True" Maximum="1" Minimum="0"/>

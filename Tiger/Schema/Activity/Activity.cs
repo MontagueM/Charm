@@ -1,4 +1,5 @@
 ﻿using Tiger.Schema.Audio;
+using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Activity;
 
@@ -37,7 +38,7 @@ public struct SActivity
     public DynamicArray<D2Class_24898080> Unk50;
     public TigerHash Unk60;
     public FileHash Unk64;  // an entity thing
-    public FileHash64 UnkActivity68;
+    // public FileHash64 UnkActivity68;  // todo this uses an unknown hash64 system in the package
 }
 
 [SchemaStruct("8B8E8080", 0x78)]
@@ -73,7 +74,8 @@ public struct D2Class_2E898080
     public StringPointer ActivityName;
 }
 
-[SchemaStruct("26898080", 0x58)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "26898080", 0x58)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "26898080", 0x68)]
 public struct D2Class_26898080
 {
     public TigerHash LocationName;
@@ -88,8 +90,10 @@ public struct D2Class_26898080
     public TigerHash Unk24;
     public TigerHash Unk28;
     [SchemaField(0x30)]
+    // todo there are other changes here in LATEST but cba
     public int Unk30;
-    [SchemaField(0x38)]
+    [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_48898080> Unk38;
 }
 

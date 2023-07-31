@@ -184,9 +184,22 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
             activityEntries.UnionWith(package.GetAllActivities());
         });
 
-        _activityNames = activityEntries
-            .DistinctBy(entry => entry.TagHash.Hash32)
-            .ToDictionary(entry => entry.TagHash.Hash32, entry => entry.Name.Value)!;
+        _activityNames = new Dictionary<uint, string>();
+
+        foreach (SPackageActivityEntry entry in activityEntries)
+        {
+            if (_activityNames.ContainsKey(entry.TagHash.Hash32))
+            {
+                if (entry.Name.Value.Length > _activityNames[entry.TagHash.Hash32].Length)
+                {
+                    _activityNames[entry.TagHash.Hash32] = entry.Name.Value;
+                }
+            }
+            else
+            {
+                _activityNames.Add(entry.TagHash.Hash32, entry.Name.Value);
+            }
+        }
     }
 }
 

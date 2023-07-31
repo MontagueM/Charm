@@ -1,5 +1,5 @@
 ﻿
-namespace Tiger.Schema;
+namespace Tiger.Schema.Strings;
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "889A8080", 0x50)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "EF998080", 0x50)]
@@ -25,12 +25,12 @@ public struct SStringHash
 public struct SLocalizedStringsData
 {
     public long ThisSize;
-    public DynamicArray<SStringPart> StringParts;
+    public DynamicArrayUnloaded<SStringPart> StringParts;
     // might be a colour table here
     [SchemaField(0x38, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<SStringCharacter> StringCharacters;
-    public DynamicArray<SStringPartDefinition> StringCombinations;
+    public DynamicArrayUnloaded<SStringCharacter> StringCharacters;
+    public DynamicArrayUnloaded<SStringPartDefinition> StringCombinations;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "909A8080", 0x20)]

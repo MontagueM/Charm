@@ -73,8 +73,8 @@ namespace Charm
                     // if (ConfigSubsystem.GetUnrealInteropEnabled())
                     // {
                     //     fbxHandler.InfoHandler.SetUnrealInteropPath(ConfigSubsystem.GetUnrealInteropPath());
-                    //     AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.EImportType.Entity, ConfigSubsystem.GetOutputTextureFormat());
-                    //     //AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Entity, ConfigSubsystem.GetOutputTextureFormat());
+                    //     AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.EImportType.Entity, ConfigSubsystem.GetOutputTextureFormat());
+                    //     //AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Entity, ConfigSubsystem.GetOutputTextureFormat());
                     // }
                     // fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
                     // Console.WriteLine($"[Charm] Saved all data to {savePath}.");

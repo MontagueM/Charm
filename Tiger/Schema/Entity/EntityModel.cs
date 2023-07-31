@@ -57,7 +57,6 @@ public class EntityModel : Tag<D2Class_076F8080>
                 }
             }
         }
-        reader.Close();
         return parts;
     }
 
@@ -198,7 +197,7 @@ public class DynamicMeshPart : MeshPart
 
     private Material GetMaterialFromExternalMaterial(short externalMaterialIndex, EntityResource parentResource)
     {
-        TigerReader reader = parentResource.GetReader();
+        using TigerReader reader = parentResource.GetReader();
 
         var map = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
         var mats = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
@@ -216,7 +215,6 @@ public class DynamicMeshPart : MeshPart
         {
             materials.Add(mats[reader, i].Material);
         }
-        reader.Close();
         return materials[0];
     }
 }

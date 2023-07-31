@@ -91,6 +91,58 @@ public struct PackageHeader : IPackageHeader
             hash64List.Add(entry);
         }
 
+        if (PackageId != 0x013e)
+        {
+            return hash64List;
+        }
+
+        // test
+        reader.Seek(Hash64TableOffset + 0x28, SeekOrigin.Begin);
+        long count = reader.ReadInt64();
+        RelativePointer pointer = SchemaDeserializer.Get().DeserializeTigerType<RelativePointer>(reader);
+        reader.Seek(pointer.AbsoluteOffset+0x10+count*4, SeekOrigin.Begin);
+        return hash64List;
+        while (true)
+        {
+            ushort count0 = reader.ReadUInt16();
+            List<ushort> unk0s = new();
+            for (ushort i = 0; i < count0; i++)
+            {
+                ushort unk0 = reader.ReadUInt16();
+                unk0s.Add(unk0);
+            }
+            ushort count1 = reader.ReadUInt16();
+            List<ushort> unk1s = new();
+            for (ushort i = 0; i < count1; i++)
+            {
+                ushort unk1 = reader.ReadUInt16();
+                unk1s.Add(unk1);
+            }
+            ushort count2 = reader.ReadUInt16();
+            List<ushort> unk2s = new();
+            for (ushort i = 0; i < count2; i++)
+            {
+                ushort unk2 = reader.ReadUInt16();
+                unk2s.Add(unk2);
+            }
+            ushort count3 = reader.ReadUInt16();
+            // padded to 8 bytes
+            if (reader.Position % 8 != 0)
+            {
+                reader.Seek(8 - reader.Position % 8, SeekOrigin.Current);
+            }
+            List<ulong> hash64s = new();
+            for (ushort i = 0; i < count3; i++)
+            {
+                ulong hash64 = reader.ReadUInt64();
+                hash64s.Add(hash64);
+            }
+            if (reader.Position >= reader.BaseStream.Length)
+            {
+                break;
+            }
+        }
+
         return hash64List;
     }
 

@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Serilog;
+using Arithmic;
 using Tiger;
 using Tiger.Schema;
 using VersionChecker;
@@ -152,11 +152,11 @@ public partial class MainWindow
 
     private void InitialiseSubsystems()
     {
-        Log.Information("Initialising Charm subsystems");
+        Log.Info("Initialising Charm subsystems");
         string[] args = Environment.GetCommandLineArgs();
         CharmInstance.Args = new CharmArgs(args);
         CharmInstance.InitialiseSubsystems();
-        Log.Information("Initialised Charm subsystems");
+        Log.Info("Initialised Charm subsystems");
 
     }
 
@@ -168,7 +168,7 @@ public partial class MainWindow
             var path = config.GetPackagesPath(Strategy.CurrentStrategy).Split("packages")[0] + "destiny2.exe";
             var versionInfo = FileVersionInfo.GetVersionInfo(path);
             string version = versionInfo.FileVersion;
-            Log.Information("Game version: " + version);
+            Log.Info("Game version: " + version);
         }
         catch (Exception e)
         {
@@ -187,11 +187,11 @@ public partial class MainWindow
             if (!upToDate)
             {
                 MessageBox.Show($"New version available on GitHub! (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id})");
-                Log.Information($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
+                Log.Info($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
             }
             else
             {
-                Log.Information($"Version is up to date ({versionChecker.CurrentVersion.Id}).");
+                Log.Info($"Version is up to date ({versionChecker.CurrentVersion.Id}).");
             }
         }
         catch (Exception e)

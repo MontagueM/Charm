@@ -119,7 +119,7 @@ public struct PackageHeaderNew : IPackageHeader
     public List<D2FileEntry> GetFileEntries(TigerReader reader)
     {
         List<D2FileEntry> fileEntries = new();
-        foreach (D2FileEntryBitpacked fileEntryBitpacked in PackageTablesData.Value.FileEntries.Enumerate(reader))
+        foreach (D2FileEntryBitpacked fileEntryBitpacked in PackageTablesData.Value.FileEntries)
         {
             fileEntries.Add(new D2FileEntry(fileEntryBitpacked));
         }
@@ -130,7 +130,7 @@ public struct PackageHeaderNew : IPackageHeader
     public List<D2BlockEntry> GetBlockEntries(TigerReader reader)
     {
         List<D2BlockEntry> blockEntries = new();
-        foreach (D2BlockEntry blockEntry in PackageTablesData.Value.BlockEntries.Enumerate(reader))
+        foreach (D2BlockEntry blockEntry in PackageTablesData.Value.BlockEntries)
         {
             blockEntries.Add(blockEntry);
         }

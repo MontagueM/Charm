@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Globalization;
+using Arithmic;
 
 namespace Tiger.Schema;
 
@@ -15,7 +16,7 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
     /// <summary>
     /// We assume it exists, otherwise will throw an exception
     /// </summary>
-    public uint GetHash32(ulong tag64)
+    public uint GetHash32Checked(ulong tag64)
     {
         if (!_map.ContainsKey(tag64))
         {
@@ -24,10 +25,20 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
         return _map[tag64];
     }
 
-    public static string GetHash32(string strHash)
+    public uint GetHash32(ulong tag64)
+    {
+        if (!_map.ContainsKey(tag64))
+        {
+            Log.Debug($"Hash64 {tag64}/{Endian.U64ToString(tag64)} not found in map");
+            return FileHash.InvalidHash32;
+        }
+        return _map[tag64];
+    }
+
+    public static string GetHash32Checked(string strHash)
     {
         ulong tagHash64 = Endian.SwapU64(UInt64.Parse(strHash, NumberStyles.HexNumber));
-        return GetHash32(strHash);
+        return GetHash32Checked(strHash);
     }
 
     // todo race condition where

@@ -13,13 +13,14 @@ using System.Windows.Input;
 using System.Windows.Media;
 using ConcurrentCollections;
 using Tiger;
-using Serilog;
 using System.Text;
+using Arithmic;
 using Tiger.Schema;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Activity;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
+using Tiger.Schema.Strings;
 
 namespace Charm;
 
@@ -104,7 +105,7 @@ public partial class TagListView : UserControl
     private struct ParentInfo
     {
         public ETagListType TagListType;
-        public FileHash? Hash;
+        public TigerHash? Hash;
         public string SearchTerm;
         public ConcurrentBag<TagItem> AllTagItems;
     }
@@ -112,11 +113,10 @@ public partial class TagListView : UserControl
     private ConcurrentBag<TagItem> _allTagItems;
     private static MainWindow _mainWindow = null;
     private ETagListType _tagListType;
-    private FileHash? _currentHash = null;
+    private TigerHash? _currentHash = null;
     private Stack<ParentInfo> _parentStack = new Stack<ParentInfo>();
     private bool _bTrimName = true;
     private bool _bShowNamedOnly = false;
-    private readonly ILogger _tagListLogger = Log.ForContext<TagListView>();
     private TagListView _tagListControl = null;
     private ToggleButton _previouslySelected = null;
     private int _selectedIndex = -1;
@@ -142,14 +142,14 @@ public partial class TagListView : UserControl
             else if ((Parent as Grid).Parent is TagView)
                 return (Parent as Grid).Parent as TagView;
         }
-        _tagListLogger.Error($"Parent is not a TagListViewerView, is {Parent.GetType().Name}.");
+        Log.Error($"Parent is not a TagListViewerView, is {Parent.GetType().Name}.");
         return null;
     }
 
-    public async void LoadContent(ETagListType tagListType, FileHash contentValue = null, bool bFromBack = false,
+    public async void LoadContent(ETagListType tagListType, TigerHash contentValue = null, bool bFromBack = false,
         ConcurrentBag<TagItem> overrideItems = null)
     {
-        _tagListLogger.Debug($"Loading content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+        Log.Verbose($"Loading content type {tagListType} contentValue {contentValue} from back {bFromBack}");
         if (overrideItems != null)
         {
             _allTagItems = overrideItems;
@@ -168,22 +168,22 @@ public partial class TagListView : UserControl
             switch (tagListType)
             {
                 case ETagListType.DestinationGlobalTagBagList:
-                    LoadDestinationGlobalTagBagList();
+                    await LoadDestinationGlobalTagBagList();
                     break;
                 case ETagListType.Back:
                     Back_Clicked();
                     return;
                 case ETagListType.DestinationGlobalTagBag:
-                    LoadDestinationGlobalTagBag(contentValue);
+                    LoadDestinationGlobalTagBag(contentValue as FileHash);
                     break;
                 case ETagListType.BudgetSet:
-                    LoadBudgetSet(contentValue);
+                    LoadBudgetSet(contentValue as FileHash);
                     break;
                 case ETagListType.Entity:
-                    LoadEntity(contentValue);
+                    LoadEntity(contentValue as FileHash);
                     break;
                 case ETagListType.ApiList:
-                    LoadApiList();
+                    await LoadApiList();
                     break;
                 case ETagListType.ApiEntity:
                     LoadApiEntity(contentValue);
@@ -192,69 +192,69 @@ public partial class TagListView : UserControl
                     await LoadEntityList();
                     break;
                 case ETagListType.Package:
-                    LoadPackage(contentValue);
+                    LoadPackage(contentValue as FileHash);
                     break;
                 case ETagListType.ActivityList:
-                    LoadActivityList();
+                    await LoadActivityList();
                     break;
                 case ETagListType.Activity:
-                    LoadActivity(contentValue);
+                    LoadActivity(contentValue as FileHash);
                     break;
                 case ETagListType.StaticsList:
                     await LoadStaticList();
                     break;
                 case ETagListType.Static:
-                    LoadStatic(contentValue);
+                    LoadStatic(contentValue as FileHash);
                     break;
                 case ETagListType.TextureList:
                     await LoadTextureList();
                     break;
                 case ETagListType.Texture:
-                    LoadTexture(contentValue);
+                    LoadTexture(contentValue as FileHash);
                     break;
                 case ETagListType.DialogueList:
-                    LoadDialogueList(contentValue);
+                    LoadDialogueList(contentValue as FileHash);
                     break;
                 case ETagListType.Dialogue:
-                    LoadDialogue(contentValue);
+                    LoadDialogue(contentValue as FileHash);
                     break;
                 case ETagListType.DirectiveList:
-                    LoadDirectiveList(contentValue);
+                    LoadDirectiveList(contentValue as FileHash);
                     break;
                 case ETagListType.Directive:
-                    LoadDirective(contentValue);
+                    LoadDirective(contentValue as FileHash);
                     break;
                 case ETagListType.StringContainersList:
                     LoadStringContainersList();
                     break;
                 case ETagListType.StringContainer:
-                    LoadStringContainer(contentValue);
+                    LoadStringContainer(contentValue as FileHash);
                     break;
                 case ETagListType.Strings:
-                    LoadStrings(contentValue);
+                    LoadStrings(contentValue as FileHash);
                     break;
                 case ETagListType.String:
                     break;
                 case ETagListType.SoundsPackagesList:
-                    LoadSoundsPackagesList();
+                    await LoadSoundsPackagesList();
                     break;
                 case ETagListType.SoundsPackage:
-                    LoadSoundsPackage(contentValue);
+                    LoadSoundsPackage(contentValue as FileHash);
                     break;
                 case ETagListType.SoundsList:
-                    LoadSoundsList(contentValue);
+                    await LoadSoundsList(contentValue as FileHash);
                     break;
                 case ETagListType.Sound:
-                    LoadSound(contentValue);
+                    LoadSound(contentValue as FileHash);
                     break;
                 case ETagListType.MusicList:
-                    LoadMusicList(contentValue);
+                    LoadMusicList(contentValue as FileHash);
                     break;
                 case ETagListType.Music:
-                    LoadMusic(contentValue);
+                    LoadMusic(contentValue as FileHash);
                     break;
                 case ETagListType.WeaponAudioGroupList:
-                    LoadWeaponAudioGroupList();
+                    await LoadWeaponAudioGroupList();
                     break;
                 case ETagListType.WeaponAudioGroup:
                     LoadWeaponAudioGroup(contentValue);
@@ -263,7 +263,7 @@ public partial class TagListView : UserControl
                     LoadWeaponAudioList(contentValue);
                     break;
                 case ETagListType.WeaponAudio:
-                    LoadWeaponAudio(contentValue);
+                    await LoadWeaponAudio(contentValue as FileHash);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -282,8 +282,7 @@ public partial class TagListView : UserControl
             RefreshItemList();
         }
 
-        _tagListLogger.Debug(
-            $"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
+        Log.Verbose($"Loaded content type {tagListType} contentValue {contentValue} from back {bFromBack}");
     }
 
     /// <summary>
@@ -466,14 +465,14 @@ public partial class TagListView : UserControl
     {
         var btn = sender as ToggleButton;
         TagItem tagItem = btn.DataContext as TagItem;
-        FileHash fileHash = tagItem.Hash as FileHash;
+        TigerHash tigerHash = tagItem.Hash;
         if (_previouslySelected != null)
             _previouslySelected.IsChecked = false;
         _selectedIndex = TagList.Items.IndexOf(tagItem);
         // if (_previouslySelected == btn)
         // _previouslySelected.IsChecked = !_previouslySelected.IsChecked;
         _previouslySelected = btn;
-        LoadContent(tagItem.TagType, fileHash);
+        LoadContent(tagItem.TagType, tigerHash);
     }
 
     public static T GetChildOfType<T>(DependencyObject depObj)
@@ -654,7 +653,7 @@ public partial class TagListView : UserControl
     /// <summary>
     /// Type 0x8080471D and only in sr_destination_metadata_010a?
     /// </summary>
-    private async void LoadDestinationGlobalTagBagList()
+    private async Task LoadDestinationGlobalTagBagList()
     {
         _allTagItems = new ConcurrentBag<TagItem>();
         var vals = await PackageResourcer.Get().GetAllHashes<D2Class_1D478080>();
@@ -750,7 +749,7 @@ public partial class TagListView : UserControl
         bool bLoadedSuccessfully = viewer.EntityControl.LoadEntity(fileHash, _globalFbxHandler);
         if (!bLoadedSuccessfully)
         {
-            _tagListLogger.Error($"UI failed to load entity for hash {fileHash}. You can still try to export the full model instead.");
+            Log.Error($"UI failed to load entity for hash {fileHash}. You can still try to export the full model instead.");
             _mainWindow.SetLoggerSelected();
         }
         SetExportFunction(ExportEntity, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.Minimal);
@@ -906,19 +905,20 @@ public partial class TagListView : UserControl
 
     #region API
 
-    private void LoadApiList()
+    private async Task LoadApiList()
     {
+        IEnumerable<InventoryItem> inventoryItems = await Investment.Get().GetInventoryItems();
         _allTagItems = new ConcurrentBag<TagItem>();
-        Parallel.ForEach(Investment.Get().InventoryItems, kvp =>
+        Parallel.ForEach(inventoryItems, item =>
         {
-            if (kvp.Value.GetArtArrangementIndex() == -1) return;
-            string name = Investment.Get().GetItemName(kvp.Value);
-            string type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(kvp.Key)].TagData.ItemType.Value;
+            if (item.GetArtArrangementIndex() == -1) return;
+            string name = Investment.Get().GetItemName(item);
+            string type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
             if (type == "Finisher" || type.Contains("Emote"))
                 return;  // they point to Animation instead of Entity
             _allTagItems.Add(new TagItem
             {
-                Hash = new FileHash(kvp.Key),
+                Hash = item.TagData.InventoryItemHash,
                 Name = name,
                 Type = type.Trim(),
                 TagType = ETagListType.ApiEntity
@@ -959,7 +959,7 @@ public partial class TagListView : UserControl
     /// <summary>
     /// Type 0x80808e8e, but we use a child of it (0x80808e8b) so we can get the location.
     /// </summary>
-    private async void LoadActivityList()
+    private async Task LoadActivityList()
     {
         _allTagItems = new ConcurrentBag<TagItem>();
 
@@ -970,7 +970,7 @@ public partial class TagListView : UserControl
         Parallel.ForEach(valsChild, val =>
         {
             Tag<D2Class_8B8E8080> tag = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(val);
-            foreach (var entry in tag.TagData.Activities.Enumerate(tag.GetReader()))
+            foreach (var entry in tag.TagData.Activities)
             {
                 names.TryAdd(entry.ActivityName, tag.TagData.LocationName);  // todo no longer a name, instead a hash
             }
@@ -1162,7 +1162,7 @@ public partial class TagListView : UserControl
         ConcurrentBag<FileHash> dialogueTables = new ConcurrentBag<FileHash>();
         if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 entry)
         {
-            foreach (var dirtable in entry.DialogueTables.Enumerate(activity.GetReader()))
+            foreach (var dirtable in entry.DialogueTables)
             {
                 if (dirtable.DialogueTable != null)
                     dialogueTables.Add(dirtable.DialogueTable.Hash);
@@ -1170,13 +1170,13 @@ public partial class TagListView : UserControl
         }
         Parallel.ForEach(activity.TagData.Unk50, val =>
         {
-            foreach (var d2Class48898080 in val.Unk18.Enumerate(activity.GetReader()))
+            foreach (var d2Class48898080 in val.Unk18)
             {
                 var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
                 if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
                     resource is D2Class_18978080 || resource is D2Class_19978080)
                 {
-                    if (resource.Value.DialogueTable != null)
+                    if (resource.DialogueTable != null)
                         dialogueTables.Add(resource.DialogueTable.Hash);
                 }
             }
@@ -1388,7 +1388,7 @@ public partial class TagListView : UserControl
         viewer.TagListControl.LoadContent(ETagListType.SoundsList, fileHash, true);
     }
 
-    private async void LoadSoundsList(FileHash fileHash)
+    private async Task LoadSoundsList(FileHash fileHash)
     {
         MainWindow.Progress.SetProgressStages(new List<string>
         {
@@ -1478,10 +1478,10 @@ public partial class TagListView : UserControl
             }
         });
 
-        if (activity.TagData.Unk18 is D2Class_6A988080)
+        if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 res)
         {
-            if (((D2Class_6A988080) activity.TagData.Unk18.GetValue(activity.GetReader())).Music != null)
-                musics.Add(((D2Class_6A988080) activity.TagData.Unk18.GetValue(activity.GetReader())).Music.Hash);
+            if (res.Music != null)
+                musics.Add(res.Music.Hash);
         }
 
         Parallel.ForEach(musics, hash =>
@@ -1506,15 +1506,16 @@ public partial class TagListView : UserControl
 
     #region Weapon Audio
 
-    private void LoadWeaponAudioGroupList()
+    private async Task LoadWeaponAudioGroupList()
     {
+        IEnumerable<InventoryItem> inventoryItems = await Investment.Get().GetInventoryItems();
         _allTagItems = new ConcurrentBag<TagItem>();
-        Parallel.ForEach(Investment.Get().InventoryItems, kvp =>
+        Parallel.ForEach(inventoryItems, item =>
         {
-            if (kvp.Value.GetWeaponPatternIndex() == -1)
+            if (item.GetWeaponPatternIndex() == -1)
                 return;
-            string name = Investment.Get().GetItemName(kvp.Value);
-            string type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(kvp.Key)].TagData.ItemType.Value;
+            string name = Investment.Get().GetItemName(item);
+            string type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
             if (type == null)
             {
                 type = "";
@@ -1523,7 +1524,7 @@ public partial class TagListView : UserControl
                 return;
             _allTagItems.Add(new TagItem
             {
-                Hash = new FileHash(kvp.Key),
+                Hash = item.TagData.InventoryItemHash,
                 Name = name,
                 Type = type.Trim(),
                 TagType = ETagListType.WeaponAudioGroup
@@ -1531,11 +1532,11 @@ public partial class TagListView : UserControl
         });
     }
 
-    private void LoadWeaponAudioGroup(FileHash fileHash)
+    private void LoadWeaponAudioGroup(TigerHash apiHash)
     {
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.TagList);
-        viewer.TagListControl.LoadContent(ETagListType.WeaponAudioList, fileHash, true);
+        viewer.TagListControl.LoadContent(ETagListType.WeaponAudioList, apiHash, true);
         viewer.MusicPlayer.Visibility = Visibility.Visible;
     }
 
@@ -1671,7 +1672,7 @@ public partial class TagListView : UserControl
         return sounds;
     }
 
-    private async void LoadWeaponAudio(FileHash fileHash)
+    private async Task LoadWeaponAudio(FileHash fileHash)
     {
         var viewer = GetViewer();
         WwiseSound tag = FileResourcer.Get().GetFile<WwiseSound>(fileHash);

@@ -2,6 +2,7 @@
 using System.Data.SQLite;
 using Tiger.Exporters;
 using Tiger.Schema;
+using Tiger.Schema.Strings;
 
 namespace Tiger.Commandlets;
 

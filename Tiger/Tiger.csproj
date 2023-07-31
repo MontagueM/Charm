@@ -15,7 +15,6 @@
       <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
       <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="Serilog" Version="2.11.1-dev-01397" />
       <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
       <PackageReference Include="SonarAnalyzer.CSharp" Version="9.0.0.68202">
         <PrivateAssets>all</PrivateAssets>
@@ -41,6 +40,18 @@
       <None Remove="Entities\**" />
       <None Remove="General\**" />
       <None Remove="Investment\**" />
+      <None Update="Exporters\blender_api_template.py">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Exporters\import_to_blender.py">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Exporters\import_to_ue5.py">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Exporters\template.vmdl">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
     <ItemGroup>

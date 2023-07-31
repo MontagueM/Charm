@@ -2,7 +2,9 @@
 using System.Text;
 using ConcurrentCollections;
 using Newtonsoft.Json;
+using Tiger.Exporters;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Investment;
 
@@ -27,7 +29,7 @@ public class Investment : Strategy.StrategistSingleton<Investment>
     // private Dictionary<TigerHash, FileHash> _sortedPatternGlobalTagIdAssignments = null;
     private Tag<D2Class_095A8080> _localizedStringsIndexTag = null;
     private Dictionary<int, LocalizedStrings> _localizedStringsIndexMap = null;
-    public ConcurrentDictionary<uint, InventoryItem> InventoryItems = null;
+    private ConcurrentDictionary<uint, InventoryItem> _inventoryItems = null;
     private Tag<D2Class_015A8080> _inventoryItemIconTag = null;
     // private Tag<D2Class_8C978080> _dyeManifestTag = null;
     private Tag<D2Class_C2558080> _artDyeReferenceTag = null;
@@ -142,24 +144,30 @@ public class Investment : Strategy.StrategistSingleton<Investment>
     private void GetInventoryItemStringThings()
     {
         InventoryItemStringThings = new ConcurrentDictionary<int, Tag<D2Class_9F548080>>();
+        using TigerReader reader = _inventoryItemStringThing.GetReader();
         for (int i = 0; i < _inventoryItemStringThing.TagData.StringThings.Count; i++)
         {
-            InventoryItemStringThings.TryAdd(i, _inventoryItemStringThing.TagData.StringThings[_inventoryItemStringThing.GetReader(), i].StringThing);
+            InventoryItemStringThings.TryAdd(i, _inventoryItemStringThing.TagData.StringThings[reader, i].StringThing);
         }
     }
 
     private void GetLocalizedStringsIndexDict()
     {
         _localizedStringsIndexMap = new Dictionary<int, LocalizedStrings>(_localizedStringsIndexTag.TagData.StringContainerMap.Count);
+        using TigerReader reader = _localizedStringsIndexTag.GetReader();
+        _localizedStringsIndexTag.TempDump();
         for (int i = 0; i < _localizedStringsIndexTag.TagData.StringContainerMap.Count; i++)
         {
-            _localizedStringsIndexMap.Add(i, _localizedStringsIndexTag.TagData.StringContainerMap[_localizedStringsIndexTag.GetReader(), i].LocalizedStrings);
+            _localizedStringsIndexMap.Add(i, _localizedStringsIndexTag.TagData.StringContainerMap[reader, i].LocalizedStrings);
         }
     }
 
     public LocalizedStrings GetLocalizedStringsFromIndex(int index)
     {
-        return _localizedStringsIndexMap[index];
+        // presume we want to read from it, so load it
+        LocalizedStrings ls = _localizedStringsIndexMap[index];
+        ls.Load();
+        return ls;
     }
 
     private void GetEntityAssignmentDict()
@@ -196,7 +204,7 @@ public class Investment : Strategy.StrategistSingleton<Investment>
 
         var patternGlobalId = GetPatternGlobalTagId(item);
         var patternData = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(_sandboxPatternAssignmentsTag.GetReader(), patternGlobalId);
-        if (patternData.HasValue && patternData.Value.EntityRelationHash.GetReferenceHash() == 0x80809ad8)
+        if (patternData.HasValue && patternData.Value.EntityRelationHash.IsValid() && patternData.Value.EntityRelationHash.GetReferenceHash() == 0x80809ad8)
         {
             return FileResourcer.Get().GetFile<Entity.Entity>(patternData.Value.EntityRelationHash);
         }
@@ -220,7 +228,7 @@ public class Investment : Strategy.StrategistSingleton<Investment>
 
     public Dye? GetDyeFromIndex(short index)
     {
-         var artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(_sandboxPatternAssignmentsTag.GetReader(), index);
+         var artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(_artDyeReferenceTag.GetReader(), index);
 
          var dyeEntry = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(_sandboxPatternAssignmentsTag.GetReader(), artEntry.DyeManifestHash);
          if (dyeEntry.HasValue && dyeEntry.Value.EntityRelationHash.GetReferenceHash() == 0x80806fa3)
@@ -243,14 +251,27 @@ public class Investment : Strategy.StrategistSingleton<Investment>
     public void GetInventoryItemDict()
     {
         _inventoryItemIndexmap = new Dictionary<uint, int>();
-        InventoryItems = new ConcurrentDictionary<uint, InventoryItem>();
+        _inventoryItems = new ConcurrentDictionary<uint, InventoryItem>();
 
+        using TigerReader reader = _inventoryItemMap.GetReader();
         for (int i = 0; i < _inventoryItemMap.TagData.InventoryItemDefinitionEntries.Count; i++)
         {
-            D2Class_9B798080 entry = _inventoryItemMap.TagData.InventoryItemDefinitionEntries[_inventoryItemMap.GetReader(), i];
+            D2Class_9B798080 entry = _inventoryItemMap.TagData.InventoryItemDefinitionEntries[reader, i];
             _inventoryItemIndexmap.Add(entry.InventoryItemHash, i);
-            InventoryItems.TryAdd(entry.InventoryItemHash, entry.InventoryItem);
+            _inventoryItems.TryAdd(entry.InventoryItemHash, entry.InventoryItem);
         }
+    }
+
+    // Getter so we can load them properly
+    public async Task<IEnumerable<InventoryItem>> GetInventoryItems()
+    {
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 16, CancellationToken = CancellationToken.None };
+        await Parallel.ForEachAsync(_inventoryItems.Values, parallelOptions, async (item, ct) =>
+        {
+            // todo needs a proper consumer queue
+            item.Load();
+        });
+        return _inventoryItems.Values;
     }
 
     public TigerHash GetArtArrangementHash(InventoryItem item)
@@ -306,6 +327,7 @@ public class Investment : Strategy.StrategistSingleton<Investment>
         // var x = new D2Class_454F8080 {AssignmentHash = assignmentHash};
         // var index = _entityAssignmentsMap.TagData.EntityArrangementMap.BinarySearch(x, new D2Class_454F8080());
         Tag<D2Class_A36F8080> tag = _sortedArrangementHashmap[assignmentHash];
+        tag.Load();
         if (tag.TagData.EntityData is null)
             return null;
         // if entity
@@ -500,26 +522,26 @@ public class Investment : Strategy.StrategistSingleton<Investment>
 
 
         // armour
-        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["ArmorPlate"],dyes["ArmorSuit"],dyes["ArmorCloth"]}, "_armour");
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["ArmorPlate"],dyes["ArmorSuit"],dyes["ArmorCloth"]}, "_armour");
 
         // ghost
-        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["GhostMain"],dyes["GhostHighlights"],dyes["GhostDecals"]}, "_ghost");
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["GhostMain"],dyes["GhostHighlights"],dyes["GhostDecals"]}, "_ghost");
 
         // ship
-        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["ShipUpper"],dyes["ShipDecals"],dyes["ShipLower"]}, "_ship");
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["ShipUpper"],dyes["ShipDecals"],dyes["ShipLower"]}, "_ship");
 
         // sparrow
-        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["SparrowUpper"],dyes["SparrowEngine"],dyes["SparrowLower"]}, "_sparrow");
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["SparrowUpper"],dyes["SparrowEngine"],dyes["SparrowLower"]}, "_sparrow");
 
         // weapon
-        AutomatedImporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["Weapon1"],dyes["Weapon2"],dyes["Weapon3"]}, "_weapon");
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye>{dyes["Weapon1"],dyes["Weapon2"],dyes["Weapon3"]}, "_weapon");
     }
 }
 
 
 public class InventoryItem : Tag<D2Class_9D798080>
 {
-    public InventoryItem(FileHash hash) : base(hash)
+    public InventoryItem(FileHash hash, bool shouldParse) : base(hash, shouldParse)
     {
     }
 
@@ -545,7 +567,7 @@ public class InventoryItem : Tag<D2Class_9D798080>
 
     private Texture? GetTexture(Tag<D2Class_CF3E8080> iconSecondaryContainer)
     {
-        TigerReader reader = iconSecondaryContainer.GetReader();
+        using TigerReader reader = iconSecondaryContainer.GetReader();
         dynamic? prim = iconSecondaryContainer.TagData.Unk10.GetValue(reader);
         if (prim is D2Class_CD3E8080 structCD3E8080)
         {
@@ -556,7 +578,6 @@ public class InventoryItem : Tag<D2Class_9D798080>
         {
             return structCB3E8080.Unk00[reader, 0].TextureList[reader, 0].IconTexture;
         }
-        reader.Close();
         return null;
     }
 

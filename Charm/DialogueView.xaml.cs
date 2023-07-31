@@ -56,9 +56,9 @@ public partial class DialogueView : UserControl
                     {
                         Narrator = a.NarratorString,
                         Voiceline = a.Unk28.Value.ToString(),
-                        Wem = a.Sound1.TagData.Wems[a.Sound1.GetReader(), 0],
+                        Wem = a.Sound1.TagData.Wems[0],
                         RecursionDepth = recursionDepth,
-                        Duration = a.Sound1.TagData.Wems[a.Sound1.GetReader(), 0].Duration
+                        Duration = a.Sound1.TagData.Wems[0].Duration
                     });
             }
         }

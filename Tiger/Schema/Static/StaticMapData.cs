@@ -51,11 +51,11 @@ public struct SStaticMapData
     [SchemaField(0x18)]
     public Tag<SOcclusionBounds> ModelOcclusionBounds;
     [SchemaField(0x40)]
-    public DynamicArrayLoaded<SStaticMeshInstanceTransform> Instances;
+    public DynamicArray<SStaticMeshInstanceTransform> Instances;
     public DynamicArray<SUnknownUInt> Unk50;
     [SchemaField(0x78)]
-    public DynamicArrayLoaded<D2Class_BD938080> Statics;
-    public DynamicArrayLoaded<D2Class_286D8080> InstanceCounts;
+    public DynamicArray<D2Class_BD938080> Statics;
+    public DynamicArray<D2Class_286D8080> InstanceCounts;
     [SchemaField(0x98)]
     public TigerHash Unk98;
     [SchemaField(0xA0)]

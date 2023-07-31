@@ -22,7 +22,7 @@ namespace Charm;
 
 public partial class DareView : UserControl
 {
-    private ConcurrentDictionary<TigerHash, ApiItem> _allItems;
+    private ConcurrentDictionary<uint, ApiItem> _allItems;
     private ObservableCollection<ApiItem> _selectedItems;
 
     public DareView()
@@ -38,13 +38,14 @@ public partial class DareView : UserControl
     private void RefreshItemList()
     {
         string searchTerm = SearchBox.Text.ToLower();
-        ConcurrentBag<ApiItem> items = new ConcurrentBag<ApiItem>();
+        ConcurrentBag<ApiItem> items = new();
 
-        Parallel.ForEach(_allItems, pair =>
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 16 };
+        Parallel.ForEach(_allItems.Values, parallelOptions, item =>
         {
-            if (items.Count < 100 && pair.Value.ItemName.ToLower().Contains(searchTerm))
+            if (items.Count < 100 && item.ItemName.ToLower().Contains(searchTerm))
             {
-                items.Add(pair.Value);
+                items.Add(item);
             }
         });
         var sortedItems = new List<ApiItem>(items);
@@ -54,38 +55,39 @@ public partial class DareView : UserControl
 
     public async void LoadContent()
     {
-        _allItems = new ConcurrentDictionary<TigerHash, ApiItem>();
+        _allItems = new ConcurrentDictionary<uint, ApiItem>();
         _selectedItems = new ObservableCollection<ApiItem>();
-        await Task.Run(LoadApiList);
+        await LoadApiList();
         RefreshItemList();
     }
 
-    private void LoadApiList()
+    private async Task LoadApiList()
     {
-        List<string> mapStages = Investment.Get().InventoryItems.Select((_, i) => $"loading {i+1}/{Investment.Get().InventoryItems.Count}").ToList();
+        IEnumerable<InventoryItem> inventoryItems = await Investment.Get().GetInventoryItems();
+        List<string> mapStages = inventoryItems.Select((_, i) => $"loading {i+1}/{inventoryItems.Count()}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages, false, true);
-        Parallel.ForEach(Investment.Get().InventoryItems, kvp =>
+        await Parallel.ForEachAsync(inventoryItems, async (item, ct) =>
         {
             // if (_allItems.Count > 500)
             // {
             //     MainWindow.Progress.CompleteStage();
             //     return;
             // }
-            string name = Investment.Get().GetItemName(kvp.Value);
-            string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(kvp.Key)].TagData.ItemType.Value;
+            string name = Investment.Get().GetItemName(item);
+            string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
             // todo not sure why the type can now be null, be whatever
             if (type == null)
             {
                 type = "";
             }
-            if (kvp.Value.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
+            if (item.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
             {
                 if (!type.Contains("Finisher") && !type.Contains("Emote")) // they point to Animation instead of Entity
                 {
                     // icon bg
-                    var bgStream = kvp.Value.GetIconBackgroundStream();
-                    var primaryStream = kvp.Value.GetIconPrimaryStream();
-                    var overlayStream = kvp.Value.GetIconOverlayStream();
+                    var bgStream = item.GetIconBackgroundStream();
+                    var primaryStream = item.GetIconPrimaryStream();
+                    var overlayStream = item.GetIconOverlayStream();
                     if (bgStream != null && primaryStream != null)
                     {
                         var bg = MakeBitmapImage(bgStream, 96, 96);
@@ -119,9 +121,9 @@ public partial class DareView : UserControl
                             ImageHeight = 96,
                             ImageWidth = 96,
                             GridBackground = brush,
-                            Item = kvp.Value
+                            Item = item
                         };
-                        _allItems.TryAdd(new TigerHash(kvp.Key), newItem);
+                        _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
                     }
                 }
             }
@@ -147,13 +149,13 @@ public partial class DareView : UserControl
         ApiItem apiItem = (sender as Button).DataContext as ApiItem;
 
         // Remove from _allItems, add to _selectedItems if not already there otherwise remove from _selectedItems and add back to _allItems
-        if (_allItems.TryRemove(apiItem.Item.TagData.InventoryItemHash, out _))
+        if (_allItems.TryRemove(apiItem.Item.TagData.InventoryItemHash.Hash32, out _))
         {
             _selectedItems.Add(apiItem);
         }
         else
         {
-            _allItems.TryAdd(apiItem.Item.TagData.InventoryItemHash, apiItem);
+            _allItems.TryAdd(apiItem.Item.TagData.InventoryItemHash.Hash32, apiItem);
             _selectedItems.Remove(apiItem);
         }
         SelectedItemView.ItemsSource = _selectedItems;
@@ -164,7 +166,7 @@ public partial class DareView : UserControl
     {
         foreach (var selectedItem in _selectedItems)
         {
-            _allItems.TryAdd(selectedItem.Item.TagData.InventoryItemHash, selectedItem);
+            _allItems.TryAdd(selectedItem.Item.TagData.InventoryItemHash.Hash32, selectedItem);
         }
         _selectedItems.Clear();
         SelectedItemView.ItemsSource = _selectedItems;
@@ -177,7 +179,8 @@ public partial class DareView : UserControl
         MainWindow.Progress.SetProgressStages(apiStages);
         Task.Run(() =>
         {
-            Parallel.ForEach(_selectedItems, item =>
+            _selectedItems.ToList().ForEach(item =>
+            // Parallel.ForEach(_selectedItems, item =>
             {
                 if (item.Item.GetArtArrangementIndex() != -1)
                 {

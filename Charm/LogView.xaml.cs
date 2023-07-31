@@ -3,13 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
-// using System.Windows.Forms;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
-using Serilog.Formatting.Display;
-using Serilog.Sinks.RichTextBox.Themes;
-using Serilog.Templates;
+using Arithmic;
 using Tiger;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -20,6 +14,24 @@ public partial class LogView : UserControl
     public LogView()
     {
         InitializeComponent();
+
+        Log.BindDelegate(OnLogEvent);
+    }
+
+    // todo amortize this, as can cause huge thread issues when a threaded process logs a call when the receiver
+    // requires a ui thread dispatch (or just some way to stop this being terrible)
+    private void OnLogEvent(object? sender, LogEventArgs e)
+    {
+        if (e.Verbosity > LogVerbosity.Info)
+        {
+            return;
+        }
+
+        Dispatcher.Invoke(() =>
+        {
+            LogBox.AppendText(e.Message + Environment.NewLine);
+            LogBox.ScrollToEnd();
+        });
     }
 }
 
@@ -27,31 +39,13 @@ public class LogHandler
 {
     public static void Initialise(LogView logView)
     {
-        InitLogger(logView);
-
         // Application.Current.DispatcherUnhandledException += DispatcherUnhandledException;
         #if !DEBUG
         AppDomain.CurrentDomain.UnhandledException += CatchUnhandledException;
         #endif
     }
 
-    private static void InitLogger(LogView logView)
-    {
-        string outputTemplate = "{Timestamp:HH:mm:ss} [{Level}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
-        if (File.Exists("charm.log"))
-            File.Delete("charm.log");
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("charm.log", outputTemplate: outputTemplate, shared: true)
-            .WriteTo.RichTextBox(logView.LogBox,
-                theme: RichTextBoxConsoleTheme.Colored,
-                outputTemplate: outputTemplate)
-            .Enrich.FromLogContext()
-            .MinimumLevel.Verbose()
-            .CreateLogger();
-        Log.Information("Logger initialised");
-    }
-
-    #if !DEBUG
+#if !DEBUG
     static void CatchUnhandledException
         (object sender, UnhandledExceptionEventArgs e)
     {
@@ -89,6 +83,6 @@ public class LogHandler
         if (config.GetExportSavePath() != String.Empty)
             Log.Fatal("Exported directory:\n" + string.Join("\n", Directory.GetFiles(config.GetExportSavePath()))
             + "\n" + string.Join("\n", Directory.GetDirectories(config.GetExportSavePath())));
-        Log.CloseAndFlush();
+        // Log.CloseAndFlush();
     }
 }

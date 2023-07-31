@@ -9,8 +9,8 @@ using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Arithmic;
 using Tiger;
-using Serilog;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
 using Tiger.Schema.Entity;
@@ -19,8 +19,6 @@ namespace Charm;
 
 public partial class ActivityMapView : UserControl
 {
-    private readonly ILogger _activityLog = Log.ForContext<ActivityMapView>();
-
     public ActivityMapView()
     {
         InitializeComponent();
@@ -36,9 +34,9 @@ public partial class ActivityMapView : UserControl
     private ObservableCollection<DisplayBubble> GetMapList(Activity activity)
     {
         var maps = new ObservableCollection<DisplayBubble>();
-        foreach (var mapEntry in activity.TagData.Unk50.Enumerate(activity.GetReader()))
+        foreach (var mapEntry in activity.TagData.Unk50)
         {
-            foreach (var mapReferences in mapEntry.MapReferences.Enumerate(activity.GetReader()))
+            foreach (var mapReferences in mapEntry.MapReferences)
             {
                 // idk why this can happen but it can, some weird stuff with h64
                 // for the child map reference, ive only seen it once so far but the hash for it was just FFFFFFFF in the map reference file
@@ -84,10 +82,10 @@ public partial class ActivityMapView : UserControl
         {
             if (m.MapContainer.TagData.MapDataTables.Count > 1)
             {
-                Tag<SMapDataTable> mapDataTable = m.MapContainer.TagData.MapDataTables[m.MapContainer.GetReader(), 1].MapDataTable;
+                Tag<SMapDataTable> mapDataTable = m.MapContainer.TagData.MapDataTables[1].MapDataTable;
                 if (mapDataTable.TagData.DataEntries.Count > 0)
                 {
-                    StaticMapData tag = mapDataTable.TagData.DataEntries[m.MapContainer.GetReader(), 0].DataResource.GetValue(mapDataTable.GetReader()).StaticMapParent.TagData.StaticMap;
+                    StaticMapData tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader()).StaticMapParent.TagData.StaticMap;
                     items.Add(new DisplayStaticMap
                     {
                         Hash = m.MapContainer.Hash,
@@ -151,7 +149,7 @@ public partial class ActivityMapView : UserControl
     public async void ExportFull(ExportInfo info)
     {
         Activity activity = FileResourcer.Get().GetFile<Activity>(info.Hash);
-        _activityLog.Debug($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.Hash)}, hash: {activity.Hash}");
+        Log.Info($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.Hash)}, hash: {activity.Hash}");
         Dispatcher.Invoke(() =>
         {
             MapControl.Visibility = Visibility.Hidden;
@@ -175,7 +173,7 @@ public partial class ActivityMapView : UserControl
 
         if (maps.Count == 0)
         {
-            _activityLog.Error("No maps selected for export.");
+            Log.Error("No maps selected for export.");
             MessageBox.Show("No maps selected for export.");
             return;
         }
@@ -212,7 +210,7 @@ public partial class ActivityMapView : UserControl
         {
             MapControl.Visibility = Visibility.Visible;
         });
-        _activityLog.Information($"Exported activity data name: {PackageResourcer.Get().GetActivityName(activity.Hash)}, hash: {activity.Hash}");
+        Log.Info($"Exported activity data name: {PackageResourcer.Get().GetActivityName(activity.Hash)}, hash: {activity.Hash}");
         MessageBox.Show("Activity map data exported completed.");
     }
 
@@ -221,7 +219,7 @@ public partial class ActivityMapView : UserControl
         var s = sender as Button;
         var dc = s.DataContext as DisplayStaticMap;
         MapControl.Clear();
-        _activityLog.Debug($"Loading UI for static map hash: {dc.Name}");
+        Log.Info($"Loading UI for static map hash: {dc.Name}");
         MapControl.Visibility = Visibility.Hidden;
         var lod = MapControl.ModelView.GetSelectedLod();
         if (dc.Name == "Select all")
@@ -230,7 +228,7 @@ public partial class ActivityMapView : UserControl
             List<string> mapStages = items.Select(x => $"loading to ui: {x.Hash}").ToList();
             if (mapStages.Count == 0)
             {
-                _activityLog.Error("No maps selected for export.");
+                Log.Error("No maps selected for export.");
                 MessageBox.Show("No maps selected for export.");
                 return;
             }

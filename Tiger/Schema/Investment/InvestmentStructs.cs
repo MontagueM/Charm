@@ -1,4 +1,5 @@
 ﻿using Tiger.Schema.Entity;
+using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Investment;
 
@@ -9,14 +10,14 @@ namespace Tiger.Schema.Investment;
 public struct D2Class_97798080
 {
     public long FileSize;
-    public DynamicArray<D2Class_9B798080> InventoryItemDefinitionEntries;
+    public DynamicArrayUnloaded<D2Class_9B798080> InventoryItemDefinitionEntries;
 }
 
 [SchemaStruct("9B798080", 0x20)]
 public struct D2Class_9B798080
 {
     public TigerHash InventoryItemHash;
-    [SchemaField(0x10)]
+    [SchemaField(0x10), NoLoad]
     public InventoryItem InventoryItem;  // I don't want to parse all these, should be Tag<D2Class_9D798080>, todo revisit this
 }
 
@@ -130,7 +131,7 @@ public struct D2Class_7F738080
 [SchemaStruct("77738080", 0x60)]
 public struct D2Class_77738080
 {
-    public DynamicArray<D2Class_7D738080> Arrangements;  // "arrangements" from API
+    public DynamicArrayUnloaded<D2Class_7D738080> Arrangements;  // "arrangements" from API
     [SchemaField(0x28)]
     public DynamicArray<D2Class_7B738080> CustomDyes;  // "customDyes" from API
     public DynamicArray<D2Class_7B738080> DefaultDyes;  // "defaultDyes" from API
@@ -166,7 +167,7 @@ public struct D2Class_7B738080
 public struct D2Class_99548080
 {
     public long FileSize;
-    public DynamicArray<D2Class_9D548080> StringThings;
+    public DynamicArrayUnloaded<D2Class_9D548080> StringThings;
 }
 
 [SchemaStruct("9D548080", 0x20)]
@@ -312,7 +313,7 @@ public struct D2Class_B4548080
 public struct D2Class_F2708080
 {
     public long FileSize;
-    public DynamicArray<D2Class_ED6F8080> ArtArrangementHashes;
+    public DynamicArrayUnloaded<D2Class_ED6F8080> ArtArrangementHashes;
 }
 
 [SchemaStruct("ED6F8080", 4)]
@@ -333,7 +334,7 @@ public struct D2Class_ED6F8080
 public struct D2Class_CE558080
 {
     public long FileSize;
-    public DynamicArray<D2Class_D4558080> ArtArrangementEntityAssignments;
+    public DynamicArrayUnloaded<D2Class_D4558080> ArtArrangementEntityAssignments;
     // [DestinyField(FieldType.TablePointer)]
     // public DynamicArray<D2Class_D8558080> FinalAssignment;  // this is not needed as the above table has resource pointers
 }
@@ -377,13 +378,14 @@ public struct D2Class_434F8080
     public long FileSize;
     // This is large but kept as a DynamicArray so we can perform binary searches... todo implement binary search for DynamicArray
     // We could do binary searches... or we could not and transform into a dictionary
-    public DynamicArray<D2Class_454F8080> EntityArrangementMap;
+    public DynamicArrayUnloaded<D2Class_454F8080> EntityArrangementMap;
 }
 
 [SchemaStruct("454F8080", 8)]
 public struct D2Class_454F8080 : IComparer<D2Class_454F8080>
 {
     public TigerHash AssignmentHash;
+    [NoLoad]
     public Tag<D2Class_A36F8080> EntityParent;
 
     public int Compare(D2Class_454F8080 x, D2Class_454F8080 y)
@@ -410,7 +412,7 @@ public struct D2Class_A44E8080
 public struct D2Class_8C978080
 {
     public long FileSize;
-    public DynamicArray<D2Class_0F878080> AssignmentBSL;
+    public DynamicArrayUnloaded<D2Class_0F878080> AssignmentBSL;
     public DynamicArray<D2Class_0B008080> Unk18;
 }
 
@@ -432,7 +434,7 @@ public struct D2Class_0F878080 : IComparer<D2Class_0F878080>
 public struct D2Class_AA528080
 {
     public long FileSize;
-    public DynamicArray<D2Class_AE528080> SandboxPatternGlobalTagId;
+    public DynamicArrayUnloaded<D2Class_AE528080> SandboxPatternGlobalTagId;
 }
 
 [SchemaStruct("AE528080", 0x30)]
@@ -483,7 +485,7 @@ public struct D2Class_96798080
 public struct D2Class_015A8080
 {
     public long FileSize;
-    public DynamicArray<D2Class_075A8080> InventoryItemIconsMap;
+    public DynamicArrayUnloaded<D2Class_075A8080> InventoryItemIconsMap;
 }
 
 [SchemaStruct("075A8080", 0x20)]
@@ -518,25 +520,25 @@ public struct D2Class_CF3E8080
 [SchemaStruct("CD3E8080", 0x20)]
 public struct D2Class_CD3E8080
 {
-    public DynamicArray<D2Class_D23E8080> Unk00;
+    public DynamicArrayUnloaded<D2Class_D23E8080> Unk00;
 }
 
 [SchemaStruct("CB3E8080", 0x20)]
 public struct D2Class_CB3E8080
 {
-    public DynamicArray<D2Class_D03E8080> Unk00;
+    public DynamicArrayUnloaded<D2Class_D03E8080> Unk00;
 }
 
 [SchemaStruct("D23E8080", 0x10)]
 public struct D2Class_D23E8080
 {
-    public DynamicArray<D2Class_D53E8080> TextureList;
+    public DynamicArrayUnloaded<D2Class_D53E8080> TextureList;
 }
 
 [SchemaStruct("D03E8080", 0x10)]
 public struct D2Class_D03E8080
 {
-    public DynamicArray<D2Class_D43E8080> TextureList;
+    public DynamicArrayUnloaded<D2Class_D43E8080> TextureList;
 }
 
 [SchemaStruct("D53E8080", 4)]
@@ -560,7 +562,7 @@ public struct D2Class_D43E8080
 public struct D2Class_C2558080
 {
     public long FileSize;
-    public DynamicArray<D2Class_C6558080> ArtDyeReferences;
+    public DynamicArrayUnloaded<D2Class_C6558080> ArtDyeReferences;
 }
 
 [SchemaStruct("C6558080", 8)]
@@ -583,7 +585,7 @@ public struct D2Class_E36C8080
 public struct D2Class_F2518080
 {
     public long FileSize;
-    public DynamicArray<D2Class_2C4F8080> ChannelHashes;
+    public DynamicArrayUnloaded<D2Class_2C4F8080> ChannelHashes;
 }
 
 [SchemaStruct("2C4F8080", 4)]
@@ -601,15 +603,17 @@ public struct D2Class_2C4F8080
 public struct D2Class_095A8080
 {
     public long FileSize;
-    public DynamicArray<D2Class_0E5A8080> StringContainerMap;
+    public DynamicArrayUnloaded<D2Class_0E5A8080> StringContainerMap;
 }
 
-[SchemaStruct("0E5A8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "0E5A8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "0E5A8080", 0x20)]
 public struct D2Class_0E5A8080
 {
     public TigerHash BankFnvHash;  // some kind of name for the bank
-    [SchemaField(0x8), Tag64]
+    [SchemaField(0x8), Tag64, NoLoad]
     public LocalizedStrings LocalizedStrings;
+    public short Unk18;
 }
 
 #endregion

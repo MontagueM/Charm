@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Tiger;
 using Tiger.Schema;
+using Tiger.Exporters;
 
 namespace Charm;
 
@@ -58,13 +59,13 @@ public partial class StaticView : UserControl
             if (config.GetUnrealInteropEnabled())
             {
                 fbxHandler.InfoHandler.SetUnrealInteropPath(config.GetUnrealInteropPath());
-                AutomatedImporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedImporter.ImportType.Static, config.GetOutputTextureFormat());
-                AutomatedImporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedImporter.ImportType.Static, config.GetOutputTextureFormat());
+                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
+                AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
             }
 
             if(source2Models)
             {
-                File.Copy("template.vmdl", $"{savePath}/{meshName}.vmdl", true);
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{meshName}.vmdl", true);
                 string text = File.ReadAllText($"{savePath}/{meshName}.vmdl");
                 StringBuilder mats = new StringBuilder();
 

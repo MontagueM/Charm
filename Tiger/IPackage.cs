@@ -2,8 +2,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using Serilog;
-using Tiger.DESTINY2_WITCHQUEEN_6307;
+using Arithmic;
 
 namespace Tiger;
 
@@ -47,6 +46,8 @@ public interface IPackage
     FileMetadata GetFileMetadata(FileHash fileId);
     List<FileMetadata> GetAllFileMetadata();
 
+    // todo change these systems to be async producer/consumer, and do some smart calculations based on the queue
+    // identify tasks that are sequential/from the same block so we can do all the processing in one go
     byte[] GetFileBytes(ushort fileIndex);
     byte[] GetFileBytes(FileHash fileHash);
     HashSet<int> GetRequiredPatches();

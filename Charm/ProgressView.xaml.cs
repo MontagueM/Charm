@@ -3,7 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Serilog;
+using Arithmic;
 
 namespace Charm;
 
@@ -11,7 +11,6 @@ public partial class ProgressView : UserControl
 {
     private Queue<string> _progressStages;
     private int TotalStageCount;
-    private ILogger _progressLog;
     private bool bLogProgress = true;
     private bool bUseFullBar = false;
 
@@ -25,7 +24,7 @@ public partial class ProgressView : UserControl
     {
         Visibility = Visibility.Hidden;
     }
-    
+
     public void Show()
     {
         // Grid.Background = new SolidColorBrush(new Color {A = 0, B = 0, G = 0, R = 0});
@@ -42,7 +41,6 @@ public partial class ProgressView : UserControl
     {
         this.bLogProgress = bLogProgress;
         this.bUseFullBar = bUseFullBar;
-        _progressLog = Log.Logger.ForContext<ProgressView>();
         Dispatcher.Invoke(() =>
         {
             TotalStageCount = progressStages.Count;
@@ -51,9 +49,9 @@ public partial class ProgressView : UserControl
             {
                 _progressStages.Enqueue(progressStage);
             }
-        
+
             UpdateProgress();
-            Show(); 
+            Show();
         });
     }
 
@@ -63,12 +61,12 @@ public partial class ProgressView : UserControl
         {
             string removed = _progressStages.Dequeue();
             if (bLogProgress)
-                _progressLog.Debug($"Completed loading stage: {removed}");
+                Log.Verbose($"Completed loading stage: {removed}");
             UpdateProgress();
             if (_progressStages.Count == 0)
             {
                 Hide();
-            } 
+            }
         });
     }
 
@@ -78,12 +76,12 @@ public partial class ProgressView : UserControl
         {
             var stage = _progressStages.Peek();
             if (bLogProgress)
-                _progressLog.Debug($"Starting loading stage: {stage}");
+                Log.Verbose($"Starting loading stage: {stage}");
             return stage;
         }
         return "Loading";
     }
-    
+
     public int GetProgressPercentage()
     {
         // We want to artificially make it more meaningful, so we pad by 15% on each side

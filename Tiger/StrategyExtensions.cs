@@ -93,9 +93,13 @@ public static class ResourcerStrategyExtensions
             {
                 if (value == null || value.Equals(default))
                 {
-                    throw new Exception($"No type found for strategy {strategy}");
+                    // todo do something about it, its bad but shouldnt be fatal for testing purposes
+                    // throw new Exception($"No type found for strategy {strategy}");
                 }
-                dict.Add(strategy, value);
+                else
+                {
+                    dict.Add(strategy, value);
+                }
             }
         }
     }

@@ -116,7 +116,7 @@ public class Strategy
     /// </summary>
     /// <exception cref="ArgumentException">Strategy already exists, or packages directory is invalid.</exception>
     /// <exception cref="DirectoryNotFoundException">Package directory does not exist.</exception>
-    public static void AddNewStrategy(TigerStrategy strategy, string packagesDirectory)
+    public static void AddNewStrategy(TigerStrategy strategy, string packagesDirectory, bool set=true)
     {
         if (strategy == TigerStrategy.NONE || _strategyConfigurations.ContainsKey(strategy))
         {
@@ -131,7 +131,7 @@ public class Strategy
 
         var config = new StrategyConfiguration { PackagesDirectory = packagesDirectory };
         _strategyConfigurations.Add(strategy, config);
-        if (_currentStrategy == _defaultStrategy)
+        if (set && _currentStrategy == _defaultStrategy)
         {
             SetStrategy(strategy);
         }

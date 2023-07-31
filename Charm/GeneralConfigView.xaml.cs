@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
-using Serilog;
+using Arithmic;
 using Tiger;
 using Tiger.Schema;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -126,8 +126,12 @@ public partial class GeneralConfigView : UserControl
 
     private void PackagePathStrategyComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        _packagePathStrategy = (TigerStrategy)(_packagePathStrategyComboBox.SelectedItem as ComboBoxItem).Tag;
-
+        TigerStrategy strategy = (TigerStrategy)(_packagePathStrategyComboBox.SelectedItem as ComboBoxItem).Tag;
+        if (_packagePathStrategy != strategy)
+        {
+            _packagePathStrategy = strategy;
+            PopulateConfigPanel();
+        }
     }
 
     private List<ComboBoxItem> MakeEnumComboBoxItems<T>() where T : Enum

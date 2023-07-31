@@ -5,8 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using Arithmic;
 using NAudio.Wave;
-using Serilog;
 using Tiger.Schema.Audio;
 
 namespace Charm;
@@ -17,7 +17,6 @@ public partial class MusicPlayerControl : UserControl
     private Wem _wem;
     private WwiseSound _sound;
     private WaveChannel32 _waveProvider;
-    private readonly ILogger _musicLog = Log.ForContext<MusicPlayerControl>();
 
     public bool CanPlay { get; set; } = false;
     private double _prevPositionValue = 0;
@@ -55,7 +54,7 @@ public partial class MusicPlayerControl : UserControl
         if (_waveProvider == null)
         {
             CanPlay = false;
-            _musicLog.Error("WaveProvider is null");
+            Log.Error("WaveProvider is null");
             MessageBox.Show("Error: WaveProvider is null");
             return false;
         }
@@ -108,11 +107,11 @@ public partial class MusicPlayerControl : UserControl
     {
         if (_output == null)
         {
-            _musicLog.Error("Output is null");
+            Log.Error("Output is null");
             return;
         }
         string name = _wem == null ? _sound.Hash : _wem.Hash;
-        _musicLog.Information($"Playing {name}");
+        Log.Info($"Playing {name}");
         (PlayPause.Content as TextBlock).Text = "PAUSE";
         Task.Run(() =>
         {
@@ -122,7 +121,7 @@ public partial class MusicPlayerControl : UserControl
             }
             catch (Exception e)
             {
-                _musicLog.Warning(e.Message);
+                Log.Warning(e.Message);
                 return;
             }
             StartPositionHandlerAsync();
@@ -165,7 +164,7 @@ public partial class MusicPlayerControl : UserControl
         _output.Pause();
         (PlayPause.Content as TextBlock).Text = "PLAY";
         string name = _wem == null ? _sound.Hash : _wem.Hash;
-        _musicLog.Debug($"Paused {name}");
+        Log.Verbose($"Paused {name}");
     }
 
     public void SetVolume(double volume)

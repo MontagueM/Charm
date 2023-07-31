@@ -133,10 +133,8 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 NonSchemaStructAttribute? nonSchemaStructAttr = GetAttribute<NonSchemaStructAttribute>(schemaType);
                 if (nonSchemaStructAttr != null)
                 {
-                    _schemaSerializedSizeMap.TryAdd(type, nonSchemaStructAttr.SerializedSize);
                     _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaStructAttr.Type, SubTypes = nonSchemaStructAttr.SubTypes});
                     _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
-                    return;
                 }
             }
 
@@ -204,6 +202,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 // Also add any other types we need e.g. uint, ushort, etc.
                 if (fieldInfo.FieldType.IsEnum)
                 {
+                    // todo figure out why this doesnt work wrt to the deserializer also needing its own enum parsing
                     _schemaSerializedSizeMap.TryAdd(fieldInfo.FieldType, Marshal.SizeOf(Enum.GetUnderlyingType(fieldInfo.FieldType)));
                     continue;
                 }
@@ -216,28 +215,33 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         });
     }
 
-    public static T DeserializeTag64<T>(TigerReader reader) where T : TigerFile
+    public static T DeserializeTag64<T>(TigerReader reader, bool shouldLoad=true) where T : TigerFile
     {
-        return (T)DeserializeTag64(reader, typeof(T));
+        return (T)DeserializeTag64(reader, typeof(T), shouldLoad);
     }
 
-    public static TigerFile DeserializeTag64(TigerReader reader, Type fieldType)
+    public static FileHash GetFileHashFrom64(TigerReader reader)
     {
         uint u32 = reader.ReadUInt32();
         int bIs32Bit = reader.ReadInt32();
         ulong u64 = reader.ReadUInt64();
         if (bIs32Bit == 1)
         {
-            return FileResourcer.Get().GetFile(fieldType, new FileHash(u32));
+            return new FileHash(u32);
         }
         else if (bIs32Bit == 0)
         {
-            return FileResourcer.Get().GetFile(fieldType, new FileHash64(u64));
+            return new FileHash64(u64);
         }
         else
         {
             throw new Exception("Invalid bIs32Bit value");
         }
+    }
+
+    public static TigerFile DeserializeTag64(TigerReader reader, Type fieldType, bool shouldLoad=true)
+    {
+        return FileResourcer.Get().GetFile(fieldType, GetFileHashFrom64(reader), shouldLoad);
     }
 
     public T DeserializeSchema<T>(TigerReader reader) where T : struct
@@ -263,20 +267,30 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
             long fieldSize = -1;
             dynamic? fieldValue;
-            if (IsTigerDeserializeType(fieldInfo.FieldType))
+            if (IsTigerFile64Type(fieldInfo))
+            {
+                // hardcode allow for 64 bit file but instead just the hash as FileHash
+                if (fieldInfo.FieldType == typeof(FileHash))
+                {
+                    fieldValue = GetFileHashFrom64(reader);
+                }
+                else
+                {
+                    bool shouldLoad = !HasNoLoadAttribute(fieldInfo);
+                    fieldValue = DeserializeTag64(reader, fieldInfo.FieldType, shouldLoad);
+                }
+                fieldSize = 0x10;
+            }
+            else if (IsTigerDeserializeType(fieldInfo.FieldType))
             {
                 fieldValue = DeserializeTigerType(reader, fieldInfo.FieldType);
                 fieldSize = GetSchemaTypeSize(fieldInfo.FieldType);
             }
-            else if (IsTigerFile64Type(fieldInfo))
-            {
-                fieldValue = DeserializeTag64(reader, fieldInfo.FieldType);
-                fieldSize = 0x10;
-            }
             else if (IsTigerFileType(fieldInfo.FieldType))
             {
                 FileHash fileHash = new(reader.ReadUInt32());
-                fieldValue = FileResourcer.Get().GetFile(fieldInfo.FieldType, fileHash);
+                bool shouldLoad = !HasNoLoadAttribute(fieldInfo);
+                fieldValue = FileResourcer.Get().GetFile(fieldInfo.FieldType, fileHash, shouldLoad);
                 fieldSize = GetSchemaTypeSize(fieldInfo.FieldType);
             }
             else if (fieldInfo.FieldType.IsEnum)
@@ -359,12 +373,29 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         return GetFirstAttribute<Tag64Attribute>(fieldInfo) != null;
     }
 
+    private bool HasNoLoadAttribute(FieldInfo fieldInfo)
+    {
+        return GetFirstAttribute<NoLoadAttribute>(fieldInfo) != null;
+    }
+
     private dynamic DeserializeTigerType(TigerReader reader, Type fieldType)
     {
         ITigerDeserialize? fieldValue = (ITigerDeserialize?)Activator.CreateInstance(fieldType);
         if (fieldValue == null)
         {
             throw new Exception($"Failed to create schema field instance of type {fieldType}");
+        }
+
+        fieldValue.Deserialize(reader);
+        return fieldValue;
+    }
+
+    public T DeserializeTigerType<T>(TigerReader reader) where T : ITigerDeserialize, new()
+    {
+        T fieldValue = Activator.CreateInstance<T>();
+        if (fieldValue == null)
+        {
+            throw new Exception($"Failed to create schema field instance of type {typeof(T)}");
         }
 
         fieldValue.Deserialize(reader);

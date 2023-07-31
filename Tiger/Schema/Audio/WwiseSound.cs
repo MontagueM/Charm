@@ -28,7 +28,7 @@ public class WwiseSound : TigerReferenceFile<D2Class_38978080>
 
     private MixingSampleProvider MakeProvider()
     {
-        MixingSampleProvider provider = new(_tag.Wems[GetReader(), 0].MakeWaveChannel()?.WaveFormat);
+        MixingSampleProvider provider = new(_tag.Wems[0].MakeWaveChannel()?.WaveFormat);
         Parallel.ForEach(_tag.Wems, wem =>
         {
             provider.AddMixerInput(wem.MakeWaveChannel());

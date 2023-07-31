@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Arithmic;
 using DirectXTexNet;
 using Microsoft.VisualBasic.FileIO;
 using Tiger.Schema.Audio;
@@ -10,7 +11,7 @@ namespace Tiger.Schema.Entity;
 public struct D2Class_D89A8080  // Entity
 {
     public long FileSize;
-    public DynamicArray<D2Class_CD9A8080> EntityResources;
+    public DynamicArrayUnloaded<D2Class_CD9A8080> EntityResources;
     public DynamicArray<D2Class_8F9A8080> Unk18;
     public long Zeros28;
     public long Zeros30;
@@ -78,10 +79,10 @@ public struct D2Class_069B8080  // Entity resource
     // public Table ResourceTable20;
     // public Table ResourceTable30;
     [SchemaField(0x40)]
-    public DynamicArray<D2Class_7C908080> ResourceTable40;
+    public DynamicArrayUnloaded<D2Class_7C908080> ResourceTable40;
     // public Table ResourceTable50;
     [SchemaField(0x60)]
-    public DynamicArray<D2Class_6E908080> ResourceTable60;
+    public DynamicArrayUnloaded<D2Class_6E908080> ResourceTable60;
     // public Table ResourceTable70;
     [SchemaField(0x80)]
     public Tag UnkHash80;
@@ -116,9 +117,9 @@ public struct D2Class_8F6D8080
     [SchemaField(0x310)]
     public Tag<D2Class_1C6E8080> TexturePlates;
     [SchemaField(0x3C0)]
-    public DynamicArray<D2Class_976D8080> ExternalMaterialsMap;
+    public DynamicArrayUnloaded<D2Class_976D8080> ExternalMaterialsMap;
     [SchemaField(0x400)]
-    public DynamicArray<D2Class_14008080> ExternalMaterials;
+    public DynamicArrayUnloaded<D2Class_14008080> ExternalMaterials;
 }
 
 #region Texture Plates
@@ -149,7 +150,6 @@ public class TexturePlate : Tag<D2Class_919E8080>
             original.Dispose();
             resizedOriginal.Dispose();
         }
-        reader.Close();
         return outputPlate;
     }
 
@@ -165,7 +165,7 @@ public class TexturePlate : Tag<D2Class_919E8080>
     public IntVector2 GetPlateDimensions()
     {
         int maxDimension = 0;  // plate must be square
-        foreach (var transform in _tag.PlateTransforms)
+        foreach (var transform in _tag.PlateTransforms.Enumerate(GetReader()))
         {
             if (transform.Translation.X + transform.Scale.X > maxDimension)
             {
@@ -212,7 +212,7 @@ public struct D2Class_919E8080
 {
     public long FileSize;
     [SchemaField(0x10)]
-    public DynamicArray<D2Class_939E8080> PlateTransforms;
+    public DynamicArrayUnloaded<D2Class_939E8080> PlateTransforms;
 }
 
 [SchemaStruct("939E8080", 0x14)]
@@ -318,13 +318,13 @@ public struct D2Class_DE818080
     [SchemaField(0x88)]
     public TigerHash Unk88;
     public TigerHash Unk8C;
-    public DynamicArray<D2Class_42868080> NodeHierarchy;
-    public DynamicArray<D2Class_4F9F8080> DefaultObjectSpaceTransforms;
-    public DynamicArray<D2Class_4F9F8080> DefaultInverseObjectSpaceTransforms;
-    public DynamicArray<D2Class_06008080> RangeIndexMap;
-    public DynamicArray<D2Class_06008080> InnerIndexMap;
+    public DynamicArrayUnloaded<D2Class_42868080> NodeHierarchy;
+    public DynamicArrayUnloaded<D2Class_4F9F8080> DefaultObjectSpaceTransforms;
+    public DynamicArrayUnloaded<D2Class_4F9F8080> DefaultInverseObjectSpaceTransforms;
+    public DynamicArrayUnloaded<D2Class_06008080> RangeIndexMap;
+    public DynamicArrayUnloaded<D2Class_06008080> InnerIndexMap;
     public Vector4 UnkE0;
-    public DynamicArray<D2Class_E1818080> UnkF0; // lod distance?
+    public DynamicArrayUnloaded<D2Class_E1818080> UnkF0; // lod distance?
 }
 
 [SchemaStruct("42868080", 0x10)]
@@ -348,7 +348,7 @@ public struct D2Class_076F8080  // Entity model
 {
     public long FileSize;
     [SchemaField(0x10)]
-    public DynamicArray<D2Class_C56E8080> Meshes;
+    public DynamicArrayUnloaded<D2Class_C56E8080> Meshes;
     [SchemaField(0x20)]
     public Vector4 Unk20;
     public long Unk30;
@@ -377,7 +377,7 @@ public struct D2Class_C56E8080
     public VertexBuffer VertexColour;  // vertex colour
     public VertexBuffer SinglePassSkinningBuffer;  // single pass skinning buffer
     public int Zeros1C;
-    public DynamicArray<D2Class_CB6E8080> Parts;
+    public DynamicArrayUnloaded<D2Class_CB6E8080> Parts;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 37)]
     public short[] StagePartOffsets;
 }

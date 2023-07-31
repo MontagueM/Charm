@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Serilog;
+using Arithmic;
 using Tiger.Schema;
 using Tiger.Schema.Investment;
+using Tiger.Schema.Strings;
 
 namespace Tiger;
 
@@ -70,11 +71,52 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
     public int Count;
     public RelativePointer Offset;
     protected int _elementSize;
-    private bool _loaded = false;
-
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash defined for array
 
     public virtual void Deserialize(TigerReader reader)
+    {
+        Count = reader.ReadInt32();
+        reader.Seek(4, SeekOrigin.Current);
+        Offset = reader.ReadSchemaType<RelativePointer>();
+        Offset.AddExtraOffset(0x10);
+        reader.Seek(4, SeekOrigin.Current);
+
+        _elementSize = SchemaDeserializer.Get().GetSchemaStructSize<T>();
+
+        for (int i = 0; i < Count; i++)
+        {
+            reader.Seek(Offset.AbsoluteOffset + i * _elementSize, SeekOrigin.Begin);
+            Add(ReadElement(reader, i));
+        }
+    }
+
+    protected T ReadElement(TigerReader reader, int index)
+    {
+        // todo consolidate with SchemaDeserializer
+        reader.Seek(Offset.AbsoluteOffset + index * _elementSize, SeekOrigin.Begin);
+        if (typeof(T).IsValueType) // if T is a struct
+        {
+            return reader.ReadSchemaStruct(typeof(T));
+        }
+        else if (SchemaDeserializer.Get().IsTigerDeserializeType(typeof(T)))
+        {
+            return (T)reader.ReadSchemaType(typeof(T));
+        }
+        else if (SchemaDeserializer.Get().IsTigerFileType(typeof(T)))
+        {
+            FileHash fileHash = new(reader.ReadUInt32());
+            return FileResourcer.Get().GetFile(typeof(T), fileHash);
+        }
+        else
+        {
+            throw new NotSupportedException("T must be a struct or a type that implements ITigerDeserialize");
+        }
+    }
+}
+
+public class DynamicArrayUnloaded<T> : DynamicArray<T>
+{
+    public override void Deserialize(TigerReader reader)
     {
         Count = reader.ReadInt32();
         reader.Seek(4, SeekOrigin.Current);
@@ -93,14 +135,10 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
         }
     }
 
-    public void Load(TigerReader reader)
+    public new IEnumerable<TResult> Select<TResult>(Func<T, TResult> selector)
     {
-        if (Count != 0)
-        {
-            return;
-        }
-        _loaded = true;
-        AddRange(Enumerate(reader));
+        throw new NotSupportedException(
+            "DynamicArray does not store data locally, use with TigerReader or change to DynamicArray");
     }
 
     public IEnumerable<TResult> Select<TResult>(TigerReader reader, Func<T, TResult> selector)
@@ -115,32 +153,21 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
 
     public new T this[int index]
     {
-        get
-        {
-            if (_loaded)
-            {
-                return OriginalIndexAccess(index);
-            }
-            else
-            {
-                throw new NotSupportedException(
-                    "DynamicArray does not store data locally, use with TigerReader or change to DynamicArrayLoaded");
-            }
-        }
+        get => throw new NotSupportedException(
+            "DynamicArray does not store data locally, use with TigerReader or change to DynamicArray");
         set => throw new NotSupportedException("DynamicArray is read-only");
+    }
+
+    public void ForEach(Action<T> action)
+    {
+        throw new NotSupportedException(
+            "DynamicArray does not store data locally, use with TigerReader or change to DynamicArray");
     }
 
     public new Enumerator GetEnumerator()
     {
-        if (_loaded)
-        {
-            return base.GetEnumerator();
-        }
-        else
-        {
-            throw new NotSupportedException(
-                "DynamicArray does not store data locally, use with TigerReader or change to DynamicArrayLoaded");
-        }
+        throw new NotSupportedException(
+            "DynamicArray does not store data locally, use with TigerReader or change to DynamicArray");
     }
 
     public T this[TigerReader reader, int index]
@@ -156,15 +183,8 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
 
     public new T ElementAt(int index)
     {
-        if (_loaded)
-        {
-            return OriginalIndexAccess(index);
-        }
-        else
-        {
-            throw new NotSupportedException(
-                "DynamicArray does not store data locally, use with TigerReader or change to DynamicArrayLoaded");
-        }
+        throw new NotSupportedException(
+            "DynamicArray does not store data locally, use with TigerReader or change to DynamicArray");
     }
 
     public T ElementAt(TigerReader reader, int index)
@@ -174,7 +194,6 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
             throw new IndexOutOfRangeException("Index out of range");
         }
 
-        // TigerReader reader = new TigerReader(_arrayData);
         return ReadElement(reader, index);
     }
 
@@ -201,6 +220,7 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
         }
     }
 
+    // todo interpolation search
     /// <summary>
     /// We assume the list is sorted via a position 0 DestinyHash uint32.
     /// </summary>
@@ -265,35 +285,12 @@ public class Optional<T>
     }
 }
 
-public class DynamicArrayLoaded<T> : DynamicArray<T> where T : struct
-{
-    public override void Deserialize(TigerReader reader)
-    {
-        base.Deserialize(reader);
-
-        for (int i = 0; i < Count; i++)
-        {
-            reader.Seek(Offset.AbsoluteOffset + i * _elementSize, SeekOrigin.Begin);
-            Add(ReadElement(reader, i));
-        }
-    }
-
-    public new T this[int index]
-    {
-        get => OriginalIndexAccess(index);
-        set => throw new NotSupportedException("DynamicArray is read-only");
-    }
-
-    public new Enumerator GetEnumerator()
-        => new();
-}
-
 /// <summary>
 /// Assume the first field of T is a uint32 sort key.
 /// This allows for binary searching.
 /// We actually use interpolation searching as its more efficent since hashes are uniformly distributed.
 /// </summary>
-public class SortedDynamicArray<T> : DynamicArray<T> where T : struct
+public class SortedDynamicArray<T> : DynamicArrayUnloaded<T> where T : struct
 {
     public T? InterpolationSearch(TigerReader reader, TigerHash hash)
     {
@@ -410,7 +407,7 @@ public class ResourcePointer : RelativePointer
         }
         else
         {
-            Log.Warning($"Unknown resource class hash {ResourceClassHash:X8}");
+            Log.Debug($"Unknown resource class hash {ResourceClassHash:X8}");
             return null;
         }
     }
@@ -428,7 +425,7 @@ public class ResourcePointer : RelativePointer
         ResourceClassHash = reader.ReadUInt32();
         if (ResourceClassHash == 0)
         {
-            Debug.Fail("Resource class hash is 0");
+            // Debug.Fail("Resource class hash is 0");
             ResourceClassHash = TigerHash.InvalidHash32;
         }
     }
@@ -483,6 +480,8 @@ public class StringReference : ITigerDeserialize
         StringHash stringHash = new(reader.ReadUInt32());
         Value = localizedStrings.GetStringFromHash(stringHash);
     }
+
+    public static implicit operator string(StringReference stringReference) => stringReference.Value.ToString();
 }
 
 /// <summary>
@@ -504,6 +503,8 @@ public class StringIndexReference : ITigerDeserialize
         StringHash stringHash = new(reader.ReadUInt32());
         Value = localizedStrings.GetStringFromHash(stringHash);
     }
+
+    public static implicit operator string(StringIndexReference stringIndexReference) => stringIndexReference.Value.ToString();
 }
 
 /// <summary>
@@ -518,8 +519,14 @@ public class StringReference64 : ITigerDeserialize
     {
         LocalizedStrings localizedStrings = SchemaDeserializer.DeserializeTag64<LocalizedStrings>(reader);
         StringHash stringHash = new(reader.ReadUInt32());
+        if (localizedStrings == null || stringHash.IsInvalid())
+        {
+            return;
+        }
         Value = localizedStrings.GetStringFromHash(stringHash);
     }
+
+    public static implicit operator string(StringReference64 stringReference64) => stringReference64.Value.ToString();
 }
 
 /// <summary>
@@ -570,7 +577,12 @@ public class ResourcePointerWithClass : ResourcePointer
     public override void Deserialize(TigerReader reader)
     {
         base.Deserialize(reader);
+        reader.Seek(_basePosition + 8, SeekOrigin.Begin);
         uint extraResourceClassHash = reader.ReadUInt32();
+        if (ResourceClassHash == 0)
+        {
+            ResourceClassHash = extraResourceClassHash;
+        }
         Debug.Assert(extraResourceClassHash == ResourceClassHash);
     }
 }

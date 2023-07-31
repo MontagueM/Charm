@@ -42,7 +42,7 @@ public partial class DevView : UserControl
         strHash = Regex.Replace(strHash, @"(\s+|r|h)", "");
         if (strHash.Length == 16)
         {
-            strHash = Hash64Map.GetHash32(strHash);
+            strHash = Hash64Map.GetHash32Checked(strHash);
         }
         if (strHash == "")
         {

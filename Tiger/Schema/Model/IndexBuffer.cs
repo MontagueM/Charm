@@ -93,6 +93,10 @@ public class IndexBuffer : TigerReferenceFile<SIndexHeader>
         {
             handle.BaseStream.Seek(offset * 2, SeekOrigin.Begin);
             long start = handle.BaseStream.Position;
+            if (handle.ReadUInt16() != 0xFF_FF)
+            {
+                handle.Seek(-2, SeekOrigin.Current);
+            }
             while (handle.BaseStream.Position + 4 - start < count * 2)  // + 4 from reading the first two previous
             {
                 uint i1 = handle.ReadUInt16();

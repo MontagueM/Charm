@@ -20,10 +20,10 @@ public partial class DirectiveView : UserControl
     {
         Tag<D2Class_C78E8080> directive = FileResourcer.Get().GetSchemaTag<D2Class_C78E8080>(hash);
 
-        ListView.ItemsSource = GetDirectiveItems(directive.TagData.DirectiveTable);
+        ListView.ItemsSource = GetDirectiveItems(directive, directive.TagData.DirectiveTable);
     }
 
-    public List<DirectiveItem> GetDirectiveItems(List<D2Class_C98E8080> directiveTable)
+    public List<DirectiveItem> GetDirectiveItems(Tag<D2Class_C78E8080> directiveTag, DynamicArray<D2Class_C98E8080> directiveTable)
     {
         // List to maintain order of directives
         var items = new List<DirectiveItem>();
@@ -34,7 +34,7 @@ public partial class DirectiveView : UserControl
             {
                 Name = directive.NameString.Value.ToString(),
                 Description = directive.DescriptionString.Value.ToString(),
-                Objective = $"{directive.ObjectiveString} 0/{directive.ObjectiveTargetCount}",
+                Objective = $"{directive.ObjectiveString.Value.ToString()} 0/{directive.ObjectiveTargetCount}",
                 Unknown = directive.Unk58.Value.ToString(),
                 Hash = directive.Hash
             });

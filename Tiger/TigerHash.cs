@@ -30,7 +30,7 @@ public class StringHash : TigerHash
     {
     }
 
-    public static StringHash Invalid => new(0x811c9dc5);
+    public static StringHash Invalid => new(InvalidHash32);
 
     public override bool IsValid()
     {
@@ -152,6 +152,10 @@ public static class FileHashExtensions
 {
     public static FileHash GetReferenceHash(this FileHash fileHash)
     {
+        if (fileHash.IsInvalid())
+        {
+            throw new Exception("Cannot get reference hash for invalid file hash.");
+        }
         return new FileHash(fileHash.GetFileMetadata().Reference.Hash32);
     }
 

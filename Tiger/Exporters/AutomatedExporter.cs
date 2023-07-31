@@ -1,6 +1,8 @@
-﻿namespace Tiger.Schema;
+﻿using Tiger.Schema;
 
-public class AutomatedImporter
+namespace Tiger.Exporters;
+
+public class AutomatedExporter
 {
     public enum ImportType
     {
@@ -14,7 +16,7 @@ public class AutomatedImporter
     public static void SaveInteropUnrealPythonFile(string saveDirectory, string meshName, ImportType importType, TextureExportFormat textureFormat, bool bSingleFolder = true)
     {
         // Copy and rename file
-        File.Copy("import_to_ue5.py", $"{saveDirectory}/{meshName}_import_to_ue5.py", true);
+        File.Copy("Exporters/import_to_ue5.py", $"{saveDirectory}/{meshName}_import_to_ue5.py", true);
         if (importType == ImportType.Static)
         {
             string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_ue5.py");
@@ -48,7 +50,7 @@ public class AutomatedImporter
 
         //// Copy and rename file
         //saveDirectory = saveDirectory.Replace("\\", "/");
-        //File.Copy("import_to_blender.py", $"{saveDirectory}/{meshName}_import_to_blender.py", true);
+        //File.Copy("Exporters/import_to_blender.py", $"{saveDirectory}/{meshName}_import_to_blender.py", true);
 
         ////Lets just make a py for all exports now because why not
         //string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
@@ -77,7 +79,7 @@ public class AutomatedImporter
 
     public static void SaveBlenderApiFile(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
     {
-        File.Copy($"blender_api_template.py", $"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", true);
+        File.Copy($"Exporters/blender_api_template.py", $"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", true);
         string text = File.ReadAllText($"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py");
 
         string[] components = {"X", "Y", "Z", "W"};
@@ -99,12 +101,10 @@ public class AutomatedImporter
                 }
             }
 
-            TigerReader reader = dye.GetReader();
-            var diff = dye.TagData.DyeTextures[reader, 0];
+            var diff = dye.TagData.DyeTextures[0];
             text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}_{diff.TextureIndex}.{TextureExtractor.GetExtension(outputTextureFormat)}");
-            var norm = dye.TagData.DyeTextures[reader, 1];
+            var norm = dye.TagData.DyeTextures[1];
             text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}_{norm.TextureIndex}.{TextureExtractor.GetExtension(outputTextureFormat)}");
-            reader.Close();
             dyeIndex++;
         }
 

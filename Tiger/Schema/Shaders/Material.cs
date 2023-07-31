@@ -26,7 +26,7 @@ public class Material : Tag<SMaterial>
     {
         foreach (var e in _tag.VSTextures)
         {
-            if (e.Texture.Hash.IsInvalid())
+            if (e.Texture == null)
             {
                 continue;
             }
@@ -39,7 +39,7 @@ public class Material : Tag<SMaterial>
         }
         foreach (var e in _tag.PSTextures)
         {
-            if (e.Texture.Hash.IsInvalid())
+            if (e.Texture == null)
             {
                 continue;
             }

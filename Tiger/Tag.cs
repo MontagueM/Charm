@@ -15,6 +15,7 @@ public class Tag<T> : TigerFile where T : struct
     // separated as it should be a red flag if we're using this
     [Obsolete("Use TagData sparingly as it breaks the Law of Demeter; instead isolate code in owning structures.")]
     public T TagData => _tag;
+    private bool _isLoaded = false;
 
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash reference
     public  Tag(FileHash fileHash, bool shouldParse = true) : base(fileHash)
@@ -44,10 +45,23 @@ public class Tag<T> : TigerFile where T : struct
 
     private void Deserialize()
     {
-        using (TigerReader reader = GetReader())
+        _isLoaded = true;
+        using TigerReader reader = GetReader();
+        _tag = SchemaDeserializer.Get().DeserializeSchema<T>(reader);
+    }
+
+    public void Load()
+    {
+        if (!_isLoaded)
         {
-            _tag = SchemaDeserializer.Get().DeserializeSchema<T>(reader);
+            Deserialize();
         }
+    }
+
+    public void TempDump()
+    {
+        byte[] data = GetData();
+        File.WriteAllBytes($"TempFiles/{Hash}.bin", data);
     }
 }
 
