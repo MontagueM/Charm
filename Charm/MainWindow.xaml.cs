@@ -41,6 +41,10 @@ public partial class MainWindow
     {
         InitializeComponent();
 
+        Strategy.BeforeStrategyEvent += ((StrategyEventArgs e, int invocationCount) => { Progress.SetProgressStages(Enumerable.Range(1, invocationCount).Select(num => $"Initialising game version {e.Strategy}: {num}/{invocationCount}").ToList()); });
+        Strategy.DuringStrategyEvent += ((StrategyEventArgs e) => { Progress.CompleteStage(); });
+        Strategy.AfterStrategyEvent += ((StrategyEventArgs e) => { Progress.CompleteStage(); });
+
         InitialiseStrategistSingletons();
         InitialiseSubsystems();
 
