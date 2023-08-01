@@ -1,0 +1,30 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:charmAvalonia="clr-namespace:CharmAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CharmAvalonia.TagView">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="95*" />
+            <RowDefinition Height="5*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+        <charmAvalonia:EntityView IsVisible="False" x:Name="EntityControl" Grid.ColumnSpan="2"/>
+        <charmAvalonia:StaticView IsVisible="False" x:Name="StaticControl" Grid.ColumnSpan="2"/>
+        <!-- <local:ActivityView Visibility="Hidden" x:Name="ActivityControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" /> -->
+        <charmAvalonia:TextureView IsVisible="False" x:Name="TextureControl" Grid.ColumnSpan="2"/>
+        <charmAvalonia:CubemapView IsVisible="False" x:Name="CubemapControl" Grid.ColumnSpan="2"/>
+        <charmAvalonia:DialogueView IsVisible="False" x:Name="DialogueControl" Grid.ColumnSpan="2"/>
+        <charmAvalonia:DirectiveView IsVisible="False" x:Name="DirectiveControl" Grid.ColumnSpan="2"/>
+        <charmAvalonia:MusicView IsVisible="False" x:Name="MusicControl" Grid.ColumnSpan="2"/>
+        <charmAvalonia:TagListView IsVisible="False" x:Name="TagListControl" Grid.ColumnSpan="2"/>
+        <charmAvalonia:ExportControl x:Name="ExportControl" IsVisible="False" Grid.Column="1" Grid.Row="1"/>
+        <charmAvalonia:MusicPlayerControl x:Name="MusicPlayer" IsVisible="False" Grid.Column="0" Grid.Row="1"/>
+    </Grid>
+</UserControl>
+

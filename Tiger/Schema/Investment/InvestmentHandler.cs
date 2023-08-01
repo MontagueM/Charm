@@ -41,9 +41,9 @@ public class Investment : Strategy.StrategistSingleton<Investment>
 
     protected override void Reset() => throw new NotImplementedException();
 
-    protected override void Initialise()
+    protected override async Task Initialise()
     {
-        GetAllInvestmentTags();
+        await Task.Run(GetAllInvestmentTags);
     }
 
     public string GetItemName(InventoryItem item)
@@ -80,7 +80,7 @@ public class Investment : Strategy.StrategistSingleton<Investment>
         return _inventoryItemIndexmap[hash32];
     }
 
-    private async void GetAllInvestmentTags()
+    private async Task GetAllInvestmentTags()
     {
         // Iterate over all investment pkgs until we find all the tags we need
         bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup");

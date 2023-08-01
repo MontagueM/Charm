@@ -1,0 +1,58 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:charmAvalonia="clr-namespace:CharmAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CharmAvalonia.DialogueView">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="DialogueTemplate">
+            <Button Height="70" Width="880" Margin="0,5,0,5"
+                    Click="PlayWem_OnClick">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="80*" />
+                        <RowDefinition Height="20*" />
+                    </Grid.RowDefinitions>
+                    <Border Grid.RowSpan="2" BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="1" Panel.ZIndex="1" />
+                    <TextBlock Grid.Row="0" TextWrapping="WrapWithOverflow"
+                               HorizontalAlignment="Left" Text="{Binding Voiceline}" />
+                    <TextBlock Grid.Row="1"  HorizontalAlignment="Left"
+                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+                               VerticalAlignment="Bottom" FontSize="12"
+                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding Narrator}" />
+                    <TextBlock Grid.Row="0"  HorizontalAlignment="Right"
+                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+                               VerticalAlignment="Top" FontSize="8"
+                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding RecursionDepth}" Margin="0,0,4,0" />
+                    <TextBlock Grid.Row="1"  HorizontalAlignment="Right"
+                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+                               VerticalAlignment="Bottom" FontSize="12"
+                               Foreground="{StaticResource ForegroundColour75}" Text="{Binding Duration}" Margin="0,0,4,0" />
+                </Grid>
+            </Button>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90*" />
+            <RowDefinition Height="10*" />
+        </Grid.RowDefinitions>
+        <ListView Grid.Row="0" x:Name="ListView">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                    <Setter Property="Template" Value="{StaticResource DialogueTemplate}" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"></StackPanel>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+        <charmAvalonia:MusicPlayerControl Grid.Row="1" x:Name="MusicPlayer"/>
+    </Grid>
+</UserControl>
+

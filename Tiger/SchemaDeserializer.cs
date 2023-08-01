@@ -60,9 +60,10 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     {
     }
 
-    protected override void Initialise()
+    protected override Task Initialise()
     {
         FillSchemaCaches();
+        return Task.CompletedTask;
     }
 
     protected override void Reset()

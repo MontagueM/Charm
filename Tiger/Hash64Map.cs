@@ -42,12 +42,12 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
     }
 
     // todo race condition where
-    protected override void Initialise()
+    protected override Task Initialise()
     {
         // Pre-BL has no Hash64s
         if (_strategy < TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         List<ushort> packageIds = PackageResourcer.Get().PackagePathsCache.GetAllPackageIds();
@@ -63,6 +63,8 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
                 _map.TryAdd(definition.Hash64, definition.Hash32);
             }
         });
+
+        return Task.CompletedTask;
     }
 
     protected override void Reset()

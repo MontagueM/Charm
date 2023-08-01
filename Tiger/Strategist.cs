@@ -1,16 +1,13 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Tiger;
 
-public class UpdateStrategyEventArgs : EventArgs
-{
-    public TigerStrategy NewStrategy { get; set; }
-}
 
 
-public class ResetStrategyEventArgs : EventArgs
+public class StrategyEventArgs : EventArgs
 {
-    public TigerStrategy StrategyToReset { get; set; }
+    public TigerStrategy Strategy { get; set; }
 }
 
 
@@ -53,10 +50,19 @@ public class Strategy
     // Instead, you should use StrategistSingleton to abstract the strategy away.
     public static TigerStrategy CurrentStrategy { get => _currentStrategy; }
 
-    public delegate void UpdateStrategyEventHandler(UpdateStrategyEventArgs e);
+    public delegate void BeforeStrategyEventHandler(StrategyEventArgs e, int invocationCount);
+    public static event BeforeStrategyEventHandler BeforeStrategyEvent = delegate { };
+
+    public delegate void DuringStrategyEventHandler(StrategyEventArgs e);
+    public static event DuringStrategyEventHandler DuringStrategyEvent = delegate { };
+
+    public delegate void AfterStrategyEventHandler(StrategyEventArgs e);
+    public static event AfterStrategyEventHandler AfterStrategyEvent = delegate { };
+
+    public delegate void UpdateStrategyEventHandler(StrategyEventArgs e);
     public static event UpdateStrategyEventHandler OnStrategyChangedEvent = delegate { };
 
-    public delegate void ResetStrategyEventHandler(ResetStrategyEventArgs e);
+    public delegate void ResetStrategyEventHandler(StrategyEventArgs e);
     public static event ResetStrategyEventHandler OnStrategyResetEvent = delegate { };
 
     static Strategy() { SetStrategy(_defaultStrategy); }
@@ -80,7 +86,18 @@ public class Strategy
             throw new ArgumentException($"Game strategy does not exist '{strategy}'");
         }
         _currentStrategy = strategy;
-        OnStrategyChangedEvent.Invoke(new UpdateStrategyEventArgs { NewStrategy = _currentStrategy });
+
+        if (strategy == TigerStrategy.NONE)
+        {
+            return;
+        }
+
+        Task.Run(() =>
+        {
+            BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy }, invocationCount:OnStrategyChangedEvent.GetInvocationList().Length);
+            OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+            AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        });
     }
 
     /// <exception cref="ArgumentException">'strategy' does not exist.</exception>
@@ -107,7 +124,7 @@ public class Strategy
 
         if (bResetState)
         {
-            OnStrategyResetEvent.Invoke(new ResetStrategyEventArgs() { StrategyToReset = strategy });
+            OnStrategyResetEvent.Invoke(new StrategyEventArgs() { Strategy = strategy });
         }
     }
 
@@ -213,7 +230,7 @@ public class Strategy
     public abstract class StrategistSingleton<T>
         where T : StrategistSingleton<T>
     {
-        private static Dictionary<TigerStrategy, T> _strategyInstances = new();
+        private static ConcurrentDictionary<TigerStrategy, T> _strategyInstances = new();
 
         private static T? _instance = null;
 
@@ -222,7 +239,7 @@ public class Strategy
         /// <summary>
         /// Called after the StrategySingleton instance is created.
         /// </summary>
-        protected abstract void Initialise();
+        protected abstract Task Initialise();
 
         /// <summary>
         /// Called after a reset operation is called for this strategy, e.g. when the packages directory changes.
@@ -271,9 +288,9 @@ public class Strategy
                 throw new Exception($"Invalid constructor for {typeof(T)}");
             }
 
-            _strategyInstances.Add(strategy, _instance);
+            _strategyInstances.TryAdd(strategy, _instance);
 
-            _instance.Initialise();
+            Task.WaitAll(_instance.Initialise());
         }
 
         static StrategistSingleton()
@@ -291,29 +308,31 @@ public class Strategy
             Strategy.OnStrategyResetEvent += OnStrategyResetEvent;
         }
 
-        private static void OnStrategyChangedEvent(UpdateStrategyEventArgs e)
+        private static void OnStrategyChangedEvent(StrategyEventArgs e)
         {
-            if (e.NewStrategy == TigerStrategy.NONE)
+            if (e.Strategy == TigerStrategy.NONE)
             {
                 _instance = null;
                 return;
             }
 
-            if (!_strategyInstances.ContainsKey(e.NewStrategy))
+            if (!_strategyInstances.ContainsKey(e.Strategy))
             {
-                AddNewStrategyInstance(e.NewStrategy);
+                AddNewStrategyInstance(e.Strategy);
             }
-            _instance = _strategyInstances[e.NewStrategy];
+            _instance = _strategyInstances[e.Strategy];
+            DuringStrategyEvent.Invoke(e);
         }
 
-        private static void OnStrategyResetEvent(ResetStrategyEventArgs e)
+        private static void OnStrategyResetEvent(StrategyEventArgs e)
         {
-            if (!_strategyInstances.ContainsKey(e.StrategyToReset))
+            if (!_strategyInstances.ContainsKey(e.Strategy))
             {
                 throw new Exception("Strategy to reset does not exist");
             }
-            _strategyInstances[e.StrategyToReset].Reset();
-            _strategyInstances[e.StrategyToReset].Initialise();
+            _strategyInstances[e.Strategy].Reset();
+            _strategyInstances[e.Strategy].Initialise();
+            DuringStrategyEvent.Invoke(e);
         }
     }
 

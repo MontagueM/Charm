@@ -1,0 +1,37 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+             xmlns:charmAvalonia="clr-namespace:CharmAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CharmAvalonia.CubemapView">
+    <UserControl.Resources>
+        <charmAvalonia:MainViewModel x:Key="MVM"/>
+        <hx:RenderTechniqueConverter x:Key="RenderTechniqueConverter"/>
+    </UserControl.Resources>
+    <UserControl.DataContext>
+        <Binding Source="{StaticResource MVM}"/>
+    </UserControl.DataContext>
+    <Grid>
+        <hx:Viewport3DX x:Name="CubemapViewport"
+                        EffectsManager="{Binding EffectsManager}"
+                        EnableDesignModeRendering="True"
+                        EnableSwapChainRendering="True"
+                        IsShadowMappingEnabled="False"
+                        ShowCoordinateSystem="True"
+                        EnableDeferredRendering="False" EnableRenderFrustum="True"
+                        Title="{Binding Title}"
+                        TextBrush="{StaticResource ForegroundColour75}"
+                        ShowViewCube="False"
+                        SubTitle="{Binding SubTitle}"
+                        InfoForeground="{StaticResource ForegroundColour75}"
+                        InfoBackground="{StaticResource BackgroundColour14}"
+        >
+            <hx:Viewport3DX.Camera>
+                <hx:PerspectiveCamera Position="0,0,5"/>
+            </hx:Viewport3DX.Camera>
+        </hx:Viewport3DX>
+    </Grid>
+</UserControl>
+

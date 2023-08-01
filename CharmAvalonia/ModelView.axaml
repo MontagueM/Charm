@@ -1,0 +1,82 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CharmAvalonia.ModelView">
+    <UserControl.Resources>
+        <charm:MainViewModel x:Key="MVM" />
+        <hx:RenderTechniqueConverter x:Key="RenderTechniqueConverter" />
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+    <UserControl.DataContext>
+        <Binding Source="{StaticResource MVM}" />
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="98*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="4*" />
+            <RowDefinition Height="100*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <CheckBox x:Name="GridCheckbox" Margin="10,0,10,0" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center">Grid</CheckBox>
+            <ComboBox x:Name="LodCombobox" SelectionChanged="LodCombobox_OnSelectionChanged" Margin="10,0,10,0">
+                <ComboBoxItem IsSelected="True">Most Detail</ComboBoxItem>
+                <ComboBoxItem>Least Detail</ComboBoxItem>
+                <ComboBoxItem>All Detail</ComboBoxItem>
+            </ComboBox>
+            <ComboBox x:Name="GroupsCombobox" SelectionChanged="GroupsCombobox_OnSelectionChanged" Margin="10,0,10,0">
+                <!-- <ComboBoxItem IsSelected="True">Group 1/n</ComboBoxItem> -->
+            </ComboBox>
+        </StackPanel>
+
+        <TextBlock
+            Grid.Column="1"
+            Grid.Row="0"
+            FontSize="12"
+            Foreground="{StaticResource ForegroundColour90}"
+            Text="{Binding ElementName=Viewport, Path=RenderDetailOutput}" />
+
+        <hx:Viewport3DX x:Name="ModelViewport" Grid.Row="1" Grid.ColumnSpan="1"
+                        EffectsManager="{Binding EffectsManager}"
+                        EnableDesignModeRendering="False"
+                        EnableSwapChainRendering="True"
+                        IsShadowMappingEnabled="False"
+                        ShowCoordinateSystem="False"
+                        ShowFrameRate="True"
+                        ShowTriangleCountInfo="True"
+                        EnableDeferredRendering="False" EnableRenderFrustum="True"
+                        Title="{Binding Title}"
+                        TextBrush="{StaticResource ForegroundColour75}"
+                        TitleFontFamily="Arial"
+                        ShowViewCube="False"
+                        SubTitle="{Binding SubTitle}"
+                        InfoForeground="{StaticResource ForegroundColour75}"
+                        InfoBackground="{StaticResource BackgroundColour14}"
+                        Camera="{Binding Camera}">
+            <hx:Viewport3DX.InputBindings>
+                <KeyBinding Key="R" Command="{Binding RotateCommand}" />
+                <KeyBinding Key="W" Command="{Binding ForwardCommand}" />
+                <KeyBinding Key="A" Command="{Binding LeftCommand}" />
+                <KeyBinding Key="S" Command="{Binding BackCommand}" />
+                <KeyBinding Key="D" Command="{Binding RightCommand}" />
+            </hx:Viewport3DX.InputBindings>
+            <hx:AmbientLight3D Color="#ffffffff" />
+            <hx:Element3DPresenter Content="{Binding ModelGroup}" />
+            <hx:LineGeometryModel3D
+                Geometry="{Binding Grid}"
+                Transform="{Binding GridTransform}"
+                Smoothness="2"
+                Thickness="1.0"
+                Color="{StaticResource BackgroundColour14C}"
+                Visibility="{Binding IsChecked,
+                                                     ElementName=GridCheckbox,
+                                                     Converter={StaticResource BoolToVisibility}}" />
+        </hx:Viewport3DX>
+    </Grid>
+</UserControl>
+

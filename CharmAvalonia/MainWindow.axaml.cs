@@ -32,16 +32,10 @@ public partial class MainWindow : Avalonia.Controls.Window
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         Progress = ProgressView;
-        if (MainMenuTab.IsVisible)
-        {
-            Task.Run(InitialiseHandlers);
-            _bHasInitialised = true;
-        }
-    }
 
-    public MainWindow()
-    {
-        InitializeComponent();
+        Strategy.BeforeStrategyEvent += ((StrategyEventArgs e, int invocationCount) => { Progress.SetProgressStages(Enumerable.Range(1, invocationCount).Select(num => $"Initialising game version {e.Strategy}: {num}/{invocationCount}").ToList()); });
+        Strategy.DuringStrategyEvent += ((StrategyEventArgs e) => { Progress.CompleteStage(); });
+        Strategy.AfterStrategyEvent += ((StrategyEventArgs e) => { Progress.CompleteStage(); });
 
         InitialiseStrategistSingletons();
         InitialiseSubsystems();
@@ -79,6 +73,17 @@ public partial class MainWindow : Avalonia.Controls.Window
         {
             Environment.Exit(0);
         }
+
+        if (MainMenuTab.IsVisible)
+        {
+            Task.Run(InitialiseHandlers);
+            _bHasInitialised = true;
+        }
+    }
+
+    public MainWindow()
+    {
+        InitializeComponent();
     }
 
     private void InitialiseStrategistSingletons()
@@ -303,13 +308,13 @@ public partial class MainWindow : Avalonia.Controls.Window
 
     private void OpenConfigPanel_OnClick(object sender, RoutedEventArgs e)
     {
-        // MakeNewTab("Configuration", new ConfigView());
-        // SetNewestTabSelected();
+        MakeNewTab("Configuration", new ConfigView());
+        SetNewestTabSelected();
     }
 
     private void OpenLogPanel_OnClick(object sender, RoutedEventArgs e)
     {
-        // MakeNewTab("Log", _logView);
+        MakeNewTab("Log", _logView);
         SetNewestTabSelected();
     }
 
@@ -362,39 +367,39 @@ public partial class MainWindow : Avalonia.Controls.Window
 
         _newestTab = new TabItem();
         _newestTab.Content = content;
-        // _newestTab.MouseDown += MenuTab_OnMouseDown;
+        _newestTab.PointerPressed += MenuTab_OnMouseDown;
         MainTabControl.Items.Add(_newestTab);
         SetNewestTabName(name);
     }
 
-    private void MenuTab_OnMouseDown(object sender, MouseButtonEventArgs e)
+    private void MenuTab_OnMouseDown(object? sender, PointerPressedEventArgs pointerPressedEventArgs)
     {
-        // if (e.ChangedButton == MouseButton.Middle && e.Source is TabItem)
-        // {
-        //     TabItem tab = (TabItem)sender;
-        //     MainTabControl.Items.Remove(tab);
-        //     dynamic content = tab.Content;
-        //     if (content is ActivityView av)
-        //     {
-        //         av.Dispose();
-        //     }
-        // }
+        if (pointerPressedEventArgs.GetCurrentPoint(this).Properties.IsMiddleButtonPressed && pointerPressedEventArgs.Source is TabItem)
+        {
+            TabItem tab = (TabItem)sender;
+            MainTabControl.Items.Remove(tab);
+            dynamic content = tab.Content;
+            // if (content is ActivityView av)
+            // {
+            //     av.Dispose();
+            // }
+        }
     }
 
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        // if (e.Key == Key.D && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-        // {
-        //     MakeNewTab("Dev", new DevView());
-        //     SetNewestTabSelected();
-        // }
-        // else if (e.Key == Key.C
-        //          && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
-        //          && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift
-        //          && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
-        // {
-        //     throw new ExternalException("Crash induced.");
-        // }
+        if (e.Key == Key.D && (e.KeyModifiers & KeyModifiers.Control) == KeyModifiers.Control)
+        {
+            // MakeNewTab("Dev", new DevView());
+            SetNewestTabSelected();
+        }
+        else if (e.Key == Key.C
+                 && (e.KeyModifiers & KeyModifiers.Control) == KeyModifiers.Control
+                 && (e.KeyModifiers & KeyModifiers.Shift) == KeyModifiers.Shift
+                 && (e.KeyModifiers & KeyModifiers.Alt) == KeyModifiers.Alt)
+        {
+            throw new ExternalException("Crash induced.");
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Arithmic;
 using ConcurrentCollections;
 
 namespace Tiger;
@@ -32,11 +33,12 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         PackagesDirectory = strategyConfiguration.PackagesDirectory;
     }
 
-    protected override void Initialise()
+    protected override Task Initialise()
     {
         _packagePathsCache = new PackagePathsCache(_strategy);
         LoadAllPackages();
         CacheAllActivityNames();
+        return Task.CompletedTask;
     }
 
     protected override void Reset()
@@ -85,7 +87,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
         if (package == null || !_packagesCache.TryAdd(packageId, package))
         {
-            throw new Exception($"Failed to add package to package cache: '{packageId}', '{packagePath}'");
+            Log.Verbose($"Failed to add package to package cache: '{packageId}', '{packagePath}'");
         }
         return package;
     }

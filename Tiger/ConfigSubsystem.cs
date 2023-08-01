@@ -431,6 +431,7 @@ public class ConfigSubsystem : Subsystem
          {
              Strategy.AddNewStrategy(strategy, packagesPath, false);
          }
+
          Strategy.SetStrategy(_settings.Common.CurrentStrategy);
 
          return true;

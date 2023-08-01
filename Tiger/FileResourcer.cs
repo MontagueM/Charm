@@ -10,8 +10,9 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
     {
     }
 
-    protected override void Initialise()
+    protected override Task Initialise()
     {
+        return Task.CompletedTask;
     }
 
     protected override void Reset()

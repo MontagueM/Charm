@@ -1,0 +1,25 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CharmAvalonia.ExportControl">
+    <Grid>
+        <!-- If exporting is not allowed, we hide the options with this red error quad -->
+        <Rectangle x:Name="DisabledOverlay" IsVisible="False" IsHitTestVisible="True" Fill="Red" Opacity="0.5" Panel.ZIndex="100"/>
+        <Border BorderBrush="{StaticResource BackgroundColour30}" BorderThickness="1" Panel.ZIndex="1"/>
+        <Grid VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="100*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100*"/>
+            </Grid.RowDefinitions>
+            <ComboBox HorizontalAlignment="Center" x:Name="ExportComboBox">
+            </ComboBox>
+            <Button Grid.Column="1" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton"/>
+        </Grid>
+    </Grid>
+</UserControl>
+
