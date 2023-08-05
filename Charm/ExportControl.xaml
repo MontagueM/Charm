@@ -18,9 +18,9 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="100*"/>
             </Grid.RowDefinitions>
-            <ComboBox HorizontalAlignment="Center" x:Name="ExportComboBox">
+            <ComboBox HorizontalAlignment="Center" x:Name="ExportComboBox" Style="{StaticResource MaterialDesignComboBox}">
             </ComboBox>
-            <Button Grid.Column="1" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton"/>
+            <Button Grid.Column="1" HorizontalAlignment="Center" Content="EXPORT" Padding="5,5,5,5" x:Name="ExportButton" Style="{StaticResource MaterialDesignPaperDarkButton}"/>
         </Grid>
     </Grid>
 </UserControl>

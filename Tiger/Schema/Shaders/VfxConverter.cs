@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
@@ -94,7 +95,7 @@ PS
     RenderState(CullMode, F_RENDER_BACKFACES? NONE : DEFAULT );";
 
 
-    public string HlslToVfx(Material material, string hlslText, bool bIsVertexShader, bool bIsTerrain = false)
+    public string HlslToVfx(IMaterial material, string hlslText, bool bIsVertexShader, bool bIsTerrain = false)
     {
         //Console.WriteLine("Material: " + material.Hash);
         hlsl = new StringReader(hlslText);
@@ -201,7 +202,7 @@ PS
         } while (line != null);
     }
 
-    private void WriteCbuffers(Material material, bool bIsVertexShader)
+    private void WriteCbuffers(IMaterial material, bool bIsVertexShader)
     {
         // Try to find matches, pixel shader has Unk2D0 Unk2E0 Unk2F0 Unk300 available
         foreach (var cbuffer in cbuffers)
@@ -211,47 +212,47 @@ PS
             dynamic data = null;
             if (bIsVertexShader)
             {
-                if (cbuffer.Count == material.TagData.Unk90.Count)
+                if (cbuffer.Count == material.Unk90.Count)
                 {
-                    data = material.TagData.Unk90;
+                    data = material.Unk90;
                 }
-                else if (cbuffer.Count == material.TagData.UnkA0.Count)
+                else if (cbuffer.Count == material.UnkA0.Count)
                 {
-                    data = material.TagData.UnkA0;
+                    data = material.UnkA0;
                 }
-                else if (cbuffer.Count == material.TagData.UnkB0.Count)
+                // else if (cbuffer.Count == material.TagData.UnkB0.Count)
+                // {
+                //     data = material.TagData.UnkB0;
+                // }
+                else if (cbuffer.Count == material.UnkC0.Count)
                 {
-                    data = material.TagData.UnkB0;
-                }
-                else if (cbuffer.Count == material.TagData.UnkC0.Count)
-                {
-                    data = material.TagData.UnkC0;
+                    data = material.UnkC0;
                 }
             }
             else
             {
-                if (cbuffer.Count == material.TagData.Unk2D0.Count)
+                if (cbuffer.Count == material.Unk2D0.Count)
                 {
-                    data = material.TagData.Unk2D0;
+                    data = material.Unk2D0;
                 }
-                else if (cbuffer.Count == material.TagData.Unk2E0.Count)
+                else if (cbuffer.Count == material.Unk2E0.Count)
                 {
-                    data = material.TagData.Unk2E0;
+                    data = material.Unk2E0;
                 }
-                else if (cbuffer.Count == material.TagData.Unk2F0.Count)
+                // else if (cbuffer.Count == material.TagData.Unk2F0.Count)
+                // {
+                //     data = material.TagData.Unk2F0;
+                // }
+                else if (cbuffer.Count == material.Unk300.Count)
                 {
-                    data = material.TagData.Unk2F0;
-                }
-                else if (cbuffer.Count == material.TagData.Unk300.Count)
-                {
-                    data = material.TagData.Unk300;
+                    data = material.Unk300;
                 }
                 else
                 {
-                    if (material.TagData.PSVector4Container.IsValid())
+                    if (material.PSVector4Container.IsValid())
                     {
                         // Try the Vector4 storage file
-                        TigerFile container = new(material.TagData.PSVector4Container.GetReferenceHash());
+                        TigerFile container = new(material.PSVector4Container.GetReferenceHash());
                         byte[] containerData = container.GetData();
                         int num = containerData.Length / 16;
                         if (cbuffer.Count == num)
@@ -313,7 +314,7 @@ PS
         }
     }
 
-    private void WriteFunctionDefinition(Material material, bool bIsVertexShader)
+    private void WriteFunctionDefinition(IMaterial material, bool bIsVertexShader)
     {
         if (!bIsVertexShader)
         {
@@ -336,7 +337,7 @@ PS
 
         if (!bIsVertexShader)
         {
-            foreach (var e in material.TagData.PSTextures)
+            foreach (var e in material.EnumeratePSTextures())
             {
                 string type = "Srgb";
                 if (e.Texture != null)

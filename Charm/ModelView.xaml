@@ -29,13 +29,13 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <CheckBox x:Name="GridCheckbox" Margin="10,0,10,0" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center">Grid</CheckBox>
-            <ComboBox x:Name="LodCombobox" SelectionChanged="LodCombobox_OnSelectionChanged" Margin="10,0,10,0">
+            <CheckBox x:Name="GridCheckbox" Margin="10,0,10,0" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource MaterialDesignCheckBox}">Grid</CheckBox>
+            <ComboBox x:Name="LodCombobox" SelectionChanged="LodCombobox_OnSelectionChanged" Margin="10,0,10,0" Style="{StaticResource MaterialDesignComboBox}">
                 <ComboBoxItem IsSelected="True">Most Detail</ComboBoxItem>
                 <ComboBoxItem>Least Detail</ComboBoxItem>
                 <ComboBoxItem>All Detail</ComboBoxItem>
             </ComboBox>
-            <ComboBox x:Name="GroupsCombobox" SelectionChanged="GroupsCombobox_OnSelectionChanged" Margin="10,0,10,0">
+            <ComboBox x:Name="GroupsCombobox" SelectionChanged="GroupsCombobox_OnSelectionChanged" Margin="10,0,10,0" Style="{StaticResource MaterialDesignComboBox}">
                 <!-- <ComboBoxItem IsSelected="True">Group 1/n</ComboBoxItem> -->
             </ComboBox>
         </StackPanel>

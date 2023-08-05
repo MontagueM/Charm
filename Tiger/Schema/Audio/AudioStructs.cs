@@ -57,23 +57,30 @@ public struct D2Class_2A978080
     public DynamicArray<D2Class_2F978080> Unk28;
 }
 
-[SchemaStruct("33978080", 0x88)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "33978080", 0x88)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "33978080", 0x90)]
 public struct D2Class_33978080
 {
     public TigerHash Unk00;
     public TigerHash Unk04;
     public TigerHash Unk08;
     public TigerHash Unk0C;
-    [SchemaField(0x18), Tag64]
+    [SchemaField(TigerStrategy.DESTINY2_LATEST)]
+    public TigerHash Unk10;
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST), Tag64]
     public WwiseSound Sound1;
     public StringReference64 Unk28;
-    [SchemaField(0x40)]
+    [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_LATEST)]
     public float Unk40;
     public Tag Unk44;
-    [SchemaField(0x48), Tag64]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_LATEST), Tag64]
     public WwiseSound Sound2;
     public StringReference64 Unk58;
-    [SchemaField(0x70)]
+    [SchemaField(0x70, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
     public float Unk70;
     public Tag Unk74;
     public TigerHash Unk78;

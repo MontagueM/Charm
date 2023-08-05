@@ -22,6 +22,10 @@ public struct PackageHeaderOld : IPackageHeader
     public uint BlockEntryTableCount;
     [SchemaField(0xD4)]
     public uint BlockEntryTableOffset;
+    [SchemaField(0xF0)]
+    public GlobalPointer<SMiscTableDataOld> MiscTableData;
+    [SchemaField(0xF4)]
+    public uint MiscTableDataSize;
 
     public ushort GetPackageId()
     {
@@ -73,9 +77,20 @@ public struct PackageHeaderOld : IPackageHeader
         return blockEntries;
     }
 
-    public List<Hash64Definition> GetHash64Definitions(TigerReader reader) => throw new NotSupportedException();
+    public List<SHash64Definition> GetHash64Definitions(TigerReader reader)
+    {
+        return new List<SHash64Definition>();
+    }
 
-    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader) => throw new NotSupportedException();
+    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader)
+    {
+        if (MiscTableData.Value.Activities == null)
+        {
+            return new List<SPackageActivityEntry>();
+        }
+
+        return MiscTableData.Value.Activities;
+    }
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x120)]
@@ -88,12 +103,12 @@ public struct PackageHeaderNew : IPackageHeader
     [SchemaField(0x20)]
     public ushort PatchId;
     [SchemaField(0xF0)]
-    public GlobalPointer<ActivityTableData> ActivityTableData;
-    [SchemaField(0xF8)]
-    public uint ActivityTableDataSize;
+    public GlobalPointer<SMiscTableDataNew> MiscTableData;
+    [SchemaField(0xF4)]
+    public uint MiscTableDataSize;
     [SchemaField(0x110)]
-    public GlobalPointer<PackageTablesData> PackageTablesData;
-    [SchemaField(0x118)]
+    public GlobalPointer<SPackageTablesData> PackageTablesData;
+    [SchemaField(0x114)]
     public uint PackageTablesDataSize;
 
     public ushort GetPackageId()
@@ -138,24 +153,48 @@ public struct PackageHeaderNew : IPackageHeader
         return blockEntries;
     }
 
-    public List<Hash64Definition> GetHash64Definitions(TigerReader reader) => throw new NotSupportedException();
+    public List<SHash64Definition> GetHash64Definitions(TigerReader reader)
+    {
+        if (MiscTableData.Value.Hash64s == null)
+        {
+            return new List<SHash64Definition>();
+        }
 
-    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader) => throw new NotSupportedException();
+        return MiscTableData.Value.Hash64s;
+    }
+
+    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader)
+    {
+        if (MiscTableData.Value.Activities == null)
+        {
+            return new List<SPackageActivityEntry>();
+        }
+
+        return MiscTableData.Value.Activities;
+    }
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x20)]
-public struct ActivityTableData
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x18)]
+public struct SMiscTableDataOld
+{
+    [SchemaField(0x00)]
+    public long ThisSize;
+    public DynamicArray<SPackageActivityEntry> Activities;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x60)]
+public struct SMiscTableDataNew
 {
     [SchemaField(0x00)]
     public long ThisSize;
     [SchemaField(0x10)]
-    public uint ActivityTableCount;
-    [SchemaField(0x18)]
-    public uint ActivityTableOffset;
+    public DynamicArray<SPackageActivityEntry> Activities;
+    [SchemaField(0x30)]
+    public DynamicArray<SHash64Definition> Hash64s;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x30)]
-public struct PackageTablesData
+public struct SPackageTablesData
 {
     [SchemaField(0x00)]
     public long ThisSize;
@@ -169,7 +208,7 @@ public struct PackageTablesData
 [StrategyClass(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
 public class Package : Tiger.Package
 {
-    [DllImport("oo2core_3_win64.dll", EntryPoint = "OodleLZ_Decompress")]
+    [DllImport("ThirdParty/oo2core_3_win64.dll", EntryPoint = "OodleLZ_Decompress")]
     public static extern bool OodleLZ_Decompress(byte[] buffer, int bufferSize, byte[] outputBuffer, int outputBufferSize, int a, int b,
         int c, IntPtr d, IntPtr e, IntPtr f, IntPtr g, IntPtr h, IntPtr i, int threadModule);
 
@@ -179,9 +218,9 @@ public class Package : Tiger.Package
 
     protected override void ReadHeader(TigerReader reader)
     {
-        reader.Seek(0x8, SeekOrigin.Begin);
-        ulong buildId = reader.ReadUInt64();
-        bool isNewHeader = buildId >= 17011569960331205102;
+        reader.Seek(0x10, SeekOrigin.Begin);
+        ulong timestamp = reader.ReadUInt32();
+        bool isNewHeader = timestamp >= 1533900000;
         reader.Seek(0, SeekOrigin.Begin);
         if (isNewHeader)
         {

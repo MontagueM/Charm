@@ -14,9 +14,9 @@
 //         [DestinyField(FieldType.TablePointer)]
 //         public List<D2Class_0B008080> Unk50;
 //         [SchemaField(0x78), DestinyField(FieldType.TablePointer)]
-//         public List<D2Class_BD938080> Statics;
+//         public List<SStaticMeshHash> Statics;
 //         [DestinyField(FieldType.TablePointer)]
-//         public List<D2Class_286D8080> InstanceCounts;
+//         public List<SStaticMeshInstanceMap> InstanceCounts;
 //         [SchemaField(0x98)]
 //         public TigerHash Unk98;
 //         [SchemaField(0xA0)]

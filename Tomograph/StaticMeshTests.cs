@@ -1,5 +1,6 @@
 ﻿using Tiger;
 using Tiger.Schema;
+using Tiger.Schema.Static;
 
 namespace Tomograph;
 

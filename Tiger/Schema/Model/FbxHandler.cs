@@ -2,6 +2,8 @@
 using Internal.Fbx;
 using SharpDX;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Shaders;
+using Tiger.Schema.Static;
 
 namespace Tiger.Schema;
 
@@ -288,13 +290,13 @@ public class FbxHandler
         mesh.AddDeformer(skin);
     }
 
-    private void AddMaterial(FbxMesh mesh, FbxNode node, int index, Material material)
+    private void AddMaterial(FbxMesh mesh, FbxNode node, int index, IMaterial material)
     {
         FbxSurfacePhong fbxMaterial;
         FbxLayerElementMaterial materialLayer;
         lock (_fbxLock)
         {
-            fbxMaterial = FbxSurfacePhong.Create(_scene, material.Hash);
+            fbxMaterial = FbxSurfacePhong.Create(_scene, material.FileHash);
             materialLayer = FbxLayerElementMaterial.Create(mesh, $"matlayer_{node.GetName()}_{index}");
         }
         fbxMaterial.DiffuseFactor.Set(1);
@@ -480,7 +482,7 @@ public class FbxHandler
 
     public void AddDynamicPointsToScene(SMapDataEntry points, string meshName, FbxHandler dynamicHandler)
     {
-        Entity.Entity entity = FileResourcer.Get().GetFile<Entity.Entity>(points.Entity.Hash);
+        Entity.Entity entity = FileResourcer.Get().GetFile<Entity.Entity>(points.GetEntityHash());
         if(entity.Model != null)
         {
             meshName += "_Model";

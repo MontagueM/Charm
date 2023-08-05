@@ -1,9 +1,10 @@
 ﻿using System.Runtime.InteropServices;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static;
 
 
-public class Terrain : Tag<D2Class_816C8080>
+public class Terrain : Tag<STerrain>
 {
     public Terrain(FileHash hash) : base(hash)
     {
@@ -46,7 +47,7 @@ public class Terrain : Tag<D2Class_816C8080>
                 {
                     partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/", true);
                     partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/Vertex/");
-                    partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
+                    // partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
                 }
             }
         }
@@ -85,25 +86,25 @@ public class Terrain : Tag<D2Class_816C8080>
             Texture dyemap = _tag.MeshGroups[part.GroupIndex].Dyemap;
             if (dyemap != null)
             {
-                fbxHandler.InfoHandler.AddCustomTexture(part.Material.Hash, terrainTextureIndex, dyemap);
+                fbxHandler.InfoHandler.AddCustomTexture(part.Material.FileHash, terrainTextureIndex, dyemap);
 
-                if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat"))
+                if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.FileHash}.vmat"))
                 {
                     //Get the last line of the vmat file
-                    var vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat");
+                    var vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.FileHash}.vmat");
                     var lastLine = vmat[vmat.Length - 1];
 
                     //Insert a new line before the last line
                     var newVmat = vmat.Take(vmat.Length - 1).ToList();
                     newVmat.Add($"  TextureT14 " + $"\"{dyemap.Hash}.png\"");
                     newVmat.Add(lastLine);
-                    File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.Hash}.vmat", newVmat);
+                    File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.FileHash}.vmat", newVmat);
                 }
             }
         }
     }
 
-    public StaticPart MakePart(D2Class_846C8080 entry)
+    public StaticPart MakePart(SStaticPart entry)
     {
         StaticPart part = new(entry);
         part.GroupIndex = entry.GroupIndex;
@@ -118,8 +119,8 @@ public class Terrain : Tag<D2Class_816C8080>
         }
         part.VertexIndices = uniqueVertexIndices.ToList();
 
-        _tag.Vertices1.ReadVertexData(part, uniqueVertexIndices);
-        _tag.Vertices2.ReadVertexData(part, uniqueVertexIndices);
+        _tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+        _tag.Vertices2.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
 
         return part;
     }
@@ -154,6 +155,18 @@ public class Terrain : Tag<D2Class_816C8080>
             scaleX = 32;
             translateX = -14;
         }
+        else if (vec.Z == -1.9609375)
+        {
+            // todo shadowkeep idk
+            scaleX = 1;
+            translateX = 0;
+        }
+        else if (vec.Z == -2.9453125)
+        {
+            // todo shadowkeep idk
+            scaleX = 1;
+            translateX = 0;
+        }
         else
         {
             throw new Exception("Unknown terrain uv scale x");
@@ -167,6 +180,18 @@ public class Terrain : Tag<D2Class_816C8080>
         {
             scaleY = -32;
             translateY = -14;
+        }
+        else if (vec.W == -1.9609375)
+        {
+            // todo shadowkeep idk
+            scaleY = 1;
+            translateY = 0;
+        }
+        else if (vec.W == -2.9453125)
+        {
+            // todo shadowkeep idk
+            scaleY = 1;
+            translateY = 0;
         }
         else
         {
@@ -185,7 +210,8 @@ public class Terrain : Tag<D2Class_816C8080>
 /// <summary>
 /// Terrain data resource.
 /// </summary>
-[SchemaStruct("7D6C8080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4B718080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "7D6C8080", 0x20)]
 public struct D2Class_7D6C8080
 {
     [SchemaField(0x10)]
@@ -199,35 +225,40 @@ public struct D2Class_7D6C8080
 /// <summary>
 /// Terrain _tag.
 /// </summary>
-[SchemaStruct("816C8080", 0xB0)]
-public struct D2Class_816C8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4F718080", 0xB0)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "816C8080", 0xB0)]
+public struct STerrain
 {
     public long FileSize;
     [SchemaField(0x10)]
     public Vector4 Unk10;
     public Vector4 Unk20;
     public Vector4 Unk30;
-    [SchemaField(0x50)]
-    public DynamicArray<D2Class_866C8080> MeshGroups;
+    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArray<SMeshGroup> MeshGroups;
 
     public VertexBuffer Vertices1;
     public VertexBuffer Vertices2;
     public IndexBuffer Indices1;
-    public Material Unk6C;
-    public Material Unk70;
-    [SchemaField(0x78)]
-    public DynamicArray<D2Class_846C8080> StaticParts;
+    public IMaterial Unk6C;
+    public IMaterial Unk70;
+    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArray<SStaticPart> StaticParts;
     public VertexBuffer Vertices3;
     public VertexBuffer Vertices4;
     public IndexBuffer Indices2;
-    [SchemaField(0x98)]
+    [SchemaField(0xA0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public int Unk98;
     public int Unk9C;
     public int UnkA0;
 }
 
-[SchemaStruct("866C8080", 0x60)]
-public struct D2Class_866C8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "54718080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "866C8080", 0x60)]
+public struct SMeshGroup
 {
     public float Unk00;
     public float Unk04;
@@ -249,10 +280,11 @@ public struct D2Class_866C8080
     public Texture Dyemap;
 }
 
-[SchemaStruct("846C8080", 0x0C)]
-public struct D2Class_846C8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "52718080", 0x0C)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "846C8080", 0x0C)]
+public struct SStaticPart
 {
-    public Material Material;
+    public IMaterial Material;
     public uint IndexOffset;
     public ushort IndexCount;
     public byte GroupIndex;

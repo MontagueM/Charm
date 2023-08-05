@@ -9,7 +9,7 @@
     <UserControl.Resources>
         <ControlTemplate x:Key="WemTemplate">
             <Button Height="70" Width="880" Margin="0,5,0,5"
-                    Click="Play_OnClick">
+                    Click="Play_OnClick" Style="{StaticResource MaterialDesignPaperDarkButton}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="60*" />
@@ -18,14 +18,11 @@
                     <Border Grid.RowSpan="3" BorderBrush="{StaticResource BackgroundColour30}"
                             BorderThickness="1" Panel.ZIndex="1" />
                     <TextBlock Grid.Row="0" HorizontalAlignment="Left" Margin="10,0,0,0"
-                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
                                VerticalAlignment="Center" Text="{Binding Name}" />
                     <TextBlock Grid.Row="1" HorizontalAlignment="Left" Margin="10,0,0,0"
-                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
                                VerticalAlignment="Center"
                                Foreground="{StaticResource ForegroundColour75}" Text="{Binding Duration}" />
                     <TextBlock Grid.Row="0" HorizontalAlignment="Right" Margin="0,0,10,0"
-                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
                                VerticalAlignment="Center"
                                Foreground="{StaticResource ForegroundColour75}" Text="{Binding Hash}"/>
                 </Grid>

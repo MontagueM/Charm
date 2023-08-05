@@ -90,7 +90,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
     public MainViewModel()
     {
-        EffectsManager = new  DefaultEffectsManager();
+        EffectsManager = new DefaultEffectsManager();
         Scene = new HelixToolkitScene(new GroupNode());
         ModelGroup.AddNode(Scene.Root);
 
@@ -249,6 +249,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                 {
                     lookup[(int)part.BasePart.VertexIndices[i]] = i;
                 }
+                var a = 0;
                 foreach (var vertexIndex in part.BasePart.VertexIndices)
                 {
                     var v4p = part.BasePart.VertexPositions[lookup[(int)vertexIndex]];
@@ -303,6 +304,11 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
     private Vector3 ConsiderQuatToEulerConvert(Vector4 v4N)
     {
+        // shadowkeep and below don't have quaternion normals
+        if (Strategy.CurrentStrategy < TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            return new Vector3(v4N.X, v4N.Y, v4N.Z);
+        }
         Vector3 res = new Vector3();
         if (Math.Abs(v4N.Magnitude - 1) < 0.01)  // Quaternion
         {

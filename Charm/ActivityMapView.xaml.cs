@@ -24,30 +24,37 @@ public partial class ActivityMapView : UserControl
         InitializeComponent();
     }
 
-    public void LoadUI(Activity activity)
+    public void LoadUI(IActivity activity)
     {
         MapList.ItemsSource = GetMapList(activity);
         ExportControl.SetExportFunction(ExportFull, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.Minimal | (int)ExportTypeFlag.ArrangedMap | (int)ExportTypeFlag.TerrainOnly, true);
-        ExportControl.SetExportInfo(activity.Hash);
+        ExportControl.SetExportInfo(activity.FileHash);
     }
 
-    private ObservableCollection<DisplayBubble> GetMapList(Activity activity)
+    private ObservableCollection<DisplayBubble> GetMapList(IActivity activity)
     {
         var maps = new ObservableCollection<DisplayBubble>();
-        foreach (var mapEntry in activity.TagData.Unk50)
+        foreach (var bubble in activity.EnumerateBubbles())
         {
-            foreach (var mapReferences in mapEntry.MapReferences)
-            {
-                // idk why this can happen but it can, some weird stuff with h64
-                // for the child map reference, ive only seen it once so far but the hash for it was just FFFFFFFF in the map reference file
-                if (mapReferences.MapReference is null || mapReferences.MapReference.TagData.ChildMapReference == null)
-                    continue;
-                DisplayBubble displayMap = new DisplayBubble();
-                displayMap.Name = $"{mapEntry.BubbleName} ({mapEntry.LocationName})";  // assuming Unk10 is 0F978080 or 0B978080
-                displayMap.Hash = mapReferences.MapReference.TagData.ChildMapReference.Hash;
-                maps.Add(displayMap);
-            }
+            DisplayBubble displayMap = new();
+            displayMap.Name = bubble.Name;
+            displayMap.Hash = bubble.MapReference.TagData.ChildMapReference.Hash;
+            maps.Add(displayMap);
         }
+        // foreach (var mapEntry in activity.TagData.Unk50)
+        // {
+        //     foreach (var mapReferences in mapEntry.MapReferences)
+        //     {
+        //         // idk why this can happen but it can, some weird stuff with h64
+        //         // for the child map reference, ive only seen it once so far but the hash for it was just FFFFFFFF in the map reference file
+        //         if (mapReferences.MapReference is null || mapReferences.MapReference.TagData.ChildMapReference == null)
+        //             continue;
+        //         DisplayBubble displayMap = new DisplayBubble();
+        //         displayMap.Name = $"{mapEntry.BubbleName} ({mapEntry.LocationName})";  // assuming Unk10 is 0F978080 or 0B978080
+        //         displayMap.Hash = mapReferences.MapReference.TagData.ChildMapReference.Hash;
+        //         maps.Add(displayMap);
+        //     }
+        // }
         return maps;
     }
 
@@ -85,7 +92,11 @@ public partial class ActivityMapView : UserControl
                 Tag<SMapDataTable> mapDataTable = m.MapContainer.TagData.MapDataTables[1].MapDataTable;
                 if (mapDataTable.TagData.DataEntries.Count > 0)
                 {
-                    StaticMapData tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader()).StaticMapParent.TagData.StaticMap;
+                    StaticMapData? tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent.TagData.StaticMap;
+                    if (tag == null)
+                    {
+                        return; // todo sk broke this
+                    }
                     items.Add(new DisplayStaticMap
                     {
                         Hash = m.MapContainer.Hash,
@@ -114,14 +125,14 @@ public partial class ActivityMapView : UserControl
             {
                 if(entry is SMapDataEntry dynamicResource)
                 {
-                    Entity entity = FileResourcer.Get().GetFile(typeof(Entity), dynamicResource.Entity.Hash);
+                    Entity entity = FileResourcer.Get().GetFile(typeof(Entity), dynamicResource.GetEntityHash());
 
                     if(entity.Model != null)
                     {
                         items.Add(new DisplayDynamicMap
                         {
-                            Hash = dynamicResource.Entity.Hash,
-                            Name = $"{dynamicResource.Entity.Hash}: {entity.Model.TagData.Meshes.Count} meshes",
+                            Hash = dynamicResource.GetEntityHash(),
+                            Name = $"{dynamicResource.GetEntityHash()}: {entity.Model.TagData.Meshes.Count} meshes",
                             Models = entity.Model.TagData.Meshes.Count
                         });
                     }
@@ -129,8 +140,8 @@ public partial class ActivityMapView : UserControl
                     {
                         items.Add(new DisplayDynamicMap
                         {
-                            Hash = dynamicResource.Entity.Hash,
-                            Name = $"{dynamicResource.Entity.Hash}: 0 meshes",
+                            Hash = dynamicResource.GetEntityHash(),
+                            Name = $"{dynamicResource.GetEntityHash()}: 0 meshes",
                             Models = 0
                         });
                     }
@@ -148,8 +159,9 @@ public partial class ActivityMapView : UserControl
 
     public async void ExportFull(ExportInfo info)
     {
-        Activity activity = FileResourcer.Get().GetFile<Activity>(info.Hash);
-        Log.Info($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.Hash)}, hash: {activity.Hash}");
+        // todo figure out how to make this work
+        IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(info.Hash);
+        Log.Info($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.FileHash)}, hash: {activity.FileHash}");
         Dispatcher.Invoke(() =>
         {
             MapControl.Visibility = Visibility.Hidden;
@@ -210,7 +222,7 @@ public partial class ActivityMapView : UserControl
         {
             MapControl.Visibility = Visibility.Visible;
         });
-        Log.Info($"Exported activity data name: {PackageResourcer.Get().GetActivityName(activity.Hash)}, hash: {activity.Hash}");
+        Log.Info($"Exported activity data name: {PackageResourcer.Get().GetActivityName(activity.FileHash)}, hash: {activity.FileHash}");
         MessageBox.Show("Activity map data exported completed.");
     }
 

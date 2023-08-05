@@ -15,7 +15,7 @@
                     <ColumnDefinition Width="100*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" HorizontalAlignment="Left" Text="{Binding Name}"/>
-                <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding Hash}" Click="GetBubbleContentsButton_OnClick" Content="View contents"/>
+                <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding Hash}" Click="GetBubbleContentsButton_OnClick" Content="View contents" Style="{StaticResource MaterialDesignPaperDarkButton}"/>
             </Grid>
         </ControlTemplate>
 
@@ -27,14 +27,14 @@
                 </Grid.ColumnDefinitions>
                 <Border Grid.ColumnSpan="2" BorderBrush="{StaticResource BackgroundColour30}"
                         BorderThickness="1" Panel.ZIndex="1" />
-                <CheckBox Grid.Column="0" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Tag="{Binding Hash}" IsChecked="{Binding Selected}" Checked ="StaticMapPart_OnCheck">
+                <CheckBox Grid.Column="0" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Tag="{Binding Hash}" IsChecked="{Binding Selected}" Checked ="StaticMapPart_OnCheck" Style="{StaticResource MaterialDesignCheckBox}">
                     <TextBlock TextAlignment="Center" Text="{Binding Name}"/>
                 </CheckBox>
-                <Button Grid.Column="1" Click="StaticMap_OnClick" HorizontalAlignment="Right">
+                <Button Grid.Column="1" Click="StaticMap_OnClick" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignPaperDarkButton}">
                     <TextBlock TextAlignment="Center" Text="View"/>
                 </Button>
             </Grid>
-        </ControlTemplate> 
+        </ControlTemplate>
 
         <ControlTemplate x:Key="dynamicTemplate">
             <Grid Height="20" Margin="0,1,0,1">
@@ -44,14 +44,14 @@
                 </Grid.ColumnDefinitions>
                 <Border Grid.ColumnSpan="2" BorderBrush="{StaticResource BackgroundColour30}"
                         BorderThickness="1" Panel.ZIndex="1" />
-                <CheckBox Grid.Column="0" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Tag="{Binding Hash}" IsChecked="{Binding Selected}">
+                <CheckBox Grid.Column="0" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Tag="{Binding Hash}" IsChecked="{Binding Selected}" Style="{StaticResource MaterialDesignCheckBox}">
                     <TextBlock TextAlignment="Center" Text="{Binding Name}"/>
                 </CheckBox>
-                <Button Grid.Column="1" HorizontalAlignment="Right">
+                <Button Grid.Column="1" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignPaperDarkButton}">
                     <TextBlock TextAlignment="Center" Text="Export"/>
                 </Button>
             </Grid>
-        </ControlTemplate>  
+        </ControlTemplate>
     </UserControl.Resources>
 
     <Grid>

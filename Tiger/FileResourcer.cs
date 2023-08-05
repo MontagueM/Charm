@@ -10,9 +10,8 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
     {
     }
 
-    protected override Task Initialise()
+    protected override void Initialise()
     {
-        return Task.CompletedTask;
     }
 
     protected override void Reset()
@@ -28,6 +27,16 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
     public T GetFile<T>(FileHash fileHash, bool shouldLoad = true) where T : TigerFile
     {
         return GetFile(typeof(T), fileHash, shouldLoad);
+    }
+
+    public T GetFileInterface<T>(string fileHash, bool shouldLoad = true) where T : ISchema
+    {
+        return GetFileInterface<T>(new FileHash(fileHash), shouldLoad);
+    }
+
+    public T GetFileInterface<T>(FileHash fileHash, bool shouldLoad = true) where T : ISchema
+    {
+        return GetFile(SchemaDeserializer.Get().GetSchemaInterfaceType(typeof(T)), fileHash, shouldLoad);
     }
 
     public Tag<T> GetSchemaTag<T>(string fileHash, bool shouldLoad = true) where T : struct

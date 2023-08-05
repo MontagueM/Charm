@@ -29,8 +29,9 @@ public class PerfTestCommandlet : ICommandlet
             PackageMetadata pkgMetadata = pkg.GetPackageMetadata();
             ushort fileCount = (ushort)pkgMetadata.FileCount;
 
-            RunTest(RunSerialTest, pkg, fileCount);
-            RunTest(RunParallelTest, pkg, fileCount);
+            RunTest(RunGroupedTest, pkg, fileCount);
+            // RunTest(RunSerialTest, pkg, fileCount);
+            // RunTest(RunParallelTest, pkg, fileCount);
         }
     }
 
@@ -44,8 +45,9 @@ public class PerfTestCommandlet : ICommandlet
             PackageMetadata pkgMetadata = pkg.GetPackageMetadata();
             ushort fileCount = (ushort)pkgMetadata.FileCount;
 
-            RunTest(RunSerialTest, pkg, fileCount);
-            RunTest(RunParallelTest, pkg, fileCount);
+            RunTest(RunGroupedTest, pkg, fileCount);
+            // RunTest(RunSerialTest, pkg, fileCount);
+            // RunTest(RunParallelTest, pkg, fileCount);
         });
     }
 
@@ -61,8 +63,9 @@ public class PerfTestCommandlet : ICommandlet
         ushort fileCount = (ushort)pkgMetadata.FileCount;
 
         int testCount = 3;
-        RunManyTests(RunSerialTest, testCount, pkg, fileCount);
-        RunManyTests(RunParallelTest, testCount, pkg, fileCount);
+        RunManyTests(RunGroupedTest, testCount, pkg, fileCount);
+        // RunManyTests(RunSerialTest, testCount, pkg, fileCount);
+        // RunManyTests(RunParallelTest, testCount, pkg, fileCount);
     }
 
     private double RunTest(Action<IPackage, ushort> testFunc, IPackage pkg, ushort fileCount)
@@ -102,5 +105,10 @@ public class PerfTestCommandlet : ICommandlet
             // get pkg handle
             pkg.GetFileBytes((ushort)i);
         });
+    }
+
+    private void RunGroupedTest(IPackage pkg, ushort fileCount)
+    {
+        pkg.GetAllFileData();
     }
 }

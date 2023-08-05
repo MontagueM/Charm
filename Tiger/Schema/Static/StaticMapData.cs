@@ -27,7 +27,7 @@ public class StaticMapData : Tag<SStaticMapData>
 
     public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, bool bSaveShaders)
     {
-        List<D2Class_BD938080> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
+        List<SStaticMeshHash> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
 
         Parallel.ForEach(extractedStatics, s =>
         {
@@ -44,7 +44,8 @@ public class StaticMapData : Tag<SStaticMapData>
     }
 }
 
-[SchemaStruct("AD938080", 0xC0)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D968080", 0xA0)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AD938080", 0xC0)]
 public struct SStaticMapData
 {
     public long FileSize;
@@ -53,12 +54,15 @@ public struct SStaticMapData
     [SchemaField(0x40)]
     public DynamicArray<SStaticMeshInstanceTransform> Instances;
     public DynamicArray<SUnknownUInt> Unk50;
-    [SchemaField(0x78)]
-    public DynamicArray<D2Class_BD938080> Statics;
-    public DynamicArray<D2Class_286D8080> InstanceCounts;
-    [SchemaField(0x98)]
+    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArray<SStaticMeshHash> Statics;
+    public DynamicArray<SStaticMeshInstanceMap> InstanceCounts;
+    [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk98;
-    [SchemaField(0xA0)]
+    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 UnkA0; // likely a bound corner
     public Vector4 UnkB0; // likely the other bound corner
 }
@@ -85,7 +89,8 @@ public struct SMeshInstanceOcclusionBounds
     public TigerHash Unk20;
 }
 
-[SchemaStruct("406D8080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A3718080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "406D8080", 0x40)]
 public struct SStaticMeshInstanceTransform
 {
     public Vector4 Rotation;
@@ -93,14 +98,16 @@ public struct SStaticMeshInstanceTransform
     public Vector3 Scale;  // Only X is used as a global scale
 }
 
-[SchemaStruct("BD938080", 0x4)]
-public struct D2Class_BD938080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7D968080", 0x4)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BD938080", 0x4)]
+public struct SStaticMeshHash
 {
     public StaticMesh Static;
 }
 
-[SchemaStruct("286D8080", 0x8)]
-public struct D2Class_286D8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "90718080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "286D8080", 0x8)]
+public struct SStaticMeshInstanceMap
 {
     public short InstanceCount;
     public short InstanceOffset;
@@ -114,24 +121,26 @@ public struct D2Class_286D8080
 /// <summary>
 /// The very top reference for all map-related things.
 /// </summary>
-[SchemaStruct("1E898080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "AE7D8080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "1E898080", 0x60)]
 public struct SBubbleParent
 {
     public long FileSize;
     public Tag<SBubbleDefinition> ChildMapReference;
-    [SchemaField(0x10)]
+    [SchemaField(0x10)] // todo i dont get this
     public StringHash MapName;
     public int Unk1C;
     [SchemaField(0x40)]
     public DynamicArray<D2Class_C9968080> Unk40;
-    [Tag64]
+    [Tag64, SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag Unk50;  // some kind of parent thing, very strange weird idk
 }
 
 /// <summary>
 /// Basically same table as in the child tag, but in a weird format. Never understood what its for.
 /// </summary>
-[SchemaStruct("C9968080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "44968080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C9968080", 0x10)]
 public struct D2Class_C9968080
 {
     [Tag64]
@@ -142,14 +151,16 @@ public struct D2Class_C9968080
 /// The one below the top reference, actually contains useful information.
 /// First of MapResources is what I call "ambient entities", second is always the static map.
 /// </summary>
-[SchemaStruct("01878080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E0918080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "01878080", 0x60)]
 public struct SBubbleDefinition
 {
     public long FileSize;
     public DynamicArray<SMapContainerEntry> MapResources;
 }
 
-[SchemaStruct("03878080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C1848080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "03878080", 0x10)]
 public struct SMapContainerEntry
 {
     [Tag64]
@@ -160,7 +171,8 @@ public struct SMapContainerEntry
 /// A map resource, contains data used to make a map.
 /// This is quite similar to EntityResource, but with more children.
 /// </summary>
-[SchemaStruct("07878080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "548A8080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "07878080", 0x38)]
 public struct SMapContainer
 {
     public long FileSize;
@@ -169,7 +181,8 @@ public struct SMapContainer
     public DynamicArray<SMapDataTableEntry> MapDataTables;
 }
 
-[SchemaStruct("09878080", 4)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B08B8080", 4)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "09878080", 4)]
 public struct SMapDataTableEntry
 {
     public Tag<SMapDataTable> MapDataTable;
@@ -178,7 +191,8 @@ public struct SMapDataTableEntry
 /// <summary>
 /// A map data table, containing data entries.
 /// </summary>
-[SchemaStruct("83988080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D6998080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "83988080", 0x18)]
 public struct SMapDataTable
 {
     public long FileSize;
@@ -189,36 +203,55 @@ public struct SMapDataTable
 /// <summary>
 /// A data entry. Can be static maps, entities, etc. with a defined world transform.
 /// </summary>
-[SchemaStruct("85988080", 0x90)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D8998080", 0x90)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "85988080", 0x90)]
 public struct SMapDataEntry
 {
+    // for now we'll process both entities as if they were the same
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
+    public Entity.Entity EntitySK;
+    [SchemaField(0x28, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 Rotation;
     public Vector4 Translation;
-    [SchemaField(0x28), Tag64]
-    public Entity.Entity Entity;
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64, NoLoad]
+    public Entity.Entity EntityWQ;
+    [SchemaField(0x68)]
+    public uint Unk68;
     [SchemaField(0x78)]
     public ResourcePointer DataResource;
+
+    public FileHash GetEntityHash()
+    {
+        if (EntitySK != null)
+            return EntitySK.Hash;
+        else
+            return EntityWQ.Hash;
+    }
 }
 
 /// <summary>
 /// Data resource containing a static map.
 /// </summary>
-[SchemaStruct("C96C8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B3718080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C96C8080", 0x18)]
 public struct SMapDataResource
 {
     [SchemaField(0x8)]
     public TigerHash Unk08;
     [SchemaField(0x10)]
-    public Tag<D2Class_0D6A8080> StaticMapParent;
+    public Tag<SStaticMapParent> StaticMapParent;
 }
 
-[SchemaStruct("0D6A8080", 0x30)]
-public struct D2Class_0D6A8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F46E8080", 0x28)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "0D6A8080", 0x30)]
+public struct SStaticMapParent
 {
     // no filesize
     [SchemaField(0x8)]
     public StaticMapData StaticMap;  // could make it StaticMapData but dont want it to load it, could have a NoLoad option
-    [SchemaField(0x2C)]
+    [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x2C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk2C;
 }
 

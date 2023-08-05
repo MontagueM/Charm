@@ -246,7 +246,7 @@ public partial class GeneralConfigView : UserControl
 
     private void SingleFolderMapsEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        _config.SetSingleFolderMapsEnabled(!_config.GetIndvidualStaticsEnabled());
+        _config.SetSingleFolderMapsEnabled(!_config.GetSingleFolderMapsEnabled());
         PopulateConfigPanel();
     }
 

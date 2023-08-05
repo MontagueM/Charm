@@ -29,7 +29,6 @@ public partial class MainWindow
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
-        Progress = ProgressView;
         if (MainMenuTab.Visibility == Visibility.Visible)
         {
             Task.Run(InitialiseHandlers);
@@ -41,11 +40,13 @@ public partial class MainWindow
     {
         InitializeComponent();
 
-        Strategy.BeforeStrategyEvent += ((StrategyEventArgs e, int invocationCount) => { Progress.SetProgressStages(Enumerable.Range(1, invocationCount).Select(num => $"Initialising game version {e.Strategy}: {num}/{invocationCount}").ToList()); });
-        Strategy.DuringStrategyEvent += ((StrategyEventArgs e) => { Progress.CompleteStage(); });
-        Strategy.AfterStrategyEvent += ((StrategyEventArgs e) => { Progress.CompleteStage(); });
+        Progress = ProgressView;
 
-        InitialiseStrategistSingletons();
+        int numSingletons = InitialiseStrategistSingletons();
+
+        Strategy.BeforeStrategyEvent += ((StrategyEventArgs e) => { Progress.SetProgressStages(Enumerable.Range(1, numSingletons).Select(num => $"Initialising game version {e.Strategy}: {num}/{numSingletons}").ToList()); });
+        Strategy.DuringStrategyEvent += ((StrategyEventArgs e) => { Progress.CompleteStage(); });
+
         InitialiseSubsystems();
 
         _logView = new LogView();
@@ -77,29 +78,46 @@ public partial class MainWindow
         // Log game version
         CheckGameVersion();
 
-        if (Commandlet.RunCommandlet())
+        Strategy.AfterStrategyEvent += delegate(StrategyEventArgs args)
         {
-            Environment.Exit(0);
-        }
+            Dispatcher.Invoke(() =>
+            {
+                if (Commandlet.RunCommandlet())
+                {
+                    // Environment.Exit(0);
+                }
+            });
+        };
     }
 
-    private void InitialiseStrategistSingletons()
+    private int InitialiseStrategistSingletons()
     {
+        HashSet<Type> lazyStrategistSingletons = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(a => a.GetTypes())
+            .Select(t => t.GetNonGenericParent(typeof(Strategy.LazyStrategistSingleton<>)))
+            .Where(t => t is {ContainsGenericParameters: false})
+            .Select(t => t.GetNonGenericParent(typeof(Strategy.StrategistSingleton<>)))
+            .ToHashSet();
+
         // Get all classes that inherit from StrategistSingleton<>
         // Then call RegisterEvents() on each of them
-        List<Type> allStrategistSingletons = AppDomain.CurrentDomain.GetAssemblies()
+        HashSet<Type> allStrategistSingletons = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
             .Select(t => t.GetNonGenericParent(typeof(Strategy.StrategistSingleton<>)))
-            .Where(t => t != null)
-            .ToHashSet().ToList();
+            .Where(t => t is {ContainsGenericParameters: false})
+            .ToHashSet();
+
+        allStrategistSingletons.ExceptWith(lazyStrategistSingletons);
 
         // order dependencies from InitializesAfterAttribute
-        allStrategistSingletons = SortByInitializationOrder(allStrategistSingletons).ToList();
+        List<Type> strategistSingletons = SortByInitializationOrder(allStrategistSingletons.ToList()).ToList();
 
-        foreach (Type strategistSingleton in allStrategistSingletons)
+        foreach (Type strategistSingleton in strategistSingletons)
         {
             strategistSingleton.GetMethod("RegisterEvents", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, null);
         }
+
+        return strategistSingletons.Count;
     }
 
     private static IEnumerable<Type> SortByInitializationOrder(IEnumerable<Type> types)
@@ -365,6 +383,7 @@ public partial class MainWindow
         _newestTab = new TabItem();
         _newestTab.Content = content;
         _newestTab.MouseDown += MenuTab_OnMouseDown;
+        _newestTab.HorizontalAlignment = HorizontalAlignment.Left;
         MainTabControl.Items.Add(_newestTab);
         SetNewestTabName(name);
     }

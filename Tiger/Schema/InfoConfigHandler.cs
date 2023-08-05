@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
@@ -30,20 +31,20 @@ public class InfoConfigHandler
         }
     }
 
-    public void AddMaterial(Material material)
+    public void AddMaterial(IMaterial material)
     {
-        if (!material.Hash.IsValid())
+        if (!material.FileHash.IsValid())
         {
             return;
         }
         Dictionary<string, Dictionary<int, TexInfo>> textures = new Dictionary<string, Dictionary<int, TexInfo>>();
-        if (!_config["Materials"].TryAdd(material.Hash, textures))
+        if (!_config["Materials"].TryAdd(material.FileHash, textures))
         {
             return;
         }
         Dictionary<int, TexInfo> vstex = new Dictionary<int, TexInfo>();
         textures.Add("VS", vstex);
-        foreach (var vst in material.TagData.VSTextures)
+        foreach (var vst in material.EnumerateVSTextures())
         {
             if (vst.Texture != null)
             {
@@ -52,7 +53,7 @@ public class InfoConfigHandler
         }
         Dictionary<int, TexInfo> pstex = new Dictionary<int, TexInfo>();
         textures.Add("PS", pstex);
-        foreach (var pst in material.TagData.PSTextures)
+        foreach (var pst in material.EnumeratePSTextures())
         {
             if (pst.Texture != null)
             {
@@ -63,7 +64,7 @@ public class InfoConfigHandler
 
     public void AddPart(MeshPart part, string partName)
     {
-        _config["Parts"].TryAdd(partName, part.Material.Hash);
+        _config["Parts"].TryAdd(partName, part.Material.FileHash);
     }
 
     public void AddType(string type)

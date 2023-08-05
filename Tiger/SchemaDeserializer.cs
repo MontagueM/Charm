@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Arithmic;
 using ConcurrentCollections;
 
 namespace Tiger;
@@ -56,14 +57,16 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     // Stores all ITagDeserialize types
     private readonly ConcurrentHashSet<Type> _tagDeserializeTypes = new();
 
+    // Stores all interface types as a map between the interface and the implementing type
+    private readonly ConcurrentDictionary<Type, Type> _interfaceImplementingTypeMap = new();
+
     public SchemaDeserializer(TigerStrategy strategy) : base(strategy)
     {
     }
 
-    protected override Task Initialise()
+    protected override void Initialise()
     {
         FillSchemaCaches();
-        return Task.CompletedTask;
     }
 
     protected override void Reset()
@@ -135,7 +138,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 if (nonSchemaStructAttr != null)
                 {
                     _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaStructAttr.Type, SubTypes = nonSchemaStructAttr.SubTypes});
-                    _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
+                    _schemaTypeFieldsMap.TryAdd(type, GetStrategyFields(type.GetFields()));
                 }
             }
 
@@ -145,7 +148,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 _schemaSerializedSizeMap.TryAdd(type, schemaStructAttribute.SerializedSize);
                 _schemaHashTypeMap.TryAdd(new FileHash(schemaStructAttribute.ClassHash).Hash32, type);
                 _schemaTypeHashMap.TryAdd(type, new FileHash(schemaStructAttribute.ClassHash).Hash32);
-                _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
+                _schemaTypeFieldsMap.TryAdd(type, GetStrategyFields(type.GetFields()));
                 return;
             }
 
@@ -154,7 +157,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             {
                 _schemaSerializedSizeMap.TryAdd(type, nonSchemaStructAttribute.SerializedSize);
                 _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaStructAttribute.Type, SubTypes = nonSchemaStructAttribute.SubTypes});
-                _schemaTypeFieldsMap.TryAdd(type, type.GetFields());
+                _schemaTypeFieldsMap.TryAdd(type, GetStrategyFields(type.GetFields()));
                 return;
             }
 
@@ -171,7 +174,49 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 _schemaSerializedSizeMap.TryAdd(type, schemaTypeAttribute.SerializedSize);
                 return;
             }
+
+            bool isSchemaInterface = type.GetInterfaces().Contains(typeof(ISchema));
+            if (isSchemaInterface)
+            {
+                // ConcurrentDictionary<TigerStrategy, Type> interfaceMap = new();
+                // find the types that implement this interface, then find the strategy from their namespaces
+                foreach (Type interfaceType in types.Where(t => t.GetInterfaces().Contains(type)))
+                {
+                    TigerStrategy strategy = GetStrategyFromNamespace(interfaceType.Namespace);
+                    if (strategy == TigerStrategy.NONE)
+                    {
+                        throw new Exception($"Could not find strategy for interface {interfaceType}");
+                    }
+                    if (strategy > _strategy)
+                    {
+                        continue;
+                    }
+                    // interfaceMap.TryAdd(strategy, interfaceType);
+
+                    SchemaStructAttribute? intSchemaStructAttribute = GetAttribute<SchemaStructAttribute>(interfaceType.BaseType.GenericTypeArguments.First());
+                    _schemaTypeHashMap.TryAdd(type, new FileHash(intSchemaStructAttribute.ClassHash).Hash32);
+                    _interfaceImplementingTypeMap.TryAdd(type, interfaceType);
+                }
+            }
         });
+    }
+
+    private FieldInfo[] GetStrategyFields(FieldInfo[] getFields)
+    {
+        // don't include fields that have a strategy assigned but are larger than us
+        return getFields.Where(f => !f.GetCustomAttributes<SchemaFieldAttribute>().Any() || _strategy >= GetAttribute<SchemaFieldAttribute>(f).Strategy).ToArray();
+    }
+
+    private TigerStrategy GetStrategyFromNamespace(string namespaceString)
+    {
+        string strategyString = namespaceString.Split(".").Last();
+        if (Enum.TryParse(strategyString, out TigerStrategy strategy))
+        {
+            return strategy;
+        }
+
+        Log.Error($"Could not parse strategy from namespace {namespaceString}");
+        return TigerStrategy.NONE;
     }
 
     // side effect also adds some more types to the serialized size map
@@ -184,10 +229,15 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         {
             _schemaFieldOffsetMap.TryAdd(type, new ConcurrentDictionary<string, int>());
 
-            foreach (FieldInfo fieldInfo in type.GetFields())
+            foreach (FieldInfo fieldInfo in GetStrategyFields(type.GetFields()))
             {
+                if (fieldInfo.FieldType.GetInterfaces().Contains(typeof(ISchema)))
+                {
+                    continue;
+                }
+
                 SchemaFieldAttribute? schemaFieldAttribute = GetAttribute<SchemaFieldAttribute>(fieldInfo);
-                if (schemaFieldAttribute != null)
+                if (schemaFieldAttribute != null && schemaFieldAttribute.Offset != -1)
                 {
                     _schemaFieldOffsetMap[type].TryAdd(fieldInfo.Name, schemaFieldAttribute.Offset);
                 }
@@ -259,6 +309,12 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         long fieldOffset = 0;
         foreach (FieldInfo fieldInfo in fields)
         {
+            Type fieldType = fieldInfo.FieldType;
+            if (IsSchemaInterfaceType(fieldType))
+            {
+                fieldType = GetSchemaInterfaceType(fieldType);
+            }
+
             if (GetSchemaFieldOffset(schemaType, fieldInfo, out int offset))
             {
                 fieldOffset = offset;
@@ -271,72 +327,72 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             if (IsTigerFile64Type(fieldInfo))
             {
                 // hardcode allow for 64 bit file but instead just the hash as FileHash
-                if (fieldInfo.FieldType == typeof(FileHash))
+                if (fieldType == typeof(FileHash))
                 {
                     fieldValue = GetFileHashFrom64(reader);
                 }
                 else
                 {
                     bool shouldLoad = !HasNoLoadAttribute(fieldInfo);
-                    fieldValue = DeserializeTag64(reader, fieldInfo.FieldType, shouldLoad);
+                    fieldValue = DeserializeTag64(reader, fieldType, shouldLoad);
                 }
                 fieldSize = 0x10;
             }
-            else if (IsTigerDeserializeType(fieldInfo.FieldType))
+            else if (IsTigerDeserializeType(fieldType))
             {
-                fieldValue = DeserializeTigerType(reader, fieldInfo.FieldType);
-                fieldSize = GetSchemaTypeSize(fieldInfo.FieldType);
+                fieldValue = DeserializeTigerType(reader, fieldType);
+                fieldSize = GetSchemaTypeSize(fieldType);
             }
-            else if (IsTigerFileType(fieldInfo.FieldType))
+            else if (IsTigerFileType(fieldType))
             {
                 FileHash fileHash = new(reader.ReadUInt32());
                 bool shouldLoad = !HasNoLoadAttribute(fieldInfo);
-                fieldValue = FileResourcer.Get().GetFile(fieldInfo.FieldType, fileHash, shouldLoad);
-                fieldSize = GetSchemaTypeSize(fieldInfo.FieldType);
+                fieldValue = FileResourcer.Get().GetFile(fieldType, fileHash, shouldLoad);
+                fieldSize = GetSchemaTypeSize(fieldType);
             }
-            else if (fieldInfo.FieldType.IsEnum)
+            else if (fieldType.IsEnum)
             {
-                fieldValue = Enum.ToObject(fieldInfo.FieldType, reader.ReadByte());
+                fieldValue = Enum.ToObject(fieldType, reader.ReadByte());
                 fieldSize = 1;
             }
-            else if (fieldInfo.FieldType.IsArray)
+            else if (fieldType.IsArray)
             {
                 int arraySize = ((MarshalAsAttribute)fieldInfo.GetCustomAttribute(typeof(MarshalAsAttribute), true)).SizeConst;
-                fieldValue = Activator.CreateInstance(fieldInfo.FieldType, arraySize);
+                fieldValue = Activator.CreateInstance(fieldType, arraySize);
                 for (int i = 0; i < arraySize; i++)
                 {
                     dynamic value;
-                    if (IsTigerDeserializeType(fieldInfo.FieldType))
+                    if (IsTigerDeserializeType(fieldType))
                     {
-                        value =  DeserializeTigerType(reader, fieldInfo.FieldType.GetElementType());
+                        value =  DeserializeTigerType(reader, fieldType.GetElementType());
                     }
                     else
                     {
-                        value =  DeserializeMarshalType(reader, fieldInfo.FieldType.GetElementType());
+                        value =  DeserializeMarshalType(reader, fieldType.GetElementType());
                     }
                     // assume it's a tiger deserialize type
                     fieldValue[i] = value;
                 }
 
-                if (IsTigerDeserializeType(fieldInfo.FieldType))
+                if (IsTigerDeserializeType(fieldType))
                 {
-                    fieldSize = GetSchemaTypeSize(fieldInfo.FieldType.GetElementType()) * arraySize;
+                    fieldSize = GetSchemaTypeSize(fieldType.GetElementType()) * arraySize;
                 }
                 else
                 {
-                    fieldSize = Marshal.SizeOf(fieldInfo.FieldType.GetElementType()) * arraySize;
+                    fieldSize = Marshal.SizeOf(fieldType.GetElementType()) * arraySize;
                 }
             }
             else
             {
-                fieldValue = DeserializeMarshalType(reader, fieldInfo.FieldType);
-                fieldSize = Marshal.SizeOf(fieldInfo.FieldType);
+                fieldValue = DeserializeMarshalType(reader, fieldType);
+                fieldSize = Marshal.SizeOf(fieldType);
             }
             fieldInfo.SetValue(resource, fieldValue); // todo check if this set is required, might be a reference type?
 
             if (fieldSize == -1)
             {
-                throw new Exception($"Failed to get field size for field {fieldInfo.Name} of type {fieldInfo.FieldType}");
+                throw new Exception($"Failed to get field size for field {fieldInfo.Name} of type {fieldType}");
             }
             fieldOffset += fieldSize;
         }
@@ -367,6 +423,16 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
     public bool IsTigerFileType(Type fieldType)
     {
         return fieldType == typeof(TigerFile) || fieldType.IsSubclassOf(typeof(TigerFile));
+    }
+
+    public bool IsSchemaInterfaceType(Type fieldType)
+    {
+        return _interfaceImplementingTypeMap.ContainsKey(fieldType);
+    }
+
+    public Type GetSchemaInterfaceType(Type fieldType)
+    {
+        return _interfaceImplementingTypeMap[fieldType];
     }
 
     private bool IsTigerFile64Type(FieldInfo fieldInfo)
@@ -514,7 +580,8 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         }
         else
         {
-            throw new Exception($"Failed to get schema struct size for type {var} as it has multiple schema struct attributes but none match the current strategy {_strategy}");
+            return null;
+            Log.Error($"Failed to get schema struct size for type {var} as it has multiple schema struct attributes but none match the current strategy {_strategy}");
         }
     }
 }

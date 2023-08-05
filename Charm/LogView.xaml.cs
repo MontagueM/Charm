@@ -27,11 +27,11 @@ public partial class LogView : UserControl
             return;
         }
 
-        Dispatcher.Invoke(() =>
-        {
-            LogBox.AppendText(e.Message + Environment.NewLine);
-            LogBox.ScrollToEnd();
-        });
+        // Dispatcher.Invoke(() =>
+        // {
+        //     LogBox.AppendText(e.Message + Environment.NewLine);
+        //     LogBox.ScrollToEnd();
+        // });
     }
 }
 

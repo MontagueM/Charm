@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
+using Arithmic;
 using ConcurrentCollections;
 using Newtonsoft.Json;
 using Tiger.Exporters;
@@ -13,7 +14,7 @@ namespace Tiger.Schema.Investment;
 /// Finds them on launch from their tag class instead of hash.
 /// </summary>
 [InitializeAfter(typeof(PackageResourcer))]
-public class Investment : Strategy.StrategistSingleton<Investment>
+public class Investment : Strategy.LazyStrategistSingleton<Investment>
 {
     private Tag<D2Class_8C798080> _inventoryItemIndexDictTag = null;
     private Tag<D2Class_97798080> _inventoryItemMap = null;
@@ -33,7 +34,7 @@ public class Investment : Strategy.StrategistSingleton<Investment>
     private Tag<D2Class_015A8080> _inventoryItemIconTag = null;
     // private Tag<D2Class_8C978080> _dyeManifestTag = null;
     private Tag<D2Class_C2558080> _artDyeReferenceTag = null;
-    private Tag<D2Class_F2518080> _dyeChannelTag = null;
+    private Tag<SDyeChannels> _dyeChannelTag = null;
 
     public Investment(TigerStrategy strategy) : base(strategy)
     {
@@ -41,9 +42,16 @@ public class Investment : Strategy.StrategistSingleton<Investment>
 
     protected override void Reset() => throw new NotImplementedException();
 
-    protected override async Task Initialise()
+    protected override void Initialise()
     {
-        await Task.Run(GetAllInvestmentTags);
+        if (_strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            GetAllInvestmentTags();
+        }
+        else
+        {
+            Log.Info("API is not supported for versions below DESTINY2_WITCHQUEEN_6307");
+        }
     }
 
     public string GetItemName(InventoryItem item)
@@ -80,11 +88,11 @@ public class Investment : Strategy.StrategistSingleton<Investment>
         return _inventoryItemIndexmap[hash32];
     }
 
-    private async Task GetAllInvestmentTags()
+    private void GetAllInvestmentTags()
     {
         // Iterate over all investment pkgs until we find all the tags we need
         bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup");
-        ConcurrentHashSet<FileHash> allHashes = await PackageResourcer.Get().GetAllHashes(PackageFilterFunc);
+        ConcurrentHashSet<FileHash> allHashes = PackageResourcer.Get().GetAllHashes(PackageFilterFunc);
         // maybe i can parallel this? todo maybe parallel
         Parallel.ForEach(allHashes, (val, state, i) =>
         {
@@ -124,8 +132,8 @@ public class Investment : Strategy.StrategistSingleton<Investment>
                 case 0x808055c2:
                     _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<D2Class_C2558080>(val);
                     break;
-                case 0x808051f2:
-                    _dyeChannelTag = FileResourcer.Get().GetSchemaTag<D2Class_F2518080>(val);
+                case 0x808051f2:  // shadowkeep is 0x80805bde
+                    _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(val);
                     break;
             }
         });

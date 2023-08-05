@@ -1,29 +1,22 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Arithmic;
+using ConcurrentCollections;
 
 namespace Tiger;
 
-[SchemaStruct("C29E8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "029D8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C29E8080", 0x10)]
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]
-public struct Hash64Definition
+public struct SHash64Definition
 {
     public ulong Hash64;
     public uint Hash32;
     public uint TagClass;
 }
-
-// [StructLayout(LayoutKind.Sequential, Size = 0x10)]
-// public struct Activity
-// {
-//     public uint FileHash;
-//     public uint TagClass;
-//
-//     [DestinyField(FieldType.RelativePointer)]
-//     public string ActivityName;
-// }
 
 public interface IPackageHeader
 {
@@ -33,9 +26,15 @@ public interface IPackageHeader
     public uint GetFileCount();
     public List<D2FileEntry> GetFileEntries(TigerReader reader);
     public List<D2BlockEntry> GetBlockEntries(TigerReader reader);
-    public List<Hash64Definition> GetHash64Definitions(TigerReader reader);
+    public List<SHash64Definition> GetHash64Definitions(TigerReader reader);
 
     public List<SPackageActivityEntry> GetAllActivities(TigerReader reader);
+}
+
+public struct FileView
+{
+    public byte[] Data;
+    public FileMetadata Metadata;
 }
 
 public interface IPackage
@@ -45,17 +44,20 @@ public interface IPackage
     FileMetadata GetFileMetadata(ushort fileId);
     FileMetadata GetFileMetadata(FileHash fileId);
     List<FileMetadata> GetAllFileMetadata();
+    public HashSet<FileView> GetAllFileData();
 
     // todo change these systems to be async producer/consumer, and do some smart calculations based on the queue
     // identify tasks that are sequential/from the same block so we can do all the processing in one go
     byte[] GetFileBytes(ushort fileIndex);
+    Span<byte> GetFileSpan(ushort fileIndex);
     byte[] GetFileBytes(FileHash fileHash);
     HashSet<int> GetRequiredPatches();
-    List<Hash64Definition> GetHash64List();
+    List<SHash64Definition> GetHash64List();
 
     public List<SPackageActivityEntry> GetAllActivities();
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EC9E8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C59E8080", 0x10)]
 public struct SPackageActivityEntry
 {
@@ -97,7 +99,7 @@ public abstract class Package : IPackage
         return requiredPatches;
     }
 
-    public List<Hash64Definition> GetHash64List()
+    public List<SHash64Definition> GetHash64List()
     {
         using TigerReader reader = GetReader();
         return Header.GetHash64Definitions(reader);
@@ -190,9 +192,9 @@ public abstract class Package : IPackage
         return tags;
     }
 
-    // public HashSet<FileHash> GetAllHashes<T>()
+    // public HashSet<FileHash> GetAllHashesAsync<T>()
     // {
-    //     return GetAllHashes(typeof(T));
+    //     return GetAllHashesAsync(typeof(T));
     // }
 
     public HashSet<FileHash> GetAllHashes()
@@ -223,6 +225,190 @@ public abstract class Package : IPackage
         });
 
         return hashes.ToHashSet();
+    }
+
+    /// <summary>
+    /// Since we know we need every file, we can figure out what blocks to extract and read them into files
+    /// Will read blocks serially, but after the block reads we can do it multithreaded.
+    /// </summary>
+    /// <returns></returns>
+    // public HashSet<FileView> GetAllFileData()
+    // {
+    //     var a = FileEntries.Select(e => e.StartingBlockIndex).Distinct().Select(i => new KeyValuePair<int, ConcurrentHashSet<(ushort, int)>>(i, new ConcurrentHashSet<(ushort, int)>()));
+    //     // Maps a block index -> a set of entry index offsets to split into separate files
+    //     ConcurrentDictionary<int, ConcurrentHashSet<(ushort, int)>> blockEntryMap = new(a);
+    //     Parallel.For(0, FileEntries.Count, entryIndex =>
+    //     {
+    //         blockEntryMap[FileEntries[entryIndex].StartingBlockIndex].Add(((ushort)entryIndex, FileEntries[entryIndex].StartingBlockOffset));
+    //     });
+    //
+    //     // Span<byte> test = stackalloc byte[100];
+    //
+    //     // todo maybe sorting the blockOffsets can reduce random access times?
+    //
+    //     // at most there can be 1 file that stretches across block boundaries
+    //
+    //     ConcurrentDictionary<ushort, FileView> fileViews = new();
+    //     // int crossBlockSizeAlreadyRead = -1;
+    //     // short crossBlockFileIndex = -1;
+    //     // byte[] crossBlockData = default;
+    //     HashSet<int> unseenBlockIndices = Enumerable.Range(0, BlockEntries.Count).ToHashSet();
+    //     foreach ((int blockIndex, ConcurrentHashSet<(ushort, int)> blockOffsets) in blockEntryMap)
+    //     {
+    //         unseenBlockIndices.Remove(blockIndex);
+    //         Span<byte> finalBytes;
+    //         D2BlockEntry blockEntry = BlockEntries[blockIndex];
+    //         using (TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId))
+    //         {
+    //             finalBytes = ReadBlockBufferSpan(packageHandle, blockEntry);
+    //         }
+    //
+    //         // if (crossBlockFileIndex != -1)
+    //         // {
+    //         //     // todo this doesnt work for multi-cross-blocks rn
+    //         //     FileMetadata fileMetadata = GetFileMetadata((ushort)crossBlockFileIndex);
+    //         //     if (fileMetadata.Size - crossBlockSizeAlreadyRead > BlockSize)
+    //         //     {
+    //         //         Array.Copy(finalBytes.ToArray(), 0, crossBlockData, crossBlockSizeAlreadyRead, BlockSize);
+    //         //         crossBlockSizeAlreadyRead += BlockSize;
+    //         //         continue;
+    //         //     }
+    //         //     Span<byte> secondBlockData = finalBytes.Slice(0, fileMetadata.Size - crossBlockSizeAlreadyRead);
+    //         //     byte[] crossBlockFinalBytes = new byte[fileMetadata.Size];
+    //         //     crossBlockData.CopyTo(crossBlockFinalBytes, 0);
+    //         //     Array.Copy(secondBlockData.ToArray(), 0, crossBlockFinalBytes, crossBlockSizeAlreadyRead, secondBlockData.Length);
+    //         //
+    //         //
+    //         //     fileViews.TryAdd((ushort) crossBlockFileIndex, new FileView {Data = crossBlockData, Metadata = fileMetadata});
+    //         //     crossBlockFileIndex = -1;
+    //         //     crossBlockSizeAlreadyRead = -1;
+    //         // }
+    //
+    //         foreach (var indexAndOffset in blockOffsets)
+    //         {
+    //             FileMetadata fileMetadata = GetFileMetadata(indexAndOffset.Item1);
+    //             if (indexAndOffset.Item2 + fileMetadata.Size > BlockSize)
+    //             {
+    //                 // Debug.Assert(crossBlockFileIndex == -1);
+    //                 // crossBlockFileIndex = (short)fileMetadata.FileIndex;
+    //                 byte[] crossBlockData = new byte[fileMetadata.Size];
+    //                 Array.Copy(finalBytes.Slice(indexAndOffset.Item2).ToArray(), crossBlockData, BlockSize - indexAndOffset.Item2);
+    //                 int crossBlockSizeAlreadyRead = BlockSize - indexAndOffset.Item2;
+    //
+    //                 int blocksRequired = GetBlockCount(FileEntries[fileMetadata.FileIndex]) - 1;
+    //
+    //                 // we can assume all the same patch
+    //                 using (TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId))
+    //                 {
+    //                     for (int i = blockIndex; i < blockIndex + blocksRequired; i++)
+    //                     {
+    //                         unseenBlockIndices.Remove(i);
+    //                         D2BlockEntry blockEntryRec = BlockEntries[i];
+    //                         Span<byte> finalBytesRec = ReadBlockBufferSpan(packageHandle, blockEntryRec);
+    //                         // Span<byte> finalBytesRec = DecryptAndDecompressBlockBufferIfRequired(bytes, blockEntry);
+    //                         int lengthToRead = i == blockIndex + blocksRequired - 1 ? fileMetadata.Size - crossBlockSizeAlreadyRead : BlockSize;
+    //                         Array.Copy(finalBytesRec.ToArray(), 0, crossBlockData, crossBlockSizeAlreadyRead, lengthToRead);
+    //                         crossBlockSizeAlreadyRead += BlockSize;
+    //                     }
+    //                 }
+    //                 fileViews.TryAdd(fileMetadata.FileIndex, new FileView {Data = crossBlockData, Metadata = fileMetadata});
+    //
+    //                 continue;
+    //             }
+    //             ReadOnlySpan<byte> aa = finalBytes.Slice(indexAndOffset.Item2, fileMetadata.Size);
+    //             // for now skip the large ones
+    //
+    //             fileViews.TryAdd(fileMetadata.FileIndex, new FileView {Data = aa.ToArray(), Metadata = fileMetadata});
+    //         }
+    //     }
+    //
+    //     // would be faster to make a consumer queue that runs async to the block reads as a single producer
+    //     // this can then be generalised to multiple packages
+    //     return fileViews.Values.ToHashSet();
+    // }
+
+    public HashSet<FileView> GetAllFileData()
+    {
+        // We know that basically all blocks are read, so we read then serially inside of each patch file but in parallel across patch files
+
+        // Maps block index to a set of block (index, offset, size) to read
+        ConcurrentDictionary<ushort, ConcurrentHashSet<(int, D2BlockEntry)>> patchBlockEntryMap = new();
+        for (ushort i = 0; i < Header.GetPatchId()+1; i++)
+        {
+            patchBlockEntryMap.TryAdd(i, new ConcurrentHashSet<(int, D2BlockEntry)>());
+        }
+        Parallel.For(0, BlockEntries.Count, blockIndex =>
+        {
+            patchBlockEntryMap[BlockEntries[blockIndex].PatchId].Add((blockIndex, BlockEntries[blockIndex]));
+        });
+
+        // remove empty patch files
+        foreach (var pair in patchBlockEntryMap)
+        {
+            if (pair.Value.Count == 0)
+            {
+                patchBlockEntryMap.TryRemove(pair.Key, out _);
+            }
+        }
+
+        ConcurrentDictionary<int, byte[]> blockMap = new();
+
+        Parallel.ForEach(patchBlockEntryMap, pair =>
+        {
+            using TigerReader packageHandle = GetPackageHandle(pair.Key);
+            List<(int, D2BlockEntry)> sortedBlockIndices = pair.Value.OrderBy(x => x.Item2.Offset).ToList();
+            foreach (var block in sortedBlockIndices)
+            {
+                packageHandle.Seek(block.Item2.Offset, SeekOrigin.Begin);
+                blockMap.TryAdd(block.Item1, packageHandle.ReadBytes((int)block.Item2.Size));
+            }
+        });
+
+        // parallel process the blocks into their actual data
+        Parallel.ForEach(blockMap.Keys, blockIndex =>
+        {
+            blockMap[blockIndex] = DecryptAndDecompressBlockBufferIfRequired(blockMap[blockIndex], BlockEntries[blockIndex]);
+        });
+
+        ConcurrentDictionary<ushort, FileView> fileViews = new();
+        Parallel.For(0, FileEntries.Count, fileIndex =>
+        {
+            D2FileEntry fileEntry = FileEntries[fileIndex];
+            byte[] finalFileBuffer = new byte[fileEntry.FileSize];
+            int blockCount = GetBlockCount(fileEntry);
+            int currentBufferOffset = 0;
+
+            for (int currentBlockId = 0; currentBlockId < blockCount; currentBlockId++)
+            {
+                bool isFirstBlock = currentBlockId == 0;
+                bool isLastBlock = currentBlockId == blockCount - 1;
+                bool isOnlyOneBlock = blockCount == 1;
+                if (isOnlyOneBlock)
+                {
+                    int copySize = fileEntry.FileSize;
+                    Array.Copy(blockMap[fileEntry.StartingBlockIndex+currentBlockId], fileEntry.StartingBlockOffset, finalFileBuffer, 0, copySize);
+                }
+                else if (isFirstBlock)
+                {
+                    int copySize = BlockSize - fileEntry.StartingBlockOffset;
+                    Array.Copy(blockMap[fileEntry.StartingBlockIndex+currentBlockId], fileEntry.StartingBlockOffset, finalFileBuffer, 0, copySize);
+                    currentBufferOffset += copySize;
+                }
+                else if (isLastBlock)
+                {
+                    int copySize = fileEntry.FileSize - currentBufferOffset;
+                    Array.Copy(blockMap[fileEntry.StartingBlockIndex+currentBlockId], 0, finalFileBuffer, currentBufferOffset, copySize);
+                }
+                else
+                {
+                    const int copySize = BlockSize;
+                    Array.Copy(blockMap[fileEntry.StartingBlockIndex+currentBlockId], 0, finalFileBuffer, currentBufferOffset, copySize);
+                    currentBufferOffset += BlockSize;
+                }
+            }
+        });
+
+        return fileViews.Values.ToHashSet();
     }
 
     private T? GetAttribute<T>(ICustomAttributeProvider var) where T : StrategyAttribute
@@ -284,6 +470,11 @@ public abstract class Package : IPackage
         return GetFileBytes(fileHash.FileIndex);
     }
 
+    public Span<byte> GetFileSpan(ushort fileIndex)
+    {
+        return GetFileBytes(fileIndex).AsSpan();
+    }
+
     /// <summary>
     /// Find what blocks the file is made out of. For most small files this is a single block since blocks are
     /// 262144 bytes long, but larger files will span multiple blocks.
@@ -310,10 +501,11 @@ public abstract class Package : IPackage
         foreach (D2BlockEntry blockEntry in blocks)
         {
             // TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId);
+            // todo use spans
             byte[] blockBuffer;
             using (TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId))
             {
-                blockBuffer = ReadBlockBuffer(packageHandle, blockEntry);
+                blockBuffer = ReadBlockBuffer(packageHandle, blockEntry).ToArray();
             }
 
             blockBuffer = DecryptAndDecompressBlockBufferIfRequired(blockBuffer, blockEntry);
@@ -413,6 +605,64 @@ public abstract class Package : IPackage
         packageHandle.Seek(blockEntry.Offset, SeekOrigin.Begin);
         byte[] blockBuffer = packageHandle.ReadBytes((int)blockEntry.Size);
         return blockBuffer;
+    }
+
+    [DllImport("ThirdParty/oo2core_9_win64.dll", EntryPoint = "OodleLZ_Decompress")]
+    public static extern bool OodleLZ_Decompress(byte[] buffer, int bufferSize, byte[] outputBuffer, int outputBufferSize, int a, int b,
+        int c, IntPtr d, IntPtr e, IntPtr f, IntPtr g, IntPtr h, IntPtr i, int threadModule);
+
+    private Span<byte> ReadBlockBufferSpan(TigerReader packageHandle, D2BlockEntry blockEntry)
+    {
+        packageHandle.Seek(blockEntry.Offset, SeekOrigin.Begin);
+        Span<byte> blockBuffer = stackalloc byte[(int)blockEntry.Size];
+        packageHandle.Read(blockBuffer);
+
+        if ((blockEntry.BitFlag & 0x8) == 8)
+        {
+            return new byte[blockBuffer.Length];
+        }
+        Span<byte> decryptedBuffer = stackalloc byte[blockBuffer.Length];
+        if ((blockEntry.BitFlag & 0x2) == 2)
+        {
+            unsafe
+            {
+                byte[] key;
+                if ((blockEntry.BitFlag & 0x4) == 4)
+                {
+                    key = AesKey1;
+                }
+                else
+                {
+                    key = AesKey0;
+                }
+
+                byte[] iv = GenerateNonce();
+                using var aes = new AesGcm(key);
+                byte[] tag = new byte[0x10];
+                Marshal.Copy((IntPtr)blockEntry.GCMTag, tag, 0, 0x10);
+                aes.Decrypt(iv, blockBuffer, tag, decryptedBuffer);
+            }
+        }
+        else
+        {
+            decryptedBuffer = blockBuffer;
+        }
+
+        byte[] decompressedBuffer;
+        if ((blockEntry.BitFlag & 0x1) == 1)
+        {
+            byte[] decompressedBufferTest = new byte[BlockSize];
+            OodleLZ_Decompress(decryptedBuffer.ToArray(), decryptedBuffer.Length, decompressedBufferTest, BlockSize, 0, 0, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero,
+                IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 3);
+
+            decompressedBuffer = decompressedBufferTest;
+        }
+        else
+        {
+            decompressedBuffer = decryptedBuffer.ToArray();
+        }
+
+        return decompressedBuffer.AsSpan();
     }
 
     private byte[] DecryptAndDecompressBlockBufferIfRequired(byte[] blockBuffer, D2BlockEntry blockEntry)
@@ -549,6 +799,7 @@ public struct D2FileEntry
 };
 
 [StructLayout(LayoutKind.Sequential)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F39E8080", 0x10)]
 public struct D2FileEntryBitpacked
 {
     public uint Reference;
@@ -566,6 +817,7 @@ public struct D2FileEntryBitpacked
 }
 
 [StructLayout(LayoutKind.Sequential)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EE9E8080", 0x30)]
 public unsafe struct D2BlockEntry
 {
     public uint Offset;

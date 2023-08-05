@@ -37,10 +37,6 @@ public abstract class Commandlet
 
     private static void ParseBaseCommandletParams()
     {
-        if (CharmInstance.Args.GetArgValue("strategy", out string strategyName))
-        {
-            Strategy.SetStrategy(strategyName);
-        }
         if (CharmInstance.Args.IsArgPresent("NewPackagePathsCache"))
         {
             PackagePathsCache.ClearCacheFiles();

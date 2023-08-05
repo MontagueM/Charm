@@ -14,7 +14,7 @@
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" FontSize="24" Margin="0,0,20,0" Text="{Binding SettingName}" TextWrapping="Wrap"/>
         <TextBox Grid.Column="1" FontSize="24" IsReadOnly="True" Margin="0,0,50,0" Text="{Binding SettingValue}"/>
-        <Button Grid.Column="2" FontSize="24" x:Name="ChangeButton">
+        <Button Grid.Column="2" FontSize="24" x:Name="ChangeButton" Style="{StaticResource MaterialDesignPaperDarkButton}" VerticalAlignment="Stretch">
             <TextBlock Text="Change" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
         </Button>
     </Grid>

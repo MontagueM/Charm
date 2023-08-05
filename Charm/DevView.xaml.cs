@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,7 +43,7 @@ public partial class DevView : UserControl
         strHash = Regex.Replace(strHash, @"(\s+|r|h)", "");
         if (strHash.Length == 16)
         {
-            strHash = Hash64Map.GetHash32Checked(strHash);
+            strHash = Hash64Map.Get().GetHash32Checked(strHash);
         }
         if (strHash == "")
         {
@@ -75,9 +76,14 @@ public partial class DevView : UserControl
                 StringBuilder data = new();
                 data.AppendLine($"PKG: {PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId(hash.PackageId)})");
                 data.AppendLine($"PKG ID: {hash.PackageId}");
-                data.AppendLine($"Entry Index: {hash.FileIndex }");
+                data.AppendLine($"Entry Index: {hash.FileIndex}");
                 // data.AppendLine($"Dev String: {hash.GetDevString() ?? hash.GetContainerString() ?? "NULL"}");
                 data.AppendLine($"Reference Hash: {hash.GetReferenceHash()}");
+                string h64 = Hash64Map.Get().GetHash64(hash);
+                if (!string.IsNullOrEmpty(h64))
+                {
+                    data.AppendLine($"Hash64: {h64}");
+                }
 
                 HashLocation.Text = data.ToString();
                 break;
@@ -215,7 +221,13 @@ public partial class DevView : UserControl
         {
             Directory.CreateDirectory(savePath);
         }
-        string path = $"{savePath}/{hash.PackageId:x4}_{hash.GetReferenceHash()}_{hash}.bin";
+
+        string strategy = Strategy.CurrentStrategy.ToString();
+        if (strategy.Contains("_"))
+        {
+            strategy = strategy.Split("_").Last();
+        }
+        string path = $"{savePath}/{strategy}_{hash.PackageId:x4}_{hash.GetReferenceHash()}_{hash}.bin";
         using (var fileStream = new FileStream(path, FileMode.Create))
         {
             using (var writer = new BinaryWriter(fileStream))

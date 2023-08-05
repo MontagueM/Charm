@@ -21,7 +21,8 @@ public class FileSink : ISink
             timer.AutoReset = true;
         }
 
-        _loqQueue.Enqueue(e.Message);
+        // todo fix
+        // _loqQueue.Enqueue(e.Message);
     }
 
     private void OnTimer(object? sender, ElapsedEventArgs elapsedEventArgs)

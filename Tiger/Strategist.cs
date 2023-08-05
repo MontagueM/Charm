@@ -50,7 +50,7 @@ public class Strategy
     // Instead, you should use StrategistSingleton to abstract the strategy away.
     public static TigerStrategy CurrentStrategy { get => _currentStrategy; }
 
-    public delegate void BeforeStrategyEventHandler(StrategyEventArgs e, int invocationCount);
+    public delegate void BeforeStrategyEventHandler(StrategyEventArgs e);
     public static event BeforeStrategyEventHandler BeforeStrategyEvent = delegate { };
 
     public delegate void DuringStrategyEventHandler(StrategyEventArgs e);
@@ -73,7 +73,7 @@ public class Strategy
         bool strategyExists = Enum.TryParse(strategyString, true, out TigerStrategy strategy);
         if (!strategyExists)
         {
-            throw new ArgumentException($"Game strategy does not exist '{strategyString}'");
+            throw new ArgumentException($"Game strategy string does not exist '{strategyString}'");
         }
         SetStrategy(strategy);
     }
@@ -94,7 +94,7 @@ public class Strategy
 
         Task.Run(() =>
         {
-            BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy }, invocationCount:OnStrategyChangedEvent.GetInvocationList().Length);
+            BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
             OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
             AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
         });
@@ -232,14 +232,14 @@ public class Strategy
     {
         private static ConcurrentDictionary<TigerStrategy, T> _strategyInstances = new();
 
-        private static T? _instance = null;
+        protected static T? _instance = null;
 
         protected TigerStrategy _strategy;
 
         /// <summary>
         /// Called after the StrategySingleton instance is created.
         /// </summary>
-        protected abstract Task Initialise();
+        protected abstract void Initialise();
 
         /// <summary>
         /// Called after a reset operation is called for this strategy, e.g. when the packages directory changes.
@@ -248,7 +248,7 @@ public class Strategy
 
         public static T Get()
         {
-            if (_instance == null) // todo make this maybe work? disallowed due to thread safety concerns
+            if (_instance == null)
             {
                 throw new InvalidOperationException("Strategy instance has not been created");
             }
@@ -273,7 +273,7 @@ public class Strategy
             throw new ArgumentException($"Strategy '{strategy}' does not exist");
         }
 
-        private static void AddNewStrategyInstance(TigerStrategy strategy)
+        protected static void AddNewStrategyInstance(TigerStrategy strategy)
         {
             if (typeof(T).GetConstructor(new[] { typeof(TigerStrategy) }) != null)
             {
@@ -290,7 +290,7 @@ public class Strategy
 
             _strategyInstances.TryAdd(strategy, _instance);
 
-            Task.WaitAll(_instance.Initialise());
+            _instance.Initialise();
         }
 
         static StrategistSingleton()
@@ -333,6 +333,26 @@ public class Strategy
             _strategyInstances[e.Strategy].Reset();
             _strategyInstances[e.Strategy].Initialise();
             DuringStrategyEvent.Invoke(e);
+        }
+    }
+
+    public abstract class LazyStrategistSingleton<T> : StrategistSingleton<T> where T : LazyStrategistSingleton<T>
+    {
+        protected LazyStrategistSingleton(TigerStrategy strategy) : base(strategy)
+        {
+        }
+
+        /// <summary>
+        /// Manual init is only available for lazy singletons to avoid mistakes.
+        /// Only used when trying to do something that is slow and not used all the time (e.g. investment)
+        /// </summary>
+        /// <returns></returns>
+        public static void LazyInit()
+        {
+            if (_instance == null)
+            {
+                AddNewStrategyInstance(_currentStrategy);
+            }
         }
     }
 

@@ -1,33 +1,34 @@
-﻿using Tiger.Schema.Static;
+﻿
+using System.Diagnostics;
 
-namespace Tiger.Schema;
+namespace Tiger.Schema.Static;
 
 public class StaticPart : MeshPart
 {
-    public StaticPart(D2Class_846C8080 terrainPartEntry) : base()
+    public StaticPart(SStaticPart terrainPartEntry) : base()
     {
         IndexOffset = terrainPartEntry.IndexOffset;
         IndexCount = terrainPartEntry.IndexCount;
         PrimitiveType = PrimitiveType.TriangleStrip;
     }
 
-    public StaticPart(D2Class_376D8080 staticPartEntry) : base()
+    public StaticPart(SStaticMeshPart staticPartEntry) : base()
     {
         IndexOffset = staticPartEntry.IndexOffset;
         IndexCount = staticPartEntry.IndexCount;
         PrimitiveType = (PrimitiveType)staticPartEntry.PrimitiveType;
     }
 
-    public StaticPart(D2Class_2F6D8080 decalPartEntry) : base()
+    public StaticPart(SStaticMeshDecal decalPartEntry) : base()
     {
         IndexOffset = decalPartEntry.IndexOffset;
         IndexCount = decalPartEntry.IndexCount;
         PrimitiveType = (PrimitiveType)decalPartEntry.PrimitiveType;
     }
 
-    public void GetAllData(D2Class_366D8080 mesh, SStaticMesh container)
+    public void GetAllData(SStaticMeshBuffers buffers, SStaticMesh container)
     {
-        Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
+        Indices = buffers.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
         foreach (UIntVector3 index in Indices)
@@ -38,14 +39,15 @@ public class StaticPart : MeshPart
         }
         VertexIndices = uniqueVertexIndices.ToList();
         // Have to call it like this b/c we don't know the format of the vertex data here
-        mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices);
-        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices);
+        buffers.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0);
+        buffers.Vertices1?.ReadVertexData(this, uniqueVertexIndices, 1, buffers.Vertices0.TagData.Stride);
 
-        TransformPositions(container.StaticData.TagData);
-        TransformUVs(container.StaticData.TagData);
+        Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
+
+        TransformData(container);
     }
 
-    public void GetDecalData(D2Class_2F6D8080 mesh, SStaticMesh container)
+    public void GetDecalData(SStaticMeshDecal mesh, SStaticMesh container)
     {
         Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
         // Get unique vertex indices we need to get data for
@@ -58,34 +60,48 @@ public class StaticPart : MeshPart
         }
         VertexIndices = uniqueVertexIndices.ToList();
         // Have to call it like this b/c we don't know the format of the vertex data here
-        mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices);
-        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices);
+        mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0);
+        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 1);
         mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices);
 
-        TransformPositions(container.StaticData.TagData);
-        TransformUVs(container.StaticData.TagData);
+        TransformData(container);
     }
 
-    private void TransformUVs(SStaticMeshData header)
+    private void TransformData(SStaticMesh container)
+    {
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            var t = (container.StaticData as Tiger.Schema.Static.DESTINY2_WITCHQUEEN_6307.StaticMeshData).TagData;
+            TransformPositions(t.ModelTransform);
+            TransformUVs(new Vector2(t.TexcoordScale, t.TexcoordScale), t.TexcoordTranslation);
+        }
+        else
+        {
+            TransformPositions(container.ModelTransform);
+            TransformUVs(container.TexcoordScale, container.TexcoordTranslation);
+        }
+    }
+
+    private void TransformUVs(Vector2 texcoordScale, Vector2 texcoordTranslation)
     {
         for (int i = 0; i < VertexTexcoords0.Count; i++)
         {
             VertexTexcoords0[i] = new Vector2(
-                VertexTexcoords0[i].X * header.TexcoordScale + header.TexcoordXTranslation,
-                VertexTexcoords0[i].Y * -header.TexcoordScale + 1 - header.TexcoordYTranslation
+                VertexTexcoords0[i].X * texcoordScale.X + texcoordTranslation.X,
+                VertexTexcoords0[i].Y * -texcoordScale.Y + 1 - texcoordTranslation.Y
             );
         }
     }
 
-    private void TransformPositions(SStaticMeshData header)
+    private void TransformPositions(Vector4 modelTransform)
     {
         for (int i = 0; i < VertexPositions.Count; i++)
         {
             // i think theres a different scale and offset for model data vs decals... like 99% sure
             VertexPositions[i] = new Vector4(
-                VertexPositions[i].X * header.ModelTransform.W + header.ModelTransform.X,
-                VertexPositions[i].Y * header.ModelTransform.W + header.ModelTransform.Y,
-                VertexPositions[i].Z * header.ModelTransform.W + header.ModelTransform.Z,
+                VertexPositions[i].X * modelTransform.W + modelTransform.X,
+                VertexPositions[i].Y * modelTransform.W + modelTransform.Y,
+                VertexPositions[i].Z * modelTransform.W + modelTransform.Z,
                 VertexPositions[i].W
             );
         }

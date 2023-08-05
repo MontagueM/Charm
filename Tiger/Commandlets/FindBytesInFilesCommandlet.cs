@@ -65,24 +65,24 @@ public class FindBytesInFilesCommandlet : ICommandlet
 
         PackageMetadata packageMetadata = package.GetPackageMetadata();
 
-
-
         IEnumerable<ushort> fileIndices = package
             .GetAllFileMetadata()
             .Where(f => (f.Type == 8 || f.Type == 16) && f.SubType == 0)
             .Select(f => f.FileIndex);
+
         Parallel.ForEach(fileIndices, fileIndex =>
         {
-            byte[] fileBytes = package.GetFileBytes(fileIndex);
-            using MemoryStream ms = new(fileBytes);
-            using BinaryReader br = new(ms);
-            while (ms.Position <= ms.Length - bytes.Length)
+            ReadOnlySpan<byte> fileData = package.GetFileSpan(fileIndex);
+            int position = 0;
+            while (position <= fileData.Length - bytes.Length)
             {
-                if (br.ReadBytes(bytes.Length).SequenceEqual(bytes))
+                if (fileData.Slice(position, bytes.Length).SequenceEqual(bytes))
                 {
-                    Log.Info($"Found in {new FileHash(pkgId, fileIndex)} at offset {ms.Position - bytes.Length}");
+                    Log.Info($"Found in {new FileHash(pkgId, fileIndex)} at offset {position}");
                     break; // stop after one instance
                 }
+
+                position += bytes.Length;
             }
         });
     }

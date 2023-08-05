@@ -10,7 +10,7 @@ namespace Charm;
 
 public partial class ActivityView : UserControl
 {
-    private Activity _activity;
+    private IActivity _activity;
 
     public ActivityView()
     {
@@ -31,7 +31,7 @@ public partial class ActivityView : UserControl
         _activity = null;
         await Task.Run(() =>
         {
-            _activity = FileResourcer.Get().GetFile<Activity>(hash);
+            _activity = FileResourcer.Get().GetFileInterface<IActivity>(hash);
         });
         MainWindow.Progress.CompleteStage();
         await Task.Run(() =>
@@ -41,20 +41,20 @@ public partial class ActivityView : UserControl
                 MapControl.LoadUI(_activity);
             });
             MainWindow.Progress.CompleteStage();
-            Dispatcher.Invoke(() =>
-            {
-                DialogueControl.LoadUI(_activity.Hash);
-            });
+            // Dispatcher.Invoke(() =>
+            // {
+            //     DialogueControl.LoadUI(_activity.FileHash);
+            // });
             MainWindow.Progress.CompleteStage();
-            Dispatcher.Invoke(() =>
-            {
-                DirectiveControl.LoadUI(_activity.Hash);
-            });
+            // Dispatcher.Invoke(() =>
+            // {
+            //     DirectiveControl.LoadUI(_activity.FileHash);
+            // });
             MainWindow.Progress.CompleteStage();
-            Dispatcher.Invoke(() =>
-            {
-                MusicControl.LoadUI(_activity.Hash);
-            });
+            // Dispatcher.Invoke(() =>
+            // {
+            //     MusicControl.LoadUI(_activity.FileHash);
+            // });
             MainWindow.Progress.CompleteStage();
         });
 

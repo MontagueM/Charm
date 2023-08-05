@@ -1,5 +1,6 @@
 ﻿namespace Tiger;
 
+[AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
 public class Tag64Attribute : Attribute
 {
 }
@@ -32,6 +33,11 @@ public class SchemaFieldAttribute : StrategyAttribute
     public SchemaFieldAttribute(int offset, TigerStrategy strategy) : base(strategy)
     {
         Offset = offset;
+    }
+
+    public SchemaFieldAttribute(TigerStrategy strategy) : base(strategy)
+    {
+        Offset = -1;
     }
 }
 

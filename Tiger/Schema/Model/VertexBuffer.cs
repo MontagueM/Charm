@@ -33,39 +33,139 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     /// </summary>
     /// <param name="part">The parent part to set the changes to.</param>
     /// <param name="uniqueVertexIndices">All the vertex indices that will be acquired.</param>
-    public void ReadVertexData(MeshPart part, HashSet<uint> uniqueVertexIndices)
+    public void ReadVertexData(MeshPart part, HashSet<uint> uniqueVertexIndices, int bufferIndex = -1, int otherStride = -1, bool isTerrain = false)
     {
         using (var handle = GetReferenceReader())
         {
             foreach (var vertexIndex in uniqueVertexIndices)
             {
-                ReadVertexData(handle, part, vertexIndex);
+                ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
             }
         }
     }
 
-    private void ReadVertexData(TigerReader handle, MeshPart part, uint vertexIndex)
+    private void ReadVertexData(TigerReader handle, MeshPart part, uint vertexIndex, int bufferIndex = -1, int otherStride = -1, bool isTerrain = false)
     {
         handle.BaseStream.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
         bool status = false;
-        switch (_tag.Type)
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_SHADOWKEEP_2601)
         {
-            case 0:
-                status = ReadVertexDataType0(handle, part);
-                break;
-            case 1:
-                status = ReadVertexDataType1(handle, part);
-                break;
-            case 5:
-                status = ReadVertexDataType5(handle, part);
-                break;
-            case 6:
-                status = ReadVertexDataType6(handle, part as DynamicMeshPart, vertexIndex);
-                break;
-            default:
-                throw new NotImplementedException($"Vertex type {_tag.Type} is not implemented.");
-                break;
+            switch (bufferIndex)
+            {
+                case 0:
+                    switch (_tag.Stride)
+                    {
+                        case 0x8:
+                            handle.Seek(6, SeekOrigin.Current);
+                            ushort w = handle.ReadUInt16();
+                            handle.Seek(-8, SeekOrigin.Current);
+                            Vector4 v;
+                            if (isTerrain)
+                            {
+                                v = new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadUInt16(), handle.ReadInt16(), true);
+                                if (v.W > 0)
+                                {
+                                    v.Z += 2 * v.W;  // terrain uses a z precision extension.
+                                }
+                            }
+                            else
+                            {
+                                v = new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true);
+                            }
+
+                            part.VertexPositions.Add(v);
+                            break;
+                        case 0xC:
+                            part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            break;
+                        case 0x10:
+                            part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            // Quaternion normal
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16()));
+                            break;
+                        case 0x1C:
+                            part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            break;
+                        case 0x20:
+                            part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()));
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case 1:
+                    switch (_tag.Stride)
+                    {
+                        case 0x08:
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            break;
+                        case 0x0C:
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            break;
+                        case 0x10:
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            break;
+                        case 0x14:
+                            if (otherStride == 8)
+                            {
+                                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            }
+                            else
+                            {
+                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                                part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()));
+                            }
+                            break;
+                        case 0x18:  // normal and tangent euler
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()));
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            status = true;
         }
+        else
+        {
+            switch (_tag.Type)
+            {
+                case 0:
+                    status = ReadVertexDataType0(handle, part);
+                    break;
+                case 1:
+                    status = ReadVertexDataType1(handle, part);
+                    break;
+                case 5:
+                    status = ReadVertexDataType5(handle, part);
+                    break;
+                case 6:
+                    status = ReadVertexDataType6(handle, part as DynamicMeshPart, vertexIndex);
+                    break;
+                default:
+                    throw new NotImplementedException($"Vertex type {_tag.Type} is not implemented.");
+                    break;
+            }
+        }
+
         if (!status)
         {
             throw new NotImplementedException($"Vertex stride {_tag.Stride} for type {_tag.Type} is not implemented.");
@@ -81,7 +181,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 break;
             case 0x8:  // all terrain-specific
                 var v = new Vector4(handle.ReadUInt16(), handle.ReadUInt16(), handle.ReadInt16(), handle.ReadUInt16(), true);
-                if (v.W > 0)
+                if (v.W > 0 && Math.Abs(v.W - 0x7F_FF) > 0.1f)
                 {
                     v.Z += 2 * v.W;  // terrain uses a z precision extension.
                 }

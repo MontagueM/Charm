@@ -4,26 +4,32 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Charm"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Loaded="OnControlLoaded"
         PreviewKeyDown="MainWindow_PreviewKeyDown"
-        Title="Charm" Height="1080" Width="1920">
+        Title="Charm" Height="1080" Width="1920"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Normal"
+        TextElement.FontSize="14"
+        FontFamily="{materialDesign:MaterialDesignFont}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="3*" />
+            <RowDefinition Height="4*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0">
+        <Menu Grid.Row="0" Style="{StaticResource MaterialDesignMenu}">
             <MenuItem Header="Settings">
-                <MenuItem Header="ConfigSubsystem panel" Click="OpenConfigPanel_OnClick"/>
+                <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick"/>
                 <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/>
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1" x:Name="MainTabControl">
-            <TabItem Header="MAIN MENU" x:Name="MainMenuTab">
+            <TabItem Header="MAIN MENU" x:Name="MainMenuTab" HorizontalAlignment="Left">
                 <local:MainMenuView/>
             </TabItem>
         </TabControl>

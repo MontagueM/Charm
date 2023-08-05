@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Exporters;
+using Tiger.Schema.Static;
 
 namespace Charm;
 
@@ -19,14 +20,14 @@ public partial class StaticView : UserControl
         InitializeComponent();
     }
 
-    public async void LoadStatic(FileHash hash, ExportDetailLevel detailLevel)
+    public void LoadStatic(FileHash hash, ExportDetailLevel detailLevel)
     {
         StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(hash);
         var parts = staticMesh.Load(detailLevel);
-        await Task.Run(() =>
-        {
-            parts = staticMesh.Load(detailLevel);
-        });
+        // await Task.Run(() =>
+        // {
+        //     parts = staticMesh.Load(detailLevel);
+        // });
         MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
         MVM.Clear();
         var displayParts = MakeDisplayParts(parts);
@@ -78,8 +79,8 @@ public partial class StaticView : UserControl
                 {
                     mats.AppendLine("{");
                     //mats.AppendLine($"    from = \"{meshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
-                    mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
+                    mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
+                    mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
                     mats.AppendLine("},\n");
                     i++;
                 }
@@ -103,7 +104,7 @@ public partial class StaticView : UserControl
             foreach (StaticPart lodpart in lodparts)
             {
                 Console.WriteLine($"Exporting LOD {lodpart.LodCategory}");
-                Console.WriteLine(lodpart.Material.Hash.ToString());
+                Console.WriteLine(lodpart.Material.FileHash.ToString());
             }
 
             lodfbxHandler.AddStaticToScene(lodparts, $"{meshName}_LOD");

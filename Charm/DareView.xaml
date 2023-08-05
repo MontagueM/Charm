@@ -23,25 +23,25 @@
             <ColumnDefinition Width="80*" />
             <ColumnDefinition Width="20*" />
         </Grid.ColumnDefinitions>
-        <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BackgroundColour20}"> 
+        <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BackgroundColour20}">
             <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Center"
                      Width="600" Background="{StaticResource BackgroundColour30}"
                      TextWrapping="Wrap" VerticalAlignment="Center" FontSize="30"
-                     FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 65 Medium}" FontWeight="36" />
+                     FontWeight="36" />
         </Border>
         <StackPanel HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Background="{StaticResource BackgroundColour7}" Orientation="Horizontal">
-            <Button VerticalAlignment="Center" Height="50" Width="90" Margin="5,0,5,0" Click="ClearQueue_OnClick">
+            <Button VerticalAlignment="Center" Height="50" Width="90" Margin="5,0,5,0" Click="ClearQueue_OnClick" Style="{StaticResource MaterialDesignPaperDarkButton}">
                 <TextBlock Text="Clear Queue" TextWrapping="Wrap" TextAlignment="Center"/>
             </Button>
-            <Button VerticalAlignment="Center" Height="50" Width="110" Margin="5,0,5,0" Click="OpenOutputFolder_OnClick">
+            <Button VerticalAlignment="Center" Height="50" Width="110" Margin="5,0,5,0" Click="OpenOutputFolder_OnClick" Style="{StaticResource MaterialDesignPaperDarkButton}">
                 <TextBlock Text="Open Output Folder" TextWrapping="Wrap" TextAlignment="Center"/>
             </Button>
-            <Button VerticalAlignment="Center" Height="50" Width="90" Margin="5,0,5,0" Click="ExecuteQueue_OnClick">
+            <Button VerticalAlignment="Center" Height="50" Width="90" Margin="5,0,5,0" Click="ExecuteQueue_OnClick" Style="{StaticResource MaterialDesignPaperDarkButton}">
                 <TextBlock Text="Execute Queue" TextWrapping="Wrap" TextAlignment="Center"/>
             </Button>
         </StackPanel>
         <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" Background="{StaticResource BackgroundColour30}"/>
-        
+
         <!-- <ListView Grid.Row="1" Grid.RowSpan="2" -->
         <!--           Name="DareListView" -->
         <!--           ItemTemplate="{StaticResource ItemTemplate}"> -->
@@ -51,7 +51,7 @@
         <!--         </ItemsPanelTemplate> -->
         <!--     </ListView.ItemsPanel> -->
         <!-- </ListView> -->
-        
+
         <ScrollViewer Grid.Row="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Visible" >
             <ItemsControl Name="DareListView" ItemTemplate="{StaticResource ItemTemplate}">
                 <ItemsControl.ItemsPanel>
@@ -65,12 +65,12 @@
         <ListView x:Name="SelectedItemView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Button Click="DareItemControl_OnClick" Height="96" Width="288" Margin="0">
+                    <Button Click="DareItemControl_OnClick" Height="96" Width="288" Margin="0" Style="{StaticResource MaterialDesignPaperDarkButton}">
                         <local:DareItemControl/>
                     </Button>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        
+
     </Grid>
 </UserControl>

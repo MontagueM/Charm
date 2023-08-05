@@ -4,6 +4,7 @@ using DirectXTexNet;
 using Microsoft.VisualBasic.FileIO;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Investment;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
 
@@ -236,7 +237,7 @@ public struct D2Class_976D8080
 [SchemaStruct("14008080", 0x4)]
 public struct D2Class_14008080
 {
-    public Material Material;
+    public IMaterial Material;
 }
 
 [SchemaStruct("8F9A8080", 0x38)]
@@ -385,7 +386,7 @@ public struct D2Class_C56E8080
 [SchemaStruct("CB6E8080", 0x24)]
 public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
 {
-    public Schema.Material Material;  // AA6D8080
+    public IMaterial Material;  // AA6D8080
     public short VariantShaderIndex;  // variant_shader_index
     public short PrimitiveType;
     public uint IndexOffset;

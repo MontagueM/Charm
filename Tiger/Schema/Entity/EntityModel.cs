@@ -1,4 +1,6 @@
 ﻿
+using Tiger.Schema.Shaders;
+
 namespace Tiger.Schema.Entity;
 
 public class EntityModel : Tag<D2Class_076F8080>
@@ -195,7 +197,7 @@ public class DynamicMeshPart : MeshPart
         }
     }
 
-    private Material GetMaterialFromExternalMaterial(short externalMaterialIndex, EntityResource parentResource)
+    private IMaterial GetMaterialFromExternalMaterial(short externalMaterialIndex, EntityResource parentResource)
     {
         using TigerReader reader = parentResource.GetReader();
 
@@ -210,7 +212,7 @@ public class DynamicMeshPart : MeshPart
 
         var mapEntry = map[reader, externalMaterialIndex];
         // For now we'll just set as the first material in the array
-        List<Material> materials = new List<Material>();
+        List<IMaterial> materials = new();
         for (int i = mapEntry.MaterialStartIndex; i < mapEntry.MaterialStartIndex + mapEntry.MaterialCount; i++)
         {
             materials.Add(mats[reader, i].Material);

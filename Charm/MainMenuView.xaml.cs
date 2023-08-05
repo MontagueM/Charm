@@ -9,6 +9,7 @@ using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using Tiger;
 using SharpDX.Toolkit.Graphics;
+using Tiger.Schema.Investment;
 
 namespace Charm;
 
@@ -19,6 +20,20 @@ public partial class MainMenuView : UserControl
     public MainMenuView()
     {
         InitializeComponent();
+
+        ApiButton.IsEnabled = ShowApiButton(Strategy.CurrentStrategy);
+        Strategy.OnStrategyChangedEvent += delegate(StrategyEventArgs args)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ApiButton.IsEnabled = ShowApiButton(args.Strategy);
+            });
+        };
+    }
+
+    private bool ShowApiButton(TigerStrategy strategy)
+    {
+        return strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307;
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -30,6 +45,11 @@ public partial class MainMenuView : UserControl
     {
         // TagListViewerView apiView = new TagListViewerView();
         // apiView.LoadContent(ETagListType.ApiList);
+        // todo actually make this show the progress bar, cba rn
+        MainWindow.Progress.SetProgressStages(new(){"Start investment system"});
+        Investment.LazyInit();
+        MainWindow.Progress.CompleteStage();;
+
         DareView apiView = new DareView();
         apiView.LoadContent();
         _mainWindow.MakeNewTab("api", apiView);

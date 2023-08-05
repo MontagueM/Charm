@@ -379,6 +379,10 @@ public class GlobalPointer<T> : ITigerDeserialize where T : struct
     public virtual void Deserialize(TigerReader reader)
     {
         AbsoluteOffset = reader.ReadInt32();
+        if (AbsoluteOffset == 0)
+        {
+            return;
+        }
         reader.Seek(AbsoluteOffset, SeekOrigin.Begin);
         Value = reader.ReadSchemaStruct<T>();
     }
@@ -585,4 +589,8 @@ public class ResourcePointerWithClass : ResourcePointer
         }
         Debug.Assert(extraResourceClassHash == ResourceClassHash);
     }
+}
+
+public interface ISchema
+{
 }

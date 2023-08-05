@@ -581,15 +581,17 @@ public struct D2Class_E36C8080
     // same thing + some unknown flags and info
 }
 
-[SchemaStruct("F2518080", 0x18)]
-public struct D2Class_F2518080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DE5B8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F2518080", 0x18)]
+public struct SDyeChannels
 {
     public long FileSize;
-    public DynamicArrayUnloaded<D2Class_2C4F8080> ChannelHashes;
+    public DynamicArrayUnloaded<SDyeChannelHash> ChannelHashes;
 }
 
-[SchemaStruct("2C4F8080", 4)]
-public struct D2Class_2C4F8080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E25B8080", 4)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "2C4F8080", 4)]
+public struct SDyeChannelHash
 {
     public TigerHash ChannelHash;
 }

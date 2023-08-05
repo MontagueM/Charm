@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Arithmic;
 using ConcurrentCollections;
+using Tiger.Schema;
 
 namespace Tiger;
 
@@ -8,6 +9,7 @@ namespace Tiger;
 /// Provides an interface for getting IPackage objects from a directory of packages.
 /// There is one PackageResourcer per game.
 /// </summary>
+[InitializeAfter(typeof(SchemaDeserializer))]
 public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 {
     private PackagePathsCache? _packagePathsCache;
@@ -33,12 +35,11 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         PackagesDirectory = strategyConfiguration.PackagesDirectory;
     }
 
-    protected override Task Initialise()
+    protected override void Initialise()
     {
         _packagePathsCache = new PackagePathsCache(_strategy);
         LoadAllPackages();
         CacheAllActivityNames();
-        return Task.CompletedTask;
     }
 
     protected override void Reset()
@@ -135,12 +136,12 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return GetPackage(fileHash.PackageId).GetFileMetadata(fileHash);
     }
 
-    public Task<ConcurrentHashSet<FileHash>> GetAllHashes<T>()
+    public Task<ConcurrentHashSet<FileHash>> GetAllHashesAsync<T>()
     {
-        return GetAllHashes(typeof(T));
+        return GetAllHashesAsync(typeof(T));
     }
 
-    public async Task<ConcurrentHashSet<FileHash>> GetAllHashes(Type schemaType)
+    public async Task<ConcurrentHashSet<FileHash>> GetAllHashesAsync(Type schemaType)
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
 
@@ -153,7 +154,21 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return fileHashes;
     }
 
-    public async Task<ConcurrentHashSet<FileHash>> GetAllHashes(Func<string, bool> packageFilterFunc)
+    public ConcurrentHashSet<FileHash> GetAllHashes(Func<string, bool> packageFilterFunc)
+    {
+        ConcurrentHashSet<FileHash> fileHashes = new();
+
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        IEnumerable<Package> packages = _packagesCache.Values.Where(package => packageFilterFunc(package.PackagePath));
+        Parallel.ForEach(packages, parallelOptions,  (package) =>
+        {
+            fileHashes.UnionWith(package.GetAllHashes());
+        });
+
+        return fileHashes;
+    }
+
+    public async Task<ConcurrentHashSet<FileHash>> GetAllHashesAsync(Func<string, bool> packageFilterFunc)
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
 

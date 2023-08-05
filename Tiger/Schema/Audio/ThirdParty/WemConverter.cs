@@ -26,7 +26,7 @@ using System.Text;
 /// </summary>
 static class WemConverter
 {
-    private const string CodebookPath = "packed_codebooks_aoTuV_603.bin";
+    private const string CodebookPath = "ThirdParty/packed_codebooks_aoTuV_603.bin";
 
     private static bool _fileChecked;
 

@@ -17,17 +17,14 @@
                 <Border Grid.RowSpan="3" BorderBrush="{StaticResource BackgroundColour30}"
                         BorderThickness="1" Panel.ZIndex="1" />
                 <TextBlock Grid.Row="0" HorizontalAlignment="Left" Margin="0,10,0,0"
-                           FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}" FontSize="26" Text="{Binding Name}" />
+                           FontSize="26" Text="{Binding Name}" />
                 <TextBlock Grid.Row="1" HorizontalAlignment="Left"
-                           FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
                            VerticalAlignment="Bottom" FontSize="20"
                            Foreground="{StaticResource ForegroundColour75}" Text="{Binding Description}" />
                 <TextBlock Grid.Row="2" HorizontalAlignment="Left"
-                           FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
                            VerticalAlignment="Bottom" FontSize="16" Margin="0,0,0,10"
                            Foreground="{StaticResource ForegroundColour75}" Text="{Binding Objective}" />
                 <TextBlock Grid.Row="0" HorizontalAlignment="Right"
-                           FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
                            VerticalAlignment="Bottom" FontSize="16"
                            Foreground="{StaticResource ForegroundColour75}" Text="{Binding Hash}"
                            Margin="0,0,5,5" />

@@ -212,7 +212,7 @@ public partial class MapView : UserControl
                 }
                 else if(entry is SMapDataEntry dynamicResource)
                 {
-                    dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.Entity.Hash, dynamicHandler);
+                    dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.GetEntityHash(), dynamicHandler);
                 }
                 // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == ExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
                 // {
@@ -263,8 +263,8 @@ public partial class MapView : UserControl
                                 {
                                     mats.AppendLine("{");
                                     //mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
-                                    mats.AppendLine($"    from = \"{staticpart.Material.Hash}.vmat\"");
-                                    mats.AppendLine($"    to = \"materials/{staticpart.Material.Hash}.vmat\"");
+                                    mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
+                                    mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
                                     mats.AppendLine("},\n");
                                     i++;
                                 }

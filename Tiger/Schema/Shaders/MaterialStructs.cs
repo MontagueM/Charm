@@ -1,7 +1,38 @@
 ﻿namespace Tiger.Schema;
 
-[SchemaStruct("AA6D8080", 0x3D0)]
-public struct SMaterial
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E8718080", 0x400)]
+public struct SMaterial_SK
+{
+    public long FileSize;
+    public uint Unk08;
+    public uint Unk0C;
+    public uint Unk10;
+
+    [SchemaField(0x48)]
+    public ShaderBytecode VertexShader;
+    [SchemaField(0x50)]
+    public DynamicArray<STextureTag> VSTextures;
+    [SchemaField(0x68)]
+    public DynamicArray<D2Class_09008080> Unk68;
+    public DynamicArray<Vec4> Unk78;
+    public DynamicArray<D2Class_F3738080> Unk88;
+    public DynamicArray<Vec4> Unk98;
+
+    [SchemaField(0x2C8)]
+    public ShaderBytecode? PixelShader;
+    [SchemaField(0x2D0)]
+    public DynamicArray<STextureTag> PSTextures;
+    [SchemaField(0x2E8)]
+    public DynamicArray<D2Class_09008080> Unk2E8;
+    public DynamicArray<Vec4> Unk2F8;
+    public DynamicArray<D2Class_F3738080> Unk300;
+    public DynamicArray<Vec4> Unk310;
+    [SchemaField(0x348)]
+    public FileHash PSVector4Container;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AA6D8080", 0x3D0)]
+public struct SMaterial_WQ
 {
     public long FileSize;
     public uint Unk08;
@@ -39,7 +70,15 @@ public struct SMaterial
     public DynamicArray<Vec4> CSCbuffers0;
     public DynamicArray<D2Class_3F018080> Unk380;
     public DynamicArray<Vec4> CSCbuffers1;
+}
 
+[SchemaStruct("11728080", 0x8)]
+public struct STextureTag
+{
+    public uint TextureIndex;
+    public Texture Texture;
+
+    public static implicit operator STextureTag(STextureTag64 tag) => new() { TextureIndex = (uint)tag.TextureIndex, Texture = tag.Texture };
 }
 
 [SchemaStruct("CF6D8080", 0x18)]
@@ -58,6 +97,13 @@ public struct D2Class_09008080
 
 [SchemaStruct("3F018080", 0x10)]
 public struct D2Class_3F018080
+{
+    // [DestinyField(FieldType.TagHash64)]
+    // public Tag Unk00;
+}
+
+[SchemaStruct("F3738080", 0x10)]
+public struct D2Class_F3738080
 {
     // [DestinyField(FieldType.TagHash64)]
     // public Tag Unk00;

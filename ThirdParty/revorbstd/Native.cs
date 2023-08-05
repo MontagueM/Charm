@@ -29,7 +29,7 @@ namespace RevorbStd
             EOSWriteError
         }
 
-        [DllImport("librevorb.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("ThirdParty/librevorb.dll", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int revorb(ref RevorbFile fi, ref RevorbFile fo);
     }
 }

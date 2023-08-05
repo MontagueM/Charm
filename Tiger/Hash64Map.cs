@@ -35,36 +35,30 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
         return _map[tag64];
     }
 
-    public static string GetHash32Checked(string strHash)
+    public string GetHash32Checked(string strHash)
     {
         ulong tagHash64 = Endian.SwapU64(UInt64.Parse(strHash, NumberStyles.HexNumber));
-        return GetHash32Checked(strHash);
+        return Endian.U64ToString(GetHash32Checked(tagHash64));
+    }
+
+    public string GetHash64(uint tag32)
+    {
+        var x = _map.Where(x => x.Value == tag32);
+        return x.Any() ? Endian.U64ToString(x.First().Key) : "";
     }
 
     // todo race condition where
-    protected override Task Initialise()
+    protected override void Initialise()
     {
-        // Pre-BL has no Hash64s
-        if (_strategy < TigerStrategy.DESTINY2_WITCHQUEEN_6307)
-        {
-            return Task.CompletedTask;
-        }
-
         List<ushort> packageIds = PackageResourcer.Get().PackagePathsCache.GetAllPackageIds();
         Parallel.ForEach(packageIds, packageId =>
         {
             IPackage package = PackageResourcer.Get().GetPackage(packageId);
-            foreach (Hash64Definition definition in package.GetHash64List())
+            foreach (SHash64Definition definition in package.GetHash64List())
             {
-                if (definition.Hash64 == 16580767463058767872)
-                {
-                    var a = 0;
-                }
                 _map.TryAdd(definition.Hash64, definition.Hash32);
             }
         });
-
-        return Task.CompletedTask;
     }
 
     protected override void Reset()

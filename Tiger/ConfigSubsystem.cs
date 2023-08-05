@@ -432,7 +432,14 @@ public class ConfigSubsystem : Subsystem
              Strategy.AddNewStrategy(strategy, packagesPath, false);
          }
 
-         Strategy.SetStrategy(_settings.Common.CurrentStrategy);
+         if (CharmInstance.Args.GetArgValue("strategy", out string strategyName))
+         {
+             Strategy.SetStrategy(strategyName);
+         }
+         else
+         {
+             Strategy.SetStrategy(_settings.Common.CurrentStrategy);
+         }
 
          return true;
      }

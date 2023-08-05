@@ -1,4 +1,7 @@
 ﻿
+using Tiger.Schema.Shaders;
+using Tiger.Schema.Static;
+
 namespace Tiger.Schema;
 
 public enum ExportDetailLevel
@@ -37,7 +40,7 @@ public class MeshPart
     public List<Vector4> VertexNormals = new List<Vector4>();
     public List<Vector4> VertexTangents = new List<Vector4>();
     public List<Vector4> VertexColours = new List<Vector4>();
-    public Material? Material;
+    public IMaterial? Material;
     public int GroupIndex = 0;
 }
 
@@ -71,7 +74,7 @@ public class StaticMesh : Tag<SStaticMesh>
             {
                 part.Material.SavePixelShader($"{saveDirectory}/Shaders");
                 part.Material.SaveVertexShader($"{saveDirectory}/Shaders");
-                part.Material.SaveComputeShader($"{saveDirectory}/Shaders");
+                // part.Material.SaveComputeShader($"{saveDirectory}/Shaders");
             }
         }
     }
@@ -110,7 +113,7 @@ public class StaticMesh : Tag<SStaticMesh>
             }
             StaticPart part = new StaticPart(decalPartEntry);
             part.GetDecalData(decalPartEntry, _tag);
-            part.Material = decalPartEntry.MaterialHash;
+            part.Material = decalPartEntry.Material;
             parts.Add(part);
         }
 

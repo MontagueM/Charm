@@ -13,8 +13,8 @@
             <ColumnDefinition Width="10*"/>
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" FontSize="24" Margin="0,0,20,0" Text="{Binding SettingName}" TextWrapping="Wrap"/>
-        <ComboBox Grid.Column="1" FontSize="24" IsReadOnly="False" Margin="0,0,50,0" x:Name="SettingsCombobox"/>
-        <Button Grid.Column="2" FontSize="24" x:Name="ChangeButton">
+        <ComboBox Grid.Column="1" FontSize="24" IsReadOnly="False" Margin="0,0,50,0" x:Name="SettingsCombobox" Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+        <Button Grid.Column="2" FontSize="24" x:Name="ChangeButton"  Style="{StaticResource MaterialDesignPaperDarkButton}">
             <TextBlock Text="Change" TextAlignment="Center" VerticalAlignment="Center"></TextBlock>
         </Button>
     </Grid>

@@ -80,14 +80,14 @@ public struct PackageHeader : IPackageHeader
         return blockEntries;
     }
 
-    public List<Hash64Definition> GetHash64Definitions(TigerReader reader)
+    public List<SHash64Definition> GetHash64Definitions(TigerReader reader)
     {
-        List<Hash64Definition> hash64List = new();
+        List<SHash64Definition> hash64List = new();
 
         reader.Seek(Hash64TableOffset + 0x50, SeekOrigin.Begin);
         for (int i = 0; i < Hash64TableSize; i++)
         {
-            var entry = reader.ReadBytes(0x10).ToType<Hash64Definition>();
+            var entry = reader.ReadBytes(0x10).ToType<SHash64Definition>();
             hash64List.Add(entry);
         }
 
@@ -176,7 +176,7 @@ public class Package : Tiger.Package
         Header = reader.ReadType<PackageHeader>();
     }
 
-    [DllImport("oo2core_9_win64.dll", EntryPoint = "OodleLZ_Decompress")]
+    [DllImport("ThirdParty/oo2core_9_win64.dll", EntryPoint = "OodleLZ_Decompress")]
     public static extern bool OodleLZ_Decompress(byte[] buffer, int bufferSize, byte[] outputBuffer, int outputBufferSize, int a, int b,
         int c, IntPtr d, IntPtr e, IntPtr f, IntPtr g, IntPtr h, IntPtr i, int threadModule);
 

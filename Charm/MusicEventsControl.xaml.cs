@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 
 namespace Charm;
 
@@ -15,12 +16,14 @@ public partial class MusicEventsControl : UserControl
 
     public void Load(D2Class_F5458080 res)
     {
+        return;
         MusicLoopName.Text = res.WwiseMusicLoopName.Value;
         EventList.ItemsSource = GetEventItems(res.Unk18);
     }
 
     public void Load(D2Class_F7458080 res)
     {
+        return;
         MusicLoopName.Text = res.AmbientMusicSetName.Value;
         EventList.ItemsSource = GetEventItems(res.Unk18);
     }

@@ -187,11 +187,12 @@ public struct STextureHeader
 {
     public uint DataSize;
     public uint Format;  // DXGI_FORMAT
-    [SchemaField(0x10)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public float Unk10;
-    [SchemaField(0x14)]
+    [SchemaField(0x14, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public float Unk14;
-    [SchemaField(0x20)]
+    [SchemaField(0x0C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ushort CAFE;
 
     public ushort Width;
@@ -205,6 +206,7 @@ public struct STextureHeader
     public ushort Unk32;
     public ushort Unk34;
 
-    [SchemaField(0x3C)]
+    [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x3C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerFile? LargeTextureBuffer;
 }

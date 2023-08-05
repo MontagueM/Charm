@@ -59,6 +59,11 @@ public partial class ProgressView : UserControl
     {
         Dispatcher.Invoke(() =>
         {
+            if (_progressStages.Count == 0)
+            {
+                Hide();
+                return;
+            }
             string removed = _progressStages.Dequeue();
             if (bLogProgress)
                 Log.Verbose($"Completed loading stage: {removed}");
