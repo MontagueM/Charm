@@ -2,7 +2,7 @@
 
 namespace Tiger.Schema.Entity;
 
-public class Entity : Tag<D2Class_D89A8080>
+public class Entity : Tag<SEntity>
 {
     public List<EntityResource> Resources = new();
 

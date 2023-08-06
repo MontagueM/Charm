@@ -9,7 +9,7 @@ using Tiger.Schema.Shaders;
 namespace Tiger.Schema.Entity;
 
 [SchemaStruct("D89A8080", 0x98)]
-public struct D2Class_D89A8080  // Entity
+public struct SEntity
 {
     public long FileSize;
     public DynamicArrayUnloaded<D2Class_CD9A8080> EntityResources;

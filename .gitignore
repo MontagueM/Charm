@@ -273,7 +273,7 @@ FakesAssemblies/
 #ThirdParty/3Dmigoto
 #ThirdParty/DXDecompiler
 # Include libreborb dll and hlsl exe
-!/ThirdParty/*.dll
-!/ThirdParty/*.exe
+!Charm/ThirdParty/*.dll
+!Charm/ThirdParty/*.exe
 .vscode/tasks.json
 .vscode/launch.json
