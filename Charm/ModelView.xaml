@@ -54,7 +54,7 @@
                         IsShadowMappingEnabled="False"
                         ShowCoordinateSystem="False"
                         ShowFrameRate="True"
-                        ShowTriangleCountInfo="True"
+                        ShowTriangleCountInfo="False"
                         EnableDeferredRendering="False" EnableRenderFrustum="True"
                         Title="{Binding Title}"
                         TextBrush="{StaticResource ForegroundColour75}"

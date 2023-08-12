@@ -73,7 +73,7 @@ namespace Tiger.Schema.Shaders
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.CreateNoWindow = false;
                 startInfo.UseShellExecute = false;
-                startInfo.FileName = "3dmigoto_shader_decomp.exe";
+                startInfo.FileName = "ThirdParty/3dmigoto_shader_decomp.exe";
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 startInfo.Arguments = $"-D {binPath}";
                 using (Process exeProcess = Process.Start(startInfo))

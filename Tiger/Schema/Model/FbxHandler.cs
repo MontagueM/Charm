@@ -32,8 +32,8 @@ public class FbxHandler
         lock (_fbxLock)
         {
             node = FbxNode.Create(_manager, mesh.GetName());
+            node.SetNodeAttribute(mesh);
         }
-        node.SetNodeAttribute(mesh);
 
         if (part.VertexNormals.Count > 0)
         {
@@ -296,7 +296,7 @@ public class FbxHandler
         FbxLayerElementMaterial materialLayer;
         lock (_fbxLock)
         {
-            fbxMaterial = FbxSurfacePhong.Create(_scene, material.FileHash);
+            fbxMaterial = FbxSurfacePhong.Create(_scene, material.FileHash.ToString());
             materialLayer = FbxLayerElementMaterial.Create(mesh, $"matlayer_{node.GetName()}_{index}");
         }
         fbxMaterial.DiffuseFactor.Set(1);
