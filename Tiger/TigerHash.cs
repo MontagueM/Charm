@@ -44,7 +44,7 @@ public class StringHash : TigerHash
 /// See "FileHash", "FileHash64", and "TagClassHash" for children of this class.
 /// </summary>
 [SchemaType(0x04)]
-public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEquatable<TigerHash>
+public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEquatable<TigerHash>, IEqualityComparer<TigerHash>
 {
     public uint Hash32;
     public const uint InvalidHash32 = 0xFFFFFFFF;
@@ -113,6 +113,46 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
     public virtual void Deserialize(TigerReader reader)
     {
         Hash32 = reader.ReadUInt32();
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(this, obj as TigerHash);
+    }
+
+    public bool Equals(TigerHash x, TigerHash y)
+    {
+        if (ReferenceEquals(x, y))
+        {
+            return true;
+        }
+
+        if (ReferenceEquals(x, null))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(y, null))
+        {
+            return false;
+        }
+
+        if (x.GetType() != y.GetType())
+        {
+            return false;
+        }
+
+        return x.Hash32 == y.Hash32;
+    }
+
+    public override int GetHashCode()
+    {
+        return (int)Hash32;
+    }
+
+    public int GetHashCode(TigerHash obj)
+    {
+        return obj.GetHashCode();
     }
 }
 

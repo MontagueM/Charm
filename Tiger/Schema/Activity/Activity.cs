@@ -42,7 +42,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
 
         private string GetBubbleNameFromBubbleIndex(int index)
         {
-            return _tag.LocationNames.TagData.BubbleNames.First(e => e.BubbleIndex == index).BubbleName.ToString();
+            return GlobalStrings.Get().GetString(_tag.LocationNames.TagData.BubbleNames.First(e => e.BubbleIndex == index).BubbleName);
         }
     }
 }
@@ -68,7 +68,7 @@ namespace Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307
                     {
                         continue;
                     }
-                    yield return new Bubble { Name = mapEntry.BubbleName, MapReference = mapReference.MapReference };
+                    yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), MapReference = mapReference.MapReference };
                 }
             }
         }

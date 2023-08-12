@@ -17,6 +17,7 @@ using ConcurrentCollections;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
@@ -978,18 +979,25 @@ public partial class TagListView : UserControl
     {
         _allTagItems = new ConcurrentBag<TagItem>();
 
-        // // Getting names
-        // var valsChild = await PackageResourcer.Get().GetAllHashesAsync<D2Class_8B8E8080>();
-        //
-        // ConcurrentDictionary<string, string> names = new ConcurrentDictionary<string, string>();
-        // Parallel.ForEach(valsChild, val =>
-        // {
-        //     Tag<D2Class_8B8E8080> tag = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(val);
-        //     foreach (var entry in tag.TagData.Activities)
-        //     {
-        //         names.TryAdd(entry.ActivityName, tag.TagData.LocationName);  // todo no longer a name, instead a hash
-        //     }
-        // });
+        // Getting names
+        if (Strategy.CurrentStrategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        {
+            var valsChild = await PackageResourcer.Get().GetAllHashesAsync<D2Class_8B8E8080>();
+            Parallel.ForEach(valsChild, val =>
+            {
+                Tag<D2Class_8B8E8080> tag = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(val);
+                GlobalStrings.Get().AddStrings(tag.TagData.StringContainer);
+            });
+        }
+        else
+        {
+            var valsChild = await PackageResourcer.Get().GetAllHashesAsync<SUnkActivity_SK>();
+            Parallel.ForEach(valsChild, val =>
+            {
+                Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
+                GlobalStrings.Get().AddStrings(tag.TagData.LocalizedStrings);
+            });
+        }
 
         var vals = await PackageResourcer.Get().GetAllHashesAsync<IActivity>();
 

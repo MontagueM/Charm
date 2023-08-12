@@ -25,7 +25,7 @@ public struct SActivity_WQ
 public struct D2Class_8B8E8080
 {
     public long FileSize;
-    public TigerHash LocationName;
+    public StringHash LocationName;
     [SchemaField(0x10), Tag64]
     public LocalizedStrings StringContainer;
     public FileHash Events;
@@ -209,7 +209,7 @@ public struct D2Class_24898080
 {
     public TigerHash LocationName;
     public TigerHash ActivityName;
-    public TigerHash BubbleName;
+    public StringHash BubbleName;
     [SchemaField(0x10)]
     public ResourcePointer Unk10;  // 0F978080, 53418080
     public DynamicArray<D2Class_48898080> Unk18;
