@@ -42,7 +42,8 @@ namespace RevorbStd
             // Pin input
             var hInput = GCHandle.Alloc(input, GCHandleType.Pinned);
             var pInput = hInput.AddrOfPinnedObject();
-            RevorbFile inputFile = new RevorbFile {
+            RevorbFile inputFile = new RevorbFile
+            {
                 Start = pInput,
                 Cursor = pInput,
                 Size = input.Length

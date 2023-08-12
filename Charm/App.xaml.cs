@@ -35,7 +35,7 @@ namespace Charm
                 }
                 if (apiHash != 0)
                 {
-                    return;
+                    return; // todo fix api
                     // to check if we need to update caches
                     // PackageHandler.Initialise();
                     //

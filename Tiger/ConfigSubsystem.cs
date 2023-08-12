@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Forms;
+using Arithmic;
 using Newtonsoft.Json;
 // using MessageBox = System.Windows.Forms.MessageBox;
 using Tiger;
@@ -402,11 +403,11 @@ public class ConfigSubsystem : Subsystem
         }
         catch (JsonSerializationException e)
         {
-            throw new JsonSerializationException($"Failed to load config file {_configFilePath}: {e.Message}", e);
+            Log.Error($"Failed to load config file {_configFilePath}: {e.Message}");
         }
         catch (JsonReaderException e)
         {
-            throw new JsonReaderException($"Failed to load config file {_configFilePath}: {e.Message}", e);
+            Log.Error($"Failed to load config file {_configFilePath}: {e.Message}");
         }
 
         // bool configIsMissingField = false;
@@ -425,6 +426,13 @@ public class ConfigSubsystem : Subsystem
             _settings.Blender = new BlenderSettings();
             _settings.Unreal = new UnrealSettings();
             _settings.Source2 = new Source2Settings();
+            WriteConfig();
+        }
+
+        // todo make validation generic, lots of nice ways to do this in .net 8
+        if (!Enum.IsDefined(typeof(TigerStrategy), _settings.Common.CurrentStrategy))
+        {
+            _settings.Common.CurrentStrategy = TigerStrategy.NONE;
             WriteConfig();
         }
 

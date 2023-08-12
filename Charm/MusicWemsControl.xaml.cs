@@ -55,14 +55,12 @@ public partial class MusicWemsControl : UserControl
 
     public void Load(D2Class_F5458080 res)
     {
-        return;
         WwiseSound loop = res.MusicLoopSound;
         WemList.ItemsSource = GetWemItems(loop);
     }
 
     public async void Load(D2Class_F7458080 res)
     {
-        return;
         if (res.AmbientMusicSet == null)
             return;
         // ambient_music_set instead of wwise_loop

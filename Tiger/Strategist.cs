@@ -15,21 +15,21 @@ public class StrategyEventArgs : EventArgs
 // todo separate the metadata out, no need to put it all in one place - just gets too long and nasty
 // the package type should be done by the resourcer, the app/depot etc should be done by tomograph data
 
-// Order matters; Tag definitions are processed top to bottom so if you only provide a tag definition for WQ and not LF,
+// Order of values matters; Tag definitions are processed top to bottom so if you only provide a tag definition for WQ and not LF,
 // the code will presume that LF is the same as WQ. If this is not the case it will throw an exception.
 public enum TigerStrategy
 {
-    NONE,
+    NONE = 0,
     // [StrategyMetadata("ps4", typeof(IPackage))]
-    // DESTINY1_PS4,
+    // DESTINY1_PS4 = 100,
     [StrategyMetadata("w64", 1085660, 1085661, 7002268313830901797, 1085662, 2399965969279284756)]
-    DESTINY2_SHADOWKEEP_2601,
+    DESTINY2_SHADOWKEEP_2601 = 2601,
     [StrategyMetadata("w64", 1085660, 1085661, 4160053308690659072, 1085662, 4651412338057797072)]
-    DESTINY2_SHADOWKEEP_2999,
+    DESTINY2_SHADOWKEEP_2999 = 2999,
     [StrategyMetadata("w64", 1085660, 1085661, 6051526863119423207, 1085662, 1078048403901153652)]
-    DESTINY2_WITCHQUEEN_6307,
+    DESTINY2_WITCHQUEEN_6307 = 6307,
     [StrategyMetadata("w64")]
-    DESTINY2_LATEST,
+    DESTINY2_LATEST = 20000,  // there probably wont be a tiger version higher than this
 }
 
 public struct StrategyConfiguration
@@ -81,18 +81,18 @@ public class Strategy
         SetStrategy(strategy);
     }
 
-    /// <exception cref="ArgumentException">'strategy' does not exist.</exception>
-    public static void SetStrategy(TigerStrategy strategy)
+    public static bool SetStrategy(TigerStrategy strategy)
     {
         if (strategy != TigerStrategy.NONE && !_strategyConfigurations.ContainsKey(strategy))
         {
-            throw new ArgumentException($"Game strategy does not exist '{strategy}'");
+            Log.Error($"Game strategy does not exist '{strategy}', ignoring.");
+            return false;
         }
         _currentStrategy = strategy;
 
         if (strategy == TigerStrategy.NONE)
         {
-            return;
+            return true;
         }
 
         Task.Run(() =>
@@ -101,6 +101,8 @@ public class Strategy
             OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
             AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
         });
+
+        return true;
     }
 
     /// <exception cref="ArgumentException">'strategy' does not exist.</exception>
@@ -134,15 +136,22 @@ public class Strategy
     /// <summary>
     /// Add a new strategy to the list of available strategies.
     /// </summary>
-    public static void AddNewStrategy(TigerStrategy strategy, string packagesDirectory, bool set = true)
+    public static bool AddNewStrategy(TigerStrategy strategy, string packagesDirectory, bool set = true)
     {
         if (strategy == TigerStrategy.NONE || _strategyConfigurations.ContainsKey(strategy))
         {
-            throw new ArgumentException($"Game strategy already exists '{strategy}'");
+            Log.Error($"Game strategy '{strategy}' already exists.");
+            return false;
+        }
+        if (!Enum.IsDefined(typeof(TigerStrategy), strategy))
+        {
+            Log.Error($"Game strategy '{strategy}' cannot be set as is not defined.");
+            return false;
         }
         if (_strategyConfigurations.Values.Any(config => config.PackagesDirectory == packagesDirectory))
         {
-            throw new ArgumentException($"Game strategy cannot re-use an existing packages path '{packagesDirectory}'");
+            Log.Error($"Game strategy '{strategy}' cannot re-use an existing packages path '{packagesDirectory}'");
+            return false;
         }
 
         bool isValid = CheckValidPackagesDirectory(strategy, packagesDirectory);
@@ -150,14 +159,18 @@ public class Strategy
         if (!isValid)
         {
             Log.Error($"Game strategy cannot use an invalid packages path '{packagesDirectory}', ignoring.");
-            return;
+            return false;
         }
 
         var config = new StrategyConfiguration { PackagesDirectory = packagesDirectory };
         _strategyConfigurations.Add(strategy, config);
         if (set && _currentStrategy == _defaultStrategy)
         {
-            SetStrategy(strategy);
+            return SetStrategy(strategy);
+        }
+        else
+        {
+            return false;
         }
     }
 

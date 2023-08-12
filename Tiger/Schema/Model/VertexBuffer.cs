@@ -75,7 +75,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                         case 0xC:
                             part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                             // theres no way to do this "correctly" without using the DXBC info, which i dont want to do
-                            if (otherStride == 0x10)
+                            if (otherStride == 0x10 || part is not DynamicMeshPart)
                             {
                                 part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                             }
@@ -131,7 +131,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                             break;
                         case 0x14:
-                            if (otherStride is 0x08 or 0x0C or 0x10)  // 12 and 16 is for entity
+                            if (otherStride is 0x08 or 0x10 || otherStride == 0x0C && part is DynamicMeshPart)  // 12 and 16 is for entity
                             {
                                 part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                                 part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));

@@ -14,7 +14,7 @@ public class EntityControlRig : EntityResource
 #pragma warning disable S1144 // Unused private types or members should be removed
     public EntityControlRig(FileHash resource) : base(resource)
     {
-        WriteDebugObj();
+        // WriteDebugObj();
     }
 
     private void WriteDebugObj()

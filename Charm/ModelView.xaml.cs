@@ -51,6 +51,7 @@ public partial class ModelView : UserControl
 
     private Action _loadModelFunc = null;
     private bool _bFromSelectionChange = false;
+    private bool _bFromSetGroupIndices = false;
 
     public void SetModelFunction(Action action)
     {
@@ -68,6 +69,11 @@ public partial class ModelView : UserControl
 
     private void GroupsCombobox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_bFromSetGroupIndices)
+        {
+            return;
+        }
+
         _bFromSelectionChange = true;
         if (_loadModelFunc != null)
         {
@@ -81,6 +87,7 @@ public partial class ModelView : UserControl
     {
         if (_bFromSelectionChange || hashSet.Count == 0)
             return;
+        _bFromSetGroupIndices = true;
 
         GroupsCombobox.Items.Clear();
         var l = hashSet.ToList();
@@ -97,5 +104,6 @@ public partial class ModelView : UserControl
                 });
             }
         }
+        _bFromSetGroupIndices = false;
     }
 }

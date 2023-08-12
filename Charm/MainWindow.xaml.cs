@@ -53,7 +53,7 @@ public partial class MainWindow
                 // remove all tabs marked with .Tag == 1 as this means we added it manually
                 MainTabControl.Items.SourceCollection
                     .Cast<TabItem>()
-                    .Where(t => t.Tag is 1 && !t.Name.Contains("configuration", StringComparison.InvariantCultureIgnoreCase))
+                    .Where(t => t.Tag is 1 && !t.Header.ToString().Contains("configuration", StringComparison.InvariantCultureIgnoreCase))
                     .ToList()
                     .ForEach(t => MainTabControl.Items.Remove(t));
                 CurrentStrategyText.Text = args.Strategy.ToString().Split(".").Last();

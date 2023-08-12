@@ -33,7 +33,7 @@
                     <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/>
                 </MenuItem>
             </Menu>
-            <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0" HorizontalAlignment="Center" x:Name="CurrentStrategyText" Text="NO GAME SELECTED"/>
+            <TextBlock Grid.Column="1" VerticalAlignment="Top" Margin="0,4,4,0" HorizontalAlignment="Right" x:Name="CurrentStrategyText" Text="NO GAME SELECTED"/>
         </Grid>
         <TabControl Grid.Row="1" x:Name="MainTabControl">
             <TabItem Header="MAIN MENU" x:Name="MainMenuTab" HorizontalAlignment="Left">

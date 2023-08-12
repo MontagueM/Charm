@@ -44,33 +44,48 @@ public partial class GeneralConfigView : UserControl
 
         StackPanel sp = new();
         sp.Orientation = Orientation.Horizontal;
-        GeneralConfigPanel.Children.Add(sp);
 
         // Packages path
         _packagePathStrategyComboBox = new ComboBox();
         _packagePathStrategyComboBox.ItemsSource = MakeEnumComboBoxItems<TigerStrategy>();
-        _packagePathStrategyComboBox.SelectionChanged += PackagePathStrategyComboBox_OnSelectionChanged;
         if (_packagePathStrategy == TigerStrategy.NONE)
         {
             _packagePathStrategy = _config.GetCurrentStrategy();
         }
 
-        _packagePathStrategyComboBox.SelectedIndex = (int)_packagePathStrategy;
+        _packagePathStrategyComboBox.SelectedIndex = _packagePathStrategyComboBox.ItemsSource.Cast<ComboBoxItem>().Select(c => (TigerStrategy)c.Tag).ToList().IndexOf(_packagePathStrategy);
+        if (_packagePathStrategyComboBox.SelectedIndex == -1)
+        {
+            _packagePathStrategyComboBox.SelectedIndex = 0;
+        }
+        _packagePathStrategyComboBox.SelectionChanged += PackagePathStrategyComboBox_OnSelectionChanged;
         sp.Children.Add(_packagePathStrategyComboBox);
 
         ConfigSettingControl cpp = new ConfigSettingControl();
         cpp.SettingName = "Packages path";
-        var val = _config.GetPackagesPath(_packagePathStrategy);
-        cpp.SettingValue = val == "" ? "Not set" : val;
-        cpp.ChangeButton.Click += PackagesPath_OnClick;
+        if (_packagePathStrategy == TigerStrategy.NONE)
+        {
+            cpp.SettingValue = "Cannot set packages path without a strategy selected";
+            cpp.ChangeButton.IsEnabled = false;
+        }
+        else
+        {
+            var packagesPath = _config.GetPackagesPath(_packagePathStrategy);
+            cpp.SettingValue = packagesPath == "" ? "Not set" : packagesPath;
+            cpp.ChangeButton.Click += PackagesPath_OnClick;
+        }
+
         cpp.Margin = new Thickness(10, 0, 0, 0);
         sp.Children.Add(cpp);
+
+        GeneralConfigPanel.Children.Add(sp);
+
 
         // Save path
         ConfigSettingControl csp = new ConfigSettingControl();
         csp.SettingName = "Export save path";
-        val = _config.GetExportSavePath();
-        csp.SettingValue = val == "" ? "Not set" : val;
+        string exportSavePath = _config.GetExportSavePath();
+        csp.SettingValue = exportSavePath == "" ? "Not set" : exportSavePath;
         csp.ChangeButton.Click += ExportSavePath_OnClick;
         GeneralConfigPanel.Children.Add(csp);
 
@@ -119,6 +134,10 @@ public partial class GeneralConfigView : UserControl
         TigerStrategy csval = _config.GetCurrentStrategy();
         cs.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems((TigerStrategy val) => Strategy.HasConfiguration(val));
         cs.SettingsCombobox.SelectedIndex = cs.SettingsCombobox.ItemsSource.Cast<ComboBoxItem>().ToList().FindIndex(x => (TigerStrategy)x.Tag == csval);
+        if (cs.SettingsCombobox.SelectedIndex == -1)
+        {
+            cs.SettingsCombobox.SelectedIndex = 0;
+        }
         cs.SettingsCombobox.SelectionChanged += CurrentStrategy_OnSelectionChanged;
         cs.ChangeButton.Visibility = Visibility.Hidden;
         GeneralConfigPanel.Children.Add(cs);
@@ -155,7 +174,7 @@ public partial class GeneralConfigView : UserControl
 
     private void PackagesPath_OnClick(object sender, RoutedEventArgs e)
     {
-        TigerStrategy strategy = (TigerStrategy)_packagePathStrategyComboBox.SelectedIndex;
+        TigerStrategy strategy = (TigerStrategy)(_packagePathStrategyComboBox.SelectedItem as ComboBoxItem).Tag;
         OpenPackagesPathDialog(strategy);
         PopulateConfigPanel();
     }
@@ -277,5 +296,6 @@ public partial class GeneralConfigView : UserControl
         _config.SetCurrentStrategy(strategy);
         Strategy.SetStrategy(_config.GetCurrentStrategy());
         PopulateConfigPanel();
+        ConsiderShowingMainMenu();
     }
 }

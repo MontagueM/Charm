@@ -1,5 +1,6 @@
 ﻿
 using System.Diagnostics;
+using Arithmic;
 
 namespace Tiger.Schema.Static;
 
@@ -39,8 +40,12 @@ public class StaticPart : MeshPart
         }
         VertexIndices = uniqueVertexIndices.ToList();
         // Have to call it like this b/c we don't know the format of the vertex data here
+
+        Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{buffers.Vertices0.TagData.Stride} and {buffers.Vertices1?.Hash}/{buffers.Vertices1?.TagData.Stride}");
         buffers.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0);
         buffers.Vertices1?.ReadVertexData(this, uniqueVertexIndices, 1, buffers.Vertices0.TagData.Stride);
+
+        // todo wait what happened to the wq stuff? they have vertices2 no?
 
         Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
 

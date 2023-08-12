@@ -147,7 +147,7 @@ public partial class TagListView : UserControl
         return null;
     }
 
-    public void LoadContent(ETagListType tagListType, TigerHash contentValue = null, bool bFromBack = false,
+    public async void LoadContent(ETagListType tagListType, TigerHash contentValue = null, bool bFromBack = false,
         ConcurrentBag<TagItem> overrideItems = null)
     {
         Log.Verbose($"Loading content type {tagListType} contentValue {contentValue} from back {bFromBack}");
@@ -171,7 +171,7 @@ public partial class TagListView : UserControl
             switch (tagListType)
             {
                 case ETagListType.DestinationGlobalTagBagList:
-                    // await LoadDestinationGlobalTagBagList();
+                    await LoadDestinationGlobalTagBagList();
                     break;
                 case ETagListType.Back:
                     Back_Clicked();
@@ -186,31 +186,31 @@ public partial class TagListView : UserControl
                     LoadEntity(contentValue as FileHash);
                     break;
                 case ETagListType.ApiList:
-                    // await LoadApiList();
+                    await LoadApiList();
                     break;
                 case ETagListType.ApiEntity:
                     LoadApiEntity(contentValue);
                     break;
                 case ETagListType.EntityList:
-                    LoadEntityList();
+                    await LoadEntityList();
                     break;
                 case ETagListType.Package:
                     LoadPackage(contentValue as FileHash);
                     break;
                 case ETagListType.ActivityList:
-                    // await LoadActivityList();
+                    await LoadActivityList();
                     break;
                 case ETagListType.Activity:
                     LoadActivity(contentValue as FileHash);
                     break;
                 case ETagListType.StaticsList:
-                    // await LoadStaticList();
+                    await LoadStaticList();
                     break;
                 case ETagListType.Static:
                     LoadStatic(contentValue as FileHash);
                     break;
                 case ETagListType.TextureList:
-                    // await LoadTextureList();
+                    await LoadTextureList();
                     break;
                 case ETagListType.Texture:
                     LoadTexture(contentValue as FileHash);
@@ -228,7 +228,7 @@ public partial class TagListView : UserControl
                     LoadDirective(contentValue as FileHash);
                     break;
                 case ETagListType.StringContainersList:
-                    LoadStringContainersList();
+                    await LoadStringContainersList();
                     break;
                 case ETagListType.StringContainer:
                     LoadStringContainer(contentValue as FileHash);
@@ -239,13 +239,13 @@ public partial class TagListView : UserControl
                 case ETagListType.String:
                     break;
                 case ETagListType.SoundsPackagesList:
-                    // await LoadSoundsPackagesList();
+                    await LoadSoundsPackagesList();
                     break;
                 case ETagListType.SoundsPackage:
                     LoadSoundsPackage(contentValue as FileHash);
                     break;
                 case ETagListType.SoundsList:
-                    // await LoadSoundsList(contentValue as FileHash);
+                    await LoadSoundsList(contentValue as FileHash);
                     break;
                 case ETagListType.Sound:
                     LoadSound(contentValue as FileHash);
@@ -257,7 +257,7 @@ public partial class TagListView : UserControl
                     LoadMusic(contentValue as FileHash);
                     break;
                 case ETagListType.WeaponAudioGroupList:
-                    // await LoadWeaponAudioGroupList();
+                    await LoadWeaponAudioGroupList();
                     break;
                 case ETagListType.WeaponAudioGroup:
                     LoadWeaponAudioGroup(contentValue);
@@ -266,7 +266,7 @@ public partial class TagListView : UserControl
                     LoadWeaponAudioList(contentValue);
                     break;
                 case ETagListType.WeaponAudio:
-                    // await LoadWeaponAudio(contentValue as FileHash);
+                    await LoadWeaponAudio(contentValue as FileHash);
                     break;
                 default:
                     throw new NotImplementedException();
