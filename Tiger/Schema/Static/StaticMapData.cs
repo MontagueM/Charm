@@ -209,6 +209,7 @@ public struct SMapDataEntry
 {
     // for now we'll process both entities as if they were the same
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true), Tag64, NoLoad]
     public Entity.Entity EntitySK;
     [SchemaField(0x28, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]

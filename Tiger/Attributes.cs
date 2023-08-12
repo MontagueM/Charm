@@ -25,6 +25,8 @@ public class SchemaFieldAttribute : StrategyAttribute
 {
     public int Offset { get; }
     public int ArraySizeConst { get; set; } = 1;  // used for marshalled fixed arrays
+    // used to mark that this field no longer exists in this strategy onwards
+    public bool Obsolete { get; set; } = false;
 
     public SchemaFieldAttribute(int offset)
     {
@@ -42,7 +44,7 @@ public class SchemaFieldAttribute : StrategyAttribute
     }
 }
 
-[AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
 public class NoLoadAttribute : Attribute
 {
 }
