@@ -43,7 +43,9 @@ public struct D2Class_2F978080
     public ResourcePointer Unk40; // 2A978080, 2D978080
 }
 
-[SchemaStruct("2A978080", 0x38)]
+// rest is wrong for latest but the array is correct
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "2A978080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "2A978080", 0x40)]
 public struct D2Class_2A978080
 {
     public TigerHash Unk00;
@@ -53,7 +55,8 @@ public struct D2Class_2A978080
     public long Unk10;
     public long Unk18;
     public TigerHash Unk20;
-    [SchemaField(0x28)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_2F978080> Unk28;
 }
 
@@ -88,17 +91,22 @@ public struct D2Class_33978080
     public float Unk80;
 }
 
-[SchemaStruct("2D978080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "2D978080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "2D978080", 0x38)]
 public struct D2Class_2D978080
 {
     public TigerHash Unk00;
     public TigerHash Unk04;
+    [SchemaField(TigerStrategy.DESTINY2_LATEST)]
+    public uint UnkLatest;
     public Tag Unk08;
     public TigerHash Unk0C;
     public float Unk10;
-    [SchemaField(0x18)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST)]
     public TigerHash Unk18;
-    [SchemaField(0x20)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_30978080> Unk20;
 }
 

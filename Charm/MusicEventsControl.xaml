@@ -8,7 +8,7 @@
              d:DesignHeight="1000" d:DesignWidth="960">
     <UserControl.Resources>
         <ControlTemplate x:Key="EventTemplate">
-            <Button Height="70" Width="880" Margin="0,5,0,5" Style="{StaticResource MaterialDesignPaperDarkButton}">
+            <Button Height="70" Width="880" Margin="0,5,0,5">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="60*" />

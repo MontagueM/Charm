@@ -95,12 +95,12 @@ public class FbxHandler
         }
 
         // Conversion lookup table
-        Dictionary<int, int> lookup = new Dictionary<int, int>();
+        Dictionary<uint, int> lookup = new Dictionary<uint, int>();
         for (int i = 0; i < part.VertexIndices.Count; i++)
         {
-            lookup[(int)part.VertexIndices[i]] = i;
+            lookup[part.VertexIndices[i]] = i;
         }
-        foreach (int vertexIndex in part.VertexIndices.OfType<int>())
+        foreach (uint vertexIndex in part.VertexIndices)
         {
             // todo utilise dictionary to make this control point thing better maybe?
             var pos = part.VertexPositions[lookup[vertexIndex]];
@@ -109,9 +109,9 @@ public class FbxHandler
         foreach (var face in part.Indices)
         {
             mesh.BeginPolygon();
-            mesh.AddPolygon(lookup[(int)face.X]);
-            mesh.AddPolygon(lookup[(int)face.Y]);
-            mesh.AddPolygon(lookup[(int)face.Z]);
+            mesh.AddPolygon(lookup[face.X]);
+            mesh.AddPolygon(lookup[face.Y]);
+            mesh.AddPolygon(lookup[face.Z]);
             mesh.EndPolygon();
         }
 
@@ -261,12 +261,12 @@ public class FbxHandler
 
         // for (int i = 0; i < meshPart.VertexWeights.Count; i++)
         // Conversion lookup table
-        Dictionary<int, int> lookup = new Dictionary<int, int>();
+        Dictionary<uint, int> lookup = new();
         for (int i = 0; i < meshPart.VertexIndices.Count; i++)
         {
-            lookup[(int)meshPart.VertexIndices[i]] = i;
+            lookup[meshPart.VertexIndices[i]] = i;
         }
-        foreach (int v in meshPart.VertexIndices.OfType<int>())
+        foreach (uint v in meshPart.VertexIndices)
         {
             VertexWeight vw = meshPart.VertexWeights[lookup[v]];
             for (int j = 0; j < 4; j++)

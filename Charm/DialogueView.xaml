@@ -9,7 +9,7 @@
     <UserControl.Resources>
         <ControlTemplate x:Key="DialogueTemplate">
             <Button Height="70" Width="880" Margin="0,5,0,5"
-                    Click="PlayWem_OnClick" Style="{StaticResource MaterialDesignPaperDarkButton}">
+                    Click="PlayWem_OnClick">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="80*" />

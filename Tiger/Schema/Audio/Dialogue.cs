@@ -16,7 +16,6 @@ public class Dialogue : Tag<D2Class_B8978080>
         List<dynamic?> result = new();
         foreach (var entry in _tag.Unk18.Select(u => u.Unk08.GetValue(GetReader())))
         {
-
             switch (entry)
             {
                 case D2Class_2D978080:

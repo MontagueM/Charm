@@ -41,20 +41,20 @@ public partial class ActivityView : UserControl
                 MapControl.LoadUI(_activity);
             });
             MainWindow.Progress.CompleteStage();
-            // Dispatcher.Invoke(() =>
-            // {
-            //     DialogueControl.LoadUI(_activity.FileHash);
-            // });
+            Dispatcher.Invoke(() =>
+            {
+                DialogueControl.LoadUI(_activity.FileHash);
+            });
             MainWindow.Progress.CompleteStage();
-            // Dispatcher.Invoke(() =>
-            // {
-            //     DirectiveControl.LoadUI(_activity.FileHash);
-            // });
+            Dispatcher.Invoke(() =>
+            {
+                DirectiveControl.LoadUI(_activity.FileHash);
+            });
             MainWindow.Progress.CompleteStage();
-            // Dispatcher.Invoke(() =>
-            // {
-            //     MusicControl.LoadUI(_activity.FileHash);
-            // });
+            Dispatcher.Invoke(() =>
+            {
+                MusicControl.LoadUI(_activity.FileHash);
+            });
             MainWindow.Progress.CompleteStage();
         });
 

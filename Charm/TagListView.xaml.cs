@@ -17,11 +17,14 @@ using ConcurrentCollections;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Static;
 using Tiger.Schema.Strings;
+
+using ActivityWQ = Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307.Activity;
 
 namespace Charm;
 
@@ -1167,42 +1170,47 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadDialogueList(FileHash fileHash)
     {
-        // Activity activity = FileResourcer.Get().GetFile<Activity>(fileHash);
-        // _allTagItems = new ConcurrentBag<TagItem>();
-        //
-        // // Dialogue tables can be in the 0x80808948 entries
-        // ConcurrentBag<FileHash> dialogueTables = new ConcurrentBag<FileHash>();
-        // if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 entry)
-        // {
-        //     foreach (var dirtable in entry.DialogueTables)
-        //     {
-        //         if (dirtable.DialogueTable != null)
-        //             dialogueTables.Add(dirtable.DialogueTable.Hash);
-        //     }
-        // }
-        // Parallel.ForEach(activity.TagData.Unk50, val =>
-        // {
-        //     foreach (var d2Class48898080 in val.Unk18)
-        //     {
-        //         var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
-        //         if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
-        //             resource is D2Class_18978080 || resource is D2Class_19978080)
-        //         {
-        //             if (resource.DialogueTable != null)
-        //                 dialogueTables.Add(resource.DialogueTable.Hash);
-        //         }
-        //     }
-        // });
-        //
-        // Parallel.ForEach(dialogueTables, hash =>
-        // {
-        //     _allTagItems.Add(new TagItem
-        //     {
-        //         Hash = hash,
-        //         Name = hash,
-        //         TagType = ETagListType.Dialogue
-        //     });
-        // });
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        {
+            return;
+        }
+        ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+
+        _allTagItems = new ConcurrentBag<TagItem>();
+
+        // Dialogue tables can be in the 0x80808948 entries
+        ConcurrentBag<FileHash> dialogueTables = new ConcurrentBag<FileHash>();
+        if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 entry)
+        {
+            foreach (var dirtable in entry.DialogueTables)
+            {
+                if (dirtable.DialogueTable != null)
+                    dialogueTables.Add(dirtable.DialogueTable.Hash);
+            }
+        }
+        Parallel.ForEach(activity.TagData.Unk50, val =>
+        {
+            foreach (var d2Class48898080 in val.Unk18)
+            {
+                var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
+                if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
+                    resource is D2Class_18978080 || resource is D2Class_19978080)
+                {
+                    if (resource.DialogueTable != null)
+                        dialogueTables.Add(resource.DialogueTable.Hash);
+                }
+            }
+        });
+
+        Parallel.ForEach(dialogueTables, hash =>
+        {
+            _allTagItems.Add(new TagItem
+            {
+                Hash = hash,
+                Name = hash,
+                TagType = ETagListType.Dialogue
+            });
+        });
     }
 
 
@@ -1220,38 +1228,42 @@ public partial class TagListView : UserControl
 
     private void LoadDirectiveList(FileHash fileHash)
     {
-        // Activity activity = FileResourcer.Get().GetFile<Activity>(fileHash);
-        // _allTagItems = new ConcurrentBag<TagItem>();
-        //
-        // // Dialogue tables can be in the 0x80808948 entries
-        // if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 a988080)
-        // {
-        //     var directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
-        //
-        //     Parallel.ForEach(directiveTables, hash =>
-        //     {
-        //         _allTagItems.Add(new TagItem
-        //         {
-        //             Hash = hash,
-        //             Name = hash,
-        //             TagType = ETagListType.Directive
-        //         });
-        //     });
-        // }
-        // else if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_20978080 class20978080)
-        // {
-        //     var directiveTables = class20978080.PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
-        //
-        //     Parallel.ForEach(directiveTables, hash =>
-        //     {
-        //         _allTagItems.Add(new TagItem
-        //         {
-        //             Hash = hash,
-        //             Name = hash,
-        //             TagType = ETagListType.Directive
-        //         });
-        //     });
-        // }
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        {
+            return;
+        }
+        ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+        _allTagItems = new ConcurrentBag<TagItem>();
+
+        // Dialogue tables can be in the 0x80808948 entries
+        if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 a988080)
+        {
+            var directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
+
+            Parallel.ForEach(directiveTables, hash =>
+            {
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = hash,
+                    Name = hash,
+                    TagType = ETagListType.Directive
+                });
+            });
+        }
+        else if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_20978080 class20978080)
+        {
+            var directiveTables = class20978080.PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
+
+            Parallel.ForEach(directiveTables, hash =>
+            {
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = hash,
+                    Name = hash,
+                    TagType = ETagListType.Directive
+                });
+            });
+        }
     }
 
     // TODO replace with taglist control
@@ -1470,41 +1482,45 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadMusicList(FileHash fileHash)
     {
-        // Activity activity = FileResourcer.Get().GetFile<Activity>(fileHash);
-        // _allTagItems = new ConcurrentBag<TagItem>();
-        //
-        // ConcurrentBag<FileHash> musics = new();
-        // Parallel.ForEach(activity.TagData.Unk50, val =>
-        // {
-        //     foreach (var d2Class48898080 in val.Unk18)
-        //     {
-        //         var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
-        //         if (resource is D2Class_D5908080)
-        //         {
-        //             var res = (D2Class_D5908080)resource;
-        //             if (res.Music != null)
-        //             {
-        //                 musics.Add(res.Music.Hash);
-        //             }
-        //         }
-        //     }
-        // });
-        //
-        // if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 res)
-        // {
-        //     if (res.Music != null)
-        //         musics.Add(res.Music.Hash);
-        // }
-        //
-        // Parallel.ForEach(musics, hash =>
-        // {
-        //     _allTagItems.Add(new TagItem
-        //     {
-        //         Hash = hash,
-        //         Name = hash,
-        //         TagType = ETagListType.Music
-        //     });
-        // });
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        {
+            return;
+        }
+        ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+        _allTagItems = new ConcurrentBag<TagItem>();
+
+        ConcurrentBag<FileHash> musics = new();
+        Parallel.ForEach(activity.TagData.Unk50, val =>
+        {
+            foreach (var d2Class48898080 in val.Unk18)
+            {
+                var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
+                if (resource is D2Class_D5908080)
+                {
+                    var res = (D2Class_D5908080)resource;
+                    if (res.Music != null)
+                    {
+                        musics.Add(res.Music.Hash);
+                    }
+                }
+            }
+        });
+
+        if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 res)
+        {
+            if (res.Music != null)
+                musics.Add(res.Music.Hash);
+        }
+
+        Parallel.ForEach(musics, hash =>
+        {
+            _allTagItems.Add(new TagItem
+            {
+                Hash = hash,
+                Name = hash,
+                TagType = ETagListType.Music
+            });
+        });
     }
 
     private void LoadMusic(FileHash fileHash)
