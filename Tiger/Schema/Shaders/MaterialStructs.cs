@@ -1,4 +1,6 @@
-﻿namespace Tiger.Schema;
+﻿using Microsoft.VisualBasic.FileIO;
+
+namespace Tiger.Schema;
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E8718080", 0x400)]
 public struct SMaterial_SK
@@ -15,7 +17,7 @@ public struct SMaterial_SK
     [SchemaField(0x68)]
     public DynamicArray<D2Class_09008080> Unk68;
     public DynamicArray<Vec4> Unk78;
-    public DynamicArray<D2Class_F3738080> Unk88;
+    public DynamicArray<SDirectXSamplerTag> VS_Samplers;
     public DynamicArray<Vec4> Unk98;
 
     [SchemaField(0x2C8)]
@@ -25,7 +27,7 @@ public struct SMaterial_SK
     [SchemaField(0x2E8)]
     public DynamicArray<D2Class_09008080> Unk2E8;
     public DynamicArray<Vec4> Unk2F8;
-    public DynamicArray<D2Class_F3738080> Unk300;
+    public DynamicArray<SDirectXSamplerTag> PS_Samplers;
     public DynamicArray<Vec4> Unk310;
     [SchemaField(0x348)]
     public FileHash PSVector4Container;
@@ -46,7 +48,7 @@ public struct SMaterial_WQ
     [SchemaField(0x90)]
     public DynamicArray<D2Class_09008080> Unk90;
     public DynamicArray<Vec4> UnkA0;
-    public DynamicArray<D2Class_3F018080> UnkB0;
+    public DynamicArray<SDirectXSamplerTag> VS_Samplers;
     public DynamicArray<Vec4> UnkC0;
 
     [SchemaField(0x2B0)]
@@ -56,7 +58,7 @@ public struct SMaterial_WQ
     [SchemaField(0x2D0)]
     public DynamicArray<D2Class_09008080> Unk2D0;
     public DynamicArray<Vec4> Unk2E0;
-    public DynamicArray<D2Class_3F018080> Unk2F0;
+    public DynamicArray<SDirectXSamplerTag> PS_Samplers;
     public DynamicArray<Vec4> Unk300;
     [SchemaField(0x324)]
     public FileHash PSVector4Container;
@@ -68,7 +70,7 @@ public struct SMaterial_WQ
     [SchemaField(0x360)]
     public DynamicArray<D2Class_09008080> Unk360;
     public DynamicArray<Vec4> CSCbuffers0;
-    public DynamicArray<D2Class_3F018080> Unk380;
+    public DynamicArray<SDirectXSamplerTag> CS_Samplers;
     public DynamicArray<Vec4> CSCbuffers1;
 }
 
@@ -89,17 +91,18 @@ public struct STextureTag64
     public Texture Texture;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F3738080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "3F018080", 0x10)]
+public struct SDirectXSamplerTag
+{
+    public DirectXSampler Samplers;
+}
+
+
 [SchemaStruct("09008080", 1)]
 public struct D2Class_09008080
 {
     public byte Value;
-}
-
-[SchemaStruct("3F018080", 0x10)]
-public struct D2Class_3F018080
-{
-    // [DestinyField(FieldType.TagHash64)]
-    // public Tag Unk00;
 }
 
 [SchemaStruct("F3738080", 0x10)]

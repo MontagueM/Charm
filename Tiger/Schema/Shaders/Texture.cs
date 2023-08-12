@@ -20,6 +20,16 @@ public class Texture : TigerReferenceFile<STextureHeader>
         return _tag.Depth != 1;
     }
 
+    public string GetDimension()
+    {
+        if (IsCubemap())
+            return "Cube";
+        else if (IsVolume())
+            return "3D";
+        else
+            return "2D";
+    }
+
     public ScratchImage GetScratchImage()
     {
         DXGI_FORMAT format = (DXGI_FORMAT)_tag.Format;
@@ -108,6 +118,25 @@ public class Texture : TigerReferenceFile<STextureHeader>
         }
     }
 
+    public static ScratchImage FlattenCubemap(ScratchImage input)
+    {
+        var image = input.GetImage(0);
+        if (image.Width == 0)
+        {
+            return null;
+        }
+
+        bool bSrgb = TexHelper.Instance.IsSRGB(image.Format);
+        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM, image.Width * input.GetImageCount(), image.Height, 1, 0, 0);
+
+        for (int i = 0; i < input.GetImageCount(); i++)
+        {
+            TexHelper.Instance.CopyRectangle(input.GetImage(i), 0, 0, image.Width, image.Height, outputPlate.GetImage(0), bSrgb ? TEX_FILTER_FLAGS.SEPARATE_ALPHA : 0, image.Width * i, 0);
+        }
+        input.Dispose();
+        return outputPlate;
+    }
+
     public bool IsSrgb()
     {
         return TexHelper.Instance.IsSRGB((DXGI_FORMAT)_tag.Format);
@@ -132,11 +161,11 @@ public class Texture : TigerReferenceFile<STextureHeader>
         return ms;
     }
 
-    public static void SavetoFile(string savePath, ScratchImage simg)
+    public static void SavetoFile(string savePath, ScratchImage simg, bool isCubemap = false)
     {
         try
         {
-            TextureExtractor.SaveTextureToFile(savePath, simg);
+            TextureExtractor.SaveTextureToFile(savePath, simg, isCubemap);
         }
         catch (FileLoadException)
         {
@@ -146,7 +175,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
     public void SavetoFile(string savePath)
     {
         ScratchImage simg = GetScratchImage();
-        SavetoFile(savePath, simg);
+        SavetoFile(savePath, simg, IsCubemap());
     }
 
 

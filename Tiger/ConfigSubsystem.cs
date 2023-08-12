@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Forms;
 using Arithmic;
 using Newtonsoft.Json;
 // using MessageBox = System.Windows.Forms.MessageBox;
@@ -297,6 +296,10 @@ public class ConfigSubsystem : Subsystem
 
     public bool GetUnrealInteropEnabled()
     {
+        if (_settings.Unreal == null)
+        {
+            return false;
+        }
         return _settings.Unreal.UnrealInteropEnabled;
     }
 
