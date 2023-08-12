@@ -408,7 +408,7 @@ public partial class TagListView : UserControl
         }
 
         List<TagItem> tagItems = displayItems.ToList();
-        if (tagItems.First().Type == "Package")
+        if (tagItems.Any() && tagItems.First().Type == "Package")
         {
             tagItems.Sort((p, q) => string.Compare(p.Name, q.Name, StringComparison.OrdinalIgnoreCase));
         }
