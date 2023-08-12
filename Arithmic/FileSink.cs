@@ -9,8 +9,8 @@ public class FileSink : ISink
     private static readonly string LogDirectory = "./Logs";
     private static string? _filePath;
 
-    private StringBuilder _logsBuffer = new();
-    private System.Timers.Timer _timer = new(2000);
+    private readonly StringBuilder _logsBuffer = new();
+    private readonly System.Timers.Timer _timer = new(2000);
 
     public void OnLogEvent(object sender, LogEventArgs e)
     {
