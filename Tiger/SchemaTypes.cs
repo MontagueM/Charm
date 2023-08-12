@@ -411,7 +411,7 @@ public class ResourcePointer : RelativePointer
         }
         else
         {
-            Log.Debug($"Unknown resource class hash {ResourceClassHash:X8}");
+            // Log.Debug($"Unknown resource class hash {ResourceClassHash:X8}");
             return null;
         }
     }

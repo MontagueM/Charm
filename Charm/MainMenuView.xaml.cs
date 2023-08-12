@@ -21,17 +21,20 @@ public partial class MainMenuView : UserControl
     {
         InitializeComponent();
 
-        ApiButton.IsEnabled = ShowApiButton(Strategy.CurrentStrategy);
+        ApiButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
+        BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
+
         Strategy.OnStrategyChangedEvent += delegate(StrategyEventArgs args)
         {
             Dispatcher.Invoke(() =>
             {
-                ApiButton.IsEnabled = ShowApiButton(args.Strategy);
+                ApiButton.IsEnabled = ShowWQButtons(args.Strategy);
+                BagsButton.IsEnabled = ShowWQButtons(args.Strategy);
             });
         };
     }
 
-    private bool ShowApiButton(TigerStrategy strategy)
+    private bool ShowWQButtons(TigerStrategy strategy)
     {
         return strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307;
     }

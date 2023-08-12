@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Linq;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
@@ -33,6 +34,7 @@ public partial class StaticView : UserControl
         var displayParts = MakeDisplayParts(parts);
         MVM.SetChildren(displayParts);
         MVM.Title = hash;
+        MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
     }
 
     public static void ExportStatic(FileHash hash, string name, ExportTypeFlag exportType, string extraPath = "")

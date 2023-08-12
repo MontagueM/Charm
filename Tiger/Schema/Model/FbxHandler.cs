@@ -59,8 +59,8 @@ public class FbxHandler
         {
             if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
             {
-                AddSlotColoursToMesh(mesh, dynamicMeshPart);
-                AddTexcoords1ToMesh(mesh, dynamicMeshPart);
+                // AddSlotColoursToMesh(mesh, dynamicMeshPart);
+                // AddTexcoords1ToMesh(mesh, dynamicMeshPart);
             }
         }
 

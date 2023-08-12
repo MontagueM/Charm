@@ -25,6 +25,9 @@ public static class Log
     public static List<LogEventArgs> LogHistory { get; } = new();
     private static event EventHandler<LogEventArgs> OnLogEvent = delegate { };
 
+    public delegate void FlushEventHandler();
+    public static event FlushEventHandler OnFlushEvent = delegate { };
+
     public static T AddSink<T>() where T : ISink
     {
         T sink = (T)Activator.CreateInstance(typeof(T));
@@ -102,5 +105,10 @@ public static class Log
     public static void Clear()
     {
         LogHistory.Clear();
+    }
+
+    public static void Flush()
+    {
+        OnFlushEvent();
     }
 }

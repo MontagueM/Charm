@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading;
+using System.Timers;
 using System.Windows;
 using System.Windows.Threading;
 using Arithmic;
@@ -11,11 +13,16 @@ namespace Charm;
 
 public partial class LogView : UserControl
 {
+    private StringBuilder _logsBuffer = new();
+    private System.Timers.Timer _timer = new(2000);
+
     public LogView()
     {
         InitializeComponent();
 
         Log.BindDelegate(OnLogEvent);
+        _timer.Elapsed += OnTimer;
+        _timer.Start();
     }
 
     // todo amortize this, as can cause huge thread issues when a threaded process logs a call when the receiver
@@ -27,11 +34,18 @@ public partial class LogView : UserControl
             return;
         }
 
-        // Dispatcher.Invoke(() =>
-        // {
-        //     LogBox.AppendText(e.Message + Environment.NewLine);
-        //     LogBox.ScrollToEnd();
-        // });
+        _logsBuffer.AppendLine(e.Message);
+    }
+
+    private void OnTimer(object? sender, ElapsedEventArgs elapsedEventArgs)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            LogBox.AppendText(_logsBuffer.ToString());
+            LogBox.ScrollToEnd();
+        });
+        _logsBuffer.Clear();
+        _timer.Start();
     }
 }
 
@@ -83,6 +97,6 @@ public class LogHandler
         if (config.GetExportSavePath() != String.Empty)
             Log.Fatal("Exported directory:\n" + string.Join("\n", Directory.GetFiles(config.GetExportSavePath()))
             + "\n" + string.Join("\n", Directory.GetDirectories(config.GetExportSavePath())));
-        // Log.CloseAndFlush();
+        Log.Flush();
     }
 }

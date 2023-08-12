@@ -63,6 +63,7 @@ public partial class GeneralConfigView : UserControl
         var val = _config.GetPackagesPath(_packagePathStrategy);
         cpp.SettingValue = val == "" ? "Not set" : val;
         cpp.ChangeButton.Click += PackagesPath_OnClick;
+        cpp.Margin = new Thickness(10, 0, 0, 0);
         sp.Children.Add(cpp);
 
         // Save path
@@ -152,22 +153,11 @@ public partial class GeneralConfigView : UserControl
         return items;
     }
 
-    private void ConsiderShowingMainMenu()
-    {
-        if (_config.GetPackagesPath(Strategy.CurrentStrategy) != "" && _config.GetExportSavePath() != "")
-        {
-            var _mainWindow = Window.GetWindow(this) as MainWindow;
-            _mainWindow.ShowMainMenu();
-        }
-    }
-
     private void PackagesPath_OnClick(object sender, RoutedEventArgs e)
     {
         TigerStrategy strategy = (TigerStrategy)_packagePathStrategyComboBox.SelectedIndex;
         OpenPackagesPathDialog(strategy);
         PopulateConfigPanel();
-
-        ConsiderShowingMainMenu();
     }
 
     private void OpenPackagesPathDialog(TigerStrategy strategy)
@@ -181,6 +171,10 @@ public partial class GeneralConfigView : UserControl
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 success = _config.TrySetPackagePath(dialog.SelectedPath, strategy);
+            }
+            else
+            {
+                return;
             }
 
             if (!success)
@@ -199,6 +193,15 @@ public partial class GeneralConfigView : UserControl
         OpenExportSavePathDialog();
         PopulateConfigPanel();
         ConsiderShowingMainMenu();
+    }
+
+    private void ConsiderShowingMainMenu()
+    {
+        if (_config.GetPackagesPath(Strategy.CurrentStrategy) != "" && _config.GetExportSavePath() != "")
+        {
+            var _mainWindow = Window.GetWindow(this) as MainWindow;
+            _mainWindow.ShowMainMenu();
+        }
     }
 
     private void OpenExportSavePathDialog()

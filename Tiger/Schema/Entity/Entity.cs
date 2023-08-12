@@ -41,19 +41,19 @@ public class Entity : Tag<SEntity>
                     Model = ((D2Class_8F6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).Model;
                     ModelParentResource = resource;
                     break;
-                case D2Class_5B6D8080:  // Entity physics model
+                case D2Class_5B6D8080:  // Entity physics model  todo shadowkeep
                     PhysicsModel = ((D2Class_6C6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).PhysicsModel;
                     break;
                 case D2Class_DD818080:  // Entity skeleton FK
                     Skeleton = FileResourcer.Get().GetFile<EntitySkeleton>(resource.Hash);
                     break;
-                case D2Class_668B8080:  // Entity skeleton IK
+                case D2Class_668B8080:  // Entity skeleton IK  todo shadowkeep
                     ControlRig = FileResourcer.Get().GetFile<EntityControlRig>(resource.Hash);
                     break;
-                case D2Class_97318080:
+                case D2Class_97318080: // todo shadowkeep
                     PatternAudio = resource;
                     break;
-                case D2Class_F62C8080:
+                case D2Class_F62C8080: // todo shadowkeep
                     PatternAudioUnnamed = resource;
                     break;
                 default:

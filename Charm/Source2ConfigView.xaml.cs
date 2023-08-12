@@ -96,6 +96,10 @@ public partial class Source2ConfigView : UserControl
                 {
                     success = _config.TrySetSource2Path(dialog.SelectedPath);
                 }
+                else
+                {
+                    return;
+                }
 
                 if (!success)
                 {

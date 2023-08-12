@@ -67,6 +67,10 @@ public partial class UnrealConfigView : UserControl
                 {
                     success = _config.TrySetUnrealInteropPath(dialog.SelectedPath);
                 }
+                else
+                {
+                    return;
+                }
             }
         }
     }

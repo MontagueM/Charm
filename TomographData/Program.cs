@@ -29,9 +29,9 @@ public class Program
             }
             StrategyMetadataAttribute strategyMetadata = attribute.Strategy.GetStrategyMetadata();
 
-            if (!strategyMetadata.DepotManifestVersionMain.HasValue || !strategyMetadata.DepotManifestVersionAudio.HasValue)
+            if (!strategyMetadata.DepotManifestVersionMain.HasValue || !strategyMetadata.DepotManifestVersionLanguage.HasValue)
             {
-                Console.WriteLine($"TestClass Strategy {strategyMetadata} has no DepotManifestVersionMain and DepotManifestVersionAudio, skipping test data initialization.");
+                Console.WriteLine($"TestClass Strategy {strategyMetadata} has no DepotManifestVersionMain and DepotManifestVersionLanguage, skipping test data initialization.");
                 continue;
             }
 

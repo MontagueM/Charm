@@ -245,7 +245,7 @@ public class Material : Tag<SMaterial_SK>, IMaterial
 
     public IEnumerable<STextureTag> EnumeratePSTextures()
     {
-        foreach (STextureTag texture in _tag.VSTextures)
+        foreach (STextureTag texture in _tag.PSTextures)
         {
             yield return texture;
         }
@@ -282,7 +282,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
 
     public IEnumerable<STextureTag> EnumeratePSTextures()
     {
-        foreach (STextureTag64 texture in _tag.VSTextures)
+        foreach (STextureTag64 texture in _tag.PSTextures)
         {
             yield return texture;
         }

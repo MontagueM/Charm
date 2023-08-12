@@ -14,6 +14,7 @@ using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf;
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.VisualBasic.Logging;
 using SharpDX;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -29,6 +30,7 @@ using Color = System.Windows.Media.Color;
 using Plane = SharpDX.Plane;
 using Colors = System.Windows.Media.Colors;
 using Color4 = SharpDX.Color4;
+using Log = Arithmic.Log;
 using MeshBuilder = HelixToolkit.SharpDX.Core.MeshBuilder;
 
 namespace Charm;
@@ -176,6 +178,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         GC.Collect();
     }
 
+
     public bool LoadEntityFromFbx(string modelFile)
     {
         Clear();
@@ -183,9 +186,11 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         importer.Configuration.ImportAnimations = true;
         importer.Configuration.SkeletonSizeScale = 0.02f;
         importer.Configuration.GlobalScale = 1f;
+        // this can crash, and theres nothing I can do about it :)
         HelixToolkitScene scene = importer.Load(modelFile);
         if (scene == null)  // unsure why this happens, but seems to be always bone related for massive objects
         {
+            Log.Error("Failed to load scene");
             return false;
         }
         bool bSkel = false;

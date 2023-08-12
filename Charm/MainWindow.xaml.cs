@@ -44,8 +44,21 @@ public partial class MainWindow
 
         int numSingletons = InitialiseStrategistSingletons();
 
-        Strategy.BeforeStrategyEvent += ((StrategyEventArgs e) => { Progress.SetProgressStages(Enumerable.Range(1, numSingletons).Select(num => $"Initialising game version {e.Strategy}: {num}/{numSingletons}").ToList()); });
-        Strategy.DuringStrategyEvent += ((StrategyEventArgs e) => { Progress.CompleteStage(); });
+        Strategy.BeforeStrategyEvent +=  args => { Progress.SetProgressStages(Enumerable.Range(1, numSingletons).Select(num => $"Initialising game version {args.Strategy}: {num}/{numSingletons}").ToList()); };
+        Strategy.DuringStrategyEvent += _ => { Progress.CompleteStage(); };
+        Strategy.OnStrategyChangedEvent += args =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                // remove all tabs marked with .Tag == 1 as this means we added it manually
+                MainTabControl.Items.SourceCollection
+                    .Cast<TabItem>()
+                    .Where(t => t.Tag is 1 && !t.Name.Contains("configuration", StringComparison.InvariantCultureIgnoreCase))
+                    .ToList()
+                    .ForEach(t => MainTabControl.Items.Remove(t));
+                CurrentStrategyText.Text = args.Strategy.ToString().Split(".").Last();
+            });
+        };
 
         InitialiseSubsystems();
 
@@ -341,7 +354,7 @@ public partial class MainWindow
     public void ShowMainMenu()
     {
         MainMenuTab.Visibility = Visibility.Visible;
-        MainTabControl.SelectedItem = MainMenuTab;
+        // MainTabControl.SelectedItem = MainMenuTab;
         if (_bHasInitialised == false)
         {
             Task.Run(InitialiseHandlers);
@@ -382,6 +395,7 @@ public partial class MainWindow
 
         _newestTab = new TabItem();
         _newestTab.Content = content;
+        _newestTab.Tag = 1;
         _newestTab.MouseDown += MenuTab_OnMouseDown;
         _newestTab.HorizontalAlignment = HorizontalAlignment.Left;
         MainTabControl.Items.Add(_newestTab);

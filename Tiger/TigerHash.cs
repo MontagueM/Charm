@@ -143,7 +143,13 @@ public class FileHash : TigerHash
         return (uint)(0x80800000 + (packageId << 0xD) + fileIndex);
     }
 
-    public ushort PackageId => (ushort)((Hash32 >> 0xd) & 0x3ff | (Hash32 & 0x1000000) >> 0x0E);
+    public ushort PackageId
+    {
+        get
+        {
+            return (ushort)(((Hash32 >> 0xd) & 0x3ff) + (((Hash32 >> 0x17) & 3)-1)*0x400);
+        }
+    }
 
     public ushort FileIndex => (ushort)(Hash32 & 0x1fff);
 }

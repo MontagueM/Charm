@@ -20,21 +20,22 @@
             <RowDefinition Height="5*" />
         </Grid.RowDefinitions>
 
-        <Button x:Name="BulkExportButton" Grid.Row="0" Grid.Column="0" Margin="10" Click="BulkExport_OnClick" Visibility="Hidden" Style="{StaticResource MaterialDesignPaperDarkButton}">
-            <TextBlock TextAlignment="Center" VerticalAlignment="Center" Text="Bulk export" TextWrapping="WrapWithOverflow"/>
+        <Button x:Name="BulkExportButton" Grid.Row="0" Grid.Column="0" Margin="5" Click="BulkExport_OnClick" Visibility="Hidden" Style="{StaticResource MaterialDesignFlatButton}">
+            <TextBlock TextAlignment="Center" VerticalAlignment="Center" Text="Bulk export"/>
         </Button>
 
         <TextBox Grid.Row="0" Grid.Column="1" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Stretch"
                  TextWrapping="Wrap" VerticalAlignment="Center" FontSize="30" Padding="5,0,5,0"
                  FontWeight="36" />
 
-        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left" Margin="10,0,0,0">
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0">
             <CheckBox Checked="TrimCheckbox_OnChecked" Unchecked="TrimCheckbox_OnUnchecked" x:Name="TrimCheckbox"
                       IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"
                       HorizontalAlignment="Left" Content="Trim names" Style="{StaticResource MaterialDesignCheckBox}"/>
             <CheckBox Checked="ShowNamedCheckbox_OnChecked" Unchecked="ShowNamedCheckbox_OnUnchecked" x:Name="ShowNamedCheckbox"
                       IsChecked="False" VerticalAlignment="Center" VerticalContentAlignment="Center"
-                      HorizontalAlignment="Left" Content="Filter named" Style="{StaticResource MaterialDesignCheckBox}"/>
+                      HorizontalAlignment="Left" Content="Filter named" Style="{StaticResource MaterialDesignCheckBox}"
+                      />
         </StackPanel>
 
 

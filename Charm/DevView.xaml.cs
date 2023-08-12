@@ -165,6 +165,7 @@ public partial class DevView : UserControl
         {
             switch (reference.Hash32)
             {
+                case 0x80809C0F:
                 case 0x80809AD8:
                     EntityView entityView = new EntityView();
                     entityView.LoadEntity(hash, _fbxHandler);

@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm", "Charm\Charm.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevorbStd", "ThirdParty\revorbstd\RevorbStd.csproj", "{C407B28F-077C-41C2-8C16-277CB9681E92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharmDepotDownloader", "CharmDepotDownloader\CharmDepotDownloader.csproj", "{D22CC98B-DE19-460A-B661-3155C55024AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -79,6 +81,10 @@ Global
 		{C7351B8C-6334-447F-8B19-C57FB9B6406A}.Debug|x64.Build.0 = Debug|Any CPU
 		{C7351B8C-6334-447F-8B19-C57FB9B6406A}.Release|x64.ActiveCfg = Release|Any CPU
 		{C7351B8C-6334-447F-8B19-C57FB9B6406A}.Release|x64.Build.0 = Release|Any CPU
+		{D22CC98B-DE19-460A-B661-3155C55024AE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D22CC98B-DE19-460A-B661-3155C55024AE}.Debug|x64.Build.0 = Debug|Any CPU
+		{D22CC98B-DE19-460A-B661-3155C55024AE}.Release|x64.ActiveCfg = Release|Any CPU
+		{D22CC98B-DE19-460A-B661-3155C55024AE}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

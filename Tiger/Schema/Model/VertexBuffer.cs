@@ -48,7 +48,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     {
         handle.BaseStream.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
         bool status = false;
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_SHADOWKEEP_2601)
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
         {
             switch (bufferIndex)
             {
@@ -56,9 +56,6 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     switch (_tag.Stride)
                     {
                         case 0x8:
-                            handle.Seek(6, SeekOrigin.Current);
-                            ushort w = handle.ReadUInt16();
-                            handle.Seek(-8, SeekOrigin.Current);
                             Vector4 v;
                             if (isTerrain)
                             {
@@ -77,12 +74,30 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             break;
                         case 0xC:
                             part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
-                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            // theres no way to do this "correctly" without using the DXBC info, which i dont want to do
+                            if (otherStride == 0x10)
+                            {
+                                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            }
+                            else
+                            {
+                                VertexWeight vw2 = new()
+                                {
+                                    // 0xFE designates no bone weight assigned.
+                                    WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0xFE, 0xFE),
+                                    WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0),
+                                };
+                                (part as DynamicMeshPart).VertexWeights.Add(vw2);
+                            }
                             break;
                         case 0x10:
                             part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
-                            // Quaternion normal
-                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16()));
+                            VertexWeight vw = new()
+                            {
+                                WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
+                                WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
+                            };
+                            (part as DynamicMeshPart).VertexWeights.Add(vw);
                             break;
                         case 0x1C:
                             part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
@@ -116,7 +131,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));
                             break;
                         case 0x14:
-                            if (otherStride == 8)
+                            if (otherStride is 0x08 or 0x0C or 0x10)  // 12 and 16 is for entity
                             {
                                 part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                                 part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), true));

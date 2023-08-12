@@ -22,12 +22,19 @@
             <RowDefinition Height="4*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0" Style="{StaticResource MaterialDesignMenu}">
-            <MenuItem Header="Settings">
-                <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick"/>
-                <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/>
-            </MenuItem>
-        </Menu>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70*"/>
+                <ColumnDefinition Width="30*"/>
+            </Grid.ColumnDefinitions>
+            <Menu Style="{StaticResource MaterialDesignMenu}">
+                <MenuItem Header="Settings">
+                    <MenuItem Header="Config panel" Click="OpenConfigPanel_OnClick"/>
+                    <MenuItem Header="Log panel" Click="OpenLogPanel_OnClick"/>
+                </MenuItem>
+            </Menu>
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0" HorizontalAlignment="Center" x:Name="CurrentStrategyText" Text="NO GAME SELECTED"/>
+        </Grid>
         <TabControl Grid.Row="1" x:Name="MainTabControl">
             <TabItem Header="MAIN MENU" x:Name="MainMenuTab" HorizontalAlignment="Left">
                 <local:MainMenuView/>

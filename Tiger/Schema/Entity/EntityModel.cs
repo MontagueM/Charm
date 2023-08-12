@@ -1,9 +1,11 @@
 ﻿
+using System.Diagnostics;
+using Arithmic;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
 
-public class EntityModel : Tag<D2Class_076F8080>
+public class EntityModel : Tag<SEntityModel>
 {
     public EntityModel(FileHash hash) : base(hash)
     {
@@ -14,7 +16,7 @@ public class EntityModel : Tag<D2Class_076F8080>
      */
     public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource)
     {
-        Dictionary<int, D2Class_CB6E8080> dynamicParts = GetPartsOfDetailLevel(detailLevel);
+        Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts = GetPartsOfDetailLevel(detailLevel);
         List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource);
         return parts;
     }
@@ -30,70 +32,84 @@ public class EntityModel : Tag<D2Class_076F8080>
     /// </summary>
     /// <param name="detailLevel">The desired level of detail to get parts for.</param>
     /// <returns></returns>
-    private Dictionary<int, D2Class_CB6E8080> GetPartsOfDetailLevel(ExportDetailLevel eDetailLevel)
+    private Dictionary<int, Dictionary<int, D2Class_CB6E8080>> GetPartsOfDetailLevel(ExportDetailLevel eDetailLevel)
     {
-        Dictionary<int, D2Class_CB6E8080> parts = new Dictionary<int, D2Class_CB6E8080>();
+        Dictionary<int, Dictionary<int, D2Class_CB6E8080>> parts = new();
 
         using TigerReader reader = GetReader();
-        D2Class_C56E8080 mesh = _tag.Meshes[reader, 0];
-        for (var i = 0; i < mesh.Parts.Count; i++)
+
+        int meshIndex = 0;
+        foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
-            D2Class_CB6E8080 part = mesh.Parts[reader, i];
-            if (eDetailLevel == ExportDetailLevel.AllLevels)
+            int partIndex = 0;
+            parts.Add(meshIndex, new Dictionary<int, D2Class_CB6E8080>());
+            for (int i = 0; i < mesh.Parts.Count; i++)
             {
-                parts.Add(i, part);
-            }
-            else
-            {
-                if (eDetailLevel == ExportDetailLevel.MostDetailed && (part.LodCategory == ELodCategory.MainGeom0 ||
-                                                        part.LodCategory == ELodCategory.GripStock0 ||
-                                                        part.LodCategory == ELodCategory.Stickers0 ||
-                                                        part.LodCategory == ELodCategory.InternalGeom0 ||
-                                                        part.LodCategory == ELodCategory.Detail0))
+                D2Class_CB6E8080 part = mesh.Parts[reader, i];
+                if (eDetailLevel == ExportDetailLevel.AllLevels)
                 {
-                    parts.Add(i, part);
+                    parts[meshIndex].Add(partIndex++, part);
                 }
-                else if (eDetailLevel == ExportDetailLevel.LeastDetailed && part.LodCategory == ELodCategory.LowPolyGeom3)
+                else
                 {
-                    parts.Add(i, part);
+                    if (eDetailLevel == ExportDetailLevel.MostDetailed && (part.LodCategory == ELodCategory.MainGeom0 ||
+                                                                           part.LodCategory == ELodCategory.GripStock0 ||
+                                                                           part.LodCategory == ELodCategory.Stickers0 ||
+                                                                           part.LodCategory == ELodCategory.InternalGeom0 ||
+                                                                           part.LodCategory == ELodCategory.Detail0))
+                    {
+                        parts[meshIndex].Add(partIndex++, part);
+                    }
+                    else if (eDetailLevel == ExportDetailLevel.LeastDetailed && part.LodCategory == ELodCategory.LowPolyGeom3)
+                    {
+                        parts[meshIndex].Add(partIndex++, part);
+                    }
                 }
             }
+
+            meshIndex++;
         }
+
         return parts;
     }
 
-    private List<DynamicMeshPart> GenerateParts(Dictionary<int, D2Class_CB6E8080> dynamicParts, EntityResource parentResource)
+    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts, EntityResource parentResource)
     {
-        List<DynamicMeshPart> parts = new List<DynamicMeshPart>();
-        if (_tag.Meshes.Count > 1) throw new Exception("Multiple meshes not supported");
-        if (_tag.Meshes.Count == 0) return new List<DynamicMeshPart>();
-        D2Class_C56E8080 mesh = _tag.Meshes[GetReader(), 0];
+        List<DynamicMeshPart> parts = new();
+        if (_tag.Meshes.Count == 0) return parts;
 
-        // Make part group map
-        Dictionary<int, int> partGroups = new Dictionary<int, int>();
-        HashSet<short> groups = new HashSet<short>(mesh.StagePartOffsets.AsEnumerable());
-        var groupList = groups.ToList();
-        groupList.Remove(0x707);
-        groupList.Sort();
-        for (var i = 0; i < groupList.Count-1; i++)
+        int meshIndex = 0;
+        foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
-            for (int j = groupList[i]; j < groupList[i + 1]; j++)
+            // Make part group map
+            Dictionary<int, int> partGroups = new();
+            HashSet<short> groups = new(mesh.StagePartOffsets.AsEnumerable());
+            var groupList = groups.ToList();
+            groupList.Remove(0x707);
+            groupList.Sort();
+            for (int i = 0; i < groupList.Count-1; i++)
             {
-                partGroups[j] = i;
+                for (int j = groupList[i]; j < groupList[i + 1]; j++)
+                {
+                    partGroups[j] = i;
+                }
             }
+
+            foreach ((int i, D2Class_CB6E8080 part) in dynamicParts[meshIndex])
+            {
+                DynamicMeshPart dynamicMeshPart = new(part, parentResource)
+                {
+                    Index = i, GroupIndex = partGroups[i], LodCategory = part.LodCategory,
+                    bAlphaClip = (part.Flags & 0x8) != 0,
+                    GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
+                };
+                dynamicMeshPart.GetAllData(mesh, _tag);
+                parts.Add(dynamicMeshPart);
+            }
+
+            meshIndex++;
         }
 
-        foreach (var (i, part) in dynamicParts)
-        {
-            DynamicMeshPart dynamicMeshPart = new(part, parentResource);
-            dynamicMeshPart.Index = i;
-            dynamicMeshPart.GroupIndex = partGroups[i];
-            dynamicMeshPart.LodCategory = part.LodCategory;
-            dynamicMeshPart.bAlphaClip = (part.Flags & 0x8) != 0;
-            dynamicMeshPart.GearDyeChangeColorIndex = part.GearDyeChangeColorIndex;
-            dynamicMeshPart.GetAllData(mesh, _tag);
-            parts.Add(dynamicMeshPart);
-        }
         return parts;
     }
 
@@ -129,7 +145,7 @@ public class DynamicMeshPart : MeshPart
     {
     }
 
-    public void GetAllData(D2Class_C56E8080 mesh, D2Class_076F8080 model)
+    public void GetAllData(SEntityModelMesh mesh, SEntityModel model)
     {
         Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
 
@@ -149,8 +165,9 @@ public class DynamicMeshPart : MeshPart
         }
 
         // Have to call it like this b/c we don't know the format of the vertex data here
-        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices);
-        mesh.Vertices2.ReadVertexData(this, uniqueVertexIndices);
+        Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
+        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
+        mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride,  false);
         if (mesh.OldWeights != null)
         {
             mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices);
@@ -164,11 +181,13 @@ public class DynamicMeshPart : MeshPart
             mesh.SinglePassSkinningBuffer.ReadVertexData(this, uniqueVertexIndices);
         }
 
+        Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
+
         TransformPositions(model);
         TransformTexcoords(model);
     }
 
-    private void TransformTexcoords(D2Class_076F8080 header)
+    private void TransformTexcoords(SEntityModel header)
     {
         for (int i = 0; i < VertexTexcoords0.Count; i++)
         {
@@ -184,7 +203,7 @@ public class DynamicMeshPart : MeshPart
         }
     }
 
-    private void TransformPositions(D2Class_076F8080 header)
+    private void TransformPositions(SEntityModel header)
     {
         for (int i = 0; i < VertexPositions.Count; i++)
         {
@@ -197,26 +216,34 @@ public class DynamicMeshPart : MeshPart
         }
     }
 
-    private IMaterial GetMaterialFromExternalMaterial(short externalMaterialIndex, EntityResource parentResource)
+    private IMaterial? GetMaterialFromExternalMaterial(short externalMaterialIndex, EntityResource parentResource)
     {
         using TigerReader reader = parentResource.GetReader();
 
-        var map = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
-        var mats = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
-        if (map.Count == 0 || mats.Count == 0)
-        {
-            return null;
-        }
-        if (externalMaterialIndex >= map.Count)
-            return null; // todo this is actually wrong ig...
-
-        var mapEntry = map[reader, externalMaterialIndex];
-        // For now we'll just set as the first material in the array
         List<IMaterial> materials = new();
-        for (int i = mapEntry.MaterialStartIndex; i < mapEntry.MaterialStartIndex + mapEntry.MaterialCount; i++)
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            materials.Add(mats[reader, i].Material);
+            var map = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMapWQ;
+            var mats = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
+            if (map.Count == 0 || mats.Count == 0)
+            {
+                return null;
+            }
+            if (externalMaterialIndex >= map.Count)
+                return null; // todo this is actually wrong ig...
+
+            var mapEntry = map[reader, externalMaterialIndex];
+            // For now we'll just set as the first material in the array
+            for (int i = mapEntry.MaterialStartIndex; i < mapEntry.MaterialStartIndex + mapEntry.MaterialCount; i++)
+            {
+                materials.Add(mats[reader, i].Material);
+            }
         }
+        else
+        {
+            return null; // todo shadowkeep
+        }
+
         return materials[0];
     }
 }

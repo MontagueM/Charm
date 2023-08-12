@@ -1,4 +1,6 @@
-﻿using System.Timers;
+﻿using System.Text;
+using System.Timers;
+using Timer = System.Threading.Timer;
 
 namespace Arithmic;
 
@@ -7,7 +9,8 @@ public class FileSink : ISink
     private static readonly string LogDirectory = "./Logs";
     private static string? _filePath;
 
-    private Queue<string> _loqQueue = new();
+    private StringBuilder _logsBuffer = new();
+    private System.Timers.Timer _timer = new(2000);
 
     public void OnLogEvent(object sender, LogEventArgs e)
     {
@@ -16,18 +19,33 @@ public class FileSink : ISink
             Directory.CreateDirectory(LogDirectory);
             _filePath = Path.Join(LogDirectory, $"log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
 
-            System.Timers.Timer timer = new(2000);
-            timer.Elapsed += OnTimer;
-            timer.AutoReset = true;
+            _timer.Elapsed += OnTimer;
+            _timer.AutoReset = false;
+            _timer.Start();
+
+            Log.OnFlushEvent += () =>
+            {
+                lock (_logsBuffer)
+                {
+                    File.AppendAllText(_filePath, _logsBuffer.ToString());
+                    _logsBuffer.Clear();
+                }
+            };
         }
 
-        // todo fix
-        // _loqQueue.Enqueue(e.Message);
+        lock (_logsBuffer)
+        {
+            _logsBuffer.AppendLine(e.Message);
+        }
     }
 
     private void OnTimer(object? sender, ElapsedEventArgs elapsedEventArgs)
     {
-        var a = 0;
-        // File.AppendAllText(_filePath, e.Message + Environment.NewLine);
+        lock (_logsBuffer)
+        {
+            File.AppendAllText(_filePath, _logsBuffer.ToString());
+            _logsBuffer.Clear();
+        }
+        _timer.Start();
     }
 }

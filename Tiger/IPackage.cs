@@ -128,7 +128,7 @@ public abstract class Package : IPackage
 
     public List<T> GetAllFiles<T>() where T : TigerFile
     {
-        List<T> tags = new();
+        ConcurrentBag<T> tags = new();
 
 
         Type type = typeof(T);
@@ -141,27 +141,32 @@ public abstract class Package : IPackage
 
         if (typeIdentifier.HasClassHash())
         {
-            for (int i = 0; i < FileEntries.Count; i++)
+            Parallel.For(0, FileEntries.Count, i =>
             {
-                if (FileEntries[i].Reference.Hash32 == typeIdentifier.ClassHash)
+                if (FileEntries[i].Reference.Hash32 != typeIdentifier.ClassHash)
                 {
-                    T tag = FileResourcer.Get().GetFile<T>(new FileHash(Header.GetPackageId(), (uint)i));
-                    tags.Add(tag);
+                    return;
                 }
-            }
+
+                T tag = FileResourcer.Get().GetFile<T>(new FileHash(Header.GetPackageId(), (uint)i));
+                tags.Add(tag);
+            });
         }
         else
         {
             if (typeIdentifier.HasTypeSubType())
             {
-                for (int i = 0; i < FileEntries.Count; i++)
+                Parallel.For(0, FileEntries.Count, i =>
                 {
-                    if (FileEntries[i].NumType == typeIdentifier.Type && typeIdentifier.SubTypes.Contains(FileEntries[i].NumSubType))
+                    if (FileEntries[i].NumType != typeIdentifier.Type ||
+                        !typeIdentifier.SubTypes.Contains(FileEntries[i].NumSubType))
                     {
-                        T tag = FileResourcer.Get().GetFile<T>(new FileHash(Header.GetPackageId(), (uint)i));
-                        tags.Add(tag);
+                        return;
                     }
-                }
+
+                    T tag = FileResourcer.Get().GetFile<T>(new FileHash(Header.GetPackageId(), (uint)i));
+                    tags.Add(tag);
+                });
             }
             else
             {
@@ -170,7 +175,7 @@ public abstract class Package : IPackage
         }
 
 
-        return tags;
+        return tags.ToList();
     }
 
     public List<TigerFile> GetAllFiles(Type fileType)
@@ -180,14 +185,16 @@ public abstract class Package : IPackage
         SchemaStructAttribute attribute = GetAttribute<SchemaStructAttribute>(fileType.BaseType.GenericTypeArguments[0]);
         TigerHash referenceHash = new(attribute.ClassHash);
 
-        for (int i = 0; i < FileEntries.Count; i++)
+        Parallel.For(0, FileEntries.Count, i =>
         {
-            if (FileEntries[i].Reference.Equals(referenceHash))
+            if (!FileEntries[i].Reference.Equals(referenceHash))
             {
-                TigerFile tag = FileResourcer.Get().GetFile(fileType, new FileHash(Header.GetPackageId(), (uint)i));
-                tags.Add(tag);
+                return;
             }
-        }
+
+            TigerFile tag = FileResourcer.Get().GetFile(fileType, new FileHash(Header.GetPackageId(), (uint)i));
+            tags.Add(tag);
+        });
 
         return tags;
     }

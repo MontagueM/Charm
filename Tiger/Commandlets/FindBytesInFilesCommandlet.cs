@@ -14,7 +14,6 @@ public class FindBytesInFilesCommandlet : ICommandlet
         if (!args.GetArgValue("packageFilter", out packageFilter))
         {
             Log.Warning("No packageFilter argument provided, searching all packages");
-            return;
         }
 
         if (!args.GetArgValue("bytes", out bytesStr))
@@ -62,8 +61,6 @@ public class FindBytesInFilesCommandlet : ICommandlet
     private void SearchPackage(ushort pkgId)
     {
         IPackage package = PackageResourcer.Get().GetPackage(pkgId);
-
-        PackageMetadata packageMetadata = package.GetPackageMetadata();
 
         IEnumerable<ushort> fileIndices = package
             .GetAllFileMetadata()

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
+using Arithmic;
 
 namespace Tiger;
 
@@ -23,6 +24,8 @@ public enum TigerStrategy
     // DESTINY1_PS4,
     [StrategyMetadata("w64", 1085660, 1085661, 7002268313830901797, 1085662, 2399965969279284756)]
     DESTINY2_SHADOWKEEP_2601,
+    [StrategyMetadata("w64", 1085660, 1085661, 4160053308690659072, 1085662, 4651412338057797072)]
+    DESTINY2_SHADOWKEEP_2999,
     [StrategyMetadata("w64", 1085660, 1085661, 6051526863119423207, 1085662, 1078048403901153652)]
     DESTINY2_WITCHQUEEN_6307,
     [StrategyMetadata("w64")]
@@ -131,8 +134,6 @@ public class Strategy
     /// <summary>
     /// Add a new strategy to the list of available strategies.
     /// </summary>
-    /// <exception cref="ArgumentException">Strategy already exists, or packages directory is invalid.</exception>
-    /// <exception cref="DirectoryNotFoundException">Package directory does not exist.</exception>
     public static void AddNewStrategy(TigerStrategy strategy, string packagesDirectory, bool set=true)
     {
         if (strategy == TigerStrategy.NONE || _strategyConfigurations.ContainsKey(strategy))
@@ -144,7 +145,13 @@ public class Strategy
             throw new ArgumentException($"Game strategy cannot re-use an existing packages path '{packagesDirectory}'");
         }
 
-        CheckValidPackagesDirectory(strategy, packagesDirectory);
+        bool isValid = CheckValidPackagesDirectory(strategy, packagesDirectory);
+
+        if (!isValid)
+        {
+            Log.Error($"Game strategy cannot use an invalid packages path '{packagesDirectory}', ignoring.");
+            return;
+        }
 
         var config = new StrategyConfiguration { PackagesDirectory = packagesDirectory };
         _strategyConfigurations.Add(strategy, config);
@@ -164,26 +171,33 @@ public class Strategy
     /// </summary>
     /// <exception cref="DirectoryNotFoundException">Package directory does not exist.</exception>
     /// <exception cref="ArgumentException">Package directory contents is invalid.</exception>
-    private static void CheckValidPackagesDirectory(TigerStrategy strategy, string packagesDirectory)
+    private static bool CheckValidPackagesDirectory(TigerStrategy strategy, string packagesDirectory)
     {
         if (PackagesDirectoryDoesNotExist(packagesDirectory))
         {
-            throw new DirectoryNotFoundException($"The packages directory does not exist: {packagesDirectory}");
+            Log.Error($"The packages directory does not exist: {packagesDirectory}");
+            return false;
         }
+
         if (PackagesDirectoryEmpty(packagesDirectory))
         {
-            throw new ArgumentException($"The packages directory is empty: {packagesDirectory}");
+            Log.Error($"The packages directory is empty: {packagesDirectory}");
+            return false;
         }
 
         if (PackageFilesHasInvalidPrefix(strategy, packagesDirectory))
         {
-            throw new ArgumentException($"The packages directory contains a package without the correct prefix '{GetStrategyPackagePrefix(strategy)}': {packagesDirectory}");
+            Log.Error($"The packages directory contains a package without the correct prefix '{GetStrategyPackagePrefix(strategy)}': {packagesDirectory}");
+            return false;
         }
 
         if (PackageFilesHasInvalidExtension(packagesDirectory))
         {
-            throw new ArgumentException($"The packages directory contains a package without the correct extension '.pkg': {packagesDirectory}");
+            Log.Error($"The packages directory contains a package without the correct extension '.pkg': {packagesDirectory}");
+            return false;
         }
+
+        return true;
     }
 
     private static bool PackagesDirectoryDoesNotExist(string packagesDirectory)

@@ -24,6 +24,7 @@ public abstract class StrategyAttribute : Attribute
 public class SchemaFieldAttribute : StrategyAttribute
 {
     public int Offset { get; }
+    public int ArraySizeConst { get; set; } = 1;  // used for marshalled fixed arrays
 
     public SchemaFieldAttribute(int offset)
     {
@@ -198,18 +199,18 @@ public class StrategyMetadataAttribute : Attribute
 {
     public string PackagePrefix { get; }
     public DepotManifestVersion? DepotManifestVersionMain { get; }
-    public DepotManifestVersion? DepotManifestVersionAudio { get; }
+    public DepotManifestVersion? DepotManifestVersionLanguage { get; }
 
-    public StrategyMetadataAttribute(string packagePrefix, uint appId = 0, uint depotIdMain = 0, ulong manifestIdMain = 0, uint depotIdAudio = 0, ulong manifestIdAudio = 0)
+    public StrategyMetadataAttribute(string packagePrefix, uint appId = 0, uint depotIdMain = 0, ulong manifestIdMain = 0, uint depotIdLanguage = 0, ulong manifestIdLanguage = 0)
     {
         PackagePrefix = packagePrefix;
         if (depotIdMain != 0 && manifestIdMain != 0)
         {
             DepotManifestVersionMain = new DepotManifestVersion(appId, depotIdMain, manifestIdMain);
         }
-        if (depotIdAudio != 0 && manifestIdAudio != 0)
+        if (depotIdLanguage != 0 && manifestIdLanguage != 0)
         {
-            DepotManifestVersionAudio = new DepotManifestVersion(appId, depotIdAudio, manifestIdAudio);
+            DepotManifestVersionLanguage = new DepotManifestVersion(appId, depotIdLanguage, manifestIdLanguage);
         }
     }
 }

@@ -61,6 +61,7 @@ public partial class MapView : UserControl
         {
             MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
             MVM.SetChildren(displayParts);
+            MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
         });
         displayParts.Clear();
     }

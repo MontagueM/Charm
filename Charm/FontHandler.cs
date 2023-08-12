@@ -14,43 +14,45 @@ using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Charm;
 
-public class FontHandler
+public class FontHandler : Subsystem
 {
-    public static ConcurrentDictionary<FontInfo, FontFamily> Initialise()
+    public ConcurrentDictionary<FontInfo, FontFamily> Fonts = new();
+
+    protected override bool Initialise()
     {
+        return true;
         SaveAllFonts();
         return LoadAllFonts();
     }
 
-    private static async void SaveAllFonts()
+    private static void SaveAllFonts()
     {
         // 0x80a00000 represents 0100 package
         // var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
-        var vals = await PackageResourcer.Get().GetAllHashesAsync<D2Class_0F3C8080>();
-        Tag<D2Class_0F3C8080> fontsContainer = FileResourcer.Get().GetSchemaTag<D2Class_0F3C8080>(vals.First());
-        // Check if the font exists in the Fonts/ folder, if not extract it
-        if (!Directory.Exists("fonts/"))
-        {
-            Directory.CreateDirectory("fonts/");
-        }
-        Parallel.ForEach(fontsContainer.TagData.FontParents, f =>
-        {
-            var ff = f.FontParent.TagData.FontFile;
-            var fontName = f.FontParent.TagData.FontName;
-            if (!File.Exists($"fonts/{fontName}"))
-            {
-                using (TigerReader reader = ff.GetReader())
-                {
-                    var bytes = reader.ReadBytes((int)f.FontParent.TagData.FontFileSize);
-                    File.WriteAllBytes($"fonts/{fontName}", bytes);
-                }
-            }
-        });
+        // var vals = PackageResourcer.Get().GetAllHashes<D2Class_0F3C8080>();
+        // Tag<D2Class_0F3C8080> fontsContainer = FileResourcer.Get().GetSchemaTag<D2Class_0F3C8080>(vals.First());
+        // // Check if the font exists in the Fonts/ folder, if not extract it
+        // if (!Directory.Exists("fonts/"))
+        // {
+        //     Directory.CreateDirectory("fonts/");
+        // }
+        // Parallel.ForEach(fontsContainer.TagData.FontParents, f =>
+        // {
+        //     var ff = f.FontParent.TagData.FontFile;
+        //     var fontName = f.FontParent.TagData.FontName;
+        //     if (!File.Exists($"fonts/{fontName}"))
+        //     {
+        //         using (TigerReader reader = ff.GetReader())
+        //         {
+        //             var bytes = reader.ReadBytes((int)f.FontParent.TagData.FontFileSize);
+        //             File.WriteAllBytes($"fonts/{fontName}", bytes);
+        //         }
+        //     }
+        // });
     }
 
-    private static ConcurrentDictionary<FontInfo, FontFamily> LoadAllFonts()
+    private bool LoadAllFonts()
     {
-        ConcurrentDictionary<FontInfo, FontFamily> fontFamilies = new ConcurrentDictionary<FontInfo, FontFamily>();
 
         // Parallel.ForEach(Directory.GetFiles(@"fonts/"), s =>
         foreach (var s in Directory.GetFiles(@"fonts/"))
@@ -58,10 +60,10 @@ public class FontHandler
             var otfPath = Environment.CurrentDirectory + "/" + s;
             FontInfo fontInfo = GetFontInfo(otfPath);
             FontFamily font = new FontFamily(otfPath + $"#{fontInfo.Family}");
-            fontFamilies[fontInfo] = font;
+            Fonts.TryAdd(fontInfo, font);
         }//);
 
-        return fontFamilies;
+        return Fonts.Count > 0;
     }
 
     public struct FontInfo
@@ -70,56 +72,52 @@ public class FontHandler
         public string Subfamily;
     }
 
-    private static FontInfo GetFontInfo(string fontPath)
+    private FontInfo GetFontInfo(string fontPath)
     {
         FontInfo fontInfo;
-        using (var br = new BinaryReaderBE(new MemoryStream(File.ReadAllBytes(fontPath))))
+        using var br = new BinaryReaderBE(new MemoryStream(File.ReadAllBytes(fontPath)));
+        byte[] val = br.ReadBytes(4);
+        while (Encoding.ASCII.GetString(val) != "name")
         {
-
-            byte[] val = br.ReadBytes(4);
-            while (Encoding.ASCII.GetString(val) != "name")
-            {
-                val = br.ReadBytes(4);
-            }
-
-
-            var nameTableRecord = br.ReadType<OtfNameTableRecord>();
-
-            br.BaseStream.Seek(nameTableRecord.Offset, SeekOrigin.Begin);
-
-            var namingTableVer0 = br.ReadType<OtfNamingTableVersion0>();
-
-            List<OtfNameRecord> nameRecords = new(namingTableVer0.Count);
-            for (int i = 0; i < namingTableVer0.Count; i++)
-            {
-                nameRecords.Add(br.ReadType<OtfNameRecord>());
-            }
-
-            OtfNameRecord familyRecord;
-            try
-            {
-                familyRecord = nameRecords.First(x => x.NameId == 16);
-            }
-            catch (InvalidOperationException e)
-            {
-                familyRecord = nameRecords.First(x => x.NameId == 1);
-            }
-            br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + familyRecord.StringOffset, SeekOrigin.Begin);
-            fontInfo.Family = ReadString(br, familyRecord.Length).Trim();
-
-            OtfNameRecord subfamilyRecord;
-            try
-            {
-                subfamilyRecord = nameRecords.FirstOrDefault(x => x.NameId == 17);
-            }
-            catch (InvalidOperationException e)
-            {
-                subfamilyRecord = nameRecords.FirstOrDefault(x => x.NameId == 2);
-            }
-
-            br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + subfamilyRecord.StringOffset, SeekOrigin.Begin);
-            fontInfo.Subfamily = ReadString(br, subfamilyRecord.Length).Trim();
+            val = br.ReadBytes(4);
         }
+
+        var nameTableRecord = br.ReadType<OtfNameTableRecord>();
+
+        br.BaseStream.Seek(nameTableRecord.Offset, SeekOrigin.Begin);
+
+        var namingTableVer0 = br.ReadType<OtfNamingTableVersion0>();
+
+        List<OtfNameRecord> nameRecords = new(namingTableVer0.Count);
+        for (int i = 0; i < namingTableVer0.Count; i++)
+        {
+            nameRecords.Add(br.ReadType<OtfNameRecord>());
+        }
+
+        OtfNameRecord familyRecord;
+        try
+        {
+            familyRecord = nameRecords.First(x => x.NameId == 16);
+        }
+        catch (InvalidOperationException e)
+        {
+            familyRecord = nameRecords.First(x => x.NameId == 1);
+        }
+        br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + familyRecord.StringOffset, SeekOrigin.Begin);
+        fontInfo.Family = ReadString(br, familyRecord.Length).Trim();
+
+        OtfNameRecord subfamilyRecord;
+        try
+        {
+            subfamilyRecord = nameRecords.FirstOrDefault(x => x.NameId == 17);
+        }
+        catch (InvalidOperationException e)
+        {
+            subfamilyRecord = nameRecords.FirstOrDefault(x => x.NameId == 2);
+        }
+
+        br.BaseStream.Seek(nameTableRecord.Offset + namingTableVer0.StorageOffset + subfamilyRecord.StringOffset, SeekOrigin.Begin);
+        fontInfo.Subfamily = ReadString(br, subfamilyRecord.Length).Trim();
 
         return fontInfo;
     }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Arithmic;
@@ -357,7 +358,12 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             }
             else if (fieldType.IsArray)
             {
-                int arraySize = ((MarshalAsAttribute)fieldInfo.GetCustomAttribute(typeof(MarshalAsAttribute), true)).SizeConst;
+                var attr = GetAttribute<SchemaFieldAttribute>(fieldInfo);
+                if (attr == null)
+                {
+                    throw new Exception("Array type must have SchemaFieldAttribute to define array size.");
+                }
+                int arraySize = attr.ArraySizeConst;
                 fieldValue = Activator.CreateInstance(fieldType, arraySize);
                 for (int i = 0; i < arraySize; i++)
                 {
@@ -559,6 +565,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     private T? GetAttribute<T>(ICustomAttributeProvider var) where T : StrategyAttribute
     {
+        // todo all this stuff should be cached, reflection is slow
         T[] attributes = var.GetCustomAttributes(typeof(T), false).Cast<T>().ToArray();
         if (!attributes.Any())
         {
