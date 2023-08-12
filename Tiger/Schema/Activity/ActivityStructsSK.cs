@@ -74,16 +74,16 @@ public struct SUnkActivity_SK
     public TigerHash Unk20;
     public TigerHash Unk24;
     public LocalizedStrings LocalizedStrings;
-    [SchemaField(0x30)]
-    public StringPointer ActivityDevName;
-    public Tag Unk38;  // 80978080
-    [SchemaField(0x40)]
-    public DynamicArray<S4A928080> Unk40;
-    public DynamicArray<S4D928080> Unk50;
-    [SchemaField(0x78)]
-    public Tag Unk78;
-    [SchemaField(0x80)]
-    public Tag Unk80;  // 40948080
+    // [SchemaField(0x30)]
+    // public StringPointer ActivityDevName;
+    // public Tag Unk38;  // 80978080
+    // [SchemaField(0x40)]
+    // public DynamicArray<S4A928080> Unk40;
+    // public DynamicArray<S4D928080> Unk50;
+    // [SchemaField(0x78)]
+    // public Tag Unk78;
+    // [SchemaField(0x80)]
+    // public Tag Unk80;  // 40948080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4A928080", 0x10)]
