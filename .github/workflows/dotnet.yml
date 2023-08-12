@@ -5,9 +5,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "reborn" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "reborn" ]
+    branches: [ "main" ]
 
 jobs:
   build:
