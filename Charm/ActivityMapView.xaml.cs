@@ -161,7 +161,7 @@ public partial class ActivityMapView : UserControl
     {
         // todo figure out how to make this work
         IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(info.Hash);
-        Log.Info($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.FileHash)}, hash: {activity.FileHash}");
+        Log.Info($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.FileHash)}, hash: {activity.FileHash}, export type {info.ExportType.ToString()}");
         Dispatcher.Invoke(() =>
         {
             MapControl.Visibility = Visibility.Hidden;
