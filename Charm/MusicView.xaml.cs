@@ -22,9 +22,9 @@ public partial class MusicView : UserControl
         InitializeComponent();
     }
 
-    public async void Load(FileHash fileHash)
+    public void Load(FileHash fileHash)
     {
-        Tag<D2Class_EB458080> music = FileResourcer.Get().GetSchemaTag<D2Class_EB458080>(fileHash);
+        Tag<SMusicTemplate> music = FileResourcer.Get().GetSchemaTag<SMusicTemplate>(fileHash);
 
         if (music == null)
             return;
@@ -50,6 +50,10 @@ public partial class MusicView : UserControl
                 var sbhash = res.AmbientMusicSet.TagData.Unk08[0].MusicLoopSound.TagData.Unk18.TagData.SoundBank.Hash;
                 SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.PackageId:X4}-{sbhash.FileIndex:X4}";
             }
+        }
+        else if (resource is SUnkMusicE6BF8080 rese6bf)
+        {
+            EventsControl.Load(rese6bf, music.TagData.MusicTemplateName.Value);
         }
         else
         {

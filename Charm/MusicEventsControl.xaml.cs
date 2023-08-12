@@ -1,8 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows.Controls;
-using Tiger.Schema.Activity;
+using Tiger;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 
 namespace Charm;
@@ -24,6 +23,28 @@ public partial class MusicEventsControl : UserControl
     {
         MusicLoopName.Text = res.AmbientMusicSetName.Value;
         EventList.ItemsSource = GetEventItems(res.Unk18);
+    }
+
+
+    public void Load(SUnkMusicE6BF8080 rese6Bf, string name)
+    {
+        MusicLoopName.Text = name;
+        EventList.ItemsSource = GetEventItems(rese6Bf.Unk28);
+    }
+
+    private IEnumerable GetEventItems(DynamicArray<SUnkMusicE8BF8080> array)
+    {
+        var items = new List<EventItem>();
+        foreach (var entry in array)
+        {
+            items.Add(new EventItem
+            {
+                Name = entry.EventDescription.Value,
+                Hash = entry.EventHash,
+            });
+        }
+
+        return items;
     }
 
     // both of these are lists to maintain the original order
