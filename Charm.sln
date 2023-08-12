@@ -5,17 +5,11 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tiger", "Tiger\Tiger.csproj", "{33040C46-022F-43E5-981F-03BD68C1587D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resourcer", "Resourcer\Resourcer.csproj", "{B4A072B0-25F7-4203-B8FD-A29952DD1277}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tomograph", "Tomograph\Tomograph.csproj", "{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomographData", "TomographData\TomographData.csproj", "{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arithmic", "Arithmic\Arithmic.csproj", "{F7EE1308-38FF-4803-82DD-F2CC7EED58BE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schema", "Schema\Schema.csproj", "{61AC1676-FF29-44BC-922C-5AD0CCE87DDA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interop", "Interop\Interop.csproj", "{84D52BF5-9E33-4285-AAED-C7C7BCCB09A2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charm", "Charm\Charm.csproj", "{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}"
 EndProject
