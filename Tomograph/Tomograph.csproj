@@ -36,9 +36,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Arithmic\Arithmic.csproj" />
-      <ProjectReference Include="..\Resourcer\Resourcer.csproj" />
-      <ProjectReference Include="..\Schema\Schema.csproj" />
       <ProjectReference Include="..\Tiger\Tiger.csproj" />
     </ItemGroup>
 
