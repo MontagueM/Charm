@@ -378,7 +378,7 @@ public partial class TagListView : UserControl
             if (name.ToLower().Contains(searchStr)
                 || item.Hash.ToString().ToLower().Contains(searchStr)
                 || item.Hash.Hash32.ToString().Contains(searchStr)
-                || item.Subname.ToLower().Contains(searchStr))
+                || (item.Subname != null && item.Subname.ToLower().Contains(searchStr)))
             {
                 displayItems.Add(new TagItem
                 {

@@ -84,12 +84,11 @@ public static class Log
 
     private static void LogEvent(LogVerbosity verbosity, string message, string callerMethodName, string callerFile)
     {
-#if !DEBUG
+        // disable if debugging things
         if (verbosity == LogVerbosity.Debug)
         {
             return;
         }
-#endif
 
         string formattedMessage = MakeFormattedMessage(verbosity, message, callerMethodName, callerFile);
         LogEventArgs logEventArgs = new LogEventArgs { Verbosity = verbosity, Message = formattedMessage, Time = DateTime.Now };

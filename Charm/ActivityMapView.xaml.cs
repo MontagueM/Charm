@@ -161,7 +161,7 @@ public partial class ActivityMapView : UserControl
     {
         // todo figure out how to make this work
         IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(info.Hash);
-        Log.Info($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.FileHash)}, hash: {activity.FileHash}");
+        Log.Info($"Exporting activity data name: {PackageResourcer.Get().GetActivityName(activity.FileHash)}, hash: {activity.FileHash}, export type {info.ExportType.ToString()}");
         Dispatcher.Invoke(() =>
         {
             MapControl.Visibility = Visibility.Hidden;
@@ -173,12 +173,14 @@ public partial class ActivityMapView : UserControl
             if (item.Selected && item.Name == "Select all")
             {
                 bSelectAll = true;
+                Log.Info($"Selected all maps");
             }
             else
             {
                 if (item.Selected || bSelectAll)
                 {
                     maps.Add(FileResourcer.Get().GetSchemaTag<SMapContainer>(item.Hash));
+                    Log.Info($"Selected map: {item.Hash}");
                 }
             }
         }
