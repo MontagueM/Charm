@@ -8,9 +8,9 @@ name: Lint Code Base
 
 on:
   push:
-    branches: [ "reborn" ]
+    branches: [ "reborn-release-noavalon" ]
   pull_request:
-    branches: [ "reborn" ]
+    branches: [ "reborn-release-noavalon" ]
 jobs:
   run-lint:
     runs-on: ubuntu-latest
