@@ -173,12 +173,14 @@ public partial class ActivityMapView : UserControl
             if (item.Selected && item.Name == "Select all")
             {
                 bSelectAll = true;
+                Log.Info($"Selected all maps");
             }
             else
             {
                 if (item.Selected || bSelectAll)
                 {
                     maps.Add(FileResourcer.Get().GetSchemaTag<SMapContainer>(item.Hash));
+                    Log.Info($"Selected map: {item.Hash}");
                 }
             }
         }
