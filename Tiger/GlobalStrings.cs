@@ -20,7 +20,6 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
     protected override void Initialise()
     {
-
     }
 
     protected override void Reset()
