@@ -5,11 +5,11 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>TomographDownloader</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Resourcer\Resourcer.csproj" />
       <ProjectReference Include="..\Tiger\Tiger.csproj" />
       <ProjectReference Include="..\Tomograph\Tomograph.csproj" />
     </ItemGroup>

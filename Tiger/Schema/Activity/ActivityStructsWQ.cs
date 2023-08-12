@@ -173,7 +173,7 @@ public struct D2Class_D5908080
     [Tag64]
     public Tag DialogueTable;
     [SchemaField(0x38)]
-    public Tag<D2Class_EB458080> Music;
+    public Tag<SMusicTemplate> Music;
     public int Unk3C;
     public float Unk40;
     public TigerHash Unk44;
@@ -272,7 +272,7 @@ public struct D2Class_6A988080
     public TigerHash StartingBubbleName;
     public TigerHash Unk24;
     [SchemaField(0x2C)]
-    public Tag<D2Class_EB458080> Music;
+    public Tag<SMusicTemplate> Music;
 }
 
 /// <summary>
@@ -345,7 +345,7 @@ public struct D2Class_0C008080
 #region Audio
 
 [SchemaStruct("EB458080", 0x38)]
-public struct D2Class_EB458080
+public struct SMusicTemplate
 {
     public long FileSize;
     public StringPointer MusicTemplateName;
@@ -435,5 +435,29 @@ public struct D2Class_F0458080
     public int WwiseSwitchKey;
 }
 
+[SchemaStruct("E6BF8080", 0x38)]
+public struct SUnkMusicE6BF8080
+{
+    public TigerHash Unk00;
+    public TigerHash Unk04;
+    public TigerHash Unk08;
+    [SchemaField(0x18), Tag64]
+    public Tag Unk18;
+    public DynamicArray<SUnkMusicE8BF8080> Unk28;
+}
+
+[SchemaStruct("E8BF8080", 0x30)]
+public struct SUnkMusicE8BF8080
+{
+    public TigerHash EventHash;
+    [SchemaField(0x08)]
+    public StringPointer EventDescription;
+    public TigerHash Unk10;
+    public TigerHash Unk14;
+    public TigerHash Unk18; // actually might be a float
+    [SchemaField(0x20)]
+    public TigerHash Unk20;
+    public TigerHash Unk24;
+}
 
 #endregion

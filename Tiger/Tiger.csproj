@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
         <Configurations>Debug;Release;</Configurations>
         <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
