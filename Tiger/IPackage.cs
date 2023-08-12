@@ -74,7 +74,6 @@ public abstract class Package : IPackage
     protected const int BlockSize = 0x40_000;
     public string PackagePath { get; }
     protected IPackageHeader Header;
-    private readonly Dictionary<int, TigerReader> _packageHandles = new();
     protected TigerStrategy PackageStrategy;
 
     private static readonly byte[] AesKey0 = { 0xD6, 0x2A, 0xB2, 0xC1, 0x0C, 0xC0, 0x1B, 0xC5, 0x35, 0xDB, 0x7B, 0x86, 0x55, 0xC7, 0xDC,
@@ -340,7 +339,7 @@ public abstract class Package : IPackage
 
         // Maps block index to a set of block (index, offset, size) to read
         ConcurrentDictionary<ushort, ConcurrentHashSet<(int, D2BlockEntry)>> patchBlockEntryMap = new();
-        for (ushort i = 0; i < Header.GetPatchId()+1; i++)
+        for (ushort i = 0; i < Header.GetPatchId() + 1; i++)
         {
             patchBlockEntryMap.TryAdd(i, new ConcurrentHashSet<(int, D2BlockEntry)>());
         }
@@ -393,23 +392,23 @@ public abstract class Package : IPackage
                 if (isOnlyOneBlock)
                 {
                     int copySize = fileEntry.FileSize;
-                    Array.Copy(blockMap[fileEntry.StartingBlockIndex+currentBlockId], fileEntry.StartingBlockOffset, finalFileBuffer, 0, copySize);
+                    Array.Copy(blockMap[fileEntry.StartingBlockIndex + currentBlockId], fileEntry.StartingBlockOffset, finalFileBuffer, 0, copySize);
                 }
                 else if (isFirstBlock)
                 {
                     int copySize = BlockSize - fileEntry.StartingBlockOffset;
-                    Array.Copy(blockMap[fileEntry.StartingBlockIndex+currentBlockId], fileEntry.StartingBlockOffset, finalFileBuffer, 0, copySize);
+                    Array.Copy(blockMap[fileEntry.StartingBlockIndex + currentBlockId], fileEntry.StartingBlockOffset, finalFileBuffer, 0, copySize);
                     currentBufferOffset += copySize;
                 }
                 else if (isLastBlock)
                 {
                     int copySize = fileEntry.FileSize - currentBufferOffset;
-                    Array.Copy(blockMap[fileEntry.StartingBlockIndex+currentBlockId], 0, finalFileBuffer, currentBufferOffset, copySize);
+                    Array.Copy(blockMap[fileEntry.StartingBlockIndex + currentBlockId], 0, finalFileBuffer, currentBufferOffset, copySize);
                 }
                 else
                 {
                     const int copySize = BlockSize;
-                    Array.Copy(blockMap[fileEntry.StartingBlockIndex+currentBlockId], 0, finalFileBuffer, currentBufferOffset, copySize);
+                    Array.Copy(blockMap[fileEntry.StartingBlockIndex + currentBlockId], 0, finalFileBuffer, currentBufferOffset, copySize);
                     currentBufferOffset += BlockSize;
                 }
             }
@@ -617,60 +616,6 @@ public abstract class Package : IPackage
     [DllImport("ThirdParty/oo2core_9_win64.dll", EntryPoint = "OodleLZ_Decompress")]
     public static extern bool OodleLZ_Decompress(byte[] buffer, int bufferSize, byte[] outputBuffer, int outputBufferSize, int a, int b,
         int c, IntPtr d, IntPtr e, IntPtr f, IntPtr g, IntPtr h, IntPtr i, int threadModule);
-
-    private Span<byte> ReadBlockBufferSpan(TigerReader packageHandle, D2BlockEntry blockEntry)
-    {
-        packageHandle.Seek(blockEntry.Offset, SeekOrigin.Begin);
-        Span<byte> blockBuffer = stackalloc byte[(int)blockEntry.Size];
-        packageHandle.Read(blockBuffer);
-
-        if ((blockEntry.BitFlag & 0x8) == 8)
-        {
-            return new byte[blockBuffer.Length];
-        }
-        Span<byte> decryptedBuffer = stackalloc byte[blockBuffer.Length];
-        if ((blockEntry.BitFlag & 0x2) == 2)
-        {
-            unsafe
-            {
-                byte[] key;
-                if ((blockEntry.BitFlag & 0x4) == 4)
-                {
-                    key = AesKey1;
-                }
-                else
-                {
-                    key = AesKey0;
-                }
-
-                byte[] iv = GenerateNonce();
-                using var aes = new AesGcm(key);
-                byte[] tag = new byte[0x10];
-                Marshal.Copy((IntPtr)blockEntry.GCMTag, tag, 0, 0x10);
-                aes.Decrypt(iv, blockBuffer, tag, decryptedBuffer);
-            }
-        }
-        else
-        {
-            decryptedBuffer = blockBuffer;
-        }
-
-        byte[] decompressedBuffer;
-        if ((blockEntry.BitFlag & 0x1) == 1)
-        {
-            byte[] decompressedBufferTest = new byte[BlockSize];
-            OodleLZ_Decompress(decryptedBuffer.ToArray(), decryptedBuffer.Length, decompressedBufferTest, BlockSize, 0, 0, 0, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero,
-                IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 3);
-
-            decompressedBuffer = decompressedBufferTest;
-        }
-        else
-        {
-            decompressedBuffer = decryptedBuffer.ToArray();
-        }
-
-        return decompressedBuffer.AsSpan();
-    }
 
     private byte[] DecryptAndDecompressBlockBufferIfRequired(byte[] blockBuffer, D2BlockEntry blockEntry)
     {

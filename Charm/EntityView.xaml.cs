@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
-using Tiger;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using Internal.Fbx;
+using Tiger;
+using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
-using Tiger.Exporters;
 
 namespace Charm;
 
@@ -111,7 +111,7 @@ public partial class EntityView : UserControl
                 fbxHandler.InfoHandler.SetUnrealInteropPath(config.GetUnrealInteropPath());
                 AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
-            if(config.GetBlenderInteropEnabled())
+            if (config.GetBlenderInteropEnabled())
             {
                 AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
@@ -145,7 +145,7 @@ public partial class EntityView : UserControl
         // var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18;
         // if (resource.PatternAudioGroups[0].WeaponSkeletonEntity != null)
         // {
-            // overrideSkeleton = resource.PatternAudioGroups[0].WeaponSkeletonEntity.Skeleton;
+        // overrideSkeleton = resource.PatternAudioGroups[0].WeaponSkeletonEntity.Skeleton;
         // }
         if (val != null && val.Skeleton != null)
         {

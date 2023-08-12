@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Tiger;
-using Tiger.Schema.Audio;
 using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
+using Tiger.Schema.Audio;
 
 namespace Charm;
 
@@ -37,7 +37,7 @@ public partial class MusicWemsControl : UserControl
 
     private void Play_OnClick(object sender, RoutedEventArgs e)
     {
-        WemItem item = (WemItem) (sender as Button).DataContext;
+        WemItem item = (WemItem)(sender as Button).DataContext;
         PlayWem(item.Wem);
     }
 
@@ -66,7 +66,7 @@ public partial class MusicWemsControl : UserControl
         if (res.AmbientMusicSet == null)
             return;
         // ambient_music_set instead of wwise_loop
-        MainWindow.Progress.SetProgressStages(res.AmbientMusicSet.TagData.Unk08.Select((x,i) => $"Loading ambient music {i+1}/{res.AmbientMusicSet.TagData.Unk08.Count}").ToList());
+        MainWindow.Progress.SetProgressStages(res.AmbientMusicSet.TagData.Unk08.Select((x, i) => $"Loading ambient music {i + 1}/{res.AmbientMusicSet.TagData.Unk08.Count}").ToList());
 
         ConcurrentBag<WemItem> wemItems = new ConcurrentBag<WemItem>();
         await Task.Run(() =>

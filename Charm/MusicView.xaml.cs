@@ -6,9 +6,9 @@ using System.IO.Packaging;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Tiger;
 using NAudio.Vorbis;
 using NAudio.Wave;
+using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
@@ -24,7 +24,6 @@ public partial class MusicView : UserControl
 
     public async void Load(FileHash fileHash)
     {
-        return;
         Tag<D2Class_EB458080> music = FileResourcer.Get().GetSchemaTag<D2Class_EB458080>(fileHash);
 
         if (music == null)

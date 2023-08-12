@@ -147,7 +147,7 @@ public class FileHash : TigerHash
     {
         get
         {
-            return (ushort)(((Hash32 >> 0xd) & 0x3ff) + (((Hash32 >> 0x17) & 3)-1)*0x400);
+            return (ushort)(((Hash32 >> 0xd) & 0x3ff) + (((Hash32 >> 0x17) & 3) - 1) * 0x400);
         }
     }
 

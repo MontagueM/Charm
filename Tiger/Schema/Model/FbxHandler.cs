@@ -59,8 +59,8 @@ public class FbxHandler
         {
             if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
             {
-                // AddSlotColoursToMesh(mesh, dynamicMeshPart);
-                // AddTexcoords1ToMesh(mesh, dynamicMeshPart);
+                AddSlotColoursToMesh(mesh, dynamicMeshPart);
+                AddTexcoords1ToMesh(mesh, dynamicMeshPart);
             }
         }
 
@@ -100,7 +100,7 @@ public class FbxHandler
         {
             lookup[(int)part.VertexIndices[i]] = i;
         }
-        foreach (int vertexIndex in part.VertexIndices)
+        foreach (int vertexIndex in part.VertexIndices.OfType<int>())
         {
             // todo utilise dictionary to make this control point thing better maybe?
             var pos = part.VertexPositions[lookup[vertexIndex]];
@@ -266,7 +266,7 @@ public class FbxHandler
         {
             lookup[(int)meshPart.VertexIndices[i]] = i;
         }
-        foreach (int v in meshPart.VertexIndices)
+        foreach (int v in meshPart.VertexIndices.OfType<int>())
         {
             VertexWeight vw = meshPart.VertexWeights[lookup[v]];
             for (int j = 0; j < 4; j++)
@@ -276,7 +276,7 @@ public class FbxHandler
                     if (vw.WeightIndices[j] < weightClusters.Count)
                     {
                         seen.Add(vw.WeightIndices[j]);
-                        weightClusters[vw.WeightIndices[j]].AddControlPointIndex(lookup[v], (float)vw.WeightValues[j]/255);
+                        weightClusters[vw.WeightIndices[j]].AddControlPointIndex(lookup[v], (float)vw.WeightValues[j] / 255);
                     }
                 }
             }
@@ -411,7 +411,7 @@ public class FbxHandler
         {
             skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
         }
-        for( int i = 0; i < dynamicParts.Count; i++)
+        for (int i = 0; i < dynamicParts.Count; i++)
         {
             var dynamicPart = dynamicParts[i];
             FbxMesh mesh = AddMeshPartToScene(dynamicPart, i, entity.Hash);
@@ -483,7 +483,7 @@ public class FbxHandler
     public void AddDynamicPointsToScene(SMapDataEntry points, string meshName, FbxHandler dynamicHandler)
     {
         Entity.Entity entity = FileResourcer.Get().GetFile<Entity.Entity>(points.GetEntityHash());
-        if(entity.Model != null)
+        if (entity.Model != null)
         {
             meshName += "_Model";
             //Console.WriteLine($"{meshName} has geometry");
@@ -498,9 +498,9 @@ public class FbxHandler
         Quaternion quatRot = new Quaternion(points.Rotation.X, points.Rotation.Y, points.Rotation.Z, points.Rotation.W);
         System.Numerics.Vector3 eulerRot = QuaternionToEulerAngles(quatRot);
 
-        node.LclTranslation.Set(new FbxDouble3(points.Translation.X*100, points.Translation.Y*100, points.Translation.Z*100));
+        node.LclTranslation.Set(new FbxDouble3(points.Translation.X * 100, points.Translation.Y * 100, points.Translation.Z * 100));
         node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
-        node.LclScaling.Set(new FbxDouble3(100,100,100));
+        node.LclScaling.Set(new FbxDouble3(100, 100, 100));
 
         // Scale and rotate
         //ScaleAndRotateForBlender(node);

@@ -64,7 +64,7 @@ public partial class DareView : UserControl
     private async Task LoadApiList()
     {
         IEnumerable<InventoryItem> inventoryItems = await Investment.Get().GetInventoryItems();
-        List<string> mapStages = inventoryItems.Select((_, i) => $"loading {i+1}/{inventoryItems.Count()}").ToList();
+        List<string> mapStages = inventoryItems.Select((_, i) => $"loading {i + 1}/{inventoryItems.Count()}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages, false, true);
         await Parallel.ForEachAsync(inventoryItems, async (item, ct) =>
         {
@@ -175,7 +175,7 @@ public partial class DareView : UserControl
 
     private void ExecuteQueue_OnClick(object sender, RoutedEventArgs e)
     {
-        List<string> apiStages = _selectedItems.Select((_, i) => $"exporting {i+1}/{_selectedItems.Count}").ToList();
+        List<string> apiStages = _selectedItems.Select((_, i) => $"exporting {i + 1}/{_selectedItems.Count}").ToList();
         MainWindow.Progress.SetProgressStages(apiStages);
         Task.Run(() =>
         {

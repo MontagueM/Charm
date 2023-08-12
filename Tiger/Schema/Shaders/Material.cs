@@ -222,95 +222,95 @@ namespace Tiger.Schema.Shaders
 
 namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
 {
-public class Material : Tag<SMaterial_SK>, IMaterial
-{
-    public FileHash FileHash => Hash;
-    public ShaderBytecode VertexShader => _tag.VertexShader;
-    public ShaderBytecode PixelShader => _tag.PixelShader;
-    public FileHash PSVector4Container => _tag.PSVector4Container;
-    public DynamicArray<D2Class_09008080> Unk90 => _tag.Unk68;
-    public DynamicArray<Vec4> UnkA0 => _tag.Unk78;
-    public DynamicArray<Vec4> UnkC0 => _tag.Unk98;
-    public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2E8;
-    public DynamicArray<Vec4> Unk2E0 => _tag.Unk2F8;
-    public DynamicArray<Vec4> Unk300 => _tag.Unk310;
-
-    public IEnumerable<STextureTag> EnumerateVSTextures()
+    public class Material : Tag<SMaterial_SK>, IMaterial
     {
-        foreach (STextureTag texture in _tag.VSTextures)
+        public FileHash FileHash => Hash;
+        public ShaderBytecode VertexShader => _tag.VertexShader;
+        public ShaderBytecode PixelShader => _tag.PixelShader;
+        public FileHash PSVector4Container => _tag.PSVector4Container;
+        public DynamicArray<D2Class_09008080> Unk90 => _tag.Unk68;
+        public DynamicArray<Vec4> UnkA0 => _tag.Unk78;
+        public DynamicArray<Vec4> UnkC0 => _tag.Unk98;
+        public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2E8;
+        public DynamicArray<Vec4> Unk2E0 => _tag.Unk2F8;
+        public DynamicArray<Vec4> Unk300 => _tag.Unk310;
+
+        public IEnumerable<STextureTag> EnumerateVSTextures()
         {
-            yield return texture;
+            foreach (STextureTag texture in _tag.VSTextures)
+            {
+                yield return texture;
+            }
+        }
+
+        public IEnumerable<STextureTag> EnumeratePSTextures()
+        {
+            foreach (STextureTag texture in _tag.PSTextures)
+            {
+                yield return texture;
+            }
+        }
+
+        public Material(FileHash fileHash) : base(fileHash)
+        {
         }
     }
-
-    public IEnumerable<STextureTag> EnumeratePSTextures()
-    {
-        foreach (STextureTag texture in _tag.PSTextures)
-        {
-            yield return texture;
-        }
-    }
-
-    public Material(FileHash fileHash) : base(fileHash)
-    {
-    }
-}
 }
 
 namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
 {
- public class Material : Tag<SMaterial_WQ>, IMaterial
-{
-    public FileHash FileHash => Hash;
-    public ShaderBytecode VertexShader => _tag.VertexShader;
-    public ShaderBytecode PixelShader => _tag.PixelShader;
-    public FileHash PSVector4Container => _tag.PSVector4Container;
-    public DynamicArray<D2Class_09008080> Unk90 => _tag.Unk90;
-    public DynamicArray<Vec4> UnkA0 => _tag.UnkA0;
-    public DynamicArray<Vec4> UnkC0 => _tag.UnkC0;
-    public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2D0;
-    public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
-    public DynamicArray<Vec4> Unk300 => _tag.Unk300;
-
-    public IEnumerable<STextureTag> EnumerateVSTextures()
+    public class Material : Tag<SMaterial_WQ>, IMaterial
     {
-        foreach (STextureTag64 texture in _tag.VSTextures)
+        public FileHash FileHash => Hash;
+        public ShaderBytecode VertexShader => _tag.VertexShader;
+        public ShaderBytecode PixelShader => _tag.PixelShader;
+        public FileHash PSVector4Container => _tag.PSVector4Container;
+        public DynamicArray<D2Class_09008080> Unk90 => _tag.Unk90;
+        public DynamicArray<Vec4> UnkA0 => _tag.UnkA0;
+        public DynamicArray<Vec4> UnkC0 => _tag.UnkC0;
+        public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2D0;
+        public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
+        public DynamicArray<Vec4> Unk300 => _tag.Unk300;
+
+        public IEnumerable<STextureTag> EnumerateVSTextures()
         {
-            yield return texture;
+            foreach (STextureTag64 texture in _tag.VSTextures)
+            {
+                yield return texture;
+            }
         }
-    }
 
-    public IEnumerable<STextureTag> EnumeratePSTextures()
-    {
-        foreach (STextureTag64 texture in _tag.PSTextures)
+        public IEnumerable<STextureTag> EnumeratePSTextures()
         {
-            yield return texture;
+            foreach (STextureTag64 texture in _tag.PSTextures)
+            {
+                yield return texture;
+            }
         }
-    }
 
-    public Material(FileHash fileHash) : base(fileHash)
-    {
-    }
+        public Material(FileHash fileHash) : base(fileHash)
+        {
+        }
 
-    // public void SaveComputeShader(string saveDirectory)
-    // {
-    //     Directory.CreateDirectory($"{saveDirectory}");
-    //     if (_tag.ComputeShader != null && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
-    //     {
-    //         string hlsl = Decompile(_tag.ComputeShader.GetBytecode(), "cs");
-    //         string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-    //         if (usf != String.Empty)
-    //         {
-    //             try
-    //             {
-    //                 File.WriteAllText($"{saveDirectory}/CS_{Hash}.usf", usf);
-    //                 Console.WriteLine($"Saved compute shader {Hash}");
-    //             }
-    //             catch (IOException)  // threading error
-    //             {
-    //             }
-    //         }
-    //     }
-    // }
-}
+        // public void SaveComputeShader(string saveDirectory)
+        // {
+        //     Directory.CreateDirectory($"{saveDirectory}");
+        //     if (_tag.ComputeShader != null && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
+        //     {
+        //         string hlsl = Decompile(_tag.ComputeShader.GetBytecode(), "cs");
+        //         string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
+        //         if (usf != String.Empty)
+        //         {
+        //             try
+        //             {
+        //                 File.WriteAllText($"{saveDirectory}/CS_{Hash}.usf", usf);
+        //                 Console.WriteLine($"Saved compute shader {Hash}");
+        //             }
+        //             catch (IOException)  // threading error
+        //             {
+        //             }
+        //         }
+        //     }
+        // }
+    }
 }

@@ -1,10 +1,10 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO.Packaging;
 using System.Linq;
-using System;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
@@ -72,7 +72,7 @@ public partial class ActivityMapView : UserControl
 
         foreach (DisplayStaticMap item in StaticList.Items)
         {
-            if(item.Name == "Select all")
+            if (item.Name == "Select all")
                 continue;
 
             // if (item.Selected)
@@ -123,11 +123,11 @@ public partial class ActivityMapView : UserControl
         {
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
-                if(entry is SMapDataEntry dynamicResource)
+                if (entry is SMapDataEntry dynamicResource)
                 {
                     Entity entity = FileResourcer.Get().GetFile(typeof(Entity), dynamicResource.GetEntityHash());
 
-                    if(entity.Model != null)
+                    if (entity.Model != null)
                     {
                         items.Add(new DisplayDynamicMap
                         {
@@ -190,7 +190,7 @@ public partial class ActivityMapView : UserControl
             return;
         }
 
-        List<string> mapStages = maps.Select((x, i) => $"exporting {i+1}/{maps.Count}").ToList();
+        List<string> mapStages = maps.Select((x, i) => $"exporting {i + 1}/{maps.Count}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages);
         // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
         Parallel.ForEach(maps, map =>
@@ -216,7 +216,7 @@ public partial class ActivityMapView : UserControl
             MainWindow.Progress.CompleteStage();
         });
         // MapView.ExportFullMap(staticMapData);
-            // MainWindow.Progress.CompleteStage();
+        // MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>
         {
@@ -257,7 +257,7 @@ public partial class ActivityMapView : UserControl
         else
         {
             var fileHash = new FileHash(dc.Hash);
-            MainWindow.Progress.SetProgressStages(new List<string> {fileHash });
+            MainWindow.Progress.SetProgressStages(new List<string> { fileHash });
             // cant do this rn bc of lod problems with dupes
             // MapControl.ModelView.SetModelFunction(() => MapControl.LoadMap(fileHash, MapControl.ModelView.GetSelectedLod()));
             await Task.Run(() =>

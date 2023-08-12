@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Tiger;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Animations;
 using HelixToolkit.SharpDX.Core.Assimp;
@@ -16,22 +15,22 @@ using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.VisualBasic.Logging;
 using SharpDX;
+using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
-using Vector3 = Tiger.Schema.Vector3;
-using Vector4 = Tiger.Schema.Vector4;
-
+using Color = System.Windows.Media.Color;
+using Color4 = SharpDX.Color4;
+using Colors = System.Windows.Media.Colors;
+using Log = Arithmic.Log;
 using Media3D = System.Windows.Media.Media3D;
+using MeshBuilder = HelixToolkit.SharpDX.Core.MeshBuilder;
+using Plane = SharpDX.Plane;
 using Point3D = System.Windows.Media.Media3D.Point3D;
-using Vector3D = System.Windows.Media.Media3D.Vector3D;
 using Transform3D = System.Windows.Media.Media3D.Transform3D;
 using TranslateTransform3D = System.Windows.Media.Media3D.TranslateTransform3D;
-using Color = System.Windows.Media.Color;
-using Plane = SharpDX.Plane;
-using Colors = System.Windows.Media.Colors;
-using Color4 = SharpDX.Color4;
-using Log = Arithmic.Log;
-using MeshBuilder = HelixToolkit.SharpDX.Core.MeshBuilder;
+using Vector3 = Tiger.Schema.Vector3;
+using Vector3D = System.Windows.Media.Media3D.Vector3D;
+using Vector4 = Tiger.Schema.Vector4;
 
 namespace Charm;
 using System.ComponentModel;
@@ -122,7 +121,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected bool SetValue<T>(ref T backingField, T value, [CallerMemberName]string propertyName = "")
+    protected bool SetValue<T>(ref T backingField, T value, [CallerMemberName] string propertyName = "")
     {
         if (object.Equals(backingField, value))
         {
@@ -203,7 +202,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                 {
                     DiffuseColor = new Color4(0.7f, 0.7f, 0.7f, 1.0f)
                 };
-                mn.ModelMatrix = node.ModelMatrix * SharpDX.Matrix.RotationX(-(float) Math.PI / 2) * SharpDX.Matrix.RotationY(-(float) Math.PI / 2);
+                mn.ModelMatrix = node.ModelMatrix * SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2);
                 mn.Material = material;
                 if (mn is BoneSkinMeshNode m)
                 {
@@ -216,7 +215,8 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                         var skeleton = m.CreateSkeletonNode(mat, importer.Configuration.SkeletonEffects, importer.Configuration.SkeletonSizeScale);
                         skeleton.ModelMatrix = m.ModelMatrix;
                         ModelGroup.AddNode(skeleton);
-                        ModelGroup.AddNode(new NodePostEffectXRayGrid {
+                        ModelGroup.AddNode(new NodePostEffectXRayGrid
+                        {
                             EffectName = importer.Configuration.SkeletonEffects,
                             Color = mat.DiffuseColor,
                             GridDensity = 1,

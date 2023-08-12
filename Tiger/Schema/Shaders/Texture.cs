@@ -182,7 +182,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
     }
 }
 
-[NonSchemaStruct(0x40, 32, new []{1, 2, 3})]
+[NonSchemaStruct(0x40, 32, new[] { 1, 2, 3 })]
 public struct STextureHeader
 {
     public uint DataSize;

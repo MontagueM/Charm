@@ -773,7 +773,7 @@ public struct D2Class_DB5E8080
     public ResourceInTagPointer Unk00;
 }
 
-    [SchemaStruct("12848080", 0x50)]
+[SchemaStruct("12848080", 0x50)]
 public struct D2Class_12848080
 {
     public ResourceInTagPointer Unk00;

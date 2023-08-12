@@ -37,7 +37,7 @@ public class Terrain : Tag<STerrain>
                 z.AddRange(part.VertexPositions.Select(a => a.Z));
                 // Material
                 if (partEntry.Material == null) continue;
-                if(!Directory.Exists($"{saveDirectory}/Textures/"))
+                if (!Directory.Exists($"{saveDirectory}/Textures/"))
                     Directory.CreateDirectory($"{saveDirectory}/Textures/");
 
                 partEntry.Material.SaveAllTextures($"{saveDirectory}/Textures/");
@@ -68,7 +68,7 @@ public class Terrain : Tag<STerrain>
                 partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/{partEntry.Dyemap.Hash}");
             }
         }
-        localOffset = new Vector3((x.Max() + x.Min())/2, (y.Max() + y.Min())/2, (z.Max() + z.Min())/2);
+        localOffset = new Vector3((x.Max() + x.Min()) / 2, (y.Max() + y.Min()) / 2, (z.Max() + z.Min()) / 2);
         foreach (var part in parts)
         {
             // scale by 1.99 ish, -1 for all sides, multiply by 512?

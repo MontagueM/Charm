@@ -6,18 +6,17 @@ namespace Tiger.Schema.Audio.ThirdParty;
 // Modified RevorbStd: https://github.com/xyx0826/revorbstd/tree/big-enough
 // Modified librevorb.dll (RevorbStd dependency): https://github.com/xyx0826/librevorb/releases/tag/v0.5
 
-using DataTool.ConvertLogic;
-using RevorbStd;
-using System.IO;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using DataTool.ConvertLogic;
+using RevorbStd;
 
 /// <summary>
 /// <para>Converts a Wwise Encoded Media (.wem) to an Ogg Vorbis file.</para>

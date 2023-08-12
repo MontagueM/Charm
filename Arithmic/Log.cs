@@ -44,7 +44,7 @@ public static class Log
 
     public static void BindDelegate(Action<object?, LogEventArgs> action)
     {
-        OnLogEvent += delegate(object? sender, LogEventArgs args) { action(sender, args); };
+        OnLogEvent += delegate (object? sender, LogEventArgs args) { action(sender, args); };
 
         foreach (LogEventArgs logEvent in LogHistory)
         {
@@ -84,12 +84,12 @@ public static class Log
 
     private static void LogEvent(LogVerbosity verbosity, string message, string callerMethodName, string callerFile)
     {
-        #if !DEBUG
+#if !DEBUG
         if (verbosity == LogVerbosity.Debug)
         {
             return;
         }
-        #endif
+#endif
 
         string formattedMessage = MakeFormattedMessage(verbosity, message, callerMethodName, callerFile);
         LogEventArgs logEventArgs = new LogEventArgs { Verbosity = verbosity, Message = formattedMessage, Time = DateTime.Now };

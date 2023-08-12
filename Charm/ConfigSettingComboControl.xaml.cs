@@ -9,6 +9,6 @@ public partial class ConfigSettingComboControl : UserControl
         InitializeComponent();
         DataContext = this;
     }
-    
+
     public string SettingName { get; set; }
 }

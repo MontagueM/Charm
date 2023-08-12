@@ -145,7 +145,7 @@ public class NonSchemaStructAttribute : StrategyAttribute
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class NonSchemaTypeAttribute : Attribute
 {
-    public int Type { get; } = -1;
+    public int Type { get; }
     public HashSet<int> SubTypes { get; } = new();
 
     public NonSchemaTypeAttribute(int type, int subType)

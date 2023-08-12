@@ -160,7 +160,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
         IEnumerable<Package> packages = _packagesCache.Values.Where(package => packageFilterFunc(package.PackagePath));
-        Parallel.ForEach(packages, parallelOptions,  (package) =>
+        Parallel.ForEach(packages, parallelOptions, (package) =>
         {
             fileHashes.UnionWith(package.GetAllHashes());
         });

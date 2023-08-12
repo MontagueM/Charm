@@ -146,7 +146,7 @@ public partial class MusicPlayerControl : UserControl
         var duration = _wem == null ? _sound.GetDuration() : _wem.GetDuration();
         var proportion = bytePosition / (duration.TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
         _prevPositionValue = ProgressBar.Value;
-        if (Math.Abs(ProgressBar.Value - proportion)*duration.TotalMilliseconds < 500 || bForce)
+        if (Math.Abs(ProgressBar.Value - proportion) * duration.TotalMilliseconds < 500 || bForce)
         {
             CurrentDuration.Text = Wem.GetDurationString(TimeSpan.FromMilliseconds(proportion * duration.TotalMilliseconds));
             ProgressBar.Value = proportion;

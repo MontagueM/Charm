@@ -1,15 +1,15 @@
-﻿using System.Text;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System;
 using System.Linq;
 using System.Security.Policy;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Tiger;
-using Tiger.Schema;
 using Tiger.Exporters;
+using Tiger.Schema;
 using Tiger.Schema.Static;
 
 namespace Charm;
@@ -66,7 +66,7 @@ public partial class StaticView : UserControl
                 AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
             }
 
-            if(source2Models)
+            if (source2Models)
             {
                 File.Copy("Exporters/template.vmdl", $"{savePath}/{meshName}.vmdl", true);
                 string text = File.ReadAllText($"{savePath}/{meshName}.vmdl");
@@ -98,7 +98,7 @@ public partial class StaticView : UserControl
         fbxHandler.InfoHandler.AddType("Static");
         fbxHandler.ExportScene($"{savePath}/{name}.fbx");
 
-        if(lodexport)
+        if (lodexport)
         {
             List<StaticPart> lodparts = staticMesh.Load(ExportDetailLevel.LeastDetailed);
             Directory.CreateDirectory(savePath + "/LOD");

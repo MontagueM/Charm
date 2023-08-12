@@ -7,8 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
-using Tiger;
 using SharpDX.Toolkit.Graphics;
+using Tiger;
 using Tiger.Schema.Investment;
 
 namespace Charm;
@@ -24,7 +24,7 @@ public partial class MainMenuView : UserControl
         ApiButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
         BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
 
-        Strategy.OnStrategyChangedEvent += delegate(StrategyEventArgs args)
+        Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
         {
             Dispatcher.Invoke(() =>
             {
@@ -49,9 +49,9 @@ public partial class MainMenuView : UserControl
         // TagListViewerView apiView = new TagListViewerView();
         // apiView.LoadContent(ETagListType.ApiList);
         // todo actually make this show the progress bar, cba rn
-        MainWindow.Progress.SetProgressStages(new(){"Start investment system"});
+        MainWindow.Progress.SetProgressStages(new() { "Start investment system" });
         Investment.LazyInit();
-        MainWindow.Progress.CompleteStage();;
+        MainWindow.Progress.CompleteStage();
 
         DareView apiView = new DareView();
         apiView.LoadContent();

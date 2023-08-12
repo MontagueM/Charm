@@ -10,7 +10,7 @@ public partial class TagView : UserControl
     {
         InitializeComponent();
     }
-    
+
     public enum EViewerType
     {
         [Description("Entity")]

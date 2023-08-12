@@ -44,7 +44,7 @@ public partial class MainWindow
 
         int numSingletons = InitialiseStrategistSingletons();
 
-        Strategy.BeforeStrategyEvent +=  args => { Progress.SetProgressStages(Enumerable.Range(1, numSingletons).Select(num => $"Initialising game version {args.Strategy}: {num}/{numSingletons}").ToList()); };
+        Strategy.BeforeStrategyEvent += args => { Progress.SetProgressStages(Enumerable.Range(1, numSingletons).Select(num => $"Initialising game version {args.Strategy}: {num}/{numSingletons}").ToList()); };
         Strategy.DuringStrategyEvent += _ => { Progress.CompleteStage(); };
         Strategy.OnStrategyChangedEvent += args =>
         {
@@ -91,7 +91,7 @@ public partial class MainWindow
         // Log game version
         CheckGameVersion();
 
-        Strategy.AfterStrategyEvent += delegate(StrategyEventArgs args)
+        Strategy.AfterStrategyEvent += delegate (StrategyEventArgs args)
         {
             Dispatcher.Invoke(() =>
             {
@@ -108,7 +108,7 @@ public partial class MainWindow
         HashSet<Type> lazyStrategistSingletons = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
             .Select(t => t.GetNonGenericParent(typeof(Strategy.LazyStrategistSingleton<>)))
-            .Where(t => t is {ContainsGenericParameters: false})
+            .Where(t => t is { ContainsGenericParameters: false })
             .Select(t => t.GetNonGenericParent(typeof(Strategy.StrategistSingleton<>)))
             .ToHashSet();
 
@@ -117,7 +117,7 @@ public partial class MainWindow
         HashSet<Type> allStrategistSingletons = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
             .Select(t => t.GetNonGenericParent(typeof(Strategy.StrategistSingleton<>)))
-            .Where(t => t is {ContainsGenericParameters: false})
+            .Where(t => t is { ContainsGenericParameters: false })
             .ToHashSet();
 
         allStrategistSingletons.ExceptWith(lazyStrategistSingletons);
@@ -135,55 +135,55 @@ public partial class MainWindow
 
     private static IEnumerable<Type> SortByInitializationOrder(IEnumerable<Type> types)
     {
-            var dependencyMap = new Dictionary<Type, List<Type>>();
-            var dependencyCount = new Dictionary<Type, int>();
+        var dependencyMap = new Dictionary<Type, List<Type>>();
+        var dependencyCount = new Dictionary<Type, int>();
 
-            // Build dependency map and count dependencies
-            foreach (var type in types)
+        // Build dependency map and count dependencies
+        foreach (var type in types)
+        {
+            var attributes = type.GenericTypeArguments[0].GetCustomAttributes(typeof(InitializeAfterAttribute), true);
+            foreach (InitializeAfterAttribute attribute in attributes)
             {
-                var attributes = type.GenericTypeArguments[0].GetCustomAttributes(typeof(InitializeAfterAttribute), true);
-                foreach (InitializeAfterAttribute attribute in attributes)
+                var dependentType = attribute.TypeToInitializeAfter.GetNonGenericParent(
+                    typeof(Strategy.StrategistSingleton<>));
+                if (!dependencyMap.ContainsKey(dependentType))
                 {
-                    var dependentType = attribute.TypeToInitializeAfter.GetNonGenericParent(
-                        typeof(Strategy.StrategistSingleton<>));
-                    if (!dependencyMap.ContainsKey(dependentType))
-                    {
-                        dependencyMap[dependentType] = new List<Type>();
-                        dependencyCount[dependentType] = 0;
-                    }
-                    dependencyMap[dependentType].Add(type);
-                    dependencyCount[type] = dependencyCount.ContainsKey(type) ? dependencyCount[type] + 1 : 1;
+                    dependencyMap[dependentType] = new List<Type>();
+                    dependencyCount[dependentType] = 0;
                 }
+                dependencyMap[dependentType].Add(type);
+                dependencyCount[type] = dependencyCount.ContainsKey(type) ? dependencyCount[type] + 1 : 1;
             }
-
-            // Perform topological sorting
-            var sortedTypes = types.Where(t => !dependencyCount.ContainsKey(t)).ToList();
-            var queue = new Queue<Type>(dependencyMap.Keys.Where(k => dependencyCount[k] == 0));
-            while (queue.Count > 0)
-            {
-                var type = queue.Dequeue();
-                sortedTypes.Add(type);
-
-                if (dependencyMap.ContainsKey(type))
-                {
-                    foreach (var dependentType in dependencyMap[type])
-                    {
-                        dependencyCount[dependentType]--;
-                        if (dependencyCount[dependentType] == 0)
-                        {
-                            queue.Enqueue(dependentType);
-                        }
-                    }
-                }
-            }
-
-            if (sortedTypes.Count < types.Count())
-            {
-                throw new InvalidOperationException("Circular dependency detected.");
-            }
-
-            return sortedTypes;
         }
+
+        // Perform topological sorting
+        var sortedTypes = types.Where(t => !dependencyCount.ContainsKey(t)).ToList();
+        var queue = new Queue<Type>(dependencyMap.Keys.Where(k => dependencyCount[k] == 0));
+        while (queue.Count > 0)
+        {
+            var type = queue.Dequeue();
+            sortedTypes.Add(type);
+
+            if (dependencyMap.ContainsKey(type))
+            {
+                foreach (var dependentType in dependencyMap[type])
+                {
+                    dependencyCount[dependentType]--;
+                    if (dependencyCount[dependentType] == 0)
+                    {
+                        queue.Enqueue(dependentType);
+                    }
+                }
+            }
+        }
+
+        if (sortedTypes.Count < types.Count())
+        {
+            throw new InvalidOperationException("Circular dependency detected.");
+        }
+
+        return sortedTypes;
+    }
 
     private void InitialiseSubsystems()
     {

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Tiger;
 using NAudio.Vorbis;
 using NAudio.Wave;
+using Tiger;
 using Tiger.Schema.Audio;
 
 namespace Charm;
@@ -43,7 +43,7 @@ public partial class DialogueView : UserControl
         {
             if (dyn is List<dynamic?>)
             {
-                ObservableCollection<VoicelineItem> res = GenerateUIRecursive(recursionDepth+1, dyn);
+                ObservableCollection<VoicelineItem> res = GenerateUIRecursive(recursionDepth + 1, dyn);
                 foreach (var q in res)
                 {
                     result.Add(q);
@@ -53,13 +53,13 @@ public partial class DialogueView : UserControl
             {
                 D2Class_33978080 a = dyn;
                 result.Add(new VoicelineItem
-                    {
-                        Narrator = a.NarratorString,
-                        Voiceline = a.Unk28.Value.ToString(),
-                        Wem = a.Sound1.TagData.Wems[0],
-                        RecursionDepth = recursionDepth,
-                        Duration = a.Sound1.TagData.Wems[0].Duration
-                    });
+                {
+                    Narrator = a.NarratorString,
+                    Voiceline = a.Unk28.Value.ToString(),
+                    Wem = a.Sound1.TagData.Wems[0],
+                    RecursionDepth = recursionDepth,
+                    Duration = a.Sound1.TagData.Wems[0].Duration
+                });
             }
         }
 
@@ -68,7 +68,7 @@ public partial class DialogueView : UserControl
 
     private void PlayWem_OnClick(object sender, RoutedEventArgs e)
     {
-        VoicelineItem item = (VoicelineItem) (sender as Button).DataContext;
+        VoicelineItem item = (VoicelineItem)(sender as Button).DataContext;
         MusicPlayer.SetWem(item.Wem);
         MusicPlayer.Play();
     }
@@ -88,6 +88,6 @@ public class VoicelineItem
 
     public Thickness Padding  // todo make this work nicely
     {
-        get => new Thickness(Convert.ToDouble(RecursionDepth*50 - 50), 0, 0, 0);
+        get => new Thickness(Convert.ToDouble(RecursionDepth * 50 - 50), 0, 0, 0);
     }
 }

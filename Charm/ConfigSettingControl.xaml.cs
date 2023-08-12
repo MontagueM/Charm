@@ -9,8 +9,8 @@ public partial class ConfigSettingControl : UserControl
         InitializeComponent();
         DataContext = this;
     }
-    
+
     public string SettingName { get; set; }
-    
+
     public string SettingValue { get; set; }
 }

@@ -102,11 +102,11 @@ public class Entity : Tag<SEntity>
     public void SaveTexturePlates(string saveDirectory)
     {
         Directory.CreateDirectory($"{saveDirectory}/Textures/");
-        if (((D2Class_8F6D8080) ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader())).TexturePlates is null)
+        if (((D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader())).TexturePlates is null)
         {
             return;
         }
-        var rsrc = ((D2Class_8F6D8080) ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader())).TexturePlates.TagData;
+        var rsrc = ((D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader())).TexturePlates.TagData;
         rsrc.AlbedoPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo");
         rsrc.NormalPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal");
         rsrc.GStackPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_gstack");

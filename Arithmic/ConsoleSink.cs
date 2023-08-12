@@ -6,11 +6,11 @@ public class ConsoleSink : ISink
 {
     public void OnLogEvent(object sender, LogEventArgs e)
     {
-        #if DEBUG
+#if DEBUG
         bool shouldPrint = true;
-        #else
+#else
         bool shouldPrint = e.Verbosity <= LogVerbosity.Info;
-        #endif
+#endif
         if (shouldPrint)
         {
             Console.WriteLine(e.Message);

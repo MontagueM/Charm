@@ -100,7 +100,7 @@ public struct PackageHeader : IPackageHeader
         reader.Seek(Hash64TableOffset + 0x28, SeekOrigin.Begin);
         long count = reader.ReadInt64();
         RelativePointer pointer = SchemaDeserializer.Get().DeserializeTigerType<RelativePointer>(reader);
-        reader.Seek(pointer.AbsoluteOffset+0x10+count*4, SeekOrigin.Begin);
+        reader.Seek(pointer.AbsoluteOffset + 0x10 + count * 4, SeekOrigin.Begin);
         return hash64List;
         while (true)
         {
@@ -154,7 +154,7 @@ public struct PackageHeader : IPackageHeader
         // 0x30 is due to the indirection table which we skip
         for (int i = 0; i < ActivityTableCount; i++)
         {
-            reader.Seek(ActivityTableOffset+0x30+0x10*i, SeekOrigin.Begin);
+            reader.Seek(ActivityTableOffset + 0x30 + 0x10 * i, SeekOrigin.Begin);
             SPackageActivityEntry entry = SchemaDeserializer.Get().DeserializeSchema<SPackageActivityEntry>(reader);
             activityEntries.Add(entry);
         }

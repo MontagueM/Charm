@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace DataTool.ConvertLogic {
-    public class BitOggstream : IDisposable {
+namespace DataTool.ConvertLogic
+{
+    public class BitOggstream : IDisposable
+    {
         private readonly BinaryWriter _os;
 
         private byte _bitBuffer;
         private uint _bitsStored;
 
-        private enum SizeEnum {
+        private enum SizeEnum
+        {
             HeaderBytes = 27,
             MaxSegments = 255,
             SegmentSize = 255
@@ -19,13 +22,14 @@ namespace DataTool.ConvertLogic {
         private bool _first;
         private bool _continued;
 
-        private readonly byte[] _pageBuffer = new byte[(int) SizeEnum.HeaderBytes + (int) SizeEnum.MaxSegments +
-                                                       (int) SizeEnum.SegmentSize * (int) SizeEnum.MaxSegments];
+        private readonly byte[] _pageBuffer = new byte[(int)SizeEnum.HeaderBytes + (int)SizeEnum.MaxSegments +
+                                                       (int)SizeEnum.SegmentSize * (int)SizeEnum.MaxSegments];
 
         private uint _granule;
         private uint _seqno;
 
-        public BitOggstream(BinaryWriter writer) {
+        public BitOggstream(BinaryWriter writer)
+        {
             _os = writer;
             _bitBuffer = 0;
             _bitsStored = 0;
@@ -36,29 +40,35 @@ namespace DataTool.ConvertLogic {
             _seqno = 0;
         }
 
-        public void PutBit(bool bit) {
-            if (bit) {
-                _bitBuffer |= (byte) (1 << (byte) _bitsStored);
+        public void PutBit(bool bit)
+        {
+            if (bit)
+            {
+                _bitBuffer |= (byte)(1 << (byte)_bitsStored);
             }
 
             _bitsStored++;
-            if (_bitsStored == 8) {
+            if (_bitsStored == 8)
+            {
                 FlushBits();
             }
         }
 
-        public void SetGranule(uint g) {
+        public void SetGranule(uint g)
+        {
             _granule = g;
         }
 
-        public void FlushBits() {
+        public void FlushBits()
+        {
             if (_bitsStored == 0) return;
-            if (_payloadBytes == (int) SizeEnum.SegmentSize * (int) SizeEnum.MaxSegments) {
+            if (_payloadBytes == (int)SizeEnum.SegmentSize * (int)SizeEnum.MaxSegments)
+            {
                 throw new Exception("ran out of space in an Ogg packet");
                 // flush_page(true);
             }
 
-            _pageBuffer[(int) SizeEnum.HeaderBytes + (int) SizeEnum.MaxSegments + _payloadBytes] =
+            _pageBuffer[(int)SizeEnum.HeaderBytes + (int)SizeEnum.MaxSegments + _payloadBytes] =
                 _bitBuffer;
             _payloadBytes++;
 
@@ -66,18 +76,21 @@ namespace DataTool.ConvertLogic {
             _bitBuffer = 0;
         }
 
-        public static byte[] Int2Le(uint data) {
+        public static byte[] Int2Le(uint data)
+        {
             byte[] b = new byte[4];
-            b[0] = (byte) data;
-            b[1] = (byte) ((data >> 8) & 0xFF);
-            b[2] = (byte) ((data >> 16) & 0xFF);
-            b[3] = (byte) ((data >> 24) & 0xFF);
+            b[0] = (byte)data;
+            b[1] = (byte)((data >> 8) & 0xFF);
+            b[2] = (byte)((data >> 16) & 0xFF);
+            b[3] = (byte)((data >> 24) & 0xFF);
             return b;
         }
 
-        private void Write32Le(IList<byte> bytes, int startIndex, uint val) {
+        private void Write32Le(IList<byte> bytes, int startIndex, uint val)
+        {
             byte[] valBytes = Int2Le(val);
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++)
+            {
                 bytes[i + startIndex] = valBytes[i];
                 // bytes[i + startIndex] = 255;
                 // bytes[i + startIndex] = (byte) (val & 0xFF);
@@ -117,7 +130,8 @@ namespace DataTool.ConvertLogic {
             0xbcb4666d, 0xb8757bda, 0xb5365d03, 0xb1f740b4
         };
 
-        private static uint Checksum(byte[] data, int bytes) {
+        private static uint Checksum(byte[] data, int bytes)
+        {
             if (data == null) throw new ArgumentNullException(nameof(data));
             uint crcReg = 0;
             int i;
@@ -129,62 +143,73 @@ namespace DataTool.ConvertLogic {
         }
 
 
-        public void FlushPage(bool nextContinued = false, bool last = false) {
-            if (_payloadBytes != (int) SizeEnum.SegmentSize * (int) SizeEnum.MaxSegments) {
+        public void FlushPage(bool nextContinued = false, bool last = false)
+        {
+            if (_payloadBytes != (int)SizeEnum.SegmentSize * (int)SizeEnum.MaxSegments)
+            {
                 FlushBits();
             }
 
-            if (_payloadBytes != 0) {
-                uint segments = (_payloadBytes + (int) SizeEnum.SegmentSize) /
-                                (int) SizeEnum.SegmentSize; // intentionally round up
-                if (segments == (int) SizeEnum.MaxSegments + 1) {
-                    segments = (int) SizeEnum.MaxSegments; // at max eschews the final 0
+            if (_payloadBytes != 0)
+            {
+                uint segments = (_payloadBytes + (int)SizeEnum.SegmentSize) /
+                                (int)SizeEnum.SegmentSize; // intentionally round up
+                if (segments == (int)SizeEnum.MaxSegments + 1)
+                {
+                    segments = (int)SizeEnum.MaxSegments; // at max eschews the final 0
                 }
 
                 // move payload back
-                for (uint i = 0; i < _payloadBytes; i++) {
-                    _pageBuffer[(int) SizeEnum.HeaderBytes + segments + i] =
-                        _pageBuffer[(int) SizeEnum.HeaderBytes + (int) SizeEnum.MaxSegments + i];
+                for (uint i = 0; i < _payloadBytes; i++)
+                {
+                    _pageBuffer[(int)SizeEnum.HeaderBytes + segments + i] =
+                        _pageBuffer[(int)SizeEnum.HeaderBytes + (int)SizeEnum.MaxSegments + i];
                     // if ((int) SizeEnum.HeaderBytes + (int) SizeEnum.MaxSegments + i == 4155) {
                     //     uint test = (int) SizeEnum.HeaderBytes + segments + i;
                     //     Debugger.Break();
                     // }
                 }
 
-                _pageBuffer[0] = (byte) 'O';
-                _pageBuffer[1] = (byte) 'g';
-                _pageBuffer[2] = (byte) 'g';
-                _pageBuffer[3] = (byte) 'S';
+                _pageBuffer[0] = (byte)'O';
+                _pageBuffer[1] = (byte)'g';
+                _pageBuffer[2] = (byte)'g';
+                _pageBuffer[3] = (byte)'S';
                 _pageBuffer[4] = 0; // stream_structure_version
-                _pageBuffer[5] = (byte) ((_continued ? 1 : 0) | (_first ? 2 : 0) | (last ? 4 : 0)); // header_type_flag
+                _pageBuffer[5] = (byte)((_continued ? 1 : 0) | (_first ? 2 : 0) | (last ? 4 : 0)); // header_type_flag
 
 
                 Write32Le(_pageBuffer, 6, _granule); // granule low bits
                 Write32Le(_pageBuffer, 10, 0); // granule high bits
-                if (_granule == 0xFFFFFFFF) {
+                if (_granule == 0xFFFFFFFF)
+                {
                     Write32Le(_pageBuffer, 10, 0xFFFFFFFF);
                 }
 
                 Write32Le(_pageBuffer, 14, 1); // stream serial number
                 Write32Le(_pageBuffer, 18, _seqno); // page sequence number
                 Write32Le(_pageBuffer, 22, 0); // checksum (0 for now)
-                _pageBuffer[26] = (byte) segments; // segment count
+                _pageBuffer[26] = (byte)segments; // segment count
 
                 // lacing values
-                for (uint i = 0, bytesLeft = _payloadBytes; i < segments; i++) {
-                    if (bytesLeft >= (int) SizeEnum.SegmentSize) {
-                        bytesLeft -= (int) SizeEnum.SegmentSize;
-                        _pageBuffer[27 + i] = (int) SizeEnum.SegmentSize;
-                    } else {
-                        _pageBuffer[27 + i] = (byte) bytesLeft;
+                for (uint i = 0, bytesLeft = _payloadBytes; i < segments; i++)
+                {
+                    if (bytesLeft >= (int)SizeEnum.SegmentSize)
+                    {
+                        bytesLeft -= (int)SizeEnum.SegmentSize;
+                        _pageBuffer[27 + i] = (int)SizeEnum.SegmentSize;
+                    }
+                    else
+                    {
+                        _pageBuffer[27 + i] = (byte)bytesLeft;
                     }
                 }
 
                 // checksum
-                Write32Le(_pageBuffer, 22, Checksum(_pageBuffer, (int) ((int) SizeEnum.HeaderBytes + segments + _payloadBytes)));
+                Write32Le(_pageBuffer, 22, Checksum(_pageBuffer, (int)((int)SizeEnum.HeaderBytes + segments + _payloadBytes)));
 
                 // output to ostream
-                for (uint i = 0; i < (int) SizeEnum.HeaderBytes + segments + _payloadBytes; i++) {
+                for (uint i = 0; i < (int)SizeEnum.HeaderBytes + segments + _payloadBytes; i++)
+                {
                     _os.Write(_pageBuffer[i]);
                 }
 
@@ -195,48 +220,58 @@ namespace DataTool.ConvertLogic {
             }
         }
 
-        public void Write(BitUint bui) {
-            for (int i = 0; i < bui.BitSize; i++) {
+        public void Write(BitUint bui)
+        {
+            for (int i = 0; i < bui.BitSize; i++)
+            {
                 // put_bit((bui.Value & (1U << i)) != 0);
                 PutBit((bui.Value & (1U << i)) != 0);
             }
         }
 
-        public void Write(OWSound.VorbisPacketHeader vph) {
+        public void Write(OWSound.VorbisPacketHeader vph)
+        {
             BitUint t = new BitUint(8, vph.m_type);
             Write(t);
 
-            for (uint i = 0; i < 6; i++) {
-                BitUint c = new BitUint(8, (byte) OWSound.VorbisPacketHeader.VORBIS_STR[i]);
+            for (uint i = 0; i < 6; i++)
+            {
+                BitUint c = new BitUint(8, (byte)OWSound.VorbisPacketHeader.VORBIS_STR[i]);
                 Write(c);
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             FlushPage();
         }
     }
 
-    public class BitUint {
+    public class BitUint
+    {
         public uint Value;
         public readonly uint BitSize;
 
-        public BitUint(uint size) {
+        public BitUint(uint size)
+        {
             BitSize = size;
             Value = 0;
         }
 
-        public BitUint(uint size, uint v) {
+        public BitUint(uint size, uint v)
+        {
             BitSize = size;
             Value = v;
         }
 
-        public static implicit operator uint(BitUint bitUint) {
+        public static implicit operator uint(BitUint bitUint)
+        {
             return bitUint.Value;
         }
 
-        public int AsInt() {
-            return (int) Value;
+        public int AsInt()
+        {
+            return (int)Value;
         }
     }
 }

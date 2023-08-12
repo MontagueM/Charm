@@ -5,9 +5,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Tiger;
 
-namespace DataTool.ConvertLogic {
-    public static class OWSound {
-        private static bool ArraysEqual(IReadOnlyCollection<byte> a1, IReadOnlyList<byte> a2) {
+namespace DataTool.ConvertLogic
+{
+    public static class OWSound
+    {
+        private static bool ArraysEqual(IReadOnlyCollection<byte> a1, IReadOnlyList<byte> a2)
+        {
             if (ReferenceEquals(a1, a2))
                 return true;
 
@@ -21,67 +24,82 @@ namespace DataTool.ConvertLogic {
             return !a1.Where((t, i) => !comparer.Equals(t, a2[i])).Any();
         }
 
-        public static uint SwapBytes(uint x) {
+        public static uint SwapBytes(uint x)
+        {
             // swap adjacent 16-bit blocks
             x = (x >> 16) | (x << 16);
             // swap adjacent 8-bit blocks
             return ((x & 0xFF00FF00) >> 8) | ((x & 0x00FF00FF) << 8);
         }
 
-        public static ushort SwapBytes(ushort x) => (ushort) SwapBytes((uint) x);
+        public static ushort SwapBytes(ushort x) => (ushort)SwapBytes((uint)x);
 
-        public class Packet {
+        public class Packet
+        {
             private readonly long m_offset;
             private readonly ushort m_size;
             private readonly uint m_absoluteGranule;
             private readonly bool m_noGranule;
 
-            public Packet(BinaryReader reader, long offset, bool littleEndian, bool noGranule = false) {
+            public Packet(BinaryReader reader, long offset, bool littleEndian, bool noGranule = false)
+            {
                 m_noGranule = noGranule;
                 m_offset = offset;
                 reader.BaseStream.Seek(m_offset, SeekOrigin.Begin);
-                if (littleEndian) {
+                if (littleEndian)
+                {
                     m_size = reader.ReadUInt16();
                     // _size = read_16_le(i);
-                    if (!m_noGranule) {
+                    if (!m_noGranule)
+                    {
                         m_absoluteGranule = reader.ReadUInt32();
                     }
-                } else {
+                }
+                else
+                {
                     Debugger.Break();
                     m_size = SwapBytes(reader.ReadUInt16());
-                    if (!m_noGranule) {
+                    if (!m_noGranule)
+                    {
                         m_absoluteGranule = SwapBytes(reader.ReadUInt32());
                     }
                 }
             }
 
-            public long HeaderSize() {
+            public long HeaderSize()
+            {
                 return m_noGranule ? 2 : 6;
             }
 
-            public long Offset() {
+            public long Offset()
+            {
                 return m_offset + HeaderSize();
             }
 
-            public ushort Size() {
+            public ushort Size()
+            {
                 return m_size;
             }
 
-            public uint Granule() {
+            public uint Granule()
+            {
                 return m_absoluteGranule;
             }
 
-            public long NextOffset() {
+            public long NextOffset()
+            {
                 return m_offset + HeaderSize() + m_size;
             }
         }
 
-        public class VorbisPacketHeader {
+        public class VorbisPacketHeader
+        {
             public byte m_type;
 
-            public static readonly char[] VORBIS_STR = {'v', 'o', 'r', 'b', 'i', 's'};
+            public static readonly char[] VORBIS_STR = { 'v', 'o', 'r', 'b', 'i', 's' };
 
-            public VorbisPacketHeader(byte type) {
+            public VorbisPacketHeader(byte type)
+            {
                 m_type = type;
             }
         }
@@ -91,56 +109,58 @@ namespace DataTool.ConvertLogic {
         [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Local")]
         [SuppressMessage("ReSharper", "NotAccessedField.Local")]
         // ported from ww2ogg
-        public class WwiseRIFFVorbis : IDisposable {
-            private string _codebooksFile;
-            private Stream _stream;
-            private BinaryReader _reader;
-            private bool _littleEndian;
-            private long _fileSize;
-            private uint _riffSize;
-            private char[] _waveHead;
-            private char[] _riffHead;
-            private long _chunkOffset;
-            private long _fmtOffset;
-            private long _cueOffset;
-            private long _listOffset;
-            private long _smplOffset;
-            private long _vorbOffset;
-            private long _dataOffset;
+        public class WwiseRIFFVorbis : IDisposable
+        {
+            private readonly string _codebooksFile;
+            private readonly Stream _stream;
+            private readonly BinaryReader _reader;
+            private readonly bool _littleEndian;
+            private readonly long _fileSize;
+            private readonly uint _riffSize;
+            private readonly char[] _waveHead;
+            private readonly char[] _riffHead;
+            private readonly long _chunkOffset;
+            private readonly long _fmtOffset;
+            private readonly long _cueOffset;
+            private readonly long _listOffset;
+            private readonly long _smplOffset;
+            private readonly long _vorbOffset;
+            private readonly long _dataOffset;
 
-            private uint _fmtSize;
-            private uint _cueSize;
-            private uint _listSize;
-            private uint _smplSize;
-            private uint _vorbSize;
-            private uint _dataSize;
+            private readonly uint _fmtSize;
+            private readonly uint _cueSize;
+            private readonly uint _listSize;
+            private readonly uint _smplSize;
+            private readonly uint _vorbSize;
+            private readonly uint _dataSize;
 
-            private ushort _channels;
-            private uint _sampleRate;
-            private uint _avgBytesPerSecond;
-            private uint _subtype;
-            private ushort _extUnk;
+            private readonly ushort _channels;
+            private readonly uint _sampleRate;
+            private readonly uint _avgBytesPerSecond;
+            private readonly uint _subtype;
+            private readonly ushort _extUnk;
 
-            private uint _cueCount;
+            private readonly uint _cueCount;
 
-            private uint _loopCount;
-            private uint _loopStart;
-            private uint _loopEnd;
+            private readonly uint _loopCount;
+            private readonly uint _loopStart;
+            private readonly uint _loopEnd;
 
-            private uint _setupPacketOffset;
-            private uint _firstAudioPacketOffset;
+            private readonly uint _setupPacketOffset;
+            private readonly uint _firstAudioPacketOffset;
 
-            private uint _sampleCount;
-            private bool _noGranule;
-            private bool _modPackets;
+            private readonly uint _sampleCount;
+            private readonly bool _noGranule;
+            private readonly bool _modPackets;
 
-            private bool _headerTriadPresent;
-            private bool _oldPacketHeaders;
-            private uint _uid;
-            private byte _blocksize0Pow;
-            private byte _blocksize1Pow;
+            private readonly bool _headerTriadPresent;
+            private readonly bool _oldPacketHeaders;
+            private readonly uint _uid;
+            private readonly byte _blocksize0Pow;
+            private readonly byte _blocksize1Pow;
 
-            public WwiseRIFFVorbis(Stream stream, string codebooksFile) {
+            public WwiseRIFFVorbis(Stream stream, string codebooksFile)
+            {
                 _codebooksFile = codebooksFile;
                 _stream = stream;
                 _reader = new BinaryReader(stream, Encoding.Default, true);
@@ -151,8 +171,10 @@ namespace DataTool.ConvertLogic {
                 #region check header
 
                 _riffHead = _reader.ReadChars(4);
-                if (new string(_riffHead) != "RIFX") {
-                    if (new string(_riffHead) != "RIFF") {
+                if (new string(_riffHead) != "RIFX")
+                {
+                    if (new string(_riffHead) != "RIFF")
+                    {
                         throw new Exception("missing RIFF");
                     }
 
@@ -186,7 +208,8 @@ namespace DataTool.ConvertLogic {
                 _smplSize = 0;
                 _vorbSize = 0;
                 _dataSize = 0;
-                while (_chunkOffset < _riffSize) {
+                while (_chunkOffset < _riffSize)
+                {
                     _reader.BaseStream.Seek(_chunkOffset, SeekOrigin.Begin);
                     if (_chunkOffset + 8 > _riffSize) throw new Exception("chunk header truncated");
 
@@ -194,22 +217,33 @@ namespace DataTool.ConvertLogic {
                     string chunkTypeString = new string(chunkType);
                     uint chunkSize = Read32();
 
-                    if (chunkTypeString == "fmt ") {
+                    if (chunkTypeString == "fmt ")
+                    {
                         _fmtOffset = _chunkOffset + 8;
                         _fmtSize = chunkSize;
-                    } else if (chunkTypeString == "cue ") {
+                    }
+                    else if (chunkTypeString == "cue ")
+                    {
                         _cueOffset = _chunkOffset + 8;
                         _cueSize = chunkSize;
-                    } else if (chunkTypeString == "LIST") {
+                    }
+                    else if (chunkTypeString == "LIST")
+                    {
                         _listOffset = _chunkOffset + 8;
                         _listSize = chunkSize;
-                    } else if (chunkTypeString == "smpl") {
+                    }
+                    else if (chunkTypeString == "smpl")
+                    {
                         _smplOffset = _chunkOffset + 8;
                         _smplSize = chunkSize;
-                    } else if (chunkTypeString == "vorb") {
+                    }
+                    else if (chunkTypeString == "vorb")
+                    {
                         _vorbOffset = _chunkOffset + 8;
                         _vorbSize = chunkSize;
-                    } else if (chunkTypeString == "data") {
+                    }
+                    else if (chunkTypeString == "data")
+                    {
                         _dataOffset = _chunkOffset + 8;
                         _dataSize = chunkSize;
                     }
@@ -230,7 +264,8 @@ namespace DataTool.ConvertLogic {
                 if (-1 != _vorbOffset && 0x28 != _fmtSize && 0x18 != _fmtSize && 0x12 != _fmtSize)
                     throw new Exception("bad fmt size");
 
-                if (-1 == _vorbOffset && 0x42 == _fmtSize) {
+                if (-1 == _vorbOffset && 0x42 == _fmtSize)
+                {
                     // fake it out
                     _vorbOffset = _fmtOffset + 0x18;
                 }
@@ -248,16 +283,19 @@ namespace DataTool.ConvertLogic {
                 if (0U != Read16()) throw new Exception("expected 0 bps");
                 if (_fmtSize - 0x12 != Read16()) throw new Exception("bad extra fmt length");
 
-                if (_fmtSize - 0x12 >= 2) {
+                if (_fmtSize - 0x12 >= 2)
+                {
                     // read extra fmt
                     _extUnk = Read16();
-                    if (_fmtSize - 0x12 >= 6) {
+                    if (_fmtSize - 0x12 >= 6)
+                    {
                         _subtype = Read32();
                     }
                 }
 
-                if (_fmtSize == 0x28) {
-                    byte[] whoknowsbufCheck = {1, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xAA, 0, 0x38, 0x9b, 0x71};
+                if (_fmtSize == 0x28)
+                {
+                    byte[] whoknowsbufCheck = { 1, 0, 0, 0, 0, 0, 0x10, 0, 0x80, 0, 0, 0xAA, 0, 0x38, 0x9b, 0x71 };
                     byte[] whoknowsbuf = _reader.ReadBytes(16);
                     if (!ArraysEqual(whoknowsbuf, whoknowsbufCheck))
                         throw new Exception("expected signature in extra fmt?");
@@ -268,7 +306,8 @@ namespace DataTool.ConvertLogic {
                 #region read cue
 
                 _cueCount = 0;
-                if (-1 != _cueOffset) {
+                if (-1 != _cueOffset)
+                {
                     _reader.BaseStream.Seek(_cueOffset, SeekOrigin.Begin);
 
                     _cueCount = Read32();
@@ -278,7 +317,8 @@ namespace DataTool.ConvertLogic {
 
                 #region read LIST
 
-                if (-1 != _listOffset) {
+                if (-1 != _listOffset)
+                {
                     // this is all disabled in ww2ogg
 
                     //if ( 4 != _LIST_size ) throw Parse_error_str("bad LIST size");
@@ -296,7 +336,8 @@ namespace DataTool.ConvertLogic {
                 _loopCount = 0;
                 _loopStart = 0;
                 _loopEnd = 0;
-                if (-1 != _smplOffset) {
+                if (-1 != _smplOffset)
+                {
                     _reader.BaseStream.Seek(_smplOffset + 0x1C, SeekOrigin.Begin);
                     _loopCount = Read32();
 
@@ -311,7 +352,8 @@ namespace DataTool.ConvertLogic {
 
                 #region read vorb
 
-                switch (_vorbSize) {
+                switch (_vorbSize)
+                {
                     case 0:
                     case 0x28:
                     case 0x2A:
@@ -328,7 +370,8 @@ namespace DataTool.ConvertLogic {
                 _sampleCount = Read32();
                 _noGranule = false;
                 _modPackets = false;
-                switch (_vorbSize) {
+                switch (_vorbSize)
+                {
                     case 0:
                     case 0x2A:
                         _noGranule = true;
@@ -350,7 +393,8 @@ namespace DataTool.ConvertLogic {
 
                         // seems to be 0xD9 when _mod_packets should be set
                         // also seen 0xCB, 0xBC, 0xB2
-                        if (0x4A != modSignal && 0x4B != modSignal && 0x69 != modSignal && 0x70 != modSignal) {
+                        if (0x4A != modSignal && 0x4B != modSignal && 0x69 != modSignal && 0x70 != modSignal)
+                        {
                             _modPackets = true;
                         }
 
@@ -365,7 +409,8 @@ namespace DataTool.ConvertLogic {
                 _setupPacketOffset = Read32();
                 _firstAudioPacketOffset = Read32();
 
-                switch (_vorbSize) {
+                switch (_vorbSize)
+                {
                     case 0:
                     case 0x2A:
                         _reader.BaseStream.Seek(_vorbOffset + 0x24, SeekOrigin.Begin);
@@ -382,7 +427,8 @@ namespace DataTool.ConvertLogic {
                 _uid = 0;
                 _blocksize0Pow = 0;
                 _blocksize1Pow = 0;
-                switch (_vorbSize) {
+                switch (_vorbSize)
+                {
                     case 0x28:
                     case 0x2C:
                         // ok to leave _uid, _blocksize_0_pow and _blocksize_1_pow unset
@@ -403,10 +449,14 @@ namespace DataTool.ConvertLogic {
                 #endregion
 
                 // check/set loops now that we know total sample count
-                if (0 != _loopCount) {
-                    if (_loopEnd == 0) {
+                if (0 != _loopCount)
+                {
+                    if (_loopEnd == 0)
+                    {
                         _loopEnd = _sampleCount;
-                    } else {
+                    }
+                    else
+                    {
                         _loopEnd = _loopEnd + 1;
                     }
 
@@ -428,9 +478,11 @@ namespace DataTool.ConvertLogic {
                 // }
             }
 
-            public static int Ilog(uint v) {
+            public static int Ilog(uint v)
+            {
                 int ret = 0;
-                while (v != 0) {
+                while (v != 0)
+                {
                     ret++;
                     v >>= 1;
                 }
@@ -438,7 +490,8 @@ namespace DataTool.ConvertLogic {
                 return ret;
             }
 
-            private void GenerateOggHeader(BitOggstream os, out bool[] modeBlockflag, out int modeBits) {
+            private void GenerateOggHeader(BitOggstream os, out bool[] modeBlockflag, out int modeBits)
+            {
                 // Identification packet
                 {
                     VorbisPacketHeader vhead = new VorbisPacketHeader(1);
@@ -483,31 +536,37 @@ namespace DataTool.ConvertLogic {
                     const string vendor = "Converted from Audiokinetic Wwise by DataTool";
                     //const string vendor = "converted from Audiokinetic Wwise by ww2ogg 0.24"; // I want the correct checksums for now
 
-                    BitUint vendorSize = new BitUint(32, (uint) vendor.Length);
+                    BitUint vendorSize = new BitUint(32, (uint)vendor.Length);
                     os.Write(vendorSize);
 
-                    foreach (char vendorChar in vendor) {
-                        BitUint c = new BitUint(8, (byte) vendorChar);
+                    foreach (char vendorChar in vendor)
+                    {
+                        BitUint c = new BitUint(8, (byte)vendorChar);
                         os.Write(c);
                     }
 
-                    if (_loopCount == 0) {
+                    if (_loopCount == 0)
+                    {
                         BitUint userCommentCount = new BitUint(32, 0);
                         os.Write(userCommentCount);
-                    } else {
+                    }
+                    else
+                    {
                         List<string> comments = new List<string> {
                             $"LoopStart={_loopStart}",
                             $"LoopEnd={_loopEnd}"
                         };
-                        BitUint userCommentCount = new BitUint(32, (uint) comments.Count);
+                        BitUint userCommentCount = new BitUint(32, (uint)comments.Count);
                         os.Write(userCommentCount);
 
-                        foreach (string comment in comments) {
-                            BitUint commentLength = new BitUint(32, (uint) comment.Length);
+                        foreach (string comment in comments)
+                        {
+                            BitUint commentLength = new BitUint(32, (uint)comment.Length);
                             os.Write(commentLength);
 
-                            foreach (char c in comment) {
-                                BitUint charBit = new BitUint(8, (byte) c);
+                            foreach (char c in comment)
+                            {
+                                BitUint charBit = new BitUint(8, (byte)c);
                                 os.Write(charBit);
                             }
                         }
@@ -541,12 +600,16 @@ namespace DataTool.ConvertLogic {
 
                     CodebookLibrary library = new CodebookLibrary(_codebooksFile);
 
-                    for (int i = 0; i < codebookCount; i++) {
+                    for (int i = 0; i < codebookCount; i++)
+                    {
                         BitUint codebookID = new BitUint(10);
                         ss.Read(codebookID);
-                        try {
+                        try
+                        {
                             library.Rebuild(codebookID.AsInt(), os); // todo: build once and just reuse data.
-                        } catch (CodebookLibrary.InvalidID) {
+                        }
+                        catch (CodebookLibrary.InvalidID)
+                        {
                             //         B         C         V
                             //    4    2    4    3    5    6
                             // 0100 0010 0100 0011 0101 0110
@@ -564,7 +627,8 @@ namespace DataTool.ConvertLogic {
                             //           \_____|_ _|_______/
                             //                   X
                             //         01 0101 10 01 0000
-                            if (codebookIdentifier == 0x159) {
+                            if (codebookIdentifier == 0x159)
+                            {
                                 // starts with BCV, probably --full-setup
                                 throw new Exception("invalid codebook id 0x342, try --full-setup");
                             }
@@ -589,7 +653,8 @@ namespace DataTool.ConvertLogic {
                         os.Write(floorCountLess1);
 
                         // rebuild floors
-                        for (uint i = 0; i < floorCount; i++) {
+                        for (uint i = 0; i < floorCount; i++)
+                        {
                             BitUint floorType = new BitUint(16, 1);
                             os.Write(floorType);
 
@@ -601,21 +666,24 @@ namespace DataTool.ConvertLogic {
                             uint[] floor1PartitionClassList = new uint[floor1Partitions];
 
                             uint maximumClass = 0;
-                            for (int j = 0; j < floor1Partitions; j++) {
+                            for (int j = 0; j < floor1Partitions; j++)
+                            {
                                 BitUint floor1PartitionClass = new BitUint(4);
                                 ss.Read(floor1PartitionClass);
                                 os.Write(floor1PartitionClass);
 
                                 floor1PartitionClassList[j] = floor1PartitionClass;
 
-                                if (floor1PartitionClass > maximumClass) {
+                                if (floor1PartitionClass > maximumClass)
+                                {
                                     maximumClass = floor1PartitionClass;
                                 }
                             }
 
                             uint[] floor1ClassDimensionsList = new uint[maximumClass + 1];
 
-                            for (int j = 0; j <= maximumClass; j++) {
+                            for (int j = 0; j <= maximumClass; j++)
+                            {
                                 BitUint classDimensionsLess1 = new BitUint(3);
                                 ss.Read(classDimensionsLess1);
                                 os.Write(classDimensionsLess1);
@@ -626,7 +694,8 @@ namespace DataTool.ConvertLogic {
                                 ss.Read(classSubclasses);
                                 os.Write(classSubclasses);
 
-                                if (classSubclasses != 0) {
+                                if (classSubclasses != 0)
+                                {
                                     BitUint masterBook = new BitUint(8);
                                     ss.Read(masterBook);
                                     os.Write(masterBook);
@@ -635,7 +704,8 @@ namespace DataTool.ConvertLogic {
                                         throw new Exception("invalid floor1 masterbook");
                                 }
 
-                                for (uint k = 0; k < 1U << classSubclasses.AsInt(); k++) {
+                                for (uint k = 0; k < 1U << classSubclasses.AsInt(); k++)
+                                {
                                     BitUint subclassBookPlus1 = new BitUint(8);
                                     ss.Read(subclassBookPlus1);
                                     os.Write(subclassBookPlus1);
@@ -654,9 +724,11 @@ namespace DataTool.ConvertLogic {
                             ss.Read(rangebits);
                             os.Write(rangebits);
 
-                            for (uint j = 0; j < floor1Partitions; j++) {
+                            for (uint j = 0; j < floor1Partitions; j++)
+                            {
                                 uint currentClassNumber = floor1PartitionClassList[j];
-                                for (uint k = 0; k < floor1ClassDimensionsList[currentClassNumber]; k++) {
+                                for (uint k = 0; k < floor1ClassDimensionsList[currentClassNumber]; k++)
+                                {
                                     BitUint x = new BitUint(rangebits);
                                     ss.Read(x);
                                     os.Write(x);
@@ -670,7 +742,8 @@ namespace DataTool.ConvertLogic {
                         uint residueCount = residueCountLess1 + 1;
                         os.Write(residueCountLess1);
 
-                        for (uint i = 0; i < residueCount; i++) {
+                        for (uint i = 0; i < residueCount; i++)
+                        {
                             BitUint residueType = new BitUint(2);
                             ss.Read(residueType);
                             os.Write(new BitUint(16, residueType));
@@ -698,7 +771,8 @@ namespace DataTool.ConvertLogic {
                             if (residueClassbook >= codebookCount) throw new Exception("invalid residue classbook");
 
                             uint[] residueCascade = new uint[residueClassifications];
-                            for (uint j = 0; j < residueClassifications; j++) {
+                            for (uint j = 0; j < residueClassifications; j++)
+                            {
                                 BitUint highBits = new BitUint(5, 0);
                                 BitUint lowBits = new BitUint(3);
 
@@ -708,7 +782,8 @@ namespace DataTool.ConvertLogic {
                                 BitUint bitFlag = new BitUint(1);
                                 ss.Read(bitFlag);
                                 os.Write(bitFlag);
-                                if (bitFlag == 1) {
+                                if (bitFlag == 1)
+                                {
                                     ss.Read(highBits);
                                     os.Write(highBits);
                                 }
@@ -716,9 +791,12 @@ namespace DataTool.ConvertLogic {
                                 residueCascade[j] = highBits * 8 + lowBits;
                             }
 
-                            for (uint j = 0; j < residueClassifications; j++) {
-                                for (int k = 0; k < 8; k++) {
-                                    if ((residueCascade[j] & (1 << k)) != 0) {
+                            for (uint j = 0; j < residueClassifications; j++)
+                            {
+                                for (int k = 0; k < 8; k++)
+                                {
+                                    if ((residueCascade[j] & (1 << k)) != 0)
+                                    {
                                         BitUint residueBook = new BitUint(8);
                                         ss.Read(residueBook);
                                         os.Write(residueBook);
@@ -734,7 +812,8 @@ namespace DataTool.ConvertLogic {
                         uint mappingCount = mappingCountLess1 + 1;
                         os.Write(mappingCountLess1);
 
-                        for (uint i = 0; i < mappingCount; i++) {
+                        for (uint i = 0; i < mappingCount; i++)
+                        {
                             // always mapping type 0, the only one
                             BitUint mappingType = new BitUint(16, 0);
                             os.Write(mappingType);
@@ -744,7 +823,8 @@ namespace DataTool.ConvertLogic {
                             os.Write(submapsFlag);
 
                             uint submaps = 1;
-                            if (submapsFlag == 1) {
+                            if (submapsFlag == 1)
+                            {
                                 BitUint submapsLess1 = new BitUint(4);
                                 ss.Read(submapsLess1);
                                 submaps = submapsLess1 + 1;
@@ -755,15 +835,17 @@ namespace DataTool.ConvertLogic {
                             ss.Read(squarePolarFlag);
                             os.Write(squarePolarFlag);
 
-                            if (squarePolarFlag == 1) {
+                            if (squarePolarFlag == 1)
+                            {
                                 BitUint couplingStepsLess1 = new BitUint(8);
                                 ss.Read(couplingStepsLess1);
                                 uint couplingSteps = couplingStepsLess1 + 1;
                                 os.Write(couplingStepsLess1);
 
-                                for (uint j = 0; j < couplingSteps; j++) {
-                                    BitUint magnitude = new BitUint((uint) Ilog((uint) (_channels - 1)));
-                                    BitUint angle = new BitUint((uint) Ilog((uint) (_channels - 1)));
+                                for (uint j = 0; j < couplingSteps; j++)
+                                {
+                                    BitUint magnitude = new BitUint((uint)Ilog((uint)(_channels - 1)));
+                                    BitUint angle = new BitUint((uint)Ilog((uint)(_channels - 1)));
 
                                     ss.Read(magnitude);
                                     ss.Read(angle);
@@ -781,8 +863,10 @@ namespace DataTool.ConvertLogic {
                             os.Write(mappingReserved);
                             if (0 != mappingReserved) throw new Exception("mapping reserved field nonzero");
 
-                            if (submaps > 1) {
-                                for (uint j = 0; j < _channels; j++) {
+                            if (submaps > 1)
+                            {
+                                for (uint j = 0; j < _channels; j++)
+                                {
                                     BitUint mappingMux = new BitUint(4);
                                     ss.Read(mappingMux);
                                     os.Write(mappingMux);
@@ -791,7 +875,8 @@ namespace DataTool.ConvertLogic {
                                 }
                             }
 
-                            for (uint j = 0; j < submaps; j++) {
+                            for (uint j = 0; j < submaps; j++)
+                            {
                                 BitUint timeConfig = new BitUint(8);
                                 ss.Read(timeConfig);
                                 os.Write(timeConfig);
@@ -819,7 +904,8 @@ namespace DataTool.ConvertLogic {
                         modeBlockflag = new bool[modeCount];
                         modeBits = Ilog(modeCount - 1);
 
-                        for (uint i = 0; i < modeCount; i++) {
+                        for (uint i = 0; i < modeCount; i++)
+                        {
                             BitUint blockFlag = new BitUint(1);
                             ss.Read(blockFlag);
                             os.Write(blockFlag);
@@ -850,8 +936,10 @@ namespace DataTool.ConvertLogic {
                 }
             }
 
-            public void ConvertToOgg(Stream outputStream) {
-                using (BinaryWriter writer = new BinaryWriter(outputStream, Encoding.Default, true)) { // leave open
+            public void ConvertToOgg(Stream outputStream)
+            {
+                using (BinaryWriter writer = new BinaryWriter(outputStream, Encoding.Default, true))
+                { // leave open
                     outputStream.SetLength(0);
                     BitOggstream os = new BitOggstream(writer);
 
@@ -859,10 +947,13 @@ namespace DataTool.ConvertLogic {
                     bool[] modeBlockflag;
                     int modeBits;
                     bool prevBlockflag = false;
-                    if (_headerTriadPresent) {
+                    if (_headerTriadPresent)
+                    {
                         throw new Exception("unsuppored");
                         // generate_ogg_header_with_triad(os);
-                    } else {
+                    }
+                    else
+                    {
                         GenerateOggHeader(os, out modeBlockflag, out modeBits);
                     }
 
@@ -870,16 +961,20 @@ namespace DataTool.ConvertLogic {
                     {
                         long offset = _dataOffset + _firstAudioPacketOffset;
 
-                        while (offset < _dataOffset + _dataSize) {
+                        while (offset < _dataOffset + _dataSize)
+                        {
                             uint size;
                             uint granule;
                             long packetHeaderSize;
                             long packetPayloadOffset;
                             long nextOffset;
 
-                            if (_oldPacketHeaders) {
+                            if (_oldPacketHeaders)
+                            {
                                 throw new Exception("unsupported (if this happens please message the devs)");
-                            } else {
+                            }
+                            else
+                            {
                                 Packet audioPacket = new Packet(_reader, offset, _littleEndian, _noGranule);
                                 packetHeaderSize = audioPacket.HeaderSize();
                                 size = audioPacket.Size();
@@ -888,7 +983,8 @@ namespace DataTool.ConvertLogic {
                                 nextOffset = audioPacket.NextOffset();
                             }
 
-                            if (offset + packetHeaderSize > _dataOffset + _dataSize) {
+                            if (offset + packetHeaderSize > _dataOffset + _dataSize)
+                            {
                                 throw new Exception("page header truncated");
                             }
 
@@ -896,14 +992,19 @@ namespace DataTool.ConvertLogic {
 
                             _reader.BaseStream.Position = packetPayloadOffset;
 
-                            if (granule == 0xFFFFFFFF) {
+                            if (granule == 0xFFFFFFFF)
+                            {
                                 os.SetGranule(1);
-                            } else {
+                            }
+                            else
+                            {
                                 os.SetGranule(granule);
                             }
 
-                            if (_modPackets) {
-                                if (modeBlockflag == null) {
+                            if (_modPackets)
+                            {
+                                if (modeBlockflag == null)
+                                {
                                     throw new Exception("didn't load blockflag");
                                 }
 
@@ -918,39 +1019,42 @@ namespace DataTool.ConvertLogic {
                                     BitStream ss = new BitStream(_reader);
 
                                     // IN/OUT: N bit mode number (max 6 bits)
-                                    modeNumberP = new BitUint((uint) modeBits);
+                                    modeNumberP = new BitUint((uint)modeBits);
                                     ss.Read(modeNumberP);
                                     os.Write(modeNumberP);
 
                                     // IN: remaining bits of first (input) byte
-                                    remainderP = new BitUint((uint) (8 - modeBits));
+                                    remainderP = new BitUint((uint)(8 - modeBits));
                                     ss.Read(remainderP);
                                 }
 
-                                if (modeBlockflag[modeNumberP]) {
+                                if (modeBlockflag[modeNumberP])
+                                {
                                     // long window, peek at next frame
                                     _reader.BaseStream.Position = nextOffset;
                                     bool nextBlockflag = false;
-                                    if (nextOffset + packetHeaderSize <= _dataOffset + _dataSize) {
+                                    if (nextOffset + packetHeaderSize <= _dataOffset + _dataSize)
+                                    {
                                         // mod_packets always goes with 6-byte headers
                                         Packet audioPacket = new Packet(_reader, nextOffset, _littleEndian, _noGranule);
                                         uint nextPacketSize = audioPacket.Size();
 
-                                        if (nextPacketSize > 0) {
+                                        if (nextPacketSize > 0)
+                                        {
                                             _reader.BaseStream.Position = audioPacket.Offset();
 
                                             BitStream ss = new BitStream(_reader);
-                                            BitUint nextModeNumber = new BitUint((uint) modeBits);
+                                            BitUint nextModeNumber = new BitUint((uint)modeBits);
                                             ss.Read(nextModeNumber);
 
                                             nextBlockflag = modeBlockflag[nextModeNumber];
                                         }
                                     }
 
-                                    BitUint prevWindowType = new BitUint(1, (uint) (prevBlockflag ? 1 : 0));
+                                    BitUint prevWindowType = new BitUint(1, (uint)(prevBlockflag ? 1 : 0));
                                     os.Write(prevWindowType);
 
-                                    BitUint nextWindowType = new BitUint(1, (uint) (nextBlockflag ? 1 : 0));
+                                    BitUint nextWindowType = new BitUint(1, (uint)(nextBlockflag ? 1 : 0));
                                     os.Write(nextWindowType);
 
                                     _reader.BaseStream.Position = offset + 1;
@@ -959,25 +1063,30 @@ namespace DataTool.ConvertLogic {
                                 prevBlockflag = modeBlockflag[modeNumberP];
 
                                 os.Write(remainderP);
-                            } else {
+                            }
+                            else
+                            {
                                 // nothing unusual for first byte
                                 int v = _reader.ReadByte();
-                                if (v < 0) {
+                                if (v < 0)
+                                {
                                     throw new Exception("file truncated");
                                 }
 
-                                BitUint c = new BitUint(8, (uint) v);
+                                BitUint c = new BitUint(8, (uint)v);
                                 os.Write(c);
                             }
 
                             // remainder of packet
-                            for (uint i = 1; i < size; i++) {
+                            for (uint i = 1; i < size; i++)
+                            {
                                 int v = _reader.ReadByte();
-                                if (v < 0) {
+                                if (v < 0)
+                                {
                                     throw new Exception("file truncated");
                                 }
 
-                                BitUint c = new BitUint(8, (uint) v);
+                                BitUint c = new BitUint(8, (uint)v);
                                 os.Write(c);
                             }
 
@@ -985,21 +1094,24 @@ namespace DataTool.ConvertLogic {
                             os.FlushPage(false, offset == _dataOffset + _dataSize);
                         }
 
-                        if (offset > _dataOffset + _dataSize) {
+                        if (offset > _dataOffset + _dataSize)
+                        {
                             throw new Exception("page truncated");
                         }
                     }
                 }
             }
 
-            public void Dispose() {
+            public void Dispose()
+            {
                 _stream?.Dispose();
                 _reader?.Dispose();
             }
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 4)]
-        public struct WwiseBankHeader {
+        public struct WwiseBankHeader
+        {
             public uint MagicNumber;
             public uint HeaderLength;
             public uint Version;
@@ -1007,7 +1119,8 @@ namespace DataTool.ConvertLogic {
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 4)]
-        public struct WwiseBankChunkHeader {
+        public struct WwiseBankChunkHeader
+        {
             public uint MagicNumber;
             public uint ChunkLength;
 
@@ -1015,28 +1128,34 @@ namespace DataTool.ConvertLogic {
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 4)]
-        public struct WwiseBankWemDef {
+        public struct WwiseBankWemDef
+        {
             public uint FileID;
             public uint DataOffset;
             public int FileLength;
         }
 
         [AttributeUsage(AttributeTargets.Class)]
-        public class BankObjectAttribute : Attribute {
+        public class BankObjectAttribute : Attribute
+        {
             public byte Type;
 
-            public BankObjectAttribute(byte type) {
+            public BankObjectAttribute(byte type)
+            {
                 Type = type;
             }
         }
 
-        public interface IBankObject {
+        public interface IBankObject
+        {
             void Read(BinaryReader reader);
         }
 
         [BankObject(3)]
-        public class BankObjectEventAction : IBankObject {
-            public enum EventActionScope : byte {
+        public class BankObjectEventAction : IBankObject
+        {
+            public enum EventActionScope : byte
+            {
                 GameObjectSwitchOrTrigger = 1, // Switch or Trigger
                 Global = 2,
                 GameObjectReference = 3, // see referenced object id
@@ -1045,7 +1164,8 @@ namespace DataTool.ConvertLogic {
                 AllExceptReference = 5, // see referenced object id
             }
 
-            public enum EventActionType : byte {
+            public enum EventActionType : byte
+            {
                 Stop = 0x1,
                 Pause = 0x2,
                 Resume = 0x3,
@@ -1073,7 +1193,8 @@ namespace DataTool.ConvertLogic {
                 Seek = 0x1E
             }
 
-            public enum EventActionParameterType : byte {
+            public enum EventActionParameterType : byte
+            {
                 Delay = 0xE, // Delay, given as uint32 in milliseconds
                 Play = 0xF, // Play: Fade in time, given as uint32 in milliseconds
 
@@ -1087,22 +1208,26 @@ namespace DataTool.ConvertLogic {
 
             public List<KeyValuePair<EventActionParameterType, object>> Parameters;
 
-            public void Read(BinaryReader reader) {
-                Scope = (EventActionScope) reader.ReadByte();
-                Type = (EventActionType) reader.ReadByte();
+            public void Read(BinaryReader reader)
+            {
+                Scope = (EventActionScope)reader.ReadByte();
+                Type = (EventActionType)reader.ReadByte();
                 ReferenceObjectID = reader.ReadUInt32();
                 byte zero = reader.ReadByte();
                 byte parameterCount = reader.ReadByte();
                 Parameters = new List<KeyValuePair<EventActionParameterType, object>>(parameterCount);
                 EventActionParameterType[] tempTypes = new EventActionParameterType[parameterCount];
-                for (int i = parameterCount - 1; i >= 0; i--) {
-                    EventActionParameterType parameterType = (EventActionParameterType) reader.ReadByte();
+                for (int i = parameterCount - 1; i >= 0; i--)
+                {
+                    EventActionParameterType parameterType = (EventActionParameterType)reader.ReadByte();
                     tempTypes[i] = parameterType;
                 }
 
-                foreach (EventActionParameterType parameterType in tempTypes) {
+                foreach (EventActionParameterType parameterType in tempTypes)
+                {
                     object val;
-                    switch (parameterType) {
+                    switch (parameterType)
+                    {
                         case EventActionParameterType.Probability:
                             val = reader.ReadSingle();
                             break;
@@ -1122,8 +1247,10 @@ namespace DataTool.ConvertLogic {
         }
 
         [BankObject(2)]
-        public class BankObjectSoundSFX : IBankObject {
-            public enum SoundLocation : byte {
+        public class BankObjectSoundSFX : IBankObject
+        {
+            public enum SoundLocation : byte
+            {
                 Embedded = 0,
                 Streamed = 1,
                 StreamedZeroLatency = 2
@@ -1132,9 +1259,10 @@ namespace DataTool.ConvertLogic {
             public uint SoundID;
             public SoundLocation Location;
 
-            public void Read(BinaryReader reader) {
+            public void Read(BinaryReader reader)
+            {
                 // using a different structure to the wiki :thinking:
-                Location = (SoundLocation) reader.ReadByte();
+                Location = (SoundLocation)reader.ReadByte();
 
                 ushort u1 = reader.ReadUInt16();
                 ushort u2 = reader.ReadUInt16();
@@ -1144,26 +1272,31 @@ namespace DataTool.ConvertLogic {
         }
 
         [BankObject(1)]
-        public class BankObjectSettings : IBankObject {
-            public enum SettingType : byte {
+        public class BankObjectSettings : IBankObject
+        {
+            public enum SettingType : byte
+            {
                 VoiceVolume = 1,
                 VoiceLowPassFilter = 3
             }
 
             public List<KeyValuePair<SettingType, float>> Settings;
 
-            public void Read(BinaryReader reader) {
+            public void Read(BinaryReader reader)
+            {
                 byte numSettings = reader.ReadByte();
 
                 SettingType[] types = new SettingType[numSettings];
-                for (int i = 0; i < numSettings; i++) {
-                    SettingType type = (SettingType) reader.ReadByte();
+                for (int i = 0; i < numSettings; i++)
+                {
+                    SettingType type = (SettingType)reader.ReadByte();
                     types[i] = type;
                 }
 
                 Settings = new List<KeyValuePair<SettingType, float>>();
 
-                foreach (SettingType settingType in types) {
+                foreach (SettingType settingType in types)
+                {
                     float value = reader.ReadSingle();
                     Settings.Add(new KeyValuePair<SettingType, float>(settingType, value));
                 }
@@ -1171,21 +1304,26 @@ namespace DataTool.ConvertLogic {
         }
 
         [BankObject(4)]
-        public class BankObjectEvent : IBankObject {
+        public class BankObjectEvent : IBankObject
+        {
             public uint[] Actions;
 
-            public void Read(BinaryReader reader) {
+            public void Read(BinaryReader reader)
+            {
                 byte numActions = reader.ReadByte();
 
                 Actions = new uint[numActions];
-                for (int i = 0; i < numActions; i++) {
+                for (int i = 0; i < numActions; i++)
+                {
                     Actions[i] = reader.ReadUInt32();
                 }
             }
         }
 
-        public class BankSoundStructure : IBankObject { // might as well use interface
-            public enum AdditionalParameterType : byte {
+        public class BankSoundStructure : IBankObject
+        { // might as well use interface
+            public enum AdditionalParameterType : byte
+            {
                 VoiceVolume = 0x0, // General Settings: Voice: Volume, float
                 VoicePitch = 0x2, // General Settings: Voice: Pitch, float
                 VoiceLowPassFilter = 0x3, // General Settings: Voice: Low-pass filter, float
@@ -1205,9 +1343,10 @@ namespace DataTool.ConvertLogic {
                 OutputBusLowPassFilter = 0x18 // General Settings: Output Bus: Low-pass filter, float
             }
 
-            public void Read(BinaryReader reader) {
+            public void Read(BinaryReader reader)
+            {
                 // untested but you can try if you are brave
-            #if I_CAN_SIMPLY_SNAP_MY_FINGERS
+#if I_CAN_SIMPLY_SNAP_MY_FINGERS
                 bool overrideParentSettingsEffect = reader.ReadBoolean();  // whether to override parent settings for Effects section
                 byte numEffects = reader.ReadByte();
 
@@ -1236,19 +1375,21 @@ namespace DataTool.ConvertLogic {
 
                 // byte zero2 = reader.ReadByte();
                 // Debug.Assert(zero2 == 0);
-            #else
+#else
                 throw new NotImplementedException();
-            #endif
+#endif
             }
         }
 
         public class BankNotReadyException : Exception { }
 
-        public class BankObjectTooMuchReadException : Exception {
+        public class BankObjectTooMuchReadException : Exception
+        {
             public BankObjectTooMuchReadException(string message) : base(message) { }
         }
 
-        public class WwiseBank {
+        public class WwiseBank
+        {
             public WwiseBankWemDef[] WemDefs { get; }
             public byte[][] WemData { get; }
 
@@ -1259,14 +1400,16 @@ namespace DataTool.ConvertLogic {
             public static bool Ready { get; private set; }
             public static Dictionary<byte, Type> Types { get; private set; }
 
-            public static void GetReady() {
+            public static void GetReady()
+            {
                 Types = new Dictionary<byte, Type>();
 
                 Assembly assembly = typeof(WwiseBank).Assembly;
                 Type baseType = typeof(IBankObject);
                 List<Type> types = assembly.GetTypes().Where(type => type != baseType && baseType.IsAssignableFrom(type)).ToList();
 
-                foreach (Type type in types) {
+                foreach (Type type in types)
+                {
                     BankObjectAttribute bankObjectAttribute = type.GetCustomAttribute<BankObjectAttribute>();
                     if (bankObjectAttribute == null) continue;
                     Types[bankObjectAttribute.Type] = type;
@@ -1275,15 +1418,18 @@ namespace DataTool.ConvertLogic {
                 Ready = true;
             }
 
-            public WwiseBank(Stream stream) {
+            public WwiseBank(Stream stream)
+            {
                 if (!Ready) throw new BankNotReadyException();
-                using (BinaryReader reader = new BinaryReader(stream, Encoding.Default, true)) {
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.Default, true))
+                {
                     // reference: http://wiki.xentax.com/index.php/Wwise_SoundBank_(*.bnk)
 
                     ChunkPositions = new Dictionary<WwiseBankChunkHeader, long>();
                     Chunks = new List<WwiseBankChunkHeader>();
 
-                    while (reader.BaseStream.Position < reader.BaseStream.Length) {
+                    while (reader.BaseStream.Position < reader.BaseStream.Length)
+                    {
                         WwiseBankChunkHeader chunk = reader.ReadBytes(Marshal.SizeOf(typeof(WwiseBankChunkHeader))).ToType<WwiseBankChunkHeader>();
                         Chunks.Add(chunk);
                         ChunkPositions[chunk] = reader.BaseStream.Position;
@@ -1293,13 +1439,15 @@ namespace DataTool.ConvertLogic {
                     WwiseBankChunkHeader dataHeader = Chunks.FirstOrDefault(x => x.Name == "DATA");
                     WwiseBankChunkHeader didxHeader = Chunks.FirstOrDefault(x => x.Name == "DIDX");
 
-                    if (dataHeader.MagicNumber != 0 && dataHeader.MagicNumber != 0) {
+                    if (dataHeader.MagicNumber != 0 && dataHeader.MagicNumber != 0)
+                    {
                         reader.BaseStream.Position = ChunkPositions[didxHeader];
                         if (didxHeader.ChunkLength <= 0) return;
 
                         WemDefs = new WwiseBankWemDef[didxHeader.ChunkLength / 12];
                         WemData = new byte[didxHeader.ChunkLength / 12][];
-                        for (int i = 0; i < didxHeader.ChunkLength / 12; i++) {
+                        for (int i = 0; i < didxHeader.ChunkLength / 12; i++)
+                        {
                             WemDefs[i] = reader.ReadBytes(Marshal.SizeOf(typeof(WwiseBankWemDef))).ToType<WwiseBankWemDef>();
 
                             long temp = reader.BaseStream.Position;
@@ -1313,11 +1461,13 @@ namespace DataTool.ConvertLogic {
 
                     WwiseBankChunkHeader hircHeader = Chunks.FirstOrDefault(x => x.Name == "HIRC");
 
-                    if (hircHeader.MagicNumber != 0) {
+                    if (hircHeader.MagicNumber != 0)
+                    {
                         reader.BaseStream.Position = ChunkPositions[hircHeader];
                         uint objectCount = reader.ReadUInt32();
-                        Objects = new Dictionary<uint, IBankObject>((int) objectCount);
-                        for (int o = 0; o < objectCount; o++) {
+                        Objects = new Dictionary<uint, IBankObject>((int)objectCount);
+                        for (int o = 0; o < objectCount; o++)
+                        {
                             byte objectType = reader.ReadByte();
                             uint objectLength = reader.ReadUInt32();
 
@@ -1325,11 +1475,14 @@ namespace DataTool.ConvertLogic {
 
                             uint objectID = reader.ReadUInt32();
 
-                            if (Types.ContainsKey(objectType)) {
+                            if (Types.ContainsKey(objectType))
+                            {
                                 if (!(Activator.CreateInstance(Types[objectType]) is IBankObject bankObject)) continue;
                                 bankObject.Read(reader);
                                 Objects[objectID] = bankObject;
-                            } else {
+                            }
+                            else
+                            {
                                 Debugger.Log(0, "[DataTool.Convertlogic.Sound]", $"Unhandled Bank object type: {objectType}\r\n");
                                 Objects[objectID] = null;
                             }
@@ -1342,23 +1495,29 @@ namespace DataTool.ConvertLogic {
                 }
             }
 
-            public void WriteWems(string output) {
+            public void WriteWems(string output)
+            {
                 if (WemDefs == null) return;
-                for (int i = 0; i < WemDefs.Length; i++) {
+                for (int i = 0; i < WemDefs.Length; i++)
+                {
                     WwiseBankWemDef wemDef = WemDefs[i];
                     byte[] data = WemData[i];
 
-                    using (Stream outputs = File.Open($"{output}{Path.DirectorySeparatorChar}{wemDef.FileID:X8}.wem", FileMode.OpenOrCreate, FileAccess.Write)) {
+                    using (Stream outputs = File.Open($"{output}{Path.DirectorySeparatorChar}{wemDef.FileID:X8}.wem", FileMode.OpenOrCreate, FileAccess.Write))
+                    {
                         outputs.SetLength(0);
                         outputs.Write(data, 0, data.Length);
                     }
                 }
             }
 
-            public IEnumerable<T> ObjectsOfType<T>() {
-                foreach (KeyValuePair<uint, IBankObject> bankObject in Objects) {
-                    if (bankObject.Value != null && bankObject.Value.GetType() == typeof(T)) {
-                        yield return (T) bankObject.Value;
+            public IEnumerable<T> ObjectsOfType<T>()
+            {
+                foreach (KeyValuePair<uint, IBankObject> bankObject in Objects)
+                {
+                    if (bankObject.Value != null && bankObject.Value.GetType() == typeof(T))
+                    {
+                        yield return (T)bankObject.Value;
                     }
                 }
             }

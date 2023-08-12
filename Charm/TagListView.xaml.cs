@@ -5,19 +5,19 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using Arithmic;
 using ConcurrentCollections;
 using Tiger;
-using System.Text;
-using Arithmic;
 using Tiger.Schema;
-using Tiger.Schema.Audio;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Static;
@@ -161,7 +161,9 @@ public partial class TagListView : UserControl
             {
                 _parentStack.Push(new ParentInfo
                 {
-                    AllTagItems = _allTagItems, Hash = _currentHash, TagListType = _tagListType,
+                    AllTagItems = _allTagItems,
+                    Hash = _currentHash,
+                    TagListType = _tagListType,
                     SearchTerm = SearchBox.Text
                 });
             }
@@ -581,7 +583,7 @@ public partial class TagListView : UserControl
             if (currentButton == null)
                 return;
             currentButton.IsChecked = false;
-            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex+1));
+            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex + 1));
             if (nextButton == null)
                 return;
             nextButton.IsChecked = true;
@@ -595,7 +597,7 @@ public partial class TagListView : UserControl
             if (currentButton == null)
                 return;
             currentButton.IsChecked = false;
-            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex-1));
+            var nextButton = GetChildOfType<ToggleButton>(TagList.ItemContainerGenerator.ContainerFromIndex(_selectedIndex - 1));
             if (nextButton == null)
                 return;
             nextButton.IsChecked = true;
@@ -638,7 +640,7 @@ public partial class TagListView : UserControl
             MessageBox.Show("No tags to export.");
             return;
         }
-        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i+1}/{exportItems.Count}: {x.Hash}").ToList());
+        MainWindow.Progress.SetProgressStages(exportItems.Select((x, i) => $"Exporting {i + 1}/{exportItems.Count}: {x.Hash}").ToList());
         await Task.Run(() =>
         {
             foreach (var tagItem in exportItems)
@@ -770,7 +772,7 @@ public partial class TagListView : UserControl
     private void ExportEntity(ExportInfo info)
     {
         Entity entity = FileResourcer.Get().GetFile<Entity>(info.Hash);
-        EntityView.Export(new List<Entity> {entity}, info.Name, info.ExportType);
+        EntityView.Export(new List<Entity> { entity }, info.Name, info.ExportType);
     }
 
     /// <summary>
@@ -864,7 +866,7 @@ public partial class TagListView : UserControl
             Parallel.ForEach(eVals, entity =>
             {
                 // if (existingEntities.Contains(entity.Hash)) // O(1) check
-                    // return;
+                // return;
 
                 // Check the entity has geometry
                 // bool bHasGeometry = false;
@@ -1614,7 +1616,7 @@ public partial class TagListView : UserControl
             if (!entry.WeaponContentGroupHash.Equals(weaponContentGroupHash))
                 return;
 
-            List<TigerFile> entitiesParents = new() {entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248};
+            List<TigerFile> entitiesParents = new() { entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248 };
             List<Entity> entities = new();
             foreach (var tag in entitiesParents)
             {

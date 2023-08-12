@@ -54,9 +54,9 @@ public class LogHandler
     public static void Initialise(LogView logView)
     {
         // Application.Current.DispatcherUnhandledException += DispatcherUnhandledException;
-        #if !DEBUG
+#if !DEBUG
         AppDomain.CurrentDomain.UnhandledException += CatchUnhandledException;
-        #endif
+#endif
     }
 
 #if !DEBUG
@@ -72,7 +72,7 @@ public class LogHandler
             Application.Current.Shutdown();
         }
     }
-    #endif
+#endif
 
     static void DispatcherUnhandledException
         (object sender, DispatcherUnhandledExceptionEventArgs e)

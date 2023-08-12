@@ -72,7 +72,7 @@ public class Source2Settings
 public class ConfigSubsystem : Subsystem
 {
     // private Configuration _config =
-        // ConfigurationManager.OpenExeConfiguration(System.Windows.Forms.Application.ExecutablePath);
+    // ConfigurationManager.OpenExeConfiguration(System.Windows.Forms.Application.ExecutablePath);
 
     // private Dictionary<Type, dynamic?> _settings = new();
 
@@ -158,6 +158,7 @@ public class ConfigSubsystem : Subsystem
         return _settings.Common.CurrentStrategy;
     }
 
+#pragma warning disable S1144 // Unused private types or members should be removed
     private TigerStrategy FindEnumValueStrategy(string description)
     {
         for (int i = 0; i < typeof(TigerStrategy).GetFields().Length - 1; i++)
@@ -394,68 +395,68 @@ public class ConfigSubsystem : Subsystem
     }
 
     private bool LoadConfig()
-     {
-         try
-         {
-             _settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(_configFilePath));
-         }
-         catch (JsonSerializationException e)
-         {
-             throw new JsonSerializationException($"Failed to load config file {_configFilePath}: {e.Message}", e);
-         }
-         catch (JsonReaderException e)
-         {
-             throw new JsonReaderException($"Failed to load config file {_configFilePath}: {e.Message}", e);
-         }
+    {
+        try
+        {
+            _settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(_configFilePath));
+        }
+        catch (JsonSerializationException e)
+        {
+            throw new JsonSerializationException($"Failed to load config file {_configFilePath}: {e.Message}", e);
+        }
+        catch (JsonReaderException e)
+        {
+            throw new JsonReaderException($"Failed to load config file {_configFilePath}: {e.Message}", e);
+        }
 
-         // bool configIsMissingField = false;
-         // foreach (var field in GetConfigFields())
-         // {
-         //     configIsMissingField |= SetFieldValueFromConfig(field.Key, field, deserializedSettings);
-         // }
-         //
-         // if (configIsMissingField)
-         // {
-         //     return WriteConfig();
-         // }
-         if (_settings.Common == null)
-         {
-             _settings.Common = new CommonSettings();
-             _settings.Blender = new BlenderSettings();
+        // bool configIsMissingField = false;
+        // foreach (var field in GetConfigFields())
+        // {
+        //     configIsMissingField |= SetFieldValueFromConfig(field.Key, field, deserializedSettings);
+        // }
+        //
+        // if (configIsMissingField)
+        // {
+        //     return WriteConfig();
+        // }
+        if (_settings.Common == null)
+        {
+            _settings.Common = new CommonSettings();
+            _settings.Blender = new BlenderSettings();
             _settings.Unreal = new UnrealSettings();
             _settings.Source2 = new Source2Settings();
             WriteConfig();
-         }
+        }
 
-         foreach ((TigerStrategy strategy, string packagesPath) in _settings.Common.PackagesPath)
-         {
-             Strategy.AddNewStrategy(strategy, packagesPath, false);
-         }
+        foreach ((TigerStrategy strategy, string packagesPath) in _settings.Common.PackagesPath)
+        {
+            Strategy.AddNewStrategy(strategy, packagesPath, false);
+        }
 
-         if (CharmInstance.Args.GetArgValue("strategy", out string strategyName))
-         {
-             Strategy.SetStrategy(strategyName);
-         }
-         else
-         {
-             Strategy.SetStrategy(_settings.Common.CurrentStrategy);
-         }
+        if (CharmInstance.Args.GetArgValue("strategy", out string strategyName))
+        {
+            Strategy.SetStrategy(strategyName);
+        }
+        else
+        {
+            Strategy.SetStrategy(_settings.Common.CurrentStrategy);
+        }
 
-         return true;
-     }
+        return true;
+    }
 
     private bool WriteConfig()
-     {
-         string serializedSettings = JsonConvert.SerializeObject(_settings, Formatting.Indented);
-         File.WriteAllText(_configFilePath, serializedSettings);
+    {
+        string serializedSettings = JsonConvert.SerializeObject(_settings, Formatting.Indented);
+        File.WriteAllText(_configFilePath, serializedSettings);
 
-         return ConfigFileExists();
-     }
+        return ConfigFileExists();
+    }
 
     private bool ConfigFileExists()
-     {
-         return File.Exists(_configFilePath);
-     }
+    {
+        return File.Exists(_configFilePath);
+    }
 
     private void Save()
     {
@@ -468,7 +469,7 @@ public class ConfigSubsystem : Subsystem
     {
         if (CharmInstance.Args.GetArgValue("config", out string configPath))
         {
-             _configFilePath = configPath;
+            _configFilePath = configPath;
         }
 
         if (ConfigFileExists())
@@ -476,7 +477,7 @@ public class ConfigSubsystem : Subsystem
             bool successfullyLoadedConfig = LoadConfig();
             if (successfullyLoadedConfig)
             {
-             return true;
+                return true;
             }
         }
         else

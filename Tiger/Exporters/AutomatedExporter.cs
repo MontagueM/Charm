@@ -82,7 +82,7 @@ public class AutomatedExporter
         File.Copy($"Exporters/blender_api_template.py", $"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", true);
         string text = File.ReadAllText($"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py");
 
-        string[] components = {"X", "Y", "Z", "W"};
+        string[] components = { "X", "Y", "Z", "W" };
 
         int dyeIndex = 1;
         foreach (var dye in dyes)

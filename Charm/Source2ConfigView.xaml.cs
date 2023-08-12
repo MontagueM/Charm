@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Tiger;
 
 namespace Charm;
@@ -122,7 +122,7 @@ public partial class Source2ConfigView : UserControl
         PopulateConfigPanel();
     }
 
-     private void S2VMDLExportEnabled_OnClick(object sender, RoutedEventArgs e)
+    private void S2VMDLExportEnabled_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetS2VMDLExportEnabled(!_config.GetS2VMDLExportEnabled());
         PopulateConfigPanel();

@@ -18,7 +18,7 @@ public class Tag<T> : TigerFile where T : struct
     private bool _isLoaded = false;
 
     // todo verify that T is valid for the hash we get given by checking SchemaStruct against hash reference
-    public  Tag(FileHash fileHash, bool shouldParse = true) : base(fileHash)
+    public Tag(FileHash fileHash, bool shouldParse = true) : base(fileHash)
     {
         if (shouldParse)
         {

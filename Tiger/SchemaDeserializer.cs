@@ -138,7 +138,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 NonSchemaStructAttribute? nonSchemaStructAttr = GetAttribute<NonSchemaStructAttribute>(schemaType);
                 if (nonSchemaStructAttr != null)
                 {
-                    _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaStructAttr.Type, SubTypes = nonSchemaStructAttr.SubTypes});
+                    _nonSchemaTypeMap.TryAdd(type, new TypeSubType { Type = nonSchemaStructAttr.Type, SubTypes = nonSchemaStructAttr.SubTypes });
                     _schemaTypeFieldsMap.TryAdd(type, GetStrategyFields(type.GetFields()));
                 }
             }
@@ -157,7 +157,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             if (nonSchemaStructAttribute != null)
             {
                 _schemaSerializedSizeMap.TryAdd(type, nonSchemaStructAttribute.SerializedSize);
-                _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaStructAttribute.Type, SubTypes = nonSchemaStructAttribute.SubTypes});
+                _nonSchemaTypeMap.TryAdd(type, new TypeSubType { Type = nonSchemaStructAttribute.Type, SubTypes = nonSchemaStructAttribute.SubTypes });
                 _schemaTypeFieldsMap.TryAdd(type, GetStrategyFields(type.GetFields()));
                 return;
             }
@@ -165,7 +165,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             NonSchemaTypeAttribute? nonSchemaTypeAttr = GetFirstAttribute<NonSchemaTypeAttribute>(type);
             if (nonSchemaTypeAttr != null)
             {
-                _nonSchemaTypeMap.TryAdd(type, new TypeSubType{ Type = nonSchemaTypeAttr.Type, SubTypes = nonSchemaTypeAttr.SubTypes});
+                _nonSchemaTypeMap.TryAdd(type, new TypeSubType { Type = nonSchemaTypeAttr.Type, SubTypes = nonSchemaTypeAttr.SubTypes });
                 return;
             }
 
@@ -258,7 +258,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                     _schemaSerializedSizeMap.TryAdd(fieldInfo.FieldType, Marshal.SizeOf(Enum.GetUnderlyingType(fieldInfo.FieldType)));
                     continue;
                 }
-                if (fieldInfo.FieldType is {IsGenericType: false, IsArray: false} && !_schemaSerializedSizeMap.ContainsKey(fieldInfo.FieldType))
+                if (fieldInfo.FieldType is { IsGenericType: false, IsArray: false } && !_schemaSerializedSizeMap.ContainsKey(fieldInfo.FieldType))
                 {
                     _schemaSerializedSizeMap.TryAdd(fieldInfo.FieldType, Marshal.SizeOf(fieldInfo.FieldType));
                     continue;
@@ -267,7 +267,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         });
     }
 
-    public static T DeserializeTag64<T>(TigerReader reader, bool shouldLoad=true) where T : TigerFile
+    public static T DeserializeTag64<T>(TigerReader reader, bool shouldLoad = true) where T : TigerFile
     {
         return (T)DeserializeTag64(reader, typeof(T), shouldLoad);
     }
@@ -291,7 +291,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         }
     }
 
-    public static TigerFile DeserializeTag64(TigerReader reader, Type fieldType, bool shouldLoad=true)
+    public static TigerFile DeserializeTag64(TigerReader reader, Type fieldType, bool shouldLoad = true)
     {
         return FileResourcer.Get().GetFile(fieldType, GetFileHashFrom64(reader), shouldLoad);
     }
@@ -370,11 +370,11 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                     dynamic value;
                     if (IsTigerDeserializeType(fieldType))
                     {
-                        value =  DeserializeTigerType(reader, fieldType.GetElementType());
+                        value = DeserializeTigerType(reader, fieldType.GetElementType());
                     }
                     else
                     {
-                        value =  DeserializeMarshalType(reader, fieldType.GetElementType());
+                        value = DeserializeMarshalType(reader, fieldType.GetElementType());
                     }
                     // assume it's a tiger deserialize type
                     fieldValue[i] = value;

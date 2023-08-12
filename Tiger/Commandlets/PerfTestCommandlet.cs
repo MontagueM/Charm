@@ -89,6 +89,7 @@ public class PerfTestCommandlet : ICommandlet
         Log.Info($"{testFunc.Method.Name}: took {mean} pm {stdDeviation} ms over {testCount} runs");
     }
 
+#pragma warning disable S1144 // Unused private types or members should be removed
     private void RunSerialTest(IPackage pkg, ushort fileCount)
     {
         for (ushort i = 0; i < fileCount; i++)

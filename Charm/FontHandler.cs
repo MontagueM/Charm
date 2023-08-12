@@ -181,8 +181,9 @@ struct OtfNameRecord
     public ushort StringOffset;
 }
 
-public class BinaryReaderBE : BinaryReader {
-    public BinaryReaderBE(Stream stream)  : base(stream) { }
+public class BinaryReaderBE : BinaryReader
+{
+    public BinaryReaderBE(Stream stream) : base(stream) { }
 
     public override int ReadInt32()
     {

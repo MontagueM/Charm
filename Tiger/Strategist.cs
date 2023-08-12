@@ -134,7 +134,7 @@ public class Strategy
     /// <summary>
     /// Add a new strategy to the list of available strategies.
     /// </summary>
-    public static void AddNewStrategy(TigerStrategy strategy, string packagesDirectory, bool set=true)
+    public static void AddNewStrategy(TigerStrategy strategy, string packagesDirectory, bool set = true)
     {
         if (strategy == TigerStrategy.NONE || _strategyConfigurations.ContainsKey(strategy))
         {
@@ -316,6 +316,7 @@ public class Strategy
             _strategy = strategy;
         }
 
+#pragma warning disable S1144 // Unused private types or members should be removed
         private static void RegisterEvents()
         {
             Strategy.OnStrategyChangedEvent += OnStrategyChangedEvent;

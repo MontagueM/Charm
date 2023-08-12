@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -91,7 +91,7 @@ public partial class MapView : UserControl
         fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
 
-        if(exportStatics)
+        if (exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
             ExportStatics(exportStatics, savePath, map);
@@ -128,7 +128,7 @@ public partial class MapView : UserControl
         Directory.CreateDirectory(savePath);
         Directory.CreateDirectory(savePath + "/Dynamics");
 
-        if(exportStatics)
+        if (exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
             Directory.CreateDirectory(savePath + "/Statics/LOD");
@@ -166,7 +166,7 @@ public partial class MapView : UserControl
             fbxHandler.InfoHandler.SetUnrealInteropPath(_config.GetUnrealInteropPath());
         }
 
-        fbxHandler.InfoHandler.SetMeshName(meshName+"_Terrain");
+        fbxHandler.InfoHandler.SetMeshName(meshName + "_Terrain");
         Directory.CreateDirectory(savePath);
 
         Parallel.ForEach(map.TagData.MapDataTables, data =>
@@ -211,7 +211,7 @@ public partial class MapView : UserControl
                         staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoFbxScene(fbxHandler, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                     }
                 }
-                else if(entry is SMapDataEntry dynamicResource)
+                else if (entry is SMapDataEntry dynamicResource)
                 {
                     dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.GetEntityHash(), dynamicHandler);
                 }
@@ -239,9 +239,9 @@ public partial class MapView : UserControl
                         var parts = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.Statics;
                         //staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoFbxScene(staticHandler, savePath, _config.GetUnrealInteropEnabled());
                         //Parallel.ForEach(parts, part =>
-                        foreach(var part in parts)
+                        foreach (var part in parts)
                         {
-                            if(File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
+                            if (File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
 
                             string staticMeshName = part.Static.Hash.ToString();
                             FbxHandler staticHandler = new FbxHandler(false);
@@ -251,7 +251,7 @@ public partial class MapView : UserControl
 
                             staticHandler.AddStaticToScene(staticmesh, part.Static.Hash);
 
-                            if(source2Models)
+                            if (source2Models)
                             {
                                 //Source 2 shit
                                 File.Copy("Exporters/template.vmdl", $"{savePath}/Statics/{staticMeshName}.vmdl", true);
@@ -280,7 +280,7 @@ public partial class MapView : UserControl
 
                             staticHandler.ExportScene($"{savePath}/Statics/{staticMeshName}.fbx");
                             staticHandler.Dispose();
-                    }//);
+                        }//);
                     }
                     // Dont see a reason to export terrain itself as its own fbx
                     // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement)  // Terrain

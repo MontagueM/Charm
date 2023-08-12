@@ -544,7 +544,7 @@ public class ResourceInTablePointer<T> : ITigerDeserialize where T : struct
     public void Deserialize(TigerReader reader)
     {
         long resourcePointer = reader.ReadInt64();
-        reader.Seek(resourcePointer-8, SeekOrigin.Current);
+        reader.Seek(resourcePointer - 8, SeekOrigin.Current);
         Value = reader.ReadSchemaStruct<T>();
     }
 }
@@ -557,6 +557,7 @@ public class ResourceInTagPointer : ITigerDeserialize
 {
     public void Deserialize(TigerReader reader)
     {
+        // Method intentionally left empty.
     }
 }
 
@@ -564,10 +565,11 @@ public class ResourceInTagPointer : ITigerDeserialize
 /// The weird one of above todo improve this comment
 /// </summary>
 [SchemaType(0x18)]
-public class ResourceInTagWeirdPointer: ITigerDeserialize
+public class ResourceInTagWeirdPointer : ITigerDeserialize
 {
     public void Deserialize(TigerReader reader)
     {
+        // Method intentionally left empty.
     }
 }
 

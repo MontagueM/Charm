@@ -39,7 +39,7 @@ public partial class ExportControl : UserControl
     //     ExportName.Text = $"Exporting: {name}";
     // }
 
-    public void SetExportFunction(Action<ExportInfo> function, int exportTypeFlags, bool disableLoadingBar=false)
+    public void SetExportFunction(Action<ExportInfo> function, int exportTypeFlags, bool disableLoadingBar = false)
     {
         _disableLoadingBar = disableLoadingBar;
         if (_bExportFunctionSet)
@@ -57,7 +57,7 @@ public partial class ExportControl : UserControl
         for (int i = 0; i < values.Count; i++)
         {
             var value = values[i];
-            if (((int) value & exportTypeFlags) == (int) value)
+            if (((int)value & exportTypeFlags) == (int)value)
             {
                 string name = TagItem.GetEnumDescription(value);
                 ExportComboBox.Items.Add(new ComboBoxItem
@@ -106,7 +106,7 @@ public partial class ExportControl : UserControl
     {
         if (_bExportFunctionSet && DisabledOverlay.Visibility == Visibility.Visible)
             DisabledOverlay.Visibility = Visibility.Hidden;
-        ExportInfo info = new() {Name = name, Hash = hash};
+        ExportInfo info = new() { Name = name, Hash = hash };
         // SetExportName(name);
         ExportButton.Tag = info;
     }
@@ -121,7 +121,8 @@ public struct ExportInfo
 {
     private string _name = String.Empty;
 
-    public string Name {
+    public string Name
+    {
         get => _name == String.Empty ? Hash : _name;
         set => _name = value;
     }

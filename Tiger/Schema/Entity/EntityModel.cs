@@ -87,7 +87,7 @@ public class EntityModel : Tag<SEntityModel>
             var groupList = groups.ToList();
             groupList.Remove(0x707);
             groupList.Sort();
-            for (int i = 0; i < groupList.Count-1; i++)
+            for (int i = 0; i < groupList.Count - 1; i++)
             {
                 for (int j = groupList[i]; j < groupList[i + 1]; j++)
                 {
@@ -99,7 +99,9 @@ public class EntityModel : Tag<SEntityModel>
             {
                 DynamicMeshPart dynamicMeshPart = new(part, parentResource)
                 {
-                    Index = i, GroupIndex = partGroups[i], LodCategory = part.LodCategory,
+                    Index = i,
+                    GroupIndex = partGroups[i],
+                    LodCategory = part.LodCategory,
                     bAlphaClip = (part.Flags & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
                 };
@@ -167,7 +169,7 @@ public class DynamicMeshPart : MeshPart
         // Have to call it like this b/c we don't know the format of the vertex data here
         Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
         mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
-        mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride,  false);
+        mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
         if (mesh.OldWeights != null)
         {
             mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices);
@@ -223,8 +225,8 @@ public class DynamicMeshPart : MeshPart
         List<IMaterial> materials = new();
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            var map = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMapWQ;
-            var mats = ((D2Class_8F6D8080) parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
+            var map = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMapWQ;
+            var mats = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
             if (map.Count == 0 || mats.Count == 0)
             {
                 return null;
