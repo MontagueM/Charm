@@ -90,7 +90,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             }
             else if (TexHelper.Instance.IsSRGB(format))
             {
-                scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SRGB, 0);
+                scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0);
             }
             else
             {

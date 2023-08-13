@@ -160,8 +160,8 @@ public class TexturePlate : Tag<D2Class_919E8080>
         foreach (var transform in _tag.PlateTransforms.Enumerate(reader))
         {
             ScratchImage original = transform.Texture.GetScratchImage();
-            ScratchImage resizedOriginal = original.Resize(transform.Scale.X, transform.Scale.Y, 0);
-            TexHelper.Instance.CopyRectangle(resizedOriginal.GetImage(0, 0, 0), 0, 0, transform.Scale.X, transform.Scale.Y, outputPlate.GetImage(0, 0, 0), bSrgb ? TEX_FILTER_FLAGS.SRGB : 0, transform.Translation.X, transform.Translation.Y);
+            ScratchImage resizedOriginal = original.Resize(transform.Scale.X, transform.Scale.Y, TEX_FILTER_FLAGS.SEPARATE_ALPHA);
+            TexHelper.Instance.CopyRectangle(resizedOriginal.GetImage(0, 0, 0), 0, 0, transform.Scale.X, transform.Scale.Y, outputPlate.GetImage(0, 0, 0), bSrgb ? TEX_FILTER_FLAGS.SEPARATE_ALPHA : 0, transform.Translation.X, transform.Translation.Y);
             original.Dispose();
             resizedOriginal.Dispose();
         }
