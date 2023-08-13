@@ -430,7 +430,11 @@ PS
                         {
                             try
                             {
-                                if (data[i] is Vector4)
+                                if (data[i] is Vec4)
+                                {
+                                    CBuffers.AppendLine($"\t\tfloat4({data[i].Vec.X}, {data[i].Vec.Y}, {data[i].Vec.Z}, {data[i].Vec.W}), //" + i);
+                                }
+                                else if (data[i] is Vector4)
                                 {
                                     CBuffers.AppendLine($"\t\tfloat4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}), //" + i);
                                 }
