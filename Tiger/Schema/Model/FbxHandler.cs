@@ -550,7 +550,7 @@ public class FbxHandler
         Quaternion quatRot = new Quaternion(points.Rotation.X, points.Rotation.Y, points.Rotation.Z, points.Rotation.W);
         System.Numerics.Vector3 eulerRot = QuaternionToEulerAngles(quatRot);
 
-        node.LclTranslation.Set(new FbxDouble3(points.Translation.X * 100, points.Translation.Y * 100, points.Translation.Z * 100));
+        node.LclTranslation.Set(new FbxDouble3(points.Translation.X * 100, points.Translation.Z * 100, -points.Translation.Y * 100));
         node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
         node.LclScaling.Set(new FbxDouble3(100, 100, 100));
 
