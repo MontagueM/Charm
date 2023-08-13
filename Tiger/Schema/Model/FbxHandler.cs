@@ -2,9 +2,9 @@
 using Internal.Fbx;
 using SharpDX;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
-using Tiger.Schema.Model;
 
 namespace Tiger.Schema;
 
@@ -12,7 +12,7 @@ public class FbxHandler
 {
     private readonly FbxManager _manager;
     private readonly FbxScene _scene;
-    List<FileHash> addedEntities = new List<FileHash>();
+    private readonly List<FileHash> addedEntities = new();
     public InfoConfigHandler InfoHandler;
     private static object _fbxLock = new object();
 
@@ -503,7 +503,7 @@ public class FbxHandler
             List<FbxNode> skeletonNodes = new List<FbxNode>();
             List<DynamicMeshPart> dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
             entity.SaveMaterialsFromParts(savePath, dynamicParts, bSaveShaders);
-           
+
             if (entity.Skeleton != null)
             {
                 skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
@@ -515,7 +515,7 @@ public class FbxHandler
                 if (dynamicPart.Material == null)
                     continue;
 
-                if (dynamicPart.Material.EnumeratePSTextures().Count() == 0) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                if (!dynamicPart.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
                 {
                     continue;
                 }

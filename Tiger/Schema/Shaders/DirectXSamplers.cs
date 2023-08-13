@@ -20,7 +20,7 @@ public class DirectXSampler : TigerReferenceFile<SSamplerHeader>
     public D3D11_SAMPLER_DESC GetSampler()
     {
         using TigerReader reader = GetReferenceReader();
-            return reader.ReadType<D3D11_SAMPLER_DESC>();
+        return reader.ReadType<D3D11_SAMPLER_DESC>();
     }
 
     [StructLayout(LayoutKind.Sequential, Size = 0x34)]
@@ -39,7 +39,7 @@ public class DirectXSampler : TigerReferenceFile<SSamplerHeader>
         public float MaxLOD;
     }
 
-    public enum D3D11_FILTER : int
+    public enum D3D11_FILTER 
     {
         MIN_MAG_MIP_POINT = 0x0,
         MIN_MAG_POINT_MIP_LINEAR = 0x1,
@@ -79,7 +79,7 @@ public class DirectXSampler : TigerReferenceFile<SSamplerHeader>
         MAXIMUM_ANISOTROPIC = 0x1d5
     }
 
-    public enum D3D11_TEXTURE_ADDRESS_MODE : int
+    public enum D3D11_TEXTURE_ADDRESS_MODE 
     {
         WRAP = 0x1,
         MIRROR = 0x2,
@@ -88,7 +88,7 @@ public class DirectXSampler : TigerReferenceFile<SSamplerHeader>
         MIRROR_ONCE = 0x5
     }
 
-    public enum D3D11_COMPARISON_FUNC : int
+    public enum D3D11_COMPARISON_FUNC 
     {
         NEVER = 0x1,
         LESS = 0x2,
