@@ -195,7 +195,7 @@ public partial class MapView : UserControl
             });
         });
 
-        if(export)
+        if (export)
         {
             if (_config.GetUnrealInteropEnabled())
             {
@@ -204,7 +204,7 @@ public partial class MapView : UserControl
             }
 
             fbxHandler.InfoHandler.AddType("Terrain");
-            fbxHandler.ExportScene($"{savePath}/{meshName}_Terrain.fbx"); 
+            fbxHandler.ExportScene($"{savePath}/{meshName}_Terrain.fbx");
         }
         fbxHandler.Dispose();
     }

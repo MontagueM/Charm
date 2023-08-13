@@ -2,8 +2,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using Tiger.Schema;
 using Tiger;
+using Tiger.Schema;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
@@ -12,12 +12,12 @@ public class S2ShaderConverter
 {
     private StringReader hlsl;
     private StringBuilder vfx;
-    private List<TextureView> textures = new List<TextureView>();
-    private List<int> samplers = new List<int>();
-    private List<Cbuffer> cbuffers = new List<Cbuffer>();
-    private List<Shaders.Buffer> buffers = new List<Shaders.Buffer>();
-    private List<Input> inputs = new List<Input>();
-    private List<Output> outputs = new List<Output>();
+    private readonly List<TextureView> textures = new List<TextureView>();
+    private readonly List<int> samplers = new List<int>();
+    private readonly List<Cbuffer> cbuffers = new List<Cbuffer>();
+    private readonly List<Shaders.Buffer> buffers = new List<Shaders.Buffer>();
+    private readonly List<Input> inputs = new List<Input>();
+    private readonly List<Output> outputs = new List<Output>();
     private static bool isTerrain = false;
     private bool bOpacityEnabled = false;
     private bool bUsesFrontFace = false;

@@ -1,5 +1,5 @@
-﻿using Tiger.Schema.Shaders;
-using Tiger.Schema.Model;
+﻿using Tiger.Schema.Model;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static;
 

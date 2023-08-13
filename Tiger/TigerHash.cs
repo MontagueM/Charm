@@ -46,6 +46,7 @@ public class StringHash : TigerHash
 [SchemaType(0x04)]
 public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEquatable<TigerHash>, IEqualityComparer<TigerHash>
 {
+#pragma warning disable S1104
     public uint Hash32;
     public const uint InvalidHash32 = 0xFFFFFFFF;
 

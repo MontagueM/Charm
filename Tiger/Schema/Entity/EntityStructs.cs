@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using DirectXTexNet;
-using Tiger.Schema.Model;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Investment;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;

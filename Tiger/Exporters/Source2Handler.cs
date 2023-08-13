@@ -62,7 +62,7 @@ public class Source2Handler
                 if (part.Material == null)
                     continue;
 
-                if (part.Material.EnumeratePSTextures().Count() == 0)
+                if (!part.Material.EnumeratePSTextures().Any())
                     continue;
 
                 mats.AppendLine("{");
@@ -121,7 +121,7 @@ public class Source2Handler
             vmat.AppendLine($"  shader \"complex.shader\"");
 
             //Use just the first texture for the diffuse
-            if (materialHeader.EnumeratePSTextures().Count() > 0)
+            if (materialHeader.EnumeratePSTextures().Any())
             {
                 if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
                     vmat.AppendLine($"  TextureColor \"materials/Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
@@ -171,7 +171,7 @@ public class Source2Handler
         vmat.AppendLine($"  shader \"projected_decals.shader\"");
 
         //Use just the first texture for the diffuse
-        if (materialHeader.EnumeratePSTextures().Count() > 0)
+        if (materialHeader.EnumeratePSTextures().Any())
         {
             if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
                 vmat.AppendLine($"  TextureColor \"materials/Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
