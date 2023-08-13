@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using Arithmic;
 using DirectXTexNet;
-using Microsoft.VisualBasic.FileIO;
+using Tiger.Schema.Model;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;

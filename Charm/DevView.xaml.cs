@@ -172,6 +172,7 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, entityView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+                case 0x808071a7:
                 case 0x80806D44:
                     StaticView staticView = new StaticView();
                     staticView.LoadStatic(hash, ExportDetailLevel.MostDetailed);

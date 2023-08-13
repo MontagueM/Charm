@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static;
