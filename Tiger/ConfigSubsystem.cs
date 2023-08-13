@@ -296,6 +296,10 @@ public class ConfigSubsystem : Subsystem
 
     public bool GetUnrealInteropEnabled()
     {
+        if (_settings.Unreal == null)
+        {
+            return false;
+        }
         return _settings.Unreal.UnrealInteropEnabled;
     }
 

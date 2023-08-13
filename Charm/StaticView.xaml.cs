@@ -68,32 +68,8 @@ public partial class StaticView : UserControl
 
             if (source2Models)
             {
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{meshName}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{meshName}.vmdl");
-                StringBuilder mats = new StringBuilder();
-
-                // {
-                //     from = ""
-                //     to = "materials/"
-                // },
-                int i = 0;
-                foreach (StaticPart staticpart in parts)
-                {
-                    mats.AppendLine("{");
-                    //mats.AppendLine($"    from = \"{meshName}_Group{staticpart.GroupIndex}_index{staticpart.Index}_{i}_{staticpart.LodCategory}_{i}.vmat\"");
-                    mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
-                    mats.AppendLine("},\n");
-                    i++;
-                }
-
-                text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"models/{meshName}.fbx");
-                text = text.Replace("%MESHNAME%", meshName);
-
-                File.WriteAllText($"{savePath}/{meshName}.vmdl", text);
+                Source2Handler.SaveStaticVMDL($"{savePath}", meshName, parts);
             }
-
         }
         fbxHandler.InfoHandler.AddType("Static");
         fbxHandler.ExportScene($"{savePath}/{name}.fbx");

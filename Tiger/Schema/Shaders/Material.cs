@@ -1,8 +1,49 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using Tiger.Exporters;
 
 namespace Tiger.Schema.Shaders
 {
+
+    public struct TextureView
+    {
+        public string Dimension;
+        public string Type;
+        public string Variable;
+        public int Index;
+    }
+
+    public struct Buffer
+    {
+        public string Variable;
+        public string Type;
+        public int Index;
+    }
+
+    public struct Cbuffer
+    {
+        public string Variable;
+        public string Type;
+        public int Count;
+        public int Index;
+    }
+
+    public struct Input
+    {
+        public string Variable;
+        public string Type;
+        public int Index;
+        public string Semantic;
+    }
+
+    public struct Output
+    {
+        public string Variable;
+        public string Type;
+        public int Index;
+        public string Semantic;
+    }
+
     public interface IMaterial : ISchema
     {
         public FileHash FileHash { get; }
@@ -11,6 +52,8 @@ namespace Tiger.Schema.Shaders
         public ShaderBytecode VertexShader { get; }
         public ShaderBytecode PixelShader { get; }
         public FileHash PSVector4Container { get; }
+        public DynamicArray<SDirectXSamplerTag> PS_Samplers { get; }
+        public DynamicArray<SDirectXSamplerTag> VS_Samplers { get; }
         public DynamicArray<D2Class_09008080> Unk90 { get; }
         public DynamicArray<Vec4> UnkA0 { get; }
         public DynamicArray<Vec4> UnkC0 { get; }
@@ -18,6 +61,7 @@ namespace Tiger.Schema.Shaders
         public DynamicArray<Vec4> Unk2E0 { get; }
         public DynamicArray<Vec4> Unk300 { get; }
         public static object _lock = new object();
+        private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
         public void SaveAllTextures(string saveDirectory)
         {
@@ -49,11 +93,11 @@ namespace Tiger.Schema.Shaders
             }
         }
 
-        public string Decompile(byte[] shaderBytecode, string? type = "ps")
+        public string Decompile(byte[] shaderBytecode, string name)
         {
             string directory = "hlsl_temp";
-            string binPath = $"{directory}/{type}{FileHash}.bin";
-            string hlslPath = $"{directory}/{type}{FileHash}.hlsl";
+            string binPath = $"{directory}/{name}.bin";
+            string hlslPath = $"{directory}/{name}.hlsl";
 
             if (!Directory.Exists(directory))
             {
@@ -109,78 +153,39 @@ namespace Tiger.Schema.Shaders
         {
             if (PixelShader != null)
             {
-                string hlsl = Decompile(PixelShader.GetBytecode());
-                string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-                string vfx = new VfxConverter().HlslToVfx(this, hlsl, false, isTerrain);
+                string pixel = Decompile(PixelShader.GetBytecode(), $"ps{FileHash}");
+                string vertex = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
+                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
+                string vfx = Source2Handler.source2Shaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
 
-                Directory.CreateDirectory($"{saveDirectory}/Source2");
-                Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
-                StringBuilder vmat = new StringBuilder();
-                if (usf != String.Empty || vfx != String.Empty)
+                Directory.CreateDirectory($"{saveDirectory}/Unreal");
+                if (Source2Handler.source2Shaders)
                 {
-                    try
-                    {
-                        if (!File.Exists($"{saveDirectory}/PS_{FileHash}.usf"))
-                        {
-                            File.WriteAllText($"{saveDirectory}/PS_{FileHash}.usf", usf);
-                        }
-                        if (!File.Exists($"{saveDirectory}/Source2/PS_{FileHash}.shader"))
-                        {
-                            File.WriteAllText($"{saveDirectory}/Source2/PS_{FileHash}.shader", vfx);
-                        }
-
-                        Console.WriteLine($"Saved pixel shader {FileHash}");
-                    }
-                    catch (IOException)  // threading error
-                    {
-                    }
+                    Directory.CreateDirectory($"{saveDirectory}/Source2");
+                    Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
                 }
 
-                vmat.AppendLine("Layer0 \n{");
+                //if (saveCBuffers)
+                //    SaveCbuffers(this, false, pixel, saveDirectory);
 
-                //If the shader doesnt exist, just use the default complex.shader
-                if (!File.Exists($"{saveDirectory}/Source2/PS_{FileHash}.shader"))
+                try
                 {
-                    vmat.AppendLine($"  shader \"complex.shader\"");
-
-                    //Use just the first texture for the diffuse
-                    if (EnumeratePSTextures().Any())
+                    if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{FileHash}.usf"))
                     {
-                        vmat.AppendLine($"  TextureColor \"materials/Textures/{EnumeratePSTextures().First().Texture.Hash}.png\"");
+                        File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
+                    }
+                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{FileHash}.shader"))
+                    {
+                        File.WriteAllText($"{saveDirectory}/Source2/PS_{FileHash}.shader", vfx);
                     }
                 }
-                else
+                catch (IOException)  // threading error
                 {
-                    vmat.AppendLine($"  shader \"ps_{FileHash}.shader\"");
-                    vmat.AppendLine("   F_ALPHA_TEST 1");
                 }
 
-                foreach (var e in EnumeratePSTextures())
-                {
-                    if (e.Texture == null)
-                    {
-                        continue;
-                    }
-
-                    vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
-                }
-
-                // if(isTerrain)
-                // {
-                //     vmat.AppendLine($"  TextureT14 \"materials/Textures/{partEntry.Dyemap.Hash}.png\"");
-                // }
-                vmat.AppendLine("}");
-
-                if (!File.Exists($"{saveDirectory}/Source2/materials/{FileHash}.vmat"))
-                {
-                    try
-                    {
-                        File.WriteAllText($"{saveDirectory}/Source2/materials/{FileHash}.vmat", vmat.ToString());
-                    }
-                    catch (IOException)
-                    {
-                    }
-                }
+                //Need to save material after shader has be exported, to check if it exists
+                if (Source2Handler.source2Shaders)
+                    Source2Handler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
             }
         }
 
@@ -189,7 +194,7 @@ namespace Tiger.Schema.Shaders
             Directory.CreateDirectory($"{saveDirectory}");
             if (VertexShader.Hash.IsValid() && !File.Exists($"{saveDirectory}/VS_{FileHash}.usf"))
             {
-                string hlsl = Decompile(VertexShader.GetBytecode(), "vs");
+                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
                 string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
                 if (usf != String.Empty)
                 {
@@ -234,6 +239,8 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2E8;
         public DynamicArray<Vec4> Unk2E0 => _tag.Unk2F8;
         public DynamicArray<Vec4> Unk300 => _tag.Unk310;
+        public DynamicArray<SDirectXSamplerTag> VS_Samplers => _tag.VS_Samplers;
+        public DynamicArray<SDirectXSamplerTag> PS_Samplers => _tag.PS_Samplers;
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {
@@ -271,6 +278,8 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2D0;
         public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
         public DynamicArray<Vec4> Unk300 => _tag.Unk300;
+        public DynamicArray<SDirectXSamplerTag> VS_Samplers => _tag.VS_Samplers;
+        public DynamicArray<SDirectXSamplerTag> PS_Samplers => _tag.PS_Samplers;
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {

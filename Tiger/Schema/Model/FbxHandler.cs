@@ -12,8 +12,10 @@ public class FbxHandler
 {
     private readonly FbxManager _manager;
     private readonly FbxScene _scene;
+    List<FileHash> addedEntities = new List<FileHash>();
     public InfoConfigHandler InfoHandler;
     private static object _fbxLock = new object();
+
     public FbxHandler(bool bMakeInfoHandler = true)
     {
         lock (_fbxLock) // bc fbx is not thread-safe
@@ -481,6 +483,56 @@ public class FbxHandler
         }
     }
 
+    public void AddDynamicToScene(SMapDataEntry points, string meshName, string savePath, bool bSaveShaders = false, bool bSaveCBuffers = false, bool skipCheck = false)
+    {
+        Entity.Entity entity = FileResourcer.Get().GetFile<Entity.Entity>(points.EntityWQ.Hash);
+
+        if (!skipCheck)
+            if (!entity.HasGeometry())
+            {
+                return;
+            }
+
+        if (InfoHandler != null)
+            InfoHandler.AddInstance(entity.Hash, points.Translation.W, points.Rotation, points.Translation.ToVec3());
+
+        if (!addedEntities.Contains(entity.Hash))
+        {
+            addedEntities.Add(entity.Hash);
+
+            List<FbxNode> skeletonNodes = new List<FbxNode>();
+            List<DynamicMeshPart> dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
+            entity.SaveMaterialsFromParts(savePath, dynamicParts, bSaveShaders);
+           
+            if (entity.Skeleton != null)
+            {
+                skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
+            }
+            for (int i = 0; i < dynamicParts.Count; i++)
+            {
+                var dynamicPart = dynamicParts[i];
+
+                if (dynamicPart.Material == null)
+                    continue;
+
+                if (dynamicPart.Material.EnumeratePSTextures().Count() == 0) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                {
+                    continue;
+                }
+
+                FbxMesh mesh = AddMeshPartToScene(dynamicPart, i, entity.Hash);
+
+                if (dynamicPart.VertexWeights.Count > 0)
+                {
+                    if (skeletonNodes.Count > 0)
+                    {
+                        AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
+                    }
+                }
+            }
+        }
+    }
+
     public void AddDynamicPointsToScene(SMapDataEntry points, string meshName, FbxHandler dynamicHandler)
     {
         Entity.Entity entity = FileResourcer.Get().GetFile<Entity.Entity>(points.GetEntityHash());
@@ -499,7 +551,7 @@ public class FbxHandler
         Quaternion quatRot = new Quaternion(points.Rotation.X, points.Rotation.Y, points.Rotation.Z, points.Rotation.W);
         System.Numerics.Vector3 eulerRot = QuaternionToEulerAngles(quatRot);
 
-        node.LclTranslation.Set(new FbxDouble3(points.Translation.X * 100, points.Translation.Y * 100, points.Translation.Z * 100));
+        node.LclTranslation.Set(new FbxDouble3(points.Translation.X * 100, points.Translation.Z * 100, -points.Translation.Y * 100));
         node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
         node.LclScaling.Set(new FbxDouble3(100, 100, 100));
 

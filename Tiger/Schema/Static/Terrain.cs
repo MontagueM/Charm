@@ -1,4 +1,4 @@
-﻿using Tiger.Schema.Model;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static;
@@ -12,7 +12,7 @@ public class Terrain : Tag<STerrain>
     }
 
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource)
+    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource, bool exportStatic = false)
     {
         // Directory.CreateDirectory(saveDirectory + "/Textures/Terrain/");
         // Directory.CreateDirectory(saveDirectory + "/Shaders/Terrain/");
@@ -22,7 +22,8 @@ public class Terrain : Tag<STerrain>
         //     return;
         // }
         // Uses triangle strip + only using first set of vertices and indices
-        List<StaticPart> parts = new();
+        Dictionary<StaticPart, IMaterial> parts = new Dictionary<StaticPart, IMaterial>();
+        List<string> dyeMaps = new List<string>();
         var x = new List<float>();
         var y = new List<float>();
         var z = new List<float>();
@@ -31,7 +32,7 @@ public class Terrain : Tag<STerrain>
             if (partEntry.DetailLevel == 0)
             {
                 var part = MakePart(partEntry);
-                parts.Add(part);
+                parts.TryAdd(part, partEntry.Material);
                 x.AddRange(part.VertexPositions.Select(a => a.X));
                 y.AddRange(part.VertexPositions.Select(a => a.Y));
                 z.AddRange(part.VertexPositions.Select(a => a.Z));
@@ -66,39 +67,55 @@ public class Terrain : Tag<STerrain>
             if (partEntry.Dyemap != null)
             {
                 partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/{partEntry.Dyemap.Hash}");
+                dyeMaps.Add(partEntry.Dyemap.Hash.ToString());
             }
         }
         localOffset = new Vector3((x.Max() + x.Min()) / 2, (y.Max() + y.Min()) / 2, (z.Max() + z.Min()) / 2);
         foreach (var part in parts)
         {
             // scale by 1.99 ish, -1 for all sides, multiply by 512?
-            TransformPositions(part, localOffset);
-            TransformTexcoords(part);
+            TransformPositions(part.Key, localOffset);
+            TransformTexcoords(part.Key);
         }
 
-        fbxHandler.AddStaticToScene(parts, Hash);
+        fbxHandler.AddStaticToScene(parts.Keys.ToList(), Hash);
         // For now we pre-transform it
-        fbxHandler.InfoHandler.AddInstance(Hash, 1, Vector4.Zero, globalOffset);
+        if (!exportStatic)
+            fbxHandler.InfoHandler.AddInstance(Hash, 1, Vector4.Zero, globalOffset);
 
         // We need to add these textures after the static is initialised
         foreach (var part in parts)
         {
-            Texture dyemap = _tag.MeshGroups[part.GroupIndex].Dyemap;
+            Texture dyemap = _tag.MeshGroups[part.Key.GroupIndex].Dyemap;
             if (dyemap != null)
             {
-                fbxHandler.InfoHandler.AddCustomTexture(part.Material.FileHash, terrainTextureIndex, dyemap);
-
-                if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/{part.Material.FileHash}.vmat"))
+                if (!exportStatic)
                 {
-                    //Get the last line of the vmat file
-                    var vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.FileHash}.vmat");
-                    var lastLine = vmat[vmat.Length - 1];
+                    fbxHandler.InfoHandler.AddCustomTexture(part.Key.Material.FileHash, terrainTextureIndex, dyemap);
+                }
 
-                    //Insert a new line before the last line
-                    var newVmat = vmat.Take(vmat.Length - 1).ToList();
-                    newVmat.Add($"  TextureT14 " + $"\"{dyemap.Hash}.png\"");
-                    newVmat.Add(lastLine);
-                    File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/{part.Material.FileHash}.vmat", newVmat);
+                if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2ShaderExportEnabled())
+                {
+                    if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat"))
+                    {
+                        string[] vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat");
+                        int lastBraceIndex = Array.FindLastIndex(vmat, line => line.Trim().Equals("}")); //Searches for the last brace (})
+                        bool textureFound = Array.Exists(vmat, line => line.Trim().StartsWith("TextureT14"));
+                        if (!textureFound && lastBraceIndex != -1)
+                        {
+                            var newVmat = vmat.Take(lastBraceIndex).ToList();
+
+                            for (int i = 0; i < dyeMaps.Count; i++) //Add all the dyemaps to the vmat
+                            {
+                                //Console.WriteLine($"{dyeMaps[i]}");
+                                newVmat.Add($"  TextureT{terrainTextureIndex}_{i} \"materials/Textures/{dyeMaps[i]}.png\"");
+                            }
+
+                            newVmat.AddRange(vmat.Skip(lastBraceIndex));
+                            File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/Terrain/{Hash}_{part.Value.FileHash}.vmat", newVmat);
+                            File.Delete($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat"); //Delete the old vmat, dont need it anymore
+                        }
+                    }
                 }
             }
         }
