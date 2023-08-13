@@ -1,4 +1,5 @@
 ﻿using Tiger.Schema.Shaders;
+using Tiger.Schema.Model;
 
 namespace Tiger.Schema.Static;
 
@@ -107,7 +108,7 @@ public struct SStaticMeshBuffers
 {
     public IndexBuffer Indices;
     public VertexBuffer Vertices0;
-    public VertexBuffer Vertices1;
+    public VertexBuffer? Vertices1;
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public VertexBuffer Vertices2;
     public uint UnkOffset;

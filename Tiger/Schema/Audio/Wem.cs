@@ -9,7 +9,8 @@ namespace Tiger.Schema.Audio;
 /// Only loads the tag when asked and keeps it cached here, it's ofc still in PackageHandler cache
 /// but still a bit more efficient.
 /// </summary>
-[NonSchemaType(26, new[] { 7 })]
+[NonSchemaType(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 26, new[] { 6 })]
+[NonSchemaType(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 26, new[] { 7 })]
 public class Wem : TigerFile
 {
     private MemoryStream _wemStream = null;

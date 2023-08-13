@@ -58,6 +58,17 @@ public class TigerReader : BinaryReader
         File.WriteAllBytes("dump.bin", data);
         Seek(pos, SeekOrigin.Begin);
     }
+
+    public string ReadNullTerminatedString()
+    {
+        StringBuilder sb = new();
+        char c;
+        while ((c = ReadChar()) != 0)
+        {
+            sb.Append(c);
+        }
+        return sb.ToString();
+    }
 }
 
 public interface ITigerDeserialize

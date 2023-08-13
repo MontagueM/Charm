@@ -54,8 +54,8 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
                 if (materialMap.ContainsKey(i))
                 {
                     StaticPart part = new(staticPartEntry);
-                    part.GetAllData(_tag.Buffers[staticPartEntry.BufferIndex], parent);
                     part.Material = materialMap[i];
+                    part.GetAllData(_tag.Buffers[staticPartEntry.BufferIndex], parent);
                     parts.Add(part);
                 }
             }

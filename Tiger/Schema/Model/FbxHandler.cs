@@ -4,6 +4,7 @@ using SharpDX;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
+using Tiger.Schema.Model;
 
 namespace Tiger.Schema;
 

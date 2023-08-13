@@ -1,7 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using Arithmic;
 using DirectXTexNet;
-using Microsoft.VisualBasic.FileIO;
+using Tiger.Schema.Model;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
@@ -129,6 +128,7 @@ public struct D2Class_8F6D8080
     public Tag<D2Class_1C6E8080> TexturePlates;
     // todo there might be a nice way to combine these two and namespace the struct, and instead use properties not fields? would mean all the mess is in the data side not the logic, basically mapping one onto the other. Possible to make it so everything maps onto the latest given, so it only needs to be done for older versions.
     [SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntrySK> ExternalMaterialsMapSK;
     [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntryWQ> ExternalMaterialsMapWQ;
