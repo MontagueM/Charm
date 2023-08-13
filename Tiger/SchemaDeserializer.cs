@@ -169,7 +169,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 return;
             }
 
-            NonSchemaTypeAttribute? nonSchemaTypeAttr = GetFirstAttribute<NonSchemaTypeAttribute>(type);
+            NonSchemaTypeAttribute? nonSchemaTypeAttr = GetAttribute<NonSchemaTypeAttribute>(type);
             if (nonSchemaTypeAttr != null)
             {
                 _nonSchemaTypeMap.TryAdd(type, new TypeSubType { Type = nonSchemaTypeAttr.Type, SubTypes = nonSchemaTypeAttr.SubTypes });

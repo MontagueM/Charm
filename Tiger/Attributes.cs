@@ -144,19 +144,19 @@ public class NonSchemaStructAttribute : StrategyAttribute
 /// <summary>
 /// -1 type or empty subtype represents "any"
 /// </summary>
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-public class NonSchemaTypeAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class NonSchemaTypeAttribute : StrategyAttribute
 {
     public int Type { get; }
     public HashSet<int> SubTypes { get; } = new();
 
-    public NonSchemaTypeAttribute(int type, int subType)
+    public NonSchemaTypeAttribute(int type, int[] subTypes)
     {
         Type = type;
-        SubTypes.Add(subType);
+        SubTypes.UnionWith(subTypes);
     }
 
-    public NonSchemaTypeAttribute(int type, int[] subTypes)
+    public NonSchemaTypeAttribute(TigerStrategy strategy, int type, int[] subTypes) : base(strategy)
     {
         Type = type;
         SubTypes.UnionWith(subTypes);
