@@ -11,11 +11,10 @@ namespace Tiger.Schema;
 
 public class DirectXSampler : TigerReferenceFile<SSamplerHeader>
 {
-    public D3D11_SAMPLER_DESC Sampler;
+    public D3D11_SAMPLER_DESC Sampler => GetSampler();
 
     public DirectXSampler(FileHash hash) : base(hash)
     {
-        Sampler = GetSampler();
     }
 
     public D3D11_SAMPLER_DESC GetSampler()
