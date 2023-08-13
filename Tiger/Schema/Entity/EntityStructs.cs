@@ -1379,21 +1379,3 @@ public struct CubemapResource //Dataresource for cubemaps
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Texture Unk1C0; //Sometype of reflection tint texture idk
 }
-
-//[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2999, "7F6B8080", 0x1C0)]
-//public struct CubemapResource_SK //Dataresource for Pre-BL cubemaps
-//{
-//    [SchemaField(0x20)]
-//    public Vector4 CubemapSize; //XYZ, no W
-//    public Vector4 CubemapPosition; //Cubemap texture lines up with this one
-//    //[SchemaField(0xF0)]
-//    //public Vector4 UnkF0; //This might actually be position? Similar to other but in GDC image this one looked more correct
-//    [SchemaField(0x140)]
-//    public Vector4 CubemapRotation;
-//    [SchemaField(0x190)]
-//    public StringPointer CubemapName;
-//    [SchemaField(0x198)]
-//    public Texture CubemapTexture;
-//    [SchemaField(0x1A0)]
-//    public Texture Unk1A0; //Sometype of reflection tint texture idk
-//}

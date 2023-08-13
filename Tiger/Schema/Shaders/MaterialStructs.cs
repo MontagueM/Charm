@@ -3,6 +3,7 @@
 namespace Tiger.Schema;
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E8718080", 0x400)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2999, "E8718080", 0x400)]
 public struct SMaterial_SK
 {
     public long FileSize;
@@ -29,7 +30,7 @@ public struct SMaterial_SK
     public DynamicArray<Vec4> Unk2F8;
     public DynamicArray<SDirectXSamplerTag> PS_Samplers;
     public DynamicArray<Vec4> Unk310;
-    [SchemaField(0x348)]
+    [SchemaField(0x34C)]
     public FileHash PSVector4Container;
 }
 
