@@ -3,7 +3,6 @@
 namespace Tiger.Schema;
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E8718080", 0x400)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2999, "E8718080", 0x400)]
 public struct SMaterial_SK
 {
     public long FileSize;
