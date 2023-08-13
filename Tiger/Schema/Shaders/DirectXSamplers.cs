@@ -15,6 +15,13 @@ public class DirectXSampler : TigerReferenceFile<SSamplerHeader>
 
     public DirectXSampler(FileHash hash) : base(hash)
     {
+        Sampler = GetSampler();
+    }
+
+    public D3D11_SAMPLER_DESC GetSampler()
+    {
+        using TigerReader reader = GetReferenceReader();
+            return reader.ReadType<D3D11_SAMPLER_DESC>();
     }
 
     [StructLayout(LayoutKind.Sequential, Size = 0x34)]

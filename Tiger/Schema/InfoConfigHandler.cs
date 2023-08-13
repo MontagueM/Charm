@@ -19,6 +19,8 @@ public class InfoConfigHandler
         _config.TryAdd("Parts", parts);
         ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> instances = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
         _config.TryAdd("Instances", instances);
+        ConcurrentDictionary<string, ConcurrentBag<JsonCubemap>> cubemaps = new ConcurrentDictionary<string, ConcurrentBag<JsonCubemap>>();
+        _config.TryAdd("Cubemaps", cubemaps);
         bOpen = true;
     }
 
@@ -86,13 +88,6 @@ public class InfoConfigHandler
         }
     }
 
-    private struct JsonInstance
-    {
-        public float[] Translation;
-        public float[] Rotation;
-        public float Scale;
-    }
-
     public void AddInstance(string modelHash, float scale, Vector4 quatRotation, Vector3 translation)
     {
         if (!_config["Instances"].ContainsKey(modelHash))
@@ -124,6 +119,20 @@ public class InfoConfigHandler
             _config["Materials"][material] = textures;
         }
         _config["Materials"][material]["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb() });
+    }
+
+    public void AddCubemap(string name, Vector3 scale, Vector4 quatRotation, Vector3 translation)
+    {
+        if (!_config["Cubemaps"].ContainsKey(name))
+        {
+            _config["Cubemaps"][name] = new ConcurrentBag<JsonCubemap>();
+        }
+        _config["Cubemaps"][name].Add(new JsonCubemap
+        {
+            Translation = new[] { translation.X, translation.Y, translation.Z },
+            Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
+            Scale = new[] { scale.X, scale.Y, scale.Z }
+        });
     }
 
     public void WriteToFile(string path)
@@ -181,7 +190,22 @@ public class InfoConfigHandler
         }
         Dispose();
     }
+
+    private struct JsonInstance
+    {
+        public float[] Translation;
+        public float[] Rotation;
+        public float Scale;
+    }
+
+    private struct JsonCubemap
+    {
+        public float[] Translation;
+        public float[] Rotation;
+        public float[] Scale;
+    }
 }
+
 
 public struct TexInfo
 {

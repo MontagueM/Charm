@@ -1111,6 +1111,23 @@ public struct D2Class_44318080
     public Entity? Entity;
 }
 
+[SchemaStruct("95668080", 0x1E0)]
+public struct D2Class_95668080 //Dataresource for cubemaps
+{
+    [SchemaField(0x20)]
+    public Vector4 CubemapSize; //XYZ, no W
+    public Vector4 CubemapPosition; //Cubemap texture lines up with this one
+    [SchemaField(0xF0)]
+    public Vector4 UnkF0; //This might actually be position? Similar to other but in GDC image this one looked more correct
+    public Vector4 CubemapRotation;
+    [SchemaField(0x1B0)]
+    public StringPointer CubemapName;
+    [SchemaField(0x1B8)]
+    public Texture CubemapTexture;
+    [SchemaField(0x1C0)]
+    public Texture Unk1C0; //Sometype of reflection tint texture idk
+}
+
 #region Named entities
 
 //I think this is the old struct for named bags, it seems like it changed to 1D478080?

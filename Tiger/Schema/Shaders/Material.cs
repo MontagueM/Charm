@@ -93,11 +93,11 @@ namespace Tiger.Schema.Shaders
             }
         }
 
-        public string Decompile(byte[] shaderBytecode, string? type = "ps")
+        public string Decompile(byte[] shaderBytecode, string name)
         {
             string directory = "hlsl_temp";
-            string binPath = $"{directory}/{type}{FileHash}.bin";
-            string hlslPath = $"{directory}/{type}{FileHash}.hlsl";
+            string binPath = $"{directory}/{name}.bin";
+            string hlslPath = $"{directory}/{name}.hlsl";
 
             if (!Directory.Exists(directory))
             {
@@ -194,7 +194,7 @@ namespace Tiger.Schema.Shaders
             Directory.CreateDirectory($"{saveDirectory}");
             if (VertexShader.Hash.IsValid() && !File.Exists($"{saveDirectory}/VS_{FileHash}.usf"))
             {
-                string hlsl = Decompile(VertexShader.GetBytecode(), "vs");
+                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
                 string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
                 if (usf != String.Empty)
                 {

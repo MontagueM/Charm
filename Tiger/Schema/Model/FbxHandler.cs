@@ -11,8 +11,10 @@ public class FbxHandler
 {
     private readonly FbxManager _manager;
     private readonly FbxScene _scene;
+    List<FileHash> addedEntities = new List<FileHash>();
     public InfoConfigHandler InfoHandler;
     private static object _fbxLock = new object();
+
     public FbxHandler(bool bMakeInfoHandler = true)
     {
         lock (_fbxLock) // bc fbx is not thread-safe
@@ -475,6 +477,56 @@ public class FbxHandler
                 lock (_fbxLock)
                 {
                     _scene.GetRootNode().AddChild(node);
+                }
+            }
+        }
+    }
+
+    public void AddDynamicToScene(SMapDataEntry points, string meshName, string savePath, bool bSaveShaders = false, bool bSaveCBuffers = false, bool skipCheck = false)
+    {
+        Entity.Entity entity = FileResourcer.Get().GetFile<Entity.Entity>(points.EntityWQ.Hash);
+
+        if (!skipCheck)
+            if (!entity.HasGeometry())
+            {
+                return;
+            }
+
+        if (InfoHandler != null)
+            InfoHandler.AddInstance(entity.Hash, points.Translation.W, points.Rotation, points.Translation.ToVec3());
+
+        if (!addedEntities.Contains(entity.Hash))
+        {
+            addedEntities.Add(entity.Hash);
+
+            List<FbxNode> skeletonNodes = new List<FbxNode>();
+            List<DynamicMeshPart> dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
+            entity.SaveMaterialsFromParts(savePath, dynamicParts, bSaveShaders);
+           
+            if (entity.Skeleton != null)
+            {
+                skeletonNodes = AddSkeleton(entity.Skeleton.GetBoneNodes());
+            }
+            for (int i = 0; i < dynamicParts.Count; i++)
+            {
+                var dynamicPart = dynamicParts[i];
+
+                if (dynamicPart.Material == null)
+                    continue;
+
+                if (dynamicPart.Material.EnumeratePSTextures().Count() == 0) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                {
+                    continue;
+                }
+
+                FbxMesh mesh = AddMeshPartToScene(dynamicPart, i, entity.Hash);
+
+                if (dynamicPart.VertexWeights.Count > 0)
+                {
+                    if (skeletonNodes.Count > 0)
+                    {
+                        AddWeightsToMesh(mesh, dynamicPart, skeletonNodes);
+                    }
                 }
             }
         }

@@ -13,14 +13,14 @@ public class Source2Handler
     public static bool source2Models = _config.GetS2VMDLExportEnabled();
     public static bool source2Materials = _config.GetS2VMATExportEnabled();
 
-    public static void SaveStaticVMDL(string savePath, string staticMeshName, List<MeshPart> staticMesh)
+    public static void SaveStaticVMDL(string savePath, string staticMeshName, List<StaticPart> staticMesh)
     {
         try
         {
             if (!File.Exists($"{savePath}/{staticMeshName}.vmdl"))
             {
                 //Source 2 shit
-                File.Copy("template.vmdl", $"{savePath}/{staticMeshName}.vmdl", true);
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{staticMeshName}.vmdl", true);
                 string text = File.ReadAllText($"{savePath}/{staticMeshName}.vmdl");
 
                 StringBuilder mats = new StringBuilder();
@@ -51,7 +51,7 @@ public class Source2Handler
     {
         if (!File.Exists($"{savePath}/{entity.Hash}.vmdl"))
         {
-            File.Copy("template.vmdl", $"{savePath}/{entity.Hash}.vmdl", true);
+            File.Copy("Exporters/template.vmdl", $"{savePath}/{entity.Hash}.vmdl", true);
             string text = File.ReadAllText($"{savePath}/{entity.Hash}.vmdl");
 
             StringBuilder mats = new StringBuilder();
