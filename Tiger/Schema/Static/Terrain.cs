@@ -81,7 +81,8 @@ public class Terrain : Tag<STerrain>
 
         fbxHandler.AddStaticToScene(parts.Keys.ToList(), Hash);
         // For now we pre-transform it
-        fbxHandler.InfoHandler.AddInstance(Hash, 1, Vector4.Zero, globalOffset);
+        if (!exportStatic)
+            fbxHandler.InfoHandler.AddInstance(Hash, 1, Vector4.Zero, globalOffset);
 
         // We need to add these textures after the static is initialised
         foreach (var part in parts)

@@ -184,7 +184,7 @@ public partial class MapView : UserControl
                         Directory.CreateDirectory($"{savePath}/Statics/");
                         if (source2Models)
                         {
-                            File.Copy("template.vmdl", $"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.vmdl", true);
+                            File.Copy("Exporters/template.vmdl", $"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.vmdl", true);
                         }
                         FbxHandler staticHandler = new FbxHandler(false);
                         terrainArrangement.Terrain.LoadIntoFbxScene(staticHandler, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), terrainArrangement, true);
@@ -240,15 +240,10 @@ public partial class MapView : UserControl
                     //dynamicHandler.AddDynamicToScene(dynamicResource, dynamicResource.EntityWQ.Hash, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), false, false);
                     dynamicHandler.AddDynamicPointsToScene(dynamicResource, dynamicResource.GetEntityHash(), dynamicHandler);
                 }
-                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is D2Class_95668080 cubemap)
+                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is CubemapResource cubemap)
                 {
                     fbxHandler.InfoHandler.AddCubemap(cubemap.CubemapName, cubemap.CubemapSize.ToVec3(), cubemap.CubemapRotation, cubemap.CubemapPosition.ToVec3());
                 }
-                // else if (entry.DataResource is D2Class_7D6C8080 terrainArrangement && exportTypeFlag == ExportTypeFlag.Full)  // Terrain should only export with a Full export or terrain only
-                // {
-                //     //entry.Rotation.SetW(1);
-                //     terrainArrangement.Terrain.LoadIntoFbxScene(fbxHandler, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), terrainArrangement);
-                // }
             });
         });
         dynamicHandler.ExportScene($"{savePath}/{map.Hash}_DynamicPoints.fbx");
