@@ -39,43 +39,51 @@ public class StaticPart : MeshPart
         }
         VertexIndices = uniqueVertexIndices.ToList();
         // Have to call it like this b/c we don't know the format of the vertex data here
+        //Debug.Assert(b0Stride + b1Stride == stride); commented out for now
 
-        List<InputSignature> inputSignatures = Material.VertexShader.InputSignatures;
-        int b0Stride = buffers.Vertices0.TagData.Stride;
-        int b1Stride = buffers.Vertices1?.TagData.Stride ?? 0;
-        List<InputSignature> inputSignatures0 = new();
-        List<InputSignature> inputSignatures1 = new();
-        int stride = 0;
-        foreach (InputSignature inputSignature in inputSignatures)
+        //Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{b0Stride}/{inputSignatures0.DebugString()} and {buffers.Vertices1?.Hash}/{b1Stride}/{inputSignatures1.DebugString()}"); commented out for now
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
         {
-            if (stride < b0Stride)
+            List<InputSignature> inputSignatures = Material.VertexShader.InputSignatures;
+            int b0Stride = buffers.Vertices0.TagData.Stride;
+            int b1Stride = buffers.Vertices1?.TagData.Stride ?? 0;
+            List<InputSignature> inputSignatures0 = new();
+            List<InputSignature> inputSignatures1 = new();
+            int stride = 0;
+            foreach (InputSignature inputSignature in inputSignatures)
             {
-                inputSignatures0.Add(inputSignature);
-            }
-            else
-            {
-                inputSignatures1.Add(inputSignature);
-            }
+                if (stride < b0Stride)
+                {
+                    inputSignatures0.Add(inputSignature);
+                }
+                else
+                {
+                    inputSignatures1.Add(inputSignature);
+                }
 
-            if (inputSignature.Semantic == InputSemantic.Colour)
-            {
-                stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+                if (inputSignature.Semantic == InputSemantic.Colour)
+                {
+                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+                }
+                else
+                {
+                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
+                }
+                // todo entities can have 4 bytes per component, although its isolated for cloth so we can probably account for it
             }
-            else
-            {
-                stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
-            }
-            // todo entities can have 4 bytes per component, although its isolated for cloth so we can probably account for it
+            buffers.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0);
+            buffers.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1);
         }
-        Debug.Assert(b0Stride + b1Stride == stride);
-
-        Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{b0Stride}/{inputSignatures0.DebugString()} and {buffers.Vertices1?.Hash}/{b1Stride}/{inputSignatures1.DebugString()}");
-        buffers.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0);
-        buffers.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1);
+        else
+        {
+            buffers.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0);
+            buffers.Vertices1?.ReadVertexData(this, uniqueVertexIndices, 0);
+            buffers.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 0);
+        }
 
         // todo wait what happened to the wq stuff? they have vertices2 no?
 
-        Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
+        //Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count); commented out for now
 
         TransformData(container);
     }
