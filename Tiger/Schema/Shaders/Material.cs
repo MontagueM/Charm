@@ -192,7 +192,7 @@ namespace Tiger.Schema.Shaders
         public void SaveVertexShader(string saveDirectory)
         {
             Directory.CreateDirectory($"{saveDirectory}");
-            if (VertexShader.Hash.IsValid() && !File.Exists($"{saveDirectory}/VS_{FileHash}.usf"))
+            if (VertexShader != null && !File.Exists($"{saveDirectory}/VS_{FileHash}.usf"))
             {
                 string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
                 string usf = new UsfConverter().HlslToUsf(this, hlsl, true);

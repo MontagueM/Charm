@@ -115,6 +115,7 @@ public class StaticPart : MeshPart
             var t = (container.StaticData as Tiger.Schema.Static.DESTINY2_WITCHQUEEN_6307.StaticMeshData).TagData;
             TransformPositions(t.ModelTransform);
             TransformUVs(new Vector2(t.TexcoordScale, t.TexcoordScale), t.TexcoordTranslation);
+            TransformNormals();
         }
         else
         {
@@ -146,5 +147,43 @@ public class StaticPart : MeshPart
                 VertexPositions[i].W
             );
         }
+    }
+
+    private void TransformNormals()
+    {
+        for (int i = 0; i < VertexNormals.Count; i++)
+        {
+            VertexNormals[i] = new Vector4(
+                ConsiderQuatToEulerConvert(VertexNormals[i]).X,
+                ConsiderQuatToEulerConvert(VertexNormals[i]).Y,
+                ConsiderQuatToEulerConvert(VertexNormals[i]).Z,
+                1);
+        }
+    }
+
+    private Vector3 ConsiderQuatToEulerConvert(Vector4 v4N)
+    {
+        // shadowkeep and below don't have quaternion normals
+        if (Strategy.CurrentStrategy < TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            return new Vector3(v4N.X, v4N.Y, v4N.Z);
+        }
+        Vector3 res = new Vector3();
+        if (Math.Abs(v4N.Magnitude - 1) < 0.01)  // Quaternion
+        {
+            var quat = new SharpDX.Quaternion(v4N.X, v4N.Y, v4N.Z, v4N.W);
+            var a = new SharpDX.Vector3(1, 0, 0);
+            var result = SharpDX.Vector3.Transform(a, quat);
+            res.X = result.X;
+            res.Y = result.Y;
+            res.Z = result.Z;
+        }
+        else
+        {
+            res.X = v4N.X;
+            res.Y = v4N.Y;
+            res.Z = v4N.Z;
+        }
+        return res;
     }
 }
