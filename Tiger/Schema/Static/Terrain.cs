@@ -14,6 +14,11 @@ public class Terrain : Tag<STerrain>
     // To test use edz.strike_hmyn and alleys_a adf6ae80
     public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource, bool exportStatic = false)
     {
+        // todo fix terrain
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        {
+            return;
+        }
         // Directory.CreateDirectory(saveDirectory + "/Textures/Terrain/");
         // Directory.CreateDirectory(saveDirectory + "/Shaders/Terrain/");
 
