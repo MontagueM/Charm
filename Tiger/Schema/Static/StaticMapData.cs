@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Tiger.Exporters;
 
 namespace Tiger.Schema;
 
@@ -17,11 +18,12 @@ public class StaticMapData : Tag<SStaticMapData>
 
     public void LoadArrangedIntoFbxScene(FbxHandler fbxHandler)
     {
+        ExporterScene scene = CharmInstance.GetSubsystem<Exporter>().CreateScene(Hash);
         Parallel.ForEach(_tag.InstanceCounts, c =>
         {
             var s = _tag.Statics[c.StaticIndex].Static;
             var parts = s.Load(ExportDetailLevel.MostDetailed);
-            fbxHandler.AddStaticInstancesToScene(parts, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), s.Hash);
+            scene.AddStaticInstances(s.Hash, parts, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount));
         });
     }
 
