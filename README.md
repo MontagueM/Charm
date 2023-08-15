@@ -6,17 +6,13 @@ A new, flashier, fully C# version of my previous tool Phonon. It is designed to 
 
 ## How do I install and use it?
 
-- You'll need [.NET 6.0 x64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-6.0.7-windows-x64-installer) installed.
+- You'll need [.NET 7.0 x64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-7.0.400-windows-x64-installer) installed.
 - Download the latest release and run Charm.exe.
 - Set the packages and export paths first.
 
 If you encounter any problems, take a look in the charm.log file and look at the exception.
 
 Also take a look at the [Charm wiki](https://github.com/MontagueM/DestinyDocs/blob/main/Charm/Home.md) for more info.
-
-### Known issues
-
-* `Unhandled Exception: System.ArgumentException: Invalid hash given: 2157969408.` - delete the empty paths.cache file and try again.
 
 ## Functionality
 
@@ -82,7 +78,7 @@ I put a sponsor on this project as some people wanted to contribute, if you want
 
 ## License
 
-The Charm source code is licensed under GPLv3. All other used code and DLLs are subject to their own licenses. Symmetry is fully copywritten.
+The Charm source code is licensed under GPLv3. All other used code and DLLs are subject to their own licenses.
 
 ## Credits
 
