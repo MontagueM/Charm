@@ -38,7 +38,7 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
     public string GetHash32Checked(string strHash)
     {
         ulong tagHash64 = Endian.SwapU64(UInt64.Parse(strHash, NumberStyles.HexNumber));
-        return Endian.U64ToString(GetHash32Checked(tagHash64));
+        return Endian.U32ToString(GetHash32Checked(tagHash64));
     }
 
     public string GetHash64(uint tag32)
