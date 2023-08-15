@@ -21,19 +21,25 @@ public struct SActivity_WQ
     // public FileHash64 UnkActivity68;  // todo this uses an unknown hash64 system in the package
 }
 
-[SchemaStruct("8B8E8080", 0x78)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8B8E8080", 0xD0)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "8B8E8080", 0x78)]
 public struct D2Class_8B8E8080
 {
     public long FileSize;
     public StringHash LocationName;
-    [SchemaField(0x10), Tag64]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public StringPointer LocalizedStringsContentPath;
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402), Tag64]
     public LocalizedStrings StringContainer;
     public FileHash Events;
     public FileHash Patrols;
     public uint Unk28;
     public FileHash Unk2C;
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_DE448080> TagBags;
-    [SchemaField(0x48)]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0xB8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<D2Class_2E898080> Activities;
     public StringPointer DestinationName;
 }

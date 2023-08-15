@@ -17,6 +17,7 @@ using ConcurrentCollections;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Audio;
@@ -1188,8 +1189,9 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadDialogueList(FileHash fileHash)
     {
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
+            //TODO: add beyond light
             return;
         }
         ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
@@ -1246,8 +1248,9 @@ public partial class TagListView : UserControl
 
     private void LoadDirectiveList(FileHash fileHash)
     {
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
+            //TODO: add beyond light
             return;
         }
         ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
@@ -1500,8 +1503,9 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadMusicList(FileHash fileHash)
     {
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
+            //TODO: add beyond light
             return;
         }
         ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
