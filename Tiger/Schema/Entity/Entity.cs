@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Tiger.Schema.Entity;
 
@@ -34,6 +35,7 @@ public class Entity : Tag<SEntity>
     {
         Deserialize();
         _loaded = true;
+        Debug.Assert(_tag.FileSize != 0);
         foreach (var resource in _tag.EntityResources.Select(GetReader(), r => r.Resource))
         {
             switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
