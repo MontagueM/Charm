@@ -18,6 +18,7 @@
         </Grid.RowDefinitions>
         <TextBlock Text="PLAYING: " TextAlignment="Left" Margin="10, 0, 0, 0" VerticalAlignment="Center" x:Name="PlayingText"/>
         <!-- TODO replace this with images, eg using C# Path with SVG https://jxnblk.github.io/paths/?d=M20%2016%20L20%2048%20L44%2032%20Z -->
+        <!-- TODO fix only being able to click the button on the sides, where the text block isnt -->
         <Button Grid.Column="1" Margin="5,5,5,5" Click="PlayPause_OnClick" x:Name="PlayPause" Style="{StaticResource MaterialDesignPaperDarkButton}">
             <TextBlock Text="PLAY" TextAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"/>
         </Button>

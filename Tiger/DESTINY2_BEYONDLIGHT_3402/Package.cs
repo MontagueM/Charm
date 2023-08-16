@@ -1,6 +1,4 @@
-﻿// TODO: combine into DESTINY2_WITCHQUEEN_6307?
-
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace Tiger.DESTINY2_BEYONDLIGHT_3402;

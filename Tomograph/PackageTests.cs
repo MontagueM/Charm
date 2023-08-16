@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Tiger;
 using SKPackage = Tiger.DESTINY2_SHADOWKEEP_2601.Package;
-using WQPackage = Tiger.DESTINY2_WITCHQUEEN_6307.Package;
+using WQPackage = Tiger.DESTINY2_BEYONDLIGHT_3402.Package;
 
 namespace Tomograph;
 
