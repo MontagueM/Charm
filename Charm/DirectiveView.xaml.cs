@@ -31,12 +31,17 @@ public partial class DirectiveView : UserControl
 
         foreach (var directive in directiveTable)
         {
+            // TODO: this looks ugly, but eh?
+            string nameString = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? directive.NameStringBL.Value.ToString() : directive.NameString.Value.ToString();
+            string descString = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? directive.DescriptionStringBL.Value.ToString() : directive.DescriptionString.Value.ToString();
+            string objString = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? directive.ObjectiveStringBL.Value.ToString() : directive.ObjectiveString.Value.ToString();
+            string unk58String = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? directive.Unk58BL.Value.ToString() : directive.Unk58.Value.ToString();
             items.Add(new DirectiveItem
             {
-                Name = directive.NameString.Value.ToString(),
-                Description = directive.DescriptionString.Value.ToString(),
-                Objective = $"{directive.ObjectiveString.Value.ToString()} 0/{directive.ObjectiveTargetCount}",
-                Unknown = directive.Unk58.Value.ToString(),
+                Name = nameString,
+                Description = descString,
+                Objective = $"{objString} 0/{directive.ObjectiveTargetCount}",
+                Unknown = unk58String,
                 Hash = directive.Hash
             });
         }

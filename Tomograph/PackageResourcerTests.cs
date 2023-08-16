@@ -1,7 +1,7 @@
 using System.Reflection;
 using Tiger;
 using SKPackage = Tiger.DESTINY2_SHADOWKEEP_2601.Package;
-using WQPackage = Tiger.DESTINY2_WITCHQUEEN_6307.Package;
+using BLPackage = Tiger.DESTINY2_BEYONDLIGHT_3402.Package;
 
 namespace Tomograph;
 
@@ -15,8 +15,8 @@ public interface IPackageResourcerTests
 
 
 
-[TestClass, TestCategory("DESTINY2_WITCHQUEEN_6307"), TestStrategy(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests, IPackageResourcerTests
+[TestClass, TestCategory("DESTINY2_BEYONDLIGHT_3402"), TestStrategy(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+public class DESTINY2_BEYONDLIGHT_3402_PackageResourcerTests : CharmPackageTests, IPackageResourcerTests
 {
     [TestInitialize]
     public void Initialize()
@@ -54,7 +54,7 @@ public class DESTINY2_WITCHQUEEN_6307_PackageResourcerTests : CharmPackageTests,
     {
         ushort expectedPackageId = 0x100;
         IPackage package = PackageResourcer.Get().GetPackage(expectedPackageId);
-        Assert.IsInstanceOfType(package, typeof(WQPackage));
+        Assert.IsInstanceOfType(package, typeof(BLPackage));
         PackageMetadata actualPackageMetadata = package.GetPackageMetadata();
         Assert.AreEqual(expectedPackageId, actualPackageMetadata.Id);
     }
