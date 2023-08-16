@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,6 +18,7 @@ using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
+using Exporter = HelixToolkit.Wpf.SharpDX.Exporter;
 
 namespace Charm;
 
@@ -76,26 +78,19 @@ public partial class EntityView : UserControl
 
     public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null)
     {
-        FbxHandler fbxHandler = new FbxHandler(exportType == ExportTypeFlag.Full);
-        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        ConfigSubsystem config = ConfigSubsystem.Get();
+        string savePath = config.GetExportSavePath();
 
-        List<FbxNode> boneNodes = null;
-        if (overrideSkeleton != null)
-            boneNodes = fbxHandler.AddSkeleton(overrideSkeleton.GetBoneNodes());
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+
+        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entity);
 
         Log.Verbose($"Exporting entity model name: {name}");
-        string savePath = config.GetExportSavePath();
-        string meshName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
-        if (exportType == ExportTypeFlag.Full)
-        {
-            savePath += $"/{meshName}";
-        }
-        Directory.CreateDirectory(savePath);
 
         foreach (var entity in entities)
         {
             var dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
-            fbxHandler.AddEntityToScene(entity, dynamicParts, ExportDetailLevel.MostDetailed, boneNodes);
+            scene.AddEntity(entity.Hash, dynamicParts, overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>());
             if (exportType == ExportTypeFlag.Full)
             {
                 entity.SaveMaterialsFromParts(savePath, dynamicParts, config.GetUnrealInteropEnabled() || config.GetS2ShaderExportEnabled());
@@ -105,23 +100,19 @@ public partial class EntityView : UserControl
 
         if (exportType == ExportTypeFlag.Full)
         {
-            fbxHandler.InfoHandler.SetMeshName(meshName);
             if (config.GetUnrealInteropEnabled())
             {
-                fbxHandler.InfoHandler.SetUnrealInteropPath(config.GetUnrealInteropPath());
-                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
+                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
             if (config.GetBlenderInteropEnabled())
             {
-                AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
+                AutomatedExporter.SaveInteropBlenderPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
         }
 
         // Scale and rotate
         // fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
-        fbxHandler.InfoHandler.AddType("Entity");
-        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
-        fbxHandler.Dispose();
+        Tiger.Exporters.Exporter.Get().Export();
         Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 

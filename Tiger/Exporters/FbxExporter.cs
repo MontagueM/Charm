@@ -27,9 +27,9 @@ public class FbxExporter : AbstractExporter
                 Debug.Assert(scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) == 1);
                 AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
             }
-            foreach (ExporterMesh mesh in scene.EntityMeshes)
+            foreach (ExporterEntity entity in scene.Entities)
             {
-                AddEntityMesh(fbxScene, mesh);
+                AddEntity(fbxScene, entity);
             }
 
             foreach (var p in scene.EntityPoints)
@@ -104,13 +104,107 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddEntityMesh(FbxScene fbxScene, ExporterMesh mesh)
+    private void AddEntity(FbxScene fbxScene, ExporterEntity entity)
     {
-        foreach (ExporterPart part in mesh.Parts)
+        List<FbxNode> skeletonNodes = AddSkeleton(fbxScene, entity.BoneNodes);
+        foreach (ExporterPart part in entity.Mesh.Parts)
         {
             var dynamicMeshPart = part.MeshPart as DynamicMeshPart;
-            AddPart(fbxScene, part);
+            FbxMesh fbxMesh = AddPart(fbxScene, part);
+
+            if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
+            {
+                fbxMesh.AddSlotColours(dynamicMeshPart);
+                fbxMesh.AddTexcoords1(dynamicMeshPart);
+            }
+
+            if (dynamicMeshPart.VertexWeights.Count > 0)
+            {
+                Debug.Assert(dynamicMeshPart.VertexWeights.Count == dynamicMeshPart.VertexPositions.Count);
+                if (skeletonNodes.Count > 0)
+                {
+                    AddWeightsToMesh(fbxMesh, dynamicMeshPart, skeletonNodes);
+                }
+            }
         }
+    }
+
+    private List<FbxNode> AddSkeleton(FbxScene fbxScene, List<BoneNode> boneNodes)
+    {
+        FbxNode rootNode = null;
+        List<FbxNode> skeletonNodes = new();
+        foreach (var boneNode in boneNodes)
+        {
+            FbxSkeleton skeleton = FbxSkeleton.Create(_manager, boneNode.Hash.ToString());
+            FbxNode node = FbxNode.Create(_manager, boneNode.Hash.ToString());
+            skeleton.SetSkeletonType(FbxSkeleton.EType.eLimbNode);
+            node.SetNodeAttribute(skeleton);
+            Vector3 location = boneNode.DefaultObjectSpaceTransform.Translation;
+            if (boneNode.ParentNodeIndex != -1)
+            {
+                location -= boneNodes[boneNode.ParentNodeIndex].DefaultObjectSpaceTransform.Translation;
+            }
+            node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
+            if (rootNode == null)
+            {
+                skeleton.SetSkeletonType(FbxSkeleton.EType.eRoot);
+                rootNode = node;
+            }
+            else
+            {
+                skeletonNodes[boneNode.ParentNodeIndex].AddChild(node);
+            }
+            skeletonNodes.Add(node);
+        }
+
+        fbxScene.GetRootNode().AddChild(rootNode);
+        return skeletonNodes;
+    }
+
+    private void AddWeightsToMesh(FbxMesh mesh, DynamicMeshPart meshPart, List<FbxNode> skeletonNodes)
+    {
+        FbxSkin skin = FbxSkin.Create(_manager, "skinName");
+        HashSet<int> seen = new();
+
+        List<FbxCluster> weightClusters = new();
+        foreach (var node in skeletonNodes)
+        {
+            FbxCluster weightCluster = FbxCluster.Create(_manager, node.GetName());
+            weightCluster.SetLink(node);
+            weightCluster.SetLinkMode(FbxCluster.ELinkMode.eTotalOne);
+            FbxAMatrix transform = node.EvaluateGlobalTransform();
+            weightCluster.SetTransformLinkMatrix(transform);
+            weightClusters.Add(weightCluster);
+        }
+
+        // Conversion lookup table
+        Dictionary<uint, int> lookup = new();
+        for (int i = 0; i < meshPart.VertexIndices.Count; i++)
+        {
+            lookup[meshPart.VertexIndices[i]] = i;
+        }
+        foreach (uint v in meshPart.VertexIndices)
+        {
+            VertexWeight vw = meshPart.VertexWeights[lookup[v]];
+            for (int j = 0; j < 4; j++)
+            {
+                if (vw.WeightValues[j] != 0)
+                {
+                    if (vw.WeightIndices[j] < weightClusters.Count)
+                    {
+                        seen.Add(vw.WeightIndices[j]);
+                        weightClusters[vw.WeightIndices[j]].AddControlPointIndex(lookup[v], (float)vw.WeightValues[j] / 255);
+                    }
+                }
+            }
+        }
+
+        foreach (var c in weightClusters)
+        {
+            skin.AddCluster(c);
+        }
+
+        mesh.AddDeformer(skin);
     }
 
     private void AddInstancedMesh(FbxScene fbxScene, List<ExporterPart> parts, List<Transform> transforms)
@@ -134,7 +228,7 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddPart(FbxScene fbxScene, ExporterPart part)
+    private FbxMesh AddPart(FbxScene fbxScene, ExporterPart part)
     {
         FbxMesh fbxMesh = AddVerticesAndIndices(part);
         FbxNode node = FbxNode.Create(_manager, fbxMesh.GetName());
@@ -153,14 +247,7 @@ public class FbxExporter : AbstractExporter
 
         fbxMesh.AddSmoothing();
 
-        if (part.MeshPart is DynamicMeshPart dynamicMeshPart)
-        {
-            if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
-            {
-                fbxMesh.AddSlotColours(dynamicMeshPart);
-                fbxMesh.AddTexcoords1(dynamicMeshPart);
-            }
-        }
+        return fbxMesh;
     }
 
     private FbxMesh AddVerticesAndIndices(ExporterPart part)

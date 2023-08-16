@@ -61,7 +61,7 @@ public class ExporterScene
     public string Name { get; set; }
     public ExportType Type { get; set; }
     public ConcurrentBag<ExporterMesh> StaticMeshes = new();
-    public ConcurrentBag<ExporterMesh> EntityMeshes = new();
+    public ConcurrentBag<ExporterEntity> Entities = new();
     public ConcurrentDictionary<FileHash, List<Transform>> StaticMeshInstances = new();
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentDictionary<string, SMapDataEntry> EntityPoints = new();
@@ -151,10 +151,27 @@ public class ExporterScene
         EntityPoints.TryAdd(meshName, points);
     }
 
+    public void AddEntity(FileHash entityHash, List<DynamicMeshPart> parts, List<BoneNode> boneNodes)
+    {
+        ExporterMesh mesh = new(entityHash);
+        for (int i = 0; i < parts.Count; i++)
+        {
+            DynamicMeshPart part = parts[i];
+            mesh.AddPart(entityHash, part, i);
+        }
+        Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
+    }
+
     public void AddCubemap(CubemapResource cubemap)
     {
         Cubemaps.Add(cubemap);
     }
+}
+
+public class ExporterEntity
+{
+    public ExporterMesh Mesh { get; set; }
+    public List<BoneNode> BoneNodes { get; set; } = new();
 }
 
 public class ExporterMesh

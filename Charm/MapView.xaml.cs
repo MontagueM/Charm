@@ -166,7 +166,7 @@ public partial class MapView : UserControl
                         {
                             File.Copy("Exporters/template.vmdl", $"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.vmdl", true);
                         }
-                        ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.Terrain);
+                        ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
                         terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), terrainArrangement, true);
                     }
                 }
@@ -185,7 +185,7 @@ public partial class MapView : UserControl
     private static void ExtractDataTables(Tag<SMapContainer> map, string savePath, ExporterScene scene, ExportTypeFlag exportTypeFlag)
     {
         // todo these scenes can be combined
-        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{map.Hash}_DynamicPoints", ExportType.EntityPoints);
+        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{map.Hash}_EntityPoints", ExportType.EntityPoints);
         bool export = false;
         Parallel.ForEach(map.TagData.MapDataTables, data =>
         {

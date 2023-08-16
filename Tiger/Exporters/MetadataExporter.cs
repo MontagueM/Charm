@@ -61,9 +61,9 @@ class MetadataScene
             AddInstanced(meshInstanced.Key, meshInstanced.Value);
         }
 
-        foreach (ExporterMesh entityMesh in scene.EntityMeshes)
+        foreach (ExporterEntity entityMesh in scene.Entities)
         {
-            foreach (var part in entityMesh.Parts)
+            foreach (var part in entityMesh.Mesh.Parts)
             {
                 if (part.Material != null)
                 {
@@ -190,6 +190,10 @@ class MetadataScene
         else if (_exportType is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
         {
             path = Path.Join(path, "Maps");
+        }
+        else if (_exportType is ExportType.StaticInMap)
+        {
+            return;
         }
 
         // If theres only 1 part, we need to rename it + the instance to the name of the mesh (unreal imports to fbx name if only 1 mesh inside)
