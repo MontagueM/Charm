@@ -43,8 +43,12 @@ public class Tag<T> : TigerFile where T : struct
         }
     }
 
-    private void Deserialize()
+    protected void Deserialize()
     {
+        if (_isLoaded)
+        {
+            return;
+        }
         _isLoaded = true;
         using TigerReader reader = GetReader();
         _tag = SchemaDeserializer.Get().DeserializeSchema<T>(reader);

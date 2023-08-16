@@ -1,35 +1,86 @@
 ﻿using System.Collections.Concurrent;
-using System.Text.Json;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Tiger.Schema;
+using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 
-namespace Tiger.Schema;
+namespace Tiger.Exporters;
 
-public class InfoConfigHandler
+public class MetadataExporter: AbstractExporter
 {
-    public bool bOpen = false;
-    private readonly ConcurrentDictionary<string, dynamic> _config = new ConcurrentDictionary<string, dynamic>();
 
-    public InfoConfigHandler()
+    public override void Export(Exporter.ExportEventArgs args)
     {
-        ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>> mats = new ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>>();
-        _config.TryAdd("Materials", mats);
-        ConcurrentDictionary<string, string> parts = new ConcurrentDictionary<string, string>();
-        _config.TryAdd("Parts", parts);
-        ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> instances = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
-        _config.TryAdd("Instances", instances);
-        ConcurrentDictionary<string, ConcurrentBag<JsonCubemap>> cubemaps = new ConcurrentDictionary<string, ConcurrentBag<JsonCubemap>>();
-        _config.TryAdd("Cubemaps", cubemaps);
-        bOpen = true;
-    }
-
-    public void Dispose()
-    {
-        if (bOpen)
+        Parallel.ForEach(args.Scenes, scene =>
         {
-            _config.Clear();
-            bOpen = false;
+            MetadataScene metadataScene = new(scene);
+            metadataScene.WriteToFile(args.OutputDirectory);
+        });
+    }
+}
+
+class MetadataScene
+{
+    private readonly ConcurrentDictionary<string, dynamic> _config = new();
+    private ExportType _exportType;
+
+    public MetadataScene(ExporterScene scene)
+    {
+        ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>> mats = new();
+        _config.TryAdd("Materials", mats);
+        ConcurrentDictionary<string, string> parts = new();
+        _config.TryAdd("Parts", parts);
+        ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> instances = new();
+        _config.TryAdd("Instances", instances);
+        ConcurrentDictionary<string, ConcurrentBag<JsonCubemap>> cubemaps = new();
+        _config.TryAdd("Cubemaps", cubemaps);
+
+        if (ConfigSubsystem.Get().GetUnrealInteropEnabled())
+        {
+            SetUnrealInteropPath(ConfigSubsystem.Get().GetUnrealInteropPath());
+        }
+
+        SetType(scene.Type.ToString());
+        _exportType = scene.Type;
+        SetMeshName(scene.Name);
+
+        foreach (var mesh in scene.StaticMeshes)
+        {
+            foreach (var part in mesh.Parts)
+            {
+                if (part.Material != null)
+                {
+                    AddMaterial(part.Material);
+                }
+                AddPart(part, part.Name);
+            }
+        }
+
+        foreach (var meshInstanced in scene.StaticMeshInstances)
+        {
+            AddInstanced(meshInstanced.Key, meshInstanced.Value);
+        }
+
+        foreach (ExporterEntity entityMesh in scene.Entities)
+        {
+            foreach (var part in entityMesh.Mesh.Parts)
+            {
+                if (part.Material != null)
+                {
+                    AddMaterial(part.Material);
+                }
+                AddPart(part, part.Name);
+            }
+        }
+
+        foreach (MaterialTexture texture in scene.ExternalMaterialTextures)
+        {
+            AddTextureToMaterial(texture.Material, texture.Index, texture.Texture);
+        }
+
+        foreach (CubemapResource cubemap in scene.Cubemaps)
+        {
+            AddCubemap(cubemap.CubemapName, cubemap.CubemapSize.ToVec3(), cubemap.CubemapRotation, cubemap.CubemapPosition.ToVec3());
         }
     }
 
@@ -39,12 +90,12 @@ public class InfoConfigHandler
         {
             return;
         }
-        Dictionary<string, Dictionary<int, TexInfo>> textures = new Dictionary<string, Dictionary<int, TexInfo>>();
+        Dictionary<string, Dictionary<int, TexInfo>> textures = new();
         if (!_config["Materials"].TryAdd(material.FileHash, textures))
         {
             return;
         }
-        Dictionary<int, TexInfo> vstex = new Dictionary<int, TexInfo>();
+        Dictionary<int, TexInfo> vstex = new();
         textures.Add("VS", vstex);
         foreach (var vst in material.EnumerateVSTextures())
         {
@@ -53,7 +104,7 @@ public class InfoConfigHandler
                 vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
             }
         }
-        Dictionary<int, TexInfo> pstex = new Dictionary<int, TexInfo>();
+        Dictionary<int, TexInfo> pstex = new();
         textures.Add("PS", pstex);
         foreach (var pst in material.EnumeratePSTextures())
         {
@@ -64,12 +115,12 @@ public class InfoConfigHandler
         }
     }
 
-    public void AddPart(MeshPart part, string partName)
+    public void AddPart(ExporterPart part, string partName)
     {
-        _config["Parts"].TryAdd(partName, part.Material.FileHash);
+        _config["Parts"].TryAdd(partName, part.Material?.FileHash ?? "");
     }
 
-    public void AddType(string type)
+    public void SetType(string type)
     {
         _config["Type"] = type;
     }
@@ -88,21 +139,24 @@ public class InfoConfigHandler
         }
     }
 
-    public void AddInstance(string modelHash, float scale, Vector4 quatRotation, Vector3 translation)
+    public void AddInstanced(FileHash meshHash, List<Transform> transforms)
     {
-        if (!_config["Instances"].ContainsKey(modelHash))
+        if (!_config["Instances"].ContainsKey(meshHash))
         {
-            _config["Instances"][modelHash] = new ConcurrentBag<JsonInstance>();
+            _config["Instances"][meshHash] = new ConcurrentBag<JsonInstance>();
         }
-        _config["Instances"][modelHash].Add(new JsonInstance
+        foreach (Transform transform in transforms)
         {
-            Translation = new[] { translation.X, translation.Y, translation.Z },
-            Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
-            Scale = scale
-        });
+            _config["Instances"][meshHash].Add(new JsonInstance
+            {
+                Translation = new[] { transform.Position.X, transform.Position.Y, transform.Position.Z },
+                Rotation = new[] { transform.Quaternion.X, transform.Quaternion.Y, transform.Quaternion.Z, transform.Quaternion.W },
+                Scale = transform.Scale.X
+            });
+        }
     }
 
-    public void AddCustomTexture(string material, int index, Texture texture)
+    public void AddTextureToMaterial(string material, int index, Texture texture)
     {
         if (!_config["Materials"].ContainsKey(material))
         {
@@ -113,8 +167,34 @@ public class InfoConfigHandler
         _config["Materials"][material]["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb() });
     }
 
+    public void AddCubemap(string name, Vector3 scale, Vector4 quatRotation, Vector3 translation)
+    {
+        if (!_config["Cubemaps"].ContainsKey(name))
+        {
+            _config["Cubemaps"][name] = new ConcurrentBag<JsonCubemap>();
+        }
+        _config["Cubemaps"][name].Add(new JsonCubemap
+        {
+            Translation = new[] { translation.X, translation.Y, translation.Z },
+            Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
+            Scale = new[] { scale.X, scale.Y, scale.Z }
+        });
+    }
+
     public void WriteToFile(string path)
     {
+        if (_exportType is ExportType.Static or ExportType.Entity)
+        {
+            path = Path.Join(path, _config["MeshName"]);
+        }
+        else if (_exportType is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
+        {
+            path = Path.Join(path, "Maps");
+        }
+        else if (_exportType is ExportType.StaticInMap)
+        {
+            return;
+        }
 
         // If theres only 1 part, we need to rename it + the instance to the name of the mesh (unreal imports to fbx name if only 1 mesh inside)
         if (_config["Parts"].Count == 1)
@@ -166,13 +246,12 @@ public class InfoConfigHandler
         {
             File.WriteAllText($"{path}/info.cfg", s);
         }
-        Dispose();
     }
 
     private struct JsonInstance
     {
         public float[] Translation;
-        public float[] Rotation;
+        public float[] Rotation;  // Quaternion
         public float Scale;
     }
 
@@ -183,7 +262,6 @@ public class InfoConfigHandler
         public float[] Scale;
     }
 }
-
 
 public struct TexInfo
 {

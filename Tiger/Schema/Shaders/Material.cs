@@ -49,8 +49,8 @@ namespace Tiger.Schema.Shaders
         public FileHash FileHash { get; }
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
-        public ShaderBytecode VertexShader { get; }
-        public ShaderBytecode PixelShader { get; }
+        public ShaderBytecode? VertexShader { get; }
+        public ShaderBytecode? PixelShader { get; }
         public FileHash PSVector4Container { get; }
         public DynamicArray<SDirectXSamplerTag> PS_Samplers { get; }
         public DynamicArray<SDirectXSamplerTag> VS_Samplers { get; }
@@ -151,7 +151,7 @@ namespace Tiger.Schema.Shaders
 
         public void SavePixelShader(string saveDirectory, bool isTerrain = false)
         {
-            if (PixelShader != null)
+            if (PixelShader != null && PixelShader.Hash.IsValid())
             {
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{FileHash}");
                 string vertex = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
@@ -192,7 +192,7 @@ namespace Tiger.Schema.Shaders
         public void SaveVertexShader(string saveDirectory)
         {
             Directory.CreateDirectory($"{saveDirectory}");
-            if (VertexShader.Hash.IsValid() && !File.Exists($"{saveDirectory}/VS_{FileHash}.usf"))
+            if (VertexShader != null && VertexShader.Hash.IsValid())
             {
                 string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
                 string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
