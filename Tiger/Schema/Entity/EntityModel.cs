@@ -248,4 +248,37 @@ public class DynamicMeshPart : MeshPart
 
         return materials[0];
     }
+
+    public static void AddVertexColourSlotInfo(DynamicMeshPart dynamicPart, short w)
+    {
+        Vector4 vc = Vector4.Zero;
+        switch (w & 0x7)
+        {
+            case 0:
+                vc.X = 0.333f;
+                break;
+            case 1:
+                vc.X = 0.666f;
+                break;
+            case 2:
+                vc.X = 0.999f;
+                break;
+            case 3:
+                vc.Y = 0.333f;
+                break;
+            case 4:
+                vc.Y = 0.666f;
+                break;
+            case 5:
+                vc.Y = 0.999f;
+                break;
+        }
+
+        if (dynamicPart.bAlphaClip)
+        {
+            vc.Z = 0.25f;
+        }
+
+        dynamicPart.VertexColourSlots.Add(vc);
+    }
 }

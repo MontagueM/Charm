@@ -116,15 +116,13 @@ public partial class MapView : UserControl
 
     public static void ExportMinimalMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
     {
-        FbxHandler fbxHandler = new FbxHandler();
-
         string meshName = map.Hash.ToString();
         string savePath = _config.GetExportSavePath() + $"/{meshName}";
         if (_config.GetSingleFolderMapsEnabled())
         {
             savePath = _config.GetExportSavePath() + "/Maps";
         }
-        fbxHandler.InfoHandler.SetMeshName(meshName);
+        // fbxHandler.InfoHandler.SetMeshName(meshName);
         Directory.CreateDirectory(savePath);
         Directory.CreateDirectory(savePath + "/Dynamics");
 
@@ -135,11 +133,11 @@ public partial class MapView : UserControl
             ExportStatics(exportStatics, savePath, map);
         }
 
-        ExtractDataTables(map, savePath, fbxHandler, exportTypeFlag);
+        ExtractDataTables(map, savePath, null, exportTypeFlag);
 
         if (_config.GetUnrealInteropEnabled())
         {
-            fbxHandler.InfoHandler.SetUnrealInteropPath(_config.GetUnrealInteropPath());
+            // fbxHandler.InfoHandler.SetUnrealInteropPath(_config.GetUnrealInteropPath());
             AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
         }
         if (_config.GetBlenderInteropEnabled())
@@ -147,9 +145,10 @@ public partial class MapView : UserControl
             AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat());
         }
 
-        fbxHandler.InfoHandler.AddType("Map");
-        fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
-        fbxHandler.Dispose();
+        Exporter.Get().Export();
+        // fbxHandler.InfoHandler.AddType("Map");
+        // fbxHandler.ExportScene($"{savePath}/{meshName}.fbx");
+        // fbxHandler.Dispose();
     }
 
     public static void ExportTerrainMap(Tag<SMapContainer> map)
@@ -242,7 +241,7 @@ public partial class MapView : UserControl
                 }
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is CubemapResource cubemap)
                 {
-                    fbxHandler.InfoHandler.AddCubemap(cubemap.CubemapName, cubemap.CubemapSize.ToVec3(), cubemap.CubemapRotation, cubemap.CubemapPosition.ToVec3());
+                    // fbxHandler.InfoHandler.AddCubemap(cubemap.CubemapName, cubemap.CubemapSize.ToVec3(), cubemap.CubemapRotation, cubemap.CubemapPosition.ToVec3());
                 }
             });
         });
