@@ -32,6 +32,7 @@ public class Entity : Tag<SEntity>
 
     public void Load()
     {
+        Deserialize();
         _loaded = true;
         foreach (var resource in _tag.EntityResources.Select(GetReader(), r => r.Resource))
         {

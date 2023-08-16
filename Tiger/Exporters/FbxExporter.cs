@@ -1,19 +1,9 @@
-﻿using Internal.Fbx;
+﻿using System.Diagnostics;
+using Internal.Fbx;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 
 namespace Tiger.Exporters;
-
-public abstract class AbstractExporter : Subsystem
-{
-    protected internal override bool Initialise()
-    {
-        Exporter.ExportEvent += Export;
-        return true;
-    }
-
-    public abstract void Export(Exporter.ExportEventArgs args);
-}
 
 public class FbxExporter : AbstractExporter
 {
@@ -32,17 +22,52 @@ public class FbxExporter : AbstractExporter
             {
                 AddMesh(fbxScene, mesh);
             }
-            foreach (ExporterInstance<ExporterMesh> meshInstance in scene.StaticMeshInstances)
+            foreach (var meshInstance in scene.StaticMeshInstances)
             {
-                AddInstancedMesh(fbxScene, meshInstance);
+                Debug.Assert(scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) == 1);
+                AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
             }
             foreach (ExporterMesh mesh in scene.EntityMeshes)
             {
                 AddEntityMesh(fbxScene, mesh);
             }
 
-            ExportScene(fbxScene, Path.Join(args.OutputDirectory, scene.Name));
+            foreach (var p in scene.EntityPoints)
+            {
+                AddDynamicPoint(fbxScene, p.Key, p.Value);
+            }
+
+            string outputDirectory = args.OutputDirectory;
+            if (scene.Type is ExportType.Static or ExportType.Entity)
+            {
+                outputDirectory = Path.Join(outputDirectory, scene.Name);
+            }
+            else if (scene.Type is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
+            {
+                outputDirectory = Path.Join(outputDirectory, "Maps");
+            }
+            else if (scene.Type is ExportType.StaticInMap)
+            {
+                outputDirectory = Path.Join(outputDirectory, "Maps", "Statics");
+            }
+
+            ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
         }
+    }
+
+    private void AddDynamicPoint(FbxScene fbxScene, string pointName, SMapDataEntry point)
+    {
+        FbxNode node = FbxNode.Create(_manager, $"{pointName}");
+        Vector3 eulerRot = Vector4.QuaternionToEulerAngles(point.Rotation);
+
+        node.LclTranslation.Set(new FbxDouble3(point.Translation.X * 100, point.Translation.Z * 100, -point.Translation.Y * 100));
+        node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
+        node.LclScaling.Set(new FbxDouble3(100, 100, 100));
+
+        // Scale and rotate
+        //ScaleAndRotateForBlender(node);
+
+        fbxScene.GetRootNode().AddChild(node);
     }
 
     private void ExportScene(FbxScene fbxScene, string outputPath)
@@ -88,17 +113,17 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddInstancedMesh(FbxScene fbxScene, ExporterInstance<ExporterMesh> meshInstance)
+    private void AddInstancedMesh(FbxScene fbxScene, List<ExporterPart> parts, List<Transform> transforms)
     {
-        for (int i = 0; i < meshInstance.Object.Parts.Count; i++)
+        for (int i = 0; i < parts.Count; i++)
         {
-            FbxMesh mesh = AddPart(fbxScene, meshInstance.Object.Parts[i]);
-            for (int j = 0; j < meshInstance.Transforms.Count; j++)
+            FbxMesh fbxMesh = AddVerticesAndIndices(parts[i]);
+            for (int j = 0; j < transforms.Count; j++)
             {
-                Transform transform = meshInstance.Transforms[j];
-                FbxNode node = FbxNode.Create(_manager, $"{meshInstance.Object.Parts[i].Name}_{i}_{j}");
+                Transform transform = transforms[j];
+                FbxNode node = FbxNode.Create(_manager, $"{parts[i].Name}_{i}_{j}");
 
-                node.SetNodeAttribute(mesh);
+                node.SetNodeAttribute(fbxMesh);
 
                 node.LclTranslation.Set(new FbxDouble3(transform.Position.X, transform.Position.Y, transform.Position.Z));
                 node.LclRotation.Set(new FbxDouble3(transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z));
@@ -109,9 +134,9 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private FbxMesh AddPart(FbxScene fbxScene, ExporterPart part)
+    private void AddPart(FbxScene fbxScene, ExporterPart part)
     {
-        FbxMesh fbxMesh = AddVerticesAndIndices(fbxScene, part);
+        FbxMesh fbxMesh = AddVerticesAndIndices(part);
         FbxNode node = FbxNode.Create(_manager, fbxMesh.GetName());
         node.SetNodeAttribute(fbxMesh);
         fbxScene.GetRootNode().AddChild(node);
@@ -136,16 +161,14 @@ public class FbxExporter : AbstractExporter
                 fbxMesh.AddTexcoords1(dynamicMeshPart);
             }
         }
-
-        return fbxMesh;
     }
 
-    private FbxMesh AddVerticesAndIndices(FbxScene fbxScene, ExporterPart part)
+    private FbxMesh AddVerticesAndIndices(ExporterPart part)
     {
         FbxMesh mesh = FbxMesh.Create(_manager, part.Name);
 
         // Conversion lookup table
-        Dictionary<uint, int> lookup = new Dictionary<uint, int>();
+        Dictionary<uint, int> lookup = new();
         for (int i = 0; i < part.MeshPart.VertexIndices.Count; i++)
         {
             lookup[part.MeshPart.VertexIndices[i]] = i;

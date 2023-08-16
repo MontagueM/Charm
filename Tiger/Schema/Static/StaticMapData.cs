@@ -16,32 +16,33 @@ public class StaticMapData : Tag<SStaticMapData>
     {
     }
 
-    public void LoadArrangedIntoFbxScene(FbxHandler fbxHandler)
+    public void LoadArrangedIntoExporterScene()
     {
-        ExporterScene scene = CharmInstance.GetSubsystem<Exporter>().CreateScene(Hash);
+        ExporterScene scene = Exporter.Get().CreateScene(Hash, ExportType.Map);
         Parallel.ForEach(_tag.InstanceCounts, c =>
         {
             var s = _tag.Statics[c.StaticIndex].Static;
             var parts = s.Load(ExportDetailLevel.MostDetailed);
-            scene.AddStaticInstances(s.Hash, parts, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount));
+            scene.AddStaticInstancesAndParts(s.Hash, parts, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount));
         });
     }
 
-    public void LoadIntoFbxScene(FbxHandler fbxHandler, string savePath, bool bSaveShaders)
+    public void LoadIntoExporterScene(ExporterScene scene, string savePath, bool bSaveShaders)
     {
         List<SStaticMeshHash> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
 
+        // todo this loads statics twice
         Parallel.ForEach(extractedStatics, s =>
         {
             var parts = s.Static.Load(ExportDetailLevel.MostDetailed);
-            fbxHandler.AddStaticToScene(parts, s.Static.Hash);
+            scene.AddStatic(s.Static.Hash, parts);
             s.Static.SaveMaterialsFromParts(savePath, parts, bSaveShaders);
         });
 
         Parallel.ForEach(_tag.InstanceCounts, c =>
         {
             var model = _tag.Statics[c.StaticIndex].Static;
-            fbxHandler.InfoHandler.AddStaticInstances(_tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList(), model.Hash);
+            scene.AddStaticInstancesToMesh(model.Hash, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList());
         });
     }
 }

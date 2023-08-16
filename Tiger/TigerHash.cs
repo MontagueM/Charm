@@ -111,6 +111,25 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
 
     public static implicit operator uint(TigerHash hash) => hash.Hash32;
 
+    public static bool operator ==(TigerHash x, TigerHash y)
+    {
+        if (x is null)
+        {
+            return y is null;
+        }
+
+        return x.Equals(y);
+    }
+
+    public static bool operator !=(TigerHash x, TigerHash y)
+    {
+        if (x is null)
+        {
+            return y is not null;
+        }
+        return !x.Equals(y);
+    }
+
     public virtual void Deserialize(TigerReader reader)
     {
         Hash32 = reader.ReadUInt32();

@@ -1,4 +1,6 @@
-﻿using Tiger.Schema;
+﻿using System.Collections.Concurrent;
+using Arithmic;
+using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
@@ -30,9 +32,9 @@ public class Exporter : Subsystem<Exporter>
         return true;
     }
 
-    public ExporterScene CreateScene(string name)
+    public ExporterScene CreateScene(string name, ExportType type)
     {
-        var scene = new ExporterScene { Name = name };
+        var scene = new ExporterScene { Name = name, Type = type };
         _scenes.Add(scene);
         return scene;
     }
@@ -57,40 +59,113 @@ public class Exporter : Subsystem<Exporter>
 public class ExporterScene
 {
     public string Name { get; set; }
-    public List<ExporterMesh> StaticMeshes = new();
-    public List<ExporterMesh> EntityMeshes = new();
-    public List<ExporterInstance<ExporterMesh>> StaticMeshInstances = new();
+    public ExportType Type { get; set; }
+    public ConcurrentBag<ExporterMesh> StaticMeshes = new();
+    public ConcurrentBag<ExporterMesh> EntityMeshes = new();
+    public ConcurrentDictionary<FileHash, List<Transform>> StaticMeshInstances = new();
+    public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
+    public ConcurrentDictionary<string, SMapDataEntry> EntityPoints = new();
+    public ConcurrentBag<CubemapResource> Cubemaps = new();
 
-    public void AddStatic(string name, List<StaticPart> parts)
+    public void AddStatic(FileHash meshHash, List<StaticPart> parts)
     {
-        ExporterMesh mesh = new();
+        ExporterMesh mesh = new(meshHash);
         for (int i = 0; i < parts.Count; i++)
         {
             StaticPart part = parts[i];
-            mesh.AddPart(name, part, i);
+            mesh.AddPart(meshHash, part, i);
         }
         StaticMeshes.Add(mesh);
     }
 
-    public void AddStaticInstances(string name, List<StaticPart> parts, IEnumerable<SStaticMeshInstanceTransform> instances)
+    public void AddStaticInstancesAndParts(FileHash meshHash, List<StaticPart> parts, IEnumerable<SStaticMeshInstanceTransform> instances)
     {
-        ExporterInstance<ExporterMesh> mesh = new();
-
+        ExporterMesh mesh = new(meshHash);
         for (int i = 0; i < parts.Count; i++)
         {
             StaticPart part = parts[i];
-            mesh.Object.AddPart(name, part, i);
+            mesh.AddPart(meshHash, part, i);
+        }
+        StaticMeshes.Add(mesh);
+
+        StaticMeshInstances.TryAdd(meshHash, InstancesToTransforms(instances));
+    }
+
+    public void AddStaticInstancesToMesh(FileHash modelHash, IEnumerable<SStaticMeshInstanceTransform> instances)
+    {
+        if (!StaticMeshInstances.ContainsKey(modelHash))
+        {
+            StaticMeshInstances.TryAdd(modelHash, InstancesToTransforms(instances));
+        }
+        else
+        {
+            foreach (Transform transform in InstancesToTransforms(instances))
+            {
+                StaticMeshInstances[modelHash].Add(transform);
+            }
+        }
+    }
+
+    private static List<Transform> InstancesToTransforms(IEnumerable<SStaticMeshInstanceTransform> instances)
+    {
+        return instances.Select(t => new Transform
+        {
+            Position = t.Position,
+            Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
+            Quaternion = t.Rotation,
+            Scale = t.Scale
+        }).ToList();
+    }
+
+    public void AddStaticInstance(FileHash modelHash, float scale, Vector4 quatRotation, Vector3 translation)
+    {
+        if (!StaticMeshInstances.ContainsKey(modelHash))
+        {
+            StaticMeshInstances.TryAdd(modelHash, new());
         }
 
-        mesh.AddTransforms(instances);
+        StaticMeshInstances[modelHash].Add(new Transform
+        {
+            Position = translation,
+            Rotation = Vector4.QuaternionToEulerAngles(quatRotation),
+            Quaternion = quatRotation,
+            Scale = new Vector3(scale, scale, scale)
+        });
+    }
 
-        StaticMeshInstances.Add(mesh);
+    public void AddTextureToMaterial(string material, int index, Texture texture)
+    {
+        ExternalMaterialTextures.Add(new MaterialTexture { Material = material, Index = index, Texture = texture});
+    }
+
+    public void AddEntityPoints(SMapDataEntry points, string meshName)
+    {
+        Entity entity = FileResourcer.Get().GetFile<Entity>(points.GetEntityHash());
+        entity.Load();
+        if (entity.Model != null)
+        {
+            meshName += "_Model";
+            // dynamicHandler.AddEntityToScene(entity, entity.Model.Load(ExportDetailLevel.MostDetailed, points.Entity.ModelParentResource), ExportDetailLevel.MostDetailed);
+        }
+
+        EntityPoints.TryAdd(meshName, points);
+    }
+
+    public void AddCubemap(CubemapResource cubemap)
+    {
+        Cubemaps.Add(cubemap);
     }
 }
 
 public class ExporterMesh
 {
+    public FileHash Hash { get; set; }
     public List<ExporterPart> Parts { get; } = new();
+
+    public ExporterMesh(FileHash hash)
+    {
+        Hash = hash;
+    }
 
     public void AddPart(string name, MeshPart part, int index)
     {
@@ -116,34 +191,53 @@ public class ExporterPart
     }
 }
 
-/// <summary>
-/// A wrapper for any exporter type that can be instanced.
-/// Side effect is can also be used to place objects in the world at not-origin.
-/// </summary>
-public class ExporterInstance<T> where T : class
-{
-    public T Object { get; }
-    public List<Transform> Transforms { get; set; } = new();
-
-    public ExporterInstance()
-    {
-        Object = Activator.CreateInstance<T>();
-    }
-
-    public void AddTransforms(IEnumerable<SStaticMeshInstanceTransform> transforms)
-    {
-        Transforms.AddRange(transforms.Select(t => new Transform
-        {
-            Position = t.Position,
-            Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
-            Scale = t.Scale
-        }));
-    }
-}
+// /// <summary>
+// /// A wrapper for any exporter type that can be instanced.
+// /// Side effect is can also be used to place objects in the world at not-origin.
+// /// </summary>
+// public class ExporterInstanced<T> where T : class
+// {
+//     public T Object { get; }
+//     public List<Transform> Transforms { get; set; } = new();
+//
+//     public ExporterInstanced(FileHash hash)
+//     {
+//         Object = (T)Activator.CreateInstance(typeof(T), new object[]{hash});
+//     }
+//
+//     public void AddTransforms(IEnumerable<SStaticMeshInstanceTransform> transforms)
+//     {
+//         Transforms.AddRange(transforms.Select(t => new Transform
+//         {
+//             Position = t.Position,
+//             Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
+//             Quaternion = t.Rotation,
+//             Scale = t.Scale
+//         }));
+//     }
+// }
 
 public struct Transform
 {
     public Vector3 Position { get; set; }
     public Vector3 Rotation { get; set; }
+    public Vector4 Quaternion { get; set; }
     public Vector3 Scale { get; set; }
+}
+
+public struct MaterialTexture
+{
+    public string Material;
+    public int Index;
+    public Texture Texture;
+}
+
+public enum ExportType
+{
+    Static,
+    Entity,
+    Map,
+    Terrain,
+    EntityPoints,
+    StaticInMap
 }
