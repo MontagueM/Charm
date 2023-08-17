@@ -6,7 +6,7 @@ using Tiger.Schema.Shaders;
 
 namespace Tiger.Exporters;
 
-public class MetadataExporter: AbstractExporter
+public class MetadataExporter : AbstractExporter
 {
 
     public override void Export(Exporter.ExportEventArgs args)
@@ -22,7 +22,7 @@ public class MetadataExporter: AbstractExporter
 class MetadataScene
 {
     private readonly ConcurrentDictionary<string, dynamic> _config = new();
-    private ExportType _exportType;
+    private readonly ExportType _exportType;
 
     public MetadataScene(ExporterScene scene)
     {

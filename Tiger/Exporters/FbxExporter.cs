@@ -7,7 +7,7 @@ namespace Tiger.Exporters;
 
 public class FbxExporter : AbstractExporter
 {
-    private FbxManager _manager = FbxManager.Create();
+    private readonly FbxManager _manager = FbxManager.Create();
 
     /// <summary>
     /// Must be single-threaded
