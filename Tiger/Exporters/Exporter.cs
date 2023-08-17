@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Transactions;
 using Arithmic;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -63,9 +64,12 @@ public class ExporterScene
     public ConcurrentBag<ExporterMesh> StaticMeshes = new();
     public ConcurrentBag<ExporterEntity> Entities = new();
     public ConcurrentDictionary<FileHash, List<Transform>> StaticMeshInstances = new();
+    public ConcurrentDictionary<FileHash, List<Transform>> ArrangedStaticMeshInstances = new();
+    public ConcurrentDictionary<FileHash, List<Transform>> EntityInstances = new();
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentDictionary<string, SMapDataEntry> EntityPoints = new();
     public ConcurrentBag<CubemapResource> Cubemaps = new();
+    private List<FileHash> _addedEntities = new List<FileHash>();
 
     public void AddStatic(FileHash meshHash, List<StaticPart> parts)
     {
@@ -88,7 +92,7 @@ public class ExporterScene
         }
         StaticMeshes.Add(mesh);
 
-        StaticMeshInstances.TryAdd(meshHash, InstancesToTransforms(instances));
+        ArrangedStaticMeshInstances.TryAdd(meshHash, InstancesToTransforms(instances));
     }
 
     public void AddStaticInstancesToMesh(FileHash modelHash, IEnumerable<SStaticMeshInstanceTransform> instances)
@@ -140,14 +144,6 @@ public class ExporterScene
 
     public void AddEntityPoints(SMapDataEntry points, string meshName)
     {
-        Entity entity = FileResourcer.Get().GetFile<Entity>(points.GetEntityHash());
-        entity.Load();
-        if (entity.Model != null)
-        {
-            meshName += "_Model";
-            // dynamicHandler.AddEntityToScene(entity, entity.Model.Load(ExportDetailLevel.MostDetailed, points.Entity.ModelParentResource), ExportDetailLevel.MostDetailed);
-        }
-
         EntityPoints.TryAdd(meshName, points);
     }
 
@@ -160,6 +156,42 @@ public class ExporterScene
             mesh.AddPart(entityHash, part, i);
         }
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
+    }
+
+    public void AddMapEntity(SMapDataEntry dynamicResource, Entity entity)
+    {
+        ExporterMesh mesh = new(dynamicResource.GetEntityHash());
+
+        if (!_addedEntities.Contains(entity.Hash)) //Dont want duplicate entities being added
+        {
+            _addedEntities.Add(entity.Hash);
+            var parts = entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource);
+            for (int i = 0; i < parts.Count; i++)
+            {
+                DynamicMeshPart part = parts[i];
+
+                if (!part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                {
+                    continue;
+                }
+
+                mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
+            }
+            Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = entity.Skeleton?.GetBoneNodes() });
+        }
+
+        if (!EntityInstances.ContainsKey(dynamicResource.GetEntityHash()))
+        {
+            EntityInstances.TryAdd(dynamicResource.GetEntityHash(), new());
+        }
+
+        EntityInstances[dynamicResource.GetEntityHash()].Add(new Transform
+        {
+            Position = dynamicResource.Translation.ToVec3(),
+            Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
+            Quaternion = dynamicResource.Rotation,
+            Scale = new Vector3(dynamicResource.Translation.W, dynamicResource.Translation.W, dynamicResource.Translation.W)
+        });
     }
 
     public void AddCubemap(CubemapResource cubemap)
@@ -256,5 +288,6 @@ public enum ExportType
     Map,
     Terrain,
     EntityPoints,
-    StaticInMap
+    StaticInMap,
+    EntityInMap
 }

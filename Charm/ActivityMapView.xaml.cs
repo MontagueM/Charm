@@ -193,7 +193,8 @@ public partial class ActivityMapView : UserControl
             return;
         }
 
-        List<string> mapStages = maps.Select((x, i) => $"exporting {i + 1}/{maps.Count}").ToList();
+        List<string> mapStages = maps.Select((x, i) => $"Exporting {i + 1}/{maps.Count}").ToList();
+        mapStages.Add("Finishing Export");
         MainWindow.Progress.SetProgressStages(mapStages);
         // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
         Parallel.ForEach(maps, map =>
@@ -222,6 +223,8 @@ public partial class ActivityMapView : UserControl
         // MainWindow.Progress.CompleteStage();
 
         Tiger.Exporters.Exporter.Get().Export();
+        Tiger.Exporters.Exporter.Get().Reset(); //Clear the scenes for the next export
+        MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>
         {
