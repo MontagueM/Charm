@@ -52,11 +52,7 @@ public class EntityModel : Tag<SEntityModel>
                 }
                 else
                 {
-                    if (eDetailLevel == ExportDetailLevel.MostDetailed && (part.LodCategory == ELodCategory.MainGeom0 ||
-                                                                           part.LodCategory == ELodCategory.GripStock0 ||
-                                                                           part.LodCategory == ELodCategory.Stickers0 ||
-                                                                           part.LodCategory == ELodCategory.InternalGeom0 ||
-                                                                           part.LodCategory == ELodCategory.Detail0))
+                    if (eDetailLevel == ExportDetailLevel.MostDetailed && part.LodCategory is ELodCategory.MainGeom0 or ELodCategory.GripStock0 or ELodCategory.Stickers0 or ELodCategory.InternalGeom0 or ELodCategory.Detail0)
                     {
                         parts[meshIndex].Add(partIndex++, part);
                     }
