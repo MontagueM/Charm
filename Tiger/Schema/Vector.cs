@@ -96,6 +96,11 @@ public struct Vector3
     {
         return new Vector3(x.X - y.X, x.Y - y.Y, x.Z - y.Z);
     }
+
+    public static Vector3 operator *(Vector3 x, float y)
+    {
+        return new Vector3(x.X * y, x.Y * y, x.Z * y);
+    }
 }
 
 public struct IntVector3
@@ -294,6 +299,75 @@ public struct Vector4
             }
             throw new IndexOutOfRangeException();
         }
+    }
+
+    /// euler degrees
+    /// From https://github.com/OwlGamingCommunity/V/blob/492d0cb3e89a97112ac39bf88de39da57a3a1fbf/Source/owl_core/Server/MapLoader.cs
+    public static Vector3 QuaternionToEulerAngles(Vector4 q)
+    {
+        Vector3 retVal = new();
+
+        // roll (x-axis rotation)
+        double sinr_cosp = +2.0 * (q.W * q.X + q.Y * q.Z);
+        double cosr_cosp = +1.0 - 2.0 * (q.X * q.X + q.Y * q.Y);
+        retVal.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+        // pitch (y-axis rotation)
+        double sinp = +2.0 * (q.W * q.Y - q.Z * q.X);
+        double absSinP = Math.Abs(sinp);
+        bool bSinPOutOfRage = absSinP >= 1.0;
+        if (bSinPOutOfRage)
+        {
+            retVal.Y = 90.0f; // use 90 degrees if out of range
+        }
+        else
+        {
+            retVal.Y = (float)Math.Asin(sinp);
+        }
+
+        // yaw (z-axis rotation)
+        double siny_cosp = +2.0 * (q.W * q.Z + q.X * q.Y);
+        double cosy_cosp = +1.0 - 2.0 * (q.Y * q.Y + q.Z * q.Z);
+        retVal.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+        // Rad to Deg
+        retVal.X *= (float)(180.0f / Math.PI);
+
+        if (!bSinPOutOfRage) // only mult if within range
+        {
+            retVal.Y *= (float)(180.0f / Math.PI);
+        }
+        retVal.Z *= (float)(180.0f / Math.PI);
+
+        return retVal;
+    }
+
+
+    /// euler in radians
+    public static Vector3 ConsiderQuatToEulerConvert(Vector4 v4N)
+    {
+        // shadowkeep and below don't have quaternion normals
+        if (Strategy.CurrentStrategy < TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            return new Vector3(v4N.X, v4N.Y, v4N.Z);
+        }
+        Vector3 res = new Vector3();
+        if (Math.Abs(v4N.Magnitude - 1) < 0.01)  // Quaternion
+        {
+            var quat = new SharpDX.Quaternion(v4N.X, v4N.Y, v4N.Z, v4N.W);
+            var a = new SharpDX.Vector3(1, 0, 0);
+            var result = SharpDX.Vector3.Transform(a, quat);
+            res.X = result.X;
+            res.Y = result.Y;
+            res.Z = result.Z;
+        }
+        else
+        {
+            res.X = v4N.X;
+            res.Y = v4N.Y;
+            res.Z = v4N.Z;
+        }
+        return res;
     }
 }
 
