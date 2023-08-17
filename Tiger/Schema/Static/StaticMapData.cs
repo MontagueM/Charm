@@ -39,7 +39,7 @@ public class StaticMapData : Tag<SStaticMapData>
             s.Static.SaveMaterialsFromParts(savePath, parts, bSaveShaders);
         });
 
-        foreach(var c in _tag.InstanceCounts)
+        foreach (var c in _tag.InstanceCounts)
         {
             var model = _tag.Statics[c.StaticIndex].Static;
             scene.AddStaticInstancesToMesh(model.Hash, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList());

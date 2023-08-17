@@ -9,7 +9,7 @@ namespace Tiger.Exporters;
 
 public class Exporter : Subsystem<Exporter>
 {
-    private List<ExporterScene> _scenes = new();
+    private readonly List<ExporterScene> _scenes = new();
 
     public class ExportEventArgs : EventArgs
     {
@@ -135,7 +135,7 @@ public class ExporterScene
 
     public void AddTextureToMaterial(string material, int index, Texture texture)
     {
-        ExternalMaterialTextures.Add(new MaterialTexture { Material = material, Index = index, Texture = texture});
+        ExternalMaterialTextures.Add(new MaterialTexture { Material = material, Index = index, Texture = texture });
     }
 
     public void AddEntityPoints(SMapDataEntry points, string meshName)
