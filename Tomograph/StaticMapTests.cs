@@ -41,9 +41,9 @@ public class StaticMapTests
         string fileHash = "17A7B580";
         StaticMapData mapData = FileResourcer.Get().GetFile<StaticMapData>(fileHash);
         FbxHandler handler = new();
-        // mapData.LoadArrangedIntoFbxScene(handler);
-        mapData.LoadIntoFbxScene(handler, "TestModels/TestMap", true);
-        handler.ExportScene("TestModels/TestMap.fbx");
+        // mapData.LoadArrangedIntoExporterScene(handler);
+        // mapData.LoadIntoExporterScene(handler, "TestModels/TestMap", true);
+        // handler.ExportScene("TestModels/TestMap.fbx");
         var a = 0;
         // mesh.
         // Assert.IsNotNull(strings);

@@ -1,3 +1,4 @@
+using Tiger.Exporters;
 using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
@@ -12,7 +13,7 @@ public class Terrain : Tag<STerrain>
     }
 
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoFbxScene(FbxHandler fbxHandler, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource, bool exportStatic = false)
+    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool bSaveShaders, D2Class_7D6C8080 parentResource, bool exportStatic = false)
     {
         // todo fix terrain
         if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
@@ -83,10 +84,12 @@ public class Terrain : Tag<STerrain>
             TransformTexcoords(part.Key);
         }
 
-        fbxHandler.AddStaticToScene(parts.Keys.ToList(), Hash);
+        scene.AddStatic(Hash, parts.Keys.ToList());
         // For now we pre-transform it
         if (!exportStatic)
-            fbxHandler.InfoHandler.AddInstance(Hash, 1, Vector4.Zero, globalOffset);
+        {
+            scene.AddStaticInstance(Hash, 1, Vector4.Zero, globalOffset);
+        }
 
         // We need to add these textures after the static is initialised
         foreach (var part in parts)
@@ -96,7 +99,7 @@ public class Terrain : Tag<STerrain>
             {
                 if (!exportStatic)
                 {
-                    fbxHandler.InfoHandler.AddCustomTexture(part.Key.Material.FileHash, terrainTextureIndex, dyemap);
+                    scene.AddTextureToMaterial(part.Key.Material.FileHash, terrainTextureIndex, dyemap);
                 }
 
                 if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2ShaderExportEnabled())
