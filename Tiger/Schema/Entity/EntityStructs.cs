@@ -1212,14 +1212,17 @@ public struct D2Class_F62C8080
 {
 }
 
-[SchemaStruct("F42C8080", 0x338)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F42C8080", 0x338)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "F42C8080", 0x358)]
 public struct D2Class_F42C8080
 {
-    [SchemaField(0x2c8)]
+    [SchemaField(0x2C8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x2E8, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_FA2C8080> PatternAudioGroups;
 }
 
-[SchemaStruct("FA2C8080", 0x258)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "FA2C8080", 0x258)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "EEBC8080", 0x278)]
 public struct D2Class_FA2C8080
 {
     [SchemaField(0x10)]
@@ -1259,30 +1262,34 @@ public struct D2Class_FA2C8080
     public Tag Unk130;
     [SchemaField(0x148), Tag64]
     public Tag Unk148;
-    [SchemaField(0x168)]
-    public int Unk168;
-    [SchemaField(0x178)]
-    public int Unk178;
-    [SchemaField(0x180)]
-    public float Unk180;
-    public float Unk184;
-    public float Unk188;
-    public int Unk18C;
-    public int Unk190;
-    public float Unk194;
-    public float Unk198;
-    [SchemaField(0x1A8)]
-    public int Unk1A8;
-    public float Unk1AC;
-    [SchemaField(0x1C0), Tag64]
+    //[SchemaField(0x168)]
+    //public int Unk168;
+    //[SchemaField(0x178)]
+    //public int Unk178;
+    //[SchemaField(0x180)]
+    //public float Unk180;
+    //public float Unk184;
+    //public float Unk188;
+    //public int Unk18C;
+    //public int Unk190;
+    //public float Unk194;
+    //public float Unk198;
+    //[SchemaField(0x1A8)]
+    //public int Unk1A8;
+    //public float Unk1AC;
+    [SchemaField(0x1C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x1D0, TigerStrategy.DESTINY2_LATEST), Tag64]
     public Tag Unk1C0;
-    [SchemaField(0x1D8), Tag64]
+
+    [SchemaField(0x1D8, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x1E8, TigerStrategy.DESTINY2_LATEST), Tag64]
     public Tag Unk1D8;
 
     // public DynamicArray<D2Class_87978080> Unk1E8;
     // public DynamicArray<D2Class_84978080> Unk1F8;
     // public DynamicArray<D2Class_062D8080> Unk208;
-    [SchemaField(0x248), Tag64]
+    [SchemaField(0x248, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x268, TigerStrategy.DESTINY2_LATEST), Tag64]
     public Tag Unk248;
 }
 

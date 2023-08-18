@@ -1585,7 +1585,6 @@ public partial class TagListView : UserControl
             RefreshItemList();
             return;
         }
-
         var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.TagData.Unk18.GetValue(val.PatternAudioUnnamed.GetReader());
         var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18.GetValue(val.PatternAudio.GetReader());
         var item = Investment.Get().GetInventoryItem(apiHash);
@@ -1683,20 +1682,20 @@ public partial class TagListView : UserControl
             }
             foreach (var entity in entities)
             {
-                foreach (var e in entity.TagData.EntityResources)
+                foreach (var e in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
                 {
-                    if (e.Resource.TagData.Unk18.GetValue(e.Resource.GetReader()) is D2Class_79818080 a)
+                    if (e.TagData.Unk18.GetValue(e.GetReader()) is D2Class_79818080 a)
                     {
                         foreach (var d2ClassF1918080 in a.WwiseSounds1)
                         {
-                            if (d2ClassF1918080.Unk10.GetValue(e.Resource.GetReader()) is D2Class_40668080 b)
+                            if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is D2Class_40668080 b)
                             {
                                 sounds.Add(b.Sound);
                             }
                         }
                         foreach (var d2ClassF1918080 in a.WwiseSounds2)
                         {
-                            if (d2ClassF1918080.Unk10.GetValue(e.Resource.GetReader()) is D2Class_40668080 b)
+                            if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is D2Class_40668080 b)
                             {
                                 sounds.Add(b.Sound);
                             }
