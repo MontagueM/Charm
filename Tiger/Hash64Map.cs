@@ -38,7 +38,7 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
     public string GetHash32Checked(string strHash)
     {
         ulong tagHash64 = Endian.SwapU64(UInt64.Parse(strHash, NumberStyles.HexNumber));
-        return Endian.U64ToString(GetHash32Checked(tagHash64));
+        return Endian.U32ToString(GetHash32Checked(tagHash64));
     }
 
     public string GetHash64(uint tag32)
@@ -56,6 +56,10 @@ public class Hash64Map : Strategy.StrategistSingleton<Hash64Map>
             IPackage package = PackageResourcer.Get().GetPackage(packageId);
             foreach (SHash64Definition definition in package.GetHash64List())
             {
+                if (definition.Hash64 == 3131997318944522240)
+                {
+                    var a = 0;
+                }
                 _map.TryAdd(definition.Hash64, definition.Hash32);
             }
         });
