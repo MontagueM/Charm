@@ -151,8 +151,8 @@ namespace Tiger.Schema.Static.DESTINY2_WITCHQUEEN_6307
                 if (materialMap.ContainsKey(i))
                 {
                     StaticPart part = new StaticPart(staticPartEntry);
-                    part.Material = materialMap[i];
                     part.GetAllData(mesh, parent);
+                    part.Material = materialMap[i];
                     parts.Add(part);
                 }
             }
