@@ -134,7 +134,8 @@ public class FbxHandler
         // Check if quaternion
         foreach (var normal in part.VertexNormals)
         {
-            normalsLayer.GetDirectArray().Add(new FbxVector4(normal.X, normal.Y, normal.Z));
+            var normal_euler = ConsiderQuatToEulerConvert(normal);
+            normalsLayer.GetDirectArray().Add(new FbxVector4(normal_euler.X, normal_euler.Y, normal_euler.Z));
         }
         mesh.GetLayer(0).SetNormals(normalsLayer);
     }
@@ -602,5 +603,31 @@ public class FbxHandler
         retVal.Z *= (float)(180.0f / Math.PI);
 
         return retVal;
+    }
+
+    private Vector3 ConsiderQuatToEulerConvert(Vector4 v4N)
+    {
+        // shadowkeep and below don't have quaternion normals
+        if (Strategy.CurrentStrategy < TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            return new Vector3(v4N.X, v4N.Y, v4N.Z);
+        }
+        Vector3 res = new Vector3();
+        if (Math.Abs(v4N.Magnitude - 1) < 0.01)  // Quaternion
+        {
+            var quat = new Quaternion(v4N.X, v4N.Y, v4N.Z, v4N.W);
+            var a = new SharpDX.Vector3(1, 0, 0);
+            var result = SharpDX.Vector3.Transform(a, quat);
+            res.X = result.X;
+            res.Y = result.Y;
+            res.Z = result.Z;
+        }
+        else
+        {
+            res.X = v4N.X;
+            res.Y = v4N.Y;
+            res.Z = v4N.Z;
+        }
+        return res;
     }
 }
