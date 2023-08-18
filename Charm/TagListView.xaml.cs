@@ -980,12 +980,15 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>();
 
         // Getting names
+        ConcurrentDictionary<string, StringHash> nameHashes = new();
+        ConcurrentDictionary<string, string> names = new();
         if (Strategy.CurrentStrategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999)
         {
             var valsChild = await PackageResourcer.Get().GetAllHashesAsync<D2Class_8B8E8080>();
             Parallel.ForEach(valsChild, val =>
             {
                 Tag<D2Class_8B8E8080> tag = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(val);
+                nameHashes.TryAdd(tag.TagData.DestinationName, tag.TagData.LocationName);
                 GlobalStrings.Get().AddStrings(tag.TagData.StringContainer);
             });
         }
@@ -999,16 +1002,22 @@ public partial class TagListView : UserControl
             });
         }
 
+        foreach (var keyValuePair in nameHashes)
+        {
+            names[keyValuePair.Key] = GlobalStrings.Get().GetString(keyValuePair.Value);
+        }
+
         var vals = await PackageResourcer.Get().GetAllHashesAsync<IActivity>();
 
         Parallel.ForEach(vals, val =>
         {
             var activityName = PackageResourcer.Get().GetActivityName(val);
+            var first = activityName.Split(".").First();
             _allTagItems.Add(new TagItem
             {
                 Hash = val,
                 Name = activityName,
-                // Subname = names.ContainsKey(activityName) && !names[activityName].StartsWith("%%NOGLOBALSTRING") ? names[activityName] : "",
+                Subname = names.ContainsKey(first) ? names[first] : "",
                 TagType = ETagListType.Activity
             });
         });
