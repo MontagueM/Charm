@@ -223,7 +223,7 @@ public partial class ActivityMapView : UserControl
         // MainWindow.Progress.CompleteStage();
 
         Tiger.Exporters.Exporter.Get().Export();
-        Tiger.Exporters.Exporter.Get().Reset(); //Clear the scenes for the next export
+        
         MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>

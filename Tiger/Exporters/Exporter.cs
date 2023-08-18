@@ -52,6 +52,7 @@ public class Exporter : Subsystem<Exporter>
     {
         string outputDirectory = CharmInstance.GetSubsystem<ConfigSubsystem>().GetExportSavePath();
         ExportEvent(new ExportEventArgs(_scenes, outputDirectory));
+        Reset();
     }
 }
 
