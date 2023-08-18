@@ -96,7 +96,7 @@ public partial class MapView : UserControl
             Directory.CreateDirectory(savePath + "/Entities");
             ExportStatics(savePath, map);
         }
- 
+
         ExtractDataTables(map, savePath, scene, ExportTypeFlag.Full);
 
         if (_config.GetUnrealInteropEnabled())
@@ -132,11 +132,10 @@ public partial class MapView : UserControl
 
     public static void ExportTerrainMap(Tag<SMapContainer> map)
     {
-        string meshName = map.Hash.ToString();
-        string savePath = _config.GetExportSavePath() + $"/{meshName}";
         ExporterScene scene = Exporter.Get().CreateScene($"{map.Hash}_Terrain", ExportType.Terrain);
         bool export = false;
-        
+        string meshName = map.Hash.ToString();
+        string savePath = _config.GetExportSavePath() + $"/{meshName}";
         if (_config.GetSingleFolderMapsEnabled())
         {
             savePath = _config.GetExportSavePath() + "/Maps";

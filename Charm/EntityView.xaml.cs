@@ -103,10 +103,6 @@ public partial class EntityView : UserControl
             {
                 AutomatedExporter.SaveInteropUnrealPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
-            if (config.GetBlenderInteropEnabled())
-            {
-                AutomatedExporter.SaveInteropBlenderPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
-            }
         }
 
         // Scale and rotate
