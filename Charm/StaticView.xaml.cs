@@ -39,11 +39,11 @@ public partial class StaticView : UserControl
 
     public static void ExportStatic(FileHash hash, string name, ExportTypeFlag exportType, string extraPath = "")
     {
+        ExporterScene scene = Exporter.Get().CreateScene(name, ExportType.Static);
         bool lodexport = false;
-        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        ConfigSubsystem config = ConfigSubsystem.Get();
         bool source2Models = config.GetS2VMDLExportEnabled();
-        FbxHandler fbxHandler = new FbxHandler(exportType == ExportTypeFlag.Full);
-        FbxHandler lodfbxHandler = new FbxHandler(exportType == ExportTypeFlag.Full);
+
         string savePath = config.GetExportSavePath() + "/" + extraPath + "/";
         string meshName = hash;
         if (exportType == ExportTypeFlag.Full)
@@ -53,15 +53,13 @@ public partial class StaticView : UserControl
 
         StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(hash);
         List<StaticPart> parts = staticMesh.Load(ExportDetailLevel.MostDetailed);
-        fbxHandler.AddStaticToScene(parts, meshName);
+        scene.AddStatic(hash, parts);
         Directory.CreateDirectory(savePath);
         if (exportType == ExportTypeFlag.Full)
         {
             staticMesh.SaveMaterialsFromParts(savePath, parts, config.GetUnrealInteropEnabled() || config.GetS2ShaderExportEnabled());
-            fbxHandler.InfoHandler.SetMeshName(meshName);
             if (config.GetUnrealInteropEnabled())
             {
-                fbxHandler.InfoHandler.SetUnrealInteropPath(config.GetUnrealInteropPath());
                 AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
                 AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
             }
@@ -71,11 +69,11 @@ public partial class StaticView : UserControl
                 Source2Handler.SaveStaticVMDL($"{savePath}", meshName, parts);
             }
         }
-        fbxHandler.InfoHandler.AddType("Static");
-        fbxHandler.ExportScene($"{savePath}/{name}.fbx");
 
         if (lodexport)
         {
+            ExporterScene lodScene = Exporter.Get().CreateScene($"{name}_LOD", ExportType.Static);
+
             List<StaticPart> lodparts = staticMesh.Load(ExportDetailLevel.LeastDetailed);
             Directory.CreateDirectory(savePath + "/LOD");
 
@@ -85,10 +83,10 @@ public partial class StaticView : UserControl
                 Console.WriteLine(lodpart.Material.FileHash.ToString());
             }
 
-            lodfbxHandler.AddStaticToScene(lodparts, $"{meshName}_LOD");
-            lodfbxHandler.InfoHandler.SetMeshName($"{meshName}_LOD");
-            lodfbxHandler.ExportScene($"{savePath}/LOD/{name}_LOD.fbx");
+            lodScene.AddStatic(hash, lodparts);
         }
+
+        Exporter.Get().Export();
     }
 
     private List<MainViewModel.DisplayPart> MakeDisplayParts(List<StaticPart> containerParts)

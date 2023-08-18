@@ -69,7 +69,7 @@ public class Source2Settings
 //     }
 // }
 
-public class ConfigSubsystem : Subsystem
+public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 {
     // private Configuration _config =
     // ConfigurationManager.OpenExeConfiguration(System.Windows.Forms.Application.ExecutablePath);

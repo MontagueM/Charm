@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
+using HelixToolkit.Wpf.SharpDX;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
@@ -219,6 +220,8 @@ public partial class ActivityMapView : UserControl
         });
         // MapView.ExportFullMap(staticMapData);
         // MainWindow.Progress.CompleteStage();
+
+        Tiger.Exporters.Exporter.Get().Export();
 
         Dispatcher.Invoke(() =>
         {

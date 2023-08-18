@@ -93,16 +93,18 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
             type = typeof(Tag<>).MakeGenericType(type);
         }
 
-
-
         dynamic? file;
-        if (!shouldLoad)
+        if (type.GetConstructor(new[] { typeof(FileHash), typeof(bool) }) != null)
         {
             file = Activator.CreateInstance(type, hash, shouldLoad);
         }
-        else
+        else if (type.GetConstructor(new[] { typeof(FileHash) }) != null)
         {
             file = Activator.CreateInstance(type, hash);
+        }
+        else
+        {
+            throw new Exception($"Invalid constructor for {type}");
         }
 
         _fileCache.TryAdd(hash.Hash32, file);

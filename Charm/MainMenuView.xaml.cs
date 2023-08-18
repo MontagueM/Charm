@@ -23,6 +23,7 @@ public partial class MainMenuView : UserControl
 
         ApiButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
         BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
+        WeaponAudioButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
 
         Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
         {
@@ -30,13 +31,14 @@ public partial class MainMenuView : UserControl
             {
                 ApiButton.IsEnabled = ShowWQButtons(args.Strategy);
                 BagsButton.IsEnabled = ShowWQButtons(args.Strategy);
+                WeaponAudioButton.IsEnabled = ShowWQButtons(args.Strategy);
             });
         };
     }
 
     private bool ShowWQButtons(TigerStrategy strategy)
     {
-        return strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307;
+        return strategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999;
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -93,6 +95,11 @@ public partial class MainMenuView : UserControl
 
     private void WeaponAudioViewButton_Click(object sender, RoutedEventArgs e)
     {
+        // todo actually make this show the progress bar, cba rn
+        MainWindow.Progress.SetProgressStages(new() { "Start investment system" });
+        Investment.LazyInit();
+        MainWindow.Progress.CompleteStage();
+
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.WeaponAudioGroupList);
         _mainWindow.MakeNewTab("weapon audio", tagListView);
