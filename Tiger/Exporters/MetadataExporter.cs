@@ -60,6 +60,10 @@ class MetadataScene
         {
             AddInstanced(meshInstanced.Key, meshInstanced.Value);
         }
+        foreach (var meshInstanced in scene.EntityInstances)
+        {
+            AddInstanced(meshInstanced.Key, meshInstanced.Value);
+        }
 
         foreach (ExporterEntity entityMesh in scene.Entities)
         {
@@ -191,7 +195,7 @@ class MetadataScene
         {
             path = Path.Join(path, "Maps");
         }
-        else if (_exportType is ExportType.StaticInMap)
+        else if (_exportType is ExportType.StaticInMap or ExportType.EntityInMap)
         {
             return;
         }

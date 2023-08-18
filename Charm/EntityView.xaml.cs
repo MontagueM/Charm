@@ -79,9 +79,8 @@ public partial class EntityView : UserControl
     public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
-        string savePath = config.GetExportSavePath() + $"/{name}";
-
         name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        string savePath = config.GetExportSavePath() + $"/{name}";
 
         ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entity);
 
@@ -103,10 +102,6 @@ public partial class EntityView : UserControl
             if (config.GetUnrealInteropEnabled())
             {
                 AutomatedExporter.SaveInteropUnrealPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
-            }
-            if (config.GetBlenderInteropEnabled())
-            {
-                AutomatedExporter.SaveInteropBlenderPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
             }
         }
 

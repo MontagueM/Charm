@@ -22,7 +22,7 @@ public class FbxExporter : AbstractExporter
             {
                 AddMesh(fbxScene, mesh);
             }
-            foreach (var meshInstance in scene.StaticMeshInstances)
+            foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
             {
                 Debug.Assert(scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) == 1);
                 AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
@@ -49,6 +49,10 @@ public class FbxExporter : AbstractExporter
             else if (scene.Type is ExportType.StaticInMap)
             {
                 outputDirectory = Path.Join(outputDirectory, "Maps", "Statics");
+            }
+            else if (scene.Type is ExportType.EntityInMap)
+            {
+                outputDirectory = Path.Join(outputDirectory, "Maps", "Entities");
             }
 
             ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
@@ -106,11 +110,12 @@ public class FbxExporter : AbstractExporter
 
     private void AddEntity(FbxScene fbxScene, ExporterEntity entity)
     {
-        List<FbxNode> skeletonNodes = AddSkeleton(fbxScene, entity.BoneNodes);
+        List<FbxNode> skeletonNodes = entity.BoneNodes == null ? new() : AddSkeleton(fbxScene, entity.BoneNodes);
         foreach (ExporterPart part in entity.Mesh.Parts)
         {
             var dynamicMeshPart = part.MeshPart as DynamicMeshPart;
-            FbxMesh fbxMesh = AddPart(fbxScene, part);
+
+            FbxMesh fbxMesh = AddPart(fbxScene, part, true);
 
             if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
             {
@@ -228,7 +233,7 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private FbxMesh AddPart(FbxScene fbxScene, ExporterPart part)
+    private FbxMesh AddPart(FbxScene fbxScene, ExporterPart part, bool isEntity = false)
     {
         FbxMesh fbxMesh = AddVerticesAndIndices(part);
         FbxNode node = FbxNode.Create(_manager, fbxMesh.GetName());
@@ -236,7 +241,7 @@ public class FbxExporter : AbstractExporter
         fbxScene.GetRootNode().AddChild(node);
 
         fbxMesh.AddTexcoords0(part);
-        fbxMesh.AddNormals(part);
+        fbxMesh.AddNormals(part, isEntity);
         fbxMesh.AddTangents(part);
         fbxMesh.AddColours(part);
 
@@ -322,7 +327,7 @@ public static class FbxMeshExtensions
         fbxMesh.GetLayer(1).SetUVs(uvLayer);
     }
 
-    public static void AddNormals(this FbxMesh fbxMesh, ExporterPart part)
+    public static void AddNormals(this FbxMesh fbxMesh, ExporterPart part, bool isEntity = false)
     {
         if (!part.MeshPart.VertexNormals.Any())
         {
@@ -338,7 +343,7 @@ public static class FbxMeshExtensions
 
             if (Strategy.CurrentStrategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999)
             {
-                Vector3 euler = Vector4.ConsiderQuatToEulerConvert(normal);
+                Vector3 euler = isEntity ? new Vector3(normal.X, normal.Y, normal.Z) : Vector4.ConsiderQuatToEulerConvert(normal);
                 vec4 = new FbxVector4(euler.X, euler.Y, euler.Z);
             }
             else
