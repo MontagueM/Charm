@@ -181,7 +181,6 @@ public partial class MapView : UserControl
 
         Parallel.ForEach(map.TagData.MapDataTables, data =>
         {
-            //Console.WriteLine($"{data.MapDataTable.Hash}");
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
@@ -207,6 +206,10 @@ public partial class MapView : UserControl
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is CubemapResource cubemap)
                 {
                     scene.AddCubemap(cubemap);
+                }
+                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SPointLightResource pointLight)
+                {
+                    scene.AddPointLight(pointLight, entry);
                 }
             });
         });

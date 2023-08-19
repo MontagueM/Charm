@@ -34,6 +34,8 @@ class MetadataScene
         _config.TryAdd("Instances", instances);
         ConcurrentDictionary<string, ConcurrentBag<JsonCubemap>> cubemaps = new();
         _config.TryAdd("Cubemaps", cubemaps);
+        ConcurrentDictionary<string, ConcurrentBag<JsonLight>> pointLights = new();
+        _config.TryAdd("Lights", pointLights);
 
         if (ConfigSubsystem.Get().GetUnrealInteropEnabled())
         {
@@ -85,6 +87,14 @@ class MetadataScene
         foreach (CubemapResource cubemap in scene.Cubemaps)
         {
             AddCubemap(cubemap.CubemapName, cubemap.CubemapSize.ToVec3(), cubemap.CubemapRotation, cubemap.CubemapPosition.ToVec3());
+        }
+        foreach (var pointLight in scene.PointLights)
+        {
+            var light = FileResourcer.Get().GetSchemaTag<D2Class_786A8080>(pointLight.Key);
+            AddLight(light.Hash,
+                    "Point",
+                    pointLight.Value,
+                    (light.TagData.Unk10.TagData.Unk40.Count == 0 ? light.TagData.Unk10.TagData.Unk60[0].Vec : light.TagData.Unk10.TagData.Unk40[0].Vec));
         }
     }
 
@@ -185,6 +195,30 @@ class MetadataScene
         });
     }
 
+    public void AddLight(string name, string type, List<Transform> transforms, Vector4 color)
+    {
+        //Idk how color/intensity is handled, so if its above 1 just bring it down
+        float R = color.X > 1 ? color.X / 100 : color.X;
+        float G = color.Y > 1 ? color.Y / 100 : color.Y;
+        float B = color.Z > 1 ? color.Z / 100 : color.Z;
+
+        if (!_config["Lights"].ContainsKey(name))
+        {
+            _config["Lights"][name] = new ConcurrentBag<JsonLight>();
+        }
+        foreach (Transform transform in transforms)
+        {
+            _config["Lights"][name].Add(new JsonLight
+            {
+                Type = type,
+                Translation = new[] { transform.Position.X, transform.Position.Y, transform.Position.Z },
+                Rotation = new[] { transform.Quaternion.X, transform.Quaternion.Y, transform.Quaternion.Z, transform.Quaternion.W },
+                Size = new[] { 1.0f, 1.0f },
+                Color = new[] { R, G, B }
+            });
+        }
+    }
+
     public void WriteToFile(string path)
     {
         if (_exportType is ExportType.Static or ExportType.Entity)
@@ -264,6 +298,15 @@ class MetadataScene
         public float[] Translation;
         public float[] Rotation;
         public float[] Scale;
+    }
+
+    private struct JsonLight
+    {
+        public string Type;
+        public float[] Translation;
+        public float[] Rotation;
+        public float[] Size;
+        public float[] Color;
     }
 }
 
