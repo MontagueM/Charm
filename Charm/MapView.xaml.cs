@@ -202,7 +202,7 @@ public partial class MapView : UserControl
                     {
                         dynamicScene.AddMapEntity(dynamicResource, entity);
                     }
-                    dynamicPointScene.AddEntityPoints(dynamicResource, dynamicResource.GetEntityHash());
+                    dynamicPointScene.AddEntityPoints(dynamicResource);
                 }
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is CubemapResource cubemap)
                 {

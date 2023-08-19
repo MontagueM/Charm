@@ -67,7 +67,7 @@ public class ExporterScene
     public ConcurrentDictionary<FileHash, List<Transform>> ArrangedStaticMeshInstances = new();
     public ConcurrentDictionary<FileHash, List<Transform>> EntityInstances = new();
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
-    public ConcurrentDictionary<string, SMapDataEntry> EntityPoints = new();
+    public ConcurrentBag<SMapDataEntry> EntityPoints = new();
     public ConcurrentBag<CubemapResource> Cubemaps = new();
     private List<FileHash> _addedEntities = new List<FileHash>();
 
@@ -142,9 +142,9 @@ public class ExporterScene
         ExternalMaterialTextures.Add(new MaterialTexture { Material = material, Index = index, Texture = texture });
     }
 
-    public void AddEntityPoints(SMapDataEntry points, string meshName)
+    public void AddEntityPoints(SMapDataEntry points)
     {
-        EntityPoints.TryAdd(meshName, points);
+        EntityPoints.Add(points);
     }
 
     public void AddEntity(FileHash entityHash, List<DynamicMeshPart> parts, List<BoneNode> boneNodes)
