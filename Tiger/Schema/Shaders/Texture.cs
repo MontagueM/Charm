@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Arithmic;
 using DirectXTex;
 using DirectXTexNet;
 
@@ -59,6 +60,11 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
         if (IsCubemap())
         {
+            if (scratchImage.GetMetadata().ArraySize != 6)
+            {
+                Log.Error($"Cubemap texture '{Hash}' has invalid array size '{scratchImage.GetMetadata().ArraySize}'");
+                return scratchImage;
+            }
             if (TexHelper.Instance.IsCompressed(format))
             {
                 scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.R8G8B8A8_UNORM);

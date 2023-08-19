@@ -2,47 +2,48 @@
 
 ## What is this?
 
-A new, flashier, fully C# version of my previous tool Phonon. It is designed to only support the latest versions of the game. The tool focuses on providing as much access to the information in the game files as possible, ideal for artists and content preservation.
+A new, flashier, fully C# version of my previous tool Phonon.
+
+It is designed to support many versions of the Tiger engine, including many game versions of Destiny 2.
+
+The tool focuses on providing as much access to the information in the game files as possible, ideal for artists and content preservation.
 
 ## How do I install and use it?
 
+You'll first need at least one game installation.
+Charm currently supports:
+
+| Version | Description             | Where           |  Main manifest id   | Language manifest id |
+|---------|-------------------------|-----------------|---------------------|----------------------|
+| 2.6.0.1 | Shadowkeep first update | DepotDownloader | 7002268313830901797 | 2399965969279284756  |
+| 2.9.9.9 | Shadowkeep last update  | DepotDownloader | 4160053308690659072 | 4651412338057797072  |
+| 6.3.0.7 | Witch Queen last update | DepotDownloader | 6051526863119423207 | 1078048403901153652  |
+| N/A     | Lightfall latest        | Steam           | N/A                 | N/A                  |
+
+If you just want to look at the latest release, you only need Destiny 2 downloaded on Steam.
+
+Otherwise, you can download the DepotDownloader versions by
+- Downloading [DepotDownloader]()
+- Running it with the following arguments:
+```
+dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest {main_manifest_id} -username <username> -password <password> -dir <path> -validate
+dotnet DepotDownloader.dll -app 1085660 -depot 1085662 -manifest {language_manifest_id} -username <username> -password <password> -dir <path> -validate
+
+e.g.
+dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest 4160053308690659072 -username myusername -password mypassword -dir "D:/DestinyCharmStore/v2601/" -validate
+dotnet DepotDownloader.dll -app 1085660 -depot 1085662 -manifest 4651412338057797072 -username myusername -password mypassword -dir "D:/DestinyCharmStore/v2601/" -validate
+```
+
+After you've downloaded the version(s) you want:
+
 - You'll need [.NET 7.0 x64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-7.0.400-windows-x64-installer) installed.
-- Download the latest release and run Charm.exe.
+- Download the [latest release]() and run Charm.exe.
 - Set the packages and export paths first.
 
-If you encounter any problems, take a look in the charm.log file and look at the exception.
+If you encounter any problems, take a look in the `Logs/` folder, find the latest log file, and look at the exception.
+Feel free to raise an issue on this repository on in DMR `#charm-tool-help` if you need help.
 
 Also take a look at the [Charm wiki](https://github.com/MontagueM/DestinyDocs/blob/main/Charm/Home.md) for more info.
-
-## Functionality
-
-Here's a brief list of what Charm can currently do:
-
-- Exract entities from the game API.
-- Interoperability with DARE for extraction of higher quality textures than the API provides.
-- Extraction of static models, maps, entity models, textures, audio.
-- For entities, FK skeletons are provided where they exist.
-- All geometry can export with shaders that can be imported into Unreal Engine 5 (see [tutorial](https://github.com/MontagueM/DestinyDocs/blob/main/Charm/UE5-Interoperability.md)).
-- All geometry can be imported into Blender with basic texture application. (see [tutorial](https://github.com/DeltaDesigns/Charm/wiki/Blender-Importing)). 
-- Viewing and extraction of information tied to activities.
-- Batch extraction sorted into packages.
-- Arrow keys for navigating the list of buttons easily.
-- Search bar that can search hashes and names, and when in a package view, can search recursively for names.
-- Entity names where possible.
-- Music, dialogue, directives viewing and playback.
-
-Not yet implemented:
-
-- audio exporting https://github.com/MontagueM/Charm/issues/5
-- string exporting https://github.com/MontagueM/Charm/issues/1
-- game version checking https://github.com/MontagueM/Charm/issues/3
-- parallelise batch extraction https://github.com/MontagueM/Charm/issues/6
-- enable nanite for maps in UE5 https://github.com/MontagueM/Charm/issues/7
-- use HLODs for maps in UE5 https://github.com/MontagueM/Charm/issues/8
-- add more UE5 shader controls https://github.com/MontagueM/Charm/issues/9
-- terrain for maps https://github.com/MontagueM/Charm/issues/20
-- better crash management https://github.com/MontagueM/Charm/issues/43
-- animations https://github.com/MontagueM/Charm/issues/45
 
 ## Source 2: **Only supports S&Box**
  - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/Source-2-Importing)
