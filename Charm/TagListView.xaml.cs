@@ -1595,7 +1595,7 @@ public partial class TagListView : UserControl
             RefreshItemList();
             return;
         }
-        _weaponItemName = Investment.Get().GetItemName(Investment.Get().GetInventoryItem(apiHash));
+        _weaponItemName = Investment.Get().GetItemNameSanitized(Investment.Get().GetInventoryItem(apiHash));
         var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.TagData.Unk18.GetValue(val.PatternAudioUnnamed.GetReader());
         var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18.GetValue(val.PatternAudio.GetReader());
         var item = Investment.Get().GetInventoryItem(apiHash);
