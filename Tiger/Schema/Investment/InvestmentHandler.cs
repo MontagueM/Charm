@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Arithmic;
 using ConcurrentCollections;
 using Newtonsoft.Json;
@@ -57,6 +59,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     public string GetItemName(InventoryItem item)
     {
         return GetItemName(item.TagData.InventoryItemHash);
+    }
+
+    public string GetItemNameSanitized(InventoryItem item)
+    {
+        return Regex.Replace(GetItemName(item.TagData.InventoryItemHash), @"[^\u0000-\u007F]", "_");
     }
 
     public string GetItemName(TigerHash hash)
