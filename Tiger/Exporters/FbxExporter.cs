@@ -34,7 +34,7 @@ public class FbxExporter : AbstractExporter
 
             foreach (var p in scene.EntityPoints)
             {
-                AddDynamicPoint(fbxScene, p.Key, p.Value);
+                AddDynamicPoint(fbxScene, p);
             }
 
             string outputDirectory = args.OutputDirectory;
@@ -59,9 +59,9 @@ public class FbxExporter : AbstractExporter
         }
     }
 
-    private void AddDynamicPoint(FbxScene fbxScene, string pointName, SMapDataEntry point)
+    private void AddDynamicPoint(FbxScene fbxScene, SMapDataEntry point)
     {
-        FbxNode node = FbxNode.Create(_manager, $"{pointName}");
+        FbxNode node = FbxNode.Create(_manager, $"{point.GetEntityHash()}");
         Vector3 eulerRot = Vector4.QuaternionToEulerAngles(point.Rotation);
 
         node.LclTranslation.Set(new FbxDouble3(point.Translation.X * 100, point.Translation.Z * 100, -point.Translation.Y * 100));
