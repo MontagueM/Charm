@@ -150,13 +150,6 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
                 _schemaHashTypeMap.TryAdd(new FileHash(schemaStructAttribute.ClassHash).Hash32, type);
                 _schemaTypeHashMap.TryAdd(type, new FileHash(schemaStructAttribute.ClassHash).Hash32);
                 _schemaTypeFieldsMap.TryAdd(type, GetStrategyFields(type.GetFields()));
-                if (type.Name.Contains("SMapDataEntry"))
-                {
-                    Log.Info("SMapDataEntry");
-                    Log.Info($"strategy: {_strategy} vs {Strategy.CurrentStrategy}");
-                    Log.Info($"fields before: {string.Join(",", type.GetFields().Select(t => t.Name))}");
-                    Log.Info($"fields after: {string.Join(",", GetStrategyFields(type.GetFields()).Select(t => t.Name))}");
-                }
                 return;
             }
 
