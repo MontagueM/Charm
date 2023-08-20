@@ -24,7 +24,11 @@ public class FbxExporter : AbstractExporter
             }
             foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
             {
-                Debug.Assert(scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) == 1);
+                if (scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) != 1)
+                {
+                    var a = 0;
+                }
+                // Debug.Assert(scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) == 1);
                 AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
             }
             foreach (ExporterEntity entity in scene.Entities)

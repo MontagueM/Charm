@@ -97,15 +97,20 @@ public class Strategy
             return true;
         }
 
-        Task.Run(() =>
-        {
-            BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
-            OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
-            AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
-        });
+        BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+
+        //Task.Run(() =>
+        //{
+        //    BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        //    OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        //    AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        //});
 
         return true;
     }
+
 
     /// <exception cref="ArgumentException">'strategy' does not exist.</exception>
     public static StrategyConfiguration GetStrategyConfiguration(TigerStrategy strategy)

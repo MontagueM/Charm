@@ -1,11 +1,23 @@
 ﻿
+using System.Runtime.InteropServices;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static
 {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BufferGroup
+    {
+        public Blob IndexBuffer;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst=3)]
+        public Blob[] VertexBuffers;
+        public uint IndexOffset;
+    }
+
     public interface IStaticMeshData : ISchema
     {
         public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent);
+        public List<BufferGroup> GetBuffers();
     }
 }
 
@@ -23,6 +35,8 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
             List<StaticPart> parts = GenerateParts(staticPartEntries, parent);
             return parts;
         }
+
+        public List<BufferGroup> GetBuffers() => throw new NotImplementedException();
 
         private List<StaticPart> GenerateParts(Dictionary<int, SStaticMeshPart> staticPartEntries, SStaticMesh parent)
         {
@@ -116,6 +130,30 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             Dictionary<int, SStaticMeshPart> staticPartEntries = GetPartsOfDetailLevel(detailLevel);
             List<StaticPart> parts = GenerateParts(staticPartEntries, parent);
             return parts;
+        }
+
+        public List<BufferGroup> GetBuffers()
+        {
+            List<BufferGroup> bufferGroups = new();
+            foreach (SStaticMeshBuffers buffers in _tag.Meshes)
+            {
+                BufferGroup bufferGroup = new();
+                bufferGroup.IndexBuffer = buffers.Indices.ToBlob();
+                bufferGroup.VertexBuffers = new Blob[3];
+                bufferGroup.VertexBuffers[0] = buffers.Vertices0.ToBlob();
+                if (buffers.Vertices1 != null)
+                {
+                    bufferGroup.VertexBuffers[1] = buffers.Vertices1.ToBlob();
+                }
+                if (buffers.Vertices2 != null)
+                {
+                    bufferGroup.VertexBuffers[2] = buffers.Vertices2.ToBlob();
+                }
+                bufferGroup.IndexOffset = buffers.UnkOffset;
+                bufferGroups.Add(bufferGroup);
+            }
+
+            return bufferGroups;
         }
 
         private List<StaticPart> GenerateParts(Dictionary<int, SStaticMeshPart> staticPartEntries, SStaticMesh parent)

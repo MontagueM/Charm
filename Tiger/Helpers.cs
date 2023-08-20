@@ -34,3 +34,44 @@ public static class Helpers
         return sb.ToString();
     }
 }
+
+public static class NestedTypeHelpers
+{
+    public static Type? FindNestedGenericType<T>()
+    {
+        Type? nestedType = null;
+
+        Type testType = typeof(T);
+        while (nestedType == null && testType != null && testType != typeof(object))
+        {
+            if (testType.IsGenericType)
+            {
+                nestedType = testType.GenericTypeArguments[0];
+            }
+            else
+            {
+                testType = testType.BaseType;
+            }
+        }
+
+        return nestedType;
+    }
+
+    public static Type? GetNonGenericParent(this Type inTestType, Type inheritParentType)
+    {
+        Type? testType = inTestType;
+        while (testType != null && testType != typeof(object))
+        {
+            if (testType.IsGenericType && testType.GenericTypeArguments.Length > 0 && testType.GetGenericTypeDefinition() == inheritParentType)
+            {
+                return testType;
+            }
+            else
+            {
+                testType = testType.BaseType;
+            }
+        }
+
+        return null;
+    }
+}
