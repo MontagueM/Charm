@@ -30,7 +30,7 @@ public:
     DX11Renderer(bool useSwapchain = true);
     ~DX11Renderer();
     HRESULT InitRenderTarget(void* pResource);
-    HRESULT Initialise(std::shared_ptr<RenderPanel> window);
+    HRESULT Initialise();
     void Render(Camera* camera, float deltaTime);
 
     static HRESULT CreateShaderFromCompiledFile(
@@ -75,6 +75,8 @@ private:
 public:
     ID3D11Device* Device;
 
+    HRESULT InitialiseGeneral(std::shared_ptr<RenderPanel> window);
+
 private:
     ID3D11DeviceContext* DeviceContext;
     ID3D11Texture2D* RT0Texture;
@@ -94,11 +96,10 @@ private:
 
     bool UseSwapchain;
 
-    HRESULT InitialiseGeneral();
     HRESULT CreateDeviceAndSwapChain();
     HRESULT CreateDevice();
     HRESULT CreateBackBufferView();
-    void SetRasterizerViewport();
+    HRESULT SetRasterizerViewport();
 
     HRESULT InitialiseGeometryPass();
     HRESULT CreateDepthStencilView();

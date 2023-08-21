@@ -77,6 +77,13 @@ public struct Blob
         Marshal.Copy(bytes, 0, Data, bytes.Length);
         Size = bytes.Length;
     }
+
+    public void TempDump(string name)
+    {
+        byte[] data = new byte[Size];
+        Marshal.Copy(Data, data, 0, Size);
+        File.WriteAllBytes($"TempFiles/{name}.bin", data);
+    }
 }
 
 public class TigerReferenceFile<THeader> : Tag<THeader> where THeader : struct
@@ -113,5 +120,11 @@ public class TigerReferenceFile<THeader> : Tag<THeader> where THeader : struct
             Size = data.Length
         };
         return blob;
+    }
+
+    public void TempDumpRef()
+    {
+        byte[] data = GetReferenceData();
+        File.WriteAllBytes($"TempFiles/{ReferenceHash}.bin", data);
     }
 }

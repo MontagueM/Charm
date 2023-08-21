@@ -26,7 +26,13 @@ int main(int argc, char* argv[])
     // Input::InputWindow = window;
     DX11Renderer* renderer = new DX11Renderer();
     Camera* camera = new Camera(90.0f, 0.1f, 1000.0f, window->GetAspectRatio());
-    HRESULT hr = renderer->Initialise(window);
+    HRESULT hr = renderer->InitialiseGeneral(window);
+    if (FAILED(hr))
+    {
+        printf("Failed to initialise renderer: 0x%llx", hr);
+        return 1;
+    }
+    hr = renderer->Initialise();
     if (FAILED(hr))
     {
         printf("Failed to initialise renderer: 0x%llx", hr);

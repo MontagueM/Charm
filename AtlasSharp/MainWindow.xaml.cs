@@ -108,7 +108,6 @@ public partial class MainWindow : Window
             {
                 var centre = GetCentrePositionAbsolute();
                 var delta = _currentMousePositionAbsolute - centre;
-                Console.WriteLine($"c# mouse delta: {delta}, current: {_currentMousePositionAbsolute}, centre: {centre}");
                 float sensitivity = 1.0f;
                 NativeMethods.RegisterMouseDelta((float)(delta.X * sensitivity), (float)(delta.Y * sensitivity));
 
@@ -135,20 +134,29 @@ public partial class MainWindow : Window
         StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(new FileHash(staticHash));
         List<StaticPart> parts = staticMesh.Load(ExportDetailLevel.MostDetailed);
         List<BufferGroup> bufferGroups = staticMesh.TagData.StaticData.GetBuffers();
+        List<int> strides = staticMesh.TagData.StaticData.GetStrides();
         foreach (BufferGroup bufferGroup in bufferGroups)
         {
             NativeMethods.AddStaticMeshBufferGroup(staticHash, bufferGroup);
+            bufferGroup.VertexBuffers[0].TempDump("0");
+            bufferGroup.VertexBuffers[1].TempDump("1");
+            bufferGroup.VertexBuffers[2].TempDump("2");
         }
         int partIndex = 0;
+
         foreach (StaticPart part in parts)
         {
             if (part.Material == null)
             {
                 continue;
             }
-            PartMaterial partMaterial = new(part.Material);
+
+            part.Material.VertexShader.TempDumpRef();
+
+            PartMaterial partMaterial = new(part.Material, strides);
             PartInfo partInfo = new() {IndexOffset = part.IndexOffset, IndexCount = part.IndexCount, Material = partMaterial};
-            NativeMethods.CreateStaticMeshPart(staticHash, partIndex++, partInfo);
+            NativeMethods.CreateStaticMeshPart(staticHash, partInfo);
+            partIndex++;
         }
     }
 
@@ -157,6 +165,7 @@ public partial class MainWindow : Window
         public InputSemantic Semantic;
         public int SemanticIndex;
         public int DxgiFormat;
+        public int BufferIndex;
     }
 
     public struct PartMaterial
@@ -178,7 +187,7 @@ public partial class MainWindow : Window
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public DirectXSampler.D3D11_SAMPLER_DESC[] PSSamplers;
 
-        public PartMaterial(IMaterial material)
+        public PartMaterial(IMaterial material, List<int> strides)
         {
             if (material.VertexShader == null || material.PixelShader == null)
             {
@@ -189,10 +198,15 @@ public partial class MainWindow : Window
 
             InputSignatures = new InputSignature[8];
             int sigIndex = 0;
-            foreach (Tiger.Schema.InputSignature signature in material.VertexShader.InputSignatures)
+
+            Tiger.Schema.InputSignature[] inputSignatures = material.VertexShader.InputSignatures.ToArray();
+            Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
+
+            foreach (Tiger.Schema.InputSignature signature in inputSignatures)
             {
                 InputSignatures[sigIndex].Semantic = signature.Semantic;
                 InputSignatures[sigIndex].SemanticIndex = (int)signature.SemanticIndex;
+                InputSignatures[sigIndex].BufferIndex = signature.BufferIndex;
                 switch (signature.Mask)
                 {
                     case ComponentMask.XYZW:
@@ -204,7 +218,7 @@ public partial class MainWindow : Window
 
                         InputSignatures[sigIndex].DxgiFormat = signature.ComponentType switch
                         {
-                            RegisterComponentType.Float32 => (int)DXGI_FORMAT.R32G32B32A32_FLOAT,
+                            RegisterComponentType.Float32 => (int)DXGI_FORMAT.R16G16B16A16_SNORM,
                             RegisterComponentType.SInt32 => (int)DXGI_FORMAT.R16G16B16A16_SINT,
                             RegisterComponentType.UInt32 => (int)DXGI_FORMAT.R16G16B16A16_UINT,
                             _ => throw new Exception()
@@ -488,7 +502,7 @@ static class NativeMethods
     public static extern int AddStaticMeshBufferGroup(uint hash, BufferGroup bufferGroup);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int CreateStaticMeshPart(uint hash, int partIndex, MainWindow.PartInfo partInfo);
+    public static extern int CreateStaticMeshPart(uint hash, MainWindow.PartInfo partInfo);
 
     /// <summary>
     /// Method used to invoke an Action that will catch DllNotFoundExceptions and display a warning dialog.

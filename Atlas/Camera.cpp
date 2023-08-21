@@ -102,32 +102,12 @@ bool Camera::UpdateFromMouse(DXSM::Vector2 mouseDelta, float tickDelta, bool isM
         if (isMouseCaptured)
         {
             // This seems inefficient
-            std::cout << "MouseDelta: " << mouseDelta.x << ", " << mouseDelta.y << std::endl;
             const double pitchDelta = mouseDelta.y * RotationSpeed * 0.005;
             const double yawDelta = mouseDelta.x * RotationSpeed * 0.005;
 
             RotationEulerDegrees.m128_f32[0] += pitchDelta;
             RotationEulerDegrees.m128_f32[1] += yawDelta;
         }
-
-        // const XMVECTOR lookAt = XMVectorSet(0, 0, 0, 0);
-        const XMVECTOR up = XMVectorSet(0, 0, 1, 0);
-
-        const float pitch = XMConvertToRadians(RotationEulerDegrees.m128_f32[0]);
-        const float yaw = XMConvertToRadians(RotationEulerDegrees.m128_f32[1]);
-        const float roll = XMConvertToRadians(RotationEulerDegrees.m128_f32[2]);
-        const XMMATRIX RotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
-
-        // ForwardDirection =
-        // ForwardDirection = XMVector3Transform(lookAt, RotationMatrix);
-        // UpDirection = XMVector3TransformCoord(up, RotationMatrix);
-        RightDirection = XMVector3Cross(UpDirection, ForwardDirection);
-        const XMVECTOR lookAt = XMVectorSet(cos(pitch) * sin(yaw), cos(pitch) * cos(yaw), -sin(pitch), 0);
-
-        ForwardDirection = lookAt;
-        XMVector3Normalize(ForwardDirection);
-        XMVector3Normalize(UpDirection);
-        XMVector3Normalize(RightDirection);
 
         Moved = true;
     }
@@ -142,6 +122,29 @@ bool Camera::UpdateFromMouse(float tickDelta)
 
 void Camera::UpdateViewMatrix()
 {
+    // const XMVECTOR lookAt = XMVectorSet(0, 0, 0, 0);
+    const XMVECTOR up = XMVectorSet(0, 0, 1, 0);
+
+    const float pitch = XMConvertToRadians(RotationEulerDegrees.m128_f32[0]);
+    const float yaw = XMConvertToRadians(RotationEulerDegrees.m128_f32[1]);
+    const float roll = XMConvertToRadians(RotationEulerDegrees.m128_f32[2]);
+    const XMMATRIX RotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+
+    // ForwardDirection =
+    // ForwardDirection = XMVector3Transform(lookAt, RotationMatrix);
+    // UpDirection = XMVector3TransformCoord(up, RotationMatrix);
+    RightDirection = XMVector3Cross(UpDirection, ForwardDirection);
+    const XMVECTOR lookAt = XMVectorSet(cos(pitch) * sin(yaw), cos(pitch) * cos(yaw), -sin(pitch), 0);
+
+    ForwardDirection = lookAt;
+    XMVector3Normalize(ForwardDirection);
+    XMVector3Normalize(UpDirection);
+    XMVector3Normalize(RightDirection);
+
+    std::cout << "CameraPos: " << Position.m128_f32[0] << ", " << Position.m128_f32[1] << ", " << Position.m128_f32[2] << std::endl;
+    std::cout << "CameraDir: " << RotationEulerDegrees.m128_f32[0] << ", " << RotationEulerDegrees.m128_f32[1] << ", "
+              << RotationEulerDegrees.m128_f32[2] << std::endl;
+
     ViewMatrix = XMMatrixLookToRH(Position, ForwardDirection, UpDirection);
 }
 

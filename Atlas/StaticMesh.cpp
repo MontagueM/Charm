@@ -31,21 +31,6 @@ StaticMesh::StaticMesh(uint32_t hash)
 {
 }
 
-ID3D11VertexShader* StaticMesh::GetVertexShader()
-{
-    return VertexShader;
-}
-
-ID3D11PixelShader* StaticMesh::GetPixelShader()
-{
-    return PixelShader;
-}
-
-ID3D11InputLayout* StaticMesh::GetVertexLayout() const
-{
-    return VertexLayout;
-}
-
 ID3D11Buffer* StaticMesh::GetIndexBuffer() const
 {
     return IndexBuffer;
@@ -59,27 +44,6 @@ ID3D11Buffer* const* StaticMesh::GetVertexBuffers() const
 HRESULT StaticMesh::Initialise(ID3D11Device* Device)
 {
     this->Device = Device;
-
-    // HRESULT hr;
-    // hr = CreateVertexShader(Device);
-    // if (FAILED(hr))
-    //     return hr;
-
-    // hr = CreateVertexLayout(Device);
-    // if (FAILED(hr))
-    //     return hr;
-
-    // hr = CreatePixelShader(Device);
-    // if (FAILED(hr))
-    //     return hr;
-
-    // hr = CreateConstantBuffers(Device);
-    // if (FAILED(hr))
-    //     return hr;
-
-    // hr = CreateTextureResources(Device);
-    // if (FAILED(hr))
-    //     return hr;
 
     return S_OK;
 }
@@ -99,114 +63,33 @@ HRESULT StaticMesh::AddStaticMeshBufferGroup(const BufferGroup& bufferGroup)
     return hr;
 }
 
-void StaticMesh::CreateStaticMeshPart(const int partIndex, const PartInfo& partInfo)
-{
-}
-
 HRESULT StaticMesh::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float DeltaTime)
 {
-    if (GetVertexShader() == nullptr || GetPixelShader() == nullptr || GetVertexLayout() == nullptr || GetVertexBuffers() == nullptr ||
-        GetIndexBuffer() == nullptr)
+    if (GetVertexBuffers() == nullptr || GetIndexBuffer() == nullptr)
     {
         return E_FAIL;
     }
-
-    DeviceContext->VSSetShader(GetVertexShader(), nullptr, 0);
-    DeviceContext->IASetInputLayout(GetVertexLayout());
-
-    DeviceContext->PSSetShader(GetPixelShader(), nullptr, 0);
 
     UINT strides[2] = {16, 4};
     UINT offsets[2] = {0, 0};
     DeviceContext->IASetVertexBuffers(0, 2, GetVertexBuffers(), strides, offsets);
     DeviceContext->IASetIndexBuffer(GetIndexBuffer(), DXGI_FORMAT_R16_UINT, 0);
-
-    cb12_View View;
-    View.View = Camera->GetViewMatrix();
-    View.View.r[0].m128_f32[3] = Camera->GetDirection().m128_f32[0];
-    View.View.r[1].m128_f32[3] = Camera->GetDirection().m128_f32[1];
-    View.View.r[2].m128_f32[3] = Camera->GetDirection().m128_f32[2];
-    View.View.r[0].m128_f32[2] = 0;
-    View.View.r[1].m128_f32[2] = 0;
-    View.View.r[2].m128_f32[2] = 0;
-    View.CameraPosition = Camera->GetPosition();
-
-    // std::cout << "Camera Position: " << View.CameraPosition.m128_f32[0] << ", " << View.CameraPosition.m128_f32[1] << ", "
-    //           << View.CameraPosition.m128_f32[2] << std::endl;
-    // std::cout << "Camera Direction: " << Camera->GetDirection().m128_f32[0] << ", " << Camera->GetDirection().m128_f32[1] << ", "
-    //           << Camera->GetDirection().m128_f32[2] << std::endl;
-
-    // view matrix
-    D3D11_BOX Box;
-    Box.left = 0;
-    Box.top = 0;
-    Box.front = 0;
-    Box.right = 0 + 16 * 3;
-    Box.bottom = 1;
-    Box.back = 1;
-    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.View, 0, 0);
-
-    // player position
-    Box.left = 112;
-    Box.top = 0;
-    Box.front = 0;
-    Box.right = 112 + 16;
-    Box.bottom = 1;
-    Box.back = 1;
-    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.CameraPosition, 0, 0);
-
-    for (const auto& ConstantBuffer : VSConstantBuffers)
-    {
-        if (ConstantBuffer->Slot == 12)
-        {
-            DeviceContext->CopyResource(ConstantBuffer->ResourcePointer, ViewBuffer);
-        }
-        DeviceContext->VSSetConstantBuffers(ConstantBuffer->Slot, 1, &ConstantBuffer->ResourcePointer);
-    }
-    for (const auto& ConstantBuffer : PSConstantBuffers)
-    {
-        DeviceContext->PSSetConstantBuffers(ConstantBuffer->Slot, 1, &ConstantBuffer->ResourcePointer);
-    }
+    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // DeviceContext->DrawIndexed(1116, 0, 0);    // 11529 entire thing, 1116 first part lod0
     // DeviceContext->DrawIndexed(3606, 1116, 0);
-    DeviceContext->DrawIndexed(1503, 5718, 0);
+    // DeviceContext->DrawIndexed(1503, 5718, 0);
+
+    HRESULT hr = S_OK;
+    for (auto& part : Parts)
+    {
+        if (FAILED(hr = part.Render(DeviceContext, Camera, DeltaTime)))
+        {
+            return hr;
+        }
+    }
 
     return S_OK;
-}
-
-HRESULT StaticMesh::CreateVertexShader(ID3D11Device* Device)
-{
-    // HRESULT hr = DX11Renderer::CreateShaderFromCompiledFile(L"6C24BB80/VS_CBEBD680.bin", &VertexShader, VertexShaderBlob, Device);
-    HRESULT hr = DX11Renderer::CreateShaderFromCompiledFile(
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/VS_DC6BBA80.bin", &VertexShader,
-        VertexShaderBlob, Device);
-    // const HRESULT hr = DX11Renderer::CreateShaderFromHlslFile(L"Shaders/Main.hlsl", "VSPole", &VertexShader, VertexShaderBlob, Device);
-    return hr;
-}
-
-HRESULT StaticMesh::CreateVertexLayout(ID3D11Device* Device)
-{
-    D3D11_INPUT_ELEMENT_DESC layout[] = {
-        {"POSITION", 0, DXGI_FORMAT_R16G16B16A16_SNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TANGENT", 0, DXGI_FORMAT_R16G16B16A16_SNORM, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R16G16_SNORM, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    };
-    UINT numElements = ARRAYSIZE(layout);
-
-    HRESULT hr = Device->CreateInputLayout(
-        layout, numElements, VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), &VertexLayout);
-    VertexShaderBlob->Release();
-
-    return hr;
-}
-
-HRESULT StaticMesh::CreatePixelShader(ID3D11Device* Device)
-{
-    const HRESULT hr = DX11Renderer::CreateShaderFromCompiledFile(
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_1864BA80.bin", &PixelShader, Device);
-    // const HRESULT hr = DX11Renderer::CreateShaderFromHlslFile(L"Shaders/Main.hlsl", "PSTexture", &PixelShader, Device);
-    return hr;
 }
 
 HRESULT StaticMesh::CreateIndexBuffer(const Blob& indexBlob)
@@ -257,7 +140,7 @@ HRESULT StaticMesh::CreateVertexBuffers(const Blob vertexBufferBlobs[3])
     return S_OK;
 }
 
-HRESULT StaticMesh::CreateConstantBuffers(ID3D11Device* Device)
+HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffers[16])
 {
     std::ifstream ConstantBufferFile1(
         "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/VS_cb1.bin", std::ios::in | std::ios::binary);
@@ -375,7 +258,7 @@ HRESULT StaticMesh::CreateConstantBuffers(ID3D11Device* Device)
     return S_OK;
 }
 
-HRESULT StaticMesh::CreateTextureResources(ID3D11Device* Device)
+HRESULT Part::CreateTextureResources(const Blob vsTextures[16], const Blob psTextures[16])
 {
     const std::vector<LPCWSTR> TextureFiles = {
         L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_0_AFC5BC80.dds",
@@ -392,14 +275,10 @@ HRESULT StaticMesh::CreateTextureResources(ID3D11Device* Device)
     if (FAILED(hr))
         return hr;
 
-    hr = CreateSamplers(Device);
-    if (FAILED(hr))
-        return hr;
-
     return S_OK;
 }
 
-HRESULT StaticMesh::CreateSamplers(ID3D11Device* Device)
+HRESULT Part::CreateSamplers(const Blob vsSamplers[8], const Blob psSamplers[8])
 {
     D3D11_SAMPLER_DESC sampDesc = {};
     sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
@@ -434,4 +313,191 @@ HRESULT StaticMesh::CreateSamplers(ID3D11Device* Device)
     SamplerStates.push_back(new Resource<ID3D11SamplerState>(3, SamplerState));
 
     return S_OK;
+}
+
+ID3D11VertexShader* Part::GetVertexShader() const
+{
+    return VertexShader;
+}
+
+ID3D11PixelShader* Part::GetPixelShader() const
+{
+    return PixelShader;
+}
+
+ID3D11InputLayout* Part::GetVertexLayout() const
+{
+    return VertexLayout;
+}
+
+HRESULT Part::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float DeltaTime)
+{
+    if (GetVertexShader() == nullptr || GetPixelShader() == nullptr || GetVertexLayout() == nullptr)
+    {
+        return E_FAIL;
+    }
+
+    DeviceContext->VSSetShader(GetVertexShader(), nullptr, 0);
+    DeviceContext->PSSetShader(GetPixelShader(), nullptr, 0);
+    DeviceContext->IASetInputLayout(GetVertexLayout());
+
+    cb12_View View;
+    View.View = Camera->GetViewMatrix();
+    View.View.r[0].m128_f32[3] = Camera->GetDirection().m128_f32[0];
+    View.View.r[1].m128_f32[3] = Camera->GetDirection().m128_f32[1];
+    View.View.r[2].m128_f32[3] = Camera->GetDirection().m128_f32[2];
+    View.View.r[0].m128_f32[2] = 0;
+    View.View.r[1].m128_f32[2] = 0;
+    View.View.r[2].m128_f32[2] = 0;
+    View.CameraPosition = Camera->GetPosition();
+
+    // std::cout << "Camera Position: " << View.CameraPosition.m128_f32[0] << ", " << View.CameraPosition.m128_f32[1] << ", "
+    //           << View.CameraPosition.m128_f32[2] << std::endl;
+    // std::cout << "Camera Direction: " << Camera->GetDirection().m128_f32[0] << ", " << Camera->GetDirection().m128_f32[1] << ", "
+    //           << Camera->GetDirection().m128_f32[2] << std::endl;
+
+    // view matrix
+    D3D11_BOX Box;
+    Box.left = 0;
+    Box.top = 0;
+    Box.front = 0;
+    Box.right = 0 + 16 * 3;
+    Box.bottom = 1;
+    Box.back = 1;
+    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.View, 0, 0);
+
+    // player position
+    Box.left = 112;
+    Box.top = 0;
+    Box.front = 0;
+    Box.right = 112 + 16;
+    Box.bottom = 1;
+    Box.back = 1;
+    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.CameraPosition, 0, 0);
+
+    for (const auto& ConstantBuffer : VSConstantBuffers)
+    {
+        if (ConstantBuffer->Slot == 12)
+        {
+            DeviceContext->CopyResource(ConstantBuffer->ResourcePointer, ViewBuffer);
+        }
+        DeviceContext->VSSetConstantBuffers(ConstantBuffer->Slot, 1, &ConstantBuffer->ResourcePointer);
+    }
+    for (const auto& ConstantBuffer : PSConstantBuffers)
+    {
+        DeviceContext->PSSetConstantBuffers(ConstantBuffer->Slot, 1, &ConstantBuffer->ResourcePointer);
+    }
+
+    DeviceContext->DrawIndexed(PartInfo.IndexCount, PartInfo.IndexOffset, 0);
+}
+
+HRESULT Part::Initialise(ID3D11Device* device)
+{
+    Device = device;
+
+    HRESULT hr;
+    hr = CreateVertexShader(PartInfo.PartMaterial.VSBytecode);
+    if (FAILED(hr))
+        return hr;
+
+    hr = CreatePixelShader(PartInfo.PartMaterial.PSBytecode);
+    if (FAILED(hr))
+        return hr;
+
+    hr = CreateVertexLayout(PartInfo.PartMaterial.InputSignatures, PartInfo.PartMaterial.VSBytecode);
+    if (FAILED(hr))
+        return hr;
+
+    hr = CreateConstantBuffers(PartInfo.PartMaterial.VSConstantBuffers, PartInfo.PartMaterial.VSConstantBuffers);
+    if (FAILED(hr))
+        return hr;
+
+    hr = CreateTextureResources(PartInfo.PartMaterial.VSTextures, PartInfo.PartMaterial.PSTextures);
+    if (FAILED(hr))
+        return hr;
+
+    hr = CreateSamplers(PartInfo.PartMaterial.VSSamplers, PartInfo.PartMaterial.PSSamplers);
+    if (FAILED(hr))
+        return hr;
+
+    return hr;
+}
+
+HRESULT Part::CreateVertexShader(const Blob& shaderBlob)
+{
+    // does this copy? want to know if its safe or not
+    HRESULT hr = Device->CreateVertexShader(shaderBlob.Data, shaderBlob.Size, nullptr, &VertexShader);
+    return hr;
+}
+
+HRESULT Part::CreatePixelShader(const Blob& shaderBlob)
+{
+    HRESULT hr = Device->CreatePixelShader(shaderBlob.Data, shaderBlob.Size, nullptr, &PixelShader);
+    return hr;
+}
+
+static LPCSTR GetSemanticName(InputSemantic semantic)
+{
+    switch (semantic)
+    {
+        case Position:
+            return "POSITION";
+        case Normal:
+            return "NORMAL";
+        case Tangent:
+            return "TANGENT";
+        case Colour:
+            return "COLOR";
+        case Texcoord:
+            return "TEXCOORD";
+        case BlendIndices:
+            return "BLENDINDICES";
+        case BlendWeight:
+            return "BLENDWEIGHT";
+        default:
+            return "";
+    }
+}
+
+HRESULT Part::CreateVertexLayout(const InputSignature inputSignatures[8], const Blob& shaderBlob)
+{
+    D3D11_INPUT_ELEMENT_DESC layout[8];
+
+    int numElements = 0;
+
+    for (int i = 0; i < 8; i++)
+    {
+        if (inputSignatures[i].Semantic == InputSemantic::None)
+        {
+            continue;
+        }
+
+        numElements++;
+        layout[i] = {};
+        layout[i].SemanticName = GetSemanticName(inputSignatures[i].Semantic);
+        layout[i].SemanticIndex = inputSignatures[i].SemanticIndex;
+        layout[i].Format = (DXGI_FORMAT) inputSignatures[i].DxgiFormat;
+        layout[i].InputSlot = inputSignatures[i].BufferIndex;
+        layout[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        layout[i].InstanceDataStepRate = 0;
+        layout[i].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+    }
+
+    HRESULT hr = Device->CreateInputLayout(layout, numElements, shaderBlob.Data, shaderBlob.Size, &VertexLayout);
+    // VertexShaderBlob->Release();
+
+    return hr;
+}
+
+HRESULT StaticMesh::AddPart(const PartInfo& partInfo)
+{
+    Part part(partInfo);
+    HRESULT hr = part.Initialise(Device);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+    Parts.push_back(std::move(part));
+
+    return hr;
 }

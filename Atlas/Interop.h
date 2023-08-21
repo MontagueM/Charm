@@ -18,5 +18,5 @@ extern "C"
     __declspec(dllexport) void __cdecl RegisterMouseDelta(float mouseX, float mouseY);
     __declspec(dllexport) void __cdecl CreateStaticMesh(uint32_t hash);
     __declspec(dllexport) void __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup bufferGroup);
-    __declspec(dllexport) void __cdecl CreateStaticMeshPart(uint32_t hash, int partIndex, PartInfo partInfo);
+    __declspec(dllexport) void __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo);
 }

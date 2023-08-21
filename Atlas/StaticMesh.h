@@ -11,6 +11,7 @@ struct Blob
 
 enum InputSemantic : int
 {
+    None,
     Position,
     Texcoord,
     Normal,
@@ -25,6 +26,7 @@ struct InputSignature
     InputSemantic Semantic;
     int SemanticIndex;
     int DxgiFormat;
+    int BufferIndex;
 };
 
 struct PartMaterial
@@ -36,8 +38,8 @@ struct PartMaterial
     Blob PSTextures[16];
     Blob VSConstantBuffers[16];
     Blob PSConstantBuffers[16];
-    Blob VSSamplers[16];
-    Blob PSSamplers[16];
+    Blob VSSamplers[8];
+    Blob PSSamplers[8];
 };
 
 struct PartInfo
@@ -60,22 +62,38 @@ public:
     explicit StaticMesh(uint32_t hash);
     ID3D11Device* Device;
 
-    ID3D11VertexShader* GetVertexShader();
-    ID3D11PixelShader* GetPixelShader();
-    ID3D11InputLayout* GetVertexLayout() const;
     ID3D11Buffer* GetIndexBuffer() const;
     ID3D11Buffer* const* GetVertexBuffers() const;
     HRESULT Initialise(ID3D11Device* Device);
     HRESULT AddStaticMeshBufferGroup(const BufferGroup& bufferGroup);
-    void CreateStaticMeshPart(const int partIndex, const PartInfo& partInfo);
+    HRESULT AddPart(const PartInfo& partInfo);
     HRESULT Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float DeltaTime);
     ~StaticMesh() = default;
 
 private:
-    ID3D11InputLayout* VertexLayout = nullptr;
     ID3D11Buffer* IndexBuffer = nullptr;
     std::vector<ID3D11Buffer*> VertexBuffers;
-    ID3D10Blob* VertexShaderBlob = nullptr;
+    std::vector<class Part> Parts;
+
+    HRESULT CreateIndexBuffer(const Blob& indexBlob);
+    HRESULT CreateVertexBuffers(const Blob vertexBufferBlobs[3]);
+};
+
+class Part
+{
+public:
+    Part(const PartInfo& partInfo) : PartInfo(partInfo) {}
+
+    ID3D11Device* Device;
+
+    ID3D11VertexShader* GetVertexShader() const;
+    ID3D11PixelShader* GetPixelShader() const;
+    ID3D11InputLayout* GetVertexLayout() const;
+    HRESULT Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float DeltaTime);
+    HRESULT Initialise(ID3D11Device* device);
+
+private:
+    ID3D11InputLayout* VertexLayout = nullptr;
     ID3D11VertexShader* VertexShader = nullptr;
     ID3D11PixelShader* PixelShader = nullptr;
     std::vector<Resource<ID3D11Buffer>*> VSConstantBuffers;
@@ -85,14 +103,13 @@ private:
 
     ID3D11Buffer* ViewBuffer = nullptr;
 
-    HRESULT CreateIndexBuffer(const Blob& indexBlob);
-    HRESULT CreateVertexBuffers(const Blob vertexBufferBlobs[3]);
+    PartInfo PartInfo;
 
-    HRESULT CreateVertexShader(ID3D11Device* Device);
-    HRESULT CreateVertexLayout(ID3D11Device* Device);
-    HRESULT CreatePixelShader(ID3D11Device* Device);
+    HRESULT CreateVertexShader(const Blob& shaderBlob);
+    HRESULT CreatePixelShader(const Blob& shaderBlob);
+    HRESULT CreateVertexLayout(const InputSignature inputSignatures[8], const Blob& shaderBlob);
 
-    HRESULT CreateConstantBuffers(ID3D11Device* Device);
-    HRESULT CreateTextureResources(ID3D11Device* Device);
-    HRESULT CreateSamplers(ID3D11Device* Device);
+    HRESULT CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffers[16]);
+    HRESULT CreateTextureResources(const Blob vsTextures[16], const Blob psTextures[16]);
+    HRESULT CreateSamplers(const Blob vsSamplers[8], const Blob psSamplers[8]);
 };

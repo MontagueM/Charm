@@ -2,6 +2,7 @@
 
 #include "DDSTextureLoader.h"
 #include "Entity.h"
+#include "StaticMesh.h"
 
 #include <d3dcompiler.h>
 
@@ -66,16 +67,15 @@ struct ConstantBuffer
     XMMATRIX mProjection;
 };
 
-HRESULT DX11Renderer::Initialise(std::shared_ptr<RenderPanel> window)
+HRESULT DX11Renderer::Initialise()
 {
     // Initialize the projection matrix - todo camera
-    this->window = window;
 
-    HRESULT hr = InitialiseGeneral();
-    if (FAILED(hr))
-        return hr;
+    // HRESULT hr = InitialiseGeneral();
+    // if (FAILED(hr))
+    //     return hr;
 
-    hr = InitialiseGeometryPass();
+    HRESULT hr = InitialiseGeometryPass();
     if (FAILED(hr))
         return hr;
 
@@ -167,8 +167,10 @@ HRESULT DX11Renderer::CompileShaderFromFile(LPCWSTR FileName, LPCSTR EntryPoint,
     return hr;
 }
 
-HRESULT DX11Renderer::InitialiseGeneral()
+HRESULT DX11Renderer::InitialiseGeneral(std::shared_ptr<RenderPanel> window)
 {
+    this->window = window;
+
     HRESULT hr = S_OK;
 
     if (UseSwapchain)
@@ -262,7 +264,7 @@ HRESULT DX11Renderer::CreateBackBufferView()
     return hr;
 }
 
-void DX11Renderer::SetRasterizerViewport()
+HRESULT DX11Renderer::SetRasterizerViewport()
 {
     D3D11_VIEWPORT vp;
     vp.Width = static_cast<FLOAT>(window->GetRect().Width);
@@ -272,15 +274,28 @@ void DX11Renderer::SetRasterizerViewport()
     vp.TopLeftX = 0;
     vp.TopLeftY = 0;
     DeviceContext->RSSetViewports(1, &vp);
+
+    D3D11_RASTERIZER_DESC rasterizerDesc{};
+    rasterizerDesc.CullMode = D3D11_CULL_NONE;
+    rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+    rasterizerDesc.FrontCounterClockwise = true;
+    rasterizerDesc.DepthClipEnable = true;
+
+    ID3D11RasterizerState* rasterizerState;
+    HRESULT hr = Device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
+    if (FAILED(hr))
+        return hr;
+
+    DeviceContext->RSSetState(rasterizerState);
 }
 
 HRESULT DX11Renderer::InitialiseGeometryPass()
 {
     HRESULT hr;
 
-    // hr = CreateDepthStencilView();
-    // if (FAILED(hr))
-    // return hr;
+    hr = CreateDepthStencilView();
+    if (FAILED(hr))
+        return hr;
 
     hr = CreateGeometryVertexBuffer();
     if (FAILED(hr))
@@ -332,6 +347,35 @@ HRESULT DX11Renderer::CreateDepthStencilView()
     hr = Device->CreateDepthStencilView(DepthStencil, &descDSV, &DepthStencilView);
     if (FAILED(hr))
         return hr;
+
+    D3D11_DEPTH_STENCIL_DESC dsDesc;
+
+    // Depth test parameters
+    dsDesc.DepthEnable = true;
+    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+    dsDesc.DepthFunc = D3D11_COMPARISON_GREATER;
+
+    // Stencil test parameters
+    dsDesc.StencilEnable = false;
+    dsDesc.StencilReadMask = 0xFF;
+    dsDesc.StencilWriteMask = 0xFF;
+
+    // Stencil operations if pixel is front-facing
+    dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+    dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    // Stencil operations if pixel is back-facing
+    dsDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+    dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+    // Create depth stencil state
+    ID3D11DepthStencilState* depthStencilState;
+    Device->CreateDepthStencilState(&dsDesc, &depthStencilState);
+    DeviceContext->OMSetDepthStencilState(depthStencilState, 1);
 
     return hr;
 }
@@ -677,7 +721,9 @@ HRESULT DX11Renderer::CreateLightingVertexBuffer()
 
 HRESULT DX11Renderer::CreateLightingIndexBuffer()
 {
-    WORD indices[] = {0, 1, 2, 2, 3, 0};
+    // WORD indices[] = {0, 1, 2, 2, 3, 0};
+    WORD indices[] = {0, 2, 1, 0, 3, 2};
+
     D3D11_BUFFER_DESC bd{};
     bd.Usage = D3D11_USAGE_DEFAULT;
     bd.ByteWidth = ARRAYSIZE(indices) * sizeof(WORD);
@@ -710,7 +756,7 @@ void DX11Renderer::Render(Camera* camera, float deltaTime)
     DeviceContext->ClearRenderTargetView(RT0View, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
     DeviceContext->ClearRenderTargetView(RT1View, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
     DeviceContext->ClearRenderTargetView(RT2View, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
-    // DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+    DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 0.0f, 0);
 
     RenderGeometry(camera, deltaTime);
     RenderLightingPass(camera, deltaTime);
@@ -738,7 +784,7 @@ static XMMATRIX CreatePerspectiveInfiniteReverseRH(const float fov, const float 
 void DX11Renderer::RenderGeometry(Camera* camera, float deltaTime)
 {
     ID3D11RenderTargetView* renderTargets[3] = {RT0View, RT1View, RT2View};
-    DeviceContext->OMSetRenderTargets(3, renderTargets, nullptr);
+    DeviceContext->OMSetRenderTargets(3, renderTargets, DepthStencilView);
     // DeviceContext->OMSetRenderTargets(1, &BackBufferView, DepthStencilView);
     // DeviceContext->OMSetRenderTargets(1, &BackBufferView, nullptr);
 
@@ -746,6 +792,8 @@ void DX11Renderer::RenderGeometry(Camera* camera, float deltaTime)
     // DeviceContext->DrawIndexed(13602, 0, 0);
 
     CarEntity->Render(DeviceContext, camera, deltaTime);
+    if (StaticMesh)
+        StaticMesh->Render(DeviceContext, camera, deltaTime);
 }
 
 void DX11Renderer::RenderLightingPass(Camera* camera, float deltaTime)
@@ -884,7 +932,12 @@ HRESULT DX11Renderer::InitRenderTarget(void* pResource)
         // todo add const back
         window->SetRect(outputResourceDesc.Width, outputResourceDesc.Height);
     }
-    SetRasterizerViewport();
+
+    hr = SetRasterizerViewport();
+    if (FAILED(hr))
+    {
+        return hr;
+    }
 
     // this happens when we do the lighting pass
     DeviceContext->OMSetRenderTargets(1, &BackBufferView, NULL);

@@ -18,6 +18,7 @@ namespace Tiger.Schema.Static
     {
         public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent);
         public List<BufferGroup> GetBuffers();
+        List<int> GetStrides();
     }
 }
 
@@ -37,6 +38,8 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
         }
 
         public List<BufferGroup> GetBuffers() => throw new NotImplementedException();
+
+        public List<int> GetStrides() => throw new NotImplementedException();
 
         private List<StaticPart> GenerateParts(Dictionary<int, SStaticMeshPart> staticPartEntries, SStaticMesh parent)
         {
@@ -154,6 +157,15 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             }
 
             return bufferGroups;
+        }
+
+        public List<int> GetStrides()
+        {
+            List<int> strides = new();
+            if (_tag.Meshes[0].Vertices0 != null) strides.Add(_tag.Meshes[0].Vertices0.TagData.Stride);
+            if (_tag.Meshes[0].Vertices1 != null) strides.Add(_tag.Meshes[0].Vertices1.TagData.Stride);
+            if (_tag.Meshes[0].Vertices2 != null) strides.Add(_tag.Meshes[0].Vertices2.TagData.Stride);
+            return strides;
         }
 
         private List<StaticPart> GenerateParts(Dictionary<int, SStaticMeshPart> staticPartEntries, SStaticMesh parent)

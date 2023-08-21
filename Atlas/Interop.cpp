@@ -10,7 +10,8 @@
 #include <memory>
 
 RENDERDOC_API_1_1_2* rdoc_api = NULL;
-
+static int frameCaptureCount = 0;
+static constexpr int maxFrameCaptureCount = 1;
 DX11Renderer* renderer;
 std::shared_ptr<ExternalWindow> window;
 Camera* camera;
@@ -37,7 +38,7 @@ extern HRESULT __cdecl Init(HWND hwnd)
     camera = new Camera(90.0f, 0.1f, 1000.0f, window->GetAspectRatio());
     // cube = new CCube();
     //
-    renderer->Initialise(window);
+    renderer->InitialiseGeneral(window);
     // cube->InitDevice();
     return hr;
 }
@@ -46,13 +47,13 @@ extern HRESULT __cdecl Render(void* pResource, bool isNewSurface)
 {
     HRESULT hr = S_OK;
     // return cube->Render(pResource, isNewSurface);
-    if (rdoc_api)
+    if (rdoc_api && frameCaptureCount < maxFrameCaptureCount)
         rdoc_api->StartFrameCapture(NULL, NULL);
     // If we've gotten a new Surface, need to initialize the renderTarget.
     // One of the times that this happens is on a resize.
     if (isNewSurface)
     {
-        if (FAILED(hr = renderer->Initialise(window)))
+        if (FAILED(hr = renderer->Initialise()))
         {
             return hr;
         }
@@ -67,7 +68,7 @@ extern HRESULT __cdecl Render(void* pResource, bool isNewSurface)
     camera->Update(0.01f);
     renderer->Render(camera, 0.01f);
 
-    if (rdoc_api)
+    if (rdoc_api && frameCaptureCount++ < maxFrameCaptureCount)
         rdoc_api->EndFrameCapture(NULL, NULL);
 }
 
@@ -99,10 +100,12 @@ extern void __cdecl CreateStaticMesh(uint32_t hash)
 
 extern void __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup bufferGroup)
 {
+    renderer->StaticMesh->AddStaticMeshBufferGroup(bufferGroup);
     auto a = 0;
 }
 
-extern void __cdecl CreateStaticMeshPart(uint32_t hash, int partIndex, PartInfo partInfo)
+// do we have to copy on an extern? or can we use const ref
+extern void __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo)
 {
-    auto a = 0;
+    renderer->StaticMesh->AddPart(partInfo);
 }
