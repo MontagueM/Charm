@@ -111,7 +111,7 @@ public class StaticPart : MeshPart
     {
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
-            var t = (container.StaticData as DESTINY2_BEYONDLIGHT_3402.StaticMeshData).TagData;
+            var t = (container.StaticData as dynamic).TagData;
             TransformPositions(t.ModelTransform);
             TransformUVs(new Vector2(t.TexcoordScale, t.TexcoordScale), t.TexcoordTranslation);
         }
