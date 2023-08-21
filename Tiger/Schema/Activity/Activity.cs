@@ -113,7 +113,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                     yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), MapReference = mapEntry.Unk30 };
                 }
             }
-            else if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+            else if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
             {
                 foreach (var mapEntry in _tag.Unk50)
                 {
