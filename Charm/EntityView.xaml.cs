@@ -89,7 +89,12 @@ public partial class EntityView : UserControl
         foreach (var entity in entities)
         {
             var dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
-            scene.AddEntity(entity.Hash, dynamicParts, overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>());
+            List<BoneNode> boneNodes = overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>();
+            if (entity.Skeleton != null && overrideSkeleton == null)
+            {
+                boneNodes = entity.Skeleton.GetBoneNodes();
+            }
+            scene.AddEntity(entity.Hash, dynamicParts, boneNodes);
             if (exportType == ExportTypeFlag.Full)
             {
                 entity.SaveMaterialsFromParts(savePath, dynamicParts, config.GetUnrealInteropEnabled() || config.GetS2ShaderExportEnabled());
