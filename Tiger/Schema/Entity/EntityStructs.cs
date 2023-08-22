@@ -1148,10 +1148,12 @@ public struct D2Class_D3598080
 
 #region Audio
 
-[SchemaStruct("6E358080", 0x6b8)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6E358080", 0x6b8)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "6E358080", 0x6d8)]
 public struct D2Class_6E358080
 {
-    [SchemaField(0x648)]
+    [SchemaField(0x648, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x668, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_9B318080> PatternAudioGroups;
 }
 
