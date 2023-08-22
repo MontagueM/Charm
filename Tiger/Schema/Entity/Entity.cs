@@ -38,8 +38,7 @@ public class Entity : Tag<SEntity>
         Debug.Assert(_tag.FileSize != 0);
         foreach (var resource in _tag.EntityResources.Select(GetReader(), r => r.Resource))
         {
-            var res2 = resource.TagData.Unk10.GetValue(resource.GetReader());
-            switch (res2)
+            switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
             {
                 case D2Class_8A6D8080:  // Entity model
                     Model = ((D2Class_8F6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).Model;

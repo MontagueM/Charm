@@ -57,10 +57,8 @@ public class Dialogue : Tag<D2Class_B8978080>
     private List<dynamic?> Collapse2D97(D2Class_2D978080 entry)
     {
         List<dynamic?> sounds = new();
-        foreach (var u in entry.Unk20)
+        foreach (dynamic? e in entry.Unk20.Select(u => u.Unk20.GetValue(GetReader())))
         {
-            var unk20Value = u.Unk20.GetValue(GetReader());
-            dynamic e = unk20Value;
             switch (e)
             {
                 case D2Class_2A978080:

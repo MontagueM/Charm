@@ -68,7 +68,8 @@ public struct SStaticMeshData_BL
     public DynamicArray<SStaticMeshMaterialAssignment_WQ> MaterialAssignments;
     public DynamicArray<SStaticMeshPart> Parts;
     public DynamicArray<SStaticMeshBuffers> Meshes;
-    [SchemaField(0x50)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 ModelTransform;
     public float TexcoordScale;
     public Vector2 TexcoordTranslation;

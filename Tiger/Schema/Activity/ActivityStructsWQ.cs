@@ -502,13 +502,15 @@ public struct D2Class_318A8080
     public int Unk28;
 }
 
-[SchemaStruct("FA458080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "FA458080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "FA458080", 0x20)]
 public struct D2Class_FA458080
 {
     public TigerHash Unk00;
-    [SchemaField(8)]
+    [SchemaField(8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public StringPointer EventName;
 
+    [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerHash Unk10;  // eventhash? idk
     public TigerHash Unk14;
 }
