@@ -7,6 +7,8 @@ struct Blob
 {
     void* Data;
     int Size;
+
+    bool IsInvalid() const { return Data == nullptr || Size == 0; }
 };
 
 enum InputSemantic : int
@@ -56,11 +58,20 @@ struct BufferGroup
     uint32_t IndexOffset;
 };
 
+struct Vector4
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+};
+
 class StaticMesh
 {
 public:
-    explicit StaticMesh(uint32_t hash);
+    explicit StaticMesh(uint32_t hash, const Blob& staticMeshTransforms) : StaticMeshTransforms(staticMeshTransforms){};
     ID3D11Device* Device;
+    Blob StaticMeshTransforms;
 
     ID3D11Buffer* GetIndexBuffer() const;
     ID3D11Buffer* const* GetVertexBuffers() const;
@@ -82,7 +93,7 @@ private:
 class Part
 {
 public:
-    Part(const PartInfo& partInfo) : PartInfo(partInfo) {}
+    Part(StaticMesh* staticMesh, const PartInfo& partInfo) : Parent(staticMesh), PartInfo(partInfo) {}
 
     ID3D11Device* Device;
 
@@ -98,8 +109,12 @@ private:
     ID3D11PixelShader* PixelShader = nullptr;
     std::vector<Resource<ID3D11Buffer>*> VSConstantBuffers;
     std::vector<Resource<ID3D11Buffer>*> PSConstantBuffers;
-    std::vector<ID3D11ShaderResourceView*> TextureSRVs;
-    std::vector<Resource<ID3D11SamplerState>*> SamplerStates;
+    std::vector<ID3D11ShaderResourceView*> VSTextureSRVs;
+    std::vector<ID3D11ShaderResourceView*> PSTextureSRVs;
+    std::vector<Resource<ID3D11SamplerState>*> VSSamplerStates;
+    std::vector<Resource<ID3D11SamplerState>*> PSSamplerStates;
+
+    StaticMesh* Parent = nullptr;
 
     ID3D11Buffer* ViewBuffer = nullptr;
 

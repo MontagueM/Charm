@@ -92,9 +92,9 @@ extern void __cdecl MoveCamera(MoveDirection direction)
     camera->UpdateFromKeyboard(direction, 0.1f);
 }
 
-extern void __cdecl CreateStaticMesh(uint32_t hash)
+extern void __cdecl CreateStaticMesh(uint32_t hash, Blob staticMeshTransforms)
 {
-    renderer->StaticMesh = std::make_shared<StaticMesh>(hash);
+    renderer->StaticMesh = std::make_shared<StaticMesh>(hash, staticMeshTransforms);
     renderer->StaticMesh->Initialise(renderer->Device);
 }
 

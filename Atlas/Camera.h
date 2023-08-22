@@ -17,25 +17,28 @@ enum class MoveDirection : int
 class Camera
 {
 public:
-    Camera(float fov, float nearDistance, float farDistance, float aspectRatio);
+    Camera(float fovDegrees, float nearDistance, float farDistance, float aspectRatio);
     void Update(float tickDelta);
     XMMATRIX GetViewMatrix() const;
     XMVECTOR GetPosition() const;
     XMVECTOR GetDirection() const;
-    float GetFOV() const;
+    float GetFOVDegrees() const;
+    float GetFOVRadians() const;
+    float GetAspectRatio() const;
 
     void UpdateFromKeyboard(MoveDirection direction, float tickDelta);
     bool UpdateFromMouse(SimpleMath::Vector2 mouseDelta, float tickDelta, bool isMouseCaptured);
 
 private:
-    float Fov;
+    float FovDegrees;
+    float FovRadians;
     float NearDistance;
     float FarDistance;
     float AspectRatio;
 
-    // XMVECTOR Position = XMVectorSet(13.0f, 3.0f, -4.0f, 0.0f);
+    XMVECTOR Position = XMVectorSet(13.0f, 3.0f, 5.0f, 0.0f);
     // XMVECTOR Position = XMVectorSet(350.553864f, -878.668212f, 10.7369051f, 1.0f);
-    XMVECTOR Position = XMVectorSet(344.f, -867.f, 11.f, 1.0f);
+    // XMVECTOR Position = XMVectorSet(344.f, -867.f, 11.f, 1.0f);
     // XMVECTOR RotationEulerDegrees = XMVectorSet(14.0f, -74.0f, 0.0f, 0.0f);
     XMVECTOR RotationEulerDegrees = XMVectorSet(14.7f, -95.0f, 0.0f, 0.0f);
 

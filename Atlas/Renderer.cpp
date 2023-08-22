@@ -774,13 +774,6 @@ void DX11Renderer::Render(Camera* camera, float deltaTime)
     }
 }
 
-static XMMATRIX CreatePerspectiveInfiniteReverseRH(const float fov, const float aspectRatio, const float zNear)
-{
-    assert(zNear > 0);
-    const float yScale = 1.0f / tan(fov * 0.5);
-    return {yScale / aspectRatio, 0, 0, 0, 0, yScale, 0, 0, 0, 0, 0, -1, 0, 0, zNear, 0};
-}
-
 void DX11Renderer::RenderGeometry(Camera* camera, float deltaTime)
 {
     ID3D11RenderTargetView* renderTargets[3] = {RT0View, RT1View, RT2View};

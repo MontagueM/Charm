@@ -15,21 +15,11 @@ struct cb1_InstanceData
 
 struct cb12_View
 {
-    XMMATRIX View;    // cb12[0,1,2]
-    // . . . eyeDirection.x
-    // . . . eyeDirection.y
-    // . . . eyeDirection.z
-    XMVECTOR Unk04;
-    XMVECTOR Unk05;
-    XMVECTOR NegativeCameraDirection;    // cb12[6]
-    XMVECTOR CameraPosition;             // cb12[7]
-    XMVECTOR ViewportDimensions;         // cb12[8], 0/1 is width/height, 2/3 is 1/width and 1/height
-    XMVECTOR CameraPosition2;            // cb12[10]
+    XMMATRIX WorldToProjective;     // cb12[0-3]
+    XMMATRIX CameraToWorld;         // cb12[4-7]
+    XMVECTOR ViewportDimensions;    // cb12[8], 0/1 is width/height, 2/3 is 1/width and 1/height
+    // XMVECTOR CameraPosition;        // cb12[10]
 };
-
-StaticMesh::StaticMesh(uint32_t hash)
-{
-}
 
 ID3D11Buffer* StaticMesh::GetIndexBuffer() const
 {
@@ -142,21 +132,16 @@ HRESULT StaticMesh::CreateVertexBuffers(const Blob vertexBufferBlobs[3])
 
 HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffers[16])
 {
-    std::ifstream ConstantBufferFile1(
-        "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/VS_cb1.bin", std::ios::in | std::ios::binary);
-    if (!ConstantBufferFile1)
-    {
-        return MK_E_CANTOPENFILE;
-    }
-    ConstantBufferFile1.seekg(0, std::ios::end);
-    const UINT FileLength1 = ConstantBufferFile1.tellg();
-    ConstantBufferFile1.seekg(0, std::ios::beg);
-    BYTE* cb1 = new BYTE[FileLength1];
-    ConstantBufferFile1.read((char*) cb1, FileLength1);
+    byte cb1[0x500];
+
+    memcpy(cb1, Parent->StaticMeshTransforms.Data, Parent->StaticMeshTransforms.Size);
+
+    const XMMATRIX transformMatrix = XMMatrixIdentity();
+    memcpy(cb1 + 0x20, &transformMatrix, sizeof(transformMatrix));
 
     D3D11_BUFFER_DESC bd{};
     bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = FileLength1;
+    bd.ByteWidth = 0x500;
     bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bd.CPUAccessFlags = 0;
 
@@ -168,10 +153,10 @@ HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffe
     if (FAILED(hr))
         return hr;
 
-    VSConstantBuffers.push_back(new Resource<ID3D11Buffer>(1, ConstantBuffer1));
+    VSConstantBuffers.push_back(new Resource(1, ConstantBuffer1));
 
     std::ifstream ConstantBufferFile12(
-        "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/VS_cb12.bin", std::ios::in | std::ios::binary);
+        "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/6C24BB80/VS_cb12.bin", std::ios::in | std::ios::binary);
     if (!ConstantBufferFile12)
     {
         return MK_E_CANTOPENFILE;
@@ -179,11 +164,11 @@ HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffe
     ConstantBufferFile12.seekg(0, std::ios::end);
     const UINT FileLength12 = ConstantBufferFile12.tellg();
     ConstantBufferFile12.seekg(0, std::ios::beg);
-    BYTE* cb12 = new BYTE[FileLength1];
+    BYTE* cb12 = new BYTE[FileLength12];
     ConstantBufferFile12.read((char*) cb12, FileLength12);
 
     bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = FileLength1;
+    bd.ByteWidth = FileLength12;
     bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bd.CPUAccessFlags = 0;
 
@@ -203,7 +188,7 @@ HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffe
         return hr;
 
     std::ifstream ConstantBufferFile0(
-        "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_cb0_75FFBA80.bin",
+        "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/6C24BB80/PS_cb0_03FBBA80.bin",
         std::ios::in | std::ios::binary);
     if (!ConstantBufferFile0)
     {
@@ -271,48 +256,82 @@ HRESULT Part::CreateTextureResources(const Blob vsTextures[16], const Blob psTex
         L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_7_9B42BD80.dds",
         L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_8_85C5BC80.dds"};
 
-    HRESULT hr = CreateTextureSRVsFromFiles(Device, TextureFiles, TextureSRVs);
-    if (FAILED(hr))
-        return hr;
+    HRESULT hr = S_OK;
+    for (int i = 0; i < 16; i++)
+    {
+        const Blob& vsTexture = vsTextures[i];
+        if (vsTexture.Size == 0)
+        {
+            continue;
+        }
+
+        ID3D11ShaderResourceView* TextureSRV;
+        if (FAILED(
+                hr = CreateDDSTextureFromMemory(Device, static_cast<const uint8_t*>(vsTexture.Data), vsTexture.Size, nullptr, &TextureSRV)))
+        {
+            return hr;
+        }
+        VSTextureSRVs.push_back(TextureSRV);
+    }
+    for (int i = 0; i < 16; i++)
+    {
+        const Blob& psTexture = psTextures[i];
+        if (psTexture.Size == 0)
+        {
+            continue;
+        }
+
+        ID3D11ShaderResourceView* TextureSRV;
+        if (FAILED(
+                hr = CreateDDSTextureFromMemory(Device, static_cast<const uint8_t*>(psTexture.Data), psTexture.Size, nullptr, &TextureSRV)))
+        {
+            return hr;
+        }
+        PSTextureSRVs.push_back(TextureSRV);
+    }
 
     return S_OK;
 }
 
 HRESULT Part::CreateSamplers(const Blob vsSamplers[8], const Blob psSamplers[8])
 {
-    D3D11_SAMPLER_DESC sampDesc = {};
-    sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-    sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    sampDesc.MaxAnisotropy = 4;
-    sampDesc.MinLOD = 0;
-    sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    sampDesc.MipLODBias = 0;
-    ID3D11SamplerState* SamplerState;
-    HRESULT hr = Device->CreateSamplerState(&sampDesc, &SamplerState);
-    if (FAILED(hr))
-        return hr;
-    SamplerStates.push_back(new Resource<ID3D11SamplerState>(1, SamplerState));
+    HRESULT hr = S_OK;
 
-    sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    hr = Device->CreateSamplerState(&sampDesc, &SamplerState);
-    if (FAILED(hr))
-        return hr;
-    SamplerStates.push_back(new Resource<ID3D11SamplerState>(2, SamplerState));
+    for (int i = 0; i < 8; i++)
+    {
+        const Blob& vsSampler = vsSamplers[i];
+        if (vsSampler.IsInvalid())
+        {
+            continue;
+        }
 
-    sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    hr = Device->CreateSamplerState(&sampDesc, &SamplerState);
-    if (FAILED(hr))
-        return hr;
-    SamplerStates.push_back(new Resource<ID3D11SamplerState>(3, SamplerState));
+        D3D11_SAMPLER_DESC sampDesc = *static_cast<D3D11_SAMPLER_DESC*>(vsSampler.Data);
+        ID3D11SamplerState* samplerState;
+        hr = Device->CreateSamplerState(&sampDesc, &samplerState);
+        if (FAILED(hr))
+            return hr;
 
-    return S_OK;
+        VSSamplerStates.push_back(new Resource(i, samplerState));
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+        const Blob& psSampler = psSamplers[i];
+        if (psSampler.IsInvalid())
+        {
+            continue;
+        }
+
+        D3D11_SAMPLER_DESC sampDesc = *static_cast<D3D11_SAMPLER_DESC*>(psSampler.Data);
+        ID3D11SamplerState* samplerState;
+        hr = Device->CreateSamplerState(&sampDesc, &samplerState);
+        if (FAILED(hr))
+            return hr;
+
+        PSSamplerStates.push_back(new Resource(i, samplerState));
+    }
+
+    return hr;
 }
 
 ID3D11VertexShader* Part::GetVertexShader() const
@@ -330,6 +349,13 @@ ID3D11InputLayout* Part::GetVertexLayout() const
     return VertexLayout;
 }
 
+static XMMATRIX CreatePerspectiveInfiniteReverseRH(const float fov, const float aspectRatio, const float zNear)
+{
+    assert(zNear > 0);
+    const float yScale = 1.0f / tan(fov * 0.5);
+    return {yScale / aspectRatio, 0, 0, 0, 0, yScale, 0, 0, 0, 0, 0, -1, 0, 0, zNear, 0};
+}
+
 HRESULT Part::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float DeltaTime)
 {
     if (GetVertexShader() == nullptr || GetPixelShader() == nullptr || GetVertexLayout() == nullptr)
@@ -338,18 +364,31 @@ HRESULT Part::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float D
     }
 
     DeviceContext->VSSetShader(GetVertexShader(), nullptr, 0);
+    DeviceContext->VSSetShaderResources(0, VSTextureSRVs.size(), VSTextureSRVs.data());
+    for (const auto& SamplerState : VSSamplerStates)
+    {
+        DeviceContext->VSSetSamplers(SamplerState->Slot, 1, &SamplerState->ResourcePointer);
+    }
+
     DeviceContext->PSSetShader(GetPixelShader(), nullptr, 0);
+    DeviceContext->PSSetShaderResources(0, PSTextureSRVs.size(), PSTextureSRVs.data());
+    for (const auto& SamplerState : PSSamplerStates)
+    {
+        DeviceContext->PSSetSamplers(SamplerState->Slot, 1, &SamplerState->ResourcePointer);
+    }
+
     DeviceContext->IASetInputLayout(GetVertexLayout());
 
     cb12_View View;
-    View.View = Camera->GetViewMatrix();
-    View.View.r[0].m128_f32[3] = Camera->GetDirection().m128_f32[0];
-    View.View.r[1].m128_f32[3] = Camera->GetDirection().m128_f32[1];
-    View.View.r[2].m128_f32[3] = Camera->GetDirection().m128_f32[2];
-    View.View.r[0].m128_f32[2] = 0;
-    View.View.r[1].m128_f32[2] = 0;
-    View.View.r[2].m128_f32[2] = 0;
-    View.CameraPosition = Camera->GetPosition();
+
+    auto projection = CreatePerspectiveInfiniteReverseRH(Camera->GetFOVRadians(), Camera->GetAspectRatio(), 0.01f);
+
+    View.WorldToProjective = Camera->GetViewMatrix() * projection;
+    View.CameraToWorld = XMMatrixIdentity();
+    View.CameraToWorld.r[3].m128_f32[0] = Camera->GetPosition().m128_f32[0];
+    View.CameraToWorld.r[3].m128_f32[1] = Camera->GetPosition().m128_f32[1];
+    View.CameraToWorld.r[3].m128_f32[2] = Camera->GetPosition().m128_f32[2];
+    View.CameraToWorld.r[3].m128_f32[3] = 1.0f;
 
     // std::cout << "Camera Position: " << View.CameraPosition.m128_f32[0] << ", " << View.CameraPosition.m128_f32[1] << ", "
     //           << View.CameraPosition.m128_f32[2] << std::endl;
@@ -361,19 +400,19 @@ HRESULT Part::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float D
     Box.left = 0;
     Box.top = 0;
     Box.front = 0;
-    Box.right = 0 + 16 * 3;
+    Box.right = 0 + 16 * 8;    // 2 matrices = 8 vectors
     Box.bottom = 1;
     Box.back = 1;
-    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.View, 0, 0);
+    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View, 0, 0);
 
-    // player position
-    Box.left = 112;
-    Box.top = 0;
-    Box.front = 0;
-    Box.right = 112 + 16;
-    Box.bottom = 1;
-    Box.back = 1;
-    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.CameraPosition, 0, 0);
+    // // player position
+    // Box.left = 112;
+    // Box.top = 0;
+    // Box.front = 0;
+    // Box.right = 112 + 16;
+    // Box.bottom = 1;
+    // Box.back = 1;
+    // DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.CameraPosition, 0, 0);
 
     for (const auto& ConstantBuffer : VSConstantBuffers)
     {
@@ -491,7 +530,7 @@ HRESULT Part::CreateVertexLayout(const InputSignature inputSignatures[8], const 
 
 HRESULT StaticMesh::AddPart(const PartInfo& partInfo)
 {
-    Part part(partInfo);
+    Part part(this, partInfo);
     HRESULT hr = part.Initialise(Device);
     if (FAILED(hr))
     {

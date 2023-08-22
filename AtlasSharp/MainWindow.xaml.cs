@@ -37,6 +37,22 @@ enum MoveDirection : int
     Down
 };
 
+[StructLayout(LayoutKind.Sequential)]
+public struct Transform
+{
+    public Vector4 Rotation;
+    public Vector4 Position;
+    public float Scale;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct StaticMeshInstancedInfo
+{
+    public Vector4 MeshTransform;
+    public Vector4 TexcoordTransform;
+    public Transform[] InstanceTransforms;
+}
+
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
@@ -129,9 +145,12 @@ public partial class MainWindow : Window
         InitTiger();
 
         uint staticHash = 0x80bce840; // 40E8BC80
-        NativeMethods.CreateStaticMesh(staticHash);
-
         StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(new FileHash(staticHash));
+
+        Blob staticMeshTransforms = staticMesh.TagData.StaticData.GetTransformsBlob();
+        NativeMethods.CreateStaticMesh(staticHash, staticMeshTransforms);
+
+
         List<StaticPart> parts = staticMesh.Load(ExportDetailLevel.MostDetailed);
         List<BufferGroup> bufferGroups = staticMesh.TagData.StaticData.GetBuffers();
         List<int> strides = staticMesh.TagData.StaticData.GetStrides();
@@ -234,7 +253,7 @@ public partial class MainWindow : Window
                     case ComponentMask.XY:
                         InputSignatures[sigIndex].DxgiFormat = signature.ComponentType switch
                         {
-                            RegisterComponentType.Float32 => (int)DXGI_FORMAT.R32G32_FLOAT,
+                            RegisterComponentType.Float32 => (int)DXGI_FORMAT.R16G16_SNORM,
                             RegisterComponentType.SInt32 => (int)DXGI_FORMAT.R16G16_SINT,
                             RegisterComponentType.UInt32 => (int)DXGI_FORMAT.R16G16_UINT,
                             _ => throw new Exception()
@@ -496,7 +515,7 @@ static class NativeMethods
     public static extern int RegisterMouseDelta(float mouseX, float mouseY);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int CreateStaticMesh(uint hash);
+    public static extern int CreateStaticMesh(uint hash, Blob staticMeshTransforms);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern int AddStaticMeshBufferGroup(uint hash, BufferGroup bufferGroup);

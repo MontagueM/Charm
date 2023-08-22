@@ -5,8 +5,12 @@
 #include <iostream>
 #include <ostream>
 
-Camera::Camera(float fov, float nearDistance, float farDistance, float aspectRatio)
-    : Fov(fov), NearDistance(nearDistance), FarDistance(farDistance), AspectRatio(aspectRatio)
+Camera::Camera(float fovDegrees, float nearDistance, float farDistance, float aspectRatio)
+    : FovDegrees(fovDegrees)
+    , FovRadians(XMConvertToRadians(fovDegrees))
+    , NearDistance(nearDistance)
+    , FarDistance(farDistance)
+    , AspectRatio(aspectRatio)
 {
     Update(0);
 }
@@ -163,7 +167,17 @@ XMVECTOR Camera::GetDirection() const
     return ForwardDirection;
 }
 
-float Camera::GetFOV() const
+float Camera::GetFOVDegrees() const
 {
-    return Fov;
+    return FovDegrees;
+}
+
+float Camera::GetFOVRadians() const
+{
+    return FovRadians;
+}
+
+float Camera::GetAspectRatio() const
+{
+    return AspectRatio;
 }

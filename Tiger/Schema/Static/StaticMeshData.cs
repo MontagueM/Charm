@@ -14,11 +14,21 @@ namespace Tiger.Schema.Static
         public uint IndexOffset;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct StaticMeshInfo
+    {
+        public Vector4 MeshTransform;
+        public float TexcoordScale;
+        public Vector2 TexcoordTranslation;
+        public uint Unk;
+    }
+
     public interface IStaticMeshData : ISchema
     {
         public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent);
         public List<BufferGroup> GetBuffers();
         List<int> GetStrides();
+        Blob GetTransformsBlob();
     }
 }
 
@@ -40,6 +50,8 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
         public List<BufferGroup> GetBuffers() => throw new NotImplementedException();
 
         public List<int> GetStrides() => throw new NotImplementedException();
+
+        public Blob GetTransformsBlob() => throw new NotImplementedException();
 
         private List<StaticPart> GenerateParts(Dictionary<int, SStaticMeshPart> staticPartEntries, SStaticMesh parent)
         {
@@ -166,6 +178,13 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             if (_tag.Meshes[0].Vertices1 != null) strides.Add(_tag.Meshes[0].Vertices1.TagData.Stride);
             if (_tag.Meshes[0].Vertices2 != null) strides.Add(_tag.Meshes[0].Vertices2.TagData.Stride);
             return strides;
+        }
+
+        public Blob GetTransformsBlob()
+        {
+            using TigerReader reader = GetReader();
+            reader.Seek(0x40, SeekOrigin.Begin);
+            return new Blob(reader.ReadBytes(0x20));
         }
 
         private List<StaticPart> GenerateParts(Dictionary<int, SStaticMeshPart> staticPartEntries, SStaticMesh parent)
