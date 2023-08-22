@@ -169,6 +169,8 @@ public partial class DevView : UserControl
                 case 0x80809AD8:
                     EntityView entityView = new EntityView();
                     entityView.LoadEntity(hash, _fbxHandler);
+                    Entity entity = FileResourcer.Get().GetFile<Entity>(hash);
+                    EntityView.Export(new List<Entity> { entity }, hash, ExportTypeFlag.Full);
                     _mainWindow.MakeNewTab(hash, entityView);
                     _mainWindow.SetNewestTabSelected();
                     break;

@@ -1,4 +1,5 @@
-﻿using Tiger.Schema.Entity;
+﻿using System.Diagnostics;
+using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Model;
 
@@ -409,6 +410,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     handle.BaseStream.Seek(chunkIndex * 0x20 + (vertexIndex % 8) * 4, SeekOrigin.Begin);
                     vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
                     vw.WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
+                    Debug.Assert(vw.WeightValues.X + vw.WeightValues.Y == 255);
                     dynamicPart.VertexWeights.Add(vw);
                 }
                 else
@@ -423,6 +425,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
 
                     vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
                         handle.ReadByte());
+                    // Debug.Assert(vw.WeightValues.X + vw.WeightValues.Y + vw.WeightValues.Z + vw.WeightValues.W == 255);
                     dynamicPart.VertexWeights.Add(vw);
                 }
 

@@ -116,11 +116,15 @@ public class Entity : Tag<SEntity>
         rsrc.DyemapPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_dyemap");
     }
 
+    private readonly object _lock = new();
     public bool HasGeometry()
     {
-        if (!_loaded)
+        lock (_lock)
         {
-            Load();
+            if (!_loaded)
+            {
+                Load();
+            }
         }
         return Model != null;
     }
