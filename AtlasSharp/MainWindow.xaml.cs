@@ -144,7 +144,8 @@ public partial class MainWindow : Window
     {
         InitTiger();
 
-        uint staticHash = 0x80bce840; // 40E8BC80
+        // uint staticHash = 0x80bce840; // 40E8BC80
+        uint staticHash = 0x80bce912; // 12e9bc80
         StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(new FileHash(staticHash));
 
         Blob staticMeshTransforms = staticMesh.TagData.StaticData.GetTransformsBlob();
@@ -197,10 +198,7 @@ public partial class MainWindow : Window
         public Blob[] VSTextures;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public Blob[] PSTextures;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        public Blob[] VSConstantBuffers;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-        public Blob[] PSConstantBuffers;
+        public Blob PScb0;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public DirectXSampler.D3D11_SAMPLER_DESC[] VSSamplers;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
@@ -288,9 +286,15 @@ public partial class MainWindow : Window
                 PSTextures[psTexture.TextureIndex] = new Blob(final);
             }
 
-            // todo
-            VSConstantBuffers = new Blob[16];
-            PSConstantBuffers = new Blob[16];
+            if (material.PSVector4Container.IsValid())
+            {
+                TigerFile container = FileResourcer.Get().GetFile(material.PSVector4Container.GetReferenceHash());
+                PScb0 = new Blob(container.GetData());
+            }
+            else
+            {
+                PScb0 = new Blob();
+            }
 
             VSSamplers = new DirectXSampler.D3D11_SAMPLER_DESC[8];
             for (int i = 0; i < material.VS_Samplers.Count; i++)

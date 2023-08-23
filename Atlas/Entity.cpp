@@ -23,7 +23,7 @@ struct cb12_View
     XMVECTOR Unk05;
     XMVECTOR NegativeCameraDirection;    // cb12[6]
     XMVECTOR CameraPosition;             // cb12[7]
-    XMVECTOR ViewportDimensions;         // cb12[8], 0/1 is width/height, 2/3 is 1/width and 1/height
+    XMVECTOR Target;                     // cb12[8], 0/1 is width/height, 2/3 is 1/width and 1/height
     XMVECTOR CameraPosition2;            // cb12[10]
 };
 

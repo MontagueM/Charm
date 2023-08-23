@@ -15,10 +15,13 @@ struct cb1_InstanceData
 
 struct cb12_View
 {
-    XMMATRIX WorldToProjective;     // cb12[0-3]
-    XMMATRIX CameraToWorld;         // cb12[4-7]
-    XMVECTOR ViewportDimensions;    // cb12[8], 0/1 is width/height, 2/3 is 1/width and 1/height
-    // XMVECTOR CameraPosition;        // cb12[10]
+    XMMATRIX WorldToProjective;    // cb12[0-3]
+    XMMATRIX CameraToWorld;        // cb12[4-7]
+    XMVECTOR Target;               // cb12[8], viewport dimensions 0/1 is width/height, 2/3 is 1/width and 1/height
+    XMVECTOR Unk09;
+    XMVECTOR CameraPosition;
+    XMMATRIX Unk11;    // idk why but cb12[14].z must not be zero ever
+    // XMVECTOR ViewMiscellaneous;    // cb12[9]; cb12[10] is camera position
 };
 
 ID3D11Buffer* StaticMesh::GetIndexBuffer() const
@@ -130,12 +133,18 @@ HRESULT StaticMesh::CreateVertexBuffers(const Blob vertexBufferBlobs[3])
     return S_OK;
 }
 
-HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffers[16])
+static XMMATRIX CreatePerspectiveInfiniteReverseRH(const float fov, const float aspectRatio, const float zNear)
+{
+    assert(zNear > 0);
+    const float yScale = 1.0f / tan(fov * 0.5);
+    return {yScale / aspectRatio, 0, 0, 0, 0, yScale, 0, 0, 0, 0, 0, -1, 0, 0, zNear, 0};
+}
+
+HRESULT Part::CreateConstantBuffers(const Blob& psCb0)
 {
     byte cb1[0x500];
 
     memcpy(cb1, Parent->StaticMeshTransforms.Data, Parent->StaticMeshTransforms.Size);
-
     const XMMATRIX transformMatrix = XMMatrixIdentity();
     memcpy(cb1 + 0x20, &transformMatrix, sizeof(transformMatrix));
 
@@ -155,31 +164,28 @@ HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffe
 
     VSConstantBuffers.push_back(new Resource(1, ConstantBuffer1));
 
-    std::ifstream ConstantBufferFile12(
-        "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/6C24BB80/VS_cb12.bin", std::ios::in | std::ios::binary);
-    if (!ConstantBufferFile12)
-    {
-        return MK_E_CANTOPENFILE;
-    }
-    ConstantBufferFile12.seekg(0, std::ios::end);
-    const UINT FileLength12 = ConstantBufferFile12.tellg();
-    ConstantBufferFile12.seekg(0, std::ios::beg);
-    BYTE* cb12 = new BYTE[FileLength12];
-    ConstantBufferFile12.read((char*) cb12, FileLength12);
+    cb12_View View;
+    View.WorldToProjective = XMMatrixIdentity();
+    View.CameraToWorld = XMMatrixIdentity();
+    View.Target = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+    View.Unk09 = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+    View.CameraPosition = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+    View.Unk11 = XMMatrixIdentity();
+    View.Unk11.r[3].m128_f32[2] = 0.15f;
 
     bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = FileLength12;
+    bd.ByteWidth = sizeof(View);
     bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bd.CPUAccessFlags = 0;
 
-    InitData.pSysMem = cb12;
+    InitData.pSysMem = &View;
 
     ID3D11Buffer* ConstantBuffer12;
     hr = Device->CreateBuffer(&bd, &InitData, &ConstantBuffer12);
     if (FAILED(hr))
         return hr;
 
-    VSConstantBuffers.push_back(new Resource<ID3D11Buffer>(12, ConstantBuffer12));
+    VSConstantBuffers.push_back(new Resource(12, ConstantBuffer12));
 
     // to be able to update the VS, then we copy over to the resource
     bd.BindFlags = 0;
@@ -187,25 +193,17 @@ HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffe
     if (FAILED(hr))
         return hr;
 
-    std::ifstream ConstantBufferFile0(
-        "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/6C24BB80/PS_cb0_03FBBA80.bin",
-        std::ios::in | std::ios::binary);
-    if (!ConstantBufferFile0)
-    {
-        return MK_E_CANTOPENFILE;
-    }
-    ConstantBufferFile0.seekg(0, std::ios::end);
-    const UINT FileLength0 = ConstantBufferFile0.tellg();
-    ConstantBufferFile0.seekg(0, std::ios::beg);
-    BYTE* cb0 = new BYTE[FileLength0];
-    ConstantBufferFile0.read((char*) cb0, FileLength0);
-
     bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = FileLength0;
+    bd.ByteWidth = psCb0.Size;
     bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bd.CPUAccessFlags = 0;
 
-    InitData.pSysMem = cb0;
+    InitData.pSysMem = psCb0.Data;
+
+    if (psCb0.IsInvalid())
+    {
+        return S_OK;
+    }
 
     ID3D11Buffer* ConstantBuffer;
     hr = Device->CreateBuffer(&bd, &InitData, &ConstantBuffer);
@@ -213,49 +211,39 @@ HRESULT Part::CreateConstantBuffers(const Blob vsBuffers[16], const Blob psBuffe
         return hr;
 
     PSConstantBuffers.push_back(new Resource<ID3D11Buffer>(0, ConstantBuffer));
-
-    std::ifstream PSConstantBufferFile12(
-        "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_cb12.bin", std::ios::in | std::ios::binary);
-    if (!PSConstantBufferFile12)
-    {
-        return MK_E_CANTOPENFILE;
-    }
-    PSConstantBufferFile12.seekg(0, std::ios::end);
-    const UINT PSFileLength12 = PSConstantBufferFile12.tellg();
-    PSConstantBufferFile12.seekg(0, std::ios::beg);
-    BYTE* PScb12 = new BYTE[PSFileLength12];
-    PSConstantBufferFile12.read((char*) cb0, PSFileLength12);
-
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = PSFileLength12;
-    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    bd.CPUAccessFlags = 0;
-
-    InitData.pSysMem = PScb12;
-
-    ID3D11Buffer* PSConstantBuffer12;
-    hr = Device->CreateBuffer(&bd, &InitData, &PSConstantBuffer12);
-    if (FAILED(hr))
-        return hr;
-
-    PSConstantBuffers.push_back(new Resource<ID3D11Buffer>(12, PSConstantBuffer12));
+    //
+    // std::ifstream PSConstantBufferFile12(
+    //     "C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_cb12.bin", std::ios::in |
+    //     std::ios::binary);
+    // if (!PSConstantBufferFile12)
+    // {
+    //     return MK_E_CANTOPENFILE;
+    // }
+    // PSConstantBufferFile12.seekg(0, std::ios::end);
+    // const UINT PSFileLength12 = PSConstantBufferFile12.tellg();
+    // PSConstantBufferFile12.seekg(0, std::ios::beg);
+    // BYTE* PScb12 = new BYTE[PSFileLength12];
+    // PSConstantBufferFile12.read((char*) cb0, PSFileLength12);
+    //
+    // bd.Usage = D3D11_USAGE_DEFAULT;
+    // bd.ByteWidth = PSFileLength12;
+    // bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    // bd.CPUAccessFlags = 0;
+    //
+    // InitData.pSysMem = PScb12;
+    //
+    // ID3D11Buffer* PSConstantBuffer12;
+    // hr = Device->CreateBuffer(&bd, &InitData, &PSConstantBuffer12);
+    // if (FAILED(hr))
+    //     return hr;
+    //
+    // PSConstantBuffers.push_back(new Resource<ID3D11Buffer>(12, PSConstantBuffer12));
 
     return S_OK;
 }
 
 HRESULT Part::CreateTextureResources(const Blob vsTextures[16], const Blob psTextures[16])
 {
-    const std::vector<LPCWSTR> TextureFiles = {
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_0_AFC5BC80.dds",
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_1_8848A380.dds",
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_2_53C7BC80.dds",
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_3_9742BD80.dds",
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_4_9342BD80.dds",
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_5_7DC5BC80.dds",
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_6_7D63BC80.dds",
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_7_9B42BD80.dds",
-        L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/C325BB80/PS_8_85C5BC80.dds"};
-
     HRESULT hr = S_OK;
     for (int i = 0; i < 16; i++)
     {
@@ -349,13 +337,6 @@ ID3D11InputLayout* Part::GetVertexLayout() const
     return VertexLayout;
 }
 
-static XMMATRIX CreatePerspectiveInfiniteReverseRH(const float fov, const float aspectRatio, const float zNear)
-{
-    assert(zNear > 0);
-    const float yScale = 1.0f / tan(fov * 0.5);
-    return {yScale / aspectRatio, 0, 0, 0, 0, yScale, 0, 0, 0, 0, 0, -1, 0, 0, zNear, 0};
-}
-
 HRESULT Part::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float DeltaTime)
 {
     if (GetVertexShader() == nullptr || GetPixelShader() == nullptr || GetVertexLayout() == nullptr)
@@ -447,7 +428,7 @@ HRESULT Part::Initialise(ID3D11Device* device)
     if (FAILED(hr))
         return hr;
 
-    hr = CreateConstantBuffers(PartInfo.PartMaterial.VSConstantBuffers, PartInfo.PartMaterial.VSConstantBuffers);
+    hr = CreateConstantBuffers(PartInfo.PartMaterial.PScb0);
     if (FAILED(hr))
         return hr;
 
