@@ -37,4 +37,12 @@
       <ProjectReference Include="..\Tiger\Tiger.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Page Update="AtlasView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <XamlRuntime>Wpf</XamlRuntime>
+        <SubType>Designer</SubType>
+      </Page>
+    </ItemGroup>
+
 </Project>

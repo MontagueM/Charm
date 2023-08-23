@@ -3,20 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Atlas"
-        xmlns:directX="clr-namespace:Microsoft.Wpf.Interop.DirectX;assembly=Microsoft.Wpf.Interop.DirectX"
+        xmlns:atlasSharp="clr-namespace:AtlasSharp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="480" Width="720"
-        PreviewKeyDown="MainWindow_OnPreviewKeyDown"
-        PreviewKeyUp="MainWindow_OnPreviewKeyUp"
-        MouseMove="MainWindow_OnMouseMove"
-        MouseDown="MainWindow_OnMouseDown"
-        MouseUp="MainWindow_OnMouseUp">
+        Title="MainWindow" Height="480" Width="720">
     <Grid Background="Gray">
-        <Image Stretch="Fill" Width="720" Height="480" Name="ImageHost">
-            <Image.Source>
-                <directX:D3D11Image x:Name="InteropImage"/>
-            </Image.Source>
-        </Image>
+        <atlasSharp:AtlasView x:Name="AtlasView"/>
     </Grid>
 </Window>

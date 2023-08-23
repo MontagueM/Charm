@@ -174,6 +174,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
         public List<int> GetStrides()
         {
             List<int> strides = new();
+            if (_tag.Meshes.Count() == 0) return strides;
             if (_tag.Meshes[0].Vertices0 != null) strides.Add(_tag.Meshes[0].Vertices0.TagData.Stride);
             if (_tag.Meshes[0].Vertices1 != null) strides.Add(_tag.Meshes[0].Vertices1.TagData.Stride);
             if (_tag.Meshes[0].Vertices2 != null) strides.Add(_tag.Meshes[0].Vertices2.TagData.Stride);
