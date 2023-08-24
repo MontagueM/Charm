@@ -659,12 +659,18 @@ PS
             
             foreach (var i in inputs)
             {
-                if (i.Type == "uint")
+                switch(i.Type)
                 {
-                    if (i.Semantic == "SV_isFrontFace0")
-                        funcDef.AppendLine($"\t\tint {i.Variable} = i.face;");
-                    else
-                        funcDef.AppendLine($"\t\tint {i.Variable} = {i.Variable};");
+                    case "uint":
+                        if (i.Semantic == "SV_isFrontFace0")
+                            funcDef.AppendLine($"\t\tint {i.Variable} = i.face;");
+                        else
+                            funcDef.AppendLine($"\t\tint {i.Variable} = 1;");
+                        break;
+                    case "float4":
+                        if (i.Semantic == "SV_POSITION0" && i.Variable != "v5")
+                            funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vPositionSs;");
+                        break;
                 }
             }
             funcDef.AppendLine("\t\tfloat4 o0 = float4(0,0,0,0);");
