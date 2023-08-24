@@ -170,6 +170,8 @@ public class ExporterScene
             {
                 DynamicMeshPart part = parts[i];
 
+                if (part.Material == null)
+                    continue;
                 if (!part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
                 {
                     continue;
