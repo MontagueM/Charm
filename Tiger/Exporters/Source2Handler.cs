@@ -28,6 +28,8 @@ public class Source2Handler
                 int i = 0;
                 foreach (MeshPart staticpart in staticMesh)
                 {
+                    if (staticpart.Material == null)
+                        continue;
                     mats.AppendLine("{");
                     mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
                     mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
@@ -129,8 +131,9 @@ public class Source2Handler
         }
         else
         {
-            vmat.AppendLine($"  shader \"ps_{hash}.shader\"");
-            vmat.AppendLine("   F_ALPHA_TEST 1");
+            vmat.AppendLine($"\tshader \"ps_{hash}.shader\"");
+            vmat.AppendLine($"\tF_ALPHA_TEST 1");
+            vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
         }
 
         foreach (var e in materialHeader.EnumeratePSTextures())

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Tiger;
@@ -20,8 +21,10 @@ public class S2ShaderConverter
     private readonly List<Output> outputs = new List<Output>();
     private static bool isTerrain = false;
     private bool bOpacityEnabled = false;
+    private bool bTranslucent = true;
     private bool bUsesFrontFace = false;
     private bool bFixRoughness = false;
+    private bool bUsesNormalBuffer = false;
 
     public string vfxStructure =
 $@"HEADER
@@ -201,9 +204,6 @@ PS
 
         ProcessHlslData();
 
-        if (bOpacityEnabled) //This way is stupid but it works
-            vfxStructure = vfxStructure.Replace("//alpha", "#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST 1\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT 0\r\n\t#endif");
-
         if (bUsesFrontFace)
         {
             vfxStructure = vfxStructure.Replace("//frontface", "#define S_RENDER_BACKFACES 1");
@@ -223,7 +223,7 @@ PS
         vfxStructure = vfxStructure.Replace("//ps_CBuffers", WriteCbuffers(material, false).ToString());
 
         hlsl = new StringReader(pixel);
-        StringBuilder instructions = ConvertInstructions(false);
+        StringBuilder instructions = ConvertInstructions(material, false);
         if (instructions.ToString().Length == 0)
         {
             return "";
@@ -233,6 +233,12 @@ PS
 
         if (bFixRoughness)
             vfxStructure = vfxStructure.Replace("float smoothness = saturate(8 * (normal_length - 0.375));", "float smoothness = saturate(8 * (0 - 0.375));");
+
+        if (bOpacityEnabled || bTranslucent) //This way is stupid but it works
+            vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST {((bUsesNormalBuffer || bTranslucent) ? "0" : "1")}\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT {((bUsesNormalBuffer || bTranslucent) ? "1" : "0")}\r\n\t#endif");
+
+        if(bUsesNormalBuffer) //Cant get normal buffer in forward rendering so just use world normal ig...
+            vfxStructure = vfxStructure.Replace("mat.Normal = normal_in_world_space;", $"mat.Normal = v0;");
 
         //------------------------------------------------------------------------------
 
@@ -519,11 +525,17 @@ PS
                 funcDef.AppendLine($"\tTexture2D( g_t14_3 )  < Channel( RGBA,  Box( TextureT14_3 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
                 funcDef.AppendLine($"\tTextureAttribute(g_t14_3, g_t14_3);\n");
             }
+
+            //if(bUsesNormalBuffer)
+            //{
+            //    funcDef.AppendLine($"\tBoolAttribute( bWantsFBCopyTexture, true );");
+            //    funcDef.AppendLine($"\tCreateTexture2D( g_tFrameBufferCopyTexture ) < Attribute( \"FrameBufferCopyTexture\" ); SrgbRead( true ); Filter( MIN_MAG_MIP_LINEAR ); AddressU( CLAMP ); AddressV( CLAMP ); >;");
+            //}
         }
         return funcDef;
     }
 
-    private StringBuilder ConvertInstructions(bool isVertexShader)
+    private StringBuilder ConvertInstructions(IMaterial material, bool isVertexShader)
     {
         StringBuilder funcDef = new();
 
@@ -569,14 +581,6 @@ PS
                 //}
             }
 
-            Dictionary<int, TextureView> texDict = new();
-
-            foreach (var texture in textures)
-            {
-                texDict.Add(texture.Index, texture);
-            }
-            List<int> sortedIndices = texDict.Keys.OrderBy(x => x).ToList();
-            List<TextureView> sortedTextures = texDict.Values.OrderBy(x => x.Variable).ToList();
             string line = hlsl.ReadLine();
             if (line == null)
             {
@@ -631,8 +635,6 @@ PS
         {
             funcDef.AppendLine("\t\tfloat3 vPositionWs = i.vPositionWithOffsetWs.xyz + g_vHighPrecisionLightingOffsetWs.xyz;");
             funcDef.AppendLine("\t\tfloat3 vCameraToPositionDirWs = CalculateCameraToPositionDirWs( vPositionWs.xyz );");
-
-            funcDef.AppendLine("\t\tfloat4 o0,o1,o2;");
             funcDef.AppendLine("\t\tfloat alpha = 1;");
 
             if (isTerrain) //variables are different for terrain for whatever reason, kinda have to guess
@@ -650,11 +652,11 @@ PS
                 funcDef.AppendLine("\t\tfloat4 v1 = {i.vTangentUWs,1};");
                 funcDef.AppendLine("\t\tfloat4 v2 = {i.vTangentVWs,1};");
                 funcDef.AppendLine("\t\tfloat4 v3 = {i.vTextureCoords,0,0};"); //UVs
-                funcDef.AppendLine("\t\tfloat4 v4 = {(vPositionWs+v3.xyz)/39.37,0};"); //Don't really know, just guessing its world offset or something
+                funcDef.AppendLine("\t\tfloat4 v4 = {(vPositionWs)/39.37,0};"); //Don't really know, just guessing its world offset or something
                 funcDef.AppendLine("\t\tfloat4 v5 = i.vBlendValues;"); //Vertex color.
                 //funcDef.AppendLine("uint v6 = 1;"); //Usually FrontFace but can also be v7
             }
-
+            
             foreach (var i in inputs)
             {
                 if (i.Type == "uint")
@@ -665,22 +667,23 @@ PS
                         funcDef.AppendLine($"\t\tint {i.Variable} = {i.Variable};");
                 }
             }
+            funcDef.AppendLine("\t\tfloat4 o0 = float4(0,0,0,0);");
+            funcDef.AppendLine("\t\tfloat4 o1 = float4(PackNormal3D(v0.xyz),1);");
+            funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);\n");
 
-            Dictionary<int, TextureView> texDict = new();
-
-            foreach (var texture in textures)
-            {
-                texDict.Add(texture.Index, texture);
-            }
-            List<int> sortedIndices = texDict.Keys.OrderBy(x => x).ToList();
-            List<TextureView> sortedTextures = texDict.Values.OrderBy(x => x.Variable).ToList();
+            //if(cbuffers.Any(cbuffer => cbuffer.Index == 13 && cbuffer.Count == 2)) //Should be time but probably gets manipulated somehow
+            //{
+            //    funcDef.AppendLine("\t\tcb13[0] = g_flTime.xxxx;");
+            //    funcDef.AppendLine("\t\tcb13[1] = g_flTime.xxxx;");
+            //}
+                
             string line = hlsl.ReadLine();
             if (line == null)
             {
                 // its a broken pixel shader that uses some kind of memory textures
                 return new StringBuilder();
             }
-            while (!line.Contains("SV_TARGET2"))
+            while (!line.Contains("SV_TARGET0"))
             {
                 line = hlsl.ReadLine();
                 if (line == null)
@@ -689,20 +692,23 @@ PS
                     return new StringBuilder();
                 }
             }
-            hlsl.ReadLine();
+            while (!line.Contains("{"))
+            {
+                if (line.Contains("SV_TARGET2"))
+                    bTranslucent = false;
+                line = hlsl.ReadLine();
+            }
             do
             {
                 line = hlsl.ReadLine();
                 if (line != null)
                 {
-                    if (line.Contains("cb12[7].xyz")) //cb12 is view scope
+                    if (line.Contains("cb12[7].xyz") || line.Contains("cb12[14].xyz")) //cb12 is view scope
                     {
-                        funcDef.AppendLine($"\t\t{line.TrimStart().Replace("cb12[7].xyz", "vCameraToPositionDirWs").Replace("v4.xyz", "float3(0,0,0)")}");
+                        funcDef.AppendLine($"\t\t{line.TrimStart().Replace("cb12[7].xyz", "vCameraToPositionDirWs")
+                            .Replace("v4.xyz", "float3(0,0,0)")
+                            .Replace("cb12[14].xyz", "vCameraToPositionDirWs")}");
                     }
-                    //else if (line.Contains("v4.xy * cb")) //might be a detail uv or something when v4 is used like this, idk
-                    //{
-                    //    funcDef.AppendLine($"\t\t{line.TrimStart().Replace("v4", "(v3.xy*5)")}");
-                    //}
                     else if (line.Contains("while (true)"))
                     {
                         funcDef.AppendLine($"\t\t{line.TrimStart().Replace("while (true)", "[unroll(20)] while (true)")}");
@@ -720,7 +726,7 @@ PS
                         var dotAfter = line.Split(").")[1];
                         // todo add dimension
 
-                        if (texIndex == 14) //THIS IS SO SO BAD
+                        if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
                         {
                             funcDef.AppendLine($"\t\tbool red = i.vBlendValues.x > 0.5;\r\n" +
                                 $"        bool green = i.vBlendValues.y > 0.5;\r\n" +
@@ -742,6 +748,10 @@ PS
                                 $"            {equal} = Tex2DS(g_t14_3, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
                                 $"        }}");
                         }
+                        else if(!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
+                        {
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter}"); 
+                        }
                         else
                         {
                             funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(g_s{sampleIndex}, {sampleUv}).{dotAfter}");
@@ -756,13 +766,15 @@ PS
 
                         funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.CalculateLevelOfDetail(g_s{sampleIndex}, {sampleUv});");
                     }
-                    else if (line.Contains("Load"))
+                    else if (line.Contains("t2.Load")) //Pretty sure this is normal buffer, cant get/use in Forward Rendering...
                     {
                         var equal = line.Split("=")[0];
                         var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]);
                         var sampleUv = line.Split("(")[1].Split(")")[0];
+                        var dotAfter = line.Split(").")[1];
+                        bUsesNormalBuffer = true;
 
-                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex + 1}.Load({sampleUv});"); //Usually seen in decals, the texture isnt actually valid though? Probably from gbuffer
+                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= v0.{dotAfter}");
                     }
                     else if (line.Contains("o0.w = r")) //o0.w = r(?)
                     {
@@ -788,15 +800,4 @@ PS
         }
         return funcDef;
     }
-
-    //private void AddOutputs()
-    //{
-    //    Dictionary<int, Texture> texDict = new Dictionary<int, Texture>();
-
-    //    foreach (var texture in textures)
-    //    {
-    //        texDict.Add(texture.Index, texture);
-    //    }
-    //    List<Texture> sortedTextures = texDict.Values.OrderBy(x => x.Variable).ToList();
-    //}
 }
