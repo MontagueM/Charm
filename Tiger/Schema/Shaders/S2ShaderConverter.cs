@@ -482,42 +482,30 @@ PS
         {
             foreach (var i in inputs)
             {
-                if (i.Semantic == "POSITION0")
+                switch(i.Semantic)
                 {
-                    funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(i.vPositionOs, 0); //{i.Semantic}");
+                    case "POSITION0":
+                        funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(i.vPositionOs, 0); //{i.Semantic}");
+                        break;
+                    case "TANGENT0":
+                        funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vTangentUOs; //{i.Semantic}");
+                        break;
+                    case "TEXCOORD0":
+                        funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(i.vTexCoord, 0, 0); //{i.Semantic}");
+                        break;
+                    case "NORMAL0":
+                        funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vNormalOs; //{i.Semantic}");
+                        break;
+                    case "SV_VERTEXID0":
+                        funcDef.AppendLine($"\t\tuint {i.Variable} = i.vVertexID; //{i.Semantic}");
+                        break;
+                    case "SV_InstanceID0":
+                        funcDef.AppendLine($"\t\tuint {i.Variable} = i.vInstanceID; //{i.Semantic}");
+                        break;
+                    default:
+                        funcDef.AppendLine($"\t\t{i.Type} {i.Variable} = {i.Variable}; //{i.Semantic}");
+                        break;
                 }
-                else if (i.Semantic == "TANGENT0")
-                {
-                    funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vTangentUOs; //{i.Semantic}");
-                }
-                else if (i.Semantic == "TEXCOORD0")
-                {
-                    funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(i.vTexCoord, 0, 0); //{i.Semantic}");
-                }
-                else if (i.Semantic == "NORMAL0")
-                {
-                    funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vNormalOs; //{i.Semantic}");
-                }
-                else if (i.Semantic == "SV_VERTEXID0")
-                {
-                    funcDef.AppendLine($"\t\tuint {i.Variable} = i.vVertexID; //{i.Semantic}");
-                }
-                else if (i.Semantic == "SV_InstanceID0")
-                {
-                    funcDef.AppendLine($"\t\tuint {i.Variable} = i.vInstanceID; //{i.Semantic}");
-                }
-                else
-                {
-                    funcDef.AppendLine($"\t\t{i.Type} {i.Variable} = {i.Variable}; //{i.Semantic}");
-                }
-
-                //if (i.Type == "uint")
-                //{
-                //    if (i.Semantic == "SV_isFrontFace0")
-                //        funcDef.AppendLine($"       int {i.Variable} = i.face;");
-                //    else
-                //        funcDef.AppendLine($"       int {i.Variable} = {i.Variable};");
-                //}
             }
 
             string line = hlsl.ReadLine();
@@ -616,12 +604,12 @@ PS
             funcDef.AppendLine("\t\tfloat4 o1 = float4(PackNormal3D(v0.xyz),1);");
             funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);\n");
 
-            //if(cbuffers.Any(cbuffer => cbuffer.Index == 13 && cbuffer.Count == 2)) //Should be time but probably gets manipulated somehow
-            //{
-            //    funcDef.AppendLine("\t\tcb13[0] = g_flTime.xxxx;");
-            //    funcDef.AppendLine("\t\tcb13[1] = g_flTime.xxxx;");
-            //}
-                
+            if (cbuffers.Any(cbuffer => cbuffer.Index == 13 && cbuffer.Count == 2)) //Should be time (g_flTime) but probably gets manipulated somehow
+            {
+                funcDef.AppendLine("\t\tcb13[0] = 1;");
+                funcDef.AppendLine("\t\tcb13[1] = 1;");
+            }
+
             string line = hlsl.ReadLine();
             if (line == null)
             {

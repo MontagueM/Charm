@@ -153,29 +153,29 @@ public class ExporterScene
         for (int i = 0; i < parts.Count; i++)
         {
             DynamicMeshPart part = parts[i];
-            mesh.AddPart(entityHash, part, i);
+            if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+            {
+                mesh.AddPart(entityHash, part, i);
+            }
         }
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
     }
 
     public void AddMapEntity(SMapDataEntry dynamicResource, Entity entity)
     {
-        ExporterMesh mesh = new(dynamicResource.GetEntityHash());
-
         if (!_addedEntities.Contains(entity.Hash)) //Dont want duplicate entities being added
         {
+            ExporterMesh mesh = new(dynamicResource.GetEntityHash());
+
             _addedEntities.Add(entity.Hash);
             var parts = entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource);
             for (int i = 0; i < parts.Count; i++)
             {
                 DynamicMeshPart part = parts[i];
-
-                if (!part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
                 {
-                    continue;
-                }
-
-                mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
+                    mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
+                }  
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = entity.Skeleton?.GetBoneNodes() });
         }
