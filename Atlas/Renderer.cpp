@@ -789,7 +789,7 @@ void DX11Renderer::Cleanup()
     // {
     //     DeviceContext->ClearState();
     // }
-    Logger::Log("Cleaning up renderer");
+    // Logger::Log("Cleaning up renderer");
 
     if (StaticMesh)
     {

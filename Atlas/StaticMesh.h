@@ -37,7 +37,7 @@ struct PartMaterial
     Blob PSBytecode;
     InputSignature InputSignatures[8];
     Blob VSTextures[16];
-    Blob PSTextures[16];
+    Blob PSTextures[32];
     Blob PScb0;
     Blob VSSamplers[16];
     Blob PSSamplers[16];
@@ -125,6 +125,6 @@ private:
     HRESULT CreateVertexLayout(const InputSignature inputSignatures[8], const Blob& shaderBlob);
 
     HRESULT CreateConstantBuffers(const Blob& psCb0);
-    HRESULT CreateTextureResources(const Blob vsTextures[16], const Blob psTextures[16]);
+    HRESULT CreateTextureResources(const Blob vsTextures[16], const Blob psTextures[32]);
     HRESULT CreateSamplers(const Blob vsSamplers[16], const Blob psSamplers[16]);
 };

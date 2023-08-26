@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -255,7 +256,7 @@ public partial class AtlasView : UserControl
         public InputSignature[] InputSignatures;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public Blob[] VSTextures;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public Blob[] PSTextures;
         public Blob PScb0;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
@@ -348,11 +349,15 @@ public partial class AtlasView : UserControl
                     continue;
                 }
                 byte[] final = vsTexture.Texture.GetDDSBytes();
+                if (vsTexture.TextureIndex >= 16)
+                {
+                    throw new Exception();
+                }
                 VSTextures[vsTexture.TextureIndex] = new Blob(final);
             }
 
-            PSTextures = new Blob[16];
-            if (material.EnumeratePSTextures().ToList().Count > 16)
+            PSTextures = new Blob[32];
+            if (material.EnumeratePSTextures().ToList().Count > 32)
             {
                 throw new Exception();
             }
@@ -363,6 +368,10 @@ public partial class AtlasView : UserControl
                     continue;
                 }
                 byte[] final = psTexture.Texture.GetDDSBytes();
+                if (psTexture.TextureIndex >= 32)
+                {
+                    throw new Exception();
+                }
                 PSTextures[psTexture.TextureIndex] = new Blob(final);
             }
 
@@ -384,6 +393,13 @@ public partial class AtlasView : UserControl
             for (int i = 0; i < material.VS_Samplers.Count; i++)
             {
                 DirectXSampler vsSampler = material.VS_Samplers[i];
+
+                // for some reason samplers can actually be textures too? idk
+                if (PackageResourcer.Get().GetFileMetadata(vsSampler.Hash).Type == 32)
+                {
+                    continue;
+                }
+
                 VSSamplers[i] = new Blob(StructConverter.FromType(vsSampler.Sampler));
             }
 
@@ -392,10 +408,20 @@ public partial class AtlasView : UserControl
             {
                 throw new Exception();
             }
+
+            // File.WriteAllText($"TempFiles/PSBytecode_{material.FileHash}.txt", material.Decompile(material.PixelShader.GetBytecode(), material.FileHash));
+            // PSBytecode.TempDump(material.FileHash);
+
             for (int i = 0; i < material.PS_Samplers.Count; i++)
             {
                 DirectXSampler psSampler = material.PS_Samplers[i];
-                var a = StructConverter.FromType(psSampler.Sampler);
+
+                // for some reason samplers can actually be textures too? idk
+                if (PackageResourcer.Get().GetFileMetadata(psSampler.Hash).Type == 32)
+                {
+                    continue;
+                }
+
                 PSSamplers[i] = new Blob(StructConverter.FromType(psSampler.Sampler));
             }
         }
@@ -447,6 +473,12 @@ public partial class AtlasView : UserControl
                 break;
             case Key.R:
                 NativeMethods.ResetCamera();
+                break;
+            case Key.O:
+                NativeMethods.SetCameraMode(CameraMode.Orbit);
+                break;
+            case Key.F:
+                NativeMethods.SetCameraMode(CameraMode.Free);
                 break;
             default:
                 _direction = MoveDirection.None;

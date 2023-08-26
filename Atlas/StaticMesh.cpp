@@ -37,7 +37,7 @@ StaticMesh::~StaticMesh()
     }
     VertexBuffers.clear();
 
-    Logger::Log("There are %d parts to destroy", Parts.size());
+    // Logger::Log("There are %d parts to destroy", Parts.size());
 
     for (auto& part : Parts)
     {
@@ -203,7 +203,7 @@ Part::~Part()
     }
     PSSamplerStates.clear();
 
-    Logger::Log("Part destroyed");
+    // Logger::Log("Part destroyed");
 }
 
 static XMMATRIX CreatePerspectiveInfiniteReverseRH(const float fov, const float aspectRatio, const float zNear)
@@ -315,7 +315,7 @@ HRESULT Part::CreateConstantBuffers(const Blob& psCb0)
     return S_OK;
 }
 
-HRESULT Part::CreateTextureResources(const Blob vsTextures[16], const Blob psTextures[16])
+HRESULT Part::CreateTextureResources(const Blob vsTextures[16], const Blob psTextures[32])
 {
     HRESULT hr = S_OK;
     for (int i = 0; i < 16; i++)
@@ -334,7 +334,7 @@ HRESULT Part::CreateTextureResources(const Blob vsTextures[16], const Blob psTex
         }
         VSTextureSRVs.push_back(TextureSRV);
     }
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 32; i++)
     {
         const Blob& psTexture = psTextures[i];
         if (psTexture.Size == 0)
@@ -621,6 +621,6 @@ HRESULT StaticMesh::AddPart(const PartInfo& partInfo)
         return hr;
     }
     Parts.push_back(std::move(part));
-    Logger::Log("Added new part to static mesh");
+    // Logger::Log("Added new part to static mesh");
     return hr;
 }

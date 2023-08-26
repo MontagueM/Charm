@@ -106,4 +106,9 @@
       </None>
     </ItemGroup>
 
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="xcopy &quot;$(SolutionDir)x64\$(Configuration)\Atlas.dll&quot; &quot;$(TargetDir)&quot; /y /i&#xA;xcopy &quot;$(SolutionDir)x64\$(Configuration)\Atlas.pdb&quot; &quot;$(TargetDir)&quot; /y /i" />
+    </Target>
+
 </Project>
