@@ -2,6 +2,7 @@
 
 #include "Input.h"
 
+#include <algorithm>
 #include <iostream>
 #include <ostream>
 
@@ -13,6 +14,7 @@ Camera::Camera(float fovDegrees, float nearDistance, float farDistance, float as
     , AspectRatio(aspectRatio)
 {
     Update(0);
+    OnWindowSizeChanged = [&](int width, int height) { OnWindowSizeChangedImpl(width, height); };
 }
 
 void Camera::Update(float tickDelta)
@@ -34,6 +36,10 @@ bool Camera::UpdateFromInput(float tickDelta)
 
 void Camera::UpdateFromKeyboard(MoveDirection direction, float tickDelta)
 {
+    // if (Mode == CameraMode::Orbit)
+    // {
+    //     return;
+    // }
     switch (direction)
     {
         case MoveDirection::Forward:
@@ -60,7 +66,7 @@ void Camera::UpdateFromKeyboard(MoveDirection direction, float tickDelta)
 bool Camera::UpdateFromKeyboard(float tickDelta)
 {
     bool Moved = false;
-    if (!Input::IsMouseCaptured())
+    if (!Input::IsMouseCaptured())    // || Mode == CameraMode::Orbit)
     {
         return Moved;
     }
@@ -106,16 +112,35 @@ bool Camera::UpdateFromMouse(DXSM::Vector2 mouseDelta, float tickDelta, bool isM
         if (isMouseCaptured)
         {
             // This seems inefficient
-            const double pitchDelta = mouseDelta.y * RotationSpeed * 0.005;
-            const double yawDelta = mouseDelta.x * RotationSpeed * 0.005;
+            const float thetaDelta = mouseDelta.x * RotationSpeed * 0.005;
+            const float phiDelta = -mouseDelta.y * RotationSpeed * 0.005;
 
-            RotationEulerDegrees.m128_f32[0] += pitchDelta;
-            RotationEulerDegrees.m128_f32[1] += yawDelta;
+            Theta += thetaDelta;
+            Phi += phiDelta;
         }
 
         Moved = true;
     }
     return Moved;
+}
+
+void Camera::SetMode(CameraMode mode)
+{
+    Mode = mode;
+}
+
+void Camera::UpdateScroll(int delta)
+{
+    if (Mode == CameraMode::Orbit)
+    {
+        Radius += -delta * 0.01f;
+        Radius = max(0.1f, Radius);
+    }
+}
+
+void Camera::OnWindowSizeChangedImpl(int width, int height)
+{
+    AspectRatio = (float) width / height;
 }
 
 bool Camera::UpdateFromMouse(float tickDelta)
@@ -126,33 +151,38 @@ bool Camera::UpdateFromMouse(float tickDelta)
 
 void Camera::UpdateViewMatrix()
 {
-    // const XMVECTOR lookAt = XMVectorSet(0, 0, 0, 0);
-    const XMVECTOR up = XMVectorSet(0, 0, 1, 0);
+    const float theta = XMConvertToRadians(Theta);
+    const float phi = XMConvertToRadians(Phi);
 
-    const float pitch = XMConvertToRadians(RotationEulerDegrees.m128_f32[0]);
-    const float yaw = XMConvertToRadians(RotationEulerDegrees.m128_f32[1]);
-    const float roll = XMConvertToRadians(RotationEulerDegrees.m128_f32[2]);
-    const XMMATRIX RotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+    switch (Mode)
+    {
+        case CameraMode::Orbit:
+        {
+            // spherical coordinate calculation for position of point on sphere
+            Position = XMVectorSet(Radius * sinf(phi) * cosf(theta), Radius * sinf(phi) * sinf(theta), Radius * cosf(phi), 0.f);
+            ViewMatrix = XMMatrixLookAtRH(Position, XMVectorSet(0, 0, 0, 0), UpDirection);
+            break;
+        }
+        case CameraMode::Free:
+        {
+            ForwardDirection = XMVectorSet(cosf(phi) * sinf(theta), cosf(phi) * cosf(theta), sinf(phi), 0);
+            ViewMatrix = XMMatrixLookToRH(Position, ForwardDirection, UpDirection);
 
-    // ForwardDirection =
-    // ForwardDirection = XMVector3Transform(lookAt, RotationMatrix);
-    // UpDirection = XMVector3TransformCoord(up, RotationMatrix);
-    RightDirection = XMVector3Cross(UpDirection, ForwardDirection);
-    const XMVECTOR lookAt = XMVectorSet(cos(pitch) * sin(yaw), cos(pitch) * cos(yaw), -sin(pitch), 0);
+            RightDirection = XMVector3Cross(UpDirection, ForwardDirection);
+            break;
+        }
+    }
 
-    ForwardDirection = lookAt;
     XMVector3Normalize(ForwardDirection);
     XMVector3Normalize(UpDirection);
     XMVector3Normalize(RightDirection);
 
     std::cout << "CameraPos: " << Position.m128_f32[0] << ", " << Position.m128_f32[1] << ", " << Position.m128_f32[2] << std::endl;
-    std::cout << "CameraDir: " << RotationEulerDegrees.m128_f32[0] << ", " << RotationEulerDegrees.m128_f32[1] << ", "
-              << RotationEulerDegrees.m128_f32[2] << std::endl;
-
-    ViewMatrix = XMMatrixLookToRH(Position, ForwardDirection, UpDirection);
+    std::cout << "CameraDir: " << Theta << ", " << Phi << std::endl;
+    std::cout << "Radius: " << Radius << std::endl;
 }
 
-DirectX::XMMATRIX Camera::GetViewMatrix() const
+XMMATRIX Camera::GetViewMatrix() const
 {
     return ViewMatrix;
 }

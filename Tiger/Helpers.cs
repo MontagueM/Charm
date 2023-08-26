@@ -38,6 +38,10 @@ public static class Helpers
 
     public static void DecorateSignaturesWithBufferIndex(ref InputSignature[] inputSignatures, List<int> strides)
     {
+        if (!strides.Any())
+        {
+            return;
+        }
         int bufferIndex = 0;
         int offset = 0;
         int strideBound = strides[bufferIndex];

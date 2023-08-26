@@ -9,9 +9,28 @@ struct Rect
     UINT Height;
 };
 
+// todo generalise
+struct Delegate
+{
+    std::list<std::function<void(int width, int height)>> functions;
+
+public:
+    void Add(std::function<void(int width, int height)> function) { functions.push_back(function); }
+
+    void Execute(int width, int height)
+    {
+        for (const auto& function : functions)
+        {
+            function(width, height);
+        }
+    }
+};
+
 class RenderPanel
 {
 public:
+    Delegate OnSizeChanged;
+
     HWND GetHandle() const;
     Rect GetRect() const;
     float GetAspectRatio() const;

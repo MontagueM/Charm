@@ -16,7 +16,7 @@ DX11Renderer* renderer;
 std::shared_ptr<ExternalWindow> window;
 Camera* camera;
 
-extern HRESULT __cdecl Init(HWND hwnd)
+extern HRESULT __cdecl Init(HWND hwnd, int width, int height)
 {
     HRESULT hr = S_OK;
 
@@ -32,10 +32,11 @@ extern HRESULT __cdecl Init(HWND hwnd)
         return E_INVALIDARG;
     }
 
-    window = std::make_shared<ExternalWindow>(hwnd, 720, 480);
+    window = std::make_shared<ExternalWindow>(hwnd, width, height);
 
     renderer = new DX11Renderer(false);
     camera = new Camera(90.0f, 0.1f, 1000.0f, window->GetAspectRatio());
+    window->OnSizeChanged.Add(camera->OnWindowSizeChanged);
     // cube = new CCube();
     //
     renderer->InitialiseGeneral(window);
@@ -92,6 +93,16 @@ extern void __cdecl MoveCamera(MoveDirection direction)
     camera->UpdateFromKeyboard(direction, 0.1f);
 }
 
+extern void __cdecl SetCameraMode(CameraMode mode)
+{
+    if (camera == nullptr)
+    {
+        return;
+    }
+
+    camera->SetMode(mode);
+}
+
 extern void __cdecl CreateStaticMesh(uint32_t hash, Blob staticMeshTransforms)
 {
     renderer->StaticMesh = std::make_shared<StaticMesh>(hash, staticMeshTransforms);
@@ -108,4 +119,15 @@ extern void __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup bufferGr
 extern void __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo)
 {
     renderer->StaticMesh->AddPart(partInfo);
+}
+
+extern void __cdecl Resize(int width, int height)
+{
+    window->SetRect(width, height);
+    renderer->SetRasterizerViewport();
+}
+
+extern void __cdecl RegisterMouseScroll(int delta)
+{
+    camera->UpdateScroll(delta);
 }

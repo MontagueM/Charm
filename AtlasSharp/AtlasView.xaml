@@ -6,12 +6,12 @@
              xmlns:local="clr-namespace:Atlas"
              xmlns:directX="clr-namespace:Microsoft.Wpf.Interop.DirectX;assembly=Microsoft.Wpf.Interop.DirectX"
              mc:Ignorable="d"
-             Height="480" Width="720"
              MouseMove="MainWindow_OnMouseMove"
              MouseDown="MainWindow_OnMouseDown"
-             MouseUp="MainWindow_OnMouseUp">
+             MouseUp="MainWindow_OnMouseUp"
+             MouseWheel="AtlasView_OnMouseWheel">
     <Grid>
-        <Image Stretch="Fill" Width="720" Height="480" Name="ImageHost">
+        <Image Stretch="Fill" Name="ImageHost">
             <Image.Source>
                 <directX:D3D11Image x:Name="InteropImage"/>
             </Image.Source>

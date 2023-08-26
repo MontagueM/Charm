@@ -43,6 +43,7 @@ public struct StaticMeshInstancedInfo
 public partial class AtlasView : UserControl
 {
     private Point _centrePosition;
+    private bool _initialisedRenderer = false;
 
     public AtlasView()
     {
@@ -50,18 +51,35 @@ public partial class AtlasView : UserControl
 
         ImageHost.Loaded += ImageHost_Loaded;
         ImageHost.Unloaded += ImageHost_Unloaded;
-        ImageHost.SizeChanged += Host_SizeChanged;
+        SizeChanged += OnSizeChanged;
     }
 
-    private void Host_SizeChanged(object sender, SizeChangedEventArgs e)
+    public void OnLocationChanged(object? sender, EventArgs e)
     {
         _centrePosition = GetCentrePositionAbsolute();
     }
 
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        _centrePosition = GetCentrePositionAbsolute();
+        if (_initialisedRenderer)
+        {
+            NativeMethods.Resize((int)ActualWidth, (int)ActualHeight);
+        }}
+
     private Point GetCentrePositionAbsolute()
     {
         PresentationSource source = PresentationSource.FromVisual(this);
-        return new Point(source.CompositionTarget.TransformToDevice.M11*(Window.GetWindow(this).Left + ActualWidth / 2), source.CompositionTarget.TransformToDevice.M22*(Window.GetWindow(this).Top + ActualHeight / 2));
+        var window = Window.GetWindow(this);
+
+        var parentTransform = TransformToAncestor(Window.GetWindow(this)).Transform(new Point());
+        var offsetX = window.Left + parentTransform.X + ActualWidth / 2;
+        var offsetY = window.Top + parentTransform.Y + ActualHeight / 2;
+
+        var dpiScaledX = offsetX * source.CompositionTarget.TransformToDevice.M11;
+        var dpiScaledY = offsetY * source.CompositionTarget.TransformToDevice.M22;
+
+        return new Point(dpiScaledX, dpiScaledY);
     }
 
     private Point GetCentrePositionWindow()
@@ -77,6 +95,7 @@ public partial class AtlasView : UserControl
     {
         Window.GetWindow(this).PreviewKeyDown += MainWindow_OnPreviewKeyDown;
         Window.GetWindow(this).PreviewKeyUp += MainWindow_OnPreviewKeyUp;
+        Window.GetWindow(this).LocationChanged += OnLocationChanged;
 
         // InitializeRendering();
     }
@@ -86,29 +105,33 @@ public partial class AtlasView : UserControl
 
     public void LoadStatic(FileHash staticHash, Window? window = null)
     {
-        InitializeRendering(staticHash, window);
+        if (!_initialisedRenderer)
+        {
+            InitializeRendering(window);
+            _initialisedRenderer = true;
+        }
+
+        InitStaticMesh(staticHash);
+
+        // Start rendering now!
+        InteropImage.RequestRender();
     }
 
-    private void InitializeRendering(FileHash staticHash, Window? window = null)
+    private void InitializeRendering(Window? window = null)
     {
         InteropImage.WindowOwner = (new System.Windows.Interop.WindowInteropHelper(window ?? Window.GetWindow(this))).Handle;
 
 
         // WindowOwner is a uint
-        int result = NativeMethods.Init(InteropImage.WindowOwner);
+        int result = NativeMethods.Init(InteropImage.WindowOwner, (int)ActualWidth, (int)ActualHeight);
 
         if (result != 0)
         {
-            throw new Exception();
+            MessageBox.Show("Failed to initialise renderer");
         }
 
-        InitStaticMesh(staticHash);
-
-
-
         InteropImage.OnRender = DoRender;
-        InteropImage.SetPixelSize((int)ImageHost.Width, (int)ImageHost.Height);
-
+        InteropImage.SetPixelSize((int)ActualWidth, (int)ActualHeight);
 
         CompositionTarget.Rendering += (sender, args) =>
         {
@@ -128,9 +151,6 @@ public partial class AtlasView : UserControl
 
             InteropImage.RequestRender();
         };
-
-        // Start rendering now!
-         InteropImage.RequestRender();
     }
 
     private void InitStaticMesh(FileHash staticHash)
@@ -402,6 +422,11 @@ public partial class AtlasView : UserControl
             _isMouseCaptured = false;
             Cursor = Cursors.Arrow;
         }
+    }
+
+    private void AtlasView_OnMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        NativeMethods.RegisterMouseScroll(e.Delta);
     }
 }
 

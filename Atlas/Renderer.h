@@ -76,6 +76,7 @@ public:
     ID3D11Device* Device;
 
     HRESULT InitialiseGeneral(std::shared_ptr<RenderPanel> window);
+    HRESULT SetRasterizerViewport();
 
 private:
     ID3D11DeviceContext* DeviceContext;
@@ -99,7 +100,6 @@ private:
     HRESULT CreateDeviceAndSwapChain();
     HRESULT CreateDevice();
     HRESULT CreateBackBufferView();
-    HRESULT SetRasterizerViewport();
 
     HRESULT InitialiseGeometryPass();
     HRESULT CreateDepthStencilView();

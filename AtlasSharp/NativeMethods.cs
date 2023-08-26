@@ -6,6 +6,12 @@ using Tiger.Schema.Static;
 
 namespace AtlasSharp;
 
+public enum CameraMode
+{
+    Orbit,
+    Free,
+}
+
 public static class NativeMethods
 {
     /// <summary>
@@ -15,7 +21,10 @@ public static class NativeMethods
     private static bool errorHasDisplayed;
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int Init(nint hwnd);
+    public static extern int Init(nint hwnd, int width, int height);
+
+    [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void Resize(int width, int height);
 
     [DllImport("Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void Cleanup();
@@ -24,10 +33,16 @@ public static class NativeMethods
     public static extern int Render(IntPtr resourcePointer, bool isNewSurface);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int MoveCamera(MoveDirection _direction);
+    public static extern void MoveCamera(MoveDirection direction);
+
+    [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void SetCameraMode(CameraMode mode);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern int RegisterMouseDelta(float mouseX, float mouseY);
+
+    [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int RegisterMouseScroll(int delta);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern int CreateStaticMesh(uint hash, Blob staticMeshTransforms);

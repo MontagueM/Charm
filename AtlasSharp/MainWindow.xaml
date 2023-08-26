@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:atlasSharp="clr-namespace:AtlasSharp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="480" Width="720">
+        Title="MainWindow" Height="900" Width="720">
     <Grid Background="Gray">
         <atlasSharp:AtlasView x:Name="AtlasView"/>
     </Grid>

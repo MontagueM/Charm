@@ -34,6 +34,7 @@ void RenderPanel::SetRect(UINT width, UINT height)
 {
     WindowRect.Width = width;
     WindowRect.Height = height;
+    OnSizeChanged.Execute(width, height);
 }
 
 NativeWindow::NativeWindow(LPCWSTR title, UINT width, UINT height) : RenderPanel(width, height), Title(title)

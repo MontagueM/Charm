@@ -38,7 +38,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         InitTiger();
 
-        Loaded += (sender, args) => {
+        AtlasView.Loaded += (sender, args) => {
             // uint staticHash = 0x80bce840; // 40E8BC80
             uint staticHash = 0x80bce912; // 12e9bc80
             AtlasView.LoadStatic(new FileHash(staticHash));};
