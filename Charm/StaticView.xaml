@@ -15,7 +15,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
-        <!-- <local:ModelView x:Name="ModelView"/> -->
+        <local:ModelView x:Name="ModelView"/>
         <atlasSharp:AtlasView x:Name="AtlasView"/>
     </Grid>
 </UserControl>
