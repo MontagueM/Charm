@@ -28,6 +28,8 @@ public class Source2Handler
                 int i = 0;
                 foreach (MeshPart staticpart in staticMesh)
                 {
+                    if (staticpart.Material == null)
+                        continue;
                     mats.AppendLine("{");
                     mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
                     mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
