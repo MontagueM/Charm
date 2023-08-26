@@ -105,10 +105,11 @@ public partial class AtlasView : UserControl
     private Point _currentMousePositionAbsolute = new();
     MoveDirection _direction = MoveDirection.None;
     private bool _shouldRender = false;
+    private List<PartInfo> _partInfos = new();
 
     public void LoadStatic(FileHash staticHash, Window? window = null)
     {
-        NativeMethods.Cleanup();
+        Cleanup();
         if (!_initialisedRenderer)
         {
             InitializeRendering(window);
@@ -126,6 +127,23 @@ public partial class AtlasView : UserControl
         InteropImage.SetPixelSize((int)ActualWidth, (int)ActualHeight);
         InteropImage.RequestRender();
         _shouldRender = true;
+    }
+
+    private void Cleanup()
+    {
+        NativeMethods.Cleanup();
+
+        foreach (var part in _partInfos)
+        {
+            part.Material.PSSamplers.ToList().ForEach(s => s.Dispose());
+            part.Material.VSSamplers.ToList().ForEach(s => s.Dispose());
+            part.Material.PSTextures.ToList().ForEach(t => t.Dispose());
+            part.Material.VSTextures.ToList().ForEach(t => t.Dispose());
+            part.Material.PScb0.Dispose();
+            part.Material.PSBytecode.Dispose();
+            part.Material.VSBytecode.Dispose();
+        }
+        _partInfos.Clear();
     }
 
     private void InitializeRendering(Window? window = null)
@@ -215,6 +233,7 @@ public partial class AtlasView : UserControl
                 return false;
             }
             partIndex++;
+            _partInfos.Add(partInfo);
         }
 
         return true;

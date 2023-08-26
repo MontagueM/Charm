@@ -66,7 +66,7 @@ public class TigerFile
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct Blob
+public struct Blob : IDisposable
 {
     public IntPtr Data;
     public int Size;
@@ -76,6 +76,11 @@ public struct Blob
         Data = Marshal.AllocHGlobal(bytes.Length);
         Marshal.Copy(bytes, 0, Data, bytes.Length);
         Size = bytes.Length;
+    }
+
+    public readonly void Dispose()
+    {
+        Marshal.FreeHGlobal(Data);
     }
 
     public void TempDump(string name)
