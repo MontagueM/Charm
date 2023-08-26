@@ -184,7 +184,7 @@ void Camera::UpdateViewMatrix()
         case CameraMode::Orbit:
         {
             // spherical coordinate calculation for position of point on sphere
-            Position = XMVectorSet(Radius * sinf(phi) * cosf(theta), Radius * sinf(phi) * sinf(theta), Radius * cosf(phi), 0.f);
+            Position = XMVectorSet(Radius * sinf(phi) * cosf(theta), Radius * sinf(phi) * -sinf(theta), Radius * cosf(phi), 0.f);
             ViewMatrix = XMMatrixLookAtRH(Position, OrbitOrigin, UpDirection);
             break;
         }
