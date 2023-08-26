@@ -16,13 +16,16 @@ struct StaticMeshInfo;
 extern "C"
 {
     __declspec(dllexport) HRESULT __cdecl Init(HWND hwnd, int width, int height);
+    __declspec(dllexport) void __cdecl Cleanup();
     __declspec(dllexport) HRESULT __cdecl Render(void* pResource, bool isNewSurface);
     __declspec(dllexport) void __cdecl MoveCamera(MoveDirection direction);
     __declspec(dllexport) void __cdecl SetCameraMode(CameraMode mode);
     __declspec(dllexport) void __cdecl RegisterMouseDelta(float mouseX, float mouseY);
+    __declspec(dllexport) void __cdecl MoveOrbitOrigin(float mouseX, float mouseY);
     __declspec(dllexport) void __cdecl RegisterMouseScroll(int delta);
     __declspec(dllexport) void __cdecl CreateStaticMesh(uint32_t hash, Blob staticMeshTransforms);
-    __declspec(dllexport) void __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup bufferGroup);
-    __declspec(dllexport) void __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo);
-    __declspec(dllexport) void __cdecl Resize(int width, int height);
+    __declspec(dllexport) HRESULT __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup bufferGroup);
+    __declspec(dllexport) HRESULT __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo);
+    __declspec(dllexport) void __cdecl ResizeWindow(int width, int height);
+    __declspec(dllexport) void __cdecl ResetCamera();
 }

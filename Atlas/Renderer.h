@@ -15,6 +15,37 @@ enum ShaderType
     Pixel
 };
 
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(p)  \
+    {                   \
+        if (p)          \
+        {               \
+            delete (p); \
+            (p) = NULL; \
+        }               \
+    }
+#endif
+#ifndef SAFE_DELETE_ARRAY
+#define SAFE_DELETE_ARRAY(p) \
+    {                        \
+        if (p)               \
+        {                    \
+            delete[] (p);    \
+            (p) = NULL;      \
+        }                    \
+    }
+#endif
+#ifndef SAFE_RELEASE
+#define SAFE_RELEASE(p)     \
+    {                       \
+        if (p)              \
+        {                   \
+            (p)->Release(); \
+            (p) = NULL;     \
+        }                   \
+    }
+#endif
+
 class IRenderer
 {
 public:
@@ -31,7 +62,8 @@ public:
     ~DX11Renderer();
     HRESULT InitRenderTarget(void* pResource);
     HRESULT Initialise();
-    void Render(Camera* camera, float deltaTime);
+    HRESULT Render(Camera* camera, float deltaTime);
+    void Cleanup();
 
     static HRESULT CreateShaderFromCompiledFile(
         LPCWSTR FileName, ID3D11VertexShader** VertexShader, ID3D10Blob*& ShaderBlob, ID3D11Device* Device);
@@ -120,6 +152,6 @@ private:
     HRESULT CreateLightingVertexBuffer();
     HRESULT CreateLightingIndexBuffer();
     HRESULT CreateLightingConstantBuffer();
-    void RenderGeometry(Camera* camera, float deltaTime);
+    HRESULT RenderGeometry(Camera* camera, float deltaTime);
     void RenderLightingPass(Camera* camera, float deltaTime);
 };

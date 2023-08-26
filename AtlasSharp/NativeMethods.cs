@@ -21,16 +21,16 @@ public static class NativeMethods
     private static bool errorHasDisplayed;
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int Init(nint hwnd, int width, int height);
+    public static extern long Init(nint hwnd, int width, int height);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void Resize(int width, int height);
+    public static extern void ResizeWindow(int width, int height);
 
-    [DllImport("Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void Cleanup();
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int Render(IntPtr resourcePointer, bool isNewSurface);
+    public static extern long Render(IntPtr resourcePointer, bool isNewSurface);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
     public static extern void MoveCamera(MoveDirection direction);
@@ -39,19 +39,25 @@ public static class NativeMethods
     public static extern void SetCameraMode(CameraMode mode);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int RegisterMouseDelta(float mouseX, float mouseY);
+    public static extern void ResetCamera();
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int RegisterMouseScroll(int delta);
+    public static extern long RegisterMouseDelta(float mouseX, float mouseY);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int CreateStaticMesh(uint hash, Blob staticMeshTransforms);
+    public static extern long MoveOrbitOrigin(float mouseX, float mouseY);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int AddStaticMeshBufferGroup(uint hash, BufferGroup bufferGroup);
+    public static extern long RegisterMouseScroll(int delta);
 
     [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int CreateStaticMeshPart(uint hash, AtlasView.PartInfo partInfo);
+    public static extern long CreateStaticMesh(uint hash, Blob staticMeshTransforms);
+
+    [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern long AddStaticMeshBufferGroup(uint hash, BufferGroup bufferGroup);
+
+    [DllImport("C:/Users/monta/Desktop/Projects/Charm/x64/Debug/Atlas.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern long CreateStaticMeshPart(uint hash, AtlasView.PartInfo partInfo);
 
     /// <summary>
     /// Method used to invoke an Action that will catch DllNotFoundExceptions and display a warning dialog.

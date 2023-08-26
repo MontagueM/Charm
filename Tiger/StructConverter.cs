@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Tiger.Schema;
 
 namespace Tiger;
 
@@ -40,5 +41,18 @@ public static class StructConverter
             stream.Write(buffer, 0, buffer.Length);
         }
         finally { handle.Free(); }
+    }
+
+    public static byte[] FromType<T>(T value) where T : struct
+    {
+        var buffer = new byte[Marshal.SizeOf(typeof(T))];
+        var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+        try
+        {
+            Marshal.StructureToPtr(value, handle.AddrOfPinnedObject(), false);
+        }
+        finally { handle.Free(); }
+
+        return buffer;
     }
 }

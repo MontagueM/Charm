@@ -1,6 +1,7 @@
 ﻿#include "Entity.h"
 
 #include "DDSTextureLoader.h"
+#include "Logger.h"
 #include "Renderer.h"
 
 #include <fstream>
@@ -92,72 +93,73 @@ HRESULT Entity::Initialise(ID3D11Device* Device)
 
 void Entity::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float DeltaTime)
 {
-    DeviceContext->VSSetShader(GetVertexShader(), nullptr, 0);
-    DeviceContext->IASetInputLayout(GetVertexLayout());
+    // DeviceContext->VSSetShader(GetVertexShader(), nullptr, 0);
+    // DeviceContext->IASetInputLayout(GetVertexLayout());
+    //
+    // DeviceContext->PSSetShader(GetPixelShader(), nullptr, 0);
+    //
+    // UINT strides[2] = {16, 4};
+    // UINT offsets[2] = {0, 0};
+    // DeviceContext->IASetVertexBuffers(0, 2, GetVertexBuffers(), strides, offsets);
+    // DeviceContext->IASetIndexBuffer(GetIndexBuffer(), DXGI_FORMAT_R16_UINT, 0);
 
-    DeviceContext->PSSetShader(GetPixelShader(), nullptr, 0);
-
-    UINT strides[2] = {16, 4};
-    UINT offsets[2] = {0, 0};
-    DeviceContext->IASetVertexBuffers(0, 2, GetVertexBuffers(), strides, offsets);
-    DeviceContext->IASetIndexBuffer(GetIndexBuffer(), DXGI_FORMAT_R16_UINT, 0);
-
-    DeviceContext->PSSetShaderResources(0, TextureSRVs.size(), TextureSRVs.data());
+    // DeviceContext->PSSetShaderResources(0, TextureSRVs.size(), TextureSRVs.data());
     for (const auto& SamplerState : SamplerStates)
     {
+        Logger::Log("Entity SamplerState: %d, %llx", SamplerState->Slot, (__int64) SamplerState->ResourcePointer);
         DeviceContext->PSSetSamplers(SamplerState->Slot, 1, &SamplerState->ResourcePointer);
     }
 
-    cb12_View View;
-    View.View = Camera->GetViewMatrix();
-    View.View.r[0].m128_f32[3] = Camera->GetDirection().m128_f32[0];
-    View.View.r[1].m128_f32[3] = Camera->GetDirection().m128_f32[1];
-    View.View.r[2].m128_f32[3] = Camera->GetDirection().m128_f32[2];
-    View.View.r[0].m128_f32[2] = 0;
-    View.View.r[1].m128_f32[2] = 0;
-    View.View.r[2].m128_f32[2] = 0;
-    View.CameraPosition = Camera->GetPosition();
-
-    // std::cout << "Camera Position: " << View.CameraPosition.m128_f32[0] << ", " << View.CameraPosition.m128_f32[1] << ", "
-    //           << View.CameraPosition.m128_f32[2] << std::endl;
-    // std::cout << "Camera Direction: " << Camera->GetDirection().m128_f32[0] << ", " << Camera->GetDirection().m128_f32[1] << ", "
-    //           << Camera->GetDirection().m128_f32[2] << std::endl;
-
-    // view matrix
-    D3D11_BOX Box;
-    Box.left = 0;
-    Box.top = 0;
-    Box.front = 0;
-    Box.right = 0 + 16 * 3;
-    Box.bottom = 1;
-    Box.back = 1;
-    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.View, 0, 0);
-
-    // player position
-    Box.left = 112;
-    Box.top = 0;
-    Box.front = 0;
-    Box.right = 112 + 16;
-    Box.bottom = 1;
-    Box.back = 1;
-    DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.CameraPosition, 0, 0);
-
-    for (const auto& ConstantBuffer : VSConstantBuffers)
-    {
-        if (ConstantBuffer->Slot == 12)
-        {
-            DeviceContext->CopyResource(ConstantBuffer->ResourcePointer, ViewBuffer);
-        }
-        DeviceContext->VSSetConstantBuffers(ConstantBuffer->Slot, 1, &ConstantBuffer->ResourcePointer);
-    }
-    for (const auto& ConstantBuffer : PSConstantBuffers)
-    {
-        DeviceContext->PSSetConstantBuffers(ConstantBuffer->Slot, 1, &ConstantBuffer->ResourcePointer);
-    }
+    // cb12_View View;
+    // View.View = Camera->GetViewMatrix();
+    // View.View.r[0].m128_f32[3] = Camera->GetDirection().m128_f32[0];
+    // View.View.r[1].m128_f32[3] = Camera->GetDirection().m128_f32[1];
+    // View.View.r[2].m128_f32[3] = Camera->GetDirection().m128_f32[2];
+    // View.View.r[0].m128_f32[2] = 0;
+    // View.View.r[1].m128_f32[2] = 0;
+    // View.View.r[2].m128_f32[2] = 0;
+    // View.CameraPosition = Camera->GetPosition();
+    //
+    // // std::cout << "Camera Position: " << View.CameraPosition.m128_f32[0] << ", " << View.CameraPosition.m128_f32[1] << ", "
+    // //           << View.CameraPosition.m128_f32[2] << std::endl;
+    // // std::cout << "Camera Direction: " << Camera->GetDirection().m128_f32[0] << ", " << Camera->GetDirection().m128_f32[1] << ", "
+    // //           << Camera->GetDirection().m128_f32[2] << std::endl;
+    //
+    // // view matrix
+    // D3D11_BOX Box;
+    // Box.left = 0;
+    // Box.top = 0;
+    // Box.front = 0;
+    // Box.right = 0 + 16 * 3;
+    // Box.bottom = 1;
+    // Box.back = 1;
+    // DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.View, 0, 0);
+    //
+    // // player position
+    // Box.left = 112;
+    // Box.top = 0;
+    // Box.front = 0;
+    // Box.right = 112 + 16;
+    // Box.bottom = 1;
+    // Box.back = 1;
+    // DeviceContext->UpdateSubresource(ViewBuffer, 0, &Box, &View.CameraPosition, 0, 0);
+    //
+    // for (const auto& ConstantBuffer : VSConstantBuffers)
+    // {
+    //     if (ConstantBuffer->Slot == 12)
+    //     {
+    //         DeviceContext->CopyResource(ConstantBuffer->ResourcePointer, ViewBuffer);
+    //     }
+    //     DeviceContext->VSSetConstantBuffers(ConstantBuffer->Slot, 1, &ConstantBuffer->ResourcePointer);
+    // }
+    // for (const auto& ConstantBuffer : PSConstantBuffers)
+    // {
+    //     DeviceContext->PSSetConstantBuffers(ConstantBuffer->Slot, 1, &ConstantBuffer->ResourcePointer);
+    // }
 
     // DeviceContext->DrawIndexed(1116, 0, 0);    // 11529 entire thing, 1116 first part lod0
     // DeviceContext->DrawIndexed(3606, 1116, 0);
-    DeviceContext->DrawIndexed(1503, 5718, 0);
+    // DeviceContext->DrawIndexed(1503, 5718, 0);
 }
 
 HRESULT Entity::CreateVertexShader(ID3D11Device* Device)

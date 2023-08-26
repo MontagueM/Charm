@@ -39,8 +39,8 @@ struct PartMaterial
     Blob VSTextures[16];
     Blob PSTextures[16];
     Blob PScb0;
-    Blob VSSamplers[8];
-    Blob PSSamplers[8];
+    Blob VSSamplers[16];
+    Blob PSSamplers[16];
 };
 
 struct PartInfo
@@ -69,6 +69,7 @@ class StaticMesh
 {
 public:
     explicit StaticMesh(uint32_t hash, const Blob& staticMeshTransforms) : StaticMeshTransforms(staticMeshTransforms){};
+    ~StaticMesh();
     ID3D11Device* Device;
     Blob StaticMeshTransforms;
 
@@ -78,12 +79,11 @@ public:
     HRESULT AddStaticMeshBufferGroup(const BufferGroup& bufferGroup);
     HRESULT AddPart(const PartInfo& partInfo);
     HRESULT Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float DeltaTime);
-    ~StaticMesh() = default;
 
 private:
     ID3D11Buffer* IndexBuffer = nullptr;
     std::vector<ID3D11Buffer*> VertexBuffers;
-    std::vector<class Part> Parts;
+    std::vector<std::unique_ptr<class Part>> Parts;
 
     HRESULT CreateIndexBuffer(const Blob& indexBlob);
     HRESULT CreateVertexBuffers(const Blob vertexBufferBlobs[3]);
@@ -93,6 +93,7 @@ class Part
 {
 public:
     Part(StaticMesh* staticMesh, const PartInfo& partInfo) : Parent(staticMesh), PartInfo(partInfo) {}
+    ~Part();
 
     ID3D11Device* Device;
 
@@ -125,5 +126,5 @@ private:
 
     HRESULT CreateConstantBuffers(const Blob& psCb0);
     HRESULT CreateTextureResources(const Blob vsTextures[16], const Blob psTextures[16]);
-    HRESULT CreateSamplers(const Blob vsSamplers[8], const Blob psSamplers[8]);
+    HRESULT CreateSamplers(const Blob vsSamplers[16], const Blob psSamplers[16]);
 };

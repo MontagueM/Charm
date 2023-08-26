@@ -40,7 +40,8 @@ public partial class MainWindow : Window
 
         AtlasView.Loaded += (sender, args) => {
             // uint staticHash = 0x80bce840; // 40E8BC80
-            uint staticHash = 0x80bce912; // 12e9bc80
+            // uint staticHash = 0x80bce912; // 12e9bc80
+            string staticHash = "3BC0DE80";
             AtlasView.LoadStatic(new FileHash(staticHash));};
     }
 

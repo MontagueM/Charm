@@ -1,5 +1,6 @@
 ﻿#include "Interop.h"
 
+#include "Logger.h"
 #include "NativeWindow.h"
 #include "Renderer.h"
 #include "StaticMesh.h"
@@ -47,11 +48,9 @@ extern HRESULT __cdecl Init(HWND hwnd, int width, int height)
 extern HRESULT __cdecl Render(void* pResource, bool isNewSurface)
 {
     HRESULT hr = S_OK;
-    // return cube->Render(pResource, isNewSurface);
     if (rdoc_api && frameCaptureCount < maxFrameCaptureCount)
         rdoc_api->StartFrameCapture(NULL, NULL);
-    // If we've gotten a new Surface, need to initialize the renderTarget.
-    // One of the times that this happens is on a resize.
+
     if (isNewSurface)
     {
         if (FAILED(hr = renderer->Initialise()))
@@ -67,10 +66,12 @@ extern HRESULT __cdecl Render(void* pResource, bool isNewSurface)
     }
 
     camera->Update(0.01f);
-    renderer->Render(camera, 0.01f);
+    hr = renderer->Render(camera, 0.01f);
 
     if (rdoc_api && frameCaptureCount++ < maxFrameCaptureCount)
         rdoc_api->EndFrameCapture(NULL, NULL);
+
+    return hr;
 }
 
 extern void __cdecl RegisterMouseDelta(float mouseX, float mouseY)
@@ -109,19 +110,32 @@ extern void __cdecl CreateStaticMesh(uint32_t hash, Blob staticMeshTransforms)
     renderer->StaticMesh->Initialise(renderer->Device);
 }
 
-extern void __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup bufferGroup)
+extern HRESULT __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup bufferGroup)
 {
-    renderer->StaticMesh->AddStaticMeshBufferGroup(bufferGroup);
-    auto a = 0;
+    HRESULT hr = renderer->StaticMesh->AddStaticMeshBufferGroup(bufferGroup);
+
+    if (FAILED(hr))
+    {
+        Logger::Log("Failed to add buffer group for static mesh %x with error %x", hash, hr);
+    }
+
+    return hr;
 }
 
 // do we have to copy on an extern? or can we use const ref
-extern void __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo)
+extern HRESULT __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo)
 {
-    renderer->StaticMesh->AddPart(partInfo);
+    HRESULT hr = renderer->StaticMesh->AddPart(partInfo);
+
+    if (FAILED(hr))
+    {
+        Logger::Log("Failed to create static mesh part for static mesh %x with error %x", hash, hr);
+    }
+
+    return hr;
 }
 
-extern void __cdecl Resize(int width, int height)
+extern void __cdecl ResizeWindow(int width, int height)
 {
     window->SetRect(width, height);
     renderer->SetRasterizerViewport();
@@ -130,4 +144,24 @@ extern void __cdecl Resize(int width, int height)
 extern void __cdecl RegisterMouseScroll(int delta)
 {
     camera->UpdateScroll(delta);
+}
+
+extern void __cdecl ResetCamera()
+{
+    camera->Reset();
+}
+
+extern void __cdecl MoveOrbitOrigin(float mouseX, float mouseY)
+{
+    camera->MoveOrbitOrigin(mouseX, mouseY);
+}
+
+extern void __cdecl Cleanup()
+{
+    if (renderer == nullptr)
+    {
+        return;
+    }
+
+    renderer->Cleanup();
 }

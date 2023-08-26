@@ -36,6 +36,8 @@ public:
     bool UpdateFromMouse(SimpleMath::Vector2 mouseDelta, float tickDelta, bool isMouseCaptured);
     void SetMode(CameraMode mode);
     void UpdateScroll(int delta);
+    void Reset();
+    void MoveOrbitOrigin(float mouseX, float mouseY);
 
     std::function<void(int, int)> OnWindowSizeChanged;
     void OnWindowSizeChangedImpl(int width, int height);
@@ -50,23 +52,25 @@ private:
     CameraMode Mode = CameraMode::Orbit;
 
     // XMVECTOR Position = XMVectorSet(2.0f, -3.0f, 2.0f, 0.0f);
-    XMVECTOR Position = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+    XMVECTOR Position;
     // XMVECTOR Position = XMVectorSet(350.553864f, -878.668212f, 10.7369051f, 1.0f);
     // XMVECTOR Position = XMVectorSet(344.f, -867.f, 11.f, 1.0f);
     // XMVECTOR RotationEulerDegrees = XMVectorSet(14.0f, -74.0f, 0.0f, 0.0f);
 
     // Spherical coordinates for orbit camera - theta is XY plane
     // In freecam, only theta and phi are used
-    float Theta = -50.f;
-    float Phi = 30.f;
-    float Radius = 3.f;
+    float Theta;
+    float Phi;
+    float Radius;
 
     const XMVECTOR UpDirection = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-    XMVECTOR RightDirection = XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
-    XMVECTOR ForwardDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    XMVECTOR RightDirection;
+    XMVECTOR ForwardDirection;
     const float MovementSpeed = 3.0f;
     const double RotationSpeed = 10.0f;
     XMMATRIX ViewMatrix = XMMatrixIdentity();
+
+    XMVECTOR OrbitOrigin;
 
     bool UpdateFromInput(float tickDelta);
     bool UpdateFromKeyboard(float tickDelta);

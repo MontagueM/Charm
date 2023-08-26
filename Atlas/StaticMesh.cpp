@@ -1,6 +1,7 @@
 ﻿#include "StaticMesh.h"
 
 #include "DDSTextureLoader.h"
+#include "Logger.h"
 #include "Renderer.h"
 
 #include <fstream>
@@ -23,6 +24,27 @@ struct cb12_View
     XMMATRIX Unk11;    // idk why but cb12[14].z must not be zero ever
     // XMVECTOR ViewMiscellaneous;    // cb12[9]; cb12[10] is camera position
 };
+
+StaticMesh::~StaticMesh()
+{
+    Logger::Log("Deleting static mesh");
+
+    SAFE_RELEASE(IndexBuffer);
+
+    for (auto& buffer : VertexBuffers)
+    {
+        SAFE_RELEASE(buffer);
+    }
+    VertexBuffers.clear();
+
+    Logger::Log("There are %d parts to destroy", Parts.size());
+
+    for (auto& part : Parts)
+    {
+        part.reset();
+    }
+    Parts.clear();
+}
 
 ID3D11Buffer* StaticMesh::GetIndexBuffer() const
 {
@@ -60,6 +82,7 @@ HRESULT StaticMesh::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, f
 {
     if (GetVertexBuffers() == nullptr || GetIndexBuffer() == nullptr)
     {
+        Logger::Log("No vertex or index buffers set.");
         return E_FAIL;
     }
 
@@ -76,7 +99,8 @@ HRESULT StaticMesh::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, f
     HRESULT hr = S_OK;
     for (auto& part : Parts)
     {
-        if (FAILED(hr = part.Render(DeviceContext, Camera, DeltaTime)))
+        hr = part->Render(DeviceContext, Camera, DeltaTime);
+        if (FAILED(hr))
         {
             return hr;
         }
@@ -112,6 +136,10 @@ HRESULT StaticMesh::CreateVertexBuffers(const Blob vertexBufferBlobs[3])
     for (int i = 0; i < 3; i++)
     {
         const Blob& VertexBlob = vertexBufferBlobs[i];
+        if (VertexBlob.IsInvalid())
+        {
+            continue;
+        }
 
         // copy the memory so we can free the GCHandle in c#
         byte* VertexData = new byte[VertexBlob.Size];
@@ -131,6 +159,51 @@ HRESULT StaticMesh::CreateVertexBuffers(const Blob vertexBufferBlobs[3])
     }
 
     return S_OK;
+}
+
+Part::~Part()
+{
+    SAFE_RELEASE(VertexLayout);
+    SAFE_RELEASE(VertexShader);
+    SAFE_RELEASE(PixelShader);
+
+    for (auto& buffer : VSConstantBuffers)
+    {
+        SAFE_RELEASE(buffer->ResourcePointer);
+    }
+    VSConstantBuffers.clear();
+
+    for (auto& buffer : PSConstantBuffers)
+    {
+        SAFE_RELEASE(buffer->ResourcePointer);
+    }
+    PSConstantBuffers.clear();
+
+    for (auto& srv : VSTextureSRVs)
+    {
+        SAFE_RELEASE(srv);
+    }
+    VSTextureSRVs.clear();
+
+    for (auto& srv : PSTextureSRVs)
+    {
+        SAFE_RELEASE(srv);
+    }
+    PSTextureSRVs.clear();
+
+    for (auto& state : VSSamplerStates)
+    {
+        SAFE_RELEASE(state->ResourcePointer);
+    }
+    VSSamplerStates.clear();
+
+    for (auto& state : PSSamplerStates)
+    {
+        SAFE_RELEASE(state->ResourcePointer);
+    }
+    PSSamplerStates.clear();
+
+    Logger::Log("Part destroyed");
 }
 
 static XMMATRIX CreatePerspectiveInfiniteReverseRH(const float fov, const float aspectRatio, const float zNear)
@@ -281,11 +354,11 @@ HRESULT Part::CreateTextureResources(const Blob vsTextures[16], const Blob psTex
     return S_OK;
 }
 
-HRESULT Part::CreateSamplers(const Blob vsSamplers[8], const Blob psSamplers[8])
+HRESULT Part::CreateSamplers(const Blob vsSamplers[16], const Blob psSamplers[16])
 {
     HRESULT hr = S_OK;
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 16; i++)
     {
         const Blob& vsSampler = vsSamplers[i];
         if (vsSampler.IsInvalid())
@@ -297,12 +370,16 @@ HRESULT Part::CreateSamplers(const Blob vsSamplers[8], const Blob psSamplers[8])
         ID3D11SamplerState* samplerState;
         hr = Device->CreateSamplerState(&sampDesc, &samplerState);
         if (FAILED(hr))
+        {
+            Logger::Log(
+                "Failed to create VS static mesh part sampler %d (%d, %d) with error %x", i, sampDesc.AddressU, sampDesc.MipLODBias, hr);
             return hr;
+        }
 
-        VSSamplerStates.push_back(new Resource(i, samplerState));
+        VSSamplerStates.push_back(new Resource(i + 1, samplerState));
     }
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 16; i++)
     {
         const Blob& psSampler = psSamplers[i];
         if (psSampler.IsInvalid())
@@ -314,9 +391,13 @@ HRESULT Part::CreateSamplers(const Blob vsSamplers[8], const Blob psSamplers[8])
         ID3D11SamplerState* samplerState;
         hr = Device->CreateSamplerState(&sampDesc, &samplerState);
         if (FAILED(hr))
+        {
+            Logger::Log(
+                "Failed to create PS static mesh part sampler %d (%d, %d) with error %x", i, sampDesc.AddressU, sampDesc.MipLODBias, hr);
             return hr;
+        }
 
-        PSSamplerStates.push_back(new Resource(i, samplerState));
+        PSSamplerStates.push_back(new Resource(i + 1, samplerState));
     }
 
     return hr;
@@ -341,6 +422,7 @@ HRESULT Part::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float D
 {
     if (GetVertexShader() == nullptr || GetPixelShader() == nullptr || GetVertexLayout() == nullptr)
     {
+        Logger::Log("No vertex layour or shaders set.");
         return E_FAIL;
     }
 
@@ -409,6 +491,9 @@ HRESULT Part::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, float D
     }
 
     DeviceContext->DrawIndexed(PartInfo.IndexCount, PartInfo.IndexOffset, 0);
+    // Logger::Log("%d", PartInfo.IndexOffset);
+
+    return S_OK;
 }
 
 HRESULT Part::Initialise(ID3D11Device* device)
@@ -418,27 +503,45 @@ HRESULT Part::Initialise(ID3D11Device* device)
     HRESULT hr;
     hr = CreateVertexShader(PartInfo.PartMaterial.VSBytecode);
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create static mesh part vertex shader with error %x", hr);
         return hr;
+    }
 
     hr = CreatePixelShader(PartInfo.PartMaterial.PSBytecode);
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create static mesh part pixel shader with error %x", hr);
         return hr;
+    }
 
     hr = CreateVertexLayout(PartInfo.PartMaterial.InputSignatures, PartInfo.PartMaterial.VSBytecode);
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create static mesh part vertex layout with error %x", hr);
         return hr;
+    }
 
     hr = CreateConstantBuffers(PartInfo.PartMaterial.PScb0);
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create static mesh part constant buffers with error %x", hr);
         return hr;
+    }
 
     hr = CreateTextureResources(PartInfo.PartMaterial.VSTextures, PartInfo.PartMaterial.PSTextures);
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create static mesh part texture resources with error %x", hr);
         return hr;
+    }
 
     hr = CreateSamplers(PartInfo.PartMaterial.VSSamplers, PartInfo.PartMaterial.PSSamplers);
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create static mesh part samplers with error %x", hr);
         return hr;
+    }
 
     return hr;
 }
@@ -511,13 +614,13 @@ HRESULT Part::CreateVertexLayout(const InputSignature inputSignatures[8], const 
 
 HRESULT StaticMesh::AddPart(const PartInfo& partInfo)
 {
-    Part part(this, partInfo);
-    HRESULT hr = part.Initialise(Device);
+    std::unique_ptr<Part> part = std::make_unique<Part>(this, partInfo);
+    HRESULT hr = part->Initialise(Device);
     if (FAILED(hr))
     {
         return hr;
     }
     Parts.push_back(std::move(part));
-
+    Logger::Log("Added new part to static mesh");
     return hr;
 }

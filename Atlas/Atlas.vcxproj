@@ -169,6 +169,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Interop.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SimpleMath.cpp" />
     <ClCompile Include="NativeWindow.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Interop.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SimpleMath.h" />
     <ClInclude Include="SimpleMath.inl" />

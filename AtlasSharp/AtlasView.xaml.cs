@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Arithmic;
 using DirectXTexNet;
 using Tiger;
 using Tiger.Schema;
@@ -64,7 +66,7 @@ public partial class AtlasView : UserControl
         _centrePosition = GetCentrePositionAbsolute();
         if (_initialisedRenderer)
         {
-            NativeMethods.Resize((int)ActualWidth, (int)ActualHeight);
+            NativeMethods.ResizeWindow((int)ActualWidth, (int)ActualHeight);
         }}
 
     private Point GetCentrePositionAbsolute()
@@ -102,19 +104,28 @@ public partial class AtlasView : UserControl
 
     private Point _currentMousePositionAbsolute = new();
     MoveDirection _direction = MoveDirection.None;
+    private bool _shouldRender = false;
 
     public void LoadStatic(FileHash staticHash, Window? window = null)
     {
+        NativeMethods.Cleanup();
         if (!_initialisedRenderer)
         {
             InitializeRendering(window);
             _initialisedRenderer = true;
         }
 
-        InitStaticMesh(staticHash);
+        if (!InitStaticMesh(staticHash))
+        {
+            InteropImage.OnRender = null;
+            _shouldRender = false;
+            return;
+        }
 
-        // Start rendering now!
+        InteropImage.OnRender = DoRender;
+        InteropImage.SetPixelSize((int)ActualWidth, (int)ActualHeight);
         InteropImage.RequestRender();
+        _shouldRender = true;
     }
 
     private void InitializeRendering(Window? window = null)
@@ -123,15 +134,13 @@ public partial class AtlasView : UserControl
 
 
         // WindowOwner is a uint
-        int result = NativeMethods.Init(InteropImage.WindowOwner, (int)ActualWidth, (int)ActualHeight);
+        long result = NativeMethods.Init(InteropImage.WindowOwner, (int)ActualWidth, (int)ActualHeight);
 
         if (result != 0)
         {
             MessageBox.Show("Failed to initialise renderer");
         }
 
-        InteropImage.OnRender = DoRender;
-        InteropImage.SetPixelSize((int)ActualWidth, (int)ActualHeight);
 
         CompositionTarget.Rendering += (sender, args) =>
         {
@@ -141,7 +150,14 @@ public partial class AtlasView : UserControl
                 var centre = GetCentrePositionAbsolute();
                 var delta = _currentMousePositionAbsolute - centre;
                 float sensitivity = 1.0f;
-                NativeMethods.RegisterMouseDelta((float)(delta.X * sensitivity), (float)(delta.Y * sensitivity));
+                if (_movingOrbitOrigin)
+                {
+                    NativeMethods.MoveOrbitOrigin((float)(delta.X * sensitivity), (float)(delta.Y * sensitivity));
+                }
+                else
+                {
+                    NativeMethods.RegisterMouseDelta((float)(delta.X * sensitivity), (float)(delta.Y * sensitivity));
+                }
 
                 _currentMousePositionAbsolute = centre;
                 SetCursorPosition(centre);
@@ -149,11 +165,14 @@ public partial class AtlasView : UserControl
                 NativeMethods.MoveCamera(_direction);
             }
 
-            InteropImage.RequestRender();
+            if (_shouldRender)
+            {
+                InteropImage.RequestRender();
+            }
         };
     }
 
-    private void InitStaticMesh(FileHash staticHash)
+    private bool InitStaticMesh(FileHash staticHash)
     {
         StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(staticHash);
 
@@ -164,6 +183,11 @@ public partial class AtlasView : UserControl
         List<StaticPart> parts = staticMesh.Load(ExportDetailLevel.MostDetailed);
         List<BufferGroup> bufferGroups = staticMesh.TagData.StaticData.GetBuffers();
         List<int> strides = staticMesh.TagData.StaticData.GetStrides();
+        if (strides.Count == 0)
+        {
+            Log.Warning($"Static mesh {staticHash} has no strides");
+            return false;
+        }
         foreach (BufferGroup bufferGroup in bufferGroups)
         {
             NativeMethods.AddStaticMeshBufferGroup(staticHash, bufferGroup);
@@ -184,9 +208,16 @@ public partial class AtlasView : UserControl
 
             PartMaterial partMaterial = new(part.Material, strides);
             PartInfo partInfo = new() {IndexOffset = part.IndexOffset, IndexCount = part.IndexCount, Material = partMaterial};
-            NativeMethods.CreateStaticMeshPart(staticHash, partInfo);
+            long result = NativeMethods.CreateStaticMeshPart(staticHash, partInfo);
+            if (result != 0)
+            {
+                MessageBox.Show("Failed to create static mesh part");
+                return false;
+            }
             partIndex++;
         }
+
+        return true;
     }
 
     public struct InputSignature
@@ -208,10 +239,10 @@ public partial class AtlasView : UserControl
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public Blob[] PSTextures;
         public Blob PScb0;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public DirectXSampler.D3D11_SAMPLER_DESC[] VSSamplers;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public DirectXSampler.D3D11_SAMPLER_DESC[] PSSamplers;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public Blob[] VSSamplers;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public Blob[] PSSamplers;
 
         public PartMaterial(IMaterial material, List<int> strides)
         {
@@ -224,6 +255,11 @@ public partial class AtlasView : UserControl
 
             InputSignatures = new InputSignature[8];
             int sigIndex = 0;
+
+            if (material.VertexShader.InputSignatures.Count > 8)
+            {
+                throw new Exception();
+            }
 
             Tiger.Schema.InputSignature[] inputSignatures = material.VertexShader.InputSignatures.ToArray();
             Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
@@ -282,15 +318,31 @@ public partial class AtlasView : UserControl
             }
 
             VSTextures = new Blob[16];
+            if (material.EnumerateVSTextures().ToList().Count > 16)
+            {
+                throw new Exception();
+            }
             foreach (STextureTag vsTexture in material.EnumerateVSTextures())
             {
+                if (vsTexture.Texture == null)
+                {
+                    continue;
+                }
                 byte[] final = vsTexture.Texture.GetDDSBytes();
                 VSTextures[vsTexture.TextureIndex] = new Blob(final);
             }
 
             PSTextures = new Blob[16];
+            if (material.EnumeratePSTextures().ToList().Count > 16)
+            {
+                throw new Exception();
+            }
             foreach (STextureTag psTexture in material.EnumeratePSTextures())
             {
+                if (psTexture.Texture == null)
+                {
+                    continue;
+                }
                 byte[] final = psTexture.Texture.GetDDSBytes();
                 PSTextures[psTexture.TextureIndex] = new Blob(final);
             }
@@ -305,18 +357,27 @@ public partial class AtlasView : UserControl
                 PScb0 = new Blob();
             }
 
-            VSSamplers = new DirectXSampler.D3D11_SAMPLER_DESC[8];
+            VSSamplers = new Blob[16];
+            if (material.VS_Samplers.Count > 16)
+            {
+                throw new Exception();
+            }
             for (int i = 0; i < material.VS_Samplers.Count; i++)
             {
-                SDirectXSamplerTag vsSampler = material.VS_Samplers[i];
-                VSSamplers[i] = vsSampler.Samplers.Sampler;
+                DirectXSampler vsSampler = material.VS_Samplers[i];
+                VSSamplers[i] = new Blob(StructConverter.FromType(vsSampler.Sampler));
             }
 
-            PSSamplers = new DirectXSampler.D3D11_SAMPLER_DESC[8];
+            PSSamplers = new Blob[16];
+            if (material.PS_Samplers.Count > 16)
+            {
+                throw new Exception();
+            }
             for (int i = 0; i < material.PS_Samplers.Count; i++)
             {
-                SDirectXSamplerTag psSampler = material.PS_Samplers[i];
-                PSSamplers[i] = psSampler.Samplers.Sampler;
+                DirectXSampler psSampler = material.PS_Samplers[i];
+                var a = StructConverter.FromType(psSampler.Sampler);
+                PSSamplers[i] = new Blob(StructConverter.FromType(psSampler.Sampler));
             }
         }
     }
@@ -331,7 +392,11 @@ public partial class AtlasView : UserControl
 
     private void DoRender(IntPtr surface, bool isNewSurface)
     {
-        NativeMethods.Render(surface, isNewSurface);
+        long hr = NativeMethods.Render(surface, isNewSurface);
+        if (hr != 0)
+        {
+            MessageBox.Show($"Failed to render with error code {hr:X8}");
+        }
     }
 
     private void MainWindow_OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -360,6 +425,9 @@ public partial class AtlasView : UserControl
                 _direction = MoveDirection.None;
                 _isMouseCaptured = false;
                 Cursor = Cursors.Arrow;
+                break;
+            case Key.R:
+                NativeMethods.ResetCamera();
                 break;
             default:
                 _direction = MoveDirection.None;
@@ -406,10 +474,18 @@ public partial class AtlasView : UserControl
     [DllImport("User32.dll")]
     private static extern bool GetCursorPos(out POINT position);
 
+    private bool _movingOrbitOrigin = false;
+
     private void MainWindow_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Right)
         {
+            // check if shift key is pressed
+            if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+            {
+                _movingOrbitOrigin = true;
+            }
+
             _isMouseCaptured = true;
             Cursor = Cursors.None;
         }
@@ -417,6 +493,7 @@ public partial class AtlasView : UserControl
 
     private void MainWindow_OnMouseUp(object sender, MouseButtonEventArgs e)
     {
+        _movingOrbitOrigin = false;
         if (e.ChangedButton == MouseButton.Right)
         {
             _isMouseCaptured = false;

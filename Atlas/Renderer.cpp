@@ -2,6 +2,7 @@
 
 #include "DDSTextureLoader.h"
 #include "Entity.h"
+#include "Logger.h"
 #include "StaticMesh.h"
 
 #include <d3dcompiler.h>
@@ -287,6 +288,8 @@ HRESULT DX11Renderer::SetRasterizerViewport()
         return hr;
 
     DeviceContext->RSSetState(rasterizerState);
+
+    return S_OK;
 }
 
 HRESULT DX11Renderer::InitialiseGeometryPass()
@@ -749,7 +752,7 @@ HRESULT DX11Renderer::CreateLightingConstantBuffer()
     return hr;
 }
 
-void DX11Renderer::Render(Camera* camera, float deltaTime)
+HRESULT DX11Renderer::Render(Camera* camera, float deltaTime)
 {
     // todo put this into a function
     DeviceContext->ClearRenderTargetView(BackBufferView, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
@@ -758,7 +761,11 @@ void DX11Renderer::Render(Camera* camera, float deltaTime)
     DeviceContext->ClearRenderTargetView(RT2View, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
     DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 0.0f, 0);
 
-    RenderGeometry(camera, deltaTime);
+    HRESULT hr = RenderGeometry(camera, deltaTime);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
     RenderLightingPass(camera, deltaTime);
 
     if (UseSwapchain)
@@ -772,9 +779,25 @@ void DX11Renderer::Render(Camera* camera, float deltaTime)
             DeviceContext->Flush();
         }
     }
+
+    return S_OK;
 }
 
-void DX11Renderer::RenderGeometry(Camera* camera, float deltaTime)
+void DX11Renderer::Cleanup()
+{
+    // if (DeviceContext)
+    // {
+    //     DeviceContext->ClearState();
+    // }
+    Logger::Log("Cleaning up renderer");
+
+    if (StaticMesh)
+    {
+        StaticMesh.reset();
+    }
+}
+
+HRESULT DX11Renderer::RenderGeometry(Camera* camera, float deltaTime)
 {
     ID3D11RenderTargetView* renderTargets[3] = {RT0View, RT1View, RT2View};
     DeviceContext->OMSetRenderTargets(3, renderTargets, DepthStencilView);
@@ -784,9 +807,13 @@ void DX11Renderer::RenderGeometry(Camera* camera, float deltaTime)
     // DeviceContext->DrawIndexed(36, 0, 0);
     // DeviceContext->DrawIndexed(13602, 0, 0);
 
-    CarEntity->Render(DeviceContext, camera, deltaTime);
+    // CarEntity->Render(DeviceContext, camera, deltaTime);
     if (StaticMesh)
-        StaticMesh->Render(DeviceContext, camera, deltaTime);
+    {
+        return StaticMesh->Render(DeviceContext, camera, deltaTime);
+    }
+
+    return S_OK;
 }
 
 void DX11Renderer::RenderLightingPass(Camera* camera, float deltaTime)

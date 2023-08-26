@@ -13,6 +13,7 @@ Camera::Camera(float fovDegrees, float nearDistance, float farDistance, float as
     , FarDistance(farDistance)
     , AspectRatio(aspectRatio)
 {
+    Reset();
     Update(0);
     OnWindowSizeChanged = [&](int width, int height) { OnWindowSizeChangedImpl(width, height); };
 }
@@ -133,9 +134,33 @@ void Camera::UpdateScroll(int delta)
 {
     if (Mode == CameraMode::Orbit)
     {
-        Radius += -delta * 0.01f;
-        Radius = max(0.1f, Radius);
+        Radius += -delta * 0.001f;
+        Radius = max(0.01f, Radius);
     }
+}
+
+void Camera::Reset()
+{
+    Position = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+    Theta = -50.f;
+    Phi = 30.f;
+
+    Radius = 3.f;
+    OrbitOrigin = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+
+    RightDirection = XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
+    ForwardDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+}
+
+void Camera::MoveOrbitOrigin(float mouseX, float mouseY)
+{
+    if (Mode != CameraMode::Orbit)
+    {
+        return;
+    }
+
+    OrbitOrigin += RightDirection * mouseX * 0.01f;
+    OrbitOrigin += UpDirection * mouseY * 0.01f;
 }
 
 void Camera::OnWindowSizeChangedImpl(int width, int height)
@@ -160,7 +185,7 @@ void Camera::UpdateViewMatrix()
         {
             // spherical coordinate calculation for position of point on sphere
             Position = XMVectorSet(Radius * sinf(phi) * cosf(theta), Radius * sinf(phi) * sinf(theta), Radius * cosf(phi), 0.f);
-            ViewMatrix = XMMatrixLookAtRH(Position, XMVectorSet(0, 0, 0, 0), UpDirection);
+            ViewMatrix = XMMatrixLookAtRH(Position, OrbitOrigin, UpDirection);
             break;
         }
         case CameraMode::Free:
@@ -177,9 +202,9 @@ void Camera::UpdateViewMatrix()
     XMVector3Normalize(UpDirection);
     XMVector3Normalize(RightDirection);
 
-    std::cout << "CameraPos: " << Position.m128_f32[0] << ", " << Position.m128_f32[1] << ", " << Position.m128_f32[2] << std::endl;
-    std::cout << "CameraDir: " << Theta << ", " << Phi << std::endl;
-    std::cout << "Radius: " << Radius << std::endl;
+    // std::cout << "CameraPos: " << Position.m128_f32[0] << ", " << Position.m128_f32[1] << ", " << Position.m128_f32[2] << std::endl;
+    // std::cout << "CameraDir: " << Theta << ", " << Phi << std::endl;
+    // std::cout << "Radius: " << Radius << std::endl;
 }
 
 XMMATRIX Camera::GetViewMatrix() const
