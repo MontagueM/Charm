@@ -1,5 +1,6 @@
-Texture2D RT0_Albedo : register( t0 );
-Texture2D RT1_Normal : register( t1 );
+Texture2D RT0 : register( t0 );
+Texture2D RT1 : register( t1 );
+Texture2D RT2 : register( t2 );
 
 
 //--------------------------------------------------------------------------------------
@@ -27,6 +28,18 @@ struct VertexShaderOutput
 };
 
 
+struct VertexShaderInput2
+{
+    float4 Position : SV_POSITION;
+};
+
+struct VertexShaderOutput2
+{
+    float4 Position : SV_POSITION;
+};
+
+
+
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
@@ -41,14 +54,23 @@ VertexShaderOutput VS( VertexShaderInput input)
     return output;
 }
 
+VertexShaderOutput2 VS2( VertexShaderInput2 input)
+{
+    VertexShaderOutput2 output = (VertexShaderOutput2)0;
+
+    output.Position = input.Position;
+
+    return output;
+}
+
 //--------------------------------------------------------------------------------------
 // Pixel Shader
 //--------------------------------------------------------------------------------------
 float4 PS(VertexShaderOutput input) : SV_Target
 {
     int3 sampleIndices = int3( input.Position.xy, 0 );
-    float3 albedo = RT0_Albedo.Load(sampleIndices).xyz;
-    float3 normal = RT1_Normal.Load(sampleIndices).xyz;
+    float3 albedo = RT0.Load(sampleIndices).xyz;
+    float3 normal = RT1.Load(sampleIndices).xyz;
     //
     float4 finalColor = 0;
     //
@@ -71,7 +93,13 @@ float4 PSSolid(VertexShaderOutput input) : SV_Target
     // return float4(input.TextureUV.x, input.TextureUV.y, 0, 1);
     // return float4(1,0,1,1);
     int3 sampleIndices = int3( input.Position.xy, 0 );
-    float3 albedo = RT0_Albedo.Load(sampleIndices).xyz;
+    float3 albedo = RT0.Load(sampleIndices).xyz;
     // return float4(1,0,1,1);
     return float4(albedo*4, 1);
+}
+
+float4 PS2(VertexShaderOutput2 input) : SV_Target
+{
+    int3 sampleIndices = int3( input.Position.xy, 0 );
+    return float4(RT0.Load(sampleIndices).xyz, 1);
 }

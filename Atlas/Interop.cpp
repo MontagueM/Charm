@@ -55,6 +55,7 @@ extern HRESULT __cdecl Render(void* pResource, bool isNewSurface)
     {
         if (FAILED(hr = renderer->Initialise()))
         {
+            Logger::Log("Failed to initialise renderer");
             return hr;
         }
 

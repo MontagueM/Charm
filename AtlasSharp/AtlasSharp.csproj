@@ -76,6 +76,13 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <Content Include="..\Atlas\Shaders\Lighting.hlsl">
+	    <Link>Shaders\Lighting.hlsl</Link>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
       <Exec Command="xcopy &quot;$(SolutionDir)x64\$(Configuration)\Atlas.dll&quot; &quot;$(TargetDir)&quot; /y /i&#xA;xcopy &quot;$(SolutionDir)x64\$(Configuration)\Atlas.pdb&quot; &quot;$(TargetDir)&quot; /y /i" />

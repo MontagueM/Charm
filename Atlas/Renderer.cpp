@@ -75,13 +75,19 @@ HRESULT DX11Renderer::Initialise()
     // if (FAILED(hr))
     //     return hr;
 
-    HRESULT hr = InitialiseGeometryPass();
+    HRESULT hr = CreateDepthStencilView();
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to initialise depth stencil");
         return hr;
+    }
 
     hr = InitialiseLightingPass();
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to initialise lighting pass");
         return hr;
+    }
 
     return S_OK;
 }
@@ -117,7 +123,14 @@ HRESULT DX11Renderer::CreateShaderFromCompiledFile(
 HRESULT DX11Renderer::CreateShaderFromHlslFile(
     LPCWSTR FileName, LPCSTR EntryPoint, ID3D11VertexShader** VertexShader, ID3D10Blob*& ShaderBlob, ID3D11Device* Device)
 {
-    HRESULT hr = CompileShaderFromFile(FileName, EntryPoint, "vs_5_0", &ShaderBlob);
+    const LPWSTR path = new WCHAR[MAX_PATH];
+    GetCurrentDirectoryW(MAX_PATH, path);
+    wcscat_s(path, MAX_PATH, L"\\");
+    wcscat_s(path, MAX_PATH, FileName);
+
+    Logger::Log("Creating shader from file %ws", path);
+
+    HRESULT hr = CompileShaderFromFile(path, EntryPoint, "vs_5_0", &ShaderBlob);
     if (FAILED(hr))
         return hr;
 
@@ -286,17 +299,6 @@ HRESULT DX11Renderer::SetRasterizerViewport()
     return S_OK;
 }
 
-HRESULT DX11Renderer::InitialiseGeometryPass()
-{
-    HRESULT hr;
-
-    hr = CreateDepthStencilView();
-    if (FAILED(hr))
-        return hr;
-
-    return hr;
-}
-
 HRESULT DX11Renderer::CreateDepthStencilView()
 {
     HRESULT hr;
@@ -363,31 +365,55 @@ HRESULT DX11Renderer::InitialiseLightingPass()
 
     hr = CreateLightingRenderTargets();
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create lighting RTs");
         return hr;
+    }
 
     ID3D10Blob* VertexShaderBlob = nullptr;
     hr = CreateLightingVertexShader(VertexShaderBlob);
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create lighting vertex shader");
         return hr;
+    }
+
     hr = CreateLightingVertexLayout(VertexShaderBlob);
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create lighting vertex layout");
         return hr;
+    }
+
     VertexShaderBlob->Release();
 
     hr = CreateLightingPixelShader();
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create lighting pixel shader");
         return hr;
+    }
 
     hr = CreateLightingVertexBuffer();
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create lighting vertex buffer");
         return hr;
+    }
+
     hr = CreateLightingIndexBuffer();
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create lighting index buffer");
         return hr;
+    }
 
     hr = CreateLightingConstantBuffer();
     if (FAILED(hr))
+    {
+        Logger::Log("Failed to create lighting constant buffer");
         return hr;
+    }
 
     return hr;
 }
@@ -458,17 +484,13 @@ HRESULT DX11Renderer::CreateLightingRenderTargets()
 
 HRESULT DX11Renderer::CreateLightingVertexShader(ID3D10Blob*& VertexShaderBlob)
 {
-    const HRESULT hr =
-        CreateShaderFromHlslFile(L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/Shaders/Lighting.hlsl", "VS2",
-            &LightingVertexShader, VertexShaderBlob, Device);
+    const HRESULT hr = CreateShaderFromHlslFile(L"Shaders/Lighting.hlsl", "VS2", &LightingVertexShader, VertexShaderBlob, Device);
     return hr;
 }
 
 HRESULT DX11Renderer::CreateLightingPixelShader()
 {
-    const HRESULT hr =
-        CreateShaderFromHlslFile(L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/Shaders/Lighting.hlsl", "PS2",
-            &LightingPixelShader, Device);
+    const HRESULT hr = CreateShaderFromHlslFile(L"Shaders/Lighting.hlsl", "PS2", &LightingPixelShader, Device);
     return hr;
 }
 

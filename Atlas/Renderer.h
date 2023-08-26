@@ -124,7 +124,6 @@ private:
     HRESULT CreateDevice();
     HRESULT CreateBackBufferView();
 
-    HRESULT InitialiseGeometryPass();
     HRESULT CreateDepthStencilView();
 
     HRESULT InitialiseLightingPass();
