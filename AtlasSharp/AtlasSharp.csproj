@@ -45,6 +45,37 @@
         <SubType>Designer</SubType>
       </Page>
     </ItemGroup>
+	
+	<ItemGroup>
+	  <Content Include="..\Charm\ThirdParty\3dmigoto_shader_decomp.exe">
+	    <Link>ThirdParty\3dmigoto_shader_decomp.exe</Link>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="..\Charm\ThirdParty\d3dcompiler_46.dll">
+	    <Link>ThirdParty\d3dcompiler_46.dll</Link>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="..\Charm\ThirdParty\FbxWrapperNative.dll">
+	    <Link>ThirdParty\FbxWrapperNative.dll</Link>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="..\Charm\ThirdParty\librevorb.dll">
+	    <Link>ThirdParty\librevorb.dll</Link>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="..\Charm\ThirdParty\oo2core_3_win64.dll">
+	    <Link>ThirdParty\oo2core_3_win64.dll</Link>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="..\Charm\ThirdParty\oo2core_9_win64.dll">
+	    <Link>ThirdParty\oo2core_9_win64.dll</Link>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="..\Charm\ThirdParty\packed_codebooks_aoTuV_603.bin">
+	    <Link>ThirdParty\packed_codebooks_aoTuV_603.bin</Link>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
       <Exec Command="xcopy &quot;$(SolutionDir)x64\$(Configuration)\Atlas.dll&quot; &quot;$(TargetDir)&quot; /y /i&#xA;xcopy &quot;$(SolutionDir)x64\$(Configuration)\Atlas.pdb&quot; &quot;$(TargetDir)&quot; /y /i" />
