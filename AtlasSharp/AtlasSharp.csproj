@@ -8,6 +8,7 @@
         <AssemblyName>AtlasSharp</AssemblyName>
         <RootNamespace>AtlasSharp</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RunPostBuildEvent>Always</RunPostBuildEvent>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -1,5 +1,10 @@
 ﻿#pragma once
-#include "Entity.h"
+#include "DDSTextureLoader.h"
+
+#include <d3d11.h>
+
+#include <memory>
+#include <vector>
 
 class Camera;
 
@@ -64,6 +69,38 @@ struct Vector4
     float Z;
     float W;
 };
+
+template <class T>
+struct Resource
+{
+    int Slot;
+    T* ResourcePointer;
+};
+
+struct Texture
+{
+    LPCWSTR FileName;
+};
+
+namespace DirectX
+{
+inline HRESULT CreateTextureSRVsFromFiles(
+    ID3D11Device* Device, std::vector<LPCWSTR> FileNames, std::vector<ID3D11ShaderResourceView*>& TextureSRVs)
+{
+    std::vector<ID3D11ShaderResourceView*> Output;
+    for (const auto& FileName : FileNames)
+    {
+        ID3D11ShaderResourceView* TextureSRV;
+        HRESULT hr = CreateDDSTextureFromFile(Device, FileName, nullptr, &TextureSRV);
+        if (FAILED(hr))
+            return hr;
+        Output.push_back(TextureSRV);
+    }
+
+    TextureSRVs = Output;
+    return S_OK;
+}
+}    // namespace DirectX
 
 class StaticMesh
 {

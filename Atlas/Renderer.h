@@ -80,13 +80,6 @@ private:
     XMMATRIX World2;
     XMMATRIX View;
     XMMATRIX Projection;
-    ID3D11InputLayout* GeometryVertexLayout;
-    ID3D11Buffer* GeometryIndexBuffer;
-    ID3D11Buffer* GeometryVertexBuffer0;
-    ID3D11Buffer* GeometryVertexBuffer1;
-    ID3D11VertexShader* GeometryVertexShader;
-    ID3D11PixelShader* GeometryPixelShader;
-    ID3D11PixelShader* GeometryPixelShaderSolid;
 
     ID3D11VertexShader* LightingVertexShader;
     ID3D11PixelShader* LightingPixelShader;
@@ -125,8 +118,6 @@ private:
     ID3D11Texture2D* DepthStencil;
     ID3D11DepthStencilView* DepthStencilView;
 
-    std::shared_ptr<class Entity> CarEntity;
-
     bool UseSwapchain;
 
     HRESULT CreateDeviceAndSwapChain();
@@ -135,14 +126,6 @@ private:
 
     HRESULT InitialiseGeometryPass();
     HRESULT CreateDepthStencilView();
-    HRESULT CreateGeometryVertexShader(ID3D10Blob*& VertexShaderBlob);
-    HRESULT CreateGeometryPixelShader();
-    HRESULT CreateGeometryVertexLayout(ID3D10Blob* VertexShaderBlob);
-    HRESULT CreateGeometryVertexBuffer();
-    HRESULT CreateGeometryIndexBuffer();
-    HRESULT CreateGeometryConstantBuffers();
-    HRESULT CreateGeometryTexture();
-    HRESULT CreateGeometrySampler();
 
     HRESULT InitialiseLightingPass();
     HRESULT CreateLightingRenderTargets();

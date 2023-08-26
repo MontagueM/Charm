@@ -14,6 +14,7 @@
 		<Company>MontagueM</Company>
 		<LangVersion>11</LangVersion>
 		<ApplicationIcon>charm.ico</ApplicationIcon>
+		<RunPostBuildEvent>Always</RunPostBuildEvent>
     </PropertyGroup>
 
     <ItemGroup>

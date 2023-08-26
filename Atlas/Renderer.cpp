@@ -1,7 +1,6 @@
 ﻿#include "Renderer.h"
 
 #include "DDSTextureLoader.h"
-#include "Entity.h"
 #include "Logger.h"
 #include "StaticMesh.h"
 
@@ -81,11 +80,6 @@ HRESULT DX11Renderer::Initialise()
         return hr;
 
     hr = InitialiseLightingPass();
-    if (FAILED(hr))
-        return hr;
-
-    CarEntity = std::make_shared<Entity>(L"NOTUSED");
-    hr = CarEntity->Initialise(Device);
     if (FAILED(hr))
         return hr;
 
@@ -300,26 +294,6 @@ HRESULT DX11Renderer::InitialiseGeometryPass()
     if (FAILED(hr))
         return hr;
 
-    hr = CreateGeometryVertexBuffer();
-    if (FAILED(hr))
-        return hr;
-
-    hr = CreateGeometryIndexBuffer();
-    if (FAILED(hr))
-        return hr;
-
-    hr = CreateGeometryConstantBuffers();
-    if (FAILED(hr))
-        return hr;
-
-    // hr = CreateGeometryTexture();
-    // if (FAILED(hr))
-    //     return hr;
-
-    // hr = CreateGeometrySampler();
-    // if (FAILED(hr))
-    //     return hr;
-
     return hr;
 }
 
@@ -380,194 +354,6 @@ HRESULT DX11Renderer::CreateDepthStencilView()
     Device->CreateDepthStencilState(&dsDesc, &depthStencilState);
     DeviceContext->OMSetDepthStencilState(depthStencilState, 1);
 
-    return hr;
-}
-
-HRESULT DX11Renderer::CreateGeometryVertexShader(ID3D10Blob*& VertexShaderBlob)
-{
-    const HRESULT hr =
-        CreateShaderFromHlslFile(L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/Shaders/Main.hlsl", "VS",
-            &GeometryVertexShader, VertexShaderBlob, Device);
-    return hr;
-}
-
-HRESULT DX11Renderer::CreateGeometryPixelShader()
-{
-    const HRESULT hr =
-        CreateShaderFromHlslFile(L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/Shaders/Main.hlsl", "PSSolid",
-            &GeometryPixelShader, Device);
-    return hr;
-}
-
-HRESULT DX11Renderer::CreateGeometryVertexLayout(ID3D10Blob* VertexShaderBlob)
-{
-    D3D11_INPUT_ELEMENT_DESC layout[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    };
-    UINT numElements = ARRAYSIZE(layout);
-
-    HRESULT hr = Device->CreateInputLayout(
-        layout, numElements, VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), &GeometryVertexLayout);
-    VertexShaderBlob->Release();
-
-    return hr;
-}
-
-HRESULT DX11Renderer::CreateGeometryVertexBuffer()
-{
-    GeometryVertex0 vertices0[] = {
-        {XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
-        {XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
-        {XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
-        {XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
-
-        {XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f)},
-        {XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f)},
-        {XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f)},
-        {XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f)},
-
-        {XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f)},
-        {XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f)},
-        {XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f)},
-        {XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f)},
-
-        {XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
-        {XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
-        {XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
-        {XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
-
-        {XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f)},
-        {XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f)},
-        {XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f)},
-        {XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f)},
-
-        {XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-        {XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-        {XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-        {XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-    };
-    GeometryVertex1 vertices1[] = {
-        {XMFLOAT2(1.0f, 0.0f)},
-        {XMFLOAT2(0.0f, 0.0f)},
-        {XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT2(1.0f, 1.0f)},
-
-        {XMFLOAT2(0.0f, 0.0f)},
-        {XMFLOAT2(1.0f, 0.0f)},
-        {XMFLOAT2(1.0f, 1.0f)},
-        {XMFLOAT2(0.0f, 1.0f)},
-
-        {XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT2(1.0f, 1.0f)},
-        {XMFLOAT2(1.0f, 0.0f)},
-        {XMFLOAT2(0.0f, 0.0f)},
-
-        {XMFLOAT2(1.0f, 1.0f)},
-        {XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT2(0.0f, 0.0f)},
-        {XMFLOAT2(1.0f, 0.0f)},
-
-        {XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT2(1.0f, 1.0f)},
-        {XMFLOAT2(1.0f, 0.0f)},
-        {XMFLOAT2(0.0f, 0.0f)},
-
-        {XMFLOAT2(1.0f, 1.0f)},
-        {XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT2(0.0f, 0.0f)},
-        {XMFLOAT2(1.0f, 0.0f)},
-    };
-    D3D11_BUFFER_DESC bd{};
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = ARRAYSIZE(vertices0) * sizeof(GeometryVertex0);
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA InitData = {};
-    InitData.pSysMem = vertices0;
-    HRESULT hr = Device->CreateBuffer(&bd, &InitData, &GeometryVertexBuffer0);
-    if (FAILED(hr))
-        return hr;
-
-    bd.ByteWidth = ARRAYSIZE(vertices1) * sizeof(GeometryVertex1);
-    InitData.pSysMem = vertices1;
-    hr = Device->CreateBuffer(&bd, &InitData, &GeometryVertexBuffer1);
-    if (FAILED(hr))
-        return hr;
-
-    return hr;
-}
-
-HRESULT DX11Renderer::CreateGeometryIndexBuffer()
-{
-    WORD indices[] = {3, 1, 0, 2, 1, 3,
-
-        6, 4, 5, 7, 4, 6,
-
-        11, 9, 8, 10, 9, 11,
-
-        14, 12, 13, 15, 12, 14,
-
-        19, 17, 16, 18, 17, 19,
-
-        22, 20, 21, 23, 20, 22};
-    D3D11_BUFFER_DESC bd{};
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.ByteWidth = ARRAYSIZE(indices) * sizeof(WORD);
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA InitData = {};
-    InitData.pSysMem = indices;
-    const HRESULT hr = Device->CreateBuffer(&bd, &InitData, &GeometryIndexBuffer);
-
-    return hr;
-}
-
-HRESULT DX11Renderer::CreateGeometryConstantBuffers()
-{
-    D3D11_BUFFER_DESC bd{};
-    bd.Usage = D3D11_USAGE_DEFAULT;
-    bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    bd.CPUAccessFlags = 0;
-    bd.ByteWidth = sizeof(CBChangeOnResize);
-    HRESULT hr = Device->CreateBuffer(&bd, nullptr, &pCBChangeOnResize);
-    if (FAILED(hr))
-        return hr;
-
-    bd.ByteWidth = sizeof(ScopeView);
-    hr = Device->CreateBuffer(&bd, nullptr, &pScopeView);
-    if (FAILED(hr))
-        return hr;
-
-    Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, window->GetAspectRatio(), 0.01f, 100.0f);
-    CBChangeOnResize cbChangesOnResize;
-    cbChangesOnResize.Projection = XMMatrixTranspose(Projection);
-    DeviceContext->UpdateSubresource(pCBChangeOnResize, 0, nullptr, &cbChangesOnResize, 0, 0);
-
-    return hr;
-}
-
-HRESULT DX11Renderer::CreateGeometryTexture()
-{
-    HRESULT hr = CreateDDSTextureFromFile(
-        Device, L"C:/Users/monta/Desktop/Projects/Charm/Charm/bin/x64/Debug/net7.0-windows/Shaders/seafloor.dds", nullptr, &TextureRV);
-    return hr;
-}
-
-HRESULT DX11Renderer::CreateGeometrySampler()
-{
-    D3D11_SAMPLER_DESC sampDesc = {};
-    sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    sampDesc.MinLOD = 0;
-    sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    HRESULT hr = Device->CreateSamplerState(&sampDesc, &SamplerLinear);
     return hr;
 }
 
