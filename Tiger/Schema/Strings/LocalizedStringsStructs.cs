@@ -2,7 +2,7 @@
 namespace Tiger.Schema.Strings;
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "889A8080", 0x50)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "EF998080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EF998080", 0x50)]
 public struct SLocalizedStrings
 {
     public ulong ThisSize;
@@ -20,7 +20,7 @@ public struct SStringHash
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "8A9A8080", 0x58)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F1998080", 0x58)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F1998080", 0x58)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "F1998080", 0x48)]
 public struct SLocalizedStringsData
 {

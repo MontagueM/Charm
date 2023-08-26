@@ -103,10 +103,9 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
     }
 }
 
-
-namespace Tiger.Schema.Static.DESTINY2_WITCHQUEEN_6307
+namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
 {
-    public class StaticMeshData : Tag<SStaticMeshData_WQ>, IStaticMeshData
+    public class StaticMeshData : Tag<SStaticMeshData_BL>, IStaticMeshData
     {
         public StaticMeshData(FileHash hash) : base(hash)
         {

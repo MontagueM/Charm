@@ -109,9 +109,9 @@ public class StaticPart : MeshPart
 
     private void TransformData(SStaticMesh container)
     {
-        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
-            var t = (container.StaticData as Tiger.Schema.Static.DESTINY2_WITCHQUEEN_6307.StaticMeshData).TagData;
+            var t = (container.StaticData as DESTINY2_BEYONDLIGHT_3402.StaticMeshData).TagData;
             TransformPositions(t.ModelTransform);
             TransformUVs(new Vector2(t.TexcoordScale, t.TexcoordScale), t.TexcoordTranslation);
         }
