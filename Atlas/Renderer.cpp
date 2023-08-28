@@ -1,6 +1,7 @@
 ﻿#include "Renderer.h"
 
 #include "DDSTextureLoader.h"
+#include "Debug.h"
 #include "Logger.h"
 #include "StaticMesh.h"
 
@@ -86,6 +87,13 @@ HRESULT DX11Renderer::Initialise()
     if (FAILED(hr))
     {
         Logger::Log("Failed to initialise lighting pass");
+        return hr;
+    }
+
+    hr = Debug::Initialise(Device);
+    if (FAILED(hr))
+    {
+        Logger::Log("Failed to initialise debug pass");
         return hr;
     }
 
@@ -201,9 +209,6 @@ HRESULT DX11Renderer::InitialiseGeneral(std::shared_ptr<RenderPanel> window)
     }
 
     // SetRasterizerViewport();
-
-    // Set primitive topology
-    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     // Initialize the world matrix
     World1 = XMMatrixIdentity();
@@ -504,6 +509,7 @@ HRESULT DX11Renderer::CreateLightingVertexLayout(ID3D10Blob* VertexShaderBlob)
 
     HRESULT hr = Device->CreateInputLayout(
         layout, numElements, VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), &QuadVertexLayout);
+
     VertexShaderBlob->Release();
 
     return hr;
@@ -532,7 +538,6 @@ HRESULT DX11Renderer::CreateLightingVertexBuffer()
 
 HRESULT DX11Renderer::CreateLightingIndexBuffer()
 {
-    // WORD indices[] = {0, 1, 2, 2, 3, 0};
     WORD indices[] = {0, 2, 1, 0, 3, 2};
 
     D3D11_BUFFER_DESC bd{};
@@ -564,7 +569,7 @@ HRESULT DX11Renderer::Render(Camera* camera, float deltaTime)
 {
     // todo put this into a function
     DeviceContext->ClearRenderTargetView(BackBufferView, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
-    DeviceContext->ClearRenderTargetView(RT0View, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
+    DeviceContext->ClearRenderTargetView(RT0View, new FLOAT[4]{0.1f, 0.1f, 0.1f, 0.0f});
     DeviceContext->ClearRenderTargetView(RT1View, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
     DeviceContext->ClearRenderTargetView(RT2View, new FLOAT[4]{0.0f, 0.0f, 0.0f, 0.0f});
     DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 0.0f, 0);
@@ -605,23 +610,31 @@ void DX11Renderer::Cleanup()
     }
 }
 
+struct SVertexPositionColor
+{
+    XMFLOAT3 position;
+    XMFLOAT4 color;
+};
+
 HRESULT DX11Renderer::RenderGeometry(Camera* camera, float deltaTime)
 {
     ID3D11RenderTargetView* renderTargets[3] = {RT0View, RT1View, RT2View};
     DeviceContext->OMSetRenderTargets(3, renderTargets, DepthStencilView);
-    // DeviceContext->OMSetRenderTargets(1, &BackBufferView, DepthStencilView);
-    // DeviceContext->OMSetRenderTargets(1, &BackBufferView, nullptr);
 
-    // DeviceContext->DrawIndexed(36, 0, 0);
-    // DeviceContext->DrawIndexed(13602, 0, 0);
+    static const XMVECTORF32 xAxis = {20.f, 0.f, 0.f, 0.f};
+    static const XMVECTORF32 yAxis = {0.f, 0.f, 20.f, 0.f};
+    // Debug::DrawGrid(xAxis, yAxis, XMVectorSet(0, 0, 0, 0), 20, 20, Colors::Gray);
 
-    // CarEntity->Render(DeviceContext, camera, deltaTime);
+    HRESULT hr = S_OK;
     if (StaticMesh)
     {
-        return StaticMesh->Render(DeviceContext, camera, deltaTime);
+        hr = StaticMesh->Render(DeviceContext, camera, deltaTime);
     }
 
-    return S_OK;
+    // draw after so we can use the cb12 thats already bound for now
+    Debug::DrawGrid(DeviceContext);
+
+    return hr;
 }
 
 void DX11Renderer::RenderLightingPass(Camera* camera, float deltaTime)
@@ -630,6 +643,7 @@ void DX11Renderer::RenderLightingPass(Camera* camera, float deltaTime)
 
     DeviceContext->VSSetShader(LightingVertexShader, nullptr, 0);
     DeviceContext->IASetInputLayout(QuadVertexLayout);
+    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     ID3D11ShaderResourceView* RenderTargets[3] = {RT0SRV, RT1SRV, RT2SRV};
     DeviceContext->PSSetShaderResources(0, 3, RenderTargets);

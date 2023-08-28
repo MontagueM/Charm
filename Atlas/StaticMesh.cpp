@@ -21,8 +21,8 @@ struct cb12_View
     XMVECTOR Target;               // cb12[8], viewport dimensions 0/1 is width/height, 2/3 is 1/width and 1/height
     XMVECTOR Unk09;
     XMVECTOR CameraPosition;
-    XMMATRIX Unk11;    // idk why but cb12[14].z must not be zero ever
-    // XMVECTOR ViewMiscellaneous;    // cb12[9]; cb12[10] is camera position
+    XMMATRIX Unk11;                // idk why but cb12[14].z must not be zero ever
+    XMVECTOR ViewMiscellaneous;    // cb12[15]; cb12[10] is camera position
 };
 
 StaticMesh::~StaticMesh()
@@ -86,6 +86,7 @@ HRESULT StaticMesh::Render(ID3D11DeviceContext* DeviceContext, Camera* Camera, f
         return E_FAIL;
     }
 
+    // todo fix this how tf does it work?? maybe its ignored idk
     UINT strides[2] = {16, 4};
     UINT offsets[2] = {0, 0};
     DeviceContext->IASetVertexBuffers(0, 2, GetVertexBuffers(), strides, offsets);
@@ -245,6 +246,7 @@ HRESULT Part::CreateConstantBuffers(const Blob& psCb0)
     View.CameraPosition = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
     View.Unk11 = XMMatrixIdentity();
     View.Unk11.r[3].m128_f32[2] = 0.15f;
+    View.ViewMiscellaneous = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
     bd.Usage = D3D11_USAGE_DEFAULT;
     bd.ByteWidth = sizeof(View);

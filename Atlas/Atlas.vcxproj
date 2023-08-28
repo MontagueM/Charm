@@ -164,6 +164,7 @@
     <ClCompile Include="Atlas.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
+    <ClCompile Include="Debug.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Interop.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -176,6 +177,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DDSTextureLoader.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Interop.h" />
     <ClInclude Include="Light.h" />

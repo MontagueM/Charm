@@ -6,6 +6,11 @@
 
 #include <memory>
 
+namespace DirectX::DX11
+{
+struct VertexPositionColor;
+}
+
 class StaticMesh;
 using namespace DirectX;
 
@@ -84,6 +89,7 @@ private:
     ID3D11VertexShader* LightingVertexShader;
     ID3D11PixelShader* LightingPixelShader;
     ID3D11InputLayout* QuadVertexLayout;
+    ID3D11InputLayout* BatchVertexLayout;
     ID3D11Buffer* QuadIndexBuffer;
     ID3D11Buffer* QuadVertexBuffer;
 
