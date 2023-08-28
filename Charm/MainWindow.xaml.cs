@@ -213,7 +213,7 @@ public partial class MainWindow
 
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("1.3.2");
+        var currentVersion = new ApplicationVersion("2.0.0");
         var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         versionChecker.LatestVersionName = "version";
         try

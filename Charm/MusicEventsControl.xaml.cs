@@ -71,7 +71,7 @@ public partial class MusicEventsControl : UserControl
         {
             items.Add(new EventItem
             {
-                Name = entry.EventName.Value,
+                Name = entry.EventName?.Value ?? "",
                 Hash = $"{entry.Unk00}/{entry.Unk10}",
             });
         }

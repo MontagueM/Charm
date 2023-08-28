@@ -88,3 +88,44 @@ namespace Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307
     }
 }
 
+namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
+{
+    public class Activity : Tag<DESTINY2_WITCHQUEEN_6307.SActivity_WQ>, IActivity
+    {
+        public FileHash FileHash => Hash;
+
+        public Activity(FileHash hash) : base(hash)
+        {
+        }
+
+        public IEnumerable<Bubble> EnumerateBubbles()
+        {
+            foreach (var mapEntry in _tag.Unk50)
+            {
+                if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+                {
+                    if (mapEntry.Unk30 is null ||
+                        mapEntry.Unk30.TagData.ChildMapReference == null)
+                    {
+                        continue;
+                    }
+                    yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), MapReference = mapEntry.Unk30 };
+                }
+                else
+                {
+                    foreach (var mapReference in mapEntry.MapReferences)
+                    {
+
+                        if (mapReference.MapReference is null ||
+                            mapReference.MapReference.TagData.ChildMapReference == null)
+                        {
+                            continue;
+                        }
+                        yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), MapReference = mapReference.MapReference };
+                    }
+
+                }
+            }
+        }
+    }
+}
