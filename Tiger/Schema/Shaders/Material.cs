@@ -271,6 +271,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
     public class Material : Tag<SMaterial_BL>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
