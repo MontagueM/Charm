@@ -177,7 +177,7 @@ PS
                 vfxStructure = vfxStructure.Replace("FinalOutput MainPs", "float4 MainPs");
         }
 
-        vfxStructure = vfxStructure.Replace("//ps_output", AddOutput().ToString());
+        vfxStructure = vfxStructure.Replace("//ps_output", AddOutput(material).ToString());
 
         //------------------------------------------------------------------------------
 
@@ -683,7 +683,7 @@ PS
                         }
                         else if(!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
                         {
-                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter}"); 
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //t{texIndex}"); 
                         }
                         else
                         {
@@ -734,7 +734,7 @@ PS
         return funcDef;
     }
 
-    private StringBuilder AddOutput()
+    private StringBuilder AddOutput(IMaterial material)
     {
         StringBuilder output = new StringBuilder();
 
@@ -751,7 +751,15 @@ PS
         }
         else //only uses o0
         {
-            output.Append($"\t\treturn float4(o0.xyz, 1-o0.w);");
+            if (material.Unk0C == 2) //Unlit?
+            {
+                output.Append($"\t\treturn float4(o0.xyz, alpha);");
+            }
+            else
+            {
+                output.AppendLine($"\t\tMaterial mat = Material::From(i, float4(o0.xyz, alpha), float4(0.5, 0.5, 1, 1), float4(0.5, 0, 1, 1), float3(1.0f, 1.0f, 1.0f), 0);");
+                output.AppendLine($"\t\treturn ShadingModelStandard::Shade(i, mat);");
+            }
         }
 
         return output;

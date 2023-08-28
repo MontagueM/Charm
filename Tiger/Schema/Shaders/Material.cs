@@ -47,6 +47,7 @@ namespace Tiger.Schema.Shaders
     public interface IMaterial : ISchema
     {
         public FileHash FileHash { get; }
+        public uint Unk0C { get; } //might be for determing type? (glass, unlit, normal pbr. idk?)
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
         public ShaderBytecode? VertexShader { get; }
@@ -230,6 +231,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
     public class Material : Tag<SMaterial_SK>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
@@ -309,6 +311,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
     public class Material : Tag<SMaterial_WQ>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
