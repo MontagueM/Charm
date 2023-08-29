@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Shaders;
@@ -111,15 +112,6 @@ PS
 	#else
 		#define FinalOutput float4
 	#endif
-
-    //Debugs, uncomment for use in shader baker
-    //bool g_bDiffuse < Attribute( ""Debug_Diffuse"" ); >;
-    //bool g_bRough < Attribute( ""Debug_Rough"" ); >;
-    //bool g_bMetal < Attribute( ""Debug_Metal"" ); >;
-    //bool g_bNorm < Attribute( ""Debug_Normal"" ); >;
-    //bool g_bAO < Attribute( ""Debug_AO"" ); >;
-    //bool g_bEmit < Attribute( ""Debug_Emit"" ); >;
-    //bool g_bAlpha < Attribute( ""Debug_Alpha"" ); >;
 
 //ps_samplers
 //ps_CBuffers
@@ -310,7 +302,7 @@ PS
 
         foreach (var cbuffer in cbuffers)
         {
-            CBuffers.AppendLine($"\tstatic {cbuffer.Type} {cbuffer.Variable}[{cbuffer.Count}] = ").AppendLine("\t{");
+            //CBuffers.AppendLine($"\tstatic {cbuffer.Type} {cbuffer.Variable}[{cbuffer.Count}] = ").AppendLine("\t{");
 
             dynamic data = null;
             if (bIsVertexShader)
@@ -365,50 +357,41 @@ PS
                 }
             }
 
+            //for (int i = 0; i < cbuffer.Count; i++)
+            //{
+            //    if (data == null)
+            //        CBuffers.AppendLine("      float4(0.0, 0.0, 0.0, 0.0), //null" + i);
+            //    else
+            //    {
+            //        try
+            //        {
+            //            if (data[i] is Vec4)
+            //            {
+            //                CBuffers.AppendLine($"\t\tfloat4({data[i].Vec.X}, {data[i].Vec.Y}, {data[i].Vec.Z}, {data[i].Vec.W}), //" + i);
+            //            }
+            //            else if (data[i] is Vector4)
+            //            {
+            //                CBuffers.AppendLine($"\t\tfloat4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}), //" + i);
+            //            }
+            //            else
+            //            {
+            //                var x = data[i].Unk00.X; // really bad but required
+
+            //                CBuffers.AppendLine($"\t\tfloat4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}), //" + i);
+            //            }
+            //        }
+            //        catch (Exception e)  // figure out whats up here, taniks breaks it
+            //        {
+            //            CBuffers.AppendLine("\t\tfloat4(0.0, 0.0, 0.0, 0.0), //Exception" + i);
+            //        }
+            //    }
+            //}
+            //CBuffers.AppendLine("\t};");
+
             for (int i = 0; i < cbuffer.Count; i++)
             {
-                switch (cbuffer.Type)
-                {
-                    case "float4":
-                        if (data == null) CBuffers.AppendLine("      float4(0.0, 0.0, 0.0, 0.0), //null" + i);
-                        else
-                        {
-                            try
-                            {
-                                if (data[i] is Vec4)
-                                {
-                                    CBuffers.AppendLine($"\t\tfloat4({data[i].Vec.X}, {data[i].Vec.Y}, {data[i].Vec.Z}, {data[i].Vec.W}), //" + i);
-                                }
-                                else if (data[i] is Vector4)
-                                {
-                                    CBuffers.AppendLine($"\t\tfloat4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}), //" + i);
-                                }
-                                else
-                                {
-                                    var x = data[i].Unk00.X; // really bad but required
-
-                                    CBuffers.AppendLine($"\t\tfloat4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}), //" + i);
-                                }
-                            }
-                            catch (Exception e)  // figure out whats up here, taniks breaks it
-                            {
-                                CBuffers.AppendLine("\t\tfloat4(0.0, 0.0, 0.0, 0.0), //Exception" + i);
-                            }
-                        }
-                        break;
-                    case "float3":
-                        if (data == null) CBuffers.AppendLine("\t\tfloat3(0.0, 0.0, 0.0), //null" + i);
-                        else CBuffers.AppendLine($"\t\tfloat3({data[i].Unk00.X}, {data[i].Unk00.Y}, {data[i].Unk00.Z}), //" + i);
-                        break;
-                    case "float":
-                        if (data == null) CBuffers.AppendLine("\t\tfloat(0.0), //null" + i);
-                        else CBuffers.AppendLine($"\t\tfloat4({data[i].Unk00}), //" + i);
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
+                CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
             }
-            CBuffers.AppendLine("\t};");
         }
 
         return CBuffers.Replace("∞", "1.#INF");
@@ -604,11 +587,11 @@ PS
             funcDef.AppendLine("\t\tfloat4 o1 = float4(PackNormal3D(v0.xyz),1);");
             funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);\n");
 
-            if (cbuffers.Any(cbuffer => cbuffer.Index == 13 && cbuffer.Count == 2)) //Should be time (g_flTime) but probably gets manipulated somehow
-            {
-                funcDef.AppendLine("\t\tcb13[0] = 1;");
-                funcDef.AppendLine("\t\tcb13[1] = 1;");
-            }
+            //if (cbuffers.Any(cbuffer => cbuffer.Index == 13 && cbuffer.Count == 2)) //Should be time (g_flTime) but probably gets manipulated somehow
+            //{
+            //    funcDef.AppendLine("\t\tcb13[0] = 1;");
+            //    funcDef.AppendLine("\t\tcb13[1] = 1;");
+            //}
 
             string line = hlsl.ReadLine();
             if (line == null)
@@ -641,6 +624,13 @@ PS
                         funcDef.AppendLine($"\t\t{line.TrimStart().Replace("cb12[7].xyz", "vCameraToPositionDirWs")
                             .Replace("v4.xyz", "float3(0,0,0)")
                             .Replace("cb12[14].xyz", "vCameraToPositionDirWs")}");
+                    }
+                    else if (line.Contains("cb"))
+                    {
+                        string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                        string output = Regex.Replace(line, pattern, "cb$1_$2");
+
+                        funcDef.AppendLine($"\t\t{output.TrimStart()}");
                     }
                     else if (line.Contains("while (true)"))
                     {
@@ -741,7 +731,7 @@ PS
         if(!bTranslucent) //uses o1,o2
         {
             //this is fine...
-            output.Append($"\t\t// Normal\r\n        float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);\r\n        float normal_length = length(biased_normal);\r\n        float3 normal_in_world_space = biased_normal / normal_length;\r\n\r\n        float smoothness = saturate(8 * (normal_length - 0.375));\r\n        \r\n        Material mat = Material::From(i,\r\n                    float4(o0.xyz, alpha), //albedo, alpha\r\n                    float4(0.5, 0.5, 1, 1), //Normal, gets set later\r\n                    float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao\r\n                    float3(1.0f, 1.0f, 1.0f), //tint\r\n                    clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        mat.Transmission = o2.z;\r\n        mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From\r\n\r\n        //if(g_bDiffuse)\r\n        //{{\r\n        //    mat.Albedo = 0;\r\n        //    mat.Emission = o0.xyz;\r\n        //}}\r\n        //if(g_bRough)\r\n        //{{\r\n        //    mat.Albedo = 0;\r\n        //    mat.Emission = 1 - smoothness;\r\n        //}}\r\n        //if(g_bMetal)\r\n        //{{\r\n        //    mat.Albedo = 0;\r\n        //    mat.Emission = saturate(o2.x);\r\n        //}}\r\n        //if(g_bNorm)\r\n        //{{\r\n        //    mat.Albedo = 0;\r\n        //    mat.Emission = SrgbGammaToLinear(PackNormal3D(Vec3WsToTs(normal_in_world_space.xyz, i.vNormalWs.xyz, vTangentUWs.xyz, vTangentVWs.xyz)));\r\n        //}}\r\n        //if(g_bAO)\r\n        //{{\r\n        //    mat.Albedo = 0;\r\n        //    mat.Emission = saturate(o2.y * 2);\r\n        //}}\r\n        //if(g_bEmit)\r\n        //{{\r\n        //    mat.Albedo = 0;\r\n        //    mat.Emission = (o2.y - 0.5);\r\n        //}}\r\n        //if(g_bAlpha)\r\n        //{{\r\n        //    mat.Albedo = 0;\r\n        //    mat.Emission = alpha;\r\n        //}}\r\n\r\n        #if ( S_MODE_REFLECTIONS )\r\n\t\t{{\r\n\t\t\treturn Reflections::From( i, mat, SampleCountIntersection );\r\n\t\t}}\r\n        #else\r\n\t\t{{\r\n            return ShadingModelStandard::Shade(i, mat);\r\n        }}\r\n        #endif  ");
+            output.Append($"\t\t// Normal\r\n        float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);\r\n        float normal_length = length(biased_normal);\r\n        float3 normal_in_world_space = biased_normal / normal_length;\r\n\r\n        float smoothness = saturate(8 * (normal_length - 0.375));\r\n        \r\n        Material mat = Material::From(i,\r\n                    float4(o0.xyz, alpha), //albedo, alpha\r\n                    float4(0.5, 0.5, 1, 1), //Normal, gets set later\r\n                    float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao\r\n                    float3(1.0f, 1.0f, 1.0f), //tint\r\n                    clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        mat.Transmission = o2.z;\r\n        mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From\r\n\r\n        #if ( S_MODE_REFLECTIONS )\r\n\t\t{{\r\n\t\t\treturn Reflections::From( i, mat, SampleCountIntersection );\r\n\t\t}}\r\n        #else\r\n\t\t{{\r\n            return ShadingModelStandard::Shade(i, mat);\r\n        }}\r\n        #endif");
 
             if (bFixRoughness)
                 output = output.Replace("float smoothness = saturate(8 * (normal_length - 0.375));", "float smoothness = saturate(8 * (0 - 0.375));");

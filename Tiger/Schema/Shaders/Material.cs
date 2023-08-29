@@ -175,9 +175,9 @@ namespace Tiger.Schema.Shaders
                     {
                         File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
                     }
-                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{FileHash}.shader"))
+                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader"))
                     {
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{FileHash}.shader", vfx);
+                        File.WriteAllText($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader", vfx);
                     }
                 }
                 catch (IOException)  // threading error
