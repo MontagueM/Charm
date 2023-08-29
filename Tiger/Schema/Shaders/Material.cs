@@ -154,8 +154,8 @@ namespace Tiger.Schema.Shaders
         {
             if (PixelShader != null && PixelShader.Hash.IsValid())
             {
-                string pixel = Decompile(PixelShader.GetBytecode(), $"ps{FileHash}");
-                string vertex = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
+                string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
+                string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
                 string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
                 string vfx = Source2Handler.source2Shaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
 
@@ -195,7 +195,7 @@ namespace Tiger.Schema.Shaders
             Directory.CreateDirectory($"{saveDirectory}");
             if (VertexShader != null && VertexShader.Hash.IsValid())
             {
-                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
+                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
                 string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
                 if (usf != String.Empty)
                 {
