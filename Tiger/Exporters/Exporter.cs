@@ -153,6 +153,8 @@ public class ExporterScene
         for (int i = 0; i < parts.Count; i++)
         {
             DynamicMeshPart part = parts[i];
+            if (part.Material == null)
+                continue;
             if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
             {
                 mesh.AddPart(entityHash, part, i);
@@ -172,8 +174,9 @@ public class ExporterScene
             for (int i = 0; i < parts.Count; i++)
             {
                 DynamicMeshPart part = parts[i];
-
-                if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                if (part.Material == null)
+                    continue;
+                if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
                 {
                     mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
                 }
