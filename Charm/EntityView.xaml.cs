@@ -100,6 +100,10 @@ public partial class EntityView : UserControl
                 entity.SaveMaterialsFromParts(savePath, dynamicParts, config.GetUnrealInteropEnabled() || config.GetS2ShaderExportEnabled());
                 entity.SaveTexturePlates(savePath);
             }
+            if (ConfigSubsystem.Get().GetS2VMDLExportEnabled())
+            {
+                Source2Handler.SaveEntityVMDL($"{savePath}", entity);
+            }
         }
 
         if (exportType == ExportTypeFlag.Full)
