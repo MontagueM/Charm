@@ -9,6 +9,7 @@
         <RootNamespace>AtlasSharp</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RunPostBuildEvent>Always</RunPostBuildEvent>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
