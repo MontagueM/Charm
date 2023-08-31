@@ -21,7 +21,6 @@ jobs:
     - name: set msbuild path env var
       shell: bash
       run: |
-        echo "msbuild path is ${{ steps.setup-msbuild.outputs.msbuildPath }}"
         export VCTargetsPath="${{ steps.setup-msbuild.outputs.msbuildPath }}"
     - uses: actions/checkout@v3
       with:
