@@ -15,13 +15,14 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: msbuild-path
+    - name: Add msbuild to PATH
+    - id:   setup-msbuild
       uses: microsoft/setup-msbuild@v1.1
     - name: set msbuild path env var
       shell: bash
       run: |
-        echo "msbuild path is ${{ steps.msbuild-path.outputs.msbuildPath }}"
-        export VCTargetsPath="${{ steps.msbuild-path.outputs.msbuildPath }}"
+        echo "msbuild path is ${{ steps.setup-msbuild.outputs.msbuildPath }}"
+        export VCTargetsPath="${{ steps.setup-msbuild.outputs.msbuildPath }}"
     - uses: actions/checkout@v3
       with:
         submodules: recursive
