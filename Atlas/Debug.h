@@ -13,6 +13,7 @@ private:
     inline static ID3D11InputLayout* InputLayout;
     inline static ID3D11Buffer* VertexBuffer;
     inline static bool bInitialised = false;
+    inline static int NumVertices;
 
     static void SetupRender(ID3D11DeviceContext* deviceContext);
 };
