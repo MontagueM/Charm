@@ -21,7 +21,7 @@ jobs:
     - name: set msbuild path env var
       shell: bash
       run: |
-        export VCTargetsPath="${{ steps.setup-msbuild.outputs.msbuildPath }}../../Microsoft/VC/v170"
+        export VCTargetsPath="${{ steps.setup-msbuild.outputs.msbuildPath }}\..\..\Microsoft\VC\v170"
     - uses: actions/checkout@v3
       with:
         submodules: recursive
