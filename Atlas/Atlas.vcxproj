@@ -25,7 +25,7 @@
     <RootNamespace>Atlas</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VC\v170\Microsoft.Cpp.Default.props" />
+  <Import Project="$(VCInstallDir)\Microsoft.Cpp.Default.props" />
   <PropertyGroup>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
