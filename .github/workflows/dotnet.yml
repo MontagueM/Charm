@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - name: Add msbuild to PATH
-    - id:   setup-msbuild
+      id:   setup-msbuild
       uses: microsoft/setup-msbuild@v1.1
     - name: set msbuild path env var
       shell: bash
