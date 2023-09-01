@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Charm"
+             xmlns:atlasSharp="clr-namespace:AtlasSharp;assembly=AtlasSharp"
              mc:Ignorable="d"
              FontSize="24"
              d:DesignHeight="1080" d:DesignWidth="1920">
@@ -15,5 +16,6 @@
             <RowDefinition Height="100*"/>
         </Grid.RowDefinitions>
         <local:ModelView x:Name="ModelView"/>
+        <atlasSharp:AtlasView x:Name="AtlasView"/>
     </Grid>
 </UserControl>

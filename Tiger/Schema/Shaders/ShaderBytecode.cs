@@ -72,6 +72,7 @@ public struct SShaderBytecode
 
 public enum InputSemantic
 {
+    None,
     Position,
     Texcoord,
     Normal,
@@ -84,12 +85,15 @@ public enum InputSemantic
 public struct InputSignature
 {
     public InputSemantic Semantic;
+    public uint SemanticIndex;
     public RegisterComponentType ComponentType;
     public ComponentMask Mask;
     public uint RegisterIndex;
+    public int BufferIndex = -1; // gets set in a decorator
 
     public InputSignature(TigerReader reader, long chunkStart, DXBCInputSignature inputSignature)
     {
+        SemanticIndex = inputSignature.SemanticIndex;
         ComponentType = inputSignature.ComponentType;
         Mask = inputSignature.Mask;
         RegisterIndex = inputSignature.Register;

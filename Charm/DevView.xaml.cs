@@ -177,7 +177,7 @@ public partial class DevView : UserControl
                 case 0x808071a7:
                 case 0x80806D44:
                     StaticView staticView = new StaticView();
-                    staticView.LoadStatic(hash, ExportDetailLevel.MostDetailed);
+                    staticView.LoadStatic(hash, ExportDetailLevel.MostDetailed, Window.GetWindow(this));
                     _mainWindow.MakeNewTab(hash, staticView);
                     _mainWindow.SetNewestTabSelected();
                     break;

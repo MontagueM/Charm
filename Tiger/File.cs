@@ -1,4 +1,6 @@
-﻿namespace Tiger;
+﻿using System.Runtime.InteropServices;
+
+namespace Tiger;
 
 /// <summary>
 /// Represents the file behind the Tag, handles all the file-based processing including reading data.
@@ -63,6 +65,32 @@ public class TigerFile
     }
 }
 
+[StructLayout(LayoutKind.Sequential)]
+public struct Blob : IDisposable
+{
+    public IntPtr Data;
+    public int Size;
+
+    public Blob(byte[] bytes)
+    {
+        Data = Marshal.AllocHGlobal(bytes.Length);
+        Marshal.Copy(bytes, 0, Data, bytes.Length);
+        Size = bytes.Length;
+    }
+
+    public readonly void Dispose()
+    {
+        Marshal.FreeHGlobal(Data);
+    }
+
+    public void TempDump(string name)
+    {
+        byte[] data = new byte[Size];
+        Marshal.Copy(Data, data, 0, Size);
+        File.WriteAllBytes($"TempFiles/{name}.bin", data);
+    }
+}
+
 public class TigerReferenceFile<THeader> : Tag<THeader> where THeader : struct
 {
     protected FileHash ReferenceHash;
@@ -85,5 +113,23 @@ public class TigerReferenceFile<THeader> : Tag<THeader> where THeader : struct
     public byte[] GetReferenceData()
     {
         return PackageResourcer.Get().GetFileData(ReferenceHash);
+    }
+
+    public Blob ToBlob()
+    {
+        byte[] data = GetReferenceData();
+        GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+        Blob blob = new Blob
+        {
+            Data = handle.AddrOfPinnedObject(),
+            Size = data.Length
+        };
+        return blob;
+    }
+
+    public void TempDumpRef()
+    {
+        byte[] data = GetReferenceData();
+        File.WriteAllBytes($"TempFiles/{ReferenceHash}.bin", data);
     }
 }
