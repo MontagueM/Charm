@@ -18,10 +18,6 @@ jobs:
     - name: Add msbuild to PATH
       id:   setup-msbuild
       uses: microsoft/setup-msbuild@v1.1
-    - name: set msbuild path env var
-      shell: bash
-      run: |
-        export VCTargetsPath="${{ steps.setup-msbuild.outputs.msbuildPath }}\..\..\Microsoft\VC\v170"
     - uses: actions/checkout@v3
       with:
         submodules: recursive
@@ -33,8 +29,9 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
+      # must be hard-coded, idk how to do it otherwise as relative paths are not evaluated (${{ steps.setup-msbuild.outputs.msbuildPath }})
       env:
-        VCTargetsPath: ${{ steps.setup-msbuild.outputs.msbuildPath }}
+        VCTargetsPath: "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170"
       # Tests are disabled until I filter them to only run ones that don't need packages
     #- name: Test
     #  run: dotnet test --no-build --verbosity normal
