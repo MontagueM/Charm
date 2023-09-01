@@ -31,7 +31,7 @@ jobs:
       run: dotnet build --no-restore
       env:  
         # must be hard-coded, idk how to do it otherwise as relative paths are not evaluated
-        VCTargetsPath: "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170"
+        VCTargetsPath: C:/Program Files/Microsoft Visual Studio/2022/Enterprise/MSBuild/Microsoft/VC/v170
       # Tests are disabled until I filter them to only run ones that don't need packages
     #- name: Test
     #  run: dotnet test --no-build --verbosity normal
