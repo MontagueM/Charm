@@ -130,6 +130,28 @@ public partial class AtlasView : UserControl
         _shouldRender = true;
     }
 
+    public void LoadMap(FileHash mapHash, Window? window = null)
+    {
+        Cleanup();
+        if (!_initialisedRenderer)
+        {
+            InitializeRendering(window);
+            _initialisedRenderer = true;
+        }
+
+        if (!InitMap(mapHash))
+        {
+            InteropImage.OnRender = null;
+            _shouldRender = false;
+            return;
+        }
+
+        InteropImage.OnRender = DoRender;
+        InteropImage.SetPixelSize((int)ActualWidth, (int)ActualHeight);
+        InteropImage.RequestRender();
+        _shouldRender = true;
+    }
+
     private void Cleanup()
     {
         NativeMethods.Cleanup();
@@ -239,6 +261,81 @@ public partial class AtlasView : UserControl
 
         return true;
     }
+
+    struct StaticMeshDesc
+    {
+        public uint Hash;
+        public Blob Transforms;
+    }
+
+    struct StaticMeshMapDesc
+    {
+        public StaticMeshDesc StaticMesh;
+        public Blob InstanceTransforms;
+    }
+
+    struct MapInfo
+    {
+        public List<StaticMeshDesc> StaticMeshes;
+    }
+
+    private bool InitMap(FileHash mapHash)
+    {
+        StaticMapData staticMap = FileResourcer.Get().GetFile<StaticMapData>(mapHash);
+
+        MapInfo mapInfo = new();
+        mapInfo.StaticMeshes = new List<StaticMeshDesc>();
+        foreach (SStaticMeshInstanceMap staticInstanceMap in staticMap.TagData.InstanceCounts)
+        {
+            staticMap.TagData.Statics[staticInstanceMap.StaticIndex].Static;
+        }
+
+        Blob staticMeshTransforms = staticMesh.TagData.StaticData.GetTransformsBlob();
+        NativeMethods.CreateStaticMesh(staticHash, staticMeshTransforms);
+
+
+
+        List<StaticPart> parts = staticMesh.Load(ExportDetailLevel.MostDetailed);
+        List<BufferGroup> bufferGroups = staticMesh.TagData.StaticData.GetBuffers();
+        List<int> strides = staticMesh.TagData.StaticData.GetStrides();
+        if (strides.Count == 0)
+        {
+            Log.Warning($"Static mesh {staticHash} has no strides");
+            return false;
+        }
+        foreach (BufferGroup bufferGroup in bufferGroups)
+        {
+            NativeMethods.AddStaticMeshBufferGroup(staticHash, bufferGroup);
+            // bufferGroup.VertexBuffers[0].TempDump("0");
+            // bufferGroup.VertexBuffers[1].TempDump("1");
+            // bufferGroup.VertexBuffers[2].TempDump("2");
+        }
+        int partIndex = 0;
+
+        foreach (StaticPart part in parts)
+        {
+            if (part.Material == null)
+            {
+                continue;
+            }
+
+            // part.Material.VertexShader.TempDumpRef();
+
+            PartMaterial partMaterial = new(part.Material, strides);
+            PartInfo partInfo = new() {IndexOffset = part.IndexOffset, IndexCount = part.IndexCount, Material = partMaterial};
+            long result = NativeMethods.CreateStaticMeshPart(staticHash, partInfo);
+            if (result != 0)
+            {
+                MessageBox.Show("Failed to create static mesh part");
+                return false;
+            }
+            partIndex++;
+            _partInfos.Add(partInfo);
+        }
+
+        return true;
+    }
+
 
     public struct InputSignature
     {
