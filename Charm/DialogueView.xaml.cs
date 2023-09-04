@@ -52,10 +52,11 @@ public partial class DialogueView : UserControl
             else
             {
                 D2Class_33978080 a = dyn;
+                dynamic? unk28 = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? a.Unk28BL : a.Unk28;
                 result.Add(new VoicelineItem
                 {
                     Narrator = a.NarratorString,
-                    Voiceline = a.Unk28.Value.ToString(),
+                    Voiceline = unk28.Value.ToString(),
                     Wem = a.Sound1.TagData.Wems[0],
                     RecursionDepth = recursionDepth,
                     Duration = a.Sound1.TagData.Wems[0].Duration

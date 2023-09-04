@@ -8,12 +8,12 @@ using Tiger.Schema.Shaders;
 namespace Tiger.Schema.Entity;
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "0F9C8080", 0xA0)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D89A8080", 0x98)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D89A8080", 0x98)]
 public struct SEntity
 {
     public long FileSize;
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x08, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x08, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArrayUnloaded<D2Class_CD9A8080> EntityResources;
     public DynamicArrayUnloaded<D2Class_8F9A8080> Unk18;
     public long Zeros28;
@@ -77,12 +77,12 @@ public struct D2Class_CD9A8080  // entity resource entry
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "369C8080", 0xA0)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "069B8080", 0xA0)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "069B8080", 0xA0)]
 public struct D2Class_069B8080  // Entity resource
 {
     public long FileSize;
     public ResourcePointer Unk08;
-    public ResourcePointer Unk10;
+    public ResourcePointer Unk10; // this isnt any of the ones in Entity.Load in beyond light
     public ResourcePointer Unk18;
     // public Table ResourceTable20;
     // public Table ResourceTable30;
@@ -118,21 +118,25 @@ public struct D2Class_6E908080
  * could be these external materials are dynamic themselves - we'll extract them all but select the first
  */
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "BD728080", 0x340)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "8F6D8080", 0x450)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8F6D8080", 0x450)]
 public struct D2Class_8F6D8080
 {
     [SchemaField(0x1DC, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x224, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x224, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public EntityModel Model;
-    [SchemaField(0x310, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]  // todo shadowkeep
+    [SchemaField(0x310, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]  // todo shadowkeep, beyond light
     public Tag<D2Class_1C6E8080> TexturePlates;
     // todo there might be a nice way to combine these two and namespace the struct, and instead use properties not fields? would mean all the mess is in the data side not the logic, basically mapping one onto the other. Possible to make it so everything maps onto the latest given, so it only needs to be done for older versions.
     [SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x398, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntrySK> ExternalMaterialsMapSK;
+
     [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntryWQ> ExternalMaterialsMapWQ;
+
     [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x3A0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x400, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArrayUnloaded<D2Class_14008080> ExternalMaterials;
 }
@@ -241,6 +245,7 @@ public struct D2Class_939E8080
 #endregion
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C5728080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "986D8080", 0x8)]
 public struct SExternalMaterialMapEntrySK
 {
     public ushort MaterialCount;
@@ -286,7 +291,7 @@ public struct D2Class_5F6E8080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B8728080", 0x200)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "8A6D8080", 0x2E0)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8A6D8080", 0x2E0)]
 public struct D2Class_8A6D8080
 {
 }
@@ -298,7 +303,7 @@ public struct D2Class_F39A8080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "45858080", 0x100)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "DD818080", 0x100)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "DD818080", 0x100)]
 public struct D2Class_DD818080
 {
     public ResourceInTagPointer Unk00;
@@ -333,7 +338,7 @@ public struct D2Class_40868080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "46858080", 0xF0)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "DE818080", 0x108)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "DE818080", 0x108)]
 public struct D2Class_DE818080
 {
     public ResourceInTagPointer Unk00;
@@ -341,11 +346,11 @@ public struct D2Class_DE818080
     public ResourcePointer Unk48;
     public Tag Unk50;  // 239B8080 WQ, 549C8080 SK
     [SchemaField(0x60, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x68, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x68, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public ResourcePointer Unk68;
     public Tag Unk70;  // 239B8080 WQ, 549C8080 SK
     [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x88, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x88, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerHash Unk88;
     public TigerHash Unk8C;  // this is actually zeros in SK
     public DynamicArrayUnloaded<D2Class_42868080> NodeHierarchy;
@@ -353,15 +358,15 @@ public struct D2Class_DE818080
     public DynamicArrayUnloaded<D2Class_4F9F8080> DefaultInverseObjectSpaceTransforms;
     public DynamicArrayUnloaded<D2Class_06008080> RangeIndexMap;
     public DynamicArrayUnloaded<D2Class_06008080> InnerIndexMap;
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 UnkE0;
     [SchemaField(0xD8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0xF0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0xF0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArrayUnloaded<D2Class_E1818080> UnkF0; // lod distance?
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "088A8080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "42868080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "42868080", 0x10)]
 public struct D2Class_42868080
 {
     public TigerHash NodeHash;
@@ -402,7 +407,7 @@ public struct SEntityModel  // Entity model
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "78738080", 0x88)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C56E8080", 0x80)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C56E8080", 0x80)]
 public struct SEntityModelMesh
 {
     public VertexBuffer Vertices1;  // vert file 1 (positions)
@@ -410,19 +415,19 @@ public struct SEntityModelMesh
     public VertexBuffer OldWeights;  // old weights
     public TigerHash Unk0C;  // nothing ever
     public IndexBuffer Indices;  // indices
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public VertexBuffer VertexColour;  // vertex colour
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public VertexBuffer SinglePassSkinningBuffer;  // single pass skinning buffer
     public int Zeros1C;
     public DynamicArrayUnloaded<D2Class_CB6E8080> Parts;
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 48)]
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, ArraySizeConst = 37)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 37)]
     public short[] StagePartOffsets;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7E738080", 0x20)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "CB6E8080", 0x24)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "CB6E8080", 0x24)]
 public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
 {
     public IMaterial Material;  // AA6D8080
@@ -436,12 +441,12 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     // need to check this on WQ, theres no way its an int
     public int Flags;
     [SchemaField(0x1A, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x1C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x1C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public byte GearDyeChangeColorIndex;   // sbyte gear_dye_change_color_index
     public ELodCategory LodCategory;
     public byte Unk1E;
     public byte LodRun;  // lod_run
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public int Unk20; // variant_shader_index?
 }
 
@@ -1148,10 +1153,12 @@ public struct D2Class_D3598080
 
 #region Audio
 
-[SchemaStruct("6E358080", 0x6b8)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6E358080", 0x6b8)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "6E358080", 0x6d8)]
 public struct D2Class_6E358080
 {
-    [SchemaField(0x648)]
+    [SchemaField(0x648, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x668, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_9B318080> PatternAudioGroups;
 }
 

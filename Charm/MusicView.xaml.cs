@@ -38,7 +38,11 @@ public partial class MusicView : UserControl
         {
             WemsControl.Load(f5458080);
             EventsControl.Load(f5458080);
-            var sbhash = f5458080.MusicLoopSound.TagData.Unk18.TagData.SoundBank.Hash;
+            FileHash sbhash = null;
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+                sbhash = f5458080.MusicLoopSound.TagData.SoundbankBL.Hash;
+            else
+                sbhash = f5458080.MusicLoopSound.TagData.Unk18.TagData.SoundBank.Hash;
             SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.PackageId:X4}-{sbhash.FileIndex:X4}";
         }
         else if (resource is D2Class_F7458080 res)

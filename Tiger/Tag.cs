@@ -45,11 +45,23 @@ public class Tag<T> : TigerFile where T : struct
 
     protected void Deserialize()
     {
+        if (Hash == "C3A2A580")
+        {
+            var a = 0;
+        }
         if (_isLoaded)
         {
+            if (Hash == "C3A2A580")
+            {
+                var a = 0;
+            }
             return;
         }
         _isLoaded = true;
+        if (Hash == "C3A2A580")
+        {
+            var a = 0;
+        }
         using TigerReader reader = GetReader();
         _tag = SchemaDeserializer.Get().DeserializeSchema<T>(reader);
     }

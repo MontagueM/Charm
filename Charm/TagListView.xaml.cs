@@ -17,6 +17,7 @@ using ConcurrentCollections;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Audio;
@@ -1080,10 +1081,11 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Static);
-        viewer.StaticControl.LoadStatic(fileHash, viewer.StaticControl.ModelView.GetSelectedLod());
+        viewer.StaticControl.LoadStatic(fileHash, ExportDetailLevel.MostDetailed, Window.GetWindow(this));
+        // viewer.StaticControl.LoadStatic(fileHash, viewer.StaticControl.ModelView.GetSelectedLod());
         SetExportFunction(ExportStatic, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.Minimal);
         viewer.ExportControl.SetExportInfo(fileHash);
-        viewer.StaticControl.ModelView.SetModelFunction(() => viewer.StaticControl.LoadStatic(fileHash, viewer.StaticControl.ModelView.GetSelectedLod()));
+        // viewer.StaticControl.ModelView.SetModelFunction(() => viewer.StaticControl.LoadStatic(fileHash, viewer.StaticControl.ModelView.GetSelectedLod()));
     }
 
     private void ExportStatic(ExportInfo info)
@@ -1198,27 +1200,40 @@ public partial class TagListView : UserControl
 
         // Dialogue tables can be in the 0x80808948 entries
         ConcurrentBag<FileHash> dialogueTables = new ConcurrentBag<FileHash>();
-        if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 entry)
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            foreach (var dirtable in entry.DialogueTables)
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 entry)
             {
-                if (dirtable.DialogueTable != null)
-                    dialogueTables.Add(dirtable.DialogueTable.Hash);
-            }
-        }
-        Parallel.ForEach(activity.TagData.Unk50, val =>
-        {
-            foreach (var d2Class48898080 in val.Unk18)
-            {
-                var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
-                if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
-                    resource is D2Class_18978080 || resource is D2Class_19978080)
+                foreach (var dirtable in entry.DialogueTables)
                 {
-                    if (resource.DialogueTable != null)
-                        dialogueTables.Add(resource.DialogueTable.Hash);
+                    if (dirtable.DialogueTable != null)
+                        dialogueTables.Add(dirtable.DialogueTable.Hash);
                 }
             }
-        });
+            Parallel.ForEach(activity.TagData.Unk50, val =>
+            {
+                foreach (var d2Class48898080 in val.Unk18)
+                {
+                    var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
+                    if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
+                        resource is D2Class_18978080 || resource is D2Class_19978080)
+                    {
+                        if (resource.DialogueTable != null)
+                            dialogueTables.Add(resource.DialogueTable.Hash);
+                    }
+                }
+            });
+        }
+        else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+        {
+            var resource = activity.TagData.Unk18.GetValue(activity.GetReader());
+            if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
+                        resource is D2Class_18978080 || resource is D2Class_19978080)
+            {
+                if (resource.DialogueTableBL != null)
+                    dialogueTables.Add(resource.DialogueTableBL.Hash);
+            }
+        }
 
         Parallel.ForEach(dialogueTables, hash =>
         {
@@ -1254,33 +1269,55 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>();
 
         // Dialogue tables can be in the 0x80808948 entries
-        if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 a988080)
-        {
-            var directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
 
-            Parallel.ForEach(directiveTables, hash =>
+        // TODO: shrink this? extra if/else statement for single type change looks ugly imo
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+        {
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_19978080 resource)
             {
-                _allTagItems.Add(new TagItem
+                var directiveTables = resource.DirectiveTables.Select(x => x.DirectiveTable.Hash);
+
+                Parallel.ForEach(directiveTables, hash =>
                 {
-                    Hash = hash,
-                    Name = hash,
-                    TagType = ETagListType.Directive
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = hash,
+                        Name = hash,
+                        TagType = ETagListType.Directive
+                    });
                 });
-            });
+            }
         }
-        else if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_20978080 class20978080)
+        else
         {
-            var directiveTables = class20978080.PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
-
-            Parallel.ForEach(directiveTables, hash =>
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 a988080)
             {
-                _allTagItems.Add(new TagItem
+                var directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
+
+                Parallel.ForEach(directiveTables, hash =>
                 {
-                    Hash = hash,
-                    Name = hash,
-                    TagType = ETagListType.Directive
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = hash,
+                        Name = hash,
+                        TagType = ETagListType.Directive
+                    });
                 });
-            });
+            }
+            else if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_20978080 class20978080)
+            {
+                var directiveTables = class20978080.PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
+
+                Parallel.ForEach(directiveTables, hash =>
+                {
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = hash,
+                        Name = hash,
+                        TagType = ETagListType.Directive
+                    });
+                });
+            }
         }
     }
 
@@ -1508,26 +1545,36 @@ public partial class TagListView : UserControl
         _allTagItems = new ConcurrentBag<TagItem>();
 
         ConcurrentBag<FileHash> musics = new();
-        Parallel.ForEach(activity.TagData.Unk50, val =>
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
-            foreach (var d2Class48898080 in val.Unk18)
+            // TODO: check if wq way of music is also in beyond light
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_19978080 res)
             {
-                var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
-                if (resource is D2Class_D5908080)
+                if (res.Music != null)
+                    musics.Add(res.Music.Hash);
+            }
+        }
+        else if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            Parallel.ForEach(activity.TagData.Unk50, val =>
+            {
+                foreach (var d2Class48898080 in val.Unk18)
                 {
-                    var res = (D2Class_D5908080)resource;
-                    if (res.Music != null)
+                    var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
+                    if (resource is D2Class_D5908080 res)
                     {
-                        musics.Add(res.Music.Hash);
+                        if (res.Music != null)
+                        {
+                            musics.Add(res.Music.Hash);
+                        }
                     }
                 }
+            });
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 res)
+            {
+                if (res.Music != null)
+                    musics.Add(res.Music.Hash);
             }
-        });
-
-        if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 res)
-        {
-            if (res.Music != null)
-                musics.Add(res.Music.Hash);
         }
 
         Parallel.ForEach(musics, hash =>

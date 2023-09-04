@@ -31,7 +31,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             return "2D";
     }
 
-    public ScratchImage GetScratchImage()
+    public byte[] GetDDSBytes()
     {
         DXGI_FORMAT format = (DXGI_FORMAT)_tag.Format;
         byte[] data;
@@ -53,6 +53,14 @@ public class Texture : TigerReferenceFile<STextureHeader>
         byte[] final = new byte[data.Length + tag.Length];
         Array.Copy(tag, 0, final, 0, tag.Length);
         Array.Copy(data, 0, final, tag.Length, data.Length);
+        return final;
+    }
+
+    public ScratchImage GetScratchImage()
+    {
+        DXGI_FORMAT format = (DXGI_FORMAT)_tag.Format;
+
+        byte[] final = GetDDSBytes();
         GCHandle gcHandle = GCHandle.Alloc(final, GCHandleType.Pinned);
         IntPtr pixelPtr = gcHandle.AddrOfPinnedObject();
         var scratchImage = TexHelper.Instance.LoadFromDDSMemory(pixelPtr, final.Length, DDS_FLAGS.NONE);
@@ -222,12 +230,12 @@ public struct STextureHeader
 {
     public uint DataSize;
     public uint Format;  // DXGI_FORMAT
-    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public float Unk10;
-    [SchemaField(0x14, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x14, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public float Unk14;
     [SchemaField(0x0C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public ushort CAFE;
 
     public ushort Width;
@@ -242,6 +250,6 @@ public struct STextureHeader
     public ushort Unk34;
 
     [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x3C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x3C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerFile? LargeTextureBuffer;
 }

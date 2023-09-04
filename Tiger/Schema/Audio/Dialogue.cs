@@ -14,37 +14,41 @@ public class Dialogue : Tag<D2Class_B8978080>
     public List<dynamic?> Load()
     {
         List<dynamic?> result = new();
-        foreach (var entry in _tag.Unk18.Select(u => u.Unk08.GetValue(GetReader())))
+        foreach (var entry1 in _tag.Unk18)
         {
-            switch (entry)
+            foreach (var u in _tag.Unk18)
             {
-                case D2Class_2D978080:
-                    List<dynamic?> res2d = Collapse2D97(entry);
-                    if (res2d.Count > 1)
-                    {
-                        result.Add(res2d);
-                    }
-                    else if (res2d.Count == 1)
-                    {
-                        result.Add(res2d[0]);
-                    }
-                    break;
-                case D2Class_2A978080:
-                    List<dynamic?> res2a = Collapse2A97(entry);
-                    if (res2a.Count > 1)
-                    {
-                        result.Add(res2a);
-                    }
-                    else if (res2a.Count == 1)
-                    {
-                        result.Add(res2a[0]);
-                    }
-                    break;
-                case D2Class_33978080:
-                    result.Add(entry);
-                    break;
-                default:
-                    throw new NotImplementedException();
+                var entry = u.Unk08.GetValue(GetReader());
+                switch (entry)
+                {
+                    case D2Class_2D978080:
+                        List<dynamic?> res2d = Collapse2D97(entry);
+                        if (res2d.Count > 1)
+                        {
+                            result.Add(res2d);
+                        }
+                        else if (res2d.Count == 1)
+                        {
+                            result.Add(res2d[0]);
+                        }
+                        break;
+                    case D2Class_2A978080:
+                        List<dynamic?> res2a = Collapse2A97(entry);
+                        if (res2a.Count > 1)
+                        {
+                            result.Add(res2a);
+                        }
+                        else if (res2a.Count == 1)
+                        {
+                            result.Add(res2a[0]);
+                        }
+                        break;
+                    case D2Class_33978080:
+                        result.Add(entry);
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
             }
         }
         return result;
