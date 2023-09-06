@@ -1,0 +1,14 @@
+# Directories
+.vs/
+bin/
+bin-int/
+x64/
+
+
+DXSDK11
+.idea
+x64/
+Debug/
+
+# Exclude
+!vendor/bin

@@ -8,6 +8,7 @@
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
         <Configurations>Debug;Release;</Configurations>
         <Platforms>AnyCPU;x64</Platforms>
+        <LangVersion>11</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

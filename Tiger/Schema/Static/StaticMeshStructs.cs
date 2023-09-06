@@ -73,6 +73,7 @@ public struct SStaticMeshData_BL
     public Vector4 ModelTransform;
     public float TexcoordScale;
     public Vector2 TexcoordTranslation;
+    public uint Unk5C;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "9B718080", 0x8)]

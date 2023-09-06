@@ -53,8 +53,8 @@ namespace Tiger.Schema.Shaders
         public ShaderBytecode? VertexShader { get; }
         public ShaderBytecode? PixelShader { get; }
         public FileHash PSVector4Container { get; }
-        public DynamicArray<SDirectXSamplerTag> PS_Samplers { get; }
-        public DynamicArray<SDirectXSamplerTag> VS_Samplers { get; }
+        public List<DirectXSampler> PS_Samplers { get; }
+        public List<DirectXSampler> VS_Samplers { get; }
         public DynamicArray<D2Class_09008080> Unk90 { get; }
         public DynamicArray<Vec4> UnkA0 { get; }
         public DynamicArray<Vec4> UnkC0 { get; }
@@ -241,8 +241,8 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2E8;
         public DynamicArray<Vec4> Unk2E0 => _tag.Unk2F8;
         public DynamicArray<Vec4> Unk300 => _tag.Unk310;
-        public DynamicArray<SDirectXSamplerTag> VS_Samplers => _tag.VS_Samplers;
-        public DynamicArray<SDirectXSamplerTag> PS_Samplers => _tag.PS_Samplers;
+        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
+        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {
@@ -281,8 +281,8 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2D0;
         public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
         public DynamicArray<Vec4> Unk300 => _tag.Unk300;
-        public DynamicArray<SDirectXSamplerTag> VS_Samplers => _tag.VS_Samplers;
-        public DynamicArray<SDirectXSamplerTag> PS_Samplers => _tag.PS_Samplers;
+        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(s => s.Samplers).ToList();
+        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(s => s.Samplers).ToList();
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {
@@ -322,8 +322,8 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2D0;
         public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
         public DynamicArray<Vec4> Unk300 => _tag.Unk300;
-        public DynamicArray<SDirectXSamplerTag> VS_Samplers => _tag.VS_Samplers;
-        public DynamicArray<SDirectXSamplerTag> PS_Samplers => _tag.PS_Samplers;
+        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
+        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {

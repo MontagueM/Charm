@@ -32,7 +32,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             return "2D";
     }
 
-    public ScratchImage GetScratchImage()
+    public byte[] GetDDSBytes()
     {
         DXGI_FORMAT format = (DXGI_FORMAT)_tag.Format;
         byte[] data;
@@ -54,6 +54,14 @@ public class Texture : TigerReferenceFile<STextureHeader>
         byte[] final = new byte[data.Length + tag.Length];
         Array.Copy(tag, 0, final, 0, tag.Length);
         Array.Copy(data, 0, final, tag.Length, data.Length);
+        return final;
+    }
+
+    public ScratchImage GetScratchImage()
+    {
+        DXGI_FORMAT format = (DXGI_FORMAT)_tag.Format;
+
+        byte[] final = GetDDSBytes();
         GCHandle gcHandle = GCHandle.Alloc(final, GCHandleType.Pinned);
         IntPtr pixelPtr = gcHandle.AddrOfPinnedObject();
         var scratchImage = TexHelper.Instance.LoadFromDDSMemory(pixelPtr, final.Length, DDS_FLAGS.NONE);

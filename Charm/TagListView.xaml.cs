@@ -1081,10 +1081,11 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Static);
-        viewer.StaticControl.LoadStatic(fileHash, viewer.StaticControl.ModelView.GetSelectedLod());
+        viewer.StaticControl.LoadStatic(fileHash, ExportDetailLevel.MostDetailed, Window.GetWindow(this));
+        // viewer.StaticControl.LoadStatic(fileHash, viewer.StaticControl.ModelView.GetSelectedLod());
         SetExportFunction(ExportStatic, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.Minimal);
         viewer.ExportControl.SetExportInfo(fileHash);
-        viewer.StaticControl.ModelView.SetModelFunction(() => viewer.StaticControl.LoadStatic(fileHash, viewer.StaticControl.ModelView.GetSelectedLod()));
+        // viewer.StaticControl.ModelView.SetModelFunction(() => viewer.StaticControl.LoadStatic(fileHash, viewer.StaticControl.ModelView.GetSelectedLod()));
     }
 
     private void ExportStatic(ExportInfo info)
