@@ -24,7 +24,7 @@ Charm currently supports:
 If you just want to look at the latest release, you only need Destiny 2 downloaded on Steam.
 
 Otherwise, you can download the DepotDownloader versions by
-- Downloading [DepotDownloader]()
+- Downloading [DepotDownloader](https://github.com/SteamRE/DepotDownloader/releases)
 - Running it with the following arguments:
 ```
 dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest {main_manifest_id} -username <username> -password <password> -dir <path> -validate
