@@ -279,18 +279,45 @@ public partial class AtlasView : UserControl
         public List<StaticMeshDesc> StaticMeshes;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    struct AtlasTransform
+    {
+        public Vector4 Rotation;
+        public Vector3 Translation;
+        public float Scale;
+    }
+
     private bool InitMap(FileHash mapHash)
     {
         StaticMapData staticMap = FileResourcer.Get().GetFile<StaticMapData>(mapHash);
 
-        MapInfo mapInfo = new();
-        mapInfo.StaticMeshes = new List<StaticMeshDesc>();
+        Dictionary<uint, List<SStaticMeshInstanceTransform>> staticTransforms = new();
+
         foreach (SStaticMeshInstanceMap staticInstanceMap in staticMap.TagData.InstanceCounts)
         {
-            staticMap.TagData.Statics[staticInstanceMap.StaticIndex].Static;
+            uint hash = staticMap.TagData.Statics[staticInstanceMap.StaticIndex].Static.Hash;
+            var transforms = staticMap.TagData.Instances.Skip(staticInstanceMap.InstanceOffset).Take(staticInstanceMap.InstanceCount);
+            if (!staticTransforms.ContainsKey(hash))
+            {
+                staticTransforms[hash] = new List<SStaticMeshInstanceTransform>();
+            }
+            staticTransforms[hash].AddRange(transforms);
         }
 
-        Blob staticMeshTransforms = staticMesh.TagData.StaticData.GetTransformsBlob();
+
+        MapInfo mapInfo = new();
+        mapInfo.StaticMeshes = new List<StaticMeshDesc>();
+        int transformSize = Marshal.SizeOf<AtlasTransform>();
+        foreach ((uint hash, List<SStaticMeshInstanceTransform> transforms) in staticTransforms)
+        {
+            byte[] data = new byte[transforms.Count * transformSize];
+            for (int i = 0; i < transforms.Count; i++)
+            {
+                Array.Copy(StructConverter.FromType(transforms[i]), data, i*transformSize);
+            }
+            mapInfo.StaticMeshes.Add(new StaticMeshDesc {Hash = hash, Transforms = new Blob(data)});
+        }
+
         NativeMethods.CreateStaticMesh(staticHash, staticMeshTransforms);
 
 
