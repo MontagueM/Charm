@@ -1,5 +1,7 @@
 ﻿using System.Runtime.InteropServices;
+using Microsoft.VisualBasic.FileIO;
 using Tiger.Exporters;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
@@ -260,6 +262,58 @@ public struct SStaticMapParent
     [SchemaField(0x2C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerHash Unk2C;
 }
+
+/// <summary>
+/// Map Decals Resource
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "55698080", 0x18)]
+public struct SMapDecalsResource
+{
+    [SchemaField(0x10)]
+    public Tag<SMapDecals> MapDecals;
+}
+
+/// <summary>
+/// Map Decals
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "5B698080", 0x78)]
+public struct SMapDecals
+{
+    public ulong FileSize;
+    public DynamicArray<D2Class_63698080> DecalResources;
+    [SchemaField(0x18)]
+    public DynamicArray<D2Class_64698080> Locations;
+    [SchemaField(0x28)]
+    public Tag Unk28;
+    public Tag Unk2C;
+    [SchemaField(0x38)]
+    public Tag<SOcclusionBounds> DecalProjectionBounds;
+    [SchemaField(0x40)]
+    public Vector4 Unk40; //some type of bounds
+    public Vector4 Unk50;
+    public TigerHash Unk60;
+}
+
+/// <summary>
+/// Decal resources
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "63698080", 0x8)]
+public struct D2Class_63698080
+{
+    public IMaterial Material;
+    public short StartIndex;
+    public short Count; //Number of entries to read
+}
+
+/// <summary>
+/// Decal Location
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "64698080", 0x10)]
+public struct D2Class_64698080
+{
+    public Vector4 Location;
+}
+
 
 // /// <summary>
 // /// Boss entity data resource?
