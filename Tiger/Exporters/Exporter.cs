@@ -69,6 +69,7 @@ public class ExporterScene
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentBag<SMapDataEntry> EntityPoints = new();
     public ConcurrentBag<CubemapResource> Cubemaps = new();
+    public ConcurrentBag<SMapDecalsResource> Decals = new();
     private List<FileHash> _addedEntities = new List<FileHash>();
 
     public void AddStatic(FileHash meshHash, List<StaticPart> parts)
@@ -197,6 +198,11 @@ public class ExporterScene
     public void AddCubemap(CubemapResource cubemap)
     {
         Cubemaps.Add(cubemap);
+    }
+
+    public void AddDecals(SMapDecalsResource decal)
+    {
+        Decals.Add(decal);
     }
 }
 

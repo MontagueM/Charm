@@ -210,34 +210,7 @@ public partial class MapView : UserControl
                 }
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDecalsResource decals)
                 {
-                    if (decals.MapDecals is not null)
-                    {
-                        Directory.CreateDirectory($"{savePath}/textures/decals/");
-                        foreach (var item in decals.MapDecals.TagData.DecalResources)
-                        {
-                            // Check if the index is within the bounds of the second list
-                            if (item.StartIndex >= 0 && item.StartIndex < decals.MapDecals.TagData.Locations.Count)
-                            {
-                                // Loop through the second list based on the given parameters
-                                for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decals.MapDecals.TagData.Locations.Count; i++)
-                                {
-                                    var secondListEntry = decals.MapDecals.TagData.Locations[i];
-                                    var boxCorners = decals.MapDecals.TagData.DecalProjectionBounds.TagData.InstanceBounds[i];
-
-                                    // Access the desired data from the second list entry
-                                    Vector4 location = secondListEntry.Location;
-
-                                    //item.Material.SavePixelShader($"{ConfigHandler.GetExportSavePath()}/test/");
-                                    item.Material.SaveAllTextures($"{savePath}/textures/decals/");
-                                    //Source2Handler.SaveDecalVMAT($"{ConfigHandler.GetExportSavePath()}/test/", item.Material.Hash, item.Material);
-
-                                    //fbxHandler.AddEmptyToScene($"{item.Material.Hash} {boxCorners.Unk24}", location, Vector4.Zero);
-                                    //fbxHandler.InfoHandler.AddDecal(boxCorners.Unk24.GetHashString(), item.Material.Hash, location, boxCorners.Corner1, boxCorners.Corner2);
-                                    //fbxHandler.InfoHandler.AddMaterial(item.Material);
-                                }
-                            }
-                        }
-                    }
+                    scene.AddDecals(decals);
                 }
             });
         });

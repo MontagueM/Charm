@@ -93,6 +93,7 @@ public struct SMeshInstanceOcclusionBounds
     public Vector4 Corner1;
     public Vector4 Corner2;
     public TigerHash Unk20;
+    public TigerHash Unk24;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A3718080", 0x30)]
@@ -266,6 +267,7 @@ public struct SStaticMapParent
 /// <summary>
 /// Map Decals Resource
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "626E8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "55698080", 0x18)]
 public struct SMapDecalsResource
 {
@@ -276,6 +278,7 @@ public struct SMapDecalsResource
 /// <summary>
 /// Map Decals
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "686E8080", 0x78)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "5B698080", 0x78)]
 public struct SMapDecals
 {
@@ -297,6 +300,7 @@ public struct SMapDecals
 /// <summary>
 /// Decal resources
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6E8080", 0x8)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "63698080", 0x8)]
 public struct D2Class_63698080
 {
@@ -308,6 +312,7 @@ public struct D2Class_63698080
 /// <summary>
 /// Decal Location
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D6E8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "64698080", 0x10)]
 public struct D2Class_64698080
 {
