@@ -50,6 +50,7 @@ public class StaticMapData : Tag<SStaticMapData>
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D968080", 0xA0)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "AD938080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AD938080", 0xC0)]
 public struct SStaticMapData
 {
@@ -95,6 +96,7 @@ public struct SMeshInstanceOcclusionBounds
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A3718080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "406D8080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "406D8080", 0x40)]
 public struct SStaticMeshInstanceTransform
 {
@@ -104,14 +106,14 @@ public struct SStaticMeshInstanceTransform
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7D968080", 0x4)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BD938080", 0x4)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "BD938080", 0x4)]
 public struct SStaticMeshHash
 {
     public StaticMesh Static;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "90718080", 0x8)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "286D8080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "286D8080", 0x8)]
 public struct SStaticMeshInstanceMap
 {
     public short InstanceCount;
@@ -127,7 +129,7 @@ public struct SStaticMeshInstanceMap
 /// The very top reference for all map-related things.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "AE7D8080", 0x50)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "1E898080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "1E898080", 0x60)]
 public struct SBubbleParent
 {
     public long FileSize;
@@ -137,7 +139,7 @@ public struct SBubbleParent
     public int Unk1C;
     [SchemaField(0x40)]
     public DynamicArray<D2Class_C9968080> Unk40;
-    [Tag64, SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [Tag64, SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag Unk50;  // some kind of parent thing, very strange weird idk
 }
 
@@ -145,7 +147,7 @@ public struct SBubbleParent
 /// Basically same table as in the child tag, but in a weird format. Never understood what its for.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "44968080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C9968080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C9968080", 0x10)]
 public struct D2Class_C9968080
 {
     [Tag64]
@@ -157,7 +159,7 @@ public struct D2Class_C9968080
 /// First of MapResources is what I call "ambient entities", second is always the static map.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E0918080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "01878080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "01878080", 0x60)]
 public struct SBubbleDefinition
 {
     public long FileSize;
@@ -165,7 +167,7 @@ public struct SBubbleDefinition
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C1848080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "03878080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "03878080", 0x10)]
 public struct SMapContainerEntry
 {
     [Tag64]
@@ -177,7 +179,7 @@ public struct SMapContainerEntry
 /// This is quite similar to EntityResource, but with more children.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "548A8080", 0x38)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "07878080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "07878080", 0x38)]
 public struct SMapContainer
 {
     public long FileSize;
@@ -187,7 +189,7 @@ public struct SMapContainer
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B08B8080", 4)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "09878080", 4)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "09878080", 4)]
 public struct SMapDataTableEntry
 {
     public Tag<SMapDataTable> MapDataTable;
@@ -197,7 +199,7 @@ public struct SMapDataTableEntry
 /// A map data table, containing data entries.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D6998080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "83988080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "83988080", 0x18)]
 public struct SMapDataTable
 {
     public long FileSize;
@@ -209,18 +211,18 @@ public struct SMapDataTable
 /// A data entry. Can be static maps, entities, etc. with a defined world transform.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D8998080", 0x90)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "85988080", 0x90)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "85988080", 0x90)]
 public struct SMapDataEntry
 {
     // for now we'll process both entities as if they were the same
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true), NoLoad]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true), NoLoad]
     public Entity.Entity EntitySK;
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 Rotation;
     public Vector4 Translation;
-    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64, NoLoad]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402), Tag64, NoLoad]
     public Entity.Entity EntityWQ;
     [SchemaField(0x68)]
     public uint Unk68;
@@ -240,7 +242,7 @@ public struct SMapDataEntry
 /// Data resource containing a static map.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B3718080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C96C8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C96C8080", 0x18)]
 public struct SMapDataResource
 {
     [SchemaField(0x8)]
@@ -250,14 +252,14 @@ public struct SMapDataResource
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F46E8080", 0x28)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "0D6A8080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "0D6A8080", 0x30)]
 public struct SStaticMapParent
 {
     // no filesize
     [SchemaField(0x8)]
     public StaticMapData StaticMap;  // could make it StaticMapData but dont want it to load it, could have a NoLoad option
     [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x2C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x2C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerHash Unk2C;
 }
 

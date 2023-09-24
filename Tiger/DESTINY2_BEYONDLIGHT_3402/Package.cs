@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
-namespace Tiger.DESTINY2_WITCHQUEEN_6307;
+namespace Tiger.DESTINY2_BEYONDLIGHT_3402;
 
 [StructLayout(LayoutKind.Explicit)]
 public struct PackageHeader : IPackageHeader
@@ -163,10 +163,10 @@ public struct PackageHeader : IPackageHeader
     }
 };
 
-[StrategyClass(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+[StrategyClass(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
 public class Package : Tiger.Package
 {
-    public Package(string packagePath) : base(packagePath, TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+    public Package(string packagePath) : base(packagePath, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
     {
     }
 

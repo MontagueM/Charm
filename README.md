@@ -13,17 +13,18 @@ The tool focuses on providing as much access to the information in the game file
 You'll first need at least one game installation.
 Charm currently supports:
 
-| Version | Description             | Where           |  Main manifest id   | Language manifest id |
-|---------|-------------------------|-----------------|---------------------|----------------------|
-| 2.6.0.1 | Shadowkeep first update | DepotDownloader | 7002268313830901797 | 2399965969279284756  |
-| 2.9.9.9 | Shadowkeep last update  | DepotDownloader | 4160053308690659072 | 4651412338057797072  |
-| 6.3.0.7 | Witch Queen last update | DepotDownloader | 6051526863119423207 | 1078048403901153652  |
-| N/A     | Lightfall latest        | Steam           | N/A                 | N/A                  |
+| Version | Description              | Where           |  Main manifest id   | Language manifest id |
+|---------|--------------------------|-----------------|---------------------|----------------------|
+| 2.6.0.1 | Shadowkeep first update  | DepotDownloader | 7002268313830901797 | 2399965969279284756  |
+| 2.9.9.9 | Shadowkeep last update   | DepotDownloader | 4160053308690659072 | 4651412338057797072  |
+| 3.4.0.2 | Beyond Light last update | DepotDownloader | 5631185797932644936 | 3832609057880895101  |
+| 6.3.0.7 | Witch Queen last update  | DepotDownloader | 6051526863119423207 | 1078048403901153652  |
+| N/A     | Lightfall latest         | Steam           | N/A                 | N/A                  |
 
 If you just want to look at the latest release, you only need Destiny 2 downloaded on Steam.
 
 Otherwise, you can download the DepotDownloader versions by
-- Downloading [DepotDownloader]()
+- Downloading [DepotDownloader](https://github.com/SteamRE/DepotDownloader/releases)
 - Running it with the following arguments:
 ```
 dotnet DepotDownloader.dll -app 1085660 -depot 1085661 -manifest {main_manifest_id} -username <username> -password <password> -dir <path> -validate

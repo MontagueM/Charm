@@ -26,14 +26,14 @@ public class S2ShaderConverter
     public string vfxStructure =
 $@"HEADER
 {{
-	Description = ""Charm Auto-Generated Source 2 Shader""; 
+	Description = ""Charm Auto-Generated Source 2 Shader"";
 }}
 
 MODES
 {{
 	VrForward();
 
-	Depth(); 
+	Depth();
 
 	ToolsVis( S_MODE_TOOLS_VIS );
 	ToolsWireframe( ""vr_tools_wireframe.shader"" );
@@ -75,10 +75,10 @@ struct PixelInput
 VS
 {{
 	#include ""common/vertex.hlsl""
-    #define CUSTOM_TEXTURE_FILTERING 
+    #define CUSTOM_TEXTURE_FILTERING
     #define cmp -
 
-//vs_samplers  
+//vs_samplers
 //vs_CBuffers
 //vs_Inputs
 
@@ -99,10 +99,10 @@ PS
 {{
     #include ""common/pixel.hlsl""
     #include ""raytracing/reflections.hlsl""
-    #define CUSTOM_TEXTURE_FILTERING 
+    #define CUSTOM_TEXTURE_FILTERING
     #define cmp -
     //RenderState
-    
+
     #if ( S_MODE_REFLECTIONS )
 		#define FinalOutput ReflectionOutput
 	#else
@@ -121,7 +121,7 @@ PS
 //ps_samplers
 //ps_CBuffers
 //ps_Inputs
-        
+
     FinalOutput MainPs( PixelInput i ) : SV_Target0
     {{
 //ps_Function
@@ -132,7 +132,7 @@ PS
         float3 normal_in_world_space = biased_normal / normal_length;
 
         float smoothness = saturate(8 * (normal_length - 0.375));
-        
+
         Material mat = Material::From(i,
                     float4(o0.xyz, alpha), //albedo, alpha
                     float4(0.5, 0.5, 1, 1), //Normal, gets set later
@@ -187,7 +187,7 @@ PS
 		{{
             return ShadingModelStandard::Shade(i, mat);
         }}
-        #endif  
+        #endif
     }}
 }}";
 
@@ -212,10 +212,10 @@ PS
 
         for (int i = 0; i < material.PS_Samplers.Count; i++)
         {
-            if (material.PS_Samplers[i].Samplers is null)
+            if (material.PS_Samplers[i] is null)
                 continue;
 
-            var sampler = material.PS_Samplers[i].Samplers.Sampler;
+            var sampler = material.PS_Samplers[i].Sampler;
             texSamples.AppendLine($"\tSamplerState g_s{i + 1} < Filter({sampler.Filter}); AddressU({sampler.AddressU}); AddressV({sampler.AddressV}); AddressW({sampler.AddressW}); ComparisonFunc({sampler.ComparisonFunc}); MaxAniso({sampler.MaxAnisotropy}); >;");
         }
 
@@ -237,7 +237,7 @@ PS
         //------------------------------------------------------------------------------
 
         //Vertex Shader - Commented out for now
-        //if(bIsTerrain) 
+        //if(bIsTerrain)
         //{
         //    texSamples = new StringBuilder();
         //    hlsl = new StringReader(vertex);

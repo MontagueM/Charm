@@ -213,7 +213,7 @@ public partial class MainWindow
 
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("1.3.2");
+        var currentVersion = new ApplicationVersion("2.0.0");
         var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         versionChecker.LatestVersionName = "version";
         try
@@ -430,46 +430,5 @@ public partial class MainWindow
         {
             throw new ExternalException("Crash induced.");
         }
-    }
-}
-
-public static class NestedTypeHelpers
-{
-    public static Type? FindNestedGenericType<T>()
-    {
-        Type? nestedType = null;
-
-        Type testType = typeof(T);
-        while (nestedType == null && testType != null && testType != typeof(object))
-        {
-            if (testType.IsGenericType)
-            {
-                nestedType = testType.GenericTypeArguments[0];
-            }
-            else
-            {
-                testType = testType.BaseType;
-            }
-        }
-
-        return nestedType;
-    }
-
-    public static Type? GetNonGenericParent(this Type inTestType, Type inheritParentType)
-    {
-        Type? testType = inTestType;
-        while (testType != null && testType != typeof(object))
-        {
-            if (testType.IsGenericType && testType.GenericTypeArguments.Length > 0 && testType.GetGenericTypeDefinition() == inheritParentType)
-            {
-                return testType;
-            }
-            else
-            {
-                testType = testType.BaseType;
-            }
-        }
-
-        return null;
     }
 }

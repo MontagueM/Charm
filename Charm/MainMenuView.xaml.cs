@@ -38,7 +38,7 @@ public partial class MainMenuView : UserControl
 
     private bool ShowWQButtons(TigerStrategy strategy)
     {
-        return strategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999;
+        return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402;
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)

@@ -26,6 +26,8 @@ public enum TigerStrategy
     DESTINY2_SHADOWKEEP_2601 = 2601,
     [StrategyMetadata("w64", 1085660, 1085661, 4160053308690659072, 1085662, 4651412338057797072)]
     DESTINY2_SHADOWKEEP_2999 = 2999,
+    [StrategyMetadata("w64", 1085660, 1085661, 5631185797932644936, 1085662, 3832609057880895101)]
+    DESTINY2_BEYONDLIGHT_3402 = 3402,
     [StrategyMetadata("w64", 1085660, 1085661, 6051526863119423207, 1085662, 1078048403901153652)]
     DESTINY2_WITCHQUEEN_6307 = 6307,
     [StrategyMetadata("w64")]
@@ -95,15 +97,20 @@ public class Strategy
             return true;
         }
 
-        Task.Run(() =>
-        {
-            BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
-            OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
-            AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
-        });
+        BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+
+        //Task.Run(() =>
+        //{
+        //    BeforeStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        //    OnStrategyChangedEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        //    AfterStrategyEvent.Invoke(new StrategyEventArgs { Strategy = _currentStrategy });
+        //});
 
         return true;
     }
+
 
     /// <exception cref="ArgumentException">'strategy' does not exist.</exception>
     public static StrategyConfiguration GetStrategyConfiguration(TigerStrategy strategy)
