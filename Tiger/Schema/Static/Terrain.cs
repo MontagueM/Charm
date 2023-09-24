@@ -44,18 +44,19 @@ public class Terrain : Tag<STerrain>
                 z.AddRange(part.VertexPositions.Select(a => a.Z));
                 // Material
                 if (partEntry.Material == null) continue;
-                if (!Directory.Exists($"{saveDirectory}/Textures/"))
-                    Directory.CreateDirectory($"{saveDirectory}/Textures/");
+                // if (!Directory.Exists($"{saveDirectory}/Textures/"))
+                    // Directory.CreateDirectory($"{saveDirectory}/Textures/");
 
-                partEntry.Material.SaveAllTextures($"{saveDirectory}/Textures/");
+                scene.Materials.Add(partEntry.Material);
+                // partEntry.Material.SaveAllTextures($"{saveDirectory}/Textures/");
                 part.Material = partEntry.Material;
                 // dynamicPart.Material.SaveVertexShader(saveDirectory);
-                if (bSaveShaders)
-                {
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/", true);
-                    partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/Vertex/");
+                // if (bSaveShaders)
+                // {
+                    // partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders/", true);
+                    // partEntry.Material.SaveVertexShader($"{saveDirectory}/Shaders/Vertex/");
                     // partEntry.Material.SaveComputeShader($"{saveDirectory}/Shaders/");
-                }
+                // }
             }
         }
         var globalOffset = new Vector3(
@@ -72,7 +73,8 @@ public class Terrain : Tag<STerrain>
             var partEntry = _tag.MeshGroups[i];
             if (partEntry.Dyemap != null)
             {
-                partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/{partEntry.Dyemap.Hash}");
+
+                // partEntry.Dyemap.SavetoFile($"{saveDirectory}/Textures/{partEntry.Dyemap.Hash}");
                 dyeMaps.Add(partEntry.Dyemap.Hash.ToString());
             }
         }

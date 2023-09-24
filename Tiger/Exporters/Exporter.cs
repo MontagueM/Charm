@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Arithmic;
+using ConcurrentCollections;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
@@ -69,7 +70,9 @@ public class ExporterScene
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentBag<SMapDataEntry> EntityPoints = new();
     public ConcurrentBag<CubemapResource> Cubemaps = new();
-    private List<FileHash> _addedEntities = new List<FileHash>();
+    private ConcurrentBag<FileHash> _addedEntities = new();
+    public ConcurrentHashSet<Texture> Textures = new();
+    public ConcurrentHashSet<IMaterial> Materials = new();
 
     public void AddStatic(FileHash meshHash, List<StaticPart> parts)
     {

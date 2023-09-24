@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using Tiger.Exporters;
 
 namespace Tiger.Schema.Entity;
 
@@ -84,20 +85,21 @@ public class Entity : Tag<SEntity>
         return dynamicParts;
     }
 
-    public void SaveMaterialsFromParts(string saveDirectory, List<DynamicMeshPart> dynamicParts, bool bSaveShaders)
+    public void SaveMaterialsFromParts(ExporterScene scene, List<DynamicMeshPart> dynamicParts)
     {
-        Directory.CreateDirectory($"{saveDirectory}/Textures");
-        Directory.CreateDirectory($"{saveDirectory}/Shaders");
+        // Directory.CreateDirectory($"{saveDirectory}/Textures");
+        // Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var dynamicPart in dynamicParts)
         {
             if (dynamicPart.Material == null) continue;
-            dynamicPart.Material.SaveAllTextures($"{saveDirectory}/Textures");
+            scene.Materials.Add(dynamicPart.Material);
+            // dynamicPart.Material.SaveAllTextures($"{saveDirectory}/Textures");
             // dynamicPart.Material.SaveVertexShader(saveDirectory);
-            if (bSaveShaders)
-            {
-                dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
-                dynamicPart.Material.SaveVertexShader($"{saveDirectory}/Shaders");
-            }
+            // if (bSaveShaders)
+            // {
+                // dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
+                // dynamicPart.Material.SaveVertexShader($"{saveDirectory}/Shaders");
+            // }
             // Environment.Exit(5);
         }
     }
