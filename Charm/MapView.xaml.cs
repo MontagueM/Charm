@@ -207,7 +207,7 @@ public partial class MapView : UserControl
                 {
                     scene.AddCubemap(cubemap);
                 }
-                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SPointLightResource pointLight)
+                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapLightResource mapLight)
                 {
                     scene.AddPointLight(pointLight, entry);
                 }

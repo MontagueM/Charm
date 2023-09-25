@@ -88,13 +88,18 @@ class MetadataScene
         {
             AddCubemap(cubemap.CubemapName, cubemap.CubemapSize.ToVec3(), cubemap.CubemapRotation, cubemap.CubemapPosition.ToVec3());
         }
-        foreach (var pointLight in scene.PointLights)
+        foreach (var mapLight in scene.MapLights)
         {
-            var light = FileResourcer.Get().GetSchemaTag<D2Class_786A8080>(pointLight.Key);
-            AddLight(light.Hash,
+            for (int i = 0; i < mapLight.Unk10.TagData.Unk30.Count; i++)
+            {
+               AddLight(
+                    mapLight.Unk10.TagData.Unk30[i].UnkD0.Hash,
                     "Point",
-                    pointLight.Value,
-                    (light.TagData.Unk10.TagData.Unk40.Count == 0 ? light.TagData.Unk10.TagData.Unk60[0].Vec : light.TagData.Unk10.TagData.Unk40[0].Vec));
+                    mapLight.Unk10.TagData.Unk40[i].Translation,
+                    mapLight.Unk10.TagData.Unk40[i].Rotation,
+                    new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
+                    (mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk40.Count > 0 ? mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk40[0].Vec : mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk60[0].Vec));
+            }
         }
     }
 
@@ -195,7 +200,7 @@ class MetadataScene
         });
     }
 
-    public void AddLight(string name, string type, List<Transform> transforms, Vector4 color)
+    public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color)
     {
         //Idk how color/intensity is handled, so if its above 1 just bring it down
         float R = color.X > 1 ? color.X / 100 : color.X;
@@ -206,17 +211,15 @@ class MetadataScene
         {
             _config["Lights"][name] = new ConcurrentBag<JsonLight>();
         }
-        foreach (Transform transform in transforms)
+        _config["Lights"][name].Add(new JsonLight
         {
-            _config["Lights"][name].Add(new JsonLight
-            {
-                Type = type,
-                Translation = new[] { transform.Position.X, transform.Position.Y, transform.Position.Z },
-                Rotation = new[] { transform.Quaternion.X, transform.Quaternion.Y, transform.Quaternion.Z, transform.Quaternion.W },
-                Size = new[] { 1.0f, 1.0f },
-                Color = new[] { R, G, B }
-            });
-        }
+            Type = type,
+            Translation = new[] { translation.X, translation.Y, translation.Z },
+            Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
+            Size = new[] { size.X, size.Y },
+            Color = new[] { R, G, B }
+        });
+        
     }
 
     public void WriteToFile(string path)
