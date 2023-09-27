@@ -23,6 +23,7 @@ public partial class ActivityView : UserControl
         {
             "loading activity tag",
             "loading map ui",
+            "loading map entities ui",
             "loading dialogue ui",
             "loading directive ui",
             "loading music ui",
@@ -39,6 +40,11 @@ public partial class ActivityView : UserControl
             Dispatcher.Invoke(() =>
             {
                 MapControl.LoadUI(_activity);
+            });
+            MainWindow.Progress.CompleteStage();
+            Dispatcher.Invoke(() =>
+            {
+                MapEntityControl.LoadUI(_activity);
             });
             MainWindow.Progress.CompleteStage();
             Dispatcher.Invoke(() =>

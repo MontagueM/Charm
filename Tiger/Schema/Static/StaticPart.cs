@@ -50,7 +50,7 @@ public class StaticPart : MeshPart
             if (buffers.Vertices2 != null) strides.Add(buffers.Vertices2.TagData.Stride);
             Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
 
-            Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{buffers.Vertices0.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {buffers.Vertices1?.Hash}/{buffers.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+            Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{buffers.Vertices0.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {buffers.Vertices1?.Hash}/{buffers.Vertices1?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
             buffers.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures.Where(s => s.BufferIndex == 0).ToList());
             buffers.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures.Where(s => s.BufferIndex == 1).ToList());
         }

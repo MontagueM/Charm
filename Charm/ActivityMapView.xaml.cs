@@ -70,17 +70,6 @@ public partial class ActivityMapView : UserControl
     {
         FileHash hash = new FileHash((sender as CheckBox).Tag as string);
         Tag<SMapContainer> map = FileResourcer.Get().GetSchemaTag<SMapContainer>(hash);
-
-        foreach (DisplayStaticMap item in StaticList.Items)
-        {
-            if (item.Name == "Select all")
-                continue;
-
-            // if (item.Selected)
-            // {
-            //     PopulateDynamicsList(map);
-            // }
-        }
     }
 
     private void PopulateStaticList(Tag<SBubbleDefinition> bubbleMaps)
@@ -95,9 +84,8 @@ public partial class ActivityMapView : UserControl
                 {
                     StaticMapData? tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent.TagData.StaticMap;
                     if (tag == null)
-                    {
                         return; // todo sk broke this
-                    }
+
                     items.Add(new DisplayStaticMap
                     {
                         Hash = m.MapContainer.Hash,
@@ -114,48 +102,6 @@ public partial class ActivityMapView : UserControl
             Name = "Select all"
         });
         StaticList.ItemsSource = sortedItems;
-    }
-
-    private void PopulateDynamicsList(Tag<SMapContainer> map)//(Tag<SBubbleDefinition> bubbleMaps)
-    {
-
-        ConcurrentBag<DisplayDynamicMap> items = new ConcurrentBag<DisplayDynamicMap>();
-        Parallel.ForEach(map.TagData.MapDataTables, data =>
-        {
-            data.MapDataTable.TagData.DataEntries.ForEach(entry =>
-            {
-                if (entry is SMapDataEntry dynamicResource)
-                {
-                    Entity entity = FileResourcer.Get().GetFile(typeof(Entity), dynamicResource.GetEntityHash());
-
-                    if (entity.Model != null)
-                    {
-                        items.Add(new DisplayDynamicMap
-                        {
-                            Hash = dynamicResource.GetEntityHash(),
-                            Name = $"{dynamicResource.GetEntityHash()}: {entity.Model.TagData.Meshes.Count} meshes",
-                            Models = entity.Model.TagData.Meshes.Count
-                        });
-                    }
-                    else
-                    {
-                        items.Add(new DisplayDynamicMap
-                        {
-                            Hash = dynamicResource.GetEntityHash(),
-                            Name = $"{dynamicResource.GetEntityHash()}: 0 meshes",
-                            Models = 0
-                        });
-                    }
-                }
-            });
-        });
-        var sortedItems = new List<DisplayDynamicMap>(items);
-        sortedItems.Sort((a, b) => b.Models.CompareTo(a.Models));
-        sortedItems.Insert(0, new DisplayDynamicMap
-        {
-            Name = "Select all"
-        });
-        DynamicsList.ItemsSource = sortedItems;
     }
 
     public async void ExportFull(ExportInfo info)
@@ -294,15 +240,6 @@ public class DisplayStaticMap
     public string Name { get; set; }
     public string Hash { get; set; }
     public int Instances { get; set; }
-
-    public bool Selected { get; set; }
-}
-
-public class DisplayDynamicMap
-{
-    public string Name { get; set; }
-    public string Hash { get; set; }
-    public int Models { get; set; }
 
     public bool Selected { get; set; }
 }
