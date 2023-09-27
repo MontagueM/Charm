@@ -302,8 +302,8 @@ public partial class ActivityMapEntityView : UserControl
                     foreach (var datatable in tag.TagData.MapDataTables)
                     {
                         MapControl.LoadMap(datatable.MapDataTable.Hash, lod, true);
-                        MainWindow.Progress.CompleteStage();
-                    }            
+                    }
+                    MainWindow.Progress.CompleteStage();
                 }
             });
         }
