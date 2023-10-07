@@ -51,34 +51,41 @@ public class Source2Handler
 
     public static void SaveEntityVMDL(string savePath, Entity entity)
     {
-        if (!File.Exists($"{savePath}/{entity.Hash}.vmdl"))
+        try
         {
-            File.Copy("Exporters/template.vmdl", $"{savePath}/{entity.Hash}.vmdl", true);
-            string text = File.ReadAllText($"{savePath}/{entity.Hash}.vmdl");
-
-            StringBuilder mats = new StringBuilder();
-
-            int i = 0;
-            foreach (var part in entity.Load(ExportDetailLevel.MostDetailed))
+            if (!File.Exists($"{savePath}/{entity.Hash}.vmdl"))
             {
-                if (part.Material == null)
-                    continue;
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{entity.Hash}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{entity.Hash}.vmdl");
 
-                if (!part.Material.EnumeratePSTextures().Any())
-                    continue;
+                StringBuilder mats = new StringBuilder();
 
-                mats.AppendLine("{");
-                mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
-                mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
-                mats.AppendLine("},\n");
-                i++;
+                int i = 0;
+                foreach (var part in entity.Load(ExportDetailLevel.MostDetailed))
+                {
+                    if (part.Material == null)
+                        continue;
+
+                    if (!part.Material.EnumeratePSTextures().Any())
+                        continue;
+
+                    mats.AppendLine("{");
+                    mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
+                    mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                    mats.AppendLine("},\n");
+                    i++;
+                }
+
+                text = text.Replace("%MATERIALS%", mats.ToString());
+                text = text.Replace("%FILENAME%", $"models/{entity.Hash}.fbx");
+                text = text.Replace("%MESHNAME%", entity.Hash);
+
+                File.WriteAllText($"{savePath}/{entity.Hash}.vmdl", text);
             }
+        }
+        catch(Exception e)
+        {
 
-            text = text.Replace("%MATERIALS%", mats.ToString());
-            text = text.Replace("%FILENAME%", $"models/{entity.Hash}.fbx");
-            text = text.Replace("%MESHNAME%", entity.Hash);
-
-            File.WriteAllText($"{savePath}/{entity.Hash}.vmdl", text);
         }
     }
 

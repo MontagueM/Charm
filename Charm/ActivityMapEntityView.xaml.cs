@@ -44,7 +44,7 @@ public partial class ActivityMapEntityView : UserControl
         foreach (var bubble in activity.EnumerateBubbles())
         {
             DisplayEntBubble displayMap = new();
-            displayMap.Name = $"{bubble.Name} - {bubble.MapReference.TagData.ChildMapReference.Hash}";
+            displayMap.Name = $"{bubble.Name}";
             displayMap.Hash = bubble.MapReference.TagData.ChildMapReference.Hash;
             displayMap.LoadType = DisplayEntBubble.Type.Bubble;
             displayMap.Data = displayMap;
@@ -221,7 +221,7 @@ public partial class ActivityMapEntityView : UserControl
         {
             MapControl.Visibility = Visibility.Hidden;
         });
-        var maps = new List<Tag<SMapContainer>>();
+        var maps = new ConcurrentDictionary<List<FileHash>, string>();
         bool bSelectAll = false;
         foreach (DisplayEntityMap item in EntityContainerList.Items)
         {
@@ -234,7 +234,7 @@ public partial class ActivityMapEntityView : UserControl
             {
                 if (item.Selected || bSelectAll)
                 {
-                    maps.Add(FileResourcer.Get().GetSchemaTag<SMapContainer>(item.Hash));
+                    maps.TryAdd(item.DataTables, item.Hash);
                     Log.Info($"Selected map: {item.Hash}");
                 }
             }
@@ -253,7 +253,7 @@ public partial class ActivityMapEntityView : UserControl
 
         Parallel.ForEach(maps, map =>
         {
-            ExportFull(map);
+            ExportFull(map.Key, map.Value);
             MainWindow.Progress.CompleteStage();
         });
 
@@ -269,10 +269,9 @@ public partial class ActivityMapEntityView : UserControl
         MessageBox.Show("Activity map data exported completed.");
     }
 
-    public static void ExportFull(Tag<SMapContainer> map)
+    public static void ExportFull(List<FileHash> dataTables, string hash)
     {
-        string meshName = map.Hash.ToString();
-        string savePath = _config.GetExportSavePath() + $"/{meshName}";
+        string savePath = _config.GetExportSavePath() + $"/{hash}";
         if (_config.GetSingleFolderMapsEnabled())
         {
             savePath = _config.GetExportSavePath() + "/Maps";
@@ -282,26 +281,27 @@ public partial class ActivityMapEntityView : UserControl
         if (_config.GetIndvidualStaticsEnabled())
         {
             Directory.CreateDirectory(savePath + "/Entities");
-            ExportIndividual(savePath, map);
+            ExportIndividual(dataTables, hash, savePath);
         }
 
-        ExtractDataTables(map, savePath);
+        ExtractDataTables(dataTables, hash, savePath);
 
         if (_config.GetUnrealInteropEnabled())
         {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
+            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, hash, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
         }
     }
 
-    private static void ExtractDataTables(Tag<SMapContainer> map, string savePath)
+    private static void ExtractDataTables(List<FileHash> dataTables, string hash, string savePath)
     {
         // todo these scenes can be combined
-        ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{map.Hash}_EntityPoints", ExportType.EntityPoints);
-        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{map.Hash}_Entities", ExportType.Map);
+        ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{hash}_EntityPoints", ExportType.EntityPoints);
+        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.Map);
 
-        Parallel.ForEach(map.TagData.MapDataTables, data =>
+        Parallel.ForEach(dataTables, data =>
         {
-            data.MapDataTable.TagData.DataEntries.ForEach(entry =>
+            var dataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
+            dataTable.TagData.DataEntries.ForEach(entry =>
             {
                 if (entry is SMapDataEntry dynamicResource)
                 {
@@ -318,11 +318,12 @@ public partial class ActivityMapEntityView : UserControl
         });
     }
 
-    private static void ExportIndividual(string savePath, Tag<SMapContainer> map)
+    private static void ExportIndividual(List<FileHash> dataTables, string hash, string savePath)
     {
-        Parallel.ForEach(map.TagData.MapDataTables, data =>
+        Parallel.ForEach(dataTables, data =>
         {
-            data.MapDataTable.TagData.DataEntries.ForEach(entry =>
+            var dataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
+            dataTable.TagData.DataEntries.ForEach(entry =>
             {
                 if (entry is SMapDataEntry dynamicResource)
                 {
