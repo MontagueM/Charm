@@ -1,5 +1,8 @@
 ﻿using System.Runtime.InteropServices;
+using Microsoft.VisualBasic.FileIO;
 using Tiger.Exporters;
+using Tiger.Schema.Entity;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
@@ -261,6 +264,108 @@ public struct SStaticMapParent
     public TigerHash Unk2C;
 }
 
+/// <summary>
+/// Light Lens Flares
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "BF6C8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B5678080", 0x1C)]
+public struct D2Class_B5678080
+{
+    [SchemaField(0x10)]
+    public Tag<D2Class_786A8080> Unk10;
+}
+
+/// <summary>
+/// Unk data resource.
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "686F8080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "786A8080", 0x38)]
+public struct D2Class_786A8080
+{
+    public ulong FileSize;
+    [SchemaField(0x18)]
+    public Tag<D2Class_A16D8080> Unk10;
+    [SchemaField(0x20)]
+    public DynamicArray<D2Class_7D6A8080> Unk20;
+    public TigerHash Unk30;
+}
+
+/// <summary>
+/// Unk data resource.
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D6F8080", 0xC)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "7D6A8080", 0xC)]
+public struct D2Class_7D6A8080
+{
+    public IMaterial Unk00;
+    public Tag<D2Class_A16D8080> Unk04;
+    public int Unk08;
+}
+
+/// <summary>
+/// Unk data resource.
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DC718080", 0x80)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A16D8080", 0x80)]
+public struct D2Class_A16D8080
+{
+    public ulong FileSize;
+    [SchemaField(0x40)]
+    public DynamicArray<Vec4> Unk40; //first entry might be color?
+    [SchemaField(0x60)]
+    public DynamicArray<Vec4> Unk60; //if first doesnt exist then use this one?
+}
+
+/// <summary>
+/// Map Light
+/// </summary>
+//[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "BF6C8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "636A8080", 0x18)]
+public struct SMapLightResource
+{
+    [SchemaField(0x10)]
+    public Tag<D2Class_656C8080> Unk10;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "656C8080", 0x60)]
+public struct D2Class_656C8080
+{
+    [SchemaField(0x10)]
+    public Vector4 Unk10;
+    public Vector4 Unk20;
+    public DynamicArray<D2Class_706C8080> Unk30;
+    public DynamicArray<D2Class_4F9F8080> Unk40;
+    [SchemaField(0x58)]
+    public Tag<SOcclusionBounds> Unk58;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "706C8080", 0xF0)]
+public struct D2Class_706C8080
+{
+    public Vector4 Unk00;
+    public Vector4 Unk10;
+    public Vector4 Unk20;
+    public Vector4 Unk30;
+    public Vector4 Unk40;
+    public Vector4 Unk50;
+    public Vector4 Unk60;
+    public Vector4 Unk70;
+    public Vector4 Unk80;
+    public Vector4 Unk90;
+    public Vector4 UnkA0; //W might be area light size X/2?
+    public Vector4 UnkB0; //W Size Y/2?
+
+    public IMaterial UnkC0;
+    public IMaterial UnkC4;
+    public IMaterial UnkC8;
+    public Tag<D2Class_A16D8080> UnkCC;
+    public Tag<D2Class_A16D8080> UnkD0;
+    [SchemaField(0xDF)]
+    public byte UnkDF; //color index? unlikely
+    [SchemaField(0xE0)]
+    public byte UnkE0; //light shape?
+}
+
 // /// <summary>
 // /// Boss entity data resource?
 // /// </summary>
@@ -296,15 +401,6 @@ public struct SStaticMapParent
 //     public Tag Unk10;  // D2Class_656C8080, might be related to lights for entities?
 // }
 //
-// /// <summary>
-// /// Unk data resource.
-// /// </summary>
-// [SchemaStruct("B5678080", 0x18)]
-// public struct D2Class_B5678080
-// {
-//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
-//     public Tag Unk10;  // D2Class_A16D8080, has some materials and coords
-// }
 //
 // /// <summary>
 // /// Audio data resource.
