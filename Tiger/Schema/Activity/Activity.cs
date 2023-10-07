@@ -1,5 +1,6 @@
-﻿using Tiger.Schema.Audio;
-using Tiger.Schema.Strings;
+﻿using System.Collections.Concurrent;
+using System.Data;
+using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Activity
 {
@@ -9,10 +10,19 @@ namespace Tiger.Schema.Activity
         public Tag<SBubbleParent> MapReference;
     }
 
+    public struct ActivityEntities
+    {
+        public string BubbleName;
+        public string ActivityPhaseName2;
+        public FileHash Hash;
+        public List<FileHash> DataTables;
+    }
+
     public interface IActivity : ISchema
     {
         public FileHash FileHash { get; }
         public IEnumerable<Bubble> EnumerateBubbles();
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities();
     }
 }
 
@@ -44,6 +54,11 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         {
             return GlobalStrings.Get().GetString(_tag.LocationNames.TagData.BubbleNames.First(e => e.BubbleIndex == index).BubbleName);
         }
+
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities()
+        {
+            throw new NotSupportedException();
+        }
     }
 }
 
@@ -71,6 +86,11 @@ namespace Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307
                     yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), MapReference = mapReference.MapReference };
                 }
             }
+        }
+
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities()
+        {
+            throw new NotSupportedException();
         }
 
         // protected override void ParseStructs()
@@ -126,6 +146,64 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
 
                 }
             }
+        }
+
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities()
+        {
+            foreach (var entry in _tag.Unk50)
+            {
+                foreach (var resource in entry.Unk18)
+                {
+                    yield return new ActivityEntities
+                    {
+                        BubbleName = GlobalStrings.Get().GetString(resource.BubbleName),
+                        Hash = resource.UnkEntityReference.Hash,
+                        ActivityPhaseName2 = resource.ActivityPhaseName2,
+                        DataTables = CollapseResourceParent(resource.UnkEntityReference.Hash)
+                    };
+                }
+            }
+        }
+
+        private List<FileHash> CollapseResourceParent(FileHash hash)
+        {
+            ConcurrentBag<FileHash> items = new();
+            var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_898E8080>(hash);
+            var Unk18 = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
+
+            foreach(var resource in Unk18.TagData.EntityResources)
+            { 
+                if(resource.EntityResourceParent != null)
+                {
+                    var resourceValue = resource.EntityResourceParent.TagData.EntityResource.TagData.Unk18.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader());
+                    switch (resourceValue)
+                    {
+                        case D2Class_D8928080:
+                            var tag = (D2Class_D8928080)resourceValue;
+                            if (tag.Unk84 is not null)
+                            {
+                                if (tag.Unk84.TagData.DataEntries.Count > 0)
+                                {
+                                    items.Add(tag.Unk84.Hash);
+                                }
+                            }
+                            break;
+
+                        case D2Class_EF8C8080:
+                            var tag2 = (D2Class_EF8C8080)resourceValue;
+                            if (tag2.Unk58 is not null)
+                            {
+                                if (tag2.Unk58.TagData.DataEntries.Count > 0)
+                                {
+                                    items.Add(tag2.Unk58.Hash);
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+
+            return items.ToList();
         }
     }
 }

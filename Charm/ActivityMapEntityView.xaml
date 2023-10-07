@@ -16,17 +16,34 @@
                     <ColumnDefinition Width="100*" />
                     <ColumnDefinition Width="100*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*" />
+                    <RowDefinition Height="50*" />
+                </Grid.RowDefinitions>
+                <Border
+                    Grid.RowSpan="2"
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
                 <TextBlock
+                    Grid.Row="0"
                     Grid.Column="0"
                     HorizontalAlignment="Left"
                     Text="{Binding Name}" />
+                <TextBlock
+                    Grid.Row="1"
+                    HorizontalAlignment="Left"
+                    FontSize="12px"
+                    Text="{Binding LoadType}" />
                 <Button
+                    Grid.RowSpan="2"
                     Grid.Column="1"
                     HorizontalAlignment="Right"
                     Click="GetBubbleContentsButton_OnClick"
                     Content="View contents"
                     Style="{StaticResource MaterialDesignPaperDarkButton}"
-                    Tag="{Binding Hash}" />
+                    Tag="{Binding Data}" />
             </Grid>
         </ControlTemplate>
 
@@ -48,7 +65,7 @@
                     Click="EntityMapPart_OnCheck"
                     IsChecked="{Binding Selected}"
                     Style="{StaticResource MaterialDesignCheckBox}"
-                    Tag="{Binding Hash}">
+                    Tag="{Binding Data}">
                     <TextBlock Text="{Binding Name}" TextAlignment="Center" />
                 </CheckBox>
                 <Button

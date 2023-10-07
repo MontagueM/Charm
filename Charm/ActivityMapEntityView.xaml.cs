@@ -10,10 +10,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
+using NVorbis.Contracts;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Entity;
 
 namespace Charm;
@@ -36,24 +38,44 @@ public partial class ActivityMapEntityView : UserControl
         ExportControl.SetExportInfo(activity.FileHash);
     }
 
-    private ObservableCollection<DisplayBubble> GetMapList(IActivity activity)
+    private ObservableCollection<DisplayEntBubble> GetMapList(IActivity activity)
     {
-        var maps = new ObservableCollection<DisplayBubble>();
+        var maps = new ObservableCollection<DisplayEntBubble>();
         foreach (var bubble in activity.EnumerateBubbles())
         {
-            DisplayBubble displayMap = new();
-            displayMap.Name = bubble.Name;
+            DisplayEntBubble displayMap = new();
+            displayMap.Name = $"{bubble.Name} - {bubble.MapReference.TagData.ChildMapReference.Hash}";
             displayMap.Hash = bubble.MapReference.TagData.ChildMapReference.Hash;
+            displayMap.LoadType = DisplayEntBubble.Type.Bubble;
+            displayMap.Data = displayMap;
             maps.Add(displayMap);
         }
+
+        DisplayEntBubble displayActivity = new();
+        displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(activity.FileHash)}";
+        displayActivity.Hash = $"{activity.FileHash}";
+        displayActivity.LoadType = DisplayEntBubble.Type.Activity;
+        displayActivity.Data = displayActivity;
+        maps.Add(displayActivity);
+
         return maps;
     }
 
     private void GetBubbleContentsButton_OnClick(object sender, RoutedEventArgs e)
     {
-        FileHash hash = new FileHash((sender as Button).Tag as string);
-        Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
-        PopulateEntityContainerList(bubbleMaps);
+        DisplayEntBubble tagData = (sender as Button).Tag as DisplayEntBubble; //apparently this works..?
+        if(tagData.LoadType == DisplayEntBubble.Type.Bubble)
+        {
+            FileHash hash = new FileHash(tagData.Hash);
+            Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
+            PopulateEntityContainerList(bubbleMaps);
+        }
+        else
+        {
+            FileHash hash = new FileHash(tagData.Hash);
+            IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(hash);
+            PopulateActivityEntityContainerList(activity);
+        }
     }
 
     private void EntityMapPart_OnCheck(object sender, RoutedEventArgs e)
@@ -61,8 +83,8 @@ public partial class ActivityMapEntityView : UserControl
         if ((sender as CheckBox).Tag is null)
             return;
 
-        FileHash hash = new FileHash((sender as CheckBox).Tag as string);
-        Tag<SMapContainer> map = FileResourcer.Get().GetSchemaTag<SMapContainer>(hash);
+        DisplayEntityMap tagData = (sender as CheckBox).Tag as DisplayEntityMap; //apparently this works..?
+
         foreach (DisplayEntityMap item in EntityContainerList.Items)
         {
             if (item.Name == "Select all")
@@ -70,11 +92,25 @@ public partial class ActivityMapEntityView : UserControl
 
             if (item.Selected)
             {
-                if (map == null)
-                    continue;
-                PopulateEntityList(map);
+                if (tagData.EntityType == DisplayEntityMap.Type.Map)
+                {
+                    Tag<SMapContainer> map = FileResourcer.Get().GetSchemaTag<SMapContainer>(tagData.Hash);
+                    if (map == null)
+                        continue;
+
+                    ConcurrentBag<FileHash> sMapDataTables = new();
+                    foreach(var entry in map.TagData.MapDataTables)
+                    {
+                        sMapDataTables.Add(entry.MapDataTable.Hash);
+                    }
+
+                    PopulateEntityList(sMapDataTables.ToList());
+                }  
+                else
+                {
+                    PopulateEntityList(tagData.DataTables);
+                }
             }
-               
         }
     }
 
@@ -85,12 +121,14 @@ public partial class ActivityMapEntityView : UserControl
         {
             if (m.MapContainer.TagData.MapDataTables.Count > 0)
             {
-                items.Add(new DisplayEntityMap
-                {
-                    Hash = m.MapContainer.Hash,
-                    Name = $"{m.MapContainer.Hash}", //{m.MapContainer.TagData.MapDataTables.Count} MapDataTables",
-                    Count = m.MapContainer.TagData.MapDataTables.Count
-                });
+                DisplayEntityMap entityMap = new();
+                entityMap.Name = $"{m.MapContainer.Hash}";
+                entityMap.Hash = m.MapContainer.Hash;
+                entityMap.Count = m.MapContainer.TagData.MapDataTables.Count;
+                entityMap.EntityType = DisplayEntityMap.Type.Map;
+                entityMap.Data = entityMap;
+
+                items.Add(entityMap);
             }
         });
         var sortedItems = new List<DisplayEntityMap>(items);
@@ -102,14 +140,44 @@ public partial class ActivityMapEntityView : UserControl
         EntityContainerList.ItemsSource = sortedItems;
     }
 
-    private void PopulateEntityList(Tag<SMapContainer> map)
+    private void PopulateActivityEntityContainerList(IActivity activity)
+    {
+        ConcurrentBag<DisplayEntityMap> items = new ConcurrentBag<DisplayEntityMap>();
+
+        foreach (var entry in activity.EnumerateActivityEntities())
+        {
+            if(entry.DataTables.Count > 0)
+            {
+                DisplayEntityMap entityMap = new();
+                entityMap.Name = $"{entry.BubbleName} {entry.ActivityPhaseName2}: {entry.DataTables.Count} Entries";
+                entityMap.Hash = entry.Hash;
+                entityMap.Count = entry.DataTables.Count;
+                entityMap.EntityType = DisplayEntityMap.Type.Activity;
+                entityMap.DataTables = entry.DataTables;
+                entityMap.Data = entityMap;
+
+                items.Add(entityMap);
+            }
+        }
+
+        var sortedItems = new List<DisplayEntityMap>(items);
+        sortedItems.Sort((a, b) => a.Name.CompareTo(b.Name));
+        sortedItems.Insert(0, new DisplayEntityMap
+        {
+            Name = "Select all"
+        });
+        EntityContainerList.ItemsSource = sortedItems;
+    }
+
+    private void PopulateEntityList(List<FileHash> dataTables)
     {
         ConcurrentBag<DisplayEntityList> items = new ConcurrentBag<DisplayEntityList>();
         ConcurrentDictionary<FileHash, int> entityCountDictionary = new ConcurrentDictionary<FileHash, int>();
 
-        Parallel.ForEach(map.TagData.MapDataTables, data =>
+        Parallel.ForEach(dataTables, data =>
         {
-            data.MapDataTable.TagData.DataEntries.ForEach(entry => //Need(?) to do this to get number of instances for Entities
+            Tag<SMapDataTable> entry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
+            entry.TagData.DataEntries.ForEach(entry => //Need(?) to do this to get number of instances for Entities
             {
                 if (entry is SMapDataEntry dynamicResource)
                 {
@@ -140,7 +208,7 @@ public partial class ActivityMapEntityView : UserControl
         sortedItems.Insert(0, new DisplayEntityList
         {
             Name = "Select all",
-            Parent = map
+            Parent = dataTables
         });
         EntitiesList.ItemsSource = sortedItems;
     }
@@ -298,28 +366,48 @@ public partial class ActivityMapEntityView : UserControl
             {
                 foreach (DisplayEntityMap item in items)
                 {
-                    Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(new FileHash(item.Hash));
+                    if(item.EntityType == DisplayEntityMap.Type.Map)
+                    {
+                        Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(new FileHash(item.Hash));
+                        foreach (var datatable in tag.TagData.MapDataTables)
+                        {
+                            MapControl.LoadMap(datatable.MapDataTable.Hash, lod, true);
+                        }
+                        MainWindow.Progress.CompleteStage();
+                    }
+                    else
+                    {
+                        foreach (var datatable in item.DataTables)
+                        {
+                            MapControl.LoadMap(datatable, lod, true);
+                        }
+                        MainWindow.Progress.CompleteStage();
+                    }
+                }
+            });
+        }
+        else
+        {
+            MainWindow.Progress.SetProgressStages(new List<string> { dc.Hash });
+            await Task.Run(() =>
+            {
+                if (dc.EntityType == DisplayEntityMap.Type.Map)
+                {
+                    Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(new FileHash(dc.Hash));
                     foreach (var datatable in tag.TagData.MapDataTables)
                     {
                         MapControl.LoadMap(datatable.MapDataTable.Hash, lod, true);
                     }
                     MainWindow.Progress.CompleteStage();
                 }
-            });
-        }
-        else
-        {
-            var fileHash = new FileHash(dc.Hash);
-            MainWindow.Progress.SetProgressStages(new List<string> { fileHash });
-            await Task.Run(() =>
-            {
-                Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(fileHash);
-                foreach (var datatable in tag.TagData.MapDataTables)
+                else
                 {
-                    MapControl.LoadMap(datatable.MapDataTable.Hash, lod, true);
+                    foreach (var datatable in dc.DataTables)
+                    {
+                        MapControl.LoadMap(datatable, lod, true);
+                    }
                     MainWindow.Progress.CompleteStage();
                 }
-                MainWindow.Progress.CompleteStage();
             });
         }
         MapControl.Visibility = Visibility.Visible;
@@ -335,8 +423,8 @@ public partial class ActivityMapEntityView : UserControl
         var lod = MapControl.ModelView.GetSelectedLod();
         if (dc.Name == "Select all")
         {
-            var items = dc.Parent.TagData.MapDataTables;
-            List<string> mapStages = items.Select(x => $"Loading to UI: {x.MapDataTable.Hash}").ToList();
+            var items = dc.Parent;
+            List<string> mapStages = items.Select(x => $"Loading to UI: {x}").ToList();
             if (mapStages.Count == 0)
             {
                 Log.Error("No entities available for view.");
@@ -349,7 +437,8 @@ public partial class ActivityMapEntityView : UserControl
             {
                 foreach (var datatable in items)
                 {
-                    MapControl.LoadMap(datatable.MapDataTable.Hash, lod, true);
+                    var mapDataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(datatable);
+                    MapControl.LoadMap(mapDataTable.Hash, lod, true);
                     MainWindow.Progress.CompleteStage();
                 }
             });
@@ -376,8 +465,8 @@ public partial class ActivityMapEntityView : UserControl
 
         if (dc.Name == "Select all")
         {
-            var items = dc.Parent.TagData.MapDataTables;
-            List<string> mapStages = items.Select(x => $"Exporting Entities: {x.MapDataTable.Hash}").ToList();
+            var items = dc.Parent;
+            List<string> mapStages = items.Select(x => $"Exporting Entities: {x}").ToList();
             if (mapStages.Count == 0)
             {
                 Log.Error("No entities available for export.");
@@ -390,7 +479,8 @@ public partial class ActivityMapEntityView : UserControl
             {
                 foreach (var datatable in items)
                 {
-                    foreach(var entry in datatable.MapDataTable.TagData.DataEntries)
+                    var mapDataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(datatable);
+                    foreach (var entry in mapDataTable.TagData.DataEntries)
                     {
                         Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
                         EntityView.Export(new List<Entity> { entity }, entity.Hash, ExportTypeFlag.Full);
@@ -419,6 +509,20 @@ public partial class ActivityMapEntityView : UserControl
     }
 }
 
+public class DisplayEntBubble
+{
+    public string Name { get; set; }
+    public string Hash { get; set; }
+    public Type LoadType { get; set; } //this kinda sucks but dont want to have 2 seperate tabs for map and activity entities
+    public DisplayEntBubble Data { get; set; }
+
+    public enum Type
+    {
+        Bubble,
+        Activity
+    }
+}
+
 public class DisplayEntityMap
 {
     public string Name { get; set; }
@@ -426,13 +530,22 @@ public class DisplayEntityMap
     public int Count { get; set; }
 
     public bool Selected { get; set; }
+    public Type EntityType { get; set; }
+    public List<FileHash> DataTables { get; set; }
+    public DisplayEntityMap Data { get; set; }
+
+    public enum Type
+    {
+        Map,
+        Activity
+    }
 }
 
 public class DisplayEntityList
 {
     public string Name { get; set; }
     public string Hash { get; set; }
-    public Tag<SMapContainer> Parent { get; set; }
+    public List<FileHash> Parent { get; set; }
     public int Instances { get; set; }
 
     public bool Selected { get; set; }
