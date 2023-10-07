@@ -51,17 +51,23 @@ public class Source2Handler
 
     public static void SaveEntityVMDL(string savePath, Entity entity)
     {
+        var parts = entity.Load(ExportDetailLevel.MostDetailed);
+        SaveEntityVMDL(savePath, entity.Hash, parts);
+    }
+
+    public static void SaveEntityVMDL(string savePath, string hash, List<DynamicMeshPart> parts)
+    {
         try
         {
-            if (!File.Exists($"{savePath}/{entity.Hash}.vmdl"))
+            if (!File.Exists($"{savePath}/{hash}.vmdl"))
             {
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{entity.Hash}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{entity.Hash}.vmdl");
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{hash}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{hash}.vmdl");
 
                 StringBuilder mats = new StringBuilder();
 
                 int i = 0;
-                foreach (var part in entity.Load(ExportDetailLevel.MostDetailed))
+                foreach (var part in parts)
                 {
                     if (part.Material == null)
                         continue;
@@ -77,10 +83,10 @@ public class Source2Handler
                 }
 
                 text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"models/{entity.Hash}.fbx");
-                text = text.Replace("%MESHNAME%", entity.Hash);
+                text = text.Replace("%FILENAME%", $"models/{hash}.fbx");
+                text = text.Replace("%MESHNAME%", hash);
 
-                File.WriteAllText($"{savePath}/{entity.Hash}.vmdl", text);
+                File.WriteAllText($"{savePath}/{hash}.vmdl", text);
             }
         }
         catch(Exception e)

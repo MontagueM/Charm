@@ -230,6 +230,18 @@ public class ExporterScene
         });
     }
 
+    public void AddModel(EntityModel model)
+    {
+        ExporterMesh mesh = new(model.Hash);
+        var parts = model.Load(ExportDetailLevel.MostDetailed, null);
+        for (int i = 0; i < parts.Count; i++)
+        {
+            DynamicMeshPart part = parts[i];
+            mesh.AddPart(model.Hash, part, i);
+        }
+        Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
+    }
+
     public void AddCubemap(CubemapResource cubemap)
     {
         Cubemaps.Add(cubemap);

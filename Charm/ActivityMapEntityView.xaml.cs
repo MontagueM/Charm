@@ -318,6 +318,9 @@ public partial class ActivityMapEntityView : UserControl
                 {
                     foreach (var element in skyResource.Unk10.TagData.Unk08)
                     {
+                        if (element.Unk60.TagData.Unk08 is null)
+                            continue;
+
                         Matrix4x4 matrix = new Matrix4x4(
                             element.Unk00.X, element.Unk00.Y, element.Unk00.Z, element.Unk00.W,
                             element.Unk10.X, element.Unk10.Y, element.Unk10.Z, element.Unk10.W,
@@ -365,6 +368,22 @@ public partial class ActivityMapEntityView : UserControl
                         if (_config.GetS2VMDLExportEnabled())
                         {
                             Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
+                        }
+                    }
+                }
+                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
+                {
+                    foreach (var element in skyResource.Unk10.TagData.Unk08)
+                    {
+                        if (element.Unk60.TagData.Unk08 is null)
+                            continue;
+
+                        ExporterScene skyScene = Exporter.Get().CreateScene(element.Unk60.TagData.Unk08.Hash, ExportType.EntityInMap);
+                        skyScene.AddModel(element.Unk60.TagData.Unk08);
+
+                        if (_config.GetS2VMDLExportEnabled())
+                        {
+                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
                         }
                     }
                 }
