@@ -28,9 +28,9 @@ public class TextureExtractor
                     break;
                 case TextureExportFormat.DDS_BGRA_BC7_DX10:
                     if (TexHelper.Instance.IsSRGB(scratchImage.GetMetadata().Format))
-                        scratchImage = scratchImage.Compress(DXGI_FORMAT.BC7_UNORM_SRGB, TEX_COMPRESS_FLAGS.SRGB, 0);
+                        scratchImage = scratchImage.Compress(DXGI_FORMAT.BC3_UNORM_SRGB, TEX_COMPRESS_FLAGS.SRGB, 0);
                     else
-                        scratchImage = scratchImage.Compress(DXGI_FORMAT.BC7_UNORM, TEX_COMPRESS_FLAGS.DEFAULT, 0);
+                        scratchImage = scratchImage.Compress(DXGI_FORMAT.BC3_UNORM, TEX_COMPRESS_FLAGS.DEFAULT, 0);
 
                     scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX9_LEGACY, savePath + ".dds");
                     break;
