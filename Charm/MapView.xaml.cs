@@ -211,6 +211,10 @@ public partial class MapView : UserControl
                 {
                     scene.AddPointLight(pointLight, entry);
                 }
+                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDecalsResource decals)
+                {
+                    scene.AddDecals(decals);
+                }
             });
         });
     }

@@ -36,6 +36,8 @@ class MetadataScene
         _config.TryAdd("Cubemaps", cubemaps);
         ConcurrentDictionary<string, ConcurrentBag<JsonLight>> pointLights = new();
         _config.TryAdd("Lights", pointLights);
+        ConcurrentDictionary<string, ConcurrentBag<JsonDecal>> decals = new ConcurrentDictionary<string, ConcurrentBag<JsonDecal>>();
+        _config.TryAdd("Decals", decals);
 
         if (ConfigSubsystem.Get().GetUnrealInteropEnabled())
         {
@@ -100,6 +102,39 @@ class MetadataScene
                     new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
                     (mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk40.Count > 0 ? mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk40[0].Vec : mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk60[0].Vec));
             }
+        }
+        foreach(SMapDecalsResource decal in scene.Decals)
+        {
+            if (decal.MapDecals is not null)
+            {
+                string savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/textures/decals/";
+                if (ConfigSubsystem.Get().GetSingleFolderMapsEnabled())
+                    savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/Maps/textures/decals/";
+
+                Directory.CreateDirectory(savePath);
+                foreach (var item in decal.MapDecals.TagData.DecalResources)
+                {
+                    // Check if the index is within the bounds of the second list
+                    if (item.StartIndex >= 0 && item.StartIndex < decal.MapDecals.TagData.Locations.Count)
+                    {
+                        // Loop through the second list based on the given parameters
+                        for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decal.MapDecals.TagData.Locations.Count; i++)
+                        {
+                            var location = decal.MapDecals.TagData.Locations[i].Location;
+                            var boxCorners = decal.MapDecals.TagData.DecalProjectionBounds.TagData.InstanceBounds[i];
+
+                            item.Material.SaveAllTextures(savePath);
+                            //item.Material.SavePixelShader($"{savePath}/Shaders/");
+                            //Source2Handler.SaveDecalVMAT($"{ConfigHandler.GetExportSavePath()}/test/", item.Material.Hash, item.Material);
+
+                            //fbxHandler.AddEmptyToScene($"{item.Material.Hash} {boxCorners.Unk24}", location, Vector4.Zero);
+                            AddDecal(boxCorners.Unk24.ToString(), item.Material.FileHash, location, boxCorners.Corner1, boxCorners.Corner2);
+                            AddMaterial(item.Material);
+                        }
+                    }
+                }
+            }
+
         }
     }
 
@@ -219,7 +254,22 @@ class MetadataScene
             Size = new[] { size.X, size.Y },
             Color = new[] { R, G, B }
         });
-        
+    }
+
+    public void AddDecal(string boxhash, string materialName, Vector4 origin, Vector4 corner1, Vector4 corner2)
+    {
+        if (!_config["Decals"].ContainsKey(boxhash))
+        {
+            _config["Decals"][boxhash] = new ConcurrentBag<JsonDecal>();
+        }
+        _config["Decals"][boxhash].Add(new JsonDecal
+        {
+            Material = materialName,
+            Origin = new[] { origin.X, origin.Y, origin.Z },
+            Scale = origin.W,
+            Corner1 = new[] { corner1.X, corner1.Y, corner1.Z },
+            Corner2 = new[] { corner2.X, corner2.Y, corner2.Z }
+        });
     }
 
     public void WriteToFile(string path)
@@ -310,6 +360,14 @@ class MetadataScene
         public float[] Rotation;
         public float[] Size;
         public float[] Color;
+    }
+    private struct JsonDecal
+    {
+        public string Material;
+        public float[] Origin;
+        public float Scale;
+        public float[] Corner1;
+        public float[] Corner2;
     }
 }
 

@@ -94,6 +94,7 @@ public struct SMeshInstanceOcclusionBounds
     public Vector4 Corner1;
     public Vector4 Corner2;
     public TigerHash Unk20;
+    public TigerHash Unk24;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A3718080", 0x30)]
@@ -365,6 +366,60 @@ public struct D2Class_706C8080
     [SchemaField(0xE0)]
     public byte UnkE0; //light shape?
 }
+/// Map Decals Resource
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "626E8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "55698080", 0x18)]
+public struct SMapDecalsResource
+{
+    [SchemaField(0x10)]
+    public Tag<SMapDecals> MapDecals;
+}
+
+/// <summary>
+/// Map Decals
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "686E8080", 0x78)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "5B698080", 0x78)]
+public struct SMapDecals
+{
+    public ulong FileSize;
+    public DynamicArray<D2Class_63698080> DecalResources;
+    [SchemaField(0x18)]
+    public DynamicArray<D2Class_64698080> Locations;
+    [SchemaField(0x28)]
+    public Tag Unk28;
+    public Tag Unk2C;
+    [SchemaField(0x38)]
+    public Tag<SOcclusionBounds> DecalProjectionBounds;
+    [SchemaField(0x40)]
+    public Vector4 Unk40; //some type of bounds
+    public Vector4 Unk50;
+    public TigerHash Unk60;
+}
+
+/// <summary>
+/// Decal resources
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6E8080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "63698080", 0x8)]
+public struct D2Class_63698080
+{
+    public IMaterial Material;
+    public short StartIndex;
+    public short Count; //Number of entries to read
+}
+
+/// <summary>
+/// Decal Location
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D6E8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "64698080", 0x10)]
+public struct D2Class_64698080
+{
+    public Vector4 Location;
+}
+
 
 // /// <summary>
 // /// Boss entity data resource?

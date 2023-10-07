@@ -70,6 +70,7 @@ public class ExporterScene
     public ConcurrentBag<SMapDataEntry> EntityPoints = new();
     public ConcurrentBag<CubemapResource> Cubemaps = new();
     public ConcurrentBag<SMapLightResource> MapLights = new();
+    public ConcurrentBag<SMapDecalsResource> Decals = new();
     private List<FileHash> _addedEntities = new List<FileHash>();
 
     public void AddStatic(FileHash meshHash, List<StaticPart> parts)
@@ -203,6 +204,10 @@ public class ExporterScene
     public void AddMapLight(SMapLightResource mapLight)
     {
         MapLights.Add(mapLight);
+    }
+    public void AddDecals(SMapDecalsResource decal)
+    {
+        Decals.Add(decal);
     }
 }
 
