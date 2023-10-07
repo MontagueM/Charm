@@ -1,5 +1,7 @@
 ﻿using System.Runtime.InteropServices;
+using Microsoft.VisualBasic.FileIO;
 using Tiger.Exporters;
+using Tiger.Schema.Entity;
 
 namespace Tiger.Schema;
 
@@ -261,6 +263,76 @@ public struct SStaticMapParent
     public TigerHash Unk2C;
 }
 
+/// <summary>
+/// Background entities/skybox resource
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A36A8080", 0x18)]
+public struct SMapSkyEntResource
+{
+    [SchemaField(0x10)]
+    public Tag<SMapSkyEntities> Unk10;  // A76A8080
+}
+
+/// <summary>
+/// Background entities/skybox
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A76A8080", 0x60)]
+public struct SMapSkyEntities
+{
+    public long FileSize;
+    public DynamicArray<D2Class_A96A8080> Unk08;
+    public DynamicArray<D2Class_B3938080> Unk18;
+    public DynamicArray<D2Class_07008080> Unk28;
+    [SchemaField(0x40)]
+    public Vector4 Unk40;
+    public Vector4 Unk50;
+
+    [SchemaField(0x10)]
+    public Tag Unk10;  // A76A8080
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]
+public struct D2Class_A96A8080
+{
+    //Matrix4x4
+    public Vector4 Unk00;
+    public Vector4 Unk10;
+    public Vector4 Unk20;
+    public Vector4 Unk30;
+
+    //Bounds
+    public Vector4 Unk40;
+    public Vector4 Unk50;
+
+    public Tag<D2Class_AE6A8080> Unk60;//80806aae
+    public float Unk64;
+    public int Unk68;
+    public ushort Unk6C;
+    public short Unk6E;
+    public float Unk70;
+    public int Unk74;
+    public Tag Unk78;
+    public int Unk7C;
+    public long Unk80;
+    public int Unk88;
+    public int Unk8c;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AE6A8080", 0x10)]
+public struct D2Class_AE6A8080
+{
+    public long FileSize;
+    public EntityModel Unk08;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B3938080", 0x30)]
+public struct D2Class_B3938080
+{
+    //Bounds
+    public Vector4 Unk00;
+    public Vector4 Unk10;
+}
+
 // /// <summary>
 // /// Boss entity data resource?
 // /// </summary>
@@ -343,16 +415,6 @@ public struct SStaticMapParent
 // {
 //     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
 //     public Tag Unk10;  // B78C8080
-// }
-//
-// /// <summary>
-// /// Unk data resource.
-// /// </summary>
-// [SchemaStruct("A36A8080", 0x18)]
-// public struct D2Class_A36A8080
-// {
-//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
-//     public Tag Unk10;  // A76A8080
 // }
 //
 // /// <summary>

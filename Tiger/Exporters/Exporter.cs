@@ -117,7 +117,7 @@ public class ExporterScene
             Position = t.Position,
             Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
             Quaternion = t.Rotation,
-            Scale = t.Scale
+            Scale = new Vector3(t.Scale.X, t.Scale.X, t.Scale.X)
         }).ToList();
     }
 
@@ -191,6 +191,42 @@ public class ExporterScene
             Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
             Quaternion = dynamicResource.Rotation,
             Scale = new Vector3(dynamicResource.Translation.W, dynamicResource.Translation.W, dynamicResource.Translation.W)
+        });
+    }
+
+    public void AddMapModel(EntityModel model, Vector4 translation, Vector4 rotation, Vector3 scale)
+    {
+        ExporterMesh mesh = new(model.Hash);
+
+        if (!_addedEntities.Contains(model.Hash)) //Dont want duplicate entities being added
+        {
+            _addedEntities.Add(model.Hash);
+            var parts = model.Load(ExportDetailLevel.MostDetailed, null);
+            for (int i = 0; i < parts.Count; i++)
+            {
+                DynamicMeshPart part = parts[i];
+
+                if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                {
+                    continue;
+                }
+
+                mesh.AddPart(model.Hash, part, i);
+            }
+            Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
+        }
+
+        if (!EntityInstances.ContainsKey(model.Hash))
+        {
+            EntityInstances.TryAdd(model.Hash, new());
+        }
+
+        EntityInstances[model.Hash].Add(new Transform
+        {
+            Position = translation.ToVec3(),
+            Rotation = Vector4.QuaternionToEulerAngles(rotation),
+            Quaternion = rotation,
+            Scale = scale
         });
     }
 

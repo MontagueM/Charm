@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
@@ -98,12 +99,7 @@ public partial class ActivityMapEntityView : UserControl
                     if (map == null)
                         continue;
 
-                    ConcurrentBag<FileHash> sMapDataTables = new();
-                    foreach(var entry in map.TagData.MapDataTables)
-                    {
-                        sMapDataTables.Add(entry.MapDataTable.Hash);
-                    }
-
+                    ConcurrentBag<FileHash> sMapDataTables = new ConcurrentBag<FileHash>(map.TagData.MapDataTables.Select(entry => entry.MapDataTable.Hash));
                     PopulateEntityList(sMapDataTables.ToList());
                 }  
                 else
@@ -126,6 +122,7 @@ public partial class ActivityMapEntityView : UserControl
                 entityMap.Hash = m.MapContainer.Hash;
                 entityMap.Count = m.MapContainer.TagData.MapDataTables.Count;
                 entityMap.EntityType = DisplayEntityMap.Type.Map;
+                entityMap.DataTables = m.MapContainer.TagData.MapDataTables.Select(entry => entry.MapDataTable.Hash).ToList();
                 entityMap.Data = entityMap;
 
                 items.Add(entityMap);
@@ -234,6 +231,8 @@ public partial class ActivityMapEntityView : UserControl
             {
                 if (item.Selected || bSelectAll)
                 {
+                    if (item.DataTables is null)
+                        continue;
                     maps.TryAdd(item.DataTables, item.Hash);
                     Log.Info($"Selected map: {item.Hash}");
                 }
@@ -297,6 +296,7 @@ public partial class ActivityMapEntityView : UserControl
         // todo these scenes can be combined
         ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{hash}_EntityPoints", ExportType.EntityPoints);
         ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.Map);
+        ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyEnts", ExportType.Map);
 
         Parallel.ForEach(dataTables, data =>
         {
@@ -313,6 +313,34 @@ public partial class ActivityMapEntityView : UserControl
                     }
                     else
                         dynamicPointScene.AddEntityPoints(dynamicResource);
+                }
+                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
+                {
+                    foreach (var element in skyResource.Unk10.TagData.Unk08)
+                    {
+                        Matrix4x4 matrix = new Matrix4x4(
+                            element.Unk00.X, element.Unk00.Y, element.Unk00.Z, element.Unk00.W,
+                            element.Unk10.X, element.Unk10.Y, element.Unk10.Z, element.Unk10.W,
+                            element.Unk20.X, element.Unk20.Y, element.Unk20.Z, element.Unk20.W,
+                            element.Unk30.X, element.Unk30.Y, element.Unk30.Z, element.Unk30.W
+                        );
+
+                        System.Numerics.Vector3 scale = new();
+                        System.Numerics.Vector3 trans = new();
+                        Quaternion quat = new();
+                        Matrix4x4.Decompose(matrix, out scale, out quat, out trans);
+
+                        skyScene.AddMapModel(element.Unk60.TagData.Unk08,
+                            new Tiger.Schema.Vector4(trans.X, trans.Y, trans.Z, 1.0f),
+                            new Tiger.Schema.Vector4(quat.X, quat.Y, quat.Z, quat.W),
+                            new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z));
+
+                        foreach (DynamicMeshPart part in element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null))
+                        {
+                            part.Material.SaveAllTextures($"{savePath}/textures");
+                            part.Material.SavePixelShader($"{savePath}/shaders");
+                        }
+                    }
                 }
             });
         });

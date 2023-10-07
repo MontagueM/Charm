@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Media;
+using System.Numerics;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -241,6 +244,35 @@ public partial class MapView : UserControl
                 {
                     scene.AddCubemap(cubemap);
                 }
+                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapSkyEntResource skyResource)
+                {
+                    ExporterScene skyScene = Exporter.Get().CreateScene($"{map.Hash}_SkyEnts", ExportType.Map);
+                    foreach (var element in skyResource.Unk10.TagData.Unk08)
+                    {
+                        Matrix4x4 matrix = new Matrix4x4(
+                            element.Unk00.X, element.Unk00.Y, element.Unk00.Z, element.Unk00.W,
+                            element.Unk10.X, element.Unk10.Y, element.Unk10.Z, element.Unk10.W,
+                            element.Unk20.X, element.Unk20.Y, element.Unk20.Z, element.Unk20.W,
+                            element.Unk30.X, element.Unk30.Y, element.Unk30.Z, element.Unk30.W
+                        );
+
+                        System.Numerics.Vector3 scale = new();
+                        System.Numerics.Vector3 trans = new();
+                        Quaternion quat = new();
+                        Matrix4x4.Decompose(matrix, out scale, out quat, out trans);
+
+                        skyScene.AddMapModel(element.Unk60.TagData.Unk08,
+                            new Tiger.Schema.Vector4(trans.X, trans.Y, trans.Z, 1.0f),
+                            new Tiger.Schema.Vector4(quat.X, quat.Y, quat.Z, quat.W),
+                            new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z));
+
+                        foreach(DynamicMeshPart part in element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null))
+                        {
+                            part.Material.SaveAllTextures($"{savePath}/textures");
+                            part.Material.SavePixelShader($"{savePath}/shaders");
+                        }
+                    }  
+                }
             });
         });
     }
@@ -314,7 +346,7 @@ public partial class MapView : UserControl
                     displayPart.BasePart = part;
                     displayPart.Translations.Add(entry.Translation.ToVec3());
                     displayPart.Rotations.Add(entry.Rotation);
-                    displayPart.Scales.Add(new Vector3(entry.Translation.W, entry.Translation.W, entry.Translation.W));
+                    displayPart.Scales.Add(new Tiger.Schema.Vector3(entry.Translation.W, entry.Translation.W, entry.Translation.W));
                     displayParts.Add(displayPart);
                 }
             }
