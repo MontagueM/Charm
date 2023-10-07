@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Media;
+using System.Numerics;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Arithmic;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -40,10 +44,18 @@ public partial class MapView : UserControl
         InitializeComponent();
     }
 
-    public void LoadMap(FileHash fileHash, ExportDetailLevel detailLevel)
+    public void LoadMap(FileHash fileHash, ExportDetailLevel detailLevel, bool isEntities = false)
     {
-        GetStaticMapData(fileHash, detailLevel);
-        // _mainWindow.SetNewestTabSelected();
+        if (isEntities)
+            GetEntityMapData(fileHash, detailLevel);
+        else
+            GetStaticMapData(fileHash, detailLevel);
+    }
+
+    private void GetEntityMapData(FileHash tagHash, ExportDetailLevel detailLevel)
+    {
+        Tag<SMapDataTable> dataentry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(tagHash);
+        SetEntityMapUI(dataentry, detailLevel);
     }
 
     private void GetStaticMapData(FileHash fileHash, ExportDetailLevel detailLevel)
@@ -64,6 +76,45 @@ public partial class MapView : UserControl
             MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
         });
         displayParts.Clear();
+    }
+
+    private void SetEntityMapUI(Tag<SMapDataTable> dataentry, ExportDetailLevel detailLevel)
+    {
+        var displayParts = MakeEntityDisplayParts(dataentry, detailLevel);
+        Dispatcher.Invoke(() =>
+        {
+            MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+            MVM.SetChildren(displayParts);
+        });
+        displayParts.Clear();
+    }
+
+    public bool LoadEntity(FileHash entityHash, FbxHandler fbxHandler)
+    {
+        fbxHandler.Clear();
+        AddEntity(entityHash, ExportDetailLevel.MostDetailed, fbxHandler);
+        return LoadUI(fbxHandler);
+    }
+
+    private void AddEntity(FileHash entityHash, ExportDetailLevel detailLevel, FbxHandler fbxHandler)
+	{
+        Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash);
+        var dynamicParts = entity.Load(detailLevel);
+		//ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
+		//dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
+		fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
+        Log.Verbose($"Adding entity {entity.Hash}/{entity.Model?.Hash} with {dynamicParts.Sum(p => p.Indices.Count)} vertices to fbx");
+	}
+
+    private bool LoadUI(FbxHandler fbxHandler)
+    {
+        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        string filePath = $"{config.GetExportSavePath()}/temp.fbx";
+        fbxHandler.ExportScene(filePath);
+        bool loaded = MVM.LoadEntityFromFbx(filePath);
+        fbxHandler.Clear();
+        return loaded;
     }
 
     public void Clear()
@@ -93,7 +144,6 @@ public partial class MapView : UserControl
         if(exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
-            Directory.CreateDirectory(savePath + "/Entities");
             ExportStatics(savePath, map);
         }
 
@@ -118,7 +168,6 @@ public partial class MapView : UserControl
         if (exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
-            Directory.CreateDirectory(savePath + "/Entities");
             ExportStatics(savePath, map);
         }
 
@@ -175,10 +224,6 @@ public partial class MapView : UserControl
 
     private static void ExtractDataTables(Tag<SMapContainer> map, string savePath, ExporterScene scene, ExportTypeFlag exportTypeFlag)
     {
-        // todo these scenes can be combined
-        ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{map.Hash}_EntityPoints", ExportType.EntityPoints);
-        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{map.Hash}_Entities", ExportType.Map);
-
         Parallel.ForEach(map.TagData.MapDataTables, data =>
         {
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
@@ -193,15 +238,6 @@ public partial class MapView : UserControl
                     {
                         staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                     }
-                }
-                if (entry is SMapDataEntry dynamicResource)
-                {
-                    Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                    if(entity.HasGeometry())
-                    {
-                        dynamicScene.AddMapEntity(dynamicResource, entity);
-                    }
-                    dynamicPointScene.AddEntityPoints(dynamicResource);
                 }
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is CubemapResource cubemap)
                 {
@@ -242,21 +278,7 @@ public partial class MapView : UserControl
                             Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
                         }
                     }
-                }
-                if (entry is SMapDataEntry dynamicResource)
-                {
-                    Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                    if (entity.HasGeometry())
-                    {
-                        ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
-                        dynamicScene.AddEntity(dynamicResource.GetEntityHash(), entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource), entity.Skeleton?.GetBoneNodes());
-                        entity.SaveMaterialsFromParts(savePath, entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource), true);
-                        if (source2Models)
-                        {
-                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
-                        }
-                    }
-                }
+                }      
             });
         });
     }
@@ -281,6 +303,30 @@ public partial class MapView : UserControl
                     displayParts.Add(displayPart);
                 }
 
+            }
+        });
+        return displayParts.ToList();
+    }
+
+    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(Tag<SMapDataTable> dataentry, ExportDetailLevel detailLevel)
+    {
+        ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
+        Parallel.ForEach(dataentry.TagData.DataEntries, entry =>
+        {
+            Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entry.GetEntityHash());
+            if (entity.HasGeometry())
+            {
+                var parts = entity.Load(ExportDetailLevel.MostDetailed);
+
+                foreach (var part in parts)
+                {
+                    MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+                    displayPart.BasePart = part;
+                    displayPart.Translations.Add(entry.Translation.ToVec3());
+                    displayPart.Rotations.Add(entry.Rotation);
+                    displayPart.Scales.Add(new Tiger.Schema.Vector3(entry.Translation.W, entry.Translation.W, entry.Translation.W));
+                    displayParts.Add(displayPart);
+                }
             }
         });
         return displayParts.ToList();

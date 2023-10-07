@@ -1,0 +1,190 @@
+﻿<UserControl
+    x:Class="Charm.ActivityMapEntityView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="1000"
+    d:DesignWidth="1900"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ControlTemplate x:Key="bubbleTemplate">
+            <Grid Height="50">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100*" />
+                    <ColumnDefinition Width="100*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*" />
+                    <RowDefinition Height="50*" />
+                </Grid.RowDefinitions>
+                <Border
+                    Grid.RowSpan="2"
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    Text="{Binding Name}" />
+                <TextBlock
+                    Grid.Row="1"
+                    HorizontalAlignment="Left"
+                    FontSize="12px"
+                    Text="{Binding LoadType}" />
+                <Button
+                    Grid.RowSpan="2"
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Click="GetBubbleContentsButton_OnClick"
+                    Content="View contents"
+                    Style="{StaticResource MaterialDesignPaperDarkButton}"
+                    Tag="{Binding Data}" />
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="staticTemplate">
+            <Grid Height="25" Margin="0,1,0,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80*" />
+                    <ColumnDefinition Width="20*" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
+                <CheckBox
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    HorizontalContentAlignment="Left"
+                    Click="EntityMapPart_OnCheck"
+                    IsChecked="{Binding Selected}"
+                    Style="{StaticResource MaterialDesignCheckBox}"
+                    Tag="{Binding Data}">
+                    <TextBlock Text="{Binding Name}" TextAlignment="Center" />
+                </CheckBox>
+                <Button
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Click="EntityMapView_OnClick"
+                    Style="{StaticResource MaterialDesignPaperDarkButton}">
+                    <TextBlock Text="View" TextAlignment="Center" />
+                </Button>
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="dynamicTemplate">
+            <Grid Height="25" Margin="0,1,0,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="90*" />
+                    <ColumnDefinition Width="20*" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
+                <CheckBox
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    HorizontalContentAlignment="Left"
+                    IsChecked="{Binding Selected}"
+                    Style="{StaticResource MaterialDesignCheckBox}"
+                    Tag="{Binding Hash}">
+                    <TextBlock Text="{Binding Name}" TextAlignment="Center" />
+                </CheckBox>
+                <Button
+                    Grid.Column="0"
+                    HorizontalAlignment="Right"
+                    Click="EntityView_OnClick"
+                    Style="{StaticResource MaterialDesignPaperDarkButton}">
+                    <TextBlock Text="View" TextAlignment="Center" />
+                </Button>
+                <Button
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Click="EntityExport_OnClick"
+                    Style="{StaticResource MaterialDesignPaperDarkButton}">
+                    <TextBlock Text="Export" TextAlignment="Center" />
+                </Button>
+            </Grid>
+        </ControlTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*" />
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45*" />
+                <RowDefinition Height="50*" />
+                <RowDefinition Height="5*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="100*" />
+            </Grid.ColumnDefinitions>
+            <ListView
+                x:Name="MapList"
+                Grid.Row="0"
+                Grid.ColumnSpan="2">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Template" Value="{StaticResource bubbleTemplate}" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+            </ListView>
+            <ListView
+                x:Name="EntityContainerList"
+                Grid.Row="1"
+                Grid.Column="0">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Template" Value="{StaticResource staticTemplate}" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+            </ListView>
+            <local:ExportControl
+                x:Name="ExportControl"
+                Grid.Row="2"
+                Grid.ColumnSpan="2" />
+            <ListView
+                x:Name="EntitiesList"
+                Grid.Row="1"
+                Grid.Column="1">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Template" Value="{StaticResource dynamicTemplate}" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+            </ListView>
+        </Grid>
+        <local:MapView x:Name="MapControl" Grid.Column="1" />
+    </Grid>
+
+</UserControl>

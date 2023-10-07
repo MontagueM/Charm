@@ -73,8 +73,8 @@ namespace Tiger.Schema.Shaders
                     continue;
                 }
                 // todo change to 64 bit hash?
-                string path = $"{saveDirectory}/VS_{e.TextureIndex}_{e.Texture.Hash}";
-                if (!File.Exists(path))
+                string path = $"{saveDirectory}/VS_{e.Texture.Hash}";
+                if (!File.Exists(path + ".dds") && !File.Exists(path + ".png") && !File.Exists(path + ".tga"))
                 {
                     e.Texture.SavetoFile(path);
                 }

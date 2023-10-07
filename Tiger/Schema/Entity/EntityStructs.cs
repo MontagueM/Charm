@@ -1393,3 +1393,29 @@ public struct CubemapResource //Dataresource for cubemaps
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Texture Unk1C0; //Sometype of reflection tint texture idk
 }
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D8928080", 0x190)]
+public struct D2Class_D8928080
+{
+    //[DestinyOffset(0x10)]
+    //public DestinyHash Unk10;
+    //public DestinyHash Unk14;
+    //public DestinyHash Unk18;
+    //public DestinyHash Unk1C;
+    //public DestinyHash Unk20;
+    //public DestinyHash Unk24;
+    //[SchemaField(0x68)]
+    //public DynamicArray<D2Class_56998080> Unk68;
+    [SchemaField(0x84)]
+    public Tag<SMapDataTable> Unk84;
+    [SchemaField(0x90)]
+    public Vector4 Rotation;
+    public Vector4 Translation;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "EF8C8080", 0x60)]
+public struct D2Class_EF8C8080
+{
+    [SchemaField(0x58)]
+    public Tag<SMapDataTable> Unk58;
+}

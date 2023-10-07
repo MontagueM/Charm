@@ -205,7 +205,7 @@ class MetadataScene
             {
                 Translation = new[] { transform.Position.X, transform.Position.Y, transform.Position.Z },
                 Rotation = new[] { transform.Quaternion.X, transform.Quaternion.Y, transform.Quaternion.Z, transform.Quaternion.W },
-                Scale = transform.Scale.X
+                Scale = new[] { transform.Scale.X, transform.Scale.Y, transform.Scale.Z }
             });
         }
     }
@@ -315,7 +315,7 @@ class MetadataScene
         foreach (var keyValuePair in (ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>)_config["Instances"])
         {
             var array = keyValuePair.Value;
-            var sortedArray = array.OrderBy(x => x.Scale);
+            var sortedArray = array.OrderBy(x => x.Scale[0]);
 
             // Convert the sorted array to a ConcurrentBag
             var sortedBag = new ConcurrentBag<JsonInstance>(sortedArray);
@@ -343,7 +343,7 @@ class MetadataScene
     {
         public float[] Translation;
         public float[] Rotation;  // Quaternion
-        public float Scale;
+        public float[] Scale;
     }
 
     private struct JsonCubemap
