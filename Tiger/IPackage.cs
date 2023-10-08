@@ -506,6 +506,10 @@ public abstract class Package : IPackage
         List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
         foreach (D2BlockEntry blockEntry in blocks)
         {
+            if ((blockEntry.BitFlag & 0x8) == 8)
+            {
+                return new byte[fileEntry.FileSize];
+            }
             // TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId);
             // todo use spans
             byte[] blockBuffer;

@@ -75,12 +75,29 @@ public partial class AtlasView : UserControl
         PresentationSource source = PresentationSource.FromVisual(this);
         var window = Window.GetWindow(this);
 
-        var parentTransform = TransformToAncestor(Window.GetWindow(this)).Transform(new Point());
+        Point parentTransform = new();
+        if (IsAncestorOf(window))
+        {
+            parentTransform = TransformToAncestor(window).Transform(new Point());
+        }
+
         var offsetX = window.Left + parentTransform.X + ActualWidth / 2;
         var offsetY = window.Top + parentTransform.Y + ActualHeight / 2;
 
-        var dpiScaledX = offsetX * source.CompositionTarget.TransformToDevice.M11;
-        var dpiScaledY = offsetY * source.CompositionTarget.TransformToDevice.M22;
+        double dpiX = 1;
+        double dpiY = 1;
+        double dpiScaledX;
+        double dpiScaledY;
+        if (source != null)
+        {
+            dpiScaledX = offsetX * source.CompositionTarget.TransformToDevice.M11;
+            dpiScaledY = offsetY * source.CompositionTarget.TransformToDevice.M22;
+        }
+        else
+        {
+            dpiScaledX = offsetX * dpiX;
+            dpiScaledY = offsetY * dpiY;
+        }
 
         return new Point(dpiScaledX, dpiScaledY);
     }

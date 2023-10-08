@@ -243,7 +243,7 @@ public partial class MapView : UserControl
                     {
                         ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
                         dynamicScene.AddEntity(dynamicResource.GetEntityHash(), entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource), entity.Skeleton?.GetBoneNodes());
-                        entity.SaveMaterialsFromParts(savePath, entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource), true);
+                        entity.SaveMaterialsFromParts(dynamicScene, entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource));
                         if (source2Models)
                         {
                             Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
