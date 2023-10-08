@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Arithmic;
+using ConcurrentCollections;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
@@ -56,6 +57,27 @@ public class Exporter : Subsystem<Exporter>
     }
 }
 
+public struct ExportMaterial
+{
+    public readonly IMaterial Material;
+    public readonly bool IsTerrain;
+
+    public ExportMaterial(IMaterial material, bool isTerrain = false)
+    {
+        Material = material;
+        IsTerrain = isTerrain;
+    }
+
+    public override int GetHashCode()
+    {
+        return (int)Material.FileHash.Hash32;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is ExportMaterial material && material.Material.FileHash == Material.FileHash;
+    }
+}
 
 public class ExporterScene
 {
@@ -69,7 +91,9 @@ public class ExporterScene
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentBag<SMapDataEntry> EntityPoints = new();
     public ConcurrentBag<CubemapResource> Cubemaps = new();
-    private List<FileHash> _addedEntities = new List<FileHash>();
+    private ConcurrentBag<FileHash> _addedEntities = new();
+    public ConcurrentHashSet<Texture> Textures = new();
+    public ConcurrentHashSet<ExportMaterial> Materials = new();
 
     public void AddStatic(FileHash meshHash, List<StaticPart> parts)
     {
@@ -170,10 +194,10 @@ public class ExporterScene
             {
                 DynamicMeshPart part = parts[i];
 
-                if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-                {
+                if (part.Material == null)
                     continue;
-                }
+                if (!part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                    continue;
 
                 mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
             }

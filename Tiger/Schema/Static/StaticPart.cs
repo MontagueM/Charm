@@ -79,9 +79,47 @@ public class StaticPart : MeshPart
         }
         VertexIndices = uniqueVertexIndices.ToList();
         // Have to call it like this b/c we don't know the format of the vertex data here
-        mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0);
-        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 1);
-        mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices);
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        {
+            List<InputSignature> inputSignatures = mesh.Material.VertexShader.InputSignatures;
+            int b0Stride = mesh.Vertices0.TagData.Stride;
+            int b1Stride = mesh.Vertices1?.TagData.Stride ?? 0;
+            List<InputSignature> inputSignatures0 = new();
+            List<InputSignature> inputSignatures1 = new();
+            int stride = 0;
+            foreach (InputSignature inputSignature in inputSignatures)
+            {
+                if (stride < b0Stride)
+                {
+                    inputSignatures0.Add(inputSignature);
+                }
+                else
+                {
+                    inputSignatures1.Add(inputSignature);
+                }
+
+                if (inputSignature.Semantic == InputSemantic.Colour)
+                {
+                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+                }
+                else
+                {
+                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
+                }
+                // todo entities can have 4 bytes per component, although its isolated for cloth so we can probably account for it
+            }
+            Debug.Assert(b0Stride + b1Stride == stride);
+
+            Log.Debug($"Reading vertex buffers {mesh.Vertices0.Hash}/{b0Stride}/{inputSignatures0.DebugString()} and {mesh.Vertices1?.Hash}/{b1Stride}/{inputSignatures1.DebugString()}");
+            mesh.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0);
+            mesh.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1);
+        }
+        else
+        {
+            mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices);
+            mesh.Vertices1?.ReadVertexData(this, uniqueVertexIndices);
+            mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices);
+        }
 
         TransformData(container);
     }
