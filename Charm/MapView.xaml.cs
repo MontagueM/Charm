@@ -210,7 +210,19 @@ public partial class MapView : UserControl
                 }
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDecalsResource decals)
                 {
+                    if (decals.MapDecals is null || decals.MapDecals.TagData.DecalResources is null)
+                        return;
                     scene.AddDecals(decals);
+                    foreach (var item in decals.MapDecals.TagData.DecalResources)
+                    {
+                        if (item.StartIndex >= 0 && item.StartIndex < decals.MapDecals.TagData.Locations.Count)
+                        { 
+                            for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decals.MapDecals.TagData.Locations.Count; i++)
+                            {
+                                scene.Materials.Add(new ExportMaterial(item.Material));
+                            }
+                        }
+                    }
                 }
             });
         });
