@@ -1116,7 +1116,7 @@ public partial class TagListView : UserControl
             // var tex1d = PackageHandler.GetAllTagsWithTypes(32, 1);
             // var tex2d = PackageHandler.GetAllTagsWithTypes(32, 2);
             // var tex3d = PackageHandler.GetAllTagsWithTypes(32, 3);
-            var tex = PackageResourcer.Get().GetAllFiles<Texture>();
+            var tex = PackageResourcer.Get().GetAllHashes<Texture>();
 
             // PackageHandler.CacheHashDataList(tex1d.Select(x => x.Hash).ToArray());
             MainWindow.Progress.CompleteStage();
@@ -1127,18 +1127,10 @@ public partial class TagListView : UserControl
 
             Parallel.ForEach(tex, val =>
             {
-                string dimension;
-                if (val.IsCubemap())
-                    dimension = "Cube";
-                else if (val.IsVolume())
-                    dimension = "Volume";
-                else
-                    dimension = "2D";
-
                 _allTagItems.Add(new TagItem
                 {
-                    Hash = val.Hash,
-                    Name = $"Texture {dimension} {val.TagData.Width} x {val.TagData.Height}",
+                    Hash = val,
+                    Name = $"Texture",
                     TagType = ETagListType.Texture
                 });
             });

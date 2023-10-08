@@ -278,7 +278,7 @@ public partial class MapView : UserControl
                             Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
                         }
                     }
-                }      
+                }
             });
         });
     }
