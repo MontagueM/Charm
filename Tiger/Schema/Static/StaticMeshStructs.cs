@@ -36,11 +36,15 @@ public struct SMaterialHash
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2F6D8080", 0x24)]
 public struct SStaticMeshDecal
 {
-    public sbyte Unk00;
-    public sbyte Unk01;
+    public short Unk00;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public short Unk02;
     public sbyte LODLevel;
     public sbyte Unk03;
-    public int PrimitiveType;
+    public short PrimitiveType;
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public short Unk06;
     public IndexBuffer Indices;
     public VertexBuffer Vertices0;
     public VertexBuffer Vertices1;
