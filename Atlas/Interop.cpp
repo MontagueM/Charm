@@ -77,6 +77,11 @@ extern HRESULT __cdecl Render(void* pResource, bool isNewSurface)
 
 extern void __cdecl RegisterMouseDelta(float mouseX, float mouseY)
 {
+    if (camera == nullptr)
+    {
+        return;
+    }
+
     camera->UpdateFromMouse(SimpleMath::Vector2(mouseX, mouseY), 0.01f, true);
 }
 
@@ -107,12 +112,22 @@ extern void __cdecl SetCameraMode(CameraMode mode)
 
 extern void __cdecl CreateStaticMesh(uint32_t hash, Blob staticMeshTransforms)
 {
+    if (renderer == nullptr)
+    {
+        return;
+    }
+
     renderer->StaticMesh = std::make_shared<StaticMesh>(hash, staticMeshTransforms);
     renderer->StaticMesh->Initialise(renderer->Device);
 }
 
 extern HRESULT __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup bufferGroup)
 {
+    if (renderer == nullptr)
+    {
+        return E_FAIL;
+    }
+
     HRESULT hr = renderer->StaticMesh->AddStaticMeshBufferGroup(bufferGroup);
 
     if (FAILED(hr))
@@ -126,6 +141,11 @@ extern HRESULT __cdecl AddStaticMeshBufferGroup(uint32_t hash, BufferGroup buffe
 // do we have to copy on an extern? or can we use const ref
 extern HRESULT __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo)
 {
+    if (renderer == nullptr)
+    {
+        return E_FAIL;
+    }
+
     HRESULT hr = renderer->StaticMesh->AddPart(partInfo);
 
     if (FAILED(hr))
@@ -138,22 +158,40 @@ extern HRESULT __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo)
 
 extern void __cdecl ResizeWindow(int width, int height)
 {
+    if (window == nullptr || renderer == nullptr)
+    {
+        return;
+    }
+
     window->SetRect(width, height);
     renderer->SetRasterizerViewport();
 }
 
 extern void __cdecl RegisterMouseScroll(int delta)
 {
+    if (camera == nullptr)
+    {
+        return;
+    }
     camera->UpdateScroll(delta);
 }
 
 extern void __cdecl ResetCamera()
 {
+    if (camera == nullptr)
+    {
+        return;
+    }
     camera->Reset();
 }
 
 extern void __cdecl MoveOrbitOrigin(float mouseX, float mouseY)
 {
+    if (camera == nullptr)
+    {
+        return;
+    }
+
     camera->MoveOrbitOrigin(mouseX, mouseY);
 }
 
