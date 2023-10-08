@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Tiger;
+using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
@@ -205,6 +207,20 @@ public partial class DevView : UserControl
                     dialogueView.Load(hash);
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
+                    break;
+                case 0x808073A5:
+                case 0x80806F07: //Entity model
+                    EntityModel entityModel = FileResourcer.Get().GetFile<EntityModel>(hash);
+                    ExporterScene scene = Exporter.Get().CreateScene(hash, ExportType.Entity);
+                    scene.AddModel(entityModel);
+                    var parts = entityModel.Load(ExportDetailLevel.MostDetailed, null);
+                    Exporter.Get().Export();
+
+                    //foreach (DynamicMeshPart part in parts)
+                    //{
+                    //    part.Material.SaveVertexShader($"{ConfigSubsystem.Get().GetExportSavePath()}/{hash}/shaders/");
+                    //    part.Material.SaveAllTextures($"{ConfigSubsystem.Get().GetExportSavePath()}/{hash}/textures/");
+                    //}
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
