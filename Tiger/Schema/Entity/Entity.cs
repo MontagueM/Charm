@@ -87,20 +87,10 @@ public class Entity : Tag<SEntity>
 
     public void SaveMaterialsFromParts(ExporterScene scene, List<DynamicMeshPart> dynamicParts)
     {
-        // Directory.CreateDirectory($"{saveDirectory}/Textures");
-        // Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var dynamicPart in dynamicParts)
         {
             if (dynamicPart.Material == null) continue;
-            scene.Materials.Add(dynamicPart.Material);
-            // dynamicPart.Material.SaveAllTextures($"{saveDirectory}/Textures");
-            // dynamicPart.Material.SaveVertexShader(saveDirectory);
-            // if (bSaveShaders)
-            // {
-                // dynamicPart.Material.SavePixelShader($"{saveDirectory}/Shaders");
-                // dynamicPart.Material.SaveVertexShader($"{saveDirectory}/Shaders");
-            // }
-            // Environment.Exit(5);
+            scene.Materials.Add(new ExportMaterial(dynamicPart.Material));
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using ConcurrentCollections;
+﻿using System.Collections.Concurrent;
+using ConcurrentCollections;
 using Tiger.Schema;
 using Tiger.Schema.Shaders;
 
@@ -8,20 +9,19 @@ public class MaterialExporter : AbstractExporter
 {
     public override void Export(Exporter.ExportEventArgs args)
     {
-        ExportTextures(args);
-    }
-
-    private void ExportTextures(Exporter.ExportEventArgs args)
-    {
         ConcurrentHashSet<Texture> mapTextures = new();
+        ConcurrentHashSet<ExportMaterial> mapMaterials = new();
+        bool saveShaders = ConfigSubsystem.Get().GetUnrealInteropEnabled() || ConfigSubsystem.Get().GetS2ShaderExportEnabled();
+
         Parallel.ForEach(args.Scenes, scene =>
         {
             if (scene.Type is ExportType.Entity or ExportType.Static)
             {
                 ConcurrentHashSet<Texture> textures = scene.Textures;
-                foreach (IMaterial material in scene.Materials)
+
+                foreach (ExportMaterial material in scene.Materials)
                 {
-                    foreach (STextureTag texture in material.EnumerateVSTextures())
+                    foreach (STextureTag texture in material.Material.EnumerateVSTextures())
                     {
                         if (texture.Texture == null)
                         {
@@ -29,45 +29,68 @@ public class MaterialExporter : AbstractExporter
                         }
                         textures.Add(texture.Texture);
                     }
-                    foreach (STextureTag texture in material.EnumeratePSTextures())
+                    foreach (STextureTag texture in material.Material.EnumeratePSTextures())
                     {
                         if (texture.Texture == null)
                         {
                             continue;
                         }
                         textures.Add(texture.Texture);
+                    }
+
+                    if (saveShaders)
+                    {
+                        string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Shaders";
+                        material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
+                        material.Material.SaveVertexShader(shaderSaveDirectory);
                     }
                 }
 
-                string saveDirectory = $"{args.OutputDirectory}/{scene.Name}/Textures";
-                Directory.CreateDirectory(saveDirectory);
+                string textureSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Textures";
+                Directory.CreateDirectory(textureSaveDirectory);
                 foreach (Texture texture in textures)
                 {
-                    texture.SavetoFile($"{saveDirectory}/{texture.Hash}");
+                    texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
                 }
             }
             else
             {
                 mapTextures.UnionWith(scene.Textures);
-                foreach (IMaterial material in scene.Materials)
+                foreach (ExportMaterial material in scene.Materials)
                 {
-                    foreach (STextureTag texture in material.EnumerateVSTextures())
+                    foreach (STextureTag texture in material.Material.EnumerateVSTextures())
                     {
                         mapTextures.Add(texture.Texture);
                     }
-                    foreach (STextureTag texture in material.EnumeratePSTextures())
+                    foreach (STextureTag texture in material.Material.EnumeratePSTextures())
                     {
                         mapTextures.Add(texture.Texture);
+                    }
+
+                    if (material.Material.VertexShader != null || material.Material.PixelShader != null)
+                    {
+                        mapMaterials.Add(material);
                     }
                 }
             }
         });
 
-        string saveDirectory = $"{args.OutputDirectory}/Maps/Textures";
-        Directory.CreateDirectory(saveDirectory);
+        string textureSaveDirectory = $"{args.OutputDirectory}/Maps/Textures";
+        Directory.CreateDirectory(textureSaveDirectory);
         foreach (Texture texture in mapTextures)
         {
-            texture.SavetoFile($"{saveDirectory}/{texture.Hash}");
+            texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
+        }
+
+        if (saveShaders)
+        {
+            string shaderSaveDirectory = $"{args.OutputDirectory}/Maps/Shaders";
+            Directory.CreateDirectory(shaderSaveDirectory);
+            foreach (ExportMaterial material in mapMaterials)
+            {
+                material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
+                material.Material.SaveVertexShader(shaderSaveDirectory);
+            }
         }
     }
 }

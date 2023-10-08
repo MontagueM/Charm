@@ -62,22 +62,13 @@ public class StaticMesh : Tag<SStaticMesh>
 
     public void SaveMaterialsFromParts(ExporterScene scene, List<StaticPart> parts)
     {
-        // Directory.CreateDirectory($"{saveDirectory}/Textures");
-        // Directory.CreateDirectory($"{saveDirectory}/Shaders");
         foreach (var part in parts)
         {
             if (part.Material == null)
             {
                 continue;
             }
-            scene.Materials.Add(part.Material);
-            // part.Material.SaveAllTextures($"{saveDirectory}/Textures");
-            // if (bSaveShaders)
-            // {
-                // part.Material.SavePixelShader($"{saveDirectory}/Shaders");
-                // part.Material.SaveVertexShader($"{saveDirectory}/Shaders");
-                // part.Material.SaveComputeShader($"{saveDirectory}/Shaders");
-            // }
+            scene.Materials.Add(new ExportMaterial(part.Material));
         }
     }
 

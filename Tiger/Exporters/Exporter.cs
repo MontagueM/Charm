@@ -57,6 +57,27 @@ public class Exporter : Subsystem<Exporter>
     }
 }
 
+public struct ExportMaterial
+{
+    public readonly IMaterial Material;
+    public readonly bool IsTerrain;
+
+    public ExportMaterial(IMaterial material, bool isTerrain = false)
+    {
+        Material = material;
+        IsTerrain = isTerrain;
+    }
+
+    public override int GetHashCode()
+    {
+        return (int)Material.FileHash.Hash32;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is ExportMaterial material && material.Material.FileHash == Material.FileHash;
+    }
+}
 
 public class ExporterScene
 {
@@ -72,7 +93,7 @@ public class ExporterScene
     public ConcurrentBag<CubemapResource> Cubemaps = new();
     private ConcurrentBag<FileHash> _addedEntities = new();
     public ConcurrentHashSet<Texture> Textures = new();
-    public ConcurrentHashSet<IMaterial> Materials = new();
+    public ConcurrentHashSet<ExportMaterial> Materials = new();
 
     public void AddStatic(FileHash meshHash, List<StaticPart> parts)
     {
