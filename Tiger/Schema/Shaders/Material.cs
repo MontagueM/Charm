@@ -63,36 +63,6 @@ namespace Tiger.Schema.Shaders
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
-        public void SaveAllTextures(string saveDirectory)
-        {
-            foreach (var e in EnumerateVSTextures())
-            {
-                if (e.Texture == null)
-                {
-                    continue;
-                }
-                // todo change to 64 bit hash?
-                string path = $"{saveDirectory}/VS_{e.TextureIndex}_{e.Texture.Hash}";
-                if (!File.Exists(path))
-                {
-                    e.Texture.SavetoFile(path);
-                }
-            }
-            foreach (var e in EnumeratePSTextures())
-            {
-                if (e.Texture == null)
-                {
-                    continue;
-                }
-                // todo change to 64 bit hash?
-                string path = $"{saveDirectory}/{e.Texture.Hash}";
-                if (!File.Exists(path + ".dds") && !File.Exists(path + ".png") && !File.Exists(path + ".tga"))
-                {
-                    e.Texture.SavetoFile(path);
-                }
-            }
-        }
-
         public string Decompile(byte[] shaderBytecode, string name)
         {
             string directory = "hlsl_temp";

@@ -97,7 +97,7 @@ public partial class EntityView : UserControl
             scene.AddEntity(entity.Hash, dynamicParts, boneNodes);
             if (exportType == ExportTypeFlag.Full)
             {
-                entity.SaveMaterialsFromParts(savePath, dynamicParts, config.GetUnrealInteropEnabled() || config.GetS2ShaderExportEnabled());
+                entity.SaveMaterialsFromParts(scene, dynamicParts);
                 entity.SaveTexturePlates(savePath);
             }
         }

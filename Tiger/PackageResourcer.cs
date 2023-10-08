@@ -154,6 +154,24 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return fileHashes;
     }
 
+    public ConcurrentHashSet<FileHash> GetAllHashes<T>()
+    {
+        return GetAllHashes(typeof(T));
+    }
+
+    public ConcurrentHashSet<FileHash> GetAllHashes(Type schemaType)
+    {
+        ConcurrentHashSet<FileHash> fileHashes = new();
+
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        Parallel.ForEach(_packagesCache.Values, parallelOptions,  (package) =>
+        {
+            fileHashes.UnionWith(package.GetAllHashes(schemaType));
+        });
+
+        return fileHashes;
+    }
+
     public ConcurrentHashSet<FileHash> GetAllHashes(Func<string, bool> packageFilterFunc)
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
