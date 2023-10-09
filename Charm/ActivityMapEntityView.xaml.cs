@@ -309,7 +309,7 @@ public partial class ActivityMapEntityView : UserControl
                     if (entity.HasGeometry())
                     {
                         dynamicScene.AddMapEntity(dynamicResource, entity);
-                        entity.SaveMaterialsFromParts(savePath, entity.Load(ExportDetailLevel.MostDetailed), true);
+                        entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
                     }
                     else
                         dynamicPointScene.AddEntityPoints(dynamicResource);
@@ -340,8 +340,8 @@ public partial class ActivityMapEntityView : UserControl
 
                         foreach (DynamicMeshPart part in element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null))
                         {
-                            part.Material.SaveAllTextures($"{savePath}/textures");
-                            part.Material.SavePixelShader($"{savePath}/shaders");
+                            if (part.Material == null) continue;
+                            skyScene.Materials.Add(new ExportMaterial(part.Material));
                         }
                     }
                 }
@@ -363,7 +363,7 @@ public partial class ActivityMapEntityView : UserControl
                     {
                         ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
                         dynamicScene.AddEntity(dynamicResource.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
-                        entity.SaveMaterialsFromParts(savePath, entity.Load(ExportDetailLevel.MostDetailed), true);
+                        entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
 
                         if (_config.GetS2VMDLExportEnabled())
                         {

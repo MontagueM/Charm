@@ -214,13 +214,12 @@ public partial class DevView : UserControl
                     ExporterScene scene = Exporter.Get().CreateScene(hash, ExportType.Entity);
                     scene.AddModel(entityModel);
                     var parts = entityModel.Load(ExportDetailLevel.MostDetailed, null);
+                    foreach (DynamicMeshPart part in parts)
+                    {
+                        if (part.Material == null) continue;
+                        scene.Materials.Add(new ExportMaterial(part.Material));
+                    }
                     Exporter.Get().Export();
-
-                    //foreach (DynamicMeshPart part in parts)
-                    //{
-                    //    part.Material.SaveVertexShader($"{ConfigSubsystem.Get().GetExportSavePath()}/{hash}/shaders/");
-                    //    part.Material.SaveAllTextures($"{ConfigSubsystem.Get().GetExportSavePath()}/{hash}/textures/");
-                    //}
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
