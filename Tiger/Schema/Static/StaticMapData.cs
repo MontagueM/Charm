@@ -340,9 +340,7 @@ public struct D2Class_656C8080
     public Tag<SOcclusionBounds> Unk58;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "706C8080", 0xF0)]
-public struct D2Class_706C8080
-{
+/// </summary>
 /// Background entities/skybox resource
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A36A8080", 0x18)]
@@ -370,10 +368,9 @@ public struct SMapSkyEntities
     public Tag Unk10;  // A76A8080
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]
-public struct D2Class_A96A8080
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "706C8080", 0xF0)]
+public struct D2Class_706C8080
 {
-    //Matrix4x4
     public Vector4 Unk00;
     public Vector4 Unk10;
     public Vector4 Unk20;
@@ -396,6 +393,33 @@ public struct D2Class_A96A8080
     public byte UnkDF; //color index? unlikely
     [SchemaField(0xE0)]
     public byte UnkE0; //light shape?
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]
+public struct D2Class_A96A8080
+{
+    //Matrix4x4
+    public Vector4 Unk00;
+    public Vector4 Unk10;
+    public Vector4 Unk20;
+    public Vector4 Unk30;
+
+    //Bounds
+    public Vector4 Unk40;
+    public Vector4 Unk50;
+
+    public Tag<D2Class_AE6A8080> Unk60;//80806aae
+    public float Unk64;
+    public int Unk68;
+    public ushort Unk6C;
+    public short Unk6E;
+    public float Unk70;
+    public int Unk74;
+    public Tag Unk78;
+    public int Unk7C;
+    public long Unk80;
+    public int Unk88;
+    public int Unk8c;
 }
 
 /// </summary>
@@ -451,26 +475,6 @@ public struct D2Class_63698080
 public struct D2Class_64698080
 {
     public Vector4 Location;
-}
-
-
-
-    //Bounds
-    public Vector4 Unk40;
-    public Vector4 Unk50;
-
-    public Tag<D2Class_AE6A8080> Unk60;//80806aae
-    public float Unk64;
-    public int Unk68;
-    public ushort Unk6C;
-    public short Unk6E;
-    public float Unk70;
-    public int Unk74;
-    public Tag Unk78;
-    public int Unk7C;
-    public long Unk80;
-    public int Unk88;
-    public int Unk8c;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AE6A8080", 0x10)]

@@ -245,7 +245,7 @@ public partial class MapView : UserControl
                 }
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapLightResource mapLight)
                 {
-                    scene.AddPointLight(pointLight, entry);
+                    scene.AddMapLight(mapLight);
                 }
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDecalsResource decals)
                 {
