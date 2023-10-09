@@ -373,16 +373,13 @@ public struct D2Class_706C8080
 {
     //public Vector4 Unk00;
     //public Vector4 Unk10;
+
+    //Matrix4x4?
+    //[SchemaField(0x20)]
     //public Vector4 Unk20;
     //public Vector4 Unk30;
     //public Vector4 Unk40;
     //public Vector4 Unk50;
-    //public Vector4 Unk60;
-    //public Vector4 Unk70;
-    //public Vector4 Unk80;
-    //public Vector4 Unk90;
-    //public Vector4 UnkA0; //W might be area light size X/2?
-    //public Vector4 UnkB0; //W Size Y/2?
 
     //[SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     //[SchemaField(0xC0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]

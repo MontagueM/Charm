@@ -94,13 +94,14 @@ class MetadataScene
         {
             for (int i = 0; i < mapLight.Unk10.TagData.Unk30.Count; i++)
             {
-               AddLight(
-                    mapLight.Unk10.TagData.Unk30[i].UnkD0.Hash,
+                var data = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_SHADOWKEEP_2601 ? mapLight.Unk10.TagData.Unk30[i].UnkCC : mapLight.Unk10.TagData.Unk30[i].UnkD0;
+                AddLight(
+                    data.Hash,
                     "Point",
                     mapLight.Unk10.TagData.Unk40[i].Translation,
                     mapLight.Unk10.TagData.Unk40[i].Rotation,
                     new Vector2(1,1), //new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
-                    (mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk40.Count > 0 ? mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk40[0].Vec : mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk60[0].Vec));
+                    (data.TagData.Unk40.Count > 0 ? data.TagData.Unk40[0].Vec : data.TagData.Unk60[0].Vec));
             }
         }
         foreach(SMapDecalsResource decal in scene.Decals)
