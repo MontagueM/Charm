@@ -98,8 +98,9 @@ public class FbxExporter : AbstractExporter
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
         var exporter = Internal.Fbx.FbxExporter.Create(_manager, "");
-        exporter.Initialize(outputPath + ".fbx", -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient
-        exporter.Export(fbxScene);
+        exporter.Initialize(outputPath + ".fbx", -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient                                         
+        if (fbxScene.GetRootNode().GetChildCount() > 0) // Only export if theres actually something to export
+            exporter.Export(fbxScene);
         exporter.Destroy();
         fbxScene.Clear();
     }

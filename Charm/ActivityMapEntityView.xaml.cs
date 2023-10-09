@@ -345,6 +345,30 @@ public partial class ActivityMapEntityView : UserControl
                         }
                     }
                 }
+                if (entry.DataResource.GetValue(dataTable.GetReader()) is CubemapResource cubemap)
+                {
+                    dynamicScene.AddCubemap(cubemap);
+                }
+                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapLightResource mapLight)
+                {
+                    dynamicScene.AddMapLight(mapLight);
+                }
+                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapDecalsResource decals)
+                {
+                    if (decals.MapDecals is null || decals.MapDecals.TagData.DecalResources is null)
+                        return;
+                    dynamicScene.AddDecals(decals);
+                    foreach (var item in decals.MapDecals.TagData.DecalResources)
+                    {
+                        if (item.StartIndex >= 0 && item.StartIndex < decals.MapDecals.TagData.Locations.Count)
+                        {
+                            for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decals.MapDecals.TagData.Locations.Count; i++)
+                            {
+                                dynamicScene.Materials.Add(new ExportMaterial(item.Material));
+                            }
+                        }
+                    }
+                }
             });
         });
     }

@@ -99,7 +99,7 @@ class MetadataScene
                     "Point",
                     mapLight.Unk10.TagData.Unk40[i].Translation,
                     mapLight.Unk10.TagData.Unk40[i].Rotation,
-                    new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
+                    new Vector2(1,1), //new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
                     (mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk40.Count > 0 ? mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk40[0].Vec : mapLight.Unk10.TagData.Unk30[i].UnkD0.TagData.Unk60[0].Vec));
             }
         }
@@ -264,6 +264,15 @@ class MetadataScene
 
     public void WriteToFile(string path)
     {
+        if (_config["Lights"].Count == 0
+            && _config["Materials"].Count == 0
+            && _config["Cubemaps"].Count == 0
+            && _config["Instances"].Count == 0
+            && _config["Parts"].Count == 0
+            && _config["Decals"].Count == 0
+            && _exportType is not ExportType.EntityPoints)
+            return; //Dont export if theres nothing in the cfg (this is kind of a mess though)
+
         if (_exportType is ExportType.Static or ExportType.Entity)
         {
             path = Path.Join(path, _config["MeshName"]);

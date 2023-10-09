@@ -80,15 +80,16 @@ public struct SUnknownUInt
     public uint Unk00;
 }
 
-
-[SchemaStruct("B1938080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "71968080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B1938080", 0x18)]
 public struct SOcclusionBounds
 {
     public long FileSize;
     public DynamicArray<SMeshInstanceOcclusionBounds> InstanceBounds;
 }
 
-[SchemaStruct("B3938080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "73968080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B3938080", 0x30)]
 public struct SMeshInstanceOcclusionBounds
 {
     public Vector4 Corner1;
@@ -306,7 +307,7 @@ public struct D2Class_7D6A8080
 /// <summary>
 /// Unk data resource.
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DC718080", 0x80)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DC718080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A16D8080", 0x80)]
 public struct D2Class_A16D8080
 {
@@ -320,7 +321,7 @@ public struct D2Class_A16D8080
 /// <summary>
 /// Map Light
 /// </summary>
-//[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "BF6C8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5A6F8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "636A8080", 0x18)]
 public struct SMapLightResource
 {
@@ -328,6 +329,7 @@ public struct SMapLightResource
     public Tag<D2Class_656C8080> Unk10;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3A718080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "656C8080", 0x60)]
 public struct D2Class_656C8080
 {
@@ -363,36 +365,44 @@ public struct SMapSkyEntities
     [SchemaField(0x40)]
     public Vector4 Unk40;
     public Vector4 Unk50;
-
-    [SchemaField(0x10)]
-    public Tag Unk10;  // A76A8080
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3E718080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "706C8080", 0xF0)]
 public struct D2Class_706C8080
 {
-    public Vector4 Unk00;
-    public Vector4 Unk10;
-    public Vector4 Unk20;
-    public Vector4 Unk30;
-    public Vector4 Unk40;
-    public Vector4 Unk50;
-    public Vector4 Unk60;
-    public Vector4 Unk70;
-    public Vector4 Unk80;
-    public Vector4 Unk90;
-    public Vector4 UnkA0; //W might be area light size X/2?
-    public Vector4 UnkB0; //W Size Y/2?
+    //public Vector4 Unk00;
+    //public Vector4 Unk10;
+    //public Vector4 Unk20;
+    //public Vector4 Unk30;
+    //public Vector4 Unk40;
+    //public Vector4 Unk50;
+    //public Vector4 Unk60;
+    //public Vector4 Unk70;
+    //public Vector4 Unk80;
+    //public Vector4 Unk90;
+    //public Vector4 UnkA0; //W might be area light size X/2?
+    //public Vector4 UnkB0; //W Size Y/2?
 
-    public IMaterial UnkC0;
-    public IMaterial UnkC4;
-    public IMaterial UnkC8;
+    //[SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    //[SchemaField(0xC0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public IMaterial UnkC0;
+    //[SchemaField(0x84, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    //[SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public IMaterial UnkC4;
+    //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    //[SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public IMaterial UnkC8;
+    [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xCC, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<D2Class_A16D8080> UnkCC;
+    [SchemaField(0x8C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<D2Class_A16D8080> UnkD0;
-    [SchemaField(0xDF)]
-    public byte UnkDF; //color index? unlikely
-    [SchemaField(0xE0)]
-    public byte UnkE0; //light shape?
+    //[SchemaField(0xDF)]
+    //public byte UnkDF; //color index? unlikely
+    //[SchemaField(0xE0)]
+    //public byte UnkE0; //light shape?
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]

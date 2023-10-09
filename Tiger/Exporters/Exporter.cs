@@ -376,5 +376,6 @@ public enum ExportType
     Terrain,
     EntityPoints,
     StaticInMap,
-    EntityInMap
+    EntityInMap,
+    MapResource
 }
