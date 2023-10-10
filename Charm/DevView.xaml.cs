@@ -222,7 +222,8 @@ public partial class DevView : UserControl
                     }
                     Exporter.Get().Export();
                     break;
-                case 0x8080714F: //4F718080
+                case 0x8080714F:
+                case 0x80806C81:
                     Terrain terrain = FileResourcer.Get().GetFile<Terrain>(hash);
                     ExporterScene terrainScene = Exporter.Get().CreateScene(hash, ExportType.Terrain);
                     terrain.LoadIntoExporter(terrainScene, ConfigSubsystem.Get().GetExportSavePath(), false);

@@ -35,35 +35,21 @@ public class Terrain : Tag<STerrain>
             {
                 if (partEntry.Material is null || partEntry.Material.VertexShader is null)
                     continue;
+
                 var part = MakePart(partEntry);
                 parts.TryAdd(part, partEntry.Material);
                 x.AddRange(part.VertexPositions.Select(a => a.X));
                 y.AddRange(part.VertexPositions.Select(a => a.Y));
                 z.AddRange(part.VertexPositions.Select(a => a.Z));
 
-                if (partEntry.Material == null) continue;
-
                 scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
                 part.Material = partEntry.Material;
             }
         }
 
-        var globalOffset = new Vector3(
-            (_tag.Unk10.X + _tag.Unk20.X) / 2,
-            (_tag.Unk10.Y + _tag.Unk20.Y) / 2,
-            (_tag.Unk10.Z + _tag.Unk20.Z) / 2);
-
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
-        {
-            globalOffset = new Vector3(0f,0f,0f);
-        }
-
-        Vector3 localOffset;
         int terrainTextureIndex = 14;
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
-            // Part part = MakePart(partEntry);
-            // parts.Add(part);
             var partEntry = _tag.MeshGroups[i];
             if (partEntry.Dyemap != null)
             {
@@ -71,7 +57,7 @@ public class Terrain : Tag<STerrain>
                 dyeMaps.Add(partEntry.Dyemap.Hash.ToString());
             }
         }
-        localOffset = new Vector3((x.Max() + x.Min()) / 2, (y.Max() + y.Min()) / 2, (z.Max() + z.Min()) / 2);
+        Vector3 localOffset = new Vector3((x.Max() + x.Min()) / 2, (y.Max() + y.Min()) / 2, (z.Max() + z.Min()) / 2);
         foreach (var part in parts)
         {
             // scale by 1.99 ish, -1 for all sides, multiply by 512?
@@ -83,7 +69,7 @@ public class Terrain : Tag<STerrain>
         // For now we pre-transform it
         if (!exportStatic)
         {
-            scene.AddStaticInstance(Hash, 1, Vector4.Zero, globalOffset);
+            scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
         }
 
         // We need to add these textures after the static is initialised
@@ -139,16 +125,28 @@ public class Terrain : Tag<STerrain>
         }
         part.VertexIndices = uniqueVertexIndices.ToList();
 
-        InputSignature[] inputSignatures = entry.Material.VertexShader.InputSignatures.ToArray();
+        List<InputSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
+        int b0Stride = _tag.Vertices1.TagData.Stride;
+        int b1Stride = _tag.Vertices2?.TagData.Stride ?? 0;
+        List<InputSignature> inputSignatures0 = new();
+        List<InputSignature> inputSignatures1 = new();
+        int stride = 0;
+        foreach (InputSignature inputSignature in inputSignatures)
+        {
+            if (stride < b0Stride)
+                inputSignatures0.Add(inputSignature);
+            else
+                inputSignatures1.Add(inputSignature);
 
-        List<int> strides = new();
-        if (_tag.Vertices1 != null) strides.Add(_tag.Vertices1.TagData.Stride);
-        if (_tag.Vertices2 != null) strides.Add(_tag.Vertices2.TagData.Stride);
-        Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
+            if (inputSignature.Semantic == InputSemantic.Colour)
+                stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+            else
+                stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
+        }
 
         Log.Debug($"Reading vertex buffers {_tag.Vertices1.Hash}/{_tag.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices2?.Hash}/{_tag.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-        _tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures.Where(s => s.BufferIndex == 0).ToList(), true);
-        _tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures.Where(s => s.BufferIndex == 1).ToList(), true);
+        _tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures0, true);
+        _tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures1, true);
 
         //_tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
         //_tag.Vertices2.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
@@ -158,77 +156,63 @@ public class Terrain : Tag<STerrain>
 
     private void TransformPositions(StaticPart part, Vector3 localOffset)
     {
-        //Console.WriteLine($"{part.VertexPositions.Count} : {part.VertexNormals.Count}");
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
-            if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
-            {
-                //The "standard" terrain vertex shader from hlsl
-                System.Numerics.Vector4 r0, r1, r2 = new();
-                System.Numerics.Vector4 v0 = new(part.VertexPositions[i].X, part.VertexPositions[i].Y, part.VertexPositions[i].Z, part.VertexPositions[i].W);
-                System.Numerics.Vector4 v1 = new(part.VertexNormals[i].X, part.VertexNormals[i].Y, part.VertexNormals[i].Z, part.VertexNormals[i].W);
+            //The "standard" terrain vertex shader from hlsl
+            System.Numerics.Vector4 r0, r1, r2 = new();
+            System.Numerics.Vector4 v0 = new(part.VertexPositions[i].X, part.VertexPositions[i].Y, part.VertexPositions[i].Z, part.VertexPositions[i].W);
+            System.Numerics.Vector4 v1 = new(part.VertexNormals[i].X, part.VertexNormals[i].Y, part.VertexNormals[i].Z, part.VertexNormals[i].W);
 
-                //r0 = cb11.transform + v0;
-                r0.X = _tag.Unk30.X + v0.X;
-                r0.Y = _tag.Unk30.Y + v0.Y;
-                r0.Z = _tag.Unk30.Z + v0.Z;
-                r0.W = _tag.Unk30.W + v0.W;
+            //r0 = cb11.transform + v0;
+            r0.X = _tag.Unk30.X + v0.X;
+            r0.Y = _tag.Unk30.Y + v0.Y;
+            r0.Z = _tag.Unk30.Z + v0.Z;
+            r0.W = _tag.Unk30.W + v0.W;
 
-                r0.Z = r0.W * 65536 + r0.Z;
+            r0.Z = r0.W * 65536 + r0.Z;
 
-                //r0.xyw = float3(0.015625, 0.015625, 0.000122070313) * r0.xyz;
-                r0.X = 0.015625f * r0.X;
-                r0.Y = 0.015625f * r0.Y;
-                r0.W = 0.000122070313f * r0.Z;
+            //r0.xyw = float3(0.015625, 0.015625, 0.000122070313) * r0.xyz;
+            r0.X = 0.015625f * r0.X;
+            r0.Y = 0.015625f * r0.Y;
+            r0.W = 0.000122070313f * r0.Z;
 
-                //r1.xyz = float3(0,1,0) * v1.yzx;
-                r1.X = 0 * v1.Y;
-                r1.Y = 1 * v1.Z;
-                r1.Z = 0 * v1.X;
+            //r1.xyz = float3(0,1,0) * v1.yzx;
+            r1.X = 0 * v1.Y;
+            r1.Y = 1 * v1.Z;
+            r1.Z = 0 * v1.X;
 
-                //r1.xyz = v1.zxy * float3(0,0,1) + -r1.xyz;
-                r1.X = v1.Z * 0 + -r1.X;
-                r1.Y = v1.X * 0 + -r1.Y;
-                r1.Z = v1.Y * 1 + -r1.Z;
+            //r1.xyz = v1.zxy * float3(0,0,1) + -r1.xyz;
+            r1.X = v1.Z * 0 + -r1.X;
+            r1.Y = v1.X * 0 + -r1.Y;
+            r1.Z = v1.Y * 1 + -r1.Z;
 
-                //r0.z = dot(r1.yz, r1.yz);
-                r0.Z = System.Numerics.Vector2.Dot(new(r1.Y, r1.Z), new(r1.Y, r1.Z));
+            //r0.z = dot(r1.yz, r1.yz);
+            r0.Z = System.Numerics.Vector2.Dot(new(r1.Y, r1.Z), new(r1.Y, r1.Z));
 
-                //r0.z = rsqrt(r0.z);
-                r0.Z = MathF.ReciprocalSqrtEstimate(r0.Z);
+            //r0.z = rsqrt(r0.z);
+            r0.Z = MathF.ReciprocalSqrtEstimate(r0.Z);
 
-                //r1.xyz = r1.xyz * r0.zzz;
-                r1.X = r1.X * r0.Z;
-                r1.Y = r1.Y * r0.Z;
-                r1.Z = r1.Z * r0.Z;
+            //r1.xyz = r1.xyz * r0.zzz;
+            r1.X = r1.X * r0.Z;
+            r1.Y = r1.Y * r0.Z;
+            r1.Z = r1.Z * r0.Z;
 
-                //r2.xyz = v1.zxy * r1.yzx;
-                r2.X = v1.Z * r1.Y;
-                r2.Y = v1.X * r1.Z;
-                r2.Z = v1.Y * r1.X;
+            //r2.xyz = v1.zxy * r1.yzx;
+            r2.X = v1.Z * r1.Y;
+            r2.Y = v1.X * r1.Z;
+            r2.Z = v1.Y * r1.X;
 
-                //r2.xyz = v1.yzx * r1.zxy + -r2.xyz;
-                r2.X = v1.Y * r1.Z + -r2.X;
-                r2.Y = v1.Z * r1.X + -r2.Y;
-                r2.Z = v1.X * r1.Y + -r2.Z;
+            //r2.xyz = v1.yzx * r1.zxy + -r2.xyz;
+            r2.X = v1.Y * r1.Z + -r2.X;
+            r2.Y = v1.Z * r1.X + -r2.Y;
+            r2.Z = v1.X * r1.Y + -r2.Z;
 
-                //r0.z = dot(r2.xyz, r2.xyz);
-                //r0.z = rsqrt(r0.z);
-                r0.Z = System.Numerics.Vector3.Dot(new(r2.X, r2.Y, r2.Z), new(r2.X, r2.Y, r2.Z));
-                r0.Z = MathF.ReciprocalSqrtEstimate(r0.Z);
+            //r0.z = dot(r2.xyz, r2.xyz);
+            //r0.z = rsqrt(r0.z);
+            r0.Z = System.Numerics.Vector3.Dot(new(r2.X, r2.Y, r2.Z), new(r2.X, r2.Y, r2.Z));
+            r0.Z = MathF.ReciprocalSqrtEstimate(r0.Z);
                 
-                part.VertexPositions[i] = new Vector4(r0.X, r0.Y, r0.Z * r0.W, r0.W);
-            }
-            else
-            {
-                // based on middle points
-                part.VertexPositions[i] = new Vector4(  // technically actually 1008 1008 4 not 1024 1024 4?
-                    (part.VertexPositions[i].X - localOffset.X) * 1024,
-                    (part.VertexPositions[i].Y - localOffset.Y) * 1024,
-                    (part.VertexPositions[i].Z - localOffset.Z) * 4,
-                    part.VertexPositions[i].W
-                );
-            }  
+            part.VertexPositions[i] = new Vector4(r0.X, r0.Y, r0.Z * r0.W, r0.W); 
         }
     }
 
