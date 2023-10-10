@@ -1394,6 +1394,7 @@ public struct CubemapResource //Dataresource for cubemaps
     public Texture Unk1C0; //Sometype of reflection tint texture idk
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D99B8080", 0x190)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D8928080", 0x190)]
 public struct D2Class_D8928080
 {

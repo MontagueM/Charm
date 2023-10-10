@@ -1,5 +1,6 @@
 using Arithmic;
 using System;
+using System.Diagnostics;
 using Tiger.Exporters;
 using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
@@ -156,6 +157,7 @@ public class Terrain : Tag<STerrain>
 
     private void TransformPositions(StaticPart part, Vector3 localOffset)
     {
+         Debug.Assert(part.VertexPositions.Count == part.VertexNormals.Count);
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
             //The "standard" terrain vertex shader from hlsl
