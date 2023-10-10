@@ -198,8 +198,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is D2Class_7D6C8080 terrainArrangement)  // Terrain
                 {
-                    export = true;
-                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled(), terrainArrangement);
+                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled());
                     if (exportStatics)
                     {
                         if (source2Models)
@@ -207,18 +206,15 @@ public partial class MapView : UserControl
                             File.Copy("Exporters/template.vmdl", $"{savePath}/Statics/{terrainArrangement.Terrain.Hash}_Terrain.vmdl", true);
                         }
                         ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), terrainArrangement, true);
+                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
                     }
                 }
             });
         });
 
-        if (export)
+        if (_config.GetUnrealInteropEnabled())
         {
-            if (_config.GetUnrealInteropEnabled())
-            {
-                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName + "_Terrain", AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
-            }
+            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName + "_Terrain", AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
         }
     }
 

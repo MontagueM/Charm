@@ -15,6 +15,7 @@ using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Static;
 
 namespace Charm;
 
@@ -219,6 +220,12 @@ public partial class DevView : UserControl
                         if (part.Material == null) continue;
                         scene.Materials.Add(new ExportMaterial(part.Material));
                     }
+                    Exporter.Get().Export();
+                    break;
+                case 0x8080714F: //4F718080
+                    Terrain terrain = FileResourcer.Get().GetFile<Terrain>(hash);
+                    ExporterScene terrainScene = Exporter.Get().CreateScene(hash, ExportType.Terrain);
+                    terrain.LoadIntoExporter(terrainScene, ConfigSubsystem.Get().GetExportSavePath(), false);
                     Exporter.Get().Export();
                     break;
                 default:

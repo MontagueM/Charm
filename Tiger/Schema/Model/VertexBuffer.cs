@@ -438,17 +438,17 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     }
 
     public void ReadVertexDataSignatures(MeshPart part, HashSet<uint> uniqueVertexIndices,
-        List<InputSignature> inputSignatures)
+        List<InputSignature> inputSignatures, bool isTerrain = false)
     {
         using var reader = GetReferenceReader();
         foreach (uint vertexIndex in uniqueVertexIndices)
         {
-            ReadVertexDataSignature(reader, part, vertexIndex, inputSignatures);
+            ReadVertexDataSignature(reader, part, vertexIndex, inputSignatures, isTerrain);
         }
     }
 
     private void ReadVertexDataSignature(TigerReader reader, MeshPart part, uint vertexIndex,
-        List<InputSignature> inputSignatures)
+        List<InputSignature> inputSignatures, bool isTerrain = false)
     {
         reader.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
         foreach (InputSignature inputSignature in inputSignatures)
@@ -456,8 +456,14 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
             switch (inputSignature.Semantic)
             {
                 case InputSemantic.Position:
-                    part.VertexPositions.Add(new Vector4(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(),
-                        reader.ReadInt16(), true));
+                    if(isTerrain) //has to be a float
+                    {
+                        part.VertexPositions.Add(new Vector4((float)reader.ReadInt16(), (float)reader.ReadInt16(), (float)reader.ReadInt16(),
+                            (float)reader.ReadInt16()));
+                    }
+                    else
+                        part.VertexPositions.Add(new Vector4(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(),
+                            reader.ReadInt16()));
                     break;
                 case InputSemantic.Texcoord:
                     switch (inputSignature.Mask)
