@@ -121,7 +121,6 @@ public class Source2Handler
             text = text.Replace("%MESHNAME%", hash);
 
             File.WriteAllText($"{savePath}/Statics/{hash}_Terrain.vmdl", text);
-
         }
     }
 
@@ -147,102 +146,23 @@ public class Source2Handler
             vmat.AppendLine($"\tshader \"ps_{materialHeader.PixelShader.Hash}.shader\"");
             vmat.AppendLine($"\tF_ALPHA_TEST 1");
             vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
+
+            if(materialHeader.Unk0C != 0)
+            {
+                vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
+            }
         }
 
         foreach (var e in materialHeader.EnumeratePSTextures())
         {
             if (e.Texture == null)
-            {
                 continue;
-            }
 
             vmat.AppendLine($"\tTextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
         }
 
-        List<Cbuffer> cbuffers = new List<Cbuffer>();
-        StringBuilder buffers = new StringBuilder();
-        StringReader hlsl = new StringReader(materialHeader.Decompile(materialHeader.PixelShader.GetBytecode(), $"ps{materialHeader.FileHash}"));
-
-        string line = string.Empty;
-        do
-        {
-            line = hlsl.ReadLine();
-            if (line != null)
-            {
-                if (line.Contains("cbuffer"))
-                {
-                    hlsl.ReadLine();
-                    line = hlsl.ReadLine();
-                    Cbuffer cbuffer = new Cbuffer();
-                    cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
-                    cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
-                    cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
-                    cbuffer.Type = line.Split("cb")[0].Trim();
-                    cbuffers.Add(cbuffer);
-                }
-            }
-
-        } while (line != null);
-
-        foreach (var cbuffer in cbuffers)
-        {
-            dynamic data = null;
-
-            if (cbuffer.Count == materialHeader.Unk2E0.Count)
-            {
-                data = materialHeader.Unk2E0;
-            }
-            else if (cbuffer.Count == materialHeader.Unk300.Count)
-            {
-                data = materialHeader.Unk300;
-            }
-            else
-            {
-                if (materialHeader.PSVector4Container.IsValid())
-                {
-                    // Try the Vector4 storage file
-                    TigerFile container = new(materialHeader.PSVector4Container.GetReferenceHash());
-                    byte[] containerData = container.GetData();
-                    int num = containerData.Length / 16;
-                    if (cbuffer.Count == num)
-                    {
-                        List<Vector4> float4s = new();
-                        for (int i = 0; i < containerData.Length / 16; i++)
-                        {
-                            float4s.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
-                        }
-
-                        data = float4s;
-                    }
-                }
-            }
-
-            for (int i = 0; i < cbuffer.Count; i++)
-            {
-                if (data == null)
-                    buffers.AppendLine($"\tcb{cbuffer.Index}_{i} \"[0.000 0.000 0.000 0.000]\"");
-                else
-                {
-                    try
-                    {
-                        if (data[i] is Vec4)
-                        {
-                            buffers.AppendLine($"\tcb{cbuffer.Index}_{i} \"[{data[i].Vec.X} {data[i].Vec.Y} {data[i].Vec.Z} {data[i].Vec.W}]\"");
-                        }
-                        else if (data[i] is Vector4)
-                        {
-                            buffers.AppendLine($"\tcb{cbuffer.Index}_{i} \"[{data[i].X} {data[i].Y} {data[i].Z} {data[i].W}]\"");
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        buffers.AppendLine($"\tcb{cbuffer.Index}_{i} \"[0.000 0.000 0.000 0.000]\"");
-                    }
-                }
-            }
-        }
-
-        vmat.AppendLine(buffers.ToString());
+        //vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.VertexShader.GetBytecode(), $"vs{materialHeader.VertexShader.Hash}"), materialHeader, true).ToString());
+        vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.PixelShader.GetBytecode(), $"ps{materialHeader.PixelShader.Hash}"), materialHeader).ToString());
         vmat.AppendLine("}");
 
         string terrainDir = isTerrain ? "/Terrain/" : "";
@@ -298,5 +218,109 @@ public class Source2Handler
             {
             }
         }
+    }
+
+    public static StringBuilder PopulateCBuffers(string hlsl, IMaterial materialHeader, bool isVertexShader = false)
+    {
+        StringReader reader = new(hlsl);
+
+        List<Cbuffer> cbuffers = new List<Cbuffer>();
+        StringBuilder buffers = new StringBuilder();
+
+        string line = string.Empty;
+        do
+        {
+            line = reader.ReadLine();
+            if (line != null)
+            {
+                if (line.Contains("cbuffer"))
+                {
+                    reader.ReadLine();
+                    line = reader.ReadLine();
+                    Cbuffer cbuffer = new Cbuffer();
+                    cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
+                    cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
+                    cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
+                    cbuffer.Type = line.Split("cb")[0].Trim();
+                    cbuffers.Add(cbuffer);
+                }
+            }
+
+        } while (line != null);
+
+        foreach (var cbuffer in cbuffers)
+        {
+            dynamic data = null;
+            string cbType = isVertexShader ? "vs_cb" : "cb";
+
+            if(isVertexShader)
+            {
+                if (cbuffer.Count == materialHeader.UnkA0.Count)
+                {
+                    data = materialHeader.UnkA0;
+                }
+                else if (cbuffer.Count == materialHeader.UnkC0.Count)
+                {
+                    data = materialHeader.UnkC0;
+                }
+            }
+            else
+            {
+                if (cbuffer.Count == materialHeader.Unk2E0.Count)
+                {
+                    data = materialHeader.Unk2E0;
+                }
+                else if (cbuffer.Count == materialHeader.Unk300.Count)
+                {
+                    data = materialHeader.Unk300;
+                }
+                else
+                {
+                    if (materialHeader.PSVector4Container.IsValid())
+                    {
+                        // Try the Vector4 storage file
+                        TigerFile container = new(materialHeader.PSVector4Container.GetReferenceHash());
+                        byte[] containerData = container.GetData();
+                        int num = containerData.Length / 16;
+                        if (cbuffer.Count == num)
+                        {
+                            List<Vector4> float4s = new();
+                            for (int i = 0; i < containerData.Length / 16; i++)
+                            {
+                                float4s.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
+                            }
+
+                            data = float4s;
+                        }
+                    }
+                }
+            }
+            
+            for (int i = 0; i < cbuffer.Count; i++)
+            {
+                if (data == null)
+                    buffers.AppendLine($"\t{cbType}{cbuffer.Index}_{i} \"[0.000 0.000 0.000 0.000]\"");
+                else
+                {
+                    try
+                    {
+                        if (data[i] is Vec4)
+                        {
+                            buffers.AppendLine($"\t{cbType}{cbuffer.Index}_{i} \"[{data[i].Vec.X} {data[i].Vec.Y} {data[i].Vec.Z} {data[i].Vec.W}]\"");
+                        }
+                        else if (data[i] is Vector4)
+                        {
+                            buffers.AppendLine($"\t{cbType}{cbuffer.Index}_{i} \"[{data[i].X} {data[i].Y} {data[i].Z} {data[i].W}]\"");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        buffers.AppendLine($"\t{cbType}{cbuffer.Index}_{i} \"[0.000 0.000 0.000 0.000]\"");
+                    }
+                }
+            }
+        }
+
+        return buffers;
     }
 }

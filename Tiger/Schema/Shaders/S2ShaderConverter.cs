@@ -138,7 +138,6 @@ PS
         if (bUsesFrontFace)
         {
             vfxStructure = vfxStructure.Replace("//frontface", "#define S_RENDER_BACKFACES 1");
-            vfxStructure = vfxStructure.Replace("//RenderState", "RenderState( CullMode, S_RENDER_BACKFACES ? NONE : DEFAULT );");
         }
 
         for (int i = 0; i < material.PS_Samplers.Count; i++)
@@ -174,32 +173,28 @@ PS
         //------------------------------------------------------------------------------
 
         //Vertex Shader - Commented out for now
-        //if(bIsTerrain)
+        //texSamples = new StringBuilder();
+        //hlsl = new StringReader(vertex);
+
+        //ProcessHlslData();
+
+        //for (int i = 0; i < material.VS_Samplers.Count; i++)
         //{
-        //    texSamples = new StringBuilder();
-        //    hlsl = new StringReader(vertex);
+        //    if (material.VS_Samplers[i] is null)
+        //        continue;
 
-        //    ProcessHlslData();
-
-        //    for (int i = 0; i < material.Header.VSSamplers.Count; i++)
-        //    {
-        //        if (material.Header.VSSamplers[i].Samplers is null)
-        //            continue;
-
-        //        var sampler = material.Header.VSSamplers[i].Samplers.Sampler;
-        //        texSamples.AppendLine($"SamplerState g_s{i + 1} < Filter({sampler.Header.Filter}); AddressU({sampler.Header.AddressU}); AddressV({sampler.Header.AddressV}); AddressW({sampler.Header.AddressW}); ComparisonFunc({sampler.Header.ComparisonFunc}); MaxAniso({sampler.Header.MaxAnisotropy}); >;");
-        //    }
-
-        //    vfxStructure = vfxStructure.Replace("//vs_samplers", texSamples.ToString());
-
-        //    vfxStructure = vfxStructure.Replace("//vs_Inputs", WriteFunctionDefinition(material, true).ToString());
-        //    vfxStructure = vfxStructure.Replace("//vs_CBuffers", WriteCbuffers(material, true).ToString());
-
-        //    hlsl = new StringReader(vertex);
-        //    instructions = ConvertInstructions(true);
-        //    vfxStructure = vfxStructure.Replace("//vs_Function", instructions.ToString());
-
+        //    var sampler = material.VS_Samplers[i].Sampler;
+        //    texSamples.AppendLine($"SamplerState g_s{i + 1} < Filter({sampler.Filter}); AddressU({sampler.AddressU}); AddressV({sampler.AddressV}); AddressW({sampler.AddressW}); ComparisonFunc({sampler.ComparisonFunc}); MaxAniso({sampler.MaxAnisotropy}); >;");
         //}
+
+        //vfxStructure = vfxStructure.Replace("//vs_samplers", texSamples.ToString());
+
+        //vfxStructure = vfxStructure.Replace("//vs_Inputs", WriteFunctionDefinition(material, true).ToString());
+        //vfxStructure = vfxStructure.Replace("//vs_CBuffers", WriteCbuffers(material, true).ToString());
+
+        //hlsl = new StringReader(vertex);
+        //instructions = ConvertInstructions(material, true);
+        //vfxStructure = vfxStructure.Replace("//vs_Function", instructions.ToString());
 
         //--------------------------
         vfx.AppendLine(vfxStructure);
@@ -293,8 +288,7 @@ PS
     private StringBuilder WriteCbuffers(IMaterial material, bool bIsVertexShader)
     {
         StringBuilder CBuffers = new();
-        // Try to find matches, pixel shader has Unk2D0, Unk2E0, Unk300 available
-        // Vertex has Unk90, UnkA0, UnkC0
+
         foreach (var buffer in buffers)
         {
             CBuffers.AppendLine($"\tBuffer<{buffer.Type}> b_{buffer.Variable} : register({buffer.Variable});");
@@ -307,90 +301,17 @@ PS
             dynamic data = null;
             if (bIsVertexShader)
             {
-                if (cbuffer.Count == material.Unk90.Count)
+                for (int i = 0; i < cbuffer.Count; i++)
                 {
-                    data = material.Unk90;
-                }
-                else if (cbuffer.Count == material.UnkA0.Count)
-                {
-                    data = material.UnkA0;
-                }
-                else if (cbuffer.Count == material.UnkC0.Count)
-                {
-                    data = material.UnkC0;
+                    CBuffers.AppendLine($"\tfloat4 vs_cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"vs_cb{cbuffer.Index}/{i}\"); >;");
                 }
             }
             else
             {
-                //if (cbuffer.Count == material.Header.Unk2D0.Count) Unk2D0 is byte, not float, so not a cbuffer?
-                //{
-                //    data = material.Header.Unk2D0;
-                //}
-                if (cbuffer.Count == material.Unk2E0.Count)
+                for (int i = 0; i < cbuffer.Count; i++)
                 {
-                    data = material.Unk2E0;
+                    CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
                 }
-                else if (cbuffer.Count == material.Unk300.Count)
-                {
-                    data = material.Unk300;
-                }
-                else
-                {
-                    if (material.PSVector4Container.IsValid())
-                    {
-                        // Try the Vector4 storage file
-                        TigerFile container = new(material.PSVector4Container.GetReferenceHash());
-                        byte[] containerData = container.GetData();
-                        int num = containerData.Length / 16;
-                        if (cbuffer.Count == num)
-                        {
-                            List<Vector4> float4s = new();
-                            for (int i = 0; i < containerData.Length / 16; i++)
-                            {
-                                float4s.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
-                            }
-
-                            data = float4s;
-                        }
-                    }
-
-                }
-            }
-
-            //for (int i = 0; i < cbuffer.Count; i++)
-            //{
-            //    if (data == null)
-            //        CBuffers.AppendLine("      float4(0.0, 0.0, 0.0, 0.0), //null" + i);
-            //    else
-            //    {
-            //        try
-            //        {
-            //            if (data[i] is Vec4)
-            //            {
-            //                CBuffers.AppendLine($"\t\tfloat4({data[i].Vec.X}, {data[i].Vec.Y}, {data[i].Vec.Z}, {data[i].Vec.W}), //" + i);
-            //            }
-            //            else if (data[i] is Vector4)
-            //            {
-            //                CBuffers.AppendLine($"\t\tfloat4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}), //" + i);
-            //            }
-            //            else
-            //            {
-            //                var x = data[i].Unk00.X; // really bad but required
-
-            //                CBuffers.AppendLine($"\t\tfloat4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}), //" + i);
-            //            }
-            //        }
-            //        catch (Exception e)  // figure out whats up here, taniks breaks it
-            //        {
-            //            CBuffers.AppendLine("\t\tfloat4(0.0, 0.0, 0.0, 0.0), //Exception" + i);
-            //        }
-            //    }
-            //}
-            //CBuffers.AppendLine("\t};");
-
-            for (int i = 0; i < cbuffer.Count; i++)
-            {
-                CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
             }
         }
 
@@ -628,7 +549,7 @@ PS
                     else if (line.Contains("cb"))
                     {
                         string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
-                        string output = Regex.Replace(line, pattern, "cb$1_$2");
+                        string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
 
                         funcDef.AppendLine($"\t\t{output.TrimStart()}");
                     }
@@ -649,29 +570,30 @@ PS
                         var dotAfter = line.Split(").")[1];
                         // todo add dimension
 
-                        if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
-                        {
-                            funcDef.AppendLine($"\t\tbool red = i.vBlendValues.x > 0.5;\r\n" +
-                                $"        bool green = i.vBlendValues.y > 0.5;\r\n" +
-                                $"        bool blue = i.vBlendValues.z > 0.5;\r\n\r\n" +
-                                $"        if (red && !green && !blue)\r\n" +
-                                $"        {{\r\n" +
-                                $"            {equal} = Tex2DS(g_t14_0, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
-                                $"        }}\r\n" +
-                                $"        else if (!red && green && !blue)\r\n" +
-                                $"        {{\r\n" +
-                                $"            {equal} = Tex2DS(g_t14_1, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
-                                $"        }}\r\n" +
-                                $"        else if (!red && !green && blue)\r\n" +
-                                $"        {{\r\n" +
-                                $"            {equal} = Tex2DS(g_t14_2, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
-                                $"        }}\r\n" +
-                                $"        else if (red && green && blue)\r\n" +
-                                $"        {{\r\n" +
-                                $"            {equal} = Tex2DS(g_t14_3, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
-                                $"        }}");
-                        }
-                        else if(!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
+                        //if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
+                        //{
+                        //    funcDef.AppendLine($"\t\tbool red = i.vBlendValues.x > 0.5;\r\n" +
+                        //        $"        bool green = i.vBlendValues.y > 0.5;\r\n" +
+                        //        $"        bool blue = i.vBlendValues.z > 0.5;\r\n\r\n" +
+                        //        $"        if (red && !green && !blue)\r\n" +
+                        //        $"        {{\r\n" +
+                        //        $"            {equal} = Tex2DS(g_t14_0, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
+                        //        $"        }}\r\n" +
+                        //        $"        else if (!red && green && !blue)\r\n" +
+                        //        $"        {{\r\n" +
+                        //        $"            {equal} = Tex2DS(g_t14_1, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
+                        //        $"        }}\r\n" +
+                        //        $"        else if (!red && !green && blue)\r\n" +
+                        //        $"        {{\r\n" +
+                        //        $"            {equal} = Tex2DS(g_t14_2, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
+                        //        $"        }}\r\n" +
+                        //        $"        else if (red && green && blue)\r\n" +
+                        //        $"        {{\r\n" +
+                        //        $"            {equal} = Tex2DS(g_t14_3, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
+                        //        $"        }}");
+                        //}
+
+                        if(!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
                         {
                             funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //t{texIndex}");
                         }
@@ -689,15 +611,22 @@ PS
 
                         funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.CalculateLevelOfDetail(g_s{sampleIndex}, {sampleUv});");
                     }
-                    else if (line.Contains("t2.Load")) //Pretty sure this is normal buffer, cant get/use in Forward Rendering...
+                    else if (line.Contains("Load")) 
                     {
                         var equal = line.Split("=")[0];
                         var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]);
                         var sampleUv = line.Split("(")[1].Split(")")[0];
                         var dotAfter = line.Split(").")[1];
-                        bUsesNormalBuffer = true;
-
-                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= v0.{dotAfter}");
+                        
+                        if (texIndex == 2) //Pretty sure this is normal buffer, cant get/use in Forward Rendering...
+                        {
+                            bUsesNormalBuffer = true;
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= v0.{dotAfter}");
+                        }
+                        else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
+                        {
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //t{texIndex}.Load");
+                        }
                     }
                     else if (line.Contains("o0.w = r")) //o0.w = r(?)
                     {
@@ -741,15 +670,18 @@ PS
         }
         else //only uses o0
         {
-            if (material.Unk0C == 2) //Unlit?
-            {
-                output.Append($"\t\treturn float4(o0.xyz, alpha);");
-            }
-            else
-            {
-                output.AppendLine($"\t\tMaterial mat = Material::From(i, float4(o0.xyz, alpha), float4(0.5, 0.5, 1, 1), float4(0.5, 0, 1, 1), float3(1.0f, 1.0f, 1.0f), 0);");
-                output.AppendLine($"\t\treturn ShadingModelStandard::Shade(i, mat);");
-            }
+            output.AppendLine($"\t\tMaterial mat = Material::From(i, float4(o0.xyz, alpha), float4(0.5, 0.5, 1, 1), float4(0.5, 0, 1, 1), float3(1.0f, 1.0f, 1.0f), 0);");
+            output.AppendLine($"\t\treturn ShadingModelStandard::Shade(i, mat);");
+
+            //if (material.Unk0C == 2) //Unlit?
+            //{
+            //    output.Append($"\t\treturn float4(o0.xyz, alpha);");
+            //}
+            //else
+            //{
+            //    output.AppendLine($"\t\tMaterial mat = Material::From(i, float4(o0.xyz, alpha), float4(0.5, 0.5, 1, 1), float4(0.5, 0, 1, 1), float3(1.0f, 1.0f, 1.0f), 0);");
+            //    output.AppendLine($"\t\treturn ShadingModelStandard::Shade(i, mat);");
+            //}
         }
 
         return output;

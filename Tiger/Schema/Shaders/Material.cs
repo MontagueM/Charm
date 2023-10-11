@@ -47,7 +47,7 @@ namespace Tiger.Schema.Shaders
     public interface IMaterial : ISchema
     {
         public FileHash FileHash { get; }
-        public uint Unk0C { get; } //might be for determing type? (glass, unlit, normal pbr. idk?)
+        public uint Unk0C { get; } //Seems to be backface culling
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
         public ShaderBytecode? VertexShader { get; }
@@ -61,6 +61,7 @@ namespace Tiger.Schema.Shaders
         public DynamicArray<D2Class_09008080> Unk2D0 { get; }
         public DynamicArray<Vec4> Unk2E0 { get; }
         public DynamicArray<Vec4> Unk300 { get; }
+
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
