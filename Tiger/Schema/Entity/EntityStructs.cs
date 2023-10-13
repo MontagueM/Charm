@@ -126,14 +126,15 @@ public struct D2Class_8F6D8080
     public EntityModel Model;
     [SchemaField(0x310, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]  // todo shadowkeep, beyond light
     public Tag<D2Class_1C6E8080> TexturePlates;
-    // todo there might be a nice way to combine these two and namespace the struct, and instead use properties not fields? would mean all the mess is in the data side not the logic, basically mapping one onto the other. Possible to make it so everything maps onto the latest given, so it only needs to be done for older versions.
+
+    [SchemaField(0x2D0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)] //todo beyond light
+    [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArrayUnloaded<SExternalMaterialMapEntry> ExternalMaterialsMap;
+
     [SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x398, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    public DynamicArrayUnloaded<SExternalMaterialMapEntrySK> ExternalMaterialsMapSK;
-
-    [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArrayUnloaded<SExternalMaterialMapEntryWQ> ExternalMaterialsMapWQ;
+    [SchemaField(0x3F0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArrayUnloaded<D2Class_986D8080> Unk3F0;
 
     [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x3A0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -246,16 +247,17 @@ public struct D2Class_939E8080
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C5728080", 0x8)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "986D8080", 0x8)]
-public struct SExternalMaterialMapEntrySK
+public struct D2Class_986D8080
 {
-    public ushort MaterialCount;
-    public ushort MaterialStartIndex;
-    public ushort Unk04;  // maybe some kind of LOD or dynamic marker
+    public ushort Unk00;
+    public ushort Unk02;
+    public ushort Unk04;
     public ushort Unk06;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C4728080", 0xC)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "976D8080", 0xC)]
-public struct SExternalMaterialMapEntryWQ
+public struct SExternalMaterialMapEntry
 {
     public int MaterialCount;
     public int MaterialStartIndex;

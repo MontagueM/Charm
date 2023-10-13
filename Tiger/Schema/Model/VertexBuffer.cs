@@ -451,6 +451,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         List<InputSignature> inputSignatures, bool isTerrain = false)
     {
         reader.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
+
         foreach (InputSignature inputSignature in inputSignatures)
         {
             switch (inputSignature.Semantic)
@@ -520,6 +521,17 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 case InputSemantic.Colour:
                     part.VertexColours.Add(new Vector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
                         reader.ReadByte()));
+                    break;
+                case InputSemantic.BlendIndices:
+                    //Indices get set in BlendWeight
+                    break;
+                case InputSemantic.BlendWeight:
+                    //VertexWeight vw = new()
+                    //{
+                    //    WeightIndices = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
+                    //    WeightValues = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
+                    //};
+                    //(part as DynamicMeshPart).VertexWeights.Add(vw);
                     break;
                 default:
                     throw new NotImplementedException();

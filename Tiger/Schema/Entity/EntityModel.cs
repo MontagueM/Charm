@@ -101,6 +101,12 @@ public class EntityModel : Tag<SEntityModel>
                     bAlphaClip = (part.Flags & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
                 };
+
+                //We only care about the vertex shader for now for mesh data
+                //But if theres also no pixel shader then theres no point in adding it
+                if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.VertexShader is null || dynamicMeshPart.Material.PixelShader is null)
+                    continue;
+
                 dynamicMeshPart.GetAllData(mesh, _tag);
                 parts.Add(dynamicMeshPart);
             }
@@ -214,35 +220,24 @@ public class DynamicMeshPart : MeshPart
         }
     }
 
-    private IMaterial? GetMaterialFromExternalMaterial(short externalMaterialIndex, EntityResource parentResource)
+    private IMaterial? GetMaterialFromExternalMaterial(short variantShaderIndex, EntityResource parentResource)
     {
         using TigerReader reader = parentResource.GetReader();
 
         List<IMaterial> materials = new();
-        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        
+        var map = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
+        var mats = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
+        if (map.Count == 0 || mats.Count == 0)
         {
-            var map = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMapWQ;
-            var mats = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
-            if (map.Count == 0 || mats.Count == 0)
-            {
-                return null;
-            }
-            if (externalMaterialIndex >= map.Count)
-                return null; // todo this is actually wrong ig...
-
-            var mapEntry = map[reader, externalMaterialIndex];
-            // For now we'll just set as the first material in the array
-            for (int i = mapEntry.MaterialStartIndex; i < mapEntry.MaterialStartIndex + mapEntry.MaterialCount; i++)
-            {
-                materials.Add(mats[reader, i].Material);
-            }
+            return null;
         }
-        else
-        {
-            return null; // todo shadowkeep
-        }
+        if (variantShaderIndex >= map.Count)
+            return null; // todo this is actually wrong ig...s
 
-        return materials[0];
+        var mapEntry = map[reader, variantShaderIndex];
+
+        return mats[reader, mapEntry.MaterialStartIndex + (0 % mapEntry.MaterialCount)].Material;
     }
 
     public static void AddVertexColourSlotInfo(DynamicMeshPart dynamicPart, short w)
