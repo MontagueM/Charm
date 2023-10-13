@@ -52,12 +52,16 @@ public partial class ActivityMapEntityView : UserControl
             maps.Add(displayMap);
         }
 
-        DisplayEntBubble displayActivity = new();
-        displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(activity.FileHash)}";
-        displayActivity.Hash = $"{activity.FileHash}";
-        displayActivity.LoadType = DisplayEntBubble.Type.Activity;
-        displayActivity.Data = displayActivity;
-        maps.Add(displayActivity);
+        //SK needs implemented, also havent tested Beyond Light, so WQ+ for now
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            DisplayEntBubble displayActivity = new();
+            displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(activity.FileHash)}";
+            displayActivity.Hash = $"{activity.FileHash}";
+            displayActivity.LoadType = DisplayEntBubble.Type.Activity;
+            displayActivity.Data = displayActivity;
+            maps.Add(displayActivity);
+        }
 
         return maps;
     }
