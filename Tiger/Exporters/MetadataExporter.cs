@@ -95,6 +95,8 @@ class MetadataScene
             for (int i = 0; i < mapLight.Unk10.TagData.Unk30.Count; i++)
             {
                 var data = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_SHADOWKEEP_2601 ? mapLight.Unk10.TagData.Unk30[i].UnkCC : mapLight.Unk10.TagData.Unk30[i].UnkD0;
+                if (data is null)
+                    continue;
                 AddLight(
                     data.Hash,
                     "Point",
