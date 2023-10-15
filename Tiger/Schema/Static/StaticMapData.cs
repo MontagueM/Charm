@@ -393,7 +393,6 @@ public struct D2Class_706C8080
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xCC, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<D2Class_A16D8080> UnkCC;
-    [SchemaField(0x8C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xD0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<D2Class_A16D8080> UnkD0;
     //[SchemaField(0xDF)]
@@ -539,6 +538,15 @@ public struct D2Class_BA6C8080
     public Vector4 Unk40;
 }
 
+[SchemaStruct("5E6C8080", 0x20)]
+public struct SMapSpotLightResource
+{
+    [SchemaField(0x10)]
+    public Tag Unk10;  // D2Class_716C8080, might be related to lights for entities?
+    [SchemaField(0x1C)]
+    public TigerHash Unk1C;
+}
+
 // /// <summary>
 // /// Boss entity data resource?
 // /// </summary>
@@ -552,17 +560,6 @@ public struct D2Class_BA6C8080
 //     public TigerHash EntityName;
 // }
 //
-// /// <summary>
-// /// Unk data resource, maybe lights for entities?
-// /// </summary>
-// [SchemaStruct("5E6C8080", 0x20)]
-// public struct D2Class_5E6C8080
-// {
-//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
-//     public Tag Unk10;  // D2Class_716C8080, might be related to lights for entities?
-//     [SchemaField(0x1C)]
-//     public TigerHash Unk1C;
-// }
 //
 // /// <summary>
 // /// Unk data resource, maybe lights for entities?
