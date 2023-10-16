@@ -129,6 +129,19 @@ class MetadataScene
             }
 
         }
+        foreach (var mapLight in scene.MapSpotLights)
+        {
+            foreach(var entry in mapLight.Value)
+            {
+                AddLight(
+                    mapLight.Key,
+                    "Spot",
+                    new Vector4(entry.Position.X, entry.Position.Y, entry.Position.Z, 1),
+                    entry.Quaternion,
+                    new Vector2(1, 1),
+                    new Vector4(1,1,1,1));
+            }
+        }
     }
 
     public void AddMaterial(IMaterial material)

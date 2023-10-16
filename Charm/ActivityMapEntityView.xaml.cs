@@ -177,8 +177,8 @@ public partial class ActivityMapEntityView : UserControl
 
         Parallel.ForEach(dataTables, data =>
         {
-            Tag<SMapDataTable> entry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
-            entry.TagData.DataEntries.ForEach(entry => //Need(?) to do this to get number of instances for Entities
+            Tag<SMapDataTable> entries = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
+            entries.TagData.DataEntries.ForEach(entry => //Need(?) to do this to get number of instances for Entities
             {
                 if (entry is SMapDataEntry dynamicResource)
                 {
@@ -372,6 +372,11 @@ public partial class ActivityMapEntityView : UserControl
                             }
                         }
                     }
+                }
+                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSpotLightResource spotLight)
+                {
+                    if(spotLight.Unk10 is not null)
+                        dynamicScene.AddMapSpotLight(entry, spotLight);
                 }
             });
         });
