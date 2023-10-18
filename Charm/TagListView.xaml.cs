@@ -1219,8 +1219,9 @@ public partial class TagListView : UserControl
         else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
             var resource = activity.TagData.Unk18.GetValue(activity.GetReader());
-            if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
-                        resource is D2Class_18978080 || resource is D2Class_19978080)
+            //if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
+            //    resource is D2Class_18978080 || resource is D2Class_19978080)
+            if (resource is D2Class_19978080)
             {
                 if (resource.DialogueTableBL != null)
                     dialogueTables.Add(resource.DialogueTableBL.Hash);

@@ -30,10 +30,10 @@ public struct SActivity_WQ
     [SchemaField(0x70, TigerStrategy.DESTINY2_LATEST)]
     public TigerHash Unk60;
     public FileHash Unk64;  // an entity thing
-    [SchemaField(0xA0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x68, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
-    public FileHash64 UnkActivity68;  // todo this uses an unknown hash64 system in the package
+    //[SchemaField(0xA0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    //[SchemaField(0x68, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //[SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
+    //public FileHash64 UnkActivity68;  // todo this uses an unknown hash64 system in the package
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8B8E8080", 0xD0)]
@@ -200,15 +200,63 @@ public struct D2Class_C39F8080
     public Tag<D2Class_C78E8080> DirectiveTable;
 }
 
-[SchemaStruct("18978080", 0x20)]
-public struct D2Class_18978080
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "18978080", 0x80)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "18978080", 0x20)]
+public struct D2Class_18978080 //uhh
 {
-    [Tag64]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    [Tag64, SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag DialogueTable;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk10;
-    [SchemaField(0x18)]
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk18;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public int Unk1C;
+
+    //Beyond Light only below
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public int Unk00BL;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public TigerHash Unk04BL;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public TigerHash Unk08BL;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public TigerHash Unk0CBL;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public TigerHash Unk10BL;
+
+    [Tag64, SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Tag Unk28BL;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public DynamicArray<D2Class_C39F8080> Unk38BL;
+
+    [Tag64, SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Tag Unk50BL;
+
+    [Tag64, SchemaField(0x68, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Tag Unk68BL;
 }
 
 [SchemaStruct("17978080", 0x20)]

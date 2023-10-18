@@ -493,6 +493,10 @@ public class StringReference : ITigerDeserialize
         FileHash fileHash = new(reader.ReadUInt32());
         LocalizedStrings localizedStrings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
         StringHash stringHash = new(reader.ReadUInt32());
+        if (localizedStrings == null || stringHash.IsInvalid())
+        {
+            return;
+        }
         Value = localizedStrings.GetStringFromHash(stringHash);
     }
 
