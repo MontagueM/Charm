@@ -308,7 +308,7 @@ public struct D2Class_7D6A8080
 /// Unk data resource.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DC718080", 0x90)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A16D8080", 0x80)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "A16D8080", 0x80)]
 public struct D2Class_A16D8080
 {
     public ulong FileSize;
@@ -322,7 +322,7 @@ public struct D2Class_A16D8080
 /// Map Light
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5A6F8080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "636A8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "636A8080", 0x18)]
 public struct SMapLightResource
 {
     [SchemaField(0x10)]
@@ -330,7 +330,7 @@ public struct SMapLightResource
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3A718080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "656C8080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "656C8080", 0x60)]
 public struct D2Class_656C8080
 {
     [SchemaField(0x10)]
@@ -368,7 +368,7 @@ public struct SMapSkyEntities
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3E718080", 0xA0)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "706C8080", 0xF0)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "706C8080", 0xF0)]
 public struct D2Class_706C8080
 {
     //public Vector4 Unk00;
@@ -391,9 +391,9 @@ public struct D2Class_706C8080
     //[SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     //public IMaterial UnkC8;
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0xCC, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag<D2Class_A16D8080> UnkCC;
-    [SchemaField(0xD0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag<D2Class_A16D8080> UnkD0;
     //[SchemaField(0xDF)]
     //public byte UnkDF; //color index? unlikely
@@ -432,7 +432,7 @@ public struct D2Class_A96A8080
 /// Map Decals Resource
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "626E8080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "55698080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "55698080", 0x18)]
 public struct SMapDecalsResource
 {
     [SchemaField(0x10)]
@@ -443,7 +443,7 @@ public struct SMapDecalsResource
 /// Map Decals
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "686E8080", 0x78)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "5B698080", 0x78)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "5B698080", 0x78)]
 public struct SMapDecals
 {
     public ulong FileSize;
@@ -465,7 +465,7 @@ public struct SMapDecals
 /// Decal resources
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6E8080", 0x8)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "63698080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "63698080", 0x8)]
 public struct D2Class_63698080
 {
     public IMaterial Material;
@@ -477,7 +477,7 @@ public struct D2Class_63698080
 /// Decal Location
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D6E8080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "64698080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "64698080", 0x10)]
 public struct D2Class_64698080
 {
     public Vector4 Location;

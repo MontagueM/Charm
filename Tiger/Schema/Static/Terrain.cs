@@ -290,7 +290,7 @@ public class Terrain : Tag<STerrain>
 /// Terrain data resource.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4B718080", 0x20)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "7D6C8080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "7D6C8080", 0x20)]
 public struct D2Class_7D6C8080
 {
     [SchemaField(0x10)]
@@ -305,7 +305,7 @@ public struct D2Class_7D6C8080
 /// Terrain _tag.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4F718080", 0xB0)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "816C8080", 0xB0)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "816C8080", 0xB0)]
 public struct STerrain
 {
     public long FileSize;
@@ -314,7 +314,7 @@ public struct STerrain
     public Vector4 Unk20;
     public Vector4 Unk30;
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x50, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<SMeshGroup> MeshGroups;
 
     public VertexBuffer Vertices1;
@@ -323,20 +323,20 @@ public struct STerrain
     public IMaterial Unk6C;
     public IMaterial Unk70;
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<SStaticPart> StaticParts;
     public VertexBuffer Vertices3;
     public VertexBuffer Vertices4;
     public IndexBuffer Indices2;
     [SchemaField(0xA0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x98, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public int Unk98;
     public int Unk9C;
     public int UnkA0;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "54718080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "866C8080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "866C8080", 0x60)]
 public struct SMeshGroup
 {
     public float Unk00;
@@ -360,7 +360,7 @@ public struct SMeshGroup
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "52718080", 0x0C)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "846C8080", 0x0C)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "846C8080", 0x0C)]
 public struct SStaticPart
 {
     public IMaterial Material;

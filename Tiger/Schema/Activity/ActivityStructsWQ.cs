@@ -25,12 +25,12 @@ public struct SActivity_WQ
     [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_26898080> Unk40;
     public DynamicArray<D2Class_24898080> Unk50;
+    [SchemaField(0x90, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_LATEST)]
     public TigerHash Unk60;
-    [SchemaField(0x64, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x74, TigerStrategy.DESTINY2_LATEST)]
     public FileHash Unk64;  // an entity thing
+    [SchemaField(0xA0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x68, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
     public FileHash64 UnkActivity68;  // todo this uses an unknown hash64 system in the package
