@@ -118,7 +118,8 @@ public struct D2Class_6E908080
  * could be these external materials are dynamic themselves - we'll extract them all but select the first
  */
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "BD728080", 0x340)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8F6D8080", 0x450)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8F6D8080", 0x3E0)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "8F6D8080", 0x450)]
 public struct D2Class_8F6D8080
 {
     [SchemaField(0x1DC, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -127,7 +128,8 @@ public struct D2Class_8F6D8080
     [SchemaField(0x310, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]  // todo shadowkeep, beyond light
     public Tag<D2Class_1C6E8080> TexturePlates;
 
-    [SchemaField(0x2D0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)] //todo beyond light
+    [SchemaField(0x2D0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x360, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntry> ExternalMaterialsMap;
 
@@ -256,7 +258,7 @@ public struct D2Class_986D8080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C4728080", 0xC)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "976D8080", 0xC)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "976D8080", 0xC)]
 public struct SExternalMaterialMapEntry
 {
     public int MaterialCount;

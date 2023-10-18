@@ -52,8 +52,8 @@ public partial class ActivityMapEntityView : UserControl
             maps.Add(displayMap);
         }
 
-        //SK needs implemented, also havent tested Beyond Light, so WQ+ for now
-        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        //SK needs implemented
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
             DisplayEntBubble displayActivity = new();
             displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(activity.FileHash)}";
