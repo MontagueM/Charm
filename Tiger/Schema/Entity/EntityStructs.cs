@@ -1368,7 +1368,7 @@ public struct D2Class_E3918080
 #endregion
 
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2999, "7F6B8080", 0x1C0)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7F6B8080", 0x1C0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "95668080", 0x1E0)]
 public struct CubemapResource //Dataresource for cubemaps
 {
@@ -1379,19 +1379,19 @@ public struct CubemapResource //Dataresource for cubemaps
     [SchemaField(0xF0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 UnkF0; //This might actually be position? Similar to other but in GDC image this one looked more correct
 
-    [SchemaField(0x140, TigerStrategy.DESTINY2_SHADOWKEEP_2999)]
+    [SchemaField(0x140, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x100, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 CubemapRotation;
 
-    [SchemaField(0x190, TigerStrategy.DESTINY2_SHADOWKEEP_2999)]
+    [SchemaField(0x190, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public StringPointer CubemapName;
 
-    [SchemaField(0x198, TigerStrategy.DESTINY2_SHADOWKEEP_2999)]
+    [SchemaField(0x198, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Texture CubemapTexture;
 
-    [SchemaField(0x1A0, TigerStrategy.DESTINY2_SHADOWKEEP_2999)]
+    [SchemaField(0x1A0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Texture Unk1C0; //Sometype of reflection tint texture idk
 }

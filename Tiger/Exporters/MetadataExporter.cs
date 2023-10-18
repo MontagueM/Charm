@@ -88,7 +88,11 @@ class MetadataScene
 
         foreach (CubemapResource cubemap in scene.Cubemaps)
         {
-            AddCubemap(cubemap.CubemapName, cubemap.CubemapSize.ToVec3(), cubemap.CubemapRotation, cubemap.CubemapPosition.ToVec3());
+            AddCubemap(cubemap.CubemapName,
+                cubemap.CubemapSize.ToVec3(),
+                cubemap.CubemapRotation,
+                cubemap.CubemapPosition.ToVec3(),
+                cubemap.CubemapTexture != null ? cubemap.CubemapTexture.Hash : "");
         }
         foreach (var mapLight in scene.MapLights)
         {
@@ -138,8 +142,8 @@ class MetadataScene
                     "Spot",
                     new Vector4(entry.Position.X, entry.Position.Y, entry.Position.Z, 1),
                     entry.Quaternion,
-                    new Vector2(1, 1),
-                    new Vector4(1,1,1,1));
+                    new Vector2(1.0, 1.0),
+                    new Vector4(1.0,1.0,1.0,1.0));
             }
         }
     }
@@ -227,7 +231,7 @@ class MetadataScene
         _config["Materials"][material]["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb() });
     }
 
-    public void AddCubemap(string name, Vector3 scale, Vector4 quatRotation, Vector3 translation)
+    public void AddCubemap(string name, Vector3 scale, Vector4 quatRotation, Vector3 translation, string texHash)
     {
         if (!_config["Cubemaps"].ContainsKey(name))
         {
@@ -237,7 +241,8 @@ class MetadataScene
         {
             Translation = new[] { translation.X, translation.Y, translation.Z },
             Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
-            Scale = new[] { scale.X, scale.Y, scale.Z }
+            Scale = new[] { scale.X, scale.Y, scale.Z },
+            Texture = texHash
         });
     }
 
@@ -366,6 +371,7 @@ class MetadataScene
         public float[] Translation;
         public float[] Rotation;
         public float[] Scale;
+        public string Texture;
     }
 
     private struct JsonLight

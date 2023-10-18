@@ -318,65 +318,73 @@ public partial class ActivityMapEntityView : UserControl
                     else
                         dynamicPointScene.AddEntityPoints(dynamicResource);
                 }
-                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
+
+                switch (entry.DataResource.GetValue(dataTable.GetReader()))
                 {
-                    foreach (var element in skyResource.Unk10.TagData.Unk08)
-                    {
-                        if (element.Unk60.TagData.Unk08 is null)
-                            continue;
-
-                        Matrix4x4 matrix = new Matrix4x4(
-                            element.Unk00.X, element.Unk00.Y, element.Unk00.Z, element.Unk00.W,
-                            element.Unk10.X, element.Unk10.Y, element.Unk10.Z, element.Unk10.W,
-                            element.Unk20.X, element.Unk20.Y, element.Unk20.Z, element.Unk20.W,
-                            element.Unk30.X, element.Unk30.Y, element.Unk30.Z, element.Unk30.W
-                        );
-
-                        System.Numerics.Vector3 scale = new();
-                        System.Numerics.Vector3 trans = new();
-                        Quaternion quat = new();
-                        Matrix4x4.Decompose(matrix, out scale, out quat, out trans);
-
-                        skyScene.AddMapModel(element.Unk60.TagData.Unk08,
-                            new Tiger.Schema.Vector4(trans.X, trans.Y, trans.Z, 1.0f),
-                            new Tiger.Schema.Vector4(quat.X, quat.Y, quat.Z, quat.W),
-                            new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z));
-
-                        foreach (DynamicMeshPart part in element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null))
+                    case SMapSkyEntResource skyResource:
+                        foreach (var element in skyResource.Unk10.TagData.Unk08)
                         {
-                            if (part.Material == null) continue;
-                            skyScene.Materials.Add(new ExportMaterial(part.Material));
-                        }
-                    }
-                }
-                if (entry.DataResource.GetValue(dataTable.GetReader()) is CubemapResource cubemap)
-                {
-                    dynamicScene.AddCubemap(cubemap);
-                }
-                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapLightResource mapLight)
-                {
-                    dynamicScene.AddMapLight(mapLight);
-                }
-                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapDecalsResource decals)
-                {
-                    if (decals.MapDecals is null || decals.MapDecals.TagData.DecalResources is null)
-                        return;
-                    dynamicScene.AddDecals(decals);
-                    foreach (var item in decals.MapDecals.TagData.DecalResources)
-                    {
-                        if (item.StartIndex >= 0 && item.StartIndex < decals.MapDecals.TagData.Locations.Count)
-                        {
-                            for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decals.MapDecals.TagData.Locations.Count; i++)
+                            if (element.Unk60.TagData.Unk08 is null)
+                                continue;
+
+                            Matrix4x4 matrix = new Matrix4x4(
+                                element.Unk00.X, element.Unk00.Y, element.Unk00.Z, element.Unk00.W,
+                                element.Unk10.X, element.Unk10.Y, element.Unk10.Z, element.Unk10.W,
+                                element.Unk20.X, element.Unk20.Y, element.Unk20.Z, element.Unk20.W,
+                                element.Unk30.X, element.Unk30.Y, element.Unk30.Z, element.Unk30.W
+                            );
+
+                            System.Numerics.Vector3 scale = new();
+                            System.Numerics.Vector3 trans = new();
+                            Quaternion quat = new();
+                            Matrix4x4.Decompose(matrix, out scale, out quat, out trans);
+
+                            skyScene.AddMapModel(element.Unk60.TagData.Unk08,
+                                new Tiger.Schema.Vector4(trans.X, trans.Y, trans.Z, 1.0f),
+                                new Tiger.Schema.Vector4(quat.X, quat.Y, quat.Z, quat.W),
+                                new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z));
+
+                            foreach (DynamicMeshPart part in element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null))
                             {
-                                dynamicScene.Materials.Add(new ExportMaterial(item.Material));
+                                if (part.Material == null) continue;
+                                skyScene.Materials.Add(new ExportMaterial(part.Material));
                             }
                         }
-                    }
-                }
-                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSpotLightResource spotLight)
-                {
-                    if(spotLight.Unk10 is not null)
-                        dynamicScene.AddMapSpotLight(entry, spotLight);
+                        break;
+
+                    case CubemapResource cubemap:
+                        Console.WriteLine($"{dataTable.Hash}");
+                        dynamicScene.AddCubemap(cubemap);
+                        break;
+
+                    case SMapLightResource mapLight:
+                        dynamicScene.AddMapLight(mapLight);
+                        break;
+
+                    case SMapDecalsResource decals:
+                        if (decals.MapDecals is null || decals.MapDecals.TagData.DecalResources is null)
+                            return;
+
+                        dynamicScene.AddDecals(decals);
+                        foreach (var item in decals.MapDecals.TagData.DecalResources)
+                        {
+                            if (item.StartIndex >= 0 && item.StartIndex < decals.MapDecals.TagData.Locations.Count)
+                            {
+                                for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decals.MapDecals.TagData.Locations.Count; i++)
+                                {
+                                    dynamicScene.Materials.Add(new ExportMaterial(item.Material));
+                                }
+                            }
+                        }
+                        break;
+
+                    case SMapSpotLightResource spotLight:
+                        if (spotLight.Unk10 is not null)
+                            dynamicScene.AddMapSpotLight(entry, spotLight);
+                        break;
+
+                    default:
+                        break;
                 }
             });
         });
