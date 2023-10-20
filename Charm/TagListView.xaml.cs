@@ -23,6 +23,7 @@ using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
+using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 using Tiger.Schema.Strings;
 
@@ -100,6 +101,10 @@ public enum ETagListType
     WeaponAudioList,
     [Description("Weapon Audio [Final]")]
     WeaponAudio,
+    [Description("Material List [Packages]")]
+    MaterialList,
+    [Description("Material [Final]")]
+    Material,
 }
 
 /// <summary>
@@ -273,6 +278,12 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.WeaponAudio:
                     await LoadWeaponAudio(contentValue as FileHash);
+                    break;
+                case ETagListType.MaterialList:
+                    await LoadMaterialList();
+                    break;
+                case ETagListType.Material:
+                    LoadMaterial(contentValue as FileHash);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -1771,6 +1782,52 @@ public partial class TagListView : UserControl
         viewer.MusicPlayer.Play();
     }
 
+    #endregion
+
+    #region Material
+    private async Task LoadMaterialList()
+    {
+        // If there are packages, we don't want to reload the view as very poor for performance.
+        if (_allTagItems != null)
+            return;
+
+        MainWindow.Progress.SetProgressStages(new List<string>
+        {
+            "caching materials",
+            "adding materials to ui",
+        });
+
+        await Task.Run(() =>
+        {
+            _allTagItems = new ConcurrentBag<TagItem>();
+
+            var mats = PackageResourcer.Get().GetAllHashes<IMaterial>();
+            MainWindow.Progress.CompleteStage();
+
+            Parallel.ForEach(mats, val =>
+            {
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = val,
+                    Name = $"Material",
+                    TagType = ETagListType.Material
+                });
+            });
+            MainWindow.Progress.CompleteStage();
+
+            MakePackageTagItems();
+        });
+
+        RefreshItemList();  // bc of async stuff
+    }
+
+    private void LoadMaterial(FileHash fileHash)
+    {
+        var materialView = new MaterialView();
+        materialView.Load(fileHash);
+        _mainWindow.MakeNewTab(fileHash, materialView);
+        _mainWindow.SetNewestTabSelected();
+    }
     #endregion
 
 }

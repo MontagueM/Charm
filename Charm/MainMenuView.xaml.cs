@@ -129,4 +129,12 @@ public partial class MainMenuView : UserControl
         _mainWindow.MakeNewTab("textures", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
+
+    private void AllMaterialsViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.MaterialList);
+        _mainWindow.MakeNewTab("materials", tagListView);
+        _mainWindow.SetNewestTabSelected();
+    }
 }

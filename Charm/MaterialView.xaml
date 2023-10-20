@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="1000"
     d:DesignWidth="1900"
+    Loaded="OnControlLoaded"
     mc:Ignorable="d">
     <UserControl.Resources>
         <ControlTemplate x:Key="MaterialViewTemplate">
@@ -32,14 +33,15 @@
                     BorderBrush="{StaticResource BackgroundColour30}"
                     BorderThickness="1" />
 
-                <Border
+                <Button
                     Grid.RowSpan="6"
                     Margin="0,0,0,0"
                     Panel.ZIndex="1"
-                    BorderBrush="White"
-                    BorderThickness="2">
-                    <Image Source="{Binding Texture}" />
-                </Border>
+                    Click="Texture_OnClick">
+                    <Border BorderBrush="White" BorderThickness="2">
+                        <Image Source="{Binding Texture}" />
+                    </Border>
+                </Button>
 
                 <TextBlock
                     Grid.Row="0"

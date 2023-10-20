@@ -17,9 +17,15 @@ namespace Charm;
 
 public partial class MaterialView : UserControl
 {
+    private static MainWindow _mainWindow = null;
     public MaterialView()
     {
         InitializeComponent();
+    }
+
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        _mainWindow = Window.GetWindow(this) as MainWindow;
     }
 
     public void Load(FileHash hash)
@@ -248,6 +254,27 @@ public partial class MaterialView : UserControl
         }
 
         return cbuffers;
+    }
+
+    private void Texture_OnClick(object sender, RoutedEventArgs e)
+    {
+        var s = sender as Button;
+        var dc = s.DataContext as TextureDetail;
+
+        Texture textureHeader = FileResourcer.Get().GetFile<Texture>(dc.Hash);
+        if (textureHeader.IsCubemap())
+        {
+            var cubemapView = new CubemapView();
+            cubemapView.LoadCubemap(textureHeader);
+            _mainWindow.MakeNewTab(dc.Hash, cubemapView);
+        }
+        else
+        {
+            var textureView = new TextureView();
+            textureView.LoadTexture(textureHeader);
+            _mainWindow.MakeNewTab(dc.Hash, textureView);
+        }
+        _mainWindow.SetNewestTabSelected();
     }
 }
 
