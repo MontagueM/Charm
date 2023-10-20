@@ -206,6 +206,13 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+                case 0x808071E8:
+                case 0x80806DAA:
+                    var materialView = new MaterialView();
+                    materialView.Load(hash);
+                    _mainWindow.MakeNewTab(hash, materialView);
+                    _mainWindow.SetNewestTabSelected();
+                    break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
                     break;
