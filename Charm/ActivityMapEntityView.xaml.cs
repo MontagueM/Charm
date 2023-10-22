@@ -185,23 +185,23 @@ public partial class ActivityMapEntityView : UserControl
                     entityCountDictionary.AddOrUpdate(dynamicResource.GetEntityHash(), 1, (_, count) => count + 1);
                 }
             });
+        });
 
-            entityCountDictionary.Keys.AsParallel().ForAll(entityHash =>
+        entityCountDictionary.Keys.AsParallel().ForAll(entityHash =>
+        {
+            Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash);
+            if (entity.HasGeometry())
             {
-                Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash);
-                if (entity.HasGeometry())
+                if (!items.Any(item => item.Hash == entity.Hash)) //Check if the entity is already in the EntityList
                 {
-                    if (!items.Any(item => item.Hash == entity.Hash)) //Check if the entity is already in the EntityList
+                    items.Add(new DisplayEntityList
                     {
-                        items.Add(new DisplayEntityList
-                        {
-                            Name = $"Entity {entity.Hash}: {entityCountDictionary[entityHash]} Instances",
-                            Hash = entity.Hash,
-                            Instances = entityCountDictionary[entityHash]
-                        });
-                    }
+                        Name = $"Entity {entity.Hash}: {entityCountDictionary[entityHash]} Instances",
+                        Hash = entity.Hash,
+                        Instances = entityCountDictionary[entityHash]
+                    });
                 }
-            });
+            }
         });
 
         var sortedItems = new List<DisplayEntityList>(items);

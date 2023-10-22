@@ -26,7 +26,7 @@ public class TextureExtractor
                 case TextureExportFormat.DDS_BGRA_UNCOMP_DX10:
                     scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath + ".dds");
                     break;
-                case TextureExportFormat.DDS_BGRA_BC7_DX10:
+                case TextureExportFormat.DDS_BGRA_BC3_DX10:
                     if (TexHelper.Instance.IsSRGB(scratchImage.GetMetadata().Format))
                         scratchImage = scratchImage.Compress(DXGI_FORMAT.BC3_UNORM_SRGB, TEX_COMPRESS_FLAGS.SRGB, 0);
                     else
@@ -61,7 +61,7 @@ public class TextureExtractor
         switch (exportFormat)
         {
             case TextureExportFormat.DDS_BGRA_UNCOMP_DX10:
-            case TextureExportFormat.DDS_BGRA_BC7_DX10:
+            case TextureExportFormat.DDS_BGRA_BC3_DX10:
             case TextureExportFormat.DDS_BGRA_UNCOMP:
                 return "dds";
             case TextureExportFormat.PNG:
@@ -77,7 +77,7 @@ public class TextureExtractor
 public enum TextureExportFormat
 {
     DDS_BGRA_UNCOMP_DX10,
-    DDS_BGRA_BC7_DX10,
+    DDS_BGRA_BC3_DX10,
     DDS_BGRA_UNCOMP,
     PNG,
     TGA,

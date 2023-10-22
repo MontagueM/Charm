@@ -382,7 +382,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
 
                 // new code vvv
                 VertexWeight vw = new VertexWeight();
-                short w = (short)dynamicPart.VertexPositions[dynamicPart.VertexIndices.IndexOf(vertexIndex)].W;
+                short w = (short)dynamicPart.VertexPositions[dynamicPart.VertexIndexMap[vertexIndex]].W;
                 if (w >= 0 && w < 0x800)
                 {
                     vw.WeightIndices = new IntVector4(w, 0, 0, 0);
@@ -410,6 +410,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     handle.BaseStream.Seek(chunkIndex * 0x20 + (vertexIndex % 8) * 4, SeekOrigin.Begin);
                     vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
                     vw.WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
+                    Debug.Assert(vw.WeightValues.X + vw.WeightValues.Y == 255);
                     dynamicPart.VertexWeights.Add(vw);
                 }
                 else
