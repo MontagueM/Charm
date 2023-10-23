@@ -35,13 +35,19 @@ public partial class MaterialView : UserControl
         if (material is null)
             return;
 
+        UnkDataList.ItemsSource = GetUnkDataDetails(material);
+
+        if (material.VertexShader is not null)
+        {
+            VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"ps{material.VertexShader.Hash}");
+            VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
+        }
+
         if (material.PixelShader is not null)
         {
             TextureListView.ItemsSource = GetTextureDetails(material);
             PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
-            VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"ps{material.VertexShader.Hash}");
-            PS_CBufferList.ItemsSource = GetCBufferDetails(material);
-            VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
+            PS_CBufferList.ItemsSource = GetCBufferDetails(material); 
         }
     }
 
@@ -80,7 +86,7 @@ public partial class MaterialView : UserControl
                 Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
                 Dimension = $"Dimension: {tex.Texture.GetDimension()}",
                 Format = $"Format: {(DXGI_FORMAT)tex.Texture.TagData.Format}",
-                Dimensions = $"Texture Dimensions: {tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
+                Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
                 Texture = LoadTexture(tex.Texture)
             });
         } 
@@ -135,7 +141,7 @@ public partial class MaterialView : UserControl
     {
         BitmapImage bitmapImage = new BitmapImage();
         bitmapImage.BeginInit();
-        bitmapImage.StreamSource = textureHeader.GetTexture();
+        bitmapImage.StreamSource = (textureHeader.IsCubemap() || textureHeader.IsVolume()) ? textureHeader.GetCubemapFace(0) : textureHeader.GetTexture();
         bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
         // Divide aspect ratio to fit 960x1000
         float widthDivisionRatio = (float)textureHeader.TagData.Width / 960;
@@ -276,6 +282,20 @@ public partial class MaterialView : UserControl
         }
         _mainWindow.SetNewestTabSelected();
     }
+
+    public List<UnkDataDetail> GetUnkDataDetails(IMaterial material)
+    {
+        var items = new List<UnkDataDetail>();
+
+        items.Add(new UnkDataDetail
+        {
+            Name = "Test",
+            Value = "123"
+        });
+
+        return items;
+
+    }
 }
 
 public class TextureDetail
@@ -302,4 +322,10 @@ public class CBufferDataDetail
 {
     public int Index { get; set; }
     public string Vector { get; set; }
+}
+
+public class UnkDataDetail
+{
+    public string Name { get; set; }
+    public string Value { get; set; }
 }

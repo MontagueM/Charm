@@ -11,7 +11,7 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <ControlTemplate x:Key="MaterialViewTemplate">
-            <Grid Height="150" Margin="5,0,0,10">
+            <Grid Margin="5,0,0,10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30*" />
                     <RowDefinition Height="30*" />
@@ -31,7 +31,7 @@
                     Grid.ColumnSpan="2"
                     Panel.ZIndex="0"
                     BorderBrush="{StaticResource BackgroundColour30}"
-                    BorderThickness="1" />
+                    BorderThickness="2" />
 
                 <Button
                     Grid.RowSpan="6"
@@ -46,7 +46,7 @@
                 <TextBlock
                     Grid.Row="0"
                     Grid.Column="1"
-                    Margin="0,0,5,0"
+                    Margin="0,5,5,0"
                     HorizontalAlignment="Right"
                     FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
                     FontSize="15"
@@ -60,7 +60,7 @@
                     FontSize="26"
                     Text="{Binding Hash}" />
                 <TextBlock
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Grid.Column="1"
                     Margin="5,0,0,0"
                     HorizontalAlignment="Left"
@@ -69,7 +69,7 @@
                     Foreground="{StaticResource ForegroundColour75}"
                     Text="{Binding Index}" />
                 <TextBlock
-                    Grid.Row="2"
+                    Grid.Row="3"
                     Grid.Column="1"
                     Margin="5,0,0,0"
                     HorizontalAlignment="Left"
@@ -78,7 +78,7 @@
                     Foreground="{StaticResource ForegroundColour75}"
                     Text="{Binding Type}" />
                 <TextBlock
-                    Grid.Row="3"
+                    Grid.Row="4"
                     Grid.Column="1"
                     Margin="5,0,0,0"
                     HorizontalAlignment="Left"
@@ -87,7 +87,7 @@
                     Foreground="{StaticResource ForegroundColour75}"
                     Text="{Binding Dimension}" />
                 <TextBlock
-                    Grid.Row="4"
+                    Grid.Row="5"
                     Grid.Column="1"
                     Margin="5,0,0,0"
                     HorizontalAlignment="Left"
@@ -98,8 +98,8 @@
                 <TextBlock
                     Grid.Row="5"
                     Grid.Column="1"
-                    Margin="5,0,0,0"
-                    HorizontalAlignment="Left"
+                    Margin="0,0,5,0"
+                    HorizontalAlignment="Right"
                     FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
                     FontSize="17"
                     Foreground="{StaticResource ForegroundColour75}"
@@ -175,6 +175,44 @@
             </Grid>
         </ControlTemplate>
 
+        <ControlTemplate x:Key="UnkDataViewTemplate">
+            <Grid Margin="0,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="25*" />
+                    <ColumnDefinition Width="50*" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.RowSpan="3"
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
+
+                <Border
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontSize="20"
+                        Text="{Binding Name}" />
+                </Border>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontSize="18"
+                    Text="{Binding Value}" />
+            </Grid>
+        </ControlTemplate>
+
     </UserControl.Resources>
 
     <Grid>
@@ -184,7 +222,27 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="1">
-            <ListView x:Name="TextureListView" Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="21*" />
+            </Grid.RowDefinitions>
+
+            <Border
+                Grid.RowSpan="2"
+                Panel.ZIndex="0"
+                BorderBrush="{StaticResource BackgroundColour30}"
+                BorderThickness="1" />
+
+            <TextBlock
+                Grid.Row="0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                FontSize="25"
+                Text="Textures"
+                TextWrapping="Wrap" />
+
+            <ListView x:Name="TextureListView" Grid.Row="1">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -373,7 +431,25 @@
                     </Grid>
 
                     <Grid Grid.Column="1">
-                        <ListView x:Name="CBufferDataList">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="19*" />
+                        </Grid.RowDefinitions>
+
+                        <Border
+                            Grid.RowSpan="2"
+                            Panel.ZIndex="0"
+                            BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="1" />
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                            FontSize="16"
+                            Text="CBuffer Values" />
+
+                        <ListView x:Name="CBufferDataList" Grid.Row="1">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -391,21 +467,38 @@
                 </Grid>
 
                 <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="19*" />
+                    </Grid.RowDefinitions>
+
                     <Border
-                        Grid.RowSpan="5"
-                        Grid.ColumnSpan="2"
+                        Grid.RowSpan="2"
                         Panel.ZIndex="0"
                         BorderBrush="{StaticResource BackgroundColour30}"
                         BorderThickness="1" />
 
                     <TextBlock
-                        Name="Other"
-                        Margin="0,0,0,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
                         FontSize="16"
-                        Text="Other (TODO)" />
+                        Text="Unknown Values" />
+
+                    <ListView x:Name="UnkDataList" Grid.Row="1">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="OverridesDefaultStyle" Value="True" />
+                                <Setter Property="Template" Value="{StaticResource UnkDataViewTemplate}" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
                 </Grid>
 
             </Grid>

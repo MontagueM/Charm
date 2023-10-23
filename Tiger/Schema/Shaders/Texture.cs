@@ -175,6 +175,17 @@ public class Texture : TigerReferenceFile<STextureHeader>
         return ms;
     }
 
+    public UnmanagedMemoryStream GetCubemapFace(int index)
+    {
+        ScratchImage scratchImage = GetScratchImage();
+
+        UnmanagedMemoryStream ms;
+        Guid guid = TexHelper.Instance.GetWICCodec(WICCodecs.BMP);
+        ms = scratchImage.SaveToWICMemory(index, WIC_FLAGS.NONE, guid);
+        scratchImage.Dispose();
+        return ms;
+    }
+
     public static void SavetoFile(string savePath, ScratchImage simg, bool isCubemap = false)
     {
         try
