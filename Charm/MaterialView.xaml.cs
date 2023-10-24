@@ -49,6 +49,16 @@ public partial class MaterialView : UserControl
             PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
             PS_CBufferList.ItemsSource = GetCBufferDetails(material); 
         }
+
+        if(material.PS_TFX_Bytecode.Count > 0)
+        {
+            var list = TfxBytecodeOp.ParseAll(material.PS_TFX_Bytecode);
+            foreach(var entry in list)
+            {
+                Console.WriteLine($"{entry.op} : {TfxBytecodeOp.TfxToString(entry)}");
+            }
+        }
+            
     }
 
     public List<TextureDetail> GetTextureDetails(IMaterial material)
@@ -143,14 +153,14 @@ public partial class MaterialView : UserControl
         bitmapImage.BeginInit();
         bitmapImage.StreamSource = (textureHeader.IsCubemap() || textureHeader.IsVolume()) ? textureHeader.GetCubemapFace(0) : textureHeader.GetTexture();
         bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-        // Divide aspect ratio to fit 960x1000
-        float widthDivisionRatio = (float)textureHeader.TagData.Width / 960;
-        float heightDivisionRatio = (float)textureHeader.TagData.Height / 1000;
-        float transformRatio = Math.Max(heightDivisionRatio, widthDivisionRatio);
-        int imgWidth = (int)Math.Floor(textureHeader.TagData.Width / transformRatio);
-        int imgHeight = (int)Math.Floor(textureHeader.TagData.Height / transformRatio);
-        bitmapImage.DecodePixelWidth = imgWidth;
-        bitmapImage.DecodePixelHeight = imgHeight;
+        //// Divide aspect ratio to fit 960x1000
+        //float widthDivisionRatio = (float)textureHeader.TagData.Width / 512;
+        //float heightDivisionRatio = (float)textureHeader.TagData.Height / 512;
+        //float transformRatio = Math.Max(heightDivisionRatio, widthDivisionRatio);
+        //int imgWidth = (int)Math.Floor(textureHeader.TagData.Width / transformRatio);
+        //int imgHeight = (int)Math.Floor(textureHeader.TagData.Height / transformRatio);
+        bitmapImage.DecodePixelWidth = 256;
+        bitmapImage.DecodePixelHeight = 256;
         bitmapImage.EndInit();
         bitmapImage.Freeze();
         return bitmapImage;
@@ -285,13 +295,61 @@ public partial class MaterialView : UserControl
 
     public List<UnkDataDetail> GetUnkDataDetails(IMaterial material)
     {
-        var items = new List<UnkDataDetail>();
-
-        items.Add(new UnkDataDetail
+        //Theres gotta be a better way of doing all this
+        var items = new List<UnkDataDetail>
         {
-            Name = "Test",
-            Value = "123"
-        });
+            new UnkDataDetail
+            {
+                Name = "Unk08",
+                Value = material.Unk08.ToString("X2")
+            },
+            new UnkDataDetail
+            {
+                Name = "Unk0C",
+                Value = material.Unk0C.ToString("X2")
+            },
+            new UnkDataDetail
+            {
+                Name = "Unk10",
+                Value = material.Unk10.ToString("X2")
+            }
+        };
+
+        if (material.VS_TFX_Bytecode.Count > 0)
+        {
+            items.Add(new UnkDataDetail
+            {
+                Name = "VS TFX Bytecode",
+                Value = material.VS_TFX_Bytecode.Count.ToString()
+            });
+        }
+
+        if (material.PS_TFX_Bytecode.Count > 0)
+        {
+            items.Add(new UnkDataDetail
+            {
+                Name = "PS TFX Bytecode",
+                Value = material.PS_TFX_Bytecode.Count.ToString()
+            });
+        }
+
+        if (material.VS_Samplers.Count > 0)
+        {
+            items.Add(new UnkDataDetail
+            {
+                Name = "VS Samplers",
+                Value = material.VS_Samplers.Count.ToString()
+            });
+        }
+
+        if (material.PS_Samplers.Count > 0)
+        {
+            items.Add(new UnkDataDetail
+            {
+                Name = "PS Samplers",
+                Value = material.PS_Samplers.Count.ToString()
+            });
+        }
 
         return items;
 

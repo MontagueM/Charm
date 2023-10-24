@@ -47,6 +47,9 @@ namespace Tiger.Schema.Shaders
     public interface IMaterial : ISchema
     {
         public FileHash FileHash { get; }
+        public uint Unk08 { get; }
+        public uint Unk0C { get; }
+        public uint Unk10 { get; }
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
         public ShaderBytecode? VertexShader { get; }
@@ -54,10 +57,10 @@ namespace Tiger.Schema.Shaders
         public FileHash PSVector4Container { get; }
         public List<DirectXSampler> PS_Samplers { get; }
         public List<DirectXSampler> VS_Samplers { get; }
-        public DynamicArray<D2Class_09008080> Unk90 { get; }
+        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode { get; }
         public DynamicArray<Vec4> UnkA0 { get; }
         public DynamicArray<Vec4> UnkC0 { get; }
-        public DynamicArray<D2Class_09008080> Unk2D0 { get; }
+        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode { get; }
         public DynamicArray<Vec4> Unk2E0 { get; }
         public DynamicArray<Vec4> Unk300 { get; }
         public static object _lock = new object();
@@ -200,13 +203,16 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
     public class Material : Tag<SMaterial_SK>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk08 => _tag.Unk08;
+        public uint Unk10 => _tag.Unk10;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
-        public DynamicArray<D2Class_09008080> Unk90 => _tag.Unk68;
+        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> UnkA0 => _tag.Unk78;
         public DynamicArray<Vec4> UnkC0 => _tag.Unk98;
-        public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2E8;
+        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
         public DynamicArray<Vec4> Unk2E0 => _tag.Unk2F8;
         public DynamicArray<Vec4> Unk300 => _tag.Unk310;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
@@ -239,13 +245,16 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
     public class Material : Tag<SMaterial_BL>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk08 => _tag.Unk08;
+        public uint Unk10 => _tag.Unk10;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
-        public DynamicArray<D2Class_09008080> Unk90 => _tag.Unk90;
+        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> UnkA0 => _tag.UnkA0;
         public DynamicArray<Vec4> UnkC0 => _tag.UnkC0;
-        public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2D0;
+        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
         public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
         public DynamicArray<Vec4> Unk300 => _tag.Unk300;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(s => s.Samplers).ToList();
@@ -279,13 +288,16 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
     public class Material : Tag<SMaterial_WQ>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk08 => _tag.Unk08;
+        public uint Unk10 => _tag.Unk10;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
-        public DynamicArray<D2Class_09008080> Unk90 => _tag.Unk90;
+        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> UnkA0 => _tag.UnkA0;
         public DynamicArray<Vec4> UnkC0 => _tag.UnkC0;
-        public DynamicArray<D2Class_09008080> Unk2D0 => _tag.Unk2D0;
+        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
         public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
         public DynamicArray<Vec4> Unk300 => _tag.Unk300;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();

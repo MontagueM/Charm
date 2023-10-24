@@ -15,7 +15,7 @@ public struct SMaterial_SK
     [SchemaField(0x50)]
     public DynamicArray<STextureTag> VSTextures;
     [SchemaField(0x68)]
-    public DynamicArray<D2Class_09008080> Unk68;
+    public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
     public DynamicArray<Vec4> Unk78;
     public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
     public DynamicArray<Vec4> Unk98;
@@ -25,7 +25,7 @@ public struct SMaterial_SK
     [SchemaField(0x2D0)]
     public DynamicArray<STextureTag> PSTextures;
     [SchemaField(0x2E8)]
-    public DynamicArray<D2Class_09008080> Unk2E8;
+    public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
     public DynamicArray<Vec4> Unk2F8;
     public DynamicArray<SDirectXSamplerTagSK> PS_Samplers;
     public DynamicArray<Vec4> Unk310;
@@ -47,7 +47,7 @@ public struct SMaterial_BL
     public DynamicArray<STextureTag64> VSTextures;
     //TODO: change these names
     [SchemaField(0x78)]
-    public DynamicArray<D2Class_09008080> Unk90;
+    public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
     public DynamicArray<Vec4> UnkA0;
     public DynamicArray<SDirectXSamplerTagBL> VS_Samplers;
     public DynamicArray<Vec4> UnkC0;
@@ -57,7 +57,7 @@ public struct SMaterial_BL
     [SchemaField(0x2A0)]
     public DynamicArray<STextureTag64> PSTextures;
     [SchemaField(0x2B8)]
-    public DynamicArray<D2Class_09008080> Unk2D0;
+    public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
     public DynamicArray<Vec4> Unk2E0;
     public DynamicArray<SDirectXSamplerTagBL> PS_Samplers;
     public DynamicArray<Vec4> Unk300;
@@ -69,7 +69,7 @@ public struct SMaterial_BL
     [SchemaField(0x330)]
     public DynamicArray<STextureTag64> CSTextures;
     [SchemaField(0x348)]
-    public DynamicArray<D2Class_09008080> Unk360;
+    public DynamicArray<D2Class_09008080> CS_TFX_Bytecode;
     public DynamicArray<Vec4> CSCbuffers0;
     public DynamicArray<SDirectXSamplerTagBL> CS_Samplers;
     public DynamicArray<Vec4> CSCbuffers1;
@@ -88,7 +88,7 @@ public struct SMaterial_WQ
     [SchemaField(0x78)]
     public DynamicArray<STextureTag64> VSTextures;
     [SchemaField(0x90)]
-    public DynamicArray<D2Class_09008080> Unk90;
+    public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
     public DynamicArray<Vec4> UnkA0;
     public DynamicArray<SDirectXSamplerTagBL> VS_Samplers;
     public DynamicArray<Vec4> UnkC0;
@@ -98,7 +98,7 @@ public struct SMaterial_WQ
     [SchemaField(0x2B8)]
     public DynamicArray<STextureTag64> PSTextures;
     [SchemaField(0x2D0)]
-    public DynamicArray<D2Class_09008080> Unk2D0;
+    public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
     public DynamicArray<Vec4> Unk2E0;
     public DynamicArray<SDirectXSamplerTagBL> PS_Samplers;
     public DynamicArray<Vec4> Unk300;
@@ -110,7 +110,7 @@ public struct SMaterial_WQ
     [SchemaField(0x348)]
     public DynamicArray<STextureTag64> CSTextures;
     [SchemaField(0x360)]
-    public DynamicArray<D2Class_09008080> Unk360;
+    public DynamicArray<D2Class_09008080> CS_TFX_Bytecode;
     public DynamicArray<Vec4> CSCbuffers0;
     public DynamicArray<SDirectXSamplerTagBL> CS_Samplers;
     public DynamicArray<Vec4> CSCbuffers1;

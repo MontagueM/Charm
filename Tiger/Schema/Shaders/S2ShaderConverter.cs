@@ -370,11 +370,7 @@ PS
             dynamic data = null;
             if (bIsVertexShader)
             {
-                if (cbuffer.Count == material.Unk90.Count)
-                {
-                    data = material.Unk90;
-                }
-                else if (cbuffer.Count == material.UnkA0.Count)
+                if (cbuffer.Count == material.UnkA0.Count)
                 {
                     data = material.UnkA0;
                 }
@@ -385,10 +381,6 @@ PS
             }
             else
             {
-                //if (cbuffer.Count == material.Header.Unk2D0.Count) Unk2D0 is byte, not float, so not a cbuffer?
-                //{
-                //    data = material.Header.Unk2D0;
-                //}
                 if (cbuffer.Count == material.Unk2E0.Count)
                 {
                     data = material.Unk2E0;
