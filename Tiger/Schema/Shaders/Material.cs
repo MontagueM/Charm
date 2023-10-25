@@ -58,11 +58,11 @@ namespace Tiger.Schema.Shaders
         public List<DirectXSampler> PS_Samplers { get; }
         public List<DirectXSampler> VS_Samplers { get; }
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode { get; }
-        public DynamicArray<Vec4> UnkA0 { get; }
-        public DynamicArray<Vec4> UnkC0 { get; }
+        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants { get; }
+        public DynamicArray<Vec4> VS_CBuffers { get; }
         public DynamicArray<D2Class_09008080> PS_TFX_Bytecode { get; }
-        public DynamicArray<Vec4> Unk2E0 { get; }
-        public DynamicArray<Vec4> Unk300 { get; }
+        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants { get; }
+        public DynamicArray<Vec4> PS_CBuffers { get; }
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
@@ -210,11 +210,11 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
-        public DynamicArray<Vec4> UnkA0 => _tag.Unk78;
-        public DynamicArray<Vec4> UnkC0 => _tag.Unk98;
+        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
+        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
         public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
-        public DynamicArray<Vec4> Unk2E0 => _tag.Unk2F8;
-        public DynamicArray<Vec4> Unk300 => _tag.Unk310;
+        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
+        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
 
@@ -252,11 +252,11 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
-        public DynamicArray<Vec4> UnkA0 => _tag.UnkA0;
-        public DynamicArray<Vec4> UnkC0 => _tag.UnkC0;
+        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
+        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
         public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
-        public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
-        public DynamicArray<Vec4> Unk300 => _tag.Unk300;
+        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
+        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(s => s.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(s => s.Samplers).ToList();
 
@@ -295,11 +295,11 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
-        public DynamicArray<Vec4> UnkA0 => _tag.UnkA0;
-        public DynamicArray<Vec4> UnkC0 => _tag.UnkC0;
+        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
+        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
         public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
-        public DynamicArray<Vec4> Unk2E0 => _tag.Unk2E0;
-        public DynamicArray<Vec4> Unk300 => _tag.Unk300;
+        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
+        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
 

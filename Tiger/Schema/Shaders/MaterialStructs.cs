@@ -16,9 +16,9 @@ public struct SMaterial_SK
     public DynamicArray<STextureTag> VSTextures;
     [SchemaField(0x68)]
     public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
-    public DynamicArray<Vec4> Unk78;
+    public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
-    public DynamicArray<Vec4> Unk98;
+    public DynamicArray<Vec4> VS_CBuffers;
 
     [SchemaField(0x2C8)]
     public ShaderBytecode? PixelShader;
@@ -26,9 +26,9 @@ public struct SMaterial_SK
     public DynamicArray<STextureTag> PSTextures;
     [SchemaField(0x2E8)]
     public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
-    public DynamicArray<Vec4> Unk2F8;
+    public DynamicArray<Vec4> PS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagSK> PS_Samplers;
-    public DynamicArray<Vec4> Unk310;
+    public DynamicArray<Vec4> PS_CBuffers;
     [SchemaField(0x34C)]
     public FileHash PSVector4Container;
 }
@@ -48,9 +48,9 @@ public struct SMaterial_BL
     //TODO: change these names
     [SchemaField(0x78)]
     public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
-    public DynamicArray<Vec4> UnkA0;
+    public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> VS_Samplers;
-    public DynamicArray<Vec4> UnkC0;
+    public DynamicArray<Vec4> VS_CBuffers;
 
     [SchemaField(0x298)]
     public ShaderBytecode? PixelShader;
@@ -58,9 +58,9 @@ public struct SMaterial_BL
     public DynamicArray<STextureTag64> PSTextures;
     [SchemaField(0x2B8)]
     public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
-    public DynamicArray<Vec4> Unk2E0;
+    public DynamicArray<Vec4> PS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> PS_Samplers;
-    public DynamicArray<Vec4> Unk300;
+    public DynamicArray<Vec4> PS_CBuffers;
     [SchemaField(0x30C)]
     public FileHash PSVector4Container;
 
@@ -70,9 +70,9 @@ public struct SMaterial_BL
     public DynamicArray<STextureTag64> CSTextures;
     [SchemaField(0x348)]
     public DynamicArray<D2Class_09008080> CS_TFX_Bytecode;
-    public DynamicArray<Vec4> CSCbuffers0;
+    public DynamicArray<Vec4> CS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> CS_Samplers;
-    public DynamicArray<Vec4> CSCbuffers1;
+    public DynamicArray<Vec4> CS_CBuffers;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AA6D8080", 0x3D0)]
@@ -89,9 +89,9 @@ public struct SMaterial_WQ
     public DynamicArray<STextureTag64> VSTextures;
     [SchemaField(0x90)]
     public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
-    public DynamicArray<Vec4> UnkA0;
+    public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> VS_Samplers;
-    public DynamicArray<Vec4> UnkC0;
+    public DynamicArray<Vec4> VS_CBuffers;
 
     [SchemaField(0x2B0)]
     public ShaderBytecode? PixelShader;
@@ -99,9 +99,9 @@ public struct SMaterial_WQ
     public DynamicArray<STextureTag64> PSTextures;
     [SchemaField(0x2D0)]
     public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
-    public DynamicArray<Vec4> Unk2E0;
+    public DynamicArray<Vec4> PS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> PS_Samplers;
-    public DynamicArray<Vec4> Unk300;
+    public DynamicArray<Vec4> PS_CBuffers;
     [SchemaField(0x324)]
     public FileHash PSVector4Container;
 
@@ -111,9 +111,9 @@ public struct SMaterial_WQ
     public DynamicArray<STextureTag64> CSTextures;
     [SchemaField(0x360)]
     public DynamicArray<D2Class_09008080> CS_TFX_Bytecode;
-    public DynamicArray<Vec4> CSCbuffers0;
+    public DynamicArray<Vec4> CS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> CS_Samplers;
-    public DynamicArray<Vec4> CSCbuffers1;
+    public DynamicArray<Vec4> CS_CBuffers;
 }
 
 [SchemaStruct("11728080", 0x8)]

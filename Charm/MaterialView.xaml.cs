@@ -55,7 +55,7 @@ public partial class MaterialView : UserControl
             var list = TfxBytecodeOp.ParseAll(material.PS_TFX_Bytecode);
             foreach(var entry in list)
             {
-                Console.WriteLine($"{entry.op} : {TfxBytecodeOp.TfxToString(entry)}");
+                Console.WriteLine($"{entry.op} : {TfxBytecodeOp.TfxToString(entry, material.PS_TFX_Bytecode_Constants)}");
             }
         }
             
@@ -201,24 +201,16 @@ public partial class MaterialView : UserControl
 
             if (isVertexShader)
             {
-                if (cbuffer.Count == material.UnkA0.Count)
+                if (cbuffer.Count == material.VS_CBuffers.Count)
                 {
-                    data = material.UnkA0;
-                }
-                else if (cbuffer.Count == material.UnkC0.Count)
-                {
-                    data = material.UnkC0;
+                    data = material.VS_CBuffers;
                 }
             }
             else
             {
-                if (cbuffer.Count == material.Unk2E0.Count)
+                if (cbuffer.Count == material.PS_CBuffers.Count)
                 {
-                    data = material.Unk2E0;
-                }
-                else if (cbuffer.Count == material.Unk300.Count)
-                {
-                    data = material.Unk300;
+                    data = material.PS_CBuffers;
                 }
                 else
                 {

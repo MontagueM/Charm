@@ -262,6 +262,8 @@ public struct Vector4
         return new Vector3(X, Y, Z);
     }
 
+    public override string ToString() => $"({X}, {Y}, {Z}, {W})";
+
     public float this[int index]
     {
         get

@@ -129,24 +129,16 @@ public class UsfConverter
             dynamic data = null;
             if (bIsVertexShader)
             {
-                if (cbuffer.Count == material.UnkA0.Count)
+                if (cbuffer.Count == material.VS_CBuffers.Count)
                 {
-                    data = material.UnkA0;
-                }
-                else if (cbuffer.Count == material.UnkC0.Count)
-                {
-                    data = material.UnkC0;
+                    data = material.VS_CBuffers;
                 }
             }
             else
             {
-                if (cbuffer.Count == material.Unk2E0.Count)
+                if (cbuffer.Count == material.PS_CBuffers.Count)
                 {
-                    data = material.Unk2E0;
-                }
-                else if (cbuffer.Count == material.Unk300.Count)
-                {
-                    data = material.Unk300;
+                    data = material.PS_CBuffers;
                 }
                 else
                 {
