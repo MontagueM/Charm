@@ -42,15 +42,9 @@ public class TfxBytecodeOp
 
         switch (tfxData.op)
         {
-            case TfxBytecode.Unk0b:
-                Unk0bData Unk0bData = new();
-                Unk0bData.unk1 = reader.ReadByte();
-                Unk0bData.unk2 = reader.ReadByte();
-                tfxData.data = Unk0bData;
-                break;
             case TfxBytecode.Permute:
                 PermuteData PermuteData = new();
-                PermuteData.unk1 = reader.ReadByte();
+                PermuteData.fields = reader.ReadByte();
                 tfxData.data = PermuteData;
                 break;
             case TfxBytecode.PushConstantVec4:
@@ -88,33 +82,41 @@ public class TfxBytecodeOp
                 UnkLoadConstantData.constant_index = reader.ReadByte();
                 tfxData.data = UnkLoadConstantData;
                 break;
-            case TfxBytecode.LoadExtern:
-                LoadExternData LoadExternData = new();
-                LoadExternData.extern_ = (TfxExtern)reader.ReadByte();
-                LoadExternData.element = reader.ReadByte();
-                tfxData.data = LoadExternData;
+            case TfxBytecode.PushExternInputFloat:
+                PushExternInputFloatData PushExternInputFloatData = new();
+                PushExternInputFloatData.extern_ = (TfxExtern)reader.ReadByte();
+                PushExternInputFloatData.element = reader.ReadByte();
+                tfxData.data = PushExternInputFloatData;
                 break;
             case TfxBytecode.Unk3d:
                 Unk3dData Unk3dData = new();
-                Unk3dData.unk1 = reader.ReadByte();
-                Unk3dData.unk2 = reader.ReadByte();
+                Unk3dData.extern_ = (TfxExtern)reader.ReadByte();
+                Unk3dData.element = reader.ReadByte();
                 tfxData.data = Unk3dData;
                 break;
             case TfxBytecode.Unk3e:
                 Unk3eData Unk3eData = new();
                 Unk3eData.unk1 = reader.ReadByte();
+                Unk3eData.unk2 = reader.ReadByte();
                 tfxData.data = Unk3eData;
                 break;
             case TfxBytecode.Unk3f:
                 Unk3fData Unk3fData = new();
-                Unk3fData.unk1 = reader.ReadByte();
+                Unk3fData.extern_ = (TfxExtern)reader.ReadByte();
+                Unk3fData.element = reader.ReadByte();
                 tfxData.data = Unk3fData;
                 break;
-            case TfxBytecode.Unk42:
-                Unk42Data Unk42Data = new();
-                Unk42Data.unk1 = reader.ReadByte();
-                Unk42Data.unk2 = reader.ReadByte();
-                tfxData.data = Unk42Data;
+            case TfxBytecode.Unk40:
+                Unk40Data Unk40Data = new();
+                Unk40Data.unk1 = reader.ReadByte();
+                Unk40Data.unk2 = reader.ReadByte();
+                tfxData.data = Unk40Data;
+                break;
+            case TfxBytecode.Unk41:
+                Unk41Data Unk41Data = new();
+                Unk41Data.unk1 = reader.ReadByte();
+                Unk41Data.unk2 = reader.ReadByte();
+                tfxData.data = Unk41Data;
                 break;
             case TfxBytecode.PopOutput:
                 PopOutputData PopOutputData = new();
@@ -128,12 +130,12 @@ public class TfxBytecodeOp
                 break;
             case TfxBytecode.PushTemp:
                 PushTempData PushTempData = new();
-                PushTempData.unk1 = reader.ReadByte();
+                PushTempData.slot = reader.ReadByte();
                 tfxData.data = PushTempData;
                 break;
             case TfxBytecode.PopTemp:
                 PopTempData PopTempData = new();
-                PopTempData.unk1 = reader.ReadByte();
+                PopTempData.slot = reader.ReadByte();
                 tfxData.data = PopTempData;
                 break;
             case TfxBytecode.Unk47:
@@ -156,6 +158,11 @@ public class TfxBytecodeOp
                 Unk4aData.unk1 = reader.ReadByte();
                 tfxData.data = Unk4aData;
                 break;
+            case TfxBytecode.Unk4b:
+                Unk4bData Unk4bData = new();
+                Unk4bData.unk1 = reader.ReadByte();
+                tfxData.data = Unk4bData;
+                break;
             case TfxBytecode.Unk4c:
                 Unk4cData Unk4cData = new();
                 Unk4cData.unk1 = reader.ReadByte();
@@ -170,6 +177,8 @@ public class TfxBytecodeOp
                 Unk4eData Unk4eData = new();
                 Unk4eData.unk1 = reader.ReadByte();
                 Unk4eData.unk2 = reader.ReadByte();
+                Unk4eData.unk3 = reader.ReadByte();
+                Unk4eData.unk4 = reader.ReadByte();
                 tfxData.data = Unk4eData;
                 break;
             case TfxBytecode.Unk4f:
@@ -177,11 +186,28 @@ public class TfxBytecodeOp
                 Unk4fData.unk1 = reader.ReadByte();
                 tfxData.data = Unk4fData;
                 break;
+            case TfxBytecode.Unk50:
+                Unk50Data Unk50Data = new();
+                Unk50Data.unk1 = reader.ReadByte();
+                tfxData.data = Unk50Data;
+                break;
             case TfxBytecode.Unk52:
                 Unk52Data Unk52Data = new();
                 Unk52Data.unk1 = reader.ReadByte();
                 Unk52Data.unk2 = reader.ReadByte();
                 tfxData.data = Unk52Data;
+                break;
+            case TfxBytecode.Unk53:
+                Unk53Data Unk53Data = new();
+                Unk53Data.unk1 = reader.ReadByte();
+                Unk53Data.unk2 = reader.ReadByte();
+                tfxData.data = Unk53Data;
+                break;
+            case TfxBytecode.Unk54:
+                Unk54Data Unk54Data = new();
+                Unk54Data.unk1 = reader.ReadByte();
+                Unk54Data.unk2 = reader.ReadByte();
+                tfxData.data = Unk54Data;
                 break;
         }
 
@@ -193,11 +219,8 @@ public class TfxBytecodeOp
         string output = "";
         switch (tfxData.data)
         {
-            case Unk0bData:
-                output = $"unk1 {((Unk0bData)tfxData.data).unk1}, unk2 {((Unk0bData)tfxData.data).unk2}";
-                break;
             case PermuteData:
-                output = $"unk1 {((PermuteData)tfxData.data).unk1}";
+                output = $"permute({DecodePermuteParam(((PermuteData)tfxData.data).fields)}), fields {((PermuteData)tfxData.data).fields}";
                 break;
             case PushConstantVec4Data:
                 output = $"constant_index {((PushConstantVec4Data)tfxData.data).constant_index}: Constant value: {constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString()}";
@@ -220,20 +243,23 @@ public class TfxBytecodeOp
             case UnkLoadConstantData:
                 output = $"constant_index {((UnkLoadConstantData)tfxData.data).constant_index}: Constant value: {constants[((UnkLoadConstantData)tfxData.data).constant_index]}";
                 break;
-            case LoadExternData:
-                output = $"extern {((LoadExternData)tfxData.data).extern_}, element {((LoadExternData)tfxData.data).element}";
+            case PushExternInputFloatData:
+                output = $"extern {((PushExternInputFloatData)tfxData.data).extern_}, element {((PushExternInputFloatData)tfxData.data).element}";
                 break;
             case Unk3dData:
-                output = $"unk1 {((Unk3dData)tfxData.data).unk1}, unk2 {((Unk3dData)tfxData.data).unk2}";
+                output = $"extern {((Unk3dData)tfxData.data).extern_}, element {((Unk3dData)tfxData.data).element}";
                 break;
             case Unk3eData:
                 output = $"unk1 {((Unk3eData)tfxData.data).unk1}";
                 break;
             case Unk3fData:
-                output = $"unk1 {((Unk3fData)tfxData.data).unk1}, unk2 {((Unk3fData)tfxData.data).unk2}";
+                output = $"extern {((Unk3fData)tfxData.data).extern_}, element {((Unk3fData)tfxData.data).element}";
                 break;
-            case Unk42Data:
-                output = $"unk1 {((Unk42Data)tfxData.data).unk1}, unk2 {((Unk42Data)tfxData.data).unk2}";
+            case Unk40Data:
+                output = $"extern {((Unk40Data)tfxData.data).unk1}, element {((Unk40Data)tfxData.data).unk2}";
+                break;
+            case Unk41Data:
+                output = $"extern {((Unk41Data)tfxData.data).unk1}, element {((Unk41Data)tfxData.data).unk2}";
                 break;
             case PopOutputData:
                 output = $"unk1 {((PopOutputData)tfxData.data).unk1}";
@@ -242,10 +268,10 @@ public class TfxBytecodeOp
                 output = $"element {((StoreToBufferData)tfxData.data).element}";
                 break;
             case PushTempData:
-                output = $"unk1 {((PushTempData)tfxData.data).unk1}";
+                output = $"unk1 {((PushTempData)tfxData.data).slot}";
                 break;
             case PopTempData:
-                output = $"unk1 {((PopTempData)tfxData.data).unk1}";
+                output = $"unk1 {((PopTempData)tfxData.data).slot}";
                 break;
             case Unk47Data:
                 output = $"unk1 {((Unk47Data)tfxData.data).unk1}";
@@ -259,6 +285,9 @@ public class TfxBytecodeOp
             case Unk4aData:
                 output = $"unk1 {((Unk4aData)tfxData.data).unk1}";
                 break;
+            case Unk4bData:
+                output = $"unk1 {((Unk4bData)tfxData.data).unk1}";
+                break;
             case Unk4cData:
                 output = $"unk1 {((Unk4cData)tfxData.data).unk1}";
                 break;
@@ -266,30 +295,52 @@ public class TfxBytecodeOp
                 output = $"unk1 {((PushObjectChannelVectorData)tfxData.data).unk1}";
                 break;
             case Unk4eData:
-                output = $"unk1 {((Unk4eData)tfxData.data).unk1}, unk2 {((Unk4eData)tfxData.data).unk2}";
+                output = $"unk1 {((Unk4eData)tfxData.data).unk1}, unk2 {((Unk4eData)tfxData.data).unk2}, unk3 {((Unk4eData)tfxData.data).unk3}, unk4 {((Unk4eData)tfxData.data).unk4},";
                 break;
             case Unk4fData:
                 output = $"unk1 {((Unk4fData)tfxData.data).unk1}";
                 break;
+            case Unk50Data:
+                output = $"unk1 {((Unk50Data)tfxData.data).unk1}";
+                break;
             case Unk52Data:
-                output = $"unk1 {((Unk52Data)tfxData.data).unk1}, unk2 {((Unk52Data)tfxData.data).unk2}";
+                output = $"unk1 {((Unk52Data)tfxData.data).unk1}";
+                break;
+            case Unk53Data:
+                output = $"unk1 {((Unk53Data)tfxData.data).unk1}";
+                break;
+            case Unk54Data:
+                output = $"unk1 {((Unk54Data)tfxData.data).unk1}";
                 break;
         }
 
         return output;
     }
+
+    static string DecodePermuteParam(byte param)
+    {
+        char[] dims = { 'x', 'y', 'z', 'w' };
+        int s0 = (param >> 6) & 0b11;
+        int s1 = (param >> 4) & 0b11;
+        int s2 = (param >> 2) & 0b11;
+        int s3 = param & 0b11;
+
+        return $".{dims[s0]}{dims[s1]}{dims[s2]}{dims[s3]}";
+    }
 }
 
 public enum TfxBytecode : byte
 {
-    Unk01 = 0x01,
-    Unk02 = 0x02,
+    Add = 0x01,
+    Subtract = 0x02,
     Multiply = 0x03,
-    Unk04 = 0x04,
+    Unk04 = 0x04, //Divide?
+    Multiply2 = 0x05, //??
+    Add2 = 0x06, //??
     Unk07 = 0x07,
-    Unk08 = 0x08,
-    Unk09 = 0x09,
-    Unk0b = 0x0b, // Variant with associated data
+    Min = 0x08,
+    Max = 0x09,
+    Unk0b = 0x0b,
     Merge_1_3 = 0x0c,
     Unk0d = 0x0d,
     Unk0e = 0x0e,
@@ -300,15 +351,15 @@ public enum TfxBytecode : byte
     Unk13 = 0x13,
     Unk15 = 0x15,
     Unk16 = 0x16,
-    Cosine = 0x17,
+    Unk17 = 0x17,
     Unk1a = 0x1a,
     Unk1b = 0x1b,
     Unk1c = 0x1c,
     Negate = 0x1d,
-    Unk1f = 0x1f,
+    Cosine = 0x1f,
     Unk20 = 0x20,
-    Unk21 = 0x21,
-    Permute = 0x22, // Variant with associated data
+    PermuteAllX = 0x21,
+    Permute = 0x22, //{ fields: u8 }
     Saturate = 0x23,
     Unk25 = 0x25,
     Unk26 = 0x26,
@@ -317,31 +368,42 @@ public enum TfxBytecode : byte
     Unk29 = 0x29,
     Unk2a = 0x2a,
     Unk2e = 0x2e,
-    PushConstantVec4 = 0x34, // Variant with associated data
-    Unk35 = 0x35, // Variant with associated data
-    Spline4Const = 0x37, // Variant with associated data
-    Unk38 = 0x38, // Variant with associated data
-    Unk39 = 0x39, // Variant with associated data
-    Unk3a = 0x3a, // Variant with associated data
-    UnkLoadConstant = 0x3b, // Variant with associated data
-    LoadExtern = 0x3c, // Variant with associated data
-    Unk3d = 0x3d, // Variant with associated data
-    Unk3e = 0x3e, // Variant with associated data
-    Unk3f = 0x3f, // Variant with associated data
-    Unk42 = 0x42, // Variant with associated data
-    PopOutput = 0x43, // Variant with associated data
-    StoreToBuffer = 0x44, // Variant with associated data
-    PushTemp = 0x45, // Variant with associated data
-    PopTemp = 0x46, // Variant with associated data
-    Unk47 = 0x47, // Variant with associated data
-    Unk48 = 0x48, // Variant with associated data
-    Unk49 = 0x49, // Variant with associated data
-    Unk4a = 0x4a, // Variant with associated data
-    Unk4c = 0x4c, // Variant with associated data
-    PushObjectChannelVector = 0x4d, // Variant with associated data
-    Unk4e = 0x4e, // Variant with associated data
-    Unk4f = 0x4f, // Variant with associated data
-    Unk52 = 0x52, // Variant with associated data
+    PushConstantVec4 = 0x34, //{ constant_index: u8 }
+    Unk35 = 0x35, //{ unk1: u8 }
+    Spline4Const = 0x37, //{ unk1: u8 }
+    Unk38 = 0x38, //{ unk1: u8 }
+    Unk39 = 0x39, //{ unk1: u8 }
+    Unk3a = 0x3a, //{ unk1: u8 }
+    UnkLoadConstant = 0x3b, //{ constant_index: u8 }
+    PushExternInputFloat = 0x3c, //{ extern_: TfxExtern, element: u8 }
+    Unk3d = 0x3d, //{ extern_: TfxExtern, unk2: u8 }
+    Unk3e = 0x3e, //{ unk1: u8, unk2: u8 }
+    Unk3f = 0x3f, //{ extern_: TfxExtern, unk2: u8 }
+    Unk40 = 0x40, //{ unk1: u8, unk2: u8 }
+    Unk41 = 0x41, //{ unk1: u8, unk2: u8 }
+    Unk42 = 0x42,
+    PopOutput = 0x43, //{ unk1: u8 }
+    StoreToBuffer = 0x44, //{ element: u8 }
+    PushTemp = 0x45, //{ slot: u8 }
+    PopTemp = 0x46, //{ slot: u8 }
+    Unk47 = 0x47, //{ unk1: u8 }
+    Unk48 = 0x48, //{ unk1: u8 }
+    Unk49 = 0x49, //{ unk1: u8 }
+    Unk4a = 0x4a, //{ unk1: u8 }
+    Unk4b = 0x4b, //{ unk1: u8 }
+    Unk4c = 0x4c, //{ unk1: u8 }
+    PushObjectChannelVector = 0x4d, //{ unk1: u8 }
+    Unk4e = 0x4e, //{ unk1: u8, unk2: u8, unk3: u8, unk4: u8 }
+    Unk4f = 0x4f, //{ unk1: u8 }
+    Unk50 = 0x50, //{ unk1: u8 }
+    Unk51 = 0x51,
+    Unk52 = 0x52, //{ unk1: u8, unk2: u8 }
+    Unk53 = 0x53, //{ unk1: u8, unk2: u8 }
+    Unk54 = 0x54, //{ unk1: u8, unk2: u8 }
+    Unk55 = 0x55,
+    Unk56 = 0x56,
+    Unk57 = 0x57,
+    Unk58 = 0x58,
 }
 
 public struct TfxData
@@ -350,15 +412,9 @@ public struct TfxData
     public dynamic? data;
 }
 
-public struct Unk0bData
-{
-    public byte unk1;
-    public byte unk2;
-}
-
 public struct PermuteData
 {
-    public byte unk1;
+    public byte fields;
 }
 
 public struct PushConstantVec4Data
@@ -396,7 +452,7 @@ public struct UnkLoadConstantData
     public byte constant_index;
 }
 
-public struct LoadExternData
+public struct PushExternInputFloatData
 {
     public TfxExtern extern_;
     public byte element;
@@ -404,22 +460,29 @@ public struct LoadExternData
 
 public struct Unk3dData
 {
-    public byte unk1;
-    public byte unk2;
+    public TfxExtern extern_;
+    public byte element;
 }
 
 public struct Unk3eData
 {
     public byte unk1;
+    public byte unk2;
 }
 
 public struct Unk3fData
+{
+    public TfxExtern extern_;
+    public byte element;
+}
+
+public struct Unk40Data
 {
     public byte unk1;
     public byte unk2;
 }
 
-public struct Unk42Data
+public struct Unk41Data
 {
     public byte unk1;
     public byte unk2;
@@ -437,12 +500,12 @@ public struct StoreToBufferData
 
 public struct PushTempData
 {
-    public byte unk1;
+    public byte slot;
 }
 
 public struct PopTempData
 {
-    public byte unk1;
+    public byte slot;
 }
 
 public struct Unk47Data
@@ -465,6 +528,11 @@ public struct Unk4aData
     public byte unk1;
 }
 
+public struct Unk4bData
+{
+    public byte unk1;
+}
+
 public struct Unk4cData
 {
     public byte unk1;
@@ -479,9 +547,16 @@ public struct Unk4eData
 {
     public byte unk1;
     public byte unk2;
+    public byte unk3;
+    public byte unk4;
 }
 
 public struct Unk4fData
+{
+    public byte unk1;
+}
+
+public struct Unk50Data
 {
     public byte unk1;
 }
@@ -491,3 +566,17 @@ public struct Unk52Data
     public byte unk1;
     public byte unk2;
 }
+
+public struct Unk53Data
+{
+    public byte unk1;
+    public byte unk2;
+}
+
+public struct Unk54Data
+{
+    public byte unk1;
+    public byte unk2;
+}
+
+
