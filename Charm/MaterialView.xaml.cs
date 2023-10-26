@@ -53,10 +53,14 @@ public partial class MaterialView : UserControl
         if(material.PS_TFX_Bytecode.Count > 0)
         {
             var list = TfxBytecodeOp.ParseAll(material.PS_TFX_Bytecode);
-            foreach(var entry in list)
-            {
-                Console.WriteLine($"{entry.op} : {TfxBytecodeOp.TfxToString(entry, material.PS_TFX_Bytecode_Constants)}");
-            }
+            TfxBytecodeInterpreter test = new(list);
+
+            test.Evaluate(material.PS_TFX_Bytecode_Constants);
+
+            //foreach (var entry in list)
+            //{
+            //    Console.WriteLine($"{entry.op} : {TfxBytecodeOp.TfxToString(entry, material.PS_TFX_Bytecode_Constants)}");
+            //}
         }
             
     }

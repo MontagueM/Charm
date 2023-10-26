@@ -96,8 +96,8 @@ public class TfxBytecodeOp
                 break;
             case TfxBytecode.Unk3e:
                 Unk3eData Unk3eData = new();
-                Unk3eData.unk1 = reader.ReadByte();
-                Unk3eData.unk2 = reader.ReadByte();
+                Unk3eData.extern_ = (TfxExtern)reader.ReadByte();
+                Unk3eData.element = reader.ReadByte();
                 tfxData.data = Unk3eData;
                 break;
             case TfxBytecode.Unk3f:
@@ -108,14 +108,14 @@ public class TfxBytecodeOp
                 break;
             case TfxBytecode.Unk40:
                 Unk40Data Unk40Data = new();
-                Unk40Data.unk1 = reader.ReadByte();
-                Unk40Data.unk2 = reader.ReadByte();
+                Unk40Data.extern_ = (TfxExtern)reader.ReadByte();
+                Unk40Data.element = reader.ReadByte();
                 tfxData.data = Unk40Data;
                 break;
             case TfxBytecode.Unk41:
                 Unk41Data Unk41Data = new();
-                Unk41Data.unk1 = reader.ReadByte();
-                Unk41Data.unk2 = reader.ReadByte();
+                Unk41Data.extern_ = (TfxExtern)reader.ReadByte();
+                Unk41Data.element = reader.ReadByte();
                 tfxData.data = Unk41Data;
                 break;
             case TfxBytecode.PopOutput:
@@ -250,16 +250,16 @@ public class TfxBytecodeOp
                 output = $"extern {((Unk3dData)tfxData.data).extern_}, element {((Unk3dData)tfxData.data).element}";
                 break;
             case Unk3eData:
-                output = $"unk1 {((Unk3eData)tfxData.data).unk1}";
+                output = $"extern {((Unk3eData)tfxData.data).extern_}, element {((Unk3eData)tfxData.data).element}";
                 break;
             case Unk3fData:
                 output = $"extern {((Unk3fData)tfxData.data).extern_}, element {((Unk3fData)tfxData.data).element}";
                 break;
             case Unk40Data:
-                output = $"extern {((Unk40Data)tfxData.data).unk1}, element {((Unk40Data)tfxData.data).unk2}";
+                output = $"extern {((Unk40Data)tfxData.data).extern_}, element {((Unk40Data)tfxData.data).element}";
                 break;
             case Unk41Data:
-                output = $"extern {((Unk41Data)tfxData.data).unk1}, element {((Unk41Data)tfxData.data).unk2}";
+                output = $"extern {((Unk41Data)tfxData.data).extern_}, element {((Unk41Data)tfxData.data).element}";
                 break;
             case PopOutputData:
                 output = $"unk1 {((PopOutputData)tfxData.data).unk1}";
@@ -334,7 +334,7 @@ public enum TfxBytecode : byte
     Add = 0x01,
     Subtract = 0x02,
     Multiply = 0x03,
-    Unk04 = 0x04, //Divide?
+    IsZero = 0x04,
     Multiply2 = 0x05, //??
     Add2 = 0x06, //??
     Unk07 = 0x07,
@@ -348,7 +348,7 @@ public enum TfxBytecode : byte
     Unk10 = 0x10,
     Unk11 = 0x11,
     MultiplyAdd = 0x12,
-    Unk13 = 0x13,
+    Clamp = 0x13,
     Unk15 = 0x15,
     Unk16 = 0x16,
     Unk17 = 0x17,
@@ -466,8 +466,8 @@ public struct Unk3dData
 
 public struct Unk3eData
 {
-    public byte unk1;
-    public byte unk2;
+    public TfxExtern extern_;
+    public byte element;
 }
 
 public struct Unk3fData
@@ -478,14 +478,14 @@ public struct Unk3fData
 
 public struct Unk40Data
 {
-    public byte unk1;
-    public byte unk2;
+    public TfxExtern extern_;
+    public byte element;
 }
 
 public struct Unk41Data
 {
-    public byte unk1;
-    public byte unk2;
+    public TfxExtern extern_;
+    public byte element;
 }
 
 public struct PopOutputData
