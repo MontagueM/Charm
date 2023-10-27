@@ -16,6 +16,7 @@ using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Entity;
 
@@ -62,6 +63,26 @@ public partial class ActivityMapEntityView : UserControl
             displayActivity.Data = displayActivity;
             maps.Add(displayActivity);
         }
+        else
+        {
+            var vals = PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>();
+            foreach(var val in vals)
+            {
+                Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
+                string activityName = PackageResourcer.Get().GetActivityName(activity.FileHash).Split(':')[1];
+
+                if (tag.TagData.ActivityDevName.Value.Contains(activityName)) //This is probably really bad...
+                {
+                    DisplayEntBubble displayActivity = new();
+                    displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(val)}";
+                    displayActivity.Hash = $"{tag.Hash}";
+                    displayActivity.ParentHash = $"{activity.FileHash}";
+                    displayActivity.LoadType = DisplayEntBubble.Type.Activity;
+                    displayActivity.Data = displayActivity;
+                    maps.Add(displayActivity);
+                }
+            }
+        }
 
         return maps;
     }
@@ -78,8 +99,18 @@ public partial class ActivityMapEntityView : UserControl
         else
         {
             FileHash hash = new FileHash(tagData.Hash);
-            IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(hash);
-            PopulateActivityEntityContainerList(activity);
+            if(Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+            {
+                FileHash parentHash = new FileHash(tagData.ParentHash);
+                IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(parentHash);
+                PopulateActivityEntityContainerList(activity, hash);
+            }
+            else
+            {
+                IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(hash);
+                PopulateActivityEntityContainerList(activity);
+            }
+            
         }
     }
 
@@ -141,11 +172,11 @@ public partial class ActivityMapEntityView : UserControl
         EntityContainerList.ItemsSource = sortedItems;
     }
 
-    private void PopulateActivityEntityContainerList(IActivity activity)
+    private void PopulateActivityEntityContainerList(IActivity activity, FileHash UnkActivity = null)
     {
         ConcurrentBag<DisplayEntityMap> items = new ConcurrentBag<DisplayEntityMap>();
 
-        foreach (var entry in activity.EnumerateActivityEntities())
+        foreach (var entry in activity.EnumerateActivityEntities(UnkActivity))
         {
             if(entry.DataTables.Count > 0)
             {
@@ -602,6 +633,7 @@ public class DisplayEntBubble
 {
     public string Name { get; set; }
     public string Hash { get; set; }
+    public string ParentHash { get; set; }
     public Type LoadType { get; set; } //this kinda sucks but dont want to have 2 seperate tabs for map and activity entities
     public DisplayEntBubble Data { get; set; }
 

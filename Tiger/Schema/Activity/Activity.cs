@@ -22,7 +22,7 @@ namespace Tiger.Schema.Activity
     {
         public FileHash FileHash { get; }
         public IEnumerable<Bubble> EnumerateBubbles();
-        public IEnumerable<ActivityEntities> EnumerateActivityEntities();
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null);
     }
 }
 
@@ -55,9 +55,86 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
             return GlobalStrings.Get().GetString(_tag.LocationNames.TagData.BubbleNames.First(e => e.BubbleIndex == index).BubbleName);
         }
 
-        public IEnumerable<ActivityEntities> EnumerateActivityEntities()
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
         {
-            throw new NotSupportedException();
+            Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(UnkActivity);
+            Console.WriteLine(UnkActivity.ToString());
+
+            foreach (var entry in tag.TagData.Unk50)
+            {
+                foreach (var entry2 in entry.Unk08)
+                {
+                    yield return new ActivityEntities
+                    {
+                        BubbleName = GlobalStrings.Get().GetString(entry2.UnkName1),
+                        Hash = entry2.Unk44.Hash,
+                        ActivityPhaseName2 = GlobalStrings.Get().GetString(entry2.UnkName0),
+                        DataTables = CollapseResourceParent(entry2.Unk44.Hash)
+                    };
+                }
+            }
+        }
+
+        private List<FileHash> CollapseResourceParent(FileHash hash)
+        {
+            ConcurrentBag<FileHash> items = new();
+
+            var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_SHADOWKEEP_2601.S5B928080>(hash);
+
+            // :)))
+            foreach (var resource in entry.TagData.Unk14.TagData.Unk08)
+            {
+                foreach (var a in resource.Unk00.TagData.Unk38)
+                {
+                    foreach (var table in a.Unk08)
+                    {
+                        if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
+                            continue;
+
+                        if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
+                        {
+                            items.Add(table.Unk00.TagData.DataTable.Hash);
+                            Console.WriteLine($"{table.Unk00.TagData.DataTable.Hash}");
+                        }
+                    } 
+                }
+            }
+            foreach (var resource in entry.TagData.Unk14.TagData.Unk18)
+            {
+                foreach (var a in resource.Unk00.TagData.Unk38)
+                {
+                    foreach (var table in a.Unk08)
+                    {
+                        if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
+                            continue;
+
+                        if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
+                        {
+                            items.Add(table.Unk00.TagData.DataTable.Hash);
+                            Console.WriteLine($"{table.Unk00.TagData.DataTable.Hash}");
+                        }
+                    }
+                }
+            }
+            foreach (var resource in entry.TagData.Unk14.TagData.Unk28)
+            {
+                foreach (var a in resource.Unk00.TagData.Unk38)
+                {
+                    foreach (var table in a.Unk08)
+                    {
+                        if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
+                            continue;
+
+                        if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
+                        {
+                            items.Add(table.Unk00.TagData.DataTable.Hash);
+                            Console.WriteLine($"{table.Unk00.TagData.DataTable.Hash}");
+                        }
+                    }
+                }
+            }
+
+            return items.ToList();
         }
     }
 }
@@ -88,7 +165,7 @@ namespace Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307
             }
         }
 
-        public IEnumerable<ActivityEntities> EnumerateActivityEntities()
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
         {
             throw new NotSupportedException();
         }
@@ -148,7 +225,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
             }
         }
 
-        public IEnumerable<ActivityEntities> EnumerateActivityEntities()
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
         {
             foreach (var entry in _tag.Unk50)
             {
