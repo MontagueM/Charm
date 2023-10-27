@@ -12,6 +12,7 @@ using Arithmic;
 using Tiger.Schema.Entity;
 using System.Collections;
 using Newtonsoft.Json.Linq;
+using System.Collections.Concurrent;
 
 public class TfxBytecodeInterpreter
 {
@@ -26,7 +27,7 @@ public class TfxBytecodeInterpreter
         Temp = new(capacity: 16);
     }
 
-    public static List<string> StackPop(int pops)
+    private List<string> StackPop(int pops)
     {
         if (Stack.Count < pops)
         {
@@ -38,7 +39,7 @@ public class TfxBytecodeInterpreter
         return v;
     }
 
-    public void StackPush(string value)
+    private void StackPush(string value)
     {
         if (Stack.Count >= Stack.Capacity)
         {
@@ -48,7 +49,7 @@ public class TfxBytecodeInterpreter
         Stack.Add(value);
     }
 
-    public string StackTop()
+    private string StackTop()
     {
         if (Stack.Count == 0)
         {
@@ -59,8 +60,9 @@ public class TfxBytecodeInterpreter
         return top;
     }
 
-    public void Evaluate(DynamicArray<Vec4> constants)
+    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants)
     {
+        Dictionary<int, string> hlsl = new();
         foreach ((int _ip, var op) in Opcodes.Select((value, index) => (index, value)))
         {
             switch (op.op)
@@ -143,6 +145,9 @@ public class TfxBytecodeInterpreter
                     Temp.Clear();
                     Temp.AddRange(Stack);
                     Stack.Clear();
+
+                    //Just output 1 to the given buffer for the time being
+                    hlsl.TryAdd(((StoreToBufferData)op.data).element, "float4(1, 1, 0, 0)");
                     break;
                 default:
                     Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
@@ -155,9 +160,11 @@ public class TfxBytecodeInterpreter
         {
             Console.WriteLine($"Stack Length {Temp.Count}, Stack Value {a}");
         }
+
+        return hlsl;
     }
 
-    static string GetExtern(TfxExtern extern_, byte element)
+    private string GetExtern(TfxExtern extern_, byte element)
     {
         switch (extern_)
         {

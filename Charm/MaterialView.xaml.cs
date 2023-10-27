@@ -18,6 +18,8 @@ namespace Charm;
 public partial class MaterialView : UserControl
 {
     private static MainWindow _mainWindow = null;
+    private static IMaterial Material;
+
     public MaterialView()
     {
         InitializeComponent();
@@ -35,6 +37,7 @@ public partial class MaterialView : UserControl
         if (material is null)
             return;
 
+        Material = material;
         UnkDataList.ItemsSource = GetUnkDataDetails(material);
 
         if (material.VertexShader is not null)
@@ -48,21 +51,7 @@ public partial class MaterialView : UserControl
             TextureListView.ItemsSource = GetTextureDetails(material);
             PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
             PS_CBufferList.ItemsSource = GetCBufferDetails(material); 
-        }
-
-        if(material.PS_TFX_Bytecode.Count > 0)
-        {
-            var list = TfxBytecodeOp.ParseAll(material.PS_TFX_Bytecode);
-            TfxBytecodeInterpreter test = new(list);
-
-            test.Evaluate(material.PS_TFX_Bytecode_Constants);
-
-            //foreach (var entry in list)
-            //{
-            //    Console.WriteLine($"{entry.op} : {TfxBytecodeOp.TfxToString(entry, material.PS_TFX_Bytecode_Constants)}");
-            //}
-        }
-            
+        } 
     }
 
     public List<TextureDetail> GetTextureDetails(IMaterial material)
@@ -118,7 +107,8 @@ public partial class MaterialView : UserControl
             {
                 Index = $"CB{cbuffer.Key.Index}",
                 Count = $"Count: {cbuffer.Key.Count}",
-                Data = cbuffer.Value
+                Data = cbuffer.Value,
+                Stage = bVertexShader ? CBufferDetail.Shader.Vertex : CBufferDetail.Shader.Pixel
             });
         }
         var sortedItems = new List<CBufferDetail>(items);
@@ -135,10 +125,25 @@ public partial class MaterialView : UserControl
         {
             Dispatcher.Invoke(() =>
             {
+                if(dc.Index == "CB0") //tfx only changes cb0
+                {
+                    TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode : Material.VS_TFX_Bytecode));
+                    var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants);
+
+                    if (bytecode_hlsl.Count > 0)
+                    {
+                        foreach (var entry in bytecode_hlsl)
+                        {
+                            dc.Data[entry.Key] = Vector4.One;
+                        }
+                    }
+                }
+ 
                 ConcurrentBag<CBufferDataDetail> items = new ConcurrentBag<CBufferDataDetail>();
                 for (int i = 0; i < dc.Data.Count; i++)
                 {
                     CBufferDataDetail dataEntry = new();
+                    
                     dataEntry.Index = i;
                     dataEntry.Vector = $"{dc.Data[i].X}, {dc.Data[i].Y}, {dc.Data[i].Z}, {dc.Data[i].W}";
 
@@ -172,7 +177,8 @@ public partial class MaterialView : UserControl
 
     public static ConcurrentDictionary<Cbuffer, List<Vector4>> GetCBuffers(IMaterial material, bool isVertexShader = false)
     {
-        StringReader reader = new(material.Decompile((isVertexShader ? material.VertexShader : material.PixelShader).GetBytecode(), $"ps{(isVertexShader ? material.VertexShader : material.PixelShader).Hash}"));
+        StringReader reader = new(material.Decompile((isVertexShader ? material.VertexShader : material.PixelShader).GetBytecode(),
+            $"{(isVertexShader ? $"vs{material.VertexShader.Hash}" : $"vs{material.PixelShader.Hash}")}"));
 
         List<Cbuffer> buffers = new();
         ConcurrentDictionary<Cbuffer, List<Vector4>> cbuffers = new();
@@ -369,7 +375,14 @@ public class CBufferDetail
 {
     public string Index { get; set; }
     public string Count { get; set; }
+    public Shader Stage { get; set; }
     public List<Vector4> Data { get; set; }
+
+    public enum Shader
+    {
+        Pixel,
+        Vertex
+    }
 }
 
 public class CBufferDataDetail

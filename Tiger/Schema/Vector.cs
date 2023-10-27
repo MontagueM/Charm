@@ -231,6 +231,19 @@ public struct Vector4
         }
     }
 
+    public static Vector4 One
+    {
+        get
+        {
+            Vector4 vec4 = new Vector4();
+            vec4.X = 1.0f;
+            vec4.Y = 1.0f;
+            vec4.Z = 1.0f;
+            vec4.W = 1.0f;
+            return vec4;
+        }
+    }
+
     public void SetW(int w)
     {
         W = w / 32_767.0f;
