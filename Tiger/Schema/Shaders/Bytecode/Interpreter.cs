@@ -9,10 +9,6 @@ using Tiger;
 
 using Vector4 = System.Numerics.Vector4;
 using Arithmic;
-using Tiger.Schema.Entity;
-using System.Collections;
-using Newtonsoft.Json.Linq;
-using System.Collections.Concurrent;
 
 public class TfxBytecodeInterpreter
 {
@@ -63,102 +59,164 @@ public class TfxBytecodeInterpreter
     public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants)
     {
         Dictionary<int, string> hlsl = new();
-        foreach ((int _ip, var op) in Opcodes.Select((value, index) => (index, value)))
-        {
-            switch (op.op)
+        try
+        { 
+            foreach ((int _ip, var op) in Opcodes.Select((value, index) => (index, value)))
             {
-                case TfxBytecode.Add:
-                case TfxBytecode.Add2:
-                    var add = StackPop(2);
-                    Console.WriteLine($"Add: {add[0]} + {add[1]}");
-                    StackPush($"({add[0]} + {add[1]})");
-                    break;
-                case TfxBytecode.Subtract:
-                    var sub = StackPop(2);
-                    Console.WriteLine($"Subtract: {sub[0]} - {sub[1]}");
-                    StackPush($"({sub[0]} - {sub[1]})");
-                    break;
-                case TfxBytecode.Multiply:
-                case TfxBytecode.Multiply2:
-                    var mul = StackPop(2);
-                    Console.WriteLine($"Multiply: {mul[0]} * {mul[1]}");
-                    StackPush($"({mul[0]} * {mul[1]})");
-                    break;
-                case TfxBytecode.IsZero: //Divide?
-                    //var isZero = StackTop();
-                    //Console.WriteLine($"IsZero: {isZero}");
-                    //StackPush($"float4({isZero}.x == 0 ? 1 : 0, " +
-                    //    $"{isZero}.y == 0 ? 1 : 0, " +
-                    //    $"{isZero}.z == 0 ? 1 : 0, " +
-                    //    $"{isZero}.w == 0 ? 1 : 0)");
+                switch (op.op)
+                {
+                    case TfxBytecode.Add:
+                    case TfxBytecode.Add2:
+                        var add = StackPop(2);
+                        StackPush($"({add[0]} + {add[1]})");
+                        break;
+                    case TfxBytecode.Subtract:
+                        var sub = StackPop(2);
+                        StackPush($"({sub[0]} - {sub[1]})");
+                        break;
+                    case TfxBytecode.Multiply:
+                    case TfxBytecode.Multiply2:
+                        var mul = StackPop(2);
+                        StackPush($"({mul[0]} * {mul[1]})");
+                        break;
+                    case TfxBytecode.IsZero: //Divide?
+                        var isZero = StackTop();
+                        StackPush($"(float4({isZero}.x == 0 ? 1 : 0, " +
+                            $"{isZero}.y == 0 ? 1 : 0, " +
+                            $"{isZero}.z == 0 ? 1 : 0, " +
+                            $"{isZero}.w == 0 ? 1 : 0))");
 
-                    var div = StackPop(2);
-                    Console.WriteLine($"Divide: {div[0]} / {div[1]}");
-                    StackPush($"({div[0]} / {div[1]})");
-                    break;
-                case TfxBytecode.MultiplyAdd:
-                    var mulAdd = StackPop(3);
-                    Console.WriteLine($"MultiplyAdd: {mulAdd[0]} * {mulAdd[1]} + {mulAdd[2]}");
-                    StackPush($"({mulAdd[0]} * {mulAdd[1]} + {mulAdd[2]})");
-                    break;
-                case TfxBytecode.Clamp:
-                    var clamp = StackPop(3);
-                    Console.WriteLine($"Clamp: clamp({clamp[0]}, {clamp[1]}, {clamp[2]})");
-                    StackPush($"clamp({clamp[0]}, {clamp[1]}, {clamp[2]})");
-                    break;
-                case TfxBytecode.Negate:
-                    var negate = StackTop();
-                    Console.WriteLine($"Negate: -{negate}");
-                    StackPush($"-{negate}");
-                    break;
-                case TfxBytecode.Merge_1_3:
-                    var merge = StackPop(2);
-                    Console.WriteLine($"Merge_1_3: float4({merge[0]}.x, {merge[1]}.x, {merge[1]}.y, {merge[1]}.z)");
-                    StackPush($"float4({merge[0]}.x, {merge[1]}.x, {merge[1]}.y, {merge[1]}.z)");
-                    break;
-                case TfxBytecode.PushExternInputFloat:
-                    var v = GetExtern(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element);
-                    Console.WriteLine($"GetExtern {((PushExternInputFloatData)op.data).extern_}, {v.ToString()}");
-                    StackPush(v);
-                    break;
-                case TfxBytecode.PushConstantVec4:
-                    var vec = constants[((PushConstantVec4Data)op.data).constant_index].Vec;
-                    Console.WriteLine($"PushConstVec4: float4({vec.X}, {vec.Y}, {vec.Z}, {vec.W})");
-                    StackPush($"float4({vec.X}, {vec.Y}, {vec.Z}, {vec.W})");
-                    break;
+                        //var div = StackPop(2);
+                        //Console.WriteLine($"Divide: {div[0]} / {div[1]}");
+                        //StackPush($"({div[0]} / {div[1]})");
+                        break;
+                    case TfxBytecode.MultiplyAdd:
+                        var mulAdd = StackPop(3);
+                        StackPush($"({mulAdd[0]} * {mulAdd[1]} + {mulAdd[2]})");
+                        break;
+                    case TfxBytecode.Clamp:
+                        var clamp = StackPop(3);
+                        StackPush($"(clamp({clamp[0]}, {clamp[1]}, {clamp[2]}))");
+                        break;
+                    case TfxBytecode.Cosine:
+                        var cos = StackTop();
+                        StackPush($"(cos({cos}))");
+                        break;
+                    case TfxBytecode.Negate:
+                        var negate = StackTop();
+                        StackPush($"(-{negate})");
+                        break;
+                    case TfxBytecode.Merge_1_3:
+                        var merge = StackPop(2);
+                        StackPush($"(float4({merge[0]}.x, {merge[1]}.x, {merge[1]}.y, {merge[1]}.z))");
+                        break;
 
-                case TfxBytecode.Unk17: //floor?
-                    var floor = StackTop();
-                    Console.WriteLine($"Floor: floor({floor})");
-                    StackPush($"floor({floor})");
-                    break;
+                    //Unk0B
 
-                //case TfxBytecode.Unk0d: //Divide?
-                //    var div = StackPop(2);
-                //    Console.WriteLine($"Divide: {div[0]} / {div[1]}");
-                //    StackPush($"({div[0]} / {div[1]})");
-                //    break;
+                    case TfxBytecode.Unk0d: //??????
+                        var Unk0d = StackPop(2);
+                        StackPush($"(((float4({Unk0d[1]}.x, {Unk0d[1]}.y, 0.0, 0.0) && float4(0.0, 0.0, 0.0, 0.0)) || 1.0) + ((float4(0.0, 0.0, {Unk0d[0]}.z, {Unk0d[0]}.w) && float4(0.0, 0.0, 0.0, 0.0)) || 1.0))");
+                        break;
 
+                    case TfxBytecode.Unk0f: //jesus christ
+                        var Unk0f = StackPop(2);
+                        StackPush($"((dot(float4({Unk0f[1]}.x, {Unk0f[1]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y)) + " +
+                            $"dot(float4({Unk0f[1]}.z, {Unk0f[1]}.w, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y))) * dot(float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y)) + " +
+                            $"(dot(float4({Unk0f[1]}.y, {Unk0f[1]}.x, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y)) + dot(float4({Unk0f[1]}.w, {Unk0f[1]}.z, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y))))");
+                        break;
 
-                case TfxBytecode.StoreToBuffer:
-                    Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
-                    Temp.Clear();
-                    Temp.AddRange(Stack);
-                    Stack.Clear();
+                    case TfxBytecode.Unk1a: //chatgpt probably messing all this up...
+                        var Unk1a = StackTop();
+                        StackPush($"({Unk1a} - ((floor({Unk1a}) - step({Unk1a}, floor({Unk1a}))) && step(8388608.0, {Unk1a})))");
+                        break;
 
-                    //Just output 1 to the given buffer for the time being
-                    hlsl.TryAdd(((StoreToBufferData)op.data).element, "float4(1, 1, 0, 0)");
-                    break;
-                default:
-                    Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
-                    break;
+                    //case TfxBytecode.Unk1a: //frac?, is this one right?
+                    //    var frac = StackTop();
+                    //    StackPush($"frac({frac})");
+                    //    break;
 
-            }    
+                    case TfxBytecode.Unk27: //bytecode_op_triangle
+                        var Unk27 = StackTop();
+                        StackPush($"(abs({Unk27} - round({Unk27})) * 2.0)");
+                        break;
+
+                    case TfxBytecode.Unk3d:
+                    case TfxBytecode.Unk3f:
+                    case TfxBytecode.Unk4c:
+                    //case TfxBytecode.Unk4d:
+                    case TfxBytecode.Unk4e:
+                    case TfxBytecode.Unk4f:
+                        StackPush($"(float4(1, 1, 1, 1))");
+                        break;
+
+                    case TfxBytecode.PushExternInputFloat:
+                        var v = GetExtern(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element);
+                        StackPush(v);
+                        break;
+                    case TfxBytecode.PushConstantVec4:
+                        var vec = constants[((PushConstantVec4Data)op.data).constant_index].Vec;
+                        StackPush($"(float4({vec.X}, {vec.Y}, {vec.Z}, {vec.W}))");
+                        break;
+                    case TfxBytecode.PermuteAllX:
+                        var permutex = StackTop();
+                        StackPush($"({permutex}.xxxx)");
+                        break;
+                    case TfxBytecode.Permute:
+                        var param = ((PermuteData)op.data).fields;
+                        var permute = StackTop();
+                        StackPush($"({permute}{TfxBytecodeOp.DecodePermuteParam(param)})");
+                        break;
+                    case TfxBytecode.Saturate:
+                        var saturate = StackTop();
+                        StackPush($"(saturate({saturate}))");
+                        break;
+                    case TfxBytecode.Min:
+                        var min = StackPop(2);
+                        StackPush($"(min({min[0]}, {min[1]}))");
+                        break;
+                    case TfxBytecode.Max:
+                        var max = StackPop(2);
+                        StackPush($"(max({max[0]}, {max[1]}))");
+                        break;
+
+                    case TfxBytecode.Unk17: //floor?
+                        var floor = StackTop();
+                        StackPush($"(floor({floor}))");
+                        break;
+
+                    case TfxBytecode.PopOutput: //??
+                        Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                        Temp.Clear();
+                        Temp.AddRange(Stack);
+                        Stack.Clear();
+
+                        //Just output 1 to the given buffer for the time being
+                        hlsl.TryAdd(((PopOutputData)op.data).unk1, "float4(1, 1, 0, 0)");
+                        break;
+                    //case TfxBytecode.StoreToBuffer:
+                    //    Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                    //    Temp.Clear();
+                    //    Temp.AddRange(Stack);
+                    //    Stack.Clear();
+
+                    //    //Just output 1 to the given buffer for the time being
+                    //    hlsl.TryAdd(((StoreToBufferData)op.data).element, "float4(1, 1, 0, 0)");
+                    //    break;
+                    default:
+                        Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                        break;
+
+                }    
+            }
+            
+            foreach (var a in Temp)
+            {
+                Console.WriteLine($"Stack Length {Temp.Count}, Stack Value {a}");
+            }
         }
-        
-        foreach (var a in Temp)
+        catch (Exception e)
         {
-            Console.WriteLine($"Stack Length {Temp.Count}, Stack Value {a}");
+            Log.Error(e.Message);
         }
 
         return hlsl;

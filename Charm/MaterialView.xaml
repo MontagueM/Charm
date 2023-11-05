@@ -225,6 +225,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition Height="21*" />
+                <RowDefinition />
             </Grid.RowDefinitions>
 
             <Border
@@ -256,6 +257,13 @@
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
             </ListView>
+
+            <Button
+                Grid.Row="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Click="ExportMaterial_OnClick"
+                Content="Export Material" />
         </Grid>
 
         <Grid Grid.Column="0">
@@ -483,7 +491,7 @@
                         VerticalAlignment="Center"
                         FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
                         FontSize="16"
-                        Text="Unknown Values" />
+                        Text="Other Values" />
 
                     <ListView x:Name="UnkDataList" Grid.Row="1">
                         <ListView.ItemContainerStyle>

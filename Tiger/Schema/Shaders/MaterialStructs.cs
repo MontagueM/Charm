@@ -31,6 +31,16 @@ public struct SMaterial_SK
     public DynamicArray<Vec4> PS_CBuffers;
     [SchemaField(0x34C)]
     public FileHash PSVector4Container;
+
+    [SchemaField(0x368)]
+    public ShaderBytecode? ComputeShader;
+    [SchemaField(0x370)]
+    public DynamicArray<STextureTag> CSTextures;
+    [SchemaField(0x388)]
+    public DynamicArray<D2Class_09008080> CS_TFX_Bytecode;
+    public DynamicArray<Vec4> CS_TFX_Bytecode_Constants;
+    public DynamicArray<SDirectXSamplerTagSK> CS_Samplers;
+    public DynamicArray<Vec4> CS_CBuffers;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "AA6D8080", 0x3B0)]
@@ -45,7 +55,6 @@ public struct SMaterial_BL
     public ShaderBytecode VertexShader;
     [SchemaField(0x60)]
     public DynamicArray<STextureTag64> VSTextures;
-    //TODO: change these names
     [SchemaField(0x78)]
     public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
     public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
@@ -152,13 +161,6 @@ public struct SDirectXSamplerTagBL
 public struct D2Class_09008080
 {
     public byte Value;
-}
-
-[SchemaStruct("F3738080", 0x10)]
-public struct D2Class_F3738080
-{
-    // [DestinyField(FieldType.TagHash64)]
-    // public Tag Unk00;
 }
 
 [SchemaStruct("90008080", 0x10)]

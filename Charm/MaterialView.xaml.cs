@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,6 +31,20 @@ public partial class MaterialView : UserControl
         _mainWindow = Window.GetWindow(this) as MainWindow;
     }
 
+    private async void ExportMaterial_OnClick(object sender, RoutedEventArgs e)
+    {
+        var s = sender as Button;
+        var dc = s.DataContext as CBufferDetail;
+
+        await Task.Run(() =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.FileHash}");
+            });
+        });
+    }
+
     public void Load(FileHash hash)
     {
         IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
@@ -39,6 +54,7 @@ public partial class MaterialView : UserControl
 
         Material = material;
         UnkDataList.ItemsSource = GetUnkDataDetails(material);
+        TextureListView.ItemsSource = GetTextureDetails(material);
 
         if (material.VertexShader is not null)
         {
@@ -48,7 +64,6 @@ public partial class MaterialView : UserControl
 
         if (material.PixelShader is not null)
         {
-            TextureListView.ItemsSource = GetTextureDetails(material);
             PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
             PS_CBufferList.ItemsSource = GetCBufferDetails(material); 
         } 
@@ -92,7 +107,25 @@ public partial class MaterialView : UserControl
                 Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
                 Texture = LoadTexture(tex.Texture)
             });
-        } 
+        }
+
+        foreach (var tex in material.EnumerateCSTextures())
+        {
+            if (tex.Texture is null)
+                continue;
+
+            items.Add(new TextureDetail
+            {
+                Shader = "Compute Shader",
+                Hash = $"{tex.Texture.Hash}",
+                Index = $"Index: {tex.TextureIndex}",
+                Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
+                Dimension = $"Dimension: {tex.Texture.GetDimension()}",
+                Format = $"Format: {(DXGI_FORMAT)tex.Texture.TagData.Format}",
+                Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
+                Texture = LoadTexture(tex.Texture)
+            });
+        }
 
         return items;
     }
@@ -350,6 +383,15 @@ public partial class MaterialView : UserControl
             {
                 Name = "PS Samplers",
                 Value = material.PS_Samplers.Count.ToString()
+            });
+        }
+
+        if(material.ComputeShader != null)
+        {
+            items.Add(new UnkDataDetail
+            {
+                Name = "Compute Shader",
+                Value = material.ComputeShader.Hash.ToString()
             });
         }
 

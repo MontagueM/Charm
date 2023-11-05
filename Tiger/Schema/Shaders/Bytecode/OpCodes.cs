@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Tiger.Schema;
 using Tiger;
+using Arithmic;
 
 public class TfxBytecodeOp
 {
@@ -40,177 +41,183 @@ public class TfxBytecodeOp
             data = null
         };
 
-        switch (tfxData.op)
+        try
         {
-            case TfxBytecode.Permute:
-                PermuteData PermuteData = new();
-                PermuteData.fields = reader.ReadByte();
-                tfxData.data = PermuteData;
-                break;
-            case TfxBytecode.PushConstantVec4:
-                PushConstantVec4Data PushConstantVec4Data = new();
-                PushConstantVec4Data.constant_index = reader.ReadByte();
-                tfxData.data = PushConstantVec4Data;
-                break;
-            case TfxBytecode.Unk35:
-                Unk35Data Unk35Data = new();
-                Unk35Data.unk1 = reader.ReadByte();
-                tfxData.data = Unk35Data;
-                break;
-            case TfxBytecode.Spline4Const:
-                Spline4ConstData Spline4ConstData = new();
-                Spline4ConstData.unk1 = reader.ReadByte();
-                tfxData.data = Spline4ConstData;
-                break;
-            case TfxBytecode.Unk38:
-                Unk38Data Unk38Data = new();
-                Unk38Data.unk1 = reader.ReadByte();
-                tfxData.data = Unk38Data;
-                break;
-            case TfxBytecode.Unk39:
-                Unk39Data Unk39Data = new();
-                Unk39Data.unk1 = reader.ReadByte();
-                tfxData.data = Unk39Data;
-                break;
-            case TfxBytecode.Unk3a:
-                Unk3aData Unk3aData = new();
-                Unk3aData.unk1 = reader.ReadByte();
-                tfxData.data = Unk3aData;
-                break;
-            case TfxBytecode.UnkLoadConstant:
-                UnkLoadConstantData UnkLoadConstantData = new();
-                UnkLoadConstantData.constant_index = reader.ReadByte();
-                tfxData.data = UnkLoadConstantData;
-                break;
-            case TfxBytecode.PushExternInputFloat:
-                PushExternInputFloatData PushExternInputFloatData = new();
-                PushExternInputFloatData.extern_ = (TfxExtern)reader.ReadByte();
-                PushExternInputFloatData.element = reader.ReadByte();
-                tfxData.data = PushExternInputFloatData;
-                break;
-            case TfxBytecode.Unk3d:
-                Unk3dData Unk3dData = new();
-                Unk3dData.extern_ = (TfxExtern)reader.ReadByte();
-                Unk3dData.element = reader.ReadByte();
-                tfxData.data = Unk3dData;
-                break;
-            case TfxBytecode.Unk3e:
-                Unk3eData Unk3eData = new();
-                Unk3eData.extern_ = (TfxExtern)reader.ReadByte();
-                Unk3eData.element = reader.ReadByte();
-                tfxData.data = Unk3eData;
-                break;
-            case TfxBytecode.Unk3f:
-                Unk3fData Unk3fData = new();
-                Unk3fData.extern_ = (TfxExtern)reader.ReadByte();
-                Unk3fData.element = reader.ReadByte();
-                tfxData.data = Unk3fData;
-                break;
-            case TfxBytecode.Unk40:
-                Unk40Data Unk40Data = new();
-                Unk40Data.extern_ = (TfxExtern)reader.ReadByte();
-                Unk40Data.element = reader.ReadByte();
-                tfxData.data = Unk40Data;
-                break;
-            case TfxBytecode.Unk41:
-                Unk41Data Unk41Data = new();
-                Unk41Data.extern_ = (TfxExtern)reader.ReadByte();
-                Unk41Data.element = reader.ReadByte();
-                tfxData.data = Unk41Data;
-                break;
-            case TfxBytecode.PopOutput:
-                PopOutputData PopOutputData = new();
-                PopOutputData.unk1 = reader.ReadByte();
-                tfxData.data = PopOutputData;
-                break;
-            case TfxBytecode.StoreToBuffer:
-                StoreToBufferData StoreToBufferData = new();
-                StoreToBufferData.element = reader.ReadByte();
-                tfxData.data = StoreToBufferData;
-                break;
-            case TfxBytecode.PushTemp:
-                PushTempData PushTempData = new();
-                PushTempData.slot = reader.ReadByte();
-                tfxData.data = PushTempData;
-                break;
-            case TfxBytecode.PopTemp:
-                PopTempData PopTempData = new();
-                PopTempData.slot = reader.ReadByte();
-                tfxData.data = PopTempData;
-                break;
-            case TfxBytecode.Unk47:
-                Unk47Data Unk47Data = new();
-                Unk47Data.unk1 = reader.ReadByte();
-                tfxData.data = Unk47Data;
-                break;
-            case TfxBytecode.Unk48:
-                Unk48Data Unk48Data = new();
-                Unk48Data.unk1 = reader.ReadByte();
-                tfxData.data = Unk48Data;
-                break;
-            case TfxBytecode.Unk49:
-                Unk49Data Unk49 = new();
-                Unk49.unk1 = reader.ReadByte();
-                tfxData.data = Unk49;
-                break;
-            case TfxBytecode.Unk4a:
-                Unk4aData Unk4aData = new();
-                Unk4aData.unk1 = reader.ReadByte();
-                tfxData.data = Unk4aData;
-                break;
-            case TfxBytecode.Unk4b:
-                Unk4bData Unk4bData = new();
-                Unk4bData.unk1 = reader.ReadByte();
-                tfxData.data = Unk4bData;
-                break;
-            case TfxBytecode.Unk4c:
-                Unk4cData Unk4cData = new();
-                Unk4cData.unk1 = reader.ReadByte();
-                tfxData.data = Unk4cData;
-                break;
-            case TfxBytecode.PushObjectChannelVector:
-                PushObjectChannelVectorData PushObjectChannelVectorData = new();
-                PushObjectChannelVectorData.unk1 = reader.ReadByte();
-                tfxData.data = PushObjectChannelVectorData;
-                break;
-            case TfxBytecode.Unk4e:
-                Unk4eData Unk4eData = new();
-                Unk4eData.unk1 = reader.ReadByte();
-                Unk4eData.unk2 = reader.ReadByte();
-                Unk4eData.unk3 = reader.ReadByte();
-                Unk4eData.unk4 = reader.ReadByte();
-                tfxData.data = Unk4eData;
-                break;
-            case TfxBytecode.Unk4f:
-                Unk4fData Unk4fData = new();
-                Unk4fData.unk1 = reader.ReadByte();
-                tfxData.data = Unk4fData;
-                break;
-            case TfxBytecode.Unk50:
-                Unk50Data Unk50Data = new();
-                Unk50Data.unk1 = reader.ReadByte();
-                tfxData.data = Unk50Data;
-                break;
-            case TfxBytecode.Unk52:
-                Unk52Data Unk52Data = new();
-                Unk52Data.unk1 = reader.ReadByte();
-                Unk52Data.unk2 = reader.ReadByte();
-                tfxData.data = Unk52Data;
-                break;
-            case TfxBytecode.Unk53:
-                Unk53Data Unk53Data = new();
-                Unk53Data.unk1 = reader.ReadByte();
-                Unk53Data.unk2 = reader.ReadByte();
-                tfxData.data = Unk53Data;
-                break;
-            case TfxBytecode.Unk54:
-                Unk54Data Unk54Data = new();
-                Unk54Data.unk1 = reader.ReadByte();
-                Unk54Data.unk2 = reader.ReadByte();
-                tfxData.data = Unk54Data;
-                break;
+            switch (tfxData.op)
+            {
+                case TfxBytecode.Permute:
+                    PermuteData PermuteData = new();
+                    PermuteData.fields = reader.ReadByte();
+                    tfxData.data = PermuteData;
+                    break;
+                case TfxBytecode.PushConstantVec4:
+                    PushConstantVec4Data PushConstantVec4Data = new();
+                    PushConstantVec4Data.constant_index = reader.ReadByte();
+                    tfxData.data = PushConstantVec4Data;
+                    break;
+                case TfxBytecode.Unk35:
+                    Unk35Data Unk35Data = new();
+                    Unk35Data.unk1 = reader.ReadByte();
+                    tfxData.data = Unk35Data;
+                    break;
+                case TfxBytecode.Spline4Const:
+                    Spline4ConstData Spline4ConstData = new();
+                    Spline4ConstData.unk1 = reader.ReadByte();
+                    tfxData.data = Spline4ConstData;
+                    break;
+                case TfxBytecode.Unk38:
+                    Unk38Data Unk38Data = new();
+                    Unk38Data.unk1 = reader.ReadByte();
+                    tfxData.data = Unk38Data;
+                    break;
+                case TfxBytecode.Unk39:
+                    Unk39Data Unk39Data = new();
+                    Unk39Data.unk1 = reader.ReadByte();
+                    tfxData.data = Unk39Data;
+                    break;
+                case TfxBytecode.Unk3a:
+                    Unk3aData Unk3aData = new();
+                    Unk3aData.unk1 = reader.ReadByte();
+                    tfxData.data = Unk3aData;
+                    break;
+                case TfxBytecode.UnkLoadConstant:
+                    UnkLoadConstantData UnkLoadConstantData = new();
+                    UnkLoadConstantData.constant_index = reader.ReadByte();
+                    tfxData.data = UnkLoadConstantData;
+                    break;
+                case TfxBytecode.PushExternInputFloat:
+                    PushExternInputFloatData PushExternInputFloatData = new();
+                    PushExternInputFloatData.extern_ = (TfxExtern)reader.ReadByte();
+                    PushExternInputFloatData.element = reader.ReadByte();
+                    tfxData.data = PushExternInputFloatData;
+                    break;
+                case TfxBytecode.Unk3d:
+                    Unk3dData Unk3dData = new();
+                    Unk3dData.extern_ = (TfxExtern)reader.ReadByte();
+                    Unk3dData.element = reader.ReadByte();
+                    tfxData.data = Unk3dData;
+                    break;
+                case TfxBytecode.Unk3e:
+                    Unk3eData Unk3eData = new();
+                    Unk3eData.extern_ = (TfxExtern)reader.ReadByte();
+                    Unk3eData.element = reader.ReadByte();
+                    tfxData.data = Unk3eData;
+                    break;
+                case TfxBytecode.Unk3f:
+                    Unk3fData Unk3fData = new();
+                    Unk3fData.extern_ = (TfxExtern)reader.ReadByte();
+                    Unk3fData.element = reader.ReadByte();
+                    tfxData.data = Unk3fData;
+                    break;
+                case TfxBytecode.Unk40:
+                    Unk40Data Unk40Data = new();
+                    Unk40Data.extern_ = (TfxExtern)reader.ReadByte();
+                    Unk40Data.element = reader.ReadByte();
+                    tfxData.data = Unk40Data;
+                    break;
+                case TfxBytecode.Unk41:
+                    Unk41Data Unk41Data = new();
+                    Unk41Data.extern_ = (TfxExtern)reader.ReadByte();
+                    Unk41Data.element = reader.ReadByte();
+                    tfxData.data = Unk41Data;
+                    break;
+                case TfxBytecode.PopOutput:
+                    PopOutputData PopOutputData = new();
+                    PopOutputData.unk1 = reader.ReadByte();
+                    tfxData.data = PopOutputData;
+                    break;
+                case TfxBytecode.Unk43:
+                    Unk43Data Unk43Data = new();
+                    Unk43Data.unk1 = reader.ReadByte();
+                    tfxData.data = Unk43Data;
+                    break;
+                case TfxBytecode.Unk45:
+                    Unk45Data Unk45Data = new();
+                    Unk45Data.unk1 = reader.ReadByte();
+                    tfxData.data = Unk45Data;
+                    break;
+                case TfxBytecode.PushTemp:
+                    PushTempData PushTempData = new();
+                    PushTempData.slot = reader.ReadByte();
+                    tfxData.data = PushTempData;
+                    break;
+                case TfxBytecode.PopTemp:
+                    PopTempData PopTempData = new();
+                    PopTempData.slot = reader.ReadByte();
+                    tfxData.data = PopTempData;
+                    break;
+                case TfxBytecode.Unk48:
+                    Unk48Data Unk48Data = new();
+                    Unk48Data.unk1 = reader.ReadByte();
+                    tfxData.data = Unk48Data;
+                    break;
+                case TfxBytecode.Unk49:
+                    Unk49Data Unk49 = new();
+                    Unk49.unk1 = reader.ReadByte();
+                    tfxData.data = Unk49;
+                    break;
+                case TfxBytecode.Unk4a:
+                    Unk4aData Unk4aData = new();
+                    Unk4aData.unk1 = reader.ReadByte();
+                    tfxData.data = Unk4aData;
+                    break;
+                case TfxBytecode.Unk4b:
+                    Unk4bData Unk4bData = new();
+                    Unk4bData.unk1 = reader.ReadByte();
+                    tfxData.data = Unk4bData;
+                    break;
+                case TfxBytecode.Unk4c:
+                    Unk4cData Unk4cData = new();
+                    Unk4cData.unk1 = reader.ReadByte();
+                    tfxData.data = Unk4cData;
+                    break;
+                case TfxBytecode.PushObjectChannelVector:
+                    PushObjectChannelVectorData PushObjectChannelVectorData = new();
+                    PushObjectChannelVectorData.unk1 = reader.ReadByte();
+                    tfxData.data = PushObjectChannelVectorData;
+                    break;
+                case TfxBytecode.Unk4e:
+                    Unk4eData Unk4eData = new();
+                    Unk4eData.unk1 = reader.ReadByte();
+                    Unk4eData.unk2 = reader.ReadByte();
+                    Unk4eData.unk3 = reader.ReadByte();
+                    Unk4eData.unk4 = reader.ReadByte();
+                    tfxData.data = Unk4eData;
+                    break;
+                case TfxBytecode.Unk4f:
+                    Unk4fData Unk4fData = new();
+                    Unk4fData.unk1 = reader.ReadByte();
+                    tfxData.data = Unk4fData;
+                    break;
+                case TfxBytecode.Unk50:
+                    Unk50Data Unk50Data = new();
+                    Unk50Data.unk1 = reader.ReadByte();
+                    tfxData.data = Unk50Data;
+                    break;
+                case TfxBytecode.Unk52:
+                    Unk52Data Unk52Data = new();
+                    Unk52Data.unk1 = reader.ReadByte();
+                    Unk52Data.unk2 = reader.ReadByte();
+                    tfxData.data = Unk52Data;
+                    break;
+                case TfxBytecode.Unk53:
+                    Unk53Data Unk53Data = new();
+                    Unk53Data.unk1 = reader.ReadByte();
+                    Unk53Data.unk2 = reader.ReadByte();
+                    tfxData.data = Unk53Data;
+                    break;
+                case TfxBytecode.Unk54:
+                    Unk54Data Unk54Data = new();
+                    Unk54Data.unk1 = reader.ReadByte();
+                    Unk54Data.unk2 = reader.ReadByte();
+                    tfxData.data = Unk54Data;
+                    break;
+            } 
         }
-
+        catch(Exception e)
+        {
+            Log.Error(e.Message);
+        }
         return tfxData;
     }
 
@@ -263,6 +270,9 @@ public class TfxBytecodeOp
                 break;
             case PopOutputData:
                 output = $"unk1 {((PopOutputData)tfxData.data).unk1}";
+                break;
+            case Unk43Data:
+                output = $"unk1 {((Unk43Data)tfxData.data).unk1}";
                 break;
             case StoreToBufferData:
                 output = $"element {((StoreToBufferData)tfxData.data).element}";
@@ -317,7 +327,7 @@ public class TfxBytecodeOp
         return output;
     }
 
-    static string DecodePermuteParam(byte param)
+    public static string DecodePermuteParam(byte param)
     {
         char[] dims = { 'x', 'y', 'z', 'w' };
         int s0 = (param >> 6) & 0b11;
@@ -363,10 +373,13 @@ public enum TfxBytecode : byte
     Saturate = 0x23,
     Unk25 = 0x25,
     Unk26 = 0x26,
-    Unk27 = 0x27,
-    Unk28 = 0x28,
-    Unk29 = 0x29,
-    Unk2a = 0x2a,
+    Unk27 = 0x27, //triangle?
+    Unk28 = 0x28, //jitter?
+    Unk29 = 0x29, //wander?
+    Unk2a = 0x2a, //rand?
+    Unk2b = 0x2b, //rand_smooth?
+    Unk2c = 0x2c,
+    Unk2d = 0x2d,
     Unk2e = 0x2e,
     PushConstantVec4 = 0x34, //{ constant_index: u8 }
     Unk35 = 0x35, //{ unk1: u8 }
@@ -377,16 +390,16 @@ public enum TfxBytecode : byte
     UnkLoadConstant = 0x3b, //{ constant_index: u8 }
     PushExternInputFloat = 0x3c, //{ extern_: TfxExtern, element: u8 }
     Unk3d = 0x3d, //{ extern_: TfxExtern, unk2: u8 }
-    Unk3e = 0x3e, //{ unk1: u8, unk2: u8 }
+    Unk3e = 0x3e, //{ extern_: TfxExtern, unk2: u8 }
     Unk3f = 0x3f, //{ extern_: TfxExtern, unk2: u8 }
-    Unk40 = 0x40, //{ unk1: u8, unk2: u8 }
-    Unk41 = 0x41, //{ unk1: u8, unk2: u8 }
+    Unk40 = 0x40, //{ extern_: TfxExtern, unk2: u8 }
+    Unk41 = 0x41, //{ extern_: TfxExtern, unk2: u8 }
     Unk42 = 0x42,
-    PopOutput = 0x43, //{ unk1: u8 }
-    StoreToBuffer = 0x44, //{ element: u8 }
-    PushTemp = 0x45, //{ slot: u8 }
-    PopTemp = 0x46, //{ slot: u8 }
-    Unk47 = 0x47, //{ unk1: u8 }
+    Unk43 = 0x43, //{ unk1: u8 } //storetobuffer?
+    PopOutput = 0x44, //{ element: u8 }
+    Unk45 = 0x45, //{ slot: u8 }
+    PushTemp = 0x46, //{ slot: u8 }
+    PopTemp = 0x47, //{ unk1: u8 }
     Unk48 = 0x48, //{ unk1: u8 }
     Unk49 = 0x49, //{ unk1: u8 }
     Unk4a = 0x4a, //{ unk1: u8 }
@@ -496,6 +509,16 @@ public struct PopOutputData
 public struct StoreToBufferData
 {
     public byte element;
+}
+
+public struct Unk43Data
+{
+    public byte unk1;
+}
+
+public struct Unk45Data
+{
+    public byte unk1;
 }
 
 public struct PushTempData

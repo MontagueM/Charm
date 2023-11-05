@@ -52,8 +52,10 @@ namespace Tiger.Schema.Shaders
         public uint Unk10 { get; }
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
+        public IEnumerable<STextureTag> EnumerateCSTextures();
         public ShaderBytecode? VertexShader { get; }
         public ShaderBytecode? PixelShader { get; }
+        public ShaderBytecode? ComputeShader { get; }
         public FileHash PSVector4Container { get; }
         public List<DirectXSampler> PS_Samplers { get; }
         public List<DirectXSampler> VS_Samplers { get; }
@@ -66,15 +68,14 @@ namespace Tiger.Schema.Shaders
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
-        public string Decompile(byte[] shaderBytecode, string name)
+        public string Decompile(byte[] shaderBytecode, string name, string savePath = "hlsl_temp")
         {
-            string directory = "hlsl_temp";
-            string binPath = $"{directory}/{name}.bin";
-            string hlslPath = $"{directory}/{name}.hlsl";
+            string binPath = $"{savePath}/{name}.bin";
+            string hlslPath = $"{savePath}/{name}.hlsl";
 
-            if (!Directory.Exists(directory))
+            if (!Directory.Exists(savePath))
             {
-                Directory.CreateDirectory("hlsl_temp/");
+                Directory.CreateDirectory($"{savePath}/");
             }
 
             lock (_lock)
@@ -92,7 +93,8 @@ namespace Tiger.Schema.Shaders
                 startInfo.UseShellExecute = false;
                 startInfo.FileName = "ThirdParty/3dmigoto_shader_decomp.exe";
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.Arguments = $"-D {binPath}";
+                Console.WriteLine(Path.GetFullPath(binPath));
+                startInfo.Arguments = $"-D \"{binPath}\"";
                 using (Process exeProcess = Process.Start(startInfo))
                 {
                     exeProcess.WaitForExit();
@@ -100,7 +102,7 @@ namespace Tiger.Schema.Shaders
 
                 if (!File.Exists(hlslPath))
                 {
-                    throw new FileNotFoundException($"Decompilation failed for {FileHash}");
+                    throw new FileNotFoundException($"Decompilation failed for {name}");
                 }
             }
 
@@ -126,8 +128,8 @@ namespace Tiger.Schema.Shaders
         {
             if (PixelShader != null && PixelShader.Hash.IsValid())
             {
-                string pixel = Decompile(PixelShader.GetBytecode(), $"ps{FileHash}");
-                string vertex = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
+                string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
+                string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
                 string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
                 string vfx = Source2Handler.source2Shaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
 
@@ -156,7 +158,7 @@ namespace Tiger.Schema.Shaders
                 {
                 }
 
-                //Need to save material after shader has be exported, to check if it exists
+                //Need to save vmat after shader has be exported, to check if it exists
                 if (Source2Handler.source2Shaders)
                     Source2Handler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
             }
@@ -167,7 +169,7 @@ namespace Tiger.Schema.Shaders
             Directory.CreateDirectory($"{saveDirectory}");
             if (VertexShader != null && VertexShader.Hash.IsValid())
             {
-                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
+                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
                 string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
                 if (usf != String.Empty)
                 {
@@ -182,9 +184,43 @@ namespace Tiger.Schema.Shaders
                 }
             }
         }
+
+        //Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
+        public void SaveMaterial(string saveDirectory) 
+        {
+            var hlslPath = $"{saveDirectory}/Shaders/Raw";
+            var texturePath = $"{saveDirectory}/Textures";
+            Directory.CreateDirectory(hlslPath);
+            Directory.CreateDirectory(texturePath);
+
+            if (PixelShader != null)
+            {
+                Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}", hlslPath);
+                SavePixelShader($"{saveDirectory}/Shaders/");
+            }
+            if (VertexShader != null)
+            {
+                Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}", hlslPath);
+                SaveVertexShader($"{saveDirectory}/Shaders/");
+            } 
+
+            foreach (STextureTag texture in EnumerateVSTextures())
+            {
+                if (texture.Texture == null)
+                    continue;
+
+                texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+            }
+            foreach (STextureTag texture in EnumeratePSTextures())
+            {
+                if (texture.Texture == null)
+                    continue;
+
+                texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+            }
+        }
     }
 }
-
 
 // public class RawMaterial
 // {
@@ -196,8 +232,6 @@ namespace Tiger.Schema.Shaders
 //     public List<ConstantBuffer> VSConstantBuffers;
 // }
 
-
-
 namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
 {
     public class Material : Tag<SMaterial_SK>, IMaterial
@@ -208,6 +242,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
+        public ShaderBytecode ComputeShader => _tag.ComputeShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
@@ -234,6 +269,14 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
             }
         }
 
+        public IEnumerable<STextureTag> EnumerateCSTextures()
+        {
+            foreach (STextureTag texture in _tag.CSTextures)
+            {
+                yield return texture;
+            }
+        }
+
         public Material(FileHash fileHash) : base(fileHash)
         {
         }
@@ -250,6 +293,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
+        public ShaderBytecode ComputeShader => _tag.ComputeShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
@@ -276,6 +320,14 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
             }
         }
 
+        public IEnumerable<STextureTag> EnumerateCSTextures()
+        {
+            foreach (STextureTag64 texture in _tag.CSTextures)
+            {
+                yield return texture;
+            }
+        }
+
         public Material(FileHash fileHash) : base(fileHash)
         {
         }
@@ -293,6 +345,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
+        public ShaderBytecode ComputeShader => _tag.ComputeShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
@@ -314,6 +367,14 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public IEnumerable<STextureTag> EnumeratePSTextures()
         {
             foreach (STextureTag64 texture in _tag.PSTextures)
+            {
+                yield return texture;
+            }
+        }
+
+        public IEnumerable<STextureTag> EnumerateCSTextures()
+        {
+            foreach (STextureTag64 texture in _tag.CSTextures)
             {
                 yield return texture;
             }

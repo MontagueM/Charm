@@ -13,6 +13,7 @@ using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Shaders;
 
 namespace Charm;
 
@@ -212,6 +213,9 @@ public partial class DevView : UserControl
                     materialView.Load(hash);
                     _mainWindow.MakeNewTab(hash, materialView);
                     _mainWindow.SetNewestTabSelected();
+
+                    IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
+                    material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
