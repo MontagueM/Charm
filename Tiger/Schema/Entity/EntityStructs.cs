@@ -1227,6 +1227,9 @@ public struct D2Class_F62C8080
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "F42C8080", 0x358)]
 public struct D2Class_F42C8080
 {
+    [SchemaField(0x188, TigerStrategy.DESTINY2_LATEST)]
+    public ResourcePointer Unk188;
+
     [SchemaField(0x2C8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x2E8, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_FA2C8080> PatternAudioGroups;
@@ -1288,6 +1291,9 @@ public struct D2Class_FA2C8080
     //[SchemaField(0x1A8)]
     //public int Unk1A8;
     //public float Unk1AC;
+    [SchemaField(0x118, TigerStrategy.DESTINY2_LATEST)]
+    public ResourcePointer Unk118;
+
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     [SchemaField(0x1D0, TigerStrategy.DESTINY2_LATEST), Tag64]
     public Tag Unk1C0;
@@ -1365,6 +1371,17 @@ public struct D2Class_79948080
 [SchemaStruct("E3918080", 0x40)]
 public struct D2Class_E3918080
 {
+}
+
+[SchemaStruct("0A2D8080", 0x4C)]
+public struct D2Class_0A2D8080
+{
+    [SchemaField(0x8), Tag64]
+    public Entity? Unk08;
+    [SchemaField(0x20), Tag64]
+    public Entity? Unk20;
+    [SchemaField(0x38), Tag64]
+    public Entity? Unk38;
 }
 
 #endregion
