@@ -3867,7 +3867,7 @@ class NODE(bpy.types.Operator):
 
 def register():
     global RIP_LOCATION
-    RIP_LOCATION = os.path.abspath(bpy.context.space_data.text.filepath+"/../../../")
+    RIP_LOCATION = os.path.abspath(bpy.context.space_data.text.filepath+"/../")
     bpy.utils.register_class(MAINPANEL)
     bpy.utils.register_class(NODE)
 
