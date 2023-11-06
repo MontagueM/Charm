@@ -342,7 +342,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         // var index = _entityAssignmentsMap.TagData.EntityArrangementMap.BinarySearch(x, new D2Class_454F8080());
         Tag<D2Class_A36F8080> tag = _sortedArrangementHashmap[assignmentHash];
         tag.Load();
-        if (tag.TagData.EntityData is null)
+        if (tag.TagData.EntityData.IsInvalid() || tag.TagData.EntityData is null)
             return null;
         // if entity
         if (tag.TagData.EntityData.GetReferenceHash() == 0x80809ad8)

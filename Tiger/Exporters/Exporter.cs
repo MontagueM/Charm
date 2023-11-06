@@ -182,10 +182,13 @@ public class ExporterScene
             DynamicMeshPart part = parts[i];
             if (part.Material == null)
                 continue;
-            if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-            {
-                mesh.AddPart(entityHash, part, i);
-            }
+
+            //No longer needed because of EntityModel.cs line 107?
+            //if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+            //{
+            //    mesh.AddPart(entityHash, part, i);
+            //}
+            mesh.AddPart(entityHash, part, i);
         }
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
     }
