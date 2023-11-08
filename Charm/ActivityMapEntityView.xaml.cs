@@ -209,7 +209,6 @@ public partial class ActivityMapEntityView : UserControl
 
         Parallel.ForEach(dataTables, data =>
         {
-            Console.WriteLine($"{data}");
             Tag<SMapDataTable> entries = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
             entries.TagData.DataEntries.ForEach(entry =>
             {
@@ -420,7 +419,6 @@ public partial class ActivityMapEntityView : UserControl
                         break;
 
                     case CubemapResource cubemap:
-                        Console.WriteLine($"{dataTable.Hash}");
                         dynamicScene.AddCubemap(cubemap);
                         break;
 
