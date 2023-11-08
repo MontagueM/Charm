@@ -16,6 +16,7 @@ namespace Tiger.Schema.Activity
         public string ActivityPhaseName2;
         public FileHash Hash;
         public List<FileHash> DataTables;
+        public Dictionary<ulong, string> WorldIDs;
     }
 
     public interface IActivity : ISchema
@@ -236,7 +237,8 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                         BubbleName = GlobalStrings.Get().GetString(resource.BubbleName),
                         Hash = resource.UnkEntityReference.Hash,
                         ActivityPhaseName2 = resource.ActivityPhaseName2,
-                        DataTables = CollapseResourceParent(resource.UnkEntityReference.Hash)
+                        DataTables = CollapseResourceParent(resource.UnkEntityReference.Hash),
+                        WorldIDs = GetWorldIDs(resource.UnkEntityReference.Hash)
                     };
                 }
             }
@@ -276,11 +278,73 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                                 }
                             }
                             break;
+
+                        case D2Class_F88C8080:
+                        case D2Class_FA988080:
+                            if(resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80 != null)
+                            {
+                                var unk80 = FileResourcer.Get().GetSchemaTag<D2Class_6B908080>(resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80.Hash);
+                                //Console.WriteLine($"-{resource.EntityResourceParent.TagData.EntityResource.Hash}");
+                                foreach (var worldid in resourceValue.Unk58)
+                                {
+                                   // Console.WriteLine($"{worldid.FNVHash}: WorldID {worldid.WorldID}");
+                                    foreach (var a in unk80.TagData.Unk08)
+                                    {
+                                        if (a.Unk00.Value.Name.Value is not null)
+                                        {
+                                            //Console.WriteLine($"{Helpers.Fnv(a.Unk00.Value.Name.Value, true):X2} {a.Unk00.Value.Name.Value}");
+                                        }
+                                    }
+                                }
+                            }                         
+                            break;
                     }
                 }
             }
 
             return items.ToList();
+        }
+
+        private Dictionary<ulong, string> GetWorldIDs(FileHash hash)
+        {
+            Dictionary<ulong, string> items = new();
+            var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_898E8080>(hash);
+            var Unk18 = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
+
+            foreach (var resource in Unk18.TagData.EntityResources)
+            {
+                if (resource.EntityResourceParent != null)
+                {
+                    var resourceValue = resource.EntityResourceParent.TagData.EntityResource.TagData.Unk18.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader());
+                    switch (resourceValue)
+                    {
+                        case D2Class_F88C8080:
+                        case D2Class_FA988080:
+                            if (resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80 != null)
+                            {
+                                var unk80 = FileResourcer.Get().GetSchemaTag<D2Class_6B908080>(resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80.Hash);
+                                foreach (var worldid in resourceValue.Unk58)
+                                {
+                                    //Console.WriteLine($"{worldid.FNVHash}: WorldID {worldid.WorldID}");
+                                    foreach (var a in unk80.TagData.Unk08)
+                                    {
+                                        if (a.Unk00.Value.Name.Value is not null)
+                                        {
+                                            var fnv = Helpers.Fnv(a.Unk00.Value.Name.Value, true).ToString("X2");
+                                            //Console.WriteLine($"{fnv}: {a.Unk00.Value.Name.Value}");
+                                            if (worldid.FNVHash == fnv)
+                                            {
+                                                items.TryAdd(worldid.WorldID, a.Unk00.Value.Name.Value);
+                                            }  
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+            return items;
         }
     }
 }

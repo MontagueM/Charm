@@ -1416,7 +1416,7 @@ public struct CubemapResource //Dataresource for cubemaps
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D99B8080", 0x190)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D8928080", 0x190)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D8928080", 0x190)]
 public struct D2Class_D8928080
 {
     //[DestinyOffset(0x10)]
@@ -1435,9 +1435,52 @@ public struct D2Class_D8928080
     public Vector4 Translation;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "EF8C8080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EF8C8080", 0x60)]
 public struct D2Class_EF8C8080
 {
     [SchemaField(0x58)]
     public Tag<SMapDataTable> Unk58;
 }
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "FA988080", 0x80)]
+public struct D2Class_FA988080
+{
+    [SchemaField(0x58)]
+    public DynamicArray<D2Class_05998080> Unk58;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F88C8080", 0x80)]
+public struct D2Class_F88C8080
+{
+    [SchemaField(0x58)]
+    public DynamicArray<D2Class_05998080> Unk58;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "05998080", 0x10)]
+public struct D2Class_05998080
+{
+    public TigerHash FNVHash;
+    [SchemaField(0x8)]
+    public ulong WorldID;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "6B908080", 0x28)]
+public struct D2Class_6B908080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_029D8080> Unk08;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "029D8080", 0x10)]
+public struct D2Class_029D8080
+{
+    public ResourceInTablePointer<D2Class_4D898080> Unk00;
+    public RelativePointer Unk08;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "4D898080", 0xC)]
+public struct D2Class_4D898080
+{
+    public StringPointer Name;
+}
+

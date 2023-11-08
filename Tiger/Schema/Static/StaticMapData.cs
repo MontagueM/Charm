@@ -229,6 +229,8 @@ public struct SMapDataEntry
     public Entity.Entity EntityWQ;
     [SchemaField(0x68)]
     public uint Unk68;
+    [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public ulong WorldID;
     [SchemaField(0x78)]
     public ResourcePointer DataResource;
 

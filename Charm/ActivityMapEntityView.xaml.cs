@@ -135,11 +135,11 @@ public partial class ActivityMapEntityView : UserControl
                         continue;
 
                     ConcurrentBag<FileHash> sMapDataTables = new ConcurrentBag<FileHash>(map.TagData.MapDataTables.Select(entry => entry.MapDataTable.Hash));
-                    PopulateEntityList(sMapDataTables.ToList());
+                    PopulateEntityList(sMapDataTables.ToList(), null);
                 }  
                 else
                 {
-                    PopulateEntityList(tagData.DataTables);
+                    PopulateEntityList(tagData.DataTables, tagData.WorldIDs);
                 }
             }
         }
@@ -186,6 +186,7 @@ public partial class ActivityMapEntityView : UserControl
                 entityMap.Count = entry.DataTables.Count;
                 entityMap.EntityType = DisplayEntityMap.Type.Activity;
                 entityMap.DataTables = entry.DataTables;
+                entityMap.WorldIDs = entry.WorldIDs;
                 entityMap.Data = entityMap;
 
                 items.Add(entityMap);
@@ -201,39 +202,74 @@ public partial class ActivityMapEntityView : UserControl
         EntityContainerList.ItemsSource = sortedItems;
     }
 
-    private void PopulateEntityList(List<FileHash> dataTables)
+    private void PopulateEntityList(List<FileHash> dataTables, Dictionary<ulong, string>? worldIDs)
     {
         ConcurrentBag<DisplayEntityList> items = new ConcurrentBag<DisplayEntityList>();
-        ConcurrentDictionary<FileHash, int> entityCountDictionary = new ConcurrentDictionary<FileHash, int>();
+        ConcurrentDictionary<FileHash, ConcurrentBag<ulong>> entities = new();
 
         Parallel.ForEach(dataTables, data =>
         {
+            Console.WriteLine($"{data}");
             Tag<SMapDataTable> entries = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
-            entries.TagData.DataEntries.ForEach(entry => //Need(?) to do this to get number of instances for Entities
+            entries.TagData.DataEntries.ForEach(entry =>
             {
                 if (entry is SMapDataEntry dynamicResource)
                 {
-                    entityCountDictionary.AddOrUpdate(dynamicResource.GetEntityHash(), 1, (_, count) => count + 1);
+                    if (!entities.ContainsKey(dynamicResource.GetEntityHash()))
+                    {
+                        entities[dynamicResource.GetEntityHash()] = new ConcurrentBag<ulong>();
+                    }
+                    entities[dynamicResource.GetEntityHash()].Add(dynamicResource.WorldID);
                 }
             });
         });
 
-        entityCountDictionary.Keys.AsParallel().ForAll(entityHash =>
+        entities.AsParallel().ForAll(entityHash =>
         {
-            Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash);
+            Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash.Key);
             if (entity.HasGeometry())
             {
-                if (!items.Any(item => item.Hash == entity.Hash)) //Check if the entity is already in the EntityList
+                foreach(var namedEnt in entityHash.Value)
+                {
+                    if(worldIDs is not null && worldIDs.ContainsKey(namedEnt))
+                    {
+                        items.Add(new DisplayEntityList
+                        {
+                            Name = $"{worldIDs[namedEnt]}: {entityHash.Value.Count} Instances",
+                            Hash = entity.Hash,
+                            Instances = entityHash.Value.Count
+                        });
+                    }
+                }
+                if (!items.Contains(new DisplayEntityList { Hash = entity.Hash })) //Dont want duplicate entries if a named entity was already added
                 {
                     items.Add(new DisplayEntityList
                     {
-                        Name = $"Entity {entity.Hash}: {entityCountDictionary[entityHash]} Instances",
+                        Name = $"{entity.Hash}: {entityHash.Value.Count} Instances",
                         Hash = entity.Hash,
-                        Instances = entityCountDictionary[entityHash]
+                        Instances = entityHash.Value.Count
                     });
                 }
             }
         });
+
+        //entityCountDictionary.Keys.AsParallel().ForAll(entityHash =>
+        //{
+        //    Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash);
+        //    if (entity.HasGeometry())
+        //    {
+        //        if (!items.Any(item => item.Hash == entity.Hash)) //Check if the entity is already in the EntityList
+        //        {
+        //            //var name = worldIDs.ContainsKey()
+        //            items.Add(new DisplayEntityList
+        //            {
+        //                Name = $"Entity {entity.Hash}: {entityCountDictionary[entityHash]} Instances",
+        //                Hash = entity.Hash,
+        //                Instances = entityCountDictionary[entityHash]
+        //            });
+        //        }
+        //    }
+        //});
 
         var sortedItems = new List<DisplayEntityList>(items);
         sortedItems.Sort((a, b) => b.Instances.CompareTo(a.Instances));
@@ -653,6 +689,7 @@ public class DisplayEntityMap
     public bool Selected { get; set; }
     public Type EntityType { get; set; }
     public List<FileHash> DataTables { get; set; }
+    public Dictionary<ulong, string> WorldIDs { get; set; }
     public DisplayEntityMap Data { get; set; }
 
     public enum Type
