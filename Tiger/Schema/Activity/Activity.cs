@@ -59,8 +59,6 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
         {
             Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(UnkActivity);
-            Console.WriteLine(UnkActivity.ToString());
-
             foreach (var entry in tag.TagData.Unk50)
             {
                 foreach (var entry2 in entry.Unk08)
@@ -95,7 +93,6 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
                         if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
                         {
                             items.Add(table.Unk00.TagData.DataTable.Hash);
-                            Console.WriteLine($"{table.Unk00.TagData.DataTable.Hash}");
                         }
                     } 
                 }
@@ -112,7 +109,6 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
                         if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
                         {
                             items.Add(table.Unk00.TagData.DataTable.Hash);
-                            Console.WriteLine($"{table.Unk00.TagData.DataTable.Hash}");
                         }
                     }
                 }
@@ -129,7 +125,6 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
                         if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
                         {
                             items.Add(table.Unk00.TagData.DataTable.Hash);
-                            Console.WriteLine($"{table.Unk00.TagData.DataTable.Hash}");
                         }
                     }
                 }
@@ -278,26 +273,6 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                                 }
                             }
                             break;
-
-                        case D2Class_F88C8080:
-                        case D2Class_FA988080:
-                            if(resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80 != null)
-                            {
-                                var unk80 = FileResourcer.Get().GetSchemaTag<D2Class_6B908080>(resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80.Hash);
-                                //Console.WriteLine($"-{resource.EntityResourceParent.TagData.EntityResource.Hash}");
-                                foreach (var worldid in resourceValue.Unk58)
-                                {
-                                   // Console.WriteLine($"{worldid.FNVHash}: WorldID {worldid.WorldID}");
-                                    foreach (var a in unk80.TagData.Unk08)
-                                    {
-                                        if (a.Unk00.Value.Name.Value is not null)
-                                        {
-                                            //Console.WriteLine($"{Helpers.Fnv(a.Unk00.Value.Name.Value, true):X2} {a.Unk00.Value.Name.Value}");
-                                        }
-                                    }
-                                }
-                            }                         
-                            break;
                     }
                 }
             }
@@ -325,13 +300,11 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                                 var unk80 = FileResourcer.Get().GetSchemaTag<D2Class_6B908080>(resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80.Hash);
                                 foreach (var worldid in resourceValue.Unk58)
                                 {
-                                    //Console.WriteLine($"{worldid.FNVHash}: WorldID {worldid.WorldID}");
                                     foreach (var a in unk80.TagData.Unk08)
                                     {
                                         if (a.Unk00.Value.Name.Value is not null)
                                         {
                                             var fnv = Helpers.Fnv(a.Unk00.Value.Name.Value, true).ToString("X2");
-                                            //Console.WriteLine($"{fnv}: {a.Unk00.Value.Name.Value}");
                                             if (worldid.FNVHash == fnv)
                                             {
                                                 items.TryAdd(worldid.WorldID, a.Unk00.Value.Name.Value);
