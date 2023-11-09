@@ -79,39 +79,51 @@
         </ControlTemplate>
 
         <ControlTemplate x:Key="dynamicTemplate">
-            <Grid Height="25" Margin="0,1,0,1">
+            <Grid Height="50" Margin="0,2,0,2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="90*" />
                     <ColumnDefinition Width="20*" />
+                    <ColumnDefinition Width="10*" />
                 </Grid.ColumnDefinitions>
                 <Border
-                    Grid.ColumnSpan="2"
+                    Grid.ColumnSpan="3"
                     Panel.ZIndex="1"
                     BorderBrush="{StaticResource BackgroundColour30}"
                     BorderThickness="1" />
-                <CheckBox
-                    Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    HorizontalContentAlignment="Left"
-                    IsChecked="{Binding Selected}"
-                    Style="{StaticResource MaterialDesignCheckBox}"
-                    Tag="{Binding Hash}">
-                    <TextBlock Text="{Binding DisplayName}" TextAlignment="Center" />
-                </CheckBox>
-                <Button
-                    Grid.Column="0"
-                    HorizontalAlignment="Right"
-                    Click="EntityView_OnClick"
-                    Style="{StaticResource MaterialDesignPaperDarkButton}">
-                    <TextBlock Text="View" TextAlignment="Center" />
-                </Button>
-                <Button
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Click="EntityExport_OnClick"
-                    Style="{StaticResource MaterialDesignPaperDarkButton}">
-                    <TextBlock Text="Export" TextAlignment="Center" />
-                </Button>
+
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50*" />
+                        <RowDefinition Height="50*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Margin="5,5,0,0"
+                        Text="{Binding DisplayName}"
+                        TextAlignment="Left" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Margin="5,5,0,0"
+                        FontSize="14"
+                        Text="{Binding SubName}"
+                        TextAlignment="Left" />
+                </Grid>
+
+                <Grid Grid.Column="1">
+                    <Button
+                        HorizontalAlignment="Left"
+                        Click="EntityView_OnClick"
+                        Style="{StaticResource MaterialDesignPaperDarkButton}">
+                        <TextBlock Text="View" TextAlignment="Center" />
+                    </Button>
+                    <Button
+                        HorizontalAlignment="Right"
+                        Click="EntityExport_OnClick"
+                        Style="{StaticResource MaterialDesignPaperDarkButton}">
+                        <TextBlock Text="Export" TextAlignment="Center" />
+                    </Button>
+                </Grid>
+
             </Grid>
         </ControlTemplate>
     </UserControl.Resources>

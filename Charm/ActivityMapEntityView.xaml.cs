@@ -203,7 +203,7 @@ public partial class ActivityMapEntityView : UserControl
         EntityContainerList.ItemsSource = sortedItems;
     }
 
-    private void PopulateEntityList(List<FileHash> dataTables, Dictionary<ulong, string>? worldIDs)
+    private void PopulateEntityList(List<FileHash> dataTables, Dictionary<ulong, Dictionary<string, string>>? worldIDs)
     {
         ConcurrentBag<DisplayEntityList> items = new ConcurrentBag<DisplayEntityList>();
         ConcurrentDictionary<FileHash, ConcurrentBag<ulong>> entities = new();
@@ -233,12 +233,16 @@ public partial class ActivityMapEntityView : UserControl
                 {
                     if(worldIDs is not null && worldIDs.ContainsKey(namedEnt))
                     {
-                        if (!items.Any(item => item.CompareByName(new DisplayEntityList { Name = worldIDs[namedEnt] })))
+                        //This is gross
+                        if (!items.Any(item => item.CompareByName(new DisplayEntityList { Name = $"{worldIDs[namedEnt].Keys.ElementAt(0)}:{worldIDs[namedEnt].Values.ElementAt(0)}" })))
                         {
+                            var Name = worldIDs[namedEnt].Keys.ElementAt(0);
+                            var SubName = worldIDs[namedEnt].Values.ElementAt(0);
                             items.Add(new DisplayEntityList
                             {
-                                DisplayName = $"{worldIDs[namedEnt]}: {worldIDs.Count(kvp => kvp.Value == worldIDs[namedEnt])} Instances",
-                                Name = worldIDs[namedEnt],
+                                DisplayName = $"{Name}: {worldIDs.Count(kvp => kvp.Value == worldIDs[namedEnt])} Instances",
+                                SubName = $"{SubName}",
+                                Name = $"{Name}:{SubName}",
                                 Hash = entity.Hash,
                                 Instances = worldIDs.Count(kvp => kvp.Value == worldIDs[namedEnt])
                             });
@@ -262,7 +266,7 @@ public partial class ActivityMapEntityView : UserControl
         sortedItems.Sort((a, b) => b.Instances.CompareTo(a.Instances));
         sortedItems.Insert(0, new DisplayEntityList
         {
-            DisplayName = "Select all",
+            DisplayName = "All Entities",
             Parent = dataTables
         });
         EntitiesList.ItemsSource = sortedItems;
@@ -605,7 +609,7 @@ public partial class ActivityMapEntityView : UserControl
         Log.Info($"Exporting entity: {dc.Name}");
         MapControl.Visibility = Visibility.Hidden;
 
-        if (dc.DisplayName == "Select all")
+        if (dc.DisplayName == "All Entities")
         {
             var items = dc.Parent;
             List<string> mapStages = items.Select(x => $"Exporting Entities: {x}").ToList();
@@ -625,7 +629,8 @@ public partial class ActivityMapEntityView : UserControl
                     foreach (var entry in mapDataTable.TagData.DataEntries)
                     {
                         Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                        EntityView.Export(new List<Entity> { entity }, entity.Hash, ExportTypeFlag.Full);
+                        if(entity.HasGeometry())
+                            EntityView.Export(new List<Entity> { entity }, entity.Hash, ExportTypeFlag.Full);
                     }
                     MainWindow.Progress.CompleteStage();
                 }
@@ -675,7 +680,7 @@ public class DisplayEntityMap
     public bool Selected { get; set; }
     public Type EntityType { get; set; }
     public List<FileHash> DataTables { get; set; }
-    public Dictionary<ulong, string> WorldIDs { get; set; }
+    public Dictionary<ulong, Dictionary<string, string>> WorldIDs { get; set; }
     public DisplayEntityMap Data { get; set; }
 
     public enum Type
@@ -688,6 +693,7 @@ public class DisplayEntityMap
 public class DisplayEntityList
 {
     public string DisplayName { get; set; }
+    public string SubName { get; set; }
     public string Name { get; set; }
     public string Hash { get; set; }
     public List<FileHash> Parent { get; set; }

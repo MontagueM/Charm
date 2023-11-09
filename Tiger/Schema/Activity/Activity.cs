@@ -17,7 +17,7 @@ namespace Tiger.Schema.Activity
         public string ActivityPhaseName2;
         public FileHash Hash;
         public List<FileHash> DataTables;
-        public Dictionary<ulong, string> WorldIDs;
+        public Dictionary<ulong, Dictionary<string, string>> WorldIDs; //World ID, name/subname
     }
 
     public interface IActivity : ISchema
@@ -281,9 +281,9 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
             return items.ToList();
         }
 
-        private Dictionary<ulong, string> GetWorldIDs(FileHash hash)
+        private Dictionary<ulong, Dictionary<string, string>> GetWorldIDs(FileHash hash)
         {
-            Dictionary<ulong, string> items = new();
+            Dictionary<ulong, Dictionary<string, string>> items = new();
             Dictionary<uint, string> strings = new();
             var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_898E8080>(hash);
             var Unk18 = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
@@ -314,10 +314,17 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                                     //Console.WriteLine($"{strings.ContainsKey(worldid.FNVHash.Hash32)}");
                                     if (strings.ContainsKey(worldid.FNVHash.Hash32) && strings.Any(kv => kv.Key == worldid.FNVHash.Hash32))
                                     {
-                                        if(strings.ContainsKey(resourceValue.FNVHash.Hash32))
-                                            items.TryAdd(worldid.WorldID, $"{strings[worldid.FNVHash.Hash32]}:{strings[resourceValue.FNVHash.Hash32]}");
+                                        Dictionary<string, string> name = new();
+                                        if (strings.ContainsKey(resourceValue.FNVHash.Hash32))
+                                        {
+                                            name.TryAdd(strings[worldid.FNVHash.Hash32], strings[resourceValue.FNVHash.Hash32]);
+                                            items.TryAdd(worldid.WorldID, name);
+                                        } 
                                         else
-                                            items.TryAdd(worldid.WorldID, strings[worldid.FNVHash.Hash32]);
+                                        {
+                                            name.TryAdd(strings[worldid.FNVHash.Hash32], "");
+                                            items.TryAdd(worldid.WorldID, name);
+                                        }  
                                     }
                                 }
                             }
