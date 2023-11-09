@@ -1445,6 +1445,10 @@ public struct D2Class_EF8C8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "FA988080", 0x80)]
 public struct D2Class_FA988080
 {
+    [SchemaField(0x28)]
+    public TigerHash FNVHash;
+    [SchemaField(0x30)]
+    public ulong WorldID;
     [SchemaField(0x58)]
     public DynamicArray<D2Class_05998080> Unk58;
 }
@@ -1452,6 +1456,10 @@ public struct D2Class_FA988080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F88C8080", 0x80)]
 public struct D2Class_F88C8080
 {
+    [SchemaField(0x28)]
+    public TigerHash FNVHash;
+    [SchemaField(0x30)]
+    public ulong WorldID;
     [SchemaField(0x58)]
     public DynamicArray<D2Class_05998080> Unk58;
 }
@@ -1459,6 +1467,10 @@ public struct D2Class_F88C8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EF988080", 0x80)]
 public struct D2Class_EF988080
 {
+    [SchemaField(0x28)]
+    public TigerHash FNVHash;
+    [SchemaField(0x30)]
+    public ulong WorldID;
     [SchemaField(0x58)]
     public DynamicArray<D2Class_05998080> Unk58;
 }
@@ -1466,6 +1478,10 @@ public struct D2Class_EF988080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "6F418080", 0xE0)]
 public struct D2Class_6F418080
 {
+    [SchemaField(0x28)]
+    public TigerHash FNVHash;
+    [SchemaField(0x30)]
+    public ulong WorldID;
     [SchemaField(0x58)]
     public DynamicArray<D2Class_05998080> Unk58;
 }

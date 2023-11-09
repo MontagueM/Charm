@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Data;
 using Tiger.Schema.Entity;
 
@@ -283,6 +284,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
         private Dictionary<ulong, string> GetWorldIDs(FileHash hash)
         {
             Dictionary<ulong, string> items = new();
+            Dictionary<uint, string> strings = new();
             var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_898E8080>(hash);
             var Unk18 = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
 
@@ -300,18 +302,22 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                             if (resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80 != null)
                             {
                                 var unk80 = FileResourcer.Get().GetSchemaTag<D2Class_6B908080>(resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80.Hash);
+                                foreach (var a in unk80.TagData.Unk08)
+                                {
+                                    if (a.Unk00.Value.Name.Value is not null)
+                                    {
+                                        strings.TryAdd(Helpers.Fnv(a.Unk00.Value.Name.Value), a.Unk00.Value.Name.Value);
+                                    }
+                                }
                                 foreach (var worldid in resourceValue.Unk58)
                                 {
-                                    foreach (var a in unk80.TagData.Unk08)
+                                    //Console.WriteLine($"{strings.ContainsKey(worldid.FNVHash.Hash32)}");
+                                    if (strings.ContainsKey(worldid.FNVHash.Hash32) && strings.Any(kv => kv.Key == worldid.FNVHash.Hash32))
                                     {
-                                        if (a.Unk00.Value.Name.Value is not null)
-                                        {
-                                            var fnv = Helpers.Fnv(a.Unk00.Value.Name.Value, true).ToString("X2");
-                                            if (worldid.FNVHash == fnv)
-                                            {
-                                                items.TryAdd(worldid.WorldID, a.Unk00.Value.Name.Value);
-                                            }  
-                                        }
+                                        if(strings.ContainsKey(resourceValue.FNVHash.Hash32))
+                                            items.TryAdd(worldid.WorldID, $"{strings[worldid.FNVHash.Hash32]}:{strings[resourceValue.FNVHash.Hash32]}");
+                                        else
+                                            items.TryAdd(worldid.WorldID, strings[worldid.FNVHash.Hash32]);
                                     }
                                 }
                             }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -236,10 +237,10 @@ public partial class ActivityMapEntityView : UserControl
                         {
                             items.Add(new DisplayEntityList
                             {
-                                DisplayName = $"{worldIDs[namedEnt]}: {entityHash.Value.Count} Instances",
+                                DisplayName = $"{worldIDs[namedEnt]}: {worldIDs.Count(kvp => kvp.Value == worldIDs[namedEnt])} Instances",
                                 Name = worldIDs[namedEnt],
                                 Hash = entity.Hash,
-                                Instances = entityHash.Value.Count
+                                Instances = worldIDs.Count(kvp => kvp.Value == worldIDs[namedEnt])
                             });
                         }
                     }
