@@ -293,6 +293,8 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                     var resourceValue = resource.EntityResourceParent.TagData.EntityResource.TagData.Unk18.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader());
                     switch (resourceValue)
                     {
+                        case D2Class_6F418080:
+                        case D2Class_EF988080:
                         case D2Class_F88C8080:
                         case D2Class_FA988080:
                             if (resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80 != null)

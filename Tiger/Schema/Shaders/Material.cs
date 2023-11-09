@@ -167,7 +167,7 @@ namespace Tiger.Schema.Shaders
             if (VertexShader != null && VertexShader.Hash.IsValid())
             {
                 string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
+                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
                 if (usf != String.Empty)
                 {
                     try

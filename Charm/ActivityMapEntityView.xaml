@@ -96,7 +96,7 @@
                     IsChecked="{Binding Selected}"
                     Style="{StaticResource MaterialDesignCheckBox}"
                     Tag="{Binding Hash}">
-                    <TextBlock Text="{Binding Name}" TextAlignment="Center" />
+                    <TextBlock Text="{Binding DisplayName}" TextAlignment="Center" />
                 </CheckBox>
                 <Button
                     Grid.Column="0"

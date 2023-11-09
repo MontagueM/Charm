@@ -1456,6 +1456,20 @@ public struct D2Class_F88C8080
     public DynamicArray<D2Class_05998080> Unk58;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EF988080", 0x80)]
+public struct D2Class_EF988080
+{
+    [SchemaField(0x58)]
+    public DynamicArray<D2Class_05998080> Unk58;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "6F418080", 0xE0)]
+public struct D2Class_6F418080
+{
+    [SchemaField(0x58)]
+    public DynamicArray<D2Class_05998080> Unk58;
+}
+
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "05998080", 0x10)]
 public struct D2Class_05998080
 {

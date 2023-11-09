@@ -232,19 +232,24 @@ public partial class ActivityMapEntityView : UserControl
                 {
                     if(worldIDs is not null && worldIDs.ContainsKey(namedEnt))
                     {
-                        items.Add(new DisplayEntityList
+                        if (!items.Any(item => item.CompareByName(new DisplayEntityList { Name = worldIDs[namedEnt] })))
                         {
-                            Name = $"{worldIDs[namedEnt]}: {entityHash.Value.Count} Instances",
-                            Hash = entity.Hash,
-                            Instances = entityHash.Value.Count
-                        });
+                            items.Add(new DisplayEntityList
+                            {
+                                DisplayName = $"{worldIDs[namedEnt]}: {entityHash.Value.Count} Instances",
+                                Name = worldIDs[namedEnt],
+                                Hash = entity.Hash,
+                                Instances = entityHash.Value.Count
+                            });
+                        }
                     }
                 }
-                if (!items.Contains(new DisplayEntityList { Hash = entity.Hash })) //Dont want duplicate entries if a named entity was already added
+                if (!items.Any(item => item.CompareByHash(new DisplayEntityList { Hash = entity.Hash }))) //Dont want duplicate entries if a named entity was already added
                 {
                     items.Add(new DisplayEntityList
                     {
-                        Name = $"{entity.Hash}: {entityHash.Value.Count} Instances",
+                        DisplayName = $"{entity.Hash}: {entityHash.Value.Count} Instances",
+                        Name = entity.Hash,
                         Hash = entity.Hash,
                         Instances = entityHash.Value.Count
                     });
@@ -252,29 +257,11 @@ public partial class ActivityMapEntityView : UserControl
             }
         });
 
-        //entityCountDictionary.Keys.AsParallel().ForAll(entityHash =>
-        //{
-        //    Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash);
-        //    if (entity.HasGeometry())
-        //    {
-        //        if (!items.Any(item => item.Hash == entity.Hash)) //Check if the entity is already in the EntityList
-        //        {
-        //            //var name = worldIDs.ContainsKey()
-        //            items.Add(new DisplayEntityList
-        //            {
-        //                Name = $"Entity {entity.Hash}: {entityCountDictionary[entityHash]} Instances",
-        //                Hash = entity.Hash,
-        //                Instances = entityCountDictionary[entityHash]
-        //            });
-        //        }
-        //    }
-        //});
-
         var sortedItems = new List<DisplayEntityList>(items);
         sortedItems.Sort((a, b) => b.Instances.CompareTo(a.Instances));
         sortedItems.Insert(0, new DisplayEntityList
         {
-            Name = "Select all",
+            DisplayName = "Select all",
             Parent = dataTables
         });
         EntitiesList.ItemsSource = sortedItems;
@@ -575,7 +562,7 @@ public partial class ActivityMapEntityView : UserControl
         Log.Info($"Loading UI for entity: {dc.Name}");
         MapControl.Visibility = Visibility.Hidden;
         var lod = MapControl.ModelView.GetSelectedLod();
-        if (dc.Name == "Select all")
+        if (dc.DisplayName == "Select all")
         {
             var items = dc.Parent;
             List<string> mapStages = items.Select(x => $"Loading to UI: {x}").ToList();
@@ -617,7 +604,7 @@ public partial class ActivityMapEntityView : UserControl
         Log.Info($"Exporting entity: {dc.Name}");
         MapControl.Visibility = Visibility.Hidden;
 
-        if (dc.Name == "Select all")
+        if (dc.DisplayName == "Select all")
         {
             var items = dc.Parent;
             List<string> mapStages = items.Select(x => $"Exporting Entities: {x}").ToList();
@@ -699,6 +686,7 @@ public class DisplayEntityMap
 
 public class DisplayEntityList
 {
+    public string DisplayName { get; set; }
     public string Name { get; set; }
     public string Hash { get; set; }
     public List<FileHash> Parent { get; set; }
@@ -706,10 +694,20 @@ public class DisplayEntityList
 
     public bool Selected { get; set; }
 
-    public override bool Equals(object obj)
+    //public override bool Equals(object obj)
+    //{
+    //    var other = obj as DisplayEntityList;
+    //    return other != null && Hash == other.Hash;
+    //}
+
+    public bool CompareByHash(DisplayEntityList other)
     {
-        var other = obj as DisplayEntityList;
-        return other != null && Hash == other.Hash;
+        return Hash == other.Hash;
+    }
+
+    public bool CompareByName(DisplayEntityList other)
+    {
+        return Name == other.Name;
     }
 
     public override int GetHashCode()
