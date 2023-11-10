@@ -821,6 +821,7 @@ public struct D2Class_1D848080
 {
     public int Unk00;
     public int Unk04;
+    [Tag64]
     public Tag Unk08;
     public int Unk0C;
     public int Unk10;

@@ -591,11 +591,13 @@ public partial class ActivityMapEntityView : UserControl
         }
         else
         {
-            FileHash tagHash = new FileHash(dc.Hash);
-            MainWindow.Progress.SetProgressStages(new List<string> { $"Loading Entity to UI: {tagHash}" });
+            Entity entity = FileResourcer.Get().GetFile<Entity>(dc.Hash);
+            MainWindow.Progress.SetProgressStages(new List<string> { $"Loading Entity to UI: {entity.Hash}" });
+            List<Entity> entities = new List<Entity> { entity };
+            entities.AddRange(entity.GetEntityChildren());
             await Task.Run(() =>
             {
-                MapControl.LoadEntity(tagHash, _globalFbxHandler);
+                MapControl.LoadEntity(entities, _globalFbxHandler);
                 MainWindow.Progress.CompleteStage();
             });
         }
@@ -630,7 +632,11 @@ public partial class ActivityMapEntityView : UserControl
                     {
                         Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
                         if(entity.HasGeometry())
-                            EntityView.Export(new List<Entity> { entity }, entity.Hash, ExportTypeFlag.Full);
+                        {
+                            List<Entity> entities = new List<Entity> { entity };
+                            entities.AddRange(entity.GetEntityChildren());
+                            EntityView.Export(entities, entity.Hash, ExportTypeFlag.Full);
+                        }     
                     }
                     MainWindow.Progress.CompleteStage();
                 }

@@ -89,16 +89,16 @@ public partial class MapView : UserControl
         displayParts.Clear();
     }
 
-    public bool LoadEntity(FileHash entityHash, FbxHandler fbxHandler)
+    public bool LoadEntity(List<Entity> entities, FbxHandler fbxHandler)
     {
         fbxHandler.Clear();
-        AddEntity(entityHash, ExportDetailLevel.MostDetailed, fbxHandler);
+        foreach(var entity in entities)
+            AddEntity(entity, ExportDetailLevel.MostDetailed, fbxHandler);
         return LoadUI(fbxHandler);
     }
 
-    private void AddEntity(FileHash entityHash, ExportDetailLevel detailLevel, FbxHandler fbxHandler)
+    private void AddEntity(Entity entity, ExportDetailLevel detailLevel, FbxHandler fbxHandler)
 	{
-        Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash);
         var dynamicParts = entity.Load(detailLevel);
 		//ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
 		//dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
@@ -298,18 +298,23 @@ public partial class MapView : UserControl
         Parallel.ForEach(dataentry.TagData.DataEntries, entry =>
         {
             Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entry.GetEntityHash());
-            if (entity.HasGeometry())
+            List<Entity> entities = new List<Entity> { entity };
+            entities.AddRange(entity.GetEntityChildren());
+            foreach(var ent in entities)
             {
-                var parts = entity.Load(ExportDetailLevel.MostDetailed);
-
-                foreach (var part in parts)
+                if (ent.HasGeometry())
                 {
-                    MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
-                    displayPart.BasePart = part;
-                    displayPart.Translations.Add(entry.Translation.ToVec3());
-                    displayPart.Rotations.Add(entry.Rotation);
-                    displayPart.Scales.Add(new Tiger.Schema.Vector3(entry.Translation.W, entry.Translation.W, entry.Translation.W));
-                    displayParts.Add(displayPart);
+                    var parts = ent.Load(ExportDetailLevel.MostDetailed);
+
+                    foreach (var part in parts)
+                    {
+                        MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+                        displayPart.BasePart = part;
+                        displayPart.Translations.Add(entry.Translation.ToVec3());
+                        displayPart.Rotations.Add(entry.Rotation);
+                        displayPart.Scales.Add(new Tiger.Schema.Vector3(entry.Translation.W, entry.Translation.W, entry.Translation.W));
+                        displayParts.Add(displayPart);
+                    }
                 }
             }
         });

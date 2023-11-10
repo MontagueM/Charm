@@ -333,10 +333,6 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                             }
                             break;
                         default:
-                            if (resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80 != null)
-                            {
-                                Console.WriteLine($"{resource.EntityResourceParent.TagData.EntityResource.Hash}");
-                            }
                             break;
                     }
                 }
