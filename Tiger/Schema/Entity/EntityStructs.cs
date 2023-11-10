@@ -1486,6 +1486,28 @@ public struct D2Class_6F418080
     public DynamicArray<D2Class_05998080> Unk58;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "26988080", 0x98)]
+public struct D2Class_26988080
+{
+    [SchemaField(0x28)]
+    public TigerHash FNVHash;
+    [SchemaField(0x30)]
+    public ulong WorldID;
+    [SchemaField(0x58)]
+    public DynamicArray<D2Class_05998080> Unk58;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "95468080", 0x90)]
+public struct D2Class_95468080
+{
+    [SchemaField(0x28)]
+    public TigerHash FNVHash;
+    [SchemaField(0x30)]
+    public ulong WorldID;
+    [SchemaField(0x58)]
+    public DynamicArray<D2Class_05998080> Unk58;
+}
+
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "05998080", 0x10)]
 public struct D2Class_05998080
 {

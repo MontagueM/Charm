@@ -295,6 +295,9 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                     var resourceValue = resource.EntityResourceParent.TagData.EntityResource.TagData.Unk18.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader());
                     switch (resourceValue)
                     {
+                        //This is kinda dumb 
+                        case D2Class_95468080:
+                        case D2Class_26988080:
                         case D2Class_6F418080:
                         case D2Class_EF988080:
                         case D2Class_F88C8080:
@@ -319,14 +322,20 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                                         {
                                             name.TryAdd(strings[worldid.FNVHash.Hash32], strings[resourceValue.FNVHash.Hash32]);
                                             items.TryAdd(worldid.WorldID, name);
-                                        } 
+                                        }
                                         else
                                         {
                                             name.TryAdd(strings[worldid.FNVHash.Hash32], "");
                                             items.TryAdd(worldid.WorldID, name);
-                                        }  
+                                        }
                                     }
                                 }
+                            }
+                            break;
+                        default:
+                            if (resource.EntityResourceParent.TagData.EntityResource.TagData.UnkHash80 != null)
+                            {
+                                Console.WriteLine($"{resource.EntityResourceParent.TagData.EntityResource.Hash}");
                             }
                             break;
                     }

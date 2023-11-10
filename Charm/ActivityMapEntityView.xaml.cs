@@ -567,7 +567,7 @@ public partial class ActivityMapEntityView : UserControl
         Log.Info($"Loading UI for entity: {dc.Name}");
         MapControl.Visibility = Visibility.Hidden;
         var lod = MapControl.ModelView.GetSelectedLod();
-        if (dc.DisplayName == "Select all")
+        if (dc.DisplayName == "All Entities")
         {
             var items = dc.Parent;
             List<string> mapStages = items.Select(x => $"Loading to UI: {x}").ToList();
