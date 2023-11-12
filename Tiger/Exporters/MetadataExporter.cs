@@ -38,6 +38,8 @@ class MetadataScene
         _config.TryAdd("Lights", pointLights);
         ConcurrentDictionary<string, ConcurrentBag<JsonDecal>> decals = new ConcurrentDictionary<string, ConcurrentBag<JsonDecal>>();
         _config.TryAdd("Decals", decals);
+        ConcurrentDictionary<string, ConcurrentBag<string>> terrainDyemaps = new ConcurrentDictionary<string, ConcurrentBag<string>>();
+        _config.TryAdd("TerrainDyemaps", terrainDyemaps);
 
         if (ConfigSubsystem.Get().GetUnrealInteropEnabled())
         {
@@ -145,6 +147,12 @@ class MetadataScene
                     new Vector2(1.0, 1.0),
                     new Vector4(1.0,1.0,1.0,1.0));
             }
+        }
+
+        foreach(var dyemaps in scene.TerrainDyemaps)
+        {
+            foreach(var dyemap in dyemaps.Value)
+                AddTerrainDyemap(dyemaps.Key, dyemap);
         }
     }
 
@@ -281,6 +289,15 @@ class MetadataScene
             Corner1 = new[] { corner1.X, corner1.Y, corner1.Z },
             Corner2 = new[] { corner2.X, corner2.Y, corner2.Z }
         });
+    }
+
+    public void AddTerrainDyemap(string modelHash, FileHash dyemapHash)
+    {
+        if (!_config["TerrainDyemaps"].ContainsKey(modelHash))
+        {
+            _config["TerrainDyemaps"][modelHash] = new ConcurrentBag<string>();
+        }
+        _config["TerrainDyemaps"][modelHash].Add(dyemapHash);
     }
 
     public void WriteToFile(string path)

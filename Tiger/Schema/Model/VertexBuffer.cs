@@ -478,7 +478,10 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     switch (inputSignature.Mask)
                     {
                         case ComponentMask.XY:
-                            part.VertexTexcoords0.Add(new Vector2(reader.ReadInt16(), reader.ReadInt16()));
+                            if(isTerrain)
+                                part.VertexTexcoords0.Add(new Vector2(reader.ReadHalf(), reader.ReadHalf()));
+                            else
+                                part.VertexTexcoords0.Add(new Vector2(reader.ReadInt16(), reader.ReadInt16()));
                             break;
                         case ComponentMask.XYZW:
                             part.VertexTexcoords0.Add(new Vector2(reader.ReadInt16(), reader.ReadInt16()));

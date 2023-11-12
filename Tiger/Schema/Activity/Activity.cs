@@ -314,7 +314,6 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                                 }
                                 foreach (var worldid in resourceValue.Unk58)
                                 {
-                                    //Console.WriteLine($"{strings.ContainsKey(worldid.FNVHash.Hash32)}");
                                     if (strings.ContainsKey(worldid.FNVHash.Hash32) && strings.Any(kv => kv.Key == worldid.FNVHash.Hash32))
                                     {
                                         Dictionary<string, string> name = new();

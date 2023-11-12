@@ -125,7 +125,7 @@ public class FbxExporter : AbstractExporter
             if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
             {
                 fbxMesh.AddSlotColours(dynamicMeshPart);
-                fbxMesh.AddTexcoords1(dynamicMeshPart);
+                fbxMesh.AddTexcoords1(part);
             }
 
             if (dynamicMeshPart.VertexWeights.Count > 0)
@@ -309,9 +309,9 @@ public static class FbxMeshExtensions
         fbxMesh.GetLayer(0).SetUVs(uvLayer);
     }
 
-    public static void AddTexcoords1(this FbxMesh fbxMesh, DynamicMeshPart meshPart)
+    public static void AddTexcoords1(this FbxMesh fbxMesh, ExporterPart part)
     {
-        if (!meshPart.VertexTexcoords1.Any())
+        if (!part.MeshPart.VertexTexcoords1.Any())
         {
             return;
         }
@@ -319,7 +319,7 @@ public static class FbxMeshExtensions
         FbxLayerElementUV uvLayer = FbxLayerElementUV.Create(fbxMesh, "uv1");
         uvLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         uvLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
-        foreach (var tx in meshPart.VertexTexcoords1)
+        foreach (var tx in part.MeshPart.VertexTexcoords1)
         {
             uvLayer.GetDirectArray().Add(new FbxVector2(tx.X, tx.Y));
         }

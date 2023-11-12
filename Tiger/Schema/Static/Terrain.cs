@@ -18,18 +18,9 @@ public class Terrain : Tag<STerrain>
     // To test use edz.strike_hmyn and alleys_a adf6ae80
     public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool bSaveShaders, bool exportStatic = false)
     {
-        // todo fix terrain
-        //if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
-        //{
-        //    return;
-        //}
-
         // Uses triangle strip + only using first set of vertices and indices
         Dictionary<StaticPart, IMaterial> parts = new Dictionary<StaticPart, IMaterial>();
-        List<string> dyeMaps = new List<string>();
-        var x = new List<float>();
-        var y = new List<float>();
-        var z = new List<float>();
+        List<Texture> dyeMaps = new List<Texture>();
         foreach (var partEntry in _tag.StaticParts)
         {
             if (partEntry.DetailLevel == 0)
@@ -39,12 +30,12 @@ public class Terrain : Tag<STerrain>
 
                 var part = MakePart(partEntry);
                 parts.TryAdd(part, partEntry.Material);
-                x.AddRange(part.VertexPositions.Select(a => a.X));
-                y.AddRange(part.VertexPositions.Select(a => a.Y));
-                z.AddRange(part.VertexPositions.Select(a => a.Z));
 
                 scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
                 part.Material = partEntry.Material;
+
+                if (exportStatic) //Need access to material early, before scene system exports
+                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders", true);
             }
         }
 
@@ -52,18 +43,29 @@ public class Terrain : Tag<STerrain>
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
             var partEntry = _tag.MeshGroups[i];
-            if (partEntry.Dyemap != null)
+            var lastValidEntry = _tag.MeshGroups.Last(e => e.Dyemap != null);
+
+            //Use the last valid dyemap for any invalid
+            if (partEntry.Dyemap == null)
+            {
+                if (lastValidEntry.Dyemap != null)
+                {
+                    scene.Textures.Add(lastValidEntry.Dyemap);
+                    dyeMaps.Add(lastValidEntry.Dyemap);
+                }
+            }
+            else
             {
                 scene.Textures.Add(partEntry.Dyemap);
-                dyeMaps.Add(partEntry.Dyemap.Hash.ToString());
+                dyeMaps.Add(partEntry.Dyemap);
             }
         }
-        Vector3 localOffset = new Vector3((x.Max() + x.Min()) / 2, (y.Max() + y.Min()) / 2, (z.Max() + z.Min()) / 2);
+
         foreach (var part in parts)
         {
-            // scale by 1.99 ish, -1 for all sides, multiply by 512?
-            TransformPositions(part.Key, localOffset);
+            TransformPositions(part.Key);
             TransformTexcoords(part.Key);
+            TransformVertexColors(part.Key);
         }
 
         scene.AddStatic(Hash, parts.Keys.ToList());
@@ -71,6 +73,11 @@ public class Terrain : Tag<STerrain>
         if (!exportStatic)
         {
             scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
+
+            for (int i = 0; i < dyeMaps.Count; i++)
+            {
+                scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
+            }
         }
 
         // We need to add these textures after the static is initialised
@@ -79,11 +86,6 @@ public class Terrain : Tag<STerrain>
             Texture dyemap = _tag.MeshGroups[part.Key.GroupIndex].Dyemap;
             if (dyemap != null)
             {
-                if (!exportStatic)
-                {
-                    scene.AddTextureToMaterial(part.Key.Material.FileHash, terrainTextureIndex, dyemap);
-                }
-
                 if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2ShaderExportEnabled())
                 {
                     if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat"))
@@ -97,8 +99,7 @@ public class Terrain : Tag<STerrain>
 
                             for (int i = 0; i < dyeMaps.Count; i++) //Add all the dyemaps to the vmat
                             {
-                                //Console.WriteLine($"{dyeMaps[i]}");
-                                newVmat.Add($"  TextureT{terrainTextureIndex}_{i} \"materials/Textures/{dyeMaps[i]}.png\"");
+                                newVmat.Add($"  TextureT{terrainTextureIndex}_{i} \"materials/Textures/{dyeMaps[i].Hash}.png\"");
                             }
 
                             newVmat.AddRange(vmat.Skip(lastBraceIndex));
@@ -109,6 +110,8 @@ public class Terrain : Tag<STerrain>
                 }
             }
         }
+        if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2VMDLExportEnabled())
+            Source2Handler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
     }
 
     public StaticPart MakePart(SStaticPart entry)
@@ -155,9 +158,9 @@ public class Terrain : Tag<STerrain>
         return part;
     }
 
-    private void TransformPositions(StaticPart part, Vector3 localOffset)
+    private void TransformPositions(StaticPart part)
     {
-         Debug.Assert(part.VertexPositions.Count == part.VertexNormals.Count);
+        Debug.Assert(part.VertexPositions.Count == part.VertexNormals.Count);
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
             //The "standard" terrain vertex shader from hlsl
@@ -220,68 +223,34 @@ public class Terrain : Tag<STerrain>
 
     private void TransformTexcoords(StaticPart part)
     {
-        double scaleX, scaleY, translateX, translateY;
-
-        Vector4 vec = _tag.MeshGroups[part.GroupIndex].Unk20;
-
-        if (vec.Z == 0.0078125)
-        {
-            scaleX = 1 / 0.4375 * 2.28571428571 * 2;
-            translateX = 0.333333; // 0 if no 2 * 2.285
-        }
-        else if (vec.Z == -0.9765625)
-        {
-            scaleX = 32;
-            translateX = -14;
-        }
-        else if (vec.Z == -1.9609375)
-        {
-            // todo shadowkeep idk
-            scaleX = 1;
-            translateX = 0;
-        }
-        else if (vec.Z == -2.9453125)
-        {
-            // todo shadowkeep idk
-            scaleX = 1;
-            translateX = 0;
-        }
-        else
-        {
-            throw new Exception("Unknown terrain uv scale x");
-        }
-        if (vec.W == 0.0078125)
-        {
-            scaleY = -1 / 0.4375 * 2.28571428571 * 2;
-            translateY = 0.333333;
-        }
-        else if (vec.W == -0.9765625)
-        {
-            scaleY = -32;
-            translateY = -14;
-        }
-        else if (vec.W == -1.9609375)
-        {
-            // todo shadowkeep idk
-            scaleY = 1;
-            translateY = 0;
-        }
-        else if (vec.W == -2.9453125)
-        {
-            // todo shadowkeep idk
-            scaleY = 1;
-            translateY = 0;
-        }
-        else
-        {
-            throw new Exception("Unknown terrain uv scale y");
-        }
         for (int i = 0; i < part.VertexTexcoords0.Count; i++)
         {
             part.VertexTexcoords0[i] = new Vector2(
-            part.VertexTexcoords0[i].X * scaleX + translateX,
-            part.VertexTexcoords0[i].Y * scaleY + (1 - translateY)
-            );
+            part.VertexTexcoords0[i].X * _tag.MeshGroups[part.GroupIndex].Unk20.X + _tag.MeshGroups[part.GroupIndex].Unk20.Z,
+            part.VertexTexcoords0[i].Y * -_tag.MeshGroups[part.GroupIndex].Unk20.Y + 1 - _tag.MeshGroups[part.GroupIndex].Unk20.W);
+        }
+    }
+
+    private void TransformVertexColors(StaticPart part)
+    {
+        //Helper for dyemap assignment
+        for (int i = 0; i < part.VertexPositions.Count; i++)
+        {
+            switch (part.GroupIndex)
+            {
+                case 0:
+                    part.VertexColours.Add(new Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+                    break;
+                case 1:
+                    part.VertexColours.Add(new Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+                    break;
+                case 2:
+                    part.VertexColours.Add(new Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+                    break;
+                case 3:
+                    part.VertexColours.Add(new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+                    break;
+            };
         }
     }
 }
@@ -339,14 +308,9 @@ public struct STerrain
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "866C8080", 0x60)]
 public struct SMeshGroup
 {
-    public float Unk00;
-    public float Unk04;
-    public float Unk08;
-    public float Unk0C;
-    public float Unk10;
-    public float Unk14;
-    public float Unk18;
-    [SchemaField(0x20)]
+    //Location?
+    public Vector4 Unk00;
+    public Vector4 Unk10;
     public Vector4 Unk20;
     public uint Unk30;
     public uint Unk34;

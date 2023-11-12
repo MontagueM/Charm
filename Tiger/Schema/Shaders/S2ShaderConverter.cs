@@ -72,7 +72,7 @@ struct VertexInput
 struct PixelInput
 {{
     float4 vBlendValues		 : TEXCOORD14;
-    float3 o0                : TEXCOORD15;
+    float3 v5                : TEXCOORD15; //terrain specific
 	#include ""common/pixelinput.hlsl""
 }};
 
@@ -89,12 +89,12 @@ VS
 	PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )
 	{{
 		PixelInput o = ProcessVertex( i );
-        float4 o0,o1,o2,o3,o4,o5,o6,o7,o8;
+        float4 r0,r1,r2;
         o.vBlendValues = i.vColorBlendValues;
 		o.vBlendValues.a = i.vColorBlendValues.a;
 
 //vs_Function
-        {(isTerrain ? "float4 r0;\r\n       r0.xyzw = (int4)float4(i.vPositionOs.xyz,0);\r\n        r0.xyzw = float4(0,0,0,0) + r0.xyzw;\r\n        r0.z = r0.w * 65536 + r0.z;\r\n        r0.xyw = float3(0.015625,0.015625,0.000122070313) * r0.xyz;\r\n        o.o0.xyz = r0.xyw;" : "")}
+        {(isTerrain ? "  r1.xyz = abs(i.vNormalOs.xyz) * abs(i.vNormalOs.xyz);\r\n  r1.xyz = r1.xyz * r1.xyz;\r\n  r2.xyz = r1.xyz * r1.xyz;\r\n  r2.xyz = r2.xyz * r2.xyz;\r\n  r1.xyz = r2.xyz * r1.xyz;\r\n  r0.z = dot(r1.xyz, float3(1,1,1));\r\n  o.v5.xyz = r1.xyz / r0.zzz;" : "")}
 		return FinalizeVertex( o );
 	}}
 }}
@@ -361,11 +361,11 @@ PS
                 funcDef.AppendLine($"\tTextureAttribute(g_t14_1, g_t14_1);\n");
 
                 funcDef.AppendLine($"\tCreateInputTexture2D( TextureT14_2, Linear, 8, \"\", \"\",  \"Textures,10/16\", Default3( 1.0, 1.0, 1.0 ));");
-                funcDef.AppendLine($"\tTexture2D g_t14_2< Channel( RGBA,  Box( TextureT14_2 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
+                funcDef.AppendLine($"\tTexture2D g_t14_2 < Channel( RGBA,  Box( TextureT14_2 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
                 funcDef.AppendLine($"\tTextureAttribute(g_t14_2, g_t14_2);\n");
 
                 funcDef.AppendLine($"\tCreateInputTexture2D( TextureT14_3, Linear, 8, \"\", \"\",  \"Textures,10/17\", Default3( 1.0, 1.0, 1.0 ));");
-                funcDef.AppendLine($"\tTexture2D( g_t14_3 )  < Channel( RGBA,  Box( TextureT14_3 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
+                funcDef.AppendLine($"\tTexture2D g_t14_3 < Channel( RGBA,  Box( TextureT14_3 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
                 funcDef.AppendLine($"\tTextureAttribute(g_t14_3, g_t14_3);\n");
             }
 
@@ -470,12 +470,12 @@ PS
 
             if (isTerrain) //variables are different for terrain for whatever reason, kinda have to guess
             {
-                funcDef.AppendLine("\t\tfloat4 v0 = {i.o0,1};"); //Detail uv?
-                funcDef.AppendLine("\t\tfloat4 v1 = {i.o0*0.05,1};"); //Main uv?
+                funcDef.AppendLine("\t\tfloat4 v0 = {vPositionWs/39.37, 1};"); //Detail uv?
+                funcDef.AppendLine("\t\tfloat4 v1 = {i.vTextureCoords, 1, 1};"); //Main uv?
                 funcDef.AppendLine("\t\tfloat4 v2 = {i.vNormalWs,1};");
                 funcDef.AppendLine("\t\tfloat4 v3 = {i.vTangentUWs,1};");
                 funcDef.AppendLine("\t\tfloat4 v4 = {i.vTangentVWs,1};");
-                funcDef.AppendLine("\t\tfloat4 v5 = {0,0,0,0};");
+                funcDef.AppendLine("\t\tfloat4 v5 = {i.v5,1};");
             }
             else
             {
@@ -570,30 +570,29 @@ PS
                         var dotAfter = line.Split(").")[1];
                         // todo add dimension
 
-                        //if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
-                        //{
-                        //    funcDef.AppendLine($"\t\tbool red = i.vBlendValues.x > 0.5;\r\n" +
-                        //        $"        bool green = i.vBlendValues.y > 0.5;\r\n" +
-                        //        $"        bool blue = i.vBlendValues.z > 0.5;\r\n\r\n" +
-                        //        $"        if (red && !green && !blue)\r\n" +
-                        //        $"        {{\r\n" +
-                        //        $"            {equal} = Tex2DS(g_t14_0, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
-                        //        $"        }}\r\n" +
-                        //        $"        else if (!red && green && !blue)\r\n" +
-                        //        $"        {{\r\n" +
-                        //        $"            {equal} = Tex2DS(g_t14_1, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
-                        //        $"        }}\r\n" +
-                        //        $"        else if (!red && !green && blue)\r\n" +
-                        //        $"        {{\r\n" +
-                        //        $"            {equal} = Tex2DS(g_t14_2, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
-                        //        $"        }}\r\n" +
-                        //        $"        else if (red && green && blue)\r\n" +
-                        //        $"        {{\r\n" +
-                        //        $"            {equal} = Tex2DS(g_t14_3, TextureFiltering, {sampleUv}).{dotAfter};\r\n" +
-                        //        $"        }}");
-                        //}
-
-                        if(!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
+                        if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
+                        {
+                            funcDef.AppendLine($"\t\tbool red = i.vBlendValues.x > 0.5;\r\n" +
+                                $"        bool green = i.vBlendValues.y > 0.5;\r\n" +
+                                $"        bool blue = i.vBlendValues.z > 0.5;\r\n\r\n" +
+                                $"        if (red && !green && !blue)\r\n" +
+                                $"        {{\r\n" +
+                                $"            {equal} = g_t{texIndex}_0.Sample(g_s{sampleIndex}, {sampleUv}).{dotAfter}\r\n" +
+                                $"        }}\r\n" +
+                                $"        else if (!red && green && !blue)\r\n" +
+                                $"        {{\r\n" +
+                                $"            {equal} = g_t{texIndex}_1.Sample(g_s{sampleIndex}, {sampleUv}).{dotAfter}\r\n" +
+                                $"        }}\r\n" +
+                                $"        else if (!red && !green && blue)\r\n" +
+                                $"        {{\r\n" +
+                                $"            {equal} = g_t{texIndex}_2.Sample(g_s{sampleIndex}, {sampleUv}).{dotAfter}\r\n" +
+                                $"        }}\r\n" +
+                                $"        else if (red && green && blue)\r\n" +
+                                $"        {{\r\n" +
+                                $"            {equal} = g_t{texIndex}_3.Sample(g_s{sampleIndex}, {sampleUv}).{dotAfter}\r\n" +
+                                $"        }}");
+                        }
+                        else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
                         {
                             funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //t{texIndex}");
                         }

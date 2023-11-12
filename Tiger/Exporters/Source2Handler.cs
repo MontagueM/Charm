@@ -95,8 +95,10 @@ public class Source2Handler
         }
     }
 
-    public static void SaveTerrainVMDL(string savePath, string hash, List<MeshPart> parts, STerrain terrainHeader)
+    public static void SaveTerrainVMDL(string savePath, string hash, List<StaticPart> parts, STerrain terrainHeader)
     {
+        Directory.CreateDirectory($"{savePath}/Statics/");
+        File.Copy("Exporters/template.vmdl", $"{savePath}/Statics/{hash}_Terrain.vmdl", true);
         if (File.Exists($"{savePath}/Statics/{hash}_Terrain.vmdl"))
         {
             string text = File.ReadAllText($"{savePath}/Statics/{hash}_Terrain.vmdl");

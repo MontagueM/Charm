@@ -20,6 +20,12 @@ public struct Vector2
         Y = y;
     }
 
+    public Vector2(Half x, Half y)
+    {
+        X = (float)x;
+        Y = (float)y;
+    }
+
     public Vector2(double x, double y)
     {
         X = (float)x;

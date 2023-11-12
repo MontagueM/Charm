@@ -97,6 +97,7 @@ public class ExporterScene
     private ConcurrentBag<FileHash> _addedEntities = new();
     public ConcurrentHashSet<Texture> Textures = new();
     public ConcurrentHashSet<ExportMaterial> Materials = new();
+    public ConcurrentDictionary<FileHash, List<FileHash>> TerrainDyemaps = new();
 
     public void AddStatic(FileHash meshHash, List<StaticPart> parts)
     {
@@ -304,6 +305,15 @@ public class ExporterScene
     public void AddDecals(SMapDecalsResource decal)
     {
         Decals.Add(decal);
+    }
+
+    public void AddTerrainDyemap(FileHash modelHash, FileHash dyemapHash)
+    {
+        if (!TerrainDyemaps.ContainsKey(modelHash))
+        {
+            TerrainDyemaps.TryAdd(modelHash, new());
+        }
+        TerrainDyemaps[modelHash].Add(dyemapHash);
     }
 }
 
