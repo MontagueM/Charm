@@ -86,7 +86,7 @@ VS
 //vs_CBuffers
 //vs_Inputs
 
-	PixelInput MainVs( INSTANCED_SHADER_PARAMS( VS_INPUT i ) )
+	PixelInput MainVs( VertexInput i )
 	{{
 		PixelInput o = ProcessVertex( i );
         float4 r0,r1,r2;
