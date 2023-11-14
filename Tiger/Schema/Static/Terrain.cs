@@ -234,9 +234,11 @@ public class Terrain : Tag<STerrain>
     private void TransformVertexColors(StaticPart part)
     {
         //Helper for dyemap assignment
+        //SK can have up to index 15, maybe more?
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
-            switch (part.GroupIndex)
+            int colorIndex = part.GroupIndex % 4;
+            switch (colorIndex)
             {
                 case 0:
                     part.VertexColours.Add(new Vector4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -249,6 +251,9 @@ public class Terrain : Tag<STerrain>
                     break;
                 case 3:
                     part.VertexColours.Add(new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+                    break;
+                default:
+                    part.VertexColours.Add(new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
                     break;
             };
         }
