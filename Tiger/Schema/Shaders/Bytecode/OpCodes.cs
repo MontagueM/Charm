@@ -57,7 +57,7 @@ public class TfxBytecodeOp
                     break;
                 case TfxBytecode.Unk35:
                     Unk35Data Unk35Data = new();
-                    Unk35Data.unk1 = reader.ReadByte();
+                    Unk35Data.constant_start = reader.ReadByte();
                     tfxData.data = Unk35Data;
                     break;
                 case TfxBytecode.Spline4Const:
@@ -233,7 +233,7 @@ public class TfxBytecodeOp
                 output = $"constant_index {((PushConstantVec4Data)tfxData.data).constant_index}: Constant value: {constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString()}";
                 break;
             case Unk35Data:
-                output = $"unk1 {((Unk35Data)tfxData.data).unk1}";
+                output = $"constant_start {((Unk35Data)tfxData.data).constant_start}: Constant value: {constants[((Unk35Data)tfxData.data).constant_start].Vec}";
                 break;
             case Spline4ConstData:
                 output = $"unk1 {((Spline4ConstData)tfxData.data).unk1}";
@@ -352,7 +352,7 @@ public enum TfxBytecode : byte
     Max = 0x09,
     Unk0b = 0x0b,
     Merge_1_3 = 0x0c,
-    Unk0d = 0x0d,
+    Merge_2_2 = 0x0d,
     Unk0e = 0x0e,
     Unk0f = 0x0f,
     Unk10 = 0x10,
@@ -437,7 +437,7 @@ public struct PushConstantVec4Data
 
 public struct Unk35Data
 {
-    public byte unk1;
+    public byte constant_start;
 }
 
 public struct Spline4ConstData

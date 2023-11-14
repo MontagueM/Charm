@@ -60,9 +60,11 @@ public class TfxBytecodeInterpreter
     {
         Dictionary<int, string> hlsl = new();
         try
-        { 
+        {
+            Console.WriteLine($"--------Evaluating Bytecode:");
             foreach ((int _ip, var op) in Opcodes.Select((value, index) => (index, value)))
             {
+                Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
                 switch (op.op)
                 {
                     case TfxBytecode.Add:
@@ -113,31 +115,29 @@ public class TfxBytecodeInterpreter
 
                     //Unk0B
 
-                    case TfxBytecode.Unk0d: //??????
-                        var Unk0d = StackPop(2);
-                        StackPush($"(((float4({Unk0d[1]}.x, {Unk0d[1]}.y, 0.0, 0.0) && float4(0.0, 0.0, 0.0, 0.0)) || 1.0) + ((float4(0.0, 0.0, {Unk0d[0]}.z, {Unk0d[0]}.w) && float4(0.0, 0.0, 0.0, 0.0)) || 1.0))");
+                    case TfxBytecode.Merge_2_2: //??????
+                        var merge2_2 = StackPop(2);
+                        StackPush($"(float4({merge2_2[0]}.x, {merge2_2[0]}.y, {merge2_2[1]}.x, {merge2_2[1]}.y))");
                         break;
 
                     case TfxBytecode.Unk0f: //jesus christ
                         var Unk0f = StackPop(2);
-                        StackPush($"((dot(float4({Unk0f[1]}.x, {Unk0f[1]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y)) + " +
-                            $"dot(float4({Unk0f[1]}.z, {Unk0f[1]}.w, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y))) * dot(float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y)) + " +
-                            $"(dot(float4({Unk0f[1]}.y, {Unk0f[1]}.x, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y)) + dot(float4({Unk0f[1]}.w, {Unk0f[1]}.z, {Unk0f[0]}.x, {Unk0f[0]}.y), float4({Unk0f[0]}.x, {Unk0f[0]}.y, {Unk0f[0]}.x, {Unk0f[0]}.y))))");
+                        StackPush($"((dot4({Unk0f[1]}, {Unk0f[0]}) + dot4({Unk0f[1]}.yxwz, {Unk0f[0]}.yxwz)) * dot4({Unk0f[0]}, {Unk0f[0]}) + (dot4({Unk0f[1]}.zwxy, {Unk0f[0]}.zwxy) + dot4({Unk0f[1]}.wzyx, {Unk0f[0]}.wzyx)))");
                         break;
 
-                    case TfxBytecode.Unk1a: //chatgpt probably messing all this up...
+                    case TfxBytecode.Unk1a:
                         var Unk1a = StackTop();
-                        StackPush($"({Unk1a} - ((floor({Unk1a}) - step({Unk1a}, floor({Unk1a}))) && step(8388608.0, {Unk1a})))");
+                        StackPush($"(frac({Unk1a}))");
                         break;
-
-                    //case TfxBytecode.Unk1a: //frac?, is this one right?
-                    //    var frac = StackTop();
-                    //    StackPush($"frac({frac})");
-                    //    break;
 
                     case TfxBytecode.Unk27: //bytecode_op_triangle
                         var Unk27 = StackTop();
-                        StackPush($"(abs({Unk27} - round({Unk27})) * 2.0)");
+                        StackPush($"(abs({Unk27} - floor({Unk27} + 0.5)) * 2.0)");
+                        break;
+
+                    case TfxBytecode.Unk29: //bytecode_op_wander
+                        var Unk29 = StackTop();
+                        StackPush($"{bytecode_op_wander(Unk29)}");
                         break;
 
                     case TfxBytecode.Unk3d:
@@ -156,6 +156,13 @@ public class TfxBytecodeInterpreter
                     case TfxBytecode.PushConstantVec4:
                         var vec = constants[((PushConstantVec4Data)op.data).constant_index].Vec;
                         StackPush($"(float4({vec.X}, {vec.Y}, {vec.Z}, {vec.W}))");
+                        break;
+                    case TfxBytecode.Unk35:
+                        var Unk35 = StackTop();
+                        var v1 = constants[((Unk35Data)op.data).constant_start].Vec;
+                        var v2 = constants[((Unk35Data)op.data).constant_start + 1].Vec;
+
+                        StackPush($"(((float4{v2}-float4{v1})*{Unk35})+float4{v1})");
                         break;
                     case TfxBytecode.PermuteAllX:
                         var permutex = StackTop();
@@ -185,9 +192,14 @@ public class TfxBytecodeInterpreter
                         break;
 
                     case TfxBytecode.PopOutput: //??
-                        Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                        //Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
                         Temp.Clear();
                         Temp.AddRange(Stack);
+
+                        foreach (var a in Stack)
+                        {
+                            Console.WriteLine($"Stack Length {Temp.Count}, Stack Value {a}");
+                        }
                         Stack.Clear();
 
                         //Just output 1 to the given buffer for the time being
@@ -203,16 +215,16 @@ public class TfxBytecodeInterpreter
                     //    hlsl.TryAdd(((StoreToBufferData)op.data).element, "float4(1, 1, 0, 0)");
                     //    break;
                     default:
-                        Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                        //Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
                         break;
 
                 }    
             }
             
-            foreach (var a in Temp)
-            {
-                Console.WriteLine($"Stack Length {Temp.Count}, Stack Value {a}");
-            }
+            //foreach (var a in Temp)
+            //{
+            //    Console.WriteLine($"Stack Length {Temp.Count}, Stack Value {a}");
+            //}
         }
         catch (Exception e)
         {
@@ -243,6 +255,40 @@ public class TfxBytecodeInterpreter
                 Log.Error($"Unsupported extern {extern_}[{element}]");
                 return $"float4(0, 0, 0, 0)";
         }
+    }
+
+    private string bytecode_op_jitter(string x)
+    {
+        string rotations = $"({x}.xxxx * float4(4.67, 2.99, 1.08, 1.35) + float4(0.52, 0.37, 0.16, 0.79))";
+        string a = $"({rotations} - floor({rotations} + 0.5))";
+        string ma = $"(abs({a}) * -16.0 + 8.0)";
+        string sa = $"({a} * 0.25)";
+        string v = $"(dot4({sa}, {ma}) + 0.5)";
+        string v2 = $"({v}*{v})";
+        string jitter_result = $"((-2.0 * {v} + 3.0) * {v2})";
+        return jitter_result;
+    }
+
+    private string bytecode_op_wander(string x)
+    {
+        string rot0 = $"({x}.xxxx * float4(4.08, 1.02, 3.0 / 5.37, 3.0 / 9.67))";
+        string rot1 = $"({x}.xxxx * float4(1.83, 3.09, 0.39, 0.87) + float4(0.12, 0.37, 0.16, 0.79))";
+        string sines0 = $"({_trig_helper_vector_pseudo_sin_rotations(rot0)})";
+        string sines1 =  $"({_trig_helper_vector_pseudo_sin_rotations(rot1)} * float4(0.02, 0.02, 0.28, 0.28))";
+        string wander_result = $"(0.5 + dot4({sines0}, {sines1}))"; 
+
+        return wander_result;
+    }
+
+    private string _trig_helper_vector_pseudo_sin_rotations(string a)
+    {
+        string w = $"({a}-floor({a} + 0.5))";
+        return _trig_helper_vector_pseudo_sin_rotations_clamped(w);
+    }
+
+    private string _trig_helper_vector_pseudo_sin_rotations_clamped(string a)
+    {
+        return $"({a} * (abs({a}) * -16.0 + 8.0))";
     }
 }
 
