@@ -43,7 +43,7 @@ public class Terrain : Tag<STerrain>
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
             var partEntry = _tag.MeshGroups[i];
-            var lastValidEntry = _tag.MeshGroups.Last(e => e.Dyemap != null);
+            var lastValidEntry = _tag.MeshGroups.LastOrDefault(e => e.Dyemap != null);
 
             //Use the last valid dyemap for any invalid
             if (partEntry.Dyemap == null)
