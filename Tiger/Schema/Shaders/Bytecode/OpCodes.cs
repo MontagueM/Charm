@@ -91,32 +91,32 @@ public class TfxBytecodeOp
                     PushExternInputFloatData.element = reader.ReadByte();
                     tfxData.data = PushExternInputFloatData;
                     break;
-                case TfxBytecode.Unk3d:
-                    Unk3dData Unk3dData = new();
-                    Unk3dData.extern_ = (TfxExtern)reader.ReadByte();
-                    Unk3dData.element = reader.ReadByte();
-                    tfxData.data = Unk3dData;
+                case TfxBytecode.PushExternInputVec4:
+                    PushExternInputVec4Data PushExternInputVec4Data = new();
+                    PushExternInputVec4Data.extern_ = (TfxExtern)reader.ReadByte();
+                    PushExternInputVec4Data.element = reader.ReadByte();
+                    tfxData.data = PushExternInputVec4Data;
                     break;
-                case TfxBytecode.Unk3e:
-                    Unk3eData Unk3eData = new();
-                    Unk3eData.extern_ = (TfxExtern)reader.ReadByte();
-                    Unk3eData.element = reader.ReadByte();
-                    tfxData.data = Unk3eData;
+                case TfxBytecode.PushExternInputMat4:
+                    PushExternInputMat4Data PushExternInputMat4Data = new();
+                    PushExternInputMat4Data.extern_ = (TfxExtern)reader.ReadByte();
+                    PushExternInputMat4Data.element = reader.ReadByte();
+                    tfxData.data = PushExternInputMat4Data;
                     break;
-                case TfxBytecode.Unk3f:
-                    Unk3fData Unk3fData = new();
+                case TfxBytecode.PushExternInputU64:
+                    PushExternInputU64Data Unk3fData = new();
                     Unk3fData.extern_ = (TfxExtern)reader.ReadByte();
                     Unk3fData.element = reader.ReadByte();
                     tfxData.data = Unk3fData;
                     break;
-                case TfxBytecode.Unk40:
-                    Unk40Data Unk40Data = new();
-                    Unk40Data.extern_ = (TfxExtern)reader.ReadByte();
-                    Unk40Data.element = reader.ReadByte();
-                    tfxData.data = Unk40Data;
+                case TfxBytecode.PushExternInputU32:
+                    PushExternInputU32Data PushExternInputU32Data = new();
+                    PushExternInputU32Data.extern_ = (TfxExtern)reader.ReadByte();
+                    PushExternInputU32Data.element = reader.ReadByte();
+                    tfxData.data = PushExternInputU32Data;
                     break;
-                case TfxBytecode.Unk41:
-                    Unk41Data Unk41Data = new();
+                case TfxBytecode.PushExternInputU64Unknown:
+                    PushExternInputU64UnknownData Unk41Data = new();
                     Unk41Data.extern_ = (TfxExtern)reader.ReadByte();
                     Unk41Data.element = reader.ReadByte();
                     tfxData.data = Unk41Data;
@@ -253,20 +253,20 @@ public class TfxBytecodeOp
             case PushExternInputFloatData:
                 output = $"extern {((PushExternInputFloatData)tfxData.data).extern_}, element {((PushExternInputFloatData)tfxData.data).element}";
                 break;
-            case Unk3dData:
-                output = $"extern {((Unk3dData)tfxData.data).extern_}, element {((Unk3dData)tfxData.data).element}";
+            case PushExternInputVec4Data:
+                output = $"extern {((PushExternInputVec4Data)tfxData.data).extern_}, element {((PushExternInputVec4Data)tfxData.data).element}";
                 break;
-            case Unk3eData:
-                output = $"extern {((Unk3eData)tfxData.data).extern_}, element {((Unk3eData)tfxData.data).element}";
+            case PushExternInputMat4Data:
+                output = $"extern {((PushExternInputMat4Data)tfxData.data).extern_}, element {((PushExternInputMat4Data)tfxData.data).element}";
                 break;
-            case Unk3fData:
-                output = $"extern {((Unk3fData)tfxData.data).extern_}, element {((Unk3fData)tfxData.data).element}";
+            case PushExternInputU64Data:
+                output = $"extern {((PushExternInputU64Data)tfxData.data).extern_}, element {((PushExternInputU64Data)tfxData.data).element}";
                 break;
-            case Unk40Data:
-                output = $"extern {((Unk40Data)tfxData.data).extern_}, element {((Unk40Data)tfxData.data).element}";
+            case PushExternInputU32Data:
+                output = $"extern {((PushExternInputU32Data)tfxData.data).extern_}, element {((PushExternInputU32Data)tfxData.data).element}";
                 break;
-            case Unk41Data:
-                output = $"extern {((Unk41Data)tfxData.data).extern_}, element {((Unk41Data)tfxData.data).element}";
+            case PushExternInputU64UnknownData:
+                output = $"extern {((PushExternInputU64UnknownData)tfxData.data).extern_}, element {((PushExternInputU64UnknownData)tfxData.data).element}";
                 break;
             case PopOutputData:
                 output = $"unk1 {((PopOutputData)tfxData.data).unk1}";
@@ -389,11 +389,11 @@ public enum TfxBytecode : byte
     Unk3a = 0x3a, //{ unk1: u8 }
     UnkLoadConstant = 0x3b, //{ constant_index: u8 }
     PushExternInputFloat = 0x3c, //{ extern_: TfxExtern, element: u8 }
-    Unk3d = 0x3d, //{ extern_: TfxExtern, unk2: u8 }
-    Unk3e = 0x3e, //{ extern_: TfxExtern, unk2: u8 }
-    Unk3f = 0x3f, //{ extern_: TfxExtern, unk2: u8 }
-    Unk40 = 0x40, //{ extern_: TfxExtern, unk2: u8 }
-    Unk41 = 0x41, //{ extern_: TfxExtern, unk2: u8 }
+    PushExternInputVec4 = 0x3d, //{ extern_: TfxExtern, unk2: u8 }
+    PushExternInputMat4 = 0x3e, //{ extern_: TfxExtern, unk2: u8 }
+    PushExternInputU64 = 0x3f, //{ extern_: TfxExtern, unk2: u8 }
+    PushExternInputU32 = 0x40, //{ extern_: TfxExtern, unk2: u8 }
+    PushExternInputU64Unknown = 0x41, //{ extern_: TfxExtern, unk2: u8 }
     Unk42 = 0x42,
     Unk43 = 0x43, //{ unk1: u8 } //storetobuffer?
     PopOutput = 0x44, //{ element: u8 }
@@ -471,31 +471,31 @@ public struct PushExternInputFloatData
     public byte element;
 }
 
-public struct Unk3dData
+public struct PushExternInputVec4Data
 {
     public TfxExtern extern_;
     public byte element;
 }
 
-public struct Unk3eData
+public struct PushExternInputMat4Data
 {
     public TfxExtern extern_;
     public byte element;
 }
 
-public struct Unk3fData
+public struct PushExternInputU64Data
 {
     public TfxExtern extern_;
     public byte element;
 }
 
-public struct Unk40Data
+public struct PushExternInputU32Data
 {
     public TfxExtern extern_;
     public byte element;
 }
 
-public struct Unk41Data
+public struct PushExternInputU64UnknownData
 {
     public TfxExtern extern_;
     public byte element;

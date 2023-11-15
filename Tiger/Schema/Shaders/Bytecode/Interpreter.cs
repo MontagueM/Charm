@@ -140,19 +140,14 @@ public class TfxBytecodeInterpreter
                         StackPush($"{bytecode_op_wander(Unk29)}");
                         break;
 
-                    case TfxBytecode.Unk3d:
-                    case TfxBytecode.Unk3f:
+                    //case TfxBytecode.Unk3d:
                     case TfxBytecode.Unk4c:
-                    //case TfxBytecode.Unk4d:
+                    case TfxBytecode.PushObjectChannelVector:
                     case TfxBytecode.Unk4e:
                     case TfxBytecode.Unk4f:
                         StackPush($"(float4(1, 1, 1, 1))");
                         break;
 
-                    case TfxBytecode.PushExternInputFloat:
-                        var v = GetExtern(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element);
-                        StackPush(v);
-                        break;
                     case TfxBytecode.PushConstantVec4:
                         var vec = constants[((PushConstantVec4Data)op.data).constant_index].Vec;
                         StackPush($"(float4({vec.X}, {vec.Y}, {vec.Z}, {vec.W}))");
@@ -163,6 +158,33 @@ public class TfxBytecodeInterpreter
                         var v2 = constants[((Unk35Data)op.data).constant_start + 1].Vec;
 
                         StackPush($"(((float4{v2}-float4{v1})*{Unk35})+float4{v1})");
+                        break;
+                    case TfxBytecode.UnkLoadConstant:
+                        var UnkLoadConstant = constants[((UnkLoadConstantData)op.data).constant_index].Vec;
+                        StackPush($"(float4({UnkLoadConstant.X}, {UnkLoadConstant.Y}, {UnkLoadConstant.Z}, {UnkLoadConstant.W}))");
+                        break;
+                    case TfxBytecode.PushExternInputFloat:
+                        var v = GetExtern(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element);
+                        StackPush(v);
+                        break;
+                    case TfxBytecode.PushExternInputVec4:
+                        var PushExternInputVec4 = GetExtern(((PushExternInputVec4Data)op.data).extern_, ((PushExternInputVec4Data)op.data).element);
+                        StackPush(PushExternInputVec4);
+                        break;
+                    case TfxBytecode.PushExternInputMat4:
+                        //var Mat4 = Matrix4x4.Identity;
+                        StackPush($"(float4(1,0,0,0))");
+                        StackPush($"(float4(0,1,0,0))");
+                        StackPush($"(float4(0,0,1,0))");
+                        StackPush($"(float4(0,0,0,1))");
+                        break;
+                    case TfxBytecode.PushExternInputU64:
+                        var PushExternInputU64 = GetExtern(((PushExternInputU64Data)op.data).extern_, ((PushExternInputU64Data)op.data).element);
+                        StackPush(PushExternInputU64);
+                        break;
+                    case TfxBytecode.PushExternInputU64Unknown:
+                        var PushExternInputU64Unknown = GetExtern(((PushExternInputU64UnknownData)op.data).extern_, ((PushExternInputU64UnknownData)op.data).element);
+                        StackPush(PushExternInputU64Unknown);
                         break;
                     case TfxBytecode.PermuteAllX:
                         var permutex = StackTop();
@@ -193,27 +215,29 @@ public class TfxBytecodeInterpreter
 
                     case TfxBytecode.PopOutput: //??
                         //Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
-                        Temp.Clear();
-                        Temp.AddRange(Stack);
+                        //Temp.Clear();
+                        //Temp.AddRange(Stack);
 
                         foreach (var a in Stack)
                         {
-                            Console.WriteLine($"Stack Length {Temp.Count}, Stack Value {a}");
+                            Console.WriteLine($"Stack Length {Stack.Count}, Stack Value {a}");
                         }
                         Stack.Clear();
 
                         //Just output 1 to the given buffer for the time being
                         hlsl.TryAdd(((PopOutputData)op.data).unk1, "float4(1, 1, 0, 0)");
                         break;
-                    //case TfxBytecode.StoreToBuffer:
-                    //    Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
-                    //    Temp.Clear();
-                    //    Temp.AddRange(Stack);
-                    //    Stack.Clear();
 
-                    //    //Just output 1 to the given buffer for the time being
-                    //    hlsl.TryAdd(((StoreToBufferData)op.data).element, "float4(1, 1, 0, 0)");
-                    //    break;
+                    case TfxBytecode.PushTemp:
+                        var PushTemp = ((PushTempData)op.data).slot;
+                        StackPush(Temp[PushTemp]);
+                        break;
+                    case TfxBytecode.PopTemp:
+                        var PopTemp = ((PopTempData)op.data).slot;
+                        var PopTemp_v = StackTop();
+                        Temp.Insert(PopTemp, PopTemp_v);
+                        break;
+
                     default:
                         //Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
                         break;
