@@ -123,7 +123,7 @@ public class TfxBytecodeOp
                     break;
                 case TfxBytecode.PopOutput:
                     PopOutputData PopOutputData = new();
-                    PopOutputData.unk1 = reader.ReadByte();
+                    PopOutputData.slot = reader.ReadByte();
                     tfxData.data = PopOutputData;
                     break;
                 case TfxBytecode.Unk43:
@@ -269,7 +269,7 @@ public class TfxBytecodeOp
                 output = $"extern {((PushExternInputU64UnknownData)tfxData.data).extern_}, element {((PushExternInputU64UnknownData)tfxData.data).element}";
                 break;
             case PopOutputData:
-                output = $"unk1 {((PopOutputData)tfxData.data).unk1}";
+                output = $"slot {((PopOutputData)tfxData.data).slot}";
                 break;
             case Unk43Data:
                 output = $"unk1 {((Unk43Data)tfxData.data).unk1}";
@@ -344,10 +344,10 @@ public enum TfxBytecode : byte
     Add = 0x01,
     Subtract = 0x02,
     Multiply = 0x03,
-    IsZero = 0x04,
-    Multiply2 = 0x05, //??
-    Add2 = 0x06, //??
-    Unk07 = 0x07,
+    Divide = 0x04,
+    Multiply2 = 0x05,
+    Add2 = 0x06,
+    IsZero = 0x07,
     Min = 0x08,
     Max = 0x09,
     Unk0b = 0x0b,
@@ -360,8 +360,9 @@ public enum TfxBytecode : byte
     MultiplyAdd = 0x12,
     Clamp = 0x13,
     Unk15 = 0x15,
-    Unk16 = 0x16,
-    Unk17 = 0x17,
+    Sign = 0x16,
+    Floor = 0x17,
+    Ceil = 0x18,
     Unk1a = 0x1a,
     Unk1b = 0x1b,
     Unk1c = 0x1c,
@@ -503,7 +504,7 @@ public struct PushExternInputU64UnknownData
 
 public struct PopOutputData
 {
-    public byte unk1;
+    public byte slot;
 }
 
 public struct StoreToBufferData
