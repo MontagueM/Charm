@@ -338,7 +338,9 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 // it can be longer here, its not broken i think
                 if (handle.BaseStream.Length <= handle.BaseStream.Position)
                 {
-                    part.VertexColours.Add(new Vector4(0, 0, 0, 0));
+                    handle.BaseStream.Position = handle.BaseStream.Length-4;
+                    part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                        handle.ReadByte()));
                 }
                 else
                 {
