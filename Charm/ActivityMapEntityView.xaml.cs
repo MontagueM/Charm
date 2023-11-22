@@ -649,7 +649,9 @@ public partial class ActivityMapEntityView : UserControl
             await Task.Run(() =>
             {
                 Entity entity = FileResourcer.Get().GetFile<Entity>(tagHash);
-                EntityView.Export(new List<Entity> { entity }, entity.Hash, ExportTypeFlag.Full);
+                List<Entity> entities = new List<Entity> { entity };
+                entities.AddRange(entity.GetEntityChildren());
+                EntityView.Export(entities, entity.Hash, ExportTypeFlag.Full);
                 MainWindow.Progress.CompleteStage();
             });
         }
