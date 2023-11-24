@@ -1125,7 +1125,7 @@ public partial class TagListView : UserControl
             // PackageHandler.CacheHashDataList(tex3d.Select(x => x.Hash).ToArray());
             // MainWindow.Progress.CompleteStage();
 
-            Parallel.ForEach(tex, val =>
+            tex.ToList().ForEach(val => //Doesnt really need to be parrellizedm, loads quick enough without it and fixes(?) missing entries
             {
                 _allTagItems.Add(new TagItem
                 {
