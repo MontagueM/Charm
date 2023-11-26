@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using Internal.Fbx;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -42,7 +43,7 @@ public class FbxExporter : AbstractExporter
             }
 
             string outputDirectory = args.OutputDirectory;
-            if (scene.Type is ExportType.Static or ExportType.Entity)
+            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API)
             {
                 outputDirectory = Path.Join(outputDirectory, scene.Name);
             }
@@ -156,7 +157,7 @@ public class FbxExporter : AbstractExporter
             node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
             if (rootNode == null)
             {
-                skeleton.SetSkeletonType(FbxSkeleton.EType.eRoot);
+                //skeleton.SetSkeletonType(FbxSkeleton.EType.eRoot); Not sure if needed? Just Makes the root bone/root weights dissappear in blender
                 rootNode = node;
             }
             else
@@ -165,7 +166,6 @@ public class FbxExporter : AbstractExporter
             }
             skeletonNodes.Add(node);
         }
-
         fbxScene.GetRootNode().AddChild(rootNode);
         return skeletonNodes;
     }

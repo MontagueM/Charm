@@ -187,7 +187,7 @@ class MetadataScene
 
     public void WriteToFile(string path)
     {
-        if (_exportType is ExportType.Static or ExportType.Entity)
+        if (_exportType is ExportType.Static or ExportType.Entity or ExportType.API)
         {
             path = Path.Join(path, _config["MeshName"]);
         }

@@ -101,6 +101,12 @@ public class EntityModel : Tag<SEntityModel>
                     bAlphaClip = (part.Flags & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
                 };
+
+                //We only care about the vertex shader for now for mesh data
+                //But if theres also no pixel shader then theres no point in adding it
+                if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.VertexShader is null || dynamicMeshPart.Material.PixelShader is null)
+                    continue;
+
                 dynamicMeshPart.GetAllData(mesh, _tag);
                 parts.Add(dynamicMeshPart);
             }

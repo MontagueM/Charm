@@ -313,5 +313,6 @@ public enum ExportType
     Terrain,
     EntityPoints,
     StaticInMap,
-    EntityInMap
+    EntityInMap,
+    API
 }

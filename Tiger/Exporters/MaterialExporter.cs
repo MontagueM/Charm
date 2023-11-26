@@ -15,7 +15,7 @@ public class MaterialExporter : AbstractExporter
 
         Parallel.ForEach(args.Scenes, scene =>
         {
-            if (scene.Type is ExportType.Entity or ExportType.Static)
+            if (scene.Type is ExportType.Entity or ExportType.Static or ExportType.API)
             {
                 ConcurrentHashSet<Texture> textures = scene.Textures;
 

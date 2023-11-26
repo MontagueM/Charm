@@ -79,8 +79,8 @@ public class AutomatedExporter
 
     public static void SaveBlenderApiFile(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
     {
-        File.Copy($"Exporters/blender_api_template.py", $"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", true);
-        string text = File.ReadAllText($"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py");
+        File.Copy($"Exporters/blender_api_template.py", $"{saveDirectory}/{meshName}{fileSuffix}.py", true);
+        string text = File.ReadAllText($"{saveDirectory}/{meshName}{fileSuffix}.py");
 
         string[] components = { "X", "Y", "Z", "W" };
 
@@ -102,14 +102,14 @@ public class AutomatedExporter
             }
 
             var diff = dye.TagData.DyeTextures[0];
-            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}_{diff.TextureIndex}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
             var norm = dye.TagData.DyeTextures[1];
-            text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}_{norm.TextureIndex}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
             dyeIndex++;
         }
 
         text = text.Replace("OUTPUTPATH", $"Textures");
         text = text.Replace("SHADERNAMEENUM", $"{meshName}{fileSuffix}");
-        File.WriteAllText($"{saveDirectory}/{meshName}_blender_api{fileSuffix}.py", text);
+        File.WriteAllText($"{saveDirectory}/{meshName}{fileSuffix}.py", text);
     }
 }
