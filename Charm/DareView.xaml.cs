@@ -50,6 +50,7 @@ public partial class DareView : UserControl
         Parallel.ForEach(_allItems.Values, parallelOptions, item =>
         {
             if (items.Count <= numToDisplay && (item.ItemName.ToLower().Contains(searchTerm)
+            || item.ItemHash.Contains(searchTerm)
             || item.ItemType.ToLower().Contains(searchTerm)
             || item.ItemRarity.ToString().ToLower().Contains(searchTerm)))
             {
@@ -128,6 +129,7 @@ public partial class DareView : UserControl
                             ItemName = name,
                             ItemType = type,
                             ItemRarity = (ItemTier)item.TagData.ItemRarity,
+                            ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
                             ImageSource = dw,
                             ImageHeight = 96,
                             ImageWidth = 96,
@@ -270,6 +272,7 @@ public class ApiItem
     public string ItemName { get; set; }
     public string ItemType { get; set; }
     public ItemTier ItemRarity { get; set; }
+    public string ItemHash { get; set; }
     public double ImageWidth { get; set; }
     public double ImageHeight { get; set; }
     public System.Windows.Media.ImageSource ImageSource { get; set; }

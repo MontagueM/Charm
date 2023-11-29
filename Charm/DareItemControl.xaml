@@ -32,7 +32,7 @@
         <TextBlock
             Grid.Row="0"
             Grid.Column="1"
-            Margin="10,5,0,0"
+            Margin="10,5,1,0"
             HorizontalAlignment="Left"
             Panel.ZIndex="1"
             FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Display Pro 75 Bold}"
@@ -63,6 +63,18 @@
             FontSize="12"
             Foreground="{StaticResource ForegroundColour100}"
             Text="{Binding ItemRarity}"
+            TextAlignment="Left"
+            TextWrapping="Wrap" />
+        <TextBlock
+            Grid.Row="2"
+            Grid.Column="1"
+            Margin="0,0,10,0"
+            HorizontalAlignment="Right"
+            Panel.ZIndex="1"
+            FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+            FontSize="12"
+            Foreground="{StaticResource ForegroundColour100}"
+            Text="{Binding ItemHash}"
             TextAlignment="Left"
             TextWrapping="Wrap" />
     </Grid>
