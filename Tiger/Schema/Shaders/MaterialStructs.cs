@@ -19,6 +19,8 @@ public struct SMaterial_SK
     public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
     public DynamicArray<Vec4> VS_CBuffers;
+    [SchemaField(0xCC)]
+    public FileHash VSVector4Container;
 
     [SchemaField(0x2C8)]
     public ShaderBytecode? PixelShader;
@@ -60,6 +62,8 @@ public struct SMaterial_BL
     public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> VS_Samplers;
     public DynamicArray<Vec4> VS_CBuffers;
+    [SchemaField(0xCC)]
+    public FileHash VSVector4Container;
 
     [SchemaField(0x298)]
     public ShaderBytecode? PixelShader;
@@ -101,6 +105,8 @@ public struct SMaterial_WQ
     public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> VS_Samplers;
     public DynamicArray<Vec4> VS_CBuffers;
+    [SchemaField(0xE4)]
+    public FileHash VSVector4Container;
 
     [SchemaField(0x2B0)]
     public ShaderBytecode? PixelShader;

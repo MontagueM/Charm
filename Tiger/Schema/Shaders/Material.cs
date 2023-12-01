@@ -57,6 +57,7 @@ namespace Tiger.Schema.Shaders
         public ShaderBytecode? PixelShader { get; }
         public ShaderBytecode? ComputeShader { get; }
         public FileHash PSVector4Container { get; }
+        public FileHash VSVector4Container { get; }
         public List<DirectXSampler> PS_Samplers { get; }
         public List<DirectXSampler> VS_Samplers { get; }
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode { get; }
@@ -170,7 +171,7 @@ namespace Tiger.Schema.Shaders
             if (VertexShader != null && VertexShader.Hash.IsValid())
             {
                 string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
+                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, false) : "";
                 if (usf != String.Empty)
                 {
                     try
@@ -244,6 +245,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
+        public FileHash VSVector4Container => _tag.VSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
         public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
@@ -295,6 +297,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
+        public FileHash VSVector4Container => _tag.VSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
         public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
@@ -347,6 +350,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
+        public FileHash VSVector4Container => _tag.VSVector4Container;
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
         public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
         public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;

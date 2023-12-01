@@ -19,7 +19,7 @@ public class TfxBytecodeInterpreter
     public TfxBytecodeInterpreter(List<TfxData> opcodes)
     {
         Opcodes = opcodes ?? new List<TfxData>();
-        Stack = new(capacity: 128);
+        Stack = new(capacity: 64);
         Temp = new(capacity: 16);
     }
 
@@ -100,9 +100,13 @@ public class TfxBytecodeInterpreter
                         var max = StackPop(2);
                         StackPush($"(max({max[0]}, {max[1]}))");
                         break;
-                    case TfxBytecode.Unk0b: //????
-                        var Unk0b = StackPop(2);
-                        StackPush($"((({Unk0b[0]}*{Unk0b[1]}).zywy + ({Unk0b[0]}*{Unk0b[1]})).wzyx + (({Unk0b[0]}*{Unk0b[1]}).zywy + ({Unk0b[0]}*{Unk0b[1]})))");
+                    case TfxBytecode.LessThan: //I dont think I need to do < for each element?
+                        var lessThan = StackPop(2);
+                        StackPush(LessThan(lessThan[0], lessThan[1]));
+                        break;
+                    case TfxBytecode.Dot:
+                        var dot = StackPop(2);
+                        StackPush($"(dot4({dot[0]}, {dot[1]}))");
                         break;
                     case TfxBytecode.Merge_1_3:
                         var merge = StackPop(2);
@@ -112,9 +116,18 @@ public class TfxBytecodeInterpreter
                         var merge2_2 = StackPop(2);
                         StackPush($"(float4({merge2_2[0]}.x, {merge2_2[0]}.y, {merge2_2[1]}.x, {merge2_2[1]}.y))");
                         break;
-                    case TfxBytecode.Unk0f: //????
+                    case TfxBytecode.Unk0e: //Not correct
+                        var Unk0e = StackPop(2);
+                        StackPush($"(({Unk0e[0]} + {Unk0e[1]}) / 2.0)");
+                        break;
+                    case TfxBytecode.Unk0f:
                         var Unk0f = StackPop(2);
                         StackPush($"((({Unk0f[1]}.xxxx * {Unk0f[0]} + {Unk0f[1]}.yyyy) * ({Unk0f[0]} * {Unk0f[0]})) + ({Unk0f[1]}.zzzz * {Unk0f[0]} + {Unk0f[1]}.wwww))");
+                        break;
+                    case TfxBytecode.Unk10: //Im gonna call this SubMAD
+                        var unk10 = StackPop(3);
+                        string v33 = $"({unk10[1]}-{unk10[0]})";
+                        StackPush($"(({v33}*{unk10[2]})+{unk10[0]})");
                         break;
                     case TfxBytecode.MultiplyAdd:
                         var mulAdd = StackPop(3);
@@ -123,6 +136,10 @@ public class TfxBytecodeInterpreter
                     case TfxBytecode.Clamp:
                         var clamp = StackPop(3);
                         StackPush($"(clamp({clamp[0]}, {clamp[1]}, {clamp[2]}))");
+                        break;
+                    case TfxBytecode.Abs:
+                        var abs = StackTop();
+                        StackPush($"(abs({abs}))");
                         break;
                     case TfxBytecode.Sign:
                         var sign = StackTop();
@@ -136,17 +153,30 @@ public class TfxBytecodeInterpreter
                         var ceil = StackTop();
                         StackPush($"(ceil({ceil}))");
                         break;
-                    case TfxBytecode.Unk1a:
-                        var Unk1a = StackTop();
-                        StackPush($"(frac({Unk1a}))");
+                    case TfxBytecode.Round:
+                        var round = StackTop();
+                        //S2 material expressions dont support round, for some reason...
+                        StackPush($"(floor({round}+0.5))");
+                        break;
+                    case TfxBytecode.Frac:
+                        var frac = StackTop();
+                        StackPush($"(frac({frac}))");
                         break;
                     case TfxBytecode.Negate:
                         var negate = StackTop();
                         StackPush($"(-{negate})");
                         break;
-                    case TfxBytecode.Cosine:
-                        var cos = StackTop();
-                        StackPush($"(cos({cos}))");
+                    case TfxBytecode.VecRotSin:
+                        var VecRotSin = StackTop();
+                        StackPush(_trig_helper_vector_sin_rotations_estimate(VecRotSin));
+                        break;
+                    case TfxBytecode.VecRotCos:
+                        var VecRotCos = StackTop();
+                        StackPush(_trig_helper_vector_cos_rotations_estimate(VecRotCos));
+                        break;
+                    case TfxBytecode.VecRotSinCos:
+                        var VecRotSinCos = StackTop();
+                        StackPush(_trig_helper_vector_sin_cos_rotations_estimate(VecRotSinCos));
                         break;
                     case TfxBytecode.PermuteAllX:
                         var permutex = StackTop();
@@ -161,20 +191,30 @@ public class TfxBytecodeInterpreter
                         var saturate = StackTop();
                         StackPush($"(saturate({saturate}))");
                         break;
-                  
-                    case TfxBytecode.Unk2a:
-                        var Unk2a = StackTop();
-                        StackPush(bytecode_op_rand(Unk2a));
+                    case TfxBytecode.Triangle:
+                        var Triangle = StackTop();
+                        StackPush(bytecode_op_triangle(Triangle));
                         break;
-                    case TfxBytecode.Unk27: //bytecode_op_triangle
-                        var Unk27 = StackTop();
-                        StackPush($"(abs({Unk27} - floor({Unk27} + 0.5)) * 2.0)");
+                    case TfxBytecode.Jitter:
+                        var Jitter = StackTop();
+                        StackPush(bytecode_op_jitter(Jitter));
                         break;
-                    case TfxBytecode.Unk29: //bytecode_op_wander
-                        var Unk29 = StackTop();
-                        StackPush($"{bytecode_op_wander(Unk29)}");
+                    case TfxBytecode.Wander:
+                        var Wander = StackTop();
+                        StackPush($"{bytecode_op_wander(Wander)}");
                         break;
-
+                    case TfxBytecode.Rand:
+                        var Rand = StackTop();
+                        StackPush(bytecode_op_rand(Rand));
+                        break;
+                    case TfxBytecode.RandSmooth:
+                        var RandSmooth = StackTop();
+                        StackPush(bytecode_op_rand_smooth(RandSmooth));
+                        break;
+                    case TfxBytecode.TransformVec4:
+                        var TransformVec4 = StackPop(5);
+                        StackPush($"{mul_vec4(TransformVec4)}");
+                        break;
                     case TfxBytecode.PushConstantVec4:
                         var vec = constants[((PushConstantVec4Data)op.data).constant_index].Vec;
                         StackPush($"(float4({vec.X}, {vec.Y}, {vec.Z}, {vec.W}))");
@@ -186,7 +226,8 @@ public class TfxBytecodeInterpreter
 
                         StackPush($"(((float4{v2}-float4{v1})*{Unk35})+float4{v1})");
                         break;
-                    case TfxBytecode.UnkLoadConstant:
+                    case TfxBytecode.UnkLoadConstant: //Replaces the top of the stack instead of pushing?
+                        var take = StackTop(); //Just take the top out then push
                         var UnkLoadConstant = constants[((UnkLoadConstantData)op.data).constant_index].Vec;
                         StackPush($"(float4({UnkLoadConstant.X}, {UnkLoadConstant.Y}, {UnkLoadConstant.Z}, {UnkLoadConstant.W}))");
                         break;
@@ -218,17 +259,17 @@ public class TfxBytecodeInterpreter
                     case TfxBytecode.PushObjectChannelVector:
                     case TfxBytecode.Unk4e:
                     case TfxBytecode.Unk4f:
+                    case TfxBytecode.Unk50:
+                    case TfxBytecode.Unk52:
+                    case TfxBytecode.Unk53:
+                    case TfxBytecode.Unk54:
                         StackPush($"(float4(1, 1, 1, 1))");
                         break;
-
-                    case TfxBytecode.PopOutput: //??
-                        //Temp.Clear();
+                    case TfxBytecode.PushFromOutput:
+                        StackPush($"{hlsl[((PushFromOutputData)op.data).element]}");
+                        break;
+                    case TfxBytecode.PopOutput:
                         //Temp.AddRange(Stack);
-
-                        foreach (var a in Stack)
-                        {
-                            Console.WriteLine($"Stack Length {Stack.Count}, Stack Value {a}");
-                        }
 
                         if(Stack.Count == 0 || Stack.Count > 1) //Shouldnt happen
                             hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(1, 1, 1, 1)");
@@ -237,7 +278,19 @@ public class TfxBytecodeInterpreter
 
                         Stack.Clear();
                         break;
+                    case TfxBytecode.PopOutputMat4: //uhhhhh, im 100% doing this wrong
+                        var PopOutputMat4 = StackPop(4);
+                        var Mat4_1 = PopOutputMat4[0];
+                        var Mat4_2 = PopOutputMat4[1];
+                        var Mat4_3 = PopOutputMat4[2];
+                        var Mat4_4 = PopOutputMat4[3];
 
+                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot, Mat4_1);
+                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot+1, Mat4_2);
+                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot+2, Mat4_3);
+                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot+3, Mat4_4);
+                        Stack.Clear();
+                        break;
                     case TfxBytecode.PushTemp:
                         var PushTemp = ((PushTempData)op.data).slot;
                         StackPush(Temp[PushTemp]);
@@ -254,11 +307,6 @@ public class TfxBytecodeInterpreter
 
                 }    
             }
-            
-            //foreach (var a in Temp)
-            //{
-            //    Console.WriteLine($"Stack Length {Temp.Count}, Stack Value {a}");
-            //}
         }
         catch (Exception e)
         {
@@ -268,7 +316,7 @@ public class TfxBytecodeInterpreter
         return hlsl;
     }
 
-    private string GetExtern(TfxExtern extern_, byte element)
+    private string GetExtern(TfxExtern extern_, byte element, bool asFloat = false)
     {
         switch (extern_)
         {
@@ -276,7 +324,10 @@ public class TfxBytecodeInterpreter
                 switch (element)
                 {
                     case 0:
-                        return $"float4(Time, Time, 1, 1)";
+                        if(asFloat)
+                            return $"float4(Time, Time, Time, Time)";
+                        else
+                            return $"float4(Time, Time, 1, 1)";
                     case 1:
                         return $"float4(1, 1, 1, 1)"; // Exposure scales
                     case 4:
@@ -287,8 +338,17 @@ public class TfxBytecodeInterpreter
                 }
             default:
                 Log.Error($"Unsupported extern {extern_}[{element}]");
-                return $"float4(0, 0, 0, 0)";
+                return $"float4(1, 1, 1, 1)";
         }
+    }
+
+    private string bytecode_op_triangle(string x)
+    {
+        string wrapped = $"({x}-floor({x}+0.5))";   // wrap to [-0.5, 0.5] range
+        string abs_wrap = $"(abs({wrapped}))";      // abs turns into triangle wave between [0, 0.5]
+        string triangle_result = $"({abs_wrap}*2)"; // scale to [0, 1] range
+
+        return triangle_result;
     }
 
     private string bytecode_op_jitter(string x)
@@ -322,6 +382,86 @@ public class TfxBytecodeInterpreter
         return val0;
     }
 
+    private string bytecode_op_rand_smooth(string X)
+    {
+        string v = $"({X}.x)";
+        string v0 = $"(floor({v}+0.5))";
+        string v1 = $"({v0}+1.0)";
+        string f = $"({v} - {v0})";
+        string f2 = $"({f} * {f})";
+
+        // hermite smooth interpolation (3*f^2 - 2*f^3)
+        string smooth_f = $"((-2.0 * {f} + 3.0) * {f2})";
+
+        // these magic numbers are 1/(prime/1000000)
+        string val0 = $"(dot4({v0}.xxxx, float4(1.0 / 1.043501, 1.0 / 0.794471, 1.0 / 0.113777, 1.0 / 0.015101)))";
+        string val1 = $"(dot4({v1}.xxxx, float4(1.0 / 1.043501, 1.0 / 0.794471, 1.0 / 0.113777, 1.0 / 0.015101)))";
+
+        val0 = $"(frac({val0}))";
+        val1 = $"(frac({val1}))";
+
+        //			val0=	bbs(val0);		// Blum-Blum-Shub randomimzer
+        val0 = 
+        val0 = $"(frac({val0}))";
+
+        //			val10=	bbs(val1);		// Blum-Blum-Shub randomimzer
+        val1 = $"({val1} * {val1} * 251.0)";
+        val1 = $"(frac({val1}))";
+
+        string rand_smooth_result = $"(lerp({val0}, {val1}, {smooth_f}).xxxx)";
+
+        return rand_smooth_result;
+    }
+
+    private string mul_vec4(List<string> TransformVec4) //probably wrong
+    {
+        var x_axis = TransformVec4[0];
+        var y_axis = TransformVec4[1];
+        var z_axis = TransformVec4[2];
+        var w_axis = TransformVec4[3];
+        var value = TransformVec4[4];
+
+        string res = $"({x_axis}*{value}.xxxx)";  //x_axis.mul(rhs.xxxx());
+        res = $"({res}+({y_axis}*{value}.yyyy))"; //res = res.add(self.y_axis.mul(rhs.yyyy()));
+        res = $"({res}+({z_axis}*{value}.zzzz))"; //res = res.add(self.z_axis.mul(rhs.zzzz()));
+        res = $"({res}+({w_axis}*{value}.wwww))"; //res = res.add(self.w_axis.mul(rhs.wwww()));
+
+        return res;
+    }
+
+    private string GreaterThan(string a, string b)
+    {
+        return $"({a} > {b})";
+    }
+
+    private string LessThan(string a, string b)
+    {
+        return $"({a} < {b})";
+    }
+
+    private string _trig_helper_vector_sin_rotations_estimate_clamped(string a)
+    {
+        string y = $"({a}*(-16*abs({a})+8))";
+        return $"({y}*(0.225*abs({y})+0.775))";
+    }
+
+    private string _trig_helper_vector_sin_rotations_estimate(string a)
+    {
+        string w = $"({a}-(floor({a}+0.5)))"; // wrap to [-0.5, 0.5] range
+        return _trig_helper_vector_sin_rotations_estimate_clamped(w);
+    }
+
+    private string _trig_helper_vector_sin_cos_rotations_estimate(string a)
+    {
+        return _trig_helper_vector_sin_rotations_estimate($"({a}+float4(0.0, 0.25, 0.0, 0.25))");
+    }
+
+    private string _trig_helper_vector_cos_rotations_estimate(string a)
+    {
+        return _trig_helper_vector_sin_rotations_estimate($"({a}+0.25)");
+    }
+
+    //pseudo
     private string _trig_helper_vector_pseudo_sin_rotations(string a)
     {
         string w = $"({a}-floor({a} + 0.5))";

@@ -126,14 +126,14 @@ public class TfxBytecodeOp
                     PopOutputData.slot = reader.ReadByte();
                     tfxData.data = PopOutputData;
                     break;
-                case TfxBytecode.Unk43:
-                    Unk43Data Unk43Data = new();
-                    Unk43Data.unk1 = reader.ReadByte();
+                case TfxBytecode.PushFromOutput:
+                    PushFromOutputData Unk43Data = new();
+                    Unk43Data.element = reader.ReadByte();
                     tfxData.data = Unk43Data;
                     break;
-                case TfxBytecode.Unk45:
-                    Unk45Data Unk45Data = new();
-                    Unk45Data.unk1 = reader.ReadByte();
+                case TfxBytecode.PopOutputMat4:
+                    PopOutputMat4Data Unk45Data = new();
+                    Unk45Data.slot = reader.ReadByte();
                     tfxData.data = Unk45Data;
                     break;
                 case TfxBytecode.PushTemp:
@@ -248,7 +248,7 @@ public class TfxBytecodeOp
                 output = $"unk1 {((Unk3aData)tfxData.data).unk1}";
                 break;
             case UnkLoadConstantData:
-                output = $"constant_index {((UnkLoadConstantData)tfxData.data).constant_index}: Constant value: {constants[((UnkLoadConstantData)tfxData.data).constant_index]}";
+                output = $"constant_index {((UnkLoadConstantData)tfxData.data).constant_index}: Constant value: {constants[((UnkLoadConstantData)tfxData.data).constant_index].Vec}";
                 break;
             case PushExternInputFloatData:
                 output = $"extern {((PushExternInputFloatData)tfxData.data).extern_}, element {((PushExternInputFloatData)tfxData.data).element}";
@@ -271,8 +271,8 @@ public class TfxBytecodeOp
             case PopOutputData:
                 output = $"slot {((PopOutputData)tfxData.data).slot}";
                 break;
-            case Unk43Data:
-                output = $"unk1 {((Unk43Data)tfxData.data).unk1}";
+            case PushFromOutputData:
+                output = $"element {((PushFromOutputData)tfxData.data).element}";
                 break;
             case StoreToBufferData:
                 output = $"element {((StoreToBufferData)tfxData.data).element}";
@@ -350,7 +350,8 @@ public enum TfxBytecode : byte
     IsZero = 0x07,
     Min = 0x08,
     Max = 0x09,
-    Unk0b = 0x0b,
+    LessThan = 0x0a,
+    Dot = 0x0b,
     Merge_1_3 = 0x0c,
     Merge_2_2 = 0x0d,
     Unk0e = 0x0e,
@@ -359,29 +360,31 @@ public enum TfxBytecode : byte
     Unk11 = 0x11,
     MultiplyAdd = 0x12,
     Clamp = 0x13,
-    Unk15 = 0x15,
+    Abs = 0x15,
     Sign = 0x16,
     Floor = 0x17,
     Ceil = 0x18,
-    Unk1a = 0x1a,
+    Round = 0x19,
+    Frac = 0x1a,
     Unk1b = 0x1b,
     Unk1c = 0x1c,
     Negate = 0x1d,
-    Cosine = 0x1f,
-    Unk20 = 0x20,
+    VecRotSin = 0x1e,
+    VecRotCos = 0x1f,
+    VecRotSinCos = 0x20,
     PermuteAllX = 0x21,
     Permute = 0x22, //{ fields: u8 }
     Saturate = 0x23,
     Unk25 = 0x25,
     Unk26 = 0x26,
-    Unk27 = 0x27, //triangle?
-    Unk28 = 0x28, //jitter?
-    Unk29 = 0x29, //wander?
-    Unk2a = 0x2a, //rand?
-    Unk2b = 0x2b, //rand_smooth?
+    Triangle = 0x27,
+    Jitter = 0x28,
+    Wander = 0x29,
+    Rand = 0x2a,
+    RandSmooth = 0x2b,
     Unk2c = 0x2c,
     Unk2d = 0x2d,
-    Unk2e = 0x2e,
+    TransformVec4 = 0x2e,
     PushConstantVec4 = 0x34, //{ constant_index: u8 }
     Unk35 = 0x35, //{ unk1: u8 }
     Spline4Const = 0x37, //{ unk1: u8 }
@@ -396,9 +399,9 @@ public enum TfxBytecode : byte
     PushExternInputU32 = 0x40, //{ extern_: TfxExtern, unk2: u8 }
     PushExternInputU64Unknown = 0x41, //{ extern_: TfxExtern, unk2: u8 }
     Unk42 = 0x42,
-    Unk43 = 0x43, //{ unk1: u8 } //storetobuffer?
+    PushFromOutput = 0x43, //{ unk1: u8 }
     PopOutput = 0x44, //{ element: u8 }
-    Unk45 = 0x45, //{ slot: u8 }
+    PopOutputMat4 = 0x45, //{ slot: u8 }
     PushTemp = 0x46, //{ slot: u8 }
     PopTemp = 0x47, //{ unk1: u8 }
     Unk48 = 0x48, //{ unk1: u8 }
@@ -512,14 +515,14 @@ public struct StoreToBufferData
     public byte element;
 }
 
-public struct Unk43Data
+public struct PushFromOutputData
 {
-    public byte unk1;
+    public byte element;
 }
 
-public struct Unk45Data
+public struct PopOutputMat4Data
 {
-    public byte unk1;
+    public byte slot;
 }
 
 public struct PushTempData
