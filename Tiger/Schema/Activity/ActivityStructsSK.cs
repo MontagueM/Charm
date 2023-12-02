@@ -74,12 +74,13 @@ public struct SUnkActivity_SK
     public TigerHash Unk20;
     public TigerHash Unk24;
     public LocalizedStrings LocalizedStrings;
-    // [SchemaField(0x30)]
-    // public StringPointer ActivityDevName;
+    [SchemaField(0x30)]
+    public StringPointer ActivityDevName;
     // public Tag Unk38;  // 80978080
-    // [SchemaField(0x40)]
-    // public DynamicArray<S4A928080> Unk40;
-    // public DynamicArray<S4D928080> Unk50;
+    //[SchemaField(0x40)]
+    //public DynamicArray<S4A928080> Unk40;
+    [SchemaField(0x50)]
+    public DynamicArray<S4D928080> Unk50;
     // [SchemaField(0x78)]
     // public Tag Unk78;
     // [SchemaField(0x80)]
@@ -112,7 +113,7 @@ public struct S4F928080
     public uint Unk20;
     [SchemaField(0x40)]
     public StringHash UnkName1;
-    public Tag<S5B928080> Unk44;
+    public Tag Unk44;
     public uint Unk48;
 }
 
@@ -131,17 +132,42 @@ public struct S5E928080
     public long FileSize;
     public DynamicArray<S60928080> Unk08;
     public DynamicArray<S60928080> Unk18;
-    public DynamicArray<S60928080> Unk28; // there's probably another one here
+    public DynamicArray<S60928080> Unk28; //This sometimes crashes for some reason...?
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6098080", 0x04)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "60928080", 0x4)]
 public struct S60928080
 {
     public Tag<S62948080> Unk00;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6098080", 0x04)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "62948080", 0x58)]
 public struct S62948080
 {
-    public Tag<S62948080> Unk00;
+    public long FileSize;
+    public TigerHash Unk08; //BubbleName?
+    public TigerHash Unk0C; //ActivityPhaseName?
+
+    [SchemaField(0x38)]
+    public DynamicArray<S64948080> Unk38;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "64948080", 0x1C)]
+public struct S64948080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<S66948080> Unk08;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "66948080", 0x4)]
+public struct S66948080
+{
+    public Tag<S68948080> Unk00;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "68948080", 0x20)]
+public struct S68948080
+{
+    public long FileSize;
+    public Tag<SMapDataTable> DataTable;
 }

@@ -47,6 +47,7 @@ namespace Tiger.Schema.Shaders
     public interface IMaterial : ISchema
     {
         public FileHash FileHash { get; }
+        public uint Unk0C { get; } //Seems to be backface culling
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
         public ShaderBytecode? VertexShader { get; }
@@ -60,6 +61,7 @@ namespace Tiger.Schema.Shaders
         public DynamicArray<D2Class_09008080> Unk2D0 { get; }
         public DynamicArray<Vec4> Unk2E0 { get; }
         public DynamicArray<Vec4> Unk300 { get; }
+
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
@@ -123,8 +125,8 @@ namespace Tiger.Schema.Shaders
         {
             if (PixelShader != null && PixelShader.Hash.IsValid())
             {
-                string pixel = Decompile(PixelShader.GetBytecode(), $"ps{FileHash}");
-                string vertex = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
+                string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
+                string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
                 string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
                 string vfx = Source2Handler.source2Shaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
 
@@ -144,9 +146,9 @@ namespace Tiger.Schema.Shaders
                     {
                         File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
                     }
-                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{FileHash}.shader"))
+                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader"))
                     {
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{FileHash}.shader", vfx);
+                        File.WriteAllText($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader", vfx);
                     }
                 }
                 catch (IOException)  // threading error
@@ -164,8 +166,8 @@ namespace Tiger.Schema.Shaders
             Directory.CreateDirectory($"{saveDirectory}");
             if (VertexShader != null && VertexShader.Hash.IsValid())
             {
-                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{FileHash}");
-                string usf = new UsfConverter().HlslToUsf(this, hlsl, true);
+                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
+                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
                 if (usf != String.Empty)
                 {
                     try
@@ -200,6 +202,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
     public class Material : Tag<SMaterial_SK>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
@@ -239,6 +242,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
     public class Material : Tag<SMaterial_BL>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;
@@ -279,6 +283,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
     public class Material : Tag<SMaterial_WQ>, IMaterial
     {
         public FileHash FileHash => Hash;
+        public uint Unk0C => _tag.Unk0C;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public FileHash PSVector4Container => _tag.PSVector4Container;

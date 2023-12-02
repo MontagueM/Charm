@@ -338,7 +338,9 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 // it can be longer here, its not broken i think
                 if (handle.BaseStream.Length <= handle.BaseStream.Position)
                 {
-                    part.VertexColours.Add(new Vector4(0, 0, 0, 0));
+                    handle.BaseStream.Position = handle.BaseStream.Length-4;
+                    part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                        handle.ReadByte()));
                 }
                 else
                 {
@@ -381,7 +383,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                  */
 
                 // new code vvv
-                VertexWeight vw = new();
+                VertexWeight vw = new VertexWeight();
                 short w = (short)dynamicPart.VertexPositions[dynamicPart.VertexIndexMap[vertexIndex]].W;
                 if (w >= 0 && w < 0x800)
                 {
@@ -399,7 +401,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 }
                 else
                 {
-                    chunkIndex = w - 0x800; // remove the flag
+                    chunkIndex = w - 0x800;  // remove the flag
                     weightCount = 2;
                 }
 
@@ -415,17 +417,25 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 }
                 else
                 {
+                    // always the first two weights valid then the second group can be one or two
                     handle.BaseStream.Seek(chunkIndex * 0x20 + (vertexIndex % 4) * 8, SeekOrigin.Begin);
-                    vw.WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
-                        handle.ReadByte());
-                    if (vw.WeightValues.X + vw.WeightValues.Y + vw.WeightValues.Z == 255)
+                    vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
+                    vw.WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0);
+                    // if (vw.WeightValues.X + vw.WeightValues.Y + vw.WeightValues.Z == 255)
+                    // {
+                    //     vw.WeightValues.W = 0;
+                    // }
+                    vw.WeightIndices.Z = handle.ReadByte();
+                    vw.WeightIndices.W = handle.ReadByte();
+                    vw.WeightValues.Z = handle.ReadByte();
+                    if (vw.WeightIndices.Z == vw.WeightIndices.W)
                     {
-                        vw.WeightValues.W = 0;
+                        vw.WeightIndices.W = 0;
                     }
-
-                    vw.WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
-                        handle.ReadByte());
-                    // Debug.Assert(vw.WeightValues.X + vw.WeightValues.Y + vw.WeightValues.Z + vw.WeightValues.W == 255);
+                    else
+                    {
+                        vw.WeightValues.W = handle.ReadByte();
+                    }
                     dynamicPart.VertexWeights.Add(vw);
                 }
 
@@ -438,32 +448,42 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     }
 
     public void ReadVertexDataSignatures(MeshPart part, HashSet<uint> uniqueVertexIndices,
-        List<InputSignature> inputSignatures)
+        List<InputSignature> inputSignatures, bool isTerrain = false)
     {
         using var reader = GetReferenceReader();
         foreach (uint vertexIndex in uniqueVertexIndices)
         {
-            ReadVertexDataSignature(reader, part, vertexIndex, inputSignatures);
+            ReadVertexDataSignature(reader, part, vertexIndex, inputSignatures, isTerrain);
         }
     }
 
     private void ReadVertexDataSignature(TigerReader reader, MeshPart part, uint vertexIndex,
-        List<InputSignature> inputSignatures)
+        List<InputSignature> inputSignatures, bool isTerrain = false)
     {
         reader.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
+
         foreach (InputSignature inputSignature in inputSignatures)
         {
             switch (inputSignature.Semantic)
             {
                 case InputSemantic.Position:
-                    part.VertexPositions.Add(new Vector4(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(),
-                        reader.ReadInt16(), true));
+                    if(isTerrain) //has to be a float
+                    {
+                        part.VertexPositions.Add(new Vector4((float)reader.ReadInt16(), (float)reader.ReadInt16(), (float)reader.ReadInt16(),
+                            (float)reader.ReadInt16()));
+                    }
+                    else
+                        part.VertexPositions.Add(new Vector4(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(),
+                            reader.ReadInt16()));
                     break;
                 case InputSemantic.Texcoord:
                     switch (inputSignature.Mask)
                     {
                         case ComponentMask.XY:
-                            part.VertexTexcoords0.Add(new Vector2(reader.ReadInt16(), reader.ReadInt16()));
+                            if(isTerrain)
+                                part.VertexTexcoords0.Add(new Vector2(reader.ReadHalf(), reader.ReadHalf()));
+                            else
+                                part.VertexTexcoords0.Add(new Vector2(reader.ReadInt16(), reader.ReadInt16()));
                             break;
                         case ComponentMask.XYZW:
                             part.VertexTexcoords0.Add(new Vector2(reader.ReadInt16(), reader.ReadInt16()));
@@ -514,6 +534,17 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 case InputSemantic.Colour:
                     part.VertexColours.Add(new Vector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
                         reader.ReadByte()));
+                    break;
+                case InputSemantic.BlendIndices:
+                    //Indices get set in BlendWeight
+                    break;
+                case InputSemantic.BlendWeight:
+                    //VertexWeight vw = new()
+                    //{
+                    //    WeightIndices = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
+                    //    WeightValues = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
+                    //};
+                    //(part as DynamicMeshPart).VertexWeights.Add(vw);
                     break;
                 default:
                     throw new NotImplementedException();

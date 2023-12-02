@@ -265,9 +265,12 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                     var v3ne = ConsiderQuatToEulerConvert(v4n);
                     SharpDX.Vector3 n = new SharpDX.Vector3(v3ne.X, v3ne.Y, v3ne.Z);
                     normals.Add(n);
-                    var v2t = part.BasePart.VertexTexcoords0[lookup[(int)vertexIndex]];
-                    SharpDX.Vector2 t = new SharpDX.Vector2(v2t.X, v2t.Y);
-                    textureCoordinates.Add(t);
+                    if(part.BasePart.VertexTexcoords0.Count > 0)
+                    {
+                        var v2t = part.BasePart.VertexTexcoords0[lookup[(int)vertexIndex]];
+                        SharpDX.Vector2 t = new SharpDX.Vector2(v2t.X, v2t.Y);
+                        textureCoordinates.Add(t);
+                    }
                 }
                 foreach (UIntVector3 face in part.BasePart.Indices)
                 {

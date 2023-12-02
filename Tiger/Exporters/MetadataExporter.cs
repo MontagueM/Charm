@@ -34,6 +34,12 @@ class MetadataScene
         _config.TryAdd("Instances", instances);
         ConcurrentDictionary<string, ConcurrentBag<JsonCubemap>> cubemaps = new();
         _config.TryAdd("Cubemaps", cubemaps);
+        ConcurrentDictionary<string, ConcurrentBag<JsonLight>> pointLights = new();
+        _config.TryAdd("Lights", pointLights);
+        ConcurrentDictionary<string, ConcurrentBag<JsonDecal>> decals = new ConcurrentDictionary<string, ConcurrentBag<JsonDecal>>();
+        _config.TryAdd("Decals", decals);
+        ConcurrentDictionary<string, ConcurrentBag<string>> terrainDyemaps = new ConcurrentDictionary<string, ConcurrentBag<string>>();
+        _config.TryAdd("TerrainDyemaps", terrainDyemaps);
 
         if (ConfigSubsystem.Get().GetUnrealInteropEnabled())
         {
@@ -84,7 +90,69 @@ class MetadataScene
 
         foreach (CubemapResource cubemap in scene.Cubemaps)
         {
-            AddCubemap(cubemap.CubemapName, cubemap.CubemapSize.ToVec3(), cubemap.CubemapRotation, cubemap.CubemapPosition.ToVec3());
+            AddCubemap(cubemap.CubemapName,
+                cubemap.CubemapSize.ToVec3(),
+                cubemap.CubemapRotation,
+                cubemap.CubemapPosition.ToVec3(),
+                cubemap.CubemapTexture != null ? cubemap.CubemapTexture.Hash : "");
+        }
+        foreach (var mapLight in scene.MapLights)
+        {
+            for (int i = 0; i < mapLight.Unk10.TagData.Unk30.Count; i++)
+            {
+                var data = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_SHADOWKEEP_2601 ? mapLight.Unk10.TagData.Unk30[i].UnkCC : mapLight.Unk10.TagData.Unk30[i].UnkD0;
+                if (data is null)
+                    continue;
+                AddLight(
+                    data.Hash,
+                    "Point",
+                    mapLight.Unk10.TagData.Unk40[i].Translation,
+                    mapLight.Unk10.TagData.Unk40[i].Rotation,
+                    new Vector2(1,1), //new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
+                    (data.TagData.Unk40.Count > 0 ? data.TagData.Unk40[0].Vec : data.TagData.Unk60[0].Vec));
+            }
+        }
+        foreach(SMapDecalsResource decal in scene.Decals)
+        {
+            if (decal.MapDecals is not null)
+            {
+                foreach (var item in decal.MapDecals.TagData.DecalResources)
+                {
+                    // Check if the index is within the bounds of the second list
+                    if (item.StartIndex >= 0 && item.StartIndex < decal.MapDecals.TagData.Locations.Count)
+                    {
+                        // Loop through the second list based on the given parameters
+                        for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decal.MapDecals.TagData.Locations.Count; i++)
+                        {
+                            var location = decal.MapDecals.TagData.Locations[i].Location;
+                            var boxCorners = decal.MapDecals.TagData.DecalProjectionBounds.TagData.InstanceBounds[i];
+
+                            AddDecal(boxCorners.Unk24.ToString(), item.Material.FileHash, location, boxCorners.Corner1, boxCorners.Corner2);
+                            AddMaterial(item.Material);
+                        }
+                    }
+                }
+            }
+
+        }
+        foreach (var mapLight in scene.MapSpotLights)
+        {
+            foreach(var entry in mapLight.Value)
+            {
+                AddLight(
+                    mapLight.Key,
+                    "Spot",
+                    new Vector4(entry.Position.X, entry.Position.Y, entry.Position.Z, 1),
+                    entry.Quaternion,
+                    new Vector2(1.0, 1.0),
+                    new Vector4(1.0,1.0,1.0,1.0));
+            }
+        }
+
+        foreach(var dyemaps in scene.TerrainDyemaps)
+        {
+            foreach(var dyemap in dyemaps.Value)
+                AddTerrainDyemap(dyemaps.Key, dyemap);
         }
     }
 
@@ -155,7 +223,7 @@ class MetadataScene
             {
                 Translation = new[] { transform.Position.X, transform.Position.Y, transform.Position.Z },
                 Rotation = new[] { transform.Quaternion.X, transform.Quaternion.Y, transform.Quaternion.Z, transform.Quaternion.W },
-                Scale = transform.Scale.X
+                Scale = new[] { transform.Scale.X, transform.Scale.Y, transform.Scale.Z }
             });
         }
     }
@@ -171,7 +239,7 @@ class MetadataScene
         _config["Materials"][material]["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb() });
     }
 
-    public void AddCubemap(string name, Vector3 scale, Vector4 quatRotation, Vector3 translation)
+    public void AddCubemap(string name, Vector3 scale, Vector4 quatRotation, Vector3 translation, string texHash)
     {
         if (!_config["Cubemaps"].ContainsKey(name))
         {
@@ -181,12 +249,68 @@ class MetadataScene
         {
             Translation = new[] { translation.X, translation.Y, translation.Z },
             Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
-            Scale = new[] { scale.X, scale.Y, scale.Z }
+            Scale = new[] { scale.X, scale.Y, scale.Z },
+            Texture = texHash
         });
+    }
+
+    public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color)
+    {
+        //Idk how color/intensity is handled, so if its above 1 just bring it down
+        float R = color.X > 1 ? color.X / 100 : color.X;
+        float G = color.Y > 1 ? color.Y / 100 : color.Y;
+        float B = color.Z > 1 ? color.Z / 100 : color.Z;
+
+        if (!_config["Lights"].ContainsKey(name))
+        {
+            _config["Lights"][name] = new ConcurrentBag<JsonLight>();
+        }
+        _config["Lights"][name].Add(new JsonLight
+        {
+            Type = type,
+            Translation = new[] { translation.X, translation.Y, translation.Z },
+            Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
+            Size = new[] { size.X, size.Y },
+            Color = new[] { R, G, B }
+        });
+    }
+
+    public void AddDecal(string boxhash, string materialName, Vector4 origin, Vector4 corner1, Vector4 corner2)
+    {
+        if (!_config["Decals"].ContainsKey(boxhash))
+        {
+            _config["Decals"][boxhash] = new ConcurrentBag<JsonDecal>();
+        }
+        _config["Decals"][boxhash].Add(new JsonDecal
+        {
+            Material = materialName,
+            Origin = new[] { origin.X, origin.Y, origin.Z },
+            Scale = origin.W,
+            Corner1 = new[] { corner1.X, corner1.Y, corner1.Z },
+            Corner2 = new[] { corner2.X, corner2.Y, corner2.Z }
+        });
+    }
+
+    public void AddTerrainDyemap(string modelHash, FileHash dyemapHash)
+    {
+        if (!_config["TerrainDyemaps"].ContainsKey(modelHash))
+        {
+            _config["TerrainDyemaps"][modelHash] = new ConcurrentBag<string>();
+        }
+        _config["TerrainDyemaps"][modelHash].Add(dyemapHash);
     }
 
     public void WriteToFile(string path)
     {
+        if (_config["Lights"].Count == 0
+            && _config["Materials"].Count == 0
+            && _config["Cubemaps"].Count == 0
+            && _config["Instances"].Count == 0
+            && _config["Parts"].Count == 0
+            && _config["Decals"].Count == 0
+            && _exportType is not ExportType.EntityPoints)
+            return; //Dont export if theres nothing in the cfg (this is kind of a mess though)
+
         if (_exportType is ExportType.Static or ExportType.Entity)
         {
             path = Path.Join(path, _config["MeshName"]);
@@ -216,30 +340,19 @@ class MetadataScene
         }
 
 
-        //im not smart enough to have done this, so i made an ai do it lol
         //this just sorts the "instances" part of the cfg so its ordered by scale
         //makes it easier for instancing models in Hammer/S&Box
-
         var sortedDict = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
 
-        // Use LINQ's OrderBy method to sort the values in each array
-        // based on the "Scale" key. The lambda expression specifies that
-        // the "Scale" property should be used as the key for the order.
         foreach (var keyValuePair in (ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>)_config["Instances"])
         {
             var array = keyValuePair.Value;
-            var sortedArray = array.OrderBy(x => x.Scale);
+            var sortedArray = array.OrderBy(x => x.Scale[0]);
 
-            // Convert the sorted array to a ConcurrentBag
             var sortedBag = new ConcurrentBag<JsonInstance>(sortedArray);
-
-            // Add the sorted bag to the dictionary
             sortedDict.TryAdd(keyValuePair.Key, sortedBag);
         }
-
-        // Finally, update the _config["Instances"] object with the sorted values
         _config["Instances"] = sortedDict;
-
 
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
         if (_config.ContainsKey("MeshName"))
@@ -256,7 +369,7 @@ class MetadataScene
     {
         public float[] Translation;
         public float[] Rotation;  // Quaternion
-        public float Scale;
+        public float[] Scale;
     }
 
     private struct JsonCubemap
@@ -264,6 +377,24 @@ class MetadataScene
         public float[] Translation;
         public float[] Rotation;
         public float[] Scale;
+        public string Texture;
+    }
+
+    private struct JsonLight
+    {
+        public string Type;
+        public float[] Translation;
+        public float[] Rotation;
+        public float[] Size;
+        public float[] Color;
+    }
+    private struct JsonDecal
+    {
+        public string Material;
+        public float[] Origin;
+        public float Scale;
+        public float[] Corner1;
+        public float[] Corner2;
     }
 }
 

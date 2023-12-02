@@ -100,6 +100,10 @@ public partial class EntityView : UserControl
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
                 entity.SaveTexturePlates(savePath);
             }
+            if (ConfigSubsystem.Get().GetS2VMDLExportEnabled())
+            {
+                Source2Handler.SaveEntityVMDL($"{savePath}", entity);
+            }
         }
 
         if (exportType == ExportTypeFlag.Full)
@@ -163,10 +167,11 @@ public partial class EntityView : UserControl
 
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
-        string meshName = name;
+        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
-        AutomatedExporter.SaveBlenderApiFile(savePath, string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())),
+        AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
             config.GetOutputTextureFormat(), dyes.Values.ToList());
     }
 }
