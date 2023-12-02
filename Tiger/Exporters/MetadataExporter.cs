@@ -340,30 +340,19 @@ class MetadataScene
         }
 
 
-        //im not smart enough to have done this, so i made an ai do it lol
         //this just sorts the "instances" part of the cfg so its ordered by scale
         //makes it easier for instancing models in Hammer/S&Box
-
         var sortedDict = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
 
-        // Use LINQ's OrderBy method to sort the values in each array
-        // based on the "Scale" key. The lambda expression specifies that
-        // the "Scale" property should be used as the key for the order.
         foreach (var keyValuePair in (ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>)_config["Instances"])
         {
             var array = keyValuePair.Value;
             var sortedArray = array.OrderBy(x => x.Scale[0]);
 
-            // Convert the sorted array to a ConcurrentBag
             var sortedBag = new ConcurrentBag<JsonInstance>(sortedArray);
-
-            // Add the sorted bag to the dictionary
             sortedDict.TryAdd(keyValuePair.Key, sortedBag);
         }
-
-        // Finally, update the _config["Instances"] object with the sorted values
         _config["Instances"] = sortedDict;
-
 
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
         if (_config.ContainsKey("MeshName"))

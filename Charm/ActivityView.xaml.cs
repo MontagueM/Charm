@@ -22,8 +22,8 @@ public partial class ActivityView : UserControl
         MainWindow.Progress.SetProgressStages(new List<string>
         {
             "loading activity tag",
-            "loading map ui",
-            "loading map entities ui",
+            "loading static map ui",
+            "loading map resources ui",
             "loading dialogue ui",
             "loading directive ui",
             "loading music ui",

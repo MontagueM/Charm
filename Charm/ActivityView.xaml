@@ -10,10 +10,10 @@
     mc:Ignorable="d">
     <Grid>
         <TabControl x:Name="ActivityTabControl">
-            <TabItem x:Name="MapTab" Header="MAP">
+            <TabItem x:Name="MapTab" Header="STATIC MAP">
                 <local:ActivityMapView x:Name="MapControl" />
             </TabItem>
-            <TabItem x:Name="EntityTab" Header="ENTITIES">
+            <TabItem x:Name="EntityTab" Header="MAP RESOURCES">
                 <local:ActivityMapEntityView x:Name="MapEntityControl" />
             </TabItem>
             <TabItem x:Name="DialogueTab" Header="DIALOGUE">

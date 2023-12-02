@@ -28,7 +28,7 @@ public partial class ActivityMapView : UserControl
     public void LoadUI(IActivity activity)
     {
         MapList.ItemsSource = GetMapList(activity);
-        ExportControl.SetExportFunction(ExportFull, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.Minimal | (int)ExportTypeFlag.ArrangedMap | (int)ExportTypeFlag.TerrainOnly, true);
+        ExportControl.SetExportFunction(ExportFull, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.ArrangedMap, true);
         ExportControl.SetExportInfo(activity.FileHash);
     }
 
@@ -64,12 +64,6 @@ public partial class ActivityMapView : UserControl
         FileHash hash = new FileHash((sender as Button).Tag as string);
         Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
         PopulateStaticList(bubbleMaps);
-    }
-
-    private void StaticMapPart_OnCheck(object sender, RoutedEventArgs e)
-    {
-        FileHash hash = new FileHash((sender as CheckBox).Tag as string);
-        Tag<SMapContainer> map = FileResourcer.Get().GetSchemaTag<SMapContainer>(hash);
     }
 
     private void PopulateStaticList(Tag<SBubbleDefinition> bubbleMaps)
@@ -145,24 +139,7 @@ public partial class ActivityMapView : UserControl
         // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
         Parallel.ForEach(maps, map =>
         {
-            if (info.ExportType == ExportTypeFlag.Full)
-            {
-                MapView.ExportFullMap(map);
-                MapView.ExportTerrainMap(map);
-            }
-            else if (info.ExportType == ExportTypeFlag.TerrainOnly)
-            {
-                MapView.ExportTerrainMap(map);
-            }
-            else if (info.ExportType == ExportTypeFlag.Minimal)
-            {
-                MapView.ExportMinimalMap(map, info.ExportType);
-            }
-            else
-            {
-                MapView.ExportMinimalMap(map, info.ExportType);
-            }
-
+            MapView.ExportFullMap(map, info.ExportType);
             MainWindow.Progress.CompleteStage();
         });
         // MapView.ExportFullMap(staticMapData);
@@ -194,8 +171,8 @@ public partial class ActivityMapView : UserControl
             List<string> mapStages = items.Select(x => $"loading to ui: {x.Hash}").ToList();
             if (mapStages.Count == 0)
             {
-                Log.Error("No maps selected for export.");
-                MessageBox.Show("No maps selected for export.");
+                Log.Error("No maps available for viewing.");
+                MessageBox.Show("No maps available for viewing.");
                 return;
             }
             MainWindow.Progress.SetProgressStages(mapStages);

@@ -20,6 +20,7 @@ using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Static;
 
 namespace Charm;
 
@@ -54,7 +55,6 @@ public partial class ActivityMapEntityView : UserControl
             maps.Add(displayMap);
         }
 
-        //SK needs implemented
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
             DisplayEntBubble displayActivity = new();
@@ -359,24 +359,22 @@ public partial class ActivityMapEntityView : UserControl
         ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{hash}_EntityPoints", ExportType.EntityPoints);
         ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.Map);
         ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyEnts", ExportType.Map);
+        ExporterScene terrainScene = Exporter.Get().CreateScene($"{hash}_Terrain", ExportType.Terrain);
 
         Parallel.ForEach(dataTables, data =>
         {
             var dataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
             dataTable.TagData.DataEntries.ForEach(entry =>
             {
-                if (entry is SMapDataEntry dynamicResource)
+                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
+                if (entity.HasGeometry())
                 {
-                    Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                    if (entity.HasGeometry())
-                    {
-                        dynamicScene.AddMapEntity(dynamicResource, entity);
-                        entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
-                    }
-                    else
-                        dynamicPointScene.AddEntityPoints(dynamicResource);
+                    dynamicScene.AddMapEntity(entry, entity);
+                    entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
                 }
-
+                else
+                    dynamicPointScene.AddEntityPoints(entry);
+                
                 switch (entry.DataResource.GetValue(dataTable.GetReader()))
                 {
                     case SMapSkyEntResource skyResource:
@@ -409,15 +407,16 @@ public partial class ActivityMapEntityView : UserControl
                             }
                         }
                         break;
-
                     case CubemapResource cubemap:
                         dynamicScene.AddCubemap(cubemap);
                         break;
-
                     case SMapLightResource mapLight:
                         dynamicScene.AddMapLight(mapLight);
                         break;
-
+                    case SMapSpotLightResource spotLight:
+                        if (spotLight.Unk10 is not null)
+                            dynamicScene.AddMapSpotLight(entry, spotLight);
+                        break;
                     case SMapDecalsResource decals:
                         if (decals.MapDecals is null || decals.MapDecals.TagData.DecalResources is null)
                             return;
@@ -434,12 +433,9 @@ public partial class ActivityMapEntityView : UserControl
                             }
                         }
                         break;
-
-                    case SMapSpotLightResource spotLight:
-                        if (spotLight.Unk10 is not null)
-                            dynamicScene.AddMapSpotLight(entry, spotLight);
+                    case SMapTerrainResource terrain:
+                        terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                         break;
-
                     default:
                         break;
                 }
@@ -454,19 +450,16 @@ public partial class ActivityMapEntityView : UserControl
             var dataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
             dataTable.TagData.DataEntries.ForEach(entry =>
             {
-                if (entry is SMapDataEntry dynamicResource)
+                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
+                if (entity.HasGeometry())
                 {
-                    Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                    if (entity.HasGeometry())
-                    {
-                        ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
-                        dynamicScene.AddEntity(dynamicResource.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
-                        entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
+                    ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
+                    dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
+                    entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
 
-                        if (_config.GetS2VMDLExportEnabled())
-                        {
-                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
-                        }
+                    if (_config.GetS2VMDLExportEnabled())
+                    {
+                        Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
                     }
                 }
                 if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
@@ -484,6 +477,11 @@ public partial class ActivityMapEntityView : UserControl
                             Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
                         }
                     }
+                }
+                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
+                {
+                    ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
+                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
                 }
             });
         });
@@ -503,8 +501,8 @@ public partial class ActivityMapEntityView : UserControl
             List<string> mapStages = items.Select(x => $"loading to ui: {x.Hash}").ToList();
             if (mapStages.Count == 0)
             {
-                Log.Error("No maps selected for export.");
-                MessageBox.Show("No maps selected for export.");
+                Log.Error("No entries available for viewing.");
+                MessageBox.Show("No entries available for viewing.");
                 return;
             }
             MainWindow.Progress.SetProgressStages(mapStages);
@@ -617,8 +615,8 @@ public partial class ActivityMapEntityView : UserControl
             List<string> mapStages = items.Select(x => $"Exporting Entities: {x}").ToList();
             if (mapStages.Count == 0)
             {
-                Log.Error("No entities available for export.");
-                MessageBox.Show("No entities available for export.");
+                Log.Error("No entries available for export.");
+                MessageBox.Show("No entries available for export.");
                 return;
             }
 

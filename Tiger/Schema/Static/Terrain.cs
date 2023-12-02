@@ -265,7 +265,7 @@ public class Terrain : Tag<STerrain>
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4B718080", 0x20)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "7D6C8080", 0x20)]
-public struct D2Class_7D6C8080
+public struct SMapTerrainResource
 {
     [SchemaField(0x10)]
     public short Unk10;  // tile x-y coords?

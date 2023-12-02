@@ -129,7 +129,7 @@ public partial class MapView : UserControl
         MVM.Dispose();
     }
 
-    public static void ExportFullMap(Tag<SMapContainer> map)
+    public static void ExportFullMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
     {
         ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.Map);
 
@@ -155,30 +155,6 @@ public partial class MapView : UserControl
         }
     }
 
-    public static void ExportMinimalMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
-    {
-        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.Map);
-        string meshName = map.Hash.ToString();
-        string savePath = _config.GetExportSavePath() + $"/{meshName}";
-        if (_config.GetSingleFolderMapsEnabled())
-        {
-            savePath = _config.GetExportSavePath() + "/Maps";
-        }
-        Directory.CreateDirectory(savePath);
-        if (exportStatics)
-        {
-            Directory.CreateDirectory(savePath + "/Statics");
-            ExportStatics(savePath, map);
-        }
-
-        ExtractDataTables(map, savePath, scene, exportTypeFlag);
-
-        if (_config.GetUnrealInteropEnabled())
-        {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
-        }
-    }
-
     public static void ExportTerrainMap(Tag<SMapContainer> map)
     {
         ExporterScene scene = Exporter.Get().CreateScene($"{map.Hash}_Terrain", ExportType.Terrain);
@@ -196,7 +172,7 @@ public partial class MapView : UserControl
         {
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
-                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is D2Class_7D6C8080 terrainArrangement)  // Terrain
+                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
                 {
                     terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                     if (exportStatics)
@@ -226,7 +202,7 @@ public partial class MapView : UserControl
                     {
                         staticMapResource.StaticMapParent.TagData.StaticMap.LoadArrangedIntoExporterScene(); //Arranged because...arranged
                     }
-                    else if (exportTypeFlag == ExportTypeFlag.Full || exportTypeFlag == ExportTypeFlag.Minimal) //No terrain on a minimal rip makes sense right?
+                    else if (exportTypeFlag == ExportTypeFlag.Full)
                     {
                         staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                     }
