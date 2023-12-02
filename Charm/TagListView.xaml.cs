@@ -1125,7 +1125,7 @@ public partial class TagListView : UserControl
             // PackageHandler.CacheHashDataList(tex3d.Select(x => x.Hash).ToArray());
             // MainWindow.Progress.CompleteStage();
 
-            Parallel.ForEach(tex, val =>
+            tex.ToList().ForEach(val => //Doesnt really need to be parrellizedm, loads quick enough without it and fixes(?) missing entries
             {
                 _allTagItems.Add(new TagItem
                 {
@@ -1219,8 +1219,9 @@ public partial class TagListView : UserControl
         else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
             var resource = activity.TagData.Unk18.GetValue(activity.GetReader());
-            if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
-                        resource is D2Class_18978080 || resource is D2Class_19978080)
+            //if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
+            //    resource is D2Class_18978080 || resource is D2Class_19978080)
+            if (resource is D2Class_19978080)
             {
                 if (resource.DialogueTableBL != null)
                     dialogueTables.Add(resource.DialogueTableBL.Hash);
@@ -1635,10 +1636,15 @@ public partial class TagListView : UserControl
             return;
         }
         _weaponItemName = Investment.Get().GetItemNameSanitized(Investment.Get().GetInventoryItem(apiHash));
-        var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.TagData.Unk18.GetValue(val.PatternAudioUnnamed.GetReader());
+
+        var resourceUnnamedReader = val.PatternAudioUnnamed.GetReader();
+        var resourceUnnamed = (D2Class_F42C8080)val.PatternAudioUnnamed.TagData.Unk18.GetValue(resourceUnnamedReader);
         var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18.GetValue(val.PatternAudio.GetReader());
         var item = Investment.Get().GetInventoryItem(apiHash);
         var weaponContentGroupHash = Investment.Get().GetWeaponContentGroupHash(item);
+
+        Log.Verbose($"Loading weapon entity audio {val.Hash}, ContentGroupHash {weaponContentGroupHash}");
+
         // Named
         foreach (var entry in resource.PatternAudioGroups)
         {
@@ -1664,7 +1670,7 @@ public partial class TagListView : UserControl
             }
         }
         // Unnamed
-        var sounds = GetWeaponUnnamedSounds(resourceUnnamed, weaponContentGroupHash);
+        var sounds = GetWeaponUnnamedSounds(resourceUnnamed, weaponContentGroupHash, resourceUnnamedReader);
         foreach (var s in sounds)
         {
             if (s == null)
@@ -1681,9 +1687,10 @@ public partial class TagListView : UserControl
         RefreshItemList();
     }
 
-    public List<WwiseSound> GetWeaponUnnamedSounds(D2Class_F42C8080 resource, TigerHash weaponContentGroupHash)
+    public List<WwiseSound> GetWeaponUnnamedSounds(D2Class_F42C8080 resource, TigerHash weaponContentGroupHash, TigerReader reader)
     {
         List<WwiseSound> sounds = new List<WwiseSound>();
+
         resource.PatternAudioGroups.ForEach(entry =>
         {
             if (!entry.WeaponContentGroupHash.Equals(weaponContentGroupHash))
@@ -1691,6 +1698,17 @@ public partial class TagListView : UserControl
 
             List<TigerFile> entitiesParents = new() { entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248 };
             List<Entity> entities = new();
+
+            if (entry.Unk118.GetValue(reader) is D2Class_0A2D8080 resourceUnk118)
+            {
+                if (resourceUnk118.Unk08 != null)
+                    entities.Add(resourceUnk118.Unk08);
+                if (resourceUnk118.Unk20 != null)
+                    entities.Add(resourceUnk118.Unk20);
+                if (resourceUnk118.Unk38 != null)
+                    entities.Add(resourceUnk118.Unk38);
+            }
+
             foreach (var tag in entitiesParents)
             {
                 if (tag == null)

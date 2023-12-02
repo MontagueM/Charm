@@ -50,6 +50,9 @@ public partial class AtlasView : UserControl
 
     public AtlasView()
     {
+        if (!ConfigSubsystem.Get().GetUseCustomRenderer())
+            return;
+
         InitializeComponent();
 
         ImageHost.Loaded += ImageHost_Loaded;

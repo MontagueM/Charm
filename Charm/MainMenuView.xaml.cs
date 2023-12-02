@@ -23,7 +23,7 @@ public partial class MainMenuView : UserControl
 
         ApiButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
         BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
-        WeaponAudioButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
+        WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy);
 
         Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
         {
@@ -31,7 +31,7 @@ public partial class MainMenuView : UserControl
             {
                 ApiButton.IsEnabled = ShowWQButtons(args.Strategy);
                 BagsButton.IsEnabled = ShowWQButtons(args.Strategy);
-                WeaponAudioButton.IsEnabled = ShowWQButtons(args.Strategy);
+                WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy);
             });
         };
     }
@@ -39,6 +39,11 @@ public partial class MainMenuView : UserControl
     private bool ShowWQButtons(TigerStrategy strategy)
     {
         return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402;
+    }
+
+    private bool ShowIfLatest(TigerStrategy strategy)
+    {
+        return strategy == TigerStrategy.DESTINY2_LATEST;
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)

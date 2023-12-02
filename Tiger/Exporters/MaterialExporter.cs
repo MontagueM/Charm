@@ -79,6 +79,8 @@ public class MaterialExporter : AbstractExporter
         Directory.CreateDirectory(textureSaveDirectory);
         foreach (Texture texture in mapTextures)
         {
+            if (texture is null)
+                continue;
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
         }
 
