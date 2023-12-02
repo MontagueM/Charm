@@ -339,13 +339,12 @@ public partial class ActivityMapEntityView : UserControl
         }
 
         Directory.CreateDirectory(savePath);
+        ExtractDataTables(dataTables, hash, savePath);
         if (_config.GetIndvidualStaticsEnabled())
         {
             Directory.CreateDirectory(savePath + "/Entities");
             ExportIndividual(dataTables, hash, savePath);
         }
-
-        ExtractDataTables(dataTables, hash, savePath);
 
         if (_config.GetUnrealInteropEnabled())
         {
