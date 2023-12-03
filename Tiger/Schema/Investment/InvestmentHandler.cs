@@ -533,8 +533,6 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             }
         }
 
-
-
         // armour
         AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armour");
 
@@ -604,6 +602,15 @@ public class InventoryItem : Tag<D2Class_9D798080>
         return backgroundIcon.GetTexture();
     }
 
+    public UnmanagedMemoryStream? GetIconBackgroundOverlayStream()
+    {
+        Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        if (iconContainer == null || iconContainer.TagData.IconBGOverlayContainer == null)
+            return null;
+        var backgroundIcon = GetTexture(iconContainer.TagData.IconBGOverlayContainer);
+        return backgroundIcon.GetTexture();
+    }
+
     public UnmanagedMemoryStream? GetIconPrimaryStream()
     {
         Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
@@ -611,6 +618,15 @@ public class InventoryItem : Tag<D2Class_9D798080>
             return null;
         var primaryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
         return primaryIcon.GetTexture();
+    }
+
+    public Texture? GetIconPrimaryTexture()
+    {
+        Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
+            return null;
+        var primaryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
+        return primaryIcon;
     }
 
     public UnmanagedMemoryStream? GetIconOverlayStream()

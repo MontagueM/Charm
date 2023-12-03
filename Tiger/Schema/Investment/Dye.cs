@@ -43,7 +43,7 @@ public class Dye : Tag<SDye>
         TextureExtractor.SetTextureFormat(outputTextureFormat);
         foreach (var entry in _tag.DyeTextures)
         {
-            TextureExtractor.SaveTextureToFile($"{savePath}/{entry.Texture.Hash}_{entry.TextureIndex}", entry.Texture.GetScratchImage());
+            TextureExtractor.SaveTextureToFile($"{savePath}/{entry.Texture.Hash}", entry.Texture.GetScratchImage());
         }
     }
 }

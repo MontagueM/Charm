@@ -407,5 +407,6 @@ public enum ExportType
     EntityPoints,
     StaticInMap,
     EntityInMap,
+    API,
     MapResource
 }

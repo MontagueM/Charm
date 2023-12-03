@@ -3862,12 +3862,19 @@ class NODE(bpy.types.Operator):
         shaderpreset_node.node_tree = bpy.data.node_groups[GroupNode.name]
         shaderpreset_node.use_custom_color = True
         shaderpreset_node.color = (0.101, 0.170, 0.297)
+        shaderpreset_node.name = custom_node_name
 
         return {'FINISHED'}
 
+def get_script_filepath():
+    try: #will return correct path if ran through blender text editor
+        return bpy.path.abspath(bpy.context.space_data.text.filepath+"/../")
+    except: #or if ran through the importer
+       return os.path.abspath(__file__+"/../")
+
 def register():
     global RIP_LOCATION
-    RIP_LOCATION = os.path.abspath(bpy.context.space_data.text.filepath+"/../")
+    RIP_LOCATION = get_script_filepath()
     bpy.utils.register_class(MAINPANEL)
     bpy.utils.register_class(NODE)
 
@@ -3877,3 +3884,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+    bpy.ops.node.test_operator()

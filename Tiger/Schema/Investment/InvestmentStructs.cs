@@ -44,6 +44,10 @@ public struct D2Class_9D798080
     [SchemaField(0xA8)]
     public TigerHash InventoryItemHash;
     public TigerHash UnkAC;
+    [SchemaField(0xC2)]
+    public byte ItemRarity; //Not sure
+    [SchemaField(0x108)]
+    public short SummaryItemIndex;
     [SchemaField(0x110)]
     public DynamicArray<D2Class_05798080> TraitIndices;
 }
@@ -204,6 +208,8 @@ public struct D2Class_9F548080
     public StringIndexReference ItemName;  // "displayProperties" -> "name"
     [SchemaField(0x98)]
     public StringIndexReference ItemType;  // "itemTypeDisplayName"
+    [SchemaField(0xA0)]
+    public StringIndexReference ItemUnkA0; // "displaySource"?
     [SchemaField(0xB0)]
     public StringIndexReference ItemFlavourText;  // "flavorText"
     public DynamicArray<D2Class_F1598080> UnkB8;
@@ -503,9 +509,12 @@ public struct D2Class_B83E8080
     [SchemaField(0x10)]
     public TigerHash Unk10;
     public Tag<D2Class_CF3E8080> IconPrimaryContainer;
-    [SchemaField(0x20)]
+    public Tag<D2Class_CF3E8080> IconAdContainer; //Eververse item advertisement
+    public Tag<D2Class_CF3E8080> IconBGOverlayContainer;
     public Tag<D2Class_CF3E8080> IconBackgroundContainer;
     public Tag<D2Class_CF3E8080> IconOverlayContainer;
+    //public Tag Unk28; //Always null?
+    //public Tag EmblemContainer; //For Emblems, not worth loading atm
 }
 
 
