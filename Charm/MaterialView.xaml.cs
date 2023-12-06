@@ -206,16 +206,10 @@ public partial class MaterialView : UserControl
 
                 if (bytecode_hlsl.Count > 0)
                 {
-                    StringBuilder a = new StringBuilder();
-                    a.Append($"\tDynamicParams\r\n\t{{");
                     foreach (var entry in bytecode_hlsl)
                     {
-                        a.Append($"\n\t\tcb0_{entry.Key} \"{entry.Value}\"");
                         dc.Data[entry.Key] = Vector4.One;
                     }
-                    a.Append($"\n\t}}");
-
-                    File.WriteAllText($"C:\\Users\\Michael\\Desktop\\test.txt", a.ToString());
                 }
                 
                 ConcurrentBag<CBufferDataDetail> items = new ConcurrentBag<CBufferDataDetail>();

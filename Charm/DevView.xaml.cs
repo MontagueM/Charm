@@ -216,9 +216,9 @@ public partial class DevView : UserControl
                     materialView.Load(hash);
                     _mainWindow.MakeNewTab(hash, materialView);
                     _mainWindow.SetNewestTabSelected();
-
                     IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
                     material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
+                    break;
                 case 0x808073A5:
                 case 0x80806F07: //Entity model
                     EntityModel entityModel = FileResourcer.Get().GetFile<EntityModel>(hash);
