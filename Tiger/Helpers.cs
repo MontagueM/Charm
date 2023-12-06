@@ -78,6 +78,24 @@ public static class Helpers
         // however, it's impossible for there to be more semantics than the stride max
         Debug.Assert(strideBound >= offset);
     }
+
+    public static uint Fnv(string fnvString, bool le = false)
+    {
+        uint value = 0x811c9dc5;
+        for (var i = 0; i < fnvString.Length; i++)
+        {
+            value *= 0x01000193;
+            value ^= fnvString[i];
+        }
+        if(le)
+        {
+            byte[] littleEndianBytes = BitConverter.GetBytes(value);
+            Array.Reverse(littleEndianBytes);
+            return BitConverter.ToUInt32(littleEndianBytes, 0);
+        }
+        else
+            return value;
+    }
 }
 
 public static class NestedTypeHelpers

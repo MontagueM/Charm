@@ -15,7 +15,7 @@ public class MaterialExporter : AbstractExporter
 
         Parallel.ForEach(args.Scenes, scene =>
         {
-            if (scene.Type is ExportType.Entity or ExportType.Static)
+            if (scene.Type is ExportType.Entity or ExportType.Static or ExportType.API)
             {
                 ConcurrentHashSet<Texture> textures = scene.Textures;
 
@@ -79,6 +79,8 @@ public class MaterialExporter : AbstractExporter
         Directory.CreateDirectory(textureSaveDirectory);
         foreach (Texture texture in mapTextures)
         {
+            if (texture is null)
+                continue;
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
         }
 

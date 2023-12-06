@@ -98,14 +98,13 @@ public class Entity : Tag<SEntity>
     {
         Directory.CreateDirectory($"{saveDirectory}/Textures/");
         if (((D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader())).TexturePlates is null)
-        {
             return;
-        }
+
         var rsrc = ((D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader())).TexturePlates.TagData;
-        rsrc.AlbedoPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo");
-        rsrc.NormalPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal");
-        rsrc.GStackPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_gstack");
-        rsrc.DyemapPlate.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_dyemap");
+        rsrc.AlbedoPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo");
+        rsrc.NormalPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal");
+        rsrc.GStackPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_gstack");
+        rsrc.DyemapPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_dyemap");
     }
 
     private readonly object _lock = new();
@@ -119,5 +118,48 @@ public class Entity : Tag<SEntity>
             }
         }
         return Model != null;
+    }
+
+    public List<Entity> GetEntityChildren()
+    {
+        lock (_lock)
+        {
+            if (!_loaded)
+            {
+                Load();
+            }
+        }
+
+        List<Entity> entities = new List<Entity>();
+        foreach (var resource in _tag.EntityResources.Select(GetReader(), r => r.Resource))
+        {
+            //Weird to have to get Unk10 first to be able to get Unk18
+            //Trying to get Unk18 directly just crashes
+            switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
+            {
+                case D2Class_12848080:
+                    foreach (var entry in ((D2Class_0E848080)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk88)
+                    {
+                        foreach (var entry2 in entry.Unk08)
+                        {
+                            if (entry2.Unk08 is null)
+                                continue;
+
+                            Entity entity = FileResourcer.Get().GetFile<Entity>(entry2.Unk08.Hash);
+                            if(entity.HasGeometry())
+                            {
+                                entities.Add(entity);
+                                //Just in case
+                                foreach (var child in entity.GetEntityChildren())
+                                {
+                                    entities.Add(child);
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+        return entities;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Arithmic;
 using DirectXTex;
 using DirectXTexNet;
@@ -45,7 +46,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             data = GetReferenceData();
         }
 
-        DirectXTexUtility.TexMetadata metadata = DirectXTexUtility.GenerateMetaData(_tag.Width, _tag.Height, 1, (DirectXTexUtility.DXGIFormat)format, _tag.ArraySize == 6);
+        DirectXTexUtility.TexMetadata metadata = DirectXTexUtility.GenerateMetaData(_tag.Width, _tag.Height, _tag.Depth, 1, (DirectXTexUtility.DXGIFormat)format, _tag.ArraySize == 6);
         DirectXTexUtility.DDSHeader ddsHeader;
         DirectXTexUtility.DX10Header dx10Header;
         DirectXTexUtility.GenerateDDSHeader(metadata, DirectXTexUtility.DDSFlags.NONE, out ddsHeader, out dx10Header);
@@ -200,7 +201,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
     public void SavetoFile(string savePath)
     {
         ScratchImage simg = GetScratchImage();
-        SavetoFile(savePath, simg, IsCubemap());
+        SavetoFile(savePath, simg, IsCubemap() || IsVolume());
     }
 
 

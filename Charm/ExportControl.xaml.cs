@@ -16,8 +16,8 @@ public enum ExportTypeFlag
     Full = 1,
     [Description("Minimal (no terrain)")]
     Minimal = 2,
-    [Description("Terrain only")]
-    TerrainOnly = 4,
+    //[Description("Terrain only")]
+    //TerrainOnly = 4,
     [Description("Pre-arranged map")]
     ArrangedMap = 8,
 }

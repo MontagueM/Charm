@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using Internal.Fbx;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -42,7 +43,7 @@ public class FbxExporter : AbstractExporter
             }
 
             string outputDirectory = args.OutputDirectory;
-            if (scene.Type is ExportType.Static or ExportType.Entity)
+            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API)
             {
                 outputDirectory = Path.Join(outputDirectory, scene.Name);
             }
@@ -98,8 +99,9 @@ public class FbxExporter : AbstractExporter
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
         var exporter = Internal.Fbx.FbxExporter.Create(_manager, "");
-        exporter.Initialize(outputPath + ".fbx", -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient
-        exporter.Export(fbxScene);
+        exporter.Initialize(outputPath + ".fbx", -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient                                         
+        if (fbxScene.GetRootNode().GetChildCount() > 0) // Only export if theres actually something to export
+            exporter.Export(fbxScene);
         exporter.Destroy();
         fbxScene.Clear();
     }
@@ -124,7 +126,7 @@ public class FbxExporter : AbstractExporter
             if (dynamicMeshPart.VertexColourSlots.Count > 0 || dynamicMeshPart.GearDyeChangeColorIndex != 0xFF)
             {
                 fbxMesh.AddSlotColours(dynamicMeshPart);
-                fbxMesh.AddTexcoords1(dynamicMeshPart);
+                fbxMesh.AddTexcoords1(part);
             }
 
             if (dynamicMeshPart.VertexWeights.Count > 0)
@@ -156,7 +158,7 @@ public class FbxExporter : AbstractExporter
             node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
             if (rootNode == null)
             {
-                skeleton.SetSkeletonType(FbxSkeleton.EType.eRoot);
+                //skeleton.SetSkeletonType(FbxSkeleton.EType.eRoot); Not sure if needed? Just Makes the root bone/root weights dissappear in blender
                 rootNode = node;
             }
             else
@@ -165,7 +167,6 @@ public class FbxExporter : AbstractExporter
             }
             skeletonNodes.Add(node);
         }
-
         fbxScene.GetRootNode().AddChild(rootNode);
         return skeletonNodes;
     }
@@ -308,9 +309,9 @@ public static class FbxMeshExtensions
         fbxMesh.GetLayer(0).SetUVs(uvLayer);
     }
 
-    public static void AddTexcoords1(this FbxMesh fbxMesh, DynamicMeshPart meshPart)
+    public static void AddTexcoords1(this FbxMesh fbxMesh, ExporterPart part)
     {
-        if (!meshPart.VertexTexcoords1.Any())
+        if (!part.MeshPart.VertexTexcoords1.Any())
         {
             return;
         }
@@ -318,7 +319,7 @@ public static class FbxMeshExtensions
         FbxLayerElementUV uvLayer = FbxLayerElementUV.Create(fbxMesh, "uv1");
         uvLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
         uvLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
-        foreach (var tx in meshPart.VertexTexcoords1)
+        foreach (var tx in part.MeshPart.VertexTexcoords1)
         {
             uvLayer.GetDirectArray().Add(new FbxVector2(tx.X, tx.Y));
         }

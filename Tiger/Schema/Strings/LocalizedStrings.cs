@@ -54,7 +54,7 @@ public class LocalizedStrings : Tag<SLocalizedStrings>
         if (index == -1)
         {
             // Log.Error($"Could not find string with hash {hash}");
-            return new TigerString("NotFound");
+            return new TigerString($"NotFound-{hash}");
         }
         return new TigerString(hash, _tag.EnglishStringsData.GetStringFromIndex(index));
     }

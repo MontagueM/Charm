@@ -76,13 +76,14 @@ public partial class EntityView : UserControl
         return loaded;
     }
 
-    public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null)
+    public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null, ExporterScene scene = null)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
         name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
         string savePath = config.GetExportSavePath() + $"/{name}";
 
-        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entity);
+        if(scene == null)
+            scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entity);
 
         Log.Verbose($"Exporting entity model name: {name}");
 
@@ -99,6 +100,10 @@ public partial class EntityView : UserControl
             {
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
                 entity.SaveTexturePlates(savePath);
+            }
+            if (ConfigSubsystem.Get().GetS2VMDLExportEnabled())
+            {
+                Source2Handler.SaveEntityVMDL($"{savePath}", entity);
             }
         }
 
@@ -118,32 +123,26 @@ public partial class EntityView : UserControl
 
     public static void ExportInventoryItem(ApiItem item)
     {
-        string name = string.Join("_", $"{item.Item.TagData.InventoryItemHash}_{item.ItemName}"
+        string name = string.Join("_", $"{item.ItemName}"
             .Split(Path.GetInvalidFileNameChars()));
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
         // Export the model
         // todo bad, should be replaced
-        EntitySkeleton overrideSkeleton;
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        EntitySkeleton overrideSkeleton = null;
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            overrideSkeleton = new EntitySkeleton(new FileHash("BC38AB80"));
-        }
-        // todo do DESTINY2_LATEST
-        else
-        {
-            overrideSkeleton = null;
+            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent 
+            overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
         var val = Investment.Get().GetPatternEntityFromHash(item.Item.TagData.InventoryItemHash);
-        // var resource = (D2Class_6E358080)val.PatternAudio.TagData.Unk18;
-        // if (resource.PatternAudioGroups[0].WeaponSkeletonEntity != null)
-        // {
-        // overrideSkeleton = resource.PatternAudioGroups[0].WeaponSkeletonEntity.Skeleton;
-        // }
         if (val != null && val.Skeleton != null)
         {
             overrideSkeleton = val.Skeleton;
         }
+
+        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.API);
         EntityView.Export(Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash),
-            name, ExportTypeFlag.Full, overrideSkeleton);
+            name, ExportTypeFlag.Full, overrideSkeleton, scene);
 
         // Export the dye info
         Dictionary<TigerHash, Dye> dyes = new Dictionary<TigerHash, Dye>();
@@ -163,10 +162,11 @@ public partial class EntityView : UserControl
 
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
-        string meshName = name;
+        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
-        AutomatedExporter.SaveBlenderApiFile(savePath, string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())),
+        AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
             config.GetOutputTextureFormat(), dyes.Values.ToList());
     }
 }

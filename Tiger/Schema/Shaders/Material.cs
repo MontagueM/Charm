@@ -48,8 +48,8 @@ namespace Tiger.Schema.Shaders
     {
         public FileHash FileHash { get; }
         public uint Unk08 { get; }
-        public uint Unk0C { get; }
         public uint Unk10 { get; }
+        public uint Unk0C { get; } //Seems to be backface culling
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
         public IEnumerable<STextureTag> EnumerateCSTextures();
@@ -147,9 +147,9 @@ namespace Tiger.Schema.Shaders
                     {
                         File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
                     }
-                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{FileHash}.shader"))
+                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader"))
                     {
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{FileHash}.shader", vfx);
+                        File.WriteAllText($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader", vfx);
                     }
                 }
                 catch (IOException)  // threading error
@@ -168,7 +168,7 @@ namespace Tiger.Schema.Shaders
             if (VertexShader != null && VertexShader.Hash.IsValid())
             {
                 string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, false) : "";
+                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
                 if (usf != String.Empty)
                 {
                     try
@@ -184,7 +184,7 @@ namespace Tiger.Schema.Shaders
         }
 
         //Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
-        public void SaveMaterial(string saveDirectory) 
+        public void SaveMaterial(string saveDirectory)
         {
             var hlslPath = $"{saveDirectory}/Shaders/Raw";
             var texturePath = $"{saveDirectory}/Textures";
@@ -200,7 +200,7 @@ namespace Tiger.Schema.Shaders
             {
                 Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}", hlslPath);
                 SaveVertexShader($"{saveDirectory}/Shaders/");
-            } 
+            }
 
             foreach (STextureTag texture in EnumerateVSTextures())
             {

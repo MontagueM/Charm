@@ -1,15 +1,21 @@
-﻿<UserControl x:Class="Charm.DareView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Charm"
-             mc:Ignorable="d"
-             d:DesignHeight="1080" d:DesignWidth="1920">
+﻿<UserControl
+    x:Class="Charm.DareView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="1080"
+    d:DesignWidth="1920"
+    mc:Ignorable="d">
     <UserControl.Resources>
         <DataTemplate x:Key="ItemTemplate">
-            <Button Click="DareItemControl_OnClick" Height="96" Width="288" Margin="0">
-                <local:DareItemControl/>
+            <Button
+                Width="288"
+                Height="96"
+                Margin="0"
+                Click="DareItemControl_OnClick">
+                <local:DareItemControl />
             </Button>
         </DataTemplate>
     </UserControl.Resources>
@@ -23,28 +29,103 @@
             <ColumnDefinition Width="80*" />
             <ColumnDefinition Width="20*" />
         </Grid.ColumnDefinitions>
-        <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BackgroundColour20}">
-            <TextBox x:Name="SearchBox" TextChanged="SearchBox_TextChanged" HorizontalAlignment="Center"
-                     Width="600" Background="{StaticResource BackgroundColour30}"
-                     TextWrapping="Wrap" VerticalAlignment="Center" FontSize="30"
-                     FontWeight="36" />
+        <Border
+            Grid.Row="0"
+            Grid.Column="0"
+            Background="{StaticResource BackgroundColour20}">
+            <TextBox
+                x:Name="SearchBox"
+                Width="600"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{StaticResource BackgroundColour30}"
+                FontSize="30"
+                TextChanged="SearchBox_TextChanged"
+                TextWrapping="Wrap" />
         </Border>
-        <StackPanel HorizontalAlignment="Center" Grid.Row="0" Grid.Column="1" Background="{StaticResource BackgroundColour7}" Orientation="Horizontal">
-            <Button VerticalAlignment="Center" Height="50" Width="90" Margin="5,0,5,0" Click="ClearQueue_OnClick" Style="{StaticResource MaterialDesignPaperDarkButton}">
-                <TextBlock Text="Clear Queue" TextWrapping="Wrap" TextAlignment="Center"/>
+        <TextBlock
+            Margin="5,0,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Text="Amount To Show"
+            TextAlignment="Center"
+            TextWrapping="Wrap" />
+        <TextBox
+            x:Name="AmountBox"
+            Width="50"
+            Margin="130,0,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            PreviewTextInput="NumberValidationTextBox"
+            Text="250"
+            TextAlignment="Center"
+            TextChanged="AmountBox_TextChanged" />
+        <Button
+            Grid.Row="0"
+            Grid.Column="0"
+            Margin="5,0,5,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Click="RipAllShaders_OnClick"
+            Style="{StaticResource MaterialDesignPaperDarkButton}">
+            <TextBlock
+                Text="Rip All Shaders"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+        </Button>
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="1"
+            HorizontalAlignment="Center"
+            Background="{StaticResource BackgroundColour7}"
+            Orientation="Horizontal">
+            <Button
+                Width="90"
+                Height="50"
+                Margin="5,0,5,0"
+                VerticalAlignment="Center"
+                Click="ClearQueue_OnClick"
+                Style="{StaticResource MaterialDesignPaperDarkButton}">
+                <TextBlock
+                    Text="Clear Queue"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
             </Button>
-            <Button VerticalAlignment="Center" Height="50" Width="110" Margin="5,0,5,0" Click="OpenOutputFolder_OnClick" Style="{StaticResource MaterialDesignPaperDarkButton}">
-                <TextBlock Text="Open Output Folder" TextWrapping="Wrap" TextAlignment="Center"/>
+
+            <Button
+                Width="130"
+                Height="50"
+                Margin="5,0,5,0"
+                VerticalAlignment="Center"
+                Click="OpenOutputFolder_OnClick"
+                Style="{StaticResource MaterialDesignPaperDarkButton}">
+                <TextBlock
+                    Text="Open Output Folder"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
             </Button>
-            <Button VerticalAlignment="Center" Height="50" Width="90" Margin="5,0,5,0" Click="ExecuteQueue_OnClick" Style="{StaticResource MaterialDesignPaperDarkButton}">
-                <TextBlock Text="Execute Queue" TextWrapping="Wrap" TextAlignment="Center"/>
+            <Button
+                Width="90"
+                Height="50"
+                Margin="5,0,5,0"
+                VerticalAlignment="Center"
+                Click="ExecuteQueue_OnClick"
+                Style="{StaticResource MaterialDesignPaperDarkButton}">
+                <TextBlock
+                    Text="Execute Queue"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
             </Button>
         </StackPanel>
-        <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" Background="{StaticResource BackgroundColour30}"/>
+        <Border
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Grid.Column="0"
+            Background="{StaticResource BackgroundColour30}" />
 
-        <!-- <ListView Grid.Row="1" Grid.RowSpan="2" -->
-        <!--           Name="DareListView" -->
-        <!--           ItemTemplate="{StaticResource ItemTemplate}"> -->
+        <!--  <ListView Grid.Row="1" Grid.RowSpan="2"  -->
+        <!--  Name="DareListView"  -->
+        <!--  ItemTemplate="{StaticResource ItemTemplate}">  -->
         <!--     <ListView.ItemsPanel> -->
         <!--         <ItemsPanelTemplate> -->
         <!--             <UniformGrid Rows="7" /> -->
@@ -52,21 +133,34 @@
         <!--     </ListView.ItemsPanel> -->
         <!-- </ListView> -->
 
-        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Visible" >
+        <ScrollViewer
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            HorizontalScrollBarVisibility="Visible"
+            VerticalScrollBarVisibility="Disabled">
             <ItemsControl Name="DareListView" ItemTemplate="{StaticResource ItemTemplate}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Rows="7"/>
+                        <UniformGrid Rows="7" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
         </ScrollViewer>
 
-        <ListView x:Name="SelectedItemView" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1">
+        <ListView
+            x:Name="SelectedItemView"
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Grid.Column="1">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Button Click="DareItemControl_OnClick" Height="96" Width="288" Margin="0" Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <local:DareItemControl/>
+                    <Button
+                        Width="288"
+                        Height="96"
+                        Margin="0"
+                        Click="DareItemControl_OnClick"
+                        Style="{StaticResource MaterialDesignPaperDarkButton}">
+                        <local:DareItemControl />
                     </Button>
                 </DataTemplate>
             </ListView.ItemTemplate>
