@@ -141,9 +141,6 @@ namespace Tiger.Schema.Shaders
                     Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
                 }
 
-                //if (saveCBuffers)
-                //    SaveCbuffers(this, false, pixel, saveDirectory);
-
                 try
                 {
                     if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{FileHash}.usf"))
@@ -219,6 +216,20 @@ namespace Tiger.Schema.Shaders
 
                 texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
             }
+        }
+
+        public List<Vector4> GetVec4Container(FileHash containerHash)
+        {
+            List<Vector4> data = new();
+            TigerFile container = new(containerHash);
+            byte[] containerData = container.GetData();
+
+            for (int i = 0; i < containerData.Length / 16; i++)
+            {
+                data.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
+            }
+
+            return data;
         }
     }
 }

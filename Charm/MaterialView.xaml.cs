@@ -134,16 +134,59 @@ public partial class MaterialView : UserControl
     {
         var items = new List<CBufferDetail>();
 
-        foreach (var cbuffer in GetCBuffers(material, bVertexShader))
+        //foreach (var cbuffer in GetCBuffers(material, bVertexShader))
+        //{
+        //    items.Add(new CBufferDetail
+        //    {
+        //        Index = $"CB{cbuffer.Key.Index}",
+        //        Count = $"Count: {cbuffer.Key.Count}",
+        //        Data = cbuffer.Value,
+        //        Stage = bVertexShader ? CBufferDetail.Shader.Vertex : CBufferDetail.Shader.Pixel
+        //    });
+        //}
+
+        //Only material provided cbuffer (cb0) is useful to show
+        List<Vector4> data = new();
+        if (bVertexShader)
+        {
+            if (material.VSVector4Container.IsValid())
+            {
+                data = material.GetVec4Container(material.VSVector4Container.GetReferenceHash());
+            }
+            else
+            {
+                foreach (var vec in material.VS_CBuffers)
+                {
+                    data.Add(vec.Vec);
+                }
+            }       
+        }
+        else
+        {
+            if (material.PSVector4Container.IsValid())
+            {
+                data = material.GetVec4Container(material.PSVector4Container.GetReferenceHash());
+            }
+            else
+            {
+                foreach (var vec in material.PS_CBuffers)
+                {
+                    data.Add(vec.Vec);
+                }
+            }
+        }
+
+        if (data.Count > 0)
         {
             items.Add(new CBufferDetail
             {
-                Index = $"CB{cbuffer.Key.Index}",
-                Count = $"Count: {cbuffer.Key.Count}",
-                Data = cbuffer.Value,
+                Index = "CB0",
+                Count = $"Count: {data.Count}",
+                Data = data,
                 Stage = bVertexShader ? CBufferDetail.Shader.Vertex : CBufferDetail.Shader.Pixel
             });
         }
+
         var sortedItems = new List<CBufferDetail>(items);
         sortedItems.Sort((a, b) => a.Index.CompareTo(b.Index));
         return sortedItems;
@@ -158,20 +201,23 @@ public partial class MaterialView : UserControl
         {
             Dispatcher.Invoke(() =>
             {
-                if(dc.Index == "CB0") //tfx only changes cb0
-                {
-                    TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode : Material.VS_TFX_Bytecode));
-                    var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants);
+                TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode : Material.VS_TFX_Bytecode));
+                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants);
 
-                    if (bytecode_hlsl.Count > 0)
+                if (bytecode_hlsl.Count > 0)
+                {
+                    StringBuilder a = new StringBuilder();
+                    a.Append($"\tDynamicParams\r\n\t{{");
+                    foreach (var entry in bytecode_hlsl)
                     {
-                        foreach (var entry in bytecode_hlsl)
-                        {
-                            dc.Data[entry.Key] = Vector4.One;
-                        }
+                        a.Append($"\n\t\tcb0_{entry.Key} \"{entry.Value}\"");
+                        dc.Data[entry.Key] = Vector4.One;
                     }
+                    a.Append($"\n\t}}");
+
+                    File.WriteAllText($"C:\\Users\\Michael\\Desktop\\test.txt", a.ToString());
                 }
- 
+                
                 ConcurrentBag<CBufferDataDetail> items = new ConcurrentBag<CBufferDataDetail>();
                 for (int i = 0; i < dc.Data.Count; i++)
                 {
@@ -208,13 +254,12 @@ public partial class MaterialView : UserControl
         return bitmapImage;
     }
 
-    public static ConcurrentDictionary<Cbuffer, List<Vector4>> GetCBuffers(IMaterial material, bool isVertexShader = false)
+    public static List<Cbuffer> GetCBuffers(IMaterial material, bool isVertexShader = false)
     {
         StringReader reader = new(material.Decompile((isVertexShader ? material.VertexShader : material.PixelShader).GetBytecode(),
-            $"{(isVertexShader ? $"vs{material.VertexShader.Hash}" : $"vs{material.PixelShader.Hash}")}"));
+            $"{(isVertexShader ? $"vs{material.VertexShader.Hash}" : $"ps{material.PixelShader.Hash}")}"));
 
         List<Cbuffer> buffers = new();
-        ConcurrentDictionary<Cbuffer, List<Vector4>> cbuffers = new();
 
         string line = string.Empty;
         do
@@ -237,74 +282,7 @@ public partial class MaterialView : UserControl
 
         } while (line != null);
 
-        foreach (var cbuffer in buffers)
-        {
-            List<Vector4> bufferData = new();
-            dynamic data = null;
-
-            if (isVertexShader)
-            {
-                if (cbuffer.Count == material.VS_CBuffers.Count)
-                {
-                    data = material.VS_CBuffers;
-                }
-            }
-            else
-            {
-                if (cbuffer.Count == material.PS_CBuffers.Count)
-                {
-                    data = material.PS_CBuffers;
-                }
-                else
-                {
-                    if (material.PSVector4Container.IsValid())
-                    {
-                        // Try the Vector4 storage file
-                        TigerFile container = new(material.PSVector4Container.GetReferenceHash());
-                        byte[] containerData = container.GetData();
-                        int num = containerData.Length / 16;
-                        if (cbuffer.Count == num)
-                        {
-                            List<Vector4> float4s = new();
-                            for (int i = 0; i < containerData.Length / 16; i++)
-                            {
-                                float4s.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
-                            }
-
-                            data = float4s;
-                        }
-                    }
-                }
-            }
-
-            for (int i = 0; i < cbuffer.Count; i++)
-            {
-                if (data == null)
-                    bufferData.Add(new Vector4(0f,0f,0f,0f));
-                else
-                {
-                    try
-                    {
-                        if (data[i] is Vec4)
-                        {
-                            bufferData.Add(data[i].Vec);
-                        }
-                        else if (data[i] is Vector4)
-                        {
-                            bufferData.Add(new Vector4(data[i].X, data[i].Y, data[i].Z, data[i].W));
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        bufferData.Add(new Vector4(0f, 0f, 0f, 0f));
-                    }
-                }
-            }
-
-            cbuffers.TryAdd(cbuffer, bufferData);
-        }
-
-        return cbuffers;
+        return buffers;
     }
 
     private void Texture_OnClick(object sender, RoutedEventArgs e)

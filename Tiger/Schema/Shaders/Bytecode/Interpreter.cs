@@ -302,7 +302,7 @@ public class TfxBytecodeInterpreter
                         break;
 
                     default:
-                        //Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                        Console.WriteLine($"Not Implemented: {op.op}");
                         break;
 
                 }    
