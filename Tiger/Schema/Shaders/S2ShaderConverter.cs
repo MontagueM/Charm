@@ -43,13 +43,13 @@ MODES
 	ToolsWireframe( ""vr_tools_wireframe.shader"" );
 	ToolsShadingComplexity( ""tools_shading_complexity.shader"" );
 
-	Reflection( S_MODE_REFLECTIONS );
+	//Reflection( S_MODE_REFLECTIONS );
 }}
 
 FEATURES
 {{
     #include ""common/features.hlsl""
-    Feature( F_DYNAMIC_REFLECTIONS, 0..1, ""Rendering"" );
+    //Feature( F_DYNAMIC_REFLECTIONS, 0..1, ""Rendering"" );
 }}
 
 COMMON
@@ -102,22 +102,22 @@ VS
 PS
 {{
     #include ""common/pixel.hlsl""
-    #include ""raytracing/reflections.hlsl""
+    //#include ""raytracing/reflections.hlsl""
     #define CUSTOM_TEXTURE_FILTERING
     #define cmp -
     //RenderState
 
-    #if ( S_MODE_REFLECTIONS )
-		#define FinalOutput ReflectionOutput
-	#else
-		#define FinalOutput float4
-	#endif
+ //   #if ( S_MODE_REFLECTIONS )
+	//	#define FinalOutput ReflectionOutput
+	//#else
+	//	#define FinalOutput float4
+	//#endif
 
 //ps_samplers
 //ps_CBuffers
 //ps_Inputs
 
-    FinalOutput MainPs( PixelInput i ) : SV_Target0
+    float4 MainPs( PixelInput i ) : SV_Target0
     {{
 //ps_Function
 
@@ -542,9 +542,10 @@ PS
                 {
                     if (line.Contains("cb12[7].xyz") || line.Contains("cb12[14].xyz")) //cb12 is view scope
                     {
-                        funcDef.AppendLine($"\t\t{line.TrimStart().Replace("cb12[7].xyz", "vCameraToPositionDirWs")
+                        funcDef.AppendLine($"\t\t{line.TrimStart()
+                            .Replace("cb12[7].xyz", "vCameraToPositionDirWs")
                             .Replace("v4.xyz", "float3(0,0,0)")
-                            .Replace("cb12[14].xyz", "vCameraToPositionDirWs")}");
+                            .Replace("cb12[14].xyz", "-vCameraToPositionDirWs")}");
                     }
                     else if (line.Contains("cb"))
                     {
@@ -659,7 +660,22 @@ PS
         if(!bTranslucent) //uses o1,o2
         {
             //this is fine...
-            output.Append($"\t\t// Normal\r\n        float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);\r\n        float normal_length = length(biased_normal);\r\n        float3 normal_in_world_space = biased_normal / normal_length;\r\n\r\n        float smoothness = saturate(8 * (normal_length - 0.375));\r\n        \r\n        Material mat = Material::From(i,\r\n                    float4(o0.xyz, alpha), //albedo, alpha\r\n                    float4(0.5, 0.5, 1, 1), //Normal, gets set later\r\n                    float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao\r\n                    float3(1.0f, 1.0f, 1.0f), //tint\r\n                    clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        mat.Transmission = o2.z;\r\n        mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From\r\n\r\n        #if ( S_MODE_REFLECTIONS )\r\n\t\t{{\r\n\t\t\treturn Reflections::From( i, mat, SampleCountIntersection );\r\n\t\t}}\r\n        #else\r\n\t\t{{\r\n            return ShadingModelStandard::Shade(i, mat);\r\n        }}\r\n        #endif");
+            output.Append($"\t\t// Normal\r\n        " +
+                $"float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);\r\n        " +
+                $"float normal_length = length(biased_normal);\r\n        " +
+                $"float3 normal_in_world_space = biased_normal / normal_length;\r\n\r\n        " +
+                $"float smoothness = saturate(8 * (normal_length - 0.375));\r\n        \r\n        " +
+                $"Material mat = Material::From(i,\r\n                    " +
+                $"float4(o0.xyz, alpha), //albedo, alpha\r\n                    " +
+                $"float4(0.5, 0.5, 1, 1), //Normal, gets set later\r\n                    " +
+                $"float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao\r\n                    " +
+                $"float3(1.0f, 1.0f, 1.0f), //tint\r\n                    " +
+                $"clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        " +
+                $"mat.Transmission = o2.z;\r\n        " +
+                $"mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From");
+
+
+            output.Append($"\n\t\treturn ShadingModelStandard::Shade(i, mat);");
 
             if (bFixRoughness)
                 output = output.Replace("float smoothness = saturate(8 * (normal_length - 0.375));", "float smoothness = saturate(8 * (0 - 0.375));");

@@ -232,11 +232,11 @@ public class TfxBytecodeInterpreter
                         StackPush($"(float4({UnkLoadConstant.X}, {UnkLoadConstant.Y}, {UnkLoadConstant.Z}, {UnkLoadConstant.W}))");
                         break;
                     case TfxBytecode.PushExternInputFloat:
-                        var v = GetExtern(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element);
+                        var v = GetExternFloat(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element);
                         StackPush(v);
                         break;
                     case TfxBytecode.PushExternInputVec4:
-                        var PushExternInputVec4 = GetExtern(((PushExternInputVec4Data)op.data).extern_, ((PushExternInputVec4Data)op.data).element);
+                        var PushExternInputVec4 = GetExternVec4(((PushExternInputVec4Data)op.data).extern_, ((PushExternInputVec4Data)op.data).element);
                         StackPush(PushExternInputVec4);
                         break;
                     case TfxBytecode.PushExternInputMat4:
@@ -247,12 +247,12 @@ public class TfxBytecodeInterpreter
                         StackPush($"(float4(0,0,0,1))");
                         break;
                     case TfxBytecode.PushExternInputU64:
-                        var PushExternInputU64 = GetExtern(((PushExternInputU64Data)op.data).extern_, ((PushExternInputU64Data)op.data).element);
-                        StackPush(PushExternInputU64);
+                        //var PushExternInputU64 = GetExtern(((PushExternInputU64Data)op.data).extern_, ((PushExternInputU64Data)op.data).element);
+                        StackPush($"float4(1, 1, 1, 1)");
                         break;
                     case TfxBytecode.PushExternInputU64Unknown:
-                        var PushExternInputU64Unknown = GetExtern(((PushExternInputU64UnknownData)op.data).extern_, ((PushExternInputU64UnknownData)op.data).element);
-                        StackPush(PushExternInputU64Unknown);
+                        //var PushExternInputU64Unknown = GetExtern(((PushExternInputU64UnknownData)op.data).extern_, ((PushExternInputU64UnknownData)op.data).element);
+                        StackPush($"float4(1, 1, 1, 1)");
                         break;
 
                     case TfxBytecode.Unk4c:
@@ -271,12 +271,13 @@ public class TfxBytecodeInterpreter
                     case TfxBytecode.PopOutput:
                         //Temp.AddRange(Stack);
 
+                        Console.WriteLine($"----Output Stack Count: {Stack.Count}");
                         if(Stack.Count == 0 || Stack.Count > 1) //Shouldnt happen
                             hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(1, 1, 1, 1)");
                         else
                             hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
 
-                        Stack.Clear();
+                        Stack.Clear(); //Does this matter?
                         break;
                     case TfxBytecode.PopOutputMat4: //uhhhhh, im 100% doing this wrong
                         var PopOutputMat4 = StackPop(4);
@@ -316,7 +317,7 @@ public class TfxBytecodeInterpreter
         return hlsl;
     }
 
-    private string GetExtern(TfxExtern extern_, byte element, bool asFloat = false)
+    private string GetExternFloat(TfxExtern extern_, byte element)
     {
         switch (extern_)
         {
@@ -324,14 +325,41 @@ public class TfxBytecodeInterpreter
                 switch (element)
                 {
                     case 0:
-                        if(asFloat)
-                            return $"float4(Time, Time, Time, Time)";
-                        else
-                            return $"float4(Time, Time, 1, 1)";
+                        return $"float4(Time, Time, Time, Time)";
                     case 1:
-                        return $"float4(1, 1, 1, 1)"; // Exposure scales
+                        return $"float4(Time, Time, Time, Time)"; //Wrong?
                     case 4:
-                        return $"float4(0, 0, 0, 0)"; // Stubbed
+                        return $"float4(Time, Time, Time, Time)"; //Wrong?
+                    default:
+                        Log.Error($"Unsupported element {element} for extern {extern_}");
+                        return $"float4(0, 0, 0, 0)";
+                }
+            default:
+                Log.Error($"Unsupported extern {extern_}[{element}]");
+                return $"float4(1, 1, 1, 1)";
+        }
+    }
+
+    private string GetExternVec4(TfxExtern extern_, byte element)
+    {
+        switch (extern_)
+        {
+            case TfxExtern.Frame:
+                switch (element)
+                {
+                    case 26:
+                        return $"float4(0, 0, 0, 0)";
+                    case 27:
+                        return $"float4(1, 1, 1, 1)";
+                    default:
+                        Log.Error($"Unsupported element {element} for extern {extern_}");
+                        return $"float4(0, 0, 0, 0)";
+                }
+            case TfxExtern.Atmosphere:
+                switch (element)
+                {
+                    case 7:
+                        return $"float4(1, 1, 1, 1)";
                     default:
                         Log.Error($"Unsupported element {element} for extern {extern_}");
                         return $"float4(0, 0, 0, 0)";
