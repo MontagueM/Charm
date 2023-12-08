@@ -204,21 +204,16 @@ public partial class MaterialView : UserControl
                 TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode : Material.VS_TFX_Bytecode));
                 var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants);
 
-                if (bytecode_hlsl.Count > 0)
-                {
-                    foreach (var entry in bytecode_hlsl)
-                    {
-                        dc.Data[entry.Key] = Vector4.One;
-                    }
-                }
-                
                 ConcurrentBag<CBufferDataDetail> items = new ConcurrentBag<CBufferDataDetail>();
                 for (int i = 0; i < dc.Data.Count; i++)
                 {
                     CBufferDataDetail dataEntry = new();
                     
                     dataEntry.Index = i;
-                    dataEntry.Vector = $"{dc.Data[i].X}, {dc.Data[i].Y}, {dc.Data[i].Z}, {dc.Data[i].W}";
+                    if(bytecode_hlsl.ContainsKey(i))
+                        dataEntry.Vector = $"Bytecode Assigned";
+                    else
+                        dataEntry.Vector = $"{dc.Data[i].X}, {dc.Data[i].Y}, {dc.Data[i].Z}, {dc.Data[i].W}";
 
                     items.Add(dataEntry);
                 }

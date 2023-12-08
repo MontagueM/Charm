@@ -537,6 +537,7 @@ PS
             }
             do
             {
+                //Doing these line replacements is really messy and needs to be replaced with a better method, someday
                 line = hlsl.ReadLine();
                 if (line != null)
                 {
@@ -549,10 +550,27 @@ PS
                     }
                     else if (line.Contains("cb"))
                     {
-                        string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
-                        string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+                        if(line.Contains("Sample")) //rare case where a cbuffer value is directly used as a texcoord
+                        {
+                            string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
 
-                        funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                            var equal = line.Split("=")[0];
+                            var texIndex = Int32.Parse(line.Split(".Sample")[0].Split("t")[1]);
+                            var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
+                            var sampleUv = line.Split(", ")[1].Split(").")[0];
+                            sampleUv = Regex.Replace(sampleUv, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+                            var dotAfter = line.Split(").")[1];
+
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(g_s{sampleIndex}, {sampleUv}).{dotAfter}");
+                        }
+                        else
+                        {
+                            string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                            string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+
+                            funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                        }
+                        
                     }
                     else if (line.Contains("while (true)"))
                     {
@@ -567,9 +585,8 @@ PS
                         var equal = line.Split("=")[0];
                         var texIndex = Int32.Parse(line.Split(".Sample")[0].Split("t")[1]);
                         var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
-                        var sampleUv = line.Split(", ")[1].Split(")")[0];
+                        var sampleUv = line.Split(", ")[1].Split(").")[0];
                         var dotAfter = line.Split(").")[1];
-                        // todo add dimension
 
                         if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
                         {
