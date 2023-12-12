@@ -124,10 +124,9 @@ public class TfxBytecodeInterpreter
                         var Unk0f = StackPop(2);
                         StackPush($"((({Unk0f[1]}.xxxx * {Unk0f[0]} + {Unk0f[1]}.yyyy) * ({Unk0f[0]} * {Unk0f[0]})) + ({Unk0f[1]}.zzzz * {Unk0f[0]} + {Unk0f[1]}.wwww))");
                         break;
-                    case TfxBytecode.Unk10: //Im gonna call this SubMAD
-                        var unk10 = StackPop(3);
-                        string v33 = $"({unk10[1]}-{unk10[0]})";
-                        StackPush($"(({v33}*{unk10[2]})+{unk10[0]})");
+                    case TfxBytecode.Lerp:
+                        var lerp = StackPop(3);
+                        StackPush($"(lerp({lerp[1]}, {lerp[0]}, {lerp[2]}))");
                         break;
                     case TfxBytecode.MultiplyAdd:
                         var mulAdd = StackPop(3);
@@ -219,12 +218,12 @@ public class TfxBytecodeInterpreter
                         var vec = constants[((PushConstantVec4Data)op.data).constant_index].Vec;
                         StackPush($"(float4({vec.X}, {vec.Y}, {vec.Z}, {vec.W}))");
                         break;
-                    case TfxBytecode.Unk35:
-                        var Unk35 = StackTop();
-                        var v1 = constants[((Unk35Data)op.data).constant_start].Vec;
-                        var v2 = constants[((Unk35Data)op.data).constant_start + 1].Vec;
+                    case TfxBytecode.LerpConstant:
+                        var t = StackTop();
+                        var a = constants[((LerpConstantData)op.data).constant_start].Vec;
+                        var b = constants[((LerpConstantData)op.data).constant_start + 1].Vec;
 
-                        StackPush($"(((float4{v2}-float4{v1})*{Unk35})+float4{v1})");
+                        StackPush($"(lerp({a}, {b}, {t}))");
                         break;
                     case TfxBytecode.UnkLoadConstant: //Replaces the top of the stack instead of pushing?
                         var take = StackTop(); //Just take the top out then push

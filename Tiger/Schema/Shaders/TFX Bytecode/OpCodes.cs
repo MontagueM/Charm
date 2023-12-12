@@ -55,10 +55,10 @@ public class TfxBytecodeOp
                     PushConstantVec4Data.constant_index = reader.ReadByte();
                     tfxData.data = PushConstantVec4Data;
                     break;
-                case TfxBytecode.Unk35:
-                    Unk35Data Unk35Data = new();
-                    Unk35Data.constant_start = reader.ReadByte();
-                    tfxData.data = Unk35Data;
+                case TfxBytecode.LerpConstant:
+                    LerpConstantData LerpConstantData = new();
+                    LerpConstantData.constant_start = reader.ReadByte();
+                    tfxData.data = LerpConstantData;
                     break;
                 case TfxBytecode.Spline4Const:
                     Spline4ConstData Spline4ConstData = new();
@@ -232,8 +232,8 @@ public class TfxBytecodeOp
             case PushConstantVec4Data:
                 output = $"constant_index {((PushConstantVec4Data)tfxData.data).constant_index}: Constant value: {constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString()}";
                 break;
-            case Unk35Data:
-                output = $"constant_start {((Unk35Data)tfxData.data).constant_start}: Constant value: {constants[((Unk35Data)tfxData.data).constant_start].Vec}";
+            case LerpConstantData:
+                output = $"constant_start {((LerpConstantData)tfxData.data).constant_start}: Constant 1: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: Constant 2: {constants[((LerpConstantData)tfxData.data).constant_start+1].Vec}";
                 break;
             case Spline4ConstData:
                 output = $"unk1 {((Spline4ConstData)tfxData.data).unk1}";
@@ -356,7 +356,7 @@ public enum TfxBytecode : byte
     Merge_2_2 = 0x0d,
     Unk0e = 0x0e,
     Unk0f = 0x0f,
-    Unk10 = 0x10,
+    Lerp = 0x10,
     Unk11 = 0x11,
     MultiplyAdd = 0x12,
     Clamp = 0x13,
@@ -386,7 +386,7 @@ public enum TfxBytecode : byte
     Unk2d = 0x2d,
     TransformVec4 = 0x2e,
     PushConstantVec4 = 0x34, //{ constant_index: u8 }
-    Unk35 = 0x35, //{ unk1: u8 }
+    LerpConstant = 0x35, //{ unk1: u8 }
     Spline4Const = 0x37, //{ unk1: u8 }
     Unk38 = 0x38, //{ unk1: u8 }
     Unk39 = 0x39, //{ unk1: u8 }
@@ -439,7 +439,7 @@ public struct PushConstantVec4Data
     public byte constant_index;
 }
 
-public struct Unk35Data
+public struct LerpConstantData
 {
     public byte constant_start;
 }
