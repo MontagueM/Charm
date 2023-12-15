@@ -216,19 +216,19 @@ public class TfxBytecodeInterpreter
                         break;
                     case TfxBytecode.PushConstantVec4:
                         var vec = constants[((PushConstantVec4Data)op.data).constant_index].Vec;
-                        StackPush($"(float4({vec.X}, {vec.Y}, {vec.Z}, {vec.W}))");
+                        StackPush($"(float4{vec})");
                         break;
                     case TfxBytecode.LerpConstant:
                         var t = StackTop();
                         var a = constants[((LerpConstantData)op.data).constant_start].Vec;
                         var b = constants[((LerpConstantData)op.data).constant_start + 1].Vec;
 
-                        StackPush($"(lerp({a}, {b}, {t}))");
+                        StackPush($"(lerp(float4{a}, float4{b}, {t}))");
                         break;
                     case TfxBytecode.UnkLoadConstant: //Replaces the top of the stack instead of pushing?
                         var take = StackTop(); //Just take the top out then push
                         var UnkLoadConstant = constants[((UnkLoadConstantData)op.data).constant_index].Vec;
-                        StackPush($"(float4({UnkLoadConstant.X}, {UnkLoadConstant.Y}, {UnkLoadConstant.Z}, {UnkLoadConstant.W}))");
+                        StackPush($"(float4{UnkLoadConstant})");
                         break;
                     case TfxBytecode.PushExternInputFloat:
                         var v = GetExternFloat(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element);
@@ -271,8 +271,10 @@ public class TfxBytecodeInterpreter
                         //Temp.AddRange(Stack);
 
                         Console.WriteLine($"----Output Stack Count: {Stack.Count}");
-                        if(Stack.Count == 0 || Stack.Count > 1) //Shouldnt happen
-                            hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(1, 1, 1, 1)");
+                        if(Stack.Count == 0) //Shouldnt happen
+                            hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(0, 0, 0, 0)");
+                        else if(Stack.Count > 1) //Shouldnt happen
+                            hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
                         else
                             hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
 

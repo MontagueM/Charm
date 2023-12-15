@@ -507,6 +507,7 @@ PS
             funcDef.AppendLine("\t\tfloat4 o0 = float4(0,0,0,0);");
             funcDef.AppendLine("\t\tfloat4 o1 = float4(PackNormal3D(v0.xyz),1);");
             funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);\n");
+            funcDef.AppendLine("\t\tfloat4 o3 = float4(0,0,0,0);\n");
 
             //if (cbuffers.Any(cbuffer => cbuffer.Index == 13 && cbuffer.Count == 2)) //Should be time (g_flTime) but probably gets manipulated somehow
             //{

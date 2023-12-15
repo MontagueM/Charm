@@ -157,15 +157,13 @@ public class Source2Handler
             TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(materialHeader.PS_TFX_Bytecode));
             var bytecode_hlsl = bytecode.Evaluate(materialHeader.PS_TFX_Bytecode_Constants);
 
-            if (bytecode_hlsl.Count > 0)
+            vmat.AppendLine($"\tDynamicParams\r\n\t{{");
+            foreach (var entry in bytecode_hlsl)
             {
-                vmat.AppendLine($"\tDynamicParams\r\n\t{{");
-                foreach (var entry in bytecode_hlsl)
-                {
-                    vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
-                }
-                vmat.AppendLine($"\t}}");
+                vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
             }
+            vmat.AppendLine($"\t\tcb13_0 \"Time\"");
+            vmat.AppendLine($"\t}}");
         }
 
         foreach (var e in materialHeader.EnumeratePSTextures())
@@ -177,7 +175,7 @@ public class Source2Handler
         }
 
         //vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.VertexShader.GetBytecode(), $"vs{materialHeader.VertexShader.Hash}"), materialHeader, true).ToString());
-        vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.PixelShader.GetBytecode(), $"ps{materialHeader.PixelShader.Hash}"), materialHeader).ToString());
+        vmat.AppendLine(PopulateCBuffers(materialHeader).ToString());
         vmat.AppendLine("}");
 
         string terrainDir = isTerrain ? "/Terrain/" : "";
@@ -235,7 +233,7 @@ public class Source2Handler
         }
     }
 
-    public static StringBuilder PopulateCBuffers(string hlsl, IMaterial materialHeader, bool isVertexShader = false)
+    public static StringBuilder PopulateCBuffers(IMaterial materialHeader, bool isVertexShader = false)
     {
         StringBuilder cbuffers = new();
 
