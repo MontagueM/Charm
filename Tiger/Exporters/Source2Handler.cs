@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using Arithmic;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
@@ -28,11 +30,17 @@ public class Source2Handler
                 int i = 0;
                 foreach (MeshPart staticpart in staticMesh)
                 {
-                    if (staticpart.Material == null)
-                        continue;
                     mats.AppendLine("{");
-                    mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
+                    if (staticpart.Material == null)
+                    {
+                        mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_Index{staticpart.Index}_{i}_{staticpart.LodCategory}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
+                    }
+                    else
+                    {
+                        mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
+                    }
                     mats.AppendLine("},\n");
                     i++;
                 }
@@ -44,8 +52,9 @@ public class Source2Handler
                 File.WriteAllText($"{savePath}/{staticMeshName}.vmdl", text);
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
+            Log.Error(e.Message);
         }
     }
 
@@ -69,15 +78,17 @@ public class Source2Handler
                 int i = 0;
                 foreach (var part in parts)
                 {
-                    if (part.Material == null)
-                        continue;
-
-                    if (!part.Material.EnumeratePSTextures().Any())
-                        continue;
-
                     mats.AppendLine("{");
-                    mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                    if (part.Material == null)
+                    {
+                        mats.AppendLine($"    from = \"{hash}_Group{part.GroupIndex}_Index{part.Index}_{i}_{part.LodCategory}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
+                    }
+                    else
+                    {
+                        mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                    }
                     mats.AppendLine("},\n");
                     i++;
                 }
@@ -91,7 +102,7 @@ public class Source2Handler
         }
         catch(Exception e)
         {
-
+            Log.Error(e.Message);
         }
     }
 
