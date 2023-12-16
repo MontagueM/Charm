@@ -97,7 +97,7 @@ public class AutomatedExporter
                 string valueName = fieldInfo.CustomAttributes.First().ConstructorArguments[0].Value.ToString();
                 for (int i = 0; i < 4; i++)
                 {
-                    text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i]}");
+                    text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
                 }
             }
 
