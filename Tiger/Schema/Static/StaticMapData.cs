@@ -33,12 +33,13 @@ public class StaticMapData : Tag<SStaticMapData>
     public void LoadIntoExporterScene(ExporterScene scene, string savePath, bool bSaveShaders)
     {
         List<SStaticMeshHash> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
-
         // todo this loads statics twice
         Parallel.ForEach(extractedStatics, s =>
         {
             var parts = s.Static.Load(ExportDetailLevel.MostDetailed);
-            scene.AddStatic(s.Static.Hash, parts);
+            if (scene.Type != ExportType.MapResource)
+                scene.AddStatic(s.Static.Hash, parts);
+
             s.Static.SaveMaterialsFromParts(scene, parts);
         });
 

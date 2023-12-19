@@ -131,7 +131,7 @@ public partial class MapView : UserControl
 
     public static void ExportFullMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
     {
-        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.Map);
+        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.MapResource);
 
         string meshName = map.Hash.ToString();
         string savePath = _config.GetExportSavePath() + $"/{meshName}";
@@ -141,11 +141,8 @@ public partial class MapView : UserControl
         }
 
         Directory.CreateDirectory(savePath);
-        if(exportStatics)
-        {
-            Directory.CreateDirectory(savePath + "/Statics");
-            ExportStatics(savePath, map);
-        }
+        Directory.CreateDirectory(savePath + "/Statics");
+        ExportStatics(savePath, map);
 
         ExtractDataTables(map, savePath, scene, ExportTypeFlag.Full);
     }
@@ -173,7 +170,7 @@ public partial class MapView : UserControl
                     if (exportStatics)
                     {
                         ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetSBoxShaderExportEnabled(), true);
+                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, true);
                     }
                 }
             });
@@ -188,14 +185,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
-                    if (exportTypeFlag == ExportTypeFlag.ArrangedMap)
-                    {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadArrangedIntoExporterScene(); //Arranged because...arranged
-                    }
-                    else if (exportTypeFlag == ExportTypeFlag.Full)
-                    {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetSBoxShaderExportEnabled());
-                    }
+                    staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetSBoxShaderExportEnabled());
                 }
             });
         });
@@ -218,11 +208,7 @@ public partial class MapView : UserControl
                         ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
                         var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
                         staticScene.AddStatic(part.Static.Hash, staticmesh);
-
-                        if (sboxModels)
-                        {
-                            SBoxHandler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
-                        }
+                        SBoxHandler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
                     }
                 }
             });

@@ -16,28 +16,11 @@ public class Terrain : Tag<STerrain>
     }
 
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool bSaveShaders, bool exportStatic = false)
+    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool exportStatic = false)
     {
         // Uses triangle strip + only using first set of vertices and indices
         Dictionary<StaticPart, IMaterial> parts = new Dictionary<StaticPart, IMaterial>();
         List<Texture> dyeMaps = new List<Texture>();
-        foreach (var partEntry in _tag.StaticParts)
-        {
-            if (partEntry.DetailLevel == 0)
-            {
-                if (partEntry.Material is null || partEntry.Material.VertexShader is null)
-                    continue;
-
-                var part = MakePart(partEntry);
-                parts.TryAdd(part, partEntry.Material);
-
-                scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
-                part.Material = partEntry.Material;
-
-                if (exportStatic) //Need access to material early, before scene system exports
-                    partEntry.Material.SaveShaders($"{saveDirectory}", true);
-            }
-        }
 
         int terrainTextureIndex = 14;
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
@@ -61,23 +44,43 @@ public class Terrain : Tag<STerrain>
             }
         }
 
+        if (scene.Type == ExportType.MapResource)
+        {
+            scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
+            for (int i = 0; i < dyeMaps.Count; i++)
+            {
+                scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
+            }
+            return;
+        }
+        else
+        {
+            scene.AddStatic(Hash, parts.Keys.ToList());
+        }
+
+        foreach (var partEntry in _tag.StaticParts)
+        {
+            if (partEntry.DetailLevel == 0)
+            {
+                if (partEntry.Material is null || partEntry.Material.VertexShader is null)
+                    continue;
+
+                var part = MakePart(partEntry);
+                parts.TryAdd(part, partEntry.Material);
+
+                scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
+                part.Material = partEntry.Material;
+
+                if (exportStatic) //Need access to material early, before scene system exports
+                    partEntry.Material.SaveShaders($"{saveDirectory}", true);
+            }
+        }
+
         foreach (var part in parts)
         {
             TransformPositions(part.Key);
             TransformTexcoords(part.Key);
             TransformVertexColors(part.Key);
-        }
-
-        scene.AddStatic(Hash, parts.Keys.ToList());
-        // For now we pre-transform it
-        if (!exportStatic)
-        {
-            scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
-
-            for (int i = 0; i < dyeMaps.Count; i++)
-            {
-                scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
-            }
         }
 
         // We need to add these textures after the static is initialised

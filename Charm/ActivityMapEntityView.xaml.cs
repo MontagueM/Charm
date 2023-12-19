@@ -350,10 +350,9 @@ public partial class ActivityMapEntityView : UserControl
     private static void ExtractDataTables(List<FileHash> dataTables, string hash, string savePath)
     {
         // todo these scenes can be combined
-        ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{hash}_EntityPoints", ExportType.EntityPoints);
-        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.Map);
-        ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyEnts", ExportType.Map);
-        ExporterScene terrainScene = Exporter.Get().CreateScene($"{hash}_Terrain", ExportType.Terrain);
+        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.MapResource);
+        ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyEnts", ExportType.MapResource);
+        ExporterScene terrainScene = Exporter.Get().CreateScene($"{hash}_Terrain", ExportType.MapResource);
 
         Parallel.ForEach(dataTables, data =>
         {
@@ -366,8 +365,6 @@ public partial class ActivityMapEntityView : UserControl
                     dynamicScene.AddMapEntity(entry, entity);
                     entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
                 }
-                else
-                    dynamicPointScene.AddEntityPoints(entry);
                 
                 switch (entry.DataResource.GetValue(dataTable.GetReader()))
                 {
@@ -428,7 +425,7 @@ public partial class ActivityMapEntityView : UserControl
                         }
                         break;
                     case SMapTerrainResource terrain:
-                        terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetSBoxShaderExportEnabled());
+                        terrain.Terrain.LoadIntoExporter(terrainScene, savePath);
                         break;
                     default:
                         break;
@@ -451,10 +448,7 @@ public partial class ActivityMapEntityView : UserControl
                     dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
                     entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
 
-                    if (_config.GetSBoxModelExportEnabled())
-                    {
-                        SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", entity);
-                    }
+                    SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", entity);
                 }
                 if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
                 {
@@ -466,16 +460,13 @@ public partial class ActivityMapEntityView : UserControl
                         ExporterScene skyScene = Exporter.Get().CreateScene(element.Unk60.TagData.Unk08.Hash, ExportType.EntityInMap);
                         skyScene.AddModel(element.Unk60.TagData.Unk08);
 
-                        if (_config.GetSBoxModelExportEnabled())
-                        {
-                            SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
-                        }
+                        SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
                     }
                 }
                 if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
                 {
                     ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetSBoxShaderExportEnabled(), true);
+                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, true);
                 }
             });
         });

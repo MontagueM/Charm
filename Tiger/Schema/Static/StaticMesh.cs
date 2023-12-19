@@ -65,9 +65,7 @@ public class StaticMesh : Tag<SStaticMesh>
         foreach (var part in parts)
         {
             if (part.Material == null)
-            {
                 continue;
-            }
             scene.Materials.Add(new ExportMaterial(part.Material));
         }
     }

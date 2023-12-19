@@ -47,7 +47,7 @@ public class FbxExporter : AbstractExporter
             {
                 outputDirectory = Path.Join(outputDirectory, scene.Name);
             }
-            else if (scene.Type is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
+            else if (scene.Type is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints or ExportType.MapResource)
             {
                 outputDirectory = Path.Join(outputDirectory, "Maps");
             }
