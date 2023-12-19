@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -36,13 +37,21 @@ public partial class SBoxConfigView : UserControl
         //lbl.FontSize = 10;
         //S2ConfigPanel.Children.Add(lbl);
 
-        // Packages path
+        // S&Box tools path
         ConfigSettingControl cpp = new ConfigSettingControl();
         cpp.SettingName = "S&Box tools path";
         var val = _config.GetSBoxToolsPath();
         cpp.SettingValue = val == "" ? "Not set" : val;
         cpp.ChangeButton.Click += SBoxToolsPath_OnClick;
         SBoxConfigPanel.Children.Add(cpp);
+
+        // S&Box content folder path
+        ConfigSettingControl content = new ConfigSettingControl();
+        content.SettingName = "Content Folder path";
+        var content_path = _config.GetSBoxContentPath();
+        content.SettingValue = content_path == "" ? "Not set" : content_path;
+        content.ChangeButton.Click += SBoxContentPath_OnClick;
+        SBoxConfigPanel.Children.Add(content);
 
         // Enable source 2 shader generation
         ConfigSettingControl cbe = new ConfigSettingControl();
@@ -95,6 +104,47 @@ public partial class SBoxConfigView : UserControl
         }
     }
 
+    private void SBoxContentPath_OnClick(object sender, RoutedEventArgs e)
+    {
+        OpenSBoxContentPathDialog();
+        PopulateConfigPanel();
+    }
+
+    public void OpenSBoxContentPathDialog()
+    {
+        using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+        {
+            dialog.Description = "Select the folder where compilied content will be stored";
+            bool success = false;
+            while (!success)
+            {
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    success = _config.TrySetSBoxContentPath(dialog.SelectedPath);
+                }
+                else
+                {
+                    return;
+                }
+
+                if (!success)
+                {
+                    MessageBox.Show(
+                        "Directory selected is invalid, please select a valid directory");
+                }
+                else
+                {
+                    Directory.CreateDirectory(dialog.SelectedPath);
+                    if(!File.Exists($"{dialog.SelectedPath}/.sbproj"))
+                    {
+                        CreateSBProject(dialog.SelectedPath);
+                    }
+                }
+            }
+        }
+    }
+
     private void SBoxShaderExportEnabled_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetSBoxShaderExportEnabled(!_config.GetSBoxShaderExportEnabled());
@@ -111,5 +161,12 @@ public partial class SBoxConfigView : UserControl
     {
         _config.SetSBoxModelExportEnabled(!_config.GetSBoxModelExportEnabled());
         PopulateConfigPanel();
+    }
+
+    private void CreateSBProject(string path)
+    {
+        string project_template = "{\r\n  \"Title\": \"Destiny Resources\",\r\n  \"Type\": \"content\",\r\n  \"Tags\": null,\r\n  \"Schema\": 1,\r\n  \"HasAssets\": true,\r\n  \"AssetsPath\": \"\",\r\n  \"Resources\": null,\r\n  \"MenuResources\": null,\r\n  \"HasCode\": false,\r\n  \"CodePath\": null,\r\n  \"PackageReferences\": [],\r\n  \"EditorReferences\": null,\r\n  \"Metadata\": {}\r\n}";
+
+        File.WriteAllText($"{path}/.sbproj", project_template);
     }
 }

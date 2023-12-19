@@ -51,6 +51,7 @@ public class SBoxSettings
     public bool SBoxMaterialExportsEnabled { get; set; } = false;
     public bool SBoxModelExportsEnabled { get; set; } = false;
     public string SBoxToolsPath { get; set; } = "";
+    public string SBoxContentPath { get; set; } = "";
 }
 
 public class ConfigSubsystem : Subsystem<ConfigSubsystem>
@@ -139,6 +140,22 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
             return false;
 
         _settings.SBox.SBoxToolsPath = path;
+
+        Save();
+        return true;
+    }
+
+    public string GetSBoxContentPath()
+    {
+        return _settings.SBox.SBoxContentPath;
+    }
+
+    public bool TrySetSBoxContentPath(string path)
+    {
+        if (path == "")
+            return false;
+
+        _settings.SBox.SBoxContentPath = path;
 
         Save();
         return true;
