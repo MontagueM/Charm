@@ -24,7 +24,6 @@ namespace Tiger;
 public struct Settings
 {
     public CommonSettings Common;
-    public UnrealSettings Unreal;
     public BlenderSettings Blender;
     public SBoxSettings SBox;
 }
@@ -37,13 +36,6 @@ public class CommonSettings
     public bool SingleFolderMapsEnabled { get; set; } = true;
     public bool IndividualStaticsEnabled { get; set; } = true;
     public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.DDS_BGRA_UNCOMP_DX10;
-}
-
-// [ConfigSubsystem]
-public class UnrealSettings
-{
-    public bool UnrealInteropEnabled { get; set; } = false;
-    public string UnrealInteropPath { get; set; } = "";
 }
 
 // [ConfigSubsystem]
@@ -210,49 +202,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     #endregion
 
-    #region unrealInteropPath
-
-    public bool TrySetUnrealInteropPath(string interopPath)
-    {
-        if (!interopPath.Contains("Content"))
-        {
-            SetUnrealInteropEnabled(false);
-            return false;
-        }
-
-        _settings.Unreal.UnrealInteropPath = interopPath;
-        SetUnrealInteropEnabled(true);
-
-        Save();
-        return true;
-    }
-
-    public string GetUnrealInteropPath()
-    {
-        return _settings.Unreal.UnrealInteropPath;
-    }
-
-    #endregion
-
-    #region unrealInteropEnabled
-
-    public void SetUnrealInteropEnabled(bool bUnrealInteropEnabled)
-    {
-        _settings.Unreal.UnrealInteropEnabled = bUnrealInteropEnabled;
-        Save();
-    }
-
-    public bool GetUnrealInteropEnabled()
-    {
-        if (_settings.Unreal == null)
-        {
-            return false;
-        }
-        return _settings.Unreal.UnrealInteropEnabled;
-    }
-
-    #endregion
-
     #region blenderInteropEnabled
 
     public void SetBlenderInteropEnabled(bool bBlenderInteropEnabled)
@@ -364,7 +313,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
         {
             _settings.Common = new CommonSettings();
             _settings.Blender = new BlenderSettings();
-            _settings.Unreal = new UnrealSettings();
             _settings.SBox = new SBoxSettings();
             WriteConfig();
         }

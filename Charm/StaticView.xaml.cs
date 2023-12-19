@@ -59,12 +59,6 @@ public partial class StaticView : UserControl
         if (exportType == ExportTypeFlag.Full)
         {
             staticMesh.SaveMaterialsFromParts(scene, parts);
-            if (config.GetUnrealInteropEnabled())
-            {
-                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
-                AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
-            }
-
             if (sboxModels)
             {
                 SBoxHandler.SaveStaticVMDL($"{savePath}", meshName, parts);

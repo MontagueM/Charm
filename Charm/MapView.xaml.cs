@@ -148,11 +148,6 @@ public partial class MapView : UserControl
         }
 
         ExtractDataTables(map, savePath, scene, ExportTypeFlag.Full);
-
-        if (_config.GetUnrealInteropEnabled())
-        {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
-        }
     }
 
     public static void ExportTerrainMap(Tag<SMapContainer> map)
@@ -174,20 +169,15 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
                 {
-                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled());
+                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetSBoxShaderExportEnabled());
                     if (exportStatics)
                     {
                         ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled(), true);
+                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetSBoxShaderExportEnabled(), true);
                     }
                 }
             });
         });
-
-        if (_config.GetUnrealInteropEnabled())
-        {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName + "_Terrain", AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
-        }
     }
 
     private static void ExtractDataTables(Tag<SMapContainer> map, string savePath, ExporterScene scene, ExportTypeFlag exportTypeFlag)
@@ -204,7 +194,7 @@ public partial class MapView : UserControl
                     }
                     else if (exportTypeFlag == ExportTypeFlag.Full)
                     {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled());
+                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetSBoxShaderExportEnabled());
                     }
                 }
             });

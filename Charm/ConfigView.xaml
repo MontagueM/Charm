@@ -16,10 +16,6 @@
             <TabItem x:Name="SBoxTab" Header="S&amp;BOX">
                 <local:SBoxConfigView x:Name="SBoxControl" />
             </TabItem>
-            <TabItem x:Name="UnrealTab" Header="UNREAL ENGINE">
-                <local:UnrealConfigView x:Name="UnrealControl" />
-            </TabItem>
-
         </TabControl>
     </Grid>
 </UserControl>

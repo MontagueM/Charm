@@ -131,10 +131,8 @@ namespace Tiger.Schema.Shaders
             {
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
                 string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
                 string vfx = SBoxHandler.sboxShaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
 
-                Directory.CreateDirectory($"{saveDirectory}/Unreal");
                 if (SBoxHandler.sboxShaders)
                 {
                     Directory.CreateDirectory($"{saveDirectory}/SBox");
@@ -143,10 +141,6 @@ namespace Tiger.Schema.Shaders
 
                 try
                 {
-                    if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{FileHash}.usf"))
-                    {
-                        File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
-                    }
                     if (vfx != String.Empty && !File.Exists($"{saveDirectory}/SBox/PS_{PixelShader.Hash}.shader"))
                     {
                         File.WriteAllText($"{saveDirectory}/SBox/PS_{PixelShader.Hash}.shader", vfx);
@@ -164,23 +158,22 @@ namespace Tiger.Schema.Shaders
 
         public void SaveVertexShader(string saveDirectory)
         {
-            Directory.CreateDirectory($"{saveDirectory}");
-            if (VertexShader != null && VertexShader.Hash.IsValid())
-            {
-                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
-                if (usf != String.Empty)
-                {
-                    try
-                    {
-                        File.WriteAllText($"{saveDirectory}/VS_{FileHash}.usf", usf);
-                        Console.WriteLine($"Saved vertex shader {FileHash}");
-                    }
-                    catch (IOException) // threading error
-                    {
-                    }
-                }
-            }
+            //Directory.CreateDirectory($"{saveDirectory}");
+            //if (VertexShader != null && VertexShader.Hash.IsValid())
+            //{
+            //    string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
+            //    if (usf != String.Empty)
+            //    {
+            //        try
+            //        {
+            //            File.WriteAllText($"{saveDirectory}/VS_{FileHash}.usf", usf);
+            //            Console.WriteLine($"Saved vertex shader {FileHash}");
+            //        }
+            //        catch (IOException) // threading error
+            //        {
+            //        }
+            //    }
+            //}
         }
 
         //Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system

@@ -11,7 +11,7 @@ public class MaterialExporter : AbstractExporter
     {
         ConcurrentHashSet<Texture> mapTextures = new();
         ConcurrentHashSet<ExportMaterial> mapMaterials = new();
-        bool saveShaders = ConfigSubsystem.Get().GetUnrealInteropEnabled() || ConfigSubsystem.Get().GetSBoxShaderExportEnabled();
+        bool saveShaders = ConfigSubsystem.Get().GetSBoxShaderExportEnabled();
 
         Parallel.ForEach(args.Scenes, scene =>
         {

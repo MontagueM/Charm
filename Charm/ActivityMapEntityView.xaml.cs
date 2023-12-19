@@ -345,11 +345,6 @@ public partial class ActivityMapEntityView : UserControl
             Directory.CreateDirectory(savePath + "/Entities");
             ExportIndividual(dataTables, hash, savePath);
         }
-
-        if (_config.GetUnrealInteropEnabled())
-        {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, hash, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
-        }
     }
 
     private static void ExtractDataTables(List<FileHash> dataTables, string hash, string savePath)
@@ -433,7 +428,7 @@ public partial class ActivityMapEntityView : UserControl
                         }
                         break;
                     case SMapTerrainResource terrain:
-                        terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled());
+                        terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetSBoxShaderExportEnabled());
                         break;
                     default:
                         break;
@@ -480,7 +475,7 @@ public partial class ActivityMapEntityView : UserControl
                 if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
                 {
                     ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled(), true);
+                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetSBoxShaderExportEnabled(), true);
                 }
             });
         });
