@@ -80,7 +80,6 @@ public partial class GeneralConfigView : UserControl
 
         GeneralConfigPanel.Children.Add(sp);
 
-
         // Save path
         ConfigSettingControl csp = new ConfigSettingControl();
         csp.SettingName = "Export save path";
@@ -88,14 +87,6 @@ public partial class GeneralConfigView : UserControl
         csp.SettingValue = exportSavePath == "" ? "Not set" : exportSavePath;
         csp.ChangeButton.Click += ExportSavePath_OnClick;
         GeneralConfigPanel.Children.Add(csp);
-
-        // Enable Blender interop //force people to use the addon now >:)
-        //ConfigSettingControl cbe = new ConfigSettingControl();
-        //cbe.SettingName = "Generate Blender importing script";
-        //bool bval2 = _config.GetBlenderInteropEnabled();
-        //cbe.SettingValue = bval2.ToString();
-        //cbe.ChangeButton.Click += BlenderInteropEnabled_OnClick;
-        //GeneralConfigPanel.Children.Add(cbe);
 
         // Enable combined extraction folder for maps
         ConfigSettingControl cef = new ConfigSettingControl();

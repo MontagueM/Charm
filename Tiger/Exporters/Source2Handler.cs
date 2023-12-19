@@ -8,12 +8,12 @@ using Tiger.Schema.Static;
 
 namespace Tiger.Exporters;
 
-public class Source2Handler
+public class SBoxHandler
 {
     private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-    public static bool source2Shaders = _config.GetS2ShaderExportEnabled();
-    public static bool source2Models = _config.GetS2VMDLExportEnabled();
-    public static bool source2Materials = _config.GetS2VMATExportEnabled();
+    public static bool sboxShaders = _config.GetSBoxShaderExportEnabled();
+    public static bool sboxModels = _config.GetSBoxModelExportEnabled();
+    public static bool sboxMaterials = _config.GetSBoxMaterialExportEnabled();
 
     public static void SaveStaticVMDL(string savePath, string staticMeshName, List<StaticPart> staticMesh)
     {
@@ -143,7 +143,7 @@ public class Source2Handler
         vmat.AppendLine("Layer0 \n{");
 
         //If the shader doesnt exist, just use the default complex.shader
-        if (!File.Exists($"{savePath}/Source2/PS_{materialHeader.PixelShader?.Hash}.shader"))
+        if (!File.Exists($"{savePath}/SBox/PS_{materialHeader.PixelShader?.Hash}.shader"))
         {
             vmat.AppendLine($"  shader \"complex.shader\"");
 
@@ -191,13 +191,13 @@ public class Source2Handler
 
         string terrainDir = isTerrain ? "/Terrain/" : "";
         if (isTerrain)
-            Directory.CreateDirectory($"{savePath}/Source2/materials/{terrainDir}");
+            Directory.CreateDirectory($"{savePath}/SBox/materials/{terrainDir}");
 
-        if (!File.Exists($"{savePath}/Source2/materials/{terrainDir}{hash}.vmat"))
+        if (!File.Exists($"{savePath}/SBox/materials/{terrainDir}{hash}.vmat"))
         {
             try
             {
-                File.WriteAllText($"{savePath}/Source2/materials/{terrainDir}{hash}.vmat", vmat.ToString());
+                File.WriteAllText($"{savePath}/SBox/materials/{terrainDir}{hash}.vmat", vmat.ToString());
             }
             catch (IOException)
             {
@@ -231,12 +231,12 @@ public class Source2Handler
 
         vmat.AppendLine("}");
 
-        if (!File.Exists($"{savePath}/Source2/materials/{hash}_decal.vmat"))
+        if (!File.Exists($"{savePath}/SBox/materials/{hash}_decal.vmat"))
         {
             try
             {
-                Directory.CreateDirectory($"{savePath}/Source2/materials/");
-                File.WriteAllText($"{savePath}/Source2/materials/{hash}_decal.vmat", vmat.ToString());
+                Directory.CreateDirectory($"{savePath}/SBox/materials/");
+                File.WriteAllText($"{savePath}/SBox/materials/{hash}_decal.vmat", vmat.ToString());
             }
             catch (IOException)
             {

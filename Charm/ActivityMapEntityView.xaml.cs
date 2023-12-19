@@ -433,7 +433,7 @@ public partial class ActivityMapEntityView : UserControl
                         }
                         break;
                     case SMapTerrainResource terrain:
-                        terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
+                        terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled());
                         break;
                     default:
                         break;
@@ -456,9 +456,9 @@ public partial class ActivityMapEntityView : UserControl
                     dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
                     entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
 
-                    if (_config.GetS2VMDLExportEnabled())
+                    if (_config.GetSBoxModelExportEnabled())
                     {
-                        Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
+                        SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", entity);
                     }
                 }
                 if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
@@ -471,16 +471,16 @@ public partial class ActivityMapEntityView : UserControl
                         ExporterScene skyScene = Exporter.Get().CreateScene(element.Unk60.TagData.Unk08.Hash, ExportType.EntityInMap);
                         skyScene.AddModel(element.Unk60.TagData.Unk08);
 
-                        if (_config.GetS2VMDLExportEnabled())
+                        if (_config.GetSBoxModelExportEnabled())
                         {
-                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
+                            SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
                         }
                     }
                 }
                 if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
                 {
                     ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
+                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled(), true);
                 }
             });
         });

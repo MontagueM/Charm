@@ -65,7 +65,7 @@ namespace Charm
                     // {
                     //     var dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
                     //     fbxHandler.AddEntityToScene(entity, dynamicParts, ExportDetailLevel.MostDetailed);
-                    //     entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigSubsystem.GetUnrealInteropEnabled() || ConfigSubsystem.GetS2ShaderExportEnabled());
+                    //     entity.SaveMaterialsFromParts(savePath, dynamicParts, ConfigSubsystem.GetUnrealInteropEnabled() || ConfigSubsystem.GetSBoxShaderExportEnabled());
                     //     entity.SaveTexturePlates(savePath);
                     // }
                     //

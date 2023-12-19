@@ -30,7 +30,7 @@ public partial class MapView : UserControl
 
     private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
-    private static bool source2Models = _config.GetS2VMDLExportEnabled();
+    private static bool sboxModels = _config.GetSBoxModelExportEnabled();
     private static bool exportStatics = _config.GetIndvidualStaticsEnabled();
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -174,11 +174,11 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
                 {
-                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
+                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled());
                     if (exportStatics)
                     {
                         ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
+                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled(), true);
                     }
                 }
             });
@@ -204,7 +204,7 @@ public partial class MapView : UserControl
                     }
                     else if (exportTypeFlag == ExportTypeFlag.Full)
                     {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
+                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetSBoxShaderExportEnabled());
                     }
                 }
             });
@@ -229,9 +229,9 @@ public partial class MapView : UserControl
                         var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
                         staticScene.AddStatic(part.Static.Hash, staticmesh);
 
-                        if (source2Models)
+                        if (sboxModels)
                         {
-                            Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
+                            SBoxHandler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
                         }
                     }
                 }

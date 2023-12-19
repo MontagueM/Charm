@@ -132,13 +132,13 @@ namespace Tiger.Schema.Shaders
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
                 string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
                 string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
-                string vfx = Source2Handler.source2Shaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
+                string vfx = SBoxHandler.sboxShaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
 
                 Directory.CreateDirectory($"{saveDirectory}/Unreal");
-                if (Source2Handler.source2Shaders)
+                if (SBoxHandler.sboxShaders)
                 {
-                    Directory.CreateDirectory($"{saveDirectory}/Source2");
-                    Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
+                    Directory.CreateDirectory($"{saveDirectory}/SBox");
+                    Directory.CreateDirectory($"{saveDirectory}/SBox/materials");
                 }
 
                 try
@@ -147,9 +147,9 @@ namespace Tiger.Schema.Shaders
                     {
                         File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
                     }
-                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader"))
+                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/SBox/PS_{PixelShader.Hash}.shader"))
                     {
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader", vfx);
+                        File.WriteAllText($"{saveDirectory}/SBox/PS_{PixelShader.Hash}.shader", vfx);
                     }
                 }
                 catch (IOException)  // threading error
@@ -157,8 +157,8 @@ namespace Tiger.Schema.Shaders
                 }
 
                 //Need to save vmat after shader has be exported, to check if it exists
-                if (Source2Handler.source2Shaders)
-                    Source2Handler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
+                if (SBoxHandler.sboxShaders)
+                    SBoxHandler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
             }
         }
 

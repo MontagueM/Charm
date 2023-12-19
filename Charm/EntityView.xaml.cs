@@ -101,9 +101,9 @@ public partial class EntityView : UserControl
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
                 entity.SaveTexturePlates(savePath);
             }
-            if (ConfigSubsystem.Get().GetS2VMDLExportEnabled())
+            if (ConfigSubsystem.Get().GetSBoxModelExportEnabled())
             {
-                Source2Handler.SaveEntityVMDL($"{savePath}", entity);
+                SBoxHandler.SaveEntityVMDL($"{savePath}", entity);
             }
         }
 

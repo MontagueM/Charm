@@ -53,7 +53,7 @@ public partial class StaticView : UserControl
         ExporterScene scene = Exporter.Get().CreateScene(name, ExportType.Static);
         bool lodexport = false;
         ConfigSubsystem config = ConfigSubsystem.Get();
-        bool source2Models = config.GetS2VMDLExportEnabled();
+        bool sboxModels = config.GetSBoxModelExportEnabled();
 
         string savePath = config.GetExportSavePath() + "/" + extraPath + "/";
         string meshName = hash;
@@ -75,9 +75,9 @@ public partial class StaticView : UserControl
                 AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
             }
 
-            if (source2Models)
+            if (sboxModels)
             {
-                Source2Handler.SaveStaticVMDL($"{savePath}", meshName, parts);
+                SBoxHandler.SaveStaticVMDL($"{savePath}", meshName, parts);
             }
         }
 

@@ -86,11 +86,11 @@ public class Terrain : Tag<STerrain>
             Texture dyemap = _tag.MeshGroups[part.Key.GroupIndex].Dyemap;
             if (dyemap != null)
             {
-                if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2ShaderExportEnabled())
+                if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetSBoxShaderExportEnabled())
                 {
-                    if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat"))
+                    if (File.Exists($"{saveDirectory}/Shaders/SBox/materials/Terrain/{part.Value.FileHash}.vmat"))
                     {
-                        string[] vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat");
+                        string[] vmat = File.ReadAllLines($"{saveDirectory}/Shaders/SBox/materials/Terrain/{part.Value.FileHash}.vmat");
                         int lastBraceIndex = Array.FindLastIndex(vmat, line => line.Trim().Equals("}")); //Searches for the last brace (})
                         bool textureFound = Array.Exists(vmat, line => line.Trim().StartsWith("TextureT14"));
                         if (!textureFound && lastBraceIndex != -1)
@@ -103,15 +103,15 @@ public class Terrain : Tag<STerrain>
                             }
 
                             newVmat.AddRange(vmat.Skip(lastBraceIndex));
-                            File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/Terrain/{Hash}_{part.Value.FileHash}.vmat", newVmat);
-                            File.Delete($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat"); //Delete the old vmat, dont need it anymore
+                            File.WriteAllLines($"{saveDirectory}/Shaders/SBox/materials/Terrain/{Hash}_{part.Value.FileHash}.vmat", newVmat);
+                            File.Delete($"{saveDirectory}/Shaders/SBox/materials/Terrain/{part.Value.FileHash}.vmat"); //Delete the old vmat, dont need it anymore
                         }
                     }
                 }
             }
         }
-        if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2VMDLExportEnabled())
-            Source2Handler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
+        if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetSBoxModelExportEnabled())
+            SBoxHandler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
     }
 
     public StaticPart MakePart(SStaticPart entry)
