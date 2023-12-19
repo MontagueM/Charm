@@ -139,11 +139,13 @@ public class SBoxHandler
 
     public static void SaveVMAT(string savePath, string hash, IMaterial materialHeader, bool isTerrain = false)
     {
+        Directory.CreateDirectory($"{savePath}/Materials");
         StringBuilder vmat = new StringBuilder();
+
         vmat.AppendLine("Layer0 \n{");
 
         //If the shader doesnt exist, just use the default complex.shader
-        if (!File.Exists($"{savePath}/SBox/PS_{materialHeader.PixelShader?.Hash}.shader"))
+        if (!File.Exists($"{savePath}/Shaders/PS_{materialHeader.PixelShader?.Hash}.shader"))
         {
             vmat.AppendLine($"  shader \"complex.shader\"");
 
@@ -151,7 +153,7 @@ public class SBoxHandler
             if (materialHeader.EnumeratePSTextures().Any())
             {
                 if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
-                    vmat.AppendLine($"  TextureColor \"materials/Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
+                    vmat.AppendLine($"  TextureColor \"Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
             }
         }
         else
@@ -174,6 +176,7 @@ public class SBoxHandler
                 vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
             }
             vmat.AppendLine($"\t\tcb13_0 \"Time\"");
+            vmat.AppendLine($"\t\tcb13_1 \"float4(1,1,1,1)\"");
             vmat.AppendLine($"\t}}");
         }
 
@@ -182,7 +185,7 @@ public class SBoxHandler
             if (e.Texture == null)
                 continue;
 
-            vmat.AppendLine($"\tTextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
+            vmat.AppendLine($"\tTextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
         }
 
         //vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.VertexShader.GetBytecode(), $"vs{materialHeader.VertexShader.Hash}"), materialHeader, true).ToString());
@@ -191,17 +194,14 @@ public class SBoxHandler
 
         string terrainDir = isTerrain ? "/Terrain/" : "";
         if (isTerrain)
-            Directory.CreateDirectory($"{savePath}/SBox/materials/{terrainDir}");
+            Directory.CreateDirectory($"{savePath}/materials/{terrainDir}");
 
-        if (!File.Exists($"{savePath}/SBox/materials/{terrainDir}{hash}.vmat"))
+        try
         {
-            try
-            {
-                File.WriteAllText($"{savePath}/SBox/materials/{terrainDir}{hash}.vmat", vmat.ToString());
-            }
-            catch (IOException)
-            {
-            }
+            File.WriteAllText($"{savePath}/materials/{terrainDir}{hash}.vmat", vmat.ToString());
+        }
+        catch (IOException)
+        {
         }
     }
 
@@ -216,31 +216,26 @@ public class SBoxHandler
         if (materialHeader.EnumeratePSTextures().Any())
         {
             if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
-                vmat.AppendLine($"  TextureColor \"materials/Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
+                vmat.AppendLine($"  TextureColor \"Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
         }
 
         foreach (var e in materialHeader.EnumeratePSTextures())
         {
             if (e.Texture == null)
-            {
                 continue;
-            }
 
-            vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
+            vmat.AppendLine($"  TextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
         }
 
         vmat.AppendLine("}");
 
-        if (!File.Exists($"{savePath}/SBox/materials/{hash}_decal.vmat"))
+        try
         {
-            try
-            {
-                Directory.CreateDirectory($"{savePath}/SBox/materials/");
-                File.WriteAllText($"{savePath}/SBox/materials/{hash}_decal.vmat", vmat.ToString());
-            }
-            catch (IOException)
-            {
-            }
+            Directory.CreateDirectory($"{savePath}/materials/");
+            File.WriteAllText($"{savePath}/materials/{hash}_decal.vmat", vmat.ToString());
+        }
+        catch (IOException)
+        {
         }
     }
 

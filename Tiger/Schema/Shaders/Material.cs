@@ -4,7 +4,6 @@ using Tiger.Exporters;
 
 namespace Tiger.Schema.Shaders
 {
-
     public struct TextureView
     {
         public string Dimension;
@@ -125,34 +124,26 @@ namespace Tiger.Schema.Shaders
             return hlsl;
         }
 
-        public void SavePixelShader(string saveDirectory, bool isTerrain = false)
+        public void SaveShaders(string saveDirectory, bool isTerrain = false)
         {
+            Directory.CreateDirectory($"{saveDirectory}/Shaders");
             if (PixelShader != null && PixelShader.Hash.IsValid())
             {
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
                 string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string vfx = SBoxHandler.sboxShaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
-
-                if (SBoxHandler.sboxShaders)
-                {
-                    Directory.CreateDirectory($"{saveDirectory}/SBox");
-                    Directory.CreateDirectory($"{saveDirectory}/SBox/materials");
-                }
+                string vfx = new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain);
 
                 try
                 {
-                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/SBox/PS_{PixelShader.Hash}.shader"))
+                    if (vfx != String.Empty)
                     {
-                        File.WriteAllText($"{saveDirectory}/SBox/PS_{PixelShader.Hash}.shader", vfx);
+                        File.WriteAllText($"{saveDirectory}/Shaders/PS_{PixelShader.Hash}.shader", vfx);
+                        SBoxHandler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
                     }
                 }
                 catch (IOException)  // threading error
                 {
                 }
-
-                //Need to save vmat after shader has be exported, to check if it exists
-                if (SBoxHandler.sboxShaders)
-                    SBoxHandler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
             }
         }
 
@@ -179,7 +170,7 @@ namespace Tiger.Schema.Shaders
         //Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
         public void SaveMaterial(string saveDirectory)
         {
-            var hlslPath = $"{saveDirectory}/Shaders/Raw";
+            var hlslPath = $"{saveDirectory}/Raw_Shaders";
             var texturePath = $"{saveDirectory}/Textures";
             Directory.CreateDirectory(hlslPath);
             Directory.CreateDirectory(texturePath);
@@ -187,12 +178,12 @@ namespace Tiger.Schema.Shaders
             if (PixelShader != null)
             {
                 Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}", hlslPath);
-                SavePixelShader($"{saveDirectory}/Shaders/");
+                SaveShaders($"{saveDirectory}");
             }
             if (VertexShader != null)
             {
                 Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}", hlslPath);
-                SaveVertexShader($"{saveDirectory}/Shaders/");
+                SaveVertexShader($"{saveDirectory}");
             }
 
             foreach (STextureTag texture in EnumerateVSTextures())

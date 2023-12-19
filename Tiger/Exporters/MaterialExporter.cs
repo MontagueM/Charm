@@ -40,8 +40,8 @@ public class MaterialExporter : AbstractExporter
 
                     if (saveShaders)
                     {
-                        string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Shaders";
-                        material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
+                        string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}";
+                        material.Material.SaveShaders(shaderSaveDirectory, material.IsTerrain);
                         material.Material.SaveVertexShader(shaderSaveDirectory);
                     }
                 }
@@ -86,11 +86,11 @@ public class MaterialExporter : AbstractExporter
 
         if (saveShaders)
         {
-            string shaderSaveDirectory = $"{args.OutputDirectory}/Maps/Shaders";
+            string shaderSaveDirectory = $"{args.OutputDirectory}/Maps";
             Directory.CreateDirectory(shaderSaveDirectory);
             foreach (ExportMaterial material in mapMaterials)
             {
-                material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
+                material.Material.SaveShaders(shaderSaveDirectory, material.IsTerrain);
                 material.Material.SaveVertexShader(shaderSaveDirectory);
             }
         }

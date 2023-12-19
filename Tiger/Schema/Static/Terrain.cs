@@ -35,7 +35,7 @@ public class Terrain : Tag<STerrain>
                 part.Material = partEntry.Material;
 
                 if (exportStatic) //Need access to material early, before scene system exports
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders", true);
+                    partEntry.Material.SaveShaders($"{saveDirectory}", true);
             }
         }
 
@@ -88,9 +88,9 @@ public class Terrain : Tag<STerrain>
             {
                 if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetSBoxShaderExportEnabled())
                 {
-                    if (File.Exists($"{saveDirectory}/Shaders/SBox/materials/Terrain/{part.Value.FileHash}.vmat"))
+                    if (File.Exists($"{saveDirectory}/materials/Terrain/{part.Value.FileHash}.vmat"))
                     {
-                        string[] vmat = File.ReadAllLines($"{saveDirectory}/Shaders/SBox/materials/Terrain/{part.Value.FileHash}.vmat");
+                        string[] vmat = File.ReadAllLines($"{saveDirectory}/materials/Terrain/{part.Value.FileHash}.vmat");
                         int lastBraceIndex = Array.FindLastIndex(vmat, line => line.Trim().Equals("}")); //Searches for the last brace (})
                         bool textureFound = Array.Exists(vmat, line => line.Trim().StartsWith("TextureT14"));
                         if (!textureFound && lastBraceIndex != -1)
@@ -99,14 +99,14 @@ public class Terrain : Tag<STerrain>
 
                             for (int i = 0; i < dyeMaps.Count; i++) //Add all the dyemaps to the vmat
                             {
-                                newVmat.Add($"  TextureT{terrainTextureIndex}_{i} \"materials/Textures/{dyeMaps[i].Hash}.png\"");
+                                newVmat.Add($"  TextureT{terrainTextureIndex}_{i} \"Textures/{dyeMaps[i].Hash}.png\"");
                             }
 
                             newVmat.AddRange(vmat.Skip(lastBraceIndex));
-                            File.WriteAllLines($"{saveDirectory}/Shaders/SBox/materials/Terrain/{Hash}_{part.Value.FileHash}.vmat", newVmat);
-                            File.Delete($"{saveDirectory}/Shaders/SBox/materials/Terrain/{part.Value.FileHash}.vmat"); //Delete the old vmat, dont need it anymore
+                            File.WriteAllLines($"{saveDirectory}/materials/Terrain/{Hash}_{part.Value.FileHash}.vmat", newVmat); 
                         }
                     }
+                    File.Delete($"{saveDirectory}/materials/Terrain/{part.Value.FileHash}.vmat"); //Delete the old vmat, dont need it anymore
                 }
             }
         }
