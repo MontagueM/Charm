@@ -1,7 +1,7 @@
 # S&Charm (CharmBox?)
 
 ## What is this?
-A fork of Charm solely focused on exporting to S&Box
+A fork of [Charm](https://github.com/MontagueM/Charm) solely focused on exporting to S&Box
 
 ## WIP
  - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/Source-2-Importing)
