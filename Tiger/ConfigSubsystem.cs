@@ -37,7 +37,6 @@ public class CommonSettings
     public bool SingleFolderMapsEnabled { get; set; } = true;
     public bool IndividualStaticsEnabled { get; set; } = true;
     public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.DDS_BGRA_UNCOMP_DX10;
-    public bool UseCustomRenderer { get; set; } = false;
 }
 
 // [ConfigSubsystem]
@@ -322,17 +321,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     }
 
     #endregion
-
-    public void SetUseCustomRenderer(bool useCustomRenderer)
-    {
-        _settings.Common.UseCustomRenderer = useCustomRenderer;
-        Save();
-    }
-
-    public bool GetUseCustomRenderer()
-    {
-        return _settings.Common.UseCustomRenderer;
-    }
 
     private string _configFilePath = "./config.json";
     private Settings _settings;

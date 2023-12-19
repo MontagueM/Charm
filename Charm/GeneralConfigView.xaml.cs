@@ -104,14 +104,6 @@ public partial class GeneralConfigView : UserControl
         cfe.ChangeButton.Click += IndvidualStaticsEnabled_OnClick;
         GeneralConfigPanel.Children.Add(cfe);
 
-        // Enable individual static extraction with maps
-        ConfigSettingControl cucr = new ConfigSettingControl();
-        cucr.SettingName = "Use custom renderer";
-        bval = _config.GetUseCustomRenderer();
-        cucr.SettingValue = bval.ToString();
-        cucr.ChangeButton.Click += UseCustomRenderer_OnClick;
-        GeneralConfigPanel.Children.Add(cucr);
-
         // Output texture format
         ConfigSettingComboControl ctf = new ConfigSettingComboControl();
         ctf.SettingName = "Output texture format";
@@ -296,11 +288,5 @@ public partial class GeneralConfigView : UserControl
         Strategy.SetStrategy(_config.GetCurrentStrategy());
         PopulateConfigPanel();
         ConsiderShowingMainMenu();
-    }
-
-    private void UseCustomRenderer_OnClick(object sender, RoutedEventArgs e)
-    {
-        _config.SetUseCustomRenderer(!_config.GetUseCustomRenderer());
-        PopulateConfigPanel();
     }
 }

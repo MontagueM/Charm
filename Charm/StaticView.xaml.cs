@@ -23,29 +23,19 @@ public partial class StaticView : UserControl
 
     public void LoadStatic(FileHash hash, ExportDetailLevel detailLevel, Window window)
     {
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_LATEST && ConfigSubsystem.Get().GetUseCustomRenderer() == true)
-        {
-            AtlasView.Visibility = Visibility.Visible;
-            ModelView.Visibility = Visibility.Collapsed;
-            AtlasView.LoadStatic(hash, window);
-        }
-        else
-        {
-            AtlasView.Visibility = Visibility.Collapsed;
-            ModelView.Visibility = Visibility.Visible;
-            StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(hash);
-            var parts = staticMesh.Load(detailLevel);
-            // await Task.Run(() =>
-            // {
-            //     parts = staticMesh.Load(detailLevel);
-            // });
-            MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-            MVM.Clear();
-            var displayParts = MakeDisplayParts(parts);
-            MVM.SetChildren(displayParts);
-            MVM.Title = hash;
-            MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
-        }
+        ModelView.Visibility = Visibility.Visible;
+        StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(hash);
+        var parts = staticMesh.Load(detailLevel);
+        // await Task.Run(() =>
+        // {
+        //     parts = staticMesh.Load(detailLevel);
+        // });
+        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        MVM.Clear();
+        var displayParts = MakeDisplayParts(parts);
+        MVM.SetChildren(displayParts);
+        MVM.Title = hash;
+        MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";  
     }
 
     public static void ExportStatic(FileHash hash, string name, ExportTypeFlag exportType, string extraPath = "")
