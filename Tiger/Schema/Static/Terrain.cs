@@ -53,10 +53,6 @@ public class Terrain : Tag<STerrain>
             }
             return;
         }
-        else
-        {
-            scene.AddStatic(Hash, parts.Keys.ToList());
-        }
 
         foreach (var partEntry in _tag.StaticParts)
         {
@@ -82,6 +78,7 @@ public class Terrain : Tag<STerrain>
             TransformTexcoords(part.Key);
             TransformVertexColors(part.Key);
         }
+        scene.AddStatic(Hash, parts.Keys.ToList());
 
         // We need to add these textures after the static is initialised
         foreach (var part in parts)
