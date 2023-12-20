@@ -23,6 +23,8 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
+      <PackageReference Include="Pfim" Version="0.11.2" />
+      <PackageReference Include="ValveResourceFormat" Version="0.3.2.1621" />
     </ItemGroup>
 
     <ItemGroup>

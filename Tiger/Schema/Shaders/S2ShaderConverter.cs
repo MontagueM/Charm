@@ -25,7 +25,10 @@ public class S2ShaderConverter
     private bool bTranslucent = true;
     private bool bUsesFrontFace = false;
     private bool bFixRoughness = false;
+
     private bool bUsesNormalBuffer = false;
+    private bool bUsesFrameBuffer = false;
+    private bool bUsesDepthBuffer = false;
 
     public string vfxStructure =
 $@"HEADER
@@ -161,11 +164,11 @@ PS
         vfxStructure = vfxStructure.Replace("//ps_Function", instructions.ToString());
         vfxStructure = vfxStructure.Replace("//ps_Inputs", WriteFunctionDefinition(material, false).ToString());
 
-        if (bOpacityEnabled || bTranslucent) //This way is stupid but it works
+        if (bOpacityEnabled) //This way is stupid but it works
         {
-            vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST {((bUsesNormalBuffer || bTranslucent) ? "0" : "1")}\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT {((bUsesNormalBuffer || bTranslucent) ? "1" : "0")}\r\n\t#endif");
-            if (bTranslucent)
-                vfxStructure = vfxStructure.Replace("FinalOutput MainPs", "float4 MainPs");
+            bool a = bUsesNormalBuffer || bTranslucent || bUsesFrameBuffer || bUsesDepthBuffer;
+
+            vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST {(a ? "0" : "1")}\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT {(a ? "1" : "0")}\r\n\t#endif");
         }
 
         vfxStructure = vfxStructure.Replace("//ps_output", AddOutput(material).ToString());
@@ -308,6 +311,13 @@ PS
             }
             else
             {
+                //if(cbuffer.Index != 12)
+                //{
+                //    for (int i = 0; i < cbuffer.Count; i++)
+                //    {
+                //        CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
+                //    }
+                //}
                 for (int i = 0; i < cbuffer.Count; i++)
                 {
                     CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
@@ -369,11 +379,11 @@ PS
                 funcDef.AppendLine($"\tTextureAttribute(g_t14_3, g_t14_3);\n");
             }
 
-            //if(bUsesNormalBuffer)
-            //{
-            //    funcDef.AppendLine($"\tBoolAttribute( bWantsFBCopyTexture, true );");
-            //    funcDef.AppendLine($"\tCreateTexture2D( g_tFrameBufferCopyTexture ) < Attribute( \"FrameBufferCopyTexture\" ); SrgbRead( true ); Filter( MIN_MAG_MIP_LINEAR ); AddressU( CLAMP ); AddressV( CLAMP ); >;");
-            //}
+            if (bUsesFrameBuffer)
+            {
+                funcDef.AppendLine($"\tBoolAttribute( bWantsFBCopyTexture, true );");
+                funcDef.AppendLine($"\tCreateTexture2D( g_tFrameBufferCopyTexture ) < Attribute( \"FrameBufferCopyTexture\" ); SrgbRead( true ); Filter( MIN_MAG_MIP_LINEAR ); AddressU( CLAMP ); AddressV( CLAMP ); >;");
+            }
         }
         return funcDef;
     }
@@ -484,7 +494,7 @@ PS
                 funcDef.AppendLine("\t\tfloat4 v2 = {i.vTangentVWs,1};");
                 funcDef.AppendLine("\t\tfloat4 v3 = {i.vTextureCoords,0,0};"); //UVs
                 funcDef.AppendLine("\t\tfloat4 v4 = {(vPositionWs)/39.37,0};"); //Don't really know, just guessing its world offset or something
-                funcDef.AppendLine("\t\tfloat4 v5 = i.vBlendValues;"); //Vertex color.
+                //funcDef.AppendLine("\t\tfloat4 v5 = i.vBlendValues;"); //Vertex color.
                 //funcDef.AppendLine("uint v6 = 1;"); //Usually FrontFace but can also be v7
             }
 
@@ -499,8 +509,10 @@ PS
                             funcDef.AppendLine($"\t\tint {i.Variable} = 1;");
                         break;
                     case "float4":
-                        if (i.Semantic == "SV_POSITION0" && i.Variable != "v5")
-                            funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vPositionSs;");
+                        if (i.Semantic == "SV_POSITION0" && i.Variable == "v5")
+                            funcDef.AppendLine($"\t\tfloat4 v5 = i.vPositionSs;");
+                        else if(i.Variable == "v5")
+                            funcDef.AppendLine($"\t\tfloat4 v5 = i.vBlendValues;");
                         break;
                 }
             }
@@ -549,6 +561,11 @@ PS
                             .Replace("v4.xyz", "float3(0,0,0)")
                             .Replace("cb12[14].xyz", "-vCameraToPositionDirWs")}");
                     }
+                    else if (line.Contains("cb12[12]"))
+                    {
+                        funcDef.AppendLine($"\t\t{line.TrimStart().Replace("cb12[12].zw", "g_vFrameBufferCopyInvSizeAndUvScale.xy")}");
+                        funcDef.AppendLine($"\t\t{line.TrimStart().Replace("cb12[12].xy", "g_vFrameBufferCopyInvSizeAndUvScale.xy")}");
+                    }
                     else if (line.Contains("cb"))
                     {
                         if(line.Contains("Sample")) //rare case where a cbuffer value is directly used as a texcoord
@@ -566,10 +583,17 @@ PS
                         }
                         else
                         {
-                            string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
-                            string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+                            if (!line.Contains("cb12"))
+                            {
+                                string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                                string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
 
-                            funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                                funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                            }
+                            else
+                            {
+                                funcDef.AppendLine($"\t\t{line.TrimStart()}");
+                            }
                         }
                         
                     }
@@ -613,7 +637,20 @@ PS
                         }
                         else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
                         {
-                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //t{texIndex}");
+                            switch(texIndex)
+                            {
+                                case 10:
+                                    bUsesDepthBuffer = true;
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::Get({sampleUv}).{dotAfter} //t{texIndex}");
+                                    break;
+                                case 20: //Usually uses SampleLevel but shouldnt be an issue?
+                                    bUsesFrameBuffer = true;
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.Sample(g_s{sampleIndex}, {sampleUv}).{dotAfter} //t{texIndex}");
+                                    break;
+                                default:
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //t{texIndex}");
+                                    break;
+                            }
                         }
                         else
                         {
@@ -660,6 +697,10 @@ PS
                         funcDef.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "\t\to1.xyzw = float4(PackNormal3D(v0.xyz),0);")); //decals(?) have 0 normals sometimes, dont want that
                         bFixRoughness = true;
                     }
+                    else if (line.Contains("GetDimensions")) //Uhhhh
+                    {
+                        funcDef.AppendLine($"\t\t//{line.TrimStart()}"); 
+                    }
                     else
                     {
                         funcDef.AppendLine($"\t\t{line.TrimStart()}");
@@ -703,20 +744,24 @@ PS
         }
         else //only uses o0
         {
-            output.AppendLine($"\t\tMaterial mat = Material::From(i, float4(o0.xyz, alpha), float4(0.5, 0.5, 1, 1), float4(0.5, 0, 1, 1), float3(1.0f, 1.0f, 1.0f), 0);");
-            output.AppendLine($"\t\treturn ShadingModelStandard::Shade(i, mat);");
+            bool a = bUsesNormalBuffer || bTranslucent || bUsesFrameBuffer || bUsesDepthBuffer;
 
-            //if (material.Unk0C == 2) //Unlit?
-            //{
-            //    output.Append($"\t\treturn float4(o0.xyz, alpha);");
-            //}
-            //else
-            //{
-            //    output.AppendLine($"\t\tMaterial mat = Material::From(i, float4(o0.xyz, alpha), float4(0.5, 0.5, 1, 1), float4(0.5, 0, 1, 1), float3(1.0f, 1.0f, 1.0f), 0);");
-            //    output.AppendLine($"\t\treturn ShadingModelStandard::Shade(i, mat);");
-            //}
+            if (a) //??
+            {
+                output.Append($"\t\treturn float4(o0.xyz, {(bUsesFrameBuffer ? "1" : "alpha")});");
+            }
+            else
+            {
+                output.AppendLine($"\t\tMaterial mat = Material::From(i, float4(o0.xyz, alpha), float4(0.5, 0.5, 1, 1), float4(0.5, 0, 1, 1), float3(1.0f, 1.0f, 1.0f), 0);");
+                output.AppendLine($"\t\treturn ShadingModelStandard::Shade(i, mat);");
+            }
         }
 
         return output;
+    }
+
+    private string AddViewScope()
+    {
+        return $"";
     }
 }

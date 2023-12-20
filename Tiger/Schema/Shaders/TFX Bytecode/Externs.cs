@@ -98,3 +98,17 @@
     PlayerCenteredCascadedGrid = 95,
     SoftDeform = 96,
 }
+
+//Based on CBuffer index
+public enum TfxScope : byte
+{
+    //Material = 0,
+    Instance = 1,
+    Transparent = 2,
+    Unk3 = 3,
+    Unk8 = 8,
+    Decal = 9,
+    View = 12,
+    Frame = 13,
+}
+
