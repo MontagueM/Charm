@@ -82,6 +82,10 @@ public class MaterialExporter : AbstractExporter
             if (texture is null)
                 continue;
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
+            if(texture.IsCubemap())
+            {
+                SBoxHandler.SaveCubemapVTEX(texture, textureSaveDirectory);
+            }
         }
 
         if (saveShaders)

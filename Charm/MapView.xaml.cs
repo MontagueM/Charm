@@ -147,36 +147,6 @@ public partial class MapView : UserControl
         ExtractDataTables(map, savePath, scene, ExportTypeFlag.Full);
     }
 
-    public static void ExportTerrainMap(Tag<SMapContainer> map)
-    {
-        ExporterScene scene = Exporter.Get().CreateScene($"{map.Hash}_Terrain", ExportType.Terrain);
-        bool export = false;
-        string meshName = map.Hash.ToString();
-        string savePath = _config.GetExportSavePath() + $"/{meshName}";
-        if (_config.GetSingleFolderMapsEnabled())
-        {
-            savePath = _config.GetExportSavePath() + "/Maps";
-        }
-
-        Directory.CreateDirectory(savePath);
-
-        Parallel.ForEach(map.TagData.MapDataTables, data =>
-        {
-            data.MapDataTable.TagData.DataEntries.ForEach(entry =>
-            {
-                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
-                {
-                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetSBoxShaderExportEnabled());
-                    if (exportStatics)
-                    {
-                        ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, true);
-                    }
-                }
-            });
-        });
-    }
-
     private static void ExtractDataTables(Tag<SMapContainer> map, string savePath, ExporterScene scene, ExportTypeFlag exportTypeFlag)
     {
         Parallel.ForEach(map.TagData.MapDataTables, data =>

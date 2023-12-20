@@ -1,10 +1,21 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using Arithmic;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
+
+using Pfim;
+using Pfim.dds;
+using ValveResourceFormat;
+using ValveResourceFormat.ResourceTypes;
+
+using ValveTexture = ValveResourceFormat.ResourceTypes.Texture;
+using Texture = Tiger.Schema.Texture;
 
 namespace Tiger.Exporters;
 
@@ -282,4 +293,119 @@ public class SBoxHandler
         
         return cbuffers;
     }
+
+    public static void SaveCubemapVTEX(Texture tex, string savePath)
+    {
+        if(tex.IsCubemap())
+        {
+            var file = TextureFile.CreateDefault(tex, ImageDimension.CUBEARRAY);
+            var json = JsonSerializer.Serialize(file, JsonSerializerOptions.Default);
+            File.WriteAllText($"{savePath}/{tex.Hash}.vtex", json);
+
+            //DDS2Vtex(tex, savePath);
+        }
+    }
+
+    //Doesnt really work but im gonna leave it here anyways i guess
+    //public static void DDS2Vtex(Texture tex, string savePath)
+    //{
+    //    using var img = Pfimage.FromStream(tex.GetTexture(), new PfimConfig(decompress: false));
+    //    var dds = img as Dds;
+
+    //    if (dds == null)
+    //    {
+    //        Console.Error.WriteLine($"Error, file is not a DDS, but a {img.GetType()} (format {img.Format}, datalen {img.DataLen})");
+    //    }
+
+    //    var flags = VTexFlags.NO_LOD;
+    //    var numMipLevels = (byte)1;
+
+    //    if (dds.Header.MipMapCount != 0)
+    //    {
+    //        Console.Error.WriteLine("Warning, DDS has mipmaps, which may not work correctly.");
+    //        flags &= ~VTexFlags.NO_LOD;
+    //        numMipLevels = (byte)dds.Header.MipMapCount;
+    //    }
+
+    //    var format = dds switch
+    //    {
+    //        Dxt1Dds => VTexFormat.DXT1,
+    //        Dxt5Dds => VTexFormat.DXT5,
+    //        Bc6hDds => VTexFormat.BC6H,
+    //        Bc7Dds => VTexFormat.BC7,
+    //        _ => VTexFormat.UNKNOWN,
+    //    };
+
+    //    if (format == VTexFormat.UNKNOWN)
+    //    {
+    //        Console.Error.WriteLine($"Error, do not handle DDS with format {dds.GetType()}.");
+    //    }
+
+    //    // TODO: check blocksize
+    //    using FileStream stream = new FileStream($"{savePath}/{tex.Hash}.vtex_c", FileMode.Create);
+    //    using var writer = new BinaryWriter(stream);
+    //    ValveTexture vtex = null!;
+    //    var nonDataSize = 0;
+    //    var offsetOfDataSize = 0;
+
+    //    using (var resource = new Resource())
+    //    {
+    //        var assembly = Assembly.GetExecutingAssembly();
+    //        using var template = assembly.GetManifestResourceStream("vtex.template");
+    //        resource.Read(template);
+    //        vtex = (ValveTexture)resource.DataBlock;
+
+    //        // Write a copy of the vtex_c up to the DATA block region
+    //        nonDataSize = (int)resource.DataBlock.Offset;
+
+    //        resource.Reader.BaseStream.Seek(8, SeekOrigin.Begin);
+    //        var blockOffset = resource.Reader.ReadUInt32();
+    //        var blockCount = resource.Reader.ReadUInt32();
+    //        resource.Reader.BaseStream.Seek(blockOffset - 8, SeekOrigin.Current); // 8 is 2 uint32s we just read
+    //        for (var i = 0; i < blockCount; i++)
+    //        {
+    //            var blockType = Encoding.UTF8.GetString(resource.Reader.ReadBytes(4));
+    //            resource.Reader.BaseStream.Position += 8; // Offset, size
+    //            if (blockType == "DATA")
+    //            {
+    //                offsetOfDataSize = (int)resource.Reader.BaseStream.Position - 4;
+    //                break;
+    //            }
+    //        }
+
+    //        resource.Reader.BaseStream.Position = 0;
+    //        writer.Write(resource.Reader.ReadBytes(nonDataSize).ToArray());
+    //    }
+
+    //    // Write the VTEX data
+    //    writer.Write(vtex.Version);
+    //    writer.Write((ushort)flags);
+    //    writer.Write(vtex.Reflectivity[0]);
+    //    writer.Write(vtex.Reflectivity[1]);
+    //    writer.Write(vtex.Reflectivity[2]);
+    //    writer.Write(vtex.Reflectivity[3]);
+    //    writer.Write((ushort)dds.Width);
+    //    writer.Write((ushort)dds.Height);
+    //    writer.Write((ushort)(dds.Header.Depth != 0 ? dds.Header.Depth : 1));
+    //    writer.Write((byte)format);
+    //    writer.Write((byte)numMipLevels);
+    //    writer.Write((uint)0);
+
+    //    // Extra data
+    //    writer.Write((uint)0);
+    //    writer.Write((uint)0);
+
+    //    var resourceSize = (uint)stream.Length;
+    //    var resourceDataSize = (uint)(resourceSize - nonDataSize);
+
+    //    // Dxt data goes here
+    //    writer.Write(dds.Data);
+
+    //    // resource: fixup the full and DATA block size
+    //    writer.Seek(0, SeekOrigin.Begin);
+    //    writer.Write(resourceSize);
+
+    //    writer.Seek(offsetOfDataSize, SeekOrigin.Begin);
+    //    writer.Write(resourceDataSize);
+    //}
 }

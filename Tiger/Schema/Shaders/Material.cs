@@ -199,6 +199,10 @@ namespace Tiger.Schema.Shaders
                     continue;
 
                 texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+                if (texture.Texture.IsCubemap())
+                {
+                    SBoxHandler.SaveCubemapVTEX(texture.Texture, $"{saveDirectory}/Textures");
+                }
             }
         }
 
