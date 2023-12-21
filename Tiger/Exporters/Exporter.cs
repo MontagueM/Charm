@@ -60,12 +60,14 @@ public class Exporter : Subsystem<Exporter>
 public struct ExportMaterial
 {
     public readonly IMaterial Material;
+    public readonly MaterialType Type;
     public readonly bool IsTerrain;
 
-    public ExportMaterial(IMaterial material, bool isTerrain = false)
+    public ExportMaterial(IMaterial material, MaterialType type, bool isTerrain = false)
     {
         Material = material;
         IsTerrain = isTerrain;
+        Type = type;
     }
 
     public override int GetHashCode()

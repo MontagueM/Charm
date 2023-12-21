@@ -20,6 +20,7 @@ using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 
 namespace Charm;
@@ -394,7 +395,7 @@ public partial class ActivityMapEntityView : UserControl
                             foreach (DynamicMeshPart part in element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null))
                             {
                                 if (part.Material == null) continue;
-                                skyScene.Materials.Add(new ExportMaterial(part.Material));
+                                skyScene.Materials.Add(new ExportMaterial(part.Material, MaterialType.Transparent));
                             }
                         }
                         break;
@@ -420,7 +421,7 @@ public partial class ActivityMapEntityView : UserControl
                             {
                                 for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decals.MapDecals.TagData.Locations.Count; i++)
                                 {
-                                    dynamicScene.Materials.Add(new ExportMaterial(item.Material));
+                                    dynamicScene.Materials.Add(new ExportMaterial(item.Material, MaterialType.Transparent));
                                 }
                             }
                         }

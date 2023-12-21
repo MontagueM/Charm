@@ -43,6 +43,12 @@ namespace Tiger.Schema.Shaders
         public string Semantic;
     }
 
+    public enum MaterialType
+    {
+        Opaque,
+        Transparent
+    }
+
     public interface IMaterial : ISchema
     {
         public FileHash FileHash { get; }
@@ -124,14 +130,14 @@ namespace Tiger.Schema.Shaders
             return hlsl;
         }
 
-        public void SaveShaders(string saveDirectory, bool isTerrain = false)
+        public void SaveShaders(string saveDirectory, MaterialType type, bool isTerrain = false)
         {
             Directory.CreateDirectory($"{saveDirectory}/Shaders");
             if (PixelShader != null && PixelShader.Hash.IsValid())
             {
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
                 string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string vfx = new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain);
+                string vfx = new S2ShaderConverter().HlslToVfx(this, pixel, vertex, type, isTerrain);
 
                 try
                 {
@@ -178,7 +184,7 @@ namespace Tiger.Schema.Shaders
             if (PixelShader != null)
             {
                 Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}", hlslPath);
-                SaveShaders($"{saveDirectory}");
+                SaveShaders($"{saveDirectory}", MaterialType.Opaque);
             }
             if (VertexShader != null)
             {
@@ -409,3 +415,4 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         // }
     }
 }
+

@@ -64,11 +64,11 @@ public class Terrain : Tag<STerrain>
                 var part = MakePart(partEntry);
                 parts.TryAdd(part, partEntry.Material);
 
-                scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
+                scene.Materials.Add(new ExportMaterial(partEntry.Material, MaterialType.Opaque, true));
                 part.Material = partEntry.Material;
 
                 if (exportStatic) //Need access to material early, before scene system exports
-                    partEntry.Material.SaveShaders($"{saveDirectory}", true);
+                    partEntry.Material.SaveShaders($"{saveDirectory}", MaterialType.Opaque, true);
             }
         }
 

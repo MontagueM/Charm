@@ -228,7 +228,7 @@ public partial class DevView : UserControl
                     foreach (DynamicMeshPart part in parts)
                     {
                         if (part.Material == null) continue;
-                        scene.Materials.Add(new ExportMaterial(part.Material));
+                        scene.Materials.Add(new ExportMaterial(part.Material, MaterialType.Opaque));
                     }
                     Exporter.Get().Export();
                     break;
