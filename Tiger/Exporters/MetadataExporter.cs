@@ -104,7 +104,8 @@ class MetadataScene
                     mapLight.Unk10.TagData.Unk40[i].Translation,
                     mapLight.Unk10.TagData.Unk40[i].Rotation,
                     new Vector2(1,1), //new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
-                    (data.TagData.Unk40.Count > 0 ? data.TagData.Unk40[0].Vec : data.TagData.Unk60[0].Vec));
+                    (data.TagData.Unk40.Count > 0 ? data.TagData.Unk40[0].Vec : data.TagData.Unk60[0].Vec),
+                    mapLight.Unk10.TagData.Unk58.TagData.InstanceBounds[i].Corner2.X - mapLight.Unk10.TagData.Unk58.TagData.InstanceBounds[i].Corner1.X);
             }
         }
         foreach(SMapDecalsResource decal in scene.Decals)
@@ -134,13 +135,15 @@ class MetadataScene
         {
             foreach(var entry in mapLight.Value)
             {
+                var data = FileResourcer.Get().GetSchemaTag<D2Class_716C8080>(mapLight.Key);
                 AddLight(
                     mapLight.Key,
                     "Spot",
                     new Vector4(entry.Position.X, entry.Position.Y, entry.Position.Z, 1),
                     entry.Quaternion,
-                    new Vector2(1.0, 1.0),
-                    new Vector4(1.0,1.0,1.0,1.0));
+                    new Vector2(1, 1),
+                    data.TagData.UnkE8.TagData.Unk40.Count > 0 ? data.TagData.UnkE8.TagData.Unk40[0].Vec : data.TagData.UnkE8.TagData.Unk60[0].Vec);
+                    
             }
         }
 
@@ -240,7 +243,7 @@ class MetadataScene
         });
     }
 
-    public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color)
+    public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color, float range = 13)
     {
         //Idk how color/intensity is handled, so if its above 1 just bring it down
         float R = color.X > 1 ? color.X / 100 : color.X;
@@ -257,7 +260,8 @@ class MetadataScene
             Translation = new[] { translation.X, translation.Y, translation.Z },
             Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
             Size = new[] { size.X, size.Y },
-            Color = new[] { R, G, B }
+            Color = new[] { R, G, B },
+            Range = range
         });
     }
 
@@ -373,6 +377,8 @@ class MetadataScene
         public float[] Rotation;
         public float[] Size;
         public float[] Color;
+        public float Range;
+        public bool Shadowing;
     }
     private struct JsonDecal
     {

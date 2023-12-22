@@ -84,6 +84,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
                 {
                     StaticPart part = new(staticPartEntry);
                     part.Material = materialMap[i];
+                    part.MaterialType = MaterialType.Opaque;
                     part.GetAllData(_tag.Buffers[staticPartEntry.BufferIndex], parent);
                     parts.Add(part);
                 }
@@ -221,6 +222,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                 {
                     StaticPart part = new StaticPart(staticPartEntry);
                     part.Material = materialMap[i];
+                    part.MaterialType = MaterialType.Opaque;
                     part.GetAllData(mesh, parent);
                     parts.Add(part);
                 }

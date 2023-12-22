@@ -190,6 +190,11 @@ public class SBoxHandler
             vmat.AppendLine($"\t\tcb2_0 \"float4(0,1,1,1)\"");
             vmat.AppendLine($"\t\tcb2_1 \"float4(0,1,1,1)\"");
 
+            for(int i = 0; i < 37; i++)
+            {
+                vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
+            }
+
             vmat.AppendLine($"\t\tcb12_4 \"float4(1,0,0,0)\"");
             vmat.AppendLine($"\t\tcb12_5 \"float4(0,1,0,0)\"");
             vmat.AppendLine($"\t\tcb12_6 \"float4(0,0,1,0)\"");

@@ -10,6 +10,7 @@ public class StaticPart : MeshPart
         IndexOffset = terrainPartEntry.IndexOffset;
         IndexCount = terrainPartEntry.IndexCount;
         PrimitiveType = PrimitiveType.TriangleStrip;
+        MaterialType = Shaders.MaterialType.Opaque;
     }
 
     public StaticPart(SStaticMeshPart staticPartEntry) : base()
@@ -17,6 +18,7 @@ public class StaticPart : MeshPart
         IndexOffset = staticPartEntry.IndexOffset;
         IndexCount = staticPartEntry.IndexCount;
         PrimitiveType = (PrimitiveType)staticPartEntry.PrimitiveType;
+        MaterialType = Shaders.MaterialType.Opaque;
     }
 
     public StaticPart(SStaticMeshDecal decalPartEntry) : base()
@@ -24,6 +26,7 @@ public class StaticPart : MeshPart
         IndexOffset = decalPartEntry.IndexOffset;
         IndexCount = decalPartEntry.IndexCount;
         PrimitiveType = (PrimitiveType)decalPartEntry.PrimitiveType;
+        MaterialType = Shaders.MaterialType.Transparent;
     }
 
     public void GetAllData(SStaticMeshBuffers buffers, SStaticMesh container)

@@ -22,7 +22,7 @@ public class S2ShaderConverter
     private readonly List<Output> outputs = new List<Output>();
     private static bool isTerrain = false;
     private bool bRT0 = true;
-    private static bool bTranslucent = false;
+    private bool bTranslucent = false;
     private bool bUsesFrontFace = false;
     private bool bFixRoughness = false;
 
@@ -57,7 +57,7 @@ FEATURES
 
 COMMON
 {{
-    {(bTranslucent ? $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST 0\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT 1\r\n\t#endif" : "")}
+    //alpha
     //frontface
 	#include ""common/shared.hlsl""
     #define CUSTOM_MATERIAL_INPUTS
@@ -164,12 +164,12 @@ PS
         vfxStructure = vfxStructure.Replace("//ps_Function", instructions.ToString());
         vfxStructure = vfxStructure.Replace("//ps_Inputs", WriteFunctionDefinition(material, false).ToString());
 
-        //if (bOpacityEnabled) //This way is stupid but it works
-        //{
-        //    bool a = bUsesNormalBuffer || bTranslucent || bUsesFrameBuffer || bUsesDepthBuffer;
-
-        //    vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST {(a ? "0" : "1")}\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT {(a ? "1" : "0")}\r\n\t#endif");
-        //}
+        if (bTranslucent) //This way is stupid but it works
+        {
+            //bool a = bUsesNormalBuffer || bTranslucent || bUsesFrameBuffer || bUsesDepthBuffer;
+            //vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST {(a ? "0" : "1")}\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT {(a ? "1" : "0")}\r\n\t#endif");
+            vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST 0\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT 1\r\n\t#endif");
+        }
 
         vfxStructure = vfxStructure.Replace("//ps_output", AddOutput(material).ToString());
 
@@ -564,12 +564,12 @@ PS
                         funcDef.AppendLine($"\t\t{line.TrimStart()
                             .Replace("cb12[7].xyz", "vCameraToPositionDirWs")
                             .Replace("v4.xyz", "float3(0,0,0)")
-                            .Replace("cb12[14].xyz", "-vCameraToPositionDirWs")}");
+                            .Replace("cb12[14].xyz", "vCameraToPositionDirWs")}");
                     }
                     else if (line.Contains("cb12[12]"))
                     {
                         funcDef.AppendLine($"\t\t{line.TrimStart()
-                            .Replace("cb12[12].zw", "g_vFrameBufferCopyInvSizeAndUvScale.xy")
+                            .Replace("cb12[12].zw", "(1/g_vFrameBufferCopyInvSizeAndUvScale.xy)")
                             .Replace("cb12[12].xy", "g_vFrameBufferCopyInvSizeAndUvScale.xy")}");
                     }
                     else if (line.Contains("cb"))
@@ -651,7 +651,7 @@ PS
                             {
                                 case 10:
                                     bUsesDepthBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::Get({sampleUv}).{dotAfter} //t{texIndex}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= 1-Depth::GetNormalized({sampleUv}).{dotAfter} //t{texIndex}");
                                     break;
                                 case 20: //Usually uses SampleLevel but shouldnt be an issue?
                                     bUsesFrameBuffer = true;

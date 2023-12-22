@@ -545,9 +545,18 @@ public struct D2Class_BA6C8080
 public struct SMapSpotLightResource
 {
     [SchemaField(0x10)]
-    public Tag Unk10;  // D2Class_716C8080, might be related to lights for entities?
+    public Tag<D2Class_716C8080> Unk10;  // D2Class_716C8080, might be related to lights for entities?
     [SchemaField(0x1C)]
     public TigerHash Unk1C;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "716C8080", 0x110)]
+public struct D2Class_716C8080
+{
+    [SchemaField(0xE8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public Tag<D2Class_A16D8080> UnkE8;
+    [SchemaField(0xEC, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public Tag<D2Class_A16D8080> UnkEC;
 }
 
 // /// <summary>
