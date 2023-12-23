@@ -52,22 +52,6 @@ public partial class SBoxConfigView : UserControl
         content.SettingValue = content_path == "" ? "Not set" : content_path;
         content.ChangeButton.Click += SBoxContentPath_OnClick;
         SBoxConfigPanel.Children.Add(content);
-
-        // Enable source 2 shader generation
-        ConfigSettingControl cbe = new ConfigSettingControl();
-        cbe.SettingName = "Generate shaders (.shader)";
-        bool bval2 = _config.GetSBoxShaderExportEnabled();
-        cbe.SettingValue = bval2.ToString();
-        cbe.ChangeButton.Click += SBoxShaderExportEnabled_OnClick;
-        SBoxConfigPanel.Children.Add(cbe);
-
-        // Enable vmdl model generation
-        ConfigSettingControl cfe = new ConfigSettingControl();
-        cfe.SettingName = "Generate models (.vmdl)";
-        bool bval = _config.GetSBoxModelExportEnabled();
-        cfe.SettingValue = bval.ToString();
-        cfe.ChangeButton.Click += SBoxModelExportEnabled_OnClick;
-        SBoxConfigPanel.Children.Add(cfe);
     }
 
     private void SBoxToolsPath_OnClick(object sender, RoutedEventArgs e)
@@ -143,24 +127,6 @@ public partial class SBoxConfigView : UserControl
                 }
             }
         }
-    }
-
-    private void SBoxShaderExportEnabled_OnClick(object sender, RoutedEventArgs e)
-    {
-        _config.SetSBoxShaderExportEnabled(!_config.GetSBoxShaderExportEnabled());
-        PopulateConfigPanel();
-    }
-
-    private void SBoxMaterialExportEnabled_OnClick(object sender, RoutedEventArgs e)
-    {
-        _config.SetSBoxMaterialExportEnabled(!_config.GetSBoxMaterialExportEnabled());
-        PopulateConfigPanel();
-    }
-
-    private void SBoxModelExportEnabled_OnClick(object sender, RoutedEventArgs e)
-    {
-        _config.SetSBoxModelExportEnabled(!_config.GetSBoxModelExportEnabled());
-        PopulateConfigPanel();
     }
 
     private void CreateSBProject(string path)

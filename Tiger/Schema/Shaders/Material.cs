@@ -144,7 +144,8 @@ namespace Tiger.Schema.Shaders
                     if (vfx != String.Empty)
                     {
                         File.WriteAllText($"{saveDirectory}/Shaders/PS_{PixelShader.Hash}.shader", vfx);
-                        SBoxHandler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
+                        if(!isTerrain)
+                            SBoxHandler.SaveVMAT(saveDirectory, FileHash, this);
                     }
                 }
                 catch (IOException)  // threading error

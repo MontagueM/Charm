@@ -21,18 +21,12 @@ namespace Tiger.Exporters;
 
 public class SBoxHandler
 {
-    private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-    public static bool sboxShaders = _config.GetSBoxShaderExportEnabled();
-    public static bool sboxModels = _config.GetSBoxModelExportEnabled();
-    public static bool sboxMaterials = _config.GetSBoxMaterialExportEnabled();
-
     public static void SaveStaticVMDL(string savePath, string staticMeshName, List<StaticPart> staticMesh)
     {
         try
         {
             if (!File.Exists($"{savePath}/{staticMeshName}.vmdl"))
             {
-                //Source 2 shit
                 File.Copy("Exporters/template.vmdl", $"{savePath}/{staticMeshName}.vmdl", true);
                 string text = File.ReadAllText($"{savePath}/{staticMeshName}.vmdl");
 
@@ -148,66 +142,40 @@ public class SBoxHandler
         }
     }
 
-    public static void SaveVMAT(string savePath, string hash, IMaterial materialHeader, bool isTerrain = false)
+    public static void SaveVMAT(string savePath, string hash, IMaterial materialHeader, bool isTerrain = false, Dictionary<int, FileHash> terrainDyemaps = null)
     {
-        Directory.CreateDirectory($"{savePath}/Materials");
+        if (isTerrain)
+            savePath = $"{savePath}/Materials/Terrain";
+        else
+            savePath = $"{savePath}/Materials";
+
+        Directory.CreateDirectory(savePath);
         StringBuilder vmat = new StringBuilder();
 
-        vmat.AppendLine("Layer0 \n{");
+        vmat.AppendLine("Layer0\n{");
 
         //If the shader doesnt exist, just use the default complex.shader
-        if (!File.Exists($"{savePath}/Shaders/PS_{materialHeader.PixelShader?.Hash}.shader"))
-        {
-            vmat.AppendLine($"  shader \"complex.shader\"");
+        //if (!File.Exists($"{savePath}/Shaders/PS_{materialHeader.PixelShader?.Hash}.shader"))
+        //{
+        //    vmat.AppendLine($"  shader \"complex.shader\"");
 
-            //Use just the first texture for the diffuse
-            if (materialHeader.EnumeratePSTextures().Any())
-            {
-                if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
-                    vmat.AppendLine($"  TextureColor \"Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
-            }
-        }
-        else
-        {
-            vmat.AppendLine($"\tshader \"ps_{materialHeader.PixelShader.Hash}.shader\"");
-            vmat.AppendLine($"\tF_ALPHA_TEST 1");
-            vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
+        //    //Use just the first texture for the diffuse
+        //    if (materialHeader.EnumeratePSTextures().Any())
+        //    {
+        //        if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
+        //            vmat.AppendLine($"  TextureColor \"Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
+        //    }
+        //}
 
-            if(materialHeader.Unk0C != 0)
-            {
-                vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
-            }
+        //Material parameters
+        vmat.AppendLine($"\tshader \"ps_{materialHeader.PixelShader.Hash}.shader\"");
+        vmat.AppendLine($"\tF_ALPHA_TEST 1");
+        vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
-            TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(materialHeader.PS_TFX_Bytecode));
-            var bytecode_hlsl = bytecode.Evaluate(materialHeader.PS_TFX_Bytecode_Constants);
+        if(materialHeader.Unk0C != 0)
+            vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
 
-            vmat.AppendLine($"\tDynamicParams\r\n\t{{");
-            foreach (var entry in bytecode_hlsl)
-            {
-                vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
-            }
-
-            vmat.AppendLine($"\t\tcb2_0 \"float4(0,1,1,1)\"");
-            vmat.AppendLine($"\t\tcb2_1 \"float4(0,1,1,1)\"");
-
-            for(int i = 0; i < 37; i++)
-            {
-                if(i < 5)
-                    vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
-                else
-                    vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
-            }
-
-            vmat.AppendLine($"\t\tcb12_4 \"float4(1,0,0,0)\"");
-            vmat.AppendLine($"\t\tcb12_5 \"float4(0,1,0,0)\"");
-            vmat.AppendLine($"\t\tcb12_6 \"float4(0,0,1,0)\"");
-
-            vmat.AppendLine($"\t\tcb13_0 \"Time\"");
-            vmat.AppendLine($"\t\tcb13_1 \"float4(1,1,1,1)\"");
-
-            vmat.AppendLine($"\t}}");
-        }
-
+        //Textures
         foreach (var e in materialHeader.EnumeratePSTextures())
         {
             if (e.Texture == null)
@@ -216,17 +184,49 @@ public class SBoxHandler
             vmat.AppendLine($"\tTextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
         }
 
+        if(terrainDyemaps is not null)
+            foreach(var tex in terrainDyemaps)
+            {
+                vmat.AppendLine($"\tTextureT14_{tex.Key} \"Textures/{tex.Value}.png\"");
+            }
+
         //vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.VertexShader.GetBytecode(), $"vs{materialHeader.VertexShader.Hash}"), materialHeader, true).ToString());
         vmat.AppendLine(PopulateCBuffers(materialHeader).ToString());
+
+        //Dynamic expressions
+        TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(materialHeader.PS_TFX_Bytecode));
+        var bytecode_hlsl = bytecode.Evaluate(materialHeader.PS_TFX_Bytecode_Constants);
+
+        vmat.AppendLine($"\tDynamicParams\r\n\t{{");
+        foreach (var entry in bytecode_hlsl)
+        {
+            vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
+        }
+
+        vmat.AppendLine($"\t\tcb2_0 \"float4(0,1,1,1)\"");
+        vmat.AppendLine($"\t\tcb2_1 \"float4(0,1,1,1)\"");
+
+        for (int i = 0; i < 37; i++)
+        {
+            if (i < 5)
+                vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
+            else
+                vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
+        }
+
+        vmat.AppendLine($"\t\tcb12_4 \"float4(1,0,0,0)\"");
+        vmat.AppendLine($"\t\tcb12_5 \"float4(0,1,0,0)\"");
+        vmat.AppendLine($"\t\tcb12_6 \"float4(0,0,1,0)\"");
+
+        vmat.AppendLine($"\t\tcb13_0 \"Time\"");
+        vmat.AppendLine($"\t\tcb13_1 \"float4(1,1,1,1)\"");
+
+        vmat.AppendLine($"\t}}");
+
         vmat.AppendLine("}");
-
-        string terrainDir = isTerrain ? "/Terrain/" : "";
-        if (isTerrain)
-            Directory.CreateDirectory($"{savePath}/materials/{terrainDir}");
-
         try
         {
-            File.WriteAllText($"{savePath}/materials/{terrainDir}{hash}.vmat", vmat.ToString());
+            File.WriteAllText($"{savePath}/{hash}.vmat", vmat.ToString());
         }
         catch (IOException)
         {

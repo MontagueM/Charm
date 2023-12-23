@@ -47,9 +47,6 @@ public class BlenderSettings
 // [ConfigSubsystem]
 public class SBoxSettings
 {
-    public bool SBoxShaderExportsEnabled { get; set; } = false;
-    public bool SBoxMaterialExportsEnabled { get; set; } = false;
-    public bool SBoxModelExportsEnabled { get; set; } = false;
     public string SBoxToolsPath { get; set; } = "";
     public string SBoxContentPath { get; set; } = "";
 }
@@ -160,40 +157,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
         Save();
         return true;
     }
-
-    public void SetSBoxShaderExportEnabled(bool bS2ShaderExportEnabled)
-    {
-        _settings.SBox.SBoxShaderExportsEnabled = bS2ShaderExportEnabled;
-        Save();
-    }
-
-    public bool GetSBoxShaderExportEnabled()
-    {
-        return _settings.SBox.SBoxShaderExportsEnabled;
-    }
-
-    public void SetSBoxMaterialExportEnabled(bool bS2VMATExportEnabled)
-    {
-        _settings.SBox.SBoxMaterialExportsEnabled = bS2VMATExportEnabled;
-        Save();
-    }
-
-    public bool GetSBoxMaterialExportEnabled()
-    {
-        return _settings.SBox.SBoxMaterialExportsEnabled;
-    }
-
-    public void SetSBoxModelExportEnabled(bool bS2VMDLExportEnabled)
-    {
-        _settings.SBox.SBoxModelExportsEnabled = bS2VMDLExportEnabled;
-        Save();
-    }
-
-    public bool GetSBoxModelExportEnabled()
-    {
-        return _settings.SBox.SBoxModelExportsEnabled;
-    }
-
 
     #endregion
 

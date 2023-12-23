@@ -29,8 +29,6 @@ public partial class MapView : UserControl
     private static MainWindow _mainWindow = null;
 
     private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-
-    private static bool sboxModels = _config.GetSBoxModelExportEnabled();
     private static bool exportStatics = _config.GetIndvidualStaticsEnabled();
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -155,7 +153,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
-                    staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetSBoxShaderExportEnabled());
+                    staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, true);
                 }
             });
         });

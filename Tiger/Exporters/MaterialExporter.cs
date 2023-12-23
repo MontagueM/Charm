@@ -11,7 +11,6 @@ public class MaterialExporter : AbstractExporter
     {
         ConcurrentHashSet<Texture> mapTextures = new();
         ConcurrentHashSet<ExportMaterial> mapMaterials = new();
-        bool saveShaders = ConfigSubsystem.Get().GetSBoxShaderExportEnabled();
 
         Parallel.ForEach(args.Scenes, scene =>
         {
@@ -38,12 +37,9 @@ public class MaterialExporter : AbstractExporter
                         textures.Add(texture.Texture);
                     }
 
-                    if (saveShaders)
-                    {
-                        string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}";
-                        material.Material.SaveShaders(shaderSaveDirectory, material.Type, material.IsTerrain);
-                        material.Material.SaveVertexShader(shaderSaveDirectory);
-                    }
+                    string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}";
+                    material.Material.SaveShaders(shaderSaveDirectory, material.Type, material.IsTerrain);
+                    material.Material.SaveVertexShader(shaderSaveDirectory);
                 }
 
                 string textureSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Textures";
@@ -88,14 +84,11 @@ public class MaterialExporter : AbstractExporter
             }
         }
 
-        if (saveShaders)
+        string shaderSaveDirectory = $"{args.OutputDirectory}/Maps";
+        Directory.CreateDirectory(shaderSaveDirectory);
+        foreach (ExportMaterial material in mapMaterials)
         {
-            string shaderSaveDirectory = $"{args.OutputDirectory}/Maps";
-            Directory.CreateDirectory(shaderSaveDirectory);
-            foreach (ExportMaterial material in mapMaterials)
-            {
-                material.Material.SaveShaders(shaderSaveDirectory, material.Type, material.IsTerrain);
-            }
+            material.Material.SaveShaders(shaderSaveDirectory, material.Type, material.IsTerrain);
         }
     }
 }

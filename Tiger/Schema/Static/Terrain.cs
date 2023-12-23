@@ -26,15 +26,15 @@ public class Terrain : Tag<STerrain>
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
             var partEntry = _tag.MeshGroups[i];
-            var lastValidEntry = _tag.MeshGroups.LastOrDefault(e => e.Dyemap != null);
+            Texture lastValidEntry = partEntry.Dyemap;
 
             //Use the last valid dyemap for any invalid
             if (partEntry.Dyemap == null)
             {
-                if (lastValidEntry.Dyemap != null)
+                if (lastValidEntry != null)
                 {
-                    scene.Textures.Add(lastValidEntry.Dyemap);
-                    dyeMaps.Add(lastValidEntry.Dyemap);
+                    scene.Textures.Add(lastValidEntry);
+                    dyeMaps.Add(lastValidEntry);
                 }
             }
             else
@@ -77,41 +77,17 @@ public class Terrain : Tag<STerrain>
             TransformPositions(part.Key);
             TransformTexcoords(part.Key);
             TransformVertexColors(part.Key);
-        }
-        scene.AddStatic(Hash, parts.Keys.ToList());
 
-        // We need to add these textures after the static is initialised
-        foreach (var part in parts)
-        {
-            Texture dyemap = _tag.MeshGroups[part.Key.GroupIndex].Dyemap;
-            if (dyemap != null)
+            Dictionary<int, FileHash> extraTexs = new();
+            for (int i = 0; i < dyeMaps.Count; i++) //Add all the dyemaps to the vmat
             {
-                if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetSBoxShaderExportEnabled())
-                {
-                    if (File.Exists($"{saveDirectory}/materials/Terrain/{part.Value.FileHash}.vmat"))
-                    {
-                        string[] vmat = File.ReadAllLines($"{saveDirectory}/materials/Terrain/{part.Value.FileHash}.vmat");
-                        int lastBraceIndex = Array.FindLastIndex(vmat, line => line.Trim().Equals("}")); //Searches for the last brace (})
-                        bool textureFound = Array.Exists(vmat, line => line.Trim().StartsWith("TextureT14"));
-                        if (!textureFound && lastBraceIndex != -1)
-                        {
-                            var newVmat = vmat.Take(lastBraceIndex).ToList();
-
-                            for (int i = 0; i < dyeMaps.Count; i++) //Add all the dyemaps to the vmat
-                            {
-                                newVmat.Add($"  TextureT{terrainTextureIndex}_{i} \"Textures/{dyeMaps[i].Hash}.png\"");
-                            }
-
-                            newVmat.AddRange(vmat.Skip(lastBraceIndex));
-                            File.WriteAllLines($"{saveDirectory}/materials/Terrain/{Hash}_{part.Value.FileHash}.vmat", newVmat); 
-                        }
-                    }
-                    File.Delete($"{saveDirectory}/materials/Terrain/{part.Value.FileHash}.vmat"); //Delete the old vmat, dont need it anymore
-                }
+                extraTexs.Add(i, dyeMaps[i].Hash);
             }
+            SBoxHandler.SaveVMAT(saveDirectory, $"{Hash}_{part.Value.FileHash}", part.Value, true, extraTexs);
         }
-        if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetSBoxModelExportEnabled())
-            SBoxHandler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
+
+        scene.AddStatic(Hash, parts.Keys.ToList());
+        SBoxHandler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
     }
 
     public StaticPart MakePart(SStaticPart entry)
