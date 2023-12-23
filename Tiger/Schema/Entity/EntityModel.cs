@@ -52,11 +52,11 @@ public class EntityModel : Tag<SEntityModel>
                 }
                 else
                 {
-                    if (eDetailLevel == ExportDetailLevel.MostDetailed && part.LodCategory is ELodCategory.MainGeom0 or ELodCategory.GripStock0 or ELodCategory.Stickers0 or ELodCategory.InternalGeom0 or ELodCategory.Detail0)
+                    if (eDetailLevel == ExportDetailLevel.MostDetailed && part.Lod.IsHighestLevel())
                     {
                         parts[meshIndex].Add(partIndex++, part);
                     }
-                    else if (eDetailLevel == ExportDetailLevel.LeastDetailed && part.LodCategory == ELodCategory.LowPolyGeom3)
+                    else if (eDetailLevel == ExportDetailLevel.LeastDetailed && !part.Lod.IsHighestLevel())
                     {
                         parts[meshIndex].Add(partIndex++, part);
                     }
@@ -97,7 +97,7 @@ public class EntityModel : Tag<SEntityModel>
                 {
                     Index = i,
                     GroupIndex = partGroups[i],
-                    LodCategory = part.LodCategory,
+                    LodCategory = part.Lod.DetailLevel,
                     bAlphaClip = (part.Flags & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
                 };

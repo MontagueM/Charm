@@ -447,7 +447,7 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     [SchemaField(0x1A, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public byte GearDyeChangeColorIndex;   // sbyte gear_dye_change_color_index
-    public ELodCategory LodCategory;
+    public ELod Lod;
     public byte Unk1E;
     public byte LodRun;  // lod_run
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]

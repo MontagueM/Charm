@@ -91,14 +91,14 @@ public class StaticMesh : Tag<SStaticMesh>
         {
             if (detailLevel == ExportDetailLevel.MostDetailed)
             {
-                if (decalPartEntry.LODLevel != 1 && decalPartEntry.LODLevel != 2 && decalPartEntry.LODLevel != 10)
+                if (!decalPartEntry.Lod.IsHighestLevel())
                 {
                     continue;
                 }
             }
             else if (detailLevel == ExportDetailLevel.LeastDetailed)
             {
-                if (decalPartEntry.LODLevel == 1 || decalPartEntry.LODLevel == 2 || decalPartEntry.LODLevel == 10)
+                if (decalPartEntry.Lod.IsHighestLevel())
                 {
                     continue;
                 }

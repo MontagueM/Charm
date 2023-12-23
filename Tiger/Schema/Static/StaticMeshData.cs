@@ -102,7 +102,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
                 for (int i = 0; i < _tag.Parts.Count; i++)
                 {
                     var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel == 1 || staticPartEntry.DetailLevel == 2 || staticPartEntry.DetailLevel == 10)
+                    if (staticPartEntry.Lod.IsHighestLevel())
                     {
                         staticPartEntries.Add(i, staticPartEntry);
                     }
@@ -113,7 +113,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
                 for (int i = 0; i < _tag.Parts.Count; i++)
                 {
                     var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel != 1 && staticPartEntry.DetailLevel != 2 && staticPartEntry.DetailLevel != 10)
+                    if (!staticPartEntry.Lod.IsHighestLevel())
                     {
                         staticPartEntries.Add(i, staticPartEntry);
                     }
@@ -239,7 +239,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                 for (int i = 0; i < _tag.Parts.Count; i++)
                 {
                     var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel == 1 || staticPartEntry.DetailLevel == 2 || staticPartEntry.DetailLevel == 10)
+                    if (staticPartEntry.Lod.IsHighestLevel())
                     {
                         staticPartEntries.Add(i, staticPartEntry);
                     }
@@ -250,7 +250,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                 for (int i = 0; i < _tag.Parts.Count; i++)
                 {
                     var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel != 1 && staticPartEntry.DetailLevel != 2 && staticPartEntry.DetailLevel != 10)
+                    if (!staticPartEntry.Lod.IsHighestLevel())
                     {
                         staticPartEntries.Add(i, staticPartEntry);
                     }

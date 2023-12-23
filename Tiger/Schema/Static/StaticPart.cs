@@ -9,6 +9,7 @@ public class StaticPart : MeshPart
     {
         IndexOffset = terrainPartEntry.IndexOffset;
         IndexCount = terrainPartEntry.IndexCount;
+        LodCategory = terrainPartEntry.Lod.DetailLevel;
         PrimitiveType = PrimitiveType.TriangleStrip;
         MaterialType = Shaders.MaterialType.Opaque;
     }
@@ -17,6 +18,7 @@ public class StaticPart : MeshPart
     {
         IndexOffset = staticPartEntry.IndexOffset;
         IndexCount = staticPartEntry.IndexCount;
+        LodCategory = staticPartEntry.Lod.DetailLevel;
         PrimitiveType = (PrimitiveType)staticPartEntry.PrimitiveType;
         MaterialType = Shaders.MaterialType.Opaque;
     }
@@ -25,6 +27,7 @@ public class StaticPart : MeshPart
     {
         IndexOffset = decalPartEntry.IndexOffset;
         IndexCount = decalPartEntry.IndexCount;
+        LodCategory = decalPartEntry.Lod.DetailLevel;
         PrimitiveType = (PrimitiveType)decalPartEntry.PrimitiveType;
         MaterialType = Shaders.MaterialType.Transparent;
     }

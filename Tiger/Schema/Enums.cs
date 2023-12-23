@@ -1,4 +1,6 @@
-﻿namespace Tiger.Schema;
+﻿using System.Runtime.InteropServices;
+
+namespace Tiger.Schema;
 
 public enum PrimitiveType  // name comes from bungie
 {
@@ -17,4 +19,19 @@ public enum ELodCategory : byte
     GripStockScope2 = 8,  // grip/stock/scope lod2
     LowPolyGeom3 = 9,  // low poly geom lod3
     Detail0 = 10 // detail lod0
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct ELod
+{
+    public ELodCategory DetailLevel;
+
+    public bool IsHighestLevel()
+    {
+        return DetailLevel == ELodCategory.MainGeom0 ||
+               DetailLevel == ELodCategory.GripStock0 ||
+               DetailLevel == ELodCategory.Stickers0 ||
+               DetailLevel == ELodCategory.InternalGeom0 ||
+               DetailLevel == ELodCategory.Detail0;
+    }
 }

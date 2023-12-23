@@ -41,9 +41,7 @@ public partial class StaticView : UserControl
     public static void ExportStatic(FileHash hash, string name, ExportTypeFlag exportType, string extraPath = "")
     {
         ExporterScene scene = Exporter.Get().CreateScene(name, ExportType.Static);
-        bool lodexport = false;
         ConfigSubsystem config = ConfigSubsystem.Get();
-        bool sboxModels = config.GetSBoxModelExportEnabled();
 
         string savePath = config.GetExportSavePath() + "/" + extraPath + "/";
         string meshName = hash;
@@ -59,18 +57,16 @@ public partial class StaticView : UserControl
         if (exportType == ExportTypeFlag.Full)
         {
             staticMesh.SaveMaterialsFromParts(scene, parts);
-            if (sboxModels)
-            {
-                SBoxHandler.SaveStaticVMDL($"{savePath}", meshName, parts);
-            }
+            SBoxHandler.SaveStaticVMDL($"{savePath}", meshName, parts);
         }
 
+        bool lodexport = true;
         if (lodexport)
         {
             ExporterScene lodScene = Exporter.Get().CreateScene($"{name}_LOD", ExportType.Static);
 
             List<StaticPart> lodparts = staticMesh.Load(ExportDetailLevel.LeastDetailed);
-            Directory.CreateDirectory(savePath + "/LOD");
+            staticMesh.SaveMaterialsFromParts(lodScene, lodparts);
 
             foreach (StaticPart lodpart in lodparts)
             {

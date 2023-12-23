@@ -56,7 +56,7 @@ public class Terrain : Tag<STerrain>
 
         foreach (var partEntry in _tag.StaticParts)
         {
-            if (partEntry.DetailLevel == 0)
+            if (partEntry.Lod.DetailLevel == ELodCategory.MainGeom0)
             {
                 if (partEntry.Material is null || partEntry.Material.VertexShader is null)
                     continue;
@@ -336,5 +336,5 @@ public struct SStaticPart
     public uint IndexOffset;
     public ushort IndexCount;
     public byte GroupIndex;
-    public byte DetailLevel;
+    public ELod Lod;
 }
