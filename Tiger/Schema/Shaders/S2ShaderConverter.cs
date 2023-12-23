@@ -20,7 +20,7 @@ public class S2ShaderConverter
     private readonly List<Shaders.Buffer> buffers = new List<Shaders.Buffer>();
     private readonly List<Input> inputs = new List<Input>();
     private readonly List<Output> outputs = new List<Output>();
-    private static bool isTerrain = false;
+    private bool isTerrain = false;
     private bool bRT0 = true;
     private bool bTranslucent = false;
     private bool bUsesFrontFace = false;
@@ -97,7 +97,7 @@ VS
 		o.vBlendValues.a = i.vColorBlendValues.a;
 
 //vs_Function
-        {(isTerrain ? "  r1.xyz = abs(i.vNormalOs.xyz) * abs(i.vNormalOs.xyz);\r\n  r1.xyz = r1.xyz * r1.xyz;\r\n  r2.xyz = r1.xyz * r1.xyz;\r\n  r2.xyz = r2.xyz * r2.xyz;\r\n  r1.xyz = r2.xyz * r1.xyz;\r\n  r0.z = dot(r1.xyz, float3(1,1,1));\r\n  o.v5.xyz = r1.xyz / r0.zzz;" : "")}
+
 		return FinalizeVertex( o );
 	}}
 }}
@@ -173,6 +173,8 @@ PS
 
         vfxStructure = vfxStructure.Replace("//ps_output", AddOutput(material).ToString());
 
+        if (isTerrain)
+            vfxStructure = vfxStructure.Replace("//vs_Function", "r1.xyz = abs(i.vNormalOs.xyz) * abs(i.vNormalOs.xyz);\r\n  r1.xyz = r1.xyz * r1.xyz;\r\n  r2.xyz = r1.xyz * r1.xyz;\r\n  r2.xyz = r2.xyz * r2.xyz;\r\n  r1.xyz = r2.xyz * r1.xyz;\r\n  r0.z = dot(r1.xyz, float3(1,1,1));\r\n  o.v5.xyz = r1.xyz / r0.zzz;");
         //------------------------------------------------------------------------------
 
         //Vertex Shader - Commented out for now
@@ -618,6 +620,7 @@ PS
                     else if (line.Contains("Sample"))
                     {
                         var equal = line.Split("=")[0];
+                        var equal_post = line.Split("=")[1];
                         var texIndex = Int32.Parse(line.Split(".Sample")[0].Split("t")[1]);
                         var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
                         var sampleUv = line.Split(", ")[1].Split(").")[0];
@@ -649,16 +652,25 @@ PS
                         {
                             switch(texIndex)
                             {
-                                case 10:
+                                case 10: //Depth
                                     bUsesDepthBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= 1-Depth::GetNormalized({sampleUv}).{dotAfter} //t{texIndex}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::Get({sampleUv}).{dotAfter} //{equal_post}");
                                     break;
-                                case 20: //Usually uses SampleLevel but shouldnt be an issue?
+                                case 11:
+                                case 13:
+                                case 23: //Usually uses SampleLevel but shouldnt be an issue?
                                     bUsesFrameBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter} //t{texIndex}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter} //{equal_post}");
+                                    break;
+                                case 20:
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.3137,0.3137,0.3137,0.3137).{dotAfter} //{equal_post}");
+                                    break;
+                                case 0:
+                                case 21:
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.1882,0.1882,0.1882,0.1882).{dotAfter} //{equal_post}");
                                     break;
                                 default:
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //t{texIndex}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //{equal_post}");
                                     break;
                             }
                         }
@@ -679,6 +691,7 @@ PS
                     else if (line.Contains("Load"))
                     {
                         var equal = line.Split("=")[0];
+                        var equal_post = line.Split("=")[1];
                         var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]);
                         var sampleUv = line.Split("(")[1].Split(")")[0];
                         var dotAfter = line.Split(").")[1];
@@ -693,14 +706,23 @@ PS
                                     break;
                                 case 10:
                                     bUsesDepthBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::Get({sampleUv}).{dotAfter} //t{texIndex}.Load({sampleUv}).{dotAfter}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::Get({sampleUv}).{dotAfter} //{equal_post}");
                                     break;
-                                case 20: //Usually uses SampleLevel but shouldnt be an issue?
+                                case 11:
+                                case 13:
+                                case 23: //Usually uses SampleLevel but shouldnt be an issue?
                                     bUsesFrameBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.Load({sampleUv}).{dotAfter} //t{texIndex}.Load({sampleUv}).{dotAfter}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.Load({sampleUv}).{dotAfter} //{equal_post}");
+                                    break;
+                                case 20:
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.3137,0.3137,0.3137,0.3137).{dotAfter} //{equal_post}");
+                                    break;
+                                case 0:
+                                case 21:
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.1882,0.1882,0.1882,0.1882).{dotAfter} //{equal_post}");
                                     break;
                                 default:
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //t{texIndex}.Load({sampleUv}).{dotAfter}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter} //{equal_post}");
                                     break;
                             }
                         }
@@ -709,11 +731,11 @@ PS
                             funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Load({sampleUv}).{dotAfter}");
                         }
                     }
-                    else if (line.Contains("o0.w = r")) //o0.w = r(?)
-                    {
-                        funcDef.AppendLine($"\t\t{line.TrimStart()}");
-                        //funcDef.AppendLine($"\t\talpha = 1 - o0.w;");
-                    }
+                    //else if (line.Contains("o0.w = r")) //o0.w = r(?)
+                    //{
+                    //    funcDef.AppendLine($"\t\t{line.TrimStart()}");
+                    //    //funcDef.AppendLine($"\t\talpha = 1 - o0.w;");
+                    //}
                     //else if (line.Contains("discard"))
                     //{
                     //    funcDef.AppendLine(line.Replace("discard", "\t\t{ alpha = 0; }"));

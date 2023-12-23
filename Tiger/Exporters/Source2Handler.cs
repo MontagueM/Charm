@@ -192,7 +192,10 @@ public class SBoxHandler
 
             for(int i = 0; i < 37; i++)
             {
-                vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
+                if(i < 5)
+                    vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
+                else
+                    vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
             }
 
             vmat.AppendLine($"\t\tcb12_4 \"float4(1,0,0,0)\"");
