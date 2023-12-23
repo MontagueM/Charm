@@ -75,6 +75,13 @@ public struct Vector3
         Z = z;
     }
 
+    public Vector3(float x)
+    {
+        X = x;
+        Y = x;
+        Z = x;
+    }
+
     public static Vector3 Zero
     {
         get

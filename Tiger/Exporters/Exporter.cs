@@ -293,7 +293,7 @@ public class ExporterScene
     {
         MapLights.Add(mapLight);
     }
-    public void AddMapSpotLight(SMapDataEntry spotLightEntry, SMapSpotLightResource spotLightResource) //Spot
+    public void AddMapSpotLight(SMapDataEntry spotLightEntry, SMapShadowingLightResource spotLightResource) //Spot
     {
         if (!MapSpotLights.ContainsKey(spotLightResource.Unk10.Hash))
         {

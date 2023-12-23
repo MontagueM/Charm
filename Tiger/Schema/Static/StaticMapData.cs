@@ -541,8 +541,11 @@ public struct D2Class_BA6C8080
     public Vector4 Unk40;
 }
 
+/// <summary>
+/// A light that casts shadows
+/// </summary>
 [SchemaStruct("5E6C8080", 0x20)]
-public struct SMapSpotLightResource
+public struct SMapShadowingLightResource
 {
     [SchemaField(0x10)]
     public Tag<D2Class_716C8080> Unk10;  // D2Class_716C8080, might be related to lights for entities?
@@ -557,6 +560,16 @@ public struct D2Class_716C8080
     public Tag<D2Class_A16D8080> UnkE8;
     [SchemaField(0xEC, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<D2Class_A16D8080> UnkEC;
+}
+
+/// <summary>
+/// Usually a flat plane for screen-space reflected water
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D4688080", 0x70)]
+public struct SMapWaterDecal
+{
+    [SchemaField(0x10)]
+    public EntityModel Model;
 }
 
 // /// <summary>

@@ -354,6 +354,7 @@ public partial class ActivityMapEntityView : UserControl
         ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.MapResource);
         ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyEnts", ExportType.MapResource);
         ExporterScene terrainScene = Exporter.Get().CreateScene($"{hash}_Terrain", ExportType.MapResource);
+        ExporterScene waterScene = Exporter.Get().CreateScene($"{hash}_Water", ExportType.MapResource); //Idk what to name this besides water
 
         Parallel.ForEach(dataTables, data =>
         {
@@ -406,7 +407,7 @@ public partial class ActivityMapEntityView : UserControl
                     case SMapLightResource mapLight:
                         dynamicScene.AddMapLight(mapLight);
                         break;
-                    case SMapSpotLightResource spotLight:
+                    case SMapShadowingLightResource spotLight:
                         if (spotLight.Unk10 is not null)
                             dynamicScene.AddMapSpotLight(entry, spotLight);
                         break;
@@ -428,6 +429,17 @@ public partial class ActivityMapEntityView : UserControl
                         break;
                     case SMapTerrainResource terrain:
                         terrain.Terrain.LoadIntoExporter(terrainScene, savePath);
+                        break;
+                    case SMapWaterDecal water:
+                        waterScene.AddMapModel(water.Model,
+                            entry.Translation,
+                            entry.Rotation,
+                            new Tiger.Schema.Vector3(entry.Translation.W));
+                        foreach (DynamicMeshPart part in water.Model.Load(ExportDetailLevel.MostDetailed, null))
+                        {
+                            if (part.Material == null) continue;
+                            waterScene.Materials.Add(new ExportMaterial(part.Material, MaterialType.Transparent));
+                        }
                         break;
                     default:
                         break;
@@ -452,23 +464,30 @@ public partial class ActivityMapEntityView : UserControl
 
                     SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", entity);
                 }
-                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
-                {
-                    foreach (var element in skyResource.Unk10.TagData.Unk08)
-                    {
-                        if (element.Unk60.TagData.Unk08 is null)
-                            continue;
 
-                        ExporterScene skyScene = Exporter.Get().CreateScene(element.Unk60.TagData.Unk08.Hash, ExportType.EntityInMap);
-                        skyScene.AddModel(element.Unk60.TagData.Unk08);
-
-                        SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
-                    }
-                }
-                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
+                switch(entry.DataResource.GetValue(dataTable.GetReader()))
                 {
-                    ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, true);
+                    case SMapSkyEntResource skyResource:
+                        foreach (var element in skyResource.Unk10.TagData.Unk08)
+                        {
+                            if (element.Unk60.TagData.Unk08 is null)
+                                continue;
+
+                            ExporterScene skyScene = Exporter.Get().CreateScene(element.Unk60.TagData.Unk08.Hash, ExportType.EntityInMap);
+                            skyScene.AddModel(element.Unk60.TagData.Unk08);
+
+                            SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
+                        }
+                        break;
+                    case SMapTerrainResource terrainArrangement:
+                        ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
+                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, true);
+                        break;
+                    case SMapWaterDecal water:
+                        ExporterScene waterScene = Exporter.Get().CreateScene(hash, ExportType.EntityInMap); //Idk what to name this besides water
+                        waterScene.AddModel(water.Model);
+                        SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", water.Model.Hash, water.Model.Load(ExportDetailLevel.MostDetailed, null));
+                        break;
                 }
             });
         });
