@@ -484,7 +484,7 @@ public partial class ActivityMapEntityView : UserControl
                         terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, true);
                         break;
                     case SMapWaterDecal water:
-                        ExporterScene waterScene = Exporter.Get().CreateScene(hash, ExportType.EntityInMap); //Idk what to name this besides water
+                        ExporterScene waterScene = Exporter.Get().CreateScene(water.Model.Hash, ExportType.EntityInMap); //Idk what to name this besides water
                         waterScene.AddModel(water.Model);
                         SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", water.Model.Hash, water.Model.Load(ExportDetailLevel.MostDetailed, null));
                         break;
