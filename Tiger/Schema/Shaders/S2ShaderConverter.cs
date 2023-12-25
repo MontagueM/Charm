@@ -110,7 +110,7 @@ PS
     #define cmp -
     //RenderState
 
- //   #if ( S_MODE_REFLECTIONS )
+    //#if ( S_MODE_REFLECTIONS )
 	//	#define FinalOutput ReflectionOutput
 	//#else
 	//	#define FinalOutput float4
@@ -313,17 +313,17 @@ PS
             }
             else
             {
-                //if(cbuffer.Index != 12)
-                //{
-                //    for (int i = 0; i < cbuffer.Count; i++)
-                //    {
-                //        CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
-                //    }
-                //}
-                for (int i = 0; i < cbuffer.Count; i++)
+                if (cbuffer.Index != 12)
                 {
-                    CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
+                    for (int i = 0; i < cbuffer.Count; i++)
+                    {
+                        CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
+                    }
                 }
+                //for (int i = 0; i < cbuffer.Count; i++)
+                //{
+                //    CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
+                //}
             }
         }
 
@@ -364,21 +364,13 @@ PS
 
             if (isTerrain) //Terrain has 4 dyemaps per shader, from what ive seen
             {
-                funcDef.AppendLine($"\tCreateInputTexture2D( TextureT14_0, Linear, 8, \"\", \"\",  \"Textures,10/14\", Default3( 1.0, 1.0, 1.0 ));");
-                funcDef.AppendLine($"\tTexture2D g_t14_0 < Channel( RGBA,  Box( TextureT14_0 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
-                funcDef.AppendLine($"\tTextureAttribute(g_t14_0, g_t14_0);\n");
-
-                funcDef.AppendLine($"\tCreateInputTexture2D( TextureT14_1, Linear, 8, \"\", \"\",  \"Textures,10/15\", Default3( 1.0, 1.0, 1.0 ));");
-                funcDef.AppendLine($"\tTexture2D g_t14_1 < Channel( RGBA,  Box( TextureT14_1 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
-                funcDef.AppendLine($"\tTextureAttribute(g_t14_1, g_t14_1);\n");
-
-                funcDef.AppendLine($"\tCreateInputTexture2D( TextureT14_2, Linear, 8, \"\", \"\",  \"Textures,10/16\", Default3( 1.0, 1.0, 1.0 ));");
-                funcDef.AppendLine($"\tTexture2D g_t14_2 < Channel( RGBA,  Box( TextureT14_2 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
-                funcDef.AppendLine($"\tTextureAttribute(g_t14_2, g_t14_2);\n");
-
-                funcDef.AppendLine($"\tCreateInputTexture2D( TextureT14_3, Linear, 8, \"\", \"\",  \"Textures,10/17\", Default3( 1.0, 1.0, 1.0 ));");
-                funcDef.AppendLine($"\tTexture2D g_t14_3 < Channel( RGBA,  Box( TextureT14_3 ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
-                funcDef.AppendLine($"\tTextureAttribute(g_t14_3, g_t14_3);\n");
+                for(int i = 0; i < 4; i++)
+                {
+                    int o = 14;
+                    funcDef.AppendLine($"\tCreateInputTexture2D( TextureT14_{i}, Linear, 8, \"\", \"\",  \"Textures,10/{o+i}\", Default3( 1.0, 1.0, 1.0 ));");
+                    funcDef.AppendLine($"\tTexture2D g_t14_{i} < Channel( RGBA,  Box( TextureT14_{i} ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
+                    funcDef.AppendLine($"\tTextureAttribute(g_t14_{i}, g_t14_{i});\n");
+                }
             }
 
             if (bUsesFrameBuffer)
@@ -476,13 +468,13 @@ PS
         }
         else //Pixel
         {
-            funcDef.AppendLine("\t\tfloat3 vPositionWs = i.vPositionWithOffsetWs.xyz + g_vHighPrecisionLightingOffsetWs.xyz;");
-            funcDef.AppendLine("\t\tfloat3 vCameraToPositionDirWs = CalculateCameraToPositionDirWs( vPositionWs.xyz );");
+            //Need to divde by 39.37 to convert to meters
+            funcDef.AppendLine("\t\tfloat3 vPositionWs = (i.vPositionWithOffsetWs.xyz + g_vHighPrecisionLightingOffsetWs.xyz) / 39.37;");
             funcDef.AppendLine("\t\tfloat alpha = 1;");
 
             if (isTerrain) //variables are different for terrain for whatever reason, kinda have to guess
             {
-                funcDef.AppendLine("\t\tfloat4 v0 = {vPositionWs/39.37, 1};"); //Detail uv?
+                funcDef.AppendLine("\t\tfloat4 v0 = {vPositionWs, 1};"); //Detail uv?
                 funcDef.AppendLine("\t\tfloat4 v1 = {i.vTextureCoords, 1, 1};"); //Main uv?
                 funcDef.AppendLine("\t\tfloat4 v2 = {i.vNormalWs,1};");
                 funcDef.AppendLine("\t\tfloat4 v3 = {i.vTangentUWs,1};");
@@ -495,7 +487,7 @@ PS
                 funcDef.AppendLine("\t\tfloat4 v1 = {i.vTangentUWs,1};");
                 funcDef.AppendLine("\t\tfloat4 v2 = {i.vTangentVWs,1};");
                 funcDef.AppendLine("\t\tfloat4 v3 = {i.vTextureCoords,0,0};"); //UVs
-                funcDef.AppendLine("\t\tfloat4 v4 = {(vPositionWs)/39.37,0};"); //Don't really know, just guessing its world offset or something
+                funcDef.AppendLine("\t\tfloat4 v4 = {vPositionWs,0};"); //Don't really know, just guessing its world offset or something
                 //funcDef.AppendLine("\t\tfloat4 v5 = i.vBlendValues;"); //Vertex color.
                 //funcDef.AppendLine("uint v6 = 1;"); //Usually FrontFace but can also be v7
             }
@@ -525,14 +517,13 @@ PS
             }
             funcDef.AppendLine("\t\tfloat4 o0 = float4(0,0,0,0);");
             funcDef.AppendLine("\t\tfloat4 o1 = float4(PackNormal3D(v0.xyz),1);");
-            funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);\n");
+            funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);");
             funcDef.AppendLine("\t\tfloat4 o3 = float4(0,0,0,0);\n");
 
-            //if (cbuffers.Any(cbuffer => cbuffer.Index == 13 && cbuffer.Count == 2)) //Should be time (g_flTime) but probably gets manipulated somehow
-            //{
-            //    funcDef.AppendLine("\t\tcb13[0] = 1;");
-            //    funcDef.AppendLine("\t\tcb13[1] = 1;");
-            //}
+            if (cbuffers.Any(cbuffer => cbuffer.Index == 12))
+            {
+                funcDef.AppendLine(AddViewScope());
+            }
 
             string line = hlsl.ReadLine();
             if (line == null)
@@ -561,20 +552,19 @@ PS
                 line = hlsl.ReadLine();
                 if (line != null)
                 {
-                    if (line.Contains("cb12[7].xyz") || line.Contains("cb12[14].xyz")) //cb12 is view scope
-                    {
-                        funcDef.AppendLine($"\t\t{line.TrimStart()
-                            .Replace("cb12[7].xyz", "vCameraToPositionDirWs")
-                            .Replace("v4.xyz", "float3(0,0,0)")
-                            .Replace("cb12[14].xyz", "vCameraToPositionDirWs")}");
-                    }
-                    else if (line.Contains("cb12[12]"))
-                    {
-                        funcDef.AppendLine($"\t\t{line.TrimStart()
-                            .Replace("cb12[12].zw", "(1/g_vFrameBufferCopyInvSizeAndUvScale.xy)")
-                            .Replace("cb12[12].xy", "g_vFrameBufferCopyInvSizeAndUvScale.xy")}");
-                    }
-                    else if (line.Contains("cb"))
+                    //if (line.Contains("cb12[7].xyz") || line.Contains("cb12[14].xyz")) //cb12 is view scope
+                    //{
+                    //    funcDef.AppendLine($"\t\t{line.TrimStart()
+                    //        .Replace("cb12[7].xyz", "(g_vCameraPositionWs.xyz/39.37)")
+                    //        .Replace("cb12[14].xyz", "(g_vCameraPositionWs.xyz/39.37)")}");
+                    //}
+                    //else if (line.Contains("cb12[12]"))
+                    //{
+                    //    funcDef.AppendLine($"\t\t{line.TrimStart()
+                    //        .Replace("cb12[12].xy", "g_vFrameBufferCopyInvSizeAndUvScale.xy")
+                    //        .Replace("cb12[12].zw", "(1/g_vFrameBufferCopyInvSizeAndUvScale.xy)")}");
+                    //}
+                    if (line.Contains("cb"))
                     {
                         if(line.Contains("Sample")) //rare case where a cbuffer value is directly used as a texcoord
                         {
@@ -591,21 +581,21 @@ PS
                         }
                         else
                         {
-                            //if (!line.Contains("cb12"))
-                            //{
-                            //    string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
-                            //    string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+                            if (!line.Contains("cb12"))
+                            {
+                                string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                                string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
 
-                            //    funcDef.AppendLine($"\t\t{output.TrimStart()}");
-                            //}
-                            //else
-                            //{
-                            //    funcDef.AppendLine($"\t\t{line.TrimStart()}");
-                            //}
-                            string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
-                            string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+                                funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                            }
+                            else
+                            {
+                                funcDef.AppendLine($"\t\t{line.TrimStart()}");
+                            }
+                            //string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                            //string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
 
-                            funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                            //funcDef.AppendLine($"\t\t{output.TrimStart()}");
                         }
                         
                     }
@@ -811,6 +801,27 @@ PS
 
     private string AddViewScope()
     {
-        return $"";
+        StringBuilder viewScope = new StringBuilder();
+        viewScope.AppendLine($"\t\tfloat4 cb12[15] = {{");
+
+        viewScope.AppendLine($"\t\tg_matWorldToProjection,"); //0
+
+        viewScope.AppendLine($"\t\tfloat4(1,0,0,0),"); //4
+        viewScope.AppendLine($"\t\tfloat4(0,1,0,0),");
+        viewScope.AppendLine($"\t\tfloat4(0,0,1,0),");
+        viewScope.AppendLine($"\t\tfloat4(g_vCameraPositionWs/39.37,1),");
+
+        viewScope.AppendLine($"\t\tfloat4(0.5,0,0,0),"); //8
+        viewScope.AppendLine($"\t\tfloat4(0,1,0,0),");
+        viewScope.AppendLine($"\t\tfloat4(0,0,1,0),");
+        viewScope.AppendLine($"\t\tfloat4(-100,-100,-100,1),");
+
+        viewScope.AppendLine($"\t\tfloat4(g_vFrameBufferCopyInvSizeAndUvScale.xy, 1/g_vFrameBufferCopyInvSizeAndUvScale.xy),"); //12
+        viewScope.AppendLine($"\t\tfloat4(1,0,0,0),"); //13
+        viewScope.AppendLine($"\t\tfloat4(g_vCameraPositionWs/39.37,1)"); //14
+
+        viewScope.AppendLine($"\t\t}};");
+
+        return viewScope.ToString();
     }
 }
