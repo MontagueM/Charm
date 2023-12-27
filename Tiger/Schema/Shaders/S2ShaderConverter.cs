@@ -552,56 +552,33 @@ PS
                 line = hlsl.ReadLine();
                 if (line != null)
                 {
-                    //if (line.Contains("cb12[7].xyz") || line.Contains("cb12[14].xyz")) //cb12 is view scope
-                    //{
-                    //    funcDef.AppendLine($"\t\t{line.TrimStart()
-                    //        .Replace("cb12[7].xyz", "(g_vCameraPositionWs.xyz/39.37)")
-                    //        .Replace("cb12[14].xyz", "(g_vCameraPositionWs.xyz/39.37)")}");
-                    //}
-                    //else if (line.Contains("cb12[12]"))
-                    //{
-                    //    funcDef.AppendLine($"\t\t{line.TrimStart()
-                    //        .Replace("cb12[12].xy", "g_vFrameBufferCopyInvSizeAndUvScale.xy")
-                    //        .Replace("cb12[12].zw", "(1/g_vFrameBufferCopyInvSizeAndUvScale.xy)")}");
-                    //}
-                    if (line.Contains("cb"))
+                    if (line.Contains("cb") && !line.Contains("Sample"))
                     {
-                        if(line.Contains("Sample")) //rare case where a cbuffer value is directly used as a texcoord
+                        string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                        string output = Regex.Replace(line, pattern, match =>
                         {
-                            string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                            // Extract the values from the matched groups
+                            string group1 = match.Groups[1].Value; // cbuffer index
+                            string group2 = match.Groups[2].Value; // cbuffer array index
 
-                            var equal = line.Split("=")[0];
-                            var texIndex = Int32.Parse(line.Split(".Sample")[0].Split("t")[1]);
-                            var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
-                            var sampleUv = line.Split(", ")[1].Split(").")[0];
-                            sampleUv = Regex.Replace(sampleUv, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
-                            var dotAfter = line.Split(").")[1];
-
-                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}");
-                        }
-                        else
-                        {
-                            if (!line.Contains("cb12"))
+                            if (group1 != "12")
                             {
-                                string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
-                                string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
-
-                                funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                                // Replace with the actual values of group1 and group2
+                                return isVertexShader ? $"vs_cb{group1}_{group2}" : $"cb{group1}_{group2}";
                             }
                             else
                             {
-                                funcDef.AppendLine($"\t\t{line.TrimStart()}");
+                                // If group1 is "12", don't replace
+                                return match.Value;
                             }
-                            //string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
-                            //string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+                        });
 
-                            //funcDef.AppendLine($"\t\t{output.TrimStart()}");
-                        }
-                        
+                        // Append the modified line to funcDef
+                        funcDef.AppendLine($"\t\t{output.TrimStart()}");
                     }
                     else if (line.Contains("while (true)"))
                     {
-                        funcDef.AppendLine($"\t\t{line.TrimStart().Replace("while (true)", "[unroll(20)] while (true)")}");
+                        funcDef.AppendLine($"\t\t{line.TrimStart().Replace("while (true)", "[loop] while (true)")}");
                     }
                     else if (line.Contains("return;"))
                     {
@@ -615,6 +592,29 @@ PS
                         var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
                         var sampleUv = line.Split(", ")[1].Split(").")[0];
                         var dotAfter = line.Split(").")[1];
+
+                        if (sampleUv.Contains("cb")) //Rare case where a cbuffer value is used as a texcoord
+                        {
+                            string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                            sampleUv = Regex.Replace(sampleUv, pattern, match =>
+                            {
+                                // Extract the values from the matched groups
+                                string group1 = match.Groups[1].Value; // cbuffer index
+                                string group2 = match.Groups[2].Value; // cbuffer array index
+
+                                if (group1 != "12")
+                                {
+                                    // Replace with the actual values of group1 and group2
+                                    return isVertexShader ? $"vs_cb{group1}_{group2}" : $"cb{group1}_{group2}";
+                                }
+                                else
+                                {
+                                    // If group1 is "12", don't replace
+                                    return match.Value;
+                                }
+                            });
+                        }
+
 
                         if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
                         {
@@ -640,7 +640,7 @@ PS
                         }
                         else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
                         {
-                            switch(texIndex)
+                            switch (texIndex)
                             {
                                 case 10: //Depth
                                     bUsesDepthBuffer = true;
@@ -737,7 +737,7 @@ PS
                     }
                     else if (line.Contains("GetDimensions")) //Uhhhh
                     {
-                        funcDef.AppendLine($"\t\t//{line.TrimStart()}"); 
+                        funcDef.AppendLine($"\t\t//{line.TrimStart()}");
                     }
                     else
                     {
