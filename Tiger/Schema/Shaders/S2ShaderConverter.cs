@@ -164,7 +164,7 @@ PS
         vfxStructure = vfxStructure.Replace("//ps_Function", instructions.ToString());
         vfxStructure = vfxStructure.Replace("//ps_Inputs", WriteFunctionDefinition(material, false).ToString());
 
-        if (bTranslucent) //This way is stupid but it works
+        if (bTranslucent || bRT0) //This way is stupid but it works
         {
             //bool a = bUsesNormalBuffer || bTranslucent || bUsesFrameBuffer || bUsesDepthBuffer;
             //vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST {(a ? "0" : "1")}\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT {(a ? "1" : "0")}\r\n\t#endif");
