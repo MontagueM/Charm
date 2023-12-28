@@ -46,6 +46,26 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         }
     }
 
+    private List<DXBCShaderResource> _shaderResources;
+    public List<DXBCShaderResource> ShaderResources
+    {
+        get
+        {
+            if (_shaderResources != null)
+            {
+                return _shaderResources;
+            }
+
+            _shaderResources = GetShaderResources();
+            Log.Debug($"Shader Resources for shader {Hash} ({_shaderResources.Count}):");
+            foreach (DXBCShaderResource resource in _shaderResources)
+            {
+                Log.Debug(resource.DebugString());
+            }
+            return _shaderResources;
+        }
+    }
+
     public ShaderBytecode(FileHash hash) : base(hash)
     {
     }
@@ -103,6 +123,101 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         }
 
         return outputSignatures;
+    }
+
+    public List<DXBCShaderResource> GetShaderResources()
+    {
+        using TigerReader reader = GetReferenceReader();
+        // Go to ISGN chunk
+        reader.Seek(0x30, SeekOrigin.Begin);
+        // Get the chunk size of ISGN
+        uint sizeISGN = reader.ReadUInt32();
+
+        // Go to OSGN chunk
+        reader.Seek(sizeISGN + 0x4, SeekOrigin.Current);
+        // Get the chunk size of OSGN
+        uint sizeOSGN = reader.ReadUInt32();
+
+        // Go to SHEX chunk
+        reader.Seek(sizeOSGN+0x14, SeekOrigin.Current);
+
+        //uint a = reader.ReadUInt32();
+        //Debug.Assert(a == 1480935507);
+
+        List<DXBCShaderResource> shaderResources = new();
+        ResourceType type = (ResourceType)reader.ReadUInt32();
+        do
+        {
+            switch(type)
+            {
+                case ResourceType.CBuffer:
+                case ResourceType.CBuffer1: //Dynamically Linked or some shit, i forgot the name
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    shaderResources.Add(new DXBCShaderResource
+                    {
+                        ResourceType = ResourceType.CBuffer,
+                        Index = reader.ReadUInt32(),
+                        Count = reader.ReadUInt32()
+                    });
+                    break;
+                case ResourceType.Buffer:
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    shaderResources.Add(new DXBCShaderResource
+                    {
+                        ResourceType = ResourceType.Buffer,
+                        Index = reader.ReadUInt32(),
+                        Count = 0
+                    });
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    break;
+                case ResourceType.Texture2D:
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    shaderResources.Add(new DXBCShaderResource
+                    {
+                        ResourceType = ResourceType.Texture2D,
+                        Index = reader.ReadUInt32(),
+                        Count = 0
+                    });
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    break;
+                case ResourceType.Texture3D:
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    shaderResources.Add(new DXBCShaderResource
+                    {
+                        ResourceType = ResourceType.Texture3D,
+                        Index = reader.ReadUInt32(),
+                        Count = 0
+                    });
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    break;
+                case ResourceType.TextureCube:
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    shaderResources.Add(new DXBCShaderResource
+                    {
+                        ResourceType = ResourceType.TextureCube,
+                        Index = reader.ReadUInt32(),
+                        Count = 0
+                    });
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    break;
+                case ResourceType.SamplerState:
+                    reader.Seek(0x4, SeekOrigin.Current);
+                    shaderResources.Add(new DXBCShaderResource
+                    {
+                        ResourceType = ResourceType.SamplerState,
+                        Index = reader.ReadUInt32(),
+                        Count = 0
+                    });
+                    break;
+                //default:
+                //    throw new NotSupportedException($"Unknown Type {type}");
+            }
+
+            type = (ResourceType)reader.ReadUInt32();
+
+        } while (type != ResourceType.None);
+
+        return shaderResources;
     }
 }
 
@@ -258,6 +373,13 @@ public struct DXBCIOSignature
     }
 }
 
+public struct DXBCShaderResource
+{
+    public ResourceType ResourceType;
+    public uint Index;
+    public uint Count;
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
 public struct DXBCIOElement
 {
@@ -292,4 +414,22 @@ public enum ComponentMask : byte
     XYZ = X | Y | Z,
 
     XYZW = X | Y | Z | W
+}
+
+public enum ResourceType 
+{
+    CBuffer = 0x04000059,
+    CBuffer1 = 0x04000859,
+    Buffer = 0x04000858,
+    SamplerState = 0x0300005A,
+    Texture2D = 0x04001858,
+    Texture3D = 0x04002858,
+    TextureCube = 0x04003058,
+
+    // Can already get through IOSignatures
+    // But need to know where to stop reading
+    None = 0x02000068
+    //VSInput = 0x0300005F,
+    //PSInput = 0x03001062,
+    //Output = 0x03000065
 }
