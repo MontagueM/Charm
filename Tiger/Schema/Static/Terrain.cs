@@ -105,20 +105,20 @@ public class Terrain : Tag<STerrain>
         }
         part.VertexIndices = uniqueVertexIndices.ToList();
 
-        List<InputSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
+        List<DXBCIOSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
         int b0Stride = _tag.Vertices1.TagData.Stride;
         int b1Stride = _tag.Vertices2?.TagData.Stride ?? 0;
-        List<InputSignature> inputSignatures0 = new();
-        List<InputSignature> inputSignatures1 = new();
+        List<DXBCIOSignature> inputSignatures0 = new();
+        List<DXBCIOSignature> inputSignatures1 = new();
         int stride = 0;
-        foreach (InputSignature inputSignature in inputSignatures)
+        foreach (DXBCIOSignature inputSignature in inputSignatures)
         {
             if (stride < b0Stride)
                 inputSignatures0.Add(inputSignature);
             else
                 inputSignatures1.Add(inputSignature);
 
-            if (inputSignature.Semantic == InputSemantic.Colour)
+            if (inputSignature.Semantic == DXBCSemantic.Colour)
                 stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
             else
                 stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component

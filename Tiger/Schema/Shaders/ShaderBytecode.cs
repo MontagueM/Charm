@@ -6,8 +6,8 @@ namespace Tiger.Schema;
 
 public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
 {
-    private List<InputSignature>? _inputSignatures;
-    public List<InputSignature> InputSignatures
+    private List<DXBCIOSignature>? _inputSignatures;
+    public List<DXBCIOSignature> InputSignatures
     {
         get
         {
@@ -18,11 +18,31 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
 
             _inputSignatures = GetInputSignatures();
             Log.Debug($"Input signatures for shader {Hash} ({_inputSignatures.Count}):");
-            foreach (InputSignature inputSignature in _inputSignatures)
+            foreach (DXBCIOSignature inputSignature in _inputSignatures)
             {
                 Log.Debug(inputSignature.DebugString());
             }
             return _inputSignatures;
+        }
+    }
+
+    private List<DXBCIOSignature>? _outputSignatures;
+    public List<DXBCIOSignature> OutputSignatures
+    {
+        get
+        {
+            if (_outputSignatures != null)
+            {
+                return _outputSignatures;
+            }
+
+            _outputSignatures = GetOutputSignatures();
+            Log.Debug($"Output signatures for shader {Hash} ({_outputSignatures.Count}):");
+            foreach (DXBCIOSignature outputSignature in _outputSignatures)
+            {
+                Log.Debug(outputSignature.DebugString());
+            }
+            return _outputSignatures;
         }
     }
 
@@ -36,29 +56,53 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         return reader.ReadBytes((int)_tag.BytecodeSize);
     }
 
-    public List<InputSignature> GetInputSignatures()
+    //These are kinda messy and can probably be simplified
+    public List<DXBCIOSignature> GetInputSignatures()
     {
         using TigerReader reader = GetReferenceReader();
-#if DEBUG
-        reader.Seek(0x2C, SeekOrigin.Begin);
-        uint inputSignatureCC = reader.ReadUInt32();
-        Debug.Assert(inputSignatureCC == 1313297225);
-        uint chunkSize = reader.ReadUInt32();
-#endif
+        //#if DEBUG
+        //        reader.Seek(0x2C, SeekOrigin.Begin);
+        //        uint inputSignatureCC = reader.ReadUInt32();
+        //        Debug.Assert(inputSignatureCC == 1313297225);
+        //        uint chunkSize = reader.ReadUInt32();
+        //#endif
         reader.Seek(0x34, SeekOrigin.Begin);
         uint inputSignatureCount = reader.ReadUInt32();
         reader.Seek(0x4, SeekOrigin.Current);
-        List<InputSignature> inputSignatures = new();
+        List<DXBCIOSignature> inputSignatures = new();
         for (int i = 0; i < inputSignatureCount; i++)
         {
-            DXBCInputSignature signature = reader.ReadType<DXBCInputSignature>();
+            DXBCIOElement signature = reader.ReadType<DXBCIOElement>();
             if (signature.SystemValueType == 0)  // we only want non-system value inputs
             {
-                inputSignatures.Add(new InputSignature(reader, 0x34, signature));
+                inputSignatures.Add(new DXBCIOSignature(reader, 0x34, signature));
             }
         }
 
         return inputSignatures;
+    }
+
+    public List<DXBCIOSignature> GetOutputSignatures()
+    {
+        using TigerReader reader = GetReferenceReader();
+
+        reader.Seek(0x30, SeekOrigin.Begin);
+        uint chunkStart = reader.ReadUInt32();
+        reader.Seek(chunkStart+0x8, SeekOrigin.Current);
+
+        uint outputSignatureCount = reader.ReadUInt32();
+        reader.Seek(0x4, SeekOrigin.Current);
+        List<DXBCIOSignature> outputSignatures = new();
+        for (int i = 0; i < outputSignatureCount; i++)
+        {
+            DXBCIOElement signature = reader.ReadType<DXBCIOElement>();
+            if (signature.SystemValueType == 0)  // we only want non-system value inputs
+            {
+                outputSignatures.Add(new DXBCIOSignature(reader, chunkStart + 0x8 + 0x34, signature));
+            }
+        }
+
+        return outputSignatures;
     }
 }
 
@@ -70,28 +114,37 @@ public struct SShaderBytecode
     public TigerHash Unk0C;
 }
 
-public enum InputSemantic
+public enum DXBCSemantic
 {
     None,
     Position,
     Texcoord,
     Normal,
+    Binormal,
     Tangent,
     BlendIndices,
     BlendWeight,
-    Colour
+    Colour,
+
+    //System semantics
+    SystemVertexId,
+    SystemInstanceId,
+    SystemTarget,
+    SystemPosition,
+    SystemIsFrontFace
 }
 
-public struct InputSignature
+
+public struct DXBCIOSignature
 {
-    public InputSemantic Semantic;
+    public DXBCSemantic Semantic;
     public uint SemanticIndex;
     public RegisterComponentType ComponentType;
     public ComponentMask Mask;
     public uint RegisterIndex;
     public int BufferIndex = -1; // gets set in a decorator
 
-    public InputSignature(TigerReader reader, long chunkStart, DXBCInputSignature inputSignature)
+    public DXBCIOSignature(TigerReader reader, long chunkStart, DXBCIOElement inputSignature)
     {
         SemanticIndex = inputSignature.SemanticIndex;
         ComponentType = inputSignature.ComponentType;
@@ -104,25 +157,47 @@ public struct InputSignature
         switch (semanticName)
         {
             case "POSITION":
-                Semantic = InputSemantic.Position;
+                Semantic = DXBCSemantic.Position;
                 break;
             case "TEXCOORD":
-                Semantic = InputSemantic.Texcoord;
+                Semantic = DXBCSemantic.Texcoord;
                 break;
             case "NORMAL":
-                Semantic = InputSemantic.Normal;
+                Semantic = DXBCSemantic.Normal;
+                break;
+            case "BINORMAL":
+                Semantic = DXBCSemantic.Binormal;
                 break;
             case "TANGENT":
-                Semantic = InputSemantic.Tangent;
+                Semantic = DXBCSemantic.Tangent;
                 break;
             case "BLENDINDICES":
-                Semantic = InputSemantic.BlendIndices;
+                Semantic = DXBCSemantic.BlendIndices;
                 break;
             case "BLENDWEIGHT":
-                Semantic = InputSemantic.BlendWeight;
+                Semantic = DXBCSemantic.BlendWeight;
                 break;
             case "COLOR":
-                Semantic = InputSemantic.Colour;
+                Semantic = DXBCSemantic.Colour;
+                break;
+
+            //System
+            case "SV_POSITION":
+                Semantic = DXBCSemantic.SystemPosition;
+                break;
+            case "SV_isFrontFace":
+                Semantic = DXBCSemantic.SystemIsFrontFace;
+                break;
+            case "SV_VertexID": //Does case matter here?
+            case "SV_VERTEXID":
+                Semantic = DXBCSemantic.SystemVertexId;
+                break;
+            case "SV_InstanceID":
+                Semantic = DXBCSemantic.SystemInstanceId;
+                break;
+            case "SV_Target":
+            case "SV_TARGET":
+                Semantic = DXBCSemantic.SystemTarget;
                 break;
             default:
                 throw new NotImplementedException($"Unknown semantic {semanticName}");
@@ -145,10 +220,46 @@ public struct InputSignature
             _ => throw new NotImplementedException($"Unknown component mask {Mask}")
         };
     }
+
+    public override string ToString()
+    {
+        switch (Semantic)
+        {
+            case DXBCSemantic.Position:
+                return "POSITION";
+            case DXBCSemantic.Texcoord:
+                return "TEXCOORD";
+            case DXBCSemantic.Normal:
+                return "NORMAL";
+            case DXBCSemantic.Binormal:
+                return "BINORMAL";
+            case DXBCSemantic.Tangent:
+                return "TANGENT";
+            case DXBCSemantic.BlendIndices:
+                return "BLENDINDICES";
+            case DXBCSemantic.BlendWeight:
+                return "BLENDWEIGHT";
+            case DXBCSemantic.Colour:
+                return "COLOR";
+
+            case DXBCSemantic.SystemPosition:
+                return "SV_POSITION";
+            case DXBCSemantic.SystemIsFrontFace:
+                return "SV_ISFRONTFACE";
+            case DXBCSemantic.SystemVertexId:
+                return "SV_VERTEXID";
+            case DXBCSemantic.SystemInstanceId:
+                return "SV_INSTANCEID";
+            case DXBCSemantic.SystemTarget:
+                return "SV_TARGET";
+            default:
+                throw new NotImplementedException($"Unknown Semantic {Semantic}");
+        }
+    }
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x18)]
-public struct DXBCInputSignature
+public struct DXBCIOElement
 {
     public int SemanticNameOffset;
     public uint SemanticIndex;

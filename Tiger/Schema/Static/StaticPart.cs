@@ -48,7 +48,7 @@ public class StaticPart : MeshPart
 
         if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
         {
-            InputSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
+            DXBCIOSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
 
             List<int> strides = new();
             if (buffers.Vertices0 != null) strides.Add(buffers.Vertices0.TagData.Stride);
@@ -87,13 +87,13 @@ public class StaticPart : MeshPart
         // Have to call it like this b/c we don't know the format of the vertex data here
         if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
         {
-            List<InputSignature> inputSignatures = mesh.Material.VertexShader.InputSignatures;
+            List<DXBCIOSignature> inputSignatures = mesh.Material.VertexShader.InputSignatures;
             int b0Stride = mesh.Vertices0.TagData.Stride;
             int b1Stride = mesh.Vertices1?.TagData.Stride ?? 0;
-            List<InputSignature> inputSignatures0 = new();
-            List<InputSignature> inputSignatures1 = new();
+            List<DXBCIOSignature> inputSignatures0 = new();
+            List<DXBCIOSignature> inputSignatures1 = new();
             int stride = 0;
-            foreach (InputSignature inputSignature in inputSignatures)
+            foreach (DXBCIOSignature inputSignature in inputSignatures)
             {
                 if (stride < b0Stride)
                 {
@@ -104,7 +104,7 @@ public class StaticPart : MeshPart
                     inputSignatures1.Add(inputSignature);
                 }
 
-                if (inputSignature.Semantic == InputSemantic.Colour)
+                if (inputSignature.Semantic == DXBCSemantic.Colour)
                 {
                     stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
                 }

@@ -56,15 +56,17 @@ public class TfxBytecodeInterpreter
         return top;
     }
 
-    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants)
+    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants, bool print = false)
     {
         Dictionary<int, string> hlsl = new();
         try
         {
-            Console.WriteLine($"--------Evaluating Bytecode:");
+            if(print)
+                Console.WriteLine($"--------Evaluating Bytecode:");
             foreach ((int _ip, var op) in Opcodes.Select((value, index) => (index, value)))
             {
-                Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                if (print)
+                    Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
                 switch (op.op)
                 {
                     case TfxBytecode.Add:
@@ -270,7 +272,9 @@ public class TfxBytecodeInterpreter
                     case TfxBytecode.PopOutput:
                         //Temp.AddRange(Stack);
 
-                        Console.WriteLine($"----Output Stack Count: {Stack.Count}");
+                        if (print)
+                            Console.WriteLine($"----Output Stack Count: {Stack.Count}");
+
                         if(Stack.Count == 0) //Shouldnt happen
                             hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(0, 0, 0, 0)");
                         else if(Stack.Count > 1) //Shouldnt happen
@@ -304,7 +308,8 @@ public class TfxBytecodeInterpreter
                         break;
 
                     default:
-                        Console.WriteLine($"Not Implemented: {op.op}");
+                        if (print)
+                            Console.WriteLine($"Not Implemented: {op.op}");
                         break;
 
                 }    
