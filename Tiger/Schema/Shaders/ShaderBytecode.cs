@@ -93,10 +93,7 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         for (int i = 0; i < inputSignatureCount; i++)
         {
             DXBCIOElement signature = reader.ReadType<DXBCIOElement>();
-            if (signature.SystemValueType == 0)  // we only want non-system value inputs
-            {
-                inputSignatures.Add(new DXBCIOSignature(reader, 0x34, signature));
-            }
+            inputSignatures.Add(new DXBCIOSignature(reader, 0x34, signature));
         }
 
         return inputSignatures;
@@ -116,10 +113,7 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         for (int i = 0; i < outputSignatureCount; i++)
         {
             DXBCIOElement signature = reader.ReadType<DXBCIOElement>();
-            if (signature.SystemValueType == 0)  // we only want non-system value inputs
-            {
-                outputSignatures.Add(new DXBCIOSignature(reader, chunkStart + 0x8 + 0x34, signature));
-            }
+            outputSignatures.Add(new DXBCIOSignature(reader, chunkStart + 0x8 + 0x34, signature));
         }
 
         return outputSignatures;
