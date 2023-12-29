@@ -14,16 +14,13 @@ public class S2ShaderConverter
 {
     private StringReader hlsl;
     private StringBuilder vfx;
-    private readonly List<TextureView> textures = new List<TextureView>();
-    private readonly List<int> samplers = new List<int>();
-    private readonly List<Cbuffer> cbuffers = new List<Cbuffer>();
-    private readonly List<Shaders.Buffer> buffers = new List<Shaders.Buffer>();
-    private readonly List<Input> inputs = new List<Input>();
-    private readonly List<Output> outputs = new List<Output>();
+    private List<DXBCIOSignature> inputs = new();
+    private List<DXBCIOSignature> outputs = new();
+    private List<DXBCShaderResource> resources = new();
+
     private bool isTerrain = false;
     private bool bRT0 = true;
     private bool bTranslucent = false;
-    private bool bUsesFrontFace = false;
     private bool bFixRoughness = false;
 
     private bool bUsesNormalBuffer = false;
@@ -33,7 +30,7 @@ public class S2ShaderConverter
     public string vfxStructure =
 $@"HEADER
 {{
-	Description = ""Charm Auto-Generated Source 2 Shader"";
+	Description = ""Charm Auto-Generated S&Box Shader"";
 }}
 
 MODES
@@ -135,14 +132,15 @@ PS
         hlsl = new StringReader(pixel);
         vfx = new StringBuilder();
         isTerrain = bIsTerrain;
-        bTranslucent = type == MaterialType.Transparent;
+        inputs = material.PixelShader.InputSignatures;
+        outputs = material.PixelShader.OutputSignatures;
+        resources = material.PixelShader.Resources;
+        bTranslucent = type == MaterialType.Transparent || outputs.Count == 1;
 
-        ProcessHlslData();
+        //ProcessHlslData();
 
-        if (bUsesFrontFace)
-        {
+        if (inputs.Any(input => input.Semantic == DXBCSemantic.SystemIsFrontFace) && material.Unk0C != 0)
             vfxStructure = vfxStructure.Replace("//frontface", "#define S_RENDER_BACKFACES 1");
-        }
 
         for (int i = 0; i < material.PS_Samplers.Count; i++)
         {
@@ -164,12 +162,8 @@ PS
         vfxStructure = vfxStructure.Replace("//ps_Function", instructions.ToString());
         vfxStructure = vfxStructure.Replace("//ps_Inputs", WriteFunctionDefinition(material, false).ToString());
 
-        if (bTranslucent || bRT0) //This way is stupid but it works
-        {
-            //bool a = bUsesNormalBuffer || bTranslucent || bUsesFrameBuffer || bUsesDepthBuffer;
-            //vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST {(a ? "0" : "1")}\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT {(a ? "1" : "0")}\r\n\t#endif");
+        if (bTranslucent) //This way is stupid but it works
             vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST 0\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT 1\r\n\t#endif");
-        }
 
         vfxStructure = vfxStructure.Replace("//ps_output", AddOutput(material).ToString());
 
@@ -206,128 +200,124 @@ PS
         return vfx.ToString();
     }
 
-    private void ProcessHlslData()
-    {
-        string line = string.Empty;
-        cbuffers.Clear();
-        textures.Clear();
-        inputs.Clear();
-        bool bFindOpacity = false;
-        do
-        {
-            line = hlsl.ReadLine();
-            if (line != null)
-            {
-                if (line.Contains("r0,r1")) // at end of function definition
-                {
-                    bFindOpacity = true;
-                }
+    //private void ProcessHlslData()
+    //{
+    //    string line = string.Empty;
+    //    cbuffers.Clear();
+    //    textures.Clear();
+    //    inputs.Clear();
+    //    bool bFindOpacity = false;
+    //    do
+    //    {
+    //        line = hlsl.ReadLine();
+    //        if (line != null)
+    //        {
+    //            if (line.Contains("r0,r1")) // at end of function definition
+    //            {
+    //                bFindOpacity = true;
+    //            }
 
-                if (bFindOpacity)
-                {
-                    if (line.Contains("discard") || line.Contains("o0.w = r"))
-                    {
-                        //bOpacityEnabled = true;
-                        break;
-                    }
-                    continue;
-                }
+    //            if (bFindOpacity)
+    //            {
+    //                if (line.Contains("discard") || line.Contains("o0.w = r"))
+    //                {
+    //                    //bOpacityEnabled = true;
+    //                    break;
+    //                }
+    //                continue;
+    //            }
 
-                if (line.Contains("Texture"))
-                {
-                    TextureView texture = new TextureView();
-                    texture.Dimension = line.Split("<")[0];
-                    texture.Type = line.Split("<")[1].Split(">")[0];
-                    texture.Variable = line.Split("> ")[1].Split(" :")[0];
-                    texture.Index = Int32.TryParse(new string(texture.Variable.Skip(1).ToArray()), out int index) ? index : -1;
-                    textures.Add(texture);
-                }
-                else if (line.Contains("SamplerState"))
-                {
-                    samplers.Add(line.Split("(")[1].Split(")")[0].Last() - 48);
-                }
-                else if (line.Contains("Buffer"))
-                {
-                    Shaders.Buffer buffer = new Shaders.Buffer();
-                    buffer.Type = line.Split('<', '>')[1];
-                    buffer.Variable = line.Split(' ')[1];
-                    buffer.Index = Int32.TryParse(new string(buffer.Variable.Skip(1).ToArray()), out int index) ? index : -1;
-                    buffers.Add(buffer);
-                }
-                else if (line.Contains("cbuffer"))
-                {
-                    hlsl.ReadLine();
-                    line = hlsl.ReadLine();
-                    Cbuffer cbuffer = new Cbuffer();
-                    cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
-                    cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
-                    cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
-                    cbuffer.Type = line.Split("cb")[0].Trim();
-                    cbuffers.Add(cbuffer);
-                }
-                else if (line.Contains(" v") && line.Contains(" : ") && !line.Contains("?"))
-                {
-                    Input input = new Input();
-                    input.Variable = "v" + line.Split("v")[1].Split(" : ")[0];
-                    input.Index = Int32.TryParse(new string(input.Variable.Skip(1).ToArray()), out int index) ? index : -1;
-                    input.Semantic = line.Split(" : ")[1].Split(",")[0];
-                    if (input.Semantic == "SV_isFrontFace0")
-                        bUsesFrontFace = true;
-                    input.Type = line.Split(" v")[0].Trim();
-                    inputs.Add(input);
-                }
-                else if (line.Contains("out") && line.Contains(" : "))
-                {
-                    Output output = new Output();
-                    output.Variable = "o" + line.Split(" o")[2].Split(" : ")[0];
-                    output.Index = Int32.TryParse(new string(output.Variable.Skip(1).ToArray()), out int index) ? index : -1;
-                    output.Semantic = line.Split(" : ")[1].Split(",")[0];
-                    output.Type = line.Split("out ")[1].Split(" o")[0];
-                    outputs.Add(output);
-                }
-            }
+    //            if (line.Contains("Texture"))
+    //            {
+    //                TextureView texture = new TextureView();
+    //                texture.Dimension = line.Split("<")[0];
+    //                texture.Type = line.Split("<")[1].Split(">")[0];
+    //                texture.Variable = line.Split("> ")[1].Split(" :")[0];
+    //                texture.Index = Int32.TryParse(new string(texture.Variable.Skip(1).ToArray()), out int index) ? index : -1;
+    //                textures.Add(texture);
+    //            }
+    //            else if (line.Contains("SamplerState"))
+    //            {
+    //                samplers.Add(line.Split("(")[1].Split(")")[0].Last() - 48);
+    //            }
+    //            else if (line.Contains("Buffer"))
+    //            {
+    //                Shaders.Buffer buffer = new Shaders.Buffer();
+    //                buffer.Type = line.Split('<', '>')[1];
+    //                buffer.Variable = line.Split(' ')[1];
+    //                buffer.Index = Int32.TryParse(new string(buffer.Variable.Skip(1).ToArray()), out int index) ? index : -1;
+    //                buffers.Add(buffer);
+    //            }
+    //            else if (line.Contains("cbuffer"))
+    //            {
+    //                hlsl.ReadLine();
+    //                line = hlsl.ReadLine();
+    //                Cbuffer cbuffer = new Cbuffer();
+    //                cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
+    //                cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
+    //                cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
+    //                cbuffer.Type = line.Split("cb")[0].Trim();
+    //                cbuffers.Add(cbuffer);
+    //            }
+    //            else if (line.Contains(" v") && line.Contains(" : ") && !line.Contains("?"))
+    //            {
+    //                Input input = new Input();
+    //                input.Variable = "v" + line.Split("v")[1].Split(" : ")[0];
+    //                input.Index = Int32.TryParse(new string(input.Variable.Skip(1).ToArray()), out int index) ? index : -1;
+    //                input.Semantic = line.Split(" : ")[1].Split(",")[0];
+    //                if (input.Semantic == "SV_isFrontFace0")
+    //                    bUsesFrontFace = true;
+    //                input.Type = line.Split(" v")[0].Trim();
+    //                inputs.Add(input);
+    //            }
+    //            else if (line.Contains("out") && line.Contains(" : "))
+    //            {
+    //                Output output = new Output();
+    //                output.Variable = "o" + line.Split(" o")[2].Split(" : ")[0];
+    //                output.Index = Int32.TryParse(new string(output.Variable.Skip(1).ToArray()), out int index) ? index : -1;
+    //                output.Semantic = line.Split(" : ")[1].Split(",")[0];
+    //                output.Type = line.Split("out ")[1].Split(" o")[0];
+    //                outputs.Add(output);
+    //            }
+    //        }
 
-        } while (line != null);
-    }
+    //    } while (line != null);
+    //}
 
     private StringBuilder WriteCbuffers(IMaterial material, bool bIsVertexShader)
     {
         StringBuilder CBuffers = new();
 
-        foreach (var buffer in buffers)
+        foreach (var resource in resources)
         {
-            CBuffers.AppendLine($"\tBuffer<{buffer.Type}> b_{buffer.Variable} : register({buffer.Variable});");
-        }
-
-        foreach (var cbuffer in cbuffers)
-        {
-            //CBuffers.AppendLine($"\tstatic {cbuffer.Type} {cbuffer.Variable}[{cbuffer.Count}] = ").AppendLine("\t{");
-
-            dynamic data = null;
-            if (bIsVertexShader)
+            switch(resource.ResourceType)
             {
-                for (int i = 0; i < cbuffer.Count; i++)
-                {
-                    CBuffers.AppendLine($"\tfloat4 vs_cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"vs_cb{cbuffer.Index}/{i}\"); >;");
-                }
-            }
-            else
-            {
-                if (cbuffer.Index != 12)
-                {
-                    for (int i = 0; i < cbuffer.Count; i++)
+                case ResourceType.Buffer:
+                    CBuffers.AppendLine($"\tBuffer<float4> b_t{resource.Index} : register(t{resource.Index});");
+                    break;
+                case ResourceType.CBuffer:
+                    if (bIsVertexShader)
                     {
-                        CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
+                        for (int i = 0; i < resource.Count; i++)
+                        {
+                            CBuffers.AppendLine($"\tfloat4 vs_cb{resource.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"vs_cb{resource.Index}/{i}\"); >;");
+                        }
                     }
-                }
-                //for (int i = 0; i < cbuffer.Count; i++)
-                //{
-                //    CBuffers.AppendLine($"\tfloat4 cb{cbuffer.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{cbuffer.Index}/{i}\"); >;");
-                //}
+                    else
+                    {
+                        if (resource.Index != 12)
+                        {
+                            for (int i = 0; i < resource.Count; i++)
+                            {
+                                CBuffers.AppendLine($"\tfloat4 cb{resource.Index}_{i} < Default4( 0.0f, 0.0f, 0.0f, 0.0f ); UiGroup( \"cb{resource.Index}/{i}\"); >;");
+                            }
+                        }
+                    }
+                    break;
             }
         }
 
-        return CBuffers.Replace("∞", "1.#INF");
+        return CBuffers;
     }
 
     private StringBuilder WriteFunctionDefinition(IMaterial material, bool bIsVertexShader)
@@ -392,26 +382,26 @@ PS
             {
                 switch(i.Semantic)
                 {
-                    case "POSITION0":
-                        funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(i.vPositionOs, 0); //{i.Semantic}");
+                    case DXBCSemantic.Position:
+                        funcDef.AppendLine($"\t\tfloat4 v{i.BufferIndex} = float4(i.vPositionOs, 0); //{i.ToString()}");
                         break;
-                    case "TANGENT0":
-                        funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vTangentUOs; //{i.Semantic}");
+                    case DXBCSemantic.Tangent:
+                        funcDef.AppendLine($"\t\tfloat4 v{i.BufferIndex} = i.vTangentUOs; //{i.ToString()}");
                         break;
-                    case "TEXCOORD0":
-                        funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(i.vTexCoord, 0, 0); //{i.Semantic}");
+                    case DXBCSemantic.Texcoord:
+                        funcDef.AppendLine($"\t\tfloat4 v{i.BufferIndex} = float4(i.vTexCoord, 0, 0); //{i.ToString()}");
                         break;
-                    case "NORMAL0":
-                        funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vNormalOs; //{i.Semantic}");
+                    case DXBCSemantic.Normal:
+                        funcDef.AppendLine($"\t\tfloat4 v{i.BufferIndex} = i.vNormalOs; //{i.ToString()}");
                         break;
-                    case "SV_VERTEXID0":
-                        funcDef.AppendLine($"\t\tuint {i.Variable} = i.vVertexID; //{i.Semantic}");
+                    case DXBCSemantic.SystemVertexId:
+                        funcDef.AppendLine($"\t\tuint v{i.BufferIndex} = i.vVertexID; //{i.ToString()}");
                         break;
-                    case "SV_InstanceID0":
-                        funcDef.AppendLine($"\t\tuint {i.Variable} = i.vInstanceID; //{i.Semantic}");
+                    case DXBCSemantic.SystemInstanceId:
+                        funcDef.AppendLine($"\t\tuint v{i.BufferIndex} = i.vInstanceID; //{i.ToString()}");
                         break;
                     default:
-                        funcDef.AppendLine($"\t\t{i.Type} {i.Variable} = {i.Variable}; //{i.Semantic}");
+                        funcDef.AppendLine($"\t\t{i.GetMaskType()} v{i.BufferIndex} = float4(1,1,1,1).{i.Mask.ToString().ToLower()}; //{i.Semantic}");
                         break;
                 }
             }
@@ -494,24 +484,24 @@ PS
 
             foreach (var i in inputs)
             {
-                switch(i.Type)
+                switch (i.GetMaskType())
                 {
                     case "uint":
-                        if (i.Semantic == "SV_isFrontFace0")
-                            funcDef.AppendLine($"\t\tint {i.Variable} = i.face;");
+                        if (i.Semantic == DXBCSemantic.SystemIsFrontFace)
+                            funcDef.AppendLine($"\t\tint v{i.RegisterIndex} = i.face;");
                         else
-                            funcDef.AppendLine($"\t\tint {i.Variable} = 1;");
+                            funcDef.AppendLine($"\t\tint v{i.RegisterIndex} = 1;");
                         break;
                     case "float4":
-                        if (i.Semantic == "SV_POSITION0")
-                            funcDef.AppendLine($"\t\tfloat4 {i.Variable} = i.vPositionSs;");
-                        else if(i.Variable == "v5" && i.Semantic.Contains("TEXCOORD"))
+                        if (i.Semantic == DXBCSemantic.SystemPosition)
+                            funcDef.AppendLine($"\t\tfloat4 v{i.RegisterIndex} = i.vPositionSs;");
+                        else if(i.RegisterIndex == 5 && i.Semantic == DXBCSemantic.Texcoord)
                             funcDef.AppendLine($"\t\tfloat4 v5 = i.vBlendValues;");
                         //else
                         //    funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(1,1,1,1);");
                         break;
                     case "float":
-                        funcDef.AppendLine($"\t\tfloat {i.Variable} = 1;");
+                        funcDef.AppendLine($"\t\tfloat v{i.RegisterIndex} = 1;");
                         break;
                 }
             }
@@ -520,7 +510,7 @@ PS
             funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);");
             funcDef.AppendLine("\t\tfloat4 o3 = float4(0,0,0,0);\n");
 
-            if (cbuffers.Any(cbuffer => cbuffer.Index == 12))
+            if (resources.Any(cbuffer => (cbuffer.ResourceType == ResourceType.CBuffer && cbuffer.Index == 12)))
             {
                 funcDef.AppendLine(AddViewScope());
             }

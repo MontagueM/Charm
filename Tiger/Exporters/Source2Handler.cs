@@ -203,27 +203,38 @@ public class SBoxHandler
             vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
         }
 
-        vmat.AppendLine($"\t\tcb2_0 \"float4(0,1,1,1)\"");
-        vmat.AppendLine($"\t\tcb2_1 \"float4(0,1,1,1)\"");
-
-        for (int i = 0; i < 37; i++)
+        foreach(var resource in materialHeader.PixelShader.Resources)
         {
-            if (i < 5)
-                vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
-            else
-                vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
+            if (resource.ResourceType == Schema.ResourceType.CBuffer)
+            {
+                switch (resource.Index)
+                {
+                    case 2: //Transparent scope
+                        for(int i = 0; i < resource.Count; i++)
+                        {
+                            vmat.AppendLine($"\t\tcb2_{i} \"float4(0,1,1,1)\"");
+                        }
+                        break;
+                    case 8: //??? scope
+                        for (int i = 0; i < resource.Count; i++)
+                        {
+                            if (i < 5)
+                                vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
+                            else
+                                vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
+                        }
+                        break;
+                    case 13: //Frame scope
+                        vmat.AppendLine($"\t\tcb13_0 \"Time\"");
+                        vmat.AppendLine($"\t\tcb13_1 \"float4(1,1,1,1)\"");
+                        break;
+                }    
+            }
         }
 
-        vmat.AppendLine($"\t\tcb12_4 \"float4(1,0,0,0)\"");
-        vmat.AppendLine($"\t\tcb12_5 \"float4(0,1,0,0)\"");
-        vmat.AppendLine($"\t\tcb12_6 \"float4(0,0,1,0)\"");
-
-        vmat.AppendLine($"\t\tcb13_0 \"Time\"");
-        vmat.AppendLine($"\t\tcb13_1 \"float4(1,1,1,1)\"");
-
         vmat.AppendLine($"\t}}");
-
         vmat.AppendLine("}");
+
         try
         {
             File.WriteAllText($"{savePath}/{hash}.vmat", vmat.ToString());

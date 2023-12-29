@@ -330,6 +330,23 @@ public struct DXBCIOSignature
         };
     }
 
+    public string GetMaskType()
+    {
+        switch(GetNumberOfComponents())
+        {
+            case 1:
+                return "uint";
+            case 2:
+                return "float2";
+            case 3:
+                return "float3";
+            case 4:
+                return "float4";
+            default:
+                return "float4";
+        }
+    }
+
     public override string ToString()
     {
         switch (Semantic)
