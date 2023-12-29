@@ -46,23 +46,23 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         }
     }
 
-    private List<DXBCShaderResource> _shaderResources;
-    public List<DXBCShaderResource> ShaderResources
+    private List<DXBCShaderResource> _resources;
+    public List<DXBCShaderResource> Resources
     {
         get
         {
-            if (_shaderResources != null)
+            if (_resources != null)
             {
-                return _shaderResources;
+                return _resources;
             }
 
-            _shaderResources = GetShaderResources();
-            Log.Debug($"Shader Resources for shader {Hash} ({_shaderResources.Count}):");
-            foreach (DXBCShaderResource resource in _shaderResources)
+            _resources = GetShaderResources();
+            Log.Debug($"Shader Resources for shader {Hash} ({_resources.Count}):");
+            foreach (DXBCShaderResource resource in _resources)
             {
                 Log.Debug(resource.DebugString());
             }
-            return _shaderResources;
+            return _resources;
         }
     }
 
