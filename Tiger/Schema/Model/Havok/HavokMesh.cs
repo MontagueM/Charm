@@ -1,4 +1,6 @@
 ﻿using System.Runtime.InteropServices;
+using Arithmic;
+using System.Text;
 
 namespace Tiger.Schema.Havok;
 
@@ -73,5 +75,36 @@ public unsafe class DestinyHavok
 
         FreeShapeCollection(shapeCollectionPtr);
         return shapes;
+    }
+
+    public static void SaveHavokShape(FileHash hash, Vector4 transforms)
+    {
+        var shapeCollection = DestinyHavok.ReadShapeCollection(FileResourcer.Get().GetFile(hash).GetData());
+        if (shapeCollection is null)
+        {
+            Log.Error("Havok shape collection is null");
+            return;
+        }
+
+        Directory.CreateDirectory($"{ConfigSubsystem.Get().GetExportSavePath()}/HavokShapes");
+        int i = 0;
+        foreach (var shape in shapeCollection)
+        {
+            var vertices = shape.Vertices;
+            var indices = shape.Indices;
+
+            var sb = new StringBuilder();
+            foreach (var vertex in vertices)
+            {
+                sb.AppendLine($"v {(vertex.X + transforms.X) * transforms.W} {(vertex.Y + transforms.Y) * transforms.W} {(vertex.Z + transforms.Z) * transforms.W}");
+            }
+            foreach (var index in indices.Chunk(3))
+            {
+                sb.AppendLine($"f {index[0] + 1} {index[1] + 1} {index[2] + 1}");
+            }
+
+            Console.WriteLine($"Writing 'HavokShapes/shape_{hash}_{i}.obj'");
+            File.WriteAllText($"{ConfigSubsystem.Get().GetExportSavePath()}/HavokShapes/shape_{hash}_{i++}.obj", sb.ToString());
+        }
     }
 }

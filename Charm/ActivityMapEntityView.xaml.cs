@@ -20,6 +20,7 @@ using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Havok;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 
@@ -440,6 +441,9 @@ public partial class ActivityMapEntityView : UserControl
                             if (part.Material == null) continue;
                             waterScene.Materials.Add(new ExportMaterial(part.Material, MaterialType.Transparent));
                         }
+                        break;
+                    case D2Class_21918080 havok:
+                        DestinyHavok.SaveHavokShape(havok.HavokVolume, entry.Translation);
                         break;
                     default:
                         break;

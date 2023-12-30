@@ -572,6 +572,17 @@ public struct SMapWaterDecal
     public EntityModel Model;
 }
 
+/// <summary>
+/// Havok volume data resource.
+/// </summary>
+[SchemaStruct("21918080", 0x20)]
+public struct D2Class_21918080
+{
+    [SchemaField(0x10)]
+    public FileHash HavokVolume;  // type 27 subtype 0
+    public TigerHash Unk14;
+}
+
 // /// <summary>
 // /// Boss entity data resource?
 // /// </summary>
@@ -656,16 +667,6 @@ public struct SMapWaterDecal
 //     public dynamic? Unk00;
 // }
 //
-// /// <summary>
-// /// Havok volume data resource.
-// /// </summary>
-// [SchemaStruct("21918080", 0x20)]
-// public struct D2Class_21918080
-// {
-//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
-//     public Tag HavokVolume;  // type 27 subtype 0
-//     public TigerHash Unk14;
-// }
 //
 // /// <summary>
 // /// Unk data resource.
