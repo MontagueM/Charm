@@ -86,6 +86,9 @@
       <None Update="ThirdParty\3dmigoto_shader_decomp.exe">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="ThirdParty\Alkahest\destiny_havok.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="ThirdParty\d3dcompiler_46.dll">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
