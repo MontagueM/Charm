@@ -464,6 +464,9 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
 
         foreach (DXBCIOSignature inputSignature in inputSignatures)
         {
+            if (inputSignature.ToString().Contains("SV_"))
+                continue;
+
             switch (inputSignature.Semantic)
             {
                 case DXBCSemantic.Position:
@@ -547,7 +550,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     //(part as DynamicMeshPart).VertexWeights.Add(vw);
                     break;
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException($"Not Implemented {inputSignature.Semantic}");
             }
         }
     }

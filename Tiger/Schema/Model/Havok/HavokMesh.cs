@@ -1,13 +1,14 @@
 ﻿using System.Runtime.InteropServices;
 using Arithmic;
 using System.Text;
+using System.Numerics;
 
 namespace Tiger.Schema.Havok;
 
 public unsafe class DestinyHavok
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3
+    public struct HavokVector3
     {
         public float X, Y, Z;
     }
@@ -22,7 +23,7 @@ public unsafe class DestinyHavok
     [StructLayout(LayoutKind.Sequential)]
     private struct CShape
     {
-        public CArray<Vector3> Vertices;
+        public CArray<HavokVector3> Vertices;
         public CArray<ushort> Indices;
     }
 
@@ -34,7 +35,7 @@ public unsafe class DestinyHavok
 
     public struct HavokShape
     {
-        public Vector3[] Vertices;
+        public HavokVector3[] Vertices;
         public ushort[] Indices;
     }
 
@@ -53,7 +54,7 @@ public unsafe class DestinyHavok
         for (ulong i = 0; i < shapeCollection.Length; i++)
         {
             var shape = shapeCollection.Data[i];
-            var vertices = new Vector3[shape.Vertices.Length];
+            var vertices = new HavokVector3[shape.Vertices.Length];
             var indices = new ushort[shape.Indices.Length];
 
             for (ulong j = 0; j < shape.Vertices.Length; j++)
@@ -77,7 +78,7 @@ public unsafe class DestinyHavok
         return shapes;
     }
 
-    public static void SaveHavokShape(FileHash hash, Vector4 transforms)
+    public static void SaveHavokShape(FileHash hash, string name, Vector4 transforms, Vector4 quat)
     {
         var shapeCollection = DestinyHavok.ReadShapeCollection(FileResourcer.Get().GetFile(hash).GetData());
         if (shapeCollection is null)
@@ -96,15 +97,34 @@ public unsafe class DestinyHavok
             var sb = new StringBuilder();
             foreach (var vertex in vertices)
             {
-                sb.AppendLine($"v {(vertex.X + transforms.X) * transforms.W} {(vertex.Y + transforms.Y) * transforms.W} {(vertex.Z + transforms.Z) * transforms.W}");
+                System.Numerics.Vector3 rotatedVertex = RotateVertex(vertex, new Quaternion(quat.X, quat.Y, quat.Z, quat.W));
+                sb.AppendLine($"v {(rotatedVertex.X + transforms.X) * transforms.W} {(rotatedVertex.Y + transforms.Y) * transforms.W} {(rotatedVertex.Z + transforms.Z) * transforms.W}");
             }
             foreach (var index in indices.Chunk(3))
             {
                 sb.AppendLine($"f {index[0] + 1} {index[1] + 1} {index[2] + 1}");
             }
 
-            Console.WriteLine($"Writing 'HavokShapes/shape_{hash}_{i}.obj'");
-            File.WriteAllText($"{ConfigSubsystem.Get().GetExportSavePath()}/HavokShapes/shape_{hash}_{i++}.obj", sb.ToString());
+            Console.WriteLine($"Writing 'HavokShapes/{hash}_{i}.obj'");
+            File.WriteAllText($"{ConfigSubsystem.Get().GetExportSavePath()}/HavokShapes/{name}_{hash}_{i++}.obj", sb.ToString());
         }
+    }
+
+    private static System.Numerics.Vector3 RotateVertex(HavokVector3 vertex, Quaternion rotationQuaternion)
+    {
+        // Ensure the quaternion is normalized
+        rotationQuaternion = Quaternion.Normalize(rotationQuaternion);
+
+        // Convert the vertex to a quaternion
+        Quaternion vertexQuaternion = new Quaternion(vertex.X, vertex.Y, vertex.Z, 0.0f);
+
+        // Rotate the vertex
+        Quaternion rotatedVertexQuaternion = Quaternion.Multiply(rotationQuaternion, vertexQuaternion);
+        rotatedVertexQuaternion = Quaternion.Multiply(rotatedVertexQuaternion, Quaternion.Conjugate(rotationQuaternion));
+
+        // Extract the rotated vertex
+        System.Numerics.Vector3 rotatedVertex = new System.Numerics.Vector3(rotatedVertexQuaternion.X, rotatedVertexQuaternion.Y, rotatedVertexQuaternion.Z);
+
+        return rotatedVertex;
     }
 }

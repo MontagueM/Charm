@@ -572,15 +572,38 @@ public struct SMapWaterDecal
     public EntityModel Model;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "7B918080", 0x1C)]
+public struct D2Class_7B918080
+{
+    public ResourcePointer Pointer; //21918080
+}
+
 /// <summary>
 /// Havok volume data resource.
 /// </summary>
-[SchemaStruct("21918080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "21918080", 0x20)]
 public struct D2Class_21918080
 {
     [SchemaField(0x10)]
     public FileHash HavokVolume;  // type 27 subtype 0
     public TigerHash Unk14;
+}
+
+/// <summary>
+/// Unk Havok data resource.
+/// </summary>
+[SchemaStruct("C26A8080", 0x18)]
+public struct D2Class_C26A8080
+{
+    [SchemaField(0x10)]
+    public Tag<D2Class_C46A8080> Unk10;  // C46A8080
+}
+
+[SchemaStruct("C46A8080", 0x18)]
+public struct D2Class_C46A8080
+{
+    [SchemaField(0x8)]
+    public FileHash Unk08;  // Havok Volume
 }
 
 // /// <summary>
@@ -678,15 +701,6 @@ public struct D2Class_21918080
 //     public Tag Unk10;  // C2858080
 // }
 //
-// /// <summary>
-// /// Unk data resource.
-// /// </summary>
-// [SchemaStruct("C26A8080", 0x18)]
-// public struct D2Class_C26A8080
-// {
-//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
-//     public Tag Unk10;  // C46A8080
-// }
 //
 //
 // /// <summary>

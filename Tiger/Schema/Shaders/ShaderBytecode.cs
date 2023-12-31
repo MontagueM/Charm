@@ -209,7 +209,7 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
 
             type = (ResourceType)reader.ReadUInt32();
 
-        } while (type != ResourceType.None);
+        } while (type != ResourceType.None && type != ResourceType.Output);
 
         return shaderResources;
     }
@@ -439,8 +439,8 @@ public enum ResourceType
 
     // Can already get through IOSignatures
     // But need to know where to stop reading
-    None = 0x02000068
+    None = 0x02000068,
     //VSInput = 0x0300005F,
     //PSInput = 0x03001062,
-    //Output = 0x03000065
+    Output = 0x03000065
 }

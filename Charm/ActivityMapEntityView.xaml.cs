@@ -442,9 +442,6 @@ public partial class ActivityMapEntityView : UserControl
                             waterScene.Materials.Add(new ExportMaterial(part.Material, MaterialType.Transparent));
                         }
                         break;
-                    case D2Class_21918080 havok:
-                        DestinyHavok.SaveHavokShape(havok.HavokVolume, entry.Translation);
-                        break;
                     default:
                         break;
                 }
@@ -491,6 +488,15 @@ public partial class ActivityMapEntityView : UserControl
                         ExporterScene waterScene = Exporter.Get().CreateScene(water.Model.Hash, ExportType.EntityInMap); //Idk what to name this besides water
                         waterScene.AddModel(water.Model);
                         SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", water.Model.Hash, water.Model.Load(ExportDetailLevel.MostDetailed, null));
+                        break;
+
+                    case D2Class_7B918080 KillTurnbackHavok:
+                        D2Class_21918080 havok = KillTurnbackHavok.Pointer.GetValue(dataTable.GetReader());
+                        DestinyHavok.SaveHavokShape(havok.HavokVolume, $"Turnback_{data}", entry.Translation, entry.Rotation);
+                        break;
+
+                    case D2Class_C26A8080 unkHavok:
+                        DestinyHavok.SaveHavokShape(unkHavok.Unk10.TagData.Unk08, data, entry.Translation, entry.Rotation);
                         break;
                 }
             });

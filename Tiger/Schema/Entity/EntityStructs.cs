@@ -1537,3 +1537,33 @@ public struct D2Class_4D898080
     public StringPointer Name;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "E58C8080", 0xF0)]
+public struct D2Class_E58C8080
+{
+    [SchemaField(0x68)]
+    public DynamicArray<D2Class_56998080> Unk68;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "56998080", 0x18)]
+public struct D2Class_56998080
+{
+    [SchemaField(0x10)]
+    public ResourcePointer Unk10; // C88C8080, C48C8080
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C88C8080", 0x38)]
+public struct D2Class_C88C8080
+{
+}
+
+
+/// <summary>
+/// Datatable for Kill/Turnback Havok volumes?
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C48C8080", 0x38)]
+public struct D2Class_C48C8080
+{
+    [SchemaField(0x18)]
+    public Tag<SMapDataTable> DataTable;
+}
+

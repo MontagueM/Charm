@@ -253,8 +253,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                     var resourceValue = resource.EntityResourceParent.TagData.EntityResource.TagData.Unk18.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader());
                     switch (resourceValue)
                     {
-                        case D2Class_D8928080:
-                            var tag = (D2Class_D8928080)resourceValue;
+                        case D2Class_D8928080 tag:
                             if (tag.Unk84 is not null)
                             {
                                 if (tag.Unk84.TagData.DataEntries.Count > 0)
@@ -264,13 +263,24 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                             }
                             break;
 
-                        case D2Class_EF8C8080:
-                            var tag2 = (D2Class_EF8C8080)resourceValue;
-                            if (tag2.Unk58 is not null)
+                        case D2Class_EF8C8080 tag:
+                            if (tag.Unk58 is not null)
                             {
-                                if (tag2.Unk58.TagData.DataEntries.Count > 0)
+                                if (tag.Unk58.TagData.DataEntries.Count > 0)
                                 {
-                                    items.Add(tag2.Unk58.Hash);
+                                    items.Add(tag.Unk58.Hash);
+                                }
+                            }
+                            break;
+                        case D2Class_E58C8080 tag:
+                            foreach(var tag2 in tag.Unk68)
+                            {
+                                if(tag2.Unk10.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader()) is D2Class_C48C8080 d2class_C48C8080)
+                                {
+                                    if(d2class_C48C8080.DataTable is not null && d2class_C48C8080.DataTable.TagData.DataEntries.Count > 0)
+                                    {
+                                        items.Add(d2class_C48C8080.DataTable.Hash);
+                                    }
                                 }
                             }
                             break;
