@@ -196,6 +196,28 @@ public partial class ActivityMapEntityView : UserControl
             }
         }
 
+        var ambientTag = FileResourcer.Get().GetSchemaTag<SActivity_WQ>(activity.FileHash);
+        if (ambientTag.TagData.AmbientActivity != null)
+        {
+            var ambient = FileResourcer.Get().GetFileInterface<IActivity>(ambientTag.TagData.AmbientActivity.Hash);
+            foreach (var entry in ambient.EnumerateActivityEntities(UnkActivity))
+            {
+                if (entry.DataTables.Count > 0)
+                {
+                    DisplayEntityMap entityMap = new();
+                    entityMap.Name = $"(Ambient) {entry.BubbleName} {entry.ActivityPhaseName2}: {entry.DataTables.Count} Entries";
+                    entityMap.Hash = entry.Hash;
+                    entityMap.Count = entry.DataTables.Count;
+                    entityMap.EntityType = DisplayEntityMap.Type.Activity;
+                    entityMap.DataTables = entry.DataTables;
+                    entityMap.WorldIDs = entry.WorldIDs;
+                    entityMap.Data = entityMap;
+
+                    items.Add(entityMap);
+                }
+            }
+        }
+
         var sortedItems = new List<DisplayEntityMap>(items);
         sortedItems.Sort((a, b) => a.Name.CompareTo(b.Name));
         sortedItems.Insert(0, new DisplayEntityMap
