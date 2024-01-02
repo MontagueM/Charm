@@ -21,72 +21,24 @@ namespace Tiger.Exporters;
 
 public class SBoxHandler
 {
-    public static void SaveStaticVMDL(string savePath, string staticMeshName, List<StaticPart> staticMesh)
+    public static void SaveStaticVMDL(string savePath, ExporterMesh mesh)
     {
         try
         {
-            if (!File.Exists($"{savePath}/{staticMeshName}.vmdl"))
+            if (!File.Exists($"{savePath}/{mesh.Hash}.vmdl"))
             {
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{staticMeshName}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{staticMeshName}.vmdl");
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{mesh.Hash}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{mesh.Hash}.vmdl");
 
                 StringBuilder mats = new StringBuilder();
 
                 int i = 0;
-                foreach (MeshPart staticpart in staticMesh)
-                {
-                    mats.AppendLine("{");
-                    if (staticpart.Material == null)
-                    {
-                        mats.AppendLine($"    from = \"{staticMeshName}_Group{staticpart.GroupIndex}_Index{staticpart.Index}_{i}_{staticpart.LodCategory}.vmat\"");
-                        mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
-                    }
-                    else
-                    {
-                        mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
-                        mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
-                    }
-                    mats.AppendLine("},\n");
-                    i++;
-                }
-
-                text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"models/{staticMeshName}.fbx");
-                text = text.Replace("%MESHNAME%", staticMeshName);
-
-                File.WriteAllText($"{savePath}/{staticMeshName}.vmdl", text);
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-        }
-    }
-
-    public static void SaveEntityVMDL(string savePath, Entity entity)
-    {
-        var parts = entity.Load(ExportDetailLevel.MostDetailed);
-        SaveEntityVMDL(savePath, entity.Hash, parts);
-    }
-
-    public static void SaveEntityVMDL(string savePath, string hash, List<DynamicMeshPart> parts)
-    {
-        try
-        {
-            if (!File.Exists($"{savePath}/{hash}.vmdl"))
-            {
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{hash}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{hash}.vmdl");
-
-                StringBuilder mats = new StringBuilder();
-
-                int i = 0;
-                foreach (var part in parts)
+                foreach (var part in mesh.Parts)
                 {
                     mats.AppendLine("{");
                     if (part.Material == null)
                     {
-                        mats.AppendLine($"    from = \"{hash}_Group{part.GroupIndex}_Index{part.Index}_{i}_{part.LodCategory}.vmat\"");
+                        mats.AppendLine($"    from = \"{mesh.Hash}_Group{part.MeshPart.GroupIndex}_Index{part.Index}_{i}_{part.MeshPart.LodCategory}.vmat\"");
                         mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
                     }
                     else
@@ -99,10 +51,58 @@ public class SBoxHandler
                 }
 
                 text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"models/{hash}.fbx");
-                text = text.Replace("%MESHNAME%", hash);
+                text = text.Replace("%FILENAME%", $"Models/Statics/{mesh.Hash}.fbx");
+                text = text.Replace("%MESHNAME%", mesh.Hash);
 
-                File.WriteAllText($"{savePath}/{hash}.vmdl", text);
+                File.WriteAllText($"{savePath}/{mesh.Hash}.vmdl", text);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error(e.Message);
+        }
+    }
+
+    //public static void SaveEntityVMDL(string savePath, Entity entity)
+    //{
+    //    var parts = entity.Load(ExportDetailLevel.MostDetailed);
+    //    SaveEntityVMDL(savePath, entity.Hash, parts);
+    //}
+
+    public static void SaveEntityVMDL(string savePath, ExporterEntity entity)
+    {
+        try
+        {
+            if (!File.Exists($"{savePath}/{entity.Mesh.Hash}.vmdl"))
+            {
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{entity.Mesh.Hash}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{entity.Mesh.Hash}.vmdl");
+
+                StringBuilder mats = new StringBuilder();
+
+                int i = 0;
+                foreach (var part in entity.Mesh.Parts)
+                {
+                    mats.AppendLine("{");
+                    if (part.Material == null)
+                    {
+                        mats.AppendLine($"    from = \"{entity.Mesh.Hash}_Group{part.MeshPart.GroupIndex}_Index{part.MeshPart.Index}_{i}_{part.MeshPart.LodCategory}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
+                    }
+                    else
+                    {
+                        mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                    }
+                    mats.AppendLine("},\n");
+                    i++;
+                }
+
+                text = text.Replace("%MATERIALS%", mats.ToString());
+                text = text.Replace("%FILENAME%", $"Models/Entities/{entity.Mesh.Hash}.fbx");
+                text = text.Replace("%MESHNAME%", entity.Mesh.Hash);
+
+                File.WriteAllText($"{savePath}/{entity.Mesh.Hash}.vmdl", text);
             }
         }
         catch(Exception e)
@@ -113,11 +113,11 @@ public class SBoxHandler
 
     public static void SaveTerrainVMDL(string savePath, string hash, List<StaticPart> parts, STerrain terrainHeader)
     {
-        Directory.CreateDirectory($"{savePath}/Statics/");
-        File.Copy("Exporters/template.vmdl", $"{savePath}/Statics/{hash}_Terrain.vmdl", true);
-        if (File.Exists($"{savePath}/Statics/{hash}_Terrain.vmdl"))
+        Directory.CreateDirectory($"{savePath}/Models/Terrain/");
+        File.Copy("Exporters/template.vmdl", $"{savePath}/Models/Terrain/{hash}.vmdl", true);
+        if (File.Exists($"{savePath}/Models/Terrain/{hash}.vmdl"))
         {
-            string text = File.ReadAllText($"{savePath}/Statics/{hash}_Terrain.vmdl");
+            string text = File.ReadAllText($"{savePath}/Models/Terrain/{hash}.vmdl");
 
             StringBuilder mats = new StringBuilder();
 
@@ -135,10 +135,10 @@ public class SBoxHandler
             }
 
             text = text.Replace("%MATERIALS%", mats.ToString());
-            text = text.Replace("%FILENAME%", $"models/{hash}_Terrain.fbx");
+            text = text.Replace("%FILENAME%", $"Models/Terrain/{hash}.fbx");
             text = text.Replace("%MESHNAME%", hash);
 
-            File.WriteAllText($"{savePath}/Statics/{hash}_Terrain.vmdl", text);
+            File.WriteAllText($"{savePath}/Models/Terrain/{hash}.vmdl", text);
         }
     }
 

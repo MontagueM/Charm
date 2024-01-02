@@ -37,8 +37,7 @@ public class StaticMapData : Tag<SStaticMapData>
         Parallel.ForEach(extractedStatics, s =>
         {
             var parts = s.Static.Load(ExportDetailLevel.MostDetailed);
-            if (scene.Type != ExportType.MapResource)
-                scene.AddStatic(s.Static.Hash, parts);
+            scene.AddStatic(s.Static.Hash, parts);
 
             s.Static.SaveMaterialsFromParts(scene, parts);
         });

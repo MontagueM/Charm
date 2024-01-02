@@ -139,7 +139,7 @@ PS
 
         //ProcessHlslData();
 
-        if (inputs.Any(input => input.Semantic == DXBCSemantic.SystemIsFrontFace) && material.Unk0C != 0)
+        if (inputs.Any(input => input.Semantic == DXBCSemantic.SystemIsFrontFace))
             vfxStructure = vfxStructure.Replace("//frontface", "#define S_RENDER_BACKFACES 1");
 
         for (int i = 0; i < material.PS_Samplers.Count; i++)

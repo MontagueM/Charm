@@ -101,7 +101,6 @@ public partial class EntityView : UserControl
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
                 entity.SaveTexturePlates(savePath);
             }
-            SBoxHandler.SaveEntityVMDL($"{savePath}", entity);
         }
 
         // Scale and rotate

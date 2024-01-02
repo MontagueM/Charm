@@ -55,10 +55,7 @@ public partial class StaticView : UserControl
         scene.AddStatic(hash, parts);
         Directory.CreateDirectory(savePath);
         if (exportType == ExportTypeFlag.Full)
-        {
             staticMesh.SaveMaterialsFromParts(scene, parts);
-            SBoxHandler.SaveStaticVMDL($"{savePath}", meshName, parts);
-        }
 
         bool lodexport = true;
         if (lodexport)

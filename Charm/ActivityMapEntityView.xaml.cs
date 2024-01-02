@@ -364,20 +364,15 @@ public partial class ActivityMapEntityView : UserControl
 
         Directory.CreateDirectory(savePath);
         ExtractDataTables(dataTables, hash, savePath);
-        if (_config.GetIndvidualStaticsEnabled())
-        {
-            Directory.CreateDirectory(savePath + "/Entities");
-            ExportIndividual(dataTables, hash, savePath);
-        }
     }
 
     private static void ExtractDataTables(List<FileHash> dataTables, string hash, string savePath)
     {
         // todo these scenes can be combined
-        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.MapResource);
-        ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyEnts", ExportType.MapResource);
-        ExporterScene terrainScene = Exporter.Get().CreateScene($"{hash}_Terrain", ExportType.MapResource);
-        ExporterScene waterScene = Exporter.Get().CreateScene($"{hash}_Water", ExportType.MapResource); //Idk what to name this besides water
+        ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.EntityInMap);
+        ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyEnts", ExportType.EntityInMap);
+        ExporterScene terrainScene = Exporter.Get().CreateScene($"{hash}_Terrain", ExportType.Terrain);
+        ExporterScene waterScene = Exporter.Get().CreateScene($"{hash}_Water", ExportType.EntityInMap); //Idk what to name this besides water
 
         Parallel.ForEach(dataTables, data =>
         {
@@ -386,10 +381,7 @@ public partial class ActivityMapEntityView : UserControl
             {
                 Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
                 if (entity.HasGeometry())
-                {
                     dynamicScene.AddMapEntity(entry, entity);
-                    entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
-                }
                 
                 switch (entry.DataResource.GetValue(dataTable.GetReader()))
                 {
@@ -464,53 +456,6 @@ public partial class ActivityMapEntityView : UserControl
                             waterScene.Materials.Add(new ExportMaterial(part.Material, MaterialType.Transparent));
                         }
                         break;
-                    default:
-                        break;
-                }
-            });
-        });
-    }
-
-    private static void ExportIndividual(List<FileHash> dataTables, string hash, string savePath)
-    {
-        Parallel.ForEach(dataTables, data =>
-        {
-            var dataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
-            dataTable.TagData.DataEntries.ForEach(entry =>
-            {
-                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                if (entity.HasGeometry())
-                {
-                    ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
-                    dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
-                    entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
-
-                    SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", entity);
-                }
-
-                switch(entry.DataResource.GetValue(dataTable.GetReader()))
-                {
-                    case SMapSkyEntResource skyResource:
-                        foreach (var element in skyResource.Unk10.TagData.Unk08)
-                        {
-                            if (element.Unk60.TagData.Unk08 is null)
-                                continue;
-
-                            ExporterScene skyScene = Exporter.Get().CreateScene(element.Unk60.TagData.Unk08.Hash, ExportType.EntityInMap);
-                            skyScene.AddModel(element.Unk60.TagData.Unk08);
-
-                            SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
-                        }
-                        break;
-                    case SMapTerrainResource terrainArrangement:
-                        ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, true);
-                        break;
-                    case SMapWaterDecal water:
-                        ExporterScene waterScene = Exporter.Get().CreateScene(water.Model.Hash, ExportType.EntityInMap); //Idk what to name this besides water
-                        waterScene.AddModel(water.Model);
-                        SBoxHandler.SaveEntityVMDL($"{savePath}/Entities", water.Model.Hash, water.Model.Load(ExportDetailLevel.MostDetailed, null));
-                        break;
 
                     case D2Class_7B918080 KillTurnbackHavok:
                         D2Class_21918080 havok = KillTurnbackHavok.Pointer.GetValue(dataTable.GetReader());
@@ -519,6 +464,9 @@ public partial class ActivityMapEntityView : UserControl
 
                     case D2Class_C26A8080 unkHavok:
                         DestinyHavok.SaveHavokShape(unkHavok.Unk10.TagData.Unk08, data, entry.Translation, entry.Rotation);
+                        break;
+
+                    default:
                         break;
                 }
             });

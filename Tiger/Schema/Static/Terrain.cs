@@ -16,7 +16,7 @@ public class Terrain : Tag<STerrain>
     }
 
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool exportStatic = false)
+    public void LoadIntoExporter(ExporterScene scene, string saveDirectory)
     {
         // Uses triangle strip + only using first set of vertices and indices
         Dictionary<StaticPart, IMaterial> parts = new Dictionary<StaticPart, IMaterial>();
@@ -44,14 +44,10 @@ public class Terrain : Tag<STerrain>
             }
         }
 
-        if (scene.Type == ExportType.MapResource)
+        scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
+        for (int i = 0; i < dyeMaps.Count; i++)
         {
-            scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
-            for (int i = 0; i < dyeMaps.Count; i++)
-            {
-                scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
-            }
-            return;
+            scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
         }
 
         foreach (var partEntry in _tag.StaticParts)
@@ -67,8 +63,8 @@ public class Terrain : Tag<STerrain>
                 scene.Materials.Add(new ExportMaterial(partEntry.Material, MaterialType.Opaque, true));
                 part.Material = partEntry.Material;
 
-                if (exportStatic) //Need access to material early, before scene system exports
-                    partEntry.Material.SaveShaders($"{saveDirectory}", MaterialType.Opaque, true);
+                //Need access to material early, before scene system exports
+                partEntry.Material.SaveShaders($"{saveDirectory}", MaterialType.Opaque, true);
             }
         }
 
@@ -86,7 +82,7 @@ public class Terrain : Tag<STerrain>
             SBoxHandler.SaveVMAT(saveDirectory, $"{Hash}_{part.Value.FileHash}", part.Value, true, extraTexs);
         }
 
-        scene.AddStatic(Hash, parts.Keys.ToList());
+        scene.AddTerrain(Hash, parts.Keys.ToList());
         SBoxHandler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
     }
 

@@ -50,9 +50,19 @@ class MetadataScene
             foreach (var part in mesh.Parts)
             {
                 if (part.Material != null)
-                {
                     AddMaterial(part.Material);
-                }
+
+                AddPart(part, part.Name);
+            }
+        }
+
+        foreach (var mesh in scene.TerrainMeshes)
+        {
+            foreach (var part in mesh.Parts)
+            {
+                if (part.Material != null)
+                    AddMaterial(part.Material);
+
                 AddPart(part, part.Name);
             }
         }
@@ -305,14 +315,14 @@ class MetadataScene
         {
             path = Path.Join(path, _config["MeshName"]);
         }
-        else if (_exportType is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints or ExportType.MapResource)
+        else //if (_exportType is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints or ExportType.MapResource)
         {
             path = Path.Join(path, "Maps");
         }
-        else if (_exportType is ExportType.StaticInMap or ExportType.EntityInMap)
-        {
-            return;
-        }
+        //else if (_exportType is ExportType.StaticInMap or ExportType.EntityInMap)
+        //{
+        //    return;
+        //}
 
         //// If theres only 1 part, we need to rename it + the instance to the name of the mesh (unreal imports to fbx name if only 1 mesh inside)
         //if (_config["Parts"].Count == 1)

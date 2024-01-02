@@ -129,7 +129,7 @@ public partial class MapView : UserControl
 
     public static void ExportFullMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
     {
-        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.MapResource);
+        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.StaticInMap);
 
         string meshName = map.Hash.ToString();
         string savePath = _config.GetExportSavePath() + $"/{meshName}";
@@ -139,8 +139,7 @@ public partial class MapView : UserControl
         }
 
         Directory.CreateDirectory(savePath);
-        Directory.CreateDirectory(savePath + "/Statics");
-        ExportStatics(savePath, map);
+        //ExportStatics(savePath, map);
 
         ExtractDataTables(map, savePath, scene, ExportTypeFlag.Full);
     }
@@ -176,7 +175,6 @@ public partial class MapView : UserControl
                         ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
                         var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
                         staticScene.AddStatic(part.Static.Hash, staticmesh);
-                        SBoxHandler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
                     }
                 }
             });
