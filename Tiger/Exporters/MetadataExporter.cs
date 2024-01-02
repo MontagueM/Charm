@@ -93,13 +93,13 @@ class MetadataScene
             AddTextureToMaterial(texture.Material, texture.Index, texture.Texture);
         }
 
-        foreach (CubemapResource cubemap in scene.Cubemaps)
+        foreach (var cubemap in scene.Cubemaps)
         {
-            AddCubemap(cubemap.CubemapName,
-                cubemap.CubemapSize.ToVec3(),
-                cubemap.CubemapRotation,
-                cubemap.CubemapPosition.ToVec3(),
-                cubemap.CubemapTexture != null ? cubemap.CubemapTexture.Hash : "");
+            AddCubemap(cubemap.Key.CubemapName,
+                cubemap.Key.CubemapSize.ToVec3(),
+                cubemap.Value.Quaternion,
+                cubemap.Value.Position,
+                cubemap.Key.CubemapTexture != null ? cubemap.Key.CubemapTexture.Hash : "");
         }
         foreach (var mapLight in scene.MapLights)
         {

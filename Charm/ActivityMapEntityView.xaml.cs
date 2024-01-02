@@ -416,7 +416,7 @@ public partial class ActivityMapEntityView : UserControl
                         }
                         break;
                     case CubemapResource cubemap:
-                        dynamicScene.AddCubemap(cubemap);
+                        dynamicScene.AddCubemap(entry, cubemap);
                         dynamicScene.Textures.Add(cubemap.CubemapTexture);
                         break;
                     case SMapLightResource mapLight:

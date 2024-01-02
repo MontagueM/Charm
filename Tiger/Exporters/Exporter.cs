@@ -93,7 +93,7 @@ public class ExporterScene
     public ConcurrentDictionary<FileHash, List<Transform>> EntityInstances = new();
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentBag<SMapDataEntry> EntityPoints = new();
-    public ConcurrentBag<CubemapResource> Cubemaps = new();
+    public ConcurrentDictionary<CubemapResource, Transform> Cubemaps = new();
     public ConcurrentBag<SMapLightResource> MapLights = new();
     public ConcurrentDictionary<FileHash, List<Transform>> MapSpotLights = new();
     public ConcurrentBag<SMapDecalsResource> Decals = new();
@@ -287,9 +287,15 @@ public class ExporterScene
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
     }
 
-    public void AddCubemap(CubemapResource cubemap)
+    public void AddCubemap(SMapDataEntry entry, CubemapResource cubemap)
     {
-        Cubemaps.Add(cubemap);
+        Cubemaps.TryAdd(cubemap, new Transform
+        {
+            Position = entry.Translation.ToVec3(),
+            Rotation = Vector4.QuaternionToEulerAngles(entry.Rotation),
+            Quaternion = entry.Rotation,
+            Scale = Vector3.One
+        });
     }
 
     public void AddMapLight(SMapLightResource mapLight) //Point
