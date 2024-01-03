@@ -495,7 +495,7 @@ PS
                     case "float4":
                         if (i.Semantic == DXBCSemantic.SystemPosition)
                             funcDef.AppendLine($"\t\tfloat4 v{i.RegisterIndex} = i.vPositionSs;");
-                        else if(i.RegisterIndex == 5 && i.Semantic == DXBCSemantic.Texcoord)
+                        else if(i.RegisterIndex == 5 && i.Semantic == DXBCSemantic.Texcoord && !isTerrain)
                             funcDef.AppendLine($"\t\tfloat4 v5 = i.vBlendValues;");
                         //else
                         //    funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(1,1,1,1);");

@@ -232,6 +232,14 @@ public struct Vector4
         W = w / 255.0f;
     }
 
+    public Vector4(float x)
+    {
+        X = x;
+        Y = x;
+        Z = x;
+        W = x;
+    }
+
     public static Vector4 Zero
     {
         get
@@ -284,6 +292,18 @@ public struct Vector4
         }
     }
 
+    public Vector4 Normalize()
+    {
+        float magnitude = (float)Magnitude;
+
+        X /= magnitude;
+        Y /= magnitude;
+        Z /= magnitude;
+        W /= magnitude;
+
+        return new Vector4(X, Y, Z, W);
+    }
+
     public Vector3 ToVec3()
     {
         return new Vector3(X, Y, Z);
@@ -332,6 +352,21 @@ public struct Vector4
             }
             throw new IndexOutOfRangeException();
         }
+    }
+
+    public static Vector4 operator -(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X - y.X, x.Y - y.Y, x.Z - y.Z, x.W - y.W);
+    }
+
+    public static Vector4 operator *(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X * y.X, x.Y * y.Y, x.Z * y.Z, x.W * y.W);
+    }
+
+    public static Vector4 operator +(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X + y.X, x.Y + y.Y, x.Z + y.Z, x.W + y.W);
     }
 
     /// euler degrees

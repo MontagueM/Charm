@@ -383,15 +383,16 @@ public struct D2Class_706C8080
     //public Vector4 Unk40;
     //public Vector4 Unk50;
 
-    //[SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    //[SchemaField(0xC0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC0;
-    //[SchemaField(0x84, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    //[SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC4;
-    //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    //[SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC8;
+    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xC0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public FileHash Shading;
+    [SchemaField(0x84, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xC4, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public FileHash Volumetric;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public FileHash Lightprobe;
+
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag<D2Class_A16D8080> UnkCC;

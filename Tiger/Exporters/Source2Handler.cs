@@ -226,7 +226,7 @@ public class SBoxHandler
                         break;
                     case 13: //Frame scope
                         vmat.AppendLine($"\t\tcb13_0 \"Time\"");
-                        vmat.AppendLine($"\t\tcb13_1 \"float4(1,1,1,1)\"");
+                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.25,1,1,1)\"");
                         break;
                 }    
             }
