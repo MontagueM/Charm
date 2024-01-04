@@ -9,7 +9,8 @@ public struct SMaterial_SK
     public uint Unk08;
     public uint Unk0C;
     public uint Unk10;
-
+    [SchemaField(0x20)]
+    public ushort Unk20; // ??
     [SchemaField(0x48)]
     public ShaderBytecode VertexShader;
     [SchemaField(0x50)]
@@ -52,7 +53,8 @@ public struct SMaterial_BL
     public uint Unk08;
     public uint Unk0C;
     public uint Unk10;
-
+    [SchemaField(0x20)]
+    public ushort Unk20; // ??
     [SchemaField(0x58)]
     public ShaderBytecode VertexShader;
     [SchemaField(0x60)]
@@ -95,7 +97,8 @@ public struct SMaterial_WQ
     public uint Unk08;
     public uint Unk0C;
     public uint Unk10;
-
+    [SchemaField(0x20)]
+    public ushort Unk20; // ??
     [SchemaField(0x70)]
     public ShaderBytecode VertexShader;
     [SchemaField(0x78)]

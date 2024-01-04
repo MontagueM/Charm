@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Diagnostics;
 using Arithmic;
 using Tiger.Schema.Shaders;
@@ -104,7 +105,11 @@ public class EntityModel : Tag<SEntityModel>
 
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
-                if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.VertexShader is null || dynamicMeshPart.Material.PixelShader is null)
+                if (dynamicMeshPart.Material is null ||
+                    dynamicMeshPart.Material.VertexShader is null ||
+                    dynamicMeshPart.Material.PixelShader is null ||
+                    dynamicMeshPart.Material.Unk08 != 1 ||
+                    (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
                     continue;
 
                 dynamicMeshPart.GetAllData(mesh, _tag);

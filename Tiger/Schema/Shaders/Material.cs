@@ -16,6 +16,7 @@ namespace Tiger.Schema.Shaders
         public uint Unk08 { get; }
         public uint Unk10 { get; }
         public uint Unk0C { get; } //Seems to be backface culling
+        public ushort Unk20 { get; }
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
         public IEnumerable<STextureTag> EnumerateCSTextures();
@@ -208,6 +209,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public ushort Unk20 => _tag.Unk20;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
@@ -260,6 +262,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public ushort Unk20 => _tag.Unk20;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
@@ -313,6 +316,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public ushort Unk20 => _tag.Unk20;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
