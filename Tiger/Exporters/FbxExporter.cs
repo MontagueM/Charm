@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Internal.Fbx;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -18,7 +17,7 @@ public class FbxExporter : AbstractExporter
         foreach (ExporterScene scene in args.Scenes)
         {
             string outputDirectory = args.OutputDirectory;
-            switch(scene.Type)
+            switch (scene.Type)
             {
                 case ExportType.Static:
                 case ExportType.Entity:
@@ -38,7 +37,7 @@ public class FbxExporter : AbstractExporter
                     outputDirectory = Path.Join(outputDirectory, "Maps");
                     break;
             }
-    
+
             foreach (ExporterMesh mesh in scene.StaticMeshes)
             {
                 FbxScene fbxScene = FbxScene.Create(_manager, mesh.Hash);
@@ -55,10 +54,23 @@ public class FbxExporter : AbstractExporter
             }
             foreach (ExporterEntity entity in scene.Entities)
             {
-                FbxScene fbxScene = FbxScene.Create(_manager, entity.Mesh.Hash);
-                AddEntity(fbxScene, entity);
-                ExportScene(fbxScene, Path.Join(outputDirectory, entity.Mesh.Hash));
-                SBoxHandler.SaveEntityVMDL(outputDirectory, entity);
+                if (scene.Type != ExportType.API)
+                {
+                    FbxScene fbxScene = FbxScene.Create(_manager, entity.Mesh.Hash);
+                    AddEntity(fbxScene, entity);
+                    ExportScene(fbxScene, Path.Join(outputDirectory, entity.Mesh.Hash));
+                    SBoxHandler.SaveEntityVMDL(outputDirectory, entity);
+                }
+            }
+            if (scene.Type == ExportType.API)
+            {
+                FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
+                foreach (ExporterEntity entity in scene.Entities)
+                {
+                    AddEntity(fbxScene, entity);
+                }
+                ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
+                //SBoxHandler.SaveEntityVMDL(outputDirectory, entity);
             }
 
             //foreach (var meshInstance in scene.ArrangedStaticMeshInstances)

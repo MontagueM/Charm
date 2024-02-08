@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
-using HelixToolkit.SharpDX.Core.Model.Scene;
-using Internal.Fbx;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
-using Exporter = HelixToolkit.Wpf.SharpDX.Exporter;
 
 namespace Charm;
 
@@ -82,7 +72,7 @@ public partial class EntityView : UserControl
         name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
         string savePath = config.GetExportSavePath() + $"/{name}";
 
-        if(scene == null)
+        if (scene == null)
             scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entity);
 
         Log.Verbose($"Exporting entity model name: {name}");
@@ -154,7 +144,16 @@ public partial class EntityView : UserControl
         string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
+
+        foreach (var dye in dyes)
+        {
+            dye.Value.ExportTextures($"{savePath}/Textures/", config.GetOutputTextureFormat());
+        }
+
         AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
+            config.GetOutputTextureFormat(), dyes.Values.ToList());
+
+        SBoxHandler.SaveGearVMAT(savePath, itemName,
             config.GetOutputTextureFormat(), dyes.Values.ToList());
     }
 }

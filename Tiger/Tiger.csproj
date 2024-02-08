@@ -53,6 +53,9 @@
       <None Update="Exporters\import_to_ue5.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Exporters\template.vmat">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="Exporters\template.vmdl">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

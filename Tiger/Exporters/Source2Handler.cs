@@ -1,20 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using Arithmic;
 using Tiger.Schema;
-using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
-
-using Pfim;
-using Pfim.dds;
-using ValveResourceFormat;
-using ValveResourceFormat.ResourceTypes;
-
-using ValveTexture = ValveResourceFormat.ResourceTypes.Texture;
 using Texture = Tiger.Schema.Texture;
 
 namespace Tiger.Exporters;
@@ -105,7 +94,7 @@ public class SBoxHandler
                 File.WriteAllText($"{savePath}/{entity.Mesh.Hash}.vmdl", text);
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Log.Error(e.Message);
         }
@@ -172,7 +161,7 @@ public class SBoxHandler
         vmat.AppendLine($"\tF_ALPHA_TEST 1");
         vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
-        if(materialHeader.Unk0C != 0)
+        if (materialHeader.Unk0C != 0)
             vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
 
         //Textures
@@ -184,8 +173,8 @@ public class SBoxHandler
             vmat.AppendLine($"\tTextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
         }
 
-        if(terrainDyemaps is not null)
-            foreach(var tex in terrainDyemaps)
+        if (terrainDyemaps is not null)
+            foreach (var tex in terrainDyemaps)
             {
                 vmat.AppendLine($"\tTextureT14_{tex.Key} \"Textures/{tex.Value}.png\"");
             }
@@ -203,14 +192,14 @@ public class SBoxHandler
             vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
         }
 
-        foreach(var resource in materialHeader.PixelShader.Resources)
+        foreach (var resource in materialHeader.PixelShader.Resources)
         {
             if (resource.ResourceType == Schema.ResourceType.CBuffer)
             {
                 switch (resource.Index)
                 {
                     case 2: //Transparent scope
-                        for(int i = 0; i < resource.Count; i++)
+                        for (int i = 0; i < resource.Count; i++)
                         {
                             vmat.AppendLine($"\t\tcb2_{i} \"float4(0,1,1,1)\"");
                         }
@@ -228,7 +217,7 @@ public class SBoxHandler
                         vmat.AppendLine($"\t\tcb13_0 \"Time\"");
                         vmat.AppendLine($"\t\tcb13_1 \"float4(0.25,1,1,1)\"");
                         break;
-                }    
+                }
             }
         }
 
@@ -318,122 +307,52 @@ public class SBoxHandler
         {
             cbuffers.AppendLine($"\t\"{cbType}_{i}\" \"[{data[i].X} {data[i].Y} {data[i].Z} {data[i].W}]\"");
         }
-        
+
         return cbuffers;
     }
 
     public static void SaveCubemapVTEX(Texture tex, string savePath)
     {
-        if(tex.IsCubemap())
+        if (tex.IsCubemap())
         {
             var file = TextureFile.CreateDefault(tex, ImageDimension.CUBEARRAY);
             var json = JsonSerializer.Serialize(file, JsonSerializerOptions.Default);
             File.WriteAllText($"{savePath}/{tex.Hash}.vtex", json);
-
-            //DDS2Vtex(tex, savePath);
         }
     }
 
-    //Doesnt really work but im gonna leave it here anyways i guess
-    //public static void DDS2Vtex(Texture tex, string savePath)
-    //{
-    //    using var img = Pfimage.FromStream(tex.GetTexture(), new PfimConfig(decompress: false));
-    //    var dds = img as Dds;
+    public static void SaveGearVMAT(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
+    {
+        File.Copy($"Exporters/template.vmat", $"{saveDirectory}/{meshName}{fileSuffix}.vmat", true);
+        string text = File.ReadAllText($"{saveDirectory}/{meshName}{fileSuffix}.vmat");
 
-    //    if (dds == null)
-    //    {
-    //        Console.Error.WriteLine($"Error, file is not a DDS, but a {img.GetType()} (format {img.Format}, datalen {img.DataLen})");
-    //    }
+        string[] components = { "X", "Y", "Z", "W" };
 
-    //    var flags = VTexFlags.NO_LOD;
-    //    var numMipLevels = (byte)1;
+        int dyeIndex = 1;
+        foreach (var dye in dyes)
+        {
+            var dyeInfo = dye.GetDyeInfo();
+            foreach (var fieldInfo in dyeInfo.GetType().GetFields())
+            {
+                Vector4 value = (Vector4)fieldInfo.GetValue(dyeInfo);
+                if (!fieldInfo.CustomAttributes.Any())
+                    continue;
+                string valueName = fieldInfo.CustomAttributes.First().ConstructorArguments[0].Value.ToString();
+                for (int i = 0; i < 4; i++)
+                {
+                    text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+                }
+            }
 
-    //    if (dds.Header.MipMapCount != 0)
-    //    {
-    //        Console.Error.WriteLine("Warning, DDS has mipmaps, which may not work correctly.");
-    //        flags &= ~VTexFlags.NO_LOD;
-    //        numMipLevels = (byte)dds.Header.MipMapCount;
-    //    }
+            var diff = dye.TagData.DyeTextures[0];
+            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            var norm = dye.TagData.DyeTextures[1];
+            text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            dyeIndex++;
+        }
 
-    //    var format = dds switch
-    //    {
-    //        Dxt1Dds => VTexFormat.DXT1,
-    //        Dxt5Dds => VTexFormat.DXT5,
-    //        Bc6hDds => VTexFormat.BC6H,
-    //        Bc7Dds => VTexFormat.BC7,
-    //        _ => VTexFormat.UNKNOWN,
-    //    };
-
-    //    if (format == VTexFormat.UNKNOWN)
-    //    {
-    //        Console.Error.WriteLine($"Error, do not handle DDS with format {dds.GetType()}.");
-    //    }
-
-    //    // TODO: check blocksize
-    //    using FileStream stream = new FileStream($"{savePath}/{tex.Hash}.vtex_c", FileMode.Create);
-    //    using var writer = new BinaryWriter(stream);
-    //    ValveTexture vtex = null!;
-    //    var nonDataSize = 0;
-    //    var offsetOfDataSize = 0;
-
-    //    using (var resource = new Resource())
-    //    {
-    //        var assembly = Assembly.GetExecutingAssembly();
-    //        using var template = assembly.GetManifestResourceStream("vtex.template");
-    //        resource.Read(template);
-    //        vtex = (ValveTexture)resource.DataBlock;
-
-    //        // Write a copy of the vtex_c up to the DATA block region
-    //        nonDataSize = (int)resource.DataBlock.Offset;
-
-    //        resource.Reader.BaseStream.Seek(8, SeekOrigin.Begin);
-    //        var blockOffset = resource.Reader.ReadUInt32();
-    //        var blockCount = resource.Reader.ReadUInt32();
-    //        resource.Reader.BaseStream.Seek(blockOffset - 8, SeekOrigin.Current); // 8 is 2 uint32s we just read
-    //        for (var i = 0; i < blockCount; i++)
-    //        {
-    //            var blockType = Encoding.UTF8.GetString(resource.Reader.ReadBytes(4));
-    //            resource.Reader.BaseStream.Position += 8; // Offset, size
-    //            if (blockType == "DATA")
-    //            {
-    //                offsetOfDataSize = (int)resource.Reader.BaseStream.Position - 4;
-    //                break;
-    //            }
-    //        }
-
-    //        resource.Reader.BaseStream.Position = 0;
-    //        writer.Write(resource.Reader.ReadBytes(nonDataSize).ToArray());
-    //    }
-
-    //    // Write the VTEX data
-    //    writer.Write(vtex.Version);
-    //    writer.Write((ushort)flags);
-    //    writer.Write(vtex.Reflectivity[0]);
-    //    writer.Write(vtex.Reflectivity[1]);
-    //    writer.Write(vtex.Reflectivity[2]);
-    //    writer.Write(vtex.Reflectivity[3]);
-    //    writer.Write((ushort)dds.Width);
-    //    writer.Write((ushort)dds.Height);
-    //    writer.Write((ushort)(dds.Header.Depth != 0 ? dds.Header.Depth : 1));
-    //    writer.Write((byte)format);
-    //    writer.Write((byte)numMipLevels);
-    //    writer.Write((uint)0);
-
-    //    // Extra data
-    //    writer.Write((uint)0);
-    //    writer.Write((uint)0);
-
-    //    var resourceSize = (uint)stream.Length;
-    //    var resourceDataSize = (uint)(resourceSize - nonDataSize);
-
-    //    // Dxt data goes here
-    //    writer.Write(dds.Data);
-
-    //    // resource: fixup the full and DATA block size
-    //    writer.Seek(0, SeekOrigin.Begin);
-    //    writer.Write(resourceSize);
-
-    //    writer.Seek(offsetOfDataSize, SeekOrigin.Begin);
-    //    writer.Write(resourceDataSize);
-    //}
+        text = text.Replace("OUTPUTPATH", $"Textures");
+        text = text.Replace("SHADERNAMEENUM", $"{meshName}{fileSuffix}");
+        File.WriteAllText($"{saveDirectory}/{meshName}{fileSuffix}.vmat", text);
+    }
 }

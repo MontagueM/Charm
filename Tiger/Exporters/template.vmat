@@ -1,0 +1,177 @@
+// THIS FILE IS AUTO-GENERATED
+
+Layer0
+{
+	shader "Destiny_2_Gear_Shader.shader"
+
+	g_flMaskclipvalue "0.5"
+
+	//---- Armor ----
+	g_Armor_DetailDiffuseTransform "[DiffTrans1.X DiffTrans1.Y DiffTrans1.Z DiffTrans1.W ]"
+	g_Armor_DetailNormalTransform "[NormTrans1.X NormTrans1.Y NormTrans1.Z NormTrans1.W]"
+	g_ArmorPrimary_Color "[CPrime1.X CPrime1.Y CPrime1.Z 1.000000]"
+	g_ArmorPrimary_DetailDiffuseBlend "PrimeMatParams1.X"
+	g_ArmorPrimary_DetailNormalBlend "PrimeMatParams1.Y"
+	g_ArmorPrimary_DetailRoughnessBlend "PrimeMatParams1.Z"
+	g_ArmorPrimary_Emission "[CPrimeEmit1.X CPrimeEmit1.Y CPrimeEmit1.Z 1.000000]"
+	g_ArmorPrimary_Fuzz "PrimeAdvMatParams1.Y"
+	g_ArmorPrimary_Iridescence "PrimeAdvMatParams1.X"
+	g_ArmorPrimary_Metalness "PrimeMatParams1.W"
+	g_ArmorPrimary_RoughnessRemap "[PrimeRoughMap1.X PrimeRoughMap1.Y PrimeRoughMap1.Z PrimeRoughMap1.W]"
+	g_ArmorPrimary_Transmission "PrimeAdvMatParams1.Z"
+	g_ArmorPrimary_WearRemap "[PrimeWearMap1.X PrimeWearMap1.Y PrimeWearMap1.Z PrimeWearMap1.W]"
+
+	g_WornArmorPrimary_Color "[CPrimeWear1.X CPrimeWear1.Y CPrimeWear1.Z 1.0]"
+	g_WornArmorPrimary_DetailDiffuseBlend "PrimeWornMatParams1.X"
+	g_WornArmorPrimary_DetailNormalBlend "PrimeWornMatParams1.Y"
+	g_WornArmorPrimary_DetailRoughnessBlend "PrimeWornMatParams1.Z"
+	g_WornArmorPrimary_Metalness "PrimeWornMatParams1.W"
+	g_WornArmorPrimary_RoughnessRemap "[PrimeWornRoughMap1.X PrimeWornRoughMap1.Y PrimeWornRoughMap1.Z PrimeWornRoughMap1.W]"
+
+	g_ArmorSecondary_Color "[CSecon1.X CSecon1.Y CSecon1.Z 1.000000]"
+	g_ArmorSecondary_DetailDiffuseBlend "SeconMatParams1.X"
+	g_ArmorSecondary_DetailNormalBlend "SeconMatParams1.Y"
+	g_ArmorSecondary_DetailRoughnessBlend "SeconMatParams1.Z"
+	g_ArmorSecondary_Emission "[CSeconEmit1.X CSeconEmit1.Y CSeconEmit1.Z 1.000000]"
+	g_ArmorSecondary_Fuzz "SeconAdvMatParams1.Y"
+	g_ArmorSecondary_Iridescence "SeconAdvMatParams1.X"
+	g_ArmorSecondary_Metalness "SeconMatParams1.W"
+	g_ArmorSecondary_RoughnessRemap "[SeconRoughMap1.X SeconRoughMap1.Y SeconRoughMap1.Z SeconRoughMap1.W]"
+	g_ArmorSecondary_Transmission "SeconAdvMatParams1.Z"
+	g_ArmorSecondary_WearRemap "[SeconWearMap1.X SeconWearMap1.Y SeconWearMap1.Z SeconWearMap1.W]"
+
+	g_WornArmorSecondary_Color "[CSeconWear1.X CSeconWear1.Y CSeconWear1.Z 1.000000]"
+	g_WornArmorSecondary_DetailDiffuseBlend "SeconWornMatParams1.X"
+	g_WornArmorSecondary_DetailNormalBlend "SeconWornMatParams1.Y"
+	g_WornArmorSecondary_DetailRoughnessBlend "SeconWornMatParams1.Z"
+	g_WornArmorSecondary_Metalness "SeconWornMatParams1.W"
+	g_WornArmorSecondary_RoughnessRemap "[SeconWornRoughMap1.X SeconWornRoughMap1.Y SeconWornRoughMap1.Z SeconWornRoughMap1.W]"
+
+	//---- Cloth ----
+	g_Cloth_DetailDiffuseTransform "[DiffTrans2.X DiffTrans2.Y DiffTrans2.Z DiffTrans2.W]"
+	g_Cloth_DetailNormalTransform "[NormTrans2.X NormTrans2.Y NormTrans2.Z NormTrans2.W]"
+	g_ClothPrimary_Color "[CPrime2.X CPrime2.Y CPrime2.Z 1.000000]"
+	g_ClothPrimary_DetailDiffuseBlend "PrimeMatParams2.X"
+	g_ClothPrimary_DetailNormalBlend "PrimeMatParams2.Y"
+	g_ClothPrimary_DetailRoughnessBlend "PrimeMatParams2.Z"
+	g_ClothPrimary_Emission "[CPrimeEmit2.X CPrimeEmit2.Y CPrimeEmit2.Z 1.000000]"
+	g_ClothPrimary_Fuzz "PrimeAdvMatParams2.Y"
+	g_ClothPrimary_Iridescence "PrimeAdvMatParams2.X"
+	g_ClothPrimary_Metalness "PrimeMatParams2.W"
+	g_ClothPrimary_RoughnessRemap "[PrimeRoughMap2.X PrimeRoughMap2.Y PrimeRoughMap2.Z PrimeRoughMap2.W]"
+	g_ClothPrimary_Transmission "PrimeAdvMatParams2.Z"
+	g_ClothPrimary_WearRemap "[PrimeWearMap2.X PrimeWearMap2.Y PrimeWearMap2.Z PrimeWearMap2.W]"
+	
+	g_WornClothPrimary_Color "[CPrimeWear2.X CPrimeWear2.Y CPrimeWear2.Z 1.000000]"
+	g_WornClothPrimary_DetailDiffuseBlend "PrimeWornMatParams1.X"
+	g_WornClothPrimary_DetailNormalBlend "PrimeWornMatParams1.Y"
+	g_WornClothPrimary_DetailRoughnessBlend "PrimeWornMatParams1.Z"
+	g_WornClothPrimary_Metalness "PrimeWornMatParams1.W"
+	g_WornClothPrimary_RoughnessRemap "[PrimeWornRoughMap2.X PrimeWornRoughMap2.Y PrimeWornRoughMap2.Z PrimeWornRoughMap2.W]"
+	g_WornClothPrimary_WearRemap "[0.000 1.000 0.000 1.000]"
+	
+	g_ClothSecondary_Color "[CSecon2.X CSecon2.Y CSecon2.Z 1.000000]"
+	g_ClothSecondary_DetailDiffuseBlend "SeconMatParams2.X"
+	g_ClothSecondary_DetailNormalBlend "SeconMatParams2.Y"
+	g_ClothSecondary_DetailRoughnessBlend "SeconMatParams2.Z"
+	g_ClothSecondary_Emission "[CSeconEmit2.X CSeconEmit2.Y CSeconEmit2.Z 1.000000]"
+	g_ClothSecondary_Fuzz "SeconAdvMatParams2.Y"
+	g_ClothSecondary_Iridescence "SeconAdvMatParams2.X"
+	g_ClothSecondary_Metalness "SeconMatParams2.W"
+	g_ClothSecondary_RoughnessRemap "[SeconRoughMap2.X SeconRoughMap2.Y SeconRoughMap2.Z SeconRoughMap2.W]"
+	g_ClothSecondary_Transmission "SeconAdvMatParams2.Z"
+	g_ClothSecondary_WearRemap "[SeconWearMap2.X SeconWearMap2.Y SeconWearMap2.Z SeconWearMap2.W]"
+	
+	g_WornClothSecondary_Color "[CSeconWear2.X CSeconWear2.Y CSeconWear2.Z 1.000000]"
+	g_WornClothSecondary_DetailDiffuseBlend "SeconWornMatParams2.X"
+	g_WornClothSecondary_DetailNormalBlend "SeconWornMatParams2.Y"
+	g_WornClothSecondary_DetailRoughnessBlend "SeconWornMatParams2.Z"
+	g_WornClothSecondary_Metalness "SeconWornMatParams2.W"
+	g_WornClothSecondary_RoughnessRemap "[SeconWornRoughMap2.X SeconWornRoughMap2.Y SeconWornRoughMap2.Z SeconWornRoughMap2.W]"
+	g_WornClothSecondary_WearRemap "[0.000 1.000 0.000 1.000]"
+
+	//---- Color ----
+	g_flModelTintAmount "1.000"
+	g_vColorTint "[1.000000 1.000000 1.000000 0.000000]"
+
+	//---- Detail Textures ----
+	TextureDetailDiffuse01 "OUTPUTPATH/DetailTextures/DiffMap1" //Armor Detail Diffuse
+	TextureDetailDiffuse02 "OUTPUTPATH/DetailTextures/DiffMap2" //Cloth Detail Diffuse
+	TextureDetailDiffuse03 "OUTPUTPATH/DetailTextures/DiffMap3" //Suit Detail Diffuse
+	
+	TextureDetailNormal01 "OUTPUTPATH/DetailTextures/NormMap1" //Armor Detail Normal
+	TextureDetailNormal02 "OUTPUTPATH/DetailTextures/NormMap2" //Cloth Detail Normal
+	TextureDetailNormal03 "OUTPUTPATH/DetailTextures/NormMap3" //Suit Detail Normal
+
+	//---- Fade ----
+	g_flFadeExponent "1.000"
+
+	//---- Fog ----
+	g_bFogEnabled "1"
+
+	//---- Lighting ----
+	g_flDirectionalLightmapMinZ "0.050"
+	g_flDirectionalLightmapStrength "1.000"
+
+	//---- Material ----
+	TextureColor "materials/default/default_color.tga"
+	TextureDyeMap "materials/default/default.tga"
+	TextureGStack "materials/default/default.tga"
+	TextureIridescence "materials/Textures/Iridescence_Lookup.tga"
+	TextureNormal "materials/default/default_normal.tga"
+	TextureTranslucency "materials/default/default_trans.tga"
+
+	//---- Suit ----
+	g_Suit_DetailDiffuseTransform "[DiffTrans3.X DiffTrans3.Y DiffTrans3.Z DiffTrans3.W]"
+	g_Suit_DetailNormalTransform "[NormTrans3.X NormTrans3.Y NormTrans3.Z NormTrans3.W]"
+	g_SuitPrimary_Color "[CPrime3.X CPrime3.Y CPrime3.Z 1.000000]"
+	g_SuitPrimary_DetailDiffuseBlend "PrimeMatParams3.X"
+	g_SuitPrimary_DetailNormalBlend "PrimeMatParams3.Y"
+	g_SuitPrimary_DetailRoughnessBlend "PrimeMatParams3.Z"
+	g_SuitPrimary_Emission "[CPrimeEmit3.X CPrimeEmit3.Y CPrimeEmit3.Z 1.000000]"
+	g_SuitPrimary_Fuzz "PrimeAdvMatParams3.Y"
+	g_SuitPrimary_Iridescence "PrimeAdvMatParams3.X"
+	g_SuitPrimary_Metalness "PrimeMatParams3.W"
+	g_SuitPrimary_RoughnessRemap "[PrimeRoughMap3.X PrimeRoughMap3.Y PrimeRoughMap3.Z PrimeRoughMap3.W]"
+	g_SuitPrimary_Transmission "PrimeAdvMatParams3.Z"
+	g_SuitPrimary_WearRemap "[PrimeWearMap3.X PrimeWearMap3.Y PrimeWearMap3.Z PrimeWearMap3.W]"
+	
+	g_WornSuitPrimary_Color "[CPrimeWear3.X CPrimeWear3.Y CPrimeWear3.Z 1.000000]"
+	g_WornSuitPrimary_DetailDiffuseBlend "PrimeWornMatParams3.X"
+	g_WornSuitPrimary_DetailNormalBlend "PrimeWornMatParams3.Y"
+	g_WornSuitPrimary_DetailRoughnessBlend "PrimeWornMatParams3.Z"
+	g_WornSuitPrimary_Metalness "PrimeWornMatParams3.W"
+	g_WornSuitPrimary_RoughnessRemap "[PrimeWornRoughMap3.X PrimeWornRoughMap3.Y PrimeWornRoughMap3.Z PrimeWornRoughMap3.W]"
+	g_WornSuitPrimary_WearRemap "[0.000 1.000 0.000 1.000]"
+	
+	g_SuitSecondary_Color "[CSecon3.X CSecon3.Y CSecon3.Z 1.000000]"
+	g_SuitSecondary_DetailDiffuseBlend "SeconMatParams3.X"
+	g_SuitSecondary_DetailNormalBlend "SeconMatParams3.Y"
+	g_SuitSecondary_DetailRoughnessBlend "SeconMatParams3.Z"
+	g_SuitSecondary_Emission "[CSeconEmit3.X CSeconEmit3.Y CSeconEmit3.Z 1.000000]"
+	g_SuitSecondary_Fuzz "SeconAdvMatParams3.Y"
+	g_SuitSecondary_Iridescence "SeconAdvMatParams3.X"
+	g_SuitSecondary_Metalness "SeconMatParams3.W"
+	g_SuitSecondary_RoughnessRemap "[SeconRoughMap3.X SeconRoughMap3.Y SeconRoughMap3.Z SeconRoughMap3.W]"
+	g_SuitSecondary_Transmission "SeconAdvMatParams3.Z"
+	g_SuitSecondary_WearRemap "[SeconWearMap3.X SeconWearMap3.Y SeconWearMap3.Z SeconWearMap3.W]"
+	
+	g_WornSuitSecondary_Color "[CSeconWear3.X CSeconWear3.Y CSeconWear3.Z 1.000000]"
+	g_WornSuitSecondary_DetailDiffuseBlend "SeconWornMatParams3.X"
+	g_WornSuitSecondary_DetailNormalBlend "SeconWornMatParams3.Y"
+	g_WornSuitSecondary_DetailRoughnessBlend "SeconWornMatParams3.Z"
+	g_WornSuitSecondary_Metalness "SeconWornMatParams3.W"
+	g_WornSuitSecondary_RoughnessRemap "[SeconWornRoughMap3.X SeconWornRoughMap3.Y SeconWornRoughMap3.Z SeconWornRoughMap3.W]"
+	g_WornSuitSecondary_WearRemap "[0.000 1.000 0.000 1.000]"
+
+	//---- Texture Coordinates ----
+	g_nScaleTexCoordUByModelScaleAxis "0"
+	g_nScaleTexCoordVByModelScaleAxis "0"
+	g_vTexCoordOffset "[0.000 0.000]"
+	g_vTexCoordScale "[1.000 1.000]"
+	g_vTexCoordScrollSpeed "[0.000 0.000]"
+
+	//---- Translucent ----
+	g_flAlphaTestReference "0.700"
+	g_flAntiAliasedEdgeStrength "1.000"
+}

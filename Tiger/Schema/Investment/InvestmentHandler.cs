@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using Arithmic;
 using ConcurrentCollections;
 using Newtonsoft.Json;
@@ -528,7 +527,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             foreach (var dyeEntry in translationBlock.CustomDyes)
             {
                 Dye dye = GetDyeFromIndex(dyeEntry.DyeIndex);
-                dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
+                dye.ExportTextures(savePath + "/Textures/DetailTextures/", outputTextureFormat);
                 dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
             }
         }
@@ -547,6 +546,23 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
         // weapon
         AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["Weapon1"], dyes["Weapon2"], dyes["Weapon3"] }, "_weapon");
+
+        // S&Box //
+
+        // armour
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armour");
+
+        // ghost
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["GhostMain"], dyes["GhostHighlights"], dyes["GhostDecals"] }, "_ghost");
+
+        // ship
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["ShipUpper"], dyes["ShipDecals"], dyes["ShipLower"] }, "_ship");
+
+        // sparrow
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["SparrowUpper"], dyes["SparrowEngine"], dyes["SparrowLower"] }, "_sparrow");
+
+        // weapon
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["Weapon1"], dyes["Weapon2"], dyes["Weapon3"] }, "_weapon");
     }
 }
 
