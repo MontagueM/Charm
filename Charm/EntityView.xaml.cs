@@ -147,7 +147,7 @@ public partial class EntityView : UserControl
 
         foreach (var dye in dyes)
         {
-            dye.Value.ExportTextures($"{savePath}/Textures/", config.GetOutputTextureFormat());
+            dye.Value.ExportTextures($"{savePath}/Textures/DetailTextures/", config.GetOutputTextureFormat());
         }
 
         AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
