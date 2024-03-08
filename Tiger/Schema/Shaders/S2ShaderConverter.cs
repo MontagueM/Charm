@@ -1,11 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
-using Tiger;
-using Tiger.Schema;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
@@ -290,7 +284,7 @@ PS
 
         foreach (var resource in resources)
         {
-            switch(resource.ResourceType)
+            switch (resource.ResourceType)
             {
                 case ResourceType.Buffer:
                     CBuffers.AppendLine($"\tBuffer<float4> b_t{resource.Index} : register(t{resource.Index});");
@@ -354,13 +348,7 @@ PS
 
             if (isTerrain) //Terrain has 4 dyemaps per shader, from what ive seen
             {
-                for(int i = 0; i < 4; i++)
-                {
-                    int o = 14;
-                    funcDef.AppendLine($"\tCreateInputTexture2D( TextureT14_{i}, Linear, 8, \"\", \"\",  \"Textures,10/{o+i}\", Default3( 1.0, 1.0, 1.0 ));");
-                    funcDef.AppendLine($"\tTexture2D g_t14_{i} < Channel( RGBA,  Box( TextureT14_{i} ), Linear ); OutputFormat( RGBA8888 ); SrgbRead( False ); >; ");
-                    funcDef.AppendLine($"\tTextureAttribute(g_t14_{i}, g_t14_{i});\n");
-                }
+                funcDef.AppendLine($"\tCreateTexture2DWithoutSampler( g_t14 ) < Attribute( \"TerrainDyemap\" ); SrgbRead( false ); >;\r\n\n");
             }
 
             if (bUsesFrameBuffer)
@@ -380,7 +368,7 @@ PS
         {
             foreach (var i in inputs)
             {
-                switch(i.Semantic)
+                switch (i.Semantic)
                 {
                     case DXBCSemantic.Position:
                         funcDef.AppendLine($"\t\tfloat4 v{i.BufferIndex} = float4(i.vPositionOs, 0); //{i.ToString()}");
@@ -495,7 +483,7 @@ PS
                     case "float4":
                         if (i.Semantic == DXBCSemantic.SystemPosition)
                             funcDef.AppendLine($"\t\tfloat4 v{i.RegisterIndex} = i.vPositionSs;");
-                        else if(i.RegisterIndex == 5 && i.Semantic == DXBCSemantic.Texcoord && !isTerrain)
+                        else if (i.RegisterIndex == 5 && i.Semantic == DXBCSemantic.Texcoord && !isTerrain)
                             funcDef.AppendLine($"\t\tfloat4 v5 = i.vBlendValues;");
                         //else
                         //    funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(1,1,1,1);");
@@ -608,25 +596,7 @@ PS
 
                         if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
                         {
-                            funcDef.AppendLine($"\t\tbool red = i.vBlendValues.x > 0.5;\r\n" +
-                                $"        bool green = i.vBlendValues.y > 0.5;\r\n" +
-                                $"        bool blue = i.vBlendValues.z > 0.5;\r\n\r\n" +
-                                $"        if (red && !green && !blue)\r\n" +
-                                $"        {{\r\n" +
-                                $"            {equal} = g_t{texIndex}_0.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}\r\n" +
-                                $"        }}\r\n" +
-                                $"        else if (!red && green && !blue)\r\n" +
-                                $"        {{\r\n" +
-                                $"            {equal} = g_t{texIndex}_1.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}\r\n" +
-                                $"        }}\r\n" +
-                                $"        else if (!red && !green && blue)\r\n" +
-                                $"        {{\r\n" +
-                                $"            {equal} = g_t{texIndex}_2.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}\r\n" +
-                                $"        }}\r\n" +
-                                $"        else if (red && green && blue)\r\n" +
-                                $"        {{\r\n" +
-                                $"            {equal} = g_t{texIndex}_3.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}\r\n" +
-                                $"        }}");
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()} = g_t{texIndex}.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}");
                         }
                         else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
                         {
@@ -746,7 +716,7 @@ PS
     {
         StringBuilder output = new StringBuilder();
 
-        if(!bRT0) //uses o1,o2
+        if (!bRT0) //uses o1,o2
         {
             //this is fine...
             output.Append($"\t\t// Normal\r\n        " +

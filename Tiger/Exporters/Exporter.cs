@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Arithmic;
 using ConcurrentCollections;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -113,7 +112,7 @@ public class ExporterScene
         StaticMeshes.Add(mesh);
     }
 
-    public void AddTerrain(FileHash meshHash, List<StaticPart> parts)
+    public void AddTerrain(string meshHash, List<StaticPart> parts)
     {
         ExporterMesh mesh = new(meshHash);
         for (int i = 0; i < parts.Count; i++)
@@ -227,7 +226,7 @@ public class ExporterScene
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = entity.Skeleton?.GetBoneNodes() });
         }
-       
+
         if (!EntityInstances.ContainsKey(entity.Hash))
         {
             EntityInstances.TryAdd(entity.Hash, new());
@@ -255,7 +254,7 @@ public class ExporterScene
 
                 if (part.Material == null)
                     continue;
-                    
+
                 mesh.AddPart(model.Hash, part, i);
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
@@ -341,10 +340,10 @@ public class ExporterEntity
 
 public class ExporterMesh
 {
-    public FileHash Hash { get; set; }
+    public string Hash { get; set; }
     public List<ExporterPart> Parts { get; } = new();
 
-    public ExporterMesh(FileHash hash)
+    public ExporterMesh(string hash)
     {
         Hash = hash;
     }

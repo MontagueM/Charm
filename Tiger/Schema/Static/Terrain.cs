@@ -1,6 +1,5 @@
-using Arithmic;
-using System;
 using System.Diagnostics;
+using Arithmic;
 using Tiger.Exporters;
 using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
@@ -23,67 +22,74 @@ public class Terrain : Tag<STerrain>
         List<Texture> dyeMaps = new List<Texture>();
 
         int terrainTextureIndex = 14;
+        Texture lastValidEntry = null;
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
-            var partEntry = _tag.MeshGroups[i];
-            Texture lastValidEntry = partEntry.Dyemap;
+            var meshGroup = _tag.MeshGroups[i];
+            // Check if the current Dyemap is null
 
-            //Use the last valid dyemap for any invalid
-            if (partEntry.Dyemap == null)
+            if (meshGroup.Dyemap == null)
             {
                 if (lastValidEntry != null)
                 {
+                    // Use the last valid Dyemap for any invalid
                     scene.Textures.Add(lastValidEntry);
                     dyeMaps.Add(lastValidEntry);
+                }
+                else // Use the first valid dyemap if it gets to this point
+                {
+                    var firstValidDyemap = _tag.MeshGroups.First(x => x.Dyemap != null).Dyemap;
+                    if (firstValidDyemap != null)
+                    {
+                        scene.Textures.Add(firstValidDyemap);
+                        dyeMaps.Add(firstValidDyemap);
+                    }
                 }
             }
             else
             {
-                scene.Textures.Add(partEntry.Dyemap);
-                dyeMaps.Add(partEntry.Dyemap);
+                // Update lastValidEntry with the current Dyemap
+                lastValidEntry = meshGroup.Dyemap;
+                scene.Textures.Add(meshGroup.Dyemap);
+                dyeMaps.Add(meshGroup.Dyemap);
             }
+
+            foreach (var partEntry in _tag.StaticParts.Where(x => x.GroupIndex == i))
+            {
+                if (partEntry.Lod.DetailLevel == ELodCategory.MainGeom0)
+                {
+                    if (partEntry.Material != null || partEntry.Material.VertexShader != null)
+                    {
+                        var part = MakePart(partEntry);
+
+                        scene.Materials.Add(new ExportMaterial(partEntry.Material, MaterialType.Opaque, true));
+                        part.Material = partEntry.Material;
+
+                        //Need access to material early, before scene system exports
+                        partEntry.Material.SaveShaders($"{saveDirectory}", MaterialType.Opaque, true);
+
+                        TransformPositions(part);
+                        TransformTexcoords(part);
+                        TransformVertexColors(part);
+
+                        SBoxHandler.SaveVMAT(saveDirectory, $"{part.Material.FileHash}", part.Material, true, dyeMaps);
+
+                        parts.TryAdd(part, partEntry.Material);
+                    }
+                }
+            }
+
+            scene.AddTerrain($"{Hash}_{i}", parts.Keys.ToList());
+            SBoxHandler.SaveTerrainVMDL($"{Hash}_{i}", saveDirectory, parts.Keys.ToList());
+
+            parts.Clear();
         }
 
-        scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
+        //scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
         for (int i = 0; i < dyeMaps.Count; i++)
         {
             scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
         }
-
-        foreach (var partEntry in _tag.StaticParts)
-        {
-            if (partEntry.Lod.DetailLevel == ELodCategory.MainGeom0)
-            {
-                if (partEntry.Material is null || partEntry.Material.VertexShader is null)
-                    continue;
-
-                var part = MakePart(partEntry);
-                parts.TryAdd(part, partEntry.Material);
-
-                scene.Materials.Add(new ExportMaterial(partEntry.Material, MaterialType.Opaque, true));
-                part.Material = partEntry.Material;
-
-                //Need access to material early, before scene system exports
-                partEntry.Material.SaveShaders($"{saveDirectory}", MaterialType.Opaque, true);
-            }
-        }
-
-        foreach (var part in parts)
-        {
-            TransformPositions(part.Key);
-            TransformTexcoords(part.Key);
-            TransformVertexColors(part.Key);
-
-            Dictionary<int, FileHash> extraTexs = new();
-            for (int i = 0; i < dyeMaps.Count; i++) //Add all the dyemaps to the vmat
-            {
-                extraTexs.Add(i, dyeMaps[i].Hash);
-            }
-            SBoxHandler.SaveVMAT(saveDirectory, $"{Hash}_{part.Value.FileHash}", part.Value, true, extraTexs);
-        }
-
-        scene.AddTerrain(Hash, parts.Keys.ToList());
-        SBoxHandler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
     }
 
     public StaticPart MakePart(SStaticPart entry)
@@ -188,8 +194,8 @@ public class Terrain : Tag<STerrain>
             //r0.z = rsqrt(r0.z);
             r0.Z = System.Numerics.Vector3.Dot(new(r2.X, r2.Y, r2.Z), new(r2.X, r2.Y, r2.Z));
             r0.Z = MathF.ReciprocalSqrtEstimate(r0.Z);
-                
-            part.VertexPositions[i] = new Vector4(r0.X, r0.Y, r0.Z * r0.W, r0.W); 
+
+            part.VertexPositions[i] = new Vector4(r0.X, r0.Y, r0.Z * r0.W, r0.W);
         }
     }
 
