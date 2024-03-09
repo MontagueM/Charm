@@ -66,7 +66,9 @@ struct VertexInput
 struct PixelInput
 {{
     float4 vBlendValues		 : TEXCOORD14;
-    float3 v5                : TEXCOORD15; //terrain specific
+	float3 v3                : TEXCOORD15; //terrain specific
+	float3 v4                : TEXCOORD16; //terrain specific
+    float3 v5                : TEXCOORD17; //terrain specific
 	#include ""common/pixelinput.hlsl""
 }};
 
@@ -162,7 +164,8 @@ PS
         vfxStructure = vfxStructure.Replace("//ps_output", AddOutput(material).ToString());
 
         if (isTerrain)
-            vfxStructure = vfxStructure.Replace("//vs_Function", "r1.xyz = abs(i.vNormalOs.xyz) * abs(i.vNormalOs.xyz);\r\n  r1.xyz = r1.xyz * r1.xyz;\r\n  r2.xyz = r1.xyz * r1.xyz;\r\n  r2.xyz = r2.xyz * r2.xyz;\r\n  r1.xyz = r2.xyz * r1.xyz;\r\n  r0.z = dot(r1.xyz, float3(1,1,1));\r\n  o.v5.xyz = r1.xyz / r0.zzz;");
+            vfxStructure = vfxStructure.Replace("//vs_Function", "// Terrain specific\r\n\t\tr1.xyz = float3(0,1,0) * i.vNormalOs.yzx;\r\n\t\tr1.xyz = i.vNormalOs.zxy * float3(0,0,1) + -r1.xyz;\r\n\t\tr0.z = dot(r1.yz, r1.yz);\r\n\t\tr0.z = rsqrt(r0.z);\r\n\t\tr1.xyz = r1.xyz * r0.zzz;\r\n\t\tr2.xyz = i.vNormalOs.zxy * r1.yzx;\r\n\t\tr2.xyz = i.vNormalOs.yzx * r1.zxy + -r2.xyz;\r\n\t\to.v4.xyz = r1.xyz;\r\n\t\tr0.z = dot(r2.xyz, r2.xyz);\r\n\t\tr0.z = rsqrt(r0.z);\r\n\t\to.v3.xyz = r2.xyz * r0.zzz;\r\n\t\tr1.xyz = abs(i.vNormalOs.xyz) * abs(i.vNormalOs.xyz);\r\n\t\tr1.xyz = r1.xyz * r1.xyz;\r\n\t\tr2.xyz = r1.xyz * r1.xyz;\r\n\t\tr2.xyz = r2.xyz * r2.xyz;\r\n\t\tr1.xyz = r2.xyz * r1.xyz;\r\n\t\tr0.z = dot(r1.xyz, float3(1,1,1));\r\n\t\to.v5.xyz = r1.xyz / r0.zzz;");
+
         //------------------------------------------------------------------------------
 
         //Vertex Shader - Commented out for now
@@ -455,8 +458,8 @@ PS
                 funcDef.AppendLine("\t\tfloat4 v0 = {vPositionWs, 1};"); //Detail uv?
                 funcDef.AppendLine("\t\tfloat4 v1 = {i.vTextureCoords, 1, 1};"); //Main uv?
                 funcDef.AppendLine("\t\tfloat4 v2 = {i.vNormalWs,1};");
-                funcDef.AppendLine("\t\tfloat4 v3 = {i.vTangentUWs,1};");
-                funcDef.AppendLine("\t\tfloat4 v4 = {i.vTangentVWs,1};");
+                funcDef.AppendLine("\t\tfloat4 v3 = {i.v3,1};");
+                funcDef.AppendLine("\t\tfloat4 v4 = {i.v4,1};");
                 funcDef.AppendLine("\t\tfloat4 v5 = {i.v5,1};");
             }
             else
@@ -732,7 +735,6 @@ PS
                 $"clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        " +
                 $"mat.Transmission = o2.z;\r\n        " +
                 $"mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From");
-
 
             output.Append($"\n\t\treturn ShadingModelStandard::Shade(i, mat);");
 
