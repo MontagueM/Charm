@@ -30,20 +30,15 @@ $@"HEADER
 MODES
 {{
 	VrForward();
-
-	Depth();
-
+	Depth(); 
 	ToolsVis( S_MODE_TOOLS_VIS );
 	ToolsWireframe( ""vr_tools_wireframe.shader"" );
 	ToolsShadingComplexity( ""tools_shading_complexity.shader"" );
-
-	//Reflection( S_MODE_REFLECTIONS );
 }}
 
 FEATURES
 {{
     #include ""common/features.hlsl""
-    //Feature( F_DYNAMIC_REFLECTIONS, 0..1, ""Rendering"" );
 }}
 
 COMMON
@@ -69,6 +64,11 @@ struct PixelInput
 	float3 v3                : TEXCOORD15; //terrain specific
 	float3 v4                : TEXCOORD16; //terrain specific
     float3 v5                : TEXCOORD17; //terrain specific
+
+    float3 vPositionOs : TEXCOORD18;
+	float3 vNormalOs : TEXCOORD19;
+	float4 vTangentUOs_flTangentVSign : TANGENT	< Semantic( TangentU_SignV ); >;
+
 	#include ""common/pixelinput.hlsl""
 }};
 
@@ -88,6 +88,8 @@ VS
         float4 r0,r1,r2;
         o.vBlendValues = i.vColorBlendValues;
 		o.vBlendValues.a = i.vColorBlendValues.a;
+        o.vPositionOs = i.vPositionOs.xyz;
+        VS_DecodeObjectSpaceNormalAndTangent( i, o.vNormalOs, o.vTangentUOs_flTangentVSign );
 
 //vs_Function
 
@@ -453,24 +455,22 @@ PS
             funcDef.AppendLine("\t\tfloat3 vPositionWs = (i.vPositionWithOffsetWs.xyz + g_vHighPrecisionLightingOffsetWs.xyz) / 39.37;");
             funcDef.AppendLine("\t\tfloat alpha = 1;");
 
-            if (isTerrain) //variables are different for terrain for whatever reason, kinda have to guess
+            if (isTerrain) // Input variables are different for terrain
             {
-                funcDef.AppendLine("\t\tfloat4 v0 = {vPositionWs, 1};"); //Detail uv?
-                funcDef.AppendLine("\t\tfloat4 v1 = {i.vTextureCoords, 1, 1};"); //Main uv?
-                funcDef.AppendLine("\t\tfloat4 v2 = {i.vNormalWs,1};");
-                funcDef.AppendLine("\t\tfloat4 v3 = {i.v3,1};");
-                funcDef.AppendLine("\t\tfloat4 v4 = {i.v4,1};");
-                funcDef.AppendLine("\t\tfloat4 v5 = {i.v5,1};");
+                funcDef.AppendLine("\t\tfloat4 v0 = {vPositionWs, 1};"); // World Pos
+                funcDef.AppendLine("\t\tfloat4 v1 = {i.vTextureCoords, 1, 1};"); // UVs
+                funcDef.AppendLine("\t\tfloat4 v2 = {i.vNormalWs,1};"); // Mesh world normals
+                funcDef.AppendLine("\t\tfloat4 v3 = {i.v3,1};"); // From VS, Used for normals
+                funcDef.AppendLine("\t\tfloat4 v4 = {i.v4,1};"); // From VS, Used for normals
+                funcDef.AppendLine("\t\tfloat4 v5 = {i.v5,1};"); // From VS, Used for tri-planar mapping? Mainly seen on vertical terrain
             }
             else
             {
-                funcDef.AppendLine("\t\tfloat4 v0 = {i.vNormalWs,1};"); //Mesh world normals
-                funcDef.AppendLine("\t\tfloat4 v1 = {i.vTangentUWs,1};");
-                funcDef.AppendLine("\t\tfloat4 v2 = {i.vTangentVWs,1};");
-                funcDef.AppendLine("\t\tfloat4 v3 = {i.vTextureCoords,0,0};"); //UVs
-                funcDef.AppendLine("\t\tfloat4 v4 = {vPositionWs,0};"); //Don't really know, just guessing its world offset or something
-                //funcDef.AppendLine("\t\tfloat4 v5 = i.vBlendValues;"); //Vertex color.
-                //funcDef.AppendLine("uint v6 = 1;"); //Usually FrontFace but can also be v7
+                funcDef.AppendLine("\t\tfloat4 v0 = {i.vNormalWs,1};"); // Mesh world normals
+                funcDef.AppendLine("\t\tfloat4 v1 = {i.vTangentUWs,1};"); // Tangent U
+                funcDef.AppendLine("\t\tfloat4 v2 = {i.vTangentVWs,1};"); // Tangent V
+                funcDef.AppendLine("\t\tfloat4 v3 = {i.vTextureCoords,0,0};"); // UVs
+                funcDef.AppendLine("\t\tfloat4 v4 = {vPositionWs,0};"); // World Pos
             }
 
             foreach (var i in inputs)
@@ -597,38 +597,38 @@ PS
                         }
 
 
-                        if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
+                        if (texIndex == 14 && isTerrain) // Terrain dyemap, not defined in the material itself
                         {
                             funcDef.AppendLine($"\t\t{equal.TrimStart()} = g_t{texIndex}.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}");
                         }
-                        else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) //Some kind of buffer texture
+                        else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) // Some kind of buffer texture or not defined in the material
                         {
                             switch (texIndex)
                             {
-                                case 10: //Depth
+                                case 10: // Depth buffer
                                     bUsesDepthBuffer = true;
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::Get({sampleUv}).xxxx; //{equal_post}");
                                     break;
                                 case 11:
                                 case 13:
-                                case 23: //Usually uses SampleLevel but shouldnt be an issue?
+                                case 23: // Framebuffer? Usually uses SampleLevel but shouldnt be an issue?
                                     bUsesFrameBuffer = true;
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter} //{equal_post}");
                                     break;
                                 case 15:
-                                case 20:
+                                case 20: // Unknown
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.3137,0.3137,0.3137,0.3137).{dotAfter} //{equal_post}");
                                     break;
                                 case 0:
-                                case 21:
+                                case 21: // Unknown
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.1882,0.1882,0.1882,0.1882).{dotAfter} //{equal_post}");
                                     break;
-                                default:
+                                default: // Unknown
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.5,0.5,0.5,0.5).{dotAfter} //{equal_post}");
                                     break;
                             }
                         }
-                        else
+                        else // Textures defined by the material
                         {
                             funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}");
                         }
@@ -700,7 +700,7 @@ PS
                         funcDef.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "\t\to1.xyzw = float4(PackNormal3D(v0.xyz),0);")); //decals(?) have 0 normals sometimes, dont want that
                         bFixRoughness = true;
                     }
-                    else if (line.Contains("GetDimensions")) //Uhhhh
+                    else if (line.Contains("GetDimensions")) // Uhhhh
                     {
                         funcDef.AppendLine($"\t\t//{line.TrimStart()}");
                     }
@@ -735,6 +735,8 @@ PS
                 $"clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        " +
                 $"mat.Transmission = o2.z;\r\n        " +
                 $"mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From");
+
+            output.AppendLine($"// for some toolvis shit\r\n\t\tmat.WorldTangentU = i.vTangentUWs;\r\n\t\tmat.WorldTangentV = i.vTangentVWs;\r\n        mat.TextureCoords = i.vTextureCoords.xy;");
 
             output.Append($"\n\t\treturn ShadingModelStandard::Shade(i, mat);");
 
