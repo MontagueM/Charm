@@ -187,7 +187,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
             switch (_tag.Type)
             {
                 case 0:
-                    status = ReadVertexDataType0(handle, part);
+                    status = ReadVertexDataType0(handle, part, isTerrain);
                     break;
                 case 1:
                     status = ReadVertexDataType1(handle, part);
@@ -210,28 +210,25 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         }
     }
 
-    private bool ReadVertexDataType0(TigerReader handle, MeshPart part)
+    private bool ReadVertexDataType0(TigerReader handle, MeshPart part, bool isTerrain)
     {
         switch (_tag.Stride)
         {
             case 0x4:
                 part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
-            case 0x8: // all terrain-specific
-                var v = new Vector4(handle.ReadUInt16(), handle.ReadUInt16(), handle.ReadInt16(), handle.ReadUInt16(),
-                    true);
-                if (v.W > 0 && Math.Abs(v.W - 0x7F_FF) > 0.1f)
-                {
-                    v.Z += 2 * v.W; // terrain uses a z precision extension.
-                }
-
-                part.VertexPositions.Add(v);
-
+            case 0x8: // terrain-specific
+                part.VertexPositions.Add(new Vector4((float)handle.ReadInt16(), (float)handle.ReadInt16(), (float)handle.ReadInt16(),
+                (float)handle.ReadInt16()));
                 break;
             case 0xC:
                 part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
                     handle.ReadInt16(), true));
-                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+
+                if (isTerrain)
+                    part.VertexTexcoords0.Add(new Vector2(handle.ReadHalf(), handle.ReadHalf()));
+                else
+                    part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                 break;
             case 0x10:
                 part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
@@ -247,6 +244,15 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     handle.ReadInt16(), true));
                 part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
                     handle.ReadInt16(), true));
+                break;
+            case 0x1C:
+                part.VertexPositions.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), 1.0f));
+
+                var texcoord = new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                    handle.ReadInt16(), true);
+                var normal = new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                    handle.ReadInt16(), true);
+                //var texcoord1 = new Vector2(handle.ReadInt16(), handle.ReadInt16());
                 break;
             default:
                 return false;
@@ -338,7 +344,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 // it can be longer here, its not broken i think
                 if (handle.BaseStream.Length <= handle.BaseStream.Position)
                 {
-                    handle.BaseStream.Position = handle.BaseStream.Length-4;
+                    handle.BaseStream.Position = handle.BaseStream.Length - 4;
                     part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
                         handle.ReadByte()));
                 }
@@ -470,7 +476,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
             switch (inputSignature.Semantic)
             {
                 case DXBCSemantic.Position:
-                    if(isTerrain) //has to be a float
+                    if (isTerrain) //has to be a float
                     {
                         part.VertexPositions.Add(new Vector4((float)reader.ReadInt16(), (float)reader.ReadInt16(), (float)reader.ReadInt16(),
                             (float)reader.ReadInt16()));
@@ -483,7 +489,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     switch (inputSignature.Mask)
                     {
                         case ComponentMask.XY:
-                            if(isTerrain)
+                            if (isTerrain)
                                 part.VertexTexcoords0.Add(new Vector2(reader.ReadHalf(), reader.ReadHalf()));
                             else
                                 part.VertexTexcoords0.Add(new Vector2(reader.ReadInt16(), reader.ReadInt16()));

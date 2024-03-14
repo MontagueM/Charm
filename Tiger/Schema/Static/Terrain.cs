@@ -56,6 +56,7 @@ public class Terrain : Tag<STerrain>
 
             foreach (var partEntry in _tag.StaticParts.Where(x => x.GroupIndex == i))
             {
+                // MainGeom0 LOD0, GripStock0 LOD1, Stickers0 LOD2?
                 if (partEntry.Lod.DetailLevel == ELodCategory.MainGeom0)
                 {
                     if (partEntry.Material != null || partEntry.Material.VertexShader != null)
@@ -79,6 +80,20 @@ public class Terrain : Tag<STerrain>
                 }
             }
 
+            //{ // LOD3?
+            //    var part = MakeLODPart(meshGroup, i);
+
+            //    scene.Materials.Add(new ExportMaterial(_tag.Unk6C, MaterialType.Opaque, true));
+            //    part.Material = _tag.Unk6C;
+
+            //    TransformPositions(part);
+            //    TransformTexcoords(part);
+            //    TransformVertexColors(part);
+
+            //    parts.TryAdd(part, _tag.Unk6C);
+            //}
+
+
             scene.AddTerrain($"{Hash}_{i}", parts.Keys.ToList());
             SBoxHandler.SaveTerrainVMDL($"{Hash}_{i}", saveDirectory, parts.Keys.ToList());
 
@@ -97,6 +112,9 @@ public class Terrain : Tag<STerrain>
         StaticPart part = new(entry);
         part.GroupIndex = entry.GroupIndex;
         part.Indices = _tag.Indices1.GetIndexData(PrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
+
+        //Console.WriteLine($"{_tag.Indices2.GetIndexData(PrimitiveType.TriangleStrip, _tag.MeshGroups[part.GroupIndex].Unk48, _tag.MeshGroups[part.GroupIndex].unk).Count}");
+
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
         foreach (UIntVector3 index in part.Indices)
@@ -132,6 +150,30 @@ public class Terrain : Tag<STerrain>
 
         //_tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
         //_tag.Vertices2.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+
+        return part;
+    }
+
+    public StaticPart MakeLODPart(SMeshGroup entry, int groupIndex)
+    {
+        StaticPart part = new(entry);
+
+        part.GroupIndex = groupIndex;
+        part.Indices = _tag.Indices2.GetIndexData(PrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
+
+        // Get unique vertex indices we need to get data for
+        HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
+        foreach (UIntVector3 index in part.Indices)
+        {
+            uniqueVertexIndices.Add(index.X);
+            uniqueVertexIndices.Add(index.Y);
+            uniqueVertexIndices.Add(index.Z);
+        }
+        part.VertexIndices = uniqueVertexIndices.ToList();
+
+        //Log.Debug($"Reading vertex buffers {_tag.Vertices3.Hash}/{_tag.Vertices3.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices4?.Hash}/{_tag.Vertices4?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+        _tag.Vertices3.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+        _tag.Vertices4.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
 
         return part;
     }
@@ -301,8 +343,8 @@ public struct SMeshGroup
     public uint Unk3C;
     public uint Unk40;
     public uint Unk44;
-    public uint Unk48;
-    public uint Unk4C;
+    public uint IndexOffset; // 75% sure this is right
+    public uint IndexCount;
     public Texture Dyemap;
 }
 

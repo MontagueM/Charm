@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Arithmic;
 
 namespace Tiger.Schema;
@@ -105,7 +104,7 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
 
         reader.Seek(0x30, SeekOrigin.Begin);
         uint chunkStart = reader.ReadUInt32();
-        reader.Seek(chunkStart+0x8, SeekOrigin.Current);
+        reader.Seek(chunkStart + 0x8, SeekOrigin.Current);
 
         uint outputSignatureCount = reader.ReadUInt32();
         reader.Seek(0x4, SeekOrigin.Current);
@@ -133,83 +132,94 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         uint sizeOSGN = reader.ReadUInt32();
 
         // Go to SHEX chunk
-        reader.Seek(sizeOSGN+0x14, SeekOrigin.Current);
+        reader.Seek(sizeOSGN + 0x14, SeekOrigin.Current);
 
         //uint a = reader.ReadUInt32();
         //Debug.Assert(a == 1480935507);
 
         List<DXBCShaderResource> shaderResources = new();
         ResourceType type = (ResourceType)reader.ReadUInt32();
-        do
+        try
         {
-            switch(type)
+            do
             {
-                case ResourceType.CBuffer:
-                case ResourceType.CBuffer1: //Dynamically Linked or some shit, i forgot the name
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    shaderResources.Add(new DXBCShaderResource
-                    {
-                        ResourceType = ResourceType.CBuffer,
-                        Index = reader.ReadUInt32(),
-                        Count = reader.ReadUInt32()
-                    });
-                    break;
-                case ResourceType.Buffer:
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    shaderResources.Add(new DXBCShaderResource
-                    {
-                        ResourceType = ResourceType.Buffer,
-                        Index = reader.ReadUInt32(),
-                        Count = 0
-                    });
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    break;
-                case ResourceType.Texture2D:
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    shaderResources.Add(new DXBCShaderResource
-                    {
-                        ResourceType = ResourceType.Texture2D,
-                        Index = reader.ReadUInt32(),
-                        Count = 0
-                    });
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    break;
-                case ResourceType.Texture3D:
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    shaderResources.Add(new DXBCShaderResource
-                    {
-                        ResourceType = ResourceType.Texture3D,
-                        Index = reader.ReadUInt32(),
-                        Count = 0
-                    });
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    break;
-                case ResourceType.TextureCube:
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    shaderResources.Add(new DXBCShaderResource
-                    {
-                        ResourceType = ResourceType.TextureCube,
-                        Index = reader.ReadUInt32(),
-                        Count = 0
-                    });
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    break;
-                case ResourceType.SamplerState:
-                    reader.Seek(0x4, SeekOrigin.Current);
-                    shaderResources.Add(new DXBCShaderResource
-                    {
-                        ResourceType = ResourceType.SamplerState,
-                        Index = reader.ReadUInt32(),
-                        Count = 0
-                    });
-                    break;
-                //default:
-                //    throw new NotSupportedException($"Unknown Type {type}");
+                switch (type)
+                {
+                    case ResourceType.CBuffer:
+                    case ResourceType.CBuffer1: //Dynamically Linked or some shit, i forgot the name
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        shaderResources.Add(new DXBCShaderResource
+                        {
+                            ResourceType = ResourceType.CBuffer,
+                            Index = reader.ReadUInt32(),
+                            Count = reader.ReadUInt32()
+                        });
+                        break;
+                    case ResourceType.Buffer:
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        shaderResources.Add(new DXBCShaderResource
+                        {
+                            ResourceType = ResourceType.Buffer,
+                            Index = reader.ReadUInt32(),
+                            Count = 0
+                        });
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        break;
+                    case ResourceType.Texture2D:
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        shaderResources.Add(new DXBCShaderResource
+                        {
+                            ResourceType = ResourceType.Texture2D,
+                            Index = reader.ReadUInt32(),
+                            Count = 0
+                        });
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        break;
+                    case ResourceType.Texture3D:
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        shaderResources.Add(new DXBCShaderResource
+                        {
+                            ResourceType = ResourceType.Texture3D,
+                            Index = reader.ReadUInt32(),
+                            Count = 0
+                        });
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        break;
+                    case ResourceType.TextureCube:
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        shaderResources.Add(new DXBCShaderResource
+                        {
+                            ResourceType = ResourceType.TextureCube,
+                            Index = reader.ReadUInt32(),
+                            Count = 0
+                        });
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        break;
+                    case ResourceType.SamplerState:
+                        reader.Seek(0x4, SeekOrigin.Current);
+                        shaderResources.Add(new DXBCShaderResource
+                        {
+                            ResourceType = ResourceType.SamplerState,
+                            Index = reader.ReadUInt32(),
+                            Count = 0
+                        });
+                        break;
+                        //default:
+                        //    throw new NotSupportedException($"Unknown Type {type}");
+                }
+
+                type = (ResourceType)reader.ReadUInt32();
+
             }
-
-            type = (ResourceType)reader.ReadUInt32();
-
-        } while (type != ResourceType.None && type != ResourceType.Output);
+            while (type != ResourceType.None
+                    && type != ResourceType.Output
+                    && type != ResourceType.PSInput
+                    && type != ResourceType.VSInput);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"{Hash}: {ex}");
+        }
 
         return shaderResources;
     }
@@ -332,7 +342,7 @@ public struct DXBCIOSignature
 
     public string GetMaskType()
     {
-        switch(GetNumberOfComponents())
+        switch (GetNumberOfComponents())
         {
             case 1:
                 return "uint";
@@ -427,7 +437,7 @@ public enum ComponentMask : byte
     XYZW = X | Y | Z | W
 }
 
-public enum ResourceType 
+public enum ResourceType
 {
     CBuffer = 0x04000059,
     CBuffer1 = 0x04000859,
@@ -440,7 +450,7 @@ public enum ResourceType
     // Can already get through IOSignatures
     // But need to know where to stop reading
     None = 0x02000068,
-    //VSInput = 0x0300005F,
-    //PSInput = 0x03001062,
+    VSInput = 0x0300005F,
+    PSInput = 0x03001062,
     Output = 0x03000065
 }
