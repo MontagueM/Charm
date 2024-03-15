@@ -69,7 +69,7 @@ public partial class EntityView : UserControl
     public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null, ExporterScene scene = null)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
         string savePath = config.GetExportSavePath() + $"/{name}";
 
         if (scene == null)
@@ -103,7 +103,7 @@ public partial class EntityView : UserControl
     {
         string name = string.Join("_", $"{item.ItemName}"
             .Split(Path.GetInvalidFileNameChars()));
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
         // Export the model
         // todo bad, should be replaced
         EntitySkeleton overrideSkeleton = null;
@@ -140,8 +140,8 @@ public partial class EntityView : UserControl
 
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
-        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
-        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
+        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
+        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_").Replace(".", "_");
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
 
