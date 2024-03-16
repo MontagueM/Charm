@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using Tiger.Exporters;
 
 namespace Tiger.Schema.Shaders
@@ -106,7 +105,7 @@ namespace Tiger.Schema.Shaders
                     if (vfx != String.Empty)
                     {
                         File.WriteAllText($"{saveDirectory}/Shaders/PS_{PixelShader.Hash}.shader", vfx);
-                        if(!isTerrain)
+                        if (!isTerrain)
                             SBoxHandler.SaveVMAT(saveDirectory, FileHash, this);
                     }
                 }
@@ -170,7 +169,7 @@ namespace Tiger.Schema.Shaders
                 texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
                 if (texture.Texture.IsCubemap())
                 {
-                    SBoxHandler.SaveCubemapVTEX(texture.Texture, $"{saveDirectory}/Textures");
+                    SBoxHandler.SaveVTEX(texture.Texture, $"{saveDirectory}/Textures");
                 }
             }
         }

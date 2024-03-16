@@ -1,7 +1,5 @@
-﻿using System.Collections.Concurrent;
-using ConcurrentCollections;
+﻿using ConcurrentCollections;
 using Tiger.Schema;
-using Tiger.Schema.Shaders;
 
 namespace Tiger.Exporters;
 
@@ -78,9 +76,9 @@ public class MaterialExporter : AbstractExporter
             if (texture is null)
                 continue;
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
-            if(texture.IsCubemap())
+            if (texture.IsCubemap())
             {
-                SBoxHandler.SaveCubemapVTEX(texture, textureSaveDirectory);
+                SBoxHandler.SaveVTEX(texture, textureSaveDirectory);
             }
         }
 

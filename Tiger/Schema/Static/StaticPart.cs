@@ -14,6 +14,15 @@ public class StaticPart : MeshPart
         MaterialType = Shaders.MaterialType.Opaque;
     }
 
+    public StaticPart(SMeshGroup terrainPartEntry) : base()
+    {
+        IndexOffset = terrainPartEntry.IndexOffset;
+        IndexCount = terrainPartEntry.IndexCount;
+        LodCategory = ELodCategory.LowPolyGeom1;
+        PrimitiveType = PrimitiveType.TriangleStrip;
+        MaterialType = Shaders.MaterialType.Opaque;
+    }
+
     public StaticPart(SStaticMeshPart staticPartEntry) : base()
     {
         IndexOffset = staticPartEntry.IndexOffset;
