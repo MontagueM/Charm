@@ -7,6 +7,7 @@ using ConcurrentCollections;
 
 namespace Tiger;
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "029D8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "029D8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C29E8080", 0x10)]
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]
@@ -56,6 +57,7 @@ public interface IPackage
     public List<SPackageActivityEntry> GetAllActivities();
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EC9E8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EC9E8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C59E8080", 0x10)]
 public struct SPackageActivityEntry
@@ -772,7 +774,7 @@ public struct D2FileEntryBitpacked
 }
 
 [StructLayout(LayoutKind.Sequential)]
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EE9E8080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EE9E8080", 0x30)]
 public unsafe struct D2BlockEntry
 {
     public uint Offset;

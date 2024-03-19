@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualBasic.FileIO;
-
-namespace Tiger.Schema;
+﻿namespace Tiger.Schema;
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E8718080", 0x400)]
 public struct SMaterial_SK

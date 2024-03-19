@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.VisualBasic.FileIO;
-using Tiger.Exporters;
+﻿using Tiger.Exporters;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 
@@ -50,6 +48,7 @@ public class StaticMapData : Tag<SStaticMapData>
     }
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "6D968080", 0xA0)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D968080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "AD938080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AD938080", 0xC0)]
@@ -61,13 +60,16 @@ public struct SStaticMapData
     [SchemaField(0x40)]
     public DynamicArray<SStaticMeshInstanceTransform> Instances;
     public DynamicArray<SUnknownUInt> Unk50;
+    [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<SStaticMeshHash> Statics;
     public DynamicArray<SStaticMeshInstanceMap> InstanceCounts;
+    [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk98;
+    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 UnkA0; // likely a bound corner

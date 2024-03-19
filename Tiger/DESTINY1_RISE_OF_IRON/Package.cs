@@ -69,12 +69,20 @@ public struct PackageHeader : IPackageHeader
         reader.Seek(BlockEntryTableOffset, SeekOrigin.Begin);
 
         List<D2BlockEntry> blockEntries = new();
-        int d2BlockEntrySize = Marshal.SizeOf<D2BlockEntry>();
+        int d1BlockEntrySize = Marshal.SizeOf<D1BlockEntry>();
         for (int i = 0; i < BlockEntryTableCount; i++)
         {
-            D2BlockEntry blockEntry = reader.ReadBytes(d2BlockEntrySize).ToType<D2BlockEntry>();
-            blockEntries.Add(blockEntry);
+            D1BlockEntry blockEntry = reader.ReadBytes(d1BlockEntrySize).ToType<D1BlockEntry>();
+            blockEntries.Add(new D2BlockEntry()
+            {
+                Offset = blockEntry.Offset,
+                Size = blockEntry.Size,
+                PatchId = blockEntry.PatchId,
+                BitFlag = blockEntry.BitFlag,
+                //SHA1 = blockEntry.SHA1,
+            });
         }
+
         return blockEntries;
     }
 
@@ -96,19 +104,6 @@ public struct SD1PackageActivityEntry
     public TagClassHash TagClassHash;
     //public StringNullTerminated Name;
 }
-
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x30)]
-public struct SPackageTablesData
-{
-    [SchemaField(0x00)]
-    public long ThisSize;
-    [SchemaField(0x10)]
-    public DynamicArray<D2FileEntryBitpacked> FileEntries;
-    [SchemaField(0x20)]
-    public DynamicArray<D2BlockEntry> BlockEntries;
-}
-
 
 [StrategyClass(TigerStrategy.DESTINY1_RISE_OF_IRON)]
 public class Package : Tiger.Package
@@ -143,3 +138,16 @@ public class Package : Tiger.Package
         return nonce;
     }
 }
+
+[StructLayout(LayoutKind.Sequential)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EE9E8080", 0x20)]
+public unsafe struct D1BlockEntry
+{
+    public uint Offset;
+    public uint Size;
+    public ushort PatchId;
+    public ushort BitFlag;
+    public fixed byte SHA1[0x14];
+};
+
+

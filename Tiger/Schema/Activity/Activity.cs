@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
 using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Activity
@@ -25,6 +23,118 @@ namespace Tiger.Schema.Activity
         public FileHash FileHash { get; }
         public IEnumerable<Bubble> EnumerateBubbles();
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null);
+    }
+}
+
+
+namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
+{
+    public class Activity : Tag<SActivity_ROI>, IActivity
+    {
+        public FileHash FileHash => Hash;
+
+        public Activity(FileHash hash) : base(hash)
+        {
+        }
+
+        public IEnumerable<Bubble> EnumerateBubbles()
+        {
+            //for (int bubbleIndex = 0; bubbleIndex < _tag.Bubbles.Count; bubbleIndex++)
+            //{
+            //    var bubble = _tag.Bubbles[bubbleIndex];
+            //    if (bubble.MapReference is null ||
+            //        bubble.MapReference.TagData.ChildMapReference == null)
+            //    {
+            //        continue;
+            //    }
+            //    yield return new Bubble { Name = GetBubbleNameFromBubbleIndex(bubbleIndex), MapReference = bubble.MapReference };
+            //}
+            yield return new Bubble();
+        }
+
+        private string GetBubbleNameFromBubbleIndex(int index)
+        {
+            return "";
+            //return GlobalStrings.Get().GetString(_tag.LocationNames.TagData.BubbleNames.First(e => e.BubbleIndex == index).BubbleName);
+        }
+
+        public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
+        {
+            yield return new ActivityEntities();
+            //Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(UnkActivity);
+            //foreach (var entry in tag.TagData.Unk50)
+            //{
+            //    foreach (var entry2 in entry.Unk08)
+            //    {
+            //        yield return new ActivityEntities
+            //        {
+            //            BubbleName = GlobalStrings.Get().GetString(entry2.UnkName1),
+            //            Hash = entry2.Unk44.Hash,
+            //            ActivityPhaseName2 = GlobalStrings.Get().GetString(entry2.UnkName0),
+            //            DataTables = CollapseResourceParent(entry2.Unk44.Hash)
+            //        };
+            //    }
+            //}
+        }
+
+        //private List<FileHash> CollapseResourceParent(FileHash hash)
+        //{
+        //    ConcurrentBag<FileHash> items = new();
+
+        //    var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_SHADOWKEEP_2601.S5B928080>(hash);
+
+        //    // :)))
+        //    foreach (var resource in entry.TagData.Unk14.TagData.Unk08)
+        //    {
+        //        foreach (var a in resource.Unk00.TagData.Unk38)
+        //        {
+        //            foreach (var table in a.Unk08)
+        //            {
+        //                if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
+        //                    continue;
+
+        //                if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
+        //                {
+        //                    items.Add(table.Unk00.TagData.DataTable.Hash);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    foreach (var resource in entry.TagData.Unk14.TagData.Unk18)
+        //    {
+        //        foreach (var a in resource.Unk00.TagData.Unk38)
+        //        {
+        //            foreach (var table in a.Unk08)
+        //            {
+        //                if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
+        //                    continue;
+
+        //                if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
+        //                {
+        //                    items.Add(table.Unk00.TagData.DataTable.Hash);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    foreach (var resource in entry.TagData.Unk14.TagData.Unk28)
+        //    {
+        //        foreach (var a in resource.Unk00.TagData.Unk38)
+        //        {
+        //            foreach (var table in a.Unk08)
+        //            {
+        //                if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
+        //                    continue;
+
+        //                if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
+        //                {
+        //                    items.Add(table.Unk00.TagData.DataTable.Hash);
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return items.ToList();
+        //}
     }
 }
 
@@ -95,7 +205,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
                         {
                             items.Add(table.Unk00.TagData.DataTable.Hash);
                         }
-                    } 
+                    }
                 }
             }
             foreach (var resource in entry.TagData.Unk14.TagData.Unk18)
@@ -246,9 +356,9 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
             var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_898E8080>(hash);
             var Unk18 = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
 
-            foreach(var resource in Unk18.TagData.EntityResources)
-            { 
-                if(resource.EntityResourceParent != null)
+            foreach (var resource in Unk18.TagData.EntityResources)
+            {
+                if (resource.EntityResourceParent != null)
                 {
                     var resourceValue = resource.EntityResourceParent.TagData.EntityResource.TagData.Unk18.GetValue(resource.EntityResourceParent.TagData.EntityResource.GetReader());
                     switch (resourceValue)

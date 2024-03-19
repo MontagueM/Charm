@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Arithmic;
@@ -204,6 +203,41 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     private FieldInfo[] GetStrategyFields(FieldInfo[] getFields)
     {
+        //foreach (var f in getFields)
+        //{
+        //    Console.WriteLine($"-{f} : {!f.GetCustomAttributes<SchemaFieldAttribute>().Any()} | {GetAttribute<SchemaFieldAttribute>(f) is null}");
+        //    //Console.WriteLine($"--{!f.GetCustomAttributes<SchemaFieldAttribute>().Any()} || {(_strategy >= GetAttribute<SchemaFieldAttribute>(f).Strategy && !GetAttribute<SchemaFieldAttribute>(f).Obsolete)}");
+        //}
+
+        var result = new List<FieldInfo>();
+
+        foreach (var field in getFields)
+        {
+            var attributes = field.GetCustomAttributes<SchemaFieldAttribute>().ToArray();
+
+            // Check if attributes array is null or empty
+            if (attributes.Length == 0)
+            {
+                //Console.WriteLine($"Attributes for field {field.Name} are empty.");
+                continue;
+            }
+
+            var attribute = GetAttribute<SchemaFieldAttribute>(field);
+
+            // Check if attribute is null
+            if (attribute == null)
+            {
+                Console.WriteLine($"Attribute for field {field.Name} is null.");
+                continue;
+            }
+
+            // Check strategy and obsolescence
+            if (_strategy >= attribute.Strategy && !attribute.Obsolete)
+            {
+                result.Add(field);
+            }
+        }
+
         // don't include fields that have a strategy assigned but are larger than us
         return getFields.Where(f => !f.GetCustomAttributes<SchemaFieldAttribute>().Any() || (_strategy >= GetAttribute<SchemaFieldAttribute>(f).Strategy && !GetAttribute<SchemaFieldAttribute>(f).Obsolete)).ToArray();
     }
@@ -587,8 +621,8 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         }
         else
         {
+            //Console.WriteLine($"-Failed to get schema struct size for type {var} as it has multiple schema struct attributes but none match the current strategy {_strategy}");
             return null;
-            Log.Error($"Failed to get schema struct size for type {var} as it has multiple schema struct attributes but none match the current strategy {_strategy}");
         }
     }
 }

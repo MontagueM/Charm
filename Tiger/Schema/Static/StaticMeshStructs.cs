@@ -3,6 +3,7 @@ using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static;
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A7718080", 0x90)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A7718080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "446D8080", 0x70)]
 public struct SStaticMesh

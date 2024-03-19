@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Arithmic;
 using DirectXTex;
 using DirectXTexNet;
@@ -235,6 +234,7 @@ public struct STextureHeader
     public float Unk10;
     [SchemaField(0x14, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public float Unk14;
+    [SchemaField(0x0C, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x0C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public ushort CAFE;
@@ -250,6 +250,7 @@ public struct STextureHeader
     public ushort Unk32;
     public ushort Unk34;
 
+    [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x3C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerFile? LargeTextureBuffer;

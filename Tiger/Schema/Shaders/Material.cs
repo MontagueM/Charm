@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using Tiger.Exporters;
 
 namespace Tiger.Schema.Shaders

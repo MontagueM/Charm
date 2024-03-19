@@ -7,11 +7,17 @@ using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "34078080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "0F9C8080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D89A8080", 0x98)]
 public struct SEntity
 {
     public long FileSize;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public ResourcePointer Unk08; // 06098080
+
+    [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x08, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArrayUnloaded<D2Class_CD9A8080> EntityResources;
@@ -29,6 +35,7 @@ public struct SEntity
     public TigerHash Unk88;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "259C8080", 8)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "259C8080", 8)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F09A8080", 8)]
 public struct D2Class_F09A8080
@@ -36,6 +43,12 @@ public struct D2Class_F09A8080
     public TigerHash Unk00;
     public ushort Unk04;
     public ushort Unk06;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "06098080", 0x88)]
+public struct D1Class_06098080
+{
+    public DynamicArrayUnloaded<D2Class_CD9A8080> EntityResources;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "229C8080", 0x28)]
@@ -69,6 +82,7 @@ public struct D2Class_06008080
     public short Unk0;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "15078080", 0xC)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "049C8080", 0xC)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "CD9A8080", 0xC)]
 public struct D2Class_CD9A8080  // entity resource entry
@@ -76,6 +90,7 @@ public struct D2Class_CD9A8080  // entity resource entry
     public EntityResource Resource;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "61088080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "369C8080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "069B8080", 0xA0)]
 public struct D2Class_069B8080  // Entity resource
@@ -84,21 +99,22 @@ public struct D2Class_069B8080  // Entity resource
     public ResourcePointer Unk08;
     public ResourcePointer Unk10; // this isnt any of the ones in Entity.Load in beyond light
     public ResourcePointer Unk18;
-    // public Table ResourceTable20;
-    // public Table ResourceTable30;
-    [SchemaField(0x40)]
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArrayUnloaded<D2Class_7C908080> ResourceTable40;
-    // public Table ResourceTable50;
-    [SchemaField(0x60)]
+
+    [SchemaField(0x60, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArrayUnloaded<D2Class_6E908080> ResourceTable60;
-    // public Table ResourceTable70;
-    [SchemaField(0x80)]
+
+    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag UnkHash80;
     public Tag UnkHash84;  // 819A8080
     // Rest is unknown
 }
 
-[SchemaStruct("7C908080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "30098080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7C908080", 0x10)]
 public struct D2Class_7C908080
 {
     public ResourcePointerWithClass ResourcePointer00;
@@ -386,6 +402,7 @@ public struct D2Class_E1818080
     public long Unk10;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A5738080", 0xA0)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A5738080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "076F8080", 0xA0)]
 public struct SEntityModel  // Entity model
@@ -410,6 +427,7 @@ public struct SEntityModel  // Entity model
     public TigerHash Unk94;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "78738080", 0x88)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "78738080", 0x88)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C56E8080", 0x80)]
 public struct SEntityModelMesh
@@ -425,6 +443,7 @@ public struct SEntityModelMesh
     public VertexBuffer SinglePassSkinningBuffer;  // single pass skinning buffer
     public int Zeros1C;
     public DynamicArrayUnloaded<D2Class_CB6E8080> Parts;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 48)] // TEMP (FIX ME)
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 48)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 37)]
     public short[] StagePartOffsets;
@@ -1387,7 +1406,7 @@ public struct D2Class_0A2D8080
 
 #endregion
 
-
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F6B8080", 0x1C0)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7F6B8080", 0x1C0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "95668080", 0x1E0)]
 public struct CubemapResource //Dataresource for cubemaps
@@ -1399,18 +1418,22 @@ public struct CubemapResource //Dataresource for cubemaps
     [SchemaField(0xF0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 UnkF0; //This might actually be position? Similar to other but in GDC image this one looked more correct
 
+    [SchemaField(0x140, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x140, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x100, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 CubemapRotation;
 
+    [SchemaField(0x190, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x190, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public StringPointer CubemapName;
 
+    [SchemaField(0x198, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x198, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Texture CubemapTexture;
 
+    [SchemaField(0x1A0, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x1A0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Texture Unk1C0; //Sometype of reflection tint texture idk

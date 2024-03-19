@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace Tiger.Schema.Audio;
+﻿namespace Tiger.Schema.Audio;
 
 [SchemaStruct("B8978080", 0x28)]
 public struct D2Class_B8978080
@@ -145,7 +143,8 @@ public struct D2Class_30978080
     public ResourcePointer Unk20; //33978080 or 2A978080
 }
 
-[SchemaStruct("38978080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "38978080", 0x38)] // TEMP (FIX ME)
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "38978080", 0x38)]
 public struct D2Class_38978080
 {
     public long FileSize;
@@ -154,6 +153,7 @@ public struct D2Class_38978080
     public TigerHash Unk10;
     [SchemaField(0x14)]
     public Tag<D2Class_418A8080> Unk14;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public BKHD SoundbankBL;
