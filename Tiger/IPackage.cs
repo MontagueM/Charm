@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -755,7 +754,7 @@ public struct D2FileEntry
 };
 
 [StructLayout(LayoutKind.Sequential)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F39E8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F39E8080", 0x10)]
 public struct D2FileEntryBitpacked
 {
     public uint Reference;
@@ -773,7 +772,7 @@ public struct D2FileEntryBitpacked
 }
 
 [StructLayout(LayoutKind.Sequential)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EE9E8080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EE9E8080", 0x30)]
 public unsafe struct D2BlockEntry
 {
     public uint Offset;
