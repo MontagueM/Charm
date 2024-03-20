@@ -72,21 +72,6 @@ public struct PackageHeader : IPackageHeader
         return fileEntries;
     }
 
-    //public List<D2FileEntry> GetFileEntries(TigerReader reader)
-    //{
-    //    reader.Seek(FileEntryTableOffset, SeekOrigin.Begin);
-
-    //    List<D2FileEntry> fileEntries = new();
-    //    int d2FileEntrySize = Marshal.SizeOf<D2FileEntryBitpacked>();
-    //    for (int i = 0; i < FileEntryTableCount; i++)
-    //    {
-    //        D2FileEntryBitpacked fileEntryBitpacked = reader.ReadBytes(d2FileEntrySize).ToType<D2FileEntryBitpacked>();
-    //        fileEntries.Add(new D2FileEntry(fileEntryBitpacked));
-    //    }
-
-    //    return fileEntries;
-    //}
-
     public List<D2BlockEntry> GetBlockEntries(TigerReader reader)
     {
         reader.Seek(BlockEntryTableOffset, SeekOrigin.Begin);

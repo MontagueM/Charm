@@ -5,7 +5,6 @@ public static class GcnSurfaceFormatExtensions
     public static GcnSurfaceFormat GetFormat(ushort value)
     {
         ushort maskedValue = (ushort)((value >> 4) & 0x3F);
-        Console.WriteLine($"{maskedValue} ({maskedValue.ToString("X2")})");
         return (GcnSurfaceFormat)maskedValue;
     }
 

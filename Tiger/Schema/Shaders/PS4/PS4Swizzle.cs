@@ -1,5 +1,7 @@
 ﻿
 // From RawTex by daemon1
+using Arithmic;
+
 public static class PS4SwizzleAlgorithm
 {
     public static SwizzleType Type => SwizzleType.PS4;
@@ -22,7 +24,6 @@ public static class PS4SwizzleAlgorithm
         int widthTexels = width / pixelBlockSize;
         int widthTexelsAligned = (widthTexels + 7) / 8;
         int dataIndex = 0;
-        string errorMesage = string.Empty;
 
         for (int y = 0; y < heightTexelsAligned; ++y)
         {
@@ -58,7 +59,7 @@ public static class PS4SwizzleAlgorithm
                         }
                         catch (Exception e)
                         {
-                            errorMesage = e.Message;
+                            Log.Error(e.Message);
                         }
                     }
 
@@ -66,8 +67,6 @@ public static class PS4SwizzleAlgorithm
                 }
             }
         }
-        if (errorMesage != string.Empty) Console.WriteLine(errorMesage);
-
         return processed;
     }
 

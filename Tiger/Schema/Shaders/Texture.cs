@@ -63,7 +63,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
         byte[] final = new byte[data.Length + tag.Length];
         Array.Copy(tag, 0, final, 0, tag.Length);
         Array.Copy(data, 0, final, tag.Length, data.Length);
-        Console.WriteLine(final.Length);
+
         return final;
     }
 
@@ -71,7 +71,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
     {
         var format_unknown = _tag.GetFormat();
         DXGI_FORMAT format = (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON ? (DXGI_FORMAT)(uint)format_unknown : GcnSurfaceFormatExtensions.ToDXGI((ushort)format_unknown));
-        Console.WriteLine(format);
+
         byte[] final = GetDDSBytes(format);
         GCHandle gcHandle = GCHandle.Alloc(final, GCHandleType.Pinned);
         IntPtr pixelPtr = gcHandle.AddrOfPinnedObject();
@@ -224,6 +224,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
     }
 }
 
+// Adding D1 stuff to everything is gonna become an ugly mess...
 [NonSchemaStruct(0x40, 32, new[] { 1, 2, 3 })]
 public struct STextureHeader
 {
@@ -268,7 +269,6 @@ public struct STextureHeader
         switch (Strategy.CurrentStrategy)
         {
             case TigerStrategy.DESTINY1_RISE_OF_IRON:
-                Console.WriteLine(ROIFormat);
                 return ROIFormat;
             default:
                 return Format;
