@@ -31,18 +31,28 @@ public class Texture : TigerReferenceFile<STextureHeader>
             return "2D";
     }
 
-    public byte[] GetDDSBytes()
+    public byte[] GetDDSBytes(DXGI_FORMAT format)
     {
-        DXGI_FORMAT format = (DXGI_FORMAT)_tag.Format;
         byte[] data;
-        if (_tag.LargeTextureBuffer != null)
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            // todo we shouldnt cache this
-            data = _tag.LargeTextureBuffer.GetData(false);
+            if (ReferenceHash.IsValid() && ReferenceHash.GetReferenceHash().IsValid())
+                data = PackageResourcer.Get().GetFileData(ReferenceHash.GetReferenceHash());
+            else
+                data = GetReferenceData();
+
+            if (_tag.Flags > 0 || TexHelper.Instance.IsCompressed(format))
+            {
+                var gcnformat = GcnSurfaceFormatExtensions.GetFormat((ushort)_tag.GetFormat());
+                data = PS4SwizzleAlgorithm.Swizzle(data, _tag.Width, _tag.Height, gcnformat.BlockSize(), gcnformat.PixelBlockSize());
+            }
         }
         else
         {
-            data = GetReferenceData();
+            if (_tag.LargeTextureBuffer != null)
+                data = _tag.LargeTextureBuffer.GetData(false);
+            else
+                data = GetReferenceData();
         }
 
         DirectXTexUtility.TexMetadata metadata = DirectXTexUtility.GenerateMetaData(_tag.Width, _tag.Height, _tag.Depth, 1, (DirectXTexUtility.DXGIFormat)format, _tag.ArraySize == 6);
@@ -53,14 +63,16 @@ public class Texture : TigerReferenceFile<STextureHeader>
         byte[] final = new byte[data.Length + tag.Length];
         Array.Copy(tag, 0, final, 0, tag.Length);
         Array.Copy(data, 0, final, tag.Length, data.Length);
+        Console.WriteLine(final.Length);
         return final;
     }
 
     public ScratchImage GetScratchImage()
     {
-        DXGI_FORMAT format = (DXGI_FORMAT)_tag.Format;
-
-        byte[] final = GetDDSBytes();
+        var format_unknown = _tag.GetFormat();
+        DXGI_FORMAT format = (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON ? (DXGI_FORMAT)(uint)format_unknown : GcnSurfaceFormatExtensions.ToDXGI((ushort)format_unknown));
+        Console.WriteLine(format);
+        byte[] final = GetDDSBytes(format);
         GCHandle gcHandle = GCHandle.Alloc(final, GCHandleType.Pinned);
         IntPtr pixelPtr = gcHandle.AddrOfPinnedObject();
         var scratchImage = TexHelper.Instance.LoadFromDDSMemory(pixelPtr, final.Length, DDS_FLAGS.NONE);
@@ -192,19 +204,6 @@ public class Texture : TigerReferenceFile<STextureHeader>
         SavetoFile(savePath, simg, IsCubemap() || IsVolume());
     }
 
-
-    // public void SaveToDDSFile(string savePath)
-    // {
-    //     ScratchImage scratchImage = GetScratchImage();
-    //     SaveToDDSFile(savePath, scratchImage);
-    // }
-
-    // public static void SaveToDDSFile(string savePath, ScratchImage scratchImage)
-    // {
-    //     scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath);
-    //     scratchImage.Dispose();
-    // }
-
     public UnmanagedMemoryStream GetTextureToDisplay()
     {
         ScratchImage scratchImage = GetScratchImage();
@@ -229,29 +228,51 @@ public class Texture : TigerReferenceFile<STextureHeader>
 public struct STextureHeader
 {
     public uint DataSize;
-    public uint Format;  // DXGI_FORMAT
+    [SchemaField(0x08, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public ushort ROIFormat;
+
+    [SchemaField(0x04, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public uint Format;  // DXGI_FORMAT, ushort GcnSurfaceFormat for ROI
+
     [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public float Unk10;
     [SchemaField(0x14, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public float Unk14;
-    [SchemaField(0x0C, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
+
+    [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)] // is BEEFCAFE (uint32) in D1
     [SchemaField(0x0C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public ushort CAFE;
 
+    [SchemaField(0x28, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x0E, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x22, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public ushort Width;
     public ushort Height;
     public ushort Depth;
     public ushort ArraySize;
     public ushort MipLevels; // not mip levels idk what this is
-    public ushort Unk2C;
-    public ushort Unk2E;
-    public ushort Unk30;
-    public ushort Unk32;
-    public ushort Unk34;
 
-    [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
+    [SchemaField(0x32, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public ushort Flags; // Flags for ROI
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x3C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerFile? LargeTextureBuffer;
+
+    public object GetFormat()
+    {
+        switch (Strategy.CurrentStrategy)
+        {
+            case TigerStrategy.DESTINY1_RISE_OF_IRON:
+                Console.WriteLine(ROIFormat);
+                return ROIFormat;
+            default:
+                return Format;
+        }
+    }
 }
+

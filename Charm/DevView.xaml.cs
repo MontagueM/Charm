@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -80,7 +79,7 @@ public partial class DevView : UserControl
                 data.AppendLine($"PKG: {PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId(hash.PackageId)})");
                 data.AppendLine($"PKG ID: {hash.PackageId}");
                 data.AppendLine($"Entry Index: {hash.FileIndex}");
-                // data.AppendLine($"Dev String: {hash.GetDevString() ?? hash.GetContainerString() ?? "NULL"}");
+                data.AppendLine($"Type: {hash.GetFileMetadata().Type} | SubType: {hash.GetFileMetadata().SubType}");
                 data.AppendLine($"Reference Hash: {hash.GetReferenceHash()}");
                 string h64 = Hash64Map.Get().GetHash64(hash);
                 if (!string.IsNullOrEmpty(h64))

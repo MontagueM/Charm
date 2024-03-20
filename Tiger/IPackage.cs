@@ -756,7 +756,7 @@ public struct D2FileEntry
 };
 
 [StructLayout(LayoutKind.Sequential)]
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F39E8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F39E8080", 0x10)]
 public struct D2FileEntryBitpacked
 {
     public uint Reference;

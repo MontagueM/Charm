@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -71,7 +70,8 @@ public partial class AtlasView : UserControl
         if (_initialisedRenderer)
         {
             NativeMethods.ResizeWindow((int)ActualWidth, (int)ActualHeight);
-        }}
+        }
+    }
 
     private Point GetCentrePositionAbsolute()
     {
@@ -246,7 +246,7 @@ public partial class AtlasView : UserControl
             // part.Material.VertexShader.TempDumpRef();
 
             PartMaterial partMaterial = new(part.Material, strides);
-            PartInfo partInfo = new() {IndexOffset = part.IndexOffset, IndexCount = part.IndexCount, Material = partMaterial};
+            PartInfo partInfo = new() { IndexOffset = part.IndexOffset, IndexCount = part.IndexCount, Material = partMaterial };
             long result = NativeMethods.CreateStaticMeshPart(staticHash, partInfo);
             if (result != 0)
             {
@@ -368,7 +368,7 @@ public partial class AtlasView : UserControl
                 {
                     continue;
                 }
-                byte[] final = vsTexture.Texture.GetDDSBytes();
+                byte[] final = vsTexture.Texture.GetDDSBytes((DXGI_FORMAT)vsTexture.Texture.TagData.Format);
                 if (vsTexture.TextureIndex >= 16)
                 {
                     throw new Exception();
@@ -387,7 +387,7 @@ public partial class AtlasView : UserControl
                 {
                     continue;
                 }
-                byte[] final = psTexture.Texture.GetDDSBytes();
+                byte[] final = psTexture.Texture.GetDDSBytes((DXGI_FORMAT)psTexture.Texture.TagData.Format);
                 if (psTexture.TextureIndex >= 32)
                 {
                     throw new Exception();
@@ -522,7 +522,8 @@ public partial class AtlasView : UserControl
         public int X;
         public int Y;
 
-        public static implicit operator Point(POINT point) {
+        public static implicit operator Point(POINT point)
+        {
             return new Point(point.X, point.Y);
         }
     }

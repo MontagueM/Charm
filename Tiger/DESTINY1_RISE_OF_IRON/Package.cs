@@ -54,15 +54,38 @@ public struct PackageHeader : IPackageHeader
         reader.Seek(FileEntryTableOffset, SeekOrigin.Begin);
 
         List<D2FileEntry> fileEntries = new();
-        int d2FileEntrySize = Marshal.SizeOf<D2FileEntryBitpacked>();
+        int d1FileEntrySize = Marshal.SizeOf<D1FileEntryBitpacked>();
         for (int i = 0; i < FileEntryTableCount; i++)
         {
-            D2FileEntryBitpacked fileEntryBitpacked = reader.ReadBytes(d2FileEntrySize).ToType<D2FileEntryBitpacked>();
-            fileEntries.Add(new D2FileEntry(fileEntryBitpacked));
+            D1FileEntry fileEntryBitpacked = new D1FileEntry(reader.ReadBytes(d1FileEntrySize).ToType<D1FileEntryBitpacked>());
+            fileEntries.Add(new D2FileEntry()
+            {
+                Reference = fileEntryBitpacked.Reference,
+                NumType = fileEntryBitpacked.NumType,
+                NumSubType = fileEntryBitpacked.NumSubType,
+                StartingBlockIndex = fileEntryBitpacked.StartingBlockIndex,
+                StartingBlockOffset = fileEntryBitpacked.StartingBlockOffset,
+                FileSize = fileEntryBitpacked.FileSize,
+            });
         }
 
         return fileEntries;
     }
+
+    //public List<D2FileEntry> GetFileEntries(TigerReader reader)
+    //{
+    //    reader.Seek(FileEntryTableOffset, SeekOrigin.Begin);
+
+    //    List<D2FileEntry> fileEntries = new();
+    //    int d2FileEntrySize = Marshal.SizeOf<D2FileEntryBitpacked>();
+    //    for (int i = 0; i < FileEntryTableCount; i++)
+    //    {
+    //        D2FileEntryBitpacked fileEntryBitpacked = reader.ReadBytes(d2FileEntrySize).ToType<D2FileEntryBitpacked>();
+    //        fileEntries.Add(new D2FileEntry(fileEntryBitpacked));
+    //    }
+
+    //    return fileEntries;
+    //}
 
     public List<D2BlockEntry> GetBlockEntries(TigerReader reader)
     {
@@ -136,6 +159,49 @@ public class Package : Tiger.Package
         nonce[1] ^= 0x26;
         nonce[11] ^= (byte)(Header.GetPackageId() & 0xFF);
         return nonce;
+    }
+}
+
+public struct D1FileEntry
+{
+    public TigerHash Reference;
+    public sbyte NumType;
+    public sbyte NumSubType;
+    public int StartingBlockIndex;
+    public int StartingBlockOffset;
+    public int FileSize;
+
+    public D1FileEntry(D1FileEntryBitpacked entryBitpacked)
+    {
+        // EntryA
+        Reference = new TigerHash(entryBitpacked.Reference);
+
+        // EntryB
+        NumType = (sbyte)(entryBitpacked.EntryB & 0xffff);
+        NumSubType = (sbyte)(entryBitpacked.EntryB >> 24);
+
+        // EntryC
+        StartingBlockIndex = (int)(entryBitpacked.BlockInfo & 0x3FFF);
+        StartingBlockOffset = (int)(((entryBitpacked.BlockInfo >> 14) & 0x3FFF) << 4);
+
+        // EntryD
+        FileSize = (int)((entryBitpacked.BlockInfo >> 28) & 0x3FFFFFFF);
+    }
+};
+
+[StructLayout(LayoutKind.Sequential)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F39E8080", 0x10)]
+public struct D1FileEntryBitpacked
+{
+    public uint Reference;
+    public uint EntryB;
+    public ulong BlockInfo;
+
+    public D1FileEntryBitpacked(uint reference, uint entryB, ulong blockInfo)
+    {
+        Reference = reference;
+        EntryB = entryB;
+        BlockInfo = blockInfo;
     }
 }
 
