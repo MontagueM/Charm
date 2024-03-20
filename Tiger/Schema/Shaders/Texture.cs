@@ -44,7 +44,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             if (_tag.Flags > 0 || TexHelper.Instance.IsCompressed(format))
             {
                 var gcnformat = GcnSurfaceFormatExtensions.GetFormat((ushort)_tag.GetFormat());
-                data = PS4SwizzleAlgorithm.Swizzle(data, _tag.Width, _tag.Height, gcnformat.BlockSize(), gcnformat.PixelBlockSize());
+                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, gcnformat.BlockSize(), gcnformat.PixelBlockSize());
             }
         }
         else
@@ -228,7 +228,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
 public struct STextureHeader
 {
     public uint DataSize;
-    [SchemaField(0x08, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x06, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public ushort ROIFormat;
 
