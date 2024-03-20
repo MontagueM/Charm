@@ -44,7 +44,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             if (_tag.Flags > 0 || TexHelper.Instance.IsCompressed(format))
             {
                 var gcnformat = GcnSurfaceFormatExtensions.GetFormat((ushort)_tag.GetFormat());
-                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, gcnformat.BlockSize(), gcnformat.PixelBlockSize());
+                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, gcnformat.PixelBlockSize(), gcnformat.BlockSize());
             }
         }
         else
