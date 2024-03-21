@@ -43,8 +43,8 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
             if (_tag.Flags > 0 || TexHelper.Instance.IsCompressed(format))
             {
-                var gcnformat = GcnSurfaceFormatExtensions.GetFormat((ushort)_tag.GetFormat());
-                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, gcnformat.PixelBlockSize(), gcnformat.BlockSize());
+                var gcnformat = GcnSurfaceFormatExtensions.GetFormat(_tag.ROIFormat);
+                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, gcnformat);
             }
         }
         else
@@ -69,8 +69,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
     public ScratchImage GetScratchImage()
     {
-        var format_unknown = _tag.GetFormat();
-        DXGI_FORMAT format = (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON ? (DXGI_FORMAT)(uint)format_unknown : GcnSurfaceFormatExtensions.ToDXGI((ushort)format_unknown));
+        DXGI_FORMAT format = _tag.GetFormat();
 
         byte[] final = GetDDSBytes(format);
         GCHandle gcHandle = GCHandle.Alloc(final, GCHandleType.Pinned);
@@ -264,14 +263,14 @@ public struct STextureHeader
     [SchemaField(0x3C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerFile? LargeTextureBuffer;
 
-    public object GetFormat()
+    public DXGI_FORMAT GetFormat()
     {
         switch (Strategy.CurrentStrategy)
         {
             case TigerStrategy.DESTINY1_RISE_OF_IRON:
-                return ROIFormat;
+                return GcnSurfaceFormatExtensions.ToDXGI(ROIFormat);
             default:
-                return Format;
+                return (DXGI_FORMAT)Format;
         }
     }
 }

@@ -1,24 +1,27 @@
 ﻿
 // From RawTex by daemon1
 using Arithmic;
+using static GcnSurfaceFormatExtensions;
 
 public static class PS4SwizzleAlgorithm
 {
     public static SwizzleType Type => SwizzleType.PS4;
 
-    public static byte[] Swizzle(byte[] data, int width, int height, int pixelBlockSize, int blockSize)
+    public static byte[] Swizzle(byte[] data, int width, int height, GcnSurfaceFormat format)
     {
-        return DoSwizzle(data, width, height, blockSize, pixelBlockSize, false);
+        return DoSwizzle(data, width, height, format, false);
     }
 
-    public static byte[] UnSwizzle(byte[] data, int width, int height, int pixelBlockSize, int blockSize)
+    public static byte[] UnSwizzle(byte[] data, int width, int height, GcnSurfaceFormat format)
     {
-        return DoSwizzle(data, width, height, blockSize, pixelBlockSize, true);
+        return DoSwizzle(data, width, height, format, true);
     }
 
-    private static byte[] DoSwizzle(byte[] data, int width, int height, int blockSize, int pixelBlockSize, bool unswizzle)
+    private static byte[] DoSwizzle(byte[] data, int width, int height, GcnSurfaceFormat format, bool unswizzle)
     {
         byte[] processed = new byte[data.Length];
+        int pixelBlockSize = format.PixelBlockSize();
+        int blockSize = format.BlockSize();
         int heightTexels = height / pixelBlockSize;
         int heightTexelsAligned = (heightTexels + 7) / 8;
         int widthTexels = width / pixelBlockSize;

@@ -14,6 +14,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 {
     private PackagePathsCache? _packagePathsCache;
     private Dictionary<uint, string> _activityNames = new();
+    private Dictionary<FileHash, TagClassHash> _d1Activities = new();
 
     public PackagePathsCache PackagePathsCache
     {
@@ -40,6 +41,9 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         _packagePathsCache = new PackagePathsCache(_strategy);
         LoadAllPackages();
         CacheAllActivityNames();
+
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            CacheAllD1Activites();
     }
 
     protected override void Reset()
@@ -164,7 +168,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         ConcurrentHashSet<FileHash> fileHashes = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
-        Parallel.ForEach(_packagesCache.Values, parallelOptions,  (package) =>
+        Parallel.ForEach(_packagesCache.Values, parallelOptions, (package) =>
         {
             fileHashes.UnionWith(package.GetAllHashes(schemaType));
         });
@@ -209,9 +213,14 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return "Activity name not found.";
     }
 
+    public Dictionary<FileHash, TagClassHash> GetD1Activities()
+    {
+        return _d1Activities;
+    }
+
     private async void CacheAllActivityNames()
     {
-        ConcurrentHashSet<SPackageActivityEntry> activityEntries = new();
+        ConcurrentHashSet<PackageActivityEntry> activityEntries = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
         await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
@@ -221,19 +230,38 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
         _activityNames = new Dictionary<uint, string>();
 
-        foreach (SPackageActivityEntry entry in activityEntries)
+        foreach (PackageActivityEntry entry in activityEntries)
         {
             if (_activityNames.ContainsKey(entry.TagHash.Hash32))
             {
-                if (entry.Name.Value.Length > _activityNames[entry.TagHash.Hash32].Length)
+                if (entry.Name.Length > _activityNames[entry.TagHash.Hash32].Length)
                 {
-                    _activityNames[entry.TagHash.Hash32] = entry.Name.Value;
+                    _activityNames[entry.TagHash.Hash32] = entry.Name;
                 }
             }
             else
             {
-                _activityNames.Add(entry.TagHash.Hash32, entry.Name.Value);
+                _activityNames.Add(entry.TagHash.Hash32, entry.Name);
             }
+        }
+    }
+
+    private async void CacheAllD1Activites()
+    {
+        ConcurrentHashSet<PackageActivityEntry> activityEntries = new();
+
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
+        {
+            activityEntries.UnionWith(package.GetAllActivities());
+        });
+
+        _d1Activities = new();
+
+        foreach (PackageActivityEntry entry in activityEntries)
+        {
+            Console.WriteLine($"{entry.TagHash} ({entry.TagClassHash}) : {entry.Name}");
+            _d1Activities.TryAdd(entry.TagHash, entry.TagClassHash);
         }
     }
 }

@@ -163,6 +163,8 @@ public struct D2Class_C9968080
 /// The one below the top reference, actually contains useful information.
 /// First of MapResources is what I call "ambient entities", second is always the static map.
 /// </summary>
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E0918080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E0918080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "01878080", 0x60)]
 public struct SBubbleDefinition
@@ -171,11 +173,13 @@ public struct SBubbleDefinition
     public DynamicArray<SMapContainerEntry> MapResources;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "67078080", 0x4)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C1848080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "03878080", 0x10)]
 public struct SMapContainerEntry
 {
-    [Tag64]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601), Tag64]
     public Tag<SMapContainer> MapContainer;
 }
 
@@ -183,16 +187,19 @@ public struct SMapContainerEntry
 /// A map resource, contains data used to make a map.
 /// This is quite similar to EntityResource, but with more children.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "548A8080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "548A8080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "07878080", 0x38)]
 public struct SMapContainer
 {
     public long FileSize;
     public long Unk08;
-    [SchemaField(0x28)]
+    [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SMapDataTableEntry> MapDataTables;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "09418080", 4)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B08B8080", 4)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "09878080", 4)]
 public struct SMapDataTableEntry

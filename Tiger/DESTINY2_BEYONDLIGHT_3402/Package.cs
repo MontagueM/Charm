@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 namespace Tiger.DESTINY2_BEYONDLIGHT_3402;
 
@@ -146,17 +145,22 @@ public struct PackageHeader : IPackageHeader
         return hash64List;
     }
 
-    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader)
+    public List<PackageActivityEntry> GetAllActivities(TigerReader reader)
     {
-        List<SPackageActivityEntry> activityEntries = new();
+        List<PackageActivityEntry> activityEntries = new();
 
         // todo this can be better if we had the package using schema deserialization properly
         // 0x30 is due to the indirection table which we skip
         for (int i = 0; i < ActivityTableCount; i++)
         {
             reader.Seek(ActivityTableOffset + 0x30 + 0x10 * i, SeekOrigin.Begin);
-            SPackageActivityEntry entry = SchemaDeserializer.Get().DeserializeSchema<SPackageActivityEntry>(reader);
-            activityEntries.Add(entry);
+            SD2PackageActivityEntry entry = SchemaDeserializer.Get().DeserializeSchema<SD2PackageActivityEntry>(reader);
+            activityEntries.Add(new PackageActivityEntry
+            {
+                TagHash = entry.TagHash,
+                TagClassHash = entry.TagClassHash,
+                Name = entry.Name.Value
+            });
         }
 
         return activityEntries;

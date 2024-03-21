@@ -17,7 +17,7 @@ using ConcurrentCollections;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
-using Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
+using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Audio;
@@ -984,24 +984,36 @@ public partial class TagListView : UserControl
         // Getting names
         ConcurrentDictionary<string, StringHash> nameHashes = new();
         ConcurrentDictionary<string, string> names = new();
-        if (Strategy.CurrentStrategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        switch (Strategy.CurrentStrategy)
         {
-            var valsChild = await PackageResourcer.Get().GetAllHashesAsync<D2Class_8B8E8080>();
-            Parallel.ForEach(valsChild, val =>
-            {
-                Tag<D2Class_8B8E8080> tag = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(val);
-                nameHashes.TryAdd(tag.TagData.DestinationName, tag.TagData.LocationName);
-                GlobalStrings.Get().AddStrings(tag.TagData.StringContainer);
-            });
-        }
-        else
-        {
-            var valsChild = await PackageResourcer.Get().GetAllHashesAsync<SUnkActivity_SK>();
-            Parallel.ForEach(valsChild, val =>
-            {
-                Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
-                GlobalStrings.Get().AddStrings(tag.TagData.LocalizedStrings);
-            });
+            case TigerStrategy.DESTINY1_RISE_OF_IRON:
+                var activities = PackageResourcer.Get().GetD1Activities();
+                Parallel.ForEach(activities, activity =>
+                {
+                    if (activity.Value == "16068080")
+                    {
+                        Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(activity.Key);
+                        GlobalStrings.Get().AddStrings(tag.TagData.LocalizedStrings);
+                    }
+                });
+                break;
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2601:
+                var valsChild = await PackageResourcer.Get().GetAllHashesAsync<SUnkActivity_SK>();
+                Parallel.ForEach(valsChild, val =>
+                {
+                    Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
+                    GlobalStrings.Get().AddStrings(tag.TagData.LocalizedStrings);
+                });
+                break;
+            default:
+                valsChild = await PackageResourcer.Get().GetAllHashesAsync<D2Class_8B8E8080>();
+                Parallel.ForEach(valsChild, val =>
+                {
+                    Tag<D2Class_8B8E8080> tag = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(val);
+                    nameHashes.TryAdd(tag.TagData.DestinationName, tag.TagData.LocationName);
+                    GlobalStrings.Get().AddStrings(tag.TagData.StringContainer);
+                });
+                break;
         }
 
         foreach (var keyValuePair in nameHashes)
@@ -1009,20 +1021,43 @@ public partial class TagListView : UserControl
             names[keyValuePair.Key] = GlobalStrings.Get().GetString(keyValuePair.Value);
         }
 
-        var vals = await PackageResourcer.Get().GetAllHashesAsync<IActivity>();
-
-        Parallel.ForEach(vals, val =>
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            var activityName = PackageResourcer.Get().GetActivityName(val);
-            var first = activityName.Split(".").First();
-            _allTagItems.Add(new TagItem
+            var activities = PackageResourcer.Get().GetD1Activities();
+
+            Parallel.ForEach(activities, val =>
             {
-                Hash = val,
-                Name = activityName,
-                Subname = names.ContainsKey(first) ? names[first] : "",
-                TagType = ETagListType.Activity
+                if (val.Value == "2E058080")
+                {
+                    var activityName = PackageResourcer.Get().GetActivityName(val.Key);
+                    var first = activityName.Split(".").First();
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = val.Key,
+                        Name = activityName,
+                        Subname = names.ContainsKey(first) ? names[first] : "",
+                        TagType = ETagListType.Activity
+                    });
+                }
+
             });
-        });
+        }
+        else
+        {
+            var vals = await PackageResourcer.Get().GetAllHashesAsync<IActivity>();
+            Parallel.ForEach(vals, val =>
+            {
+                var activityName = PackageResourcer.Get().GetActivityName(val);
+                var first = activityName.Split(".").First();
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = val,
+                    Name = activityName,
+                    Subname = names.ContainsKey(first) ? names[first] : "",
+                    TagType = ETagListType.Activity
+                });
+            });
+        }
     }
 
     private void LoadActivity(FileHash fileHash)
@@ -1506,7 +1541,7 @@ public partial class TagListView : UserControl
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
         WwiseSound sound = FileResourcer.Get().GetFile<WwiseSound>(info.Hash);
-        string saveDirectory = config.GetExportSavePath() + $"/Sound/{(_weaponItemName == null ?  "" : $"{_weaponItemName}/")}{info.Hash}_{info.Name}/";
+        string saveDirectory = config.GetExportSavePath() + $"/Sound/{(_weaponItemName == null ? "" : $"{_weaponItemName}/")}{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         sound.ExportSound(saveDirectory);
     }

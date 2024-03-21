@@ -19,15 +19,10 @@ public struct PackageHeader : IPackageHeader
     public uint BlockEntryTableCount;
     [SchemaField(0xD4)]
     public uint BlockEntryTableOffset;
-
-    //pub named_tag_table_size: u32,
-    //pub named_tag_table_offset: u32,
-    //pub named_tag_table_hash: [u8; 20],
-
     [SchemaField(0xEC)]
-    public uint NamedTagTableSize;
+    public uint NamedTagTableCount;
     [SchemaField(0xF0)]
-    public GlobalPointer<SD1PackageActivityEntry> NamedTagTable;
+    public uint NamedTagTableOffset;
 
     public ushort GetPackageId()
     {
@@ -99,18 +94,41 @@ public struct PackageHeader : IPackageHeader
         return new List<SHash64Definition>();
     }
 
-    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader)
+    public List<PackageActivityEntry> GetAllActivities(TigerReader reader)
     {
-        return new List<SPackageActivityEntry>();
+        reader.Seek(NamedTagTableOffset, SeekOrigin.Begin);
+
+        List<PackageActivityEntry> activityEntries = new();
+        int d1ActivityEntrySize = Marshal.SizeOf<SD1PackageActivityEntry>();
+        for (int i = 0; i < NamedTagTableCount; i++)
+        {
+            SD1PackageActivityEntry activityEntry = reader.ReadBytes(d1ActivityEntrySize).ToType<SD1PackageActivityEntry>();
+            string Name = reader.ReadNullTerminatedString();
+
+            // 16068080 is SUnkActivity_ROI
+            // 2E058080 is SActivity_ROI
+            if (activityEntry.TagClassHash == 0x80800616 || activityEntry.TagClassHash == 0x8080052E)
+            {
+                activityEntries.Add(new PackageActivityEntry()
+                {
+                    TagHash = new FileHash(activityEntry.TagHash),
+                    TagClassHash = new TagClassHash(activityEntry.TagClassHash),
+                    Name = Name,
+                });
+            }
+
+            reader.Seek(NamedTagTableOffset + (0x44 * i), SeekOrigin.Begin);
+        }
+
+        return activityEntries;
     }
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x44)]
 public struct SD1PackageActivityEntry
 {
-    public FileHash TagHash;
-    public TagClassHash TagClassHash;
-    //public StringNullTerminated Name;
+    public uint TagHash; // Reading these as FileHash and TagClassHash causes a crash for some reason...?
+    public uint TagClassHash;
 }
 
 [StrategyClass(TigerStrategy.DESTINY1_RISE_OF_IRON)]

@@ -549,7 +549,6 @@ public class StringReference64 : ITigerDeserialize
 /// <summary>
 /// A string that ends when a null character is reached
 /// </summary>
-//[SchemaType(0x20)]
 //public class StringNullTerminated : ITigerDeserialize
 //{
 //    public string? Value;
