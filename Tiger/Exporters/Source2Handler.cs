@@ -89,7 +89,7 @@ public class Source2Handler
                 File.WriteAllText($"{savePath}/{hash}.vmdl", text);
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
 
         }
@@ -149,7 +149,7 @@ public class Source2Handler
             vmat.AppendLine($"\tF_ALPHA_TEST 1");
             vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
-            if(materialHeader.Unk0C != 0)
+            if (materialHeader.Unk0C != 0)
             {
                 vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
             }
@@ -255,26 +255,15 @@ public class Source2Handler
             dynamic data = null;
             string cbType = isVertexShader ? "vs_cb" : "cb";
 
-            if(isVertexShader)
+            if (isVertexShader)
             {
-                if (cbuffer.Count == materialHeader.UnkA0.Count)
-                {
-                    data = materialHeader.UnkA0;
-                }
-                else if (cbuffer.Count == materialHeader.UnkC0.Count)
-                {
-                    data = materialHeader.UnkC0;
-                }
+                data = materialHeader.VS_CBuffers;
             }
             else
             {
-                if (cbuffer.Count == materialHeader.Unk2E0.Count)
+                if (materialHeader.PSVector4Container.IsInvalid())
                 {
-                    data = materialHeader.Unk2E0;
-                }
-                else if (cbuffer.Count == materialHeader.Unk300.Count)
-                {
-                    data = materialHeader.Unk300;
+                    data = materialHeader.PS_CBuffers;
                 }
                 else
                 {
@@ -297,7 +286,7 @@ public class Source2Handler
                     }
                 }
             }
-            
+
             for (int i = 0; i < cbuffer.Count; i++)
             {
                 if (data == null)

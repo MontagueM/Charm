@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
@@ -129,61 +127,13 @@ public class UsfConverter
             dynamic data = null;
             if (bIsVertexShader)
             {
-                if (cbuffer.Count == material.Unk90.Count)
-                {
-                    data = material.Unk90;
-                }
-                else if (cbuffer.Count == material.UnkA0.Count)
-                {
-                    data = material.UnkA0;
-                }
-                // else if (cbuffer.Count == material.TagData.UnkB0.Count)
-                // {
-                //     data = material.TagData.UnkB0;
-                // }
-                else if (cbuffer.Count == material.UnkC0.Count)
-                {
-                    data = material.UnkC0;
-                }
-                else
-                {
-
-                    // if (material.TagData.VSVector4Container.Hash != 0xffff_ffff)
-                    // {
-                    //     // Try the Vector4 storage file
-                    //     DestinyFile container = new DestinyFile(PackageHandler.GetEntryReference(material.TagData.VSVector4Container));
-                    //     byte[] containerData = container.GetData();
-                    //     int num = containerData.Length / 16;
-                    //     if (cbuffer.Count == num)
-                    //     {
-                    //         List<Vector4> float4s = new List<Vector4>();
-                    //         for (int i = 0; i < containerData.Length / 16; i++)
-                    //         {
-                    //             float4s.Add(StructConverter.ToStructure<Vector4>(containerData.Skip(i*16).Take(16).ToArray()));
-                    //         }
-
-                    //         data = float4s;
-                    //     }
-                    // }
-                }
+                data = material.VS_CBuffers;
             }
             else
             {
-                if (cbuffer.Count == material.Unk2D0.Count)
+                if (material.PSVector4Container.IsInvalid())
                 {
-                    data = material.Unk2D0;
-                }
-                else if (cbuffer.Count == material.Unk2E0.Count)
-                {
-                    data = material.Unk2E0;
-                }
-                // else if (cbuffer.Count == material.Unk2F0.Count)
-                // {
-                //     data = material.Unk2F0;
-                // }
-                else if (cbuffer.Count == material.Unk300.Count)
-                {
-                    data = material.Unk300;
+                    data = material.PS_CBuffers;
                 }
                 else
                 {
@@ -204,7 +154,6 @@ public class UsfConverter
                             data = float4s;
                         }
                     }
-
                 }
             }
 
