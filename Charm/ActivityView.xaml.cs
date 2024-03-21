@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using Tiger;
 using Tiger.Schema.Activity;
-
 namespace Charm;
 
 public partial class ActivityView : UserControl

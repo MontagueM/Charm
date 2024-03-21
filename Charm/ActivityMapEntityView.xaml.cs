@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
-using NVorbis.Contracts;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
-using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Static;
 
@@ -49,7 +44,7 @@ public partial class ActivityMapEntityView : UserControl
         {
             DisplayEntBubble displayMap = new();
             displayMap.Name = $"{bubble.Name}";
-            displayMap.Hash = bubble.MapReference.TagData.ChildMapReference.Hash;
+            displayMap.Hash = bubble.ChildMapReference.Hash;
             displayMap.LoadType = DisplayEntBubble.Type.Bubble;
             displayMap.Data = displayMap;
             maps.Add(displayMap);
@@ -67,7 +62,7 @@ public partial class ActivityMapEntityView : UserControl
         else
         {
             var vals = PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>();
-            foreach(var val in vals)
+            foreach (var val in vals)
             {
                 Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
                 string activityName = PackageResourcer.Get().GetActivityName(activity.FileHash).Split(':')[1];
@@ -91,7 +86,7 @@ public partial class ActivityMapEntityView : UserControl
     private void GetBubbleContentsButton_OnClick(object sender, RoutedEventArgs e)
     {
         DisplayEntBubble tagData = (sender as Button).Tag as DisplayEntBubble; //apparently this works..?
-        if(tagData.LoadType == DisplayEntBubble.Type.Bubble)
+        if (tagData.LoadType == DisplayEntBubble.Type.Bubble)
         {
             FileHash hash = new FileHash(tagData.Hash);
             Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
@@ -100,7 +95,7 @@ public partial class ActivityMapEntityView : UserControl
         else
         {
             FileHash hash = new FileHash(tagData.Hash);
-            if(Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+            if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
             {
                 FileHash parentHash = new FileHash(tagData.ParentHash);
                 IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(parentHash);
@@ -111,7 +106,7 @@ public partial class ActivityMapEntityView : UserControl
                 IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(hash);
                 PopulateActivityEntityContainerList(activity);
             }
-            
+
         }
     }
 
@@ -137,7 +132,7 @@ public partial class ActivityMapEntityView : UserControl
 
                     ConcurrentBag<FileHash> sMapDataTables = new ConcurrentBag<FileHash>(map.TagData.MapDataTables.Select(entry => entry.MapDataTable.Hash));
                     PopulateEntityList(sMapDataTables.ToList(), null);
-                }  
+                }
                 else
                 {
                     PopulateEntityList(tagData.DataTables, tagData.WorldIDs);
@@ -151,14 +146,14 @@ public partial class ActivityMapEntityView : UserControl
         ConcurrentBag<DisplayEntityMap> items = new ConcurrentBag<DisplayEntityMap>();
         Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
         {
-            if (m.MapContainer.TagData.MapDataTables.Count > 0)
+            if (m.GetMapContainer().TagData.MapDataTables.Count > 0)
             {
                 DisplayEntityMap entityMap = new();
-                entityMap.Name = $"{m.MapContainer.Hash}";
-                entityMap.Hash = m.MapContainer.Hash;
-                entityMap.Count = m.MapContainer.TagData.MapDataTables.Count;
+                entityMap.Name = $"{m.GetMapContainer().Hash}";
+                entityMap.Hash = m.GetMapContainer().Hash;
+                entityMap.Count = m.GetMapContainer().TagData.MapDataTables.Count;
                 entityMap.EntityType = DisplayEntityMap.Type.Map;
-                entityMap.DataTables = m.MapContainer.TagData.MapDataTables.Select(entry => entry.MapDataTable.Hash).ToList();
+                entityMap.DataTables = m.GetMapContainer().TagData.MapDataTables.Select(entry => entry.MapDataTable.Hash).ToList();
                 entityMap.Data = entityMap;
 
                 items.Add(entityMap);
@@ -179,7 +174,7 @@ public partial class ActivityMapEntityView : UserControl
 
         foreach (var entry in activity.EnumerateActivityEntities(UnkActivity))
         {
-            if(entry.DataTables.Count > 0)
+            if (entry.DataTables.Count > 0)
             {
                 DisplayEntityMap entityMap = new();
                 entityMap.Name = $"{entry.BubbleName} {entry.ActivityPhaseName2}: {entry.DataTables.Count} Entries";
@@ -229,9 +224,9 @@ public partial class ActivityMapEntityView : UserControl
             Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entityHash.Key);
             if (entity.HasGeometry())
             {
-                foreach(var namedEnt in entityHash.Value)
+                foreach (var namedEnt in entityHash.Value)
                 {
-                    if(worldIDs is not null && worldIDs.ContainsKey(namedEnt))
+                    if (worldIDs is not null && worldIDs.ContainsKey(namedEnt))
                     {
                         //This is gross
                         if (!items.Any(item => item.CompareByName(new DisplayEntityList { Name = $"{worldIDs[namedEnt].Keys.ElementAt(0)}:{worldIDs[namedEnt].Values.ElementAt(0)}" })))
@@ -319,7 +314,7 @@ public partial class ActivityMapEntityView : UserControl
         });
 
         Tiger.Exporters.Exporter.Get().Export();
-        
+
         MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>
@@ -373,7 +368,7 @@ public partial class ActivityMapEntityView : UserControl
                 }
                 else
                     dynamicPointScene.AddEntityPoints(entry);
-                
+
                 switch (entry.DataResource.GetValue(dataTable.GetReader()))
                 {
                     case SMapSkyEntResource skyResource:
@@ -509,7 +504,7 @@ public partial class ActivityMapEntityView : UserControl
             {
                 foreach (DisplayEntityMap item in items)
                 {
-                    if(item.EntityType == DisplayEntityMap.Type.Map)
+                    if (item.EntityType == DisplayEntityMap.Type.Map)
                     {
                         Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(new FileHash(item.Hash));
                         foreach (var datatable in tag.TagData.MapDataTables)
@@ -628,12 +623,12 @@ public partial class ActivityMapEntityView : UserControl
                     foreach (var entry in mapDataTable.TagData.DataEntries)
                     {
                         Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                        if(entity.HasGeometry())
+                        if (entity.HasGeometry())
                         {
                             List<Entity> entities = new List<Entity> { entity };
                             entities.AddRange(entity.GetEntityChildren());
                             EntityView.Export(entities, entity.Hash, ExportTypeFlag.Full);
-                        }     
+                        }
                     }
                     MainWindow.Progress.CompleteStage();
                 }

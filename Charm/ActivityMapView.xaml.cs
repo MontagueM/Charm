@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO.Packaging;
 using System.Linq;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
-using HelixToolkit.Wpf.SharpDX;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
-using Tiger.Schema.Entity;
 
 namespace Charm;
 
@@ -39,7 +33,7 @@ public partial class ActivityMapView : UserControl
         {
             DisplayBubble displayMap = new();
             displayMap.Name = bubble.Name;
-            displayMap.Hash = bubble.MapReference.TagData.ChildMapReference.Hash;
+            displayMap.Hash = bubble.ChildMapReference.Hash;
             maps.Add(displayMap);
         }
         // foreach (var mapEntry in activity.TagData.Unk50)
@@ -69,26 +63,60 @@ public partial class ActivityMapView : UserControl
     private void PopulateStaticList(Tag<SBubbleDefinition> bubbleMaps)
     {
         ConcurrentBag<DisplayStaticMap> items = new ConcurrentBag<DisplayStaticMap>();
-        Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
-        {
-            if (m.MapContainer.TagData.MapDataTables.Count > 1)
-            {
-                Tag<SMapDataTable> mapDataTable = m.MapContainer.TagData.MapDataTables[1].MapDataTable;
-                if (mapDataTable.TagData.DataEntries.Count > 0)
-                {
-                    StaticMapData? tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent.TagData.StaticMap;
-                    if (tag == null)
-                        return; // todo sk broke this
 
-                    items.Add(new DisplayStaticMap
+        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
+            {
+                if (m.GetMapContainer().TagData.MapDataTables.Count > 1)
+                {
+                    Tag<SMapDataTable> mapDataTable = m.GetMapContainer().TagData.MapDataTables[1].MapDataTable;
+                    if (mapDataTable.TagData.DataEntries.Count > 0)
                     {
-                        Hash = m.MapContainer.Hash,
-                        Name = $"{m.MapContainer.Hash}: {tag.TagData.Instances.Count} instances, {tag.TagData.Statics.Count} uniques",
-                        Instances = tag.TagData.Instances.Count
-                    });
+                        StaticMapData? tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent.TagData.StaticMap;
+                        if (tag == null)
+                            return; // todo sk broke this
+
+                        items.Add(new DisplayStaticMap
+                        {
+                            Hash = m.GetMapContainer().Hash,
+                            Name = $"{m.GetMapContainer().Hash}: {tag.TagData.Instances.Count} instances, {tag.TagData.Statics.Count} uniques",
+                            Instances = tag.TagData.Instances.Count
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
+        else
+        {
+            Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
+            {
+                if (m.GetMapContainer().TagData.MapDataTables.Count > 1)
+                {
+                    foreach (var dataTable in m.GetMapContainer().TagData.MapDataTables)
+                    {
+                        foreach (var entry in dataTable.MapDataTable.TagData.DataEntries)
+                        {
+                            if (entry.DataResource.GetValue(dataTable.MapDataTable.GetReader()) is SMapDataResource resource)
+                            {
+                                if (resource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData is not null)
+                                {
+                                    var d1StaticMapData = resource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData;
+                                    items.Add(new DisplayStaticMap
+                                    {
+                                        Hash = d1StaticMapData.Hash,
+                                        Name = $"{d1StaticMapData.Hash}"
+                                        //Name = $"{m.GetMapContainer().Hash}: {tag.TagData.Instances.Count} instances, {tag.TagData.Statics.Count} uniques",
+                                        //Instances = tag.TagData.Instances.Count
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         var sortedItems = new List<DisplayStaticMap>(items);
         sortedItems.Sort((a, b) => b.Instances.CompareTo(a.Instances));
         sortedItems.Insert(0, new DisplayStaticMap
@@ -146,7 +174,7 @@ public partial class ActivityMapView : UserControl
         // MainWindow.Progress.CompleteStage();
 
         Tiger.Exporters.Exporter.Get().Export();
-        
+
         MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>

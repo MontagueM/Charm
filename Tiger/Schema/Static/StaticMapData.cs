@@ -48,7 +48,7 @@ public class StaticMapData : Tag<SStaticMapData>
     }
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "6D968080", 0xA0)] // TEMP (FIX ME)
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "B4088080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D968080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "AD938080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AD938080", 0xC0)]
@@ -57,31 +57,52 @@ public struct SStaticMapData
     public long FileSize;
     [SchemaField(0x18)]
     public Tag<SOcclusionBounds> ModelOcclusionBounds;
-    [SchemaField(0x40)]
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public Tag<SD1StaticMapData> D1StaticMapData; // Contains the actual static map data in ROI
+
+    [SchemaField(0x40, TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SStaticMeshInstanceTransform> Instances;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     public DynamicArray<SUnknownUInt> Unk50;
-    [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<SStaticMeshHash> Statics;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     public DynamicArray<SStaticMeshInstanceMap> InstanceCounts;
-    [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk98;
-    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 UnkA0; // likely a bound corner
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     public Vector4 UnkB0; // likely the other bound corner
 }
 
-[SchemaStruct("0B008080", 0x04)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "751B8080", 0xD8)]
+public struct SD1StaticMapData
+{
+
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "0B008080", 0x04)]
 public struct SUnknownUInt
 {
     public uint Unk00;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "83058080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "71968080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B1938080", 0x18)]
 public struct SOcclusionBounds
@@ -90,6 +111,7 @@ public struct SOcclusionBounds
     public DynamicArray<SMeshInstanceOcclusionBounds> InstanceBounds;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E2078080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "73968080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B3938080", 0x30)]
 public struct SMeshInstanceOcclusionBounds
@@ -179,8 +201,19 @@ public struct SBubbleDefinition
 public struct SMapContainerEntry
 {
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public Tag<SMapContainer> MapContainerROI;
+
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601), Tag64]
     public Tag<SMapContainer> MapContainer;
+
+    public Tag<SMapContainer> GetMapContainer()
+    {
+        if (MapContainerROI != null)
+            return MapContainerROI;
+        else
+            return MapContainer;
+    }
 }
 
 /// <summary>
@@ -210,6 +243,7 @@ public struct SMapDataTableEntry
 /// <summary>
 /// A map data table, containing data entries.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A2098080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D6998080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "83988080", 0x18)]
 public struct SMapDataTable
@@ -222,15 +256,16 @@ public struct SMapDataTable
 /// <summary>
 /// A data entry. Can be static maps, entities, etc. with a defined world transform.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "06048080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D8998080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "85988080", 0x90)]
 public struct SMapDataEntry
 {
     // for now we'll process both entities as if they were the same
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true), NoLoad]
     public Entity.Entity EntitySK;
-    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 Rotation;
     public Vector4 Translation;
@@ -238,9 +273,11 @@ public struct SMapDataEntry
     public Entity.Entity EntityWQ;
     [SchemaField(0x68)]
     public uint Unk68;
+    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public ulong WorldID;
-    [SchemaField(0x78)]
+    [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public ResourcePointer DataResource;
 
     public FileHash GetEntityHash()
@@ -255,16 +292,19 @@ public struct SMapDataEntry
 /// <summary>
 /// Data resource containing a static map.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EA1A8080", 0x14)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B3718080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C96C8080", 0x18)]
 public struct SMapDataResource
 {
-    [SchemaField(0x8)]
+    [SchemaField(0x8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public TigerHash Unk08;
-    [SchemaField(0x10)]
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag<SStaticMapParent> StaticMapParent;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C61A8080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F46E8080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "0D6A8080", 0x30)]
 public struct SStaticMapParent
@@ -272,7 +312,7 @@ public struct SStaticMapParent
     // no filesize
     [SchemaField(0x8)]
     public StaticMapData StaticMap;  // could make it StaticMapData but dont want it to load it, could have a NoLoad option
-    [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x2C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerHash Unk2C;
 }

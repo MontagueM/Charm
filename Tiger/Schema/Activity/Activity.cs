@@ -6,7 +6,7 @@ namespace Tiger.Schema.Activity
     public struct Bubble
     {
         public string Name;
-        public Tag<SBubbleParent> MapReference;
+        public Tag<SBubbleDefinition> ChildMapReference;
     }
 
     public struct ActivityEntities
@@ -39,23 +39,19 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
 
         public IEnumerable<Bubble> EnumerateBubbles()
         {
-            //for (int bubbleIndex = 0; bubbleIndex < _tag.Bubbles.Count; bubbleIndex++)
-            //{
-            //    var bubble = _tag.Bubbles[bubbleIndex];
-            //    if (bubble.MapReference is null ||
-            //        bubble.MapReference.TagData.ChildMapReference == null)
-            //    {
-            //        continue;
-            //    }
-            //    yield return new Bubble { Name = GetBubbleNameFromBubbleIndex(bubbleIndex), MapReference = bubble.MapReference };
-            //}
-            yield return new Bubble();
+            for (int bubbleIndex = 0; bubbleIndex < _tag.Bubbles.Count; bubbleIndex++)
+            {
+                var bubble = _tag.Bubbles[bubbleIndex];
+                if (bubble.ChildMapReference is null)
+                    continue;
+
+                yield return new Bubble { Name = GetBubbleNameFromBubbleIndex(bubbleIndex), ChildMapReference = bubble.ChildMapReference };
+            }
         }
 
         private string GetBubbleNameFromBubbleIndex(int index)
         {
-            return "";
-            //return GlobalStrings.Get().GetString(_tag.LocationNames.TagData.BubbleNames.First(e => e.BubbleIndex == index).BubbleName);
+            return GlobalStrings.Get().GetString(_tag.LocationNames.TagData.BubbleNames.First(e => e.BubbleIndex == index).BubbleName);
         }
 
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
@@ -158,7 +154,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
                 {
                     continue;
                 }
-                yield return new Bubble { Name = GetBubbleNameFromBubbleIndex(bubbleIndex), MapReference = bubble.MapReference };
+                yield return new Bubble { Name = GetBubbleNameFromBubbleIndex(bubbleIndex), ChildMapReference = bubble.MapReference.TagData.ChildMapReference };
             }
         }
 
@@ -267,7 +263,7 @@ namespace Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307
                     {
                         continue;
                     }
-                    yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), MapReference = mapReference.MapReference };
+                    yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
                 }
             }
         }
@@ -313,7 +309,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                     {
                         continue;
                     }
-                    yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), MapReference = mapEntry.Unk30 };
+                    yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapEntry.Unk30.TagData.ChildMapReference };
                 }
                 else
                 {
@@ -325,7 +321,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                         {
                             continue;
                         }
-                        yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), MapReference = mapReference.MapReference };
+                        yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
                     }
 
                 }

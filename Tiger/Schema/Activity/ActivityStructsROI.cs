@@ -2,12 +2,12 @@
 
 namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2E058080", 0x88)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2E058080", 0x28)]
 public struct SActivity_ROI
 {
     public long FileSize;
-    public Tag<S62998080> LocationNames;
-    public Tag<S80978080> Unk0C;
+    public Tag<S36068080> LocationNames;
+    [SchemaField(0x10)]
     public DynamicArray<S0A418080> Bubbles;
 }
 
@@ -17,48 +17,42 @@ public struct S0A418080
     public Tag<SBubbleDefinition> ChildMapReference;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "62998080", 0x88)]
-public struct S62998080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "36068080", 0x38)]
+public struct S36068080
 {
     public long FileSize;
     public StringPointer ActivityDevName;
-    public DynamicArray<SC4988080> BubbleNames;
-    public DynamicArray<SC2988080> Unk30;
+    public StringHash Unk10; // unsure if string hash
+    [SchemaField(0x18)]
+    public DynamicArray<SDB068080> BubbleNames;
+    public DynamicArray<S7D088080> Unk30;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C4988080", 0x18)]
-public struct SC4988080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DB068080", 0x18)]
+public struct SDB068080
 {
     public TigerHash Unk00;
     public TigerHash Unk04;
     public StringHash BubbleName;
     public short Unk0C;
     public short ThisIndex;
-    public int BubbleIndex;  // index to S537D8080 in SActivity_SK
+    public int BubbleIndex;  // index to S0A418080 in SActivity_ROI
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C2988080", 0x50)]
-public struct SC2988080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7D088080", 0xAC)]
+public struct S7D088080
 {
     public StringHash BubbleName;
-    public int CumulativeOffset;
-    public DynamicArray<S9C9B8080> Unk08;
-    public DynamicArray<S9C9B8080> Unk18;
-    public int Unk28;
-    [SchemaField(0x48)]
-    public int ThisIndex;
+    //[SchemaField(0x18)]
+    //public DynamicArray<S42048080> Unk18;
+
+    // Bunch of Vec4s for some reason
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "9C9B8080", 2)]
-public struct S9C9B8080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "42048080", 2)]
+public struct S42048080
 {
     public short Unk00;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "80978080", 0x88)]
-public struct S80978080
-{
-    public long FileSize;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "16068080", 0x68)]
