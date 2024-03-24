@@ -6,7 +6,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 public struct SActivity_SK
 {
     public long FileSize;
-    public Tag<S36068080> LocationNames;
+    public Tag<S62998080> LocationNames;
     public Tag<S80978080> Unk0C;
     public DynamicArray<S537D8080> Bubbles;
 }
@@ -18,19 +18,17 @@ public struct S537D8080
     public Tag<SBubbleParent> MapReference;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "36068080", 0x38)]
-public struct S36068080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "62998080", 0x88)]
+public struct S62998080
 {
     public long FileSize;
     public StringPointer ActivityDevName;
-    public StringHash Unk10; // unsure if string hash
-    [SchemaField(0x18)]
-    public DynamicArray<SDB068080> BubbleNames;
+    public DynamicArray<SC4988080> BubbleNames;
     public DynamicArray<SC2988080> Unk30;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DB068080", 0x18)]
-public struct SDB068080
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C4988080", 0x18)]
+public struct SC4988080
 {
     public TigerHash Unk00;
     public TigerHash Unk04;

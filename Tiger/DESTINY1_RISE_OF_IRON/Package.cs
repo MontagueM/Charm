@@ -99,10 +99,10 @@ public struct PackageHeader : IPackageHeader
         reader.Seek(NamedTagTableOffset, SeekOrigin.Begin);
 
         List<PackageActivityEntry> activityEntries = new();
-        int d1ActivityEntrySize = Marshal.SizeOf<SD1PackageActivityEntry>();
+        int d1ActivityEntrySize = Marshal.SizeOf<SPackageActivityEntry_D1>();
         for (int i = 0; i < NamedTagTableCount; i++)
         {
-            SD1PackageActivityEntry activityEntry = reader.ReadBytes(d1ActivityEntrySize).ToType<SD1PackageActivityEntry>();
+            SPackageActivityEntry_D1 activityEntry = reader.ReadBytes(d1ActivityEntrySize).ToType<SPackageActivityEntry_D1>();
             string Name = reader.ReadNullTerminatedString();
 
             // 16068080 is SUnkActivity_ROI
@@ -125,7 +125,7 @@ public struct PackageHeader : IPackageHeader
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x44)]
-public struct SD1PackageActivityEntry
+public struct SPackageActivityEntry_D1
 {
     public uint TagHash; // Reading these as FileHash and TagClassHash causes a crash for some reason...?
     public uint TagClassHash;

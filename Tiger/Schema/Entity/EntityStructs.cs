@@ -97,15 +97,18 @@ public struct D2Class_069B8080  // Entity resource
     public ResourcePointer Unk10; // this isnt any of the ones in Entity.Load in beyond light
     public ResourcePointer Unk18;
 
-    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArrayUnloaded<D2Class_7C908080> ResourceTable40;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArrayUnloaded<D2Class_6E908080> ResourceTable60;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag UnkHash80;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     public Tag UnkHash84;  // 819A8080
     // Rest is unknown
 }

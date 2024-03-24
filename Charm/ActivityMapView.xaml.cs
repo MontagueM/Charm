@@ -91,26 +91,24 @@ public partial class ActivityMapView : UserControl
         {
             Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
             {
-                if (m.GetMapContainer().TagData.MapDataTables.Count > 1)
+                foreach (var dataTable in m.GetMapContainer().TagData.MapDataTables)
                 {
-                    foreach (var dataTable in m.GetMapContainer().TagData.MapDataTables)
+                    foreach (var entry in dataTable.MapDataTable.TagData.DataEntries)
                     {
-                        foreach (var entry in dataTable.MapDataTable.TagData.DataEntries)
+                        if (entry.DataResource.GetValue(dataTable.MapDataTable.GetReader()) is SMapDataResource resource)
                         {
-                            if (entry.DataResource.GetValue(dataTable.MapDataTable.GetReader()) is SMapDataResource resource)
+                            if (resource.StaticMapParent is null
+                            || resource.StaticMapParent.TagData.StaticMap is null
+                            || resource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData is null)
+                                continue;
+
+                            var tag = resource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData;
+                            items.Add(new DisplayStaticMap
                             {
-                                if (resource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData is not null)
-                                {
-                                    var d1StaticMapData = resource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData;
-                                    items.Add(new DisplayStaticMap
-                                    {
-                                        Hash = d1StaticMapData.Hash,
-                                        Name = $"{d1StaticMapData.Hash}"
-                                        //Name = $"{m.GetMapContainer().Hash}: {tag.TagData.Instances.Count} instances, {tag.TagData.Statics.Count} uniques",
-                                        //Instances = tag.TagData.Instances.Count
-                                    });
-                                }
-                            }
+                                Hash = m.GetMapContainer().Hash,
+                                Name = $"{m.GetMapContainer().Hash}: {tag.TagData.InstanceCounts} instances",
+                                Instances = tag.TagData.InstanceCounts
+                            });
                         }
                     }
                 }
@@ -123,7 +121,9 @@ public partial class ActivityMapView : UserControl
         {
             Name = "Select all"
         });
-        StaticList.ItemsSource = sortedItems;
+        // Shouldnt be a problem in D2, but in D1 a map container can have multiple static map parents
+        // it still exports fine (I think) but having multiple of the same map container entries can cause info.cfg read/write crashes
+        StaticList.ItemsSource = sortedItems.DistinctBy(x => x.Hash);
     }
 
     public async void ExportFull(ExportInfo info)

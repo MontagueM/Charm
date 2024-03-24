@@ -9,6 +9,7 @@ public class StaticPart : MeshPart
     {
         IndexOffset = terrainPartEntry.IndexOffset;
         IndexCount = terrainPartEntry.IndexCount;
+        LodCategory = (ELodCategory)terrainPartEntry.DetailLevel;
         PrimitiveType = PrimitiveType.TriangleStrip;
     }
 
@@ -16,6 +17,7 @@ public class StaticPart : MeshPart
     {
         IndexOffset = staticPartEntry.IndexOffset;
         IndexCount = staticPartEntry.IndexCount;
+        LodCategory = (ELodCategory)staticPartEntry.DetailLevel;
         PrimitiveType = (PrimitiveType)staticPartEntry.PrimitiveType;
     }
 
@@ -23,7 +25,34 @@ public class StaticPart : MeshPart
     {
         IndexOffset = decalPartEntry.IndexOffset;
         IndexCount = decalPartEntry.IndexCount;
+        LodCategory = (ELodCategory)decalPartEntry.LODLevel;
         PrimitiveType = (PrimitiveType)decalPartEntry.PrimitiveType;
+    }
+
+    public StaticPart(SStaticMeshData_D1 staticPartEntry) : base()
+    {
+        IndexOffset = staticPartEntry.IndexOffset;
+        IndexCount = staticPartEntry.IndexCount;
+        LodCategory = (ELodCategory)staticPartEntry.DetailLevel;
+        PrimitiveType = (PrimitiveType)staticPartEntry.PrimitiveType;
+    }
+
+    public void GetAllData(SStaticMeshData_D1 mesh) // D1
+    {
+        Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
+        // Get unique vertex indices we need to get data for
+        HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
+        foreach (UIntVector3 index in Indices)
+        {
+            uniqueVertexIndices.Add(index.X);
+            uniqueVertexIndices.Add(index.Y);
+            uniqueVertexIndices.Add(index.Z);
+        }
+        VertexIndices = uniqueVertexIndices.ToList();
+
+        // Have to call it like this b/c we don't know the format of the vertex data here
+        mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices1 != null ? mesh.Vertices1.TagData.Stride : -1, false);
+        mesh.Vertices1?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices0.TagData.Stride, false);
     }
 
     public void GetAllData(SStaticMeshBuffers buffers, SStaticMesh container)

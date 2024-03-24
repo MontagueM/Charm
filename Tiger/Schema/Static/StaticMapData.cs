@@ -1,6 +1,9 @@
-﻿using Tiger.Exporters;
+﻿using System.Numerics;
+using System.Runtime.InteropServices;
+using Tiger.Exporters;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
+using Tiger.Schema.Static;
 
 namespace Tiger.Schema;
 
@@ -8,6 +11,162 @@ public class Map : Tag<SMapContainer>
 {
     public Map(FileHash fileHash) : base(fileHash)
     {
+    }
+}
+
+public class StaticMapData_D1 : Tag<SStaticMapData_D1>
+{
+    public StaticMapData_D1(FileHash hash) : base(hash)
+    {
+    }
+
+    // Statics in D1 aren't there own tag, the data for them is just shoved into a table, so the 'Hash' that we will
+    // assign to them will just be their Vertices0 hash.
+    // Static tables will have multiple duplicate meshes since they are baked into the map.
+    // Each static can have multiple parts that use the same Vertices0 data, so instead of filtering out duplicate hashes,
+    // we will filter out duplicate entries that have the same hash and the same IndexOffset, that should (in theory) remove all dupes.
+    public Dictionary<SStaticMeshData_D1, List<D1Class_861B8080>> GetStatics()
+    {
+        Dictionary<SStaticMeshData_D1, List<D1Class_861B8080>> statics = new();
+        var staticEntries = CollapseStaticTables();
+        for (int i = 0; i < staticEntries.Count; i++)
+        {
+            for (int j = 0; j < staticEntries[i].Entry.TagData.StaticInfoTable.Count; j++)
+            {
+                var infoEntry = staticEntries[i].Entry.TagData.StaticInfoTable[j];
+                var staticEntry = staticEntries[i].Entry.TagData.StaticMesh[infoEntry.StaticIndex];
+                if (staticEntry.DetailLevel == 0 || staticEntry.DetailLevel == 1 || staticEntry.DetailLevel == 2 || staticEntry.DetailLevel == 3 || staticEntry.DetailLevel == 10)
+                {
+                    if (!statics.ContainsKey(staticEntry))
+                        statics[staticEntry] = new();
+
+                    statics[staticEntry].Add(infoEntry);
+                }
+            }
+        }
+
+        return statics;
+    }
+
+    public void LoadIntoExporterScene(ExporterScene scene)
+    {
+        var instances = ParseTransforms();
+        var statics = GetStatics();
+
+        Parallel.ForEach(statics, mesh =>
+        {
+            var parts = Load(mesh.Key, mesh.Value);
+            scene.AddStatic(mesh.Key.Vertices0.Hash, parts);
+            //s.Static.SaveMaterialsFromParts(scene, parts);
+        });
+
+        // I think this is working the way it should, but i feel like this isnt the right way..
+        foreach (var (mesh, info) in statics.DistinctBy(x => x.Key.Vertices0.Hash))
+        {
+            foreach (var instance in info.DistinctBy(x => x.TransformIndex))
+            {
+                scene.AddStaticInstancesToMesh(mesh.Vertices0.Hash, instances.Skip(instance.TransformIndex).Take(instance.InstanceCount).ToList());
+            }
+        }
+    }
+
+
+    // Static part loading will have to be done here since the statics aren't a seperate tag to build a class off of
+    public List<StaticPart> Load(SStaticMeshData_D1 meshData, List<D1Class_861B8080> meshInfo)
+    {
+        var instances = ParseTransforms();
+        StaticPart part = new StaticPart(meshData);
+        part.GetAllData(meshData);
+
+        var texcoordTransform = instances[meshInfo[0].TransformIndex].UVTransform;
+        for (int i = 0; i < part.VertexTexcoords0.Count; i++)
+        {
+            part.VertexTexcoords0[i] = new Vector2(
+                part.VertexTexcoords0[i].X * texcoordTransform.X + texcoordTransform.Y,
+                part.VertexTexcoords0[i].Y * -texcoordTransform.X + 1 - texcoordTransform.Z
+            );
+        }
+
+        return new List<StaticPart> { part };
+    }
+
+    public List<D1Class_A6488080> CollapseStaticTables()
+    {
+        List<D1Class_A6488080> collapsed = _tag.Statics1.ToList();
+        collapsed.AddRange(_tag.Statics2.ToList());
+        collapsed.AddRange(_tag.Statics3.ToList());
+        collapsed.AddRange(_tag.Statics4.ToList());
+
+        return collapsed;
+    }
+
+    // https://github.com/MontagueM/MontevenDynamicExtractor/blob/d1/d1map.cpp#L273
+    public List<InstanceTransform> ParseTransforms()
+    {
+        var a = ParseInstances();
+        List<InstanceTransform> transforms = new();
+        for (int i = 0; i < a.Count; i++)
+        {
+            InstanceTransform transform = new();
+            var b = a[i];
+
+            Matrix4x4 matrix = new Matrix4x4(
+                b.M0.X, b.M0.Y, b.M0.Z, b.M0.W,
+                b.M1.X, b.M1.Y, b.M1.Z, b.M1.W,
+                b.M2.X, b.M2.Y, b.M2.Z, b.M2.W,
+                b.M3.X, b.M3.Y, b.M3.Z, b.M3.W
+            );
+
+            matrix = Matrix4x4.Transpose(matrix);
+            System.Numerics.Vector3 translation = new();
+            Quaternion rotation = new Quaternion();
+            System.Numerics.Vector3 scale = new();
+            Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+
+            transform.Translation = new(translation.X, translation.Y, translation.Z, 0);
+            transform.Rotation = new(rotation.X, rotation.Y, rotation.Z, rotation.W);
+            transform.Scale = new(scale.X, scale.Y, scale.Z);
+            // X = scale
+            // Y, Z = TranslateX/Y
+            transform.UVTransform = a[i].M3;
+
+            transforms.Add(transform);
+        }
+
+        return transforms;
+    }
+
+    private List<InstanceMatrix> ParseInstances()
+    {
+        byte[] instances = PackageResourcer.Get().GetFileData(_tag.InstanceTransforms);
+        List<InstanceMatrix> instanceTransforms = new();
+        int blockSize = Marshal.SizeOf<InstanceMatrix>();
+
+        var reader = new TigerFile(_tag.InstanceTransforms).GetReader();
+        for (int i = 0; i < _tag.InstanceCounts; i++)
+        {
+            InstanceMatrix instance = reader.ReadSchemaStruct<InstanceMatrix>();
+            instanceTransforms.Add(instance);
+        }
+
+        return instanceTransforms;
+    }
+
+    [NonSchemaStruct(0x40)]
+    public struct InstanceMatrix
+    {
+        public Vector4 M0;
+        public Vector4 M1;
+        public Vector4 M2;
+        public Vector4 M3;
+    }
+
+    public struct InstanceTransform
+    {
+        public Vector4 Translation;
+        public Vector4 Rotation;
+        public Vector4 Scale;
+        public Vector4 UVTransform;
     }
 }
 
@@ -30,21 +189,30 @@ public class StaticMapData : Tag<SStaticMapData>
 
     public void LoadIntoExporterScene(ExporterScene scene, string savePath, bool bSaveShaders)
     {
-        List<SStaticMeshHash> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
-
-        // todo this loads statics twice
-        Parallel.ForEach(extractedStatics, s =>
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            var parts = s.Static.Load(ExportDetailLevel.MostDetailed);
-            scene.AddStatic(s.Static.Hash, parts);
-            s.Static.SaveMaterialsFromParts(scene, parts);
-        });
-
-        foreach (var c in _tag.InstanceCounts)
-        {
-            var model = _tag.Statics[c.StaticIndex].Static;
-            scene.AddStaticInstancesToMesh(model.Hash, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList());
+            if (_tag.D1StaticMapData is not null)
+                _tag.D1StaticMapData.LoadIntoExporterScene(scene);
         }
+        else
+        {
+            List<SStaticMeshHash> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
+
+            // todo this loads statics twice
+            Parallel.ForEach(extractedStatics, s =>
+            {
+                var parts = s.Static.Load(ExportDetailLevel.MostDetailed);
+                scene.AddStatic(s.Static.Hash, parts);
+                s.Static.SaveMaterialsFromParts(scene, parts);
+            });
+
+            foreach (var c in _tag.InstanceCounts)
+            {
+                var model = _tag.Statics[c.StaticIndex].Static;
+                scene.AddStaticInstancesToMesh(model.Hash, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList());
+            }
+        }
+
     }
 }
 
@@ -59,41 +227,28 @@ public struct SStaticMapData
     public Tag<SOcclusionBounds> ModelOcclusionBounds;
 
     [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x30, TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public Tag<SD1StaticMapData> D1StaticMapData; // Contains the actual static map data in ROI
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public StaticMapData_D1 D1StaticMapData; // Contains the actual static map data in ROI
 
-    [SchemaField(0x40, TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SStaticMeshInstanceTransform> Instances;
 
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     public DynamicArray<SUnknownUInt> Unk50;
 
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<SStaticMeshHash> Statics;
 
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     public DynamicArray<SStaticMeshInstanceMap> InstanceCounts;
 
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk98;
 
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 UnkA0; // likely a bound corner
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     public Vector4 UnkB0; // likely the other bound corner
-}
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "751B8080", 0xD8)]
-public struct SD1StaticMapData
-{
-
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "0B008080", 0x04)]
@@ -733,6 +888,77 @@ public struct SMapSpotLightResource
 //     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
 //     public Tag Unk10;  // 24878080, smth related to havok volumes
 // }
+
+
+#endregion
+
+#region Destiny 1 specific structs
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "751B8080", 0xD8)]
+public struct SStaticMapData_D1
+{
+    public long FileSize;
+    public int Unk08;
+    [SchemaField(0x10)]
+    public DynamicArray<D1Class_E71A8080> Unk10;
+    public int InstanceCounts; // Total instances
+    public FileHash InstanceTransforms; // Ref FFFFFFFF, Matrix4x4s
+    public TigerHash Unk28;
+
+    [SchemaField(0x38)]
+    public DynamicArray<D1Class_A6488080> Statics1;
+    [SchemaField(0x50)]
+    public DynamicArray<D1Class_A6488080> Statics2;
+    [SchemaField(0x68)]
+    public DynamicArray<D1Class_A6488080> Statics3;
+    [SchemaField(0x80)]
+    public DynamicArray<D1Class_A6488080> Statics4;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E71A8080", 0x70)]
+public struct D1Class_E71A8080 // ????
+{
+    public Vector4 Unk00;
+    public Vector4 Unk10;
+    public Vector4 Unk20;
+    public Vector4 Unk30;
+    public Vector4 Unk40;
+    public Vector4 Unk50;
+    public Vector4 Unk60;
+    public Vector4 Unk70;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A6488080", 0x4)]
+public struct D1Class_A6488080
+{
+    public Tag<D1Class_901A8080> Entry;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "901A8080", 0x38)]
+public struct D1Class_901A8080
+{
+    public long FileSize;
+    public DynamicArray<D1Class_AF1A8080> MaterialTable;
+    public DynamicArray<SStaticMeshData_D1> StaticMesh;
+    public DynamicArray<D1Class_861B8080> StaticInfoTable;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "AF1A8080", 0x8)]
+public struct D1Class_AF1A8080
+{
+    public int Unk00; // Unsure
+    public IMaterial Material;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "861B8080", 0x18)]
+public struct D1Class_861B8080
+{
+    public short InstanceCount; // Instance count for this static
+    [SchemaField(0x4)]
+    public short MaterialIndex; // Index in MaterialTable
+    [SchemaField(0x8)]
+    public short StaticIndex; // Index in StaticMesh table
+    public short TransformIndex; // Index in InstanceTransforms file
+}
 
 
 #endregion

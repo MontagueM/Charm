@@ -3,7 +3,7 @@ using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static;
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A7718080", 0x90)] // TEMP (FIX ME)
+//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A7718080", 0x90)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A7718080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "446D8080", 0x70)]
 public struct SStaticMesh
@@ -120,4 +120,17 @@ public struct SStaticMeshBuffers
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public VertexBuffer Vertices2;
     public uint UnkOffset;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D61B8080", 0x18)]
+public struct SStaticMeshData_D1
+{
+    public VertexBuffer Vertices0;
+    public VertexBuffer Vertices1;
+    public IndexBuffer Indices;
+    public ushort UnkC; // Unsure
+    public sbyte DetailLevel;
+    public sbyte PrimitiveType;
+    public uint IndexOffset;
+    public uint IndexCount;
 }

@@ -163,13 +163,27 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
 
                             break;
                         case 0x18: // normal and tangent euler
-                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
-                            part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
-                                handle.ReadByte()));
-                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                                handle.ReadInt16(), handle.ReadInt16(), true));
-                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                                handle.ReadInt16(), handle.ReadInt16(), true));
+                            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                            {
+                                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                    handle.ReadInt16(), handle.ReadInt16(), true));
+                                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                    handle.ReadInt16(), handle.ReadInt16()));
+                                part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                                    handle.ReadByte()));
+                            }
+                            else
+                            {
+                                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                                part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                                    handle.ReadByte()));
+                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                    handle.ReadInt16(), handle.ReadInt16(), true));
+                                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                    handle.ReadInt16(), handle.ReadInt16(), true));
+                            }
+
                             break;
                         default:
                             break;
@@ -338,7 +352,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 // it can be longer here, its not broken i think
                 if (handle.BaseStream.Length <= handle.BaseStream.Position)
                 {
-                    handle.BaseStream.Position = handle.BaseStream.Length-4;
+                    handle.BaseStream.Position = handle.BaseStream.Length - 4;
                     part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
                         handle.ReadByte()));
                 }
@@ -467,7 +481,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
             switch (inputSignature.Semantic)
             {
                 case InputSemantic.Position:
-                    if(isTerrain) //has to be a float
+                    if (isTerrain) //has to be a float
                     {
                         part.VertexPositions.Add(new Vector4((float)reader.ReadInt16(), (float)reader.ReadInt16(), (float)reader.ReadInt16(),
                             (float)reader.ReadInt16()));
@@ -480,7 +494,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     switch (inputSignature.Mask)
                     {
                         case ComponentMask.XY:
-                            if(isTerrain)
+                            if (isTerrain)
                                 part.VertexTexcoords0.Add(new Vector2(reader.ReadHalf(), reader.ReadHalf()));
                             else
                                 part.VertexTexcoords0.Add(new Vector2(reader.ReadInt16(), reader.ReadInt16()));

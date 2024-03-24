@@ -1,10 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using Arithmic;
 using ConcurrentCollections;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
+using static Tiger.Schema.StaticMapData_D1;
 
 namespace Tiger.Exporters;
 
@@ -138,11 +138,39 @@ public class ExporterScene
         }
     }
 
+    // D1
+    public void AddStaticInstancesToMesh(FileHash modelHash, IEnumerable<InstanceTransform> instances)
+    {
+        if (!StaticMeshInstances.ContainsKey(modelHash))
+        {
+            StaticMeshInstances.TryAdd(modelHash, InstancesToTransforms(instances));
+        }
+        else
+        {
+            foreach (Transform transform in InstancesToTransforms(instances))
+            {
+                StaticMeshInstances[modelHash].Add(transform);
+            }
+        }
+    }
+
     private static List<Transform> InstancesToTransforms(IEnumerable<SStaticMeshInstanceTransform> instances)
     {
         return instances.Select(t => new Transform
         {
             Position = t.Position,
+            Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
+            Quaternion = t.Rotation,
+            Scale = new Vector3(t.Scale.X, t.Scale.X, t.Scale.X)
+        }).ToList();
+    }
+
+    // D1
+    private static List<Transform> InstancesToTransforms(IEnumerable<InstanceTransform> instances)
+    {
+        return instances.Select(t => new Transform
+        {
+            Position = t.Translation.ToVec3(),
             Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
             Quaternion = t.Rotation,
             Scale = new Vector3(t.Scale.X, t.Scale.X, t.Scale.X)

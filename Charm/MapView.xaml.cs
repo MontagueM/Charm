@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Media;
-using System.Numerics;
-using System.Security.Policy;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -92,19 +85,19 @@ public partial class MapView : UserControl
     public bool LoadEntity(List<Entity> entities, FbxHandler fbxHandler)
     {
         fbxHandler.Clear();
-        foreach(var entity in entities)
+        foreach (var entity in entities)
             AddEntity(entity, ExportDetailLevel.MostDetailed, fbxHandler);
         return LoadUI(fbxHandler);
     }
 
     private void AddEntity(Entity entity, ExportDetailLevel detailLevel, FbxHandler fbxHandler)
-	{
+    {
         var dynamicParts = entity.Load(detailLevel);
-		//ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
-		//dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
-		fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
+        //ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
+        //dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
+        fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
         Log.Verbose($"Adding entity {entity.Hash}/{entity.Model?.Hash} with {dynamicParts.Sum(p => p.Indices.Count)} vertices to fbx");
-	}
+    }
 
     private bool LoadUI(FbxHandler fbxHandler)
     {
@@ -141,7 +134,7 @@ public partial class MapView : UserControl
         }
 
         Directory.CreateDirectory(savePath);
-        if(exportStatics)
+        if (exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
             ExportStatics(savePath, map);
@@ -219,19 +212,40 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
-                    var parts = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.Statics;
-                    foreach (var part in parts)
+                    if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
                     {
-                        if (File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
+                        //if (staticMapResource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData is not null)
+                        //{
+                        //    var staticEntries = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData.CollapseStaticTables();
 
-                        string staticMeshName = part.Static.Hash.ToString();
-                        ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
-                        var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
-                        staticScene.AddStatic(part.Static.Hash, staticmesh);
+                        //    for (int i = 0; i < staticEntries.Count; i++)
+                        //    {
+                        //        var staticEntry = staticEntries[i];
+                        //        var parts = staticEntry.Entry.Load(1);
 
-                        if (source2Models)
+                        //        string staticMeshName = parts.Keys.First().ToString();
+                        //        ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
+
+                        //        staticScene.AddStatic(parts.Keys.First(), parts.Values.First());
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        var parts = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.Statics;
+                        foreach (var part in parts)
                         {
-                            Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
+                            if (File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
+
+                            string staticMeshName = part.Static.Hash.ToString();
+                            ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
+                            var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
+                            staticScene.AddStatic(part.Static.Hash, staticmesh);
+
+                            if (source2Models)
+                            {
+                                Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
+                            }
                         }
                     }
                 }
@@ -272,7 +286,7 @@ public partial class MapView : UserControl
             Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entry.GetEntityHash());
             List<Entity> entities = new List<Entity> { entity };
             entities.AddRange(entity.GetEntityChildren());
-            foreach(var ent in entities)
+            foreach (var ent in entities)
             {
                 if (ent.HasGeometry())
                 {

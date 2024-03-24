@@ -997,7 +997,7 @@ public partial class TagListView : UserControl
                     }
                 });
                 break;
-            case TigerStrategy.DESTINY2_SHADOWKEEP_2601:
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2601 or TigerStrategy.DESTINY2_SHADOWKEEP_2999:
                 var valsChild = await PackageResourcer.Get().GetAllHashesAsync<SUnkActivity_SK>();
                 Parallel.ForEach(valsChild, val =>
                 {
