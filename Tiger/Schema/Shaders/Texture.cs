@@ -256,7 +256,7 @@ public struct STextureHeader
 
     [SchemaField(0x32, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public ushort Flags; // Flags for ROI
+    public sbyte Flags; // Flags for ROI
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]

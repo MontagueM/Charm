@@ -1,13 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Packaging;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms.VisualStyles;
-using System.Windows.Input;
-using SharpDX.Toolkit.Graphics;
 using Tiger;
 using Tiger.Schema.Investment;
 
@@ -24,6 +16,7 @@ public partial class MainMenuView : UserControl
         ApiButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
         BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
         WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy);
+        StaticsButton.IsEnabled = ShowIfD2(Strategy.CurrentStrategy);
 
         Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
         {
@@ -39,6 +32,11 @@ public partial class MainMenuView : UserControl
     private bool ShowWQButtons(TigerStrategy strategy)
     {
         return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402;
+    }
+
+    private bool ShowIfD2(TigerStrategy strategy)
+    {
+        return strategy > TigerStrategy.DESTINY2_SHADOWKEEP_2601;
     }
 
     private bool ShowIfLatest(TigerStrategy strategy)

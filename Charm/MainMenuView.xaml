@@ -42,7 +42,7 @@
 
         <StackPanel Grid.Column="1" Margin="10,0,0,0">
             <TextBlock Text="Static" FontSize="64" HorizontalAlignment="Center" Padding="0,0,0,50"/>
-            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllStaticsViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20" Style="{StaticResource MaterialDesignPaperDarkButton}">
+            <Button Height="75" x:Name="StaticsButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllStaticsViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20" Style="{StaticResource MaterialDesignPaperDarkButton}">
                 <TextBlock Text="LIST" VerticalAlignment="Center" FontSize="40" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
         </StackPanel>

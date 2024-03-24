@@ -53,7 +53,7 @@ public class Terrain : Tag<STerrain>
                 }
                 else // Use the first valid dyemap if it gets to this point
                 {
-                    var firstValidDyemap = _tag.MeshGroups.First(x => x.Dyemap != null).Dyemap;
+                    var firstValidDyemap = _tag.MeshGroups.FirstOrDefault(x => x.Dyemap != null).Dyemap;
                     if (firstValidDyemap != null)
                     {
                         scene.Textures.Add(firstValidDyemap);
@@ -219,10 +219,10 @@ public class Terrain : Tag<STerrain>
     private void TransformVertexColors(StaticPart part)
     {
         //Helper for dyemap assignment
-        //SK can have up to index 15, maybe more?
+        //ROI and Pre-BL can have a max of 16 per terrain part
+        float alpha = part.GroupIndex / 15.0f;
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
-            float alpha = part.GroupIndex / 15.0f;
             part.VertexColours.Add(new Vector4(0.0f, 0.0f, 0.0f, alpha));
         }
     }
