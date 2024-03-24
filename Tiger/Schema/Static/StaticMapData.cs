@@ -25,22 +25,32 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
     // Static tables will have multiple duplicate meshes since they are baked into the map.
     // Each static can have multiple parts that use the same Vertices0 data, so instead of filtering out duplicate hashes,
     // we will filter out duplicate entries that have the same hash and the same IndexOffset, that should (in theory) remove all dupes.
-    public Dictionary<SStaticMeshData_D1, List<D1Class_861B8080>> GetStatics()
+    public Dictionary<SStaticMeshData_D1, List<MeshInfo>> GetStatics()
     {
-        Dictionary<SStaticMeshData_D1, List<D1Class_861B8080>> statics = new();
+        Dictionary<SStaticMeshData_D1, List<MeshInfo>> statics = new();
         var staticEntries = CollapseStaticTables();
         for (int i = 0; i < staticEntries.Count; i++)
         {
-            for (int j = 0; j < staticEntries[i].Entry.TagData.StaticInfoTable.Count; j++)
+            var entry = staticEntries[i].Entry;
+
+            for (int j = 0; j < entry.TagData.StaticInfoTable.Count; j++)
             {
-                var infoEntry = staticEntries[i].Entry.TagData.StaticInfoTable[j];
-                var staticEntry = staticEntries[i].Entry.TagData.StaticMesh[infoEntry.StaticIndex];
+                var infoEntry = entry.TagData.StaticInfoTable[j];
+                var staticEntry = entry.TagData.StaticMesh[infoEntry.StaticIndex];
                 if (staticEntry.DetailLevel == 0 || staticEntry.DetailLevel == 1 || staticEntry.DetailLevel == 2 || staticEntry.DetailLevel == 3 || staticEntry.DetailLevel == 10)
                 {
                     if (!statics.ContainsKey(staticEntry))
                         statics[staticEntry] = new();
 
-                    statics[staticEntry].Add(infoEntry);
+                    MeshInfo meshInfo = new()
+                    {
+                        InstanceCount = infoEntry.InstanceCount,
+                        TransformIndex = infoEntry.TransformIndex,
+                        MaterialIndex = infoEntry.MaterialIndex,
+                        Material = entry.TagData.MaterialTable[infoEntry.MaterialIndex].Material,
+                    };
+
+                    statics[staticEntry].Add(meshInfo);
                 }
             }
         }
@@ -53,11 +63,26 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         var instances = ParseTransforms();
         var statics = GetStatics();
 
+        foreach (var (meshData, meshInfo) in statics)
+        {
+            Console.WriteLine($"{meshData.Vertices0.Hash} ({meshData.IndexOffset}) {meshInfo.Count}");
+            foreach (var a in meshInfo)
+            {
+                Console.WriteLine($"{a.MaterialIndex} {a.Material.FileHash}");
+            }
+        }
+
         Parallel.ForEach(statics, mesh =>
         {
-            var parts = Load(mesh.Key, mesh.Value);
+            var parts = Load(mesh.Key, mesh.Value, instances);
             scene.AddStatic(mesh.Key.Vertices0.Hash, parts);
-            //s.Static.SaveMaterialsFromParts(scene, parts);
+            foreach (var part in parts)
+            {
+                if (part.Material == null)
+                    continue;
+
+                scene.Materials.Add(new ExportMaterial(part.Material));
+            }
         });
 
         // I think this is working the way it should, but i feel like this isnt the right way..
@@ -72,10 +97,10 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
 
 
     // Static part loading will have to be done here since the statics aren't a seperate tag to build a class off of
-    public List<StaticPart> Load(SStaticMeshData_D1 meshData, List<D1Class_861B8080> meshInfo)
+    public List<StaticPart> Load(SStaticMeshData_D1 meshData, List<MeshInfo> meshInfo, List<InstanceTransform> instances)
     {
-        var instances = ParseTransforms();
         StaticPart part = new StaticPart(meshData);
+        part.Material = meshInfo[0].Material;
         part.GetAllData(meshData);
 
         var texcoordTransform = instances[meshInfo[0].TransformIndex].UVTransform;
@@ -90,10 +115,10 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         return new List<StaticPart> { part };
     }
 
+    // Statics1 seems to just be depth only meshes so I don't think it needs to be added
     public List<D1Class_A6488080> CollapseStaticTables()
     {
-        List<D1Class_A6488080> collapsed = _tag.Statics1.ToList();
-        collapsed.AddRange(_tag.Statics2.ToList());
+        List<D1Class_A6488080> collapsed = _tag.Statics2.ToList();
         collapsed.AddRange(_tag.Statics3.ToList());
         collapsed.AddRange(_tag.Statics4.ToList());
 
@@ -168,6 +193,14 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         public Vector4 Scale;
         public Vector4 UVTransform;
     }
+
+    public struct MeshInfo
+    {
+        public short InstanceCount; // Instance count for this static
+        public short TransformIndex; // Index in InstanceTransforms file
+        public short MaterialIndex;
+        public IMaterial Material;
+    }
 }
 
 public class StaticMapData : Tag<SStaticMapData>
@@ -230,24 +263,30 @@ public struct SStaticMapData
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public StaticMapData_D1 D1StaticMapData; // Contains the actual static map data in ROI
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SStaticMeshInstanceTransform> Instances;
-
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SUnknownUInt> Unk50;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<SStaticMeshHash> Statics;
-
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SStaticMeshInstanceMap> InstanceCounts;
-
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk98;
-
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 UnkA0; // likely a bound corner
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Vector4 UnkB0; // likely the other bound corner
 }
 
@@ -905,7 +944,7 @@ public struct SStaticMapData_D1
     public TigerHash Unk28;
 
     [SchemaField(0x38)]
-    public DynamicArray<D1Class_A6488080> Statics1;
+    public DynamicArray<D1Class_A6488080> Statics1;  // Is this one just for depth purposes? I've only ever seen materials with just vertex shaders
     [SchemaField(0x50)]
     public DynamicArray<D1Class_A6488080> Statics2;
     [SchemaField(0x68)]

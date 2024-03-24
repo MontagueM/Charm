@@ -109,6 +109,7 @@ public struct D2Class_069B8080  // Entity resource
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag UnkHash80;
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag UnkHash84;  // 819A8080
     // Rest is unknown
 }
