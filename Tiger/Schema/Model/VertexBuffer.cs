@@ -50,12 +50,8 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             Vector4 v;
                             if (isTerrain)
                             {
-                                v = new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadUInt16(),
-                                    handle.ReadInt16(), true);
-                                if (v.W > 0)
-                                {
-                                    v.Z += 2 * v.W; // terrain uses a z precision extension.
-                                }
+                                v = new Vector4((float)handle.ReadInt16(), (float)handle.ReadInt16(), (float)handle.ReadInt16(),
+                                        (float)handle.ReadInt16());
                             }
                             else
                             {
@@ -131,9 +127,13 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                                 handle.ReadInt16(), handle.ReadInt16(), true));
                             break;
                         case 0x0C:
-                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
-                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                                handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), true));
+
+                            if (isTerrain)
+                                part.VertexTexcoords0.Add(new Vector2(handle.ReadHalf(), handle.ReadHalf()));
+                            else
+                                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
                             break;
                         case 0x10:
                             part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
