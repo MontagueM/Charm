@@ -39,6 +39,11 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
                 var staticEntry = entry.TagData.StaticMesh[infoEntry.StaticIndex];
                 if (staticEntry.DetailLevel == 0 || staticEntry.DetailLevel == 1 || staticEntry.DetailLevel == 2 || staticEntry.DetailLevel == 3 || staticEntry.DetailLevel == 10)
                 {
+                    var material = entry.TagData.MaterialTable[infoEntry.MaterialIndex].Material;
+                    // Material is (probably) used for depth pass, so ignore this mesh
+                    if (material.Unk08 != 1)
+                        continue;
+
                     if (!statics.ContainsKey(staticEntry))
                         statics[staticEntry] = new();
 
@@ -47,7 +52,7 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
                         InstanceCount = infoEntry.InstanceCount,
                         TransformIndex = infoEntry.TransformIndex,
                         MaterialIndex = infoEntry.MaterialIndex,
-                        Material = entry.TagData.MaterialTable[infoEntry.MaterialIndex].Material,
+                        Material = material,
                     };
 
                     statics[staticEntry].Add(meshInfo);
@@ -100,9 +105,10 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
     public List<StaticPart> Load(SStaticMeshData_D1 meshData, List<MeshInfo> meshInfo, List<InstanceTransform> instances)
     {
         StaticPart part = new StaticPart(meshData);
-        part.Material = meshInfo[0].Material;
+        part.Material = meshInfo[0].Material; // I hope this is fine
         part.GetAllData(meshData);
 
+        // Why in the world Bungie would store UV transforms in here is beyond me
         var texcoordTransform = instances[meshInfo[0].TransformIndex].UVTransform;
         for (int i = 0; i < part.VertexTexcoords0.Count; i++)
         {
@@ -115,10 +121,12 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         return new List<StaticPart> { part };
     }
 
-    // Statics1 seems to just be depth only meshes so I don't think it needs to be added
+    // Statics1 seems to just be depth only meshes so I don't think it needs to be added, but ill do it just in case,
+    // they should get filtered out anyways.
     public List<D1Class_A6488080> CollapseStaticTables()
     {
-        List<D1Class_A6488080> collapsed = _tag.Statics2.ToList();
+        List<D1Class_A6488080> collapsed = _tag.Statics1.ToList();
+        collapsed.AddRange(_tag.Statics2.ToList());
         collapsed.AddRange(_tag.Statics3.ToList());
         collapsed.AddRange(_tag.Statics4.ToList());
 

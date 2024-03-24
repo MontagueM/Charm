@@ -7,10 +7,10 @@ public struct SMaterial_ROI // PS4 / ORBIS shaders aren't able to be decompiled 
     public uint Unk08;
     public uint Unk0C;
     public uint Unk10;
-    [SchemaField(0x18)]
-    public ushort Unk18; // ??
+    [SchemaField(0x24)]
+    public ushort Unk24; // ??
 
-    //[SchemaField(0x28)]
+    //[SchemaField(0x28)] // Vertex shader can be here also so idk what this is
     //public ShaderBytecode? UnkShader;
     //[SchemaField(0x120)]
     //public DynamicArray<Vec4> UnkShaderBuffer;
