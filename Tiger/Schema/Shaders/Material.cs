@@ -216,7 +216,7 @@ namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
         public uint Unk0C => _tag.Unk0C;
         public ushort Unk20 => _tag.Unk24;
         // Leaving shaders null until they (if ever) can be decompiled to hlsl
-        public ShaderBytecode VertexShader => null; //_tag.VertexShader; 
+        public ShaderBytecode VertexShader => null; //_tag.VertexShader;
         public ShaderBytecode PixelShader => null; //_tag.PixelShader;
         public ShaderBytecode ComputeShader => null;
         public FileHash PSVector4Container => _tag.PSVector4Container;
@@ -265,7 +265,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
-        public ushort Unk20 => _tag.Unk20;
+        public ushort Unk20 => _tag.Unk18;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;

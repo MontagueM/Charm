@@ -1,5 +1,4 @@
-﻿
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Arithmic;
 using Tiger.Schema.Shaders;
 
@@ -104,15 +103,18 @@ public class EntityModel : Tag<SEntityModel>
                 //But if theres also no pixel shader then theres no point in adding it
                 if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)
                 {
-                    if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.VertexShader is null || dynamicMeshPart.Material.PixelShader is null)
-                        continue;
+                    if (dynamicMeshPart.Material is null ||
+                    dynamicMeshPart.Material.VertexShader is null ||
+                    dynamicMeshPart.Material.PixelShader is null ||
+                    dynamicMeshPart.Material.Unk08 != 1 ||
+                    (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
+                    continue;
                 }
                 else
                 {
                     if (dynamicMeshPart.Material.Unk08 != 1 || (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
                         continue;
                 }
-
 
                 dynamicMeshPart.GetAllData(mesh, _tag);
                 parts.Add(dynamicMeshPart);
@@ -175,10 +177,40 @@ public class DynamicMeshPart : MeshPart
             VertexIndexMap.Add(VertexIndices[i], i);
         }
 
-        // Have to call it like this b/c we don't know the format of the vertex data here
-        Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
-        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
-        mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        {
+            InputSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
+            int b0Stride = mesh.Vertices1.TagData.Stride;
+            int b1Stride = mesh.Vertices2?.TagData.Stride ?? 0;
+            List<InputSignature> inputSignatures0 = new();
+            List<InputSignature> inputSignatures1 = new();
+            int stride = 0;
+            foreach (InputSignature inputSignature in inputSignatures)
+            {
+                if (stride < b0Stride)
+                    inputSignatures0.Add(inputSignature);
+                else
+                    inputSignatures1.Add(inputSignature);
+
+                if (inputSignature.Semantic == InputSemantic.Colour || inputSignature.Semantic == InputSemantic.BlendIndices || inputSignature.Semantic == InputSemantic.BlendWeight)
+                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+                else
+                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
+            }
+
+            Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+            mesh.Vertices1.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0, false);
+            mesh.Vertices2?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1, false);
+        }
+        else
+        {
+            // Have to call it like this b/c we don't know the format of the vertex data here
+            Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
+            mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
+            mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
+        }
+
+
         if (mesh.OldWeights != null)
         {
             mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices);

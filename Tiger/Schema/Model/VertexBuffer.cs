@@ -476,6 +476,10 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     {
         reader.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
 
+        bool HasWeights = false;
+        IntVector4 WeightValue = new();
+        IntVector4 WeightIndex = new();
+
         foreach (InputSignature inputSignature in inputSignatures)
         {
             switch (inputSignature.Semantic)
@@ -487,8 +491,27 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             (float)reader.ReadInt16()));
                     }
                     else
-                        part.VertexPositions.Add(new Vector4(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(),
-                            reader.ReadInt16()));
+                    {
+                        if (Strategy.CurrentStrategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+                        {
+                            part.VertexPositions.Add(new Vector4(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(),
+                           reader.ReadInt16()));
+                        }
+                        else // Pre-BL has bone indices for unweighted rigging in the vertex position W (Thanks BIOS!)
+                        {
+                            part.VertexPositions.Add(new Vector4(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(),
+                            reader.ReadInt16(), true));
+
+                            short w = (short)(part as DynamicMeshPart).VertexPositions[(part as DynamicMeshPart).VertexIndexMap[vertexIndex]].W;
+                            if (w >= 0)
+                            {
+                                HasWeights = true;
+                                WeightIndex = new IntVector4(w, 0, 0, 0);
+                                WeightValue = new IntVector4(255, 0, 0, 0);
+                            }
+                        }
+                    }
+
                     break;
                 case InputSemantic.Texcoord:
                     switch (inputSignature.Mask)
@@ -550,19 +573,27 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                         reader.ReadByte()));
                     break;
                 case InputSemantic.BlendIndices:
-                    //Indices get set in BlendWeight
+                    HasWeights = true;
+                    WeightIndex = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
                     break;
                 case InputSemantic.BlendWeight:
-                    //VertexWeight vw = new()
-                    //{
-                    //    WeightIndices = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
-                    //    WeightValues = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
-                    //};
-                    //(part as DynamicMeshPart).VertexWeights.Add(vw);
+                    HasWeights = true;
+                    WeightValue = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
                     break;
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        if (HasWeights)
+        {
+            //Console.WriteLine($"{WeightValue.X}, {WeightValue.Y}, {WeightValue.Z}, {WeightValue.W}");
+            VertexWeight vw = new()
+            {
+                WeightIndices = WeightIndex,
+                WeightValues = WeightValue,
+            };
+            (part as DynamicMeshPart).VertexWeights.Add(vw);
         }
     }
 }
