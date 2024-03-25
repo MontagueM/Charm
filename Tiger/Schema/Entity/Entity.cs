@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Tiger.Exporters;
 
 namespace Tiger.Schema.Entity;
@@ -61,6 +60,7 @@ public class Entity : Tag<SEntity>
                     PatternAudioUnnamed = resource;
                     break;
                 default:
+                    //Console.WriteLine($"{resource.TagData.Unk18.GetValue(resource.GetReader())}");
                     // throw new NotImplementedException($"Implement parsing for {resource.Resource._tag.Unk08}");
                     break;
             }
@@ -146,7 +146,7 @@ public class Entity : Tag<SEntity>
                                 continue;
 
                             Entity entity = FileResourcer.Get().GetFile<Entity>(entry2.Unk08.Hash);
-                            if(entity.HasGeometry())
+                            if (entity.HasGeometry())
                             {
                                 entities.Add(entity);
                                 //Just in case

@@ -73,7 +73,6 @@ public class EntityModel : Tag<SEntityModel>
     {
         List<DynamicMeshPart> parts = new();
         if (_tag.Meshes.Count == 0) return parts;
-
         int meshIndex = 0;
         foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
@@ -101,11 +100,19 @@ public class EntityModel : Tag<SEntityModel>
                     bAlphaClip = (part.Flags & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
                 };
-
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
-                if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.VertexShader is null || dynamicMeshPart.Material.PixelShader is null)
-                    continue;
+                if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)
+                {
+                    if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.VertexShader is null || dynamicMeshPart.Material.PixelShader is null)
+                        continue;
+                }
+                else
+                {
+                    if (dynamicMeshPart.Material.Unk08 != 1 || (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
+                        continue;
+                }
+
 
                 dynamicMeshPart.GetAllData(mesh, _tag);
                 parts.Add(dynamicMeshPart);
@@ -187,34 +194,40 @@ public class DynamicMeshPart : MeshPart
 
         Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
 
-        TransformPositions(model);
-        TransformTexcoords(model);
+        TransformPositions(mesh, model);
+        TransformTexcoords(mesh, model);
     }
 
-    private void TransformTexcoords(SEntityModel header)
+    private void TransformTexcoords(SEntityModelMesh mesh, SEntityModel header)
     {
+        Vector2 texcoordScale = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.TexcoordScale : mesh.TexcoordScale;
+        Vector2 texcoordTranslation = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.TexcoordTranslation : mesh.TexcoordTranslation;
+
         for (int i = 0; i < VertexTexcoords0.Count; i++)
         {
             var tx = VertexTexcoords0[i];
             VertexTexcoords0[i] = new Vector2(
-                tx.X * header.TexcoordScale.X + header.TexcoordTranslation.X,
-                tx.Y * -header.TexcoordScale.Y + 1 - header.TexcoordTranslation.Y
+                tx.X * texcoordScale.X + texcoordTranslation.X,
+                tx.Y * -texcoordScale.Y + 1 - texcoordTranslation.Y
             );
             VertexTexcoords1.Add(new Vector2(
-                tx.X * header.TexcoordScale.X * 5 + header.TexcoordTranslation.X * 5,
-                tx.Y * -header.TexcoordScale.Y * 5 + 1 - header.TexcoordTranslation.Y * 5
+                tx.X * texcoordScale.X * 5 + texcoordTranslation.X * 5,
+                tx.Y * -texcoordScale.Y * 5 + 1 - texcoordTranslation.Y * 5
             ));
         }
     }
 
-    private void TransformPositions(SEntityModel header)
+    private void TransformPositions(SEntityModelMesh mesh, SEntityModel header)
     {
+        Vector4 modelScale = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.ModelScale : mesh.ModelScale;
+        Vector4 modelTranslation = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.ModelTranslation : mesh.ModelTranslation;
+
         for (int i = 0; i < VertexPositions.Count; i++)
         {
             VertexPositions[i] = new Vector4(
-                VertexPositions[i].X * header.ModelScale.X + header.ModelTranslation.X,
-                VertexPositions[i].Y * header.ModelScale.Y + header.ModelTranslation.Y,
-                VertexPositions[i].Z * header.ModelScale.Z + header.ModelTranslation.Z,
+                VertexPositions[i].X * modelScale.X + modelTranslation.X,
+                VertexPositions[i].Y * modelScale.Y + modelTranslation.Y,
+                VertexPositions[i].Z * modelScale.Z + modelTranslation.Z,
                 VertexPositions[i].W
             );
         }
@@ -225,7 +238,7 @@ public class DynamicMeshPart : MeshPart
         using TigerReader reader = parentResource.GetReader();
 
         List<IMaterial> materials = new();
-        
+
         var map = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
         var mats = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
         if (map.Count == 0 || mats.Count == 0)
