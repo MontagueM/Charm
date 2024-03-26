@@ -68,15 +68,6 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         var instances = ParseTransforms();
         var statics = GetStatics();
 
-        foreach (var (meshData, meshInfo) in statics)
-        {
-            Console.WriteLine($"{meshData.Vertices0.Hash} ({meshData.IndexOffset}) {meshInfo.Count}");
-            foreach (var a in meshInfo)
-            {
-                Console.WriteLine($"{a.MaterialIndex} {a.Material.FileHash}");
-            }
-        }
-
         Parallel.ForEach(statics, mesh =>
         {
             var parts = Load(mesh.Key, mesh.Value, instances);

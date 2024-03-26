@@ -14,6 +14,8 @@ public struct SActivity_ROI
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "0A418080", 0x4)]
 public struct S0A418080
 {
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Tag<SBubbleDefinition> ChildMapReference;
 }
 

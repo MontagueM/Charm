@@ -36,8 +36,12 @@ public class Entity : Tag<SEntity>
         Deserialize();
         _loaded = true;
         Debug.Assert(_tag.FileSize != 0);
-        foreach (var resource in _tag.EntityResources.Select(GetReader(), r => r.Resource))
+        foreach (var resourceHash in _tag.EntityResources.Select(GetReader(), r => r.Resource))
         {
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)
+                continue;
+
+            EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
             switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
             {
                 case D2Class_8A6D8080:  // Entity model
@@ -131,8 +135,12 @@ public class Entity : Tag<SEntity>
         }
 
         List<Entity> entities = new List<Entity>();
-        foreach (var resource in _tag.EntityResources.Select(GetReader(), r => r.Resource))
+        foreach (var resourceHash in _tag.EntityResources.Select(GetReader(), r => r.Resource))
         {
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)
+                continue;
+
+            EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
             //Weird to have to get Unk10 first to be able to get Unk18
             //Trying to get Unk18 directly just crashes
             switch (resource.TagData.Unk10.GetValue(resource.GetReader()))

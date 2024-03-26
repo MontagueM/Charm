@@ -108,11 +108,11 @@ public class EntityModel : Tag<SEntityModel>
                     dynamicMeshPart.Material.PixelShader is null ||
                     dynamicMeshPart.Material.Unk08 != 1 ||
                     (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
-                    continue;
+                        continue;
                 }
                 else
                 {
-                    if (dynamicMeshPart.Material.Unk08 != 1 || (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
+                    if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.Unk08 != 1)
                         continue;
                 }
 
@@ -177,7 +177,7 @@ public class DynamicMeshPart : MeshPart
             VertexIndexMap.Add(VertexIndices[i], i);
         }
 
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999 && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
             InputSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
             int b0Stride = mesh.Vertices1.TagData.Stride;

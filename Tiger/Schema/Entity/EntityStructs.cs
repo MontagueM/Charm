@@ -84,10 +84,10 @@ public struct D2Class_06008080
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "CD9A8080", 0xC)]
 public struct D2Class_CD9A8080  // entity resource entry
 {
-    public EntityResource Resource;
+    public FileHash Resource; // Can sometimes be a non-entity resource in D1, for whatever reason
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "61088080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "61088080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "369C8080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "069B8080", 0xA0)]
 public struct D2Class_069B8080  // Entity resource
@@ -321,7 +321,7 @@ public struct D2Class_5F6E8080
 {
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "801A8080", 0x1DC)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "801A8080", 0x1D0)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B8728080", 0x200)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8A6D8080", 0x2E0)]
 public struct D2Class_8A6D8080
@@ -460,8 +460,11 @@ public struct SEntityModelMesh
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Vector4 ModelScale;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Vector4 ModelTranslation;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Vector2 TexcoordScale;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Vector2 TexcoordTranslation;
 
     [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -498,7 +501,8 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     public short Unk16;  // some kind of index
     // need to check this on WQ, theres no way its an int
     public int Flags;
-    [SchemaField(0x1A, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+
+    [SchemaField(0x1E, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public byte GearDyeChangeColorIndex;   // sbyte gear_dye_change_color_index
     public ELodCategory LodCategory;

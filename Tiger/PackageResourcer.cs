@@ -260,7 +260,6 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
         foreach (PackageActivityEntry entry in activityEntries)
         {
-            Console.WriteLine($"{entry.TagHash} ({entry.TagClassHash}) : {entry.Name}");
             _d1Activities.TryAdd(entry.TagHash, entry.TagClassHash);
         }
     }

@@ -1785,8 +1785,12 @@ public partial class TagListView : UserControl
             }
             foreach (var entity in entities)
             {
-                foreach (var e in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
+                foreach (var resourceHash in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
                 {
+                    if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)
+                        continue;
+
+                    EntityResource e = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
                     if (e.TagData.Unk18.GetValue(e.GetReader()) is D2Class_79818080 a)
                     {
                         foreach (var d2ClassF1918080 in a.WwiseSounds1)

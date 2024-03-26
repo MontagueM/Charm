@@ -25,6 +25,7 @@ public partial class MainMenuView : UserControl
                 ApiButton.IsEnabled = ShowWQButtons(args.Strategy);
                 BagsButton.IsEnabled = ShowWQButtons(args.Strategy);
                 WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy);
+                StaticsButton.IsEnabled = ShowIfD2(args.Strategy);
             });
         };
     }
@@ -36,7 +37,7 @@ public partial class MainMenuView : UserControl
 
     private bool ShowIfD2(TigerStrategy strategy)
     {
-        return strategy > TigerStrategy.DESTINY2_SHADOWKEEP_2601;
+        return strategy >= TigerStrategy.DESTINY2_SHADOWKEEP_2601;
     }
 
     private bool ShowIfLatest(TigerStrategy strategy)
