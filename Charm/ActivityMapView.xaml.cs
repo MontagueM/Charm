@@ -187,6 +187,12 @@ public partial class ActivityMapView : UserControl
 
     private async void StaticMap_OnClick(object sender, RoutedEventArgs e)
     {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            MessageBox.Show("Static map viewing for D1 is not currently available, sorry.\nPlease use Blender to view.");
+            return;
+        }
+
         var s = sender as Button;
         var dc = s.DataContext as DisplayStaticMap;
         MapControl.Clear();

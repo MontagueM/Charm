@@ -458,7 +458,8 @@ public struct SMapDataEntry
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true), NoLoad]
     public Entity.Entity EntitySK;
-    [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 Rotation;
     public Vector4 Translation;

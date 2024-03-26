@@ -209,6 +209,7 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+                case 0x80801AB5:
                 case 0x808073A5:
                 case 0x80806F07: //Entity model
                     EntityModel entityModel = FileResourcer.Get().GetFile<EntityModel>(hash);

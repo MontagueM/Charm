@@ -460,10 +460,13 @@ public struct SEntityModelMesh
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Vector4 ModelScale;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Vector4 ModelTranslation;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Vector2 TexcoordScale;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Vector2 TexcoordTranslation;
 
