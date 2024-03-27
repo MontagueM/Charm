@@ -664,16 +664,19 @@ public struct D2Class_656C8080
 /// </summary>
 /// Background entities/skybox resource
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DA1B8080", 0x10)] // TODO: SK, Pre-BL, BL (all probably work the same)
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A36A8080", 0x18)]
 public struct SMapSkyEntResource
 {
-    [SchemaField(0x10)]
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<SMapSkyEntities> Unk10;  // A76A8080
 }
 
 /// <summary>
 /// Background entities/skybox
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1F1C8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A76A8080", 0x60)]
 public struct SMapSkyEntities
 {
@@ -720,6 +723,7 @@ public struct D2Class_706C8080
     //public byte UnkE0; //light shape?
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1E1C8080", 0x80)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]
 public struct D2Class_A96A8080
 {
@@ -734,33 +738,37 @@ public struct D2Class_A96A8080
     public Vector4 Unk50;
 
     public Tag<D2Class_AE6A8080> Unk60;//80806aae
-    public float Unk64;
-    public int Unk68;
-    public ushort Unk6C;
-    public short Unk6E;
-    public float Unk70;
-    public int Unk74;
-    public Tag Unk78;
-    public int Unk7C;
-    public long Unk80;
-    public int Unk88;
-    public int Unk8c;
+
+    //public float Unk64;
+    //public int Unk68;
+    //public ushort Unk6C;
+    //public short Unk6E;
+    //public float Unk70;
+    //public int Unk74;
+    //public Tag Unk78;
+    //public int Unk7C;
+    //public long Unk80;
+    //public int Unk88;
+    //public int Unk8c;
 }
 
 /// </summary>
 /// Map Decals Resource
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "701A8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "626E8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "55698080", 0x18)]
 public struct SMapDecalsResource
 {
-    [SchemaField(0x10)]
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag<SMapDecals> MapDecals;
 }
 
 /// <summary>
 /// Map Decals
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "401B8080", 0x68)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "686E8080", 0x78)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "5B698080", 0x78)]
 public struct SMapDecals
@@ -783,6 +791,7 @@ public struct SMapDecals
 /// <summary>
 /// Decal resources
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "831A8080", 0x8)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6E8080", 0x8)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "63698080", 0x8)]
 public struct D2Class_63698080
@@ -795,6 +804,7 @@ public struct D2Class_63698080
 /// <summary>
 /// Decal Location
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "531A8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D6E8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "64698080", 0x10)]
 public struct D2Class_64698080
@@ -802,6 +812,7 @@ public struct D2Class_64698080
     public Vector4 Location;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "3A1B8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AE6A8080", 0x10)]
 public struct D2Class_AE6A8080
 {
@@ -809,6 +820,7 @@ public struct D2Class_AE6A8080
     public EntityModel Unk08;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E2078080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B3938080", 0x30)]
 public struct D2Class_B3938080
 {
