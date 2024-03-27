@@ -507,13 +507,17 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             part.VertexPositions.Add(new Vector4(reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(),
                             reader.ReadInt16(), true));
 
-                            short w = (short)(part as DynamicMeshPart).VertexPositions[(part as DynamicMeshPart).VertexIndexMap[vertexIndex]].W;
-                            if (w >= 0)
+                            if (part is DynamicMeshPart)
                             {
-                                HasWeights = true;
-                                WeightIndex = new IntVector4(w, 0, 0, 0);
-                                WeightValue = new IntVector4(255, 0, 0, 0);
+                                short w = (short)(part as DynamicMeshPart).VertexPositions[(part as DynamicMeshPart).VertexIndexMap[vertexIndex]].W;
+                                if (w >= 0)
+                                {
+                                    HasWeights = true;
+                                    WeightIndex = new IntVector4(w, 0, 0, 0);
+                                    WeightValue = new IntVector4(255, 0, 0, 0);
+                                }
                             }
+
                         }
                     }
 

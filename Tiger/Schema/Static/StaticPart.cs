@@ -72,6 +72,23 @@ public class StaticPart : MeshPart
         if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
         {
             InputSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
+            int b0Stride = buffers.Vertices0.TagData.Stride;
+            int b1Stride = buffers.Vertices1?.TagData.Stride ?? 0;
+            List<InputSignature> inputSignatures0 = new();
+            List<InputSignature> inputSignatures1 = new();
+            int stride = 0;
+            foreach (InputSignature inputSignature in inputSignatures)
+            {
+                if (stride < b0Stride)
+                    inputSignatures0.Add(inputSignature);
+                else
+                    inputSignatures1.Add(inputSignature);
+
+                if (inputSignature.Semantic == InputSemantic.Colour || inputSignature.Semantic == InputSemantic.BlendIndices || inputSignature.Semantic == InputSemantic.BlendWeight)
+                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+                else
+                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
+            }
 
             List<int> strides = new();
             if (buffers.Vertices0 != null) strides.Add(buffers.Vertices0.TagData.Stride);
@@ -80,8 +97,8 @@ public class StaticPart : MeshPart
             Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
 
             Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{buffers.Vertices0.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {buffers.Vertices1?.Hash}/{buffers.Vertices1?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-            buffers.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures.Where(s => s.BufferIndex == 0).ToList());
-            buffers.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures.Where(s => s.BufferIndex == 1).ToList());
+            buffers.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0, false);
+            buffers.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1, false);
         }
         else
         {
