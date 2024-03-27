@@ -506,6 +506,7 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     public int Flags;
 
     [SchemaField(0x1E, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x1A, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public byte GearDyeChangeColorIndex;   // sbyte gear_dye_change_color_index
     public ELodCategory LodCategory;
