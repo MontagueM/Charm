@@ -222,6 +222,11 @@ public partial class DevView : UserControl
                         scene.Materials.Add(new ExportMaterial(part.Material));
                     }
                     Exporter.Get().Export();
+
+                    EntityView entityModelView = new EntityView();
+                    entityModelView.LoadEntityModel(hash, _fbxHandler);
+                    _mainWindow.MakeNewTab(hash, entityModelView);
+                    _mainWindow.SetNewestTabSelected();
                     break;
                 case 0x8080714F:
                 case 0x80806C81:

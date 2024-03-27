@@ -56,81 +56,48 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
 
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
         {
-            yield return new ActivityEntities();
-            //Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(UnkActivity);
-            //foreach (var entry in tag.TagData.Unk50)
-            //{
-            //    foreach (var entry2 in entry.Unk08)
-            //    {
-            //        yield return new ActivityEntities
-            //        {
-            //            BubbleName = GlobalStrings.Get().GetString(entry2.UnkName1),
-            //            Hash = entry2.Unk44.Hash,
-            //            ActivityPhaseName2 = GlobalStrings.Get().GetString(entry2.UnkName0),
-            //            DataTables = CollapseResourceParent(entry2.Unk44.Hash)
-            //        };
-            //    }
-            //}
+            Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(UnkActivity);
+            foreach (var entry in tag.TagData.Unk48)
+            {
+                foreach (var entry2 in entry.Unk08)
+                {
+                    yield return new ActivityEntities
+                    {
+                        BubbleName = GlobalStrings.Get().GetString(entry2.UnkName1),
+                        Hash = entry2.Unk34.Hash,
+                        ActivityPhaseName2 = GlobalStrings.Get().GetString(entry2.UnkName0),
+                        DataTables = CollapseResourceParent(entry2.Unk34.Hash)
+                    };
+                }
+            }
         }
 
-        //private List<FileHash> CollapseResourceParent(FileHash hash)
-        //{
-        //    ConcurrentBag<FileHash> items = new();
+        private List<FileHash> CollapseResourceParent(FileHash hash)
+        {
+            ConcurrentBag<FileHash> items = new();
 
-        //    var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_SHADOWKEEP_2601.S5B928080>(hash);
+            var entry = FileResourcer.Get().GetSchemaTag<SF0088080>(hash);
+            var entry2 = FileResourcer.Get().GetSchemaTag<SF0088080_Child>(entry.TagData.Unk1C);
+            var entries = entry2.TagData.Unk08;
+            entries.AddRange(entry2.TagData.Unk18);
+            entries.AddRange(entry2.TagData.Unk28);
 
-        //    // :)))
-        //    foreach (var resource in entry.TagData.Unk14.TagData.Unk08)
-        //    {
-        //        foreach (var a in resource.Unk00.TagData.Unk38)
-        //        {
-        //            foreach (var table in a.Unk08)
-        //            {
-        //                if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
-        //                    continue;
+            foreach (var resource in entries)
+            {
+                var Unk00 = FileResourcer.Get().GetSchemaTag<S6E078080>(resource.Unk00);
+                foreach (var a in Unk00.TagData.Unk30)
+                {
+                    if (a.Unk10 is null)
+                        continue;
 
-        //                if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
-        //                {
-        //                    items.Add(table.Unk00.TagData.DataTable.Hash);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    foreach (var resource in entry.TagData.Unk14.TagData.Unk18)
-        //    {
-        //        foreach (var a in resource.Unk00.TagData.Unk38)
-        //        {
-        //            foreach (var table in a.Unk08)
-        //            {
-        //                if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
-        //                    continue;
+                    if (a.Unk10.TagData.DataEntries.Count > 0)
+                        if (!items.Contains(a.Unk10.Hash))
+                            items.Add(a.Unk10.Hash);
+                }
+            }
 
-        //                if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
-        //                {
-        //                    items.Add(table.Unk00.TagData.DataTable.Hash);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    foreach (var resource in entry.TagData.Unk14.TagData.Unk28)
-        //    {
-        //        foreach (var a in resource.Unk00.TagData.Unk38)
-        //        {
-        //            foreach (var table in a.Unk08)
-        //            {
-        //                if (table.Unk00 is null || table.Unk00.TagData.DataTable is null)
-        //                    continue;
-
-        //                if (table.Unk00.TagData.DataTable.TagData.DataEntries.Count > 0)
-        //                {
-        //                    items.Add(table.Unk00.TagData.DataTable.Hash);
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    return items.ToList();
-        //}
+            return items.ToList();
+        }
     }
 }
 

@@ -30,6 +30,25 @@ public partial class EntityView : UserControl
         return LoadUI(fbxHandler);
     }
 
+    public bool LoadEntityModel(FileHash entityModelHash, FbxHandler fbxHandler)
+    {
+        fbxHandler.Clear();
+        EntityModel entityModel = FileResourcer.Get().GetFile<EntityModel>(entityModelHash);
+
+        var dynamicParts = entityModel.Load(ModelView.GetSelectedLod(), null);
+        ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
+        if (ModelView.GetSelectedGroupIndex() != -1)
+            dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
+
+        for (int i = 0; i < dynamicParts.Count; i++)
+        {
+            var dynamicPart = dynamicParts[i];
+            fbxHandler.AddMeshPartToScene(dynamicPart, i, entityModelHash);
+        }
+
+        return LoadUI(fbxHandler);
+    }
+
     public async void LoadEntityFromApi(TigerHash apiHash, FbxHandler fbxHandler)
     {
         fbxHandler.Clear();

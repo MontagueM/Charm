@@ -13,6 +13,7 @@ using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
+using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Static;
@@ -50,34 +51,63 @@ public partial class ActivityMapEntityView : UserControl
             maps.Add(displayMap);
         }
 
-        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+        switch (Strategy.CurrentStrategy)
         {
-            DisplayEntBubble displayActivity = new();
-            displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(activity.FileHash)}";
-            displayActivity.Hash = $"{activity.FileHash}";
-            displayActivity.LoadType = DisplayEntBubble.Type.Activity;
-            displayActivity.Data = displayActivity;
-            maps.Add(displayActivity);
-        }
-        else
-        {
-            var vals = PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>();
-            foreach (var val in vals)
-            {
-                Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
-                string activityName = PackageResourcer.Get().GetActivityName(activity.FileHash).Split(':')[1];
+            case >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
+                DisplayEntBubble displayActivity = new();
+                displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(activity.FileHash)}";
+                displayActivity.Hash = $"{activity.FileHash}";
+                displayActivity.LoadType = DisplayEntBubble.Type.Activity;
+                displayActivity.Data = displayActivity;
+                maps.Add(displayActivity);
+                break;
 
-                if (tag.TagData.ActivityDevName.Value.Contains(activityName)) //This is probably really bad...
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2999 or TigerStrategy.DESTINY2_SHADOWKEEP_2601:
+                // This sucks. A lot.
+                var valsSK = PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>();
+                foreach (var val in valsSK)
                 {
-                    DisplayEntBubble displayActivity = new();
-                    displayActivity.Name = $"{PackageResourcer.Get().GetActivityName(val)}";
-                    displayActivity.Hash = $"{tag.Hash}";
-                    displayActivity.ParentHash = $"{activity.FileHash}";
-                    displayActivity.LoadType = DisplayEntBubble.Type.Activity;
-                    displayActivity.Data = displayActivity;
-                    maps.Add(displayActivity);
+                    Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
+                    string activityName = PackageResourcer.Get().GetActivityName(activity.FileHash).Split(':')[1];
+
+                    if (tag.TagData.ActivityDevName.Value.Contains(activityName)) //This is probably really bad...
+                    {
+                        DisplayEntBubble displayActivitySK = new();
+                        displayActivitySK.Name = $"{PackageResourcer.Get().GetActivityName(val)}";
+                        displayActivitySK.Hash = $"{tag.Hash}";
+                        displayActivitySK.ParentHash = $"{activity.FileHash}";
+                        displayActivitySK.LoadType = DisplayEntBubble.Type.Activity;
+                        displayActivitySK.Data = displayActivitySK;
+                        maps.Add(displayActivitySK);
+                    }
                 }
-            }
+                break;
+
+            case TigerStrategy.DESTINY1_RISE_OF_IRON:
+                // This also sucks. A lot.
+                var valsROI = PackageResourcer.Get().GetD1Activities();
+                foreach (var val in valsROI)
+                {
+                    if (val.Value == "16068080")
+                    {
+                        Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(val.Key);
+
+                        string activityName = PackageResourcer.Get().GetActivityName(activity.FileHash).Split(':')[1];
+                        if (tag.TagData.ActivityDevName.Value.Contains(activityName))
+                        {
+                            DisplayEntBubble displayActivityROI = new();
+                            displayActivityROI.Name = $"{PackageResourcer.Get().GetActivityName(val.Key)}";
+                            displayActivityROI.Hash = $"{tag.Hash}";
+                            displayActivityROI.ParentHash = $"{activity.FileHash}";
+                            displayActivityROI.LoadType = DisplayEntBubble.Type.Activity;
+                            displayActivityROI.Data = displayActivityROI;
+                            maps.Add(displayActivityROI);
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
         }
 
         return maps;

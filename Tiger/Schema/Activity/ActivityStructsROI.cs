@@ -70,8 +70,8 @@ public struct SUnkActivity_ROI
     public LocalizedStrings LocalizedStrings;
     [SchemaField(0x30)]
     public StringPointer ActivityDevName;
-    //[SchemaField(0x48)]
-    //public DynamicArray<S0C068080> Unk48;
+    [SchemaField(0x48)]
+    public DynamicArray<S0C068080> Unk48;
     //[SchemaField(0x58)]
     //public DynamicArray<S3F078080> Unk58;
 }
@@ -94,34 +94,92 @@ public struct S0C068080
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A8068080", 0x3C)]
 public struct SA8068080
 {
-    //public uint Unk00;
-    //public StringHash UnkName0;
-    //public uint Unk0C;
-    //[SchemaField(0x1C)]
-    //public uint Unk1C;
-    //public uint Unk20;
-    //[SchemaField(0x40)]
-    //public StringHash UnkName1;
-    //public Tag Unk44;
-    //public uint Unk48;
+    public uint Unk00;
+    public StringHash UnkName0;
+    [SchemaField(0x30)]
+    public StringHash UnkName1;
+    public Tag Unk34; // F0088080
 }
 
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "48018080", 0x28)]
-public struct S48018080
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F0088080", 0x20)]
+public struct SF0088080
 {
     public long FileSize;
-    [SchemaField(0x10)]
-    public Tag<S48018080_Child> Unk10;
+    public StringPointer ActivityDevName;
+    public uint Unk10;
+    [SchemaField(0x1C)]
+    public FileHash Unk1C; // SF0088080_Child
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x28)]
-public struct S48018080_Child
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0x38)] // Doesn't have an 8080 reference hash
+public struct SF0088080_Child
 {
     public long FileSize;
-    public StringHash ActivityDevName;
+    public DynamicArray<SD3408080> Unk08;
+    public DynamicArray<SD3408080> Unk18;
+    public DynamicArray<SD3408080> Unk28; //This sometimes crashes for some reason...?
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D3408080", 0x4)]
+public struct SD3408080
+{
+    public FileHash Unk00; // 6E078080
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "6E078080", 0x48)]
+public struct S6E078080
+{
+    public long FileSize;
+    public TigerHash Unk08;
+    public TigerHash Unk1C;
+    //public DynamicArray<SD3078080> Unk18;
+    //public FileHash Unk28;
+    [SchemaField(0x30)]
+    public DynamicArray<SE9058080> Unk30;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D3078080", 0x10)]
+public struct SD3078080
+{
+    public int Unk00;
+    [SchemaField(0x08)]
+    public StringPointer Name;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E9058080", 0x28)]
+public struct SE9058080
+{
     [SchemaField(0x10)]
-    public DynamicArray<S14008080> Unk10;
+    public Tag<SMapDataTable> Unk10;
+    //[SchemaField(0x18)]
+    //public DynamicArray<S22428080> Unk18;
+}
+
+//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "22428080", 0x4)]
+//public struct S22428080
+//{
+//    public Tag<SF6038080> Unk00;
+//}
+
+//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F6038080", 0x10)]
+//public struct SF6038080
+//{
+//    public EntityResource Unk0C; // Check Unk10 for 2E098080, Unk18 -> DD078080 0x80
+//}
+
+//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DD078080", 0xB0)]
+//public struct SDD078080
+//{
+//    [SchemaField(0x60)]
+//    public StringPointer EntityName;
+//    [SchemaField(0x80)]
+//    public Entity.Entity Entity; // Why doesn't just Entity work here, am I stupid?
+//}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2E098080", 0x3A0)]
+public struct S2E098080
+{
+
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "14008080", 0x4)]
