@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Tiger.Exporters;
 using Tiger.Schema.Entity;
@@ -219,12 +220,80 @@ public class StaticMapData : Tag<SStaticMapData>
         });
     }
 
-    public void LoadIntoExporterScene(ExporterScene scene, string savePath, bool bSaveShaders)
+    public void LoadDecalsIntoExporterScene(ExporterScene scene)
+    {
+        foreach (var decal in _tag.Decals)
+        {
+            Debug.Assert(decal.Transforms.Count == 1 && decal.Models.Count == 1);
+
+            var transform = decal.Transforms[0];
+            var model = decal.Models[0];
+
+            Matrix4x4 matrix = new Matrix4x4(
+                transform.M0.X, transform.M0.Y, transform.M0.Z, transform.M0.W,
+                transform.M1.X, transform.M1.Y, transform.M1.Z, transform.M1.W,
+                transform.M2.X, transform.M2.Y, transform.M2.Z, transform.M2.W,
+                transform.M3.X, transform.M3.Y, transform.M3.Z, transform.M3.W
+            );
+
+            //matrix = Matrix4x4.Transpose(matrix);
+            System.Numerics.Vector3 translation = new();
+            Quaternion rotation = new Quaternion();
+            System.Numerics.Vector3 scale = new();
+            Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+
+            scene.AddMapModel(model.Model,
+            new Tiger.Schema.Vector4(translation.X, translation.Y, translation.Z, 1.0f),
+            new Tiger.Schema.Vector4(rotation.X, rotation.Y, rotation.Z, rotation.W),
+            new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z), true);
+
+            foreach (DynamicMeshPart part in model.Model.Load(ExportDetailLevel.MostDetailed, null, true))
+            {
+                if (part.Material == null) continue;
+                scene.Materials.Add(new ExportMaterial(part.Material));
+            }
+        }
+    }
+
+    public void LoadIntoExporterScene(ExporterScene scene)
     {
         if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
             if (_tag.D1StaticMapData is not null)
                 _tag.D1StaticMapData.LoadIntoExporterScene(scene);
+
+            //Console.WriteLine(_tag.Decals.Count);
+            //foreach (var decal in _tag.Decals)
+            //{
+            //    Debug.Assert(decal.Transforms.Count == 1 && decal.Models.Count == 1);
+
+            //    var transform = decal.Transforms[0];
+            //    var model = decal.Models[0];
+
+            //    Matrix4x4 matrix = new Matrix4x4(
+            //        transform.M0.X, transform.M0.Y, transform.M0.Z, transform.M0.W,
+            //        transform.M1.X, transform.M1.Y, transform.M1.Z, transform.M1.W,
+            //        transform.M2.X, transform.M2.Y, transform.M2.Z, transform.M2.W,
+            //        transform.M3.X, transform.M3.Y, transform.M3.Z, transform.M3.W
+            //    );
+
+            //    //matrix = Matrix4x4.Transpose(matrix);
+            //    System.Numerics.Vector3 translation = new();
+            //    Quaternion rotation = new Quaternion();
+            //    System.Numerics.Vector3 scale = new();
+            //    Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+
+            //    scene.AddMapModel(model.Model,
+            //    new Tiger.Schema.Vector4(translation.X, translation.Y, translation.Z, 1.0f),
+            //    new Tiger.Schema.Vector4(rotation.X, rotation.Y, rotation.Z, rotation.W),
+            //    new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z));
+
+            //    foreach (DynamicMeshPart part in model.Model.Load(ExportDetailLevel.MostDetailed, null))
+            //    {
+            //        if (part.Material == null) continue;
+            //        scene.Materials.Add(new ExportMaterial(part.Material));
+            //    }
+            //}
         }
         else
         {
@@ -255,7 +324,12 @@ public class StaticMapData : Tag<SStaticMapData>
 public struct SStaticMapData
 {
     public long FileSize;
-    [SchemaField(0x18)]
+
+    [SchemaField(0x8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public DynamicArray<D1Class_BA048080> Decals; // Transparent/Decal meshes for ROI
+
+    [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     public Tag<SOcclusionBounds> ModelOcclusionBounds;
 
     [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -999,5 +1073,39 @@ public struct D1Class_861B8080
     public short TransformIndex; // Index in InstanceTransforms file
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "BA048080", 0x80)]
+public struct D1Class_BA048080
+{
+    public long Size; // Just the size of the entry I think
+    public DynamicArray<D1Class_75018080> Transforms;
+    public DynamicArray<D1Class_C1018080> Unk18; // Similar to the location from Transforms but slightly different
+    public DynamicArray<D1Class_A5438080> Models;
+    [SchemaField(0x50)]
+    public Vector4 Unk50; // Bounding box?
+    public Vector4 Unk60;
+    public Vector4 Unk70;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "75018080", 0x40)]
+public struct D1Class_75018080
+{
+    // Matrix4x4
+    public Vector4 M0;
+    public Vector4 M1;
+    public Vector4 M2;
+    public Vector4 M3;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C1018080", 0x10)]
+public struct D1Class_C1018080
+{
+    public Vector4 Unk00;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A5438080", 0x4)]
+public struct D1Class_A5438080
+{
+    public EntityModel Model;
+}
 
 #endregion

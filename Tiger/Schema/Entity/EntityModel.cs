@@ -13,11 +13,14 @@ public class EntityModel : Tag<SEntityModel>
     /*
      * We need the parent resource to get access to the external materials
      */
-    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource)
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource, bool transparentsOnly = false)
     {
         Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts = GetPartsOfDetailLevel(detailLevel);
         List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource);
-        return parts;
+        if (transparentsOnly) // ROI decal/transparent mesh purposes. I hate this and its not the right way to do this
+            return parts.Where(x => x.Material.Unk20 != 0).ToList();
+        else
+            return parts;
     }
 
     /// <summary>

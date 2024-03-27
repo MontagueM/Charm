@@ -127,13 +127,18 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                                 handle.ReadInt16(), handle.ReadInt16(), true));
                             break;
                         case 0x0C:
-                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
-                                handle.ReadInt16(), true));
-
                             if (isTerrain)
+                            {
+                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), true));
                                 part.VertexTexcoords0.Add(new Vector2(handle.ReadHalf(), handle.ReadHalf()));
+                            }
                             else
+                            {
                                 part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), true));
+                            }
                             break;
                         case 0x10:
                             part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),

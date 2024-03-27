@@ -22,7 +22,7 @@ public partial class ActivityMapView : UserControl
     public void LoadUI(IActivity activity)
     {
         MapList.ItemsSource = GetMapList(activity);
-        ExportControl.SetExportFunction(ExportFull, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.ArrangedMap, true);
+        ExportControl.SetExportFunction(ExportFull, (int)ExportTypeFlag.Full, true); //| (int)ExportTypeFlag.ArrangedMap, true);
         ExportControl.SetExportInfo(activity.FileHash);
     }
 
@@ -97,17 +97,16 @@ public partial class ActivityMapView : UserControl
                     {
                         if (entry.DataResource.GetValue(dataTable.MapDataTable.GetReader()) is SMapDataResource resource)
                         {
-                            if (resource.StaticMapParent is null
-                            || resource.StaticMapParent.TagData.StaticMap is null
-                            || resource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData is null)
+                            if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
                                 continue;
 
-                            var tag = resource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData;
+                            var tag = resource.StaticMapParent.TagData.StaticMap;
+                            int instanceCount = tag.TagData.D1StaticMapData != null ? tag.TagData.D1StaticMapData.TagData.InstanceCounts : tag.TagData.Decals.Count;
                             items.Add(new DisplayStaticMap
                             {
                                 Hash = m.GetMapContainer().Hash,
-                                Name = $"{m.GetMapContainer().Hash}: {tag.TagData.InstanceCounts} instances",
-                                Instances = tag.TagData.InstanceCounts
+                                Name = $"{m.GetMapContainer().Hash}: {instanceCount} instances",
+                                Instances = instanceCount
                             });
                         }
                     }
@@ -164,14 +163,12 @@ public partial class ActivityMapView : UserControl
         List<string> mapStages = maps.Select((x, i) => $"Exporting {i + 1}/{maps.Count}").ToList();
         mapStages.Add("Finishing Export");
         MainWindow.Progress.SetProgressStages(mapStages);
-        // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
+
         Parallel.ForEach(maps, map =>
         {
             MapView.ExportFullMap(map, info.ExportType);
             MainWindow.Progress.CompleteStage();
         });
-        // MapView.ExportFullMap(staticMapData);
-        // MainWindow.Progress.CompleteStage();
 
         Tiger.Exporters.Exporter.Get().Export();
 

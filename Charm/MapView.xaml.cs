@@ -187,17 +187,21 @@ public partial class MapView : UserControl
     {
         Parallel.ForEach(map.TagData.MapDataTables, data =>
         {
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            {
+                if (data.MapDataTable.TagData.DataEntries[0].DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)
+                {
+                    staticMapResource.StaticMapParent.TagData.StaticMap.LoadDecalsIntoExporterScene(scene);
+                }
+            }
+
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
-                    if (exportTypeFlag == ExportTypeFlag.ArrangedMap)
+                    if (exportTypeFlag == ExportTypeFlag.Full)
                     {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadArrangedIntoExporterScene(); //Arranged because...arranged
-                    }
-                    else if (exportTypeFlag == ExportTypeFlag.Full)
-                    {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
+                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene);
                     }
                 }
             });

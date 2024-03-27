@@ -257,14 +257,14 @@ public class ExporterScene
         });
     }
 
-    public void AddMapModel(EntityModel model, Vector4 translation, Vector4 rotation, Vector3 scale)
+    public void AddMapModel(EntityModel model, Vector4 translation, Vector4 rotation, Vector3 scale, bool transparentsOnly = false)
     {
         ExporterMesh mesh = new(model.Hash);
 
         if (!_addedEntities.Contains(model.Hash)) //Dont want duplicate entities being added
         {
             _addedEntities.Add(model.Hash);
-            var parts = model.Load(ExportDetailLevel.MostDetailed, null);
+            var parts = model.Load(ExportDetailLevel.MostDetailed, null, transparentsOnly);
             for (int i = 0; i < parts.Count; i++)
             {
                 DynamicMeshPart part = parts[i];
