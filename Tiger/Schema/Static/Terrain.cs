@@ -298,7 +298,7 @@ public struct SMeshGroup
     public uint Unk48;
     public uint Unk4C;
     [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x4C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Texture Dyemap;
 }
 
