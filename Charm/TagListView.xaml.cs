@@ -993,6 +993,9 @@ public partial class TagListView : UserControl
                     if (activity.Value == "16068080")
                     {
                         Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(activity.Key);
+                        //tag.TagData.LocationName works but some entries dont have a string for it
+                        nameHashes.TryAdd(tag.TagData.ActivityDevName.Value, tag.TagData.DestinationName);
+
                         GlobalStrings.Get().AddStrings(tag.TagData.LocalizedStrings);
                     }
                 });
@@ -1030,16 +1033,15 @@ public partial class TagListView : UserControl
                 if (val.Value == "2E058080")
                 {
                     var activityName = PackageResourcer.Get().GetActivityName(val.Key);
-                    var first = activityName.Split(".").First();
+                    var first = activityName.Split(":")[1];
                     _allTagItems.Add(new TagItem
                     {
                         Hash = val.Key,
-                        Name = activityName,
+                        Name = first,
                         Subname = names.ContainsKey(first) ? names[first] : "",
                         TagType = ETagListType.Activity
                     });
                 }
-
             });
         }
         else

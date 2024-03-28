@@ -14,7 +14,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 {
     private PackagePathsCache? _packagePathsCache;
     private Dictionary<uint, string> _activityNames = new();
-    private Dictionary<FileHash, TagClassHash> _d1Activities = new();
+    private Dictionary<FileHash, TagClassHash> _d1NamedTags = new();
 
     public PackagePathsCache PackagePathsCache
     {
@@ -43,7 +43,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         CacheAllActivityNames();
 
         if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-            CacheAllD1Activites();
+            CacheAllD1NamedTags();
     }
 
     protected override void Reset()
@@ -215,7 +215,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
 
     public Dictionary<FileHash, TagClassHash> GetD1Activities()
     {
-        return _d1Activities;
+        return _d1NamedTags;
     }
 
     private async void CacheAllActivityNames()
@@ -246,7 +246,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         }
     }
 
-    private async void CacheAllD1Activites()
+    private async void CacheAllD1NamedTags()
     {
         ConcurrentHashSet<PackageActivityEntry> activityEntries = new();
 
@@ -256,11 +256,11 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
             activityEntries.UnionWith(package.GetAllActivities());
         });
 
-        _d1Activities = new();
+        _d1NamedTags = new();
 
         foreach (PackageActivityEntry entry in activityEntries)
         {
-            _d1Activities.TryAdd(entry.TagHash, entry.TagClassHash);
+            _d1NamedTags.TryAdd(entry.TagHash, entry.TagClassHash);
         }
     }
 }

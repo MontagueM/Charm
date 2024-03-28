@@ -96,7 +96,7 @@ public partial class ActivityMapEntityView : UserControl
                         if (tag.TagData.ActivityDevName.Value.Contains(activityName))
                         {
                             DisplayEntBubble displayActivityROI = new();
-                            displayActivityROI.Name = $"{PackageResourcer.Get().GetActivityName(val.Key)}";
+                            displayActivityROI.Name = $"{PackageResourcer.Get().GetActivityName(val.Key).Split(":").First()}";
                             displayActivityROI.Hash = $"{tag.Hash}";
                             displayActivityROI.ParentHash = $"{activity.FileHash}";
                             displayActivityROI.LoadType = DisplayEntBubble.Type.Activity;

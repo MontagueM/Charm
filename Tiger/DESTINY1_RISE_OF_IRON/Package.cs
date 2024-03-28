@@ -107,15 +107,12 @@ public struct PackageHeader : IPackageHeader
 
             // 16068080 is SUnkActivity_ROI
             // 2E058080 is SActivity_ROI
-            if (activityEntry.TagClassHash == 0x80800616 || activityEntry.TagClassHash == 0x8080052E)
+            activityEntries.Add(new PackageActivityEntry()
             {
-                activityEntries.Add(new PackageActivityEntry()
-                {
-                    TagHash = new FileHash(activityEntry.TagHash),
-                    TagClassHash = new TagClassHash(activityEntry.TagClassHash),
-                    Name = Name,
-                });
-            }
+                TagHash = new FileHash(activityEntry.TagHash),
+                TagClassHash = new TagClassHash(activityEntry.TagClassHash),
+                Name = Name,
+            });
 
             reader.Seek(NamedTagTableOffset + (0x44 * i), SeekOrigin.Begin);
         }

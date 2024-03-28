@@ -61,12 +61,12 @@ public struct S42048080
 public struct SUnkActivity_ROI
 {
     public long FileSize;
-    public TigerHash LocationName;  // these all have actual string hashes but have no string container given directly
+    public StringHash LocationName;  // these all have actual string hashes but have no string container given directly
     [SchemaField(0x18)]
     public uint Unk18;
-    public TigerHash Unk1C;
-    public TigerHash Unk20;
-    public TigerHash Unk24;
+    public StringHash Unk1C;
+    public StringHash DestinationName;
+    public StringHash Unk24;
     public LocalizedStrings LocalizedStrings;
     [SchemaField(0x30)]
     public StringPointer ActivityDevName;
@@ -186,6 +186,15 @@ public struct S2E098080
 public struct S14008080
 {
     public FileHash Unk00; // Can be SUnkActivity_ROI or something else (Based on tag type?)
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "48018080", 0x28)]
+public struct S48018080 // Named tag 'parent'
+{
+    public long FileSize;
+    [SchemaField(0xC)]
+    public TagClassHash Reference; // The reference hash of the tag next to it
+    public FileHash Tag;
 }
 
 //[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "60928080", 0x4)]
