@@ -389,7 +389,7 @@ public partial class ActivityMapEntityView : UserControl
 
         Parallel.ForEach(dataTables, data =>
         {
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && data.GetReferenceHash().Hash32 == 0x808012D9)
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && data.GetReferenceHash().Hash32 == 0x808003F6)
             {
                 var dataEntries = FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityResource.CollapseIntoDataEntry();
                 foreach (var entry in dataEntries)
