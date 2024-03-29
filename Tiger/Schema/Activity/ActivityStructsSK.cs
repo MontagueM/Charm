@@ -66,12 +66,12 @@ public struct S80978080
 public struct SUnkActivity_SK
 {
     public long FileSize;
-    public TigerHash LocationName;  // these all have actual string hashes but have no string container given directly
+    public StringHash LocationName;  // these all have actual string hashes but have no string container given directly
     [SchemaField(0x18)]
     public uint Unk18;
-    public TigerHash Unk1C;
-    public TigerHash Unk20;
-    public TigerHash Unk24;
+    public StringHash Unk1C;
+    public StringHash DestinationName;
+    public StringHash Unk24;
     public LocalizedStrings LocalizedStrings;
     [SchemaField(0x30)]
     public StringPointer ActivityDevName;

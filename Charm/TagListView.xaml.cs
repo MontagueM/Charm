@@ -1005,6 +1005,7 @@ public partial class TagListView : UserControl
                 Parallel.ForEach(valsChild, val =>
                 {
                     Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
+                    nameHashes.TryAdd(tag.TagData.ActivityDevName.Value, tag.TagData.DestinationName);
                     GlobalStrings.Get().AddStrings(tag.TagData.LocalizedStrings);
                 });
                 break;
@@ -1050,7 +1051,7 @@ public partial class TagListView : UserControl
             Parallel.ForEach(vals, val =>
             {
                 var activityName = PackageResourcer.Get().GetActivityName(val);
-                var first = activityName.Split(".").First();
+                var first = activityName.Split(":")[1];
                 _allTagItems.Add(new TagItem
                 {
                     Hash = val,

@@ -114,6 +114,14 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
                                 handle.ReadByte()));
                             break;
+                        case 0x30: // wtf
+                            part.VertexPositions.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(),
+                                handle.ReadSingle(), handle.ReadSingle()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(),
+                                handle.ReadSingle(), handle.ReadSingle()));
+                            part.VertexTangents.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(),
+                                handle.ReadSingle(), handle.ReadSingle()));
+                            break;
                         default:
                             break;
                     }
@@ -122,6 +130,9 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 case 1:
                     switch (_tag.Stride)
                     {
+                        case 0x04:
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            break;
                         case 0x08:
                             part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
                                 handle.ReadInt16(), handle.ReadInt16(), true));

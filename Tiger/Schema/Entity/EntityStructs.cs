@@ -516,15 +516,16 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     public int Unk20; // variant_shader_index?
 }
 
-[SchemaStruct("5B6D8080", 0x320)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "791A8080", 0x210)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5B6D8080", 0x320)]
 public struct D2Class_5B6D8080
 {
     // Full of relative pointer shit
     // Tables start at 0x1f0
-    [SchemaField(0x210)]
-    public DynamicArray<D2Class_0B008080> Unk210;
-    [SchemaField(0x220)]
-    public DynamicArray<D2Class_D99E8080> Unk220;
+    //[SchemaField(0x210)]
+    //public DynamicArray<D2Class_0B008080> Unk210;
+    //[SchemaField(0x220)]
+    //public DynamicArray<D2Class_D99E8080> Unk220;
     // there are more tables
 }
 
@@ -540,18 +541,20 @@ public struct D2Class_D99E8080
     public DynamicArray<D2Class_0B008080> Unk00;
 }
 
-[SchemaStruct("6C6D8080", 0x480)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F61B8080", 0x840)] //wtf
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6D8080", 0x480)]
 public struct D2Class_6C6D8080
 {
-    [SchemaField(0x38)]
-    public DynamicArray<D2Class_F79A8080> Unk38;
-    [SchemaField(0x224)]
+    //[SchemaField(0x38)]
+    //public DynamicArray<D2Class_F79A8080> Unk38;
+    [SchemaField(0x15C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x224, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public EntityModel PhysicsModel;
-    [SchemaField(0x2E8)]
-    public DynamicArray<D2Class_9E958080> Unk2E8;
+    //[SchemaField(0x2E8)]
+    //public DynamicArray<D2Class_9E958080> Unk2E8;
     // there are more tables
-    [SchemaField(0x470)]
-    public Tag Unk470;  // 606D8080
+    //[SchemaField(0x470)]
+    //public Tag Unk470;  // 606D8080
 }
 
 [SchemaStruct("F79A8080", 0x18)]
