@@ -54,9 +54,30 @@ public partial class MapView : UserControl
     private void GetStaticMapData(FileHash fileHash, ExportDetailLevel detailLevel)
     {
         Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(fileHash);
-        Tag<SMapDataTable> mapDataTable = tag.TagData.MapDataTables[1].MapDataTable;
-        StaticMapData staticMapData = ((SMapDataResource)mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())).StaticMapParent.TagData.StaticMap;
-        SetMapUI(staticMapData, detailLevel);
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            foreach (var tables in tag.TagData.MapDataTables)
+            {
+                foreach (var entry in tables.MapDataTable.TagData.DataEntries)
+                {
+                    if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapDataResource resource)
+                    {
+                        if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
+                            continue;
+
+                        StaticMapData staticMapData = resource.StaticMapParent.TagData.StaticMap;
+                        SetMapUI(staticMapData, detailLevel);
+                    }
+                }
+            }
+        }
+        else
+        {
+            Tag<SMapDataTable> mapDataTable = tag.TagData.MapDataTables[1].MapDataTable;
+            StaticMapData staticMapData = ((SMapDataResource)mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())).StaticMapParent.TagData.StaticMap;
+            SetMapUI(staticMapData, detailLevel);
+        }
+
     }
 
     private void SetMapUI(StaticMapData staticMapData, ExportDetailLevel detailLevel)
@@ -260,25 +281,57 @@ public partial class MapView : UserControl
     private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap, ExportDetailLevel detailLevel)
     {
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
-        Parallel.ForEach(staticMap.TagData.InstanceCounts, c =>
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            // inefficiency as sometimes there are two instance count entries with same hash. why? idk
-            var model = staticMap.TagData.Statics[c.StaticIndex].Static;
-            var parts = model.Load(ExportDetailLevel.MostDetailed);
-            for (int i = c.InstanceOffset; i < c.InstanceOffset + c.InstanceCount; i++)
+            if (staticMap.TagData.D1StaticMapData is not null)
             {
-                foreach (var part in parts)
+                var d1MapData = staticMap.TagData.D1StaticMapData;
+                var statics = d1MapData.GetStatics();
+                var instances = d1MapData.ParseTransforms();
+                Parallel.ForEach(statics, mesh =>
                 {
-                    MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
-                    displayPart.BasePart = part;
-                    displayPart.Translations.Add(staticMap.TagData.Instances[i].Position);
-                    displayPart.Rotations.Add(staticMap.TagData.Instances[i].Rotation);
-                    displayPart.Scales.Add(staticMap.TagData.Instances[i].Scale);
-                    displayParts.Add(displayPart);
-                }
-
+                    var parts = d1MapData.Load(mesh.Key, mesh.Value, instances);
+                    foreach (var info in mesh.Value)
+                    {
+                        for (int i = info.TransformIndex; i < info.TransformIndex + info.InstanceCount; i++)
+                        {
+                            foreach (var part in parts)
+                            {
+                                MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+                                displayPart.BasePart = part;
+                                displayPart.Translations.Add(instances[i].Translation.ToVec3());
+                                displayPart.Rotations.Add(instances[i].Rotation);
+                                displayPart.Scales.Add(instances[i].Scale.ToVec3());
+                                displayParts.Add(displayPart);
+                            }
+                        }
+                    }
+                });
             }
-        });
+        }
+        else
+        {
+            Parallel.ForEach(staticMap.TagData.InstanceCounts, c =>
+            {
+                // inefficiency as sometimes there are two instance count entries with same hash. why? idk
+                var model = staticMap.TagData.Statics[c.StaticIndex].Static;
+                var parts = model.Load(ExportDetailLevel.MostDetailed);
+                for (int i = c.InstanceOffset; i < c.InstanceOffset + c.InstanceCount; i++)
+                {
+                    foreach (var part in parts)
+                    {
+                        MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+                        displayPart.BasePart = part;
+                        displayPart.Translations.Add(staticMap.TagData.Instances[i].Position);
+                        displayPart.Rotations.Add(staticMap.TagData.Instances[i].Rotation);
+                        displayPart.Scales.Add(staticMap.TagData.Instances[i].Scale);
+                        displayParts.Add(displayPart);
+                    }
+
+                }
+            });
+        }
+
         return displayParts.ToList();
     }
 

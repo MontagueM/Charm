@@ -261,39 +261,6 @@ public class StaticMapData : Tag<SStaticMapData>
         {
             if (_tag.D1StaticMapData is not null)
                 _tag.D1StaticMapData.LoadIntoExporterScene(scene);
-
-            //Console.WriteLine(_tag.Decals.Count);
-            //foreach (var decal in _tag.Decals)
-            //{
-            //    Debug.Assert(decal.Transforms.Count == 1 && decal.Models.Count == 1);
-
-            //    var transform = decal.Transforms[0];
-            //    var model = decal.Models[0];
-
-            //    Matrix4x4 matrix = new Matrix4x4(
-            //        transform.M0.X, transform.M0.Y, transform.M0.Z, transform.M0.W,
-            //        transform.M1.X, transform.M1.Y, transform.M1.Z, transform.M1.W,
-            //        transform.M2.X, transform.M2.Y, transform.M2.Z, transform.M2.W,
-            //        transform.M3.X, transform.M3.Y, transform.M3.Z, transform.M3.W
-            //    );
-
-            //    //matrix = Matrix4x4.Transpose(matrix);
-            //    System.Numerics.Vector3 translation = new();
-            //    Quaternion rotation = new Quaternion();
-            //    System.Numerics.Vector3 scale = new();
-            //    Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
-
-            //    scene.AddMapModel(model.Model,
-            //    new Tiger.Schema.Vector4(translation.X, translation.Y, translation.Z, 1.0f),
-            //    new Tiger.Schema.Vector4(rotation.X, rotation.Y, rotation.Z, rotation.W),
-            //    new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z));
-
-            //    foreach (DynamicMeshPart part in model.Model.Load(ExportDetailLevel.MostDetailed, null))
-            //    {
-            //        if (part.Material == null) continue;
-            //        scene.Materials.Add(new ExportMaterial(part.Material));
-            //    }
-            //}
         }
         else
         {
