@@ -222,7 +222,7 @@ public class ExporterScene
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
     }
 
-    public void AddMapEntity(SMapDataEntry dynamicResource, Entity entity)
+    public void AddMapEntity(SMapDataEntry dynamicResource, Entity entity, Transform? transform = null)
     {
         if (!_addedEntities.Contains(entity.Hash)) //Dont want duplicate entities being added
         {
@@ -248,13 +248,17 @@ public class ExporterScene
             EntityInstances.TryAdd(dynamicResource.GetEntityHash(), new());
         }
 
-        EntityInstances[dynamicResource.GetEntityHash()].Add(new Transform
+        if (transform is null)
         {
-            Position = dynamicResource.Translation.ToVec3(),
-            Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
-            Quaternion = dynamicResource.Rotation,
-            Scale = new Vector3(dynamicResource.Translation.W, dynamicResource.Translation.W, dynamicResource.Translation.W)
-        });
+            transform = new Transform
+            {
+                Position = dynamicResource.Translation.ToVec3(),
+                Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
+                Quaternion = dynamicResource.Rotation,
+                Scale = new Vector3(dynamicResource.Translation.W, dynamicResource.Translation.W, dynamicResource.Translation.W)
+            };
+        }
+        EntityInstances[dynamicResource.GetEntityHash()].Add((Transform)transform);
     }
 
     public void AddMapModel(EntityModel model, Vector4 translation, Vector4 rotation, Vector3 scale, bool transparentsOnly = false)

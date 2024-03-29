@@ -9,6 +9,7 @@ using Arithmic;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
+using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Static;
 
@@ -47,8 +48,7 @@ public partial class MapView : UserControl
 
     private void GetEntityMapData(FileHash tagHash, ExportDetailLevel detailLevel)
     {
-        Tag<SMapDataTable> dataentry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(tagHash);
-        SetEntityMapUI(dataentry, detailLevel);
+        SetEntityMapUI(tagHash, detailLevel);
     }
 
     private void GetStaticMapData(FileHash fileHash, ExportDetailLevel detailLevel)
@@ -71,7 +71,7 @@ public partial class MapView : UserControl
         displayParts.Clear();
     }
 
-    private void SetEntityMapUI(Tag<SMapDataTable> dataentry, ExportDetailLevel detailLevel)
+    private void SetEntityMapUI(FileHash dataentry, ExportDetailLevel detailLevel)
     {
         var displayParts = MakeEntityDisplayParts(dataentry, detailLevel);
         Dispatcher.Invoke(() =>
@@ -282,10 +282,17 @@ public partial class MapView : UserControl
         return displayParts.ToList();
     }
 
-    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(Tag<SMapDataTable> dataentry, ExportDetailLevel detailLevel)
+    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(FileHash hash, ExportDetailLevel detailLevel)
     {
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
-        Parallel.ForEach(dataentry.TagData.DataEntries, entry =>
+
+        List<SMapDataEntry> dataEntries = new();
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && hash.GetReferenceHash().Hash32 == 0x808003F6) //F6038080
+            dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(hash).TagData.EntityResource.CollapseIntoDataEntry());
+        else
+            dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SMapDataTable>(hash).TagData.DataEntries);
+
+        Parallel.ForEach(dataEntries, entry =>
         {
             Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entry.GetEntityHash());
             List<Entity> entities = new List<Entity> { entity };

@@ -1,4 +1,5 @@
-﻿using Tiger.Schema.Strings;
+﻿using Tiger.Schema.Entity;
+using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 
@@ -151,21 +152,22 @@ public struct SE9058080
 {
     [SchemaField(0x10)]
     public Tag<SMapDataTable> Unk10;
-    //[SchemaField(0x18)]
-    //public DynamicArray<S22428080> Unk18;
+    [SchemaField(0x18)]
+    public DynamicArray<S22428080> Unk18;
 }
 
-//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "22428080", 0x4)]
-//public struct S22428080
-//{
-//    public Tag<SF6038080> Unk00;
-//}
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "22428080", 0x4)]
+public struct S22428080
+{
+    public Tag<SF6038080> Unk00;
+}
 
-//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F6038080", 0x10)]
-//public struct SF6038080
-//{
-//    public EntityResource Unk0C; // Check Unk10 for 2E098080, Unk18 -> DD078080 0x80
-//}
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F6038080", 0x10)]
+public struct SF6038080
+{
+    [SchemaField(0xC)]
+    public EntityResource? EntityResource; // Check Unk10 for 2E098080, Unk18 -> DD078080 0x80
+}
 
 //[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DD078080", 0xB0)]
 //public struct SDD078080
@@ -180,6 +182,19 @@ public struct SE9058080
 public struct S2E098080
 {
 
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "BC078080", 0x464)]
+public struct SBC078080
+{
+
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A7058080", 0x80)]
+public struct SA7058080
+{
+    [SchemaField(0x68)]
+    public Tag<SD9128080> Unk68;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "14008080", 0x4)]
@@ -197,41 +212,71 @@ public struct S48018080 // Named tag 'parent'
     public FileHash Tag;
 }
 
-//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "60928080", 0x4)]
-//public struct S60928080
-//{
-//    public Tag<S62948080> Unk00;
-//}
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D9128080", 0x58)]
+public struct SD9128080 // Scripted entity stuff? Using Vosik to fill this one out
+{
+    public long FileSize;
+    public StringHash Unk09; // sq_machine
+    public TigerHash Unk0C;
+    public FileHash Unk10;
+    [SchemaField(0x20)]
+    public DynamicArray<SD6148080> Unk20;
+    public DynamicArray<S2B138080> Locations;
+}
 
-//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "62948080", 0x58)]
-//public struct S62948080
-//{
-//    public long FileSize;
-//    public TigerHash Unk08; //BubbleName?
-//    public TigerHash Unk0C; //ActivityPhaseName?
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D6148080", 0x38)]
+public struct SD6148080
+{
+    public StringHash Type; // boss
+    [SchemaField(0x8)]
+    public DynamicArray<S48138080> Unk08;
+}
 
-//    [SchemaField(0x38)]
-//    public DynamicArray<S64948080> Unk38;
-//}
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "48138080", 0x10)]
+public struct S48138080
+{
+    public ResourcePointer Pointer; // 06048080 (SMapDataEntry), data resource pointing to 33138080
+}
 
-//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "64948080", 0x1C)]
-//public struct S64948080
-//{
-//    [SchemaField(0x8)]
-//    public DynamicArray<S66948080> Unk08;
-//}
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "33138080", 0x34)]
+public struct S33138080
+{
+    public ResourcePointer Pointer; // 152B8080
+    [SchemaField(0x20)]
+    public StringHash EntityName; // Vosik, The Archpriest
+}
 
-//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "66948080", 0x4)]
-//public struct S66948080
-//{
-//    public Tag<S68948080> Unk00;
-//}
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "152B8080", 0x28)]
+public struct S152B8080
+{
+    [SchemaField(0x10)]
+    public DynamicArray<S4E2A8080> Unk10;
+}
 
-//[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "68948080", 0x20)]
-//public struct S68948080
-//{
-//    public long FileSize;
-//    public Tag<SMapDataTable> DataTable;
-//}
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "4E2A8080", 0x8)]
+public struct S4E2A8080
+{
+    public TigerHash Unk00;
+    public StringHash Type; // Faction? Type? (Devil Splicer's, Scorch Cannon)
+}
+
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2B138080", 0x30)]
+public struct S2B138080
+{
+    public Vector4 Location;
+    public Vector4 Rotation;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DD078080", 0xB0)]
+public struct SDD078080
+{
+    [SchemaField(0x60)]
+    public StringPointer DevName;
+    [SchemaField(0x68)]
+    public DynamicArray<SMapDataEntry> DataEntries;
+    [SchemaField(0x80), NoLoad]
+    public Entity.Entity? UnkEntity;
+}
 
 

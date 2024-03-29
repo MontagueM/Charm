@@ -243,6 +243,11 @@ public struct Vector4
         W = w / 32_767.0f;
     }
 
+    public Vector4 WithW(float w)
+    {
+        return new Vector4(X, Y, Z, w);
+    }
+
     public static Vector4 Quaternion
     {
         get

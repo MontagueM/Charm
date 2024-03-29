@@ -87,12 +87,23 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
                 var Unk00 = FileResourcer.Get().GetSchemaTag<S6E078080>(resource.Unk00);
                 foreach (var a in Unk00.TagData.Unk30)
                 {
-                    if (a.Unk10 is null)
-                        continue;
-
-                    if (a.Unk10.TagData.DataEntries.Count > 0)
+                    if (a.Unk10 is not null && a.Unk10.TagData.DataEntries.Count > 0)
                         if (!items.Contains(a.Unk10.Hash))
                             items.Add(a.Unk10.Hash);
+
+                    foreach (var b in a.Unk18)
+                    {
+                        if (!items.Contains(b.Unk00.Hash))
+                            items.Add(b.Unk00.Hash);
+
+                        // For NPCs, enemies and other AI (it's cool but not really worth adding)
+                        //if (b.Unk00.TagData.EntityResource.TagData.Unk10.GetValue(b.Unk00.TagData.EntityResource.GetReader()) is SBC078080 c)
+                        //{
+                        //    var d = (SA7058080)b.Unk00.TagData.EntityResource.TagData.Unk18.GetValue(b.Unk00.TagData.EntityResource.GetReader());
+                        //    if (!items.Contains(d.Unk68.Hash))
+                        //        items.Add(d.Unk68.Hash);
+                        //}
+                    }
                 }
             }
 

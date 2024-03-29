@@ -12,9 +12,11 @@ using System.Windows.Input;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
+using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Static;
+using Tiger.Schema.Strings;
 
 namespace Charm;
 
@@ -135,7 +137,7 @@ public partial class DevView : UserControl
         // Adds a new tab to the tab control
         TigerHash reference = hash.GetReferenceHash();
         FileMetadata fileMetadata = PackageResourcer.Get().GetFileMetadata(hash);
-        if (fileMetadata.Type == 26 && fileMetadata.SubType == 7)
+        if ((fileMetadata.Type == 26 && fileMetadata.SubType == 7) || (fileMetadata.Type == 8 && fileMetadata.SubType == 21))
         {
             var audioView = new TagView();
             audioView.SetViewer(TagView.EViewerType.TagList);
