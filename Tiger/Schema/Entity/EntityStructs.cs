@@ -483,7 +483,7 @@ public struct SEntityModelMesh
     public VertexBuffer SinglePassSkinningBuffer;  // single pass skinning buffer
     public int Zeros1C;
     public DynamicArrayUnloaded<D2Class_CB6E8080> Parts;
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 48)]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 30)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 48)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 37)]
     public short[] StagePartOffsets;

@@ -13,7 +13,7 @@ public partial class MainMenuView : UserControl
     {
         InitializeComponent();
 
-        ApiButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
+        ApiButton.IsEnabled = ShowAPIButton(Strategy.CurrentStrategy);
         BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
         WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy);
         StaticsButton.IsEnabled = ShowIfD2(Strategy.CurrentStrategy);
@@ -22,7 +22,7 @@ public partial class MainMenuView : UserControl
         {
             Dispatcher.Invoke(() =>
             {
-                ApiButton.IsEnabled = ShowWQButtons(args.Strategy);
+                ApiButton.IsEnabled = ShowAPIButton(args.Strategy);
                 BagsButton.IsEnabled = ShowWQButtons(args.Strategy);
                 WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy);
                 StaticsButton.IsEnabled = ShowIfD2(args.Strategy);
@@ -43,6 +43,11 @@ public partial class MainMenuView : UserControl
     private bool ShowIfLatest(TigerStrategy strategy)
     {
         return strategy == TigerStrategy.DESTINY2_LATEST;
+    }
+
+    private bool ShowAPIButton(TigerStrategy strategy)
+    {
+        return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402 || strategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)

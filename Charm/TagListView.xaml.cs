@@ -1688,7 +1688,7 @@ public partial class TagListView : UserControl
         {
             if (entry.WeaponContentGroup1Hash.Equals(weaponContentGroupHash) && entry.AudioGroup != null)
             {
-                var audioGroup = FileResourcer.Get().GetSchemaTag<D2Class_0D8C8080>(entry.AudioGroup.TagData.EntityData);
+                var audioGroup = FileResourcer.Get().GetSchemaTag<D2Class_0D8C8080>(entry.AudioGroup.TagData.GetEntityData());
                 audioGroup.TagData.Audio.ForEach(audio =>
                 {
                     foreach (var s in audio.Sounds)
@@ -1754,7 +1754,7 @@ public partial class TagListView : UserControl
                 var reference = tag.Hash.GetReferenceHash();
                 if (reference == 0x80806fa3)
                 {
-                    var entityData = FileResourcer.Get().GetSchemaTag<D2Class_A36F8080>(tag.Hash).TagData.EntityData;
+                    var entityData = FileResourcer.Get().GetSchemaTag<D2Class_A36F8080>(tag.Hash).TagData.GetEntityData();
                     var reference2 = entityData.GetReferenceHash();
                     if (reference2 == 0x80802d09)
                     {

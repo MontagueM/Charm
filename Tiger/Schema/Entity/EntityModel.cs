@@ -82,7 +82,9 @@ public class EntityModel : Tag<SEntityModel>
             Dictionary<int, int> partGroups = new();
             HashSet<short> groups = new(mesh.StagePartOffsets.AsEnumerable());
             var groupList = groups.ToList();
-            groupList.Remove(0x707);
+            // Idk what this is actually supposed to do but Ill just leave it for BL+ since its stage part offset size is an odd number?
+            if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+                groupList.Remove(0x707);
             groupList.Sort();
             for (int i = 0; i < groupList.Count - 1; i++)
             {
