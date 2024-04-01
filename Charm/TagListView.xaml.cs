@@ -1051,7 +1051,9 @@ public partial class TagListView : UserControl
             Parallel.ForEach(vals, val =>
             {
                 var activityName = PackageResourcer.Get().GetActivityName(val);
-                var first = activityName.Split(":")[1];
+                var first = Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402
+                ? activityName.Split(".").First() : activityName.Split(":")[1];
+
                 _allTagItems.Add(new TagItem
                 {
                     Hash = val,

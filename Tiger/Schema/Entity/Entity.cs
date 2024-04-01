@@ -40,7 +40,6 @@ public class Entity : Tag<SEntity>
         {
             if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)
                 continue;
-
             EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
             switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
             {
@@ -101,10 +100,18 @@ public class Entity : Tag<SEntity>
     public void SaveTexturePlates(string saveDirectory)
     {
         Directory.CreateDirectory($"{saveDirectory}/Textures/");
-        if (((D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader())).TexturePlates is null)
+        var parentResource = (D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader());
+
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_SHADOWKEEP_2601 && parentResource.TexturePlates is null)
             return;
 
-        var rsrc = ((D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader())).TexturePlates.TagData;
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && (parentResource.TexturePlatesROI.Count == 0 || parentResource.TexturePlatesROI[0].TexturePlates is null))
+            return;
+
+        var rsrc = Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON
+            ? parentResource.TexturePlates.TagData : parentResource.TexturePlatesROI[0].TexturePlates.TagData;
+
+
         rsrc.AlbedoPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_albedo");
         rsrc.NormalPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_normal");
         rsrc.GStackPlate?.SavePlatedTexture($"{saveDirectory}/Textures/{Hash}_gstack");

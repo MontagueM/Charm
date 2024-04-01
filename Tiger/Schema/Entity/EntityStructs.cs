@@ -145,8 +145,11 @@ public struct D2Class_8F6D8080
     [SchemaField(0x224, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public EntityModel Model;
 
-    [SchemaField(0x308, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x1A8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public DynamicArray<S121B8080> TexturePlatesROI;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x310, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]  // todo shadowkeep, beyond light
     public Tag<D2Class_1C6E8080> TexturePlates;
 
@@ -167,6 +170,13 @@ public struct D2Class_8F6D8080
     [SchemaField(0x3A0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x400, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArrayUnloaded<D2Class_14008080> ExternalMaterials;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "121B8080", 0x30)]
+public struct S121B8080
+{
+    [SchemaField(0x28)]
+    public Tag<D2Class_1C6E8080> TexturePlates;
 }
 
 #region Texture Plates
