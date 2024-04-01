@@ -115,50 +115,38 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 {
                     case 0x80807997:
                         _inventoryItemMap = FileResourcer.Get().GetSchemaTag<D2Class_97798080>(val);
-                        Console.WriteLine($"_inventoryItemMap {val}");
                         break;
                     case 0x808070f2:
                         _artArrangementMap = FileResourcer.Get().GetSchemaTag<D2Class_F2708080>(val);
-                        Console.WriteLine($"_artArrangementMap {val}");
                         break;
                     case 0x808055ce:
                         _entityAssignmentTag = FileResourcer.Get().GetSchemaTag<D2Class_CE558080>(val);
-                        Console.WriteLine($"_entityAssignmentTag {val}");
                         break;
                     case 0x80805499:
                         _inventoryItemStringThing = FileResourcer.Get().GetSchemaTag<D2Class_99548080>(val);
-                        Console.WriteLine($"_inventoryItemStringThing {val}");
                         break;
                     case 0x8080798c:
                         _inventoryItemIndexDictTag = FileResourcer.Get().GetSchemaTag<D2Class_8C798080>(val);
-                        Console.WriteLine($"_inventoryItemIndexDictTag {val}");
                         break;
                     case 0x80805a09:
                         _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<D2Class_095A8080>(val);
-                        Console.WriteLine($"_localizedStringsIndexTag {val}");
                         break;
                     case 0x80804ea4: // points to parent of the sandbox pattern ref list thing + entity assignment map
                         var parent = FileResourcer.Get().GetSchemaTag<D2Class_A44E8080>(val);
                         _sandboxPatternAssignmentsTag = parent.TagData.SandboxPatternAssignmentsTag; // also art dye refs
-                        Console.WriteLine($"_sandboxPatternAssignmentsTag {_sandboxPatternAssignmentsTag.Hash}");
                         _entityAssignmentsMap = parent.TagData.EntityAssignmentsMap;
-                        Console.WriteLine($"_entityAssignmentsMap {_entityAssignmentsMap.Hash}");
                         break;
                     case 0x808052aa: // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
                         _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<D2Class_AA528080>(val);
-                        Console.WriteLine($"_sandboxPatternGlobalTagIdTag {val}");
                         break;
                     case 0x80805a01:
                         _inventoryItemIconTag = FileResourcer.Get().GetSchemaTag<D2Class_015A8080>(val);
-                        Console.WriteLine($"_inventoryItemIconTag {val}");
                         break;
                     case 0x808055c2:
                         _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<D2Class_C2558080>(val);
-                        Console.WriteLine($"_artDyeReferenceTag {val}");
                         break;
                     case 0x808051f2:  // shadowkeep is 0x80805bde
                         _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(val);
-                        Console.WriteLine($"_dyeChannelTag {val}");
                         break;
                 }
             });
@@ -170,21 +158,17 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             //_inventoryItemIconTag = FileResourcer.Get().GetSchemaTag<D2Class_015A8080>(val); // Not in D1, icons are with _inventoryItemStringThing
 
             _inventoryItemMap = FileResourcer.Get().GetSchemaTag<D2Class_97798080>(new FileHash("BEFFA580"));
-
             _entityAssignmentTag = FileResourcer.Get().GetSchemaTag<D2Class_CE558080>(new FileHash("A7FFA580"));
             _inventoryItemStringThing = FileResourcer.Get().GetSchemaTag<D2Class_99548080>(new FileHash("9CFFA580"));
-
             _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<D2Class_095A8080>(new FileHash("1AE2A580"));
-
-
             _sandboxPatternAssignmentsTag = FileResourcer.Get().GetSchemaTag<D2Class_8C978080>(new FileHash("DCE1A780")); // also art dye refs
             _entityAssignmentsMap = FileResourcer.Get().GetSchemaTag<D2Class_434F8080>(new FileHash("DDE1A780"));
 
             // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
-            //_sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<D2Class_AA528080>(val);
+            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<D2Class_AA528080>(new FileHash("A9FFA580"));
 
-            //_artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<D2Class_C2558080>(val);
-            //_dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(val);
+            _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<D2Class_C2558080>(new FileHash("A8FFA580")); // Wrong 
+            _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(new FileHash("49E2A580"));
 
         }
 
@@ -293,6 +277,21 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         if (dyeEntry.HasValue && dyeEntry.Value.GetEntityRelationHash().GetReferenceHash() == 0x80806fa3)
         {
             return FileResourcer.Get().GetSchemaTag<D2Class_E36C8080>(FileResourcer.Get().GetSchemaTag<D2Class_A36F8080>(dyeEntry.Value.GetEntityRelationHash()).TagData.GetEntityData()).TagData.Dye;
+        }
+        return null;
+    }
+
+    public DyeD1 GetD1DyeFromIndex(short index)
+    {
+        var artEntry = _artDyeReferenceTag.TagData.ArtDyeReferences.ElementAt(_artDyeReferenceTag.GetReader(), index);
+        var dyeEntry = _sandboxPatternAssignmentsTag.TagData.AssignmentBSL.BinarySearch(_sandboxPatternAssignmentsTag.GetReader(), artEntry.DyeManifestHash);
+
+        if (dyeEntry.HasValue)
+            Console.WriteLine($"{dyeEntry.Value.GetEntityRelationHash().GetReferenceFromManifest()}");
+
+        if (dyeEntry.HasValue && dyeEntry.Value.GetEntityRelationHash().GetReferenceFromManifest() == "63348080")
+        {
+            return FileResourcer.Get().GetFile<DyeD1>(FileResourcer.Get().GetSchemaTag<D2Class_A36F8080>(dyeEntry.Value.GetEntityRelationHash()).TagData.GetEntityData());
         }
         return null;
     }
@@ -563,35 +562,46 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         public int[] geometry { get; set; }
     }
 #endif
+
     public void ExportShader(InventoryItem item, string savePath, string name, TextureExportFormat outputTextureFormat)
     {
-        Dictionary<string, Dye> dyes = new();
-
-        // export all the customDyes
-        if (item.TagData.Unk90.GetValue(item.GetReader()) is D2Class_77738080 translationBlock)
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            foreach (var dyeEntry in translationBlock.CustomDyes)
+            Dictionary<string, DyeD1> dyes = new();
+            if (item.TagData.Unk90.GetValue(item.GetReader()) is D2Class_77738080 translationBlock)
             {
-                Dye dye = GetDyeFromIndex(dyeEntry.DyeIndex);
-                dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
-                dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
+                foreach (var dyeEntry in translationBlock.CustomDyes)
+                {
+                    DyeD1 dye = GetD1DyeFromIndex(dyeEntry.DyeIndex);
+                    dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
+                    dyes.Add(DyeD1.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
+                }
             }
         }
-
-        // armour
-        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armour");
-
-        // ghost
-        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["GhostMain"], dyes["GhostHighlights"], dyes["GhostDecals"] }, "_ghost");
-
-        // ship
-        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ShipUpper"], dyes["ShipDecals"], dyes["ShipLower"] }, "_ship");
-
-        // sparrow
-        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["SparrowUpper"], dyes["SparrowEngine"], dyes["SparrowLower"] }, "_sparrow");
-
-        // weapon
-        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["Weapon1"], dyes["Weapon2"], dyes["Weapon3"] }, "_weapon");
+        else
+        {
+            Dictionary<string, Dye> dyes = new();
+            // export all the customDyes
+            if (item.TagData.Unk90.GetValue(item.GetReader()) is D2Class_77738080 translationBlock)
+            {
+                foreach (var dyeEntry in translationBlock.CustomDyes)
+                {
+                    Dye dye = GetDyeFromIndex(dyeEntry.DyeIndex);
+                    dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
+                    dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
+                }
+            }
+            // armor
+            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armour");
+            // ghost
+            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["GhostMain"], dyes["GhostHighlights"], dyes["GhostDecals"] }, "_ghost");
+            // ship
+            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ShipUpper"], dyes["ShipDecals"], dyes["ShipLower"] }, "_ship");
+            // sparrow
+            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["SparrowUpper"], dyes["SparrowEngine"], dyes["SparrowLower"] }, "_sparrow");
+            // weapon
+            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["Weapon1"], dyes["Weapon2"], dyes["Weapon3"] }, "_weapon");
+        }
     }
 }
 

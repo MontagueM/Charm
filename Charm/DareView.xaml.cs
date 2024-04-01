@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,10 +32,10 @@ public partial class DareView : UserControl
     }
     private void AmountBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if(_allItems != null) //Gotta do this for some reason
+        if (_allItems != null) //Gotta do this for some reason
             RefreshItemList();
     }
-    
+
     private void RefreshItemList()
     {
         string searchTerm = SearchBox.Text.ToLower();
@@ -93,7 +89,10 @@ public partial class DareView : UserControl
             {
                 if (!type.Contains("Finisher") && !type.Contains("Emote")) // they point to Animation instead of Entity
                 {
-                    if(name != "")
+                    if (name == "" && type == "Armor Ornament") // D1 armor ornaments dont have names and icons :))
+                        name = item.TagData.InventoryItemHash.Hash32.ToString();
+
+                    if (name != "")
                     {
                         // icon bg
                         var bgStream = item.GetIconBackgroundStream();
@@ -247,7 +246,7 @@ public partial class DareView : UserControl
                 Investment.Get().ExportShader(item.Value.Item, savePath, itemName, config.GetOutputTextureFormat());
 
                 item.Value.Item.GetIconPrimaryTexture().SavetoFile($"{savePath}/{itemName}");
-                    
+
                 MainWindow.Progress.CompleteStage();
             });
         });

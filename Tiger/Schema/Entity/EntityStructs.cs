@@ -144,6 +144,9 @@ public struct D2Class_8F6D8080
     [SchemaField(0x1DC, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x224, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public EntityModel Model;
+
+    [SchemaField(0x308, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     [SchemaField(0x310, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]  // todo shadowkeep, beyond light
     public Tag<D2Class_1C6E8080> TexturePlates;
 
@@ -231,27 +234,27 @@ public class TexturePlate : Tag<D2Class_919E8080>
 /// <summary>
 /// Texture plate header that stores all the texture plates used for the EntityModel.
 /// </summary>
-[SchemaStruct("1C6E8080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "3C1C8080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "1C6E8080", 0x38)]
 public struct D2Class_1C6E8080
 {
     public long FileSize;
-    [SchemaField(0x18)]
-    public byte Unk18;
-    public byte Unk19;
-    public short Unk1A;
-    public int Unk1C;
-    public int Unk20;
-    public int Unk24;
+
+    [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TexturePlate AlbedoPlate;
     public TexturePlate NormalPlate;
     public TexturePlate GStackPlate;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TexturePlate DyemapPlate;
 }
 
 /// <summary>
 /// Texture plate that stores the data for placing textures on a canvas.
 /// </summary>
-[SchemaStruct("919E8080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "47018080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "919E8080", 0x20)]
 public struct D2Class_919E8080
 {
     public long FileSize;
@@ -259,7 +262,8 @@ public struct D2Class_919E8080
     public DynamicArrayUnloaded<D2Class_939E8080> PlateTransforms;
 }
 
-[SchemaStruct("939E8080", 0x14)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "63018080", 0x14)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "939E8080", 0x14)]
 public struct D2Class_939E8080
 {
     public Texture Texture;

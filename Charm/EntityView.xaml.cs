@@ -154,29 +154,62 @@ public partial class EntityView : UserControl
         EntityView.Export(Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash),
             name, ExportTypeFlag.Full, overrideSkeleton, scene);
 
-        // Export the dye info
-        Dictionary<TigerHash, Dye> dyes = new Dictionary<TigerHash, Dye>();
-        if (item.Item.TagData.Unk90.GetValue(item.Item.GetReader()) is D2Class_77738080 translationBlock)
-        {
-            foreach (var dyeEntry in translationBlock.DefaultDyes)
-            {
-                Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
-                dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
-            }
-            foreach (var dyeEntry in translationBlock.LockedDyes)
-            {
-                Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
-                dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
-            }
-        }
-
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
         string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
         string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
-        AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
-            config.GetOutputTextureFormat(), dyes.Values.ToList());
+
+        ExportGearShader(item, itemName, savePath);
+    }
+
+
+    // I don't like this
+    public static void ExportGearShader(ApiItem item, string itemName, string savePath)
+    {
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+
+        // Export the dye info
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            Dictionary<TigerHash, DyeD1> dyes = new Dictionary<TigerHash, DyeD1>();
+            if (item.Item.TagData.Unk90.GetValue(item.Item.GetReader()) is D2Class_77738080 translationBlock)
+            {
+                foreach (var dyeEntry in translationBlock.DefaultDyes)
+                {
+                    DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.DyeIndex);
+                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                    dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
+                }
+                foreach (var dyeEntry in translationBlock.LockedDyes)
+                {
+                    DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.DyeIndex);
+                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                    dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
+                }
+            }
+        }
+        else
+        {
+            Dictionary<TigerHash, Dye> dyes = new Dictionary<TigerHash, Dye>();
+            if (item.Item.TagData.Unk90.GetValue(item.Item.GetReader()) is D2Class_77738080 translationBlock)
+            {
+                foreach (var dyeEntry in translationBlock.DefaultDyes)
+                {
+                    Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
+                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                }
+                foreach (var dyeEntry in translationBlock.LockedDyes)
+                {
+                    Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
+                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                }
+            }
+
+            AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
+                config.GetOutputTextureFormat(), dyes.Values.ToList());
+        }
+
     }
 }

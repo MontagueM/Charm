@@ -95,7 +95,7 @@ public struct DyeInfo
 }
 
 
-[SchemaStruct("BA6D8080", 0x378)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BA6D8080", 0x378)]
 public struct SDye
 {
     public long FileSize;
@@ -113,4 +113,66 @@ public struct SDye
     [SchemaField(0xB0)]
     public int UnkB0;
     public FileHash DyeInfoHeader;
+}
+
+public class DyeD1 : Tag<SDye_D1>
+{
+    public DyeD1(FileHash hash) : base(hash) { }
+
+    private static Dictionary<uint, string> ChannelNames = new()
+    {
+        {662199250, "ArmorPlate"},
+        {1367384683, "ArmorSuit"},
+        {218592586, "ArmorCloth"},
+        {1667433279, "Weapon1"},
+        {1667433278, "Weapon2"},
+        {1667433277, "Weapon3"},
+        {3073305669, "ShipUpper"},
+        {3073305668, "ShipDecals"},
+        {3073305671, "ShipLower"},
+        {1971582085, "SparrowUpper"},
+        {1971582084, "SparrowEngine"},
+        {1971582087, "SparrowLower"},
+        {373026848, "GhostMain"},
+        {373026849, "GhostHighlights"},
+        {373026850, "GhostDecals"},
+    };
+
+    public static string GetChannelName(TigerHash channelHash)
+    {
+        return ChannelNames[channelHash.Hash32];
+    }
+
+    public void ExportTextures(string savePath, TextureExportFormat outputTextureFormat)
+    {
+        TextureExtractor.SetTextureFormat(outputTextureFormat);
+        TextureExtractor.SaveTextureToFile($"{savePath}/{_tag.DetailDiffuse.Hash}", _tag.DetailDiffuse.GetScratchImage());
+        TextureExtractor.SaveTextureToFile($"{savePath}/{_tag.DetailNormal.Hash}", _tag.DetailNormal.GetScratchImage());
+    }
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F41A8080", 0xD0)]
+public struct SDye_D1
+{
+    public long FileSize;
+    public StringPointer DevName;
+
+    [SchemaField(0x10)]
+    public int DyeType; // 0 Armor, 1 Cloth, 2 Suit
+
+    [SchemaField(0x30)]
+    public Vector4 Unk30;
+
+    [SchemaField(0x50)]
+    public Vector4 Unk50;
+
+    public Texture DetailDiffuse;
+    public Texture DetailNormal;
+
+    [SchemaField(0x70)]
+    public Vector4 Unk70;
+    public Vector4 Unk80;
+    public Vector4 Unk90;
+    public Vector4 UnkA0;
+    public Vector4 UnkB0;
 }
