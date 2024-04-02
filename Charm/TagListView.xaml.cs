@@ -1646,12 +1646,14 @@ public partial class TagListView : UserControl
             {
                 type = "";
             }
-            if (type == "Vehicle" || type == "Ship")
+            if (type == "Vehicle" || type == "Ship" || type == "Ship Schematics" || type == "Ghost Shell")
                 return;
+
             _allTagItems.Add(new TagItem
             {
                 Hash = item.TagData.InventoryItemHash,
                 Name = name,
+                Subname = ((ItemTier)item.TagData.ItemRarity).ToString(),
                 Type = type.Trim(),
                 TagType = ETagListType.WeaponAudioGroup
             });
@@ -1684,42 +1686,64 @@ public partial class TagListView : UserControl
         var weaponContentGroupHash = Investment.Get().GetWeaponContentGroupHash(item);
 
         Log.Verbose($"Loading weapon entity audio {val.Hash}, ContentGroupHash {weaponContentGroupHash}");
-
         // Named
-        foreach (var entry in resource.PatternAudioGroups)
-        {
-            if (entry.WeaponContentGroup1Hash.Equals(weaponContentGroupHash) && entry.AudioGroup != null)
-            {
-                var audioGroup = FileResourcer.Get().GetSchemaTag<D2Class_0D8C8080>(entry.AudioGroup.TagData.GetEntityData());
-                audioGroup.TagData.Audio.ForEach(audio =>
-                {
-                    foreach (var s in audio.Sounds)
-                    {
-                        if (s.Sound == null)
-                            continue;
+        Tag<D2Class_0D8C8080>? audioGroup = null;
 
-                        _allTagItems.Add(new TagItem
-                        {
-                            Hash = s.Sound.Hash,
-                            Name = s.WwiseEventName,
-                            Subname = audio.WwiseEventHash,
-                            TagType = ETagListType.WeaponAudio
-                        });
-                    }
-                });
+        if (!resource.PatternAudioGroups.Where(x => x.WeaponContentGroup1Hash == weaponContentGroupHash).Any())
+        {
+            if (resource.FallbackAudioGroup != null)
+            {
+                audioGroup = FileResourcer.Get().GetSchemaTag<D2Class_0D8C8080>(resource.FallbackAudioGroup.TagData.GetEntityData());
             }
         }
+        else
+        {
+            foreach (var entry in resource.PatternAudioGroups)
+            {
+                if (entry.WeaponContentGroup1Hash.Equals(weaponContentGroupHash) && entry.GetAudioGroup() != null)
+                {
+                    audioGroup = FileResourcer.Get().GetSchemaTag<D2Class_0D8C8080>(entry.GetAudioGroup().TagData.GetEntityData());
+                }
+            }
+        }
+
+        if (audioGroup != null)
+        {
+            audioGroup.TagData.Audio.ForEach(audio =>
+            {
+                foreach (var s in audio.Sounds)
+                {
+                    if (s.GetSound() == null)
+                        continue;
+
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = s.GetSound().Hash,
+                        Name = s.WwiseEventName,
+                        Subname = audio.WwiseEventHash,
+                        TagType = ETagListType.WeaponAudio
+                    });
+                }
+            });
+        }
+
+
         // Unnamed
         var sounds = GetWeaponUnnamedSounds(resourceUnnamed, weaponContentGroupHash, resourceUnnamedReader);
-        foreach (var s in sounds)
+        foreach (var sound in sounds)
         {
-            if (s == null)
+            if (sound == null)
                 continue;
+
+            string name = "";
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON) // && name == "")
+                name = sound.TagData.SoundbankBL.GetNameFromBank();
 
             _allTagItems.Add(new TagItem
             {
-                Hash = s.Hash,
-                Subname = s.Hash,
+                Hash = sound.Hash,
+                Name = name,
+                Subname = sound.Hash,
                 TagType = ETagListType.WeaponAudio
             });
         }
@@ -1729,93 +1753,122 @@ public partial class TagListView : UserControl
 
     public List<WwiseSound> GetWeaponUnnamedSounds(D2Class_F42C8080 resource, TigerHash weaponContentGroupHash, TigerReader reader)
     {
-        List<WwiseSound> sounds = new List<WwiseSound>();
+        List<WwiseSound> sounds = new();
+        List<Entity> entities = new();
 
-        resource.PatternAudioGroups.ForEach(entry =>
+        if (!resource.PatternAudioGroups.Where(x => x.WeaponContentGroupHash == weaponContentGroupHash).Any())
         {
-            if (!entry.WeaponContentGroupHash.Equals(weaponContentGroupHash))
-                return;
-
-            List<TigerFile> entitiesParents = new() { entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.AudioEntityParent, entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248 };
-            List<Entity> entities = new();
-
-            if (entry.Unk118.GetValue(reader) is D2Class_0A2D8080 resourceUnk118)
+            if (resource.FallbackAudio1 != null)
+                entities.Add(resource.FallbackAudio1);
+            if (resource.FallbackAudio2 != null)
+                entities.Add(resource.FallbackAudio2);
+        }
+        else
+        {
+            resource.PatternAudioGroups.ForEach(entry =>
             {
-                if (resourceUnk118.Unk08 != null)
-                    entities.Add(resourceUnk118.Unk08);
-                if (resourceUnk118.Unk20 != null)
-                    entities.Add(resourceUnk118.Unk20);
-                if (resourceUnk118.Unk38 != null)
-                    entities.Add(resourceUnk118.Unk38);
-            }
+                if (!entry.WeaponContentGroupHash.Equals(weaponContentGroupHash))
+                    return;
 
-            foreach (var tag in entitiesParents)
-            {
-                if (tag == null)
-                    continue;
-                var reference = tag.Hash.GetReferenceHash();
-                if (reference == 0x80806fa3)
+                List<TigerFile> entitiesParents = new() { entry.Unk60, entry.Unk78, entry.Unk90, entry.UnkA8, entry.UnkC0, entry.UnkD8, entry.GetAudioEntityParent(), entry.Unk130, entry.Unk148, entry.Unk1C0, entry.Unk1D8, entry.Unk248 };
+
+                if (entry.Unk118.GetValue(reader) is D2Class_0A2D8080 or S40238080)
                 {
-                    var entityData = FileResourcer.Get().GetSchemaTag<D2Class_A36F8080>(tag.Hash).TagData.GetEntityData();
-                    var reference2 = entityData.GetReferenceHash();
-                    if (reference2 == 0x80802d09)
+                    dynamic resourceUnk118 = Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON ? (S40238080)entry.Unk118.GetValue(reader) : (D2Class_0A2D8080)entry.Unk118.GetValue(reader);
+                    if (resourceUnk118.Unk08 != null)
+                        entities.Add(resourceUnk118.Unk08);
+                    if (resourceUnk118.Unk20 != null)
+                        entities.Add(resourceUnk118.Unk20);
+                    if (resourceUnk118.Unk38 != null)
+                        entities.Add(resourceUnk118.Unk38);
+                }
+
+                foreach (var tag in entitiesParents)
+                {
+                    if (tag == null)
+                        continue;
+
+                    var reference = Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON ? tag.Hash.GetReferenceHash() : tag.Hash.GetReferenceFromManifest();
+                    if (reference == 0x80806fa3 || reference == 0x80803463)
                     {
-                        var tagInner = FileResourcer.Get().GetSchemaTag<D2Class_2D098080>(entityData);
-                        if (tagInner.TagData.Unk18 != null)
-                            entities.Add(tagInner.TagData.Unk18);
-                        if (tagInner.TagData.Unk30 != null)
-                            entities.Add(tagInner.TagData.Unk30);
-                        if (tagInner.TagData.Unk48 != null)
-                            entities.Add(tagInner.TagData.Unk48);
-                        if (tagInner.TagData.Unk60 != null)
-                            entities.Add(tagInner.TagData.Unk60);
-                        if (tagInner.TagData.Unk78 != null)
-                            entities.Add(tagInner.TagData.Unk78);
-                        if (tagInner.TagData.Unk90 != null)
-                            entities.Add(tagInner.TagData.Unk90);
+                        var entityData = FileResourcer.Get().GetSchemaTag<D2Class_A36F8080>(tag.Hash).TagData.GetEntityData();
+                        var reference2 = entityData.GetReferenceHash();
+                        if (reference2 == 0x80802d09 || reference2 == 0x80803165)
+                        {
+                            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+                            {
+                                var tagInner = FileResourcer.Get().GetSchemaTag<D2Class_092D8080>(entityData);
+                                if (tagInner.TagData.Unk18 != null)
+                                    entities.Add(tagInner.TagData.Unk18);
+                                if (tagInner.TagData.Unk30 != null)
+                                    entities.Add(tagInner.TagData.Unk30);
+                                if (tagInner.TagData.Unk48 != null)
+                                    entities.Add(tagInner.TagData.Unk48);
+                                if (tagInner.TagData.Unk60 != null)
+                                    entities.Add(tagInner.TagData.Unk60);
+                                if (tagInner.TagData.Unk78 != null)
+                                    entities.Add(tagInner.TagData.Unk78);
+                                if (tagInner.TagData.Unk90 != null)
+                                    entities.Add(tagInner.TagData.Unk90);
+                            }
+                            else
+                            {
+                                // These have tag paths but getting the names from the soundbank is better (93% of the time)
+                                var tagInner = FileResourcer.Get().GetSchemaTag<S65318080>(entityData);
+                                if (tagInner.TagData.Entity1 != null)
+                                    entities.Add(tagInner.TagData.Entity1);
+                                if (tagInner.TagData.Entity2 != null)
+                                    entities.Add(tagInner.TagData.Entity2);
+                                if (tagInner.TagData.Entity3 != null)
+                                    entities.Add(tagInner.TagData.Entity3);
+                                if (tagInner.TagData.Entity4 != null)
+                                    entities.Add(tagInner.TagData.Entity4);
+                            }
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
                     }
-                    else
+                    else if (reference == 0x80809ad8)
+                    {
+                        entities.Add(FileResourcer.Get().GetFile<Entity>(tag.Hash));
+                    }
+                    else if (reference != 0x8080325a)  // 0x8080325a materials,
                     {
                         throw new NotImplementedException();
                     }
                 }
-                else if (reference == 0x80809ad8)
-                {
-                    entities.Add(FileResourcer.Get().GetFile<Entity>(tag.Hash));
-                }
-                else if (reference != 0x8080325a)  // 0x8080325a materials,
-                {
-                    throw new NotImplementedException();
-                }
-            }
-            foreach (var entity in entities)
-            {
-                foreach (var resourceHash in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
-                {
-                    if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)
-                        continue;
+            });
+        }
 
-                    EntityResource e = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
-                    if (e.TagData.Unk18.GetValue(e.GetReader()) is D2Class_79818080 a)
+        foreach (var entity in entities)
+        {
+            foreach (var resourceHash in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
+            {
+                if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)
+                    continue;
+
+                EntityResource e = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
+                if (e.TagData.Unk18.GetValue(e.GetReader()) is D2Class_79818080 a)
+                {
+                    foreach (var d2ClassF1918080 in a.WwiseSounds1)
                     {
-                        foreach (var d2ClassF1918080 in a.WwiseSounds1)
+                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is D2Class_40668080 b)
                         {
-                            if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is D2Class_40668080 b)
-                            {
-                                sounds.Add(b.Sound);
-                            }
+                            sounds.Add(b.GetSound());
                         }
-                        foreach (var d2ClassF1918080 in a.WwiseSounds2)
+                    }
+                    foreach (var d2ClassF1918080 in a.WwiseSounds2)
+                    {
+                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is D2Class_40668080 b)
                         {
-                            if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is D2Class_40668080 b)
-                            {
-                                sounds.Add(b.Sound);
-                            }
+                            sounds.Add(b.GetSound());
                         }
                     }
                 }
             }
-        });
+        }
         return sounds;
     }
 

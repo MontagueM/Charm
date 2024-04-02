@@ -1237,42 +1237,70 @@ public struct D2Class_D3598080
 
 #region Audio
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "80258080", 0x598)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6E358080", 0x6b8)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "6E358080", 0x6d8)]
 public struct D2Class_6E358080
 {
+    [SchemaField(0x538, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x648, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x668, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_9B318080> PatternAudioGroups;
+
+    [SchemaField(0x4E8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Tag<D2Class_A36F8080> FallbackAudioGroup;
 }
 
-[SchemaStruct("9B318080", 0x128)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DE318080", 0xD8)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "9B318080", 0x128)]
 public struct D2Class_9B318080
 {
     public TigerHash WeaponContentGroup1Hash;
     [SchemaField(0x8)]
     public TigerHash Unk08;
-    [SchemaField(0x18), Tag64]
-    public FileHash StringContainer;  // idk why but i presume debug strings
+    //[SchemaField(0x18), Tag64]
+    //public FileHash StringContainer;  // idk why but i presume debug strings, not important
+
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash WeaponContentGroup2Hash;  // "weaponContentGroupHash" from API
     // theres other stringcontainer stuff but skipping it
-    [SchemaField(0xA0), Tag64]
-    public Entity? WeaponSkeletonEntity;
-    [SchemaField(0xD0), Tag64]
-    public Tag<D2Class_A36F8080> AudioGroup;
-    public float UnkE0;
-    [SchemaField(0x110)]
-    public float Unk110;
+
+    [SchemaField(0x40, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Entity? WeaponSkeletonEntityD1;
+
+    [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    public Entity? WeaponSkeletonEntityD2;
+
+    [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Tag<D2Class_A36F8080> AudioGroupD1;
+
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    public Tag<D2Class_A36F8080> AudioGroupD2;
+
+    public Tag<D2Class_A36F8080> GetAudioGroup()
+    {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return AudioGroupD1;
+        else
+            return AudioGroupD2;
+    }
+
 }
 
-[SchemaStruct("0D8C8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "960C8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "0D8C8080", 0x18)]
 public struct D2Class_0D8C8080
 {
     public long FileSize;
     public DynamicArray<D2Class_0F8C8080> Audio;
 }
 
-[SchemaStruct("0F8C8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "FD038080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "0F8C8080", 0x18)]
 public struct D2Class_0F8C8080
 {
     public TigerHash WwiseEventHash;
@@ -1280,7 +1308,8 @@ public struct D2Class_0F8C8080
     public DynamicArray<D2Class_138C8080> Sounds;
 }
 
-[SchemaStruct("138C8080", 0x28)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "0E068080", 0x24)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "138C8080", 0x28)]
 public struct D2Class_138C8080
 {
     public short Unk00;
@@ -1289,20 +1318,36 @@ public struct D2Class_138C8080
     public TigerHash Unk08;
     [SchemaField(0x10)]
     public StringPointer WwiseEventName;
-    [Tag64]
-    public WwiseSound Sound;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public WwiseSound SoundD1;
+
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    public WwiseSound SoundD2;
+
+    public WwiseSound GetSound()
+    {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return SoundD1;
+        else
+            return SoundD2;
+    }
 }
 
-[SchemaStruct("97318080", 0x540)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "19278080", 0x530)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "97318080", 0x540)]
 public struct D2Class_97318080
 {
 }
 
-[SchemaStruct("F62C8080", 0xB0)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "98258080", 0x90)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F62C8080", 0xB0)]
 public struct D2Class_F62C8080
 {
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "8D248080", 0x208)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F42C8080", 0x338)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "F42C8080", 0x358)]
 public struct D2Class_F42C8080
@@ -1310,74 +1355,81 @@ public struct D2Class_F42C8080
     [SchemaField(0x188, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk188;
 
+    [SchemaField(0x1D8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x2C8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x2E8, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_FA2C8080> PatternAudioGroups;
+
+    [SchemaField(0xD0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Entity? FallbackAudio1;
+
+    [SchemaField(0xF0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Entity? FallbackAudio2;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "12238080", 0x140)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "FA2C8080", 0x258)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "EEBC8080", 0x278)]
 public struct D2Class_FA2C8080
 {
-    [SchemaField(0x10)]
+    [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash WeaponContentGroupHash; // "weaponContentGroupHash" from API
     public TigerHash Unk14;
     public TigerHash Unk18;
-    [SchemaField(0x30)]
+
+    [SchemaField(0x30, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash WeaponTypeHash1; // "weaponTypeHash" from API
-    public byte Unk34;
-    public byte Unk35;
-    public byte Unk36;
-    public byte Unk37;
-    public float Unk38;
-    public float Unk3C;
-    public float Unk40;
-    [SchemaField(0x48)]
-    public int Unk48;
-    [SchemaField(0x50)]
-    public TigerHash Unk50;
-    [SchemaField(0x60), Tag64]
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)] // These aren't obsolete but not needed, I don't think
+    [SchemaField(0x60, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public Tag Unk60;
-    [SchemaField(0x78), Tag64]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public Tag Unk78;
-    [SchemaField(0x90), Tag64]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x90, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public Tag Unk90;
-    [SchemaField(0xA8), Tag64]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xA8, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public Tag UnkA8;
-    [SchemaField(0xC0), Tag64]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xC0, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public Tag UnkC0;
-    [SchemaField(0xD8), Tag64]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xD8, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public Tag UnkD8;
-    [SchemaField(0xF0), Tag64]
-    public Tag<D2Class_A36F8080> AudioEntityParent;
-    [SchemaField(0x120)]
+
+    [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public Tag<D2Class_A36F8080> AudioEntityParentD1;
+
+    [SchemaField(0xF0, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    public Tag<D2Class_A36F8080> AudioEntityParentD2;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x120, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash WeaponTypeHash2; // "weaponTypeHash" from API
-    [SchemaField(0x130), Tag64]
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x130, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public Tag Unk130;
-    [SchemaField(0x148), Tag64]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x148, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public Tag Unk148;
-    //[SchemaField(0x168)]
-    //public int Unk168;
-    //[SchemaField(0x178)]
-    //public int Unk178;
-    //[SchemaField(0x180)]
-    //public float Unk180;
-    //public float Unk184;
-    //public float Unk188;
-    //public int Unk18C;
-    //public int Unk190;
-    //public float Unk194;
-    //public float Unk198;
-    //[SchemaField(0x1A8)]
-    //public int Unk1A8;
-    //public float Unk1AC;
+
+    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x118, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk118;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     [SchemaField(0x1D0, TigerStrategy.DESTINY2_LATEST), Tag64]
     public Tag Unk1C0;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x1D8, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     [SchemaField(0x1E8, TigerStrategy.DESTINY2_LATEST), Tag64]
     public Tag Unk1D8;
@@ -1385,14 +1437,41 @@ public struct D2Class_FA2C8080
     // public DynamicArray<D2Class_87978080> Unk1E8;
     // public DynamicArray<D2Class_84978080> Unk1F8;
     // public DynamicArray<D2Class_062D8080> Unk208;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x248, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     [SchemaField(0x268, TigerStrategy.DESTINY2_LATEST), Tag64]
     public Tag Unk248;
+
+    public Tag<D2Class_A36F8080> GetAudioEntityParent()
+    {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return AudioEntityParentD1;
+        else
+            return AudioEntityParentD2;
+    }
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "65318080", 0x50)]
+public struct S65318080
+{
+    public long FileSize;
+    public StringPointer TagPath1;
+    public Entity? Entity1;
+    [SchemaField(0x18)]
+    public StringPointer TagPath2;
+    public Entity? Entity2;
+    [SchemaField(0x28)]
+    public StringPointer TagPath3;
+    public Entity? Entity3;
+    [SchemaField(0x38)]
+    public StringPointer TagPath4;
+    public Entity? Entity4;
 
-[SchemaStruct("2D098080", 0xA0)]
-public struct D2Class_2D098080
+}
+
+[SchemaStruct("092D8080", 0xA0)]
+public struct D2Class_092D8080
 {
     public long FileSize;
     public TigerHash Unk08;
@@ -1410,27 +1489,45 @@ public struct D2Class_2D098080
     public Entity? Unk90;
 }
 
-[SchemaStruct("79818080", 0x390)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "10068080", 0x270)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "79818080", 0x390)]
 public struct D2Class_79818080
 {
-    [SchemaField(0x1a8)]
+    [SchemaField(0x110, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x1A8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_F1918080> WwiseSounds1;
+    [SchemaField(0x130, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x1B8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_F1918080> WwiseSounds2;
 }
 
-[SchemaStruct("F1918080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "29068080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F1918080", 0x18)]
 public struct D2Class_F1918080
 {
-    [SchemaField(0x10)]
+    [SchemaField(0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ResourcePointer Unk10;
 }
 
-
-[SchemaStruct("40668080", 0x68)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "001F8080", 0x54)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "40668080", 0x68)]
 public struct D2Class_40668080
 {
-    [SchemaField(0x28), Tag64]
-    public WwiseSound Sound;
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    public WwiseSound SoundD1;
+
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    public WwiseSound SoundD2;
+
+    public WwiseSound GetSound()
+    {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return SoundD1;
+        else
+            return SoundD2;
+    }
 }
 
 [SchemaStruct("72818080", 0x18)]
@@ -1461,6 +1558,17 @@ public struct D2Class_0A2D8080
     [SchemaField(0x20), Tag64]
     public Entity? Unk20;
     [SchemaField(0x38), Tag64]
+    public Entity? Unk38;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "40238080", 0x34)]
+public struct S40238080
+{
+    [SchemaField(0x8)]
+    public Entity? Unk08;
+    [SchemaField(0x18)]
+    public Entity? Unk20;
+    [SchemaField(0x28)]
     public Entity? Unk38;
 }
 

@@ -15,7 +15,7 @@ public partial class MainMenuView : UserControl
 
         ApiButton.IsEnabled = ShowAPIButton(Strategy.CurrentStrategy);
         BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
-        WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy);
+        WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy) || ShowIfD1(Strategy.CurrentStrategy);
         StaticsButton.IsEnabled = ShowIfD2(Strategy.CurrentStrategy);
 
         Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
@@ -24,7 +24,7 @@ public partial class MainMenuView : UserControl
             {
                 ApiButton.IsEnabled = ShowAPIButton(args.Strategy);
                 BagsButton.IsEnabled = ShowWQButtons(args.Strategy);
-                WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy);
+                WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy) || ShowIfD1(args.Strategy);
                 StaticsButton.IsEnabled = ShowIfD2(args.Strategy);
             });
         };
@@ -38,6 +38,11 @@ public partial class MainMenuView : UserControl
     private bool ShowIfD2(TigerStrategy strategy)
     {
         return strategy >= TigerStrategy.DESTINY2_SHADOWKEEP_2601;
+    }
+
+    private bool ShowIfD1(TigerStrategy strategy)
+    {
+        return strategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
     }
 
     private bool ShowIfLatest(TigerStrategy strategy)

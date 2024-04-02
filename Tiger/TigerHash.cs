@@ -237,10 +237,8 @@ public static class FileHashExtensions
         if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)
             return fileHash.GetReferenceHash();
 
-        Console.WriteLine($"Type {fileHash.GetFileMetadata().Type}");
         var temp = FileResourcer.Get().GetSchemaTag<S48018080>(fileHash.GetReferenceHash());
         return new FileHash(temp.TagData.Reference.Hash32);
-
     }
 }
 
