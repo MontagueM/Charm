@@ -17,6 +17,7 @@ public partial class MainMenuView : UserControl
         BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
         WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy) || ShowIfD1(Strategy.CurrentStrategy);
         StaticsButton.IsEnabled = ShowIfD2(Strategy.CurrentStrategy);
+        SoundBanksButton.Visibility = ShowIfD1(Strategy.CurrentStrategy) ? Visibility.Visible : Visibility.Hidden;
 
         Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
         {
@@ -26,6 +27,7 @@ public partial class MainMenuView : UserControl
                 BagsButton.IsEnabled = ShowWQButtons(args.Strategy);
                 WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy) || ShowIfD1(args.Strategy);
                 StaticsButton.IsEnabled = ShowIfD2(args.Strategy);
+                SoundBanksButton.Visibility = ShowIfD1(Strategy.CurrentStrategy) ? Visibility.Visible : Visibility.Hidden;
             });
         };
     }
@@ -125,6 +127,14 @@ public partial class MainMenuView : UserControl
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.SoundsPackagesList);
         _mainWindow.MakeNewTab("sounds", tagListView);
+        _mainWindow.SetNewestTabSelected();
+    }
+
+    private void AllBKHDViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.BKHDGroupList);
+        _mainWindow.MakeNewTab("sound banks", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
 

@@ -100,6 +100,14 @@ public enum ETagListType
     WeaponAudioList,
     [Description("Weapon Audio [Final]")]
     WeaponAudio,
+    [Description("BKHD Group List")]
+    BKHDGroupList,
+    [Description("BKHD Group [Final]")]
+    BKHDGroup,
+    [Description("Weapon Audio List")]
+    BKHDAudioList,
+    [Description("Weapon Audio [Final]")]
+    BKHDAudio,
 }
 
 /// <summary>
@@ -273,6 +281,15 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.WeaponAudio:
                     await LoadWeaponAudio(contentValue as FileHash);
+                    break;
+                case ETagListType.BKHDGroupList:
+                    await LoadBKHDGroupList();
+                    break;
+                case ETagListType.BKHDGroup:
+                    LoadBKHDAudioGroup(contentValue as FileHash);
+                    break;
+                case ETagListType.BKHDAudioList:
+                    LoadBKHDAudioList(contentValue as FileHash);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -1516,6 +1533,7 @@ public partial class TagListView : UserControl
             {
                 if (wem.GetData().Length == 1)
                     return;
+
                 _allTagItems.Add(new TagItem
                 {
                     Name = wem.Hash,
@@ -1527,6 +1545,60 @@ public partial class TagListView : UserControl
         });
 
         MainWindow.Progress.CompleteStage();
+        RefreshItemList();
+    }
+
+    private async Task LoadBKHDGroupList()
+    {
+        var banks = PackageResourcer.Get().GetAllFiles<WwiseSound>();
+        _allTagItems = new ConcurrentBag<TagItem>();
+
+        Parallel.ForEach(banks, bank =>
+        {
+            if (bank.TagData.Wems.Count > 0)
+            {
+                string name = bank.TagData.SoundbankBL.GetNameFromBank();
+
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = bank.Hash,
+                    Name = name,
+                    Subname = $"{bank.TagData.Wems.Count} sounds",
+                    TagType = ETagListType.BKHDGroup
+                });
+            }
+        });
+
+        _allTagItems.OrderBy(x => x.Name);
+    }
+
+    private void LoadBKHDAudioGroup(FileHash hash)
+    {
+        var viewer = GetViewer();
+        SetViewer(TagView.EViewerType.TagList);
+        viewer.TagListControl.LoadContent(ETagListType.BKHDAudioList, hash, true);
+        viewer.MusicPlayer.Visibility = Visibility.Visible;
+    }
+
+    private void LoadBKHDAudioList(FileHash hash)
+    {
+        _allTagItems = new ConcurrentBag<TagItem>();
+        WwiseSound bank = FileResourcer.Get().GetFile<WwiseSound>(hash);
+
+        Parallel.ForEach(bank.TagData.Wems, wem =>
+        {
+            if (wem.GetData().Length == 1)
+                return;
+
+            _allTagItems.Add(new TagItem
+            {
+                Name = wem.Hash,
+                Hash = wem.Hash,
+                Subname = wem.Duration,
+                TagType = ETagListType.Sound
+            });
+        });
+
         RefreshItemList();
     }
 
