@@ -643,14 +643,14 @@ public struct SMapSkyEntResource
 /// <summary>
 /// Background entities/skybox
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1F1C8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1F1C8080", 0x68)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A76A8080", 0x60)]
 public struct SMapSkyEntities
 {
     public long FileSize;
     public DynamicArray<D2Class_A96A8080> Unk08;
-    public DynamicArray<D2Class_B3938080> Unk18;
-    public DynamicArray<D2Class_07008080> Unk28;
+    //public DynamicArray<D2Class_B3938080> Unk18;
+    //public DynamicArray<D2Class_07008080> Unk28;
     [SchemaField(0x40)]
     public Vector4 Unk40;
     public Vector4 Unk50;

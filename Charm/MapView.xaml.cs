@@ -68,6 +68,13 @@ public partial class MapView : UserControl
                         StaticMapData staticMapData = resource.StaticMapParent.TagData.StaticMap;
                         SetMapUI(staticMapData, detailLevel);
                     }
+                    else if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapTerrainResource terrain)
+                    {
+                        if (terrain.Terrain is null)
+                            continue;
+
+                        SetTerrainMapUI(terrain.Terrain, detailLevel);
+                    }
                 }
             }
         }
@@ -76,6 +83,20 @@ public partial class MapView : UserControl
             Tag<SMapDataTable> mapDataTable = tag.TagData.MapDataTables[1].MapDataTable;
             StaticMapData staticMapData = ((SMapDataResource)mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())).StaticMapParent.TagData.StaticMap;
             SetMapUI(staticMapData, detailLevel);
+
+            foreach (var tables in tag.TagData.MapDataTables)
+            {
+                foreach (var entry in tables.MapDataTable.TagData.DataEntries)
+                {
+                    if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapTerrainResource terrain)
+                    {
+                        if (terrain.Terrain is null)
+                            continue;
+
+                        SetTerrainMapUI(terrain.Terrain, detailLevel);
+                    }
+                }
+            }
         }
 
     }
@@ -95,6 +116,18 @@ public partial class MapView : UserControl
     private void SetEntityMapUI(FileHash dataentry, ExportDetailLevel detailLevel)
     {
         var displayParts = MakeEntityDisplayParts(dataentry, detailLevel);
+        Dispatcher.Invoke(() =>
+        {
+            MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+            MVM.SetChildren(displayParts);
+        });
+        displayParts.Clear();
+    }
+
+    private void SetTerrainMapUI(Terrain terrain, ExportDetailLevel detailLevel)
+    {
+        var displayParts = MakeTerrainDisplayParts(terrain, detailLevel);
+        System.Console.WriteLine("test");
         Dispatcher.Invoke(() =>
         {
             MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
@@ -278,6 +311,7 @@ public partial class MapView : UserControl
         });
     }
 
+    // TODO: Merge all this into one, or simplify it?
     private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap, ExportDetailLevel detailLevel)
     {
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
@@ -324,7 +358,7 @@ public partial class MapView : UserControl
                         displayPart.BasePart = part;
                         displayPart.Translations.Add(staticMap.TagData.Instances[i].Position);
                         displayPart.Rotations.Add(staticMap.TagData.Instances[i].Rotation);
-                        displayPart.Scales.Add(staticMap.TagData.Instances[i].Scale);
+                        displayPart.Scales.Add(new Vector3(staticMap.TagData.Instances[i].Scale.X));
                         displayParts.Add(displayPart);
                     }
 
@@ -332,6 +366,33 @@ public partial class MapView : UserControl
             });
         }
 
+        return displayParts.ToList();
+    }
+
+    private List<MainViewModel.DisplayPart> MakeTerrainDisplayParts(Terrain terrain, ExportDetailLevel detailLevel)
+    {
+        ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
+        List<StaticPart> parts = new();
+        foreach (var partEntry in terrain.TagData.StaticParts)
+        {
+            if (partEntry.DetailLevel == 0)
+            {
+                var part = terrain.MakePart(partEntry);
+                terrain.TransformPositions(part);
+                terrain.TransformTexcoords(part);
+                parts.Add(part);
+            }
+        }
+
+        foreach (var part in parts)
+        {
+            MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+            displayPart.BasePart = part;
+            displayPart.Translations.Add(Vector3.Zero);
+            displayPart.Rotations.Add(Vector4.Zero);
+            displayPart.Scales.Add(Vector3.One);
+            displayParts.Add(displayPart);
+        }
         return displayParts.ToList();
     }
 

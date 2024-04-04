@@ -27,10 +27,14 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     public void ReadVertexData(MeshPart part, HashSet<uint> uniqueVertexIndices, int bufferIndex = -1,
         int otherStride = -1, bool isTerrain = false)
     {
+        var _strategy = Strategy.CurrentStrategy;
         using var handle = GetReferenceReader();
         foreach (var vertexIndex in uniqueVertexIndices)
         {
-            ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
+            if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                ReadD1VertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
+            else
+                ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
         }
     }
 
@@ -179,27 +183,13 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
 
                             break;
                         case 0x18: // normal and tangent euler
-                            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-                            {
-                                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
-                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                                    handle.ReadInt16(), handle.ReadInt16(), true));
-                                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                                    handle.ReadInt16(), handle.ReadInt16()));
-                                part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
-                                    handle.ReadByte()));
-                            }
-                            else
-                            {
-                                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
-                                part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
-                                    handle.ReadByte()));
-                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                                    handle.ReadInt16(), handle.ReadInt16(), true));
-                                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                                    handle.ReadInt16(), handle.ReadInt16(), true));
-                            }
-
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                                handle.ReadByte()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), handle.ReadInt16(), true));
                             break;
                         default:
                             break;
@@ -614,6 +604,198 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 WeightValues = WeightValue,
             };
             (part as DynamicMeshPart).VertexWeights.Add(vw);
+        }
+    }
+
+    private void ReadD1VertexData(TigerReader handle, MeshPart part, uint vertexIndex, int bufferIndex = -1,
+        int otherStride = -1, bool isTerrain = false)
+    {
+        handle.BaseStream.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
+        bool status = false;
+
+        switch (bufferIndex)
+        {
+            case 0:
+                switch (_tag.Stride)
+                {
+                    case 0x8:
+                        Vector4 v;
+                        if (isTerrain)
+                        {
+                            v = new Vector4((float)handle.ReadInt16(), (float)handle.ReadInt16(), (float)handle.ReadInt16(),
+                                    (float)handle.ReadInt16());
+                        }
+                        else
+                        {
+                            v = new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), true);
+                        }
+
+                        part.VertexPositions.Add(v);
+                        break;
+                    case 0xC:
+                        part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+
+
+                        if (otherStride == 0x10 || part is not DynamicMeshPart)
+                        {
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                        }
+                        else
+                        {
+                            VertexWeight vw2 = new()
+                            {
+                                // 0xFE designates no bone weight assigned.
+                                WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0xFE, 0xFE),
+                                WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), 0, 0),
+                            };
+                            (part as DynamicMeshPart).VertexWeights.Add(vw2);
+                        }
+
+                        break;
+                    case 0x10:
+                        part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        VertexWeight vw = new()
+                        {
+                            WeightValues =
+                                new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                                    handle.ReadByte()),
+                            WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(),
+                                handle.ReadByte(), handle.ReadByte()),
+                        };
+                        (part as DynamicMeshPart).VertexWeights.Add(vw);
+                        break;
+                    case 0x1C:
+                        part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                        part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        break;
+                    case 0x20:
+                        part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                        part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                            handle.ReadByte()));
+                        break;
+                    case 0x30: // wtf
+                        part.VertexPositions.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(),
+                            handle.ReadSingle(), handle.ReadSingle()));
+                        part.VertexNormals.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(),
+                            handle.ReadSingle(), handle.ReadSingle()));
+                        part.VertexTangents.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(),
+                            handle.ReadSingle(), handle.ReadSingle()));
+                        break;
+                    default:
+                        break;
+                }
+
+                break;
+            case 1:
+                switch (_tag.Stride)
+                {
+                    case 0x04:
+                        part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                        break;
+                    case 0x08:
+                        part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        break;
+                    case 0x0C:
+                        if (isTerrain)
+                        {
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), true));
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadHalf(), handle.ReadHalf()));
+                        }
+                        else
+                        {
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), true));
+                        }
+                        break;
+                    case 0x10:
+                        part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        break;
+                    case 0x14:
+                        if (otherStride is 0x08 or 0x10 ||
+                            otherStride == 0x0C && part is DynamicMeshPart) // 12 and 16 is for entity
+                        {
+                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), handle.ReadInt16(), true));
+                        }
+                        else
+                        {
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(),
+                                handle.ReadByte(), handle.ReadByte()));
+                        }
+
+                        break;
+                    case 0x18:
+                        part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+
+                        // This is really stupid
+                        handle.Seek(0xA, SeekOrigin.Current); // Check for Normal W (should always be 0?)
+                        var check = handle.ReadInt16();
+                        handle.Seek(0x6, SeekOrigin.Current);
+                        var check2 = handle.ReadInt16();  // Check for Tangent W
+                        handle.BaseStream.Position -= 0x14;
+
+                        // I thought tangents were euler? so why can it be 32767 or -32767?
+                        if (check == 0 && (check2 == 32767 || check2 == -32767))
+                        {
+                            part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                            handle.ReadByte()));
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        }
+                        else
+                        {
+                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                            part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                            handle.ReadByte()));
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+
+        status = true;
+
+
+        if (!status)
+        {
+            throw new NotImplementedException($"Vertex stride {_tag.Stride} for type {_tag.Type} is not implemented.");
         }
     }
 }

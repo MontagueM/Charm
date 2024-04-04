@@ -440,7 +440,7 @@ public struct D2Class_E1818080
     public long Unk10;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "B51A8080", 0x48)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "B51A8080", 0x44)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "A5738080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "076F8080", 0xA0)]
 public struct SEntityModel  // Entity model
@@ -453,16 +453,27 @@ public struct SEntityModel  // Entity model
     public long Unk30;
     [SchemaField(0x38)]
     public long UnkFlags38;
-    [SchemaField(0x40)]
-    public long Unk40;
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)] // Model transforms are stored in SEntityModelMesh for D1
     [SchemaField(0x50, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Vector4 ModelScale;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Vector4 ModelTranslation;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Vector2 TexcoordScale;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Vector2 TexcoordTranslation;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Vector4 Unk80;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public TigerHash Unk90;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public TigerHash Unk94;
 }
 

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Internal.Fbx;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
