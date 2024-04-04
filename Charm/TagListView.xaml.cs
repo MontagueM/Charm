@@ -1608,7 +1608,7 @@ public partial class TagListView : UserControl
         if (viewer.MusicPlayer.SetWem(FileResourcer.Get().GetFile<Wem>(fileHash)))
         {
             viewer.MusicPlayer.Play();
-            SetExportFunction(ExportWem, (int)ExportTypeFlag.Full);
+            SetExportFunction(ExportWav, (int)ExportTypeFlag.Full);
             viewer.ExportControl.SetExportInfo(fileHash);
         }
     }
@@ -1631,6 +1631,16 @@ public partial class TagListView : UserControl
         string saveDirectory = config.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         wem.SaveToFile($"{saveDirectory}/{info.Name}.wem");
+    }
+
+    private void ExportWav(ExportInfo info)
+    {
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+
+        Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash);
+        string saveDirectory = config.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
+        Directory.CreateDirectory(saveDirectory);
+        wem.SaveToFile($"{saveDirectory}/{info.Name}.wav");
     }
 
     #endregion

@@ -134,6 +134,9 @@ namespace Tiger.Schema.Shaders
 
         public void SavePixelShader(string saveDirectory, bool isTerrain = false)
         {
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                return;
+
             if (PixelShader != null && PixelShader.Hash.IsValid())
             {
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
@@ -216,8 +219,8 @@ namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
         public uint Unk0C => _tag.Unk0C;
         public ushort Unk20 => _tag.Unk20;
         // Leaving shaders null until they (if ever) can be decompiled to hlsl
-        public ShaderBytecode VertexShader => null; //_tag.VertexShader;
-        public ShaderBytecode PixelShader => null; //_tag.PixelShader;
+        public ShaderBytecode VertexShader => _tag.VertexShader; // null;
+        public ShaderBytecode PixelShader => _tag.PixelShader; // null;
         public ShaderBytecode ComputeShader => null;
         public FileHash PSVector4Container => _tag.PSVector4Container;
         public FileHash VSVector4Container => _tag.VSVector4Container;

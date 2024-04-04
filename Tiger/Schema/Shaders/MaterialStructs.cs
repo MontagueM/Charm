@@ -17,17 +17,17 @@ public struct SMaterial_ROI // PS4 / ORBIS shaders aren't able to be decompiled 
     //[SchemaField(0x14C)]
     //public FileHash UnkShaderVector4Container;
 
-    [SchemaField(0x168)]
+    [SchemaField(0x28)]
     public ShaderBytecode? VertexShader;
-    [SchemaField(0x178)]
+    [SchemaField(0x38)]
     public DynamicArray<STextureTag> VSTextures;
-    [SchemaField(0x190)]
+    [SchemaField(0x50)]
     public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
-    [SchemaField(0x1B0)]
+    [SchemaField(0x70)]
     public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
     public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<Vec4> VS_CBuffers;
-    [SchemaField(0x1EC)]
+    [SchemaField(0xAC)]
     public FileHash VSVector4Container;
 
     [SchemaField(0x2A8)]

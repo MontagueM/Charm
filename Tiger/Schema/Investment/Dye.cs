@@ -158,21 +158,25 @@ public struct SDye_D1
     public StringPointer DevName;
 
     [SchemaField(0x10)]
-    public int DyeType; // 0 Armor, 1 Cloth, 2 Suit
+    public int SlotTypeIndex; // 0 Armor, 1 Cloth, 2 Suit
+
+    [SchemaField(0x20)]
+    public Texture Decal;
 
     [SchemaField(0x30)]
-    public Vector4 Unk30;
+    public Vector4 DecalAlphaMapTransform;
+    public int DecalBlendOption;
 
     [SchemaField(0x50)]
-    public Vector4 Unk50;
+    public Vector4 SpecularProperties;
 
     public Texture DetailDiffuse;
     public Texture DetailNormal;
 
     [SchemaField(0x70)]
-    public Vector4 Unk70;
-    public Vector4 Unk80;
-    public Vector4 Unk90;
-    public Vector4 UnkA0;
-    public Vector4 UnkB0;
+    public Vector4 DetailTransform;
+    public Vector4 DetailNormalContributionStrength;
+    public Vector4 PrimaryColor;
+    public Vector4 SecondaryColor;
+    public Vector4 SubsurfaceScatteringStrength;
 }

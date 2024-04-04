@@ -36,12 +36,17 @@ public struct D2Class_9D798080
     public ResourcePointer Unk08;  // D2Class_E4768080, 16198080 D1
     [SchemaField(0x18)]
     public ResourcePointer Unk18;  // D2Class_E7778080, 06178080 D1
+
+    [SchemaField(0x48, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)] // probably not obsolete, just dont care
+    public ResourcePointer Unk48;  // 15108080 D1
+
     [SchemaField(0x50)]
     public ResourcePointer Unk50; // 8B178080 D1
 
     [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public ResourcePointer Unk78;  // D2Class_81738080
+    public ResourcePointer Unk78;  // D2Class_81738080, BD178080 D1
 
     //[SchemaField(0x88, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     //public ResourcePointer Unk88;  // D2Class_7F738080
@@ -66,6 +71,17 @@ public struct D2Class_9D798080
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x110, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_05798080> TraitIndices;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "15108080", 0x1C)]
+public struct S15108080
+{
+    public DynamicArray<S13108080> Unk00;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "13108080", 0x2)]
+public struct S13108080
+{
 }
 
 [SchemaStruct("E4768080", 0x90)]
@@ -780,6 +796,99 @@ public struct D2Class_0E5A8080
         else
             return LocalizedStrings;
     }
+}
+
+#endregion
+
+#region Destiny 1 API stuff
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "BD178080", 0x4)]
+public struct SBD178080
+{
+    public short TalenGridIndex; // "talentGridHash" from API
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C2188080", 0x18)]
+public struct SC2188080
+{
+    [SchemaField(0x8)]
+    public DynamicArrayUnloaded<SCB178080> TalentGridEntries;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "CB178080", 0x18)]
+public struct SCB178080
+{
+    public TigerHash TalentGridHash;
+    [SchemaField(0x10)]
+    public Tag<S63198080> TalentGrid;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C2188080", 0x38)]
+public struct S63198080
+{
+    [SchemaField(0x10)]
+    public DynamicArray<S28178080> Nodes;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "28178080", 0x40)]
+public struct S28178080
+{
+    public TigerHash NodeHash; // ??
+    [SchemaField(0x18)]
+    public DynamicArray<S58178080> Unk18;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "58178080", 0x90)]
+public struct S58178080
+{
+    public DynamicArray<SDE168080> Unk00;
+    [SchemaField(0x20)]
+    public DynamicArray<SF1458080> Unk20;
+    public TigerHash Unk30;
+    public int Unk34;
+    [SchemaField(0x70)]
+    public DynamicArray<S940F8080> Unk70;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DE168080", 0x50)]
+public struct SDE168080
+{
+    public DynamicArray<SE8188080> Unk00;
+    public DynamicArray<S87178080> Unk10;
+    public DynamicArray<S28468080> Unk20;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F1458080", 0x2)]
+public struct SF1458080
+{
+    public short Unk00;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "940F8080", 0x4)]
+public struct S940F8080
+{
+    public short Unk00; // socketTypeHash?
+    public short PlugItemIndex; // plugItemHash
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E8188080", 0x10)]
+public struct SE8188080
+{
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "87178080", 0x10)]
+public struct S87178080
+{
+    public int Unk00;
+    public float Unk04; // min value?
+    public float Unk08; // max value?
+    public byte Unk0C; // index?
+    public byte Unk0D;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "28468080", 0x4)]
+public struct S28468080
+{
 }
 
 #endregion

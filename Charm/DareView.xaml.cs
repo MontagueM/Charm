@@ -87,11 +87,9 @@ public partial class DareView : UserControl
             }
             if (item.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
             {
-                if (!type.Contains("Finisher") && !type.Contains("Emote")) // they point to Animation instead of Entity
+                if (!type.Contains("Finisher") && !type.Contains("Emote") && !type.Contains("Ship Schematics")) // they point to Animation instead of Entity
                 {
-                    if (name == "" && type == "Armor Ornament") // D1 armor ornaments dont have names and icons :))
-                        name = item.TagData.InventoryItemHash.Hash32.ToString();
-
+                    CreateOrnamentItems(item);
                     if (name != "")
                     {
                         // icon bg
@@ -137,6 +135,7 @@ public partial class DareView : UserControl
                         };
                         _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
                     }
+
                 }
             }
             MainWindow.Progress.CompleteStage();
@@ -264,6 +263,68 @@ public partial class DareView : UserControl
         Regex regex = new Regex("[^0-9]+");
         e.Handled = regex.IsMatch(e.Text);
     }
+
+    public void CreateOrnamentItems(InventoryItem parent)
+    {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON &&
+            parent.TagData.Unk78.GetValue(parent.GetReader()) is SBD178080 a)
+        {
+            var talentGrid = Investment.Get().GetTalentGrid(a.TalenGridIndex);
+            int i = 0;
+            talentGrid.TagData.Nodes.ForEach(node =>
+            {
+                node.Unk18.ForEach(entry =>
+                {
+                    entry.Unk70.ForEach(entry2 =>
+                    {
+                        if (entry2.PlugItemIndex != -1)
+                        {
+                            var item = Investment.Get().GetInventoryItem(entry2.PlugItemIndex);
+                            if (Investment.Get().GetItemName(item) == "")
+                            {
+                                var bgStream = parent.GetTextureFromHash(new FileHash("1935A680"));
+                                var bgOverlayStream = parent.GetTextureFromHash(new FileHash("713AA680"));
+                                var primaryStream = parent.GetIconPrimaryStream();
+                                var overlayStream = parent.GetIconOverlayStream(); //parent.GetTextureFromHash(new FileHash("E1DBA580"));
+
+                                var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+                                var bgOverlay = bgOverlayStream != null ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
+                                var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+
+                                var group = new DrawingGroup();
+                                //group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+                                group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
+                                group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
+
+                                var dw = new DrawingImage(group);
+                                dw.Freeze();
+
+                                var background = bgStream != null ? MakeBitmapImage(bgStream, 512, 256) : null;
+                                ImageBrush brush = new ImageBrush(background);
+                                brush.Freeze();
+
+                                var newItem = new ApiItem
+                                {
+                                    ItemName = $"{Investment.Get().GetItemName(parent)} Ornament {i + 1}",
+                                    ItemType = "Armor Ornament",
+                                    ItemRarity = (ItemTier)parent.TagData.ItemRarity,
+                                    ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
+                                    ImageSource = dw,
+                                    ImageHeight = 96,
+                                    ImageWidth = 96,
+                                    GridBackground = brush,
+                                    Item = item,
+                                    Parent = parent
+                                };
+                                _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
+                                i++;
+                            }
+                        }
+                    });
+                });
+            });
+        }
+    }
 }
 
 public class ApiItem
@@ -279,6 +340,7 @@ public class ApiItem
     public System.Windows.Media.ImageBrush GridBackground { get; set; }
 
     public InventoryItem Item { get; set; }
+    public InventoryItem Parent { get; set; }
 }
 
 public enum ItemTier : byte

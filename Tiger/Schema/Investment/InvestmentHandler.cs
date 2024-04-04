@@ -37,6 +37,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<D2Class_C2558080> _artDyeReferenceTag = null;
     private Tag<SDyeChannels> _dyeChannelTag = null;
 
+    private Tag<SC2188080> _talentGridMap = null;
+
     public Investment(TigerStrategy strategy) : base(strategy)
     {
     }
@@ -167,8 +169,10 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
             _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<D2Class_AA528080>(new FileHash("A9FFA580"));
 
-            _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<D2Class_C2558080>(new FileHash("A8FFA580")); // Wrong 
+            _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<D2Class_C2558080>(new FileHash("A8FFA580"));
             _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(new FileHash("49E2A580"));
+
+            _talentGridMap = FileResourcer.Get().GetSchemaTag<SC2188080>(new FileHash("27E2A580"));
 
         }
 
@@ -182,6 +186,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             Task.Run(GetEntityAssignmentDict),
             // Task.Run(GetSandboxPatternAssignmentsDict),
         });
+    }
+
+    public Tag<S63198080> GetTalentGrid(int index)
+    {
+        return _talentGridMap.TagData.TalentGridEntries.ElementAt(_talentGridMap.GetReader(), index).TalentGrid;
     }
 
     private void GetInventoryItemStringThings()
@@ -688,5 +697,12 @@ public class InventoryItem : Tag<D2Class_9D798080>
             return null;
         var overlayIcon = GetTexture(iconContainer.TagData.IconOverlayContainer);
         return overlayIcon.GetTexture();
+    }
+
+    public UnmanagedMemoryStream? GetTextureFromHash(FileHash hash)
+    {
+        Texture texture = FileResourcer.Get().GetFile<Texture>(hash);
+
+        return texture.GetTexture();
     }
 }
