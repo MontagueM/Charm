@@ -13,10 +13,10 @@ public class EntityModel : Tag<SEntityModel>
     /*
      * We need the parent resource to get access to the external materials
      */
-    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource, bool transparentsOnly = false)
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource, bool transparentsOnly = false, bool hasSkeleton = false)
     {
         Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts = GetPartsOfDetailLevel(detailLevel);
-        List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource);
+        List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource, hasSkeleton);
         if (transparentsOnly) // ROI decal/transparent mesh purposes. I hate this and its not the right way to do this
             return parts.Where(x => x.Material.Unk20 != 0).ToList();
         else
@@ -71,7 +71,7 @@ public class EntityModel : Tag<SEntityModel>
         return parts;
     }
 
-    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts, EntityResource parentResource)
+    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts, EntityResource parentResource, bool hasSkeleton = false)
     {
         List<DynamicMeshPart> parts = new();
         if (_tag.Meshes.Count == 0) return parts;
@@ -101,8 +101,9 @@ public class EntityModel : Tag<SEntityModel>
                     Index = i,
                     GroupIndex = partGroups[i],
                     LodCategory = part.LodCategory,
-                    bAlphaClip = (part.Flags & 0x8) != 0,
-                    GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
+                    bAlphaClip = (part.GetFlags() & 0x8) != 0,
+                    GearDyeChangeColorIndex = part.GearDyeChangeColorIndex,
+                    HasSkeleton = hasSkeleton
                 };
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
@@ -142,6 +143,7 @@ public class DynamicMeshPart : MeshPart
 
     public List<Vector4> VertexColourSlots = new List<Vector4>();
     public bool bAlphaClip;
+    public bool HasSkeleton;
     public byte GearDyeChangeColorIndex = 0xFF;
 
     public DynamicMeshPart(D2Class_CB6E8080 part, EntityResource parentResource) : base()
@@ -218,7 +220,7 @@ public class DynamicMeshPart : MeshPart
 
         if (mesh.OldWeights != null)
         {
-            mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices);
+            mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices, 2); // bufferIndex 2 is used for D1, shouldnt affect D2 I hope
         }
         if (mesh.VertexColour != null)
         {

@@ -528,7 +528,11 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     public short ExternalIdentifier;  // external_identifier
     public short Unk16;  // some kind of index
     // need to check this on WQ, theres no way its an int
-    public int Flags;
+    public int FlagsD2;
+
+    [SchemaField(0x1C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public short FlagsD1; //??
 
     [SchemaField(0x1E, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1A, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -539,6 +543,14 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     public byte LodRun;  // lod_run
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public int Unk20; // variant_shader_index?
+
+    public int GetFlags()
+    {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return FlagsD1;
+        else
+            return FlagsD2;
+    }
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "791A8080", 0x210)]

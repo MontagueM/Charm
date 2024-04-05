@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -26,8 +27,28 @@ public partial class EntityView : UserControl
     {
         fbxHandler.Clear();
         Entity entity = FileResourcer.Get().GetFile<Entity>(entityHash);
-        AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
-        return LoadUI(fbxHandler);
+
+        // HelixToolkit is throwing a huge fit about a lot of D1 entities and just crashes when trying to load from fbx :))))))
+        // Only option is to load them as display parts instead. Won't show skeleton and won't look as nice but no other choice.
+        // On the plus side, things load slightly faster.
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            var parts = MakeEntityDisplayParts(entity, ExportDetailLevel.MostDetailed);
+            Dispatcher.Invoke(() =>
+            {
+                MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+                MVM.Clear();
+                MVM.SetChildren(parts);
+            });
+            parts.Clear();
+            return true;
+        }
+        else
+        {
+            AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
+            return LoadUI(fbxHandler);
+        }
+
     }
 
     public bool LoadEntityModel(FileHash entityModelHash, FbxHandler fbxHandler)
@@ -211,5 +232,29 @@ public partial class EntityView : UserControl
                 config.GetOutputTextureFormat(), dyes.Values.ToList());
         }
 
+    }
+
+    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(Entity ent, ExportDetailLevel detailLevel)
+    {
+        ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
+
+        if (ent.HasGeometry())
+        {
+            var dynamicParts = ent.Load(detailLevel);
+            ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
+            if (ModelView.GetSelectedGroupIndex() != -1)
+                dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
+
+            foreach (var part in dynamicParts)
+            {
+                MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+                displayPart.BasePart = part;
+                displayPart.Translations.Add(Vector3.Zero);
+                displayPart.Rotations.Add(Vector4.Zero);
+                displayPart.Scales.Add(Vector3.One);
+                displayParts.Add(displayPart);
+            }
+        }
+        return displayParts.ToList();
     }
 }

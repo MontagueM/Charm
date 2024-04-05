@@ -79,11 +79,11 @@ public class Entity : Tag<SEntity>
         var dynamicParts = new List<DynamicMeshPart>();
         if (Model != null)
         {
-            dynamicParts = dynamicParts.Concat(Model.Load(detailLevel, ModelParentResource)).ToList();
+            dynamicParts = dynamicParts.Concat(Model.Load(detailLevel, ModelParentResource, hasSkeleton: Skeleton != null)).ToList();
         }
         if (PhysicsModel != null)
         {
-            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, ModelParentResource)).ToList();
+            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, ModelParentResource, hasSkeleton: Skeleton != null)).ToList();
         }
         return dynamicParts;
     }

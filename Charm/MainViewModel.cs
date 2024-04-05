@@ -275,7 +275,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             model.Geometry = mesh;
             model.Material = new DiffuseMaterial
             {
-                DiffuseColor = new Color4(0.7f, 0.7f, 0.7f, 1.0f)
+                DiffuseColor = new Color4(0.9f, 0.9f, 0.9f, 1.0f)
             };
             List<Matrix> instances = new List<Matrix>();
 
