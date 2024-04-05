@@ -89,8 +89,12 @@ public partial class DareView : UserControl
             {
                 if (!type.Contains("Finisher") && !type.Contains("Emote") && !type.Contains("Ship Schematics")) // they point to Animation instead of Entity
                 {
-                    CreateOrnamentItems(item);
-                    if (name != "")
+                    CreateOrnamentItems(item); // D1
+                    var isD1 = Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
+                    var isOrnament = type.Contains("Ornament");
+                    var isNameNotEmpty = !string.IsNullOrEmpty(name);
+
+                    if ((isD1 && !isOrnament && isNameNotEmpty) || (!isD1 && isNameNotEmpty))
                     {
                         // icon bg
                         var bgStream = item.GetIconBackgroundStream();
@@ -264,6 +268,7 @@ public partial class DareView : UserControl
         e.Handled = regex.IsMatch(e.Text);
     }
 
+    // TODO: D2 maybe?
     public void CreateOrnamentItems(InventoryItem parent)
     {
         if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON &&
@@ -280,45 +285,42 @@ public partial class DareView : UserControl
                         if (entry2.PlugItemIndex != -1)
                         {
                             var item = Investment.Get().GetInventoryItem(entry2.PlugItemIndex);
-                            if (Investment.Get().GetItemName(item) == "")
+                            string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+
+                            var bgStream = type != "Armor Ornament" ? item.GetIconBackgroundStream() : parent.GetTextureFromHash(new FileHash("1935A680"));
+                            var primaryStream = type != "Armor Ornament" ? item.GetIconPrimaryStream() : parent.GetIconPrimaryStream();
+                            var overlayStream = type != "Armor Ornament" ? item.GetIconOverlayStream() : parent.GetIconOverlayStream(); //parent.GetTextureFromHash(new FileHash("E1DBA580"));
+
+                            var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+                            var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+
+                            var group = new DrawingGroup();
+                            group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
+                            group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
+
+                            var dw = new DrawingImage(group);
+                            dw.Freeze();
+
+                            var background = bgStream != null ? MakeBitmapImage(bgStream, 512, 256) : null;
+                            ImageBrush brush = new ImageBrush(background);
+                            brush.Freeze();
+
+                            var name = type != "Armor Ornament" ? Investment.Get().GetItemName(item) : $"{Investment.Get().GetItemName(parent)} Ornament {i + 1}";
+                            var newItem = new ApiItem
                             {
-                                var bgStream = parent.GetTextureFromHash(new FileHash("1935A680"));
-                                var bgOverlayStream = parent.GetTextureFromHash(new FileHash("713AA680"));
-                                var primaryStream = parent.GetIconPrimaryStream();
-                                var overlayStream = parent.GetIconOverlayStream(); //parent.GetTextureFromHash(new FileHash("E1DBA580"));
-
-                                var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
-                                var bgOverlay = bgOverlayStream != null ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
-                                var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
-
-                                var group = new DrawingGroup();
-                                //group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
-                                group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
-                                group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
-
-                                var dw = new DrawingImage(group);
-                                dw.Freeze();
-
-                                var background = bgStream != null ? MakeBitmapImage(bgStream, 512, 256) : null;
-                                ImageBrush brush = new ImageBrush(background);
-                                brush.Freeze();
-
-                                var newItem = new ApiItem
-                                {
-                                    ItemName = $"{Investment.Get().GetItemName(parent)} Ornament {i + 1}",
-                                    ItemType = "Armor Ornament",
-                                    ItemRarity = (ItemTier)parent.TagData.ItemRarity,
-                                    ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
-                                    ImageSource = dw,
-                                    ImageHeight = 96,
-                                    ImageWidth = 96,
-                                    GridBackground = brush,
-                                    Item = item,
-                                    Parent = parent
-                                };
-                                _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
-                                i++;
-                            }
+                                ItemName = name,
+                                ItemType = type,
+                                ItemRarity = (ItemTier)parent.TagData.ItemRarity,
+                                ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
+                                ImageSource = dw,
+                                ImageHeight = 96,
+                                ImageWidth = 96,
+                                GridBackground = brush,
+                                Item = item,
+                                Parent = parent
+                            };
+                            _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
+                            i++;
                         }
                     });
                 });

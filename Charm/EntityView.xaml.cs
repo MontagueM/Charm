@@ -110,7 +110,7 @@ public partial class EntityView : UserControl
     public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null, ExporterScene scene = null)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
         string savePath = config.GetExportSavePath() + $"/{name}";
 
         if (scene == null)
@@ -154,9 +154,9 @@ public partial class EntityView : UserControl
 
     public static void ExportInventoryItem(ApiItem item)
     {
-        string name = string.Join("_", $"{item.ItemName}"
-            .Split(Path.GetInvalidFileNameChars()));
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        string name = string.Join("_", $"{item.ItemName}".Split(Path.GetInvalidFileNameChars()));
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
+
         // Export the model
         // todo bad, should be replaced
         EntitySkeleton overrideSkeleton = null;
@@ -165,7 +165,13 @@ public partial class EntityView : UserControl
             Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent 
             overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
-        var val = Investment.Get().GetPatternEntityFromHash(item.Item.TagData.InventoryItemHash);
+        else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash("0AE18481"));
+            overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
+        }
+
+        var val = Investment.Get().GetPatternEntityFromHash(item.Parent != null ? item.Parent.TagData.InventoryItemHash : item.Item.TagData.InventoryItemHash);
         if (val != null && val.Skeleton != null)
         {
             overrideSkeleton = val.Skeleton;
@@ -177,8 +183,8 @@ public partial class EntityView : UserControl
 
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
-        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
-        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
+        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
+        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_").Replace(".", "_");
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
 
@@ -200,14 +206,20 @@ public partial class EntityView : UserControl
                 foreach (var dyeEntry in translationBlock.DefaultDyes)
                 {
                     DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.DyeIndex);
-                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
-                    dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
+                    if (dye != null)
+                    {
+                        dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                        dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
+                    }
                 }
                 foreach (var dyeEntry in translationBlock.LockedDyes)
                 {
                     DyeD1 dye = Investment.Get().GetD1DyeFromIndex(dyeEntry.DyeIndex);
-                    dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
-                    dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
+                    if (dye != null)
+                    {
+                        dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+                        dye.ExportTextures($"{savePath}/Textures", config.GetOutputTextureFormat());
+                    }
                 }
             }
         }
