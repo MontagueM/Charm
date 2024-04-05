@@ -653,13 +653,21 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                         part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
                             handle.ReadInt16(), handle.ReadInt16(), true));
 
-                        if ((otherStride == 0x18 || otherStride == 0x14 || otherStride == 0x10) && part is DynamicMeshPart)
+                        if (part is DynamicMeshPart) // (otherStride == 0x18 || otherStride == 0x14 || otherStride == 0x10)
                         {
+                            // Check Pos W
                             handle.BaseStream.Position -= 0x2;
                             var check = handle.ReadInt16();
                             if (check == 32767 || check == -32767)
                             {
-                                if ((part as DynamicMeshPart).HasSkeleton)
+                                // Check if UVs or weights
+                                handle.BaseStream.Position += 0x2;
+                                byte w1 = handle.ReadByte();
+                                byte w2 = handle.ReadByte();
+                                handle.BaseStream.Position -= 0x4;
+
+                                // stupid stupid stupid stupid stupid stupid
+                                if ((part as DynamicMeshPart).HasSkeleton || (w1 + w2 == 255 && (part as DynamicMeshPart).VertexWeights.Count == part.VertexPositions.Count - 1))
                                 {
                                     VertexWeight vw2 = new()
                                     {
@@ -678,19 +686,15 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             {
                                 part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
 
-                                if ((part as DynamicMeshPart).HasSkeleton)
+                                short w = (short)(part as DynamicMeshPart).VertexPositions[(part as DynamicMeshPart).VertexIndexMap[vertexIndex]].W;
+                                if (w >= 0)
                                 {
-                                    short w = (short)(part as DynamicMeshPart).VertexPositions[(part as DynamicMeshPart).VertexIndexMap[vertexIndex]].W;
-                                    if (w >= 0)
+                                    VertexWeight vw3 = new()
                                     {
-                                        VertexWeight vw3 = new()
-                                        {
-                                            // 0xFE designates no bone weight assigned.
-                                            WeightIndices = new IntVector4(w, 0, 0, 0),
-                                            WeightValues = new IntVector4(255, 0, 0, 0),
-                                        };
-                                        (part as DynamicMeshPart).VertexWeights.Add(vw3);
-                                    }
+                                        WeightIndices = new IntVector4(w, 0, 0, 0),
+                                        WeightValues = new IntVector4(255, 0, 0, 0),
+                                    };
+                                    (part as DynamicMeshPart).VertexWeights.Add(vw3);
                                 }
                             }
                         }
@@ -705,11 +709,8 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             handle.ReadInt16(), handle.ReadInt16(), true));
                         VertexWeight vw = new()
                         {
-                            WeightValues =
-                                new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
-                                    handle.ReadByte()),
-                            WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(),
-                                handle.ReadByte(), handle.ReadByte()),
+                            WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
+                            WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
                         };
                         (part as DynamicMeshPart).VertexWeights.Add(vw);
                         break;
@@ -744,11 +745,13 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                         part.VertexTangents.Add(new Vector4(handle.ReadSingle(), handle.ReadSingle(),
                             handle.ReadSingle(), handle.ReadSingle()));
                         break;
+
                     default:
+                        throw new NotImplementedException($"Vertex stride {_tag.Stride} (Buffer Index {bufferIndex}) for type {_tag.Type} is not implemented.");
                         break;
                 }
-
                 break;
+
             case 1:
                 switch (_tag.Stride)
                 {
@@ -833,18 +836,41 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                         }
                         else
                         {
-                            part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
-                            part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            if (_uvExists)
+                            {
+                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                    handle.ReadInt16(), handle.ReadInt16(), true));
+                                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
                                 handle.ReadInt16(), handle.ReadInt16(), true));
-                            part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                            handle.ReadInt16(), handle.ReadInt16(), true));
-                            part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
-                                handle.ReadByte()));
+                                part.VertexColours.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(),
+                                    handle.ReadInt16())); // ??
+                            }
+                            else
+                            {
+                                part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                                part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                    handle.ReadInt16(), handle.ReadInt16(), true));
+                                part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                                handle.ReadInt16(), handle.ReadInt16(), true));
+                                part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                                    handle.ReadByte()));
+                            }
                             break;
                         }
+                        break;
 
+                    case 0x1C:
+                        part.VertexTexcoords0.Add(new Vector2(handle.ReadInt16(), handle.ReadInt16()));
+                        part.VertexNormals.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        part.VertexTangents.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
+                        handle.ReadInt16(), handle.ReadInt16(), true));
+                        part.VertexColours.Add(new Vector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
+                            handle.ReadByte()));
+                        break;
 
                     default:
+                        throw new NotImplementedException($"Vertex stride {_tag.Stride} (Buffer Index {bufferIndex}) for type {_tag.Type} is not implemented.");
                         break;
                 }
                 break;
@@ -857,10 +883,8 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     case 0x08:
                         VertexWeight vw = new()
                         {
-                            WeightValues =
-                        new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
-                            WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(),
-                        handle.ReadByte()),
+                            WeightValues = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
+                            WeightIndices = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte()),
                         };
                         (part as DynamicMeshPart).VertexWeights.Add(vw);
                         break;
