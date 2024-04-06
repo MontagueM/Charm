@@ -222,6 +222,7 @@ public partial class EntityView : UserControl
                     }
                 }
             }
+            //AutomatedExporter.SaveD1ShaderInfo(savePath, itemName, config.GetOutputTextureFormat(), dyes.Values.ToList());
         }
         else
         {

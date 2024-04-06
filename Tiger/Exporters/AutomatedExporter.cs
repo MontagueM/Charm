@@ -1,4 +1,6 @@
-﻿using Tiger.Schema;
+﻿using System.Text;
+using Newtonsoft.Json;
+using Tiger.Schema;
 
 namespace Tiger.Exporters;
 
@@ -111,5 +113,17 @@ public class AutomatedExporter
         text = text.Replace("OUTPUTPATH", $"Textures");
         text = text.Replace("SHADERNAMEENUM", $"{meshName}{fileSuffix}");
         File.WriteAllText($"{saveDirectory}/{meshName}{fileSuffix}.py", text);
+    }
+
+    public static void SaveD1ShaderInfo(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<DyeD1> dyes, string fileSuffix = "")
+    {
+        StringBuilder text = new();
+
+        foreach (var dye in dyes)
+        {
+            text.AppendLine(JsonConvert.SerializeObject(dye, Formatting.Indented));
+        }
+
+        File.WriteAllText($"{saveDirectory}/{meshName}{fileSuffix}.json", text.ToString());
     }
 }
