@@ -593,28 +593,33 @@ public struct D2Class_7D6A8080
 /// <summary>
 /// Unk data resource.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F21A8080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DC718080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "A16D8080", 0x80)]
 public struct D2Class_A16D8080
 {
     public ulong FileSize;
-    [SchemaField(0x40)]
-    public DynamicArray<Vec4> Unk40; //first entry might be color?
+    [SchemaField(0x30)]
+    public DynamicArray<D2Class_09008080> Bytecode;
+    public DynamicArray<Vec4> Buffer1; // bytecode constants?
     [SchemaField(0x60)]
-    public DynamicArray<Vec4> Unk60; //if first doesnt exist then use this one?
+    public DynamicArray<Vec4> Buffer2;
 }
 
 /// <summary>
 /// Map Light
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EA1B8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5A6F8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "636A8080", 0x18)]
 public struct SMapLightResource
 {
-    [SchemaField(0x10)]
-    public Tag<D2Class_656C8080> Unk10;
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public Tag<D2Class_656C8080> Lights;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "5B1A8080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3A718080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "656C8080", 0x60)]
 public struct D2Class_656C8080
@@ -622,21 +627,23 @@ public struct D2Class_656C8080
     [SchemaField(0x10)]
     public Vector4 Unk10;
     public Vector4 Unk20;
-    public DynamicArray<D2Class_706C8080> Unk30;
-    public DynamicArray<D2Class_4F9F8080> Unk40;
-    [SchemaField(0x58)]
-    public Tag<SOcclusionBounds> Unk58;
+    public DynamicArray<D2Class_706C8080> LightData;
+    public DynamicArray<D2Class_4F9F8080> Transforms;
+    [SchemaField(0x54, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public Tag<SOcclusionBounds> Bounds;
 }
 
 /// </summary>
 /// Background entities/skybox resource
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DA1B8080", 0x10)] // TODO: SK, Pre-BL, BL (all probably work the same)
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "916F8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A36A8080", 0x18)]
 public struct SMapSkyEntResource
 {
     [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag<SMapSkyEntities> Unk10;  // A76A8080
 }
 
@@ -644,6 +651,7 @@ public struct SMapSkyEntResource
 /// Background entities/skybox
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1F1C8080", 0x68)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "956F8080", 0x68)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A76A8080", 0x60)]
 public struct SMapSkyEntities
 {
@@ -656,6 +664,7 @@ public struct SMapSkyEntities
     public Vector4 Unk50;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2F1C8080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3E718080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "706C8080", 0xF0)]
 public struct D2Class_706C8080
@@ -679,11 +688,14 @@ public struct D2Class_706C8080
     //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     //[SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     //public IMaterial UnkC8;
+
+    [SchemaField(0x84, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public Tag<D2Class_A16D8080> UnkCC;
+    public Tag<D2Class_A16D8080> BufferData;
     [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public Tag<D2Class_A16D8080> UnkD0;
+    public Tag<D2Class_A16D8080> BufferData2; // used for outer light color? i dont really know
+
     //[SchemaField(0xDF)]
     //public byte UnkDF; //color index? unlikely
     //[SchemaField(0xE0)]
@@ -691,6 +703,7 @@ public struct D2Class_706C8080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1E1C8080", 0x80)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "976F8080", 0x80)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]
 public struct D2Class_A96A8080
 {
@@ -780,6 +793,7 @@ public struct D2Class_64698080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "3A1B8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "9B6F8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AE6A8080", 0x10)]
 public struct D2Class_AE6A8080
 {
@@ -788,6 +802,7 @@ public struct D2Class_AE6A8080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E2078080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "73968080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B3938080", 0x30)]
 public struct D2Class_B3938080
 {

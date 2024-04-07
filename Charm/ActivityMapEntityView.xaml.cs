@@ -416,7 +416,12 @@ public partial class ActivityMapEntityView : UserControl
                         entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
                     }
                     else
+                    {
+                        //if (entry.Translation.ToVec3() == Tiger.Schema.Vector3.Zero)
+                        //    System.Console.WriteLine($"World origin resource {dataTable.Hash} Resource? {entry.DataResource.GetValue(dataTable.GetReader())}");
                         dynamicPointScene.AddEntityPoints(entry);
+                    }
+
 
                     switch (entry.DataResource.GetValue(dataTable.GetReader()))
                     {

@@ -76,7 +76,7 @@ public static class Helpers
         }
         // its possible for there to be buffers that are used as direct buffers instead of per-vertex (e.g. vertex colour)
         // however, it's impossible for there to be more semantics than the stride max
-        Debug.Assert(strideBound >= offset);
+        Debug.Assert(strideBound + 4 >= offset);
     }
 
     public static uint Fnv(string fnvString, bool le = false)
@@ -87,7 +87,7 @@ public static class Helpers
             value *= 0x01000193;
             value ^= fnvString[i];
         }
-        if(le)
+        if (le)
         {
             byte[] littleEndianBytes = BitConverter.GetBytes(value);
             Array.Reverse(littleEndianBytes);

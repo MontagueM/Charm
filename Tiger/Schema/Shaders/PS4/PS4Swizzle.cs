@@ -7,23 +7,26 @@ public static class PS4SwizzleAlgorithm
 {
     public static SwizzleType Type => SwizzleType.PS4;
 
-    public static byte[] Swizzle(byte[] data, int width, int height, GcnSurfaceFormat format)
+    public static byte[] Swizzle(byte[] data, int width, int height, int arraySize, GcnSurfaceFormat format)
     {
-        return DoSwizzle(data, width, height, format, false);
+        return DoSwizzle(data, width, height, arraySize, format, false);
     }
 
-    public static byte[] UnSwizzle(byte[] data, int width, int height, GcnSurfaceFormat format)
+    public static byte[] UnSwizzle(byte[] data, int width, int height, int arraySize, GcnSurfaceFormat format)
     {
-        return DoSwizzle(data, width, height, format, true);
+        return DoSwizzle(data, width, height, arraySize, format, true);
     }
 
-    private static byte[] DoSwizzle(byte[] data, int width, int height, GcnSurfaceFormat format, bool unswizzle)
+    // TODO: try to figure out cubemap faces
+    private static byte[] DoSwizzle(byte[] data, int width, int height, int arraySize, GcnSurfaceFormat format, bool unswizzle)
     {
         byte[] processed = new byte[data.Length];
         int pixelBlockSize = format.PixelBlockSize();
         int blockSize = format.BlockSize();
         int heightTexels = height / pixelBlockSize;
         int heightTexelsAligned = (heightTexels + 7) / 8;
+
+        int array = arraySize > 1 ? arraySize - 1 : 1;
         int widthTexels = width / pixelBlockSize;
         int widthTexelsAligned = (widthTexels + 7) / 8;
         int dataIndex = 0;

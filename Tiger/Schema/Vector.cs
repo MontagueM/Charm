@@ -115,6 +115,20 @@ public struct Vector3
     {
         return new Vector3(x.X * y, x.Y * y, x.Z * y);
     }
+
+    public static bool operator ==(Vector3 x, Vector3 y)
+    {
+        return x.X == y.X &&
+        x.Y == y.Y &&
+        x.Z == y.Z;
+    }
+
+    public static bool operator !=(Vector3 x, Vector3 y)
+    {
+        return x.X != y.X &&
+        x.Y != y.Y &&
+        x.Z != y.Z;
+    }
 }
 
 public struct IntVector3
@@ -318,6 +332,22 @@ public struct Vector4
             }
             throw new IndexOutOfRangeException();
         }
+    }
+
+    public static bool operator ==(Vector4 x, Vector4 y)
+    {
+        return x.X == y.X &&
+        x.Y == y.Y &&
+        x.Z == y.Z &&
+        x.W == y.W;
+    }
+
+    public static bool operator !=(Vector4 x, Vector4 y)
+    {
+        return x.X != y.X &&
+        x.Y != y.Y &&
+        x.Z != y.Z &&
+        x.W != y.W;
     }
 
     /// euler degrees

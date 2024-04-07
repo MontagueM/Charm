@@ -41,11 +41,10 @@ public class Texture : TigerReferenceFile<STextureHeader>
             else
                 data = GetReferenceData();
 
-            // Cubemaps only show one face but break if not unswizzled
-            if (_tag.Flags > 0 || !TexHelper.Instance.IsCompressed(format) || IsCubemap())
+            if ((_tag.Flags1 & 0xC00) != 0x400 || IsCubemap())
             {
                 var gcnformat = GcnSurfaceFormatExtensions.GetFormat(_tag.ROIFormat);
-                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, gcnformat);
+                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, _tag.ArraySize, gcnformat);
             }
         }
         else
@@ -253,11 +252,14 @@ public struct STextureHeader
     public ushort Height;
     public ushort Depth;
     public ushort ArraySize;
-    public ushort MipLevels; // not mip levels idk what this is
 
-    [SchemaField(0x34, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public sbyte Flags; // Flags for ROI
+    public uint Flags1; // Flags for ROI
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public uint Flags2;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public uint Flags3;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
