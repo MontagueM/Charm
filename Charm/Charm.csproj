@@ -25,7 +25,7 @@
       <PackageReference Include="HelixToolkit.SharpDX.Core.Wpf" Version="2.24.0" />
       <PackageReference Include="MaterialDesignThemes" Version="5.0.0-ci330" />
       <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
-      <PackageReference Include="NAudio" Version="2.2.1" />
+      <PackageReference Include="NAudio" Version="2.1.0" />
       <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
       <PackageReference Include="VersionChecker" Version="1.1.0" />
     </ItemGroup>
