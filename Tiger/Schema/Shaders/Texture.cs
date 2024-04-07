@@ -164,7 +164,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
     public bool IsSrgb()
     {
-        return TexHelper.Instance.IsSRGB((DXGI_FORMAT)_tag.Format);
+        return TexHelper.Instance.IsSRGB(_tag.GetFormat());
     }
 
     public UnmanagedMemoryStream GetTexture()
