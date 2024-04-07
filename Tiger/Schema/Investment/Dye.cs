@@ -180,3 +180,5 @@ public struct SDye_D1
     public Vector4 SecondaryColor;
     public Vector4 SubsurfaceScatteringStrength;
 }
+
+

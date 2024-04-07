@@ -42,7 +42,7 @@ public class FbxExporter : AbstractExporter
             }
 
             string outputDirectory = args.OutputDirectory;
-            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API)
+            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
             {
                 outputDirectory = Path.Join(outputDirectory, scene.Name);
             }

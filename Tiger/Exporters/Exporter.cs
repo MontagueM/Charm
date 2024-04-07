@@ -440,5 +440,6 @@ public enum ExportType
     StaticInMap,
     EntityInMap,
     API,
+    D1API,
     MapResource
 }

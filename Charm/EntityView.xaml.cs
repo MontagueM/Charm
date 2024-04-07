@@ -177,7 +177,7 @@ public partial class EntityView : UserControl
             overrideSkeleton = val.Skeleton;
         }
 
-        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.API);
+        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON ? ExportType.D1API : ExportType.API);
         EntityView.Export(Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash),
             name, ExportTypeFlag.Full, overrideSkeleton, scene);
 
@@ -222,7 +222,7 @@ public partial class EntityView : UserControl
                     }
                 }
             }
-            //AutomatedExporter.SaveD1ShaderInfo(savePath, itemName, config.GetOutputTextureFormat(), dyes.Values.ToList());
+            AutomatedExporter.SaveD1ShaderInfo(savePath, itemName, config.GetOutputTextureFormat(), dyes.Values.ToList());
         }
         else
         {

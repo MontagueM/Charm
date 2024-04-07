@@ -319,7 +319,7 @@ class MetadataScene
             && _exportType is not ExportType.EntityPoints)
             return; //Dont export if theres nothing in the cfg (this is kind of a mess though)
 
-        if (_exportType is ExportType.Static or ExportType.Entity or ExportType.API)
+        if (_exportType is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
         {
             path = Path.Join(path, _config["MeshName"]);
         }

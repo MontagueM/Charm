@@ -583,6 +583,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     dyes.Add(DyeD1.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
                 }
             }
+            // appliable shaders in D1 only supported armor
+            AutomatedExporter.SaveD1ShaderInfo(savePath, name, outputTextureFormat, new List<DyeD1> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armor"); // imagine spelling armor with a 'u' (laughs in freedom units)
         }
         else
         {

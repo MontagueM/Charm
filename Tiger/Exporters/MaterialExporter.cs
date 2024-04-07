@@ -1,7 +1,5 @@
-﻿using System.Collections.Concurrent;
-using ConcurrentCollections;
+﻿using ConcurrentCollections;
 using Tiger.Schema;
-using Tiger.Schema.Shaders;
 
 namespace Tiger.Exporters;
 
@@ -15,7 +13,7 @@ public class MaterialExporter : AbstractExporter
 
         Parallel.ForEach(args.Scenes, scene =>
         {
-            if (scene.Type is ExportType.Entity or ExportType.Static or ExportType.API)
+            if (scene.Type is ExportType.Entity or ExportType.Static or ExportType.API or ExportType.D1API)
             {
                 ConcurrentHashSet<Texture> textures = scene.Textures;
 
