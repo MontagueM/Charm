@@ -63,6 +63,32 @@ public struct SStringPartDefinition
     public RelativePointer StartStringPartPointer;
     public long PartCount;
 }
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "50058080", 0x10)]
+public struct S50058080
+{
+    [SchemaField(0x68)]
+    public LocalizedStrings ActivityGlobalStrings; // content\activities\strings\activity_global_strings.localized_strings.tft
+    [SchemaField(0xE8)]
+    public LocalizedStrings CharacterNames; // content\sandbox\strings\character_names.localized_strings.tft
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "02218080", 0x68)]
+public struct D2Class_02218080
+{
+    [SchemaField(0x28)]
+    public DynamicArray<D2Class_0E3C8080> Unk28;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "0E3C8080", 0x28)]
+public struct D2Class_0E3C8080
+{
+    [Tag64]
+    public Tag Unk00; // Always FFFFFFFF?
+    [Tag64]
+    public Tag Unk10; // Can be string container or something else
+}
+
 //
 //
 // // no-container string caching

@@ -25,7 +25,7 @@ using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Static;
 using Tiger.Schema.Strings;
-
+using ActivityROI = Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON.Activity;
 using ActivityWQ = Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307.Activity;
 
 namespace Charm;
@@ -828,102 +828,18 @@ public partial class TagListView : UserControl
         await Task.Run(() =>
         {
             _allTagItems = new ConcurrentBag<TagItem>();
-            // only in 010a
-            // var dgtbVals = PackageHandler.GetAllEntriesOfReference(0x010a, 0x80808930);
-            // only in the sr_globals, not best but it works
-            // var bsVals = PackageHandler.GetAllEntriesOfReference(0x010f, 0x80809eed);
-            // bsVals.AddRange(PackageHandler.GetAllEntriesOfReference(0x011a, 0x80809eed));
-            // bsVals.AddRange( PackageHandler.GetAllEntriesOfReference(0x0312, 0x80809eed));
-            // everywhere
+
             var eVals = PackageResourcer.Get().GetAllFiles<Entity>();
             ConcurrentHashSet<uint> existingEntities = new();
-            // Parallel.ForEach(dgtbVals, val =>
-            // {
-            //     Tag<D2Class_30898080> dgtb = FileResourcer.Get().GetSchemaTag<D2Class_30898080>(val);
-            //     foreach (var entry in dgtb.TagData.Unk18)
-            //     {
-            //         if (entry.Tag == null)
-            //             continue;
-            //         if (entry.TagPath.Value.Contains(".pattern.tft"))
-            //         {
-            //             _allTagItems.Add(new TagItem
-            //             {
-            //                 Hash = entry.Tag.Hash,
-            //                 Name = entry.TagPath,
-            //                 Subname = entry.TagNote,
-            //                 TagType = ETagListType.Entity
-            //             });
-            //             existingEntities.Add(entry.Tag.Hash);
-            //         }
-            //     }
-            // });
-            // MainWindow.Progress.CompleteStage();
-            //
-            // Parallel.ForEach(bsVals, val =>
-            // {
-            //     Tag<D2Class_ED9E8080> bs = FileResourcer.Get().GetSchemaTag<D2Class_ED9E8080>(val);
-            //     foreach (var entry in bs.TagData.Unk28)
-            //     {
-            //         if (entry.TagPath.Value.Contains(".pattern.tft"))
-            //         {
-            //             _allTagItems.Add(new TagItem
-            //             {
-            //                 Hash = entry.Tag.Hash,
-            //                 Name = entry.TagPath,
-            //                 TagType = ETagListType.Entity
-            //             });
-            //             existingEntities.Add(entry.Tag.Hash);
-            //         }
-            //     }
-            // });
-            // MainWindow.Progress.CompleteStage();
-
-            // We could also cache all the entity resources for an extra speed-up, but should be careful of memory there
-            // PackageHandler.CacheHashDataList(eVals.Select(x => x.Hash).ToArray());
-            // var erVals = PackageHandler.GetAllTagsWithReference(0x80809b06);
-            // PackageHandler.CacheHashDataList(erVals.Select(x => x.Hash).ToArray());
-            // MainWindow.Progress.CompleteStage();
-
 
             Parallel.ForEach(eVals, entity =>
             {
-                // if (existingEntities.Contains(entity.Hash)) // O(1) check
-                // return;
-
-                // Check the entity has geometry
-                // bool bHasGeometry = false;
-                // using (var handle = entity.GetReader())
-                // {
-                //     handle.BaseStream.Seek(8, SeekOrigin.Begin);
-                //     int resourceCount = handle.ReadInt32();
-                //     if (resourceCount > 2)
-                //     {
-                //         handle.BaseStream.Seek(0x10, SeekOrigin.Begin);
-                //         int resourcesOffset = handle.ReadInt32() + 0x20;
-                //         for (int i = 0; i < 2; i++)
-                //         {
-                //             handle.BaseStream.Seek(resourcesOffset + i * 0xC, SeekOrigin.Begin);
-                //             using (var handle2 = new Tag(new FileHash(handle.ReadUInt32())).GetReader())
-                //             {
-                //                 handle2.BaseStream.Seek(0x10, SeekOrigin.Begin);
-                //                 int checkOffset = handle2.ReadInt32() + 0x10 - 4;
-                //                 handle2.BaseStream.Seek(checkOffset, SeekOrigin.Begin);
-                //                 if (handle2.ReadUInt32() == 0x80806d8a)
-                //                 {
-                //                     bHasGeometry = true;
-                //                     break;
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
-                // if (!bHasGeometry)
-                //     return;
                 if (entity.HasGeometry())
                 {
                     _allTagItems.Add(new TagItem
                     {
                         Hash = entity.Hash,
+                        Name = entity.EntityName != null ? entity.EntityName : entity.Hash,
                         TagType = ETagListType.Entity
                     });
                 }
@@ -1238,58 +1154,80 @@ public partial class TagListView : UserControl
     /// </summary>
     private void LoadDialogueList(FileHash fileHash)
     {
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999 && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
             return;
         }
-        ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
 
         _allTagItems = new ConcurrentBag<TagItem>();
 
         // Dialogue tables can be in the 0x80808948 entries
-        ConcurrentBag<FileHash> dialogueTables = new ConcurrentBag<FileHash>();
-        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        ConcurrentDictionary<string, FileHash> dialogueTables = new();
+        switch (Strategy.CurrentStrategy)
         {
-            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 entry)
-            {
-                foreach (var dirtable in entry.DialogueTables)
+            case >= TigerStrategy.DESTINY2_WITCHQUEEN_6307:
+                ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+                if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 entry)
                 {
-                    if (dirtable.DialogueTable != null)
-                        dialogueTables.Add(dirtable.DialogueTable.Hash);
-                }
-            }
-            Parallel.ForEach(activity.TagData.Unk50, val =>
-            {
-                foreach (var d2Class48898080 in val.Unk18)
-                {
-                    var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
-                    if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
-                        resource is D2Class_18978080 || resource is D2Class_19978080)
+                    foreach (var dirtable in entry.DialogueTables)
                     {
-                        if (resource.DialogueTable != null)
-                            dialogueTables.Add(resource.DialogueTable.Hash);
+                        if (dirtable.DialogueTable != null)
+                            dialogueTables.TryAdd(dirtable.DialogueTable.Hash, dirtable.DialogueTable.Hash);
                     }
                 }
-            });
-        }
-        else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
-        {
-            var resource = activity.TagData.Unk18.GetValue(activity.GetReader());
-            //if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
-            //    resource is D2Class_18978080 || resource is D2Class_19978080)
-            if (resource is D2Class_19978080)
-            {
-                if (resource.DialogueTableBL != null)
-                    dialogueTables.Add(resource.DialogueTableBL.Hash);
-            }
+                Parallel.ForEach(activity.TagData.Unk50, val =>
+                {
+                    foreach (var d2Class48898080 in val.Unk18)
+                    {
+                        var resource = d2Class48898080.UnkEntityReference.TagData.Unk10.GetValue(d2Class48898080.UnkEntityReference.GetReader());
+                        if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
+                            resource is D2Class_18978080 || resource is D2Class_19978080)
+                        {
+                            if (resource.DialogueTable != null)
+                                dialogueTables.TryAdd(resource.DialogueTable.Hash, resource.DialogueTable.Hash);
+                        }
+                    }
+                });
+                break;
+
+            case TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
+                ActivityWQ activityBL = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+                var resource = activityBL.TagData.Unk18.GetValue(activityBL.GetReader());
+                //if (resource is D2Class_D5908080 || resource is D2Class_44938080 || resource is D2Class_45938080 ||
+                //    resource is D2Class_18978080 || resource is D2Class_19978080)
+                if (resource is D2Class_19978080)
+                {
+                    if (resource.DialogueTableBL != null)
+                        dialogueTables.TryAdd(resource.DialogueTableBL.Hash, resource.DialogueTableBL.Hash);
+                }
+                break;
+
+            case TigerStrategy.DESTINY1_RISE_OF_IRON:
+                ActivityROI activityROI = FileResourcer.Get().GetFile<ActivityROI>(fileHash);
+                var valsROI = PackageResourcer.Get().GetD1Activities();
+                foreach (var val in valsROI)
+                {
+                    if (val.Value == "16068080")
+                    {
+                        Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(val.Key);
+
+                        string activityName = PackageResourcer.Get().GetActivityName(activityROI.FileHash).Split(':')[1];
+                        if (tag.TagData.ActivityDevName.Value.Contains(activityName))
+                        {
+                            dialogueTables.TryAdd($"{PackageResourcer.Get().GetActivityName(val.Key).Split(":").First()}", val.Key);
+                        }
+                    }
+                }
+                break;
         }
 
-        Parallel.ForEach(dialogueTables, hash =>
+
+        Parallel.ForEach(dialogueTables, entry =>
         {
             _allTagItems.Add(new TagItem
             {
-                Hash = hash,
-                Name = hash,
+                Name = entry.Key,
+                Hash = entry.Value,
                 TagType = ETagListType.Dialogue
             });
         });
@@ -1301,7 +1239,7 @@ public partial class TagListView : UserControl
     {
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Dialogue);
-        viewer.DialogueControl.Load(fileHash);
+        viewer.DialogueControl.Load(fileHash, viewer);
     }
 
     #endregion
@@ -1310,63 +1248,88 @@ public partial class TagListView : UserControl
 
     private void LoadDirectiveList(FileHash fileHash)
     {
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999 && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
             return;
         }
-        ActivityWQ activity = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
         _allTagItems = new ConcurrentBag<TagItem>();
 
         // Dialogue tables can be in the 0x80808948 entries
 
         // TODO: shrink this? extra if/else statement for single type change looks ugly imo
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+        switch (Strategy.CurrentStrategy)
         {
-            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_19978080 resource)
-            {
-                var directiveTables = resource.DirectiveTables.Select(x => x.DirectiveTable.Hash);
-
-                Parallel.ForEach(directiveTables, hash =>
+            case >= TigerStrategy.DESTINY2_WITCHQUEEN_6307:
+                ActivityWQ activityWQ = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+                if (activityWQ.TagData.Unk18.GetValue(activityWQ.GetReader()) is D2Class_6A988080 a988080)
                 {
-                    _allTagItems.Add(new TagItem
-                    {
-                        Hash = hash,
-                        Name = hash,
-                        TagType = ETagListType.Directive
-                    });
-                });
-            }
-        }
-        else
-        {
-            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 a988080)
-            {
-                var directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
+                    var directiveTables = a988080.DirectiveTables.Select(x => x.DirectiveTable.Hash);
 
-                Parallel.ForEach(directiveTables, hash =>
-                {
-                    _allTagItems.Add(new TagItem
+                    Parallel.ForEach(directiveTables, hash =>
                     {
-                        Hash = hash,
-                        Name = hash,
-                        TagType = ETagListType.Directive
+                        _allTagItems.Add(new TagItem
+                        {
+                            Hash = hash,
+                            Name = hash,
+                            TagType = ETagListType.Directive
+                        });
                     });
-                });
-            }
-            else if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_20978080 class20978080)
-            {
-                var directiveTables = class20978080.PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
+                }
+                else if (activityWQ.TagData.Unk18.GetValue(activityWQ.GetReader()) is D2Class_20978080 class20978080)
+                {
+                    var directiveTables = class20978080.PEDirectiveTables.Select(x => x.DirectiveTable.Hash);
 
-                Parallel.ForEach(directiveTables, hash =>
-                {
-                    _allTagItems.Add(new TagItem
+                    Parallel.ForEach(directiveTables, hash =>
                     {
-                        Hash = hash,
-                        Name = hash,
-                        TagType = ETagListType.Directive
+                        _allTagItems.Add(new TagItem
+                        {
+                            Hash = hash,
+                            Name = hash,
+                            TagType = ETagListType.Directive
+                        });
                     });
-                });
-            }
+                }
+                break;
+
+            case TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
+                ActivityWQ activityBL = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
+                if (activityBL.TagData.Unk18.GetValue(activityBL.GetReader()) is D2Class_19978080 resource)
+                {
+                    var directiveTables = resource.DirectiveTables.Select(x => x.DirectiveTable.Hash);
+
+                    Parallel.ForEach(directiveTables, hash =>
+                    {
+                        _allTagItems.Add(new TagItem
+                        {
+                            Hash = hash,
+                            Name = hash,
+                            TagType = ETagListType.Directive
+                        });
+                    });
+                }
+                break;
+
+            case TigerStrategy.DESTINY1_RISE_OF_IRON:
+                ActivityROI activityROI = FileResourcer.Get().GetFile<ActivityROI>(fileHash);
+                var valsROI = PackageResourcer.Get().GetD1Activities();
+                foreach (var val in valsROI)
+                {
+                    if (val.Value == "16068080")
+                    {
+                        Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(val.Key);
+                        string activityName = PackageResourcer.Get().GetActivityName(activityROI.FileHash).Split(':')[1];
+                        if (tag.TagData.ActivityDevName.Value.Contains(activityName))
+                        {
+                            _allTagItems.Add(new TagItem
+                            {
+                                Hash = val.Key,
+                                Name = PackageResourcer.Get().GetActivityName(val.Key).Split(":").First(),
+                                TagType = ETagListType.Directive
+                            });
+                        }
+                    }
+                }
+                break;
         }
     }
 

@@ -1,4 +1,7 @@
-﻿namespace Tiger.Schema.Audio;
+﻿using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
+using Tiger.Schema.Entity;
+
+namespace Tiger.Schema.Audio;
 
 public class Dialogue : Tag<D2Class_B8978080>
 {
@@ -123,6 +126,77 @@ public class Dialogue : Tag<D2Class_B8978080>
             }
         }
 
+        return sounds;
+    }
+}
+
+public class DialogueD1
+{
+    public DialogueD1(FileHash hash)
+    {
+        Activity = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(hash);
+    }
+    private Tag<SUnkActivity_ROI> Activity;
+
+    // Lord forgive me for this monstrosity of code
+    public List<dynamic?> Load()
+    {
+        List<dynamic?> sounds = new();
+        foreach (var a in Activity.TagData.Unk48)
+        {
+            foreach (var b in a.Unk08)
+            {
+                if (b.Unk34.Hash.IsInvalid())
+                    continue;
+
+                var c = FileResourcer.Get().GetSchemaTag<SF0088080>(b.Unk34.Hash);
+                var c1 = FileResourcer.Get().GetSchemaTag<SF0088080_Child>(c.TagData.Unk1C);
+                List<SD3408080> c2 = c1.TagData.Unk08;
+                c2.AddRange(c1.TagData.Unk18);
+                c2.AddRange(c1.TagData.Unk28);
+                foreach (var d in c2)
+                {
+                    var d1 = FileResourcer.Get().GetSchemaTag<S6E078080>(d.Unk00);
+                    foreach (var e in d1.TagData.Unk30)
+                    {
+                        foreach (var f in e.Unk18)
+                        {
+                            if (f.Unk00.TagData.EntityResource is null)
+                                continue;
+
+                            if (f.Unk00.TagData.EntityResource.TagData.Unk10.GetValue(f.Unk00.TagData.EntityResource.GetReader()) is SB9268080)
+                            {
+                                var g = ((SDA288080)f.Unk00.TagData.EntityResource.TagData.Unk18.GetValue(f.Unk00.TagData.EntityResource.GetReader())).Unk68;
+                                if (g is null)
+                                    continue;
+
+                                foreach (var g2 in g.TagData.EntityResources.Select(g.GetReader(), r => r.Resource))
+                                {
+                                    if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && g2.GetReferenceHash() != 0x80800861)
+                                        continue;
+                                    EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(g2);
+                                    if (resource.TagData.Unk10.GetValue(resource.GetReader()) is S9A078080)
+                                    {
+                                        var h = (D2Class_79818080)resource.TagData.Unk18.GetValue(resource.GetReader());
+                                        List<D2Class_F1918080> h1 = h.WwiseSounds1;
+                                        h1.AddRange(h.WwiseSounds2);
+                                        foreach (var h2 in h1)
+                                        {
+                                            if (h2.Unk10.GetValue(resource.GetReader()) is SAA078080 dialogue)
+                                            {
+                                                //if (!sounds.Select(x => dialogue.Dialogue.Hash).Any())
+                                                if (!sounds.Contains(dialogue))
+                                                    sounds.Add(dialogue);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return sounds;
     }
 }

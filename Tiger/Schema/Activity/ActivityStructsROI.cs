@@ -73,8 +73,8 @@ public struct SUnkActivity_ROI
     public StringPointer ActivityDevName;
     [SchemaField(0x48)]
     public DynamicArray<S0C068080> Unk48;
-    //[SchemaField(0x58)]
-    //public DynamicArray<S3F078080> Unk58;
+    [SchemaField(0x58)]
+    public DynamicArray<S3F078080> Unk58; // Phases
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "3F078080", 0x8)]
@@ -134,7 +134,8 @@ public struct S6E078080
     public TigerHash Unk08;
     public TigerHash Unk1C;
     //public DynamicArray<SD3078080> Unk18;
-    //public FileHash Unk28;
+    [SchemaField(0x28)]
+    public LocalizedStrings Strings;
     [SchemaField(0x30)]
     public DynamicArray<SE9058080> Unk30;
 }
@@ -277,6 +278,27 @@ public struct SDD078080
     public DynamicArray<SMapDataEntry> DataEntries;
     [SchemaField(0x80), NoLoad]
     public Entity.Entity? UnkEntity;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "90258080", 0x570)]
+public struct S90258080
+{
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "93298080", 0xA8)]
+public struct S93298080
+{
+    [SchemaField(0x60)]
+    public StringPointer DevName;
+    public DynamicArray<SD7318080> Directives;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D7318080", 0x18)]
+public struct SD7318080
+{
+    public StringHash Description;
+    public StringHash Objective;
+    public StringHash Objective2;
 }
 
 

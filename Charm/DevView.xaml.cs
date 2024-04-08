@@ -205,7 +205,7 @@ public partial class DevView : UserControl
                     break;
                 case 0x808097B8:
                     var dialogueView = new DialogueView();
-                    dialogueView.Load(hash);
+                    dialogueView.Load(hash, null);
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
                     break;

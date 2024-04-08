@@ -4,7 +4,7 @@ using Tiger.Schema.Strings;
 
 namespace Tiger;
 
-[InitializeAfter(typeof(PackageResourcer))]
+[InitializeAfter(typeof(Hash64Map))]
 public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 {
     struct StringBiasView
@@ -20,6 +20,32 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
     protected override void Initialise()
     {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            var vals = PackageResourcer.Get().GetAllHashes<S50058080>();
+            foreach (var val in vals)
+            {
+                var tag = FileResourcer.Get().GetSchemaTag<S50058080>(val);
+                AddStrings(tag.TagData.CharacterNames);
+                AddStrings(tag.TagData.ActivityGlobalStrings);
+            }
+        }
+        // surely this is fine..
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+        {
+            var vals = PackageResourcer.Get().GetAllHashes<D2Class_02218080>();
+            foreach (var val in vals)
+            {
+                var tag = FileResourcer.Get().GetSchemaTag<D2Class_02218080>(val);
+                foreach (var entry in tag.TagData.Unk28)
+                {
+                    if (entry.Unk10 is not null && entry.Unk10.Hash.GetReferenceHash() == 0x808099EF) // EF998080
+                    {
+                        AddStrings(FileResourcer.Get().GetFile<LocalizedStrings>(entry.Unk10.Hash));
+                    }
+                }
+            }
+        }
     }
 
     protected override void Reset()

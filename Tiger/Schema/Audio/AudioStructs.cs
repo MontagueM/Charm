@@ -1,4 +1,6 @@
-﻿namespace Tiger.Schema.Audio;
+﻿using Tiger.Schema.Strings;
+
+namespace Tiger.Schema.Audio;
 
 [SchemaStruct("B8978080", 0x28)]
 public struct D2Class_B8978080
@@ -100,7 +102,7 @@ public struct D2Class_33978080
     public float Unk70;
     public Tag Unk74;
     public TigerHash Unk78;
-    public TigerHash NarratorString;
+    public StringHash NarratorString;
     public float Unk80;
 }
 
@@ -187,3 +189,20 @@ public struct D2Class_438A8080
 {
     public long FileSize;
 }
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "AA078080", 0x3C)]
+public struct SAA078080
+{
+    [SchemaField(0x20)]
+    public StringHash Narrator;
+    public Tag<D2Class_38978080> Dialogue;
+    public LocalizedStrings Strings;
+    public StringHash VoiceLine;
+    public Tag<D2Class_38978080> DialogueF; // Female
+    public LocalizedStrings StringsF;
+    public StringHash VoiceLineF;
+}
+
+
+
+
