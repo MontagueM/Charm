@@ -249,10 +249,13 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                     SharpDX.Vector3 p = new SharpDX.Vector3(v4p.X, v4p.Y, v4p.Z);
                     positions.Add(p);
                     // We need to check if the normal is Euler or Quaternion
-                    var v4n = part.BasePart.VertexNormals[lookup[(int)vertexIndex]];
-                    var v3ne = ConsiderQuatToEulerConvert(v4n);
-                    SharpDX.Vector3 n = new SharpDX.Vector3(v3ne.X, v3ne.Y, v3ne.Z);
-                    normals.Add(n);
+                    if (part.BasePart.VertexNormals.Count > 0)
+                    {
+                        var v4n = part.BasePart.VertexNormals[lookup[(int)vertexIndex]];
+                        var v3ne = ConsiderQuatToEulerConvert(v4n);
+                        SharpDX.Vector3 n = new SharpDX.Vector3(v3ne.X, v3ne.Y, v3ne.Z);
+                        normals.Add(n);
+                    }
                     if (part.BasePart.VertexTexcoords0.Count > 0)
                     {
                         var v2t = part.BasePart.VertexTexcoords0[lookup[(int)vertexIndex]];

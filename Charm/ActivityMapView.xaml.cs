@@ -14,6 +14,8 @@ namespace Charm;
 
 public partial class ActivityMapView : UserControl
 {
+    private IActivity _currentActivity;
+    private Tag<SBubbleDefinition> _currentBubble;
     public ActivityMapView()
     {
         InitializeComponent();
@@ -24,6 +26,7 @@ public partial class ActivityMapView : UserControl
         MapList.ItemsSource = GetMapList(activity);
         ExportControl.SetExportFunction(ExportFull, (int)ExportTypeFlag.Full, true); //| (int)ExportTypeFlag.ArrangedMap, true);
         ExportControl.SetExportInfo(activity.FileHash);
+        _currentActivity = activity;
     }
 
     private ObservableCollection<DisplayBubble> GetMapList(IActivity activity)
@@ -44,6 +47,7 @@ public partial class ActivityMapView : UserControl
         FileHash hash = new FileHash((sender as Button).Tag as string);
         Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
         PopulateStaticList(bubbleMaps);
+        _currentBubble = bubbleMaps;
     }
 
     private void PopulateStaticList(Tag<SBubbleDefinition> bubbleMaps)
@@ -189,11 +193,11 @@ public partial class ActivityMapView : UserControl
             MainWindow.Progress.SetProgressStages(mapStages);
             await Task.Run(() =>
             {
-                foreach (DisplayStaticMap item in items)
+                _currentBubble.TagData.MapResources.ForEach(m =>
                 {
-                    MapControl.LoadMap(new FileHash(item.Hash), lod);
+                    MapControl.LoadMap(m.GetMapContainer().Hash, lod);
                     MainWindow.Progress.CompleteStage();
-                }
+                });
             });
         }
         else

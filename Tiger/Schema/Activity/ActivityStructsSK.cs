@@ -151,7 +151,7 @@ public struct S62948080
     public DynamicArray<S64948080> Unk38;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "64948080", 0x1C)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "64948080", 0x18)]
 public struct S64948080
 {
     [SchemaField(0x8)]

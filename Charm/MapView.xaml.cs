@@ -54,51 +54,27 @@ public partial class MapView : UserControl
     private void GetStaticMapData(FileHash fileHash, ExportDetailLevel detailLevel)
     {
         Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(fileHash);
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        foreach (var tables in tag.TagData.MapDataTables)
         {
-            foreach (var tables in tag.TagData.MapDataTables)
+            foreach (var entry in tables.MapDataTable.TagData.DataEntries)
             {
-                foreach (var entry in tables.MapDataTable.TagData.DataEntries)
+                if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapDataResource resource)
                 {
-                    if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapDataResource resource)
-                    {
-                        if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
-                            continue;
+                    if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
+                        continue;
 
-                        StaticMapData staticMapData = resource.StaticMapParent.TagData.StaticMap;
-                        SetMapUI(staticMapData, detailLevel);
-                    }
-                    else if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapTerrainResource terrain)
-                    {
-                        if (terrain.Terrain is null)
-                            continue;
+                    StaticMapData staticMapData = resource.StaticMapParent.TagData.StaticMap;
+                    SetMapUI(staticMapData, detailLevel);
+                }
+                if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapTerrainResource terrain)
+                {
+                    if (terrain.Terrain is null)
+                        continue;
 
-                        SetTerrainMapUI(terrain.Terrain, detailLevel);
-                    }
+                    SetTerrainMapUI(terrain.Terrain, detailLevel);
                 }
             }
         }
-        else
-        {
-            Tag<SMapDataTable> mapDataTable = tag.TagData.MapDataTables[1].MapDataTable;
-            StaticMapData staticMapData = ((SMapDataResource)mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())).StaticMapParent.TagData.StaticMap;
-            SetMapUI(staticMapData, detailLevel);
-
-            foreach (var tables in tag.TagData.MapDataTables)
-            {
-                foreach (var entry in tables.MapDataTable.TagData.DataEntries)
-                {
-                    if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapTerrainResource terrain)
-                    {
-                        if (terrain.Terrain is null)
-                            continue;
-
-                        SetTerrainMapUI(terrain.Terrain, detailLevel);
-                    }
-                }
-            }
-        }
-
     }
 
     private void SetMapUI(StaticMapData staticMapData, ExportDetailLevel detailLevel)
@@ -127,7 +103,6 @@ public partial class MapView : UserControl
     private void SetTerrainMapUI(Terrain terrain, ExportDetailLevel detailLevel)
     {
         var displayParts = MakeTerrainDisplayParts(terrain, detailLevel);
-        System.Console.WriteLine("test");
         Dispatcher.Invoke(() =>
         {
             MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
