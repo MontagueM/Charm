@@ -373,12 +373,11 @@ public partial class TagListView : UserControl
                 return;
             }
 
-            if (!TagItem.GetEnumDescription(_tagListType).Contains("List"))
-            {
-                if (displayItems.Count > 50) return;
-
-            }
-            else if (TagItem.GetEnumDescription(_tagListType).Contains("[Packages]") && !bPackageSearchAllOverride)
+            //if (!TagItem.GetEnumDescription(_tagListType).Contains("List"))
+            //{
+            //    if (displayItems.Count > 50) return;
+            //}
+            if (TagItem.GetEnumDescription(_tagListType).Contains("[Packages]") && !bPackageSearchAllOverride)
             {
                 // Package-enabled lists have [Packages] in their enum
                 if (item.TagType != ETagListType.Package)
@@ -1625,8 +1624,15 @@ public partial class TagListView : UserControl
 
     private void ExportWem(ExportInfo info)
     {
-        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        // exporting while playing the audio causes a hang
+        var viewer = GetViewer();
+        Dispatcher.Invoke(() =>
+        {
+            if (viewer.MusicPlayer.IsPlaying())
+                viewer.MusicPlayer.Pause();
+        });
 
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash);
         string saveDirectory = config.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
@@ -1635,8 +1641,15 @@ public partial class TagListView : UserControl
 
     private void ExportWav(ExportInfo info)
     {
-        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        // exporting while playing the audio causes a hang
+        var viewer = GetViewer();
+        Dispatcher.Invoke(() =>
+        {
+            if (viewer.MusicPlayer.IsPlaying())
+                viewer.MusicPlayer.Pause();
+        });
 
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash);
         string saveDirectory = config.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
