@@ -240,6 +240,7 @@ public struct SMapTerrainResource
     public short Unk10;  // tile x-y coords?
     public short Unk12;
     public TigerHash Unk14;
+    [NoLoad]
     public Terrain Terrain;
     public Tag<SOcclusionBounds> TerrainBounds;
 }

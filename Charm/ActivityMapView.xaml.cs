@@ -63,6 +63,7 @@ public partial class ActivityMapView : UserControl
                     Tag<SMapDataTable> mapDataTable = m.GetMapContainer().TagData.MapDataTables[1].MapDataTable;
                     if (mapDataTable.TagData.DataEntries.Count > 0)
                     {
+                        mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent?.Load();
                         StaticMapData? tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent.TagData.StaticMap;
                         if (tag == null)
                             return; // todo sk broke this
@@ -87,6 +88,7 @@ public partial class ActivityMapView : UserControl
                     {
                         if (entry.DataResource.GetValue(dataTable.MapDataTable.GetReader()) is SMapDataResource resource)
                         {
+                            resource.StaticMapParent?.Load();
                             if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
                                 continue;
 

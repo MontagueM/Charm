@@ -45,7 +45,12 @@ public partial class EntityView : UserControl
         }
         else
         {
-            AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
+            List<Entity> entities = new List<Entity> { entity };
+            entities.AddRange(entity.GetEntityChildren());
+            entities.ForEach(entity =>
+            {
+                AddEntity(entity, ModelView.GetSelectedLod(), fbxHandler);
+            });
             return LoadUI(fbxHandler);
         }
 
@@ -247,27 +252,33 @@ public partial class EntityView : UserControl
 
     }
 
-    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(Entity ent, ExportDetailLevel detailLevel)
+    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(Entity entity, ExportDetailLevel detailLevel)
     {
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
+        List<Entity> entities = new List<Entity> { entity };
+        entities.AddRange(entity.GetEntityChildren());
 
-        if (ent.HasGeometry())
+        foreach (var ent in entities)
         {
-            var dynamicParts = ent.Load(detailLevel);
-            ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
-            if (ModelView.GetSelectedGroupIndex() != -1)
-                dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
-
-            foreach (var part in dynamicParts)
+            if (ent.HasGeometry())
             {
-                MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
-                displayPart.BasePart = part;
-                displayPart.Translations.Add(Vector3.Zero);
-                displayPart.Rotations.Add(Vector4.Zero);
-                displayPart.Scales.Add(Vector3.One);
-                displayParts.Add(displayPart);
+                var dynamicParts = ent.Load(detailLevel);
+                ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
+                if (ModelView.GetSelectedGroupIndex() != -1)
+                    dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
+
+                foreach (var part in dynamicParts)
+                {
+                    MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+                    displayPart.BasePart = part;
+                    displayPart.Translations.Add(Vector3.Zero);
+                    displayPart.Rotations.Add(Vector4.Zero);
+                    displayPart.Scales.Add(Vector3.One);
+                    displayParts.Add(displayPart);
+                }
             }
         }
+
         return displayParts.ToList();
     }
 }

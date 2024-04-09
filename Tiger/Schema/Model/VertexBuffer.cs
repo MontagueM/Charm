@@ -615,6 +615,11 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         handle.BaseStream.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
         bool status = false;
 
+        // this shouldn't happen but yet it can (only case was on Oryx)
+        Debug.Assert(handle.BaseStream.Length >= handle.BaseStream.Position);
+        if (handle.BaseStream.Length <= handle.BaseStream.Position)
+            handle.BaseStream.Position = handle.BaseStream.Length - _tag.Stride;
+
         switch (bufferIndex)
         {
             case 0:
@@ -650,8 +655,9 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                         }
                         break;
                     case 0xC:
+
                         part.VertexPositions.Add(new Vector4(handle.ReadInt16(), handle.ReadInt16(),
-                            handle.ReadInt16(), handle.ReadInt16(), true));
+                        handle.ReadInt16(), handle.ReadInt16(), true));
 
                         if (part is DynamicMeshPart) // (otherStride == 0x18 || otherStride == 0x14 || otherStride == 0x10)
                         {

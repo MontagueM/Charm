@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -404,7 +405,9 @@ public partial class TagListView : UserControl
                     Name = name,
                     TagType = item.TagType,
                     Type = item.Type,
-                    Subname = item.Subname,
+                    Subname = searchStr != string.Empty && item.Type != "Package" ?
+                            $"{item.Subname} {PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId((item.Hash as FileHash).PackageId).Split("\\").Last().Split(".").First()}"
+                            : item.Subname,
                     FontSize = _bTrimName || !bWasTrimmed ? 16 : 12,
                 });
             }
@@ -787,14 +790,22 @@ public partial class TagListView : UserControl
             _mainWindow.SetLoggerSelected();
         }
         SetExportFunction(ExportEntity, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.Minimal);
+        viewer.ExportControl.ExportChildrenBox.Visibility = Visibility.Visible;
         viewer.ExportControl.SetExportInfo(fileHash);
         viewer.EntityControl.ModelView.SetModelFunction(() => viewer.EntityControl.LoadEntity(fileHash, _globalFbxHandler));
     }
 
     private void ExportEntity(ExportInfo info)
     {
+        var viewer = GetViewer();
         Entity entity = FileResourcer.Get().GetFile<Entity>(info.Hash);
-        EntityView.Export(new List<Entity> { entity }, info.Name, info.ExportType);
+        List<Entity> entities = new List<Entity> { entity };
+        Dispatcher.Invoke(() =>
+        {
+            if (viewer.ExportControl.ExportChildrenBox.Visibility == Visibility.Visible && viewer.ExportControl.ExportChildrenBox.IsChecked.Value == true)
+                entities.AddRange(entity.GetEntityChildren());
+        });
+        EntityView.Export(entities, info.Name, info.ExportType);
     }
 
     /// <summary>
@@ -815,31 +826,32 @@ public partial class TagListView : UserControl
         if (_allTagItems != null)
             return;
 
-        // todo fix this, the concept no longer works cross-version
-
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            // "loading global tag bags",
-            // "loading budget sets",
-            // "caching entity tags",
-            "loading entities"
+            "Getting Entity Names",
+            "Loading Entities"
         });
 
         await Task.Run(() =>
         {
             _allTagItems = new ConcurrentBag<TagItem>();
+            var NamedEntities = TryGetEntityNames();
+            MainWindow.Progress.CompleteStage();
 
             var eVals = PackageResourcer.Get().GetAllFiles<Entity>();
             ConcurrentHashSet<uint> existingEntities = new();
-
             Parallel.ForEach(eVals, entity =>
             {
                 if (entity.HasGeometry())
                 {
+                    var entityName = entity.EntityName != null ? entity.EntityName : entity.Hash;
+                    if (NamedEntities.ContainsKey(entity.Hash) && entity.EntityName != null)
+                        entityName = NamedEntities[entity.Hash];
+
                     _allTagItems.Add(new TagItem
                     {
                         Hash = entity.Hash,
-                        Name = entity.EntityName != null ? entity.EntityName : entity.Hash,
+                        Name = entityName,
                         TagType = ETagListType.Entity
                     });
                 }
@@ -849,6 +861,68 @@ public partial class TagListView : UserControl
         });
 
         RefreshItemList();  // bc of async stuff
+    }
+
+    private ConcurrentDictionary<FileHash, string> TryGetEntityNames()
+    {
+        ConcurrentDictionary<FileHash, string> NamedEntities = new();
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            var vals = PackageResourcer.Get().GetAllHashes<SD9128080>();
+            Parallel.ForEach(vals, val =>
+            {
+                var entry = FileResourcer.Get().GetSchemaTag<SD9128080>(val);
+                foreach (var a in entry.TagData.Unk20)
+                {
+                    foreach (var b in a.Unk08)
+                    {
+                        if (b.Pointer.GetValue(entry.GetReader()) is SMapDataEntry datatable)
+                        {
+                            if (datatable.DataResource.GetValue(entry.GetReader()) is S33138080 name)
+                            {
+                                if (name.EntityName.IsValid())
+                                    NamedEntities.TryAdd(datatable.GetEntityHash(), GlobalStrings.Get().GetString(name.EntityName));
+                            }
+                        }
+                    }
+                }
+            });
+
+            var vals2 = PackageResourcer.Get().GetAllHashes<SF6038080>();
+            Parallel.ForEach(vals2, val =>
+            {
+                var entry = FileResourcer.Get().GetSchemaTag<SF6038080>(val);
+                if (entry.TagData.EntityResource is not null)
+                {
+                    if (entry.TagData.EntityResource.TagData.Unk10.GetValue(entry.TagData.EntityResource.GetReader()) is S2E098080)
+                    {
+                        var resource = (SDD078080)entry.TagData.EntityResource.TagData.Unk18.GetValue(entry.TagData.EntityResource.GetReader());
+                        foreach (var dataentry in resource.DataEntries)
+                        {
+                            if (dataentry.GetEntityHash().IsValid())
+                                NamedEntities.TryAdd(dataentry.GetEntityHash(), resource.DevName);
+                        }
+                    }
+                }
+            });
+        }
+        else if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            var vals = PackageResourcer.Get().GetAllHashes<SMapDataTable>();
+            Parallel.ForEach(vals, val =>
+            {
+                var entry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(val);
+                foreach (var dataEntry in entry.TagData.DataEntries)
+                {
+                    if (dataEntry.DataResource.GetValue(entry.GetReader()) is D2Class_19808080 name)
+                    {
+                        if (name.EntityName.IsValid())
+                            NamedEntities.TryAdd(dataEntry.GetEntityHash(), GlobalStrings.Get().GetString(name.EntityName));
+                    }
+                }
+            });
+        }
+        return NamedEntities;
     }
 
     #endregion

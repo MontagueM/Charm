@@ -60,6 +60,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapDataResource resource)
                 {
+                    resource.StaticMapParent?.Load();
                     if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
                         continue;
 
@@ -68,6 +69,7 @@ public partial class MapView : UserControl
                 }
                 if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapTerrainResource terrain)
                 {
+                    terrain.Terrain?.Load();
                     if (terrain.Terrain is null)
                         continue;
 
@@ -196,6 +198,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
                 {
+                    terrainArrangement.Terrain.Load();
                     terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                     if (exportStatics)
                     {
@@ -220,6 +223,7 @@ public partial class MapView : UserControl
             {
                 if (data.MapDataTable.TagData.DataEntries[0].DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)
                 {
+                    staticMapResource.StaticMapParent.Load();
                     staticMapResource.StaticMapParent.TagData.StaticMap.LoadDecalsIntoExporterScene(scene);
                 }
             }
@@ -230,6 +234,7 @@ public partial class MapView : UserControl
                 {
                     if (exportTypeFlag == ExportTypeFlag.Full)
                     {
+                        staticMapResource.StaticMapParent.Load();
                         staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene);
                     }
                 }
@@ -245,6 +250,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
+                    staticMapResource.StaticMapParent.Load();
                     if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
                     {
                         //if (staticMapResource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData is not null)

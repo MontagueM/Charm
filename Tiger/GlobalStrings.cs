@@ -33,7 +33,7 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         // surely this is fine..
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
-            var vals = PackageResourcer.Get().GetAllHashes<D2Class_02218080>();
+            var vals = PackageResourcer.Get().GetAllHashes<D2Class_02218080>(); //TODO: Beyond Light
             foreach (var val in vals)
             {
                 var tag = FileResourcer.Get().GetSchemaTag<D2Class_02218080>(val);

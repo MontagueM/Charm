@@ -15,6 +15,8 @@ public class Entity : Tag<SEntity>
     public EntityResource? PatternAudio { get; private set; }
     public EntityResource? PatternAudioUnnamed { get; private set; }
     public EntityControlRig? ControlRig { get; private set; }
+    public EntityResource? EntityChildren { get; private set; }
+    public string? EntityName { get; private set; } // Usually just the generic name (Ogre, Vandal, etc)
 
     private bool _loaded = false;
 
@@ -61,6 +63,28 @@ public class Entity : Tag<SEntity>
                     break;
                 case D2Class_F62C8080: // todo shadowkeep
                     PatternAudioUnnamed = resource;
+                    break;
+
+                case D2Class_357C8080: // Generic name
+                    var genericName = ((D2Class_18808080)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk3C0.TagData.EntityName;
+
+                    // we care more about the specific name so if the entity name is already assigned, dont assign this one
+                    if (EntityName == null)
+                        EntityName = GlobalStrings.Get().GetString(genericName);
+                    break;
+
+                case D2Class_DA5E8080: // Specific name
+                    var specificName = Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON ?
+                        ((D2Class_DB5E8080)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk108.TagData.EntityName :
+                        ((D2Class_DB5E8080)resource.TagData.Unk18.GetValue(resource.GetReader())).EntityName;
+
+                    // Don't assign a name if the name hash doesnt return an actual string (returns the name hash instead)
+                    if (GlobalStrings.Get().GetString(specificName) != specificName)
+                        EntityName = GlobalStrings.Get().GetString(specificName);
+                    break;
+
+                case D2Class_12848080:
+                    EntityChildren = resource;
                     break;
                 default:
                     //Console.WriteLine($"{resource.TagData.Unk18.GetValue(resource.GetReader())}");
@@ -142,39 +166,46 @@ public class Entity : Tag<SEntity>
         }
 
         List<Entity> entities = new List<Entity>();
-        foreach (var resourceHash in _tag.EntityResources.Select(GetReader(), r => r.Resource))
+        if (EntityChildren is null)
+            return entities;
+
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)
-                continue;
-
-            EntityResource resource = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
-            //Weird to have to get Unk10 first to be able to get Unk18
-            //Trying to get Unk18 directly just crashes
-            switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
+            foreach (var entry in ((D2Class_0E848080)EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader())).Unk100)
             {
-                case D2Class_12848080:
-                    foreach (var entry in ((D2Class_0E848080)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk88)
-                    {
-                        foreach (var entry2 in entry.Unk08)
-                        {
-                            if (entry2.Unk08 is null)
-                                continue;
-
-                            Entity entity = FileResourcer.Get().GetFile<Entity>(entry2.Unk08.Hash);
-                            if (entity.HasGeometry())
-                            {
-                                entities.Add(entity);
-                                //Just in case
-                                foreach (var child in entity.GetEntityChildren())
-                                {
-                                    entities.Add(child);
-                                }
-                            }
-                        }
-                    }
-                    break;
+                if (entry.Entity is null)
+                    continue;
+                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.Entity);
+                if (entity.HasGeometry())
+                {
+                    entities.Add(entity);
+                    //Just in case
+                    foreach (var child in entity.GetEntityChildren())
+                        entities.Add(child);
+                }
             }
         }
+        else
+        {
+            foreach (var entry in ((D2Class_0E848080)EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader())).Unk88)
+            {
+                foreach (var entry2 in entry.Unk08)
+                {
+                    if (entry2.Unk08 is null)
+                        continue;
+
+                    Entity entity = FileResourcer.Get().GetFile<Entity>(entry2.Unk08.Hash);
+                    if (entity.HasGeometry())
+                    {
+                        entities.Add(entity);
+                        //Just in case
+                        foreach (var child in entity.GetEntityChildren())
+                            entities.Add(child);
+                    }
+                }
+            }
+        }
+
         return entities;
     }
 }

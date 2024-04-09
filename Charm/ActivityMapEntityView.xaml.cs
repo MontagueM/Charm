@@ -466,7 +466,8 @@ public partial class ActivityMapEntityView : UserControl
                                 dynamicScene.AddMapSpotLight(entry, spotLight);
                             break;
                         case SMapDecalsResource decals:
-                            if (decals.MapDecals is null || decals.MapDecals.TagData.DecalResources is null)
+                            decals.MapDecals?.Load();
+                            if (decals.MapDecals is null)
                                 return;
 
                             dynamicScene.AddDecals(decals);
@@ -482,6 +483,7 @@ public partial class ActivityMapEntityView : UserControl
                             }
                             break;
                         case SMapTerrainResource terrain:
+                            terrain.Terrain.Load();
                             terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                             break;
                         default:
@@ -551,6 +553,7 @@ public partial class ActivityMapEntityView : UserControl
                     if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
                     {
                         ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
+                        terrainArrangement.Terrain.Load();
                         terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
                     }
                 });

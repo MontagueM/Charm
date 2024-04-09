@@ -534,8 +534,8 @@ public struct SMapDataResource
 {
     [SchemaField(0x8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public TigerHash Unk08;
-    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
     public Tag<SStaticMapParent> StaticMapParent;
 }
 
@@ -560,7 +560,7 @@ public struct SStaticMapParent
 public struct D2Class_B5678080
 {
     [SchemaField(0x10)]
-    public Tag<D2Class_786A8080> Unk10;
+    public Tag Unk10; // D2Class_786A8080
 }
 
 /// <summary>
@@ -740,8 +740,8 @@ public struct D2Class_A96A8080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "55698080", 0x18)]
 public struct SMapDecalsResource
 {
-    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
     public Tag<SMapDecals> MapDecals;
 }
 
@@ -863,17 +863,17 @@ public struct SMapSpotLightResource
 // /// <summary>
 // /// Boss entity data resource?
 // /// </summary>
-// [SchemaStruct("19808080", 0x50)]
-// public struct D2Class_19808080
-// {
-//     // todo rest of this
-//     // [DestinyField(FieldType.ResourcePointer)]
-//     // public dynamic? Unk00;
-//     [SchemaField(0x24)]
-//     public TigerHash EntityName;
-// }
-//
-//
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "19808080", 0x50)]
+public struct D2Class_19808080
+{
+    // todo rest of this
+    // [DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk00;
+    [SchemaField(0x24)]
+    public StringHash EntityName;
+}
+
+
 // /// <summary>
 // /// Unk data resource, maybe lights for entities?
 // /// </summary>

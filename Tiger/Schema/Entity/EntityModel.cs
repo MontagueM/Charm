@@ -118,8 +118,13 @@ public class EntityModel : Tag<SEntityModel>
                 }
                 else
                 {
-                    if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.Unk08 != 1)
+                    if (dynamicMeshPart.Material is null ||
+                    dynamicMeshPart.Material.VertexShader is null ||
+                    dynamicMeshPart.Material.PixelShader is null) // || dynamicMeshPart.Material.Unk08 != 1)
                         continue;
+
+                    //if (dynamicMeshPart.Material.Unk08 != 1)
+                    //    Console.WriteLine($"{dynamicMeshPart.Material.FileHash}");
                 }
 
                 dynamicMeshPart.GetAllData(mesh, _tag);

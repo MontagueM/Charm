@@ -239,7 +239,7 @@ public struct S48138080
     public ResourcePointer Pointer; // 06048080 (SMapDataEntry), data resource pointing to 33138080
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "33138080", 0x34)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "33138080", 0x34)] // D2 works the same
 public struct S33138080
 {
     public ResourcePointer Pointer; // 152B8080
