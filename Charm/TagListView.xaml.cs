@@ -845,7 +845,7 @@ public partial class TagListView : UserControl
                 if (entity.HasGeometry())
                 {
                     var entityName = entity.EntityName != null ? entity.EntityName : entity.Hash;
-                    if (NamedEntities.ContainsKey(entity.Hash) && entity.EntityName != null)
+                    if (NamedEntities.ContainsKey(entity.Hash) && entity.EntityName == null)
                         entityName = NamedEntities[entity.Hash];
 
                     _allTagItems.Add(new TagItem

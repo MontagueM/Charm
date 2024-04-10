@@ -161,7 +161,7 @@ public struct D2Class_38978080
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public BKHD SoundbankBL;
 
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<D2Class_63838080> Unk18;
 
     [SchemaField(0x38, TigerStrategy.DESTINY1_RISE_OF_IRON)]

@@ -92,7 +92,7 @@ public partial class DareView : UserControl
                     CreateOrnamentItems(item); // D1
                     var isD1 = Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
                     var isOrnament = type.Contains("Ornament");
-                    var isNameNotEmpty = !string.IsNullOrEmpty(name);
+                    var isNameNotEmpty = name != "";
 
                     if ((isD1 && !isOrnament && isNameNotEmpty) || (!isD1 && isNameNotEmpty))
                     {

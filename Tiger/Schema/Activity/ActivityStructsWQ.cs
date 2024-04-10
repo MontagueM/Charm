@@ -520,14 +520,17 @@ public struct D2Class_ED458080
     public ResourcePointer Unk00;
 }
 
-[SchemaStruct("F5458080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F5458080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "F5458080", 0x38)]
 public struct D2Class_F5458080
 {
     public StringPointer WwiseMusicLoopName;
     [Tag64]
     public WwiseSound MusicLoopSound;
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_FB458080> Unk18;
-    public TigerHash Unk28;
+    //public TigerHash Unk28;
 }
 
 [SchemaStruct("F7458080", 0x28)]

@@ -23,18 +23,18 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
             var vals = PackageResourcer.Get().GetAllHashes<S50058080>();
-            foreach (var val in vals)
+            Parallel.ForEach(vals, val =>
             {
                 var tag = FileResourcer.Get().GetSchemaTag<S50058080>(val);
                 AddStrings(tag.TagData.CharacterNames);
                 AddStrings(tag.TagData.ActivityGlobalStrings);
-            }
+            });
         }
         // surely this is fine..
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
         {
             var vals = PackageResourcer.Get().GetAllHashes<D2Class_02218080>(); //TODO: Beyond Light
-            foreach (var val in vals)
+            Parallel.ForEach(vals, val =>
             {
                 var tag = FileResourcer.Get().GetSchemaTag<D2Class_02218080>(val);
                 foreach (var entry in tag.TagData.Unk28)
@@ -44,7 +44,7 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
                         AddStrings(FileResourcer.Get().GetFile<LocalizedStrings>(entry.Unk10.Hash));
                     }
                 }
-            }
+            });
         }
     }
 

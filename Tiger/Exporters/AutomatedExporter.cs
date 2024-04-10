@@ -89,6 +89,9 @@ public class AutomatedExporter
         int dyeIndex = 1;
         foreach (var dye in dyes)
         {
+            if (dye is null)
+                continue;
+
             dye.ExportTextures($"{saveDirectory}/Textures", outputTextureFormat);
             var dyeInfo = dye.GetDyeInfo();
             foreach (var fieldInfo in dyeInfo.GetType().GetFields())
