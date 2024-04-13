@@ -167,6 +167,14 @@ public struct Vector4
     public float Z;
     public float W;
 
+    public Vector4(float x)
+    {
+        X = x;
+        Y = x;
+        Z = x;
+        W = x;
+    }
+
     public Vector4(float x, float y, float z)
     {
         X = x;
@@ -348,6 +356,22 @@ public struct Vector4
         x.Y != y.Y &&
         x.Z != y.Z &&
         x.W != y.W;
+    }
+
+    public static Vector4 operator +(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X + y.X,
+            x.Y + y.Y,
+            x.Z + y.Z,
+            x.W + y.W);
+    }
+
+    public static Vector4 operator *(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X * y.X,
+            x.Y * y.Y,
+            x.Z * y.Z,
+            x.W * y.W);
     }
 
     /// euler degrees

@@ -72,6 +72,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return InventoryItemStringThings[GetItemIndex(hash)].TagData.ItemName.Value.ToString();
     }
 
+    public Tag<D2Class_9F548080>? GetItemStringThing(TigerHash hash)
+    {
+        return InventoryItemStringThings[GetItemIndex(hash)];
+    }
+
     public Tag<D2Class_B83E8080>? GetItemIconContainer(InventoryItem item)
     {
         return GetItemIconContainer(item.TagData.InventoryItemHash);

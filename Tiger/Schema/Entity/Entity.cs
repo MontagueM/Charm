@@ -10,13 +10,14 @@ public class Entity : Tag<SEntity>
     // Entity features
     public EntitySkeleton? Skeleton { get; private set; }
     public EntityModel? Model { get; private set; }
+    public EntityModel? ModelParent { get; private set; }
     public EntityResource? ModelParentResource { get; private set; }
     public EntityModel? PhysicsModel { get; private set; }
     public EntityResource? PatternAudio { get; private set; }
     public EntityResource? PatternAudioUnnamed { get; private set; }
     public EntityControlRig? ControlRig { get; private set; }
     public EntityResource? EntityChildren { get; private set; }
-    public string? EntityName { get; private set; } // Usually just the generic name (Ogre, Vandal, etc)
+    public string? EntityName { get; set; } // Usually just the generic name (Ogre, Vandal, etc)
 
     private bool _loaded = false;
 
@@ -47,6 +48,7 @@ public class Entity : Tag<SEntity>
             {
                 case D2Class_8A6D8080:  // Entity model
                     Model = ((D2Class_8F6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).Model;
+                    ModelParent = Model; // could just use ModelParentResource but im lazy
                     ModelParentResource = resource;
                     break;
                 case D2Class_5B6D8080:  // Entity physics model  todo shadowkeep
@@ -69,7 +71,7 @@ public class Entity : Tag<SEntity>
                     var genericName = ((D2Class_18808080)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk3C0.TagData.EntityName;
 
                     // we care more about the specific name so if the entity name is already assigned, dont assign this one
-                    if (EntityName == null)
+                    if (EntityName == null && (GlobalStrings.Get().GetString(genericName) != genericName))
                         EntityName = GlobalStrings.Get().GetString(genericName);
                     break;
 
@@ -178,6 +180,15 @@ public class Entity : Tag<SEntity>
                 Entity entity = FileResourcer.Get().GetFile<Entity>(entry.Entity);
                 if (entity.HasGeometry())
                 {
+                    //entity.ModelParent = ModelParent;
+                    //var parent = entity.ModelParent.TagData.Meshes.Enumerate(entity.ModelParent.GetReader()).FirstOrDefault().ModelTranslation;
+                    //var offset = entry.Transforms.FirstOrDefault().Translation;
+                    //Console.WriteLine($"Entity {entity.Hash}");
+                    //Console.WriteLine($"ModelParent {parent}");
+                    //Console.WriteLine($"TranslationOffset {offset}");
+
+                    //entity.Model.TranslationOffset = parent + new Vector4(offset.Z, offset.X, offset.Y);
+                    //entity.Model.RotationOffset = entry.Transforms.FirstOrDefault().Rotation;
                     entities.Add(entity);
                     //Just in case
                     foreach (var child in entity.GetEntityChildren())

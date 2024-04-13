@@ -85,7 +85,7 @@ public partial class DareView : UserControl
             {
                 type = "";
             }
-            if (item.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
+            if (item.GetArtArrangementIndex() != -1 || type.Contains("Shader") || type.Contains("Ghost"))
             {
                 if (!type.Contains("Finisher") && !type.Contains("Emote") && !type.Contains("Ship Schematics")) // they point to Animation instead of Entity
                 {

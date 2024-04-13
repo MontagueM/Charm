@@ -399,6 +399,7 @@ public partial class TagListView : UserControl
                 || item.Hash.Hash32.ToString().Contains(searchStr)
                 || (item.Subname != null && item.Subname.ToLower().Contains(searchStr)))
             {
+                var pkg = (item.Hash as FileHash) is not null ? PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId((item.Hash as FileHash).PackageId).Split("\\").Last().Split(".").First() : "";
                 displayItems.Add(new TagItem
                 {
                     Hash = item.Hash,
@@ -406,7 +407,7 @@ public partial class TagListView : UserControl
                     TagType = item.TagType,
                     Type = item.Type,
                     Subname = searchStr != string.Empty && item.Type != "Package" ?
-                            $"{item.Subname} {PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId((item.Hash as FileHash).PackageId).Split("\\").Last().Split(".").First()}"
+                            $"{item.Subname} {pkg}"
                             : item.Subname,
                     FontSize = _bTrimName || !bWasTrimmed ? 16 : 12,
                 });
@@ -845,8 +846,13 @@ public partial class TagListView : UserControl
                 if (entity.HasGeometry())
                 {
                     var entityName = entity.EntityName != null ? entity.EntityName : entity.Hash;
-                    if (NamedEntities.ContainsKey(entity.Hash) && entity.EntityName == null)
+
+                    // Most of the time the most specific entity name comes from a map resource (bosses usually)
+                    if (NamedEntities.ContainsKey(entity.Hash))
+                    {
                         entityName = NamedEntities[entity.Hash];
+                        entity.EntityName = entityName;
+                    }
 
                     _allTagItems.Add(new TagItem
                     {

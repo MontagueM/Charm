@@ -10,6 +10,9 @@ public class EntityModel : Tag<SEntityModel>
     {
     }
 
+    public Vector4 RotationOffset = new();
+    public Vector4 TranslationOffset = new();
+
     /*
      * We need the parent resource to get access to the external materials
      */
@@ -48,6 +51,19 @@ public class EntityModel : Tag<SEntityModel>
             for (int i = 0; i < mesh.Parts.Count; i++)
             {
                 D2Class_CB6E8080 part = mesh.Parts[reader, i];
+                //Console.WriteLine($"{i}--------------");
+                //Console.WriteLine($"Material {part.Material?.FileHash}");
+                //Console.WriteLine($"VariantShaderIndex {part.VariantShaderIndex}");
+                //Console.WriteLine($"PrimitiveType {part.PrimitiveType}");
+                //Console.WriteLine($"IndexOffset {part.IndexOffset}");
+                //Console.WriteLine($"IndexCount {part.IndexCount}");
+                //Console.WriteLine($"Unk10 {part.Unk10}");
+                //Console.WriteLine($"ExternalIdentifier {part.ExternalIdentifier}");
+                //Console.WriteLine($"Unk16 {part.Unk16}");
+                //Console.WriteLine($"FlagsD1 {part.FlagsD1}");
+                //Console.WriteLine($"GearDyeChangeColorIndex {part.GearDyeChangeColorIndex}");
+                //Console.WriteLine($"LodCategory {part.LodCategory}");
+
                 if (eDetailLevel == ExportDetailLevel.AllLevels)
                 {
                     parts[meshIndex].Add(partIndex++, part);
@@ -99,11 +115,13 @@ public class EntityModel : Tag<SEntityModel>
                 DynamicMeshPart dynamicMeshPart = new(part, parentResource)
                 {
                     Index = i,
-                    GroupIndex = partGroups[i],
+                    GroupIndex = part.ExternalIdentifier,//partGroups[i],
                     LodCategory = part.LodCategory,
                     bAlphaClip = (part.GetFlags() & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex,
-                    HasSkeleton = hasSkeleton
+                    HasSkeleton = hasSkeleton,
+                    RotationOffset = RotationOffset,
+                    TranslationOffset = TranslationOffset
                 };
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
@@ -150,6 +168,9 @@ public class DynamicMeshPart : MeshPart
     public bool bAlphaClip;
     public bool HasSkeleton;
     public byte GearDyeChangeColorIndex = 0xFF;
+
+    public Vector4 RotationOffset = new();
+    public Vector4 TranslationOffset = new();
 
     public DynamicMeshPart(D2Class_CB6E8080 part, EntityResource parentResource) : base()
     {
@@ -269,9 +290,9 @@ public class DynamicMeshPart : MeshPart
         for (int i = 0; i < VertexPositions.Count; i++)
         {
             VertexPositions[i] = new Vector4(
-                VertexPositions[i].X * modelScale.X + modelTranslation.X,
-                VertexPositions[i].Y * modelScale.Y + modelTranslation.Y,
-                VertexPositions[i].Z * modelScale.Z + modelTranslation.Z,
+                VertexPositions[i].X * modelScale.X + modelTranslation.X + TranslationOffset.X,
+                VertexPositions[i].Y * modelScale.Y + modelTranslation.Y + TranslationOffset.Y,
+                VertexPositions[i].Z * modelScale.Z + modelTranslation.Z + TranslationOffset.Z,
                 VertexPositions[i].W
             );
         }

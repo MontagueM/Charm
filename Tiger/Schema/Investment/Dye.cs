@@ -10,8 +10,36 @@ public class Dye : Tag<SDye>
 
     public DyeInfo GetDyeInfo()
     {
-        TigerFile tag = FileResourcer.Get().GetFile(_tag.DyeInfoHeader.GetReferenceHash());
-        return tag.GetData().ToType<DyeInfo>();
+        // Bungie stopped using the DyeInfo file? Gotta do it the messy way I guess
+        //TigerFile tag = FileResourcer.Get().GetFile(_tag.DyeInfoHeader.GetReferenceHash());
+        //return tag.GetData().ToType<DyeInfo>();
+
+        var values = _tag.DyeData;
+        DyeInfo dyeInfo = new DyeInfo();
+
+        dyeInfo.DetailDiffuseTransform = values[0].Vec;
+        dyeInfo.DetailNormalTransform = values[1].Vec;
+        dyeInfo.SpecAaTransform = values[2].Vec;
+        dyeInfo.PrimaryAlbedoTint = values[3].Vec;
+        dyeInfo.PrimaryEmissiveTintColorAndIntensityBias = values[4].Vec;
+        dyeInfo.PrimaryMaterialParams = values[5].Vec;
+        dyeInfo.PrimaryMaterialAdvancedParams = values[6].Vec;
+        dyeInfo.PrimaryRoughnessRemap = values[7].Vec;
+        dyeInfo.PrimaryWornAlbedoTint = values[8].Vec;
+        dyeInfo.PrimaryWearRemap = values[9].Vec;
+        dyeInfo.PrimaryWornRoughnessRemap = values[10].Vec;
+        dyeInfo.PrimaryWornMaterialParameters = values[11].Vec;
+        dyeInfo.SecondaryAlbedoTint = values[12].Vec;
+        dyeInfo.SecondaryEmissiveTintColorAndIntensityBias = values[13].Vec;
+        dyeInfo.SecondaryMaterialParams = values[14].Vec;
+        dyeInfo.SecondaryMaterialAdvancedParams = values[15].Vec;
+        dyeInfo.SecondaryRoughnessRemap = values[16].Vec;
+        dyeInfo.SecondaryWornAlbedoTint = values[17].Vec;
+        dyeInfo.SecondaryWearRemap = values[18].Vec;
+        dyeInfo.SecondaryWornRoughnessRemap = values[19].Vec;
+        dyeInfo.SecondaryWornMaterialParameters = values[20].Vec;
+
+        return dyeInfo;
     }
 
     private static Dictionary<uint, string> ChannelNames = new()

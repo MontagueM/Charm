@@ -419,3 +419,32 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         }
     }
 }
+
+//TODO: Move this
+public enum TfxRenderStage
+{
+    GenerateGbuffer = 0,
+    Decals = 1,
+    InvestmentDecals = 2,
+    ShadowGenerate = 3,
+    LightingApply = 4,
+    LightProbeApply = 5,
+    DecalsAdditive = 6,
+    Transparents = 7,
+    Distortion = 8,
+    LightShaftOcclusion = 9,
+    SkinPrepass = 10,
+    LensFlares = 11,
+    DepthPrepass = 12,
+    WaterReflection = 13,
+    PostprocessTransparentStencil = 14,
+    Impulse = 15,
+    Reticle = 16,
+    WaterRipples = 17,
+    MaskSunLight = 18,
+    Volumetrics = 19,
+    Cubemaps = 20,
+    PostprocessScreen = 21,
+    WorldForces = 22,
+    ComputeSkinning = 23,
+}

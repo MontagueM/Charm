@@ -525,9 +525,15 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     public uint IndexOffset;
     public uint IndexCount;
     public uint Unk10;  // might be number of strips?
+
+    [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x14, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public short ExternalIdentifier;  // external_identifier
     public short Unk16;  // some kind of index
+
     // need to check this on WQ, theres no way its an int
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public int FlagsD2;
 
     [SchemaField(0x1C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -1831,4 +1837,15 @@ public struct S712B8080
 {
     [SchemaField(0x20)]
     public FileHash Entity;
+
+    [SchemaField(0x88)]
+    public DynamicArray<S93278080> Transforms;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "9A078080", 0x40)]
+public struct S93278080
+{
+    [SchemaField(0x10)]
+    public Vector4 Rotation;
+    public Vector4 Translation;
 }

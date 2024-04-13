@@ -6,9 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using ConcurrentCollections;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -33,6 +35,8 @@ public partial class DevView : UserControl
         _mainWindow = Window.GetWindow(this) as MainWindow;
         _fbxHandler = new FbxHandler(false);
         HashLocation.Text = $"PKG:\nPKG ID:\nEntry Index:";
+
+        //RipAndTear();
     }
 
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
@@ -300,5 +304,28 @@ public partial class DevView : UserControl
         {
             StaticView.ExportStatic(new FileHash(asset), asset, ExportTypeFlag.Full, "devmap");
         }
+    }
+
+    // Cleaverly done (insert name) but you're not supposed to be here. As a matter of fact, you're not.
+    // Get back where you belong and forget about all this...Until we meet again.
+    public void RipAndTear()
+    {
+        bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup");
+        ConcurrentHashSet<FileHash> allHashes = PackageResourcer.Get().GetAllHashes(PackageFilterFunc);
+        Parallel.ForEach(allHashes, (val, state, i) =>
+        {
+            if (val.GetReferenceHash().IsValid() && val.GetReferenceHash().ToString().EndsWith("8080"))
+            {
+                string path = $"C:\\Users\\Michael\\Desktop\\out\\{val.GetReferenceHash()}_{val}.bin";
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    using (var writer = new BinaryWriter(fileStream))
+                    {
+                        byte[] data = FileResourcer.Get().GetFile(val).GetData();
+                        writer.Write(data);
+                    }
+                }
+            }
+        });
     }
 }
