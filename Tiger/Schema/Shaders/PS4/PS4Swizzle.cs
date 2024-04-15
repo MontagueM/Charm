@@ -1,6 +1,6 @@
 ﻿
 // From RawTex by daemon1
-using Arithmic;
+using MathNet.Numerics;
 using static GcnSurfaceFormatExtensions;
 
 public static class PS4SwizzleAlgorithm
@@ -23,14 +23,20 @@ public static class PS4SwizzleAlgorithm
         byte[] processed = new byte[data.Length];
         int pixelBlockSize = format.PixelBlockSize();
         int blockSize = format.BlockSize();
-        int heightTexels = height / pixelBlockSize;
+        int array = arraySize > 1 ? arraySize - 1 : 1;
+
+        int width_src = format.IsCompressed() ? width.CeilingToPowerOfTwo() : width;
+        int height_src = format.IsCompressed() ? height.CeilingToPowerOfTwo() : height;
+        int width_texels_dest = width / pixelBlockSize;
+        int height_texels_dest = height / pixelBlockSize;
+
+        int heightTexels = height_src / pixelBlockSize;
         int heightTexelsAligned = (heightTexels + 7) / 8;
 
-        int array = arraySize > 1 ? arraySize - 1 : 1;
-        int widthTexels = width / pixelBlockSize;
+        int widthTexels = width_src / pixelBlockSize;
         int widthTexelsAligned = (widthTexels + 7) / 8;
-        int dataIndex = 0;
 
+        int dataIndex = 0;
         for (int y = 0; y < heightTexelsAligned; ++y)
         {
             for (int x = 0; x < widthTexelsAligned; ++x)
@@ -43,29 +49,21 @@ public static class PS4SwizzleAlgorithm
                     int yOffset = (y * 8) + num8;
                     int xOffset = (x * 8) + num9;
 
-                    if (xOffset < widthTexels && yOffset < heightTexels)
+                    if (xOffset < width_texels_dest && yOffset < height_texels_dest)
                     {
-                        int destPixelIndex = yOffset * widthTexels + xOffset;
+                        int destPixelIndex = yOffset * width_texels_dest + xOffset;
                         int destIndex = blockSize * destPixelIndex;
 
                         try
                         {
-                            if (unswizzle)
-                            {
-                                if (processed.Length < destIndex + blockSize)
-                                    Array.Resize<byte>(ref processed, destIndex + blockSize); //blockSize = processed.Length - destIndex;
-                                Array.Copy(data, dataIndex, processed, destIndex, blockSize);
-                            }
-                            else
-                            {
-                                if (processed.Length < dataIndex + blockSize)
-                                    Array.Resize<byte>(ref processed, dataIndex + blockSize); //blockSize = processed.Length - dataIndex;
-                                Array.Copy(data, destIndex, processed, dataIndex, blockSize);
-                            }
+                            int src = unswizzle ? dataIndex : destIndex;
+                            int dst = unswizzle ? destIndex : dataIndex;
+                            if ((src + blockSize) < data.Length && (dst + blockSize) < processed.Length)
+                                Array.Copy(data, src, processed, dst, blockSize);
                         }
                         catch (Exception e)
                         {
-                            Log.Error(e.Message);
+                            throw new ArgumentException(e.Message);
                         }
                     }
 

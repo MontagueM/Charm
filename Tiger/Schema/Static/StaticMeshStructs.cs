@@ -128,7 +128,7 @@ public struct SStaticMeshData_D1
     public VertexBuffer Vertices0;
     public VertexBuffer Vertices1;
     public IndexBuffer Indices;
-    public ushort UnkC; // Unsure
+    public ushort UnkC; // Unsure, render stage?
     public sbyte DetailLevel;
     public sbyte PrimitiveType;
     public uint IndexOffset;

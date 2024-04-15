@@ -529,7 +529,8 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x14, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public short ExternalIdentifier;  // external_identifier
-    public short Unk16;  // some kind of index
+    public byte Unk16;
+    public byte Unk17;
 
     // need to check this on WQ, theres no way its an int
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
