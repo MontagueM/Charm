@@ -44,6 +44,9 @@ public struct D2Class_9D798080
     [SchemaField(0x50)]
     public ResourcePointer Unk50; // 8B178080 D1
 
+    [SchemaField(0x70)]
+    public ResourcePointer Unk70;  // C0778080 socketEntries
+
     [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ResourcePointer Unk78;  // D2Class_81738080, BD178080 D1
@@ -800,6 +803,100 @@ public struct D2Class_0E5A8080
 
 #endregion
 
+#region Socket+Plug Entries
+[SchemaStruct("C0778080", 0x20)]
+public struct D2Class_C0778080
+{
+    public DynamicArray<D2Class_C3778080> SocketEntries;
+}
+
+/// <summary>
+/// "socketEntries" from API
+/// </summary>
+[SchemaStruct("C3778080", 0x58)]
+public struct D2Class_C3778080
+{
+    public short SocketTypeIndex; // 'socketTypeHash' 
+    public short Unk02;
+    public short Unk04;
+    public short SingleInitialItemIndex; // 'singleInitialItemHash'
+    [SchemaField(0x10)]
+    public short ReusablePlugSetIndex1; // randomizedPlugSetHash
+    //[SchemaField(0x18)]
+    //public DynamicArray<D2Class_3A7A8080> PlugItems;
+    [SchemaField(0x28)]
+    public short ReusablePlugSetIndex2; // randomizedPlugSetHash
+    [SchemaField(0x48)]
+    public DynamicArray<D2Class_D5778080> PlugItems;
+}
+
+[SchemaStruct("CD778080", 0x18)]
+public struct D2Class_CD778080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_D3778080> PlugSetDefinitionEntries;
+}
+
+[SchemaStruct("D3778080", 0x18)]
+public struct D2Class_D3778080
+{
+    public TigerHash PlugSetHash;
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_D5778080> ReusablePlugItems;
+}
+
+[SchemaStruct("D5778080", 0x40)]
+public struct D2Class_D5778080
+{
+    [SchemaField(0x20)]
+    public int PlugInventoryItemIndex;
+    [SchemaField(0x28)]
+    public DynamicArray<D2Class_3A7A8080>? UnkUnlocks;
+}
+#endregion
+
+#region Socket Category
+[SchemaStruct("B6768080", 0x18)]
+public struct D2Class_B6768080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_BA768080> SocketTypeEntries;
+}
+
+[SchemaStruct("BA768080", 0x68)]
+public struct D2Class_BA768080
+{
+    public TigerHash SocketHash;
+    public short Unk04;
+    public short SocketCategoryIndex;
+
+    //[SchemaField(0x30)]
+    //public DynamicArrayUnloaded<D2Class_C5768080> PlugWhitelists; // not important
+}
+
+//[SchemaStruct("C5768080", 0x8)]
+//public struct D2Class_C5768080
+//{
+//    public TigerHash CategoryHash;
+//}
+
+[SchemaStruct("594F8080", 0x18)]
+public struct D2Class_594F8080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_5D4F8080> SocketCategoryEntries;
+}
+
+[SchemaStruct("5D4F8080", 0x18)]
+public struct D2Class_5D4F8080
+{
+    public TigerHash SocketCategoryHash;
+    public StringIndexReference SocketName;
+    public StringIndexReference SocketDescription;
+    public StringHash SocketSubname;
+}
+#endregion
+
 #region Destiny 1 API stuff
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "BD178080", 0x4)]
@@ -890,5 +987,6 @@ public struct S87178080
 public struct S28468080
 {
 }
+
 
 #endregion
