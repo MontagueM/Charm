@@ -16,6 +16,7 @@ using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Investment;
 using Tiger.Schema.Static;
 
 namespace Charm;
@@ -42,20 +43,15 @@ public partial class DevView : UserControl
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R && e.Key != Key.E && e.Key != Key.L)
-        {
             return;
-        }
+
         string strHash = TagHashBox.Text.Replace(" ", "");
         strHash = Regex.Replace(strHash, @"(\s+|r|h)", "");
         if (strHash.Length == 16)
-        {
             strHash = Hash64Map.Get().GetHash32Checked(strHash);
-        }
+
         if (strHash == "")
-        {
-            TagHashBox.Text = "INVALID HASH";
             return;
-        }
 
         FileHash hash;
         if (strHash.Contains("-"))
@@ -72,8 +68,31 @@ public partial class DevView : UserControl
 
         if (!hash.IsValid())
         {
-            TagHashBox.Text = "INVALID HASH";
-            return;
+            if (uint.TryParse(strHash, out uint apiHash))
+            {
+                Investment.LazyInit();
+                var item = Investment.Get().TryGetInventoryItem(new TigerHash(apiHash));
+                if (item is not null)
+                {
+                    MainWindow.Progress.SetProgressStages(new() { "Starting investment system" });
+                    Investment.LazyInit();
+                    MainWindow.Progress.CompleteStage();
+
+                    item.Load();
+                    APIItemView apiItemView = new APIItemView(item);
+                    _mainWindow.MakeNewTab(Investment.Get().GetItemName(item), apiItemView);
+                    _mainWindow.SetNewestTabSelected();
+                }
+                else
+                    TagHashBox.Text = "INVALID API HASH";
+
+                return;
+            }
+            else
+            {
+                TagHashBox.Text = "INVALID HASH";
+                return;
+            }
         }
         //uint to int
         switch (e.Key)
@@ -310,7 +329,7 @@ public partial class DevView : UserControl
     // Get back where you belong and forget about all this...Until we meet again.
     public void RipAndTear()
     {
-        bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup");
+        bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup") || packagePath.Contains("boot");
         ConcurrentHashSet<FileHash> allHashes = PackageResourcer.Get().GetAllHashes(PackageFilterFunc);
         Parallel.ForEach(allHashes, (val, state, i) =>
         {

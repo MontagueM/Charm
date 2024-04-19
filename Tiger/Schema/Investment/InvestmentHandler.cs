@@ -41,7 +41,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<D2Class_CD778080> _randomizedPlugSetMap = null;
     private Tag<D2Class_B6768080> _socketTypeMap = null;
     private Tag<D2Class_594F8080> _socketCategoryMap = null;
+    private Tag<D2Class_CF508080> _loreStringMap = null;
+    private Tag<D2Class_2D548080> _sandboxPerkMap = null;
     public ConcurrentDictionary<int, D2Class_5D4F8080> SocketCategoryStringThings = null;
+    public ConcurrentDictionary<int, D2Class_D3508080> InventoryItemLoreStrings = null;
+    public ConcurrentDictionary<int, D2Class_33548080> SandboxPerkStrings = null;
 
     public Investment(TigerStrategy strategy) : base(strategy)
     {
@@ -76,6 +80,15 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return InventoryItemStringThings[GetItemIndex(hash)].TagData.ItemName.Value.ToString();
     }
 
+    public D2Class_D3508080? GetItemLore(TigerHash hash)
+    {
+        var item = GetInventoryItem(hash);
+        if (item.TagData.Unk30.GetValue(item.GetReader()) is D2Class_B6738080)
+            return InventoryItemLoreStrings[((D2Class_B6738080)item.TagData.Unk30.GetValue(item.GetReader())).LoreEntryIndex];
+        else
+            return null;
+    }
+
     public Tag<D2Class_9F548080>? GetItemStringThing(TigerHash hash)
     {
         return InventoryItemStringThings[GetItemIndex(hash)];
@@ -100,6 +113,19 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             return _inventoryItemIconTag.TagData.InventoryItemIconsMap.ElementAt(_inventoryItemIconTag.GetReader(), iconIndex).IconContainer;
         }
 
+    }
+
+    public Tag<D2Class_B83E8080>? GetFoundryItemIconContainer(InventoryItem item)
+    {
+        return GetFoundryItemIconContainer(item.TagData.InventoryItemHash);
+    }
+
+    public Tag<D2Class_B83E8080>? GetFoundryItemIconContainer(TigerHash hash)
+    {
+        int iconIndex = InventoryItemStringThings[GetItemIndex(hash)].TagData.FoundryIconIndex;
+        if (iconIndex == -1)
+            return null;
+        return _inventoryItemIconTag.TagData.InventoryItemIconsMap.ElementAt(_inventoryItemIconTag.GetReader(), iconIndex).IconContainer;
     }
 
     public int GetItemIndex(TigerHash hash)
@@ -208,15 +234,15 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     case 0x80804F59:
                         _socketCategoryMap = FileResourcer.Get().GetSchemaTag<D2Class_594F8080>(val);
                         break;
-                        //case 0x8080586B:
-                        //    statDefTag = FileResourcer.Get().GetSchemaTag<D2Class_6B588080>(val);
-                        //    break;
-                        //case 0x808050CF:
-                        //    loreDefTag = FileResourcer.Get().GetSchemaTag<D2Class_CF508080>(val);
-                        //    break;
-                        //case 0x8080542D:
-                        //    sandboxPerkTag = FileResourcer.Get().GetSchemaTag<D2Class_2D548080>(val);
-                        //    break;
+                    //case 0x8080586B:
+                    //    statDefTag = FileResourcer.Get().GetSchemaTag<D2Class_6B588080>(val);
+                    //    break;
+                    case 0x808050CF:
+                        _loreStringMap = FileResourcer.Get().GetSchemaTag<D2Class_CF508080>(val);
+                        break;
+                    case 0x8080542D:
+                        _sandboxPerkMap = FileResourcer.Get().GetSchemaTag<D2Class_2D548080>(val);
+                        break;
                         //case 0x80807828:
                         //    collectibleDefTag = FileResourcer.Get().GetSchemaTag<D2Class_28788080>(val);
                         //    break;
@@ -232,7 +258,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             Task.Run(GetInventoryItemDict),
             Task.Run(GetInventoryItemStringThings),
             Task.Run(GetEntityAssignmentDict),
-            Task.Run(GetSocketCategoryStringThings),
+            Task.Run(GetSocketCategoryStrings),
+            Task.Run(GetInventoryItemLoreStrings),
+            Task.Run(GetSandboxPerkStrings)
             // Task.Run(GetSandboxPatternAssignmentsDict),
         });
     }
@@ -247,7 +275,17 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         }
     }
 
-    private void GetSocketCategoryStringThings()
+    private void GetInventoryItemLoreStrings()
+    {
+        InventoryItemLoreStrings = new();
+        using TigerReader reader = _loreStringMap.GetReader();
+        for (int i = 0; i < _loreStringMap.TagData.LoreStringMap.Count; i++)
+        {
+            InventoryItemLoreStrings.TryAdd(i, _loreStringMap.TagData.LoreStringMap[reader, i]);
+        }
+    }
+
+    private void GetSocketCategoryStrings()
     {
         if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
@@ -256,6 +294,19 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             for (int i = 0; i < _socketCategoryMap.TagData.SocketCategoryEntries.Count; i++)
             {
                 SocketCategoryStringThings.TryAdd(i, _socketCategoryMap.TagData.SocketCategoryEntries[reader, i]);
+            }
+        }
+    }
+
+    private void GetSandboxPerkStrings()
+    {
+        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            SandboxPerkStrings = new();
+            using TigerReader reader = _sandboxPerkMap.GetReader();
+            for (int i = 0; i < _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries.Count; i++)
+            {
+                SandboxPerkStrings.TryAdd(i, _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries[reader, i]);
             }
         }
     }
@@ -358,6 +409,14 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return null;
     }
 
+    public InventoryItem? TryGetInventoryItem(TigerHash hash)
+    {
+        if (_inventoryItemIndexmap.ContainsKey(hash))
+            return GetInventoryItem(_inventoryItemIndexmap[hash]);
+        else
+            return null;
+    }
+
     public InventoryItem GetInventoryItem(TigerHash hash)
     {
         return GetInventoryItem(_inventoryItemIndexmap[hash]);
@@ -365,6 +424,10 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public InventoryItem GetInventoryItem(int index)
     {
+        var item = _inventoryItemMap.TagData.InventoryItemDefinitionEntries.ElementAt(_inventoryItemMap.GetReader(), index).InventoryItem;
+        if (!item.IsLoaded())
+            item.Load();
+
         return _inventoryItemMap.TagData.InventoryItemDefinitionEntries.ElementAt(_inventoryItemMap.GetReader(), index).InventoryItem;
     }
 
@@ -797,6 +860,15 @@ public class InventoryItem : Tag<D2Class_9D798080>
             return null;
         var overlayIcon = GetTexture(iconContainer.TagData.IconOverlayContainer);
         return overlayIcon.GetTexture();
+    }
+
+    public UnmanagedMemoryStream? GetFoundryIconStream()
+    {
+        Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetFoundryItemIconContainer(this);
+        if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
+            return null;
+        var foundryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
+        return foundryIcon.GetTexture();
     }
 
     public UnmanagedMemoryStream? GetTextureFromHash(FileHash hash)

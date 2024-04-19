@@ -37,9 +37,11 @@ public struct D2Class_9D798080
     [SchemaField(0x18)]
     public ResourcePointer Unk18;  // D2Class_E7778080, 06178080 D1
 
-    [SchemaField(0x48, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)] // probably not obsolete, just dont care
-    public ResourcePointer Unk48;  // 15108080 D1
+    [SchemaField(0x30, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk30;  // D2Class_B6738080, lore entry index (map CF508080 BDA1A780)
+
+    [SchemaField(0x48)]
+    public ResourcePointer Unk48;  // 15108080 D1, A1738080 D2 'plug'
 
     [SchemaField(0x50)]
     public ResourcePointer Unk50; // 8B178080 D1
@@ -66,6 +68,10 @@ public struct D2Class_9D798080
     [SchemaField(0x8A, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xC2, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public byte ItemRarity; //Not sure
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xCA, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public byte RecipeItemIndex; // 'recipeItemHash'
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x108, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -145,6 +151,7 @@ public struct D2Class_05798080
 public struct D2Class_81738080
 {
     public DynamicArray<D2Class_86738080> InvestmentStats;  // "investmentStats" from API
+    public DynamicArray<D2Class_86738080> Perks;  // 'perks'
 }
 
 /// <summary>
@@ -163,6 +170,11 @@ public struct D2Class_7F738080
     public short Unk00;
 }
 
+[SchemaStruct("B6738080", 0x4)]
+public struct D2Class_B6738080
+{
+    public short LoreEntryIndex;
+}
 
 /// <summary>
 /// "translationBlock" from API, "equippingBlock" in D1
@@ -276,7 +288,7 @@ public struct D2Class_9F548080
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public short IconIndex;
-    public short Unk8A;
+    public short FoundryIconIndex; // the banner that appears on foundry weapons (Hakke, veist, etc)
 
     [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x8C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -288,7 +300,7 @@ public struct D2Class_9F548080
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public StringIndexReference ItemUnkA0; // "displaySource"?
+    public StringIndexReference ItemDisplaySource; // "displaySource"
 
     [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xB0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -391,6 +403,22 @@ public struct D2Class_B4548080
     public int Unk14;
 }
 
+[SchemaStruct("2D548080", 0x18)]
+public struct D2Class_2D548080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_33548080> SandboxPerkDefinitionEntries;
+}
+
+[SchemaStruct("33548080", 0x28)]
+public struct D2Class_33548080
+{
+    public TigerHash SandboxPerkHash;
+    public TigerHash Unk04;
+    public StringIndexReference SandboxPerkName;
+    public StringIndexReference SandboxPerkDescription;
+    public short IconIndex;
+}
 
 #endregion
 
@@ -801,6 +829,23 @@ public struct D2Class_0E5A8080
     }
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "CF508080", 0x18)]
+public struct D2Class_CF508080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_D3508080> LoreStringMap;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D3508080", 0x28)]
+public struct D2Class_D3508080
+{
+    public long Unk00;
+    public TigerHash LoreHash;
+    public StringIndexReference LoreName;
+    public StringIndexReference LoreSubtitle;
+    public StringIndexReference LoreDescription;
+}
+
 #endregion
 
 #region Socket+Plug Entries
@@ -808,6 +853,7 @@ public struct D2Class_0E5A8080
 public struct D2Class_C0778080
 {
     public DynamicArray<D2Class_C3778080> SocketEntries;
+    public DynamicArray<D2Class_C8778080> IntrinsicSockets;
 }
 
 /// <summary>
@@ -821,13 +867,13 @@ public struct D2Class_C3778080
     public short Unk04;
     public short SingleInitialItemIndex; // 'singleInitialItemHash'
     [SchemaField(0x10)]
-    public short ReusablePlugSetIndex1; // randomizedPlugSetHash
+    public short ReusablePlugSetIndex1; // randomizedPlugSetHash -> reusablePlugItems
     //[SchemaField(0x18)]
-    //public DynamicArray<D2Class_3A7A8080> PlugItems;
+    //public DynamicArray<D2Class_3A7A8080> Unk18;
     [SchemaField(0x28)]
-    public short ReusablePlugSetIndex2; // randomizedPlugSetHash
+    public short ReusablePlugSetIndex2; // randomizedPlugSetHash -> reusablePlugItems
     [SchemaField(0x48)]
-    public DynamicArray<D2Class_D5778080> PlugItems;
+    public DynamicArray<D2Class_D5778080> PlugItems; // 'reusablePlugItems'?
 }
 
 [SchemaStruct("CD778080", 0x18)]
@@ -853,6 +899,20 @@ public struct D2Class_D5778080
     [SchemaField(0x28)]
     public DynamicArray<D2Class_3A7A8080>? UnkUnlocks;
 }
+
+[SchemaStruct("C8778080", 0x4)]
+public struct D2Class_C8778080
+{
+    public short SocketTypeIndex; // socketTypeHash
+    public short PlugItemIndex; // plugItemHash
+}
+
+[SchemaStruct("A1738080", 0x128)]
+public struct D2Class_A1738080
+{
+    public TigerHash PlugCategoryHash;
+}
+
 #endregion
 
 #region Socket Category
@@ -869,16 +929,18 @@ public struct D2Class_BA768080
     public TigerHash SocketHash;
     public short Unk04;
     public short SocketCategoryIndex;
+    public int SocketVisiblity; // 'visibility'?
 
-    //[SchemaField(0x30)]
-    //public DynamicArrayUnloaded<D2Class_C5768080> PlugWhitelists; // not important
+    [SchemaField(0x30)]
+    public DynamicArrayUnloaded<D2Class_C5768080> PlugWhitelists;
 }
 
-//[SchemaStruct("C5768080", 0x8)]
-//public struct D2Class_C5768080
-//{
-//    public TigerHash CategoryHash;
-//}
+[SchemaStruct("C5768080", 0x8)]
+public struct D2Class_C5768080
+{
+    public TigerHash PlugCategoryHash;
+    public short Unk04;
+}
 
 [SchemaStruct("594F8080", 0x18)]
 public struct D2Class_594F8080

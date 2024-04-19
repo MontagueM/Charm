@@ -1,54 +1,63 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Tiger;
+using Tiger.Schema;
 using Tiger.Schema.Other;
 using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Charm;
 
-public class FontHandler : Subsystem
+[InitializeAfter(typeof(Hash64Map))]
+public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 {
     public ConcurrentDictionary<FontInfo, FontFamily> Fonts = new();
 
-    protected override bool Initialise()
+    public FontHandler(TigerStrategy strategy) : base(strategy)
     {
-        return true;
+    }
+
+    protected override void Initialise()
+    {
+        //return true;
         SaveAllFonts();
-        return LoadAllFonts();
+        //LoadAllFonts();
+    }
+
+    protected override void Reset()
+    {
+
     }
 
     private static void SaveAllFonts()
     {
-        // 0x80a00000 represents 0100 package
-        // var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
-        // var vals = PackageResourcer.Get().GetAllHashes<D2Class_0F3C8080>();
-        // Tag<D2Class_0F3C8080> fontsContainer = FileResourcer.Get().GetSchemaTag<D2Class_0F3C8080>(vals.First());
-        // // Check if the font exists in the Fonts/ folder, if not extract it
-        // if (!Directory.Exists("fonts/"))
-        // {
-        //     Directory.CreateDirectory("fonts/");
-        // }
-        // Parallel.ForEach(fontsContainer.TagData.FontParents, f =>
-        // {
-        //     var ff = f.FontParent.TagData.FontFile;
-        //     var fontName = f.FontParent.TagData.FontName;
-        //     if (!File.Exists($"fonts/{fontName}"))
-        //     {
-        //         using (TigerReader reader = ff.GetReader())
-        //         {
-        //             var bytes = reader.ReadBytes((int)f.FontParent.TagData.FontFileSize);
-        //             File.WriteAllBytes($"fonts/{fontName}", bytes);
-        //         }
-        //     }
-        // });
+        //0x80a00000 represents 0100 package
+        //var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
+        var vals = PackageResourcer.Get().GetAllHashes<D2Class_0F3C8080>();
+        Tag<D2Class_0F3C8080> fontsContainer = FileResourcer.Get().GetSchemaTag<D2Class_0F3C8080>(vals.First());
+        // Check if the font exists in the Fonts/ folder, if not extract it
+        if (!Directory.Exists("fonts/"))
+        {
+            Directory.CreateDirectory("fonts/");
+        }
+        Parallel.ForEach(fontsContainer.TagData.FontParents, f =>
+        {
+            var ff = f.FontParent.TagData.FontFile;
+            var fontName = f.FontParent.TagData.FontName.Value;
+            if (!File.Exists($"fonts/{fontName}"))
+            {
+                using (TigerReader reader = ff.GetReader())
+                {
+                    var bytes = reader.ReadBytes((int)f.FontParent.TagData.FontFileSize);
+                    File.WriteAllBytes($"fonts/{fontName}", bytes);
+                }
+            }
+        });
     }
 
     private bool LoadAllFonts()

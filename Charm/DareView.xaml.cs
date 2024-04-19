@@ -131,47 +131,47 @@ public partial class DareView : UserControl
         {
             _selectedItems.Add(apiItem);
 
-            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-            {
-                System.Console.WriteLine($"---{apiItem.Item.Hash}---");
-                if (apiItem.Item.TagData.Unk70.GetValue(apiItem.Item.GetReader()) is D2Class_C0778080 sockets)
-                {
-                    foreach (var socket in sockets.SocketEntries)
-                    {
-                        System.Console.WriteLine($"SocketTypeIndex: {socket.SocketTypeIndex} " + (socket.SocketTypeIndex != -1 ? Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].SocketName.Value : ""));
-                        System.Console.WriteLine($"SingleInitialItemIndex: {socket.SingleInitialItemIndex} " + (socket.SingleInitialItemIndex != -1 ? Investment.Get().GetItemName(Investment.Get().GetInventoryItem(socket.SingleInitialItemIndex)) : ""));
-                        System.Console.WriteLine($"ReusablePlugSetIndex1: {socket.ReusablePlugSetIndex1}");
-                        if (socket.ReusablePlugSetIndex1 != -1)
-                        {
-                            foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex1))
-                            {
-                                if (randomPlugs.PlugInventoryItemIndex == -1)
-                                    continue;
+            //if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+            //{
+            //    System.Console.WriteLine($"---{apiItem.Item.Hash}---");
+            //    if (apiItem.Item.TagData.Unk70.GetValue(apiItem.Item.GetReader()) is D2Class_C0778080 sockets)
+            //    {
+            //        foreach (var socket in sockets.SocketEntries)
+            //        {
+            //            System.Console.WriteLine($"SocketTypeIndex: {socket.SocketTypeIndex} " + (socket.SocketTypeIndex != -1 ? Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].SocketName.Value : ""));
+            //            System.Console.WriteLine($"SingleInitialItemIndex: {socket.SingleInitialItemIndex} " + (socket.SingleInitialItemIndex != -1 ? Investment.Get().GetItemName(Investment.Get().GetInventoryItem(socket.SingleInitialItemIndex)) : ""));
+            //            System.Console.WriteLine($"ReusablePlugSetIndex1: {socket.ReusablePlugSetIndex1}");
+            //            if (socket.ReusablePlugSetIndex1 != -1)
+            //            {
+            //                foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex1))
+            //                {
+            //                    if (randomPlugs.PlugInventoryItemIndex == -1)
+            //                        continue;
 
-                                System.Console.WriteLine($"-Reusable PlugInventoryItemIndex: {Investment.Get().GetItemName(Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex))}");
-                            }
-                        }
+            //                    System.Console.WriteLine($"-Reusable PlugInventoryItemIndex: {Investment.Get().GetItemName(Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex))}");
+            //                }
+            //            }
 
-                        System.Console.WriteLine($"ReusablePlugSetIndex2: {socket.ReusablePlugSetIndex2}");
-                        if (socket.ReusablePlugSetIndex2 != -1)
-                        {
-                            foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex2))
-                            {
-                                if (randomPlugs.PlugInventoryItemIndex == -1)
-                                    continue;
+            //            System.Console.WriteLine($"ReusablePlugSetIndex2: {socket.ReusablePlugSetIndex2}");
+            //            if (socket.ReusablePlugSetIndex2 != -1)
+            //            {
+            //                foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex2))
+            //                {
+            //                    if (randomPlugs.PlugInventoryItemIndex == -1)
+            //                        continue;
 
-                                System.Console.WriteLine($"-Reusable PlugInventoryItemIndex: {Investment.Get().GetItemName(Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex))}");
-                            }
-                        }
+            //                    System.Console.WriteLine($"-Reusable PlugInventoryItemIndex: {Investment.Get().GetItemName(Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex))}");
+            //                }
+            //            }
 
-                        foreach (var plug in socket.PlugItems)
-                        {
-                            System.Console.WriteLine($"-PlugInventoryItemIndex: {plug.PlugInventoryItemIndex} " + (plug.PlugInventoryItemIndex != -1 ? Investment.Get().GetItemName(Investment.Get().GetInventoryItem(plug.PlugInventoryItemIndex)) : ""));
-                        }
-                        System.Console.WriteLine($"-------------------------");
-                    }
-                }
-            }
+            //            foreach (var plug in socket.PlugItems)
+            //            {
+            //                System.Console.WriteLine($"-PlugInventoryItemIndex: {plug.PlugInventoryItemIndex} " + (plug.PlugInventoryItemIndex != -1 ? Investment.Get().GetItemName(Investment.Get().GetInventoryItem(plug.PlugInventoryItemIndex)) : ""));
+            //            }
+            //            System.Console.WriteLine($"-------------------------");
+            //        }
+            //    }
+            //}
 
         }
         else

@@ -1,12 +1,4 @@
-﻿using System.Collections;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using Internal.Fbx;
-using Microsoft.VisualBasic.FileIO;
-using Tiger;
-
-namespace Tiger;
+﻿namespace Tiger;
 
 // Tag has a custom deserialiser that discards the inherited SchemaType attribute, as can be Tag32 or Tag64
 public class Tag<T> : TigerFile where T : struct
@@ -45,23 +37,10 @@ public class Tag<T> : TigerFile where T : struct
 
     protected void Deserialize()
     {
-        if (Hash == "C3A2A580")
-        {
-            var a = 0;
-        }
         if (_isLoaded)
-        {
-            if (Hash == "C3A2A580")
-            {
-                var a = 0;
-            }
             return;
-        }
+
         _isLoaded = true;
-        if (Hash == "C3A2A580")
-        {
-            var a = 0;
-        }
         using TigerReader reader = GetReader();
         _tag = SchemaDeserializer.Get().DeserializeSchema<T>(reader);
     }
@@ -69,9 +48,12 @@ public class Tag<T> : TigerFile where T : struct
     public void Load()
     {
         if (!_isLoaded)
-        {
             Deserialize();
-        }
+    }
+
+    public bool IsLoaded()
+    {
+        return _isLoaded;
     }
 
     public void TempDump()
