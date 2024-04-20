@@ -5,8 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Charm"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="1080"
-    d:DesignWidth="1920"
+    d:DesignHeight="944.68"
+    d:DesignWidth="1914"
     Loaded="OnLoaded"
     mc:Ignorable="d">
 
@@ -24,6 +24,7 @@
                 <local:APIItemPerk />
             </Button>
         </DataTemplate>
+
         <DataTemplate x:Key="ModItemTemplate">
             <Button
                 x:Name="PerkItemButton"
@@ -37,6 +38,61 @@
                 <local:APIItemPerk />
             </Button>
         </DataTemplate>
+
+        <DataTemplate x:Key="IntrinsicItemTemplate">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10*" />
+                    <ColumnDefinition Width="10*" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    x:Name="PerkItemButton"
+                    Grid.Column="0"
+                    Margin="0,0,10,5"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Click="PerkItem_OnClick"
+                    MouseEnter="PerkItem_MouseEnter"
+                    MouseLeave="PerkItem_MouseLeave"
+                    Style="{DynamicResource API Mod Button}">
+                    <local:APIItemPerk />
+                </Button>
+                <Grid
+                    Grid.Column="1"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                        FontSize="25"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding PerkItemName}"
+                        TextAlignment="Left" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="20"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="{Binding PerkItemDescription}"
+                        TextAlignment="Left"
+                        TextWrapping="WrapWithOverflow" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
         <Storyboard x:Key="FadeIn 0.3">
             <DoubleAnimation
                 Storyboard.TargetProperty="Opacity"
@@ -53,328 +109,476 @@
         </Storyboard>
     </UserControl.Resources>
 
+    <Grid>
+        <Grid x:Name="MainContainer" Background="#17171f">
 
-    <Grid x:Name="Item" Background="#17171f">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="100*" />
-            <RowDefinition Height="250*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200*" />
-            <ColumnDefinition Width="100*" />
-        </Grid.ColumnDefinitions>
-
-        <Grid
-            Name="SocketContainer"
-            Grid.Row="1"
-            Grid.Column="0"
-            Background="Transparent">
             <Grid.RowDefinitions>
-                <RowDefinition Height="155*" />
                 <RowDefinition Height="100*" />
-                <RowDefinition Height="100*" />
-            </Grid.RowDefinitions>
-
-            <!--  Weapon Perks  -->
-            <Grid
-                Name="WeaponPerks"
-                Margin="125,25,25,25"
-                Background="Transparent">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="100*" />
-                </Grid.RowDefinitions>
-
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Panel.ZIndex="1"
-                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
-                    FontSize="25"
-                    Foreground="{StaticResource ForegroundColour80}"
-                    Text="WEAPON PERKS"
-                    TextAlignment="Left"
-                    TextWrapping="Wrap" />
-
-                <Rectangle
-                    Grid.Row="0"
-                    Width="1200"
-                    Height="3"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom"
-                    Fill="White" />
-
-                <Grid
-                    Grid.Row="1"
-                    Grid.RowSpan="1"
-                    Grid.Column="0"
-                    Margin="0,10,0,0"
-                    Background="Transparent">
-                    <ItemsControl
-                        x:Name="PerkItemsControl"
-                        HorizontalAlignment="Left"
-                        Panel.ZIndex="1">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ScrollViewer
-                                    Width="100"
-                                    Margin="0,0,0,0"
-                                    HorizontalScrollBarVisibility="Auto"
-                                    Style="{DynamicResource ScrollViewer2}"
-                                    VerticalScrollBarVisibility="Hidden">
-                                    <StackPanel>
-                                        <ItemsControl ItemTemplate="{StaticResource PerkItemTemplate}" ItemsSource="{Binding}" />
-                                    </StackPanel>
-                                </ScrollViewer>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Grid>
-
-            </Grid>
-
-            <!--  Weapon Mods  -->
-            <Grid
-                Name="WeaponMods"
-                Grid.Row="1"
-                Margin="125,25,25,25"
-                Background="Transparent">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="100*" />
-                </Grid.RowDefinitions>
-
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Panel.ZIndex="1"
-                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
-                    FontSize="25"
-                    Foreground="{StaticResource ForegroundColour80}"
-                    Text="WEAPON MODS"
-                    TextAlignment="Left"
-                    TextWrapping="Wrap" />
-
-                <Rectangle
-                    Grid.Row="0"
-                    Width="1200"
-                    Height="3"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom"
-                    Fill="White" />
-
-                <Grid
-                    Grid.Row="1"
-                    Grid.RowSpan="1"
-                    Grid.Column="0"
-                    Margin="0,10,0,0"
-                    Background="Transparent">
-                    <ItemsControl
-                        x:Name="ModItemsControl"
-                        HorizontalAlignment="Left"
-                        Panel.ZIndex="1">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ScrollViewer
-                                    Width="70"
-                                    Margin="0,0,40,0"
-                                    HorizontalScrollBarVisibility="Auto"
-                                    Style="{DynamicResource ScrollViewer2}"
-                                    VerticalScrollBarVisibility="Auto">
-                                    <StackPanel>
-                                        <ItemsControl ItemTemplate="{StaticResource ModItemTemplate}" ItemsSource="{Binding}" />
-                                    </StackPanel>
-                                </ScrollViewer>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Grid>
-            </Grid>
-        </Grid>
-
-        <Image
-            Grid.Row="0"
-            Grid.RowSpan="2"
-            Grid.Column="0"
-            Width="569"
-            Height="569"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Panel.ZIndex="-1"
-            Opacity="0.5"
-            Source="{Binding FoundryIconSource}" />
-        <Grid
-            Grid.ColumnSpan="2"
-            Margin="125,75,125,0"
-            Background="Transparent">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50*" />
-                <RowDefinition Height="25*" />
+                <RowDefinition Height="250*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="10*" />
                 <ColumnDefinition Width="100*" />
             </Grid.ColumnDefinitions>
 
-            <Border
-                Grid.RowSpan="1"
-                Grid.Column="0"
-                Width="128"
-                Height="128"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                BorderBrush="Gold"
-                BorderThickness="4">
-                <Image
-                    Margin="0,0,0,0"
-                    Panel.ZIndex="1"
-                    Source="{Binding ImageSource}" />
-            </Border>
-
-            <Grid Grid.Column="1" Background="Transparent">
+            <Grid
+                Grid.RowSpan="2"
+                Grid.ColumnSpan="2"
+                Margin="125,50,10,675"
+                Background="Transparent">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50*" />
-                    <RowDefinition Height="50*" />
+                    <RowDefinition Height="60*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="100*" />
+                    <ColumnDefinition Width="100*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    x:Name="ItemIcon"
+                    Width="96"
+                    Height="96"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    BorderBrush="Gold"
+                    BorderThickness="4">
+                    <Image
+                        Margin="0,0,0,0"
+                        Panel.ZIndex="1"
+                        d:Source="https://www.bungie.net/common/destiny2_content/icons/7e7ea207955786273c8949d3de234733.jpg"
+                        Source="{Binding ImageSource}" />
+                </Border>
+
+                <Grid
+                    Grid.RowSpan="1"
+                    Grid.Column="1"
+                    Margin="20,0,0,0"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60*" />
+                        <RowDefinition Height="30*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        x:Name="ItemName"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        d:Text="ITEM NAME"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                        FontSize="70"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding ItemName}" />
+                    <TextBlock
+                        x:Name="ItemType"
+                        Grid.Row="1"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        d:Text="ITEM TYPE"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="30"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="{Binding ItemType}"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+                </Grid>
+
+                <TextBlock
+                    x:Name="ItemFlavorText"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Width="869"
+                    Height="59"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 56 Italic"
+                    d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                    FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
+                    FontSize="24"
+                    FontStyle="Italic"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text="{Binding ItemFlavorText}"
+                    TextAlignment="Left"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+
+            <Grid
+                Name="SocketContainer"
+                Grid.Row="1"
+                Grid.Column="0"
+                Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="255" />
+                    <RowDefinition Height="175" />
+                    <RowDefinition Height="175" />
+                </Grid.RowDefinitions>
+
+                <!--  Weapon Perks  -->
+                <Grid
+                    Name="WeaponPerks"
+                    Margin="125,25,25,25"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="100*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Panel.ZIndex="1"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="25"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="WEAPON PERKS"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+
+                    <Rectangle
+                        Grid.Row="0"
+                        Width="1200"
+                        Height="3"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Fill="White" />
+
+                    <Grid
+                        Grid.Row="1"
+                        Grid.RowSpan="1"
+                        Grid.Column="0"
+                        Margin="0,10,0,0"
+                        Background="Transparent">
+                        <ItemsControl
+                            x:Name="PerkItemsControl"
+                            HorizontalAlignment="Left"
+                            Panel.ZIndex="1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ScrollViewer
+                                        Width="100"
+                                        Margin="0,0,0,0"
+                                        HorizontalScrollBarVisibility="Auto"
+                                        Style="{DynamicResource ScrollViewer2}"
+                                        VerticalScrollBarVisibility="Hidden">
+                                        <StackPanel>
+                                            <ItemsControl ItemTemplate="{StaticResource PerkItemTemplate}" ItemsSource="{Binding}" />
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+
+                </Grid>
+
+                <!--  Weapon Mods  -->
+                <Grid
+                    Name="WeaponMods"
+                    Grid.Row="1"
+                    Margin="125,25,25,25"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="100*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Panel.ZIndex="1"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="25"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="WEAPON MODS"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+
+                    <Rectangle
+                        Grid.Row="0"
+                        Width="1200"
+                        Height="3"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Fill="White" />
+
+                    <Grid
+                        Grid.Row="1"
+                        Grid.RowSpan="1"
+                        Grid.Column="0"
+                        Margin="0,10,0,0"
+                        Background="Transparent">
+                        <ItemsControl
+                            x:Name="ModItemsControl"
+                            HorizontalAlignment="Left"
+                            Panel.ZIndex="1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ScrollViewer
+                                        Width="70"
+                                        Margin="0,0,40,0"
+                                        HorizontalScrollBarVisibility="Auto"
+                                        Style="{DynamicResource ScrollViewer2}"
+                                        VerticalScrollBarVisibility="Auto">
+                                        <StackPanel>
+                                            <ItemsControl ItemTemplate="{StaticResource ModItemTemplate}" ItemsSource="{Binding}" />
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Grid>
+
+
+                <!--  Intrinsic Traits  -->
+                <Grid
+                    Name="IntrinsicTraits"
+                    Grid.Row="2"
+                    Margin="125,25,25,25"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="100*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Panel.ZIndex="1"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="25"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="INTRINSIC TRAITS"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+
+                    <Rectangle
+                        Grid.Row="0"
+                        Width="1200"
+                        Height="3"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Fill="White" />
+
+                    <Grid
+                        Grid.Row="1"
+                        Grid.RowSpan="1"
+                        Grid.Column="0"
+                        Margin="0,10,0,0"
+                        Background="Transparent">
+                        <ItemsControl
+                            x:Name="IntrinsicTraitsControl"
+                            HorizontalAlignment="Left"
+                            Panel.ZIndex="1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ScrollViewer
+                                        Margin="0,0,40,0"
+                                        HorizontalScrollBarVisibility="Auto"
+                                        Style="{DynamicResource ScrollViewer2}"
+                                        VerticalScrollBarVisibility="Auto">
+                                        <StackPanel>
+                                            <ItemsControl ItemTemplate="{StaticResource IntrinsicItemTemplate}" ItemsSource="{Binding}" />
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <Image
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="0"
+                Width="569"
+                Height="569"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Panel.ZIndex="-1"
+                d:Source="https://www.bungie.net/common/destiny2_content/icons/6774c7855193dff237408fc5295f39c2.png"
+                Opacity="0.5"
+                Source="{Binding FoundryIconSource}" />
+
+            <Grid
+                x:Name="PerkInfoBox"
+                Grid.RowSpan="3"
+                Grid.ColumnSpan="3"
+                Width="400"
+                Height="300"
+                Background="Transparent"
+                IsHitTestVisible="False"
+                Visibility="Collapsed">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <Grid.RenderTransform>
+                    <TranslateTransform X="0" Y="0" />
+                </Grid.RenderTransform>
+
+                <Rectangle
+                    Grid.Row="0"
+                    Width="500"
+                    Height="500"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Fill="#AAAAAA" />
+
+                <Grid Grid.Row="1" Background="#020202">
+                    <Grid Margin="15" Background="Transparent">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            Grid.Row="0"
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                            FontSize="25"
+                            Foreground="{StaticResource ForegroundColour100}"
+                            Text="{Binding PerkItemName}"
+                            TextWrapping="WrapWithOverflow" />
+                        <TextBlock
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour80}"
+                            Text="{Binding PerkItemType}" />
+                    </Grid>
+                </Grid>
+
+                <Grid Grid.Row="2" Background="#93333333">
+                    <TextBlock
+                        Margin="15"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="{Binding PerkItemDescription}"
+                        TextWrapping="WrapWithOverflow" />
+                </Grid>
+            </Grid>
+
+            <Grid
+                x:Name="ItemBackground"
+                Grid.RowSpan="2"
+                Grid.ColumnSpan="2"
+                Width="1920"
+                Height="1080"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Panel.ZIndex="-5">
+                <Grid.Background>
+                    <ImageBrush d:ImageSource="https://bungie.net/common/destiny2_content/screenshots/3824673936.jpg" />
+                </Grid.Background>
+            </Grid>
+        </Grid>
+
+        <Grid
+            x:Name="LoreEntry"
+            Grid.Row="0"
+            Margin="0,0,1100,0"
+            HorizontalAlignment="Left"
+            Background="Transparent"
+            Visibility="Collapsed">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="100*" />
+                <RowDefinition Height="10*" />
+            </Grid.RowDefinitions>
+
+            <Border
+                Grid.RowSpan="3"
+                Background="#DE14141B"
+                BorderBrush="#DE717171"
+                BorderThickness="2"
+                CornerRadius="5" />
+
+            <Grid Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="2" />
                 </Grid.RowDefinitions>
                 <TextBlock
                     Grid.Row="0"
-                    Grid.Column="1"
-                    Margin="0,0,0,0"
+                    Grid.RowSpan="1"
+                    Margin="70,40,70,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Panel.ZIndex="1"
-                    FontSize="70"
+                    d:Text="ITEM NAME"
+                    FontSize="50"
                     FontWeight="Bold"
                     Foreground="{StaticResource ForegroundColour100}"
-                    Text="{Binding ItemName}"
-                    TextAlignment="Left" />
+                    Text="{Binding ItemName}" />
+
                 <TextBlock
                     Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="0,0,0,0"
+                    Grid.RowSpan="1"
+                    Margin="70,20,70,20"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Panel.ZIndex="1"
-                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
-                    FontSize="40"
-                    Foreground="{StaticResource ForegroundColour80}"
-                    Text="{Binding ItemType}"
-                    TextAlignment="Left"
-                    TextWrapping="Wrap" />
+                    d:Text="ITEM FLAVORTEXT"
+                    FontSize="25"
+                    FontWeight="Bold"
+                    Foreground="{StaticResource ForegroundColour100}"
+                    Text="{Binding ItemFlavorText}"
+                    TextWrapping="WrapWithOverflow" />
+
+                <Rectangle
+                    Grid.Row="2"
+                    Margin="70,0,70,0"
+                    Fill="#C6717171" />
             </Grid>
 
-            <TextBlock
+            <ScrollViewer
                 Grid.Row="1"
-                Grid.Column="0"
-                Grid.ColumnSpan="2"
-                Margin="0,0,700,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Bottom"
-                Panel.ZIndex="1"
-                FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
-                FontSize="25"
-                FontStyle="Italic"
-                Foreground="{StaticResource ForegroundColour80}"
-                Text="{Binding ItemFlavorText}"
-                TextAlignment="Left"
-                TextWrapping="WrapWithOverflow" />
-        </Grid>
-
-        <Border
-            x:Name="LoreEntry"
-            Grid.Row="0"
-            Grid.RowSpan="1"
-            Grid.Column="1"
-            Margin="0,25,100,0"
-            Background="#14141B"
-            BorderBrush="#101016"
-            BorderThickness="2"
-            CornerRadius="5">
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                Margin="0,20,35,20"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
                 <TextBlock
-                    Margin="20,20,20,20"
-                    FontSize="20"
+                    Margin="70,0,35,0"
+                    d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                    FontSize="22"
                     LineHeight="30px"
                     Text="{Binding ItemLore}"
                     TextWrapping="WrapWithOverflow" />
             </ScrollViewer>
-        </Border>
-
-        <Grid
-            x:Name="PerkInfoBox"
-            Grid.RowSpan="3"
-            Grid.ColumnSpan="3"
-            Width="400"
-            Height="300"
-            Background="Transparent"
-            IsHitTestVisible="False"
-            Visibility="Collapsed">
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="5" />
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-            </Grid.RowDefinitions>
-            <Grid.RenderTransform>
-                <TranslateTransform X="0" Y="0" />
-            </Grid.RenderTransform>
-
-            <Rectangle
-                Grid.Row="0"
-                Width="500"
-                Height="500"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Fill="#AAAAAA" />
-
-            <Grid Grid.Row="1" Background="#020202">
-                <Grid Margin="15" Background="Transparent">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                    </Grid.RowDefinitions>
-                    <TextBlock
-                        Grid.Row="0"
-                        VerticalAlignment="Center"
-                        FontSize="30"
-                        FontWeight="Bold"
-                        Foreground="{StaticResource ForegroundColour100}"
-                        Text="{Binding PerkItemName}"
-                        TextWrapping="WrapWithOverflow" />
-                    <TextBlock
-                        Grid.Row="1"
-                        VerticalAlignment="Center"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
-                        FontSize="16"
-                        Foreground="{StaticResource ForegroundColour80}"
-                        Text="{Binding PerkItemType}" />
-                </Grid>
-            </Grid>
-
-            <Grid Grid.Row="2" Background="#93333333">
-                <TextBlock
-                    Margin="15"
-                    FontSize="16"
-                    Foreground="{StaticResource ForegroundColour80}"
-                    Text="{Binding PerkItemDescription}"
-                    TextWrapping="WrapWithOverflow" />
-            </Grid>
         </Grid>
-
     </Grid>
 </UserControl>
 

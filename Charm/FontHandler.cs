@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Other;
@@ -26,7 +27,8 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
     {
         //return true;
         SaveAllFonts();
-        //LoadAllFonts();
+        LoadAllFonts();
+        RegisterFonts();
     }
 
     protected override void Reset()
@@ -75,6 +77,50 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
         return Fonts.Count > 0;
     }
 
+    private void RegisterFonts()
+    {
+        foreach (var (key, value) in Fonts)
+        {
+            Application.Current.Resources.Add($"{key.Family} {key.Subfamily}", value);
+        }
+
+        // Debug font list
+        //List<string> fontList = fonts.Select(pair => (pair.Key.Family + " " + pair.Key.Subfamily).Trim()).ToList();
+        //foreach (var s in fontList)
+        //{
+        //    Console.WriteLine(s);
+        //}
+        /*
+        Haas Grot Disp 75 Bold
+        Noto Serif KR Medium
+        Destiny Keys Regular
+        Pragmatica Bold
+        Pragmatica Book
+        Pragmatica Medium Oblique
+        Pragmatica Medium
+        Pragmatica Book Oblique
+        Noto Sans TC
+        Noto Sans TC Medium
+        Noto Serif TC Medium
+        Aldine 401 BT
+        Noto Serif JP Medium
+        Noto Sans JP
+        Noto Sans JP Medium
+        Noto Serif SC Medium
+        Noto Sans KR
+        Noto Sans KR Medium
+        Cromwell NF
+        Destiny Symbols
+        Cromwell HPLHS
+        Haas Grot Text 55 Roman
+        Haas Grot Text 56 Italic
+        Haas Grot Text 65 Medium
+        Haas Grot Text 66 Medium Italic
+        Noto Sans SC
+        Noto Sans SC Medium
+        */
+    }
+
     public struct FontInfo
     {
         public string Family;
@@ -91,16 +137,16 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
             val = br.ReadBytes(4);
         }
 
-        var nameTableRecord = br.ReadType<OtfNameTableRecord>();
-
+        var nameTableRecord = br.ReadType<OtfNameTableRecord>(true);
         br.BaseStream.Seek(nameTableRecord.Offset, SeekOrigin.Begin);
 
-        var namingTableVer0 = br.ReadType<OtfNamingTableVersion0>();
+        var namingTableVer0 = br.ReadType<OtfNamingTableVersion0>(true);
 
         List<OtfNameRecord> nameRecords = new(namingTableVer0.Count);
         for (int i = 0; i < namingTableVer0.Count; i++)
         {
-            nameRecords.Add(br.ReadType<OtfNameRecord>());
+            var nameRecord = br.ReadType<OtfNameRecord>(true);
+            nameRecords.Add(nameRecord);
         }
 
         OtfNameRecord familyRecord;
@@ -166,28 +212,28 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 [StructLayout(LayoutKind.Sequential)]
 struct OtfNameTableRecord
 {
-    public uint Checksum;
-    public uint Offset;
     public uint Length;
+    public uint Offset;
+    public uint Checksum;
 }
 
 [StructLayout(LayoutKind.Sequential)]
 struct OtfNamingTableVersion0
 {
-    public ushort Version;
-    public ushort Count;
     public ushort StorageOffset;
+    public ushort Count;
+    public ushort Version;
 }
 
 [StructLayout(LayoutKind.Sequential)]
 struct OtfNameRecord
 {
-    public ushort PlatformId;
-    public ushort EncodingId;
-    public ushort LanguageId;
-    public ushort NameId;
-    public ushort Length;
     public ushort StringOffset;
+    public ushort Length;
+    public ushort NameId;
+    public ushort LanguageId;
+    public ushort EncodingId;
+    public ushort PlatformId;
 }
 
 public class BinaryReaderBE : BinaryReader
@@ -220,6 +266,27 @@ public class BinaryReaderBE : BinaryReader
         var data = base.ReadBytes(4);
         Array.Reverse(data);
         return BitConverter.ToUInt32(data, 0);
+    }
+
+    public dynamic ToType(byte[] bytes, Type type)
+    {
+        GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+        try { return Marshal.PtrToStructure(handle.AddrOfPinnedObject(), type); }
+        finally { handle.Free(); }
+    }
+
+    public T ReadType<T>(bool BE = true)
+    {
+        return (T)ReadType(typeof(T), BE);
+    }
+
+    public dynamic ReadType(Type type, bool BE)
+    {
+        var buffer = new byte[Marshal.SizeOf(type)];
+        Read(buffer, 0, buffer.Length);
+        if (BE)
+            Array.Reverse(buffer);
+        return ToType(buffer, type);
     }
 
 }

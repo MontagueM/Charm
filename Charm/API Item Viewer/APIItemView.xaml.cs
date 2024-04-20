@@ -8,7 +8,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
+using Arithmic;
 using Tiger.Schema.Investment;
 
 namespace Charm;
@@ -75,20 +77,27 @@ public partial class APIItemView : UserControl
         Console.WriteLine($"Strings {Investment.Get().GetItemStringThing(ApiItem.Item.TagData.InventoryItemHash).Hash}");
         Console.WriteLine($"Icons {Investment.Get().GetItemIconContainer(ApiItem.Item.TagData.InventoryItemHash).Hash}");
         if (ApiItem.ItemLore != null)
+            LoreEntry.DataContext = ApiItem;
+
+        try
         {
-            var introAnimation = FindResource("FadeIn 0.3") as Storyboard;
-            LoreEntry.BeginStoryboard(introAnimation);
+            ImageBrush imageBrush = new ImageBrush();
+            imageBrush.ImageSource = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{ApiItem.Item.TagData.InventoryItemHash.Hash32}.jpg"));
+            ItemBackground.Background = imageBrush;
+
+            Console.WriteLine($"https://www.bungie.net/common/destiny2_content/screenshots/{ApiItem.Item.TagData.InventoryItemHash.Hash32}.jpg");
         }
-        else
+        catch (Exception ex)
         {
-            LoreEntry.Visibility = Visibility.Hidden;
+            Log.Error($"Failed to get background for {ApiItem.Item.Hash}: {ex.Message}");
         }
     }
 
     private void Load()
     {
         MouseMove += UserControl_MouseMove;
-        Item.DataContext = ApiItem;
+        KeyDown += UserControl_KeyDown;
+        MainContainer.DataContext = ApiItem;
 
         // socket type : plug entry, plugs
         ConcurrentDictionary<int, ConcurrentDictionary<int, List<int>>> SocketPlugs = new ConcurrentDictionary<int, ConcurrentDictionary<int, List<int>>>();
@@ -196,6 +205,23 @@ public partial class APIItemView : UserControl
                         modrows.Add(row);
                     }
                     ModItemsControl.ItemsSource = modrows;
+                    break;
+                case 18: // Intrinsic Traits
+                    var intrinsicrows = new List<List<PerkItem>>();
+                    foreach (var plugSet in plugs)
+                    {
+                        Console.WriteLine($"intrinsic {plugSet.Key}");
+                        var row = new List<PerkItem>();
+                        foreach (var plug in plugSet.Value)
+                        {
+                            var perkItem = CreateApiItem(Investment.Get().GetInventoryItem(plug));
+                            if (!row.Contains(perkItem))
+                                row.Add(perkItem);
+                        }
+                        row = new List<PerkItem>(row.GroupBy(x => x.PerkItemHash).Select(group => group.First()));
+                        intrinsicrows.Add(row);
+                    }
+                    IntrinsicTraitsControl.ItemsSource = intrinsicrows;
                     break;
             }
             //rows.Clear();
@@ -333,6 +359,57 @@ public partial class APIItemView : UserControl
             transform.Y = position.Y - 550;
 
             PerkInfoBox.DataContext = ActivePerkItemButton.DataContext;
+        }
+    }
+
+    private void UserControl_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (ApiItem.ItemLore is null)
+            return;
+
+        if (e.Key == Key.A)
+        {
+            if (LoreEntry.Visibility != Visibility.Visible)
+            {
+                // Fade in LoreEntry
+                LoreEntry.Visibility = Visibility.Visible;
+                DoubleAnimation fadeInAnimation = new DoubleAnimation();
+                fadeInAnimation.From = 0;
+                fadeInAnimation.To = 1;
+                fadeInAnimation.Duration = TimeSpan.FromSeconds(0.3);
+                LoreEntry.BeginAnimation(OpacityProperty, fadeInAnimation);
+
+                // Apply blur effect and fade it in
+                if (MainContainer.Effect == null || !(MainContainer.Effect is BlurEffect))
+                    MainContainer.Effect = new BlurEffect { Radius = 0 };
+                DoubleAnimation blurAnimation = new DoubleAnimation();
+                blurAnimation.From = 0;
+                blurAnimation.To = 20;
+                blurAnimation.Duration = TimeSpan.FromSeconds(0.2);
+                (MainContainer.Effect as BlurEffect).BeginAnimation(BlurEffect.RadiusProperty, blurAnimation);
+            }
+            else
+            {
+                // Fade out LoreEntry
+                DoubleAnimation fadeOutAnimation = new DoubleAnimation();
+                fadeOutAnimation.From = 1;
+                fadeOutAnimation.To = 0;
+                fadeOutAnimation.Duration = TimeSpan.FromSeconds(0.3);
+                fadeOutAnimation.Completed += (s, args) => LoreEntry.Visibility = Visibility.Collapsed;
+                LoreEntry.BeginAnimation(OpacityProperty, fadeOutAnimation);
+
+                // Fade out blur effect
+                if (MainContainer.Effect != null && MainContainer.Effect is BlurEffect)
+                {
+                    DoubleAnimation blurAnimation = new DoubleAnimation();
+                    blurAnimation.From = 20;
+                    blurAnimation.To = 0;
+                    blurAnimation.Duration = TimeSpan.FromSeconds(0.2);
+                    blurAnimation.Completed += (s, args) => MainContainer.Effect = null; // Remove blur effect after fading out
+                    (MainContainer.Effect as BlurEffect).BeginAnimation(BlurEffect.RadiusProperty, blurAnimation);
+                }
+            }
+
         }
     }
 

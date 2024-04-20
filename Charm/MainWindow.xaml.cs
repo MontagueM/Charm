@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using Arithmic;
 using Tiger;
 using Tiger.Schema;
@@ -255,12 +253,12 @@ public partial class MainWindow
         // PackageHandler.Initialise();
         // Progress.CompleteStage();
 
-        // Load all the fonts
-        // await Task.Run(() =>
-        // {
-        //     RegisterFonts(FontHandler.Initialise());
-        // });
-        // Progress.CompleteStage();
+        //Load all the fonts
+        //await Task.Run(() =>
+        //{
+        //    RegisterFonts();
+        //});
+        //Progress.CompleteStage();
 
         // // Initialise FNV handler -- must be first bc my code is shit
         // await Task.Run(FnvHandler.Initialise);
@@ -285,53 +283,6 @@ public partial class MainWindow
         // Set texture format
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         TextureExtractor.SetTextureFormat(config.GetOutputTextureFormat());
-    }
-
-    private void RegisterFonts(ConcurrentDictionary<FontHandler.FontInfo, FontFamily> initialise)
-    {
-        foreach (var (key, value) in initialise)
-        {
-            Application.Current.Resources.Add($"{key.Family} {key.Subfamily}", value);
-        }
-
-        // Debug font list
-        List<string> fontList = initialise.Select(pair => (pair.Key.Family + " " + pair.Key.Subfamily).Trim()).ToList();
-        foreach (var s in fontList)
-        {
-            Debug.WriteLine(s);
-        }
-        /*
-        AXIS Std H
-        AXIS Std R
-        AXIS Std M
-        Cromwell NF
-        Neue Haas Grotesk Text Pro 66 Medium Italic
-        Neue Haas Grotesk Text Pro 55 Roman
-        Neue Haas Grotesk Text Pro 65 Medium
-        Neue Haas Grotesk Text Pro 56 Italic
-        Aldine 401 BT
-        Cromwell HPLHS
-        Destiny Symbols
-        Sandoll MjNeo1Uni 04 Md
-        Neue Haas Unica W1G Bold
-        Neue Haas Unica W1G Medium Italic
-        Neue Haas Unica W1G Medium
-        Neue Haas Unica W1G Regular
-        Neue Haas Unica W1G Italic
-        Neue Haas Grotesk Display Pro 75 Bold
-        Iwata New Reisho Pro M
-        M Ying Hei HK W8
-        M Ying Hei HK W4
-        M Ying Hei HK W7
-        Sandoll GothicNeo1Unicode 09 Hv
-        Sandoll GothicNeo1Unicode 07 Bd
-        Sandoll GothicNeo1Unicode 05 Md
-        M Ying Hei PRC W8
-        M Ying Hei PRC W4
-        Destiny Keys Regular
-        M Ying Hei PRC W7
-        */
-        var a = 0;
     }
 
     private void OpenConfigPanel_OnClick(object sender, RoutedEventArgs e)
