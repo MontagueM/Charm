@@ -11,15 +11,19 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <DataTemplate x:Key="PerkItemTemplate">
+        <local:PercentageConverter x:Key="PercentageConverter" />
+        <local:MarginConverter x:Key="MarginConverter" />
+        <local:SignToBooleanConverter x:Key="SignToBooleanConverter" />
+        <local:FlipSignPercentageConverter x:Key="FlipSignPercentageConverter" />
+        <DataTemplate x:Key="PlugItemTemplate">
             <Button
-                x:Name="PerkItemButton"
+                x:Name="PlugItemButton"
                 Margin="0,0,0,5"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
-                Click="PerkItem_OnClick"
-                MouseEnter="PerkItem_MouseEnter"
-                MouseLeave="PerkItem_MouseLeave"
+                Click="PlugItem_OnClick"
+                MouseEnter="PlugItem_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
                 Style="{DynamicResource API Perk Button}">
                 <local:APIItemPerk />
             </Button>
@@ -27,13 +31,13 @@
 
         <DataTemplate x:Key="ModItemTemplate">
             <Button
-                x:Name="PerkItemButton"
-                Margin="0,0,50,5"
+                x:Name="PlugItemButton"
+                Margin="0,0,0,5"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
-                Click="PerkItem_OnClick"
-                MouseEnter="PerkItem_MouseEnter"
-                MouseLeave="PerkItem_MouseLeave"
+                Click="PlugItem_OnClick"
+                MouseEnter="PlugItem_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
                 Style="{DynamicResource API Mod Button}">
                 <local:APIItemPerk />
             </Button>
@@ -46,14 +50,14 @@
                     <ColumnDefinition Width="10*" />
                 </Grid.ColumnDefinitions>
                 <Button
-                    x:Name="PerkItemButton"
+                    x:Name="PlugItemButton"
                     Grid.Column="0"
                     Margin="0,0,10,5"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    Click="PerkItem_OnClick"
-                    MouseEnter="PerkItem_MouseEnter"
-                    MouseLeave="PerkItem_MouseLeave"
+                    Click="PlugItem_OnClick"
+                    MouseEnter="PlugItem_MouseEnter"
+                    MouseLeave="PlugItem_MouseLeave"
                     Style="{DynamicResource API Mod Button}">
                     <local:APIItemPerk />
                 </Button>
@@ -75,7 +79,7 @@
                         FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
                         FontSize="25"
                         Foreground="{StaticResource ForegroundColour100}"
-                        Text="{Binding PerkItemName}"
+                        Text="{Binding PlugName}"
                         TextAlignment="Left" />
                     <TextBlock
                         Grid.Row="1"
@@ -86,7 +90,7 @@
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="20"
                         Foreground="{StaticResource ForegroundColour80}"
-                        Text="{Binding PerkItemDescription}"
+                        Text="{Binding PlugDescription}"
                         TextAlignment="Left"
                         TextWrapping="WrapWithOverflow" />
                 </Grid>
@@ -111,19 +115,21 @@
 
     <Grid>
         <Grid x:Name="MainContainer" Background="#17171f">
-
             <Grid.RowDefinitions>
                 <RowDefinition Height="100*" />
-                <RowDefinition Height="250*" />
+                <RowDefinition Height="300*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="40*" />
+                <ColumnDefinition Width="40*" />
             </Grid.ColumnDefinitions>
 
+            <!--  NameContainer  -->
             <Grid
+                Name="NameContainer"
                 Grid.RowSpan="2"
                 Grid.ColumnSpan="2"
-                Margin="125,50,10,675"
+                Margin="125,50,0,675"
                 Background="Transparent">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50*" />
@@ -131,7 +137,6 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="100*" />
                     <ColumnDefinition Width="100*" />
                 </Grid.ColumnDefinitions>
 
@@ -192,8 +197,7 @@
                     Grid.Row="1"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
-                    Width="869"
-                    Height="59"
+                    Margin="0,0,1000,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Panel.ZIndex="1"
@@ -208,15 +212,168 @@
                     TextWrapping="WrapWithOverflow" />
             </Grid>
 
+            <!--  StatsContainer  -->
+            <Grid
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="0,250,0,0"
+                HorizontalAlignment="Center"
+                Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <ItemsControl x:Name="ItemStatsControl" Grid.Row="0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid
+                                Margin="0,0,0,3"
+                                HorizontalAlignment="Left"
+                                Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="250" />
+                                    <ColumnDefinition Width="210" />
+                                    <ColumnDefinition Width="50" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Margin="0,0,15,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="20"
+                                    Foreground="{StaticResource ForegroundColour80}"
+                                    Text="{Binding StatName}"
+                                    TextAlignment="Right"
+                                    TextWrapping="Wrap" />
+
+                                <!--  Background bar  -->
+                                <Rectangle
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Width="210"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    Fill="#28FFFFFF" />
+
+                                <!--  Percentage bar  -->
+                                <StackPanel
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Orientation="Horizontal">
+                                    <Rectangle
+                                        Width="{Binding StatDisplayValue, Converter={StaticResource PercentageConverter}, ConverterParameter=210}"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Fill="White" />
+
+                                    <!--  Adjustment bar  -->
+                                    <Rectangle
+                                        x:Name="PerkAdjustBar"
+                                        Width="{Binding StatAdjustValue, Converter={StaticResource FlipSignPercentageConverter}, ConverterParameter=210}"
+                                        Height="20"
+                                        Margin="{Binding StatAdjustValue, Converter={StaticResource MarginConverter}}"
+                                        HorizontalAlignment="Left">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Fill" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <!--  If AdjustmentValue is positive, set Fill to Green  -->
+                                                    <DataTrigger Binding="{Binding StatAdjustValue, Converter={StaticResource SignToBooleanConverter}}" Value="True">
+                                                        <Setter Property="Fill" Value="LimeGreen" />
+                                                    </DataTrigger>
+                                                    <!--  If AdjustmentValue is negative, set Fill to Red  -->
+                                                    <DataTrigger Binding="{Binding StatAdjustValue, Converter={StaticResource SignToBooleanConverter}}" Value="False">
+                                                        <Setter Property="Fill" Value="Red" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                </StackPanel>
+
+                                <!--  TextBlock for StatDisplayValue  -->
+                                <TextBlock
+                                    Name="StatDisplayText"
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Margin="0,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                                    FontSize="20"
+                                    Text="{Binding StatDisplayValue}"
+                                    TextAlignment="Right"
+                                    TextWrapping="Wrap" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!--  This is stupid  -->
+                <ItemsControl
+                    x:Name="ItemNumericStatsControl"
+                    Grid.Row="1"
+                    Margin="0,15,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid
+                                Margin="0,0,0,3"
+                                HorizontalAlignment="Left"
+                                Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="250" />
+                                    <ColumnDefinition Width="50" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Margin="0,0,15,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="20"
+                                    Foreground="{StaticResource ForegroundColour80}"
+                                    Text="{Binding StatName}"
+                                    TextAlignment="Right"
+                                    TextWrapping="Wrap" />
+
+                                <TextBlock
+                                    Name="StatDisplayText"
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="0,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                                    FontSize="20"
+                                    Text="{Binding StatDisplayValue}"
+                                    TextAlignment="Right"
+                                    TextWrapping="Wrap" />
+
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+
+            <!--  SocketContainer  -->
             <Grid
                 Name="SocketContainer"
                 Grid.Row="1"
                 Grid.Column="0"
                 Background="Transparent">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="255" />
-                    <RowDefinition Height="175" />
-                    <RowDefinition Height="175" />
+                    <RowDefinition Height="100*" />
+                    <RowDefinition Height="50*" />
+                    <RowDefinition Height="50*" />
                 </Grid.RowDefinitions>
 
                 <!--  Weapon Perks  -->
@@ -257,7 +414,7 @@
                         Margin="0,10,0,0"
                         Background="Transparent">
                         <ItemsControl
-                            x:Name="PerkItemsControl"
+                            x:Name="PlugItemsControl"
                             HorizontalAlignment="Left"
                             Panel.ZIndex="1">
                             <ItemsControl.ItemsPanel>
@@ -274,7 +431,7 @@
                                         Style="{DynamicResource ScrollViewer2}"
                                         VerticalScrollBarVisibility="Hidden">
                                         <StackPanel>
-                                            <ItemsControl ItemTemplate="{StaticResource PerkItemTemplate}" ItemsSource="{Binding}" />
+                                            <ItemsControl ItemTemplate="{StaticResource PlugItemTemplate}" ItemsSource="{Binding}" />
                                         </StackPanel>
                                     </ScrollViewer>
                                 </DataTemplate>
@@ -334,8 +491,8 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <ScrollViewer
-                                        Width="70"
-                                        Margin="0,0,40,0"
+                                        Width="100"
+                                        Margin="0,0,0,0"
                                         HorizontalScrollBarVisibility="Auto"
                                         Style="{DynamicResource ScrollViewer2}"
                                         VerticalScrollBarVisibility="Auto">
@@ -415,7 +572,9 @@
                 </Grid>
             </Grid>
 
+            <!--  FoundryBanner  -->
             <Image
+                Name="FoundryBanner"
                 Grid.Row="0"
                 Grid.RowSpan="2"
                 Grid.Column="0"
@@ -428,6 +587,7 @@
                 Opacity="0.5"
                 Source="{Binding FoundryIconSource}" />
 
+            <!--  PerkInfoBox  -->
             <Grid
                 x:Name="PerkInfoBox"
                 Grid.RowSpan="3"
@@ -467,7 +627,7 @@
                             FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
                             FontSize="25"
                             Foreground="{StaticResource ForegroundColour100}"
-                            Text="{Binding PerkItemName}"
+                            Text="{Binding PlugName}"
                             TextWrapping="WrapWithOverflow" />
                         <TextBlock
                             Grid.Row="1"
@@ -475,7 +635,7 @@
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                             FontSize="16"
                             Foreground="{StaticResource ForegroundColour80}"
-                            Text="{Binding PerkItemType}" />
+                            Text="{Binding PlugType}" />
                     </Grid>
                 </Grid>
 
@@ -485,11 +645,12 @@
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="16"
                         Foreground="{StaticResource ForegroundColour80}"
-                        Text="{Binding PerkItemDescription}"
+                        Text="{Binding PlugDescription}"
                         TextWrapping="WrapWithOverflow" />
                 </Grid>
             </Grid>
 
+            <!--  ItemBackground  -->
             <Grid
                 x:Name="ItemBackground"
                 Grid.RowSpan="2"
@@ -505,6 +666,7 @@
             </Grid>
         </Grid>
 
+        <!--  LoreEntry  -->
         <Grid
             x:Name="LoreEntry"
             Grid.Row="0"

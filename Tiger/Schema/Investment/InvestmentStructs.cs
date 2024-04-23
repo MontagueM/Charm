@@ -40,6 +40,9 @@ public struct D2Class_9D798080
     [SchemaField(0x30, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ResourcePointer Unk30;  // D2Class_B6738080, lore entry index (map CF508080 BDA1A780)
 
+    //[SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public ResourcePointer Unk38;  // B0738080, 'objectives'
+
     [SchemaField(0x48)]
     public ResourcePointer Unk48;  // 15108080 D1, A1738080 D2 'plug'
 
@@ -67,7 +70,7 @@ public struct D2Class_9D798080
 
     [SchemaField(0x8A, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xC2, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public byte ItemRarity; //Not sure
+    public byte ItemRarity;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xCA, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -228,6 +231,63 @@ public struct D2Class_7B738080
 
 #endregion
 
+#region Stats
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BE548080", 0x18)]
+public struct D2Class_BE548080
+{
+    public ulong FileSize;
+    public DynamicArrayUnloaded<D2Class_C4548080> StatGroupDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C4548080", 0x38)]
+public struct D2Class_C4548080
+{
+    public TigerHash StatGroupHash;
+    public short Unk04;
+    [SchemaField(0x8)]
+    public TigerHash Unk08;
+    [SchemaField(0x10)]
+    public DynamicArray<D2Class_C8548080> ScaledStats;
+    [SchemaField(0x30)]
+    public int MaximumValue;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C8548080", 0x18)]
+public struct D2Class_C8548080
+{
+    public byte StatIndex; // 'statHash'
+    public byte DisplayAsNumeric;
+    public byte Unk02;
+    public byte IsLinear; // not in api, means the value "isnt" interpolated? WYSIWYG
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_257A8080> DisplayInterpolation;
+
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "257A8080", 0x8)]
+public struct D2Class_257A8080
+{
+    public int Value;
+    public int Weight;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6B588080", 0x18)]
+public struct D2Class_6B588080
+{
+    public ulong FileSize;
+    public DynamicArrayUnloaded<D2Class_6F588080> StatDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6F588080", 0x24)]
+public struct D2Class_6F588080
+{
+    public TigerHash StatHash;
+    public StringIndexReference StatName;
+    public StringIndexReference StatDescription;
+    public short StatIconIndex;
+}
+#endregion
+
 #region String Stuff
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C7348080", 0x18)]
@@ -278,8 +338,9 @@ public struct D2Class_9F548080
     // public dynamic? Unk28;  // D2Class_E4548080
     // [SchemaField(0x68), DestinyField(FieldType.ResourcePointer)]
     // public dynamic? Unk68;  // D2Class_CA548080
-    // [SchemaField(0x78), DestinyField(FieldType.ResourcePointer)]
-    // public dynamic? Unk78;  // D2Class_B4548080
+
+    [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk78;  // D2Class_B4548080
 
     [SchemaField(0x60, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
@@ -398,9 +459,9 @@ public struct D2Class_B4548080
 {
     public TigerHash Unk00;
     public TigerHash Unk04;
-    [SchemaField(0x0C)]
+    [SchemaField(0xC)]
     public StringIndexReference InspectionTerm;
-    public int Unk14;
+    public int StatGroupIndex;
 }
 
 [SchemaStruct("2D548080", 0x18)]
@@ -873,7 +934,7 @@ public struct D2Class_C3778080
     [SchemaField(0x28)]
     public short ReusablePlugSetIndex2; // randomizedPlugSetHash -> reusablePlugItems
     [SchemaField(0x48)]
-    public DynamicArray<D2Class_D5778080> PlugItems; // 'reusablePlugItems'?
+    public DynamicArray<D2Class_D5778080> PlugItems; // reusablePlugSetHash -> reusablePlugItems
 }
 
 [SchemaStruct("CD778080", 0x18)]
@@ -926,7 +987,7 @@ public struct D2Class_B6768080
 [SchemaStruct("BA768080", 0x68)]
 public struct D2Class_BA768080
 {
-    public TigerHash SocketHash;
+    public TigerHash SocketTypeHash;
     public short Unk04;
     public short SocketCategoryIndex;
     public int SocketVisiblity; // 'visibility'?

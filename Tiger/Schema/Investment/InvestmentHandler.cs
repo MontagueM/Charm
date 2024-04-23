@@ -43,9 +43,12 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<D2Class_594F8080> _socketCategoryMap = null;
     private Tag<D2Class_CF508080> _loreStringMap = null;
     private Tag<D2Class_2D548080> _sandboxPerkMap = null;
+    private Tag<D2Class_6B588080> _statDefinitionMap = null;
+    private Tag<D2Class_BE548080> _statGroupDefinitionMap = null;
     public ConcurrentDictionary<int, D2Class_5D4F8080> SocketCategoryStringThings = null;
     public ConcurrentDictionary<int, D2Class_D3508080> InventoryItemLoreStrings = null;
     public ConcurrentDictionary<int, D2Class_33548080> SandboxPerkStrings = null;
+    public ConcurrentDictionary<int, D2Class_6F588080> StatStrings = null;
 
     public Investment(TigerStrategy strategy) : base(strategy)
     {
@@ -143,6 +146,24 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return _socketTypeMap.TagData.SocketTypeEntries.ElementAt(_socketTypeMap.GetReader(), index).SocketCategoryIndex;
     }
 
+    private int GetStatGroupIndex(InventoryItem item)
+    {
+        var stringThing = GetItemStringThing(item.TagData.InventoryItemHash);
+        if (stringThing.TagData.Unk78.GetValue(stringThing.GetReader()) is D2Class_B4548080 details)
+            return details.StatGroupIndex;
+        else
+            return -1;
+    }
+
+    public D2Class_C4548080? GetStatGroup(InventoryItem item)
+    {
+        var index = GetStatGroupIndex(item);
+        if (index == -1)
+            return null;
+
+        return _statGroupDefinitionMap.TagData.StatGroupDefinitions.ElementAt(_statGroupDefinitionMap.GetReader(), index);
+    }
+
     private void GetAllInvestmentTags()
     {
         ConcurrentHashSet<FileHash> allHashes = new();
@@ -234,14 +255,17 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     case 0x80804F59:
                         _socketCategoryMap = FileResourcer.Get().GetSchemaTag<D2Class_594F8080>(val);
                         break;
-                    //case 0x8080586B:
-                    //    statDefTag = FileResourcer.Get().GetSchemaTag<D2Class_6B588080>(val);
-                    //    break;
                     case 0x808050CF:
                         _loreStringMap = FileResourcer.Get().GetSchemaTag<D2Class_CF508080>(val);
                         break;
                     case 0x8080542D:
                         _sandboxPerkMap = FileResourcer.Get().GetSchemaTag<D2Class_2D548080>(val);
+                        break;
+                    case 0x8080586B:
+                        _statDefinitionMap = FileResourcer.Get().GetSchemaTag<D2Class_6B588080>(val);
+                        break;
+                    case 0x808054BE:
+                        _statGroupDefinitionMap = FileResourcer.Get().GetSchemaTag<D2Class_BE548080>(val);
                         break;
                         //case 0x80807828:
                         //    collectibleDefTag = FileResourcer.Get().GetSchemaTag<D2Class_28788080>(val);
@@ -255,13 +279,13 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
         Task.WaitAll(new[]
         {
-            Task.Run(GetInventoryItemDict),
             Task.Run(GetInventoryItemStringThings),
+            Task.Run(GetInventoryItemDict),
             Task.Run(GetEntityAssignmentDict),
             Task.Run(GetSocketCategoryStrings),
             Task.Run(GetInventoryItemLoreStrings),
-            Task.Run(GetSandboxPerkStrings)
-            // Task.Run(GetSandboxPatternAssignmentsDict),
+            Task.Run(GetSandboxPerkStrings),
+            Task.Run(GetStatStrings)
         });
     }
 
@@ -277,11 +301,14 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     private void GetInventoryItemLoreStrings()
     {
-        InventoryItemLoreStrings = new();
-        using TigerReader reader = _loreStringMap.GetReader();
-        for (int i = 0; i < _loreStringMap.TagData.LoreStringMap.Count; i++)
+        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            InventoryItemLoreStrings.TryAdd(i, _loreStringMap.TagData.LoreStringMap[reader, i]);
+            InventoryItemLoreStrings = new();
+            using TigerReader reader = _loreStringMap.GetReader();
+            for (int i = 0; i < _loreStringMap.TagData.LoreStringMap.Count; i++)
+            {
+                InventoryItemLoreStrings.TryAdd(i, _loreStringMap.TagData.LoreStringMap[reader, i]);
+            }
         }
     }
 
@@ -307,6 +334,19 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             for (int i = 0; i < _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries.Count; i++)
             {
                 SandboxPerkStrings.TryAdd(i, _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries[reader, i]);
+            }
+        }
+    }
+
+    private void GetStatStrings()
+    {
+        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            StatStrings = new();
+            using TigerReader reader = _statDefinitionMap.GetReader();
+            for (int i = 0; i < _statDefinitionMap.TagData.StatDefinitions.Count; i++)
+            {
+                StatStrings.TryAdd(i, _statDefinitionMap.TagData.StatDefinitions[reader, i]);
             }
         }
     }
