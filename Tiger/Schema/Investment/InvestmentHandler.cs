@@ -158,7 +158,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     public D2Class_C4548080? GetStatGroup(InventoryItem item)
     {
         var index = GetStatGroupIndex(item);
-        if (index == -1)
+        if (index == -1 || index > _statGroupDefinitionMap.TagData.StatGroupDefinitions.Count)
             return null;
 
         return _statGroupDefinitionMap.TagData.StatGroupDefinitions.ElementAt(_statGroupDefinitionMap.GetReader(), index);

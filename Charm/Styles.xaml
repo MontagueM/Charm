@@ -28,6 +28,40 @@
         <Setter Property="Background" Value="{StaticResource BackgroundColour7}" />
     </Style>
 
+    <Style TargetType="ListBoxItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="Transparent" />
+        <Setter Property="Margin" Value="5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border
+                        x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="100">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="transparent" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ListBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Margin" Value="0,0,0,0" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+    </Style>
+
     <Style TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource BackgroundColour20}" />
         <Setter Property="BorderBrush" Value="{StaticResource ForegroundColour90}" />
@@ -611,46 +645,18 @@
         </Setter>
     </Style>
 
-    <!--  Scroll bar style 2  -->
-    <Style x:Key="ScrollViewer2" TargetType="{x:Type ScrollViewer}">
-        <Setter Property="OverridesDefaultStyle" Value="True" />
-        <Setter Property="Template">
+    <Style x:Key="DropShadowMedium" TargetType="TextBlock">
+        <Setter Property="Effect">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                    <Grid
-                        Margin="0,0,0,0"
-                        HorizontalAlignment="Center"
-                        Background="Transparent">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition Width="0" />
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-
-                        <Border
-                            Grid.Column="0"
-                            BorderBrush="Transparent"
-                            BorderThickness="0">
-                            <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}" />
-                        </Border>
-                        <ScrollBar
-                            x:Name="PART_VerticalScrollBar"
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Maximum="{TemplateBinding ScrollableHeight}"
-                            ViewportSize="{TemplateBinding ViewportHeight}"
-                            Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
-                            Value="{TemplateBinding VerticalOffset}" />
-                    </Grid>
-
-                </ControlTemplate>
+                <DropShadowEffect
+                    BlurRadius="2"
+                    Direction="320"
+                    Opacity="0.7"
+                    ShadowDepth="2"
+                    Color="#1B1B1B" />
             </Setter.Value>
         </Setter>
     </Style>
-
 
 
 </ResourceDictionary>

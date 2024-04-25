@@ -1,0 +1,52 @@
+﻿<UserControl
+    x:Class="Charm.APIItemRecoilStat"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="25"
+    d:DesignWidth="50"
+    mc:Ignorable="d">
+
+    <Grid Background="Transparent" UseLayoutRounding="True">
+
+        <Path
+            x:Name="backgroundCircle"
+            Panel.ZIndex="0"
+            Fill="#63848484"
+            Stretch="Uniform"
+            Stroke="Transparent"
+            StrokeThickness="0">
+            <Path.Data>
+                <PathGeometry>
+                    <PathFigure StartPoint="0,20">
+                        <ArcSegment
+                            IsLargeArc="False"
+                            Point="40,20"
+                            Size="20,20"
+                            SweepDirection="Clockwise" />
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+        </Path>
+
+        <Path
+            x:Name="recoilPath"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            d:Data="M1,1 L1.02,0 A1,1 0 0,0 0.98, 0 Z"
+            d:RenderTransformOrigin="1,0.5"
+            Fill="White">
+            <Path.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="25" ScaleY="25" />
+                    <SkewTransform />
+                    <RotateTransform />
+                    <TranslateTransform />
+                </TransformGroup>
+            </Path.RenderTransform>
+        </Path>
+
+    </Grid>
+</UserControl>
