@@ -381,5 +381,12 @@ public partial class MainWindow
         {
             throw new ExternalException("Crash induced.");
         }
+        else if (e.Key == Key.Escape)
+        {
+            var tab = (TabItem)MainTabControl.Items[MainTabControl.SelectedIndex];
+            dynamic content = tab.Content;
+            if (content is APIItemView av)
+                MainTabControl.Items.Remove(tab);
+        }
     }
 }

@@ -38,8 +38,6 @@ public partial class APIItemRecoilStat : UserControl
         double maxSpread = 180; // degrees
 
         double direction = RecoilDirection(Value) * verticalScale * (Math.PI / 180); // Convert to radians
-        double x = Math.Sin(direction);
-        double y = Math.Cos(direction);
 
         double spread =
                     // Higher value means less spread
@@ -56,14 +54,14 @@ public partial class APIItemRecoilStat : UserControl
         double xSpreadLess = Math.Sin(direction - spread);
         double ySpreadLess = Math.Cos(direction - spread);
 
-        var d = $"M1,1 L{1 + xSpreadMore},{1 - ySpreadMore} A1,1 0 0,{(direction < 0 ? '1' : '0')} {1 + xSpreadLess}, {1 - ySpreadLess} Z";
-        Console.WriteLine($"{Value} ({direction}) : {d}");
-        // Update the path of recoilPath
+        var d = $"M1,1 L{1 + xSpreadMore},{1 - ySpreadMore} A1,1 0 0,{(direction <= 0 ? '1' : '0')} {1 + xSpreadLess}, {1 - ySpreadLess} Z";
+        //Console.WriteLine($"{Value} {direction} {d} {(float)direction < 0}");
         if (Value < 95)
         {
             recoilPath.Data = Geometry.Parse(d);
-            // stupid dumb hacky fix for the position being wrong
-            recoilPath.RenderTransformOrigin = new Point(direction < 0 ? 1.0 : 0.5, 0.5);
+            // stupid dumb hacky fix for the position being wrong (works 70% of the time)
+            bool a = direction < 0;
+            recoilPath.RenderTransformOrigin = new Point(a ? 1.0 : 0.5, 0.5);
         }
         else
         {

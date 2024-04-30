@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using Tiger.Schema;
@@ -136,5 +137,15 @@ public static class NestedTypeHelpers
         }
 
         return null;
+    }
+
+    public static string GetEnumDescription(this Enum enumValue)
+    {
+        if (Convert.ToInt32(enumValue) == -1)
+            return string.Empty;
+
+        var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
+        var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+        return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
     }
 }

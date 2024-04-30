@@ -64,15 +64,23 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 
     private bool LoadAllFonts()
     {
-
-        // Parallel.ForEach(Directory.GetFiles(@"fonts/"), s =>
         foreach (var s in Directory.GetFiles(@"fonts/"))
         {
             var otfPath = Environment.CurrentDirectory + "/" + s;
             FontInfo fontInfo = GetFontInfo(otfPath);
             FontFamily font = new FontFamily(otfPath + $"#{fontInfo.Family}");
             Fonts.TryAdd(fontInfo, font);
-        }//);
+
+            // Adds the Destiny Keys fonts as the fallback font for Haas Grot
+            if (fontInfo.Family.Contains("Haas Grot Text"))
+            {
+                FontFamily fontKeys = new FontFamily(otfPath + $"#{fontInfo.Family}, " +
+                    $"{Environment.CurrentDirectory + $"/fonts/destiny_symbols_common.otf#Destiny Keys"}, " +
+                    $"{Environment.CurrentDirectory + $"/fonts/destiny_symbols_pc.otf#Destiny Keys"}");
+
+                Fonts.TryAdd(new FontInfo { Family = $"{fontInfo.Family} {fontInfo.Subfamily}", Subfamily = "Keys" }, fontKeys);
+            }
+        }
 
         return Fonts.Count > 0;
     }

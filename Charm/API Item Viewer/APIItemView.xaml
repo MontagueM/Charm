@@ -16,6 +16,68 @@
         <local:SignToBooleanConverter x:Key="SignToBooleanConverter" />
         <local:FlipSignPercentageConverter x:Key="FlipSignPercentageConverter" />
 
+        <DataTemplate x:Key="InfoBoxSeperatorTemplate">
+            <Rectangle
+                Height="2"
+                Fill="{StaticResource ForegroundColour70}"
+                Opacity="0.75" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="InfoBoxTextTemplate">
+            <TextBlock
+                d:FontFamily="Haas Grot Text 55 Roman"
+                d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                FontSize="16"
+                Foreground="{StaticResource ForegroundColour80}"
+                Text="{Binding Description}"
+                TextWrapping="WrapWithOverflow" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="InfoBoxGridTemplate">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="32"
+                    Height="32"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    d:Source="https://www.bungie.net/common/destiny2_content/icons/c577890c4a2d81e3c4ce1c803cdb9a3b.png"
+                    Source="{Binding PlugImageSource}">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlugImageSource}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    d:FontFamily="Haas Grot Text 55 Roman"
+                    d:Text="Causing a lightning strike with this weapon partially reloads the magazine from reserves."
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="15"
+                    Foreground="{StaticResource ForegroundColour70}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="PlugItemTemplate">
             <Button
                 x:Name="PlugItemButton"
@@ -48,7 +110,7 @@
             <Grid Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="10*" />
-                    <ColumnDefinition Width="10*" />
+                    <ColumnDefinition Width="600" />
                 </Grid.ColumnDefinitions>
                 <Button
                     x:Name="PlugItemButton"
@@ -56,10 +118,7 @@
                     Margin="0,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    Click="PlugItem_OnClick"
-                    MouseEnter="PlugItem_MouseEnter"
-                    MouseLeave="PlugItem_MouseLeave"
-                    Style="{DynamicResource API Mod Button}">
+                    Style="{DynamicResource API Intrinsic}">
                     <local:APIItemMod />
                 </Button>
                 <Grid
@@ -76,7 +135,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Panel.ZIndex="1"
-                        FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                         FontSize="24"
                         Foreground="{StaticResource ForegroundColour100}"
                         Style="{StaticResource DropShadowMedium}"
@@ -87,7 +146,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Panel.ZIndex="1"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                         FontSize="20"
                         Foreground="{StaticResource ForegroundColour90}"
                         Style="{StaticResource DropShadowMedium}"
@@ -97,6 +156,15 @@
                 </Grid>
             </Grid>
         </DataTemplate>
+
+        <Style x:Key="SocketContainerRect" TargetType="{x:Type Rectangle}">
+            <Setter Property="Width" Value="700" />
+            <Setter Property="MaxWidth" Value="750" />
+            <Setter Property="Height" Value="3" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Fill" Value="{StaticResource ForegroundColour70}" />
+        </Style>
 
         <Storyboard x:Key="FadeIn 0.3">
             <DoubleAnimation
@@ -115,7 +183,14 @@
     </UserControl.Resources>
 
     <Grid>
-        <Grid x:Name="MainContainer" Background="#17171f">
+        <Grid
+            x:Name="MainContainer"
+            Background="Transparent"
+            RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TranslateTransform />
+            </Grid.RenderTransform>
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="250*" />
                 <RowDefinition Height="700*" />
@@ -124,6 +199,25 @@
                 <ColumnDefinition Width="40*" />
                 <ColumnDefinition Width="50*" />
             </Grid.ColumnDefinitions>
+
+            <!--  Item Source  -->
+            <TextBlock
+                x:Name="ItemSource"
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="125,10,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Panel.ZIndex="1"
+                d:FontFamily="Haas Grot Text 56 Italic"
+                d:Text="ITEM SOURCE"
+                FontFamily="{DynamicResource Haas Grot Text 56 Italic Keys}"
+                FontSize="24"
+                Foreground="{StaticResource ForegroundColour80}"
+                Text="{Binding ItemSource}"
+                TextAlignment="Left"
+                TextWrapping="Wrap" />
 
             <!--  NameContainer  -->
             <Grid
@@ -147,8 +241,8 @@
                     Height="96"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    BorderBrush="Gold"
-                    BorderThickness="4">
+                    BorderBrush="White"
+                    BorderThickness="3">
                     <Image
                         Margin="0,0,0,0"
                         Panel.ZIndex="1"
@@ -174,7 +268,7 @@
                         Panel.ZIndex="1"
                         d:FontFamily="Haas Grot Text 65 Medium"
                         d:Text="ITEM NAME"
-                        FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                         FontSize="70"
                         Foreground="{StaticResource ForegroundColour100}"
                         Text="{Binding ItemName}" />
@@ -186,7 +280,7 @@
                         Panel.ZIndex="1"
                         d:FontFamily="Haas Grot Text 55 Roman"
                         d:Text="ITEM TYPE"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                         FontSize="32"
                         Foreground="{StaticResource ForegroundColour80}"
                         Text="{Binding ItemType}"
@@ -205,8 +299,8 @@
                     Panel.ZIndex="1"
                     d:FontFamily="Haas Grot Text 56 Italic"
                     d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                    FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
-                    FontSize="24"
+                    FontFamily="{DynamicResource Haas Grot Text 56 Italic Keys}"
+                    FontSize="22"
                     FontStyle="Italic"
                     Foreground="{StaticResource ForegroundColour80}"
                     Text="{Binding ItemFlavorText}"
@@ -216,16 +310,85 @@
 
             <!--  StatsContainer  -->
             <Grid
+                x:Name="StatsContainer"
                 Grid.Row="1"
                 Grid.Column="1"
-                Margin="0,250,0,0"
-                HorizontalAlignment="Center"
-                Background="Transparent">
+                Margin="200,200,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Panel.ZIndex="2"
+                Background="#00FF0000"
+                Visibility="Visible">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
-                <ItemsControl x:Name="ItemStatsControl" Grid.Row="0">
+
+                <TextBlock
+                    x:Name="ItemDamageType"
+                    Grid.Column="0"
+                    Margin="0,0,20,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 65 Medium"
+                    d:Text="ITEM NAME"
+                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                    FontSize="50"
+                    Text="{Binding ItemDamageType}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource ForegroundColour100}" />
+                            <Setter Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect
+                                        BlurRadius="2"
+                                        Direction="320"
+                                        Opacity="0.7"
+                                        ShadowDepth="2"
+                                        Color="#1B1B1B" />
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Arc">
+                                    <Setter Property="Foreground" Value="#85c5ec" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Solar">
+                                    <Setter Property="Foreground" Value="#f2711b" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Void">
+                                    <Setter Property="Foreground" Value="#b184c5" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Stasis">
+                                    <Setter Property="Foreground" Value="#4d88ff" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Strand">
+                                    <Setter Property="Foreground" Value="#35e366" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <Rectangle
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="1"
+                    Width="2"
+                    Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource AncestorType=Grid}}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Fill="Silver" />
+
+                <ItemsControl
+                    x:Name="ItemStatsControl"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    VerticalAlignment="Top">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid
@@ -247,7 +410,7 @@
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
                                     Panel.ZIndex="1"
-                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                     FontSize="20"
                                     Foreground="{StaticResource ForegroundColour90}"
                                     Style="{StaticResource DropShadowMedium}"
@@ -309,7 +472,7 @@
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
                                     Panel.ZIndex="1"
-                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                                     FontSize="20"
                                     Foreground="{StaticResource ForegroundColour90}"
                                     Style="{StaticResource DropShadowMedium}"
@@ -325,7 +488,9 @@
                 <ItemsControl
                     x:Name="ItemNumericStatsControl"
                     Grid.Row="1"
-                    Margin="0,15,0,0">
+                    Grid.Column="1"
+                    Margin="0,15,0,0"
+                    VerticalAlignment="Bottom">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid
@@ -347,7 +512,7 @@
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
                                     Panel.ZIndex="1"
-                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                     FontSize="20"
                                     Foreground="{StaticResource ForegroundColour90}"
                                     Style="{StaticResource DropShadowMedium}"
@@ -363,15 +528,13 @@
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     Panel.ZIndex="1"
-                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                                     FontSize="20"
                                     Foreground="{StaticResource ForegroundColour90}"
                                     Style="{StaticResource DropShadowMedium}"
                                     Text="{Binding StatDisplayValue}"
                                     TextAlignment="Right"
                                     TextWrapping="Wrap" />
-
-
 
                                 <local:APIItemRecoilStat
                                     Grid.Column="2"
@@ -396,165 +559,214 @@
             </Grid>
 
             <!--  SocketContainer  -->
-            <StackPanel
-                Name="SocketContainer"
+            <Grid
                 Grid.Row="1"
                 Grid.Column="0"
-                Grid.ColumnSpan="1"
-                Margin="0,0,0,0"
+                Grid.ColumnSpan="2"
                 Background="Transparent">
 
-                <!--  Perks  -->
-                <Grid
-                    Name="Perks"
-                    MaxHeight="305"
-                    Margin="125,0,0,20"
-                    VerticalAlignment="Top"
+                <StackPanel
+                    Name="SocketContainer"
+                    Margin="125,0,0,0"
                     Background="Transparent"
-                    Visibility="Collapsed">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="10" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
+                    Orientation="Horizontal">
+                    <WrapPanel Orientation="Vertical">
+                        <!--  Perks  -->
+                        <Grid
+                            Name="Perks"
+                            MaxWidth="750"
+                            MaxHeight="305"
+                            Margin="0,0,100,20"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Background="Transparent"
+                            Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
 
-                    <TextBlock
-                        Name="PerksTextBlock"
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Panel.ZIndex="1"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="25"
-                        Foreground="{StaticResource ForegroundColour80}"
-                        Text="WEAPON PERKS"
-                        TextAlignment="Left"
-                        TextWrapping="Wrap" />
+                            <TextBlock
+                                Name="PerksTextBlock"
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="25"
+                                Foreground="{StaticResource ForegroundColour70}"
+                                Text="WEAPON PERKS"
+                                TextAlignment="Left"
+                                TextWrapping="Wrap" />
 
-                    <Rectangle
-                        Grid.Row="1"
-                        Width="1200"
-                        Height="3"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Fill="White" />
+                            <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
 
-                    <Grid
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        Margin="0,0,0,0"
-                        Background="Transparent">
-                        <StackPanel
-                            x:Name="PerksPanel"
-                            Panel.ZIndex="50"
-                            Orientation="Horizontal" />
-                    </Grid>
+                            <Grid
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left"
+                                Background="Transparent">
+                                <StackPanel
+                                    x:Name="PerksPanel"
+                                    Panel.ZIndex="50"
+                                    Orientation="Horizontal" />
+                            </Grid>
 
-                </Grid>
+                        </Grid>
 
-                <!--  Mods  -->
-                <Grid
-                    Name="Mods"
-                    Grid.Row="1"
-                    MaxHeight="130"
-                    Margin="125,0,0,20"
-                    VerticalAlignment="Top"
-                    Background="Transparent"
-                    Visibility="Collapsed">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="10" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
+                        <!--  Mods  -->
+                        <Grid
+                            Name="Mods"
+                            Grid.Row="1"
+                            MaxWidth="750"
+                            MaxHeight="130"
+                            Margin="0,0,100,20"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Background="Transparent"
+                            Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
 
-                    <TextBlock
-                        Name="ModsTextBlock"
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Panel.ZIndex="1"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="25"
-                        Foreground="{StaticResource ForegroundColour80}"
-                        Text="WEAPON MODS"
-                        TextAlignment="Left"
-                        TextWrapping="Wrap" />
+                            <TextBlock
+                                Name="ModsTextBlock"
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="25"
+                                Foreground="{StaticResource ForegroundColour70}"
+                                Text="WEAPON MODS"
+                                TextAlignment="Left"
+                                TextWrapping="Wrap" />
 
-                    <Rectangle
-                        Grid.Row="1"
-                        Width="1200"
-                        Height="3"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Fill="White" />
+                            <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
 
-                    <Grid
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        Margin="0,0,0,0"
-                        Background="Transparent">
-                        <StackPanel
-                            x:Name="ModsPanel"
-                            Panel.ZIndex="50"
-                            Orientation="Horizontal" />
-                    </Grid>
+                            <Grid
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left"
+                                Background="Transparent">
+                                <StackPanel
+                                    x:Name="ModsPanel"
+                                    Panel.ZIndex="50"
+                                    Orientation="Horizontal" />
+                            </Grid>
 
-                </Grid>
+                        </Grid>
 
 
-                <!--  Intrinsic Traits  -->
-                <Grid
-                    Name="Intrinsics"
-                    Grid.Row="1"
-                    MaxHeight="130"
-                    Margin="125,0,0,20"
-                    VerticalAlignment="Top"
-                    Background="Transparent"
-                    Visibility="Collapsed">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="10" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
+                        <!--  Intrinsic Traits  -->
+                        <Grid
+                            Name="Intrinsics"
+                            Grid.Row="1"
+                            MaxWidth="750"
+                            MaxHeight="135"
+                            Margin="0,0,100,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Background="Transparent"
+                            Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
 
-                    <TextBlock
-                        Name="IntrinsicTextBlock"
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Panel.ZIndex="1"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="25"
-                        Foreground="{StaticResource ForegroundColour80}"
-                        Text="INTRINSIC TRAITS"
-                        TextAlignment="Left"
-                        TextWrapping="Wrap" />
+                            <TextBlock
+                                Name="IntrinsicTextBlock"
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="25"
+                                Foreground="{StaticResource ForegroundColour70}"
+                                Text="INTRINSIC TRAITS"
+                                TextAlignment="Left"
+                                TextWrapping="Wrap" />
 
-                    <Rectangle
-                        Grid.Row="1"
-                        Width="1200"
-                        Height="3"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Fill="White" />
+                            <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
 
-                    <Grid
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        Margin="0,0,0,0"
-                        Background="Transparent">
-                        <StackPanel
-                            x:Name="IntrinsicsPanel"
-                            Panel.ZIndex="50"
-                            Orientation="Horizontal" />
-                    </Grid>
-                </Grid>
-            </StackPanel>
+                            <Grid
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Margin="0,0,0,5"
+                                HorizontalAlignment="Left"
+                                Background="Transparent">
+                                <StackPanel
+                                    x:Name="IntrinsicsPanel"
+                                    Panel.ZIndex="50"
+                                    Orientation="Horizontal" />
+                            </Grid>
+                        </Grid>
 
-            <!--  FoundryBanner  -->
+                        <!--  Cosmetics  -->
+                        <Grid
+                            Name="Cosmetics"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            MaxWidth="750"
+                            MaxHeight="130"
+                            Margin="0,0,0,20"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Background="Transparent"
+                            Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="10" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                Name="CosmeticsTextBlock"
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="25"
+                                Foreground="{StaticResource ForegroundColour70}"
+                                Text="COSMETICS"
+                                TextAlignment="Left"
+                                TextWrapping="Wrap" />
+
+                            <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
+
+                            <Grid
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left"
+                                Background="Transparent">
+                                <StackPanel
+                                    x:Name="CosmeticsPanel"
+                                    Panel.ZIndex="50"
+                                    Orientation="Horizontal" />
+                            </Grid>
+                        </Grid>
+                    </WrapPanel>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!--  Background + FoundryBanner  -->
+        <Grid
+            x:Name="BackgroundContainer"
+            Panel.ZIndex="-5"
+            Background="#17171f">
             <Image
                 Name="FoundryBanner"
                 Grid.Row="0"
@@ -566,88 +778,21 @@
                 VerticalAlignment="Top"
                 Panel.ZIndex="-1"
                 d:Source="https://www.bungie.net/common/destiny2_content/icons/6774c7855193dff237408fc5295f39c2.png"
-                Opacity="0.5"
+                Opacity="0.65"
                 Source="{Binding FoundryIconSource}" />
 
-            <!--  InfoBox  -->
-            <Grid
-                x:Name="InfoBox"
-                Width="375"
-                Background="Transparent"
-                IsHitTestVisible="False"
-                Visibility="Collapsed">
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-                <Grid.RenderTransform>
-                    <TranslateTransform X="0" Y="0" />
-                </Grid.RenderTransform>
-
-                <Rectangle
-                    Grid.Row="0"
-                    Width="500"
-                    Height="500"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Fill="#AAAAAA" />
-
-                <Grid Grid.Row="1" Background="#020202">
-                    <StackPanel
-                        Margin="15"
-                        Background="Transparent"
-                        Orientation="Vertical">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
-                            FontSize="25"
-                            Foreground="{StaticResource ForegroundColour100}"
-                            Text="{Binding Name}"
-                            TextWrapping="WrapWithOverflow" />
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                            FontSize="16"
-                            Foreground="{StaticResource ForegroundColour80}"
-                            Text="{Binding Type}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Type}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </StackPanel>
-                </Grid>
-
-
-                <Grid Grid.Row="2" Background="#D61D1D1D">
-                    <TextBlock
-                        Margin="15"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="16"
-                        Foreground="{StaticResource ForegroundColour80}"
-                        Text="{Binding Description}"
-                        TextWrapping="WrapWithOverflow" />
-                </Grid>
-            </Grid>
-
-            <!--  ItemBackground  -->
             <Grid
                 x:Name="ItemBackground"
                 Grid.RowSpan="2"
                 Grid.ColumnSpan="2"
                 Width="1920"
                 Height="1080"
-                HorizontalAlignment="Left"
+                HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Panel.ZIndex="-5">
+                <Grid.RenderTransform>
+                    <TranslateTransform X="0" Y="0" />
+                </Grid.RenderTransform>
                 <Grid.Background>
                     <ImageBrush d:ImageSource="https://bungie.net/common/destiny2_content/screenshots/3824673936.jpg" />
                 </Grid.Background>
@@ -680,39 +825,42 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
-                    <RowDefinition Height="2" />
+                    <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
                 <TextBlock
                     Grid.Row="0"
                     Grid.RowSpan="1"
-                    Margin="70,40,70,0"
+                    Margin="70,40,70,20"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Panel.ZIndex="1"
                     d:Text="ITEM NAME"
-                    FontSize="50"
-                    FontWeight="Bold"
+                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                    FontSize="40"
                     Foreground="{StaticResource ForegroundColour100}"
-                    Text="{Binding ItemName}" />
+                    Text="{Binding ItemName}"
+                    TextWrapping="WrapWithOverflow" />
+
+                <Rectangle
+                    Grid.Row="1"
+                    Height="2"
+                    Margin="70,10,70,20"
+                    VerticalAlignment="Center"
+                    Fill="#C6717171" />
 
                 <TextBlock
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Grid.RowSpan="1"
-                    Margin="70,20,70,20"
+                    Margin="70,10,70,20"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     Panel.ZIndex="1"
                     d:Text="ITEM FLAVORTEXT"
-                    FontSize="25"
-                    FontWeight="Bold"
+                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                    FontSize="22"
                     Foreground="{StaticResource ForegroundColour100}"
                     Text="{Binding ItemFlavorText}"
                     TextWrapping="WrapWithOverflow" />
-
-                <Rectangle
-                    Grid.Row="2"
-                    Margin="70,0,70,0"
-                    Fill="#C6717171" />
             </Grid>
 
             <ScrollViewer
@@ -723,12 +871,222 @@
                 <TextBlock
                     Margin="70,0,35,0"
                     d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                     FontSize="22"
                     LineHeight="30px"
                     Text="{Binding ItemLore}"
                     TextWrapping="WrapWithOverflow" />
             </ScrollViewer>
         </Grid>
+
+        <!--  InfoBox  -->
+        <Grid
+            x:Name="InfoBox"
+            Width="375"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Panel.ZIndex="5"
+            Background="Transparent"
+            IsHitTestVisible="False"
+            Visibility="Collapsed">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid.RenderTransform>
+                <TranslateTransform X="0" Y="0" />
+            </Grid.RenderTransform>
+
+            <Rectangle
+                Grid.Row="0"
+                Width="375"
+                Height="5"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Fill="#AAAAAA">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+
+            <Grid Grid.Row="1">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Background" Value="#F1020202" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="True">
+                                <Setter Property="Background" Value="#F1444242" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PlugRarity}" Value="Exotic">
+                                <Setter Property="Background" Value="#F1CEAE33" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PlugRarity}" Value="Legendary">
+                                <Setter Property="Background" Value="#F1522F64" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PlugRarity}" Value="Rare">
+                                <Setter Property="Background" Value="#F15076A4" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PlugRarity}" Value="Uncommon">
+                                <Setter Property="Background" Value="#F1367042" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+
+                <!--  Image is outside the canvas without margin for some reason?  -->
+                <Canvas
+                    Margin="0,0,54,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Background="transparent">
+                    <Image
+                        Width="54"
+                        Height="54"
+                        Source="{Binding PlugWatermark}" />
+                </Canvas>
+
+                <StackPanel
+                    Margin="15,15,15,15"
+                    Background="Transparent"
+                    Orientation="Vertical">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        d:Text="ITEM NAME "
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                        FontSize="25"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding Name}"
+                        TextWrapping="WrapWithOverflow" />
+
+                    <Grid Background="Transparent">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Type}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            d:Text="Item Type"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour90}"
+                            Opacity="0.8"
+                            Text="{Binding Type}" />
+
+                        <TextBlock
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            d:Text="Item Rarity"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour100}"
+                            Opacity="0.5"
+                            Text="{Binding PlugRarity}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding PlugRarity}" Value="Common">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="2">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Background" Value="#D6161515" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlugRarity}" Value="Exotic">
+                                <Setter Property="Background" Value="#F1342b0d" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PlugRarity}" Value="Legendary">
+                                <Setter Property="Background" Value="#D6150c19" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PlugRarity}" Value="Rare">
+                                <Setter Property="Background" Value="#F1141d29" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PlugRarity}" Value="Uncommon">
+                                <Setter Property="Background" Value="#F10e1c11" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+
+
+                <StackPanel x:Name="InfoBoxStackPanel" Orientation="Vertical">
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Margin" Value="15,10,15,10" />
+                        </Style>
+                        <Style TargetType="{x:Type Grid}">
+                            <Setter Property="Margin" Value="15,10,15,10" />
+                        </Style>
+                    </StackPanel.Resources>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!--  User Controls  -->
+        <Grid Margin="0,900,0,0" Background="#38000000">
+            <StackPanel
+                Margin="0,0,150,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                FlowDirection="RightToLeft"
+                Orientation="Horizontal">
+
+                <TextBlock
+                    Margin="0,0,25,0"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text=" Dismiss"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    x:Name="ShowLoreHint"
+                    Margin="0,0,25,0"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text=" Show Lore"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap"
+                    Visibility="Collapsed" />
+            </StackPanel>
+
+        </Grid>
+
     </Grid>
 </UserControl>
 

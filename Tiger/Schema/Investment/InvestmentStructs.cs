@@ -71,6 +71,8 @@ public struct D2Class_9D798080
     [SchemaField(0x8A, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xC2, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public byte ItemRarity;
+    [SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public byte UnkC4;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xCA, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -154,7 +156,7 @@ public struct D2Class_05798080
 public struct D2Class_81738080
 {
     public DynamicArray<D2Class_86738080> InvestmentStats;  // "investmentStats" from API
-    public DynamicArray<D2Class_86738080> Perks;  // 'perks'
+    public DynamicArray<D2Class_87738080> Perks;  // 'perks'
 }
 
 /// <summary>
@@ -165,6 +167,12 @@ public struct D2Class_86738080
 {
     public int StatTypeIndex;  // "statTypeHash" from API
     public int Value;  // "value" from API
+}
+
+[SchemaStruct("86738080", 0x18)]
+public struct D2Class_87738080
+{
+    public int PerkIndex;  // "perkHash" from API
 }
 
 [SchemaStruct("7F738080", 2)]
@@ -374,11 +382,23 @@ public struct D2Class_9F548080
     public TigerHash UnkC8;  // "bucketTypeHash" / "equipmentSlotTypeHash"
     public TigerHash UnkCC;  // DestinySandboxPatternDefinition hash
     public TigerHash UnkD0;  // DestinySandboxPatternDefinition hash
+    public TigerHash UnkD4;
+    public StringHash TooltipStyle; // 'tooltipStyle' as fnv hash
 
+    [SchemaField(0xE0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArray<D2Class_B2548080> TooltipNotifications;
     // ive missed lots of stuff here
 
     [SchemaField(0x120, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_59238080> Unk120;
+}
+
+[SchemaStruct("B2548080", 0x20)]
+public struct D2Class_B2548080
+{
+    [SchemaField(0x10)]
+    public StringIndexReference DisplayString;
+    public StringHash DisplayStyle; // No actual strings, fnv (B4437851 = ui_display_style_item_add_on)
 }
 
 [SchemaStruct("F1598080", 2)]
@@ -479,6 +499,21 @@ public struct D2Class_33548080
     public StringIndexReference SandboxPerkName;
     public StringIndexReference SandboxPerkDescription;
     public short IconIndex;
+}
+
+[SchemaStruct("AA768080", 0x18)]
+public struct D2Class_AA768080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_AE7680800> SandboxPerkDefinitionEntries;
+}
+
+[SchemaStruct("AE768080", 0xC)]
+public struct D2Class_AE7680800
+{
+    public TigerHash SandboxPerkHash;
+    public int UnkIndex;
+    public int Unk08;
 }
 
 #endregion
@@ -972,6 +1007,8 @@ public struct D2Class_C8778080
 public struct D2Class_A1738080
 {
     public TigerHash PlugCategoryHash;
+    [SchemaField(0xF8)]
+    public StringHash PlugStyle; // 'uiPlugLabel', theres only none (invalid) and masterwork (6048A01E)
 }
 
 #endregion
@@ -1016,8 +1053,58 @@ public struct D2Class_5D4F8080
     public TigerHash SocketCategoryHash;
     public StringIndexReference SocketName;
     public StringIndexReference SocketDescription;
-    public StringHash SocketSubname;
+    public uint CategoryStyle; // 'uiCategoryStyle'
 }
+#endregion
+
+#region Collectables
+
+[SchemaStruct("28788080", 0x18)]
+public struct D2Class_28788080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_2C788080> CollectibleDefinitionEntries;
+}
+
+[SchemaStruct("2C788080", 0xB0)]
+public struct D2Class_2C788080
+{
+    [SchemaField(0x18)]
+    public DynamicArray<D2Class_F7788080> ParentNodeHashes;
+    public TigerHash CollectibleHash;
+    public short InventoryItemIndex;
+    [SchemaField(0x30)]
+    public DynamicArray<D2Class_3A7A8080> UnkUnlock30;
+    [SchemaField(0x60)]
+    public DynamicArray<D2Class_3A7A8080> UnkUnlockClass;
+    public DynamicArray<D2Class_3A7A8080> Unk70;
+}
+
+[SchemaStruct("F7788080", 2)]
+public struct D2Class_F7788080
+{
+    public short ParentNodeHashIndex;
+}
+
+
+[SchemaStruct("BF598080", 0x18)]
+public struct D2Class_BF598080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_C3598080> CollectibleDefinitionStringEntries;
+}
+
+[SchemaStruct("C3598080", 0x60)]
+public struct D2Class_C3598080
+{
+    public TigerHash CollectibleHash;
+    public int Unk04;
+    public StringIndexReference CollectibleName;
+    [SchemaField(0x18)]
+    public StringIndexReference SourceName;
+    public StringIndexReference RequirementDescription;
+}
+
 #endregion
 
 #region Destiny 1 API stuff

@@ -94,7 +94,7 @@ public partial class DareView : UserControl
                     {
                         ItemName = name,
                         ItemType = type,
-                        ItemRarity = (ItemTier)item.TagData.ItemRarity,
+                        ItemRarity = (ItemRarity)item.TagData.ItemRarity,
                         ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
                         ImageSource = image.Keys.First(),
                         ImageHeight = 96,
@@ -296,7 +296,7 @@ public partial class DareView : UserControl
                 {
                     ItemName = name,
                     ItemType = type,
-                    ItemRarity = (ItemTier)parent.TagData.ItemRarity,
+                    ItemRarity = (ItemRarity)parent.TagData.ItemRarity,
                     ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
                     ImageSource = icon.Keys.First(),
                     ImageHeight = 96,
@@ -340,7 +340,7 @@ public partial class DareView : UserControl
                 {
                     ItemName = name,
                     ItemType = type,
-                    ItemRarity = (ItemTier)parent.TagData.ItemRarity,
+                    ItemRarity = (ItemRarity)parent.TagData.ItemRarity,
                     ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
                     ImageSource = dw,
                     ImageHeight = 96,
@@ -402,7 +402,7 @@ public class ApiItem
 {
     public string ItemName { get; set; }
     public string ItemType { get; set; }
-    public ItemTier ItemRarity { get; set; }
+    public ItemRarity ItemRarity { get; set; }
     public string ItemHash { get; set; }
     public double ImageWidth { get; set; }
     public double ImageHeight { get; set; }
@@ -414,7 +414,7 @@ public class ApiItem
     public InventoryItem Parent { get; set; }
 }
 
-public enum ItemTier : byte
+public enum ItemRarity : byte
 {
     Common = 1,
     Uncommon = 2,

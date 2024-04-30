@@ -35,7 +35,7 @@
             x:Name="recoilPath"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            d:Data="M1,1 L1.02,0 A1,1 0 0,0 0.98, 0 Z"
+            d:Data="M1,1 L1.2334453638559055,0.027630079602323443 A1,1 0 0,0 0.7665546361440948, 0.027630079602323332 Z"
             d:RenderTransformOrigin="1,0.5"
             Fill="White">
             <Path.RenderTransform>

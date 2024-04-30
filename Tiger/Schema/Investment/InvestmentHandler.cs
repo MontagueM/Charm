@@ -14,7 +14,7 @@ namespace Tiger.Schema.Investment;
 /// Keeps track of the investment tags.
 /// Finds them on launch from their tag class instead of hash.
 /// </summary>
-[InitializeAfter(typeof(PackageResourcer))]
+[InitializeAfter(typeof(Hash64Map))]
 public class Investment : Strategy.LazyStrategistSingleton<Investment>
 {
     private Tag<D2Class_8C798080> _inventoryItemIndexDictTag = null;
@@ -43,12 +43,17 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<D2Class_594F8080> _socketCategoryMap = null;
     private Tag<D2Class_CF508080> _loreStringMap = null;
     private Tag<D2Class_2D548080> _sandboxPerkMap = null;
+    private Tag<D2Class_AA768080> _sandboxPerkMap2 = null;
     private Tag<D2Class_6B588080> _statDefinitionMap = null;
     private Tag<D2Class_BE548080> _statGroupDefinitionMap = null;
+    private Tag<D2Class_28788080> _collectableDefinitionMap = null;
+    private Tag<D2Class_BF598080> _collectableStringsMap = null;
     public ConcurrentDictionary<int, D2Class_5D4F8080> SocketCategoryStringThings = null;
     public ConcurrentDictionary<int, D2Class_D3508080> InventoryItemLoreStrings = null;
     public ConcurrentDictionary<int, D2Class_33548080> SandboxPerkStrings = null;
     public ConcurrentDictionary<int, D2Class_6F588080> StatStrings = null;
+    public ConcurrentDictionary<int, D2Class_C3598080> CollectableStrings = null;
+    public ConcurrentDictionary<int, D2Class_AE7680800> SandboxPerkMap2 = null;
 
     public Investment(TigerStrategy strategy) : base(strategy)
     {
@@ -118,6 +123,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     }
 
+    public Tag<D2Class_B83E8080>? GetItemIconContainer(int index)
+    {
+        return _inventoryItemIconTag.TagData.InventoryItemIconsMap.ElementAt(_inventoryItemIconTag.GetReader(), index).IconContainer;
+    }
+
     public Tag<D2Class_B83E8080>? GetFoundryItemIconContainer(InventoryItem item)
     {
         return GetFoundryItemIconContainer(item.TagData.InventoryItemHash);
@@ -162,6 +172,26 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             return null;
 
         return _statGroupDefinitionMap.TagData.StatGroupDefinitions.ElementAt(_statGroupDefinitionMap.GetReader(), index);
+    }
+
+    public D2Class_C3598080? GetCollectible(int index)
+    {
+        int stringIndex = -1;
+        var reader = _collectableDefinitionMap.GetReader();
+        for (int i = 0; i < _collectableDefinitionMap.TagData.CollectibleDefinitionEntries.Count; i++)
+        {
+            var entry = _collectableDefinitionMap.TagData.CollectibleDefinitionEntries.ElementAt(reader, i);
+            if (entry.InventoryItemIndex == index)
+            {
+                stringIndex = i;
+                break;
+            }
+        }
+
+        if (stringIndex == -1 || stringIndex > CollectableStrings.Count)
+            return null;
+
+        return CollectableStrings[stringIndex];
     }
 
     private void GetAllInvestmentTags()
@@ -261,32 +291,47 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     case 0x8080542D:
                         _sandboxPerkMap = FileResourcer.Get().GetSchemaTag<D2Class_2D548080>(val);
                         break;
+                    case 0x808076AA:
+                        _sandboxPerkMap2 = FileResourcer.Get().GetSchemaTag<D2Class_AA768080>(val);
+                        break;
                     case 0x8080586B:
                         _statDefinitionMap = FileResourcer.Get().GetSchemaTag<D2Class_6B588080>(val);
                         break;
                     case 0x808054BE:
                         _statGroupDefinitionMap = FileResourcer.Get().GetSchemaTag<D2Class_BE548080>(val);
                         break;
-                        //case 0x80807828:
-                        //    collectibleDefTag = FileResourcer.Get().GetSchemaTag<D2Class_28788080>(val);
-                        //    break;
-                        //case 0x808059BF:
-                        //    collectibleStringsDefTag = FileResourcer.Get().GetSchemaTag<D2Class_BF598080>(val);
-                        //    break;
+                    case 0x80807828:
+                        _collectableDefinitionMap = FileResourcer.Get().GetSchemaTag<D2Class_28788080>(val);
+                        break;
+                    case 0x808059BF:
+                        _collectableStringsMap = FileResourcer.Get().GetSchemaTag<D2Class_BF598080>(val);
+                        break;
                 }
             });
         }
 
         Task.WaitAll(new[]
         {
-            Task.Run(GetInventoryItemStringThings),
             Task.Run(GetInventoryItemDict),
             Task.Run(GetEntityAssignmentDict),
+            Task.Run(GetInventoryItemStringThings),
             Task.Run(GetSocketCategoryStrings),
             Task.Run(GetInventoryItemLoreStrings),
             Task.Run(GetSandboxPerkStrings),
-            Task.Run(GetStatStrings)
+            Task.Run(GetStatStrings),
+            Task.Run(GetCollectableStrings),
+            Task.Run(GetSandboxPerkMap2)
         });
+    }
+
+    private void GetSandboxPerkMap2()
+    {
+        SandboxPerkMap2 = new();
+        using TigerReader reader = _sandboxPerkMap2.GetReader();
+        for (int i = 0; i < _sandboxPerkMap2.TagData.SandboxPerkDefinitionEntries.Count; i++)
+        {
+            SandboxPerkMap2.TryAdd(i, _sandboxPerkMap2.TagData.SandboxPerkDefinitionEntries[reader, i]);
+        }
     }
 
     private void GetInventoryItemStringThings()
@@ -347,6 +392,19 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             for (int i = 0; i < _statDefinitionMap.TagData.StatDefinitions.Count; i++)
             {
                 StatStrings.TryAdd(i, _statDefinitionMap.TagData.StatDefinitions[reader, i]);
+            }
+        }
+    }
+
+    private void GetCollectableStrings()
+    {
+        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            CollectableStrings = new();
+            using TigerReader reader = _collectableStringsMap.GetReader();
+            for (int i = 0; i < _collectableStringsMap.TagData.CollectibleDefinitionStringEntries.Count; i++)
+            {
+                CollectableStrings.TryAdd(i, _collectableStringsMap.TagData.CollectibleDefinitionStringEntries[reader, i]);
             }
         }
     }
@@ -782,6 +840,19 @@ public class InventoryItem : Tag<D2Class_9D798080>
     {
     }
 
+    public int GetItemDamageTypeIndex()
+    {
+        if (_tag.Unk78.GetValue(GetReader()) is D2Class_81738080 perks)
+        {
+            foreach (var perk in perks.Perks)
+            {
+                if (Investment.Get().SandboxPerkMap2[perk.PerkIndex].UnkIndex != -1)
+                    return Investment.Get().SandboxPerkMap2[perk.PerkIndex].UnkIndex;
+            }
+        }
+        return -1;
+    }
+
     public int GetArtArrangementIndex()
     {
         if (_tag.Unk90.GetValue(GetReader()) is D2Class_77738080 entry)
@@ -841,18 +912,22 @@ public class InventoryItem : Tag<D2Class_9D798080>
         return ornaments;
     }
 
-    private Texture? GetTexture(Tag<D2Class_CF3E8080> iconSecondaryContainer)
+    private Texture? GetTexture(Tag<D2Class_CF3E8080> iconSecondaryContainer, int index = 0)
     {
         using TigerReader reader = iconSecondaryContainer.GetReader();
         dynamic? prim = iconSecondaryContainer.TagData.Unk10.GetValue(reader);
         if (prim is D2Class_CD3E8080 structCD3E8080)
         {
             // TextureList[0] is default, others are for colourblind modes
-            return structCD3E8080.Unk00[reader, 0].TextureList[reader, 0].IconTexture;
+            if (index >= structCD3E8080.Unk00[reader, 0].TextureList.Count)
+                return null;
+            return structCD3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
         }
         if (prim is D2Class_CB3E8080 structCB3E8080)
         {
-            return structCB3E8080.Unk00[reader, 0].TextureList[reader, 0].IconTexture;
+            if (index >= structCB3E8080.Unk00[reader, 0].TextureList.Count)
+                return null;
+            return structCB3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
         }
         return null;
     }
@@ -884,6 +959,15 @@ public class InventoryItem : Tag<D2Class_9D798080>
         return primaryIcon.GetTexture();
     }
 
+    public UnmanagedMemoryStream? GetIconPrimaryStream(int index)
+    {
+        Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(index);
+        if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
+            return null;
+        var primaryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
+        return primaryIcon.GetTexture();
+    }
+
     public Texture? GetIconPrimaryTexture()
     {
         Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
@@ -893,12 +977,14 @@ public class InventoryItem : Tag<D2Class_9D798080>
         return primaryIcon;
     }
 
-    public UnmanagedMemoryStream? GetIconOverlayStream()
+    public UnmanagedMemoryStream? GetIconOverlayStream(int index = 0)
     {
         Tag<D2Class_B83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconOverlayContainer == null)
             return null;
-        var overlayIcon = GetTexture(iconContainer.TagData.IconOverlayContainer);
+        var overlayIcon = GetTexture(iconContainer.TagData.IconOverlayContainer, index);
+        if (overlayIcon is null)
+            return null;
         return overlayIcon.GetTexture();
     }
 

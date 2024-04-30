@@ -35,9 +35,9 @@ public class Tag<T> : TigerFile where T : struct
         }
     }
 
-    protected void Deserialize()
+    protected void Deserialize(bool force = false)
     {
-        if (_isLoaded)
+        if (_isLoaded && !force)
             return;
 
         _isLoaded = true;

@@ -31,12 +31,13 @@ public partial class APIItemView : UserControl
     public APIItemView(InventoryItem item)
     {
         InitializeComponent();
-
-        Console.WriteLine($"{item.TagData.InventoryItemHash}");
         string name = Investment.Get().GetItemName(item);
         string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
         if (type == null)
             type = "";
+
+        var source = Investment.Get().GetCollectible(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
+        var sourceString = source != null ? source.Value.SourceName.Value.ToString() : "";
 
         var foundryBanner = MakeFoundryBanner(item);
         var image = MakeIcon(item);
@@ -47,9 +48,10 @@ public partial class APIItemView : UserControl
             ItemType = type.ToUpper(),
             ItemFlavorText = Investment.Get().GetItemStringThing(item.TagData.InventoryItemHash).TagData.ItemFlavourText.Value.ToString(),
             ItemLore = Investment.Get().GetItemLore(item.TagData.InventoryItemHash)?.LoreDescription.Value.ToString(),
-            ItemRarity = (ItemTier)item.TagData.ItemRarity,
+            ItemSource = sourceString,
             ImageSource = image.Keys.First(),
-            FoundryIconSource = foundryBanner
+            FoundryIconSource = foundryBanner,
+            ItemDamageType = ((DestinyDamageType)item.GetItemDamageTypeIndex()).GetEnumDescription()
         };
         Load();
     }
@@ -57,6 +59,9 @@ public partial class APIItemView : UserControl
     public APIItemView(ApiItem apiItem)
     {
         InitializeComponent();
+
+        var source = Investment.Get().GetCollectible(Investment.Get().GetItemIndex(apiItem.Item.TagData.InventoryItemHash));
+        var sourceString = source != null ? source.Value.SourceName.Value.ToString() : "";
 
         var hash = apiItem.Item.TagData.InventoryItemHash;
         var foundryBanner = MakeFoundryBanner(apiItem.Item);
@@ -67,9 +72,10 @@ public partial class APIItemView : UserControl
             ItemType = apiItem.ItemType.ToUpper(),
             ItemFlavorText = Investment.Get().GetItemStringThing(hash).TagData.ItemFlavourText.Value.ToString(),
             ItemLore = Investment.Get().GetItemLore(hash)?.LoreDescription.Value.ToString(),
-            ItemRarity = apiItem.ItemRarity,
+            ItemSource = sourceString,
             ImageSource = apiItem.ImageSource,
-            FoundryIconSource = foundryBanner
+            FoundryIconSource = foundryBanner,
+            ItemDamageType = ((DestinyDamageType)apiItem.Item.GetItemDamageTypeIndex()).GetEnumDescription()
         };
         Load();
     }
@@ -80,7 +86,10 @@ public partial class APIItemView : UserControl
         Console.WriteLine($"Strings {Investment.Get().GetItemStringThing(ApiItem.Item.TagData.InventoryItemHash).Hash}");
         Console.WriteLine($"Icons {Investment.Get().GetItemIconContainer(ApiItem.Item.TagData.InventoryItemHash).Hash}");
         if (ApiItem.ItemLore != null)
+        {
             LoreEntry.DataContext = ApiItem;
+            ShowLoreHint.Visibility = Visibility.Visible;
+        }
 
         try
         {
@@ -96,7 +105,6 @@ public partial class APIItemView : UserControl
 
     private void Load()
     {
-        DataContext = this;
         MouseMove += UserControl_MouseMove;
         KeyDown += UserControl_KeyDown;
         MainContainer.DataContext = ApiItem;
@@ -114,12 +122,9 @@ public partial class APIItemView : UserControl
         var name = Investment.Get().GetItemName(item).ToUpper();
         var type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value.ToString();
         var description = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemDisplaySource.Value.ToString();
+        var socketName = Investment.Get().SocketCategoryStringThings[socketIndex].SocketName.Value.ToString();
         if (name == "" && type == "" && description == "")
             return null;
-
-        var socketName = Investment.Get().SocketCategoryStringThings[socketIndex].SocketName.Value.ToString();
-        if (socketName.ToLower().Contains("mods") && item.TagData.Unk78.GetValue(item.GetReader()) is D2Class_81738080 stats && stats.Perks.Count > 0)
-            description = Investment.Get().SandboxPerkStrings[stats.Perks[0].StatTypeIndex].SandboxPerkDescription.Value.ToString();
 
         PlugItem PlugItem = new PlugItem
         {
@@ -130,8 +135,11 @@ public partial class APIItemView : UserControl
             Description = description,
             PlugImageSource = icon.Keys.First(),
             PlugSocketIndex = socketIndex,
-            PlugSocketName = socketName,
-            PlugSelected = false
+            PlugSocketName = socketName.ToUpper(),
+            PlugWatermark = GetPlugWatermark(item),
+            PlugRarity = (ItemRarity)item.TagData.ItemRarity,
+            PlugSelected = false,
+            PlugStyle = item.TagData.UnkC4 == 0
         };
 
         return PlugItem;
@@ -144,12 +152,13 @@ public partial class APIItemView : UserControl
             for (int i = 0; i < sockets.SocketEntries.Count; i++)
             {
                 var socket = sockets.SocketEntries[i];
-                System.Console.WriteLine($"SocketTypeIndex: {socket.SocketTypeIndex} "
-                    + (socket.SocketTypeIndex != -1 ? Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].SocketName.Value
-                    + $" ({Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)} : {Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].SocketCategoryHash})" : ""));
 
                 if (socket.SocketTypeIndex == -1)
                     continue;
+
+                Console.WriteLine($"SocketTypeIndex: {socket.SocketTypeIndex} " +
+                    $"{Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].SocketName.Value} " +
+                    $"{(DestinySocketCategoryStyle)Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].CategoryStyle}");
 
                 var socketCategoryIndex = Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex);
                 if (socket.ReusablePlugSetIndex1 != -1)
@@ -197,10 +206,10 @@ public partial class APIItemView : UserControl
                     }
                 }
 
-                var socketName = Investment.Get().SocketCategoryStringThings[socketCategoryIndex].SocketName.Value.ToString();
+                var socketName = Investment.Get().SocketCategoryStringThings[socketCategoryIndex].SocketName.Value.ToString().ToUpper();
                 // Perks
                 var perks = _plugItems.Where(x => x.PlugSocketIndex == socketCategoryIndex
-                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("perks"));
+                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("perks")).DistinctBy(x => x.Hash);
                 if (perks.Count() != 0)
                 {
                     ListBox listBoxPerks = new ListBox();
@@ -213,7 +222,7 @@ public partial class APIItemView : UserControl
 
                 // Mods
                 var mods = _plugItems.Where(x => x.PlugSocketIndex == socketCategoryIndex
-                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("mods"));
+                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("mods")).DistinctBy(x => x.Hash);
                 if (mods.Count() != 0)
                 {
                     ListBox listBoxMods = new ListBox();
@@ -227,7 +236,7 @@ public partial class APIItemView : UserControl
 
                 // Intrinsics
                 var intrinsics = _plugItems.Where(x => x.PlugSocketIndex == socketCategoryIndex
-                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("intrinsic"));
+                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("intrinsic")).DistinctBy(x => x.Hash);
                 if (intrinsics.Count() != 0)
                 {
                     ListBox listBoxIntrinsics = new ListBox();
@@ -238,15 +247,29 @@ public partial class APIItemView : UserControl
                     Intrinsics.Visibility = Visibility.Visible;
                     IntrinsicTextBlock.Text = socketName;
                 }
-            }
 
-
-            foreach (var plug in _plugItems)
-            {
-                var socketName = Investment.Get().SocketCategoryStringThings[plug.PlugSocketIndex].SocketName.Value;
-                if (socketName == "WEAPON PERKS")
+                // Cosmetics
+                var cosmetics = _plugItems.Where(x => x.PlugSocketIndex == socketCategoryIndex
+                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("cosmetic")).DistinctBy(x => x.Hash);
+                if (cosmetics.Count() != 0)
                 {
-                    Console.WriteLine($"{socketName}: {plug.Name}: {plug.Type}, {plug.PlugOrderIndex}");
+                    // Just so "Default Shader" is first, followed by newest
+                    var list = cosmetics.ToList();
+                    int lastIndex = list.FindLastIndex(item => item.Name.ToLower().Contains("default"));
+                    if (lastIndex >= 0)
+                    {
+                        PlugItem lastItem = list[lastIndex];
+                        list.RemoveAt(lastIndex);
+                        list.Insert(0, lastItem);
+                    }
+
+                    ListBox listBoxCosmetics = new ListBox();
+                    listBoxCosmetics.ItemsSource = list;
+
+                    listBoxCosmetics.ItemTemplate = (DataTemplate)FindResource("ModItemTemplate");
+                    CosmeticsPanel.Children.Add(listBoxCosmetics);
+                    Cosmetics.Visibility = Visibility.Visible;
+                    CosmeticsTextBlock.Text = socketName;
                 }
             }
         }
@@ -257,34 +280,36 @@ public partial class APIItemView : UserControl
         if (ApiItem.Item.TagData.Unk78.GetValue(ApiItem.Item.GetReader()) is D2Class_81738080 stats)
         {
             var statGroup = Investment.Get().GetStatGroup(ApiItem.Item);
-            if (statGroup is null)
-                return;
 
-            foreach (var scaledStat in statGroup.Value.ScaledStats)
+            if (statGroup is not null)
             {
-                var statItem = Investment.Get().StatStrings[scaledStat.StatIndex];
-
-                int statValue = stats.InvestmentStats.Where(x => x.StatTypeIndex == scaledStat.StatIndex).FirstOrDefault().Value;
-                int displayValue = MakeDisplayValue(scaledStat.StatIndex, statValue);
-
-                var displayStat = new StatItem
+                foreach (var scaledStat in statGroup.Value.ScaledStats)
                 {
-                    Hash = statItem.StatHash,
-                    Name = statItem.StatName.Value.ToString(),
-                    Description = statItem.StatDescription.Value.ToString(),
-                    StatDisplayValue = displayValue,
-                    StatValue = statValue,
-                    StatDisplayNumeric = scaledStat.DisplayAsNumeric == 1,
-                    StatIsLinear = scaledStat.IsLinear == 1
-                };
-                _statItems.Add(displayStat);
-                //Console.WriteLine($"{displayStat.StatName} ({displayStat.StatDescription}) : {displayStat.StatDisplayValue} ({displayStat.StatValue})");
+                    var statItem = Investment.Get().StatStrings[scaledStat.StatIndex];
+
+                    int statValue = stats.InvestmentStats.Where(x => x.StatTypeIndex == scaledStat.StatIndex).FirstOrDefault().Value;
+                    int displayValue = MakeDisplayValue(scaledStat.StatIndex, statValue);
+
+                    var displayStat = new StatItem
+                    {
+                        Hash = statItem.StatHash,
+                        Name = statItem.StatName.Value.ToString(),
+                        Description = statItem.StatDescription.Value.ToString(),
+                        StatDisplayValue = displayValue,
+                        StatValue = statValue,
+                        StatDisplayNumeric = scaledStat.DisplayAsNumeric == 1,
+                        StatIsLinear = scaledStat.IsLinear == 1
+                    };
+                    _statItems.Add(displayStat);
+                    //Console.WriteLine($"{displayStat.StatName} ({displayStat.StatDescription}) : {displayStat.StatDisplayValue} ({displayStat.StatValue})");
+                }
             }
         }
 
         // this is dumbbbbb
         ItemStatsControl.ItemsSource = _statItems.Where(x => !x.StatDisplayNumeric);
         ItemNumericStatsControl.ItemsSource = _statItems.Where(x => x.StatDisplayNumeric);
+        StatsContainer.Visibility = _statItems.Count != 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private int MakeDisplayValue(int statIndex, int statValue)
@@ -346,7 +371,7 @@ public partial class APIItemView : UserControl
         return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
     }
 
-    private BitmapImage MakeBitmapImage(UnmanagedMemoryStream ms, int width, int height)
+    private static BitmapImage MakeBitmapImage(UnmanagedMemoryStream ms, int width, int height)
     {
         BitmapImage bitmapImage = new BitmapImage();
         bitmapImage.BeginInit();
@@ -411,6 +436,15 @@ public partial class APIItemView : UserControl
         return dw;
     }
 
+    public ImageSource GetPlugWatermark(InventoryItem item)
+    {
+        var overlayStream = item.GetIconOverlayStream(1);
+        var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+        var dw = new ImageBrush(overlay);
+        dw.Freeze();
+        return dw.ImageSource;
+    }
+
     private void PlugItem_MouseEnter(object sender, MouseEventArgs e)
     {
         InfoBox.Visibility = Visibility.Visible;
@@ -418,8 +452,12 @@ public partial class APIItemView : UserControl
         InfoBox.BeginStoryboard(fadeIn);
 
         ActivePlugItemButton = (sender as Button);
+        InfoBox.DataContext = ActivePlugItemButton.DataContext;
 
         PlugItem item = (PlugItem)(sender as Button).DataContext;
+        if (item.Description != "")
+            AddToInfoBox(item, InfoBoxType.TextBlock);
+
         if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
         {
             foreach (var stat in stats.InvestmentStats)
@@ -435,11 +473,47 @@ public partial class APIItemView : UserControl
                     _stat.StatAdjustValue = adjustValue;
                 }
             }
+            if (!item.PlugStyle)
+                return;
+
+            foreach (var perk in stats.Perks)
+            {
+                var perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
+                if (perkStrings.IconIndex == -1)
+                    continue;
+
+                // Icon
+                var overlayStream = item.Item.GetIconPrimaryStream(perkStrings.IconIndex);
+                var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+                var dw = new ImageBrush(overlay);
+                dw.Freeze();
+
+                PlugItem perkItem = new PlugItem
+                {
+                    Hash = perkStrings.SandboxPerkHash,
+                    Description = perkStrings.SandboxPerkDescription.Value,
+                    PlugImageSource = dw.ImageSource
+                };
+
+                AddToInfoBox(perkItem, InfoBoxType.Grid);
+            }
+        }
+
+        foreach (var notif in Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.Item.TagData.InventoryItemHash)].TagData.TooltipNotifications)
+        {
+            PlugItem notifItem = new PlugItem
+            {
+                Description = notif.DisplayString.Value,
+                PlugImageSource = null
+            };
+
+            AddToInfoBox(notifItem, InfoBoxType.InfoBlock);
         }
     }
 
     private void PlugItem_MouseLeave(object sender, MouseEventArgs e)
     {
+        InfoBoxStackPanel.Children.Clear();
         InfoBox.Visibility = Visibility.Collapsed;
         ActivePlugItemButton = null;
 
@@ -465,10 +539,7 @@ public partial class APIItemView : UserControl
     {
         PlugItem item = (PlugItem)(sender as Button).DataContext;
 
-        Console.WriteLine($"{item.Name}");
-        Console.WriteLine($"Item {item.Item.Hash}");
-        Console.WriteLine($"Strings {Investment.Get().GetItemStringThing(item.Item.TagData.InventoryItemHash).Hash}");
-        Console.WriteLine($"Icons {Investment.Get().GetItemIconContainer(item.Item.TagData.InventoryItemHash).Hash}");
+        Console.WriteLine($"{item.Name} {item.Item.Hash}");
 
         if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
         {
@@ -479,21 +550,38 @@ public partial class APIItemView : UserControl
                     continue;
 
                 var mainStat = ((D2Class_81738080)ApiItem.Item.TagData.Unk78.GetValue(ApiItem.Item.GetReader())).InvestmentStats.FirstOrDefault(x => x.StatTypeIndex == stat.StatTypeIndex);
-                Console.WriteLine($"{statItem.StatName.Value.ToString()} : {stat.Value} (perk) + {mainStat.Value} (main) = {stat.Value + mainStat.Value}");
+                Console.WriteLine($"{statItem.StatName.Value.ToString()} : {stat.Value} ({MakeDisplayValue(stat.StatTypeIndex, stat.Value)}) (perk) + {mainStat.Value} ({MakeDisplayValue(mainStat.StatTypeIndex, mainStat.Value)}) (main) = {stat.Value + mainStat.Value}");
 
                 if (!item.PlugSelected)
                 {
                     //TODO: Can only have one perk selected in each row, clear any added stats from current selected perk
-
                     var statToChange = _statItems.FirstOrDefault(x => x.Hash == statItem.StatHash);
                     if (statToChange is null)
                         continue;
-                    Console.WriteLine(MakeDisplayValue(stat.StatTypeIndex, stat.Value));
                     statToChange.StatDisplayValue += MakeDisplayValue(stat.StatTypeIndex, stat.Value);
                 }
             }
-            item.PlugSelected = !item.PlugSelected;
         }
+
+        if (item.Type.ToLower().Contains("ornament") || item.Name.ToLower() == "default ornament")
+        {
+            var hash = item.Item.TagData.InventoryItemHash.Hash32;
+            if (item.Name.ToLower().Contains("default"))
+                hash = ApiItem.Item.TagData.InventoryItemHash.Hash32;
+
+            try
+            {
+                ImageBrush imageBrush = new ImageBrush();
+                imageBrush.ImageSource = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{hash}.jpg"));
+                ItemBackground.Background = imageBrush;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to get background for {item.Item.Hash}: {ex.Message}");
+            }
+        }
+
+        item.PlugSelected = !item.PlugSelected;
     }
 
     private void StatItem_MouseEnter(object sender, MouseEventArgs e)
@@ -501,42 +589,54 @@ public partial class APIItemView : UserControl
         InfoBox.Visibility = Visibility.Visible;
         var fadeIn = FindResource("FadeIn 0.2") as Storyboard;
         InfoBox.BeginStoryboard(fadeIn);
-
         ActiveStatItemGrid = (sender as Grid);
+
+        var stat = (StatItem)ActiveStatItemGrid.DataContext;
+        PlugItem statItem = new PlugItem
+        {
+            Hash = stat.Hash,
+            Name = stat.Name,
+            Description = stat.Description,
+        };
+        InfoBox.DataContext = statItem;
+        AddToInfoBox(statItem, InfoBoxType.TextBlock);
     }
 
     private void StatItem_MouseLeave(object sender, MouseEventArgs e)
     {
+        InfoBoxStackPanel.Children.Clear();
         InfoBox.Visibility = Visibility.Collapsed;
         ActiveStatItemGrid = null;
     }
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
+        Point position = e.GetPosition(Application.Current.MainWindow);
         if (InfoBox.Visibility == Visibility.Visible && (ActivePlugItemButton != null || ActiveStatItemGrid != null))
         {
-            float xOffset = 12;
-            float yOffset = 100;
+            float xOffset = 25;
+            float yOffset = 10;
 
-            Point position = e.GetPosition(Application.Current.MainWindow);
             // this is stupid
             if (position.X >= Application.Current.MainWindow.RenderSize.Width / 2)
-                xOffset = 16f;
+                xOffset = (-1 * xOffset) - (float)InfoBox.Width;
 
-            TranslateTransform transform = (TranslateTransform)InfoBox.RenderTransform;
-            transform.X = position.X - xOffset - InfoBox.ActualWidth / 2;
-            transform.Y = position.Y - yOffset - InfoBox.ActualHeight / 2;
-
-            InfoBox.DataContext = ActiveStatItemGrid != null ? ActiveStatItemGrid.DataContext : ActivePlugItemButton.DataContext;
+            TranslateTransform infoBoxtransform = (TranslateTransform)InfoBox.RenderTransform;
+            infoBoxtransform.X = position.X + xOffset;
+            infoBoxtransform.Y = position.Y + yOffset - Application.Current.MainWindow.RenderSize.Height;
         }
+
+        TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
+        gridTransform.X = position.X * -0.01;
+        gridTransform.Y = position.Y * -0.01;
     }
 
     private void UserControl_KeyDown(object sender, KeyEventArgs e)
     {
-        if (ApiItem.ItemLore is null)
+        if (e.Key == Key.Escape)
             return;
 
-        if (e.Key == Key.A)
+        if (e.Key == Key.A && ApiItem.ItemLore != null)
         {
             if (LoreEntry.Visibility != Visibility.Visible)
             {
@@ -550,12 +650,17 @@ public partial class APIItemView : UserControl
 
                 // Apply blur effect and fade it in
                 if (MainContainer.Effect == null || !(MainContainer.Effect is BlurEffect))
+                {
                     MainContainer.Effect = new BlurEffect { Radius = 0 };
+                    BackgroundContainer.Effect = new BlurEffect { Radius = 0 };
+                }
+
                 DoubleAnimation blurAnimation = new DoubleAnimation();
                 blurAnimation.From = 0;
                 blurAnimation.To = 20;
                 blurAnimation.Duration = TimeSpan.FromSeconds(0.2);
                 (MainContainer.Effect as BlurEffect).BeginAnimation(BlurEffect.RadiusProperty, blurAnimation);
+                (BackgroundContainer.Effect as BlurEffect).BeginAnimation(BlurEffect.RadiusProperty, blurAnimation);
             }
             else
             {
@@ -574,11 +679,45 @@ public partial class APIItemView : UserControl
                     blurAnimation.From = 20;
                     blurAnimation.To = 0;
                     blurAnimation.Duration = TimeSpan.FromSeconds(0.2);
-                    blurAnimation.Completed += (s, args) => MainContainer.Effect = null; // Remove blur effect after fading out
+                    blurAnimation.Completed += (s, args) =>
+                    {
+                        MainContainer.Effect = null; // Remove blur effect after fading out
+                        BackgroundContainer.Effect = null;
+                    };
+
                     (MainContainer.Effect as BlurEffect).BeginAnimation(BlurEffect.RadiusProperty, blurAnimation);
+                    (BackgroundContainer.Effect as BlurEffect).BeginAnimation(BlurEffect.RadiusProperty, blurAnimation);
                 }
             }
+        }
+    }
 
+    private void AddToInfoBox(PlugItem item, InfoBoxType type)
+    {
+        switch (type)
+        {
+            case InfoBoxType.TextBlock:
+                DataTemplate infoTextTemplate = (DataTemplate)FindResource("InfoBoxTextTemplate");
+                FrameworkElement textUI = (FrameworkElement)infoTextTemplate.LoadContent();
+                textUI.DataContext = item;
+                InfoBoxStackPanel.Children.Add(textUI);
+                break;
+            case InfoBoxType.Grid:
+                DataTemplate infoGridTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
+                FrameworkElement gridUi = (FrameworkElement)infoGridTemplate.LoadContent();
+                gridUi.DataContext = item;
+                InfoBoxStackPanel.Children.Add(gridUi);
+                break;
+            case InfoBoxType.InfoBlock:
+                DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
+                FrameworkElement infoBlockSepUi = (FrameworkElement)infoBlockSepTemplate.LoadContent();
+                InfoBoxStackPanel.Children.Add(infoBlockSepUi);
+
+                DataTemplate infoBlockTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
+                FrameworkElement infoBlockUi = (FrameworkElement)infoBlockTemplate.LoadContent();
+                infoBlockUi.DataContext = item;
+                InfoBoxStackPanel.Children.Add(infoBlockUi);
+                break;
         }
     }
 
@@ -588,8 +727,11 @@ public partial class APIItemView : UserControl
         public string ItemType { get; set; }
         public string ItemFlavorText { get; set; }
         public string ItemLore { get; set; }
-        public ItemTier ItemRarity { get; set; }
+        public ItemRarity ItemRarity => (ItemRarity)Item.TagData.ItemRarity;
         public string ItemHash { get; set; }
+        public string ItemSource { get; set; }
+        public string ItemDamageType { get; set; }
+
         public double ImageWidth { get; set; }
         public double ImageHeight { get; set; }
         public ImageSource ImageSource { get; set; }
@@ -601,20 +743,41 @@ public partial class APIItemView : UserControl
         public InventoryItem Parent { get; set; }
     }
 
-    public class PlugItem
+    public class PlugItem : INotifyPropertyChanged
     {
         public TigerHash Hash { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = "";
+        public string Type { get; set; } = "";
+        public string Description { get; set; } = "";
 
         public string PlugSocketName { get; set; }
         public int PlugSocketIndex { get; set; }
         public int PlugOrderIndex { get; set; }
-        public bool PlugSelected { get; set; }
 
         public ImageSource PlugImageSource { get; set; }
         public InventoryItem Item { get; set; }
+        public ItemRarity PlugRarity { get; set; } = ItemRarity.Common;
+        public ImageSource PlugWatermark { get; set; }
+
+        //TODO: Make this an enum for actual styles
+        public bool PlugStyle { get; set; }
+
+        private bool _plugSelected;
+        public bool PlugSelected
+        {
+            get { return _plugSelected; }
+            set
+            {
+                _plugSelected = value;
+                OnPropertyChanged(nameof(PlugSelected));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     public class StatItem : INotifyPropertyChanged
@@ -666,6 +829,45 @@ public partial class APIItemView : UserControl
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    private enum InfoBoxType
+    {
+        InfoBlock,
+        TextBlock,
+        Grid
+    }
+
+    // https://bungie-net.github.io/multi/schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition.html#schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition
+    // https://bungie-net.github.io/multi/schema_Destiny-DestinySocketCategoryStyle.html#schema_Destiny-DestinySocketCategoryStyle
+    private enum DestinySocketCategoryStyle : uint
+    {
+        Unknown = 0, // 0
+        Resuable = 2656457638, // 1
+        Consumable = 1469714392, // 2
+        // where Intrinsic? // 4
+        Unlockable = 1762428417, // 3
+        EnergyMeter = 750616615, // 5
+        LargePerk = 2251952357, // 6
+        Abilities = 1901312945, // 7
+        Supers = 497024337, // 8
+    }
+
+    // TODO: Find where these indexes actually go?
+    private enum DestinyDamageType : int
+    {
+        [Description("Kinetic")]
+        Kinetic = 1319,
+        [Description(" Arc")]
+        Arc = 1320,
+        [Description(" Solar")]
+        Solar = 1321,
+        [Description(" Void")]
+        Void = 1322,
+        [Description(" Stasis")]
+        Stasis = 1323,
+        [Description(" Strand")]
+        Strand = 1324
     }
 }
 
