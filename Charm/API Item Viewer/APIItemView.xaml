@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Charm"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     d:DesignHeight="944.68"
     d:DesignWidth="1914"
     Loaded="OnLoaded"
@@ -82,7 +83,7 @@
             <Grid
                 Name="Reusables"
                 MaxWidth="750"
-                MaxHeight="305"
+                MaxHeight="295"
                 Margin="0,0,100,20"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
@@ -95,18 +96,10 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock
-                    Name="ReusableTextBlock"
                     Grid.Row="0"
                     Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Panel.ZIndex="1"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="25"
-                    Foreground="{StaticResource ForegroundColour70}"
-                    Text="{Binding Name}"
-                    TextAlignment="Left"
-                    TextWrapping="Wrap" />
+                    Style="{DynamicResource SocketContainerName}"
+                    Text="{Binding Name}" />
 
                 <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
 
@@ -119,14 +112,56 @@
                     <StackPanel
                         x:Name="ReusablePanel"
                         Panel.ZIndex="50"
-                        Orientation="Horizontal" />
+                        Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type ListBox}">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBox">
+                                            <Grid Background="Transparent">
+                                                <Canvas Grid.Row="2" Panel.ZIndex="-1">
+                                                    <Canvas.Background>
+                                                        <VisualBrush
+                                                            Stretch="Uniform"
+                                                            TileMode="Tile"
+                                                            Viewport="25.5,25.5,25.5,25.5"
+                                                            ViewportUnits="Absolute">
+                                                            <VisualBrush.Visual>
+                                                                <Rectangle
+                                                                    Width="50"
+                                                                    Height="50"
+                                                                    Fill="Transparent"
+                                                                    Stroke="#10FFFFFF" />
+                                                            </VisualBrush.Visual>
+                                                        </VisualBrush>
+                                                    </Canvas.Background>
+                                                </Canvas>
+                                                <Border>
+                                                    <ScrollViewer
+                                                        x:Name="ScrollViewer"
+                                                        HorizontalScrollBarVisibility="Hidden"
+                                                        VerticalScrollBarVisibility="Auto">
+                                                        <ScrollViewer.Resources>
+                                                            <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">4</sys:Double>
+                                                        </ScrollViewer.Resources>
+                                                        <ItemsPresenter />
+                                                    </ScrollViewer>
+                                                </Border>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </StackPanel.Resources>
+                    </StackPanel>
                 </Grid>
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="ReusableItemTemplate">
             <Button
                 x:Name="PlugItemButton"
-                Margin="0,0,0,0"
+                Margin="10,5,10,5"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Click="PlugItem_OnClick"
@@ -155,18 +190,10 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock
-                    Name="ConsumableTextBlock"
                     Grid.Row="0"
                     Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Panel.ZIndex="1"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="25"
-                    Foreground="{StaticResource ForegroundColour70}"
-                    Text="{Binding Name}"
-                    TextAlignment="Left"
-                    TextWrapping="Wrap" />
+                    Style="{DynamicResource SocketContainerName}"
+                    Text="{Binding Name}" />
 
                 <Rectangle
                     Grid.Row="1"
@@ -176,7 +203,7 @@
                 <Grid
                     Grid.Row="2"
                     Grid.Column="0"
-                    Margin="0,0,0,0"
+                    Margin="-5,0,0,0"
                     HorizontalAlignment="Left"
                     Background="Transparent">
                     <StackPanel
@@ -184,14 +211,13 @@
                         Panel.ZIndex="50"
                         Orientation="Horizontal" />
                 </Grid>
-
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="ConsumableItemTemplate">
             <Button
                 x:Name="PlugItemButton"
-                Margin="0,0,0,0"
-                HorizontalAlignment="Right"
+                Margin="5"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Click="PlugItem_OnClick"
                 MouseEnter="PlugItem_MouseEnter"
@@ -206,7 +232,7 @@
                 Name="LargePerks"
                 Grid.Row="1"
                 MaxWidth="750"
-                MaxHeight="135"
+                MaxHeight="140"
                 Margin="0,0,100,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
@@ -219,18 +245,10 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock
-                    Name="LargePerkTextBlock"
                     Grid.Row="0"
                     Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Panel.ZIndex="1"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="25"
-                    Foreground="{StaticResource ForegroundColour70}"
-                    Text="{Binding Name}"
-                    TextAlignment="Left"
-                    TextWrapping="Wrap" />
+                    Style="{DynamicResource SocketContainerName}"
+                    Text="{Binding Name}" />
 
                 <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
 
@@ -243,7 +261,49 @@
                     <StackPanel
                         x:Name="LargePerkPanel"
                         Panel.ZIndex="50"
-                        Orientation="Horizontal" />
+                        Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type ListBox}">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBox">
+                                            <Grid Background="Transparent">
+                                                <Canvas Grid.Row="2" Panel.ZIndex="-1">
+                                                    <Canvas.Background>
+                                                        <VisualBrush
+                                                            Stretch="Uniform"
+                                                            TileMode="Tile"
+                                                            Viewport="25.5,25.5,25.5,25.5"
+                                                            ViewportUnits="Absolute">
+                                                            <VisualBrush.Visual>
+                                                                <Rectangle
+                                                                    Width="50"
+                                                                    Height="50"
+                                                                    Fill="Transparent"
+                                                                    Stroke="#10FFFFFF" />
+                                                            </VisualBrush.Visual>
+                                                        </VisualBrush>
+                                                    </Canvas.Background>
+                                                </Canvas>
+                                                <Border>
+                                                    <ScrollViewer
+                                                        x:Name="ScrollViewer"
+                                                        HorizontalScrollBarVisibility="Hidden"
+                                                        VerticalScrollBarVisibility="Auto">
+                                                        <ScrollViewer.Resources>
+                                                            <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">4</sys:Double>
+                                                        </ScrollViewer.Resources>
+                                                        <ItemsPresenter />
+                                                    </ScrollViewer>
+                                                </Border>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </StackPanel.Resources>
+                    </StackPanel>
                 </Grid>
             </Grid>
         </DataTemplate>
@@ -256,16 +316,17 @@
                 <Button
                     x:Name="PlugItemButton"
                     Grid.Column="0"
-                    Margin="0,0,0,0"
+                    Margin="0,5,5,5"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     Style="{DynamicResource LargePerkButton}">
-                    <local:APIItemMod />
+                    <local:APIItemIntrinsic />
                 </Button>
                 <Grid
                     Grid.Column="1"
-                    Margin="20,0,0,0"
+                    Margin="15,0,0,0"
                     HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
                     Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -277,7 +338,7 @@
                         VerticalAlignment="Center"
                         Panel.ZIndex="1"
                         FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                        FontSize="24"
+                        FontSize="22"
                         Foreground="{StaticResource ForegroundColour100}"
                         Style="{StaticResource DropShadowMedium}"
                         Text="{Binding Name}"
@@ -288,7 +349,7 @@
                         VerticalAlignment="Center"
                         Panel.ZIndex="1"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                        FontSize="20"
+                        FontSize="19"
                         Foreground="{StaticResource ForegroundColour90}"
                         Style="{StaticResource DropShadowMedium}"
                         Text="{Binding Description}"
@@ -305,6 +366,17 @@
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Fill" Value="{StaticResource ForegroundColour70}" />
+        </Style>
+
+        <Style x:Key="SocketContainerName" TargetType="{x:Type TextBlock}">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Panel.ZIndex" Value="1" />
+            <Setter Property="FontFamily" Value="{DynamicResource Haas Grot Text 55 Roman Keys}" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="Foreground" Value="{StaticResource ForegroundColour70}" />
+            <Setter Property="TextAlignment" Value="Left" />
+            <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
 
         <Storyboard x:Key="FadeIn 0.3">
@@ -348,15 +420,15 @@
                 Grid.Row="0"
                 Grid.Column="0"
                 Grid.ColumnSpan="2"
-                Margin="125,0,0,0"
+                Margin="125,12,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Panel.ZIndex="1"
                 d:FontFamily="Haas Grot Text 56 Italic"
                 d:Text="ITEM SOURCE"
                 FontFamily="{DynamicResource Haas Grot Text 56 Italic Keys}"
-                FontSize="24"
-                Foreground="{StaticResource ForegroundColour80}"
+                FontSize="22"
+                Foreground="{StaticResource ForegroundColour70}"
                 Text="{Binding ItemSource}"
                 TextAlignment="Left"
                 TextWrapping="Wrap" />
@@ -478,7 +550,7 @@
                     VerticalAlignment="Top"
                     Panel.ZIndex="1"
                     d:FontFamily="Haas Grot Text 65 Medium"
-                    d:Text="ITEM NAME"
+                    d:Text="DMGType"
                     FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                     FontSize="50"
                     Text="{Binding ItemDamageType}">
@@ -708,7 +780,7 @@
                 Background="Transparent">
 
                 <StackPanel
-                    Margin="125,0,0,0"
+                    Margin="125,0,125,0"
                     Background="Transparent"
                     Orientation="Horizontal">
                     <WrapPanel Name="SocketContainer" Orientation="Vertical" />
@@ -781,80 +853,80 @@
         <Grid
             x:Name="LoreEntry"
             Grid.Row="0"
-            Margin="0,0,1100,0"
             HorizontalAlignment="Left"
             Background="Transparent"
             Visibility="Collapsed">
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="100*" />
-                <RowDefinition Height="10*" />
-            </Grid.RowDefinitions>
-
-            <Border
-                Grid.RowSpan="3"
-                Background="#DE14141B"
-                BorderBrush="#DE717171"
-                BorderThickness="2"
-                CornerRadius="5" />
-
-            <Grid Background="Transparent">
+            <Grid Margin="0,0,1100,0" Background="Transparent">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="100*" />
+                    <RowDefinition Height="10*" />
                 </Grid.RowDefinitions>
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.RowSpan="1"
-                    Margin="70,40,70,20"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Panel.ZIndex="1"
-                    d:Text="ITEM NAME"
-                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                    FontSize="40"
-                    Foreground="{StaticResource ForegroundColour100}"
-                    Text="{Binding ItemName}"
-                    TextWrapping="WrapWithOverflow" />
 
-                <Rectangle
+                <Border
+                    Grid.RowSpan="3"
+                    Background="#DE14141B"
+                    BorderBrush="#DE717171"
+                    BorderThickness="2"
+                    CornerRadius="5" />
+
+                <Grid Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.RowSpan="1"
+                        Margin="70,40,70,20"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:Text="ITEM NAME"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="40"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding ItemName}"
+                        TextWrapping="WrapWithOverflow" />
+
+                    <Rectangle
+                        Grid.Row="1"
+                        Height="2"
+                        Margin="70,10,70,20"
+                        VerticalAlignment="Center"
+                        Fill="#C6717171" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.RowSpan="1"
+                        Margin="70,10,70,20"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:Text="ITEM FLAVORTEXT"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="22"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding ItemFlavorText}"
+                        TextWrapping="WrapWithOverflow" />
+                </Grid>
+
+                <ScrollViewer
                     Grid.Row="1"
-                    Height="2"
-                    Margin="70,10,70,20"
-                    VerticalAlignment="Center"
-                    Fill="#C6717171" />
-
-                <TextBlock
-                    Grid.Row="2"
-                    Grid.RowSpan="1"
-                    Margin="70,10,70,20"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Panel.ZIndex="1"
-                    d:Text="ITEM FLAVORTEXT"
-                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                    FontSize="22"
-                    Foreground="{StaticResource ForegroundColour100}"
-                    Text="{Binding ItemFlavorText}"
-                    TextWrapping="WrapWithOverflow" />
+                    Margin="0,20,35,0"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <TextBlock
+                        Margin="70,0,35,0"
+                        d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="22"
+                        LineHeight="30px"
+                        Text="{Binding ItemLore}"
+                        TextWrapping="WrapWithOverflow" />
+                </ScrollViewer>
             </Grid>
-
-            <ScrollViewer
-                Grid.Row="1"
-                Margin="0,20,35,0"
-                HorizontalScrollBarVisibility="Disabled"
-                VerticalScrollBarVisibility="Auto">
-                <TextBlock
-                    Margin="70,0,35,0"
-                    d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                    FontSize="22"
-                    LineHeight="30px"
-                    Text="{Binding ItemLore}"
-                    TextWrapping="WrapWithOverflow" />
-            </ScrollViewer>
         </Grid>
 
         <!--  InfoBox  -->

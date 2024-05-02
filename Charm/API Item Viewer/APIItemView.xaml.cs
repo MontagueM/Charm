@@ -112,7 +112,7 @@ public partial class APIItemView : UserControl
         _statItems = new();
         _plugItems = new();
 
-        CreatePlugItems();
+        CreateSocketCategories();
         GetItemStats();
     }
 
@@ -154,7 +154,7 @@ public partial class APIItemView : UserControl
         return PlugItem;
     }
 
-    private void CreatePlugItems()
+    private void CreateSocketCategories()
     {
         if (ApiItem.Item.TagData.Unk70.GetValue(ApiItem.Item.GetReader()) is D2Class_C0778080 sockets)
         {
@@ -173,8 +173,8 @@ public partial class APIItemView : UserControl
                 SocketCategoryItem socketCategory = new SocketCategoryItem
                 {
                     Hash = category.SocketCategoryHash,
-                    Name = category.SocketName.Value,
-                    Description = category.SocketDescription.Value,
+                    Name = category.SocketName.Value.ToString().ToUpper(),
+                    Description = category.SocketDescription.Value.ToString(),
                     UICategoryStyle = (DestinySocketCategoryStyle)category.CategoryStyle,
                     SocketCategoryIndex = type.SocketCategoryIndex
                 };
@@ -225,13 +225,12 @@ public partial class APIItemView : UserControl
                 if (socket.SingleInitialItemIndex != -1)
                 {
                     var plugItem = CreatePlugItem(socket.SingleInitialItemIndex);
-                    plugItem.PlugOrderIndex = i;
-                    plugItem.PlugStyle = socketCategory.UICategoryStyle;
                     if (plugItem != null)
                     {
+                        plugItem.PlugOrderIndex = i;
+                        plugItem.PlugStyle = socketCategory.UICategoryStyle;
                         // Things like default shader/ornament, empty sockets, etc are single intial items and will always be first
                         plugItems.Insert(0, plugItem);
-
                         // Remove the last occurence (if needed) of said item since its gonna be first anyways
                         var lastOccurrenceIndex = plugItems.LastIndexOf(plugItem);
                         if (lastOccurrenceIndex != 0)
@@ -250,7 +249,7 @@ public partial class APIItemView : UserControl
 
             foreach (var socketCategory in socketCategories.OrderBy(x => x.SocketCategoryIndex))
             {
-                if (socketCategory.Name is null && socketCategory.Description is null)
+                if (socketCategory.Name == string.Empty && socketCategory.Description == string.Empty)
                     continue;
 
                 string style = "Reusable";
@@ -294,7 +293,6 @@ public partial class APIItemView : UserControl
             }
         }
     }
-
 
     private void GetItemStats()
     {
@@ -655,9 +653,6 @@ public partial class APIItemView : UserControl
 
     private void UserControl_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape)
-            return;
-
         if (e.Key == Key.A && ApiItem.ItemLore != null)
         {
             if (LoreEntry.Visibility != Visibility.Visible)
@@ -667,7 +662,7 @@ public partial class APIItemView : UserControl
                 DoubleAnimation fadeInAnimation = new DoubleAnimation();
                 fadeInAnimation.From = 0;
                 fadeInAnimation.To = 1;
-                fadeInAnimation.Duration = TimeSpan.FromSeconds(0.3);
+                fadeInAnimation.Duration = TimeSpan.FromSeconds(0.1);
                 LoreEntry.BeginAnimation(OpacityProperty, fadeInAnimation);
 
                 // Apply blur effect and fade it in
@@ -680,7 +675,7 @@ public partial class APIItemView : UserControl
                 DoubleAnimation blurAnimation = new DoubleAnimation();
                 blurAnimation.From = 0;
                 blurAnimation.To = 20;
-                blurAnimation.Duration = TimeSpan.FromSeconds(0.2);
+                blurAnimation.Duration = TimeSpan.FromSeconds(0.1);
                 (MainContainer.Effect as BlurEffect).BeginAnimation(BlurEffect.RadiusProperty, blurAnimation);
                 (BackgroundContainer.Effect as BlurEffect).BeginAnimation(BlurEffect.RadiusProperty, blurAnimation);
             }
@@ -690,7 +685,7 @@ public partial class APIItemView : UserControl
                 DoubleAnimation fadeOutAnimation = new DoubleAnimation();
                 fadeOutAnimation.From = 1;
                 fadeOutAnimation.To = 0;
-                fadeOutAnimation.Duration = TimeSpan.FromSeconds(0.3);
+                fadeOutAnimation.Duration = TimeSpan.FromSeconds(0.1);
                 fadeOutAnimation.Completed += (s, args) => LoreEntry.Visibility = Visibility.Collapsed;
                 LoreEntry.BeginAnimation(OpacityProperty, fadeOutAnimation);
 
@@ -700,7 +695,7 @@ public partial class APIItemView : UserControl
                     DoubleAnimation blurAnimation = new DoubleAnimation();
                     blurAnimation.From = 20;
                     blurAnimation.To = 0;
-                    blurAnimation.Duration = TimeSpan.FromSeconds(0.2);
+                    blurAnimation.Duration = TimeSpan.FromSeconds(0.1);
                     blurAnimation.Completed += (s, args) =>
                     {
                         MainContainer.Effect = null; // Remove blur effect after fading out

@@ -34,7 +34,7 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="Transparent" />
-        <Setter Property="Margin" Value="5" />
+        <Setter Property="Margin" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
@@ -70,7 +70,7 @@
                             HorizontalScrollBarVisibility="Hidden"
                             VerticalScrollBarVisibility="Auto">
                             <ScrollViewer.Resources>
-                                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">5</sys:Double>
+                                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">4</sys:Double>
                             </ScrollViewer.Resources>
                             <ItemsPresenter />
                         </ScrollViewer>
@@ -608,73 +608,197 @@
         <Setter Property="BorderBrush" Value="#AEFFFFFF" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border
-                        x:Name="border"
-                        Padding="{TemplateBinding Padding}"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="100">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
+                    <Grid Background="Transparent">
+                        <Grid x:Name="LayoutRoot" Background="Transparent">
+                            <!--  Outer circle  -->
+                            <Border
+                                x:Name="outerBorder"
+                                Margin="0"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="100"
+                                Opacity="0"
+                                RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                                </Border.RenderTransform>
+                            </Border>
+                            <!--  Content  -->
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
+                        </Grid>
+                    </Grid>
                     <ControlTemplate.Triggers>
-
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#00579D" />
+                        <!--  Trigger for mouse over  -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <!--  Fade in and scale animation for the outer circle  -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!--  Color animation for mainBorder background  -->
+                                        <ColorAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="#33FFFFFF"
+                                            Duration="0:0:0.1" />
+                                        <!--  Other animations for outerBorder  -->
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0.5"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                            To="1.15"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                            To="1.15"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <!--  Fade out and scale animation for the outer circle  -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!--  Color animation for mainBorder background  -->
+                                        <ColorAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="Transparent"
+                                            Duration="0:0:0.1" />
+                                        <!--  Other animations for outerBorder  -->
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                            To="1"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                            To="1"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers>
-            <DataTrigger Binding="{Binding PlugSelected}" Value="True">
-                <Setter Property="Background" Value="#008DFF" />
-            </DataTrigger>
-        </Style.Triggers>
     </Style>
-
 
     <Style x:Key="ConsumableButton" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="#AEFFFFFF" />
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="#A3FFFFFF" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border
-                        x:Name="border"
-                        Padding="{TemplateBinding Padding}"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="0">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
+                    <Grid Background="Transparent">
+                        <Grid x:Name="LayoutRoot" Background="Transparent">
+                            <!--  Outer  -->
+                            <Border
+                                x:Name="outerBorder"
+                                Margin="0"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="White"
+                                BorderThickness="2"
+                                CornerRadius="0"
+                                Opacity="0"
+                                RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                                </Border.RenderTransform>
+                            </Border>
+                            <!--  Content  -->
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
+                        </Grid>
+                    </Grid>
                     <ControlTemplate.Triggers>
+                        <!--  Trigger for mouse over  -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#008DFF" />
+                            <Trigger.EnterActions>
+                                <!--  Fade in and scale animation for the outer circle  -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!--  Color animation for mainBorder background  -->
+                                        <ColorAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="#33FFFFFF"
+                                            Duration="0:0:0.1" />
+                                        <!--  Other animations for outerBorder  -->
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0.5"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                            To="1.15"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                            To="1.15"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <!--  Fade out and scale animation for the outer circle  -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!--  Color animation for mainBorder background  -->
+                                        <ColorAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="Transparent"
+                                            Duration="0:0:0.1" />
+                                        <!--  Other animations for outerBorder  -->
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                            To="1"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                            To="1"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#00579D" />
-                        </Trigger>
-
-                        <DataTrigger Binding="{Binding PlugRarity}" Value="Exotic">
-                            <Setter Property="Background" Value="#F1CEAE33" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding PlugRarity}" Value="Legendary">
-                            <Setter Property="Background" Value="#F1522F64" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding PlugRarity}" Value="Rare">
-                            <Setter Property="Background" Value="#F15076A4" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding PlugRarity}" Value="Uncommon">
-                            <Setter Property="Background" Value="#F1367042" />
-                        </DataTrigger>
-
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -683,7 +807,7 @@
 
     <Style x:Key="LargePerkButton" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="#AEFFFFFF" />
+        <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Template">
