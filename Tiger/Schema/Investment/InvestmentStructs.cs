@@ -1026,11 +1026,11 @@ public struct D2Class_BA768080
 {
     public TigerHash SocketTypeHash;
     public short Unk04;
-    public short SocketCategoryIndex;
+    public short SocketCategoryIndex; // 'socketCategoryHash'
     public int SocketVisiblity; // 'visibility'?
 
     [SchemaField(0x30)]
-    public DynamicArrayUnloaded<D2Class_C5768080> PlugWhitelists;
+    public DynamicArray<D2Class_C5768080> PlugWhitelists;
 }
 
 [SchemaStruct("C5768080", 0x8)]

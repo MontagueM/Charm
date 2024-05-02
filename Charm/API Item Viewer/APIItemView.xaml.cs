@@ -108,6 +108,7 @@ public partial class APIItemView : UserControl
         MouseMove += UserControl_MouseMove;
         KeyDown += UserControl_KeyDown;
         MainContainer.DataContext = ApiItem;
+        ItemRarityBanner.DataContext = ApiItem;
         _statItems = new();
         _plugItems = new();
 
@@ -115,16 +116,23 @@ public partial class APIItemView : UserControl
         GetItemStats();
     }
 
-    private PlugItem? CreatePlugItem(int plugIndex, int socketIndex)
+    private PlugItem? CreatePlugItem(int plugIndex)
     {
+        if (plugIndex == -1)
+            return null;
+
         var item = Investment.Get().GetInventoryItem(plugIndex);
         var icon = MakeIcon(item);
         var name = Investment.Get().GetItemName(item).ToUpper();
         var type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value.ToString();
         var description = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemDisplaySource.Value.ToString();
-        var socketName = Investment.Get().SocketCategoryStringThings[socketIndex].SocketName.Value.ToString();
+        //var socketName = Investment.Get().SocketCategoryStringThings[socketIndex].SocketName.Value.ToString();
         if (name == "" && type == "" && description == "")
             return null;
+
+        TigerHash plugCategoryHash = null;
+        if (item.TagData.Unk48.GetValue(item.GetReader()) is D2Class_A1738080 plug)
+            plugCategoryHash = plug.PlugCategoryHash;
 
         PlugItem PlugItem = new PlugItem
         {
@@ -134,12 +142,13 @@ public partial class APIItemView : UserControl
             Type = type,
             Description = description,
             PlugImageSource = icon.Keys.First(),
-            PlugSocketIndex = socketIndex,
-            PlugSocketName = socketName.ToUpper(),
+            //PlugSocketIndex = socketIndex,
+            PlugCategoryHash = plugCategoryHash,
             PlugWatermark = GetPlugWatermark(item),
-            PlugRarity = (ItemRarity)item.TagData.ItemRarity,
+            PlugRarity = (DestinyTierType)item.TagData.ItemRarity,
+            PlugRarityColor = ((DestinyTierType)item.TagData.ItemRarity).GetColor(),
             PlugSelected = false,
-            PlugStyle = item.TagData.UnkC4 == 0
+            PlugStyle = DestinySocketCategoryStyle.Reusable
         };
 
         return PlugItem;
@@ -149,46 +158,52 @@ public partial class APIItemView : UserControl
     {
         if (ApiItem.Item.TagData.Unk70.GetValue(ApiItem.Item.GetReader()) is D2Class_C0778080 sockets)
         {
+            List<SocketCategoryItem> socketCategories = new();
+            List<SocketEntryItem> socketEntries = new();
             for (int i = 0; i < sockets.SocketEntries.Count; i++)
             {
                 var socket = sockets.SocketEntries[i];
-
                 if (socket.SocketTypeIndex == -1)
                     continue;
 
-                Console.WriteLine($"SocketTypeIndex: {socket.SocketTypeIndex} " +
-                    $"{Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].SocketName.Value} " +
-                    $"{(DestinySocketCategoryStyle)Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].CategoryStyle}");
+                List<PlugItem> plugItems = new();
+                var type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
+                var category = Investment.Get().SocketCategoryStringThings[type.SocketCategoryIndex];
 
-                var socketCategoryIndex = Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex);
-                if (socket.ReusablePlugSetIndex1 != -1)
+                SocketCategoryItem socketCategory = new SocketCategoryItem
                 {
-                    foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex1))
-                    {
-                        if (randomPlugs.PlugInventoryItemIndex == -1)
-                            continue;
+                    Hash = category.SocketCategoryHash,
+                    Name = category.SocketName.Value,
+                    Description = category.SocketDescription.Value,
+                    UICategoryStyle = (DestinySocketCategoryStyle)category.CategoryStyle,
+                    SocketCategoryIndex = type.SocketCategoryIndex
+                };
+                if (!socketCategories.Any(x => x.Hash == category.SocketCategoryHash))
+                    socketCategories.Add(socketCategory);
 
-                        var plugItem = CreatePlugItem(randomPlugs.PlugInventoryItemIndex, socketCategoryIndex);
-                        if (plugItem is not null)
-                        {
-                            plugItem.PlugOrderIndex = i;
-                            _plugItems.Add(plugItem);
-                        }
-                    }
-                }
-
-                if (socket.ReusablePlugSetIndex2 != -1)
+                SocketTypeItem socketType = new SocketTypeItem
                 {
-                    foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex2))
-                    {
-                        if (randomPlugs.PlugInventoryItemIndex == -1)
-                            continue;
+                    Hash = type.SocketTypeHash,
+                    SocketCategory = socketCategory,
+                    PlugCategoryWhitelist = type.PlugWhitelists.Select(x => x.PlugCategoryHash).ToList()
+                };
 
-                        var plugItem = CreatePlugItem(randomPlugs.PlugInventoryItemIndex, socketCategoryIndex);
-                        if (plugItem is not null)
+                foreach (var index in new short[] { socket.ReusablePlugSetIndex1, socket.ReusablePlugSetIndex2 })
+                {
+                    if (index != -1)
+                    {
+                        foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(index))
                         {
-                            plugItem.PlugOrderIndex = i;
-                            _plugItems.Add(plugItem);
+                            if (randomPlugs.PlugInventoryItemIndex == -1)
+                                continue;
+
+                            var plugItem = CreatePlugItem(randomPlugs.PlugInventoryItemIndex);
+                            if (plugItem is not null)
+                            {
+                                plugItem.PlugOrderIndex = i;
+                                plugItem.PlugStyle = socketCategory.UICategoryStyle;
+                                plugItems.Add(plugItem);
+                            }
                         }
                     }
                 }
@@ -198,82 +213,88 @@ public partial class APIItemView : UserControl
                     if (plug.PlugInventoryItemIndex == -1)
                         continue;
 
-                    var plugItem = CreatePlugItem(plug.PlugInventoryItemIndex, socketCategoryIndex);
+                    var plugItem = CreatePlugItem(plug.PlugInventoryItemIndex);
                     if (plugItem is not null)
                     {
                         plugItem.PlugOrderIndex = i;
-                        _plugItems.Add(plugItem);
+                        plugItem.PlugStyle = socketCategory.UICategoryStyle;
+                        plugItems.Add(plugItem);
                     }
                 }
 
-                var socketName = Investment.Get().SocketCategoryStringThings[socketCategoryIndex].SocketName.Value.ToString().ToUpper();
-                // Perks
-                var perks = _plugItems.Where(x => x.PlugSocketIndex == socketCategoryIndex
-                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("perks")).DistinctBy(x => x.Hash);
-                if (perks.Count() != 0)
+                if (socket.SingleInitialItemIndex != -1)
                 {
-                    ListBox listBoxPerks = new ListBox();
-                    listBoxPerks.ItemsSource = perks;
-                    listBoxPerks.ItemTemplate = (DataTemplate)FindResource("PlugItemTemplate");
-                    PerksPanel.Children.Add(listBoxPerks);
-                    Perks.Visibility = Visibility.Visible;
-                    PerksTextBlock.Text = socketName;
-                }
-
-                // Mods
-                var mods = _plugItems.Where(x => x.PlugSocketIndex == socketCategoryIndex
-                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("mods")).DistinctBy(x => x.Hash);
-                if (mods.Count() != 0)
-                {
-                    ListBox listBoxMods = new ListBox();
-                    listBoxMods.ItemsSource = mods;
-
-                    listBoxMods.ItemTemplate = (DataTemplate)FindResource("ModItemTemplate");
-                    ModsPanel.Children.Add(listBoxMods);
-                    Mods.Visibility = Visibility.Visible;
-                    ModsTextBlock.Text = socketName;
-                }
-
-                // Intrinsics
-                var intrinsics = _plugItems.Where(x => x.PlugSocketIndex == socketCategoryIndex
-                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("intrinsic")).DistinctBy(x => x.Hash);
-                if (intrinsics.Count() != 0)
-                {
-                    ListBox listBoxIntrinsics = new ListBox();
-                    listBoxIntrinsics.ItemsSource = intrinsics;
-
-                    listBoxIntrinsics.ItemTemplate = (DataTemplate)FindResource("IntrinsicItemTemplate");
-                    IntrinsicsPanel.Children.Add(listBoxIntrinsics);
-                    Intrinsics.Visibility = Visibility.Visible;
-                    IntrinsicTextBlock.Text = socketName;
-                }
-
-                // Cosmetics
-                var cosmetics = _plugItems.Where(x => x.PlugSocketIndex == socketCategoryIndex
-                && x.PlugOrderIndex == i && x.PlugSocketName.ToLower().Contains("cosmetic")).DistinctBy(x => x.Hash);
-                if (cosmetics.Count() != 0)
-                {
-                    // Just so "Default Shader" is first, followed by newest
-                    var list = cosmetics.ToList();
-                    int lastIndex = list.FindLastIndex(item => item.Name.ToLower().Contains("default"));
-                    if (lastIndex >= 0)
+                    var plugItem = CreatePlugItem(socket.SingleInitialItemIndex);
+                    plugItem.PlugOrderIndex = i;
+                    plugItem.PlugStyle = socketCategory.UICategoryStyle;
+                    if (plugItem != null)
                     {
-                        PlugItem lastItem = list[lastIndex];
-                        list.RemoveAt(lastIndex);
-                        list.Insert(0, lastItem);
+                        // Things like default shader/ornament, empty sockets, etc are single intial items and will always be first
+                        plugItems.Insert(0, plugItem);
+
+                        // Remove the last occurence (if needed) of said item since its gonna be first anyways
+                        var lastOccurrenceIndex = plugItems.LastIndexOf(plugItem);
+                        if (lastOccurrenceIndex != 0)
+                            plugItems.RemoveAt(lastOccurrenceIndex);
                     }
-
-                    ListBox listBoxCosmetics = new ListBox();
-                    listBoxCosmetics.ItemsSource = list;
-
-                    listBoxCosmetics.ItemTemplate = (DataTemplate)FindResource("ModItemTemplate");
-                    CosmeticsPanel.Children.Add(listBoxCosmetics);
-                    Cosmetics.Visibility = Visibility.Visible;
-                    CosmeticsTextBlock.Text = socketName;
                 }
+
+                SocketEntryItem socketEntry = new SocketEntryItem
+                {
+                    SocketType = socketType,
+                    //SingleInitialItem = CreatePlugItem(socket.SingleInitialItemIndex),
+                    PlugItems = plugItems.DistinctBy(x => x.Hash).ToList()
+                };
+                socketEntries.Add(socketEntry);
+            }
+
+            foreach (var socketCategory in socketCategories.OrderBy(x => x.SocketCategoryIndex))
+            {
+                if (socketCategory.Name is null && socketCategory.Description is null)
+                    continue;
+
+                string style = "Reusable";
+                switch (socketCategory.UICategoryStyle)
+                {
+                    case DestinySocketCategoryStyle.Unknown:
+                    case DestinySocketCategoryStyle.Reusable:
+                    case DestinySocketCategoryStyle.EnergyMeter: // TODO
+                    case DestinySocketCategoryStyle.Supers: // TODO
+                    case DestinySocketCategoryStyle.Abilities: // TODO
+                    case DestinySocketCategoryStyle.Unlockable: // TODO?
+                        style = "Reusable";
+                        break;
+                    case DestinySocketCategoryStyle.Consumable:
+                        style = "Consumable";
+                        break;
+                    case DestinySocketCategoryStyle.LargePerk:
+                        style = "LargePerk";
+                        break;
+                }
+
+                var categoryTemplate = (DataTemplate)FindResource($"{style}Template");
+                FrameworkElement content = (FrameworkElement)categoryTemplate.LoadContent();
+                var contentStackPanel = content.FindName($"{style}Panel") as StackPanel;
+                content.DataContext = socketCategory;
+
+                foreach (var socketEntry in socketEntries.Where(x => x.SocketType.SocketCategory.Hash == socketCategory.Hash))
+                {
+                    if (socketEntry.PlugItems.Count == 0)
+                        continue;
+
+                    ListBox listBox = new ListBox();
+                    var template = (DataTemplate)FindResource($"{style}ItemTemplate");
+                    listBox.ItemTemplate = template;
+                    listBox.ItemsSource = socketEntry.PlugItems.Where(x => socketEntry.SocketType.PlugCategoryWhitelist.Contains(x.PlugCategoryHash));
+
+                    contentStackPanel.Children.Add(listBox);
+                }
+
+                SocketContainer.Children.Add(content);
             }
         }
     }
+
 
     private void GetItemStats()
     {
@@ -473,7 +494,7 @@ public partial class APIItemView : UserControl
                     _stat.StatAdjustValue = adjustValue;
                 }
             }
-            if (!item.PlugStyle)
+            if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
                 return;
 
             foreach (var perk in stats.Perks)
@@ -539,7 +560,7 @@ public partial class APIItemView : UserControl
     {
         PlugItem item = (PlugItem)(sender as Button).DataContext;
 
-        Console.WriteLine($"{item.Name} {item.Item.Hash}");
+        Console.WriteLine($"{item.Name} {item.Item.Hash} ({item.PlugRarity})");
 
         if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
         {
@@ -596,6 +617,7 @@ public partial class APIItemView : UserControl
         {
             Hash = stat.Hash,
             Name = stat.Name,
+            PlugStyle = DestinySocketCategoryStyle.Reusable,
             Description = stat.Description,
         };
         InfoBox.DataContext = statItem;
@@ -727,7 +749,8 @@ public partial class APIItemView : UserControl
         public string ItemType { get; set; }
         public string ItemFlavorText { get; set; }
         public string ItemLore { get; set; }
-        public ItemRarity ItemRarity => (ItemRarity)Item.TagData.ItemRarity;
+        public DestinyTierType ItemRarity => (DestinyTierType)Item.TagData.ItemRarity;
+        public Color ItemRarityColor => ItemRarity.GetColor();
         public string ItemHash { get; set; }
         public string ItemSource { get; set; }
         public string ItemDamageType { get; set; }
@@ -745,22 +768,21 @@ public partial class APIItemView : UserControl
 
     public class PlugItem : INotifyPropertyChanged
     {
+        public InventoryItem Item { get; set; }
         public TigerHash Hash { get; set; }
         public string Name { get; set; } = "";
         public string Type { get; set; } = "";
         public string Description { get; set; } = "";
 
-        public string PlugSocketName { get; set; }
         public int PlugSocketIndex { get; set; }
+        public TigerHash PlugCategoryHash { get; set; }
         public int PlugOrderIndex { get; set; }
-
         public ImageSource PlugImageSource { get; set; }
-        public InventoryItem Item { get; set; }
-        public ItemRarity PlugRarity { get; set; } = ItemRarity.Common;
         public ImageSource PlugWatermark { get; set; }
+        public DestinyTierType PlugRarity { get; set; } = DestinyTierType.Common;
+        public Color PlugRarityColor { get; set; }
 
-        //TODO: Make this an enum for actual styles
-        public bool PlugStyle { get; set; }
+        public DestinySocketCategoryStyle PlugStyle { get; set; }
 
         private bool _plugSelected;
         public bool PlugSelected
@@ -831,43 +853,100 @@ public partial class APIItemView : UserControl
         }
     }
 
+    public class SocketEntryItem
+    {
+        public SocketTypeItem SocketType { get; set; }
+        public PlugItem SingleInitialItem { get; set; } // Probably not needed as its usually defined in the reusable/random set anyways
+        public List<PlugItem> PlugItems { get; set; }
+    }
+
+    public class SocketTypeItem
+    {
+        public TigerHash Hash;
+        public SocketCategoryItem SocketCategory { get; set; }
+        public List<TigerHash> PlugCategoryWhitelist { get; set; }
+        // TODO?: visibility, overridesUiAppearance
+    }
+
+    public class SocketCategoryItem
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public TigerHash Hash { get; set; }
+        public DestinySocketCategoryStyle UICategoryStyle { get; set; }
+        public int SocketCategoryIndex { get; set; }
+    }
+
     private enum InfoBoxType
     {
         InfoBlock,
         TextBlock,
         Grid
     }
+}
 
-    // https://bungie-net.github.io/multi/schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition.html#schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition
-    // https://bungie-net.github.io/multi/schema_Destiny-DestinySocketCategoryStyle.html#schema_Destiny-DestinySocketCategoryStyle
-    private enum DestinySocketCategoryStyle : uint
-    {
-        Unknown = 0, // 0
-        Resuable = 2656457638, // 1
-        Consumable = 1469714392, // 2
-        // where Intrinsic? // 4
-        Unlockable = 1762428417, // 3
-        EnergyMeter = 750616615, // 5
-        LargePerk = 2251952357, // 6
-        Abilities = 1901312945, // 7
-        Supers = 497024337, // 8
-    }
+// https://bungie-net.github.io/multi/schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition.html#schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition
+// https://bungie-net.github.io/multi/schema_Destiny-DestinySocketCategoryStyle.html#schema_Destiny-DestinySocketCategoryStyle
+public enum DestinySocketCategoryStyle : uint
+{
+    Unknown = 0, // 0
+    Reusable = 2656457638, // 1
+    Consumable = 1469714392, // 2
+                             // where Intrinsic? Replaced with LargePerk? // 4
+    Unlockable = 1762428417, // 3
+    EnergyMeter = 750616615, // 5
+    LargePerk = 2251952357, // 6
+    Abilities = 1901312945, // 7
+    Supers = 497024337, // 8
+}
 
-    // TODO: Find where these indexes actually go?
-    private enum DestinyDamageType : int
+// TODO: Find where these indexes actually go?
+public enum DestinyDamageType : int
+{
+    [Description("Kinetic")]
+    Kinetic = 1319,
+    [Description(" Arc")]
+    Arc = 1320,
+    [Description(" Solar")]
+    Solar = 1321,
+    [Description(" Void")]
+    Void = 1322,
+    [Description(" Stasis")]
+    Stasis = 1323,
+    [Description(" Strand")]
+    Strand = 1324
+}
+
+public enum DestinyTierType
+{
+    Unknown = -1,
+    Currency = 0,
+    Common = 1, // Basic
+    Uncommon = 2, // Common
+    Rare = 3,
+    Legendary = 4, // Superior
+    Exotic = 5,
+}
+
+public static class DestinyTierTypeColor
+{
+    private static readonly Dictionary<DestinyTierType, Color> Colors = new Dictionary<DestinyTierType, Color>
     {
-        [Description("Kinetic")]
-        Kinetic = 1319,
-        [Description(" Arc")]
-        Arc = 1320,
-        [Description(" Solar")]
-        Solar = 1321,
-        [Description(" Void")]
-        Void = 1322,
-        [Description(" Stasis")]
-        Stasis = 1323,
-        [Description(" Strand")]
-        Strand = 1324
+        { DestinyTierType.Unknown, Color.FromArgb(255, 66, 66, 66) },
+        { DestinyTierType.Currency, Color.FromArgb(255, 195, 188, 180) },
+        { DestinyTierType.Common, Color.FromArgb(255, 66, 66, 66) },
+        { DestinyTierType.Uncommon, Color.FromArgb(255, 55, 113, 67) },
+        { DestinyTierType.Rare, Color.FromArgb(255, 80, 118, 164) },
+        { DestinyTierType.Legendary, Color.FromArgb(255, 82, 47, 100) },
+        { DestinyTierType.Exotic, Color.FromArgb(255, 206, 174, 51) }
+    };
+
+    public static Color GetColor(this DestinyTierType tierType)
+    {
+        if (Colors.ContainsKey(tierType))
+            return Colors[tierType];
+        else
+            throw new ArgumentException("Invalid DestinyTierType");
     }
 }
 
@@ -934,6 +1013,49 @@ public class FlipSignPercentageConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         throw new NotSupportedException();
+    }
+}
+
+public class TransparentColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is Color color && double.TryParse(parameter?.ToString(), out double alphaFactor))
+        {
+            byte alpha = (byte)(color.A * alphaFactor);
+            return Color.FromArgb(alpha, color.R, color.G, color.B);
+        }
+
+        return value;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class InfoBoxColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is Color color && float.TryParse(parameter?.ToString(), out float brightnessFactor))
+        {
+            // hacky 'fix'
+            if (brightnessFactor == 0.5f)
+                return new SolidColorBrush(Color.FromArgb(230, color.R, color.G, color.B));
+
+            System.Drawing.Color col = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+            System.Drawing.Color newColor = ColorUtility.GenerateShades(col, 1, brightnessFactor).First();
+            return new SolidColorBrush(Color.FromArgb(230, newColor.R, newColor.G, newColor.B));
+        }
+
+        return value;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
 }
 

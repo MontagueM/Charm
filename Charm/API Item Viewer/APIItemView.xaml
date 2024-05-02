@@ -15,6 +15,8 @@
         <local:MarginConverter x:Key="MarginConverter" />
         <local:SignToBooleanConverter x:Key="SignToBooleanConverter" />
         <local:FlipSignPercentageConverter x:Key="FlipSignPercentageConverter" />
+        <local:TransparentColorConverter x:Key="TransparentColorConverter" />
+        <local:InfoBoxColorConverter x:Key="InfoBoxColorConverter" />
 
         <DataTemplate x:Key="InfoBoxSeperatorTemplate">
             <Rectangle
@@ -22,7 +24,6 @@
                 Fill="{StaticResource ForegroundColour70}"
                 Opacity="0.75" />
         </DataTemplate>
-
         <DataTemplate x:Key="InfoBoxTextTemplate">
             <TextBlock
                 d:FontFamily="Haas Grot Text 55 Roman"
@@ -33,7 +34,6 @@
                 Text="{Binding Description}"
                 TextWrapping="WrapWithOverflow" />
         </DataTemplate>
-
         <DataTemplate x:Key="InfoBoxGridTemplate">
             <Grid Background="Transparent">
                 <Grid.ColumnDefinitions>
@@ -78,7 +78,52 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate x:Key="PlugItemTemplate">
+        <DataTemplate x:Key="ReusableTemplate">
+            <Grid
+                Name="Reusables"
+                MaxWidth="750"
+                MaxHeight="305"
+                Margin="0,0,100,20"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Name="ReusableTextBlock"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="25"
+                    Foreground="{StaticResource ForegroundColour70}"
+                    Text="{Binding Name}"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap" />
+
+                <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+                    <StackPanel
+                        x:Name="ReusablePanel"
+                        Panel.ZIndex="50"
+                        Orientation="Horizontal" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="ReusableItemTemplate">
             <Button
                 x:Name="PlugItemButton"
                 Margin="0,0,0,0"
@@ -87,12 +132,62 @@
                 Click="PlugItem_OnClick"
                 MouseEnter="PlugItem_MouseEnter"
                 MouseLeave="PlugItem_MouseLeave"
-                Style="{DynamicResource API Perk Button}">
+                Style="{DynamicResource ReusableButton}">
                 <local:APIItemPerk />
             </Button>
         </DataTemplate>
 
-        <DataTemplate x:Key="ModItemTemplate">
+        <DataTemplate x:Key="ConsumableTemplate">
+            <Grid
+                Name="Consumables"
+                Grid.Row="1"
+                MaxWidth="750"
+                MaxHeight="130"
+                Margin="0,0,100,20"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Name="ConsumableTextBlock"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="25"
+                    Foreground="{StaticResource ForegroundColour70}"
+                    Text="{Binding Name}"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap" />
+
+                <Rectangle
+                    Grid.Row="1"
+                    Width="500"
+                    Style="{DynamicResource SocketContainerRect}" />
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+                    <StackPanel
+                        x:Name="ConsumablePanel"
+                        Panel.ZIndex="50"
+                        Orientation="Horizontal" />
+                </Grid>
+
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="ConsumableItemTemplate">
             <Button
                 x:Name="PlugItemButton"
                 Margin="0,0,0,0"
@@ -101,12 +196,58 @@
                 Click="PlugItem_OnClick"
                 MouseEnter="PlugItem_MouseEnter"
                 MouseLeave="PlugItem_MouseLeave"
-                Style="{DynamicResource API Mod Button}">
+                Style="{DynamicResource ConsumableButton}">
                 <local:APIItemMod />
             </Button>
         </DataTemplate>
 
-        <DataTemplate x:Key="IntrinsicItemTemplate">
+        <DataTemplate x:Key="LargePerkTemplate">
+            <Grid
+                Name="LargePerks"
+                Grid.Row="1"
+                MaxWidth="750"
+                MaxHeight="135"
+                Margin="0,0,100,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Name="LargePerkTextBlock"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="25"
+                    Foreground="{StaticResource ForegroundColour70}"
+                    Text="{Binding Name}"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap" />
+
+                <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,0,0,5"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+                    <StackPanel
+                        x:Name="LargePerkPanel"
+                        Panel.ZIndex="50"
+                        Orientation="Horizontal" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="LargePerkItemTemplate">
             <Grid Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="10*" />
@@ -118,7 +259,7 @@
                     Margin="0,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
-                    Style="{DynamicResource API Intrinsic}">
+                    Style="{DynamicResource LargePerkButton}">
                     <local:APIItemMod />
                 </Button>
                 <Grid
@@ -185,6 +326,7 @@
     <Grid>
         <Grid
             x:Name="MainContainer"
+            Margin="0,50,0,0"
             Background="Transparent"
             RenderTransformOrigin="0.5,0.5">
             <Grid.RenderTransform>
@@ -206,7 +348,7 @@
                 Grid.Row="0"
                 Grid.Column="0"
                 Grid.ColumnSpan="2"
-                Margin="125,10,0,0"
+                Margin="125,0,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Panel.ZIndex="1"
@@ -566,203 +708,15 @@
                 Background="Transparent">
 
                 <StackPanel
-                    Name="SocketContainer"
                     Margin="125,0,0,0"
                     Background="Transparent"
                     Orientation="Horizontal">
-                    <WrapPanel Orientation="Vertical">
-                        <!--  Perks  -->
-                        <Grid
-                            Name="Perks"
-                            MaxWidth="750"
-                            MaxHeight="305"
-                            Margin="0,0,100,20"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Background="Transparent"
-                            Visibility="Collapsed">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="10" />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock
-                                Name="PerksTextBlock"
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Panel.ZIndex="1"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="25"
-                                Foreground="{StaticResource ForegroundColour70}"
-                                Text="WEAPON PERKS"
-                                TextAlignment="Left"
-                                TextWrapping="Wrap" />
-
-                            <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
-
-                            <Grid
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Margin="0,0,0,0"
-                                HorizontalAlignment="Left"
-                                Background="Transparent">
-                                <StackPanel
-                                    x:Name="PerksPanel"
-                                    Panel.ZIndex="50"
-                                    Orientation="Horizontal" />
-                            </Grid>
-
-                        </Grid>
-
-                        <!--  Mods  -->
-                        <Grid
-                            Name="Mods"
-                            Grid.Row="1"
-                            MaxWidth="750"
-                            MaxHeight="130"
-                            Margin="0,0,100,20"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Background="Transparent"
-                            Visibility="Collapsed">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="10" />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock
-                                Name="ModsTextBlock"
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Panel.ZIndex="1"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="25"
-                                Foreground="{StaticResource ForegroundColour70}"
-                                Text="WEAPON MODS"
-                                TextAlignment="Left"
-                                TextWrapping="Wrap" />
-
-                            <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
-
-                            <Grid
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Margin="0,0,0,0"
-                                HorizontalAlignment="Left"
-                                Background="Transparent">
-                                <StackPanel
-                                    x:Name="ModsPanel"
-                                    Panel.ZIndex="50"
-                                    Orientation="Horizontal" />
-                            </Grid>
-
-                        </Grid>
-
-
-                        <!--  Intrinsic Traits  -->
-                        <Grid
-                            Name="Intrinsics"
-                            Grid.Row="1"
-                            MaxWidth="750"
-                            MaxHeight="135"
-                            Margin="0,0,100,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Background="Transparent"
-                            Visibility="Collapsed">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="10" />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock
-                                Name="IntrinsicTextBlock"
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Panel.ZIndex="1"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="25"
-                                Foreground="{StaticResource ForegroundColour70}"
-                                Text="INTRINSIC TRAITS"
-                                TextAlignment="Left"
-                                TextWrapping="Wrap" />
-
-                            <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
-
-                            <Grid
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Margin="0,0,0,5"
-                                HorizontalAlignment="Left"
-                                Background="Transparent">
-                                <StackPanel
-                                    x:Name="IntrinsicsPanel"
-                                    Panel.ZIndex="50"
-                                    Orientation="Horizontal" />
-                            </Grid>
-                        </Grid>
-
-                        <!--  Cosmetics  -->
-                        <Grid
-                            Name="Cosmetics"
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            MaxWidth="750"
-                            MaxHeight="130"
-                            Margin="0,0,0,20"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Background="Transparent"
-                            Visibility="Collapsed">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="10" />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock
-                                Name="CosmeticsTextBlock"
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Panel.ZIndex="1"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="25"
-                                Foreground="{StaticResource ForegroundColour70}"
-                                Text="COSMETICS"
-                                TextAlignment="Left"
-                                TextWrapping="Wrap" />
-
-                            <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
-
-                            <Grid
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Margin="0,0,0,0"
-                                HorizontalAlignment="Left"
-                                Background="Transparent">
-                                <StackPanel
-                                    x:Name="CosmeticsPanel"
-                                    Panel.ZIndex="50"
-                                    Orientation="Horizontal" />
-                            </Grid>
-                        </Grid>
-                    </WrapPanel>
+                    <WrapPanel Name="SocketContainer" Orientation="Vertical" />
                 </StackPanel>
             </Grid>
         </Grid>
 
-        <!--  Background + FoundryBanner  -->
+        <!--  Background + Foundry Banner + Rarity Fade  -->
         <Grid
             x:Name="BackgroundContainer"
             Panel.ZIndex="-5"
@@ -796,6 +750,30 @@
                 <Grid.Background>
                     <ImageBrush d:ImageSource="https://bungie.net/common/destiny2_content/screenshots/3824673936.jpg" />
                 </Grid.Background>
+            </Grid>
+
+            <Grid
+                Name="ItemRarityBanner"
+                Width="auto"
+                Height="55"
+                VerticalAlignment="Top"
+                Background="Transparent">
+                <Rectangle>
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                            <GradientStop d:Color="#B0BE9F28" Offset="1" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.7}" />
+                            <GradientStop d:Color="#33BE9F28" Offset="0" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.2}" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+                <Rectangle Margin="0,45,0,0">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                            <GradientStop d:Color="#B0BE9F28" Offset="1" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.7}" />
+                            <GradientStop d:Color="#33BE9F28" Offset="0" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.2}" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
             </Grid>
         </Grid>
 
@@ -865,7 +843,7 @@
 
             <ScrollViewer
                 Grid.Row="1"
-                Margin="0,20,35,20"
+                Margin="0,20,35,0"
                 HorizontalScrollBarVisibility="Disabled"
                 VerticalScrollBarVisibility="Auto">
                 <TextBlock
@@ -908,10 +886,10 @@
                 Fill="#AAAAAA">
                 <Rectangle.Style>
                     <Style TargetType="Rectangle">
-                        <Setter Property="Visibility" Value="Visible" />
+                        <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding PlugStyle}" Value="True">
-                                <Setter Property="Visibility" Value="Collapsed" />
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -921,22 +899,10 @@
             <Grid Grid.Row="1">
                 <Grid.Style>
                     <Style TargetType="Grid">
-                        <Setter Property="Background" Value="#F1020202" />
+                        <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.5}" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding PlugStyle}" Value="True">
-                                <Setter Property="Background" Value="#F1444242" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding PlugRarity}" Value="Exotic">
-                                <Setter Property="Background" Value="#F1CEAE33" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding PlugRarity}" Value="Legendary">
-                                <Setter Property="Background" Value="#F1522F64" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding PlugRarity}" Value="Rare">
-                                <Setter Property="Background" Value="#F15076A4" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding PlugRarity}" Value="Uncommon">
-                                <Setter Property="Background" Value="#F1367042" />
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                <Setter Property="Background" Value="#F1020202" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -1018,24 +984,14 @@
             <Grid Grid.Row="2">
                 <Grid.Style>
                     <Style TargetType="Grid">
-                        <Setter Property="Background" Value="#D6161515" />
+                        <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.1}" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding PlugRarity}" Value="Exotic">
-                                <Setter Property="Background" Value="#F1342b0d" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding PlugRarity}" Value="Legendary">
-                                <Setter Property="Background" Value="#D6150c19" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding PlugRarity}" Value="Rare">
-                                <Setter Property="Background" Value="#F1141d29" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding PlugRarity}" Value="Uncommon">
-                                <Setter Property="Background" Value="#F10e1c11" />
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                <Setter Property="Background" Value="#D6161515" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-
 
                 <StackPanel x:Name="InfoBoxStackPanel" Orientation="Vertical">
                     <StackPanel.Resources>

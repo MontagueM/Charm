@@ -151,6 +151,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return _inventoryItemIndexmap[hash32];
     }
 
+    public D2Class_BA768080 GetSocketType(int index)
+    {
+        return _socketTypeMap.TagData.SocketTypeEntries.ElementAt(_socketTypeMap.GetReader(), index);
+    }
+
     public int GetSocketCategoryIndex(int index)
     {
         return _socketTypeMap.TagData.SocketTypeEntries.ElementAt(_socketTypeMap.GetReader(), index).SocketCategoryIndex;
