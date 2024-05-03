@@ -112,10 +112,17 @@ public struct D2Class_E4768080
     public float Unk88;
 }
 
+/// <summary>
+/// D2 "equippingBlock"
+/// </summary>
 [SchemaStruct("E7778080", 0x20)]
 public struct D2Class_E7778080
 {
     public DynamicArray<D2Class_387A8080> Unk00;
+    [SchemaField(0x14)]
+    public StringHash UniqueLabel;
+    public TigerHash UniqueLabelHash;
+    public short EquipmentSlotTypeIndex; // 'equipmentSlotTypeHash'
 }
 
 [SchemaStruct("387A8080", 0x10)]
@@ -131,13 +138,25 @@ public struct D2Class_3A7A8080
     public int Unk04;
 }
 
+// 'quality'
 [SchemaStruct("DC778080", 0x70)]
 public struct D2Class_DC778080
 {
     [SchemaField(0x08)]
-    public short Unk08;
+    public short ProgressionLevelRequirementIndex; // 'progressionLevelRequirementHash'
+    [SchemaField(0x10)]
+    public DynamicArray<SStringHash> InfusionCategoryHashes;
+    [SchemaField(0x28)]
+    public DynamicArray<D2Class_2D788080> DisplayVersionWatermarkIcons; // Unsure
+
     [SchemaField(0x60)]
     public DynamicArray<D2Class_DE778080> Unk60;
+}
+
+[SchemaStruct("2D788080", 2)]
+public struct D2Class_2D788080
+{
+    public short IconIndex;
 }
 
 [SchemaStruct("DE778080", 2)]

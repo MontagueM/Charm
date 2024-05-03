@@ -160,6 +160,50 @@ public partial class APIItemView : UserControl
         {
             List<SocketCategoryItem> socketCategories = new();
             List<SocketEntryItem> socketEntries = new();
+
+            foreach (var socket in sockets.IntrinsicSockets)
+            {
+                if (socket.PlugItemIndex == -1)
+                    continue;
+
+                List<PlugItem> plugItems = new();
+
+                var type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
+                var category = Investment.Get().SocketCategoryStringThings[type.SocketCategoryIndex];
+                SocketCategoryItem socketCategory = new SocketCategoryItem
+                {
+                    Hash = category.SocketCategoryHash,
+                    Name = category.SocketName.Value.ToString().ToUpper(),
+                    Description = category.SocketDescription.Value.ToString(),
+                    UICategoryStyle = (DestinySocketCategoryStyle)category.CategoryStyle,
+                    SocketCategoryIndex = type.SocketCategoryIndex
+                };
+                if (!socketCategories.Any(x => x.Hash == category.SocketCategoryHash))
+                    socketCategories.Add(socketCategory);
+
+                SocketTypeItem socketType = new SocketTypeItem
+                {
+                    Hash = type.SocketTypeHash,
+                    SocketCategory = socketCategory,
+                    PlugCategoryWhitelist = type.PlugWhitelists.Select(x => x.PlugCategoryHash).ToList()
+                };
+
+                var plugItem = CreatePlugItem(socket.PlugItemIndex);
+                if (plugItem is not null)
+                {
+                    plugItem.PlugStyle = socketCategory.UICategoryStyle;
+                    plugItems.Add(plugItem);
+                }
+
+                SocketEntryItem socketEntry = new SocketEntryItem
+                {
+                    SocketType = socketType,
+                    //SingleInitialItem = CreatePlugItem(socket.SingleInitialItemIndex),
+                    PlugItems = plugItems.DistinctBy(x => x.Hash).ToList()
+                };
+                socketEntries.Add(socketEntry);
+            }
+
             for (int i = 0; i < sockets.SocketEntries.Count; i++)
             {
                 var socket = sockets.SocketEntries[i];
@@ -256,18 +300,13 @@ public partial class APIItemView : UserControl
                 switch (socketCategory.UICategoryStyle)
                 {
                     case DestinySocketCategoryStyle.Unknown:
-                    case DestinySocketCategoryStyle.Reusable:
-                    case DestinySocketCategoryStyle.EnergyMeter: // TODO
-                    case DestinySocketCategoryStyle.Supers: // TODO
-                    case DestinySocketCategoryStyle.Abilities: // TODO
-                    case DestinySocketCategoryStyle.Unlockable: // TODO?
+                    case DestinySocketCategoryStyle.Supers: // Dont need
+                    case DestinySocketCategoryStyle.Abilities: // Dont need
+                    case DestinySocketCategoryStyle.Unlockable: // TODO? Looks same as Reusable?
                         style = "Reusable";
                         break;
-                    case DestinySocketCategoryStyle.Consumable:
-                        style = "Consumable";
-                        break;
-                    case DestinySocketCategoryStyle.LargePerk:
-                        style = "LargePerk";
+                    default:
+                        style = socketCategory.UICategoryStyle.ToString();
                         break;
                 }
 
@@ -284,7 +323,7 @@ public partial class APIItemView : UserControl
                     ListBox listBox = new ListBox();
                     var template = (DataTemplate)FindResource($"{style}ItemTemplate");
                     listBox.ItemTemplate = template;
-                    listBox.ItemsSource = socketEntry.PlugItems.Where(x => socketEntry.SocketType.PlugCategoryWhitelist.Contains(x.PlugCategoryHash));
+                    listBox.ItemsSource = socketEntry.PlugItems; //socketEntry.PlugItems.Where(x => socketEntry.SocketType.PlugCategoryWhitelist.Contains(x.PlugCategoryHash)); not needed? idk
 
                     contentStackPanel.Children.Add(listBox);
                 }

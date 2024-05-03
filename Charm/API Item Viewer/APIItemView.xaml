@@ -359,6 +359,61 @@
             </Grid>
         </DataTemplate>
 
+        <DataTemplate x:Key="EnergyMeterTemplate">
+            <Grid
+                Name="EnergyMeter"
+                Grid.Row="1"
+                MaxWidth="750"
+                MaxHeight="130"
+                Margin="0,0,100,20"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Style="{DynamicResource SocketContainerName}"
+                    Text="{Binding Name}" />
+
+                <Rectangle
+                    Grid.Row="1"
+                    Width="500"
+                    Style="{DynamicResource SocketContainerRect}" />
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="-5,0,0,0"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+                    <StackPanel
+                        x:Name="EnergyMeterPanel"
+                        Panel.ZIndex="50"
+                        Orientation="Horizontal" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="EnergyMeterItemTemplate">
+            <Button
+                x:Name="PlugItemButton"
+                Margin="5"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Click="PlugItem_OnClick"
+                MouseEnter="PlugItem_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
+                Style="{DynamicResource ConsumableButton}">
+                <local:APIItemMod />
+            </Button>
+        </DataTemplate>
+
         <Style x:Key="SocketContainerRect" TargetType="{x:Type Rectangle}">
             <Setter Property="Width" Value="700" />
             <Setter Property="MaxWidth" Value="750" />
@@ -367,7 +422,6 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Fill" Value="{StaticResource ForegroundColour70}" />
         </Style>
-
         <Style x:Key="SocketContainerName" TargetType="{x:Type TextBlock}">
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Center" />
