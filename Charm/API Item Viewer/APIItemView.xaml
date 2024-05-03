@@ -364,7 +364,7 @@
                 Name="EnergyMeter"
                 Grid.Row="1"
                 MaxWidth="750"
-                MaxHeight="130"
+                MaxHeight="150"
                 Margin="0,0,100,20"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
@@ -388,15 +388,85 @@
                     Style="{DynamicResource SocketContainerRect}" />
 
                 <Grid
-                    Grid.Row="2"
+                    Grid.Row="3"
                     Grid.Column="0"
-                    Margin="-5,0,0,0"
                     HorizontalAlignment="Left"
                     Background="Transparent">
                     <StackPanel
                         x:Name="EnergyMeterPanel"
+                        Margin="0,5,0,0"
                         Panel.ZIndex="50"
-                        Orientation="Horizontal" />
+                        Orientation="Vertical">
+
+                        <Grid
+                            Height="70"
+                            Margin="0,0,4,5"
+                            Background="{Binding SocketRarityColor}"
+                            Opacity="0.9">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="20,0,20,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Disp 75 Bold}"
+                                FontSize="35"
+                                Foreground="{StaticResource ForegroundColour100}"
+                                Text="10" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="20"
+                                Foreground="{StaticResource ForegroundColour100}"
+                                Text="ENERGY" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="0,0,20,0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="20"
+                                Foreground="{StaticResource ForegroundColour100}"
+                                Text="Charged" />
+                        </Grid>
+
+                        <!--  Dont look at this, go away  -->
+                        <StackPanel
+                            HorizontalAlignment="Left"
+                            Background="Transparent"
+                            Orientation="Horizontal">
+                            <StackPanel.Resources>
+                                <Style TargetType="Rectangle">
+                                    <Setter Property="Width" Value="45" />
+                                    <Setter Property="Height" Value="20" />
+                                    <Setter Property="Margin" Value="0,0,4,0" />
+                                    <Setter Property="Fill" Value="White" />
+                                    <Setter Property="Stroke" Value="White" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </Grid>
         </DataTemplate>

@@ -305,6 +305,10 @@ public partial class APIItemView : UserControl
                     case DestinySocketCategoryStyle.Unlockable: // TODO? Looks same as Reusable?
                         style = "Reusable";
                         break;
+                    case DestinySocketCategoryStyle.EnergyMeter:
+                        style = socketCategory.UICategoryStyle.ToString();
+                        socketCategory.SocketRarityColor = new SolidColorBrush(ApiItem.ItemRarityColor);
+                        break;
                     default:
                         style = socketCategory.UICategoryStyle.ToString();
                         break;
@@ -317,7 +321,7 @@ public partial class APIItemView : UserControl
 
                 foreach (var socketEntry in socketEntries.Where(x => x.SocketType.SocketCategory.Hash == socketCategory.Hash))
                 {
-                    if (socketEntry.PlugItems.Count == 0)
+                    if (socketEntry.PlugItems.Count == 0 || socketCategory.UICategoryStyle == DestinySocketCategoryStyle.EnergyMeter)
                         continue;
 
                     ListBox listBox = new ListBox();
@@ -909,6 +913,7 @@ public partial class APIItemView : UserControl
         public TigerHash Hash { get; set; }
         public DestinySocketCategoryStyle UICategoryStyle { get; set; }
         public int SocketCategoryIndex { get; set; }
+        public SolidColorBrush SocketRarityColor { get; set; } // Only used for EnergyMeter
     }
 
     private enum InfoBoxType
