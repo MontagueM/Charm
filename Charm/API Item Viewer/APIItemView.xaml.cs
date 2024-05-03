@@ -108,7 +108,7 @@ public partial class APIItemView : UserControl
         MouseMove += UserControl_MouseMove;
         KeyDown += UserControl_KeyDown;
         MainContainer.DataContext = ApiItem;
-        ItemRarityBanner.DataContext = ApiItem;
+        BackgroundContainer.DataContext = ApiItem;
         _statItems = new();
         _plugItems = new();
 
