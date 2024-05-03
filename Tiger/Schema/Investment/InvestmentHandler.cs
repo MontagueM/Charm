@@ -331,6 +331,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     private void GetSandboxPerkMap2()
     {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return;
+
         SandboxPerkMap2 = new();
         using TigerReader reader = _sandboxPerkMap2.GetReader();
         for (int i = 0; i < _sandboxPerkMap2.TagData.SandboxPerkDefinitionEntries.Count; i++)
@@ -351,66 +354,66 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     private void GetInventoryItemLoreStrings()
     {
-        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return;
+
+        InventoryItemLoreStrings = new();
+        using TigerReader reader = _loreStringMap.GetReader();
+        for (int i = 0; i < _loreStringMap.TagData.LoreStringMap.Count; i++)
         {
-            InventoryItemLoreStrings = new();
-            using TigerReader reader = _loreStringMap.GetReader();
-            for (int i = 0; i < _loreStringMap.TagData.LoreStringMap.Count; i++)
-            {
-                InventoryItemLoreStrings.TryAdd(i, _loreStringMap.TagData.LoreStringMap[reader, i]);
-            }
+            InventoryItemLoreStrings.TryAdd(i, _loreStringMap.TagData.LoreStringMap[reader, i]);
         }
     }
 
     private void GetSocketCategoryStrings()
     {
-        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return;
+
+        SocketCategoryStringThings = new ConcurrentDictionary<int, D2Class_5D4F8080>();
+        using TigerReader reader = _socketCategoryMap.GetReader();
+        for (int i = 0; i < _socketCategoryMap.TagData.SocketCategoryEntries.Count; i++)
         {
-            SocketCategoryStringThings = new ConcurrentDictionary<int, D2Class_5D4F8080>();
-            using TigerReader reader = _socketCategoryMap.GetReader();
-            for (int i = 0; i < _socketCategoryMap.TagData.SocketCategoryEntries.Count; i++)
-            {
-                SocketCategoryStringThings.TryAdd(i, _socketCategoryMap.TagData.SocketCategoryEntries[reader, i]);
-            }
+            SocketCategoryStringThings.TryAdd(i, _socketCategoryMap.TagData.SocketCategoryEntries[reader, i]);
         }
     }
 
     private void GetSandboxPerkStrings()
     {
-        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return;
+
+        SandboxPerkStrings = new();
+        using TigerReader reader = _sandboxPerkMap.GetReader();
+        for (int i = 0; i < _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries.Count; i++)
         {
-            SandboxPerkStrings = new();
-            using TigerReader reader = _sandboxPerkMap.GetReader();
-            for (int i = 0; i < _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries.Count; i++)
-            {
-                SandboxPerkStrings.TryAdd(i, _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries[reader, i]);
-            }
+            SandboxPerkStrings.TryAdd(i, _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries[reader, i]);
         }
     }
 
     private void GetStatStrings()
     {
-        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return;
+
+        StatStrings = new();
+        using TigerReader reader = _statDefinitionMap.GetReader();
+        for (int i = 0; i < _statDefinitionMap.TagData.StatDefinitions.Count; i++)
         {
-            StatStrings = new();
-            using TigerReader reader = _statDefinitionMap.GetReader();
-            for (int i = 0; i < _statDefinitionMap.TagData.StatDefinitions.Count; i++)
-            {
-                StatStrings.TryAdd(i, _statDefinitionMap.TagData.StatDefinitions[reader, i]);
-            }
+            StatStrings.TryAdd(i, _statDefinitionMap.TagData.StatDefinitions[reader, i]);
         }
     }
 
     private void GetCollectableStrings()
     {
-        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            return;
+
+        CollectableStrings = new();
+        using TigerReader reader = _collectableStringsMap.GetReader();
+        for (int i = 0; i < _collectableStringsMap.TagData.CollectibleDefinitionStringEntries.Count; i++)
         {
-            CollectableStrings = new();
-            using TigerReader reader = _collectableStringsMap.GetReader();
-            for (int i = 0; i < _collectableStringsMap.TagData.CollectibleDefinitionStringEntries.Count; i++)
-            {
-                CollectableStrings.TryAdd(i, _collectableStringsMap.TagData.CollectibleDefinitionStringEntries[reader, i]);
-            }
+            CollectableStrings.TryAdd(i, _collectableStringsMap.TagData.CollectibleDefinitionStringEntries[reader, i]);
         }
     }
 

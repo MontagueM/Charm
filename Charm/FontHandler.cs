@@ -89,7 +89,8 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
     {
         foreach (var (key, value) in Fonts)
         {
-            Application.Current.Resources.Add($"{key.Family} {key.Subfamily}", value);
+            if (!Application.Current.Resources.Contains($"{key.Family} {key.Subfamily}"))
+                Application.Current.Resources.Add($"{key.Family} {key.Subfamily}", value);
         }
 
         // Debug font list
