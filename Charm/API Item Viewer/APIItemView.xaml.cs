@@ -212,8 +212,10 @@ public partial class APIItemView : UserControl
 
                 List<PlugItem> plugItems = new();
                 var type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
-                var category = Investment.Get().SocketCategoryStringThings[type.SocketCategoryIndex];
+                if (type.SocketVisiblity == 1) // Hidden
+                    continue;
 
+                var category = Investment.Get().SocketCategoryStringThings[type.SocketCategoryIndex];
                 SocketCategoryItem socketCategory = new SocketCategoryItem
                 {
                     Hash = category.SocketCategoryHash,
@@ -674,19 +676,23 @@ public partial class APIItemView : UserControl
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
-        Point position = e.GetPosition(Application.Current.MainWindow);
+        Point position = e.GetPosition(this);
         if (InfoBox.Visibility == Visibility.Visible && (ActivePlugItemButton != null || ActiveStatItemGrid != null))
         {
             float xOffset = 25;
-            float yOffset = 10;
+            float yOffset = 25;
+            float padding = 25;
 
             // this is stupid
-            if (position.X >= Application.Current.MainWindow.RenderSize.Width / 2)
+            if (position.X >= ActualWidth / 2)
                 xOffset = (-1 * xOffset) - (float)InfoBox.Width;
+
+            if (position.Y - yOffset - padding - (float)InfoBox.ActualHeight <= 0)
+                yOffset += (float)(position.Y - yOffset - padding - (float)InfoBox.ActualHeight);
 
             TranslateTransform infoBoxtransform = (TranslateTransform)InfoBox.RenderTransform;
             infoBoxtransform.X = position.X + xOffset;
-            infoBoxtransform.Y = position.Y + yOffset - Application.Current.MainWindow.RenderSize.Height;
+            infoBoxtransform.Y = position.Y - yOffset - ActualHeight;
         }
 
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;

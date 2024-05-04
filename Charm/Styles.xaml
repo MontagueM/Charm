@@ -623,6 +623,7 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="100"
+                                IsHitTestVisible="False"
                                 Opacity="0"
                                 RenderTransformOrigin="0.5,0.5">
                                 <Border.RenderTransform>
@@ -653,7 +654,7 @@
                                         <DoubleAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="Opacity"
-                                            To="0.5"
+                                            To="1"
                                             Duration="0:0:0.1" />
                                         <DoubleAnimation
                                             Storyboard.TargetName="outerBorder"
@@ -724,6 +725,7 @@
                                 BorderBrush="White"
                                 BorderThickness="2"
                                 CornerRadius="0"
+                                IsHitTestVisible="False"
                                 Opacity="0"
                                 RenderTransformOrigin="0.5,0.5">
                                 <Border.RenderTransform>
@@ -748,24 +750,43 @@
                                         <ColorAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                            To="#33FFFFFF"
-                                            Duration="0:0:0.1" />
+                                            To="#53FFFFFF"
+                                            Duration="0:0:0.2" />
                                         <!--  Other animations for outerBorder  -->
                                         <DoubleAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="Opacity"
-                                            To="0.5"
-                                            Duration="0:0:0.1" />
+                                            To="1"
+                                            Duration="0:0:0.2" />
+
                                         <DoubleAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
-                                            To="1.15"
-                                            Duration="0:0:0.1" />
+                                            From="1.2"
+                                            To="1.1"
+                                            Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="3"
+                                                    EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+
                                         <DoubleAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
-                                            To="1.15"
-                                            Duration="0:0:0.1" />
+                                            From="1.2"
+                                            To="1.1"
+                                            Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="3"
+                                                    EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
@@ -778,22 +799,22 @@
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
                                             To="Transparent"
-                                            Duration="0:0:0.1" />
-                                        <!--  Other animations for outerBorder  -->
+                                            Duration="0:0:0.2" />
                                         <DoubleAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="Opacity"
                                             To="0"
-                                            Duration="0:0:0.1" />
+                                            Duration="0:0:0.2" />
+
                                         <DoubleAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
-                                            To="1"
+                                            To="1.2"
                                             Duration="0:0:0.1" />
                                         <DoubleAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
-                                            To="1"
+                                            To="1.2"
                                             Duration="0:0:0.1" />
                                     </Storyboard>
                                 </BeginStoryboard>

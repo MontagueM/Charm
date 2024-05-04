@@ -397,10 +397,9 @@
                         Margin="0,5,0,0"
                         Panel.ZIndex="50"
                         Orientation="Vertical">
-
                         <Grid
                             Height="70"
-                            Margin="0,0,4,5"
+                            Margin="0,0,2,5"
                             Background="{Binding SocketRarityColor}"
                             Opacity="0.9">
                             <Grid.ColumnDefinitions>
@@ -448,7 +447,7 @@
                                 <Style TargetType="Rectangle">
                                     <Setter Property="Width" Value="45" />
                                     <Setter Property="Height" Value="20" />
-                                    <Setter Property="Margin" Value="0,0,4,0" />
+                                    <Setter Property="Margin" Value="0,0,2,0" />
                                     <Setter Property="Fill" Value="White" />
                                     <Setter Property="Stroke" Value="White" />
                                     <Setter Property="StrokeThickness" Value="2" />
@@ -1116,11 +1115,19 @@
                         Source="{Binding PlugWatermark}" />
                 </Canvas>
 
-                <StackPanel
-                    Margin="15,15,15,15"
-                    Background="Transparent"
-                    Orientation="Vertical">
+                <StackPanel Background="Transparent" Orientation="Vertical">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Margin" Value="15,15,15,15" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                    <Setter Property="Margin" Value="15,10,15,10" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
                     <TextBlock
+                        Margin="0,0,15,0"
                         VerticalAlignment="Center"
                         d:FontFamily="Haas Grot Text 65 Medium"
                         d:Text="ITEM NAME "
@@ -1183,7 +1190,7 @@
                         <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.1}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
-                                <Setter Property="Background" Value="#D6161515" />
+                                <Setter Property="Background" Value="#D6202020" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

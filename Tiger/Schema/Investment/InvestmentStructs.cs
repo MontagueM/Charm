@@ -1046,7 +1046,7 @@ public struct D2Class_BA768080
     public TigerHash SocketTypeHash;
     public short Unk04;
     public short SocketCategoryIndex; // 'socketCategoryHash'
-    public int SocketVisiblity; // 'visibility'?
+    public int SocketVisiblity; // 'visibility'
 
     [SchemaField(0x30)]
     public DynamicArray<D2Class_C5768080> PlugWhitelists;
