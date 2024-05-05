@@ -23,7 +23,6 @@ public partial class DareItemControl : UserControl
     private void InspectAPIItem_OnClick(object sender, RoutedEventArgs e)
     {
         e.Handled = true;
-
         ApiItem apiItem = Container.DataContext as ApiItem;
 
         APIItemView apiItemView = new APIItemView(apiItem);

@@ -130,49 +130,6 @@ public partial class DareView : UserControl
         if (_allItems.TryRemove(apiItem.Item.TagData.InventoryItemHash.Hash32, out _))
         {
             _selectedItems.Add(apiItem);
-
-            //if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-            //{
-            //    System.Console.WriteLine($"---{apiItem.Item.Hash}---");
-            //    if (apiItem.Item.TagData.Unk70.GetValue(apiItem.Item.GetReader()) is D2Class_C0778080 sockets)
-            //    {
-            //        foreach (var socket in sockets.SocketEntries)
-            //        {
-            //            System.Console.WriteLine($"SocketTypeIndex: {socket.SocketTypeIndex} " + (socket.SocketTypeIndex != -1 ? Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].SocketName.Value : ""));
-            //            System.Console.WriteLine($"SingleInitialItemIndex: {socket.SingleInitialItemIndex} " + (socket.SingleInitialItemIndex != -1 ? Investment.Get().GetItemName(Investment.Get().GetInventoryItem(socket.SingleInitialItemIndex)) : ""));
-            //            System.Console.WriteLine($"ReusablePlugSetIndex1: {socket.ReusablePlugSetIndex1}");
-            //            if (socket.ReusablePlugSetIndex1 != -1)
-            //            {
-            //                foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex1))
-            //                {
-            //                    if (randomPlugs.PlugInventoryItemIndex == -1)
-            //                        continue;
-
-            //                    System.Console.WriteLine($"-Reusable PlugInventoryItemIndex: {Investment.Get().GetItemName(Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex))}");
-            //                }
-            //            }
-
-            //            System.Console.WriteLine($"ReusablePlugSetIndex2: {socket.ReusablePlugSetIndex2}");
-            //            if (socket.ReusablePlugSetIndex2 != -1)
-            //            {
-            //                foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex2))
-            //                {
-            //                    if (randomPlugs.PlugInventoryItemIndex == -1)
-            //                        continue;
-
-            //                    System.Console.WriteLine($"-Reusable PlugInventoryItemIndex: {Investment.Get().GetItemName(Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex))}");
-            //                }
-            //            }
-
-            //            foreach (var plug in socket.PlugItems)
-            //            {
-            //                System.Console.WriteLine($"-PlugInventoryItemIndex: {plug.PlugInventoryItemIndex} " + (plug.PlugInventoryItemIndex != -1 ? Investment.Get().GetItemName(Investment.Get().GetInventoryItem(plug.PlugInventoryItemIndex)) : ""));
-            //            }
-            //            System.Console.WriteLine($"-------------------------");
-            //        }
-            //    }
-            //}
-
         }
         else
         {
@@ -203,6 +160,12 @@ public partial class DareView : UserControl
             _selectedItems.ToList().ForEach(item =>
             // Parallel.ForEach(_selectedItems, item =>
             {
+                if (item.ItemType == "Artifact" && item.Item.TagData.Unk28.GetValue(item.Item.GetReader()) is D2Class_C5738080 gearSet)
+                {
+                    if (gearSet.ItemList.Count != 0)
+                        item.Item = Investment.Get().GetInventoryItem(gearSet.ItemList.First().ItemIndex);
+                }
+
                 if (item.Item.GetArtArrangementIndex() != -1)
                 {
                     // if has a model
@@ -274,7 +237,6 @@ public partial class DareView : UserControl
         e.Handled = regex.IsMatch(e.Text);
     }
 
-    // TODO: D2 maybe?
     public void CreateOrnamentItems(InventoryItem parent)
     {
         var ornaments = parent.GetItemOrnaments();
@@ -356,7 +318,9 @@ public partial class DareView : UserControl
 
     private bool ShouldAddToList(InventoryItem item, string type)
     {
-        return (item.GetArtArrangementIndex() != -1 || type.Contains("Shader") || type.Contains("Ghost Shell")) && (!type.Contains("Finisher") && !type.Contains("Emote") && !type.Contains("Ship Schematics"));
+        var a = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)];
+        return ((a.TagData.ItemType.Value.ToString() == "Artifact" && item.TagData.Unk28.GetValue(a.GetReader()) is D2Class_C5738080)
+            || item.GetArtArrangementIndex() != -1 || type.Contains("Shader") || type.Contains("Ghost Shell")) && (!type.Contains("Finisher") && !type.Contains("Emote") && !type.Contains("Ship Schematics"));
     }
 
     public Dictionary<DrawingImage, ImageBrush> MakeIcon(InventoryItem item)

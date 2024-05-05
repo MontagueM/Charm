@@ -37,6 +37,9 @@ public struct D2Class_9D798080
     [SchemaField(0x18)]
     public ResourcePointer Unk18;  // D2Class_E7778080, 06178080 D1
 
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk28;  // D2Class_C5738080, 'gearset'
+
     [SchemaField(0x30, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ResourcePointer Unk30;  // D2Class_B6738080, lore entry index (map CF508080 BDA1A780)
 
@@ -67,12 +70,14 @@ public struct D2Class_9D798080
     [SchemaField(0xA8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash InventoryItemHash;
     public TigerHash UnkAC;
+    public byte SeasonIndex; // 'seasonHash', not used for gear
 
     [SchemaField(0x8A, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xC2, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public byte ItemRarity;
+
     [SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public byte UnkC4;
+    public byte UnkC4; // 'isInstanceItem'?
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xCA, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -122,7 +127,8 @@ public struct D2Class_E7778080
     [SchemaField(0x14)]
     public StringHash UniqueLabel;
     public TigerHash UniqueLabelHash;
-    public short EquipmentSlotTypeIndex; // 'equipmentSlotTypeHash'
+    public byte EquipmentSlotTypeIndex; // 'equipmentSlotTypeHash'
+    public byte Attributes; // EquippingItemBlockAttributes (just 0 or 1)
 }
 
 [SchemaStruct("387A8080", 0x10)]
@@ -204,6 +210,19 @@ public struct D2Class_7F738080
 public struct D2Class_B6738080
 {
     public short LoreEntryIndex;
+}
+
+// 'gearset'
+[SchemaStruct("C5738080", 0x38)]
+public struct D2Class_C5738080
+{
+    public DynamicArray<D2Class_26908080> ItemList;
+}
+
+[SchemaStruct("26908080", 0x2)]
+public struct D2Class_26908080
+{
+    public short ItemIndex;
 }
 
 /// <summary>

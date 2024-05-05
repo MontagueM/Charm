@@ -721,6 +721,7 @@
                                 x:Name="outerBorder"
                                 Margin="0"
                                 Padding="{TemplateBinding Padding}"
+                                Panel.ZIndex="1"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="White"
                                 BorderThickness="2"
@@ -750,7 +751,7 @@
                                         <ColorAnimation
                                             Storyboard.TargetName="outerBorder"
                                             Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                            To="#53FFFFFF"
+                                            To="#45FFFFFF"
                                             Duration="0:0:0.2" />
                                         <!--  Other animations for outerBorder  -->
                                         <DoubleAnimation

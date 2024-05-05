@@ -232,8 +232,8 @@
                 Name="LargePerks"
                 Grid.Row="1"
                 MaxWidth="750"
-                MaxHeight="140"
-                Margin="0,0,100,0"
+                MaxHeight="135"
+                Margin="0,0,100,15"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Background="Transparent"
@@ -255,7 +255,7 @@
                 <Grid
                     Grid.Row="2"
                     Grid.Column="0"
-                    Margin="0,0,0,5"
+                    Margin="0,0,0,0"
                     HorizontalAlignment="Left"
                     Background="Transparent">
                     <StackPanel
@@ -324,9 +324,9 @@
                 </Button>
                 <Grid
                     Grid.Column="1"
-                    Margin="15,0,0,0"
+                    Margin="15,15,5,0"
                     HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+                    VerticalAlignment="Top"
                     Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -345,6 +345,7 @@
                         TextAlignment="Left" />
                     <TextBlock
                         Grid.Row="1"
+                        Margin="0,0,0,0"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Panel.ZIndex="1"
@@ -392,20 +393,24 @@
                     Grid.Column="0"
                     HorizontalAlignment="Left"
                     Background="Transparent">
+
                     <StackPanel
                         x:Name="EnergyMeterPanel"
                         Margin="0,5,0,0"
                         Panel.ZIndex="50"
                         Orientation="Vertical">
                         <Grid
+                            Name="EnergyMeterInfo"
                             Height="70"
                             Margin="0,0,2,5"
                             Background="{Binding SocketRarityColor}"
                             Opacity="0.9">
+
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
+
                             <TextBlock
                                 Grid.Column="0"
                                 Margin="20,0,20,0"
@@ -436,6 +441,8 @@
                                 FontSize="20"
                                 Foreground="{StaticResource ForegroundColour100}"
                                 Text="Charged" />
+
+
                         </Grid>
 
                         <!--  Dont look at this, go away  -->

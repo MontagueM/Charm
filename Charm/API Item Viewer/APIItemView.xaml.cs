@@ -373,6 +373,8 @@ public partial class APIItemView : UserControl
         // this is dumbbbbb
         ItemStatsControl.ItemsSource = _statItems.Where(x => !x.StatDisplayNumeric);
         ItemNumericStatsControl.ItemsSource = _statItems.Where(x => x.StatDisplayNumeric);
+
+        // For some unknown unholy reason, this breaks showing the lore tab if Visibility.Collapsed?????
         StatsContainer.Visibility = _statItems.Count != 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
