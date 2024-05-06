@@ -43,8 +43,8 @@ public struct D2Class_9D798080
     [SchemaField(0x30, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ResourcePointer Unk30;  // D2Class_B6738080, lore entry index (map CF508080 BDA1A780)
 
-    //[SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public ResourcePointer Unk38;  // B0738080, 'objectives'
+    [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk38;  // B0738080, 'objectives'
 
     [SchemaField(0x48)]
     public ResourcePointer Unk48;  // 15108080 D1, A1738080 D2 'plug'
@@ -385,6 +385,9 @@ public struct D2Class_9F548080
     // [SchemaField(0x68), DestinyField(FieldType.ResourcePointer)]
     // public dynamic? Unk68;  // D2Class_CA548080
 
+    [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk38;  // D2Class_D8548080
+
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ResourcePointer Unk78;  // D2Class_B4548080
 
@@ -429,6 +432,19 @@ public struct D2Class_9F548080
 
     [SchemaField(0x120, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_59238080> Unk120;
+}
+
+[SchemaStruct("D8548080", 0x88)]
+public struct D2Class_D8548080
+{
+    [SchemaField(0x10)]
+    public DynamicArray<D2Class_DC548080> InsertionRules;
+}
+
+[SchemaStruct("DC548080", 0x8)]
+public struct D2Class_DC548080
+{
+    public StringIndexReference FailureMessage;
 }
 
 [SchemaStruct("B2548080", 0x20)]
@@ -1143,6 +1159,56 @@ public struct D2Class_C3598080
     public StringIndexReference RequirementDescription;
 }
 
+#endregion
+
+#region Objectives
+// objective definition
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "3C758080", 0x18)]
+public struct D2Class_3C758080
+{
+    [SchemaField(0x8)]
+    public DynamicArrayUnloaded<D2Class_40758080> ObjectiveDefinitionEntries;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "40758080", 0xB0)]
+public struct D2Class_40758080
+{
+    public TigerHash ObjectiveHash;
+    [SchemaField(0x10)]
+    public int CompletionValue;
+}
+
+// objective definition strings
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "4C588080", 0x18)]
+public struct D2Class_4C588080
+{
+    [SchemaField(0x8)]
+    public DynamicArrayUnloaded<D2Class_50588080> ObjectiveDefinitionStringEntries;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "50588080", 0x58)]
+public struct D2Class_50588080
+{
+    public TigerHash ObjectiveHash;
+    public short IconIndex;
+    [SchemaField(0x18)]
+    public StringIndexReference ProgressDescription;
+    public byte InProgressValueStyle; // enum DestinyUnlockValueUIStyle ?
+    public byte CompletedValueStyle;
+    public short LocationIndex; // 'locationHash' DestinyLocationDefinition
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B0738080", 0x28)]
+public struct D2Class_B0738080
+{
+    public DynamicArray<D2Class_15908080> Objectives;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "15908080", 0x2)]
+public struct D2Class_15908080
+{
+    public short ObjectiveIndex;
+}
 #endregion
 
 #region Destiny 1 API stuff

@@ -27,6 +27,7 @@
         </DataTemplate>
         <DataTemplate x:Key="InfoBoxTextTemplate">
             <TextBlock
+                Margin="15,10,15,10"
                 d:FontFamily="Haas Grot Text 55 Roman"
                 d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
@@ -36,7 +37,7 @@
                 TextWrapping="WrapWithOverflow" />
         </DataTemplate>
         <DataTemplate x:Key="InfoBoxGridTemplate">
-            <Grid Background="Transparent">
+            <Grid Margin="15,10,15,10" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" />
@@ -75,6 +76,116 @@
                     FontSize="15"
                     Foreground="{StaticResource ForegroundColour70}"
                     Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxWarningTextTemplate">
+            <TextBlock
+                Margin="15,5,15,5"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                FontSize="16"
+                Foreground="{StaticResource ForegroundColour90}"
+                Text="{Binding Description}"
+                TextWrapping="WrapWithOverflow" />
+        </DataTemplate>
+
+        <!--  Objective styles  -->
+        <DataTemplate x:Key="InfoBoxObjectivePercentageTemplate">
+            <Grid Margin="15,5,15,5" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Rectangle
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="24"
+                    Height="24"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Fill="#A1000000"
+                    Stroke="Gray"
+                    StrokeThickness="1.5" />
+
+                <Grid
+                    Grid.Column="1"
+                    Height="24"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Background="#A1000000">
+
+                    <TextBlock
+                        Margin="5,0,5,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="15"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Description}"
+                        TextWrapping="WrapWithOverflow" />
+                    <TextBlock
+                        Margin="5,0,5,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="15"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Type}"
+                        TextWrapping="WrapWithOverflow" />
+                </Grid>
+
+
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxObjectiveIntegerTemplate">
+            <Grid Margin="15,10,15,10" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="36"
+                    Height="36"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Source="{Binding PlugImageSource}">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlugImageSource}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="16"
+                    Foreground="{StaticResource ForegroundColour90}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="16"
+                    Foreground="{StaticResource ForegroundColour90}"
+                    Text="{Binding Type}"
                     TextWrapping="WrapWithOverflow" />
             </Grid>
         </DataTemplate>
@@ -1066,6 +1177,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
             Panel.ZIndex="5"
+            d:Visibility="Visible"
             Background="Transparent"
             IsHitTestVisible="False"
             Visibility="Collapsed">
@@ -1074,11 +1186,13 @@
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <Grid.RenderTransform>
                 <TranslateTransform X="0" Y="0" />
             </Grid.RenderTransform>
 
+            <!--  Thin top bar  -->
             <Rectangle
                 Grid.Row="0"
                 Width="375"
@@ -1098,6 +1212,7 @@
                 </Rectangle.Style>
             </Rectangle>
 
+            <!--  Main header  -->
             <Grid Grid.Row="1">
                 <Grid.Style>
                     <Style TargetType="Grid">
@@ -1191,7 +1306,19 @@
                 </StackPanel>
             </Grid>
 
+            <!--  Warning box  -->
             <Grid Grid.Row="2">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Background" Value="#D6AE4141" />
+                    </Style>
+                </Grid.Style>
+
+                <StackPanel x:Name="WarningBoxStackPanel" Orientation="Vertical" />
+            </Grid>
+
+            <!--  Subheader/Info  -->
+            <Grid Grid.Row="3">
                 <Grid.Style>
                     <Style TargetType="Grid">
                         <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.1}" />
@@ -1203,17 +1330,9 @@
                     </Style>
                 </Grid.Style>
 
-                <StackPanel x:Name="InfoBoxStackPanel" Orientation="Vertical">
-                    <StackPanel.Resources>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="Margin" Value="15,10,15,10" />
-                        </Style>
-                        <Style TargetType="{x:Type Grid}">
-                            <Setter Property="Margin" Value="15,10,15,10" />
-                        </Style>
-                    </StackPanel.Resources>
-                </StackPanel>
+                <StackPanel x:Name="InfoBoxStackPanel" Orientation="Vertical" />
             </Grid>
+
         </Grid>
 
         <!--  User Controls  -->

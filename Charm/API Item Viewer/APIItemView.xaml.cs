@@ -15,6 +15,7 @@ using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using Arithmic;
 using Tiger;
+using Tiger.Schema;
 using Tiger.Schema.Investment;
 
 namespace Charm;
@@ -39,8 +40,8 @@ public partial class APIItemView : UserControl
         var source = Investment.Get().GetCollectible(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
         var sourceString = source != null ? source.Value.SourceName.Value.ToString() : "";
 
-        var foundryBanner = MakeFoundryBanner(item);
-        var image = MakeIcon(item);
+        var foundryBanner = ApiImageUtils.MakeFoundryBanner(item);
+        var image = ApiImageUtils.MakeIcon(item);
         ApiItem = new ApiItemView
         {
             Item = item,
@@ -64,7 +65,7 @@ public partial class APIItemView : UserControl
         var sourceString = source != null ? source.Value.SourceName.Value.ToString() : "";
 
         var hash = apiItem.Item.TagData.InventoryItemHash;
-        var foundryBanner = MakeFoundryBanner(apiItem.Item);
+        var foundryBanner = ApiImageUtils.MakeFoundryBanner(apiItem.Item);
         ApiItem = new ApiItemView
         {
             Item = apiItem.Item,
@@ -122,7 +123,7 @@ public partial class APIItemView : UserControl
             return null;
 
         var item = Investment.Get().GetInventoryItem(plugIndex);
-        var icon = MakeIcon(item);
+        var icon = ApiImageUtils.MakeIcon(item);
         var name = Investment.Get().GetItemName(item).ToUpper();
         var type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value.ToString();
         var description = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemDisplaySource.Value.ToString();
@@ -144,7 +145,7 @@ public partial class APIItemView : UserControl
             PlugImageSource = icon.Keys.First(),
             //PlugSocketIndex = socketIndex,
             PlugCategoryHash = plugCategoryHash,
-            PlugWatermark = GetPlugWatermark(item),
+            PlugWatermark = ApiImageUtils.GetPlugWatermark(item),
             PlugRarity = (DestinyTierType)item.TagData.ItemRarity,
             PlugRarityColor = ((DestinyTierType)item.TagData.ItemRarity).GetColor(),
             PlugSelected = false,
@@ -437,150 +438,17 @@ public partial class APIItemView : UserControl
         return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
     }
 
-    private static BitmapImage MakeBitmapImage(UnmanagedMemoryStream ms, int width, int height)
-    {
-        BitmapImage bitmapImage = new BitmapImage();
-        bitmapImage.BeginInit();
-        bitmapImage.StreamSource = ms;
-        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-        bitmapImage.DecodePixelWidth = width;
-        bitmapImage.DecodePixelHeight = height;
-        bitmapImage.EndInit();
-        bitmapImage.Freeze();
-        return bitmapImage;
-    }
-
-    public Dictionary<DrawingImage, ImageBrush> MakeIcon(InventoryItem item)
-    {
-        Dictionary<DrawingImage, ImageBrush> icon = new();
-        string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
-        if (type is null)
-            type = "";
-
-        // streams
-        var bgStream = item.GetIconBackgroundStream();
-        var bgOverlayStream = item.GetIconBackgroundOverlayStream();
-        var primaryStream = item.GetIconPrimaryStream();
-        var overlayStream = item.GetIconOverlayStream();
-
-        //sometimes only the primary icon is valid
-        var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
-        var bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
-
-        //Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
-        var bgOverlay = bgOverlayStream != null && type.Contains("Ornament") ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
-        var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
-
-        var group = new DrawingGroup();
-        group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
-        group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
-        group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
-        group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
-
-        var dw = new DrawingImage(group);
-        dw.Freeze();
-
-        ImageBrush brush = new ImageBrush(bg);
-        brush.Freeze();
-
-        icon.TryAdd(dw, brush);
-
-        return icon;
-    }
-
-    public DrawingImage MakeFoundryBanner(InventoryItem item)
-    {
-        var foundryStream = item.GetFoundryIconStream();
-        var foundry = foundryStream != null ? MakeBitmapImage(foundryStream, 596, 596) : null;
-
-        var group = new DrawingGroup();
-        group.Children.Add(new ImageDrawing(foundry, new Rect(0, 0, 596, 596)));
-
-        var dw = new DrawingImage(group);
-        dw.Freeze();
-
-        return dw;
-    }
-
-    public ImageSource GetPlugWatermark(InventoryItem item)
-    {
-        var overlayStream = item.GetIconOverlayStream(1);
-        var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
-        var dw = new ImageBrush(overlay);
-        dw.Freeze();
-        return dw.ImageSource;
-    }
-
     private void PlugItem_MouseEnter(object sender, MouseEventArgs e)
     {
-        InfoBox.Visibility = Visibility.Visible;
-        var fadeIn = FindResource("FadeIn 0.2") as Storyboard;
-        InfoBox.BeginStoryboard(fadeIn);
-
         ActivePlugItemButton = (sender as Button);
-        InfoBox.DataContext = ActivePlugItemButton.DataContext;
-
         PlugItem item = (PlugItem)(sender as Button).DataContext;
-        if (item.Description != "")
-            AddToInfoBox(item, InfoBoxType.TextBlock);
 
-        if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
-        {
-            foreach (var stat in stats.InvestmentStats)
-            {
-                var statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
-                var adjustValue = MakeDisplayValue(stat.StatTypeIndex, stat.Value);
-
-                if (statItem.StatName.Value is not null)
-                {
-                    var _stat = _statItems.FirstOrDefault(x => x.Hash == statItem.StatHash);
-                    if (_stat is null)
-                        continue;
-                    _stat.StatAdjustValue = adjustValue;
-                }
-            }
-            if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                return;
-
-            foreach (var perk in stats.Perks)
-            {
-                var perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
-                if (perkStrings.IconIndex == -1)
-                    continue;
-
-                // Icon
-                var overlayStream = item.Item.GetIconPrimaryStream(perkStrings.IconIndex);
-                var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
-                var dw = new ImageBrush(overlay);
-                dw.Freeze();
-
-                PlugItem perkItem = new PlugItem
-                {
-                    Hash = perkStrings.SandboxPerkHash,
-                    Description = perkStrings.SandboxPerkDescription.Value,
-                    PlugImageSource = dw.ImageSource
-                };
-
-                AddToInfoBox(perkItem, InfoBoxType.Grid);
-            }
-        }
-
-        foreach (var notif in Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.Item.TagData.InventoryItemHash)].TagData.TooltipNotifications)
-        {
-            PlugItem notifItem = new PlugItem
-            {
-                Description = notif.DisplayString.Value,
-                PlugImageSource = null
-            };
-
-            AddToInfoBox(notifItem, InfoBoxType.InfoBlock);
-        }
+        MakeTooltip(item);
     }
 
     private void PlugItem_MouseLeave(object sender, MouseEventArgs e)
     {
-        InfoBoxStackPanel.Children.Clear();
-        InfoBox.Visibility = Visibility.Collapsed;
+        ClearTooltip();
         ActivePlugItemButton = null;
 
         PlugItem item = (PlugItem)(sender as Button).DataContext;
@@ -666,7 +534,7 @@ public partial class APIItemView : UserControl
             Description = stat.Description,
         };
         InfoBox.DataContext = statItem;
-        AddToInfoBox(statItem, InfoBoxType.TextBlock);
+        AddToTooltip(statItem, TooltipType.TextBlock);
     }
 
     private void StatItem_MouseLeave(object sender, MouseEventArgs e)
@@ -760,34 +628,6 @@ public partial class APIItemView : UserControl
         }
     }
 
-    private void AddToInfoBox(PlugItem item, InfoBoxType type)
-    {
-        switch (type)
-        {
-            case InfoBoxType.TextBlock:
-                DataTemplate infoTextTemplate = (DataTemplate)FindResource("InfoBoxTextTemplate");
-                FrameworkElement textUI = (FrameworkElement)infoTextTemplate.LoadContent();
-                textUI.DataContext = item;
-                InfoBoxStackPanel.Children.Add(textUI);
-                break;
-            case InfoBoxType.Grid:
-                DataTemplate infoGridTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
-                FrameworkElement gridUi = (FrameworkElement)infoGridTemplate.LoadContent();
-                gridUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(gridUi);
-                break;
-            case InfoBoxType.InfoBlock:
-                DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
-                FrameworkElement infoBlockSepUi = (FrameworkElement)infoBlockSepTemplate.LoadContent();
-                InfoBoxStackPanel.Children.Add(infoBlockSepUi);
-
-                DataTemplate infoBlockTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
-                FrameworkElement infoBlockUi = (FrameworkElement)infoBlockTemplate.LoadContent();
-                infoBlockUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(infoBlockUi);
-                break;
-        }
-    }
 
     public class ApiItemView
     {
@@ -924,76 +764,293 @@ public partial class APIItemView : UserControl
         public SolidColorBrush SocketRarityColor { get; set; } // Only used for EnergyMeter
     }
 
-    private enum InfoBoxType
+    private enum TooltipType
     {
         InfoBlock,
         TextBlock,
-        Grid
+        Grid,
+        WarningBlock,
+        Seperator,
+
+        ObjectivePercentage,
+        ObjectiveInteger,
+    }
+
+    private void MakeTooltip(PlugItem item)
+    {
+        InfoBox.Visibility = Visibility.Visible;
+        var fadeIn = FindResource("FadeIn 0.2") as Storyboard;
+        InfoBox.BeginStoryboard(fadeIn);
+        InfoBox.DataContext = ActivePlugItemButton.DataContext;
+
+        if (item.Item.GetItemStrings().TagData.Unk38.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D8548080 warning)
+        {
+            foreach (var rule in warning.InsertionRules)
+            {
+                if (rule.FailureMessage.Value is null)
+                    continue;
+
+                AddToTooltip(new PlugItem
+                {
+                    Description = rule.FailureMessage.Value,
+                    PlugRarityColor = Color.FromArgb(255, 255, 0, 0)
+                }, TooltipType.WarningBlock);
+            }
+        }
+
+        if (item.Description != "")
+            AddToTooltip(item, TooltipType.TextBlock);
+
+        if (item.Item.TagData.Unk38.GetValue(item.Item.GetReader()) is D2Class_B0738080 objectives)
+        {
+            foreach (var objective in objectives.Objectives)
+            {
+                var obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
+                if (obj is null)
+                    continue;
+
+                PlugItem objItem = new PlugItem
+                {
+                    Description = obj.Value.ProgressDescription.Value,
+                    Type = $"0/{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}",
+                    PlugImageSource = obj.Value.IconIndex != -1 ? ApiImageUtils.MakeIcon(obj.Value.IconIndex) : null
+                };
+
+                TooltipType tooltipType = TooltipType.ObjectiveInteger;
+                switch ((DestinyUnlockValueUIStyle)obj.Value.InProgressValueStyle)
+                {
+                    case DestinyUnlockValueUIStyle.Percentage:
+                        tooltipType = TooltipType.ObjectivePercentage;
+                        break;
+                    case DestinyUnlockValueUIStyle.Integer:
+                        objItem.Type = $"{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}";
+                        tooltipType = TooltipType.ObjectiveInteger;
+                        break;
+                }
+
+                if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
+                    AddToTooltip(null, TooltipType.Seperator);
+
+                AddToTooltip(objItem, tooltipType); // TODO: Other styles
+            }
+        }
+
+        if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
+        {
+            foreach (var stat in stats.InvestmentStats)
+            {
+                var statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
+                var adjustValue = MakeDisplayValue(stat.StatTypeIndex, stat.Value);
+
+                if (statItem.StatName.Value is not null)
+                {
+                    var _stat = _statItems.FirstOrDefault(x => x.Hash == statItem.StatHash);
+                    if (_stat is null)
+                        continue;
+                    _stat.StatAdjustValue = adjustValue;
+                }
+            }
+            if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
+                return;
+
+            foreach (var perk in stats.Perks)
+            {
+                var perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
+                if (perkStrings.IconIndex == -1)
+                    continue;
+
+                PlugItem perkItem = new PlugItem
+                {
+                    Hash = perkStrings.SandboxPerkHash,
+                    Description = perkStrings.SandboxPerkDescription.Value,
+                    PlugImageSource = ApiImageUtils.MakeIcon(perkStrings.IconIndex)
+                };
+
+                AddToTooltip(perkItem, TooltipType.Grid);
+            }
+        }
+
+        foreach (var notif in item.Item.GetItemStrings().TagData.TooltipNotifications)
+        {
+            PlugItem notifItem = new PlugItem
+            {
+                Description = notif.DisplayString.Value,
+                PlugImageSource = null
+            };
+            AddToTooltip(notifItem, TooltipType.InfoBlock);
+        }
+    }
+
+    private void ClearTooltip()
+    {
+        InfoBoxStackPanel.Children.Clear();
+        WarningBoxStackPanel.Children.Clear();
+        InfoBox.Visibility = Visibility.Collapsed;
+    }
+
+    private void AddToTooltip(PlugItem item, TooltipType type)
+    {
+        switch (type)
+        {
+            case TooltipType.TextBlock:
+                DataTemplate infoTextTemplate = (DataTemplate)FindResource("InfoBoxTextTemplate");
+                FrameworkElement textUI = (FrameworkElement)infoTextTemplate.LoadContent();
+                textUI.DataContext = item;
+                InfoBoxStackPanel.Children.Add(textUI);
+                break;
+            case TooltipType.Grid:
+                DataTemplate infoGridTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
+                FrameworkElement gridUi = (FrameworkElement)infoGridTemplate.LoadContent();
+                gridUi.DataContext = item;
+                InfoBoxStackPanel.Children.Add(gridUi);
+                break;
+            case TooltipType.InfoBlock:
+                DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
+                FrameworkElement infoBlockSepUi = (FrameworkElement)infoBlockSepTemplate.LoadContent();
+                InfoBoxStackPanel.Children.Add(infoBlockSepUi);
+
+                DataTemplate infoBlockTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
+                FrameworkElement infoBlockUi = (FrameworkElement)infoBlockTemplate.LoadContent();
+                infoBlockUi.DataContext = item;
+                InfoBoxStackPanel.Children.Add(infoBlockUi);
+                break;
+            case TooltipType.WarningBlock:
+                DataTemplate warningTextTemplate = (DataTemplate)FindResource("InfoBoxWarningTextTemplate");
+                FrameworkElement warningTextUI = (FrameworkElement)warningTextTemplate.LoadContent();
+                warningTextUI.DataContext = item;
+                WarningBoxStackPanel.Children.Add(warningTextUI);
+                break;
+            case TooltipType.Seperator:
+                DataTemplate seperatorTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
+                FrameworkElement seperatorUi = (FrameworkElement)seperatorTemplate.LoadContent();
+                InfoBoxStackPanel.Children.Add(seperatorUi);
+                break;
+
+            case TooltipType.ObjectivePercentage:
+                DataTemplate objPercentTemplate = (DataTemplate)FindResource("InfoBoxObjectivePercentageTemplate");
+                FrameworkElement objPercentUi = (FrameworkElement)objPercentTemplate.LoadContent();
+                objPercentUi.DataContext = item;
+                InfoBoxStackPanel.Children.Add(objPercentUi);
+                break;
+            case TooltipType.ObjectiveInteger:
+                DataTemplate objIntTemplate = (DataTemplate)FindResource("InfoBoxObjectiveIntegerTemplate");
+                FrameworkElement objIntUi = (FrameworkElement)objIntTemplate.LoadContent();
+                objIntUi.DataContext = item;
+                InfoBoxStackPanel.Children.Add(objIntUi);
+                break;
+        }
     }
 }
 
-// https://bungie-net.github.io/multi/schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition.html#schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition
-// https://bungie-net.github.io/multi/schema_Destiny-DestinySocketCategoryStyle.html#schema_Destiny-DestinySocketCategoryStyle
-public enum DestinySocketCategoryStyle : uint
+public static class ApiImageUtils
 {
-    Unknown = 0, // 0
-    Reusable = 2656457638, // 1
-    Consumable = 1469714392, // 2
-                             // where Intrinsic? Replaced with LargePerk? // 4
-    Unlockable = 1762428417, // 3
-    EnergyMeter = 750616615, // 5
-    LargePerk = 2251952357, // 6
-    Abilities = 1901312945, // 7
-    Supers = 497024337, // 8
-}
-
-// TODO: Find where these indexes actually go?
-public enum DestinyDamageType : int
-{
-    [Description("Kinetic")]
-    Kinetic = 1319,
-    [Description(" Arc")]
-    Arc = 1320,
-    [Description(" Solar")]
-    Solar = 1321,
-    [Description(" Void")]
-    Void = 1322,
-    [Description(" Stasis")]
-    Stasis = 1323,
-    [Description(" Strand")]
-    Strand = 1324
-}
-
-public enum DestinyTierType
-{
-    Unknown = -1,
-    Currency = 0,
-    Common = 1, // Basic
-    Uncommon = 2, // Common
-    Rare = 3,
-    Legendary = 4, // Superior
-    Exotic = 5,
-}
-
-public static class DestinyTierTypeColor
-{
-    private static readonly Dictionary<DestinyTierType, Color> Colors = new Dictionary<DestinyTierType, Color>
+    private static BitmapImage MakeBitmapImage(UnmanagedMemoryStream ms, int width, int height)
     {
-        { DestinyTierType.Unknown, Color.FromArgb(255, 66, 66, 66) },
-        { DestinyTierType.Currency, Color.FromArgb(255, 195, 188, 180) },
-        { DestinyTierType.Common, Color.FromArgb(255, 66, 66, 66) },
-        { DestinyTierType.Uncommon, Color.FromArgb(255, 55, 113, 67) },
-        { DestinyTierType.Rare, Color.FromArgb(255, 80, 118, 164) },
-        { DestinyTierType.Legendary, Color.FromArgb(255, 82, 47, 100) },
-        { DestinyTierType.Exotic, Color.FromArgb(255, 206, 174, 51) }
-    };
+        BitmapImage bitmapImage = new BitmapImage();
+        bitmapImage.BeginInit();
+        bitmapImage.StreamSource = ms;
+        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+        bitmapImage.DecodePixelWidth = width;
+        bitmapImage.DecodePixelHeight = height;
+        bitmapImage.EndInit();
+        bitmapImage.Freeze();
+        return bitmapImage;
+    }
 
-    public static Color GetColor(this DestinyTierType tierType)
+    public static Dictionary<DrawingImage, ImageBrush> MakeIcon(InventoryItem item)
     {
-        if (Colors.ContainsKey(tierType))
-            return Colors[tierType];
-        else
-            throw new ArgumentException("Invalid DestinyTierType");
+        Dictionary<DrawingImage, ImageBrush> icon = new();
+        string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+        if (type is null)
+            type = "";
+
+        // streams
+        var bgStream = item.GetIconBackgroundStream();
+        var bgOverlayStream = item.GetIconBackgroundOverlayStream();
+        var primaryStream = item.GetIconPrimaryStream();
+        var overlayStream = item.GetIconOverlayStream();
+
+        //sometimes only the primary icon is valid
+        var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+        var bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
+
+        //Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
+        var bgOverlay = bgOverlayStream != null && type.Contains("Ornament") ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
+        var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+
+        var group = new DrawingGroup();
+        group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
+        group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+        group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
+        group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
+
+        var dw = new DrawingImage(group);
+        dw.Freeze();
+
+        ImageBrush brush = new ImageBrush(bg);
+        brush.Freeze();
+
+        icon.TryAdd(dw, brush);
+
+        return icon;
+    }
+
+    public static DrawingImage MakeFoundryBanner(InventoryItem item)
+    {
+        var foundryStream = item.GetFoundryIconStream();
+        var foundry = foundryStream != null ? MakeBitmapImage(foundryStream, 596, 596) : null;
+
+        var group = new DrawingGroup();
+        group.Children.Add(new ImageDrawing(foundry, new Rect(0, 0, 596, 596)));
+
+        var dw = new DrawingImage(group);
+        dw.Freeze();
+
+        return dw;
+    }
+
+    public static ImageSource GetPlugWatermark(InventoryItem item)
+    {
+        var overlayStream = item.GetIconOverlayStream(1);
+        var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+        var dw = new ImageBrush(overlay);
+        dw.Freeze();
+        return dw.ImageSource;
+    }
+
+    public static ImageSource MakeIcon(int index)
+    {
+        var container = Investment.Get().GetItemIconContainer(index);
+        if (container == null || container.TagData.IconPrimaryContainer == null)
+            return null;
+
+        var primaryStream = GetTexture(container.TagData.IconPrimaryContainer).GetTexture();
+        var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+
+        var dw = new ImageBrush(primary);
+        dw.Freeze();
+
+        return dw.ImageSource;
+    }
+
+    private static Texture? GetTexture(Tag<D2Class_CF3E8080> iconContainer, int index = 0)
+    {
+        using TigerReader reader = iconContainer.GetReader();
+        dynamic? prim = iconContainer.TagData.Unk10.GetValue(reader);
+        if (prim is D2Class_CD3E8080 structCD3E8080)
+        {
+            // TextureList[0] is default, others are for colourblind modes
+            if (index >= structCD3E8080.Unk00[reader, 0].TextureList.Count)
+                return null;
+            return structCD3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
+        }
+        if (prim is D2Class_CB3E8080 structCB3E8080)
+        {
+            if (index >= structCB3E8080.Unk00[reader, 0].TextureList.Count)
+                return null;
+            return structCB3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
+        }
+        return null;
     }
 }
 
