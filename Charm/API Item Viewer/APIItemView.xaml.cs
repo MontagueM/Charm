@@ -52,7 +52,8 @@ public partial class APIItemView : UserControl
             ItemSource = sourceString,
             ImageSource = image.Keys.First(),
             FoundryIconSource = foundryBanner,
-            ItemDamageType = ((DestinyDamageType)item.GetItemDamageTypeIndex()).GetEnumDescription()
+            ItemDamageType = ((DestinyDamageType)item.GetItemDamageTypeIndex()).GetEnumDescription(),
+            ItemPowerCap = item.GetItemPowerCap()
         };
         Load();
     }
@@ -76,7 +77,8 @@ public partial class APIItemView : UserControl
             ItemSource = sourceString,
             ImageSource = apiItem.ImageSource,
             FoundryIconSource = foundryBanner,
-            ItemDamageType = ((DestinyDamageType)apiItem.Item.GetItemDamageTypeIndex()).GetEnumDescription()
+            ItemDamageType = ((DestinyDamageType)apiItem.Item.GetItemDamageTypeIndex()).GetEnumDescription(),
+            ItemPowerCap = apiItem.Item.GetItemPowerCap()
         };
         Load();
     }
@@ -640,6 +642,7 @@ public partial class APIItemView : UserControl
         public string ItemHash { get; set; }
         public string ItemSource { get; set; }
         public string ItemDamageType { get; set; }
+        public int ItemPowerCap { get; set; }
 
         public double ImageWidth { get; set; }
         public double ImageHeight { get; set; }

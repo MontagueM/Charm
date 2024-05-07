@@ -772,7 +772,7 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Panel.ZIndex="2"
-                Background="#00FF0000"
+                Background="Transparent"
                 Visibility="Visible">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="250" />
@@ -783,51 +783,81 @@
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock
-                    x:Name="ItemDamageType"
+                <Grid
                     Grid.Column="0"
                     Margin="0,0,20,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    Panel.ZIndex="1"
-                    d:FontFamily="Haas Grot Text 65 Medium"
-                    d:Text="DMGType"
-                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                    FontSize="50"
-                    Text="{Binding ItemDamageType}">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{StaticResource ForegroundColour100}" />
-                            <Setter Property="Effect">
-                                <Setter.Value>
-                                    <DropShadowEffect
-                                        BlurRadius="2"
-                                        Direction="320"
-                                        Opacity="0.7"
-                                        ShadowDepth="2"
-                                        Color="#1B1B1B" />
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Arc">
-                                    <Setter Property="Foreground" Value="#85c5ec" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Solar">
-                                    <Setter Property="Foreground" Value="#f2711b" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Void">
-                                    <Setter Property="Foreground" Value="#b184c5" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Stasis">
-                                    <Setter Property="Foreground" Value="#4d88ff" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding ItemDamageType}" Value=" Strand">
-                                    <Setter Property="Foreground" Value="#35e366" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                    Background="Transparent">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        x:Name="ItemDamageType"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Right"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        d:Text="DMGType"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="50"
+                        Text="{Binding ItemDamageType}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Foreground" Value="{StaticResource ForegroundColour100}" />
+                                <Setter Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect
+                                            BlurRadius="2"
+                                            Direction="320"
+                                            Opacity="0.7"
+                                            ShadowDepth="2"
+                                            Color="#1B1B1B" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Arc">
+                                        <Setter Property="Foreground" Value="#85c5ec" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Solar">
+                                        <Setter Property="Foreground" Value="#f2711b" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Void">
+                                        <Setter Property="Foreground" Value="#b184c5" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Stasis">
+                                        <Setter Property="Foreground" Value="#4d88ff" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Strand">
+                                        <Setter Property="Foreground" Value="#35e366" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock
+                        x:Name="ItemPowerCap"
+                        Grid.Row="1"
+                        HorizontalAlignment="Right"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="20"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Style="{StaticResource DropShadowMedium}">
+                        <Run Text="Power Cap: " />
+                        <Run Text="{Binding ItemPowerCap}" />
+                    </TextBlock>
+                </Grid>
 
                 <Rectangle
                     Grid.Row="0"
@@ -1213,7 +1243,7 @@
             </Rectangle>
 
             <!--  Main header  -->
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" d:Background="#F1020202">
                 <Grid.Style>
                     <Style TargetType="Grid">
                         <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.5}" />
