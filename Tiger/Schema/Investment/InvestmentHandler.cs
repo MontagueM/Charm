@@ -50,6 +50,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<D2Class_BF598080> _collectableStringsMap = null;
     private Tag<D2Class_3C758080> _objectiveDefinitionMap = null;
     private Tag<D2Class_4C588080> _objectiveStringsMap = null;
+    public Tag<D2Class_C9798080> _powerCapDefinitionMap = null; // Literally 0 reason for this but fuck it we ball
     public ConcurrentDictionary<int, D2Class_5D4F8080> SocketCategoryStringThings = null;
     public ConcurrentDictionary<int, D2Class_D3508080> InventoryItemLoreStrings = null;
     public ConcurrentDictionary<int, D2Class_33548080> SandboxPerkStrings = null;
@@ -193,6 +194,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                         break;
                     case 0x8080584C:
                         _objectiveStringsMap = FileResourcer.Get().GetSchemaTag<D2Class_4C588080>(val);
+                        break;
+                    case 0x808079C9:
+                        _powerCapDefinitionMap = FileResourcer.Get().GetSchemaTag<D2Class_C9798080>(val);
                         break;
                 }
             });
@@ -886,6 +890,18 @@ public class InventoryItem : Tag<D2Class_9D798080>
 {
     public InventoryItem(FileHash hash, bool shouldParse) : base(hash, shouldParse)
     {
+    }
+
+    public int GetItemPowerCap()
+    {
+        if (_tag.Unk50.GetValue(GetReader()) is D2Class_DC778080 quality)
+        {
+            if (quality.Versions.Count == 0 || quality.Versions[0].PowerCapIndex == -1)
+                return -1;
+
+            return (int)Investment.Get()._powerCapDefinitionMap.TagData.PowerCapDefinitions[quality.Versions[0].PowerCapIndex].PowerCap * 10;
+        }
+        return -1;
     }
 
     public Tag<D2Class_9F548080> GetItemStrings()

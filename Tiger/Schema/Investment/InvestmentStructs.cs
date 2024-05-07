@@ -156,7 +156,7 @@ public struct D2Class_DC778080
     public DynamicArray<D2Class_2D788080> DisplayVersionWatermarkIcons; // Unsure
 
     [SchemaField(0x60)]
-    public DynamicArray<D2Class_DE778080> Unk60;
+    public DynamicArray<D2Class_DE778080> Versions;
 }
 
 [SchemaStruct("2D788080", 2)]
@@ -168,7 +168,7 @@ public struct D2Class_2D788080
 [SchemaStruct("DE778080", 2)]
 public struct D2Class_DE778080
 {
-    public short Unk00;
+    public short PowerCapIndex; // 'powerCapHash' DestinyPowerCapDefinition
 }
 
 [SchemaStruct("05798080", 2)]
@@ -331,6 +331,20 @@ public struct D2Class_6F588080
     public StringIndexReference StatName;
     public StringIndexReference StatDescription;
     public short StatIconIndex;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C9798080", 0x18)]
+public struct D2Class_C9798080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_CF798080> PowerCapDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "CF798080", 0x8)]
+public struct D2Class_CF798080
+{
+    public TigerHash PowerCapHash;
+    public float PowerCap; // needs multiplied by 10 for some reason?
 }
 #endregion
 
