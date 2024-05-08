@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Arithmic;
 
 namespace Tiger.Schema;
@@ -38,17 +37,37 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
 
     public List<InputSignature> GetInputSignatures()
     {
+        List<InputSignature> inputSignatures = new();
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            using TigerReader reader1 = GetReader();
+            reader1.Seek(0x38, SeekOrigin.Begin);
+            var semanticCount = reader1.ReadByte();
+            reader1.Seek(0x54, SeekOrigin.Begin);
+
+            Console.WriteLine($"Semantic Count {semanticCount}");
+            for (int i = 0; i < semanticCount; i++)
+            {
+                Console.WriteLine($"--------------------");
+                ORBISInputSignature signature = reader1.ReadType<ORBISInputSignature>();
+
+                Console.WriteLine($"-SemanticIndex {signature.SemanticIndex}");
+                Console.WriteLine($"-SemanticPosition? {signature.SemanticPosition}");
+                Console.WriteLine($"-SemanticComponents {signature.SemanticComponents}");
+                Console.WriteLine($"-SystemValueType {signature.SystemValueType}");
+
+                if (signature.SystemValueType >= 1)
+                    break;
+
+            }
+
+            return inputSignatures;
+        }
+
         using TigerReader reader = GetReferenceReader();
-#if DEBUG
-        reader.Seek(0x2C, SeekOrigin.Begin);
-        uint inputSignatureCC = reader.ReadUInt32();
-        Debug.Assert(inputSignatureCC == 1313297225);
-        uint chunkSize = reader.ReadUInt32();
-#endif
         reader.Seek(0x34, SeekOrigin.Begin);
         uint inputSignatureCount = reader.ReadUInt32();
         reader.Seek(0x4, SeekOrigin.Current);
-        List<InputSignature> inputSignatures = new();
         for (int i = 0; i < inputSignatureCount; i++)
         {
             DXBCInputSignature signature = reader.ReadType<DXBCInputSignature>();
@@ -182,3 +201,39 @@ public enum ComponentMask : byte
 
     XYZW = X | Y | Z | W
 }
+
+[StructLayout(LayoutKind.Sequential, Size = 0x4)]
+public struct ORBISInputSignature
+{
+    // Byte index, byte semantic or postion to read to, byte # components, byte system value
+
+    // Signatures start at around 0x50?
+    // 0F001001 onwards are outputs?
+
+    // Semantics aren't clearly defined so its kind of a guess based on the number of components and/or position to read to?
+
+    // Position is (at least should be) always first
+    // 00040300: 00 being index, 04 being POSITION or meaning to read to 0x4, 03 being the number of components (XYZ), 00 meaning non-system?
+    // 01080400: 01 index, 08 being TEXCOORD0?, 04 (can be 02) number of components (XYZW) (XY UVs, ZW Vertex Color if 4?)
+    // 020C0300: 02, NORMAL, XYZ
+    // 03100400: 03, TANGENT, XYZW
+    // 04140400: 04, Unknown, XYZW (ive seen 01 though)
+
+    // Vertex buffer BDF24681 has position, texcoord, normal, tangent and color
+    // Vertex shader header for the material has, in order, 00040300 (Pos XYZ), 01080200 (texcoord, XY),
+    // 020C0300 (Norm, XYZ), 03100400 (Tangent, XYZW), then maybe 04140400 is Vertex color XYZW
+
+    public byte SemanticIndex;
+    public byte SemanticPosition; // ??
+    public byte SemanticComponents;
+    public byte SystemValueType;
+}
+
+//public enum ORBISSemantic : byte
+//{
+//    Position = 0x4,
+//    Texcoord = 0x8,
+//    Normal = 0xC,
+//    Tangent = 0x10,
+//    Color = 0x14,
+//}

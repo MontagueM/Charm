@@ -203,6 +203,25 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     private FieldInfo[] GetStrategyFields(FieldInfo[] getFields)
     {
+        var result = new List<FieldInfo>();
+
+        foreach (var field in getFields)
+        {
+            var attributes = field.GetCustomAttributes<SchemaFieldAttribute>().ToArray();
+
+            // Check if attributes array is null or empty
+            if (attributes.Length == 0)
+                continue;
+
+            var attribute = GetAttribute<SchemaFieldAttribute>(field);
+            // Check if attribute is null
+            if (attribute == null)
+            {
+                Console.WriteLine($"Attribute for field {field.Name} is null.");
+                continue;
+            }
+        }
+
         // don't include fields that have a strategy assigned but are larger than us
         return getFields.Where(f => !f.GetCustomAttributes<SchemaFieldAttribute>().Any() || (_strategy >= GetAttribute<SchemaFieldAttribute>(f).Strategy && !GetAttribute<SchemaFieldAttribute>(f).Obsolete)).ToArray();
     }
@@ -457,7 +476,6 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         {
             throw new Exception($"Failed to create schema field instance of type {fieldType}");
         }
-
         fieldValue.Deserialize(reader);
         return fieldValue;
     }
