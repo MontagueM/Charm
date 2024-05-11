@@ -854,6 +854,11 @@ public struct D2Class_B83E8080
     public Tag<D2Class_CF3E8080> IconOverlayContainer;
     //public Tag Unk28; //Always null?
     //public Tag EmblemContainer; //For Emblems, not worth loading atm
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    public Vector4 DyeColorR;
+    public Vector4 DyeColorG;
+    public Vector4 DyeColorB;
 }
 
 

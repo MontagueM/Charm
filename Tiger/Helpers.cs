@@ -263,4 +263,35 @@ public static class ColorUtility
         if (t < 2f / 3f) return p + (q - p) * (2f / 3f - t) * 6f;
         return p;
     }
+
+    public static Color BlendColors(Color baseColor, Color overlayColor, byte mask)
+    {
+        return Color.FromArgb(baseColor.A,
+            BlendColors(BlendColors(baseColor.R, overlayColor.R), mask),
+            BlendColors(BlendColors(baseColor.G, overlayColor.G), mask),
+            BlendColors(BlendColors(baseColor.B, overlayColor.B), mask));
+    }
+
+    public static byte BlendColors(byte baseColor, byte overlayColor)
+    {
+        return (byte)(((baseColor * overlayColor) + 0xFF) >> 8);
+    }
+
+    public static Color AddColors(Color color1, Color color2)
+    {
+        return Color.FromArgb(color1.A,
+             AddColors(color1.R, color2.R),
+             AddColors(color1.G, color2.G),
+             AddColors(color1.B, color2.B));
+    }
+
+    public static byte AddColors(byte baseColor, byte overlayColor)
+    {
+        return (byte)(baseColor + overlayColor);
+    }
+
+    public static bool IsZero(this Color color)
+    {
+        return (color.R <= 0 && color.G <= 0 && color.B <= 0);
+    }
 }

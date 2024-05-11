@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,6 +19,7 @@ using Arithmic;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Investment;
+using Color = System.Windows.Media.Color;
 
 namespace Charm;
 
@@ -548,7 +551,7 @@ public partial class APIItemView : UserControl
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
-        Point position = e.GetPosition(this);
+        System.Windows.Point position = e.GetPosition(this);
         if (InfoBox.Visibility == Visibility.Visible && (ActivePlugItemButton != null || ActiveStatItemGrid != null))
         {
             float xOffset = 25;
@@ -947,7 +950,7 @@ public partial class APIItemView : UserControl
 
 public static class ApiImageUtils
 {
-    private static BitmapImage MakeBitmapImage(UnmanagedMemoryStream ms, int width, int height)
+    public static BitmapImage MakeBitmapImage(UnmanagedMemoryStream ms, int width, int height)
     {
         BitmapImage bitmapImage = new BitmapImage();
         bitmapImage.BeginInit();
@@ -973,8 +976,14 @@ public static class ApiImageUtils
         var primaryStream = item.GetIconPrimaryStream();
         var overlayStream = item.GetIconOverlayStream();
 
+
         //sometimes only the primary icon is valid
         var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+
+        // Icon dyes
+        if (item.GetIconBackgroundOverlayStream() != null && Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            primary = MakeDyedIcon(item);
+
         var bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
 
         //Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
@@ -1054,6 +1063,121 @@ public static class ApiImageUtils
             return structCB3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
         }
         return null;
+    }
+
+    private static BitmapImage MakeDyedIcon(InventoryItem item)
+    {
+        var iconContainer = Investment.Get().GetItemIconContainer(item);
+        var primaryStream = item.GetIconPrimaryStream();
+        var maskStream = item.GetIconBackgroundOverlayStream();
+
+        Bitmap mainImage = primaryStream != null ? MakeBitmap(primaryStream) : null;
+        Bitmap colorMaskImage = maskStream != null ? MakeBitmap(maskStream) : null;
+        if (mainImage is null || colorMaskImage is null)
+            return Bitmap2BitmapImage(mainImage, 96, 96);
+
+        // both mask and main have to be the same size
+        if (iconContainer.TagData.IconBGOverlayContainer is not null && (GetTexture(iconContainer.TagData.IconBGOverlayContainer).TagData.Height < GetTexture(iconContainer.TagData.IconPrimaryContainer).TagData.Height))
+            colorMaskImage = MakeBitmap(maskStream, GetTexture(iconContainer.TagData.IconPrimaryContainer).TagData.Height);
+
+        // Define RGB colors
+        System.Drawing.Color[] overlayColors = new System.Drawing.Color[]
+        {
+            System.Drawing.Color.FromArgb((byte)(iconContainer.TagData.DyeColorR.W * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorR.X, 0.5) * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorR.Y, 0.5) * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorR.Z, 0.5) * 255)),   // Red channel overlay color
+
+            System.Drawing.Color.FromArgb((byte)(iconContainer.TagData.DyeColorG.W * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorG.X, 0.5) * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorG.Y, 0.5) * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorG.Z, 0.5) * 255)),   // Green channel overlay color
+
+            System.Drawing.Color.FromArgb((byte)(iconContainer.TagData.DyeColorB.W * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorB.X, 0.5) * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorB.Y, 0.5) * 255),
+            (byte)(Math.Pow(iconContainer.TagData.DyeColorB.Z, 0.5) * 255))    // Blue channel overlay color
+        };
+
+
+        // Apply color from color mask
+        int width = mainImage.Width;
+        int height = mainImage.Height;
+
+        // Iterate over each pixel in the color mask and apply color to the main image
+        for (int y = 0; y < height; y++)
+        {
+            //Console.WriteLine($"H {y} : {height}");
+            for (int x = 0; x < width; x++)
+            {
+                // Get color mask pixel color
+                System.Drawing.Color maskColor = colorMaskImage.GetPixel(x, y);
+
+                // Get main image pixel color
+                System.Drawing.Color mainColor = mainImage.GetPixel(x, y);
+                System.Drawing.Color blendedColor = System.Drawing.Color.FromArgb(mainColor.A, 0, 0, 0);
+
+                // Mask R
+                blendedColor = ColorUtility.BlendColors(mainColor, overlayColors[0], maskColor.R);
+                // Mask G
+                blendedColor = ColorUtility.AddColors(blendedColor, ColorUtility.BlendColors(mainColor, overlayColors[1], maskColor.G));
+                // Mask B
+                blendedColor = ColorUtility.AddColors(blendedColor, ColorUtility.BlendColors(mainColor, overlayColors[2], maskColor.B));
+
+                // Set the modified pixel color
+                if (!blendedColor.IsZero())
+                    mainImage.SetPixel(x, y, blendedColor);
+            }
+        }
+
+        return Bitmap2BitmapImage(mainImage, 96, 96);
+    }
+
+    private static Bitmap MakeBitmap(UnmanagedMemoryStream stream, int wH = 0)
+    {
+        using (var memoryStream = new System.IO.MemoryStream())
+        {
+            BitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(stream));
+            encoder.Save(memoryStream);
+
+            if (wH == 0)
+                return new Bitmap(memoryStream);
+            else
+            {
+                Bitmap originalBitmap = new Bitmap(memoryStream);
+                Bitmap resizedBitmap = new Bitmap(wH, wH);
+
+                using (Graphics graphics = Graphics.FromImage(resizedBitmap))
+                {
+                    graphics.DrawImage(originalBitmap, 0, 0, wH, wH);
+                }
+                return resizedBitmap;
+            }
+        }
+    }
+
+    public static BitmapImage Bitmap2BitmapImage(Bitmap bitmap, int width, int height)
+    {
+        using (MemoryStream memoryStream = new MemoryStream())
+        {
+            // Save bitmap to memory stream as PNG (to preserve alpha channel)
+            bitmap.Save(memoryStream, ImageFormat.Png);
+            memoryStream.Position = 0;
+
+            // Create new BitmapImage and load it from memory stream
+            BitmapImage bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.DecodePixelWidth = width;
+            bitmapImage.DecodePixelHeight = height;
+            bitmapImage.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.StreamSource = memoryStream;
+            bitmapImage.EndInit();
+            bitmapImage.Freeze(); // Freeze the BitmapImage to make it immutable
+
+            return bitmapImage;
+        }
     }
 }
 
