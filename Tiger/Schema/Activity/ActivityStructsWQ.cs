@@ -31,9 +31,9 @@ public struct SActivity_WQ
     public TigerHash Unk60;
     public FileHash Unk64;  // an entity thing
     //[SchemaField(0xA0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    //[SchemaField(0x68, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //[SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
-    //public FileHash64 UnkActivity68;  // todo this uses an unknown hash64 system in the package
+    [Tag64, SchemaField(0x68, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [Tag64, SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
+    public Tag AmbientActivity;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8B8E8080", 0xD0)]

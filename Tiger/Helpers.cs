@@ -36,7 +36,7 @@ public static class Helpers
         return sb.ToString();
     }
 
-    public static void DecorateSignaturesWithBufferIndex(ref InputSignature[] inputSignatures, List<int> strides)
+    public static void DecorateSignaturesWithBufferIndex(ref DXBCIOSignature[] inputSignatures, List<int> strides)
     {
         if (!strides.Any())
         {
@@ -45,7 +45,7 @@ public static class Helpers
         int bufferIndex = 0;
         int offset = 0;
         int strideBound = strides[bufferIndex];
-        foreach (ref InputSignature inputSignature in inputSignatures.AsSpan())
+        foreach (ref DXBCIOSignature inputSignature in inputSignatures.AsSpan())
         {
             if (offset < strideBound)
             {
@@ -57,7 +57,7 @@ public static class Helpers
                 inputSignature.BufferIndex = bufferIndex;
             }
 
-            if (inputSignature.Semantic == InputSemantic.Colour)
+            if (inputSignature.Semantic == DXBCSemantic.Colour)
             {
                 offset += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
             }

@@ -1,185 +1,233 @@
 ﻿using System.Text;
+using System.Text.Json;
+using Arithmic;
 using Tiger.Schema;
-using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
+using Texture = Tiger.Schema.Texture;
 
 namespace Tiger.Exporters;
 
-public class Source2Handler
+public class SBoxHandler
 {
-    private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-    public static bool source2Shaders = _config.GetS2ShaderExportEnabled();
-    public static bool source2Models = _config.GetS2VMDLExportEnabled();
-    public static bool source2Materials = _config.GetS2VMATExportEnabled();
-
-    public static void SaveStaticVMDL(string savePath, string staticMeshName, List<StaticPart> staticMesh)
+    public static void SaveStaticVMDL(string savePath, ExporterMesh mesh)
     {
         try
         {
-            if (!File.Exists($"{savePath}/{staticMeshName}.vmdl"))
+            if (!File.Exists($"{savePath}/{mesh.Hash}.vmdl"))
             {
-                //Source 2 shit
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{staticMeshName}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{staticMeshName}.vmdl");
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{mesh.Hash}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{mesh.Hash}.vmdl");
 
                 StringBuilder mats = new StringBuilder();
 
                 int i = 0;
-                foreach (MeshPart staticpart in staticMesh)
+                foreach (var part in mesh.Parts)
                 {
-                    if (staticpart.Material == null)
-                        continue;
                     mats.AppendLine("{");
-                    mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/{staticpart.Material.FileHash}.vmat\"");
-                    mats.AppendLine("},\n");
-                    i++;
-                }
-
-                text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"models/{staticMeshName}.fbx");
-                text = text.Replace("%MESHNAME%", staticMeshName);
-
-                File.WriteAllText($"{savePath}/{staticMeshName}.vmdl", text);
-            }
-        }
-        catch (Exception ex)
-        {
-        }
-    }
-
-    public static void SaveEntityVMDL(string savePath, Entity entity)
-    {
-        var parts = entity.Load(ExportDetailLevel.MostDetailed);
-        SaveEntityVMDL(savePath, entity.Hash, parts);
-    }
-
-    public static void SaveEntityVMDL(string savePath, string hash, List<DynamicMeshPart> parts)
-    {
-        try
-        {
-            if (!File.Exists($"{savePath}/{hash}.vmdl"))
-            {
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{hash}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{hash}.vmdl");
-
-                StringBuilder mats = new StringBuilder();
-
-                int i = 0;
-                foreach (var part in parts)
-                {
                     if (part.Material == null)
-                        continue;
-
-                    if (!part.Material.EnumeratePSTextures().Any())
-                        continue;
-
-                    mats.AppendLine("{");
-                    mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                    {
+                        mats.AppendLine($"    from = \"{mesh.Hash}_Group{part.MeshPart.GroupIndex}_Index{part.Index}_{i}_{part.MeshPart.LodCategory}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
+                    }
+                    else
+                    {
+                        mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                    }
                     mats.AppendLine("},\n");
                     i++;
                 }
 
                 text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"models/{hash}.fbx");
-                text = text.Replace("%MESHNAME%", hash);
+                text = text.Replace("%FILENAME%", $"Models/Statics/{mesh.Hash}.fbx");
+                text = text.Replace("%MESHNAME%", mesh.Hash);
 
-                File.WriteAllText($"{savePath}/{hash}.vmdl", text);
+                File.WriteAllText($"{savePath}/{mesh.Hash}.vmdl", text);
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-
+            Log.Error(e.Message);
         }
     }
 
-    public static void SaveTerrainVMDL(string savePath, string hash, List<StaticPart> parts, STerrain terrainHeader)
+    //public static void SaveEntityVMDL(string savePath, Entity entity)
+    //{
+    //    var parts = entity.Load(ExportDetailLevel.MostDetailed);
+    //    SaveEntityVMDL(savePath, entity.Hash, parts);
+    //}
+
+    public static void SaveEntityVMDL(string savePath, ExporterEntity entity)
     {
-        Directory.CreateDirectory($"{savePath}/Statics/");
-        File.Copy("Exporters/template.vmdl", $"{savePath}/Statics/{hash}_Terrain.vmdl", true);
-        if (File.Exists($"{savePath}/Statics/{hash}_Terrain.vmdl"))
+        try
         {
-            string text = File.ReadAllText($"{savePath}/Statics/{hash}_Terrain.vmdl");
+            if (!File.Exists($"{savePath}/{entity.Mesh.Hash}.vmdl"))
+            {
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{entity.Mesh.Hash}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{entity.Mesh.Hash}.vmdl");
+
+                StringBuilder mats = new StringBuilder();
+
+                int i = 0;
+                foreach (var part in entity.Mesh.Parts)
+                {
+                    mats.AppendLine("{");
+                    if (part.Material == null)
+                    {
+                        mats.AppendLine($"    from = \"{entity.Mesh.Hash}_Group{part.MeshPart.GroupIndex}_Index{part.MeshPart.Index}_{i}_{part.MeshPart.LodCategory}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
+                    }
+                    else
+                    {
+                        mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
+                        mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                    }
+                    mats.AppendLine("},\n");
+                    i++;
+                }
+
+                text = text.Replace("%MATERIALS%", mats.ToString());
+                text = text.Replace("%FILENAME%", $"Models/Entities/{entity.Mesh.Hash}.fbx");
+                text = text.Replace("%MESHNAME%", entity.Mesh.Hash);
+
+                File.WriteAllText($"{savePath}/{entity.Mesh.Hash}.vmdl", text);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error(e.Message);
+        }
+    }
+
+    public static void SaveTerrainVMDL(string name, string savePath, List<StaticPart> parts)
+    {
+        Directory.CreateDirectory($"{savePath}/Models/Terrain/");
+        File.Copy("Exporters/template.vmdl", $"{savePath}/Models/Terrain/{name}.vmdl", true);
+        if (File.Exists($"{savePath}/Models/Terrain/{name}.vmdl"))
+        {
+            string text = File.ReadAllText($"{savePath}/Models/Terrain/{name}.vmdl");
 
             StringBuilder mats = new StringBuilder();
 
             int i = 0;
             foreach (var staticpart in parts)
             {
-                if (terrainHeader.MeshGroups[staticpart.GroupIndex].Dyemap != null)
-                {
-                    mats.AppendLine("{");
-                    mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
-                    mats.AppendLine($"    to = \"materials/Terrain/{hash}_{staticpart.Material.FileHash}.vmat\"");
-                    mats.AppendLine("},\n");
-                    i++;
-                }
+                mats.AppendLine("{");
+                mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
+                mats.AppendLine($"    to = \"materials/Terrain/{staticpart.Material.FileHash}.vmat\"");
+                mats.AppendLine("},\n");
+                i++;
             }
 
             text = text.Replace("%MATERIALS%", mats.ToString());
-            text = text.Replace("%FILENAME%", $"models/{hash}_Terrain.fbx");
-            text = text.Replace("%MESHNAME%", hash);
+            text = text.Replace("%FILENAME%", $"Models/Terrain/{name}.fbx");
+            text = text.Replace("%MESHNAME%", name);
 
-            File.WriteAllText($"{savePath}/Statics/{hash}_Terrain.vmdl", text);
+            File.WriteAllText($"{savePath}/Models/Terrain/{name}.vmdl", text);
         }
     }
 
-    public static void SaveVMAT(string savePath, string hash, IMaterial materialHeader, bool isTerrain = false)
+    public static void SaveVMAT(string savePath, string hash, IMaterial materialHeader, bool isTerrain = false, List<Texture> terrainDyemaps = null)
     {
+        string path;
+        if (isTerrain)
+            path = $"{savePath}/Materials/Terrain";
+        else
+            path = $"{savePath}/Materials";
+
+        Directory.CreateDirectory(path);
         StringBuilder vmat = new StringBuilder();
-        vmat.AppendLine("Layer0 \n{");
+
+        vmat.AppendLine("Layer0\n{");
 
         //If the shader doesnt exist, just use the default complex.shader
-        if (!File.Exists($"{savePath}/Source2/PS_{materialHeader.PixelShader?.Hash}.shader"))
-        {
-            vmat.AppendLine($"  shader \"complex.shader\"");
+        //if (!File.Exists($"{savePath}/Shaders/PS_{materialHeader.PixelShader?.Hash}.shader"))
+        //{
+        //    vmat.AppendLine($"  shader \"complex.shader\"");
 
-            //Use just the first texture for the diffuse
-            if (materialHeader.EnumeratePSTextures().Any())
-            {
-                if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
-                    vmat.AppendLine($"  TextureColor \"materials/Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
-            }
-        }
-        else
-        {
-            vmat.AppendLine($"\tshader \"ps_{materialHeader.PixelShader.Hash}.shader\"");
-            vmat.AppendLine($"\tF_ALPHA_TEST 1");
-            vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
+        //    //Use just the first texture for the diffuse
+        //    if (materialHeader.EnumeratePSTextures().Any())
+        //    {
+        //        if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
+        //            vmat.AppendLine($"  TextureColor \"Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
+        //    }
+        //}
 
-            if(materialHeader.Unk0C != 0)
-            {
-                vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
-            }
-        }
+        //Material parameters
+        vmat.AppendLine($"\tshader \"ps_{materialHeader.PixelShader.Hash}.shader\"");
+        vmat.AppendLine($"\tF_ALPHA_TEST 1");
+        vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
+        if (materialHeader.Unk0C != 0)
+            vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
+
+        //Textures
         foreach (var e in materialHeader.EnumeratePSTextures())
         {
             if (e.Texture == null)
                 continue;
 
-            vmat.AppendLine($"\tTextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
+            vmat.AppendLine($"\tTextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
         }
 
         //vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.VertexShader.GetBytecode(), $"vs{materialHeader.VertexShader.Hash}"), materialHeader, true).ToString());
-        vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.PixelShader.GetBytecode(), $"ps{materialHeader.PixelShader.Hash}"), materialHeader).ToString());
+        vmat.AppendLine(PopulateCBuffers(materialHeader).ToString());
+
+        //Dynamic expressions
+        TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(materialHeader.PS_TFX_Bytecode));
+        var bytecode_hlsl = bytecode.Evaluate(materialHeader.PS_TFX_Bytecode_Constants);
+
+        vmat.AppendLine($"\tDynamicParams\r\n\t{{");
+        foreach (var entry in bytecode_hlsl)
+        {
+            vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
+        }
+
+        foreach (var resource in materialHeader.PixelShader.Resources)
+        {
+            if (resource.ResourceType == Schema.ResourceType.CBuffer)
+            {
+                switch (resource.Index)
+                {
+                    case 2: //Transparent scope
+                        for (int i = 0; i < resource.Count; i++)
+                        {
+                            vmat.AppendLine($"\t\tcb2_{i} \"float4(0,1,1,1)\"");
+                        }
+                        break;
+                    case 8: //??? scope
+                        for (int i = 0; i < resource.Count; i++)
+                        {
+                            if (i < 5)
+                                vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
+                            else
+                                vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
+                        }
+                        break;
+                    case 13: //Frame scope
+                        vmat.AppendLine($"\t\tcb13_0 \"Time\"");
+                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.25,1,1,1)\"");
+                        break;
+                }
+            }
+        }
+
+        vmat.AppendLine($"\t}}");
         vmat.AppendLine("}");
 
-        string terrainDir = isTerrain ? "/Terrain/" : "";
-        if (isTerrain)
-            Directory.CreateDirectory($"{savePath}/Source2/materials/{terrainDir}");
+        if (terrainDyemaps is not null)
+            foreach (var tex in terrainDyemaps)
+            {
+                SaveVTEX(tex, $"{savePath}/Textures");
+            }
 
-        if (!File.Exists($"{savePath}/Source2/materials/{terrainDir}{hash}.vmat"))
+        try
         {
-            try
-            {
-                File.WriteAllText($"{savePath}/Source2/materials/{terrainDir}{hash}.vmat", vmat.ToString());
-            }
-            catch (IOException)
-            {
-            }
+            File.WriteAllText($"{path}/{hash}.vmat", vmat.ToString());
+        }
+        catch (IOException)
+        {
         }
     }
 
@@ -194,135 +242,115 @@ public class Source2Handler
         if (materialHeader.EnumeratePSTextures().Any())
         {
             if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
-                vmat.AppendLine($"  TextureColor \"materials/Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
+                vmat.AppendLine($"  TextureColor \"Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
         }
 
         foreach (var e in materialHeader.EnumeratePSTextures())
         {
             if (e.Texture == null)
-            {
                 continue;
-            }
 
-            vmat.AppendLine($"  TextureT{e.TextureIndex} \"materials/Textures/{e.Texture.Hash}.png\"");
+            vmat.AppendLine($"  TextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
         }
 
         vmat.AppendLine("}");
 
-        if (!File.Exists($"{savePath}/Source2/materials/{hash}_decal.vmat"))
+        try
         {
-            try
-            {
-                Directory.CreateDirectory($"{savePath}/Source2/materials/");
-                File.WriteAllText($"{savePath}/Source2/materials/{hash}_decal.vmat", vmat.ToString());
-            }
-            catch (IOException)
-            {
-            }
+            Directory.CreateDirectory($"{savePath}/materials/");
+            File.WriteAllText($"{savePath}/materials/{hash}_decal.vmat", vmat.ToString());
+        }
+        catch (IOException)
+        {
         }
     }
 
-    public static StringBuilder PopulateCBuffers(string hlsl, IMaterial materialHeader, bool isVertexShader = false)
+    public static StringBuilder PopulateCBuffers(IMaterial materialHeader, bool isVertexShader = false)
     {
-        StringReader reader = new(hlsl);
+        StringBuilder cbuffers = new();
 
-        List<Cbuffer> cbuffers = new List<Cbuffer>();
-        StringBuilder buffers = new StringBuilder();
+        List<Vector4> data = new();
+        string cbType = isVertexShader ? "vs_cb0" : "cb0";
 
-        string line = string.Empty;
-        do
+        if (isVertexShader)
         {
-            line = reader.ReadLine();
-            if (line != null)
+            if (materialHeader.VSVector4Container.IsValid())
             {
-                if (line.Contains("cbuffer"))
-                {
-                    reader.ReadLine();
-                    line = reader.ReadLine();
-                    Cbuffer cbuffer = new Cbuffer();
-                    cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
-                    cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
-                    cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
-                    cbuffer.Type = line.Split("cb")[0].Trim();
-                    cbuffers.Add(cbuffer);
-                }
-            }
-
-        } while (line != null);
-
-        foreach (var cbuffer in cbuffers)
-        {
-            dynamic data = null;
-            string cbType = isVertexShader ? "vs_cb" : "cb";
-
-            if(isVertexShader)
-            {
-                if (cbuffer.Count == materialHeader.UnkA0.Count)
-                {
-                    data = materialHeader.UnkA0;
-                }
-                else if (cbuffer.Count == materialHeader.UnkC0.Count)
-                {
-                    data = materialHeader.UnkC0;
-                }
+                data = materialHeader.GetVec4Container(materialHeader.VSVector4Container.GetReferenceHash());
             }
             else
             {
-                if (cbuffer.Count == materialHeader.Unk2E0.Count)
+                foreach (var vec in materialHeader.VS_CBuffers)
                 {
-                    data = materialHeader.Unk2E0;
-                }
-                else if (cbuffer.Count == materialHeader.Unk300.Count)
-                {
-                    data = materialHeader.Unk300;
-                }
-                else
-                {
-                    if (materialHeader.PSVector4Container.IsValid())
-                    {
-                        // Try the Vector4 storage file
-                        TigerFile container = new(materialHeader.PSVector4Container.GetReferenceHash());
-                        byte[] containerData = container.GetData();
-                        int num = containerData.Length / 16;
-                        if (cbuffer.Count == num)
-                        {
-                            List<Vector4> float4s = new();
-                            for (int i = 0; i < containerData.Length / 16; i++)
-                            {
-                                float4s.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
-                            }
-
-                            data = float4s;
-                        }
-                    }
+                    data.Add(vec.Vec);
                 }
             }
-            
-            for (int i = 0; i < cbuffer.Count; i++)
+        }
+        else
+        {
+            if (materialHeader.PSVector4Container.IsValid())
             {
-                if (data == null)
-                    buffers.AppendLine($"\t{cbType}{cbuffer.Index}_{i} \"[0.000 0.000 0.000 0.000]\"");
-                else
+                data = materialHeader.GetVec4Container(materialHeader.PSVector4Container.GetReferenceHash());
+            }
+            else
+            {
+                foreach (var vec in materialHeader.PS_CBuffers)
                 {
-                    try
-                    {
-                        if (data[i] is Vec4)
-                        {
-                            buffers.AppendLine($"\t{cbType}{cbuffer.Index}_{i} \"[{data[i].Vec.X} {data[i].Vec.Y} {data[i].Vec.Z} {data[i].Vec.W}]\"");
-                        }
-                        else if (data[i] is Vector4)
-                        {
-                            buffers.AppendLine($"\t{cbType}{cbuffer.Index}_{i} \"[{data[i].X} {data[i].Y} {data[i].Z} {data[i].W}]\"");
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        buffers.AppendLine($"\t{cbType}{cbuffer.Index}_{i} \"[0.000 0.000 0.000 0.000]\"");
-                    }
+                    data.Add(vec.Vec);
                 }
             }
         }
 
-        return buffers;
+        for (int i = 0; i < data.Count; i++)
+        {
+            cbuffers.AppendLine($"\t\"{cbType}_{i}\" \"[{data[i].X} {data[i].Y} {data[i].Z} {data[i].W}]\"");
+        }
+
+        return cbuffers;
+    }
+
+    public static void SaveVTEX(Texture tex, string savePath)
+    {
+        if (!Directory.Exists(savePath))
+            Directory.CreateDirectory(savePath);
+
+        var file = TextureFile.CreateDefault(tex, tex.IsCubemap() ? ImageDimension.CUBEARRAY : ImageDimension._2D);
+        var json = JsonSerializer.Serialize(file, JsonSerializerOptions.Default);
+        File.WriteAllText($"{savePath}/{tex.Hash}.vtex", json);
+    }
+
+    public static void SaveGearVMAT(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
+    {
+        File.Copy($"Exporters/template.vmat", $"{saveDirectory}/{meshName}{fileSuffix}.vmat", true);
+        string text = File.ReadAllText($"{saveDirectory}/{meshName}{fileSuffix}.vmat");
+
+        string[] components = { "X", "Y", "Z", "W" };
+
+        int dyeIndex = 1;
+        foreach (var dye in dyes)
+        {
+            var dyeInfo = dye.GetDyeInfo();
+            foreach (var fieldInfo in dyeInfo.GetType().GetFields())
+            {
+                Vector4 value = (Vector4)fieldInfo.GetValue(dyeInfo);
+                if (!fieldInfo.CustomAttributes.Any())
+                    continue;
+                string valueName = fieldInfo.CustomAttributes.First().ConstructorArguments[0].Value.ToString();
+                for (int i = 0; i < 4; i++)
+                {
+                    text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+                }
+            }
+
+            var diff = dye.TagData.DyeTextures[0];
+            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            var norm = dye.TagData.DyeTextures[1];
+            text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            dyeIndex++;
+        }
+
+        text = text.Replace("OUTPUTPATH", $"Textures");
+        text = text.Replace("SHADERNAMEENUM", $"{meshName}{fileSuffix}");
+        File.WriteAllText($"{saveDirectory}/{meshName}{fileSuffix}.vmat", text);
     }
 }

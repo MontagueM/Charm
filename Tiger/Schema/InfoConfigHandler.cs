@@ -79,15 +79,6 @@ public class InfoConfigHandler
         _config["MeshName"] = meshName;
     }
 
-    public void SetUnrealInteropPath(string interopPath)
-    {
-        _config["UnrealInteropPath"] = new string(interopPath.Split("\\Content").Last().ToArray()).TrimStart('\\');
-        if (_config["UnrealInteropPath"] == "")
-        {
-            _config["UnrealInteropPath"] = "Content";
-        }
-    }
-
     public void AddInstance(string modelHash, float scale, Vector4 quatRotation, Vector3 translation)
     {
         if (!_config["Instances"].ContainsKey(modelHash))

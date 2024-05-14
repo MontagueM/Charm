@@ -40,6 +40,7 @@ public class Dye : Tag<SDye>
 
     public void ExportTextures(string savePath, TextureExportFormat outputTextureFormat)
     {
+        Directory.CreateDirectory(savePath);
         TextureExtractor.SetTextureFormat(outputTextureFormat);
         foreach (var entry in _tag.DyeTextures)
         {

@@ -80,7 +80,6 @@ public partial class GeneralConfigView : UserControl
 
         GeneralConfigPanel.Children.Add(sp);
 
-
         // Save path
         ConfigSettingControl csp = new ConfigSettingControl();
         csp.SettingName = "Export save path";
@@ -88,14 +87,6 @@ public partial class GeneralConfigView : UserControl
         csp.SettingValue = exportSavePath == "" ? "Not set" : exportSavePath;
         csp.ChangeButton.Click += ExportSavePath_OnClick;
         GeneralConfigPanel.Children.Add(csp);
-
-        // Enable Blender interop //force people to use the addon now >:)
-        //ConfigSettingControl cbe = new ConfigSettingControl();
-        //cbe.SettingName = "Generate Blender importing script";
-        //bool bval2 = _config.GetBlenderInteropEnabled();
-        //cbe.SettingValue = bval2.ToString();
-        //cbe.ChangeButton.Click += BlenderInteropEnabled_OnClick;
-        //GeneralConfigPanel.Children.Add(cbe);
 
         // Enable combined extraction folder for maps
         ConfigSettingControl cef = new ConfigSettingControl();
@@ -112,14 +103,6 @@ public partial class GeneralConfigView : UserControl
         cfe.SettingValue = bval.ToString();
         cfe.ChangeButton.Click += IndvidualStaticsEnabled_OnClick;
         GeneralConfigPanel.Children.Add(cfe);
-
-        // Enable individual static extraction with maps
-        ConfigSettingControl cucr = new ConfigSettingControl();
-        cucr.SettingName = "Use custom renderer";
-        bval = _config.GetUseCustomRenderer();
-        cucr.SettingValue = bval.ToString();
-        cucr.ChangeButton.Click += UseCustomRenderer_OnClick;
-        GeneralConfigPanel.Children.Add(cucr);
 
         // Output texture format
         ConfigSettingComboControl ctf = new ConfigSettingComboControl();
@@ -305,11 +288,5 @@ public partial class GeneralConfigView : UserControl
         Strategy.SetStrategy(_config.GetCurrentStrategy());
         PopulateConfigPanel();
         ConsiderShowingMainMenu();
-    }
-
-    private void UseCustomRenderer_OnClick(object sender, RoutedEventArgs e)
-    {
-        _config.SetUseCustomRenderer(!_config.GetUseCustomRenderer());
-        PopulateConfigPanel();
     }
 }

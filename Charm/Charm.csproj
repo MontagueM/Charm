@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -31,7 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AtlasSharp\AtlasSharp.csproj" />
       <ProjectReference Include="..\Tiger\Tiger.csproj" />
     </ItemGroup>
 
@@ -87,6 +86,9 @@
       <None Update="ThirdParty\3dmigoto_shader_decomp.exe">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="ThirdParty\Alkahest\destiny_havok.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="ThirdParty\d3dcompiler_46.dll">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -106,17 +108,5 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
-
-
-    <ItemGroup>
-      <Content Include="..\Atlas\Shaders\Lighting.hlsl">
-        <Link>Shaders\Lighting.hlsl</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
-
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="xcopy &quot;$(SolutionDir)x64\$(Configuration)\Atlas.dll&quot; &quot;$(TargetDir)&quot; /y /i&#xA;xcopy &quot;$(SolutionDir)x64\$(Configuration)\Atlas.pdb&quot; &quot;$(TargetDir)&quot; /y /i" />
-    </Target>
 
 </Project>

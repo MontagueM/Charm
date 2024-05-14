@@ -17,13 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RevorbStd", "ThirdParty\rev
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharmDepotDownloader", "CharmDepotDownloader\CharmDepotDownloader.csproj", "{D22CC98B-DE19-460A-B661-3155C55024AE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AtlasSharp", "AtlasSharp\AtlasSharp.csproj", "{161DFC33-8147-4BD1-B72C-A08D53D831A3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1132E6A9-9AD9-405D-936A-7643392B0202} = {1132E6A9-9AD9-405D-936A-7643392B0202}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Atlas", "Atlas\Atlas.vcxproj", "{1132E6A9-9AD9-405D-936A-7643392B0202}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -58,14 +51,6 @@ Global
 		{D22CC98B-DE19-460A-B661-3155C55024AE}.Debug|x64.Build.0 = Debug|Any CPU
 		{D22CC98B-DE19-460A-B661-3155C55024AE}.Release|x64.ActiveCfg = Release|Any CPU
 		{D22CC98B-DE19-460A-B661-3155C55024AE}.Release|x64.Build.0 = Release|Any CPU
-		{161DFC33-8147-4BD1-B72C-A08D53D831A3}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{161DFC33-8147-4BD1-B72C-A08D53D831A3}.Debug|x64.Build.0 = Debug|Any CPU
-		{161DFC33-8147-4BD1-B72C-A08D53D831A3}.Release|x64.ActiveCfg = Release|Any CPU
-		{161DFC33-8147-4BD1-B72C-A08D53D831A3}.Release|x64.Build.0 = Release|Any CPU
-		{1132E6A9-9AD9-405D-936A-7643392B0202}.Debug|x64.ActiveCfg = Debug|x64
-		{1132E6A9-9AD9-405D-936A-7643392B0202}.Debug|x64.Build.0 = Debug|x64
-		{1132E6A9-9AD9-405D-936A-7643392B0202}.Release|x64.ActiveCfg = Release|x64
-		{1132E6A9-9AD9-405D-936A-7643392B0202}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

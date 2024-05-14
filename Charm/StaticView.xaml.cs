@@ -23,37 +23,25 @@ public partial class StaticView : UserControl
 
     public void LoadStatic(FileHash hash, ExportDetailLevel detailLevel, Window window)
     {
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_LATEST && ConfigSubsystem.Get().GetUseCustomRenderer() == true)
-        {
-            AtlasView.Visibility = Visibility.Visible;
-            ModelView.Visibility = Visibility.Collapsed;
-            AtlasView.LoadStatic(hash, window);
-        }
-        else
-        {
-            AtlasView.Visibility = Visibility.Collapsed;
-            ModelView.Visibility = Visibility.Visible;
-            StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(hash);
-            var parts = staticMesh.Load(detailLevel);
-            // await Task.Run(() =>
-            // {
-            //     parts = staticMesh.Load(detailLevel);
-            // });
-            MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
-            MVM.Clear();
-            var displayParts = MakeDisplayParts(parts);
-            MVM.SetChildren(displayParts);
-            MVM.Title = hash;
-            MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";
-        }
+        ModelView.Visibility = Visibility.Visible;
+        StaticMesh staticMesh = FileResourcer.Get().GetFile<StaticMesh>(hash);
+        var parts = staticMesh.Load(detailLevel);
+        // await Task.Run(() =>
+        // {
+        //     parts = staticMesh.Load(detailLevel);
+        // });
+        MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+        MVM.Clear();
+        var displayParts = MakeDisplayParts(parts);
+        MVM.SetChildren(displayParts);
+        MVM.Title = hash;
+        MVM.SubTitle = $"{displayParts.Sum(p => p.BasePart.Indices.Count)} triangles";  
     }
 
     public static void ExportStatic(FileHash hash, string name, ExportTypeFlag exportType, string extraPath = "")
     {
         ExporterScene scene = Exporter.Get().CreateScene(name, ExportType.Static);
-        bool lodexport = false;
         ConfigSubsystem config = ConfigSubsystem.Get();
-        bool source2Models = config.GetS2VMDLExportEnabled();
 
         string savePath = config.GetExportSavePath() + "/" + extraPath + "/";
         string meshName = hash;
@@ -67,26 +55,15 @@ public partial class StaticView : UserControl
         scene.AddStatic(hash, parts);
         Directory.CreateDirectory(savePath);
         if (exportType == ExportTypeFlag.Full)
-        {
             staticMesh.SaveMaterialsFromParts(scene, parts);
-            if (config.GetUnrealInteropEnabled())
-            {
-                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
-                AutomatedExporter.SaveInteropBlenderPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
-            }
 
-            if (source2Models)
-            {
-                Source2Handler.SaveStaticVMDL($"{savePath}", meshName, parts);
-            }
-        }
-
+        bool lodexport = true;
         if (lodexport)
         {
             ExporterScene lodScene = Exporter.Get().CreateScene($"{name}_LOD", ExportType.Static);
 
             List<StaticPart> lodparts = staticMesh.Load(ExportDetailLevel.LeastDetailed);
-            Directory.CreateDirectory(savePath + "/LOD");
+            staticMesh.SaveMaterialsFromParts(lodScene, lodparts);
 
             foreach (StaticPart lodpart in lodparts)
             {

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Arithmic;
 using ConcurrentCollections;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -60,12 +59,14 @@ public class Exporter : Subsystem<Exporter>
 public struct ExportMaterial
 {
     public readonly IMaterial Material;
+    public readonly MaterialType Type;
     public readonly bool IsTerrain;
 
-    public ExportMaterial(IMaterial material, bool isTerrain = false)
+    public ExportMaterial(IMaterial material, MaterialType type, bool isTerrain = false)
     {
         Material = material;
         IsTerrain = isTerrain;
+        Type = type;
     }
 
     public override int GetHashCode()
@@ -84,13 +85,14 @@ public class ExporterScene
     public string Name { get; set; }
     public ExportType Type { get; set; }
     public ConcurrentBag<ExporterMesh> StaticMeshes = new();
+    public ConcurrentBag<ExporterMesh> TerrainMeshes = new();
     public ConcurrentBag<ExporterEntity> Entities = new();
     public ConcurrentDictionary<FileHash, List<Transform>> StaticMeshInstances = new();
     public ConcurrentDictionary<FileHash, List<Transform>> ArrangedStaticMeshInstances = new();
     public ConcurrentDictionary<FileHash, List<Transform>> EntityInstances = new();
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentBag<SMapDataEntry> EntityPoints = new();
-    public ConcurrentBag<CubemapResource> Cubemaps = new();
+    public ConcurrentDictionary<CubemapResource, Transform> Cubemaps = new();
     public ConcurrentBag<SMapLightResource> MapLights = new();
     public ConcurrentDictionary<FileHash, List<Transform>> MapSpotLights = new();
     public ConcurrentBag<SMapDecalsResource> Decals = new();
@@ -108,6 +110,17 @@ public class ExporterScene
             mesh.AddPart(meshHash, part, i);
         }
         StaticMeshes.Add(mesh);
+    }
+
+    public void AddTerrain(string meshHash, List<StaticPart> parts)
+    {
+        ExporterMesh mesh = new(meshHash);
+        for (int i = 0; i < parts.Count; i++)
+        {
+            StaticPart part = parts[i];
+            mesh.AddPart(meshHash, part, i);
+        }
+        TerrainMeshes.Add(mesh);
     }
 
     public void AddStaticInstancesAndParts(FileHash meshHash, List<StaticPart> parts, IEnumerable<SStaticMeshInstanceTransform> instances)
@@ -198,7 +211,7 @@ public class ExporterScene
     {
         if (!_addedEntities.Contains(entity.Hash)) //Dont want duplicate entities being added
         {
-            ExporterMesh mesh = new(dynamicResource.GetEntityHash());
+            ExporterMesh mesh = new(entity.Hash);
 
             _addedEntities.Add(entity.Hash);
             var parts = entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource);
@@ -207,20 +220,19 @@ public class ExporterScene
                 DynamicMeshPart part = parts[i];
                 if (part.Material == null)
                     continue;
-                if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-                {
-                    mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
-                }
+
+                Materials.Add(new ExportMaterial(part.Material, MaterialType.Opaque));
+                mesh.AddPart(entity.Hash, part, i);
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = entity.Skeleton?.GetBoneNodes() });
         }
 
-        if (!EntityInstances.ContainsKey(dynamicResource.GetEntityHash()))
+        if (!EntityInstances.ContainsKey(entity.Hash))
         {
-            EntityInstances.TryAdd(dynamicResource.GetEntityHash(), new());
+            EntityInstances.TryAdd(entity.Hash, new());
         }
 
-        EntityInstances[dynamicResource.GetEntityHash()].Add(new Transform
+        EntityInstances[entity.Hash].Add(new Transform
         {
             Position = dynamicResource.Translation.ToVec3(),
             Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
@@ -232,7 +244,6 @@ public class ExporterScene
     public void AddMapModel(EntityModel model, Vector4 translation, Vector4 rotation, Vector3 scale)
     {
         ExporterMesh mesh = new(model.Hash);
-
         if (!_addedEntities.Contains(model.Hash)) //Dont want duplicate entities being added
         {
             _addedEntities.Add(model.Hash);
@@ -241,10 +252,8 @@ public class ExporterScene
             {
                 DynamicMeshPart part = parts[i];
 
-                if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-                {
+                if (part.Material == null)
                     continue;
-                }
 
                 mesh.AddPart(model.Hash, part, i);
             }
@@ -277,16 +286,22 @@ public class ExporterScene
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
     }
 
-    public void AddCubemap(CubemapResource cubemap)
+    public void AddCubemap(SMapDataEntry entry, CubemapResource cubemap)
     {
-        Cubemaps.Add(cubemap);
+        Cubemaps.TryAdd(cubemap, new Transform
+        {
+            Position = entry.Translation.ToVec3(),
+            Rotation = Vector4.QuaternionToEulerAngles(entry.Rotation),
+            Quaternion = entry.Rotation,
+            Scale = Vector3.One
+        });
     }
 
     public void AddMapLight(SMapLightResource mapLight) //Point
     {
         MapLights.Add(mapLight);
     }
-    public void AddMapSpotLight(SMapDataEntry spotLightEntry, SMapSpotLightResource spotLightResource) //Spot
+    public void AddMapSpotLight(SMapDataEntry spotLightEntry, SMapShadowingLightResource spotLightResource) //Spot
     {
         if (!MapSpotLights.ContainsKey(spotLightResource.Unk10.Hash))
         {
@@ -325,10 +340,10 @@ public class ExporterEntity
 
 public class ExporterMesh
 {
-    public FileHash Hash { get; set; }
+    public string Hash { get; set; }
     public List<ExporterPart> Parts { get; } = new();
 
-    public ExporterMesh(FileHash hash)
+    public ExporterMesh(string hash)
     {
         Hash = hash;
     }

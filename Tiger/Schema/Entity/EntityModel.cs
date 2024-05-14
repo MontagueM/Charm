@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Diagnostics;
 using Arithmic;
 using Tiger.Schema.Shaders;
@@ -52,11 +53,11 @@ public class EntityModel : Tag<SEntityModel>
                 }
                 else
                 {
-                    if (eDetailLevel == ExportDetailLevel.MostDetailed && part.LodCategory is ELodCategory.MainGeom0 or ELodCategory.GripStock0 or ELodCategory.Stickers0 or ELodCategory.InternalGeom0 or ELodCategory.Detail0)
+                    if (eDetailLevel == ExportDetailLevel.MostDetailed && part.Lod.IsHighestLevel())
                     {
                         parts[meshIndex].Add(partIndex++, part);
                     }
-                    else if (eDetailLevel == ExportDetailLevel.LeastDetailed && part.LodCategory == ELodCategory.LowPolyGeom3)
+                    else if (eDetailLevel == ExportDetailLevel.LeastDetailed && !part.Lod.IsHighestLevel())
                     {
                         parts[meshIndex].Add(partIndex++, part);
                     }
@@ -97,14 +98,18 @@ public class EntityModel : Tag<SEntityModel>
                 {
                     Index = i,
                     GroupIndex = partGroups[i],
-                    LodCategory = part.LodCategory,
+                    LodCategory = part.Lod.DetailLevel,
                     bAlphaClip = (part.Flags & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
                 };
 
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
-                if (dynamicMeshPart.Material is null || dynamicMeshPart.Material.VertexShader is null || dynamicMeshPart.Material.PixelShader is null)
+                if (dynamicMeshPart.Material is null ||
+                    dynamicMeshPart.Material.VertexShader is null ||
+                    dynamicMeshPart.Material.PixelShader is null ||
+                    dynamicMeshPart.Material.Unk08 != 1 ||
+                    (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
                     continue;
 
                 dynamicMeshPart.GetAllData(mesh, _tag);

@@ -302,7 +302,7 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     armor_primary_detail_diffuse_map.extension = 'REPEAT'
     armor_primary_detail_diffuse_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DiffMap1"), check_existing=False)
+    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DetailTextures/DiffMap1"), check_existing=False)
     DetailDiffuse01 = bpy.data.images.get("DiffMap1")
     DetailDiffuse01.colorspace_settings.name = "sRGB"
     DetailDiffuse01.alpha_mode = "CHANNEL_PACKED"
@@ -317,7 +317,7 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     armor_primary_detail_normal_map.extension = 'REPEAT'
     armor_primary_detail_normal_map.hide = True
     
-    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/NormMap1"), check_existing=False)
+    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DetailTextures/NormMap1"), check_existing=False)
     DetailNormal01 = bpy.data.images.get("NormMap1")
     DetailNormal01.colorspace_settings.name = "Non-Color"
     DetailNormal01.alpha_mode = "CHANNEL_PACKED"
@@ -332,7 +332,7 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_detail_diffuse_map.extension = 'REPEAT'
     cloth_primary_detail_diffuse_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/DiffMap2"), check_existing=False)
+    bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/DetailTextures/DiffMap2"), check_existing=False)
     DetailDiffuse02 = bpy.data.images.get("DiffMap2")
     DetailDiffuse02.colorspace_settings.name = "sRGB"
     DetailDiffuse02.alpha_mode = "CHANNEL_PACKED"
@@ -347,7 +347,7 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_detail_normal_map.extension = 'REPEAT'
     cloth_primary_detail_normal_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/NormMap2"), check_existing=False)
+    bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/DetailTextures/NormMap2"), check_existing=False)
     DetailNormal02 = bpy.data.images.get("NormMap2")
     DetailNormal02.colorspace_settings.name = "Non-Color"
     DetailNormal02.alpha_mode = "CHANNEL_PACKED"
@@ -362,7 +362,7 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_detail_diffuse_map.extension = 'REPEAT'
     suit_primary_detail_diffuse_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DiffMap3"), check_existing=False)
+    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DetailTextures/DiffMap3"), check_existing=False)
     DetailDiffuse03 = bpy.data.images.get("DiffMap3")
     DetailDiffuse03.colorspace_settings.name = "sRGB"
     DetailDiffuse03.alpha_mode = "CHANNEL_PACKED"
@@ -377,7 +377,7 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_detail_normal_map.extension = 'REPEAT'
     suit_primary_detail_normal_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/NormMap3"), check_existing=False)
+    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DetailTextures/NormMap3"), check_existing=False)
     DetailNormal03 = bpy.data.images.get("NormMap3")
     DetailNormal03.colorspace_settings.name = "Non-Color"
     DetailNormal03.alpha_mode = "CHANNEL_PACKED"

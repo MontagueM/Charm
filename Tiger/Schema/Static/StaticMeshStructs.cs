@@ -40,7 +40,7 @@ public struct SStaticMeshDecal
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public short Unk02;
-    public sbyte LODLevel;
+    public ELod Lod;
     public sbyte Unk03;
     public short PrimitiveType;
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -105,7 +105,7 @@ public struct SStaticMeshPart
     public uint IndexOffset;
     public uint IndexCount;
     public ushort BufferIndex;
-    public sbyte DetailLevel;
+    public ELod Lod;
     public sbyte PrimitiveType;
 }
 

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace Tiger.Schema;
 
@@ -72,6 +73,13 @@ public struct Vector3
         X = x;
         Y = y;
         Z = z;
+    }
+
+    public Vector3(float x)
+    {
+        X = x;
+        Y = x;
+        Z = x;
     }
 
     public static Vector3 Zero
@@ -224,6 +232,14 @@ public struct Vector4
         W = w / 255.0f;
     }
 
+    public Vector4(float x)
+    {
+        X = x;
+        Y = x;
+        Z = x;
+        W = x;
+    }
+
     public static Vector4 Zero
     {
         get
@@ -233,6 +249,19 @@ public struct Vector4
             vec4.Y = 0;
             vec4.Z = 0;
             vec4.W = 0;
+            return vec4;
+        }
+    }
+
+    public static Vector4 One
+    {
+        get
+        {
+            Vector4 vec4 = new Vector4();
+            vec4.X = 1.0f;
+            vec4.Y = 1.0f;
+            vec4.Z = 1.0f;
+            vec4.W = 1.0f;
             return vec4;
         }
     }
@@ -263,10 +292,28 @@ public struct Vector4
         }
     }
 
+    public Vector4 Normalize()
+    {
+        float magnitude = (float)Magnitude;
+
+        X /= magnitude;
+        Y /= magnitude;
+        Z /= magnitude;
+        W /= magnitude;
+
+        return new Vector4(X, Y, Z, W);
+    }
+
     public Vector3 ToVec3()
     {
         return new Vector3(X, Y, Z);
     }
+
+    public override string ToString() =>
+        $"({Decimal.Parse(X.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(Y.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(Z.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(W.ToString(), NumberStyles.Float)})";
 
     public float this[int index]
     {
@@ -305,6 +352,21 @@ public struct Vector4
             }
             throw new IndexOutOfRangeException();
         }
+    }
+
+    public static Vector4 operator -(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X - y.X, x.Y - y.Y, x.Z - y.Z, x.W - y.W);
+    }
+
+    public static Vector4 operator *(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X * y.X, x.Y * y.Y, x.Z * y.Z, x.W * y.W);
+    }
+
+    public static Vector4 operator +(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X + y.X, x.Y + y.Y, x.Z + y.Z, x.W + y.W);
     }
 
     /// euler degrees

@@ -65,6 +65,9 @@
             <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllTexturesViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20" Style="{StaticResource MaterialDesignPaperDarkButton}">
                 <TextBlock Text="TEXTURES" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
             </Button>
+            <Button Height="75" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Click="AllMaterialsViewButton_OnClick" Margin="20,0,20,40" Padding="20, 20, 20, 20" Style="{StaticResource MaterialDesignPaperDarkButton}">
+                <TextBlock Text="MATERIALS" VerticalAlignment="Center" FontSize="42" FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Text Pro 55 Roman}"  HorizontalAlignment="Center" Padding="0,10,0,10"/>
+            </Button>
         </StackPanel>
             </StackPanel>
         </StackPanel>
