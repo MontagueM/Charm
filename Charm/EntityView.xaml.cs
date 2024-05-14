@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
-using HelixToolkit.SharpDX.Core.Model.Scene;
-using Internal.Fbx;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
-using Exporter = HelixToolkit.Wpf.SharpDX.Exporter;
 
 namespace Charm;
 
@@ -79,10 +69,10 @@ public partial class EntityView : UserControl
     public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null, ExporterScene scene = null)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
         string savePath = config.GetExportSavePath() + $"/{name}";
 
-        if(scene == null)
+        if (scene == null)
             scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entity);
 
         Log.Verbose($"Exporting entity model name: {name}");
@@ -101,18 +91,6 @@ public partial class EntityView : UserControl
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
                 entity.SaveTexturePlates(savePath);
             }
-            if (ConfigSubsystem.Get().GetS2VMDLExportEnabled())
-            {
-                Source2Handler.SaveEntityVMDL($"{savePath}", entity);
-            }
-        }
-
-        if (exportType == ExportTypeFlag.Full)
-        {
-            if (config.GetUnrealInteropEnabled())
-            {
-                AutomatedExporter.SaveInteropUnrealPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
-            }
         }
 
         // Scale and rotate
@@ -125,7 +103,7 @@ public partial class EntityView : UserControl
     {
         string name = string.Join("_", $"{item.ItemName}"
             .Split(Path.GetInvalidFileNameChars()));
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
         // Export the model
         // todo bad, should be replaced
         EntitySkeleton overrideSkeleton = null;
@@ -162,11 +140,20 @@ public partial class EntityView : UserControl
 
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
-        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_");
-        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
+        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
+        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_").Replace(".", "_");
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
+
+        foreach (var dye in dyes)
+        {
+            dye.Value.ExportTextures($"{savePath}/Textures/DetailTextures/", config.GetOutputTextureFormat());
+        }
+
         AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
+            config.GetOutputTextureFormat(), dyes.Values.ToList());
+
+        SBoxHandler.SaveGearVMAT(savePath, itemName,
             config.GetOutputTextureFormat(), dyes.Values.ToList());
     }
 }

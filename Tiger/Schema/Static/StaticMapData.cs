@@ -33,12 +33,12 @@ public class StaticMapData : Tag<SStaticMapData>
     public void LoadIntoExporterScene(ExporterScene scene, string savePath, bool bSaveShaders)
     {
         List<SStaticMeshHash> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
-
         // todo this loads statics twice
         Parallel.ForEach(extractedStatics, s =>
         {
             var parts = s.Static.Load(ExportDetailLevel.MostDetailed);
             scene.AddStatic(s.Static.Hash, parts);
+
             s.Static.SaveMaterialsFromParts(scene, parts);
         });
 
@@ -383,15 +383,16 @@ public struct D2Class_706C8080
     //public Vector4 Unk40;
     //public Vector4 Unk50;
 
-    //[SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    //[SchemaField(0xC0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC0;
-    //[SchemaField(0x84, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    //[SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC4;
-    //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    //[SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC8;
+    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xC0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public FileHash Shading;
+    [SchemaField(0x84, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xC4, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public FileHash Volumetric;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public FileHash Lightprobe;
+
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Tag<D2Class_A16D8080> UnkCC;
@@ -540,13 +541,69 @@ public struct D2Class_BA6C8080
     public Vector4 Unk40;
 }
 
+/// <summary>
+/// A light that casts shadows
+/// </summary>
 [SchemaStruct("5E6C8080", 0x20)]
-public struct SMapSpotLightResource
+public struct SMapShadowingLightResource
 {
     [SchemaField(0x10)]
-    public Tag Unk10;  // D2Class_716C8080, might be related to lights for entities?
+    public Tag<D2Class_716C8080> Unk10;  // D2Class_716C8080, might be related to lights for entities?
     [SchemaField(0x1C)]
     public TigerHash Unk1C;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "716C8080", 0x110)]
+public struct D2Class_716C8080
+{
+    [SchemaField(0xE8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public Tag<D2Class_A16D8080> UnkE8;
+    [SchemaField(0xEC, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public Tag<D2Class_A16D8080> UnkEC;
+}
+
+/// <summary>
+/// Usually a flat plane for screen-space reflected water
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D4688080", 0x70)]
+public struct SMapWaterDecal
+{
+    [SchemaField(0x10)]
+    public EntityModel Model;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "7B918080", 0x1C)]
+public struct D2Class_7B918080
+{
+    public ResourcePointer Pointer; //21918080
+}
+
+/// <summary>
+/// Havok volume data resource.
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "21918080", 0x20)]
+public struct D2Class_21918080
+{
+    [SchemaField(0x10)]
+    public FileHash HavokVolume;  // type 27 subtype 0
+    public TigerHash Unk14;
+}
+
+/// <summary>
+/// Unk Havok data resource.
+/// </summary>
+[SchemaStruct("C26A8080", 0x18)]
+public struct D2Class_C26A8080
+{
+    [SchemaField(0x10)]
+    public Tag<D2Class_C46A8080> Unk10;  // C46A8080
+}
+
+[SchemaStruct("C46A8080", 0x18)]
+public struct D2Class_C46A8080
+{
+    [SchemaField(0x8)]
+    public FileHash Unk08;  // Havok Volume
 }
 
 // /// <summary>
@@ -633,16 +690,6 @@ public struct SMapSpotLightResource
 //     public dynamic? Unk00;
 // }
 //
-// /// <summary>
-// /// Havok volume data resource.
-// /// </summary>
-// [SchemaStruct("21918080", 0x20)]
-// public struct D2Class_21918080
-// {
-//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
-//     public Tag HavokVolume;  // type 27 subtype 0
-//     public TigerHash Unk14;
-// }
 //
 // /// <summary>
 // /// Unk data resource.
@@ -654,15 +701,6 @@ public struct SMapSpotLightResource
 //     public Tag Unk10;  // C2858080
 // }
 //
-// /// <summary>
-// /// Unk data resource.
-// /// </summary>
-// [SchemaStruct("C26A8080", 0x18)]
-// public struct D2Class_C26A8080
-// {
-//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
-//     public Tag Unk10;  // C46A8080
-// }
 //
 //
 // /// <summary>

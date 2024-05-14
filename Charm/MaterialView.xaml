@@ -1,0 +1,518 @@
+﻿<UserControl
+    x:Class="Charm.MaterialView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="1000"
+    d:DesignWidth="1900"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="MaterialViewTemplate">
+            <Grid Margin="5,0,0,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30*" />
+                    <RowDefinition Height="30*" />
+                    <RowDefinition Height="30*" />
+                    <RowDefinition Height="30*" />
+                    <RowDefinition Height="30*" />
+                    <RowDefinition Height="30*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="18*" />
+                    <ColumnDefinition Width="80*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Grid.RowSpan="6"
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="0"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="2" />
+
+                <Button
+                    Grid.RowSpan="6"
+                    Margin="0,0,0,0"
+                    Panel.ZIndex="1"
+                    Click="Texture_OnClick">
+                    <Border BorderBrush="White" BorderThickness="2">
+                        <Image Source="{Binding Texture}" />
+                    </Border>
+                </Button>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="0,5,5,0"
+                    HorizontalAlignment="Right"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontSize="15"
+                    Text="{Binding Shader}" />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontSize="26"
+                    Text="{Binding Hash}" />
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour75}"
+                    Text="{Binding Index}" />
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour75}"
+                    Text="{Binding Type}" />
+                <TextBlock
+                    Grid.Row="4"
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour75}"
+                    Text="{Binding Dimension}" />
+                <TextBlock
+                    Grid.Row="5"
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour75}"
+                    Text="{Binding Format}" />
+                <TextBlock
+                    Grid.Row="5"
+                    Grid.Column="1"
+                    Margin="0,0,5,0"
+                    HorizontalAlignment="Right"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 65 Medium}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour75}"
+                    Text="{Binding Dimensions}" />
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="CBufferViewTemplate">
+            <Button Click="LoadCBufferData">
+                <Grid Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*" />
+                        <ColumnDefinition Width="50*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="10,0,0,0"
+                        HorizontalAlignment="Left"
+                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontSize="26"
+                        Text="{Binding Index}" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="0,0,10,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontSize="16"
+                        Text="{Binding Count}" />
+
+                </Grid>
+            </Button>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="CBufferDataViewTemplate">
+            <Grid Margin="0,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*" />
+                    <ColumnDefinition Width="50*" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.RowSpan="3"
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
+
+                <Border
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontSize="20"
+                        Text="{Binding Index}" />
+                </Border>
+
+                <TextBox
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontSize="18"
+                    IsReadOnly="True"
+                    Text="{Binding Vector}" />
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="UnkDataViewTemplate">
+            <Grid Margin="0,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="50*" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.RowSpan="3"
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
+
+                <Border
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontSize="20"
+                        Text="{Binding Name}" />
+                </Border>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontSize="18"
+                    Text="{Binding Value}" />
+            </Grid>
+        </ControlTemplate>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="125*" />
+            <ColumnDefinition Width="100*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="21*" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Border
+                Grid.RowSpan="2"
+                Panel.ZIndex="0"
+                BorderBrush="{StaticResource BackgroundColour30}"
+                BorderThickness="1" />
+
+            <TextBlock
+                Grid.Row="0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                FontSize="25"
+                Text="Textures"
+                TextWrapping="Wrap" />
+
+            <ListView x:Name="TextureListView" Grid.Row="1">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                        <Setter Property="Template" Value="{StaticResource MaterialViewTemplate}" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+            </ListView>
+
+            <Button
+                Grid.Row="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Click="ExportMaterial_OnClick"
+                Content="Export Material" />
+        </Grid>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100*" />
+                <RowDefinition Height="100*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100*" />
+                    <ColumnDefinition Width="100*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10*" />
+                        <RowDefinition Height="100*" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.RowSpan="2"
+                        Panel.ZIndex="0"
+                        BorderBrush="{StaticResource BackgroundColour30}"
+                        BorderThickness="1" />
+
+                    <TextBlock
+                        Grid.Row="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontSize="25"
+                        Text="Pixel Shader"
+                        TextWrapping="Wrap" />
+
+                    <ScrollViewer
+                        Grid.Row="1"
+                        Margin="5,0,5,0"
+                        VerticalContentAlignment="Center"
+                        HorizontalScrollBarVisibility="Auto">
+                        <TextBox
+                            x:Name="PixelShader"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                            FontSize="16"
+                            IsReadOnly="True"
+                            TextWrapping="Wrap" />
+                    </ScrollViewer>
+                </Grid>
+
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10*" />
+                        <RowDefinition Height="100*" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.RowSpan="2"
+                        Panel.ZIndex="0"
+                        BorderBrush="{StaticResource BackgroundColour30}"
+                        BorderThickness="1" />
+
+                    <TextBlock
+                        Grid.Row="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontSize="25"
+                        Text="Vertex Shader"
+                        TextWrapping="Wrap" />
+
+                    <ScrollViewer
+                        Grid.Row="1"
+                        Margin="5,0,5,0"
+                        VerticalContentAlignment="Center"
+                        HorizontalScrollBarVisibility="Auto">
+                        <TextBox
+                            x:Name="VertexShader"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                            FontSize="16"
+                            IsReadOnly="True"
+                            TextWrapping="Wrap" />
+                    </ScrollViewer>
+                </Grid>
+
+
+            </Grid>
+
+            <Grid Grid.Row="1" Grid.Column="0">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="25*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="20*" />
+                        <ColumnDefinition Width="50*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="10*" />
+                            <RowDefinition Height="10*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10*" />
+                                <RowDefinition Height="90*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                Grid.Row="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                                FontSize="16"
+                                Text="Pixel Shader CBuffers"
+                                TextWrapping="Wrap" />
+
+                            <ListView x:Name="PS_CBufferList" Grid.Row="1">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                                        <Setter Property="Template" Value="{StaticResource CBufferViewTemplate}" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                            </ListView>
+                        </Grid>
+
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10*" />
+                                <RowDefinition Height="90*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                Grid.Row="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                                FontSize="16"
+                                Text="Vertex Shader CBuffers"
+                                TextWrapping="Wrap" />
+
+                            <ListView x:Name="VS_CBufferList" Grid.Row="1">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                                        <Setter Property="Template" Value="{StaticResource CBufferViewTemplate}" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                            </ListView>
+                        </Grid>
+
+                    </Grid>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="19*" />
+                        </Grid.RowDefinitions>
+
+                        <Border
+                            Grid.RowSpan="2"
+                            Panel.ZIndex="0"
+                            BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="1" />
+
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                            FontSize="16"
+                            Text="CBuffer Values" />
+
+                        <ListView x:Name="CBufferDataList" Grid.Row="1">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                                    <Setter Property="Template" Value="{StaticResource CBufferDataViewTemplate}" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical" />
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
+                        </ListView>
+                    </Grid>
+                </Grid>
+
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="19*" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        Grid.RowSpan="2"
+                        Panel.ZIndex="0"
+                        BorderBrush="{StaticResource BackgroundColour30}"
+                        BorderThickness="1" />
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontSize="16"
+                        Text="Other Values" />
+
+                    <ListView x:Name="UnkDataList" Grid.Row="1">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="OverridesDefaultStyle" Value="True" />
+                                <Setter Property="Template" Value="{StaticResource UnkDataViewTemplate}" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
+                </Grid>
+
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+
+</UserControl>

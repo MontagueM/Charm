@@ -1,6 +1,5 @@
-using Arithmic;
-using System;
 using System.Diagnostics;
+using Arithmic;
 using Tiger.Exporters;
 using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
@@ -16,102 +15,96 @@ public class Terrain : Tag<STerrain>
     }
 
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool bSaveShaders, bool exportStatic = false)
+    public void LoadIntoExporter(ExporterScene scene, string saveDirectory)
     {
         // Uses triangle strip + only using first set of vertices and indices
         Dictionary<StaticPart, IMaterial> parts = new Dictionary<StaticPart, IMaterial>();
         List<Texture> dyeMaps = new List<Texture>();
-        foreach (var partEntry in _tag.StaticParts)
-        {
-            if (partEntry.DetailLevel == 0)
-            {
-                if (partEntry.Material is null || partEntry.Material.VertexShader is null)
-                    continue;
-
-                var part = MakePart(partEntry);
-                parts.TryAdd(part, partEntry.Material);
-
-                scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
-                part.Material = partEntry.Material;
-
-                if (exportStatic) //Need access to material early, before scene system exports
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders", true);
-            }
-        }
 
         int terrainTextureIndex = 14;
+        Texture lastValidEntry = null;
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
-            var partEntry = _tag.MeshGroups[i];
-            var lastValidEntry = _tag.MeshGroups.LastOrDefault(e => e.Dyemap != null);
+            var meshGroup = _tag.MeshGroups[i];
+            // Check if the current Dyemap is null
 
-            //Use the last valid dyemap for any invalid
-            if (partEntry.Dyemap == null)
+            if (meshGroup.Dyemap == null)
             {
-                if (lastValidEntry.Dyemap != null)
+                if (lastValidEntry != null)
                 {
-                    scene.Textures.Add(lastValidEntry.Dyemap);
-                    dyeMaps.Add(lastValidEntry.Dyemap);
+                    // Use the last valid Dyemap for any invalid
+                    scene.Textures.Add(lastValidEntry);
+                    dyeMaps.Add(lastValidEntry);
+                }
+                else // Use the first valid dyemap if it gets to this point
+                {
+                    var firstValidDyemap = _tag.MeshGroups.First(x => x.Dyemap != null).Dyemap;
+                    if (firstValidDyemap != null)
+                    {
+                        scene.Textures.Add(firstValidDyemap);
+                        dyeMaps.Add(firstValidDyemap);
+                    }
                 }
             }
             else
             {
-                scene.Textures.Add(partEntry.Dyemap);
-                dyeMaps.Add(partEntry.Dyemap);
+                // Update lastValidEntry with the current Dyemap
+                lastValidEntry = meshGroup.Dyemap;
+                scene.Textures.Add(meshGroup.Dyemap);
+                dyeMaps.Add(meshGroup.Dyemap);
             }
-        }
 
-        foreach (var part in parts)
-        {
-            TransformPositions(part.Key);
-            TransformTexcoords(part.Key);
-            TransformVertexColors(part.Key);
-        }
-
-        scene.AddStatic(Hash, parts.Keys.ToList());
-        // For now we pre-transform it
-        if (!exportStatic)
-        {
-            scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
-
-            for (int i = 0; i < dyeMaps.Count; i++)
+            foreach (var partEntry in _tag.StaticParts.Where(x => x.GroupIndex == i))
             {
-                scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
-            }
-        }
-
-        // We need to add these textures after the static is initialised
-        foreach (var part in parts)
-        {
-            Texture dyemap = _tag.MeshGroups[part.Key.GroupIndex].Dyemap;
-            if (dyemap != null)
-            {
-                if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2ShaderExportEnabled())
+                // MainGeom0 LOD0, GripStock0 LOD1, Stickers0 LOD2?
+                if (partEntry.Lod.DetailLevel == ELodCategory.MainGeom0)
                 {
-                    if (File.Exists($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat"))
+                    if (partEntry.Material != null || partEntry.Material.VertexShader != null)
                     {
-                        string[] vmat = File.ReadAllLines($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat");
-                        int lastBraceIndex = Array.FindLastIndex(vmat, line => line.Trim().Equals("}")); //Searches for the last brace (})
-                        bool textureFound = Array.Exists(vmat, line => line.Trim().StartsWith("TextureT14"));
-                        if (!textureFound && lastBraceIndex != -1)
-                        {
-                            var newVmat = vmat.Take(lastBraceIndex).ToList();
+                        var part = MakePart(partEntry);
 
-                            for (int i = 0; i < dyeMaps.Count; i++) //Add all the dyemaps to the vmat
-                            {
-                                newVmat.Add($"  TextureT{terrainTextureIndex}_{i} \"materials/Textures/{dyeMaps[i].Hash}.png\"");
-                            }
+                        scene.Materials.Add(new ExportMaterial(partEntry.Material, MaterialType.Opaque, true));
+                        part.Material = partEntry.Material;
 
-                            newVmat.AddRange(vmat.Skip(lastBraceIndex));
-                            File.WriteAllLines($"{saveDirectory}/Shaders/Source2/materials/Terrain/{Hash}_{part.Value.FileHash}.vmat", newVmat);
-                            File.Delete($"{saveDirectory}/Shaders/Source2/materials/Terrain/{part.Value.FileHash}.vmat"); //Delete the old vmat, dont need it anymore
-                        }
+                        //Need access to material early, before scene system exports
+                        partEntry.Material.SaveShaders($"{saveDirectory}", MaterialType.Opaque, true);
+
+                        TransformPositions(part);
+                        TransformTexcoords(part);
+                        TransformVertexColors(part);
+
+                        SBoxHandler.SaveVMAT(saveDirectory, $"{part.Material.FileHash}", part.Material, true, dyeMaps);
+
+                        parts.TryAdd(part, partEntry.Material);
                     }
                 }
             }
+
+            //{ // LOD3?
+            //    var part = MakeLODPart(meshGroup, i);
+
+            //    scene.Materials.Add(new ExportMaterial(_tag.Unk6C, MaterialType.Opaque, true));
+            //    part.Material = _tag.Unk6C;
+
+            //    TransformPositions(part);
+            //    TransformTexcoords(part);
+            //    TransformVertexColors(part);
+
+            //    parts.TryAdd(part, _tag.Unk6C);
+            //}
+
+
+            scene.AddTerrain($"{Hash}_{i}", parts.Keys.ToList());
+            SBoxHandler.SaveTerrainVMDL($"{Hash}_{i}", saveDirectory, parts.Keys.ToList());
+
+            parts.Clear();
         }
-        if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2VMDLExportEnabled())
-            Source2Handler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
+
+        //scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
+        for (int i = 0; i < dyeMaps.Count; i++)
+        {
+            scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
+        }
     }
 
     public StaticPart MakePart(SStaticPart entry)
@@ -119,6 +112,9 @@ public class Terrain : Tag<STerrain>
         StaticPart part = new(entry);
         part.GroupIndex = entry.GroupIndex;
         part.Indices = _tag.Indices1.GetIndexData(PrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
+
+        //Console.WriteLine($"{_tag.Indices2.GetIndexData(PrimitiveType.TriangleStrip, _tag.MeshGroups[part.GroupIndex].Unk48, _tag.MeshGroups[part.GroupIndex].unk).Count}");
+
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
         foreach (UIntVector3 index in part.Indices)
@@ -129,20 +125,20 @@ public class Terrain : Tag<STerrain>
         }
         part.VertexIndices = uniqueVertexIndices.ToList();
 
-        List<InputSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
+        List<DXBCIOSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
         int b0Stride = _tag.Vertices1.TagData.Stride;
         int b1Stride = _tag.Vertices2?.TagData.Stride ?? 0;
-        List<InputSignature> inputSignatures0 = new();
-        List<InputSignature> inputSignatures1 = new();
+        List<DXBCIOSignature> inputSignatures0 = new();
+        List<DXBCIOSignature> inputSignatures1 = new();
         int stride = 0;
-        foreach (InputSignature inputSignature in inputSignatures)
+        foreach (DXBCIOSignature inputSignature in inputSignatures)
         {
             if (stride < b0Stride)
                 inputSignatures0.Add(inputSignature);
             else
                 inputSignatures1.Add(inputSignature);
 
-            if (inputSignature.Semantic == InputSemantic.Colour)
+            if (inputSignature.Semantic == DXBCSemantic.Colour)
                 stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
             else
                 stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
@@ -154,6 +150,30 @@ public class Terrain : Tag<STerrain>
 
         //_tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
         //_tag.Vertices2.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+
+        return part;
+    }
+
+    public StaticPart MakeLODPart(SMeshGroup entry, int groupIndex)
+    {
+        StaticPart part = new(entry);
+
+        part.GroupIndex = groupIndex;
+        part.Indices = _tag.Indices2.GetIndexData(PrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
+
+        // Get unique vertex indices we need to get data for
+        HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
+        foreach (UIntVector3 index in part.Indices)
+        {
+            uniqueVertexIndices.Add(index.X);
+            uniqueVertexIndices.Add(index.Y);
+            uniqueVertexIndices.Add(index.Z);
+        }
+        part.VertexIndices = uniqueVertexIndices.ToList();
+
+        //Log.Debug($"Reading vertex buffers {_tag.Vertices3.Hash}/{_tag.Vertices3.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices4?.Hash}/{_tag.Vertices4?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+        _tag.Vertices3.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+        _tag.Vertices4.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
 
         return part;
     }
@@ -216,8 +236,8 @@ public class Terrain : Tag<STerrain>
             //r0.z = rsqrt(r0.z);
             r0.Z = System.Numerics.Vector3.Dot(new(r2.X, r2.Y, r2.Z), new(r2.X, r2.Y, r2.Z));
             r0.Z = MathF.ReciprocalSqrtEstimate(r0.Z);
-                
-            part.VertexPositions[i] = new Vector4(r0.X, r0.Y, r0.Z * r0.W, r0.W); 
+
+            part.VertexPositions[i] = new Vector4(r0.X, r0.Y, r0.Z * r0.W, r0.W);
         }
     }
 
@@ -323,8 +343,8 @@ public struct SMeshGroup
     public uint Unk3C;
     public uint Unk40;
     public uint Unk44;
-    public uint Unk48;
-    public uint Unk4C;
+    public uint IndexOffset; // 75% sure this is right
+    public uint IndexCount;
     public Texture Dyemap;
 }
 
@@ -336,5 +356,5 @@ public struct SStaticPart
     public uint IndexOffset;
     public ushort IndexCount;
     public byte GroupIndex;
-    public byte DetailLevel;
+    public ELod Lod;
 }

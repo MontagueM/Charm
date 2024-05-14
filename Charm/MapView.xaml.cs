@@ -29,8 +29,6 @@ public partial class MapView : UserControl
     private static MainWindow _mainWindow = null;
 
     private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-
-    private static bool source2Models = _config.GetS2VMDLExportEnabled();
     private static bool exportStatics = _config.GetIndvidualStaticsEnabled();
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -131,7 +129,7 @@ public partial class MapView : UserControl
 
     public static void ExportFullMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
     {
-        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.Map);
+        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.StaticInMap);
 
         string meshName = map.Hash.ToString();
         string savePath = _config.GetExportSavePath() + $"/{meshName}";
@@ -141,53 +139,9 @@ public partial class MapView : UserControl
         }
 
         Directory.CreateDirectory(savePath);
-        if(exportStatics)
-        {
-            Directory.CreateDirectory(savePath + "/Statics");
-            ExportStatics(savePath, map);
-        }
+        //ExportStatics(savePath, map);
 
         ExtractDataTables(map, savePath, scene, ExportTypeFlag.Full);
-
-        if (_config.GetUnrealInteropEnabled())
-        {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
-        }
-    }
-
-    public static void ExportTerrainMap(Tag<SMapContainer> map)
-    {
-        ExporterScene scene = Exporter.Get().CreateScene($"{map.Hash}_Terrain", ExportType.Terrain);
-        bool export = false;
-        string meshName = map.Hash.ToString();
-        string savePath = _config.GetExportSavePath() + $"/{meshName}";
-        if (_config.GetSingleFolderMapsEnabled())
-        {
-            savePath = _config.GetExportSavePath() + "/Maps";
-        }
-
-        Directory.CreateDirectory(savePath);
-
-        Parallel.ForEach(map.TagData.MapDataTables, data =>
-        {
-            data.MapDataTable.TagData.DataEntries.ForEach(entry =>
-            {
-                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
-                {
-                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
-                    if (exportStatics)
-                    {
-                        ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
-                    }
-                }
-            });
-        });
-
-        if (_config.GetUnrealInteropEnabled())
-        {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName + "_Terrain", AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
-        }
     }
 
     private static void ExtractDataTables(Tag<SMapContainer> map, string savePath, ExporterScene scene, ExportTypeFlag exportTypeFlag)
@@ -198,14 +152,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
-                    if (exportTypeFlag == ExportTypeFlag.ArrangedMap)
-                    {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadArrangedIntoExporterScene(); //Arranged because...arranged
-                    }
-                    else if (exportTypeFlag == ExportTypeFlag.Full)
-                    {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
-                    }
+                    staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, true);
                 }
             });
         });
@@ -228,11 +175,6 @@ public partial class MapView : UserControl
                         ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
                         var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
                         staticScene.AddStatic(part.Static.Hash, staticmesh);
-
-                        if (source2Models)
-                        {
-                            Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
-                        }
                     }
                 }
             });
