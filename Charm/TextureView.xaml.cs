@@ -1,11 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Media.Imaging;
-using HelixToolkit.SharpDX.Core;
-using HelixToolkit.Wpf.SharpDX;
 using Tiger;
 using Tiger.Schema;
 
@@ -42,11 +38,11 @@ public partial class TextureView : UserControl
     public static void ExportTexture(FileHash fileHash)
     {
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-
-        string savePath = config.GetExportSavePath() + $"/Textures/{fileHash}";
-        Directory.CreateDirectory(config.GetExportSavePath() + "/Textures/");
+        string pkgName = PackageResourcer.Get().GetPackage(fileHash.PackageId).GetPackageMetadata().Name.Split(".")[0];
+        string savePath = config.GetExportSavePath() + $"/Textures/{pkgName}";
+        Directory.CreateDirectory($"{savePath}/");
 
         Texture texture = FileResourcer.Get().GetFile<Texture>(fileHash);
-        texture.SavetoFile(savePath);
+        texture.SavetoFile($"{savePath}/{fileHash}");
     }
 }
