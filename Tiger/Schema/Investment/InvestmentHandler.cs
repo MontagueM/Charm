@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Arithmic;
@@ -48,9 +47,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public Investment(TigerStrategy strategy) : base(strategy)
     {
-        concurrencyValue = (int)typeof(ConcurrentDictionary<,>).MakeGenericType(typeof(int), typeof(int))
-    .GetProperty("DefaultConcurrencyLevel", BindingFlags.Static | BindingFlags.NonPublic)
-    .GetValue(new ConcurrentDictionary<int, int>());
+        concurrencyValue = Environment.ProcessorCount;
     }
 
     protected override void Reset() => throw new NotImplementedException();
