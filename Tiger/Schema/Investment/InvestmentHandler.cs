@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Arithmic;
@@ -43,8 +44,13 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<D2Class_594F8080> _socketCategoryMap = null;
     public ConcurrentDictionary<int, D2Class_5D4F8080> SocketCategoryStringThings = null;
 
+    private readonly int concurrencyValue;
+
     public Investment(TigerStrategy strategy) : base(strategy)
     {
+        concurrencyValue = (int)typeof(ConcurrentDictionary<,>).MakeGenericType(typeof(int), typeof(int))
+    .GetProperty("DefaultConcurrencyLevel", BindingFlags.Static | BindingFlags.NonPublic)
+    .GetValue(new ConcurrentDictionary<int, int>());
     }
 
     protected override void Reset() => throw new NotImplementedException();
@@ -227,20 +233,20 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             });
         }
 
-        Task.WaitAll(new[]
-        {
+        Task.WaitAll
+            (      
             Task.Run(GetInventoryItemDict),
             Task.Run(GetInventoryItemStringThings),
             Task.Run(GetEntityAssignmentDict),
-            Task.Run(GetSocketCategoryStringThings),
+            Task.Run(GetSocketCategoryStringThings)
             // Task.Run(GetSandboxPatternAssignmentsDict),
-        });
+        );
     }
 
     private void GetInventoryItemStringThings()
     {
-        InventoryItemStringThings = new ConcurrentDictionary<int, Tag<D2Class_9F548080>>();
         using TigerReader reader = _inventoryItemStringThing.GetReader();
+        InventoryItemStringThings = new ConcurrentDictionary<int, Tag<D2Class_9F548080>>(concurrencyValue, _inventoryItemStringThing.TagData.StringThings.Count);
         for (int i = 0; i < _inventoryItemStringThing.TagData.StringThings.Count; i++)
         {
             InventoryItemStringThings.TryAdd(i, _inventoryItemStringThing.TagData.StringThings[reader, i].GetStringThing());
@@ -251,7 +257,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     {
         if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            SocketCategoryStringThings = new ConcurrentDictionary<int, D2Class_5D4F8080>();
+            SocketCategoryStringThings = new ConcurrentDictionary<int, D2Class_5D4F8080>(concurrencyValue, _socketCategoryMap.TagData.SocketCategoryEntries.Count);
             using TigerReader reader = _socketCategoryMap.GetReader();
             for (int i = 0; i < _socketCategoryMap.TagData.SocketCategoryEntries.Count; i++)
             {
@@ -370,8 +376,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public void GetInventoryItemDict()
     {
-        _inventoryItemIndexmap = new Dictionary<uint, int>();
-        _inventoryItems = new ConcurrentDictionary<uint, InventoryItem>();
+        _inventoryItemIndexmap = new Dictionary<uint, int>(_inventoryItemMap.TagData.InventoryItemDefinitionEntries.Count);
+        _inventoryItems = new ConcurrentDictionary<uint, InventoryItem>(concurrencyValue, _inventoryItemMap.TagData.InventoryItemDefinitionEntries.Count);
 
         using TigerReader reader = _inventoryItemMap.GetReader();
         for (int i = 0; i < _inventoryItemMap.TagData.InventoryItemDefinitionEntries.Count; i++)
