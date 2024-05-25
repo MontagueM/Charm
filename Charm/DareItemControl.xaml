@@ -5,12 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Charm"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="96"
+    d:DesignHeight="100"
     d:DesignWidth="288"
+    Loaded="OnControlLoaded"
     mc:Ignorable="d">
     <Grid
-        Height="96"
-        Margin="0"
+        Name="Container"
+        Margin="1,1,1,1"
         Background="{Binding GridBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="50*" />
@@ -18,25 +19,43 @@
             <RowDefinition Height="25*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="96" />
-            <ColumnDefinition Width="192" />
+            <ColumnDefinition Width="50*" />
+            <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
 
+        <Button
+            x:Name="ItemInspectButton"
+            Grid.Column="1"
+            Width="22"
+            Height="22"
+            Margin="0,1,1,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Click="InspectAPIItem_OnClick"
+            Style="{StaticResource API Inspect Button}">
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="14"
+                Text="🔎" />
+        </Button>
 
-        <Image
+        <Border
             Grid.RowSpan="3"
-            Width="{Binding ImageWidth}"
-            Height="{Binding ImageHeight}"
             HorizontalAlignment="Left"
             Panel.ZIndex="1"
-            Source="{Binding ImageSource}" />
+            BorderBrush="White"
+            BorderThickness="0">
+            <Image Source="{Binding ImageSource}" />
+        </Border>
+
         <TextBlock
             Grid.Row="0"
             Grid.Column="1"
-            Margin="10,5,5,0"
+            Margin="5,5,25,0"
             HorizontalAlignment="Left"
             Panel.ZIndex="1"
-            FontFamily="{DynamicResource ResourceKey=Neue Haas Grotesk Display Pro 75 Bold}"
+            FontFamily="{DynamicResource ResourceKey=Haas Grot Disp 75 Bold}"
             FontSize="15"
             Foreground="{StaticResource ForegroundColour100}"
             Text="{Binding ItemName}"
@@ -45,10 +64,11 @@
         <TextBlock
             Grid.Row="1"
             Grid.Column="1"
-            Margin="10,0,0,0"
+            Margin="5,0,0,0"
             HorizontalAlignment="Left"
+            VerticalAlignment="Center"
             Panel.ZIndex="1"
-            FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
             FontSize="14"
             Foreground="{StaticResource ForegroundColour100}"
             Text="{Binding ItemType}"
@@ -57,10 +77,10 @@
         <TextBlock
             Grid.Row="2"
             Grid.Column="1"
-            Margin="10,0,0,0"
+            Margin="5,3,0,0"
             HorizontalAlignment="Left"
             Panel.ZIndex="1"
-            FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
             FontSize="12"
             Foreground="{StaticResource ForegroundColour100}"
             Text="{Binding ItemRarity}"
@@ -69,10 +89,10 @@
         <TextBlock
             Grid.Row="2"
             Grid.Column="1"
-            Margin="0,0,10,0"
+            Margin="0,3,5,0"
             HorizontalAlignment="Right"
             Panel.ZIndex="1"
-            FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
             FontSize="12"
             Foreground="{StaticResource ForegroundColour100}"
             Text="{Binding ItemHash}"
@@ -80,3 +100,7 @@
             TextWrapping="Wrap" />
     </Grid>
 </UserControl>
+
+
+
+

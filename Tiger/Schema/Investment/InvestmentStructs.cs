@@ -37,9 +37,17 @@ public struct D2Class_9D798080
     [SchemaField(0x18)]
     public ResourcePointer Unk18;  // D2Class_E7778080, 06178080 D1
 
-    [SchemaField(0x48, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)] // probably not obsolete, just dont care
-    public ResourcePointer Unk48;  // 15108080 D1
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk28;  // D2Class_C5738080, 'gearset'
+
+    [SchemaField(0x30, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk30;  // D2Class_B6738080, lore entry index (map CF508080 BDA1A780)
+
+    [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk38;  // B0738080, 'objectives'
+
+    [SchemaField(0x48)]
+    public ResourcePointer Unk48;  // 15108080 D1, A1738080 D2 'plug'
 
     [SchemaField(0x50)]
     public ResourcePointer Unk50; // 8B178080 D1
@@ -62,10 +70,18 @@ public struct D2Class_9D798080
     [SchemaField(0xA8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash InventoryItemHash;
     public TigerHash UnkAC;
+    public byte SeasonIndex; // 'seasonHash', not used for gear
 
     [SchemaField(0x8A, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xC2, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public byte ItemRarity; //Not sure
+    public byte ItemRarity;
+
+    [SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public byte UnkC4; // 'isInstanceItem'?
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xCA, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public byte RecipeItemIndex; // 'recipeItemHash'
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x108, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -101,10 +117,18 @@ public struct D2Class_E4768080
     public float Unk88;
 }
 
+/// <summary>
+/// D2 "equippingBlock"
+/// </summary>
 [SchemaStruct("E7778080", 0x20)]
 public struct D2Class_E7778080
 {
     public DynamicArray<D2Class_387A8080> Unk00;
+    [SchemaField(0x14)]
+    public StringHash UniqueLabel;
+    public TigerHash UniqueLabelHash;
+    public byte EquipmentSlotTypeIndex; // 'equipmentSlotTypeHash'
+    public byte Attributes; // EquippingItemBlockAttributes (just 0 or 1)
 }
 
 [SchemaStruct("387A8080", 0x10)]
@@ -120,19 +144,31 @@ public struct D2Class_3A7A8080
     public int Unk04;
 }
 
+// 'quality'
 [SchemaStruct("DC778080", 0x70)]
 public struct D2Class_DC778080
 {
     [SchemaField(0x08)]
-    public short Unk08;
+    public short ProgressionLevelRequirementIndex; // 'progressionLevelRequirementHash'
+    [SchemaField(0x10)]
+    public DynamicArray<SStringHash> InfusionCategoryHashes;
+    [SchemaField(0x28)]
+    public DynamicArray<D2Class_2D788080> DisplayVersionWatermarkIcons; // Unsure
+
     [SchemaField(0x60)]
-    public DynamicArray<D2Class_DE778080> Unk60;
+    public DynamicArray<D2Class_DE778080> Versions;
+}
+
+[SchemaStruct("2D788080", 2)]
+public struct D2Class_2D788080
+{
+    public short IconIndex;
 }
 
 [SchemaStruct("DE778080", 2)]
 public struct D2Class_DE778080
 {
-    public short Unk00;
+    public short PowerCapIndex; // 'powerCapHash' DestinyPowerCapDefinition
 }
 
 [SchemaStruct("05798080", 2)]
@@ -145,6 +181,7 @@ public struct D2Class_05798080
 public struct D2Class_81738080
 {
     public DynamicArray<D2Class_86738080> InvestmentStats;  // "investmentStats" from API
+    public DynamicArray<D2Class_87738080> Perks;  // 'perks'
 }
 
 /// <summary>
@@ -157,12 +194,36 @@ public struct D2Class_86738080
     public int Value;  // "value" from API
 }
 
+[SchemaStruct("86738080", 0x18)]
+public struct D2Class_87738080
+{
+    public int PerkIndex;  // "perkHash" from API
+}
+
 [SchemaStruct("7F738080", 2)]
 public struct D2Class_7F738080
 {
     public short Unk00;
 }
 
+[SchemaStruct("B6738080", 0x4)]
+public struct D2Class_B6738080
+{
+    public short LoreEntryIndex;
+}
+
+// 'gearset'
+[SchemaStruct("C5738080", 0x38)]
+public struct D2Class_C5738080
+{
+    public DynamicArray<D2Class_26908080> ItemList;
+}
+
+[SchemaStruct("26908080", 0x2)]
+public struct D2Class_26908080
+{
+    public short ItemIndex;
+}
 
 /// <summary>
 /// "translationBlock" from API, "equippingBlock" in D1
@@ -216,6 +277,77 @@ public struct D2Class_7B738080
 
 #endregion
 
+#region Stats
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BE548080", 0x18)]
+public struct D2Class_BE548080
+{
+    public ulong FileSize;
+    public DynamicArrayUnloaded<D2Class_C4548080> StatGroupDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C4548080", 0x38)]
+public struct D2Class_C4548080
+{
+    public TigerHash StatGroupHash;
+    public short Unk04;
+    [SchemaField(0x8)]
+    public TigerHash Unk08;
+    [SchemaField(0x10)]
+    public DynamicArray<D2Class_C8548080> ScaledStats;
+    [SchemaField(0x30)]
+    public int MaximumValue;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C8548080", 0x18)]
+public struct D2Class_C8548080
+{
+    public byte StatIndex; // 'statHash'
+    public byte DisplayAsNumeric;
+    public byte Unk02;
+    public byte IsLinear; // not in api, means the value "isnt" interpolated? WYSIWYG
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_257A8080> DisplayInterpolation;
+
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "257A8080", 0x8)]
+public struct D2Class_257A8080
+{
+    public int Value;
+    public int Weight;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6B588080", 0x18)]
+public struct D2Class_6B588080
+{
+    public ulong FileSize;
+    public DynamicArrayUnloaded<D2Class_6F588080> StatDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6F588080", 0x24)]
+public struct D2Class_6F588080
+{
+    public TigerHash StatHash;
+    public StringIndexReference StatName;
+    public StringIndexReference StatDescription;
+    public short StatIconIndex;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C9798080", 0x18)]
+public struct D2Class_C9798080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_CF798080> PowerCapDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "CF798080", 0x8)]
+public struct D2Class_CF798080
+{
+    public TigerHash PowerCapHash;
+    public float PowerCap; // needs multiplied by 10 for some reason?
+}
+#endregion
+
 #region String Stuff
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C7348080", 0x18)]
@@ -266,8 +398,12 @@ public struct D2Class_9F548080
     // public dynamic? Unk28;  // D2Class_E4548080
     // [SchemaField(0x68), DestinyField(FieldType.ResourcePointer)]
     // public dynamic? Unk68;  // D2Class_CA548080
-    // [SchemaField(0x78), DestinyField(FieldType.ResourcePointer)]
-    // public dynamic? Unk78;  // D2Class_B4548080
+
+    [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk38;  // D2Class_D8548080
+
+    [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk78;  // D2Class_B4548080
 
     [SchemaField(0x60, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
@@ -276,7 +412,7 @@ public struct D2Class_9F548080
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public short IconIndex;
-    public short Unk8A;
+    public short FoundryIconIndex; // the banner that appears on foundry weapons (Hakke, veist, etc)
 
     [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x8C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -288,7 +424,7 @@ public struct D2Class_9F548080
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public StringIndexReference ItemUnkA0; // "displaySource"?
+    public StringIndexReference ItemDisplaySource; // "displaySource"
 
     [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xB0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -301,11 +437,36 @@ public struct D2Class_9F548080
     public TigerHash UnkC8;  // "bucketTypeHash" / "equipmentSlotTypeHash"
     public TigerHash UnkCC;  // DestinySandboxPatternDefinition hash
     public TigerHash UnkD0;  // DestinySandboxPatternDefinition hash
+    public TigerHash UnkD4;
+    public StringHash TooltipStyle; // 'tooltipStyle' as fnv hash
 
+    [SchemaField(0xE0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArray<D2Class_B2548080> TooltipNotifications;
     // ive missed lots of stuff here
 
     [SchemaField(0x120, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_59238080> Unk120;
+}
+
+[SchemaStruct("D8548080", 0x88)]
+public struct D2Class_D8548080
+{
+    [SchemaField(0x10)]
+    public DynamicArray<D2Class_DC548080> InsertionRules;
+}
+
+[SchemaStruct("DC548080", 0x8)]
+public struct D2Class_DC548080
+{
+    public StringIndexReference FailureMessage;
+}
+
+[SchemaStruct("B2548080", 0x20)]
+public struct D2Class_B2548080
+{
+    [SchemaField(0x10)]
+    public StringIndexReference DisplayString;
+    public StringHash DisplayStyle; // No actual strings, fnv (B4437851 = ui_display_style_item_add_on)
 }
 
 [SchemaStruct("F1598080", 2)]
@@ -386,11 +547,42 @@ public struct D2Class_B4548080
 {
     public TigerHash Unk00;
     public TigerHash Unk04;
-    [SchemaField(0x0C)]
+    [SchemaField(0xC)]
     public StringIndexReference InspectionTerm;
-    public int Unk14;
+    public int StatGroupIndex;
 }
 
+[SchemaStruct("2D548080", 0x18)]
+public struct D2Class_2D548080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_33548080> SandboxPerkDefinitionEntries;
+}
+
+[SchemaStruct("33548080", 0x28)]
+public struct D2Class_33548080
+{
+    public TigerHash SandboxPerkHash;
+    public TigerHash Unk04;
+    public StringIndexReference SandboxPerkName;
+    public StringIndexReference SandboxPerkDescription;
+    public short IconIndex;
+}
+
+[SchemaStruct("AA768080", 0x18)]
+public struct D2Class_AA768080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_AE7680800> SandboxPerkDefinitionEntries;
+}
+
+[SchemaStruct("AE768080", 0xC)]
+public struct D2Class_AE7680800
+{
+    public TigerHash SandboxPerkHash;
+    public int UnkIndex;
+    public int Unk08;
+}
 
 #endregion
 
@@ -662,6 +854,11 @@ public struct D2Class_B83E8080
     public Tag<D2Class_CF3E8080> IconOverlayContainer;
     //public Tag Unk28; //Always null?
     //public Tag EmblemContainer; //For Emblems, not worth loading atm
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    public Vector4 DyeColorR;
+    public Vector4 DyeColorG;
+    public Vector4 DyeColorB;
 }
 
 
@@ -801,6 +998,23 @@ public struct D2Class_0E5A8080
     }
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "CF508080", 0x18)]
+public struct D2Class_CF508080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_D3508080> LoreStringMap;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D3508080", 0x28)]
+public struct D2Class_D3508080
+{
+    public long Unk00;
+    public TigerHash LoreHash;
+    public StringIndexReference LoreName;
+    public StringIndexReference LoreSubtitle;
+    public StringIndexReference LoreDescription;
+}
+
 #endregion
 
 #region Socket+Plug Entries
@@ -808,6 +1022,7 @@ public struct D2Class_0E5A8080
 public struct D2Class_C0778080
 {
     public DynamicArray<D2Class_C3778080> SocketEntries;
+    public DynamicArray<D2Class_C8778080> IntrinsicSockets;
 }
 
 /// <summary>
@@ -821,13 +1036,13 @@ public struct D2Class_C3778080
     public short Unk04;
     public short SingleInitialItemIndex; // 'singleInitialItemHash'
     [SchemaField(0x10)]
-    public short ReusablePlugSetIndex1; // randomizedPlugSetHash
+    public short ReusablePlugSetIndex1; // randomizedPlugSetHash -> reusablePlugItems
     //[SchemaField(0x18)]
-    //public DynamicArray<D2Class_3A7A8080> PlugItems;
+    //public DynamicArray<D2Class_3A7A8080> Unk18;
     [SchemaField(0x28)]
-    public short ReusablePlugSetIndex2; // randomizedPlugSetHash
+    public short ReusablePlugSetIndex2; // randomizedPlugSetHash -> reusablePlugItems
     [SchemaField(0x48)]
-    public DynamicArray<D2Class_D5778080> PlugItems;
+    public DynamicArray<D2Class_D5778080> PlugItems; // reusablePlugSetHash -> reusablePlugItems
 }
 
 [SchemaStruct("CD778080", 0x18)]
@@ -853,6 +1068,22 @@ public struct D2Class_D5778080
     [SchemaField(0x28)]
     public DynamicArray<D2Class_3A7A8080>? UnkUnlocks;
 }
+
+[SchemaStruct("C8778080", 0x4)]
+public struct D2Class_C8778080
+{
+    public short SocketTypeIndex; // socketTypeHash
+    public short PlugItemIndex; // plugItemHash
+}
+
+[SchemaStruct("A1738080", 0x128)]
+public struct D2Class_A1738080
+{
+    public TigerHash PlugCategoryHash;
+    [SchemaField(0xF8)]
+    public StringHash PlugStyle; // 'uiPlugLabel', theres only none (invalid) and masterwork (6048A01E)
+}
+
 #endregion
 
 #region Socket Category
@@ -866,19 +1097,21 @@ public struct D2Class_B6768080
 [SchemaStruct("BA768080", 0x68)]
 public struct D2Class_BA768080
 {
-    public TigerHash SocketHash;
+    public TigerHash SocketTypeHash;
     public short Unk04;
-    public short SocketCategoryIndex;
+    public short SocketCategoryIndex; // 'socketCategoryHash'
+    public int SocketVisiblity; // 'visibility'
 
-    //[SchemaField(0x30)]
-    //public DynamicArrayUnloaded<D2Class_C5768080> PlugWhitelists; // not important
+    [SchemaField(0x30)]
+    public DynamicArray<D2Class_C5768080> PlugWhitelists;
 }
 
-//[SchemaStruct("C5768080", 0x8)]
-//public struct D2Class_C5768080
-//{
-//    public TigerHash CategoryHash;
-//}
+[SchemaStruct("C5768080", 0x8)]
+public struct D2Class_C5768080
+{
+    public TigerHash PlugCategoryHash;
+    public short Unk04;
+}
 
 [SchemaStruct("594F8080", 0x18)]
 public struct D2Class_594F8080
@@ -893,7 +1126,107 @@ public struct D2Class_5D4F8080
     public TigerHash SocketCategoryHash;
     public StringIndexReference SocketName;
     public StringIndexReference SocketDescription;
-    public StringHash SocketSubname;
+    public uint CategoryStyle; // 'uiCategoryStyle'
+}
+#endregion
+
+#region Collectables
+
+[SchemaStruct("28788080", 0x18)]
+public struct D2Class_28788080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_2C788080> CollectibleDefinitionEntries;
+}
+
+[SchemaStruct("2C788080", 0xB0)]
+public struct D2Class_2C788080
+{
+    [SchemaField(0x18)]
+    public DynamicArray<D2Class_F7788080> ParentNodeHashes;
+    public TigerHash CollectibleHash;
+    public short InventoryItemIndex;
+    [SchemaField(0x30)]
+    public DynamicArray<D2Class_3A7A8080> UnkUnlock30;
+    [SchemaField(0x60)]
+    public DynamicArray<D2Class_3A7A8080> UnkUnlockClass;
+    public DynamicArray<D2Class_3A7A8080> Unk70;
+}
+
+[SchemaStruct("F7788080", 2)]
+public struct D2Class_F7788080
+{
+    public short ParentNodeHashIndex;
+}
+
+
+[SchemaStruct("BF598080", 0x18)]
+public struct D2Class_BF598080
+{
+    public long FileSize;
+    public DynamicArrayUnloaded<D2Class_C3598080> CollectibleDefinitionStringEntries;
+}
+
+[SchemaStruct("C3598080", 0x60)]
+public struct D2Class_C3598080
+{
+    public TigerHash CollectibleHash;
+    public int Unk04;
+    public StringIndexReference CollectibleName;
+    [SchemaField(0x18)]
+    public StringIndexReference SourceName;
+    public StringIndexReference RequirementDescription;
+}
+
+#endregion
+
+#region Objectives
+// objective definition
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "3C758080", 0x18)]
+public struct D2Class_3C758080
+{
+    [SchemaField(0x8)]
+    public DynamicArrayUnloaded<D2Class_40758080> ObjectiveDefinitionEntries;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "40758080", 0xB0)]
+public struct D2Class_40758080
+{
+    public TigerHash ObjectiveHash;
+    [SchemaField(0x10)]
+    public int CompletionValue;
+}
+
+// objective definition strings
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "4C588080", 0x18)]
+public struct D2Class_4C588080
+{
+    [SchemaField(0x8)]
+    public DynamicArrayUnloaded<D2Class_50588080> ObjectiveDefinitionStringEntries;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "50588080", 0x58)]
+public struct D2Class_50588080
+{
+    public TigerHash ObjectiveHash;
+    public short IconIndex;
+    [SchemaField(0x18)]
+    public StringIndexReference ProgressDescription;
+    public byte InProgressValueStyle; // enum DestinyUnlockValueUIStyle ?
+    public byte CompletedValueStyle;
+    public short LocationIndex; // 'locationHash' DestinyLocationDefinition
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B0738080", 0x28)]
+public struct D2Class_B0738080
+{
+    public DynamicArray<D2Class_15908080> Objectives;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "15908080", 0x2)]
+public struct D2Class_15908080
+{
+    public short ObjectiveIndex;
 }
 #endregion
 

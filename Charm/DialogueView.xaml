@@ -36,7 +36,7 @@
                         Margin="5,0,0,5"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Bottom"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+                        FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
                         FontSize="12"
                         Foreground="{StaticResource ForegroundColour75}"
                         Text="{Binding Narrator}" />
@@ -45,7 +45,7 @@
                         Margin="0,0,4,0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+                        FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
                         FontSize="8"
                         Foreground="{StaticResource ForegroundColour75}"
                         Text="{Binding RecursionDepth}" />
@@ -54,7 +54,7 @@
                         Margin="0,0,5,5"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+                        FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
                         FontSize="12"
                         Foreground="{StaticResource ForegroundColour75}"
                         Text="{Binding Duration}" />

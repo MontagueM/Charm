@@ -1791,7 +1791,7 @@ public partial class TagListView : UserControl
             {
                 Hash = item.TagData.InventoryItemHash,
                 Name = name,
-                Subname = ((ItemTier)item.TagData.ItemRarity).ToString(),
+                Subname = ((DestinyTierType)item.TagData.ItemRarity).ToString(),
                 Type = type.Trim(),
                 TagType = ETagListType.WeaponAudioGroup
             });
