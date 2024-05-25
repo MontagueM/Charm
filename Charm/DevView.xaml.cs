@@ -4,12 +4,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using ConcurrentCollections;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -34,6 +35,8 @@ public partial class DevView : UserControl
         _mainWindow = Window.GetWindow(this) as MainWindow;
         _fbxHandler = new FbxHandler(false);
         HashLocation.Text = $"PKG:\nPKG ID:\nEntry Index:";
+
+        //RipAndTear();
     }
 
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
@@ -80,7 +83,7 @@ public partial class DevView : UserControl
                 data.AppendLine($"PKG: {PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId(hash.PackageId)})");
                 data.AppendLine($"PKG ID: {hash.PackageId}");
                 data.AppendLine($"Entry Index: {hash.FileIndex}");
-                // data.AppendLine($"Dev String: {hash.GetDevString() ?? hash.GetContainerString() ?? "NULL"}");
+                data.AppendLine($"Type: {hash.GetFileMetadata().Type} | SubType: {hash.GetFileMetadata().SubType}");
                 data.AppendLine($"Reference Hash: {hash.GetReferenceHash()}");
                 string h64 = Hash64Map.Get().GetHash64(hash);
                 if (!string.IsNullOrEmpty(h64))
@@ -136,7 +139,7 @@ public partial class DevView : UserControl
         // Adds a new tab to the tab control
         TigerHash reference = hash.GetReferenceHash();
         FileMetadata fileMetadata = PackageResourcer.Get().GetFileMetadata(hash);
-        if (fileMetadata.Type == 26 && fileMetadata.SubType == 7)
+        if ((fileMetadata.Type == 26 && fileMetadata.SubType == 7) || (fileMetadata.Type == 8 && fileMetadata.SubType == 21))
         {
             var audioView = new TagView();
             audioView.SetViewer(TagView.EViewerType.TagList);
@@ -168,6 +171,7 @@ public partial class DevView : UserControl
         {
             switch (reference.Hash32)
             {
+                case 0x80800734:
                 case 0x80809C0F:
                 case 0x80809AD8:
                     EntityView entityView = new EntityView();
@@ -205,10 +209,11 @@ public partial class DevView : UserControl
                     break;
                 case 0x808097B8:
                     var dialogueView = new DialogueView();
-                    dialogueView.Load(hash);
+                    dialogueView.Load(hash, null);
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+                case 0x80801AB5:
                 case 0x808073A5:
                 case 0x80806F07: //Entity model
                     EntityModel entityModel = FileResourcer.Get().GetFile<EntityModel>(hash);
@@ -221,6 +226,11 @@ public partial class DevView : UserControl
                         scene.Materials.Add(new ExportMaterial(part.Material));
                     }
                     Exporter.Get().Export();
+
+                    EntityView entityModelView = new EntityView();
+                    entityModelView.LoadEntityModel(hash, _fbxHandler);
+                    _mainWindow.MakeNewTab(hash, entityModelView);
+                    _mainWindow.SetNewestTabSelected();
                     break;
                 case 0x8080714F:
                 case 0x80806C81:
@@ -294,5 +304,28 @@ public partial class DevView : UserControl
         {
             StaticView.ExportStatic(new FileHash(asset), asset, ExportTypeFlag.Full, "devmap");
         }
+    }
+
+    // Cleaverly done (insert name) but you're not supposed to be here. As a matter of fact, you're not.
+    // Get back where you belong and forget about all this...Until we meet again.
+    public void RipAndTear()
+    {
+        bool PackageFilterFunc(string packagePath) => packagePath.Contains("investment") || packagePath.Contains("client_startup");
+        ConcurrentHashSet<FileHash> allHashes = PackageResourcer.Get().GetAllHashes(PackageFilterFunc);
+        Parallel.ForEach(allHashes, (val, state, i) =>
+        {
+            if (val.GetReferenceHash().IsValid() && val.GetReferenceHash().ToString().EndsWith("8080"))
+            {
+                string path = $"C:\\Users\\Michael\\Desktop\\out\\D2\\{val.GetReferenceHash()}_{val}.bin";
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    using (var writer = new BinaryWriter(fileStream))
+                    {
+                        byte[] data = FileResourcer.Get().GetFile(val).GetData();
+                        writer.Write(data);
+                    }
+                }
+            }
+        });
     }
 }

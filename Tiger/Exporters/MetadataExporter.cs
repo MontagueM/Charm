@@ -98,21 +98,28 @@ class MetadataScene
         }
         foreach (var mapLight in scene.MapLights)
         {
-            for (int i = 0; i < mapLight.Unk10.TagData.Unk30.Count; i++)
+            for (int i = 0; i < mapLight.Lights.TagData.LightData.Count; i++)
             {
-                var data = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_SHADOWKEEP_2601 ? mapLight.Unk10.TagData.Unk30[i].UnkCC : mapLight.Unk10.TagData.Unk30[i].UnkD0;
+                var data = mapLight.Lights.TagData.LightData[i].BufferData;
                 if (data is null)
                     continue;
+
+                // This sucks and is stupid
+                var color = data.TagData.Buffer1.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).Count() != 0 ?
+                    data.TagData.Buffer1.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).FirstOrDefault().Vec :
+                    data.TagData.Buffer2.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).FirstOrDefault().Vec;
+
                 AddLight(
                     data.Hash,
                     "Point",
-                    mapLight.Unk10.TagData.Unk40[i].Translation,
-                    mapLight.Unk10.TagData.Unk40[i].Rotation,
-                    new Vector2(1,1), //new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
-                    (data.TagData.Unk40.Count > 0 ? data.TagData.Unk40[0].Vec : data.TagData.Unk60[0].Vec));
+                    mapLight.Lights.TagData.Transforms[i].Translation,
+                    mapLight.Lights.TagData.Transforms[i].Rotation,
+                    new Vector2(1, 1),
+                    color,
+                    mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner2.X - mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner1.X);
             }
         }
-        foreach(SMapDecalsResource decal in scene.Decals)
+        foreach (SMapDecalsResource decal in scene.Decals)
         {
             if (decal.MapDecals is not null)
             {
@@ -137,7 +144,7 @@ class MetadataScene
         }
         foreach (var mapLight in scene.MapSpotLights)
         {
-            foreach(var entry in mapLight.Value)
+            foreach (var entry in mapLight.Value)
             {
                 AddLight(
                     mapLight.Key,
@@ -145,13 +152,13 @@ class MetadataScene
                     new Vector4(entry.Position.X, entry.Position.Y, entry.Position.Z, 1),
                     entry.Quaternion,
                     new Vector2(1.0, 1.0),
-                    new Vector4(1.0,1.0,1.0,1.0));
+                    new Vector4(1.0, 1.0, 1.0, 1.0));
             }
         }
 
-        foreach(var dyemaps in scene.TerrainDyemaps)
+        foreach (var dyemaps in scene.TerrainDyemaps)
         {
-            foreach(var dyemap in dyemaps.Value)
+            foreach (var dyemap in dyemaps.Value)
                 AddTerrainDyemap(dyemaps.Key, dyemap);
         }
     }
@@ -254,12 +261,12 @@ class MetadataScene
         });
     }
 
-    public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color)
+    public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color, float range = 13)
     {
         //Idk how color/intensity is handled, so if its above 1 just bring it down
-        float R = color.X > 1 ? color.X / 100 : color.X;
-        float G = color.Y > 1 ? color.Y / 100 : color.Y;
-        float B = color.Z > 1 ? color.Z / 100 : color.Z;
+        //float R = color.X > 1 ? color.X / 100 : color.X;
+        //float G = color.Y > 1 ? color.Y / 100 : color.Y;
+        //float B = color.Z > 1 ? color.Z / 100 : color.Z;
 
         if (!_config["Lights"].ContainsKey(name))
         {
@@ -271,7 +278,8 @@ class MetadataScene
             Translation = new[] { translation.X, translation.Y, translation.Z },
             Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
             Size = new[] { size.X, size.Y },
-            Color = new[] { R, G, B }
+            Color = new[] { color.X, color.Y, color.Z },
+            Range = range
         });
     }
 
@@ -311,7 +319,7 @@ class MetadataScene
             && _exportType is not ExportType.EntityPoints)
             return; //Dont export if theres nothing in the cfg (this is kind of a mess though)
 
-        if (_exportType is ExportType.Static or ExportType.Entity or ExportType.API)
+        if (_exportType is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
         {
             path = Path.Join(path, _config["MeshName"]);
         }
@@ -387,6 +395,7 @@ class MetadataScene
         public float[] Rotation;
         public float[] Size;
         public float[] Color;
+        public float Range;
     }
     private struct JsonDecal
     {

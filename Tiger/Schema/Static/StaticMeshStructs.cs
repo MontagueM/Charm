@@ -36,7 +36,8 @@ public struct SMaterialHash
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2F6D8080", 0x24)]
 public struct SStaticMeshDecal
 {
-    public short Unk00;
+    public sbyte RenderStage;
+    public sbyte Unk01;
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public short Unk02;
@@ -84,7 +85,7 @@ public struct SStaticMeshData_BL
 public struct SStaticMeshMaterialAssignment_SK
 {
     public ushort PartIndex;
-    public ushort DetailLevel;  // not exactly, but definitely related to it (maybe distance-based)
+    public ushort RenderStage;  // TFX render stage
     public ushort Unk04;
     public ushort Unk06;
 }
@@ -93,7 +94,7 @@ public struct SStaticMeshMaterialAssignment_SK
 public struct SStaticMeshMaterialAssignment_WQ
 {
     public ushort PartIndex;
-    public byte DetailLevel;  // not exactly, but definitely related to it (maybe distance-based)
+    public byte RenderStage;  // TFX render stage
     public byte Unk03;
     public ushort Unk04;
 }
@@ -119,4 +120,17 @@ public struct SStaticMeshBuffers
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public VertexBuffer Vertices2;
     public uint UnkOffset;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D61B8080", 0x18)]
+public struct SStaticMeshData_D1
+{
+    public VertexBuffer Vertices0;
+    public VertexBuffer Vertices1;
+    public IndexBuffer Indices;
+    public ushort UnkC; // Unsure, render stage?
+    public sbyte DetailLevel;
+    public sbyte PrimitiveType;
+    public uint IndexOffset;
+    public uint IndexCount;
 }

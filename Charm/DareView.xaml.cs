@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,10 +32,10 @@ public partial class DareView : UserControl
     }
     private void AmountBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if(_allItems != null) //Gotta do this for some reason
+        if (_allItems != null) //Gotta do this for some reason
             RefreshItemList();
     }
-    
+
     private void RefreshItemList()
     {
         string searchTerm = SearchBox.Text.ToLower();
@@ -77,67 +73,36 @@ public partial class DareView : UserControl
         MainWindow.Progress.SetProgressStages(mapStages, false, true);
         await Parallel.ForEachAsync(inventoryItems, async (item, ct) =>
         {
-            // if (_allItems.Count > 500)
-            // {
-            //     MainWindow.Progress.CompleteStage();
-            //     return;
-            // }
             string name = Investment.Get().GetItemName(item);
             string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
 
             if (type == null)
-            {
                 type = "";
-            }
-            if (item.GetArtArrangementIndex() != -1 || type.Contains("Shader"))
+
+            if (ShouldAddToList(item, type))
             {
-                if (!type.Contains("Finisher") && !type.Contains("Emote")) // they point to Animation instead of Entity
+                CreateOrnamentItems(item); // D1
+                var isD1 = Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
+                var isOrnament = type.Contains("Ornament");
+                var isWeaponOrnament = type.Contains("Weapon Ornament");
+                var isNameNotEmpty = name != "";
+
+                if ((isD1 && !isOrnament && isNameNotEmpty) || (!isD1 && isNameNotEmpty && !isWeaponOrnament))
                 {
-                    if(name != "")
+                    var image = MakeIcon(item);
+                    var newItem = new ApiItem
                     {
-                        // icon bg
-                        var bgStream = item.GetIconBackgroundStream();
-                        var bgOverlayStream = item.GetIconBackgroundOverlayStream();
-                        var primaryStream = item.GetIconPrimaryStream();
-                        var overlayStream = item.GetIconOverlayStream();
-
-                        //sometimes only the primary icon is valid
-                        var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
-                        var bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
-                        //Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
-                        var bgOverlay = bgOverlayStream != null && type.Contains("Ornament") ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
-
-                        BitmapImage? overlay = null;
-                        if (overlayStream != null)
-                            overlay = MakeBitmapImage(overlayStream, 96, 96);
-
-                        var group = new DrawingGroup();
-                        group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
-                        group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
-                        group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
-                        if (overlay != null)
-                            group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
-
-                        var dw = new DrawingImage(group);
-                        dw.Freeze();
-
-                        ImageBrush brush = new ImageBrush(bg);
-                        brush.Freeze();
-
-                        var newItem = new ApiItem
-                        {
-                            ItemName = name,
-                            ItemType = type,
-                            ItemRarity = (ItemTier)item.TagData.ItemRarity,
-                            ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
-                            ImageSource = dw,
-                            ImageHeight = 96,
-                            ImageWidth = 96,
-                            GridBackground = brush,
-                            Item = item
-                        };
-                        _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
-                    }
+                        ItemName = name,
+                        ItemType = type,
+                        ItemRarity = (ItemTier)item.TagData.ItemRarity,
+                        ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
+                        ImageSource = image.Keys.First(),
+                        ImageHeight = 96,
+                        ImageWidth = 96,
+                        GridBackground = image.Values.First(),
+                        Item = item
+                    };
+                    _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
                 }
             }
             MainWindow.Progress.CompleteStage();
@@ -165,6 +130,49 @@ public partial class DareView : UserControl
         if (_allItems.TryRemove(apiItem.Item.TagData.InventoryItemHash.Hash32, out _))
         {
             _selectedItems.Add(apiItem);
+
+            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+            {
+                System.Console.WriteLine($"---{apiItem.Item.Hash}---");
+                if (apiItem.Item.TagData.Unk70.GetValue(apiItem.Item.GetReader()) is D2Class_C0778080 sockets)
+                {
+                    foreach (var socket in sockets.SocketEntries)
+                    {
+                        System.Console.WriteLine($"SocketTypeIndex: {socket.SocketTypeIndex} " + (socket.SocketTypeIndex != -1 ? Investment.Get().SocketCategoryStringThings[Investment.Get().GetSocketCategoryIndex(socket.SocketTypeIndex)].SocketName.Value : ""));
+                        System.Console.WriteLine($"SingleInitialItemIndex: {socket.SingleInitialItemIndex} " + (socket.SingleInitialItemIndex != -1 ? Investment.Get().GetItemName(Investment.Get().GetInventoryItem(socket.SingleInitialItemIndex)) : ""));
+                        System.Console.WriteLine($"ReusablePlugSetIndex1: {socket.ReusablePlugSetIndex1}");
+                        if (socket.ReusablePlugSetIndex1 != -1)
+                        {
+                            foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex1))
+                            {
+                                if (randomPlugs.PlugInventoryItemIndex == -1)
+                                    continue;
+
+                                System.Console.WriteLine($"-Reusable PlugInventoryItemIndex: {Investment.Get().GetItemName(Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex))}");
+                            }
+                        }
+
+                        System.Console.WriteLine($"ReusablePlugSetIndex2: {socket.ReusablePlugSetIndex2}");
+                        if (socket.ReusablePlugSetIndex2 != -1)
+                        {
+                            foreach (var randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex2))
+                            {
+                                if (randomPlugs.PlugInventoryItemIndex == -1)
+                                    continue;
+
+                                System.Console.WriteLine($"-Reusable PlugInventoryItemIndex: {Investment.Get().GetItemName(Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex))}");
+                            }
+                        }
+
+                        foreach (var plug in socket.PlugItems)
+                        {
+                            System.Console.WriteLine($"-PlugInventoryItemIndex: {plug.PlugInventoryItemIndex} " + (plug.PlugInventoryItemIndex != -1 ? Investment.Get().GetItemName(Investment.Get().GetInventoryItem(plug.PlugInventoryItemIndex)) : ""));
+                        }
+                        System.Console.WriteLine($"-------------------------");
+                    }
+                }
+            }
+
         }
         else
         {
@@ -247,7 +255,7 @@ public partial class DareView : UserControl
                 Investment.Get().ExportShader(item.Value.Item, savePath, itemName, config.GetOutputTextureFormat());
 
                 item.Value.Item.GetIconPrimaryTexture().SavetoFile($"{savePath}/{itemName}");
-                    
+
                 MainWindow.Progress.CompleteStage();
             });
         });
@@ -265,6 +273,129 @@ public partial class DareView : UserControl
         Regex regex = new Regex("[^0-9]+");
         e.Handled = regex.IsMatch(e.Text);
     }
+
+    // TODO: D2 maybe?
+    public void CreateOrnamentItems(InventoryItem parent)
+    {
+        var ornaments = parent.GetItemOrnaments();
+
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
+        {
+            foreach (var item in ornaments)
+            {
+                if (item.GetArtArrangementIndex() == -1)
+                    continue;
+
+                string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+                if (type == null)
+                    type = "";
+
+                string name = Investment.Get().GetItemName(item);
+                var icon = MakeIcon(item);
+                var newItem = new ApiItem
+                {
+                    ItemName = name,
+                    ItemType = type,
+                    ItemRarity = (ItemTier)parent.TagData.ItemRarity,
+                    ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
+                    ImageSource = icon.Keys.First(),
+                    ImageHeight = 96,
+                    ImageWidth = 96,
+                    GridBackground = icon.Values.First(),
+                    Item = item,
+                    Parent = parent
+                };
+                _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
+            }
+        }
+        else // D1
+        {
+            for (int i = 0; i < ornaments.Count; i++)
+            {
+                var item = ornaments[i];
+                string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+                if (type == null)
+                    type = "";
+
+                var bgStream = type != "Armor Ornament" ? item.GetIconBackgroundStream() : parent.GetTextureFromHash(new FileHash("1935A680"));
+                var primaryStream = type != "Armor Ornament" ? item.GetIconPrimaryStream() : parent.GetIconPrimaryStream();
+                var overlayStream = type != "Armor Ornament" ? item.GetIconOverlayStream() : parent.GetIconOverlayStream(); //parent.GetTextureFromHash(new FileHash("E1DBA580"));
+
+                var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+                var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+
+                var group = new DrawingGroup();
+                group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
+                group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
+
+                var dw = new DrawingImage(group);
+                dw.Freeze();
+
+                var background = bgStream != null ? MakeBitmapImage(bgStream, 512, 256) : null;
+                ImageBrush brush = new ImageBrush(background);
+                brush.Freeze();
+
+                var name = type != "Armor Ornament" ? Investment.Get().GetItemName(item) : $"{Investment.Get().GetItemName(parent)} Ornament {i + 1}";
+                var newItem = new ApiItem
+                {
+                    ItemName = name,
+                    ItemType = type,
+                    ItemRarity = (ItemTier)parent.TagData.ItemRarity,
+                    ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
+                    ImageSource = dw,
+                    ImageHeight = 96,
+                    ImageWidth = 96,
+                    GridBackground = brush,
+                    Item = item,
+                    Parent = parent
+                };
+                _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
+            }
+        }
+    }
+
+    private bool ShouldAddToList(InventoryItem item, string type)
+    {
+        return (item.GetArtArrangementIndex() != -1 || type.Contains("Shader") || type.Contains("Ghost Shell")) && (!type.Contains("Finisher") && !type.Contains("Emote") && !type.Contains("Ship Schematics"));
+    }
+
+    public Dictionary<DrawingImage, ImageBrush> MakeIcon(InventoryItem item)
+    {
+        Dictionary<DrawingImage, ImageBrush> icon = new();
+        string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+        if (type is null)
+            type = "";
+
+        // streams
+        var bgStream = item.GetIconBackgroundStream();
+        var bgOverlayStream = item.GetIconBackgroundOverlayStream();
+        var primaryStream = item.GetIconPrimaryStream();
+        var overlayStream = item.GetIconOverlayStream();
+
+        //sometimes only the primary icon is valid
+        var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+        var bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
+
+        //Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
+        var bgOverlay = bgOverlayStream != null && type.Contains("Ornament") ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
+        var overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+
+        var group = new DrawingGroup();
+        group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
+        group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+        group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
+        group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
+
+        var dw = new DrawingImage(group);
+        dw.Freeze();
+
+        ImageBrush brush = new ImageBrush(bg);
+        brush.Freeze();
+
+        icon.TryAdd(dw, brush);
+
+        return icon;
+    }
 }
 
 public class ApiItem
@@ -280,6 +411,7 @@ public class ApiItem
     public System.Windows.Media.ImageBrush GridBackground { get; set; }
 
     public InventoryItem Item { get; set; }
+    public InventoryItem Parent { get; set; }
 }
 
 public enum ItemTier : byte

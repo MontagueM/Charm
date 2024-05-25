@@ -1,13 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Packaging;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms.VisualStyles;
-using System.Windows.Input;
-using SharpDX.Toolkit.Graphics;
 using Tiger;
 using Tiger.Schema.Investment;
 
@@ -21,17 +13,21 @@ public partial class MainMenuView : UserControl
     {
         InitializeComponent();
 
-        ApiButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
+        ApiButton.IsEnabled = ShowAPIButton(Strategy.CurrentStrategy);
         BagsButton.IsEnabled = ShowWQButtons(Strategy.CurrentStrategy);
-        WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy);
+        WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy) || ShowIfD1(Strategy.CurrentStrategy);
+        StaticsButton.IsEnabled = ShowIfD2(Strategy.CurrentStrategy);
+        SoundBanksButton.Visibility = ShowIfD1(Strategy.CurrentStrategy) ? Visibility.Visible : Visibility.Hidden;
 
         Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
         {
             Dispatcher.Invoke(() =>
             {
-                ApiButton.IsEnabled = ShowWQButtons(args.Strategy);
+                ApiButton.IsEnabled = ShowAPIButton(args.Strategy);
                 BagsButton.IsEnabled = ShowWQButtons(args.Strategy);
-                WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy);
+                WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy) || ShowIfD1(args.Strategy);
+                StaticsButton.IsEnabled = ShowIfD2(args.Strategy);
+                SoundBanksButton.Visibility = ShowIfD1(Strategy.CurrentStrategy) ? Visibility.Visible : Visibility.Hidden;
             });
         };
     }
@@ -41,9 +37,24 @@ public partial class MainMenuView : UserControl
         return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402;
     }
 
+    private bool ShowIfD2(TigerStrategy strategy)
+    {
+        return strategy >= TigerStrategy.DESTINY2_SHADOWKEEP_2601;
+    }
+
+    private bool ShowIfD1(TigerStrategy strategy)
+    {
+        return strategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
+    }
+
     private bool ShowIfLatest(TigerStrategy strategy)
     {
         return strategy == TigerStrategy.DESTINY2_LATEST;
+    }
+
+    private bool ShowAPIButton(TigerStrategy strategy)
+    {
+        return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402 || strategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -116,6 +127,14 @@ public partial class MainMenuView : UserControl
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.SoundsPackagesList);
         _mainWindow.MakeNewTab("sounds", tagListView);
+        _mainWindow.SetNewestTabSelected();
+    }
+
+    private void AllBKHDViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        TagListViewerView tagListView = new TagListViewerView();
+        tagListView.LoadContent(ETagListType.BKHDGroupList);
+        _mainWindow.MakeNewTab("sound banks", tagListView);
         _mainWindow.SetNewestTabSelected();
     }
 

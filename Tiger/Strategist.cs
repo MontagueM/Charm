@@ -20,8 +20,8 @@ public class StrategyEventArgs : EventArgs
 public enum TigerStrategy
 {
     NONE = 0,
-    // [StrategyMetadata("ps4", typeof(IPackage))]
-    // DESTINY1_PS4 = 100,
+    [StrategyMetadata("ps4")]
+    DESTINY1_RISE_OF_IRON = 1000,
     [StrategyMetadata("w64", 1085660, 1085661, 7002268313830901797, 1085662, 2399965969279284756)]
     DESTINY2_SHADOWKEEP_2601 = 2601,
     [StrategyMetadata("w64", 1085660, 1085661, 4160053308690659072, 1085662, 4651412338057797072)]

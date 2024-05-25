@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -8,6 +7,7 @@ using ConcurrentCollections;
 
 namespace Tiger;
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "029D8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "029D8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C29E8080", 0x10)]
 [StructLayout(LayoutKind.Sequential, Size = 0x10)]
@@ -28,7 +28,7 @@ public interface IPackageHeader
     public List<D2BlockEntry> GetBlockEntries(TigerReader reader);
     public List<SHash64Definition> GetHash64Definitions(TigerReader reader);
 
-    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader);
+    public List<PackageActivityEntry> GetAllActivities(TigerReader reader);
 }
 
 public struct FileView
@@ -54,12 +54,19 @@ public interface IPackage
     HashSet<int> GetRequiredPatches();
     List<SHash64Definition> GetHash64List();
 
-    public List<SPackageActivityEntry> GetAllActivities();
+    public List<PackageActivityEntry> GetAllActivities();
+}
+
+public struct PackageActivityEntry
+{
+    public FileHash TagHash;
+    public TagClassHash TagClassHash;
+    public string Name;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EC9E8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C59E8080", 0x10)]
-public struct SPackageActivityEntry
+public struct SD2PackageActivityEntry
 {
     public FileHash TagHash;
     public TagClassHash TagClassHash;
@@ -690,7 +697,7 @@ public abstract class Package : IPackage
         return fileMetadataList;
     }
 
-    public List<SPackageActivityEntry> GetAllActivities()
+    public List<PackageActivityEntry> GetAllActivities()
     {
         using TigerReader reader = GetReader();
         return Header.GetAllActivities(reader);

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Tiger;
 
 namespace Charm;
@@ -18,8 +17,8 @@ public enum ExportTypeFlag
     Minimal = 2,
     //[Description("Terrain only")]
     //TerrainOnly = 4,
-    [Description("Pre-arranged map")]
-    ArrangedMap = 8,
+    //[Description("Pre-arranged map")]
+    //ArrangedMap = 8,
 }
 
 public partial class ExportControl : UserControl
