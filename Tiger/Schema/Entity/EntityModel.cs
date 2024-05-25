@@ -228,20 +228,20 @@ public class DynamicMeshPart : MeshPart
 
         if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999 && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            InputSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
+            DXBCIOSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
             int b0Stride = mesh.Vertices1.TagData.Stride;
             int b1Stride = mesh.Vertices2?.TagData.Stride ?? 0;
-            List<InputSignature> inputSignatures0 = new();
-            List<InputSignature> inputSignatures1 = new();
+            List<DXBCIOSignature> inputSignatures0 = new();
+            List<DXBCIOSignature> inputSignatures1 = new();
             int stride = 0;
-            foreach (InputSignature inputSignature in inputSignatures)
+            foreach (DXBCIOSignature inputSignature in inputSignatures)
             {
                 if (stride < b0Stride)
                     inputSignatures0.Add(inputSignature);
                 else
                     inputSignatures1.Add(inputSignature);
 
-                if (inputSignature.Semantic == InputSemantic.Colour || inputSignature.Semantic == InputSemantic.BlendIndices || inputSignature.Semantic == InputSemantic.BlendWeight)
+                if (inputSignature.Semantic == DXBCSemantic.Colour || inputSignature.Semantic == DXBCSemantic.BlendIndices || inputSignature.Semantic == DXBCSemantic.BlendWeight)
                     stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
                 else
                     stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component

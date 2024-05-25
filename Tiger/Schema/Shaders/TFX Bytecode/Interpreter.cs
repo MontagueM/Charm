@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using Tiger.Schema;
+﻿using Arithmic;
 using Tiger;
-
-using Vector4 = System.Numerics.Vector4;
-using Arithmic;
+using Tiger.Schema;
 
 public class TfxBytecodeInterpreter
 {
@@ -56,15 +48,17 @@ public class TfxBytecodeInterpreter
         return top;
     }
 
-    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants)
+    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants, bool print = false)
     {
         Dictionary<int, string> hlsl = new();
         try
         {
-            Console.WriteLine($"--------Evaluating Bytecode:");
+            if (print)
+                Console.WriteLine($"--------Evaluating Bytecode:");
             foreach ((int _ip, var op) in Opcodes.Select((value, index) => (index, value)))
             {
-                Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                if (print)
+                    Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
                 switch (op.op)
                 {
                     case TfxBytecode.Add:
@@ -270,10 +264,12 @@ public class TfxBytecodeInterpreter
                     case TfxBytecode.PopOutput:
                         //Temp.AddRange(Stack);
 
-                        Console.WriteLine($"----Output Stack Count: {Stack.Count}");
-                        if(Stack.Count == 0) //Shouldnt happen
+                        if (print)
+                            Console.WriteLine($"----Output Stack Count: {Stack.Count}");
+
+                        if (Stack.Count == 0) //Shouldnt happen
                             hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(0, 0, 0, 0)");
-                        else if(Stack.Count > 1) //Shouldnt happen
+                        else if (Stack.Count > 1) //Shouldnt happen
                             hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
                         else
                             hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
@@ -288,9 +284,9 @@ public class TfxBytecodeInterpreter
                         var Mat4_4 = PopOutputMat4[3];
 
                         hlsl.TryAdd(((PopOutputMat4Data)op.data).slot, Mat4_1);
-                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot+1, Mat4_2);
-                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot+2, Mat4_3);
-                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot+3, Mat4_4);
+                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot + 1, Mat4_2);
+                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot + 2, Mat4_3);
+                        hlsl.TryAdd(((PopOutputMat4Data)op.data).slot + 3, Mat4_4);
                         Stack.Clear();
                         break;
                     case TfxBytecode.PushTemp:
@@ -304,10 +300,11 @@ public class TfxBytecodeInterpreter
                         break;
 
                     default:
-                        Console.WriteLine($"Not Implemented: {op.op}");
+                        if (print)
+                            Console.WriteLine($"Not Implemented: {op.op}");
                         break;
 
-                }    
+                }
             }
         }
         catch (Exception e)
@@ -397,8 +394,8 @@ public class TfxBytecodeInterpreter
         string rot0 = $"({x}.xxxx * float4(4.08, 1.02, 3.0 / 5.37, 3.0 / 9.67))";
         string rot1 = $"({x}.xxxx * float4(1.83, 3.09, 0.39, 0.87) + float4(0.12, 0.37, 0.16, 0.79))";
         string sines0 = $"({_trig_helper_vector_pseudo_sin_rotations(rot0)})";
-        string sines1 =  $"({_trig_helper_vector_pseudo_sin_rotations(rot1)} * float4(0.02, 0.02, 0.28, 0.28))";
-        string wander_result = $"(0.5 + dot4({sines0}, {sines1}))"; 
+        string sines1 = $"({_trig_helper_vector_pseudo_sin_rotations(rot1)} * float4(0.02, 0.02, 0.28, 0.28))";
+        string wander_result = $"(0.5 + dot4({sines0}, {sines1}))";
 
         return wander_result;
     }
@@ -430,7 +427,7 @@ public class TfxBytecodeInterpreter
         val1 = $"(frac({val1}))";
 
         //			val0=	bbs(val0);		// Blum-Blum-Shub randomimzer
-        val0 = 
+        val0 =
         val0 = $"(frac({val0}))";
 
         //			val10=	bbs(val1);		// Blum-Blum-Shub randomimzer
@@ -502,4 +499,3 @@ public class TfxBytecodeInterpreter
         return $"({a} * (abs({a}) * -16.0 + 8.0))";
     }
 }
-

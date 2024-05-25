@@ -48,7 +48,7 @@
                     Grid.Column="1"
                     Margin="0,5,5,0"
                     HorizontalAlignment="Right"
-                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                     FontSize="15"
                     Text="{Binding Shader}" />
                 <TextBlock
@@ -56,7 +56,7 @@
                     Grid.Column="1"
                     Margin="5,0,0,0"
                     HorizontalAlignment="Left"
-                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                     FontSize="26"
                     Text="{Binding Hash}" />
                 <TextBlock
@@ -119,7 +119,7 @@
                         Grid.Column="0"
                         Margin="10,0,0,0"
                         HorizontalAlignment="Left"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="26"
                         Text="{Binding Index}" />
 
@@ -128,7 +128,7 @@
                         Margin="0,0,10,0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="16"
                         Text="{Binding Count}" />
 
@@ -158,7 +158,7 @@
                         Margin="0,0,0,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="20"
                         Text="{Binding Index}" />
                 </Border>
@@ -168,7 +168,7 @@
                     Margin="5,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                     FontSize="18"
                     IsReadOnly="True"
                     Text="{Binding Vector}" />
@@ -197,7 +197,7 @@
                         Margin="0,0,0,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="20"
                         Text="{Binding Name}" />
                 </Border>
@@ -207,7 +207,7 @@
                     Margin="5,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                     FontSize="18"
                     Text="{Binding Value}" />
             </Grid>
@@ -238,7 +238,7 @@
                 Grid.Row="0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                 FontSize="25"
                 Text="Textures"
                 TextWrapping="Wrap" />
@@ -294,7 +294,7 @@
                         Grid.Row="0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="25"
                         Text="Pixel Shader"
                         TextWrapping="Wrap" />
@@ -308,7 +308,7 @@
                             x:Name="PixelShader"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
-                            FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                             FontSize="16"
                             IsReadOnly="True"
                             TextWrapping="Wrap" />
@@ -331,7 +331,7 @@
                         Grid.Row="0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="25"
                         Text="Vertex Shader"
                         TextWrapping="Wrap" />
@@ -345,7 +345,7 @@
                             x:Name="VertexShader"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
-                            FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                             FontSize="16"
                             IsReadOnly="True"
                             TextWrapping="Wrap" />
@@ -384,7 +384,7 @@
                                 Grid.Row="0"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                                 FontSize="16"
                                 Text="Pixel Shader CBuffers"
                                 TextWrapping="Wrap" />
@@ -415,7 +415,7 @@
                                 Grid.Row="0"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                                 FontSize="16"
                                 Text="Vertex Shader CBuffers"
                                 TextWrapping="Wrap" />
@@ -453,7 +453,7 @@
                         <TextBlock
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                             FontSize="16"
                             Text="CBuffer Values" />
 
@@ -489,7 +489,7 @@
                     <TextBlock
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        FontFamily="{DynamicResource Neue Haas Grotesk Display Pro 75 Bold}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="16"
                         Text="Other Values" />
 

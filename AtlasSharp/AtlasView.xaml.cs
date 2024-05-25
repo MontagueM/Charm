@@ -262,7 +262,7 @@ public partial class AtlasView : UserControl
 
     public struct InputSignature
     {
-        public InputSemantic Semantic;
+        public DXBCSemantic Semantic;
         public int SemanticIndex;
         public int DxgiFormat;
         public int BufferIndex;
@@ -301,10 +301,10 @@ public partial class AtlasView : UserControl
                 throw new Exception();
             }
 
-            Tiger.Schema.InputSignature[] inputSignatures = material.VertexShader.InputSignatures.ToArray();
+            Tiger.Schema.DXBCIOSignature[] inputSignatures = material.VertexShader.InputSignatures.ToArray();
             Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
 
-            foreach (Tiger.Schema.InputSignature signature in inputSignatures)
+            foreach (Tiger.Schema.DXBCIOSignature signature in inputSignatures)
             {
                 InputSignatures[sigIndex].Semantic = signature.Semantic;
                 InputSignatures[sigIndex].SemanticIndex = (int)signature.SemanticIndex;
@@ -312,7 +312,7 @@ public partial class AtlasView : UserControl
                 switch (signature.Mask)
                 {
                     case ComponentMask.XYZW:
-                        if (signature.Semantic == InputSemantic.Colour)
+                        if (signature.Semantic == DXBCSemantic.Colour)
                         {
                             InputSignatures[sigIndex].DxgiFormat = (int)DXGI_FORMAT.R8G8B8A8_UNORM;
                             break;

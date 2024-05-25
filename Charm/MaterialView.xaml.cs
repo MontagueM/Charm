@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -58,15 +53,53 @@ public partial class MaterialView : UserControl
 
         if (material.VertexShader is not null)
         {
-            VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"ps{material.VertexShader.Hash}");
+            VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"vs{material.VertexShader.Hash}");
             VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
+
+            //var vs_test = material.VertexShader?.Resources;
+            //Console.WriteLine($"----Vertex----");
+            //foreach (var vsr in vs_test)
+            //{
+            //    Console.WriteLine($"Type: {vsr.ResourceType} | Index:{vsr.Index} | Count: {vsr.Count}");
+            //}
+
+            //var vs_in = material.VertexShader.InputSignatures;
+            //foreach (var b in vs_in)
+            //{
+            //    Console.WriteLine($"v{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
+            //}
+
+            //var vs_out = material.VertexShader.OutputSignatures;
+            //foreach (var b in vs_out)
+            //{
+            //    Console.WriteLine($"o{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
+            //}
         }
 
         if (material.PixelShader is not null)
         {
             PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
-            PS_CBufferList.ItemsSource = GetCBufferDetails(material); 
-        } 
+            PS_CBufferList.ItemsSource = GetCBufferDetails(material);
+
+            //var ps_test = material.PixelShader?.Resources;
+            //Console.WriteLine($"----Pixel----");
+            //foreach (var a in ps_test)
+            //{
+            //    Console.WriteLine($"Type: {a.ResourceType} | Index:{a.Index} | Count: {a.Count}");
+            //}
+
+            //var ps_in = material.PixelShader.InputSignatures;
+            //foreach (var b in ps_in)
+            //{
+            //    Console.WriteLine($"v{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
+            //}
+
+            //var ps_out = material.PixelShader.OutputSignatures;
+            //foreach (var b in ps_out)
+            //{
+            //    Console.WriteLine($"o{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
+            //}
+        }
     }
 
     public List<TextureDetail> GetTextureDetails(IMaterial material)
@@ -159,7 +192,7 @@ public partial class MaterialView : UserControl
                 {
                     data.Add(vec.Vec);
                 }
-            }       
+            }
         }
         else
         {
@@ -202,15 +235,15 @@ public partial class MaterialView : UserControl
             Dispatcher.Invoke(() =>
             {
                 TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode : Material.VS_TFX_Bytecode));
-                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants);
+                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants, true);
 
                 ConcurrentBag<CBufferDataDetail> items = new ConcurrentBag<CBufferDataDetail>();
                 for (int i = 0; i < dc.Data.Count; i++)
                 {
                     CBufferDataDetail dataEntry = new();
-                    
+
                     dataEntry.Index = i;
-                    if(bytecode_hlsl.ContainsKey(i))
+                    if (bytecode_hlsl.ContainsKey(i))
                         dataEntry.Vector = $"Bytecode Assigned";
                     else
                         dataEntry.Vector = $"{dc.Data[i].X}, {dc.Data[i].Y}, {dc.Data[i].Z}, {dc.Data[i].W}";
@@ -243,36 +276,36 @@ public partial class MaterialView : UserControl
         return bitmapImage;
     }
 
-    public static List<Cbuffer> GetCBuffers(IMaterial material, bool isVertexShader = false)
-    {
-        StringReader reader = new(material.Decompile((isVertexShader ? material.VertexShader : material.PixelShader).GetBytecode(),
-            $"{(isVertexShader ? $"vs{material.VertexShader.Hash}" : $"ps{material.PixelShader.Hash}")}"));
+    //public static List<Cbuffer> GetCBuffers(IMaterial material, bool isVertexShader = false)
+    //{
+    //    StringReader reader = new(material.Decompile((isVertexShader ? material.VertexShader : material.PixelShader).GetBytecode(),
+    //        $"{(isVertexShader ? $"vs{material.VertexShader.Hash}" : $"ps{material.PixelShader.Hash}")}"));
 
-        List<Cbuffer> buffers = new();
+    //    List<Cbuffer> buffers = new();
 
-        string line = string.Empty;
-        do
-        {
-            line = reader.ReadLine();
-            if (line != null)
-            {
-                if (line.Contains("cbuffer"))
-                {
-                    reader.ReadLine();
-                    line = reader.ReadLine();
-                    Cbuffer cbuffer = new Cbuffer();
-                    cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
-                    cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
-                    cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
-                    cbuffer.Type = line.Split("cb")[0].Trim();
-                    buffers.Add(cbuffer);
-                }
-            }
+    //    string line = string.Empty;
+    //    do
+    //    {
+    //        line = reader.ReadLine();
+    //        if (line != null)
+    //        {
+    //            if (line.Contains("cbuffer"))
+    //            {
+    //                reader.ReadLine();
+    //                line = reader.ReadLine();
+    //                Cbuffer cbuffer = new Cbuffer();
+    //                cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
+    //                cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
+    //                cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
+    //                cbuffer.Type = line.Split("cb")[0].Trim();
+    //                buffers.Add(cbuffer);
+    //            }
+    //        }
 
-        } while (line != null);
+    //    } while (line != null);
 
-        return buffers;
-    }
+    //    return buffers;
+    //}
 
     private void Texture_OnClick(object sender, RoutedEventArgs e)
     {
@@ -353,7 +386,7 @@ public partial class MaterialView : UserControl
             });
         }
 
-        if(material.ComputeShader != null)
+        if (material.ComputeShader != null)
         {
             items.Add(new UnkDataDetail
             {

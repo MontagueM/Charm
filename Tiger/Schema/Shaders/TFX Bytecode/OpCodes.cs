@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tiger.Schema;
+﻿using Arithmic;
 using Tiger;
-using Arithmic;
+using Tiger.Schema;
 
 public class TfxBytecodeOp
 {
     public static List<TfxData> ParseAll(DynamicArray<D2Class_09008080> bytecode)
     {
         byte[] data = new byte[bytecode.Count];
-        for(int i = 0; i < bytecode.Count; i++)
+        for (int i = 0; i < bytecode.Count; i++)
         {
             data[i] = bytecode[i].Value;
         }
@@ -212,9 +207,9 @@ public class TfxBytecodeOp
                     Unk54Data.unk2 = reader.ReadByte();
                     tfxData.data = Unk54Data;
                     break;
-            } 
+            }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Log.Error(e.Message);
         }
@@ -233,7 +228,7 @@ public class TfxBytecodeOp
                 output = $"constant_index {((PushConstantVec4Data)tfxData.data).constant_index}: Constant value: {constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString()}";
                 break;
             case LerpConstantData:
-                output = $"constant_start {((LerpConstantData)tfxData.data).constant_start}: Constant 1: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: Constant 2: {constants[((LerpConstantData)tfxData.data).constant_start+1].Vec}";
+                output = $"constant_start {((LerpConstantData)tfxData.data).constant_start}: Constant 1: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: Constant 2: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
                 break;
             case Spline4ConstData:
                 output = $"unk1 {((Spline4ConstData)tfxData.data).unk1}";
@@ -605,5 +600,4 @@ public struct Unk54Data
     public byte unk1;
     public byte unk2;
 }
-
 

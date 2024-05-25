@@ -152,7 +152,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     }
 
     // Should probably keep for Pre-BL
-    public void ReadVertexDataSignatures(MeshPart part, HashSet<uint> uniqueVertexIndices, List<InputSignature> inputSignatures, bool isTerrain = false)
+    public void ReadVertexDataSignatures(MeshPart part, HashSet<uint> uniqueVertexIndices, List<DXBCIOSignature> inputSignatures, bool isTerrain = false)
     {
         using var reader = GetReferenceReader();
         foreach (uint vertexIndex in uniqueVertexIndices)
@@ -161,7 +161,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         }
     }
 
-    private void ReadVertexDataSignature(TigerReader reader, MeshPart part, uint vertexIndex, List<InputSignature> inputSignatures, bool isTerrain = false)
+    private void ReadVertexDataSignature(TigerReader reader, MeshPart part, uint vertexIndex, List<DXBCIOSignature> inputSignatures, bool isTerrain = false)
     {
         reader.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
 
@@ -169,11 +169,11 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         IntVector4 WeightValue = new();
         IntVector4 WeightIndex = new();
 
-        foreach (InputSignature inputSignature in inputSignatures)
+        foreach (DXBCIOSignature inputSignature in inputSignatures)
         {
             switch (inputSignature.Semantic)
             {
-                case InputSemantic.Position:
+                case DXBCSemantic.Position:
                     if (isTerrain) //has to be a float
                     {
                         part.VertexPositions.Add(new Vector4((float)reader.ReadInt16(), (float)reader.ReadInt16(), (float)reader.ReadInt16(),
@@ -206,7 +206,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     }
 
                     break;
-                case InputSemantic.Texcoord:
+                case DXBCSemantic.Texcoord:
                     switch (inputSignature.Mask)
                     {
                         case ComponentMask.XY:
@@ -225,7 +225,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     }
 
                     break;
-                case InputSemantic.Normal:
+                case DXBCSemantic.Normal:
                     switch (inputSignature.Mask)
                     {
                         // euler
@@ -243,7 +243,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     }
 
                     break;
-                case InputSemantic.Tangent:
+                case DXBCSemantic.Tangent:
                     switch (inputSignature.Mask)
                     {
                         // euler
@@ -261,15 +261,15 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                     }
 
                     break;
-                case InputSemantic.Colour:
+                case DXBCSemantic.Colour:
                     part.VertexColours.Add(new Vector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
                         reader.ReadByte()));
                     break;
-                case InputSemantic.BlendIndices:
+                case DXBCSemantic.BlendIndices:
                     HasWeights = true;
                     WeightIndex = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
                     break;
-                case InputSemantic.BlendWeight:
+                case DXBCSemantic.BlendWeight:
                     HasWeights = true;
                     WeightValue = new IntVector4(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
                     break;
