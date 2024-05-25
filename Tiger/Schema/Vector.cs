@@ -461,12 +461,6 @@ public struct Vector4
         }
         return res;
     }
-
-    public override string ToString() =>
-        $"({Decimal.Parse(X.ToString(), NumberStyles.Float)}, " +
-        $"{Decimal.Parse(Y.ToString(), NumberStyles.Float)}, " +
-        $"{Decimal.Parse(Z.ToString(), NumberStyles.Float)}, " +
-        $"{Decimal.Parse(W.ToString(), NumberStyles.Float)})";
 }
 
 public struct IntVector4

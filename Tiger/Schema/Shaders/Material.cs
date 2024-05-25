@@ -52,9 +52,6 @@ namespace Tiger.Schema.Shaders
         public ushort Unk20 { get; }
 
         // Vertex
-        public IEnumerable<STextureTag> EnumerateVSTextures();
-        public IEnumerable<STextureTag> EnumeratePSTextures();
-        public IEnumerable<STextureTag> EnumerateCSTextures();
         public ShaderBytecode? VertexShader { get; }
         public FileHash VSVector4Container { get; }
         public List<DirectXSampler> VS_Samplers { get; }
@@ -65,9 +62,7 @@ namespace Tiger.Schema.Shaders
 
         // Pixel
         public ShaderBytecode? PixelShader { get; }
-        public ShaderBytecode? ComputeShader { get; }
         public FileHash PSVector4Container { get; }
-        public FileHash VSVector4Container { get; }
         public List<DirectXSampler> PS_Samplers { get; }
         public DynamicArray<D2Class_09008080> PS_TFX_Bytecode { get; }
         public DynamicArray<Vec4> PS_TFX_Bytecode_Constants { get; }
@@ -78,13 +73,7 @@ namespace Tiger.Schema.Shaders
         public IEnumerable<STextureTag> EnumerateCSTextures();
         public ShaderBytecode? ComputeShader { get; }
 
-        public List<DirectXSampler> VS_Samplers { get; }
-        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode { get; }
-        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants { get; }
-        public DynamicArray<Vec4> VS_CBuffers { get; }
-        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode { get; }
-        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants { get; }
-        public DynamicArray<Vec4> PS_CBuffers { get; }
+
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
