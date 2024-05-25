@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Tiger.Exporters;
+﻿using Tiger.Exporters;
 
 namespace Tiger.Schema.Entity;
 
@@ -11,8 +10,9 @@ public class Entity : Tag<SEntity>
     public EntitySkeleton? Skeleton { get; private set; }
     public EntityModel? Model { get; private set; }
     public EntityModel? ModelParent { get; private set; }
-    public EntityResource? ModelParentResource { get; private set; }
+    public EntityModelParent? ModelParentResource { get; private set; }
     public EntityModel? PhysicsModel { get; private set; }
+    public EntityPhysicsModelParent? PhysicsModelParentResource { get; private set; }
     public EntityResource? PatternAudio { get; private set; }
     public EntityResource? PatternAudioUnnamed { get; private set; }
     public EntityControlRig? ControlRig { get; private set; }
@@ -38,7 +38,7 @@ public class Entity : Tag<SEntity>
     {
         Deserialize();
         _loaded = true;
-        Debug.Assert(_tag.FileSize != 0);
+        //Debug.Assert(_tag.FileSize != 0);
         foreach (var resourceHash in _tag.EntityResources.Select(GetReader(), r => r.Resource))
         {
             if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)
@@ -49,10 +49,11 @@ public class Entity : Tag<SEntity>
                 case D2Class_8A6D8080:  // Entity model
                     Model = ((D2Class_8F6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).Model;
                     ModelParent = Model; // could just use ModelParentResource but im lazy
-                    ModelParentResource = resource;
+                    ModelParentResource = FileResourcer.Get().GetFile<EntityModelParent>(resource.Hash);
                     break;
-                case D2Class_5B6D8080:  // Entity physics model  todo shadowkeep
+                case D2Class_5B6D8080:  // Entity physics model
                     PhysicsModel = ((D2Class_6C6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).PhysicsModel;
+                    PhysicsModelParentResource = FileResourcer.Get().GetFile<EntityPhysicsModelParent>(resource.Hash);
                     break;
                 case D2Class_DD818080:  // Entity skeleton FK
                     Skeleton = FileResourcer.Get().GetFile<EntitySkeleton>(resource.Hash);
@@ -109,7 +110,7 @@ public class Entity : Tag<SEntity>
         }
         if (PhysicsModel != null)
         {
-            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, ModelParentResource, hasSkeleton: Skeleton != null)).ToList();
+            dynamicParts = dynamicParts.Concat(PhysicsModel.Load(detailLevel, PhysicsModelParentResource, hasSkeleton: Skeleton != null)).ToList();
         }
         return dynamicParts;
     }

@@ -41,8 +41,11 @@ public class MeshPart
     public List<Vector4> VertexNormals = new List<Vector4>();
     public List<Vector4> VertexTangents = new List<Vector4>();
     public List<Vector4> VertexColours = new List<Vector4>();
+    public Dictionary<int, List<Vector4>> VertexExtraData = new(); //TEXCOORD#, extra data
     public IMaterial? Material;
     public int GroupIndex = 0;
+    public int VertexLayoutIndex = 0;
+    public int MaxVertexColorIndex = -1;
 }
 
 public struct VertexWeight

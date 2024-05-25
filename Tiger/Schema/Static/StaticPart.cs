@@ -23,6 +23,7 @@ public class StaticPart : MeshPart
 
     public StaticPart(SStaticMeshDecal decalPartEntry) : base()
     {
+        VertexLayoutIndex = decalPartEntry.VertexLayoutIndex;
         IndexOffset = decalPartEntry.IndexOffset;
         IndexCount = decalPartEntry.IndexCount;
         LodCategory = (ELodCategory)decalPartEntry.LODLevel;
@@ -93,7 +94,7 @@ public class StaticPart : MeshPart
             List<int> strides = new();
             if (buffers.Vertices0 != null) strides.Add(buffers.Vertices0.TagData.Stride);
             if (buffers.Vertices1 != null) strides.Add(buffers.Vertices1.TagData.Stride);
-            if (buffers.Vertices2 != null) strides.Add(buffers.Vertices2.TagData.Stride);
+            if (buffers.VertexColor != null) strides.Add(buffers.VertexColor.TagData.Stride);
             Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
 
             Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{buffers.Vertices0.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {buffers.Vertices1?.Hash}/{buffers.Vertices1?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
@@ -102,12 +103,10 @@ public class StaticPart : MeshPart
         }
         else
         {
-            buffers.Vertices0.ReadVertexData(this, uniqueVertexIndices);
-            buffers.Vertices1?.ReadVertexData(this, uniqueVertexIndices);
-            buffers.Vertices2?.ReadVertexData(this, uniqueVertexIndices);
+            buffers.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
+            buffers.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+            buffers.VertexColor?.ReadVertexData(this, uniqueVertexIndices);
         }
-
-        Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
 
         TransformData(container);
     }
@@ -162,9 +161,9 @@ public class StaticPart : MeshPart
         }
         else
         {
-            mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices);
-            mesh.Vertices1?.ReadVertexData(this, uniqueVertexIndices);
-            mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices);
+            mesh.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
+            mesh.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+            mesh.VertexColor?.ReadVertexData(this, uniqueVertexIndices);
         }
 
         TransformData(container);
@@ -177,12 +176,25 @@ public class StaticPart : MeshPart
             var t = (container.StaticData as DESTINY2_BEYONDLIGHT_3402.StaticMeshData).TagData;
             TransformPositions(t.ModelTransform);
             TransformUVs(new Vector2(t.TexcoordScale, t.TexcoordScale), t.TexcoordTranslation);
+
+            if (VertexNormals.Count == 0 && VertexTangents.Count != 0)
+            {
+                // Don't question it, idk why or how this works either
+                VertexNormals = VertexTangents;
+            }
+            // Fallback vertex color
+            if (VertexColours.Count == 0)
+            {
+                VertexColours = new List<Vector4>(Enumerable.Repeat(new Vector4(0f, 0f, 0f, 1f), VertexPositions.Count));
+            }
         }
         else
         {
             TransformPositions(container.ModelTransform);
             TransformUVs(container.TexcoordScale, container.TexcoordTranslation);
         }
+
+        Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
     }
 
     private void TransformUVs(Vector2 texcoordScale, Vector2 texcoordTranslation)

@@ -161,9 +161,9 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                 {
                     bufferGroup.VertexBuffers[1] = buffers.Vertices1.ToBlob();
                 }
-                if (buffers.Vertices2 != null)
+                if (buffers.VertexColor != null)
                 {
-                    bufferGroup.VertexBuffers[2] = buffers.Vertices2.ToBlob();
+                    bufferGroup.VertexBuffers[2] = buffers.VertexColor.ToBlob();
                 }
                 bufferGroup.IndexOffset = buffers.UnkOffset;
                 bufferGroups.Add(bufferGroup);
@@ -178,7 +178,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             if (_tag.Meshes.Count() == 0) return strides;
             if (_tag.Meshes[0].Vertices0 != null) strides.Add(_tag.Meshes[0].Vertices0.TagData.Stride);
             if (_tag.Meshes[0].Vertices1 != null) strides.Add(_tag.Meshes[0].Vertices1.TagData.Stride);
-            if (_tag.Meshes[0].Vertices2 != null) strides.Add(_tag.Meshes[0].Vertices2.TagData.Stride);
+            if (_tag.Meshes[0].VertexColor != null) strides.Add(_tag.Meshes[0].VertexColor.TagData.Stride);
             return strides;
         }
 
@@ -203,7 +203,9 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                     continue;
 
                 StaticPart part = new StaticPart(staticPartEntry);
+                part.VertexLayoutIndex = _tag.MaterialAssignments[i].VertexLayoutIndex;
                 part.Material = material;
+                part.MaxVertexColorIndex = (int)_tag.MaxVertexColorIndex;
                 part.GetAllData(mesh, parent);
                 parts.Add(part);
             }
@@ -218,6 +220,9 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             {
                 var mat = _tag.MaterialAssignments[i];
                 var part = _tag.Parts[mat.PartIndex];
+                //if (!VertexLayouts.ExportRenderStages.Contains((TfxRenderStage)mat.RenderStage))
+                //    continue;
+
                 if (part.BufferIndex == 0)
                 {
                     switch (detailLevel)

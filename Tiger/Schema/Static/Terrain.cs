@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Arithmic;
 using Tiger.Exporters;
 using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
@@ -98,6 +97,8 @@ public class Terrain : Tag<STerrain>
         StaticPart part = new(entry);
         part.GroupIndex = entry.GroupIndex;
         part.Indices = _tag.Indices1.GetIndexData(PrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
+        part.VertexLayoutIndex = 22; // I think 22 is always used for terrain, I dont see anything else that would say otherwise
+
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
         foreach (UIntVector3 index in part.Indices)
@@ -110,29 +111,32 @@ public class Terrain : Tag<STerrain>
 
         if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            List<InputSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
-            int b0Stride = _tag.Vertices1.TagData.Stride;
-            int b1Stride = _tag.Vertices2?.TagData.Stride ?? 0;
-            List<InputSignature> inputSignatures0 = new();
-            List<InputSignature> inputSignatures1 = new();
-            int stride = 0;
-            foreach (InputSignature inputSignature in inputSignatures)
-            {
-                if (stride < b0Stride)
-                    inputSignatures0.Add(inputSignature);
-                else
-                    inputSignatures1.Add(inputSignature);
+            _tag.Vertices1.ReadVertexDataFromLayout(part, uniqueVertexIndices, 0);
+            _tag.Vertices2.ReadVertexDataFromLayout(part, uniqueVertexIndices, 1);
 
-                if (inputSignature.Semantic == InputSemantic.Colour)
-                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
-                else
-                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
-            }
+            // It's 2024, input signatures are a thing of the past (except they worked fine, mostly)
+            //List<InputSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
+            //int b0Stride = _tag.Vertices1.TagData.Stride;
+            //int b1Stride = _tag.Vertices2?.TagData.Stride ?? 0;
+            //List<InputSignature> inputSignatures0 = new();
+            //List<InputSignature> inputSignatures1 = new();
+            //int stride = 0;
+            //foreach (InputSignature inputSignature in inputSignatures)
+            //{
+            //    if (stride < b0Stride)
+            //        inputSignatures0.Add(inputSignature);
+            //    else
+            //        inputSignatures1.Add(inputSignature);
 
-            Log.Debug($"Reading vertex buffers {_tag.Vertices1.Hash}/{_tag.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices2?.Hash}/{_tag.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-            _tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures0, true);
-            _tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures1, true);
+            //    if (inputSignature.Semantic == InputSemantic.Colour)
+            //        stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+            //    else
+            //        stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
+            //}
 
+            //Log.Debug($"Reading vertex buffers {_tag.Vertices1.Hash}/{_tag.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices2?.Hash}/{_tag.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+            //_tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures0, true);
+            //_tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures1, true);
         }
         else // Can't get input semantics (yet) for D1 / PS4
         {

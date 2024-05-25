@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Arithmic;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
@@ -66,19 +67,20 @@ public class EntityModel : Tag<SEntityModel>
 
                 if (eDetailLevel == ExportDetailLevel.AllLevels)
                 {
-                    parts[meshIndex].Add(partIndex++, part);
+                    parts[meshIndex].Add(partIndex, part);
                 }
                 else
                 {
                     if (eDetailLevel == ExportDetailLevel.MostDetailed && part.LodCategory is ELodCategory.MainGeom0 or ELodCategory.GripStock0 or ELodCategory.Stickers0 or ELodCategory.InternalGeom0 or ELodCategory.Detail0)
                     {
-                        parts[meshIndex].Add(partIndex++, part);
+                        parts[meshIndex].Add(partIndex, part);
                     }
                     else if (eDetailLevel == ExportDetailLevel.LeastDetailed && part.LodCategory == ELodCategory.LowPolyGeom3)
                     {
-                        parts[meshIndex].Add(partIndex++, part);
+                        parts[meshIndex].Add(partIndex, part);
                     }
                 }
+                partIndex++;
             }
 
             meshIndex++;
@@ -90,48 +92,64 @@ public class EntityModel : Tag<SEntityModel>
     private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts, EntityResource parentResource, bool hasSkeleton = false)
     {
         List<DynamicMeshPart> parts = new();
+        List<int> exportPartRange = new();
         if (_tag.Meshes.Count == 0) return parts;
         int meshIndex = 0;
         foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
-            // Make part group map
-            Dictionary<int, int> partGroups = new();
-            HashSet<short> groups = new(mesh.StagePartOffsets.AsEnumerable());
-            var groupList = groups.ToList();
-            // Idk what this is actually supposed to do but Ill just leave it for BL+ since its stage part offset size is an odd number?
-            if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
-                groupList.Remove(0x707);
-            groupList.Sort();
-            for (int i = 0; i < groupList.Count - 1; i++)
+            Console.WriteLine($"Input Layout {mesh.GetInputLayoutForStage(TfxRenderStage.GenerateGbuffer)}");
+            foreach (TfxRenderStage stage in (TfxRenderStage[])Enum.GetValues(typeof(TfxRenderStage)))
             {
-                for (int j = groupList[i]; j < groupList[i + 1]; j++)
+                if (stage == TfxRenderStage.ComputeSkinning && Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
+                    continue;
+
+                var range = mesh.GetRangeForStage(stage);
+                if (!(range.Start.Value < range.End.Value))
+                    continue;
+                Console.WriteLine($"Part Range: {mesh.GetRangeForStage(stage).Start.Value}-{mesh.GetRangeForStage(stage).End.Value - 1} : {stage}");
+            }
+
+            foreach (TfxRenderStage stage in VertexLayouts.ExportRenderStages)
+            {
+                var range = mesh.GetRangeForStage(stage);
+                if (!(range.Start.Value < range.End.Value))
+                    continue;
+
+                for (int i = range.Start.Value; i < range.End.Value; i++)
                 {
-                    partGroups[j] = i;
+                    exportPartRange.Add(i);
                 }
+
+                Console.WriteLine($"Export Part Range: {mesh.GetRangeForStage(stage).Start.Value}-{mesh.GetRangeForStage(stage).End.Value - 1} : {stage}");
             }
 
             foreach ((int i, D2Class_CB6E8080 part) in dynamicParts[meshIndex])
             {
+                if (!exportPartRange.Contains(i))
+                    continue;
+
                 DynamicMeshPart dynamicMeshPart = new(part, parentResource)
                 {
                     Index = i,
-                    GroupIndex = part.ExternalIdentifier,//partGroups[i],
+                    GroupIndex = part.ExternalIdentifier,
                     LodCategory = part.LodCategory,
                     bAlphaClip = (part.GetFlags() & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex,
                     HasSkeleton = hasSkeleton,
                     RotationOffset = RotationOffset,
-                    TranslationOffset = TranslationOffset
+                    TranslationOffset = TranslationOffset,
+                    VertexLayoutIndex = mesh.GetInputLayoutForStage(TfxRenderStage.GenerateGbuffer)
                 };
+
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
                 if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)
                 {
                     if (dynamicMeshPart.Material is null ||
                     dynamicMeshPart.Material.VertexShader is null ||
-                    dynamicMeshPart.Material.PixelShader is null ||
-                    dynamicMeshPart.Material.Unk08 != 1 ||
-                    (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
+                    dynamicMeshPart.Material.PixelShader is null)
+                        //dynamicMeshPart.Material.Unk08 != 1 ||
+                        //(dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
                         continue;
                 }
                 else
@@ -154,7 +172,6 @@ public class EntityModel : Tag<SEntityModel>
 
         return parts;
     }
-
 }
 
 public class DynamicMeshPart : MeshPart
@@ -237,25 +254,24 @@ public class DynamicMeshPart : MeshPart
         }
         else
         {
+            mesh.Vertices1.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
+            mesh.Vertices2?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+
             // Have to call it like this b/c we don't know the format of the vertex data here
-            Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
-            mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
-            mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
+            //Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
+            //mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
+            //mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
         }
 
 
         if (mesh.OldWeights != null)
-        {
             mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices, 2); // bufferIndex 2 is used for D1, shouldnt affect D2 I hope
-        }
+
         if (mesh.VertexColour != null)
-        {
             mesh.VertexColour.ReadVertexData(this, uniqueVertexIndices);
-        }
+
         if (mesh.SinglePassSkinningBuffer != null)
-        {
             mesh.SinglePassSkinningBuffer.ReadVertexData(this, uniqueVertexIndices);
-        }
 
         Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
 
@@ -304,14 +320,20 @@ public class DynamicMeshPart : MeshPart
 
         List<IMaterial> materials = new();
 
-        var map = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
-        var mats = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
+        var map = parentResource is EntityPhysicsModelParent ?
+            ((D2Class_6C6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap :
+            ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
+
+        var mats = parentResource is EntityPhysicsModelParent ?
+            ((D2Class_6C6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials :
+            ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
+
         if (map.Count == 0 || mats.Count == 0)
         {
             return null;
         }
         if (variantShaderIndex >= map.Count)
-            return null; // todo this is actually wrong ig...s
+            return null; // todo this is actually wrong ig...
 
         var mapEntry = map[reader, variantShaderIndex];
 

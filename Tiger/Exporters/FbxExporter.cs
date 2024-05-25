@@ -259,6 +259,7 @@ public class FbxExporter : AbstractExporter
         fbxMesh.AddNormals(part, isEntity);
         fbxMesh.AddTangents(part);
         fbxMesh.AddColours(part);
+        fbxMesh.AddExtraData(part);
 
         if (part.Material != null)
         {
@@ -414,6 +415,31 @@ public static class FbxMeshExtensions
             colLayer.GetDirectArray().Add(new FbxColor(colour.X, colour.Y, colour.Z, colour.W));
         }
         fbxMesh.GetLayer(0).SetVertexColors(colLayer);
+    }
+
+    public static void AddExtraData(this FbxMesh fbxMesh, ExporterPart part)
+    {
+        if (!part.MeshPart.VertexExtraData.Any())
+        {
+            return;
+        }
+
+        foreach (var entry in part.MeshPart.VertexExtraData)
+        {
+            FbxLayerElementVertexColor dataLayer = FbxLayerElementVertexColor.Create(fbxMesh, $"data{entry.Key}");
+            dataLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
+            dataLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+            foreach (var data in entry.Value)
+            {
+                dataLayer.GetDirectArray().Add(new FbxColor(data.X, data.Y, data.Z, data.W));
+            }
+
+            if (fbxMesh.GetLayer(entry.Key) == null)
+            {
+                fbxMesh.CreateLayer();
+                fbxMesh.GetLayer(entry.Key).SetVertexColors(dataLayer);
+            }
+        }
     }
 
     public static void AddSlotColours(this FbxMesh fbxMesh, DynamicMeshPart meshPart)

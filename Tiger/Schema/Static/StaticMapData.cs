@@ -811,46 +811,6 @@ public struct D2Class_B3938080
     public Vector4 Unk10;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "986C8080", 0xA0)]
-public struct D2Class_986C8080
-{
-    public long FileSize;
-    public DynamicArray<D2Class_B16C8080> Unk08;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B16C8080", 0x4)]
-public struct D2Class_B16C8080
-{
-    public Tag<D2Class_B26C8080> Unk00;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B26C8080", 0x100)]
-public struct D2Class_B26C8080
-{
-    public long FileSize;
-    public EntityModel Unk08;
-
-    [SchemaField(0x34)]
-    public Tag<D2Class_B86C8080> Unk34;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B86C8080", 0x18)]
-public struct D2Class_B86C8080
-{
-    public DynamicArray<D2Class_BA6C8080> Unk08;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BA6C8080", 0x50)]
-public struct D2Class_BA6C8080
-{
-    //Matrix?
-    public Vector4 Unk00;
-    public Vector4 Unk10;
-    public Vector4 Unk20;
-    public Vector4 Unk30;
-    public Vector4 Unk40;
-}
-
 [SchemaStruct("5E6C8080", 0x20)]
 public struct SMapSpotLightResource
 {

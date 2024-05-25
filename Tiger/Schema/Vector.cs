@@ -175,6 +175,14 @@ public struct Vector4
         W = x;
     }
 
+    public Vector4(Half x, Half y, Half z, Half w)
+    {
+        X = (float)x;
+        Y = (float)y;
+        Z = (float)z;
+        W = (float)w;
+    }
+
     public Vector4(float x, float y, float z)
     {
         X = x;
@@ -246,12 +254,22 @@ public struct Vector4
         W = w;
     }
 
-    public Vector4(byte x, byte y, byte z, byte w)
+    public Vector4(byte x, byte y, byte z, byte w, bool UInt = false)
     {
-        X = x / 255.0f;
-        Y = y / 255.0f;
-        Z = z / 255.0f;
-        W = w / 255.0f;
+        if (UInt)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
+        else
+        {
+            X = x / 255.0f;
+            Y = y / 255.0f;
+            Z = z / 255.0f;
+            W = w / 255.0f;
+        }
     }
 
     public static Vector4 Zero
@@ -366,12 +384,37 @@ public struct Vector4
             x.W + y.W);
     }
 
+    public static Vector4 operator -(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X - y.X,
+            x.Y - y.Y,
+            x.Z - y.Z,
+            x.W - y.W);
+    }
+
     public static Vector4 operator *(Vector4 x, Vector4 y)
     {
         return new Vector4(x.X * y.X,
             x.Y * y.Y,
             x.Z * y.Z,
             x.W * y.W);
+    }
+
+    public static Vector4 Cross(Vector4 vector1, Vector4 vector2)
+    {
+        return new Vector4(
+            vector1.Y * vector2.Z - vector1.Z * vector2.Y,
+            vector1.Z * vector2.X - vector1.X * vector2.Z,
+            vector1.X * vector2.Y - vector1.Y * vector2.X,
+            vector1.W * vector2.W);
+    }
+
+    public static float Dot(Vector4 vector1, Vector4 vector2)
+    {
+        return (vector1.X * vector2.X)
+                 + (vector1.Y * vector2.Y)
+                 + (vector1.Z * vector2.Z)
+                 + (vector1.W * vector2.W);
     }
 
     /// euler degrees
@@ -414,7 +457,6 @@ public struct Vector4
 
         return retVal;
     }
-
 
     /// euler in radians
     public static Vector3 ConsiderQuatToEulerConvert(Vector4 v4N)
@@ -504,3 +546,18 @@ public struct IntVector4
         }
     }
 }
+
+//[StructLayout(LayoutKind.Sequential, Size = 6)]
+//public struct UShortVector3
+//{
+//    public ushort X;
+//    public ushort Y;
+//    public ushort Z;
+
+//    public UShortVector3(ushort x, ushort y, ushort z)
+//    {
+//        X = x;
+//        Y = y;
+//        Z = z;
+//    }
+//}

@@ -172,6 +172,35 @@ public struct D2Class_8F6D8080
     public DynamicArrayUnloaded<D2Class_14008080> ExternalMaterials;
 }
 
+// Physics model resource, same layout as normal model resource?
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F61B8080", 0x840)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6D8080", 0x480)]
+public struct D2Class_6C6D8080
+{
+    [SchemaField(0x15C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x1DC, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x224, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public EntityModel PhysicsModel;
+
+    [SchemaField(0x230, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x2D0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x360, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArrayUnloaded<SExternalMaterialMapEntry> ExternalMaterialsMap;
+
+    //[SchemaField(0x260, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    //[SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    //[SchemaField(0x398, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    //[SchemaField(0x3F0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public DynamicArrayUnloaded<D2Class_986D8080> Unk3F0;
+
+    [SchemaField(0x270, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x3A0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x400, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public DynamicArrayUnloaded<D2Class_14008080> ExternalMaterials;
+}
+
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "121B8080", 0x30)]
 public struct S121B8080
 {
@@ -508,10 +537,40 @@ public struct SEntityModelMesh
     public VertexBuffer SinglePassSkinningBuffer;  // single pass skinning buffer
     public int Zeros1C;
     public DynamicArrayUnloaded<D2Class_CB6E8080> Parts;
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 30)]
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 48)]
-    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 37)]
-    public short[] StagePartOffsets;
+
+    //[SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 30)]
+    //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 48)]
+    //[SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 37)]
+    //public short[] StagePartOffsets;
+
+    /// Range of parts to render per render stage
+    /// Can be obtained as follows:
+    ///
+    ///     - Start = part_range_per_render_stage[stage]
+    ///     - End = part_range_per_render_stage[stage + 1]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 24)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 25)] // ArraySizeConst being the number of elements
+    public short[] PartRangePerRenderStage;
+
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 24)]
+    public byte[] InputLayoutPerRenderStageBL;
+
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 23)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    public short[] InputLayoutPerRenderStageSK;
+
+    public Range GetRangeForStage(TfxRenderStage stage)
+    {
+        int start = PartRangePerRenderStage[(int)stage];
+        int end = PartRangePerRenderStage[(int)stage + 1];
+        return new Range(start, end);
+    }
+
+    public int GetInputLayoutForStage(TfxRenderStage stage)
+    {
+        return Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ?
+            InputLayoutPerRenderStageBL[(int)stage] : InputLayoutPerRenderStageSK[(int)stage];
+    }
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EF1A8080", 0x24)]
@@ -583,22 +642,6 @@ public struct D2Class_0B008080
 public struct D2Class_D99E8080
 {
     public DynamicArray<D2Class_0B008080> Unk00;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F61B8080", 0x840)] //wtf
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6D8080", 0x480)]
-public struct D2Class_6C6D8080
-{
-    //[SchemaField(0x38)]
-    //public DynamicArray<D2Class_F79A8080> Unk38;
-    [SchemaField(0x15C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x224, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    public EntityModel PhysicsModel;
-    //[SchemaField(0x2E8)]
-    //public DynamicArray<D2Class_9E958080> Unk2E8;
-    // there are more tables
-    //[SchemaField(0x470)]
-    //public Tag Unk470;  // 606D8080
 }
 
 [SchemaStruct("F79A8080", 0x18)]
