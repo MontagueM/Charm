@@ -267,6 +267,19 @@ public struct Vector4
         }
     }
 
+    public static Vector4 One
+    {
+        get
+        {
+            Vector4 vec4 = new Vector4();
+            vec4.X = 1.0f;
+            vec4.Y = 1.0f;
+            vec4.Z = 1.0f;
+            vec4.W = 1.0f;
+            return vec4;
+        }
+    }
+
     public void SetW(int w)
     {
         W = w / 32_767.0f;
@@ -302,6 +315,12 @@ public struct Vector4
     {
         return new Vector3(X, Y, Z);
     }
+
+    public override string ToString() =>
+        $"({Decimal.Parse(X.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(Y.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(Z.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(W.ToString(), NumberStyles.Float)})";
 
     public float this[int index]
     {
@@ -442,12 +461,6 @@ public struct Vector4
         }
         return res;
     }
-
-    public override string ToString() =>
-        $"({Decimal.Parse(X.ToString(), NumberStyles.Float)}, " +
-        $"{Decimal.Parse(Y.ToString(), NumberStyles.Float)}, " +
-        $"{Decimal.Parse(Z.ToString(), NumberStyles.Float)}, " +
-        $"{Decimal.Parse(W.ToString(), NumberStyles.Float)})";
 }
 
 public struct IntVector4

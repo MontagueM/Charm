@@ -225,6 +225,22 @@
                             FontSize="42"
                             Text="TEXTURES" />
                     </Button>
+                    <Button
+                        Height="75"
+                        Margin="20,0,20,40"
+                        Padding="20,20,20,20"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        Click="AllMaterialsViewButton_OnClick"
+                        Style="{StaticResource MaterialDesignPaperDarkButton}">
+                        <TextBlock
+                            Padding="0,10,0,10"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                            FontSize="42"
+                            Text="MATERIALS" />
+                    </Button>
                 </StackPanel>
             </StackPanel>
         </StackPanel>

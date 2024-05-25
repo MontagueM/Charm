@@ -224,13 +224,6 @@ public struct D2Class_09008080
     public byte Value;
 }
 
-[SchemaStruct("F3738080", 0x10)]
-public struct D2Class_F3738080
-{
-    // [DestinyField(FieldType.TagHash64)]
-    // public Tag Unk00;
-}
-
 [SchemaStruct("90008080", 0x10)]
 public struct Vec4
 {

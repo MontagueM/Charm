@@ -43,13 +43,13 @@ MODES
 	ToolsWireframe( ""vr_tools_wireframe.shader"" );
 	ToolsShadingComplexity( ""tools_shading_complexity.shader"" );
 
-	Reflection( S_MODE_REFLECTIONS );
+	//Reflection( S_MODE_REFLECTIONS );
 }}
 
 FEATURES
 {{
     #include ""common/features.hlsl""
-    Feature( F_DYNAMIC_REFLECTIONS, 0..1, ""Rendering"" );
+    //Feature( F_DYNAMIC_REFLECTIONS, 0..1, ""Rendering"" );
 }}
 
 COMMON
@@ -102,22 +102,22 @@ VS
 PS
 {{
     #include ""common/pixel.hlsl""
-    #include ""raytracing/reflections.hlsl""
+    //#include ""raytracing/reflections.hlsl""
     #define CUSTOM_TEXTURE_FILTERING
     #define cmp -
     //RenderState
 
-    #if ( S_MODE_REFLECTIONS )
-		#define FinalOutput ReflectionOutput
-	#else
-		#define FinalOutput float4
-	#endif
+ //   #if ( S_MODE_REFLECTIONS )
+	//	#define FinalOutput ReflectionOutput
+	//#else
+	//	#define FinalOutput float4
+	//#endif
 
 //ps_samplers
 //ps_CBuffers
 //ps_Inputs
 
-    FinalOutput MainPs( PixelInput i ) : SV_Target0
+    float4 MainPs( PixelInput i ) : SV_Target0
     {{
 //ps_Function
 
@@ -507,6 +507,7 @@ PS
             funcDef.AppendLine("\t\tfloat4 o0 = float4(0,0,0,0);");
             funcDef.AppendLine("\t\tfloat4 o1 = float4(PackNormal3D(v0.xyz),1);");
             funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);\n");
+            funcDef.AppendLine("\t\tfloat4 o3 = float4(0,0,0,0);\n");
 
             //if (cbuffers.Any(cbuffer => cbuffer.Index == 13 && cbuffer.Count == 2)) //Should be time (g_flTime) but probably gets manipulated somehow
             //{
@@ -537,21 +538,40 @@ PS
             }
             do
             {
+                //Doing these line replacements is really messy and needs to be replaced with a better method, someday
                 line = hlsl.ReadLine();
                 if (line != null)
                 {
                     if (line.Contains("cb12[7].xyz") || line.Contains("cb12[14].xyz")) //cb12 is view scope
                     {
-                        funcDef.AppendLine($"\t\t{line.TrimStart().Replace("cb12[7].xyz", "vCameraToPositionDirWs")
+                        funcDef.AppendLine($"\t\t{line.TrimStart()
+                            .Replace("cb12[7].xyz", "vCameraToPositionDirWs")
                             .Replace("v4.xyz", "float3(0,0,0)")
-                            .Replace("cb12[14].xyz", "vCameraToPositionDirWs")}");
+                            .Replace("cb12[14].xyz", "-vCameraToPositionDirWs")}");
                     }
                     else if (line.Contains("cb"))
                     {
-                        string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
-                        string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+                        if(line.Contains("Sample")) //rare case where a cbuffer value is directly used as a texcoord
+                        {
+                            string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
 
-                        funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                            var equal = line.Split("=")[0];
+                            var texIndex = Int32.Parse(line.Split(".Sample")[0].Split("t")[1]);
+                            var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
+                            var sampleUv = line.Split(", ")[1].Split(").")[0];
+                            sampleUv = Regex.Replace(sampleUv, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+                            var dotAfter = line.Split(").")[1];
+
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(g_s{sampleIndex}, {sampleUv}).{dotAfter}");
+                        }
+                        else
+                        {
+                            string pattern = @"cb(\d+)\[(\d+)\]"; // Matches cb#[#]
+                            string output = Regex.Replace(line, pattern, isVertexShader ? "vs_cb$1_$2" : "cb$1_$2");
+
+                            funcDef.AppendLine($"\t\t{output.TrimStart()}");
+                        }
+                        
                     }
                     else if (line.Contains("while (true)"))
                     {
@@ -566,9 +586,8 @@ PS
                         var equal = line.Split("=")[0];
                         var texIndex = Int32.Parse(line.Split(".Sample")[0].Split("t")[1]);
                         var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
-                        var sampleUv = line.Split(", ")[1].Split(")")[0];
+                        var sampleUv = line.Split(", ")[1].Split(").")[0];
                         var dotAfter = line.Split(").")[1];
-                        // todo add dimension
 
                         if (texIndex == 14 && isTerrain) //THIS IS SO SO BAD
                         {
@@ -610,13 +629,13 @@ PS
 
                         funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.CalculateLevelOfDetail(g_s{sampleIndex}, {sampleUv});");
                     }
-                    else if (line.Contains("Load")) 
+                    else if (line.Contains("Load"))
                     {
                         var equal = line.Split("=")[0];
                         var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]);
                         var sampleUv = line.Split("(")[1].Split(")")[0];
                         var dotAfter = line.Split(").")[1];
-                        
+
                         if (texIndex == 2) //Pretty sure this is normal buffer, cant get/use in Forward Rendering...
                         {
                             bUsesNormalBuffer = true;
@@ -659,7 +678,22 @@ PS
         if(!bTranslucent) //uses o1,o2
         {
             //this is fine...
-            output.Append($"\t\t// Normal\r\n        float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);\r\n        float normal_length = length(biased_normal);\r\n        float3 normal_in_world_space = biased_normal / normal_length;\r\n\r\n        float smoothness = saturate(8 * (normal_length - 0.375));\r\n        \r\n        Material mat = Material::From(i,\r\n                    float4(o0.xyz, alpha), //albedo, alpha\r\n                    float4(0.5, 0.5, 1, 1), //Normal, gets set later\r\n                    float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao\r\n                    float3(1.0f, 1.0f, 1.0f), //tint\r\n                    clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        mat.Transmission = o2.z;\r\n        mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From\r\n\r\n        #if ( S_MODE_REFLECTIONS )\r\n\t\t{{\r\n\t\t\treturn Reflections::From( i, mat, SampleCountIntersection );\r\n\t\t}}\r\n        #else\r\n\t\t{{\r\n            return ShadingModelStandard::Shade(i, mat);\r\n        }}\r\n        #endif");
+            output.Append($"\t\t// Normal\r\n        " +
+                $"float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);\r\n        " +
+                $"float normal_length = length(biased_normal);\r\n        " +
+                $"float3 normal_in_world_space = biased_normal / normal_length;\r\n\r\n        " +
+                $"float smoothness = saturate(8 * (normal_length - 0.375));\r\n        \r\n        " +
+                $"Material mat = Material::From(i,\r\n                    " +
+                $"float4(o0.xyz, alpha), //albedo, alpha\r\n                    " +
+                $"float4(0.5, 0.5, 1, 1), //Normal, gets set later\r\n                    " +
+                $"float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao\r\n                    " +
+                $"float3(1.0f, 1.0f, 1.0f), //tint\r\n                    " +
+                $"clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        " +
+                $"mat.Transmission = o2.z;\r\n        " +
+                $"mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From");
+
+
+            output.Append($"\n\t\treturn ShadingModelStandard::Shade(i, mat);");
 
             if (bFixRoughness)
                 output = output.Replace("float smoothness = saturate(8 * (normal_length - 0.375));", "float smoothness = saturate(8 * (0 - 0.375));");
