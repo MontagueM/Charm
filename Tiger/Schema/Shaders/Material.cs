@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using Tiger.Exporters;
 
 namespace Tiger.Schema.Shaders
@@ -50,15 +49,35 @@ namespace Tiger.Schema.Shaders
         public uint Unk08 { get; }
         public uint Unk10 { get; }
         public uint Unk0C { get; } //Seems to be backface culling
+        public ushort Unk20 { get; }
+
+        // Vertex
         public IEnumerable<STextureTag> EnumerateVSTextures();
         public IEnumerable<STextureTag> EnumeratePSTextures();
         public IEnumerable<STextureTag> EnumerateCSTextures();
         public ShaderBytecode? VertexShader { get; }
+        public FileHash VSVector4Container { get; }
+        public List<DirectXSampler> VS_Samplers { get; }
+        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode { get; }
+        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants { get; }
+        public DynamicArray<Vec4> VS_CBuffers { get; }
+        public IEnumerable<STextureTag> EnumerateVSTextures();
+
+        // Pixel
         public ShaderBytecode? PixelShader { get; }
         public ShaderBytecode? ComputeShader { get; }
         public FileHash PSVector4Container { get; }
         public FileHash VSVector4Container { get; }
         public List<DirectXSampler> PS_Samplers { get; }
+        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode { get; }
+        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants { get; }
+        public DynamicArray<Vec4> PS_CBuffers { get; }
+        public IEnumerable<STextureTag> EnumeratePSTextures();
+
+        // Compute
+        public IEnumerable<STextureTag> EnumerateCSTextures();
+        public ShaderBytecode? ComputeShader { get; }
+
         public List<DirectXSampler> VS_Samplers { get; }
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode { get; }
         public DynamicArray<Vec4> VS_TFX_Bytecode_Constants { get; }
@@ -127,6 +146,9 @@ namespace Tiger.Schema.Shaders
 
         public void SavePixelShader(string saveDirectory, bool isTerrain = false)
         {
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                return;
+
             if (PixelShader != null && PixelShader.Hash.IsValid())
             {
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
@@ -244,6 +266,57 @@ namespace Tiger.Schema.Shaders
 //     public List<ConstantBuffer> VSConstantBuffers;
 // }
 
+namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
+{
+    public class Material : Tag<SMaterial_ROI>, IMaterial
+    {
+        public FileHash FileHash => Hash;
+        public uint Unk08 => _tag.Unk08;
+        public uint Unk10 => _tag.Unk10;
+        public uint Unk0C => _tag.Unk0C;
+        public ushort Unk20 => _tag.Unk20;
+        // Leaving shaders null until they (if ever) can be decompiled to hlsl
+        public ShaderBytecode VertexShader => _tag.VertexShader; // null;
+        public ShaderBytecode PixelShader => _tag.PixelShader; // null;
+        public ShaderBytecode ComputeShader => null;
+        public FileHash PSVector4Container => _tag.PSVector4Container;
+        public FileHash VSVector4Container => _tag.VSVector4Container;
+        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
+        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
+        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
+        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
+        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
+        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
+        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
+        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
+
+        public IEnumerable<STextureTag> EnumerateVSTextures()
+        {
+            foreach (STextureTag texture in _tag.VSTextures)
+            {
+                yield return texture;
+            }
+        }
+
+        public IEnumerable<STextureTag> EnumeratePSTextures()
+        {
+            foreach (STextureTag texture in _tag.PSTextures)
+            {
+                yield return texture;
+            }
+        }
+
+        public IEnumerable<STextureTag> EnumerateCSTextures()
+        {
+            return null;
+        }
+
+        public Material(FileHash fileHash) : base(fileHash)
+        {
+        }
+    }
+}
+
 namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
 {
     public class Material : Tag<SMaterial_SK>, IMaterial
@@ -252,6 +325,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public ushort Unk20 => _tag.Unk18;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
@@ -304,6 +378,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public ushort Unk20 => _tag.Unk20;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
@@ -357,6 +432,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public ushort Unk20 => _tag.Unk20;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
@@ -398,26 +474,34 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public Material(FileHash fileHash) : base(fileHash)
         {
         }
-
-        // public void SaveComputeShader(string saveDirectory)
-        // {
-        //     Directory.CreateDirectory($"{saveDirectory}");
-        //     if (_tag.ComputeShader != null && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
-        //     {
-        //         string hlsl = Decompile(_tag.ComputeShader.GetBytecode(), "cs");
-        //         string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
-        //         if (usf != String.Empty)
-        //         {
-        //             try
-        //             {
-        //                 File.WriteAllText($"{saveDirectory}/CS_{Hash}.usf", usf);
-        //                 Console.WriteLine($"Saved compute shader {Hash}");
-        //             }
-        //             catch (IOException)  // threading error
-        //             {
-        //             }
-        //         }
-        //     }
-        // }
     }
+}
+
+//TODO: Move this
+public enum TfxRenderStage
+{
+    GenerateGbuffer = 0,
+    Decals = 1,
+    InvestmentDecals = 2,
+    ShadowGenerate = 3,
+    LightingApply = 4,
+    LightProbeApply = 5,
+    DecalsAdditive = 6,
+    Transparents = 7,
+    Distortion = 8,
+    LightShaftOcclusion = 9,
+    SkinPrepass = 10,
+    LensFlares = 11,
+    DepthPrepass = 12,
+    WaterReflection = 13,
+    PostprocessTransparentStencil = 14,
+    Impulse = 15,
+    Reticle = 16,
+    WaterRipples = 17,
+    MaskSunLight = 18,
+    Volumetrics = 19,
+    Cubemaps = 20,
+    PostprocessScreen = 21,
+    WorldForces = 22,
+    ComputeSkinning = 23,
 }

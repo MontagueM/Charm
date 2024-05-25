@@ -16,8 +16,16 @@
                     <ColumnDefinition Width="100*" />
                     <ColumnDefinition Width="100*" />
                 </Grid.ColumnDefinitions>
+                <Border
+                    Grid.RowSpan="2"
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
                 <TextBlock
+                    Grid.Row="0"
                     Grid.Column="0"
+                    Margin="5,2,0,0"
                     HorizontalAlignment="Left"
                     Text="{Binding Name}" />
                 <Button

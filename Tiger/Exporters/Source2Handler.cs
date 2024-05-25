@@ -100,7 +100,7 @@ public class Source2Handler
                 File.WriteAllText($"{savePath}/{hash}.vmdl", text);
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Log.Error(e.Message);
         }
@@ -160,7 +160,7 @@ public class Source2Handler
             vmat.AppendLine($"\tF_ALPHA_TEST 1");
             vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
-            if(materialHeader.Unk0C != 0)
+            if (materialHeader.Unk0C != 0)
             {
                 vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
             }
@@ -284,7 +284,7 @@ public class Source2Handler
         {
             cbuffers.AppendLine($"\t\"{cbType}_{i}\" \"[{data[i].X} {data[i].Y} {data[i].Z} {data[i].W}]\"");
         }
-        
+
         return cbuffers;
     }
 }

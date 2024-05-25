@@ -1,0 +1,1408 @@
+﻿<UserControl
+    x:Class="Charm.APIItemView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    d:DesignHeight="944.68"
+    d:DesignWidth="1914"
+    Loaded="OnLoaded"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <local:PercentageConverter x:Key="PercentageConverter" />
+        <local:MarginConverter x:Key="MarginConverter" />
+        <local:SignToBooleanConverter x:Key="SignToBooleanConverter" />
+        <local:FlipSignPercentageConverter x:Key="FlipSignPercentageConverter" />
+        <local:TransparentColorConverter x:Key="TransparentColorConverter" />
+        <local:InfoBoxColorConverter x:Key="InfoBoxColorConverter" />
+
+        <DataTemplate x:Key="InfoBoxSeperatorTemplate">
+            <Rectangle
+                Height="2"
+                Fill="{StaticResource ForegroundColour70}"
+                Opacity="0.75" />
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxTextTemplate">
+            <TextBlock
+                Margin="15,10,15,10"
+                d:FontFamily="Haas Grot Text 55 Roman"
+                d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                FontSize="16"
+                Foreground="{StaticResource ForegroundColour80}"
+                Text="{Binding Description}"
+                TextWrapping="WrapWithOverflow" />
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxGridTemplate">
+            <Grid Margin="15,10,15,10" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="32"
+                    Height="32"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    d:Source="https://www.bungie.net/common/destiny2_content/icons/c577890c4a2d81e3c4ce1c803cdb9a3b.png"
+                    Source="{Binding PlugImageSource}">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlugImageSource}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    d:FontFamily="Haas Grot Text 55 Roman"
+                    d:Text="Causing a lightning strike with this weapon partially reloads the magazine from reserves."
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="15"
+                    Foreground="{StaticResource ForegroundColour70}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxWarningTextTemplate">
+            <TextBlock
+                Margin="15,5,15,5"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                FontSize="16"
+                Foreground="{StaticResource ForegroundColour90}"
+                Text="{Binding Description}"
+                TextWrapping="WrapWithOverflow" />
+        </DataTemplate>
+
+        <!--  Objective styles  -->
+        <DataTemplate x:Key="InfoBoxObjectivePercentageTemplate">
+            <Grid Margin="15,5,15,5" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Rectangle
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="24"
+                    Height="24"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Fill="#A1000000"
+                    Stroke="Gray"
+                    StrokeThickness="1.5" />
+
+                <Grid
+                    Grid.Column="1"
+                    Height="24"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Background="#A1000000">
+
+                    <TextBlock
+                        Margin="5,0,5,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="15"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Description}"
+                        TextWrapping="WrapWithOverflow" />
+                    <TextBlock
+                        Margin="5,0,5,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="15"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Type}"
+                        TextWrapping="WrapWithOverflow" />
+                </Grid>
+
+
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxObjectiveIntegerTemplate">
+            <Grid Margin="15,10,15,10" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="36"
+                    Height="36"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Source="{Binding PlugImageSource}">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlugImageSource}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="16"
+                    Foreground="{StaticResource ForegroundColour90}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="16"
+                    Foreground="{StaticResource ForegroundColour90}"
+                    Text="{Binding Type}"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ReusableTemplate">
+            <Grid
+                Name="Reusables"
+                MaxWidth="750"
+                MaxHeight="295"
+                Margin="0,0,100,20"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Style="{DynamicResource SocketContainerName}"
+                    Text="{Binding Name}" />
+
+                <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+                    <StackPanel
+                        x:Name="ReusablePanel"
+                        Panel.ZIndex="50"
+                        Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type ListBox}">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBox">
+                                            <Grid Background="Transparent">
+                                                <Canvas Grid.Row="2" Panel.ZIndex="-1">
+                                                    <Canvas.Background>
+                                                        <VisualBrush
+                                                            Stretch="Uniform"
+                                                            TileMode="Tile"
+                                                            Viewport="25.5,25.5,25.5,25.5"
+                                                            ViewportUnits="Absolute">
+                                                            <VisualBrush.Visual>
+                                                                <Rectangle
+                                                                    Width="50"
+                                                                    Height="50"
+                                                                    Fill="Transparent"
+                                                                    Stroke="#10FFFFFF" />
+                                                            </VisualBrush.Visual>
+                                                        </VisualBrush>
+                                                    </Canvas.Background>
+                                                </Canvas>
+                                                <Border>
+                                                    <ScrollViewer
+                                                        x:Name="ScrollViewer"
+                                                        HorizontalScrollBarVisibility="Hidden"
+                                                        VerticalScrollBarVisibility="Auto">
+                                                        <ScrollViewer.Resources>
+                                                            <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">4</sys:Double>
+                                                        </ScrollViewer.Resources>
+                                                        <ItemsPresenter />
+                                                    </ScrollViewer>
+                                                </Border>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </StackPanel.Resources>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="ReusableItemTemplate">
+            <Button
+                x:Name="PlugItemButton"
+                Margin="10,5,10,5"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Click="PlugItem_OnClick"
+                MouseEnter="PlugItem_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
+                Style="{DynamicResource ReusableButton}">
+                <local:APIItemPerk />
+            </Button>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ConsumableTemplate">
+            <Grid
+                Name="Consumables"
+                Grid.Row="1"
+                MaxWidth="750"
+                MaxHeight="130"
+                Margin="0,0,100,20"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Style="{DynamicResource SocketContainerName}"
+                    Text="{Binding Name}" />
+
+                <Rectangle
+                    Grid.Row="1"
+                    Width="500"
+                    Style="{DynamicResource SocketContainerRect}" />
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="-5,0,0,0"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+                    <StackPanel
+                        x:Name="ConsumablePanel"
+                        Panel.ZIndex="50"
+                        Orientation="Horizontal" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="ConsumableItemTemplate">
+            <Button
+                x:Name="PlugItemButton"
+                Margin="5"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Click="PlugItem_OnClick"
+                MouseEnter="PlugItem_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
+                Style="{DynamicResource ConsumableButton}">
+                <local:APIItemMod />
+            </Button>
+        </DataTemplate>
+
+        <DataTemplate x:Key="LargePerkTemplate">
+            <Grid
+                Name="LargePerks"
+                Grid.Row="1"
+                MaxWidth="750"
+                MaxHeight="135"
+                Margin="0,0,100,15"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Style="{DynamicResource SocketContainerName}"
+                    Text="{Binding Name}" />
+
+                <Rectangle Grid.Row="1" Style="{DynamicResource SocketContainerRect}" />
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+                    <StackPanel
+                        x:Name="LargePerkPanel"
+                        Panel.ZIndex="50"
+                        Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style TargetType="{x:Type ListBox}">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBox">
+                                            <Grid Background="Transparent">
+                                                <Canvas Grid.Row="2" Panel.ZIndex="-1">
+                                                    <Canvas.Background>
+                                                        <VisualBrush
+                                                            Stretch="Uniform"
+                                                            TileMode="Tile"
+                                                            Viewport="25.5,25.5,25.5,25.5"
+                                                            ViewportUnits="Absolute">
+                                                            <VisualBrush.Visual>
+                                                                <Rectangle
+                                                                    Width="50"
+                                                                    Height="50"
+                                                                    Fill="Transparent"
+                                                                    Stroke="#10FFFFFF" />
+                                                            </VisualBrush.Visual>
+                                                        </VisualBrush>
+                                                    </Canvas.Background>
+                                                </Canvas>
+                                                <Border>
+                                                    <ScrollViewer
+                                                        x:Name="ScrollViewer"
+                                                        HorizontalScrollBarVisibility="Hidden"
+                                                        VerticalScrollBarVisibility="Auto">
+                                                        <ScrollViewer.Resources>
+                                                            <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">4</sys:Double>
+                                                        </ScrollViewer.Resources>
+                                                        <ItemsPresenter />
+                                                    </ScrollViewer>
+                                                </Border>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </StackPanel.Resources>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="LargePerkItemTemplate">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10*" />
+                    <ColumnDefinition Width="600" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    x:Name="PlugItemButton"
+                    Grid.Column="0"
+                    Margin="0,5,5,5"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Style="{DynamicResource LargePerkButton}">
+                    <local:APIItemIntrinsic />
+                </Button>
+                <Grid
+                    Grid.Column="1"
+                    Margin="15,15,5,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="22"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Style="{StaticResource DropShadowMedium}"
+                        Text="{Binding Name}"
+                        TextAlignment="Left" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="19"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Style="{StaticResource DropShadowMedium}"
+                        Text="{Binding Description}"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EnergyMeterTemplate">
+            <Grid
+                Name="EnergyMeter"
+                Grid.Row="1"
+                MaxWidth="750"
+                MaxHeight="150"
+                Margin="0,0,100,20"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Style="{DynamicResource SocketContainerName}"
+                    Text="{Binding Name}" />
+
+                <Rectangle
+                    Grid.Row="1"
+                    Width="500"
+                    Style="{DynamicResource SocketContainerRect}" />
+
+                <Grid
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    Background="Transparent">
+
+                    <StackPanel
+                        x:Name="EnergyMeterPanel"
+                        Margin="0,5,0,0"
+                        Panel.ZIndex="50"
+                        Orientation="Vertical">
+                        <Grid
+                            Name="EnergyMeterInfo"
+                            Height="70"
+                            Margin="0,0,2,5"
+                            Background="{Binding SocketRarityColor}"
+                            Opacity="0.9">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="20,0,20,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Disp 75 Bold}"
+                                FontSize="35"
+                                Foreground="{StaticResource ForegroundColour100}"
+                                Text="10" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="20"
+                                Foreground="{StaticResource ForegroundColour100}"
+                                Text="ENERGY" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="0,0,20,0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="20"
+                                Foreground="{StaticResource ForegroundColour100}"
+                                Text="Charged" />
+
+
+                        </Grid>
+
+                        <!--  Dont look at this, go away  -->
+                        <StackPanel
+                            HorizontalAlignment="Left"
+                            Background="Transparent"
+                            Orientation="Horizontal">
+                            <StackPanel.Resources>
+                                <Style TargetType="Rectangle">
+                                    <Setter Property="Width" Value="45" />
+                                    <Setter Property="Height" Value="20" />
+                                    <Setter Property="Margin" Value="0,0,2,0" />
+                                    <Setter Property="Fill" Value="White" />
+                                    <Setter Property="Stroke" Value="White" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+                            <Rectangle />
+
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="EnergyMeterItemTemplate">
+            <Button
+                x:Name="PlugItemButton"
+                Margin="5"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Click="PlugItem_OnClick"
+                MouseEnter="PlugItem_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
+                Style="{DynamicResource ConsumableButton}">
+                <local:APIItemMod />
+            </Button>
+        </DataTemplate>
+
+        <Style x:Key="SocketContainerRect" TargetType="{x:Type Rectangle}">
+            <Setter Property="Width" Value="700" />
+            <Setter Property="MaxWidth" Value="750" />
+            <Setter Property="Height" Value="3" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Fill" Value="{StaticResource ForegroundColour70}" />
+        </Style>
+        <Style x:Key="SocketContainerName" TargetType="{x:Type TextBlock}">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Panel.ZIndex" Value="1" />
+            <Setter Property="FontFamily" Value="{DynamicResource Haas Grot Text 55 Roman Keys}" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="Foreground" Value="{StaticResource ForegroundColour70}" />
+            <Setter Property="TextAlignment" Value="Left" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Storyboard x:Key="FadeIn 0.3">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.3" />
+        </Storyboard>
+        <Storyboard x:Key="FadeIn 0.2">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.2" />
+        </Storyboard>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid
+            x:Name="MainContainer"
+            Margin="0,50,0,0"
+            Background="Transparent"
+            RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TranslateTransform />
+            </Grid.RenderTransform>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="250*" />
+                <RowDefinition Height="700*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40*" />
+                <ColumnDefinition Width="50*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  Item Source  -->
+            <TextBlock
+                x:Name="ItemSource"
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="125,12,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Panel.ZIndex="1"
+                d:FontFamily="Haas Grot Text 56 Italic"
+                d:Text="ITEM SOURCE"
+                FontFamily="{DynamicResource Haas Grot Text 56 Italic Keys}"
+                FontSize="22"
+                Foreground="{StaticResource ForegroundColour70}"
+                Text="{Binding ItemSource}"
+                TextAlignment="Left"
+                TextWrapping="Wrap" />
+
+            <!--  NameContainer  -->
+            <Grid
+                Name="NameContainer"
+                Grid.ColumnSpan="2"
+                Margin="125,0,0,0"
+                VerticalAlignment="Bottom"
+                Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="96" />
+                    <RowDefinition Height="96" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="100*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    x:Name="ItemIcon"
+                    Width="96"
+                    Height="96"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    BorderBrush="White"
+                    BorderThickness="3">
+                    <Image
+                        Margin="0,0,0,0"
+                        Panel.ZIndex="1"
+                        d:Source="https://www.bungie.net/common/destiny2_content/icons/7e7ea207955786273c8949d3de234733.jpg"
+                        Source="{Binding ImageSource}" />
+                </Border>
+
+                <Grid
+                    Grid.RowSpan="1"
+                    Grid.Column="1"
+                    Margin="20,0,0,0"
+                    VerticalAlignment="Stretch"
+                    Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50*" />
+                        <RowDefinition Height="25*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        x:Name="ItemName"
+                        Margin="0,-14,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        d:Text="ITEM NAME"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="70"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding ItemName}" />
+                    <TextBlock
+                        x:Name="ItemType"
+                        Grid.Row="1"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        d:Text="ITEM TYPE"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="32"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="{Binding ItemType}"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+                </Grid>
+
+                <TextBlock
+                    x:Name="ItemFlavorText"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,0,1000,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 56 Italic"
+                    d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                    FontFamily="{DynamicResource Haas Grot Text 56 Italic Keys}"
+                    FontSize="22"
+                    FontStyle="Italic"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text="{Binding ItemFlavorText}"
+                    TextAlignment="Left"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+
+            <!--  StatsContainer  -->
+            <Grid
+                x:Name="StatsContainer"
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="200,200,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Panel.ZIndex="2"
+                Background="Transparent"
+                Visibility="Visible">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+                <Grid
+                    Grid.Column="0"
+                    Margin="0,0,20,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Background="Transparent">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        x:Name="ItemDamageType"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        HorizontalAlignment="Right"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        d:Text="DMGType"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="50"
+                        Text="{Binding ItemDamageType}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Foreground" Value="{StaticResource ForegroundColour100}" />
+                                <Setter Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect
+                                            BlurRadius="2"
+                                            Direction="320"
+                                            Opacity="0.7"
+                                            ShadowDepth="2"
+                                            Color="#1B1B1B" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Arc">
+                                        <Setter Property="Foreground" Value="#85c5ec" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Solar">
+                                        <Setter Property="Foreground" Value="#f2711b" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Void">
+                                        <Setter Property="Foreground" Value="#b184c5" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Stasis">
+                                        <Setter Property="Foreground" Value="#4d88ff" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ItemDamageType}" Value=" Strand">
+                                        <Setter Property="Foreground" Value="#35e366" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock
+                        x:Name="ItemPowerCap"
+                        Grid.Row="1"
+                        HorizontalAlignment="Right"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="20"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Style="{StaticResource DropShadowMedium}">
+                        <Run Text="Power Cap: " />
+                        <Run Text="{Binding ItemPowerCap}" />
+                    </TextBlock>
+                </Grid>
+
+                <Rectangle
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="1"
+                    Width="2"
+                    Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource AncestorType=Grid}}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Fill="Silver" />
+
+                <ItemsControl
+                    x:Name="ItemStatsControl"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    VerticalAlignment="Top">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid
+                                Margin="0,0,0,3"
+                                HorizontalAlignment="Left"
+                                Background="Transparent"
+                                MouseEnter="StatItem_MouseEnter"
+                                MouseLeave="StatItem_MouseLeave">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="250" />
+                                    <ColumnDefinition Width="210" />
+                                    <ColumnDefinition Width="50" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Margin="0,0,15,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="20"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Style="{StaticResource DropShadowMedium}"
+                                    Text="{Binding Name}"
+                                    TextAlignment="Right"
+                                    TextWrapping="Wrap" />
+
+                                <!--  Background bar  -->
+                                <Rectangle
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Width="210"
+                                    Height="20"
+                                    HorizontalAlignment="Left"
+                                    Fill="#28FFFFFF" />
+
+                                <!--  Percentage bar  -->
+                                <StackPanel
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Orientation="Horizontal">
+                                    <Rectangle
+                                        Width="{Binding StatDisplayValue, Converter={StaticResource PercentageConverter}, ConverterParameter=210}"
+                                        Height="20"
+                                        HorizontalAlignment="Left"
+                                        Fill="White" />
+
+                                    <!--  Adjustment bar  -->
+                                    <Rectangle
+                                        x:Name="PerkAdjustBar"
+                                        Width="{Binding StatAdjustValue, Converter={StaticResource FlipSignPercentageConverter}, ConverterParameter=210}"
+                                        Height="20"
+                                        Margin="{Binding StatAdjustValue, Converter={StaticResource MarginConverter}}"
+                                        HorizontalAlignment="Left">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Fill" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <!--  If AdjustmentValue is positive, set Fill to Green  -->
+                                                    <DataTrigger Binding="{Binding StatAdjustValue, Converter={StaticResource SignToBooleanConverter}}" Value="True">
+                                                        <Setter Property="Fill" Value="LimeGreen" />
+                                                    </DataTrigger>
+                                                    <!--  If AdjustmentValue is negative, set Fill to Red  -->
+                                                    <DataTrigger Binding="{Binding StatAdjustValue, Converter={StaticResource SignToBooleanConverter}}" Value="False">
+                                                        <Setter Property="Fill" Value="Red" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                </StackPanel>
+
+                                <!--  TextBlock for StatDisplayValue  -->
+                                <TextBlock
+                                    Name="StatDisplayText"
+                                    Grid.Row="0"
+                                    Grid.Column="2"
+                                    Margin="0,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                                    FontSize="20"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Style="{StaticResource DropShadowMedium}"
+                                    Text="{Binding StatDisplayValue}"
+                                    TextAlignment="Right"
+                                    TextWrapping="Wrap" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!--  This is stupid  -->
+                <ItemsControl
+                    x:Name="ItemNumericStatsControl"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,15,0,0"
+                    VerticalAlignment="Bottom">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid
+                                Margin="0,0,0,3"
+                                HorizontalAlignment="Left"
+                                Background="Transparent"
+                                MouseEnter="StatItem_MouseEnter"
+                                MouseLeave="StatItem_MouseLeave">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="250" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="60" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Margin="0,0,15,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="20"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Style="{StaticResource DropShadowMedium}"
+                                    Text="{Binding Name}"
+                                    TextAlignment="Right"
+                                    TextWrapping="Wrap" />
+
+                                <TextBlock
+                                    Name="StatDisplayText"
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="0,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                                    FontSize="20"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Style="{StaticResource DropShadowMedium}"
+                                    Text="{Binding StatDisplayValue}"
+                                    TextAlignment="Right"
+                                    TextWrapping="Wrap" />
+
+                                <local:APIItemRecoilStat
+                                    Grid.Column="2"
+                                    Margin="10,0,0,0"
+                                    Value="{Binding StatDisplayValue}">
+                                    <local:APIItemRecoilStat.Style>
+                                        <Style TargetType="local:APIItemRecoilStat">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Name}" Value="Recoil Direction">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </local:APIItemRecoilStat.Style>
+                                </local:APIItemRecoilStat>
+
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+
+            <!--  SocketContainer  -->
+            <Grid
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Background="Transparent">
+
+                <StackPanel
+                    Margin="125,0,125,0"
+                    Background="Transparent"
+                    Orientation="Horizontal">
+                    <WrapPanel Name="SocketContainer" Orientation="Vertical" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!--  Background + Foundry Banner + Rarity Fade  -->
+        <Grid
+            x:Name="BackgroundContainer"
+            Panel.ZIndex="-5"
+            Background="#17171f">
+            <Image
+                Name="FoundryBanner"
+                Grid.Row="0"
+                Grid.RowSpan="2"
+                Grid.Column="0"
+                Width="569"
+                Height="569"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Panel.ZIndex="-1"
+                d:Source="https://www.bungie.net/common/destiny2_content/icons/6774c7855193dff237408fc5295f39c2.png"
+                Opacity="0.65"
+                Source="{Binding FoundryIconSource}" />
+
+            <Grid
+                x:Name="ItemBackground"
+                Grid.RowSpan="2"
+                Grid.ColumnSpan="2"
+                Width="1920"
+                Height="1080"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Panel.ZIndex="-5">
+                <Grid.RenderTransform>
+                    <TranslateTransform X="0" Y="0" />
+                </Grid.RenderTransform>
+                <Grid.Background>
+                    <ImageBrush d:ImageSource="https://bungie.net/common/destiny2_content/screenshots/3824673936.jpg" />
+                </Grid.Background>
+            </Grid>
+
+            <Grid
+                Name="ItemRarityBanner"
+                Width="auto"
+                Height="55"
+                VerticalAlignment="Top"
+                Background="Transparent">
+                <Rectangle>
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                            <GradientStop d:Color="#B0BE9F28" Offset="1" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.7}" />
+                            <GradientStop d:Color="#33BE9F28" Offset="0" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.2}" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+                <Rectangle Margin="0,45,0,0">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                            <GradientStop d:Color="#B0BE9F28" Offset="1" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.7}" />
+                            <GradientStop d:Color="#33BE9F28" Offset="0" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.2}" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Grid>
+        </Grid>
+
+        <!--  LoreEntry  -->
+        <Grid
+            x:Name="LoreEntry"
+            Grid.Row="0"
+            HorizontalAlignment="Left"
+            Background="Transparent"
+            Visibility="Collapsed">
+            <Grid Margin="0,0,1100,0" Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="100*" />
+                    <RowDefinition Height="10*" />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.RowSpan="3"
+                    Background="#DE14141B"
+                    BorderBrush="#DE717171"
+                    BorderThickness="2"
+                    CornerRadius="5" />
+
+                <Grid Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.RowSpan="1"
+                        Margin="70,40,70,20"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:Text="ITEM NAME"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="40"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding ItemName}"
+                        TextWrapping="WrapWithOverflow" />
+
+                    <Rectangle
+                        Grid.Row="1"
+                        Height="2"
+                        Margin="70,10,70,20"
+                        VerticalAlignment="Center"
+                        Fill="#C6717171" />
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.RowSpan="1"
+                        Margin="70,10,70,20"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:Text="ITEM FLAVORTEXT"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="22"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding ItemFlavorText}"
+                        TextWrapping="WrapWithOverflow" />
+                </Grid>
+
+                <ScrollViewer
+                    Grid.Row="1"
+                    Margin="0,20,35,0"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <TextBlock
+                        Margin="70,0,35,0"
+                        d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="22"
+                        LineHeight="30px"
+                        Text="{Binding ItemLore}"
+                        TextWrapping="WrapWithOverflow" />
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+        <!--  InfoBox  -->
+        <Grid
+            x:Name="InfoBox"
+            Width="375"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Panel.ZIndex="5"
+            d:Visibility="Visible"
+            Background="Transparent"
+            IsHitTestVisible="False"
+            Visibility="Collapsed">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid.RenderTransform>
+                <TranslateTransform X="0" Y="0" />
+            </Grid.RenderTransform>
+
+            <!--  Thin top bar  -->
+            <Rectangle
+                Grid.Row="0"
+                Width="375"
+                Height="5"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Fill="#AAAAAA">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+
+            <!--  Main header  -->
+            <Grid Grid.Row="1" d:Background="#F1020202">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.5}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                <Setter Property="Background" Value="#F1020202" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+
+                <!--  Image is outside the canvas without margin for some reason?  -->
+                <Canvas
+                    Margin="0,0,54,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Background="transparent">
+                    <Image
+                        Width="54"
+                        Height="54"
+                        Source="{Binding PlugWatermark}" />
+                </Canvas>
+
+                <StackPanel Background="Transparent" Orientation="Vertical">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Margin" Value="15,15,15,15" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                    <Setter Property="Margin" Value="15,10,15,10" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <TextBlock
+                        Margin="0,0,15,0"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 65 Medium"
+                        d:Text="ITEM NAME "
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                        FontSize="25"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding Name}"
+                        TextWrapping="WrapWithOverflow" />
+
+                    <Grid Background="Transparent">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Type}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            d:Text="Item Type"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour90}"
+                            Opacity="0.8"
+                            Text="{Binding Type}" />
+
+                        <TextBlock
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            d:Text="Item Rarity"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="16"
+                            Foreground="{StaticResource ForegroundColour100}"
+                            Opacity="0.5"
+                            Text="{Binding PlugRarity}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding PlugRarity}" Value="Common">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <!--  Warning box  -->
+            <Grid Grid.Row="2">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Background" Value="#D6AE4141" />
+                    </Style>
+                </Grid.Style>
+
+                <StackPanel x:Name="WarningBoxStackPanel" Orientation="Vertical" />
+            </Grid>
+
+            <!--  Subheader/Info  -->
+            <Grid Grid.Row="3">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.1}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                <Setter Property="Background" Value="#D6202020" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+
+                <StackPanel x:Name="InfoBoxStackPanel" Orientation="Vertical" />
+            </Grid>
+
+        </Grid>
+
+        <!--  User Controls  -->
+        <Grid Margin="0,900,0,0" Background="#38000000">
+            <StackPanel
+                Margin="0,0,150,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                FlowDirection="RightToLeft"
+                Orientation="Horizontal">
+
+                <TextBlock
+                    Margin="0,0,25,0"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text=" Dismiss"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    x:Name="ShowLoreHint"
+                    Margin="0,0,25,0"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text=" Show Lore"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap"
+                    Visibility="Collapsed" />
+            </StackPanel>
+
+        </Grid>
+
+    </Grid>
+</UserControl>
+
+

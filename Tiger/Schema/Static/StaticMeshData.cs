@@ -1,6 +1,5 @@
-﻿
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static
@@ -9,7 +8,7 @@ namespace Tiger.Schema.Static
     public struct BufferGroup
     {
         public Blob IndexBuffer;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst=3)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         public Blob[] VertexBuffers;
         public uint IndexOffset;
     }
@@ -53,6 +52,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
 
         public Blob GetTransformsBlob() => throw new NotImplementedException();
 
+        //TODO: Update to new method, this still works fine so not a big deal
         private List<StaticPart> GenerateParts(Dictionary<int, SStaticMeshPart> staticPartEntries, SStaticMesh parent)
         {
             List<StaticPart> parts = new();
@@ -62,9 +62,9 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
             int lowestDetail = 0xFF;
             foreach (var d2Class386D8080 in _tag.MaterialAssignments)
             {
-                if (d2Class386D8080.DetailLevel < lowestDetail)
+                if (d2Class386D8080.RenderStage < lowestDetail)
                 {
-                    lowestDetail = d2Class386D8080.DetailLevel;
+                    lowestDetail = d2Class386D8080.RenderStage;
                 }
             }
 
@@ -72,7 +72,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
             for (var i = 0; i < _tag.MaterialAssignments.Count; i++)
             {
                 var entry = _tag.MaterialAssignments[i];
-                if (entry.DetailLevel == lowestDetail)
+                if (entry.RenderStage == lowestDetail)
                 {
                     materialMap.Add(entry.PartIndex, parent.Materials[i].Material);
                 }
@@ -142,6 +142,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
 
         public List<StaticPart> Load(ExportDetailLevel detailLevel, SStaticMesh parent)
         {
+            Debug.Assert(_tag.MaterialAssignments.Count == parent.Materials.Count);
             Dictionary<int, SStaticMeshPart> staticPartEntries = GetPartsOfDetailLevel(detailLevel);
             List<StaticPart> parts = GenerateParts(staticPartEntries, parent);
             return parts;
@@ -195,35 +196,16 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             if (_tag.Meshes.Count == 0) return new List<StaticPart>();
             SStaticMeshBuffers mesh = _tag.Meshes[0];
 
-            // Get material map
-            int lowestDetail = 0xFF;
-            foreach (var d2Class386D8080 in _tag.MaterialAssignments)
-            {
-                if (d2Class386D8080.DetailLevel < lowestDetail)
-                {
-                    lowestDetail = d2Class386D8080.DetailLevel;
-                }
-            }
-
-            Dictionary<int, IMaterial> materialMap = new();
-            for (var i = 0; i < _tag.MaterialAssignments.Count; i++)
-            {
-                var entry = _tag.MaterialAssignments[i];
-                if (entry.DetailLevel == lowestDetail)
-                {
-                    materialMap.Add(entry.PartIndex, parent.Materials[i].Material);
-                }
-            }
-
             foreach (var (i, staticPartEntry) in staticPartEntries)
             {
-                if (materialMap.ContainsKey(i))
-                {
-                    StaticPart part = new StaticPart(staticPartEntry);
-                    part.Material = materialMap[i];
-                    part.GetAllData(mesh, parent);
-                    parts.Add(part);
-                }
+                var material = parent.Materials[i].Material;
+                if (material is null || material.Unk08 != 1)
+                    continue;
+
+                StaticPart part = new StaticPart(staticPartEntry);
+                part.Material = material;
+                part.GetAllData(mesh, parent);
+                parts.Add(part);
             }
             return parts;
         }
@@ -232,37 +214,32 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
         {
             Dictionary<int, SStaticMeshPart> staticPartEntries = new Dictionary<int, SStaticMeshPart>();
 
-            if (detailLevel == ExportDetailLevel.MostDetailed)
+            for (int i = 0; i < _tag.MaterialAssignments.Count; i++)
             {
-                for (int i = 0; i < _tag.Parts.Count; i++)
+                var mat = _tag.MaterialAssignments[i];
+                var part = _tag.Parts[mat.PartIndex];
+                if (part.BufferIndex == 0)
                 {
-                    var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel == 1 || staticPartEntry.DetailLevel == 2 || staticPartEntry.DetailLevel == 10)
+                    switch (detailLevel)
                     {
-                        staticPartEntries.Add(i, staticPartEntry);
+                        case ExportDetailLevel.MostDetailed:
+                            if (part.DetailLevel == 1 || part.DetailLevel == 2 || part.DetailLevel == 10)
+                            {
+                                staticPartEntries.Add(i, part);
+                            }
+                            break;
+                        case ExportDetailLevel.LeastDetailed:
+                            if (part.DetailLevel != 1 && part.DetailLevel != 2 && part.DetailLevel != 10)
+                            {
+                                staticPartEntries.Add(i, part);
+                            }
+                            break;
+                        default:
+                            staticPartEntries.Add(i, part);
+                            break;
                     }
                 }
             }
-            else if (detailLevel == ExportDetailLevel.LeastDetailed)
-            {
-                for (int i = 0; i < _tag.Parts.Count; i++)
-                {
-                    var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel != 1 && staticPartEntry.DetailLevel != 2 && staticPartEntry.DetailLevel != 10)
-                    {
-                        staticPartEntries.Add(i, staticPartEntry);
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < _tag.Parts.Count; i++)
-                {
-                    var staticPartEntry = _tag.Parts[i];
-                    staticPartEntries.Add(i, staticPartEntry);
-                }
-            }
-
             return staticPartEntries;
         }
     }

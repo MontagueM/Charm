@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
@@ -159,7 +157,6 @@ public class UsfConverter
                             data = float4s;
                         }
                     }
-
                 }
             }
 

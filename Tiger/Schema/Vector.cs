@@ -75,6 +75,13 @@ public struct Vector3
         Z = z;
     }
 
+    public Vector3(float x)
+    {
+        X = x;
+        Y = x;
+        Z = x;
+    }
+
     public static Vector3 Zero
     {
         get
@@ -107,6 +114,20 @@ public struct Vector3
     public static Vector3 operator *(Vector3 x, float y)
     {
         return new Vector3(x.X * y, x.Y * y, x.Z * y);
+    }
+
+    public static bool operator ==(Vector3 x, Vector3 y)
+    {
+        return x.X == y.X &&
+        x.Y == y.Y &&
+        x.Z == y.Z;
+    }
+
+    public static bool operator !=(Vector3 x, Vector3 y)
+    {
+        return x.X != y.X &&
+        x.Y != y.Y &&
+        x.Z != y.Z;
     }
 }
 
@@ -145,6 +166,14 @@ public struct Vector4
     public float Y;
     public float Z;
     public float W;
+
+    public Vector4(float x)
+    {
+        X = x;
+        Y = x;
+        Z = x;
+        W = x;
+    }
 
     public Vector4(float x, float y, float z)
     {
@@ -256,6 +285,11 @@ public struct Vector4
         W = w / 32_767.0f;
     }
 
+    public Vector4 WithW(float w)
+    {
+        return new Vector4(X, Y, Z, w);
+    }
+
     public static Vector4 Quaternion
     {
         get
@@ -327,6 +361,38 @@ public struct Vector4
         }
     }
 
+    public static bool operator ==(Vector4 x, Vector4 y)
+    {
+        return x.X == y.X &&
+        x.Y == y.Y &&
+        x.Z == y.Z &&
+        x.W == y.W;
+    }
+
+    public static bool operator !=(Vector4 x, Vector4 y)
+    {
+        return x.X != y.X &&
+        x.Y != y.Y &&
+        x.Z != y.Z &&
+        x.W != y.W;
+    }
+
+    public static Vector4 operator +(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X + y.X,
+            x.Y + y.Y,
+            x.Z + y.Z,
+            x.W + y.W);
+    }
+
+    public static Vector4 operator *(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X * y.X,
+            x.Y * y.Y,
+            x.Z * y.Z,
+            x.W * y.W);
+    }
+
     /// euler degrees
     /// From https://github.com/OwlGamingCommunity/V/blob/492d0cb3e89a97112ac39bf88de39da57a3a1fbf/Source/owl_core/Server/MapLoader.cs
     public static Vector3 QuaternionToEulerAngles(Vector4 q)
@@ -395,6 +461,12 @@ public struct Vector4
         }
         return res;
     }
+
+    public override string ToString() =>
+        $"({Decimal.Parse(X.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(Y.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(Z.ToString(), NumberStyles.Float)}, " +
+        $"{Decimal.Parse(W.ToString(), NumberStyles.Float)})";
 }
 
 public struct IntVector4

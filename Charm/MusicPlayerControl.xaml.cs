@@ -7,6 +7,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Arithmic;
 using NAudio.Wave;
+using Tiger;
 using Tiger.Schema.Audio;
 
 namespace Charm;
@@ -68,6 +69,14 @@ public partial class MusicPlayerControl : UserControl
         ProgressBar.Value = 0;
         SetPlayingText(wem.Hash);
         return true;
+    }
+
+    public FileHash GetWem()
+    {
+        if (_wem != null)
+            return _wem.Hash;
+        else
+            return null;
     }
 
     public async Task SetSound(WwiseSound sound)

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Internal.Fbx;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
@@ -43,7 +42,7 @@ public class FbxExporter : AbstractExporter
             }
 
             string outputDirectory = args.OutputDirectory;
-            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API)
+            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
             {
                 outputDirectory = Path.Join(outputDirectory, scene.Name);
             }
@@ -144,30 +143,41 @@ public class FbxExporter : AbstractExporter
     {
         FbxNode rootNode = null;
         List<FbxNode> skeletonNodes = new();
+        List<BoneNode> nodes = new();
         foreach (var boneNode in boneNodes)
         {
+            BoneNode newNode = boneNode;
             FbxSkeleton skeleton = FbxSkeleton.Create(_manager, boneNode.Hash.ToString());
-            FbxNode node = FbxNode.Create(_manager, boneNode.Hash.ToString());
+            newNode.Node = FbxNode.Create(_manager, boneNode.Hash.ToString());
             skeleton.SetSkeletonType(FbxSkeleton.EType.eLimbNode);
-            node.SetNodeAttribute(skeleton);
+            newNode.Node.SetNodeAttribute(skeleton);
             Vector3 location = boneNode.DefaultObjectSpaceTransform.Translation;
             if (boneNode.ParentNodeIndex != -1)
             {
-                location -= boneNodes[boneNode.ParentNodeIndex].DefaultObjectSpaceTransform.Translation;
+                location -= boneNodes[newNode.ParentNodeIndex].DefaultObjectSpaceTransform.Translation;
             }
-            node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
-            if (rootNode == null)
-            {
-                //skeleton.SetSkeletonType(FbxSkeleton.EType.eRoot); Not sure if needed? Just Makes the root bone/root weights dissappear in blender
-                rootNode = node;
-            }
+            newNode.Node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
+            nodes.Add(newNode);
+        }
+
+        foreach (var node in nodes)
+        {
+            if (node.ParentNodeIndex != -1)
+                nodes[node.ParentNodeIndex].Node.AddChild(node.Node);
             else
             {
-                skeletonNodes[boneNode.ParentNodeIndex].AddChild(node);
+                FbxSkeleton nodeatt = FbxSkeleton.Create(_manager, node.Hash);
+                nodeatt.SetSkeletonType(FbxSkeleton.EType.eRoot);
+                rootNode = FbxNode.Create(_manager, "Armature");
+                rootNode.AddChild(node.Node);
+                rootNode.SetNodeAttribute(nodeatt);
             }
-            skeletonNodes.Add(node);
+            if (rootNode != null)
+                fbxScene.GetRootNode().AddChild(rootNode);
+            else
+                skeletonNodes[node.ParentNodeIndex].AddChild(node.Node);
+            skeletonNodes.Add(node.Node);
         }
-        fbxScene.GetRootNode().AddChild(rootNode);
         return skeletonNodes;
     }
 

@@ -1,32 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using HelixToolkit.SharpDX.Core;
-using HelixToolkit.SharpDX.Core.Animations;
 using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
-using HelixToolkit.Wpf;
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.VisualBasic.Logging;
 using SharpDX;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
-using Color = System.Windows.Media.Color;
 using Color4 = SharpDX.Color4;
-using Colors = System.Windows.Media.Colors;
 using Log = Arithmic.Log;
 using Media3D = System.Windows.Media.Media3D;
-using MeshBuilder = HelixToolkit.SharpDX.Core.MeshBuilder;
-using Plane = SharpDX.Plane;
 using Point3D = System.Windows.Media.Media3D.Point3D;
-using Transform3D = System.Windows.Media.Media3D.Transform3D;
 using TranslateTransform3D = System.Windows.Media.Media3D.TranslateTransform3D;
 using Vector3 = Tiger.Schema.Vector3;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
@@ -261,11 +249,14 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                     SharpDX.Vector3 p = new SharpDX.Vector3(v4p.X, v4p.Y, v4p.Z);
                     positions.Add(p);
                     // We need to check if the normal is Euler or Quaternion
-                    var v4n = part.BasePart.VertexNormals[lookup[(int)vertexIndex]];
-                    var v3ne = ConsiderQuatToEulerConvert(v4n);
-                    SharpDX.Vector3 n = new SharpDX.Vector3(v3ne.X, v3ne.Y, v3ne.Z);
-                    normals.Add(n);
-                    if(part.BasePart.VertexTexcoords0.Count > 0)
+                    if (part.BasePart.VertexNormals.Count > 0)
+                    {
+                        var v4n = part.BasePart.VertexNormals[lookup[(int)vertexIndex]];
+                        var v3ne = ConsiderQuatToEulerConvert(v4n);
+                        SharpDX.Vector3 n = new SharpDX.Vector3(v3ne.X, v3ne.Y, v3ne.Z);
+                        normals.Add(n);
+                    }
+                    if (part.BasePart.VertexTexcoords0.Count > 0)
                     {
                         var v2t = part.BasePart.VertexTexcoords0[lookup[(int)vertexIndex]];
                         SharpDX.Vector2 t = new SharpDX.Vector2(v2t.X, v2t.Y);
@@ -287,7 +278,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             model.Geometry = mesh;
             model.Material = new DiffuseMaterial
             {
-                DiffuseColor = new Color4(0.7f, 0.7f, 0.7f, 1.0f)
+                DiffuseColor = new Color4(0.9f, 0.9f, 0.9f, 1.0f)
             };
             List<Matrix> instances = new List<Matrix>();
 

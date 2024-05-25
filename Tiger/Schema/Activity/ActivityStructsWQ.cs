@@ -300,16 +300,18 @@ public struct D2Class_44938080
 /// <summary>
 /// Generally used in ambients to provide dialogue and music together.
 /// </summary>
-[SchemaStruct("D5908080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D5908080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "D5908080", 0x50)]
 public struct D2Class_D5908080
 {
     [Tag64]
     public Tag DialogueTable;
-    [SchemaField(0x38)]
+    [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x14, TigerStrategy.DESTINY2_LATEST)]
     public Tag<SMusicTemplate> Music;
-    public int Unk3C;
-    public float Unk40;
-    public TigerHash Unk44;
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArray<D2Class_28998080> Unk20;
 }
 
 [SchemaStruct("28998080", 0x10)]
@@ -518,14 +520,17 @@ public struct D2Class_ED458080
     public ResourcePointer Unk00;
 }
 
-[SchemaStruct("F5458080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F5458080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "F5458080", 0x38)]
 public struct D2Class_F5458080
 {
     public StringPointer WwiseMusicLoopName;
     [Tag64]
     public WwiseSound MusicLoopSound;
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_FB458080> Unk18;
-    public TigerHash Unk28;
+    //public TigerHash Unk28;
 }
 
 [SchemaStruct("F7458080", 0x28)]
@@ -605,7 +610,8 @@ public struct SUnkMusicE6BF8080
     public DynamicArray<SUnkMusicE8BF8080> Unk28;
 }
 
-[SchemaStruct("E8BF8080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "E8BF8080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "E8BF8080", 0x40)]
 public struct SUnkMusicE8BF8080
 {
     public TigerHash EventHash;

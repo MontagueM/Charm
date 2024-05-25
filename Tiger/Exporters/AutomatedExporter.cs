@@ -1,4 +1,6 @@
-﻿using Tiger.Schema;
+﻿using System.Collections.Concurrent;
+using Newtonsoft.Json;
+using Tiger.Schema;
 
 namespace Tiger.Exporters;
 
@@ -87,6 +89,9 @@ public class AutomatedExporter
         int dyeIndex = 1;
         foreach (var dye in dyes)
         {
+            if (dye is null)
+                continue;
+
             dye.ExportTextures($"{saveDirectory}/Textures", outputTextureFormat);
             var dyeInfo = dye.GetDyeInfo();
             foreach (var fieldInfo in dyeInfo.GetType().GetFields())
@@ -97,7 +102,7 @@ public class AutomatedExporter
                 string valueName = fieldInfo.CustomAttributes.First().ConstructorArguments[0].Value.ToString();
                 for (int i = 0; i < 4; i++)
                 {
-                    text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i]}");
+                    text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
                 }
             }
 
@@ -111,5 +116,62 @@ public class AutomatedExporter
         text = text.Replace("OUTPUTPATH", $"Textures");
         text = text.Replace("SHADERNAMEENUM", $"{meshName}{fileSuffix}");
         File.WriteAllText($"{saveDirectory}/{meshName}{fileSuffix}.py", text);
+    }
+
+    public static void SaveD1ShaderInfo(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<DyeD1> dyes, string fileSuffix = "")
+    {
+        ConcurrentDictionary<DyeSlot, ConcurrentBag<D1DyeJSON>> shader = new();
+
+        foreach (var dye in dyes)
+        {
+            var info = dye.TagData;
+            if (!shader.ContainsKey((DyeSlot)info.SlotTypeIndex))
+                shader[(DyeSlot)info.SlotTypeIndex] = new();
+
+            shader[(DyeSlot)info.SlotTypeIndex].Add(new D1DyeJSON
+            {
+                DevName = info.DevName,
+                PrimaryColor = $"[{info.PrimaryColor.X}, {info.PrimaryColor.Y}, {info.PrimaryColor.Z}, {info.PrimaryColor.W}]",
+                SecondaryColor = $"[{info.SecondaryColor.X}, {info.SecondaryColor.Y}, {info.SecondaryColor.Z}, {info.SecondaryColor.W}]",
+                DetailDiffuse = $"textures/{info.DetailDiffuse.Hash}.{outputTextureFormat}",
+                DetailNormal = $"textures/{info.DetailNormal.Hash}.{outputTextureFormat}",
+                DetailTransform = $"[{info.DetailTransform.X}, {info.DetailTransform.Y}, {info.DetailTransform.Z}, {info.DetailTransform.W}]",
+                DetailNormalContributionStrength = $"[{info.DetailNormalContributionStrength.X}, {info.DetailNormalContributionStrength.Y}, {info.DetailNormalContributionStrength.Z}, {info.DetailNormalContributionStrength.W}]",
+                SubsurfaceScatteringStrength = $"[{info.SubsurfaceScatteringStrength.X}, {info.SubsurfaceScatteringStrength.Y}, {info.SubsurfaceScatteringStrength.Z}, {info.SubsurfaceScatteringStrength.W}]",
+                SpecularProperties = $"[{info.SpecularProperties.X}, {info.SpecularProperties.Y}, {info.SpecularProperties.Z}, {info.SpecularProperties.W}]",
+                DecalAlphaMapTransform = $"[{info.DecalAlphaMapTransform.X}, {info.DecalAlphaMapTransform.Y}, {info.DecalAlphaMapTransform.Z}, {info.DecalAlphaMapTransform.W}]",
+                DecalBlendOption = info.DecalBlendOption,
+                Decal = info.Decal is not null ? $"textures/{info.Decal.Hash}.{outputTextureFormat}" : ""
+            });
+        }
+
+        File.WriteAllText($"{saveDirectory}/{meshName}{fileSuffix}.json", JsonConvert.SerializeObject(shader, Formatting.Indented));
+    }
+
+    public struct D1DyeJSON
+    {
+        public string DevName;
+
+        public string PrimaryColor;
+        public string SecondaryColor;
+
+        public string DetailDiffuse;
+        public string DetailNormal;
+        public string DetailTransform;
+        public string DetailNormalContributionStrength;
+
+        public string SubsurfaceScatteringStrength;
+        public string SpecularProperties;
+
+        public string DecalAlphaMapTransform;
+        public int DecalBlendOption;
+        public string Decal;
+    }
+
+    public enum DyeSlot
+    {
+        Armor,
+        Cloth,
+        Suit
     }
 }

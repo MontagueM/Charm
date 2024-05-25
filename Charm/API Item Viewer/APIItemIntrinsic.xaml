@@ -1,0 +1,107 @@
+﻿<UserControl
+    x:Class="Charm.APIItemIntrinsic"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Brush x:Key="CornerBits">#5DFFFFFF</Brush>
+    </UserControl.Resources>
+
+    <Grid
+        Name="Container"
+        Width="80"
+        Height="80"
+        Margin="0,0,0,0"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Background="Transparent">
+
+        <Border
+            x:Name="mainBorder"
+            Width="80"
+            Height="80"
+            Margin="0"
+            Padding="0"
+            Background="Transparent"
+            BorderBrush="#2DFFFFFF"
+            BorderThickness="1"
+            CornerRadius="0">
+            <Image
+                Width="65"
+                Height="65"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                d:Source="https://www.bungie.net/common/destiny2_content/icons/245796e2ee1a517bb8fdf268fcfd0ce4.png"
+                Source="{Binding PlugImageSource}" />
+        </Border>
+
+        <Rectangle
+            Width="1"
+            Height="9"
+            Margin="0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Fill="{StaticResource CornerBits}" />
+        <Rectangle
+            Width="9"
+            Height="1"
+            Margin="0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Fill="{StaticResource CornerBits}" />
+
+        <Rectangle
+            Width="1"
+            Height="9"
+            Margin="0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Fill="{StaticResource CornerBits}" />
+        <Rectangle
+            Width="9"
+            Height="1"
+            Margin="0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Fill="{StaticResource CornerBits}" />
+
+        <Rectangle
+            Width="1"
+            Height="9"
+            Margin="0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Fill="#53FFFFFF" />
+        <Rectangle
+            Width="9"
+            Height="1"
+            Margin="0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Fill="{StaticResource CornerBits}" />
+
+        <Rectangle
+            Width="1"
+            Height="9"
+            Margin="0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Fill="{StaticResource CornerBits}" />
+        <Rectangle
+            Width="9"
+            Height="1"
+            Margin="0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Fill="{StaticResource CornerBits}" />
+
+    </Grid>
+</UserControl>
+
+
+
+

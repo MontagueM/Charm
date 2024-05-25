@@ -1,69 +1,133 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Tiger;
+using Tiger.Schema;
 using Tiger.Schema.Other;
 using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Charm;
 
-public class FontHandler : Subsystem
+[InitializeAfter(typeof(Hash64Map))]
+public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 {
     public ConcurrentDictionary<FontInfo, FontFamily> Fonts = new();
 
-    protected override bool Initialise()
+    public FontHandler(TigerStrategy strategy) : base(strategy)
     {
-        return true;
+    }
+
+    protected override void Initialise()
+    {
+        //return true;
         SaveAllFonts();
-        return LoadAllFonts();
+        LoadAllFonts();
+        RegisterFonts();
+    }
+
+    protected override void Reset()
+    {
+
     }
 
     private static void SaveAllFonts()
     {
-        // 0x80a00000 represents 0100 package
-        // var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
-        // var vals = PackageResourcer.Get().GetAllHashes<D2Class_0F3C8080>();
-        // Tag<D2Class_0F3C8080> fontsContainer = FileResourcer.Get().GetSchemaTag<D2Class_0F3C8080>(vals.First());
-        // // Check if the font exists in the Fonts/ folder, if not extract it
-        // if (!Directory.Exists("fonts/"))
-        // {
-        //     Directory.CreateDirectory("fonts/");
-        // }
-        // Parallel.ForEach(fontsContainer.TagData.FontParents, f =>
-        // {
-        //     var ff = f.FontParent.TagData.FontFile;
-        //     var fontName = f.FontParent.TagData.FontName;
-        //     if (!File.Exists($"fonts/{fontName}"))
-        //     {
-        //         using (TigerReader reader = ff.GetReader())
-        //         {
-        //             var bytes = reader.ReadBytes((int)f.FontParent.TagData.FontFileSize);
-        //             File.WriteAllBytes($"fonts/{fontName}", bytes);
-        //         }
-        //     }
-        // });
+        //0x80a00000 represents 0100 package
+        //var vals = PackageHandler.GetAllEntriesOfReference(0x100, 0x80803c0f);
+        var vals = PackageResourcer.Get().GetAllHashes<D2Class_0F3C8080>();
+        Tag<D2Class_0F3C8080> fontsContainer = FileResourcer.Get().GetSchemaTag<D2Class_0F3C8080>(vals.First());
+        // Check if the font exists in the Fonts/ folder, if not extract it
+        if (!Directory.Exists("fonts/"))
+        {
+            Directory.CreateDirectory("fonts/");
+        }
+        Parallel.ForEach(fontsContainer.TagData.FontParents, f =>
+        {
+            var ff = f.FontParent.TagData.FontFile;
+            var fontName = f.FontParent.TagData.FontName.Value;
+            if (!File.Exists($"fonts/{fontName}"))
+            {
+                using (TigerReader reader = ff.GetReader())
+                {
+                    var bytes = reader.ReadBytes((int)f.FontParent.TagData.FontFileSize);
+                    File.WriteAllBytes($"fonts/{fontName}", bytes);
+                }
+            }
+        });
     }
 
     private bool LoadAllFonts()
     {
-
-        // Parallel.ForEach(Directory.GetFiles(@"fonts/"), s =>
         foreach (var s in Directory.GetFiles(@"fonts/"))
         {
             var otfPath = Environment.CurrentDirectory + "/" + s;
             FontInfo fontInfo = GetFontInfo(otfPath);
             FontFamily font = new FontFamily(otfPath + $"#{fontInfo.Family}");
             Fonts.TryAdd(fontInfo, font);
-        }//);
+
+            // Adds the Destiny Keys fonts as the fallback font for Haas Grot
+            if (fontInfo.Family.Contains("Haas Grot Text"))
+            {
+                FontFamily fontKeys = new FontFamily(otfPath + $"#{fontInfo.Family}, " +
+                    $"{Environment.CurrentDirectory + $"/fonts/destiny_symbols_common.otf#Destiny Keys"}, " +
+                    $"{Environment.CurrentDirectory + $"/fonts/destiny_symbols_pc.otf#Destiny Keys"}");
+
+                Fonts.TryAdd(new FontInfo { Family = $"{fontInfo.Family} {fontInfo.Subfamily}", Subfamily = "Keys" }, fontKeys);
+            }
+        }
 
         return Fonts.Count > 0;
+    }
+
+    private void RegisterFonts()
+    {
+        foreach (var (key, value) in Fonts)
+        {
+            if (!Application.Current.Resources.Contains($"{key.Family} {key.Subfamily}"))
+                Application.Current.Resources.Add($"{key.Family} {key.Subfamily}", value);
+        }
+
+        // Debug font list
+        //List<string> fontList = fonts.Select(pair => (pair.Key.Family + " " + pair.Key.Subfamily).Trim()).ToList();
+        //foreach (var s in fontList)
+        //{
+        //    Console.WriteLine(s);
+        //}
+        /*
+        Haas Grot Disp 75 Bold
+        Noto Serif KR Medium
+        Destiny Keys Regular
+        Pragmatica Bold
+        Pragmatica Book
+        Pragmatica Medium Oblique
+        Pragmatica Medium
+        Pragmatica Book Oblique
+        Noto Sans TC
+        Noto Sans TC Medium
+        Noto Serif TC Medium
+        Aldine 401 BT
+        Noto Serif JP Medium
+        Noto Sans JP
+        Noto Sans JP Medium
+        Noto Serif SC Medium
+        Noto Sans KR
+        Noto Sans KR Medium
+        Cromwell NF
+        Destiny Symbols
+        Cromwell HPLHS
+        Haas Grot Text 55 Roman
+        Haas Grot Text 56 Italic
+        Haas Grot Text 65 Medium
+        Haas Grot Text 66 Medium Italic
+        Noto Sans SC
+        Noto Sans SC Medium
+        */
     }
 
     public struct FontInfo
@@ -82,16 +146,16 @@ public class FontHandler : Subsystem
             val = br.ReadBytes(4);
         }
 
-        var nameTableRecord = br.ReadType<OtfNameTableRecord>();
-
+        var nameTableRecord = br.ReadType<OtfNameTableRecord>(true);
         br.BaseStream.Seek(nameTableRecord.Offset, SeekOrigin.Begin);
 
-        var namingTableVer0 = br.ReadType<OtfNamingTableVersion0>();
+        var namingTableVer0 = br.ReadType<OtfNamingTableVersion0>(true);
 
         List<OtfNameRecord> nameRecords = new(namingTableVer0.Count);
         for (int i = 0; i < namingTableVer0.Count; i++)
         {
-            nameRecords.Add(br.ReadType<OtfNameRecord>());
+            var nameRecord = br.ReadType<OtfNameRecord>(true);
+            nameRecords.Add(nameRecord);
         }
 
         OtfNameRecord familyRecord;
@@ -157,28 +221,28 @@ public class FontHandler : Subsystem
 [StructLayout(LayoutKind.Sequential)]
 struct OtfNameTableRecord
 {
-    public uint Checksum;
-    public uint Offset;
     public uint Length;
+    public uint Offset;
+    public uint Checksum;
 }
 
 [StructLayout(LayoutKind.Sequential)]
 struct OtfNamingTableVersion0
 {
-    public ushort Version;
-    public ushort Count;
     public ushort StorageOffset;
+    public ushort Count;
+    public ushort Version;
 }
 
 [StructLayout(LayoutKind.Sequential)]
 struct OtfNameRecord
 {
-    public ushort PlatformId;
-    public ushort EncodingId;
-    public ushort LanguageId;
-    public ushort NameId;
-    public ushort Length;
     public ushort StringOffset;
+    public ushort Length;
+    public ushort NameId;
+    public ushort LanguageId;
+    public ushort EncodingId;
+    public ushort PlatformId;
 }
 
 public class BinaryReaderBE : BinaryReader
@@ -211,6 +275,27 @@ public class BinaryReaderBE : BinaryReader
         var data = base.ReadBytes(4);
         Array.Reverse(data);
         return BitConverter.ToUInt32(data, 0);
+    }
+
+    public dynamic ToType(byte[] bytes, Type type)
+    {
+        GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+        try { return Marshal.PtrToStructure(handle.AddrOfPinnedObject(), type); }
+        finally { handle.Free(); }
+    }
+
+    public T ReadType<T>(bool BE = true)
+    {
+        return (T)ReadType(typeof(T), BE);
+    }
+
+    public dynamic ReadType(Type type, bool BE)
+    {
+        var buffer = new byte[Marshal.SizeOf(type)];
+        Read(buffer, 0, buffer.Length);
+        if (BE)
+            Array.Reverse(buffer);
+        return ToType(buffer, type);
     }
 
 }

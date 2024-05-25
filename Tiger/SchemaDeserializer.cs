@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Arithmic;
@@ -587,8 +586,8 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         }
         else
         {
-            return null;
             Log.Error($"Failed to get schema struct size for type {var} as it has multiple schema struct attributes but none match the current strategy {_strategy}");
+            return null;
         }
     }
 }

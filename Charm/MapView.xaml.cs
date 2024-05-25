@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Media;
-using System.Numerics;
-using System.Security.Policy;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +9,7 @@ using Arithmic;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
+using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Static;
 
@@ -54,16 +48,35 @@ public partial class MapView : UserControl
 
     private void GetEntityMapData(FileHash tagHash, ExportDetailLevel detailLevel)
     {
-        Tag<SMapDataTable> dataentry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(tagHash);
-        SetEntityMapUI(dataentry, detailLevel);
+        SetEntityMapUI(tagHash, detailLevel);
     }
 
     private void GetStaticMapData(FileHash fileHash, ExportDetailLevel detailLevel)
     {
         Tag<SMapContainer> tag = FileResourcer.Get().GetSchemaTag<SMapContainer>(fileHash);
-        Tag<SMapDataTable> mapDataTable = tag.TagData.MapDataTables[1].MapDataTable;
-        StaticMapData staticMapData = ((SMapDataResource)mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())).StaticMapParent.TagData.StaticMap;
-        SetMapUI(staticMapData, detailLevel);
+        foreach (var tables in tag.TagData.MapDataTables)
+        {
+            foreach (var entry in tables.MapDataTable.TagData.DataEntries)
+            {
+                if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapDataResource resource)
+                {
+                    resource.StaticMapParent?.Load();
+                    if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
+                        continue;
+
+                    StaticMapData staticMapData = resource.StaticMapParent.TagData.StaticMap;
+                    SetMapUI(staticMapData, detailLevel);
+                }
+                if (entry.DataResource.GetValue(tables.MapDataTable.GetReader()) is SMapTerrainResource terrain)
+                {
+                    terrain.Terrain?.Load();
+                    if (terrain.Terrain is null)
+                        continue;
+
+                    SetTerrainMapUI(terrain.Terrain, detailLevel);
+                }
+            }
+        }
     }
 
     private void SetMapUI(StaticMapData staticMapData, ExportDetailLevel detailLevel)
@@ -78,9 +91,20 @@ public partial class MapView : UserControl
         displayParts.Clear();
     }
 
-    private void SetEntityMapUI(Tag<SMapDataTable> dataentry, ExportDetailLevel detailLevel)
+    private void SetEntityMapUI(FileHash dataentry, ExportDetailLevel detailLevel)
     {
         var displayParts = MakeEntityDisplayParts(dataentry, detailLevel);
+        Dispatcher.Invoke(() =>
+        {
+            MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
+            MVM.SetChildren(displayParts);
+        });
+        displayParts.Clear();
+    }
+
+    private void SetTerrainMapUI(Terrain terrain, ExportDetailLevel detailLevel)
+    {
+        var displayParts = MakeTerrainDisplayParts(terrain, detailLevel);
         Dispatcher.Invoke(() =>
         {
             MainViewModel MVM = (MainViewModel)ModelView.UCModelView.Resources["MVM"];
@@ -92,19 +116,19 @@ public partial class MapView : UserControl
     public bool LoadEntity(List<Entity> entities, FbxHandler fbxHandler)
     {
         fbxHandler.Clear();
-        foreach(var entity in entities)
+        foreach (var entity in entities)
             AddEntity(entity, ExportDetailLevel.MostDetailed, fbxHandler);
         return LoadUI(fbxHandler);
     }
 
     private void AddEntity(Entity entity, ExportDetailLevel detailLevel, FbxHandler fbxHandler)
-	{
+    {
         var dynamicParts = entity.Load(detailLevel);
-		//ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
-		//dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
-		fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
+        //ModelView.SetGroupIndices(new HashSet<int>(dynamicParts.Select(x => x.GroupIndex)));
+        //dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
+        fbxHandler.AddEntityToScene(entity, dynamicParts, detailLevel);
         Log.Verbose($"Adding entity {entity.Hash}/{entity.Model?.Hash} with {dynamicParts.Sum(p => p.Indices.Count)} vertices to fbx");
-	}
+    }
 
     private bool LoadUI(FbxHandler fbxHandler)
     {
@@ -141,7 +165,7 @@ public partial class MapView : UserControl
         }
 
         Directory.CreateDirectory(savePath);
-        if(exportStatics)
+        if (exportStatics)
         {
             Directory.CreateDirectory(savePath + "/Statics");
             ExportStatics(savePath, map);
@@ -174,6 +198,7 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
                 {
+                    terrainArrangement.Terrain.Load();
                     terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                     if (exportStatics)
                     {
@@ -194,17 +219,23 @@ public partial class MapView : UserControl
     {
         Parallel.ForEach(map.TagData.MapDataTables, data =>
         {
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            {
+                if (data.MapDataTable.TagData.DataEntries[0].DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)
+                {
+                    staticMapResource.StaticMapParent.Load();
+                    staticMapResource.StaticMapParent.TagData.StaticMap.LoadDecalsIntoExporterScene(scene);
+                }
+            }
+
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
-                    if (exportTypeFlag == ExportTypeFlag.ArrangedMap)
+                    if (exportTypeFlag == ExportTypeFlag.Full)
                     {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadArrangedIntoExporterScene(); //Arranged because...arranged
-                    }
-                    else if (exportTypeFlag == ExportTypeFlag.Full)
-                    {
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
+                        staticMapResource.StaticMapParent.Load();
+                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene);
                     }
                 }
             });
@@ -219,19 +250,41 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
-                    var parts = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.Statics;
-                    foreach (var part in parts)
+                    staticMapResource.StaticMapParent.Load();
+                    if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
                     {
-                        if (File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
+                        //if (staticMapResource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData is not null)
+                        //{
+                        //    var staticEntries = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.D1StaticMapData.CollapseStaticTables();
 
-                        string staticMeshName = part.Static.Hash.ToString();
-                        ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
-                        var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
-                        staticScene.AddStatic(part.Static.Hash, staticmesh);
+                        //    for (int i = 0; i < staticEntries.Count; i++)
+                        //    {
+                        //        var staticEntry = staticEntries[i];
+                        //        var parts = staticEntry.Entry.Load(1);
 
-                        if (source2Models)
+                        //        string staticMeshName = parts.Keys.First().ToString();
+                        //        ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
+
+                        //        staticScene.AddStatic(parts.Keys.First(), parts.Values.First());
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        var parts = staticMapResource.StaticMapParent.TagData.StaticMap.TagData.Statics;
+                        foreach (var part in parts)
                         {
-                            Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
+                            if (File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
+
+                            string staticMeshName = part.Static.Hash.ToString();
+                            ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
+                            var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
+                            staticScene.AddStatic(part.Static.Hash, staticmesh);
+
+                            if (source2Models)
+                            {
+                                Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
+                            }
                         }
                     }
                 }
@@ -239,40 +292,107 @@ public partial class MapView : UserControl
         });
     }
 
+    // TODO: Merge all this into one, or simplify it?
     private List<MainViewModel.DisplayPart> MakeDisplayParts(StaticMapData staticMap, ExportDetailLevel detailLevel)
     {
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
-        Parallel.ForEach(staticMap.TagData.InstanceCounts, c =>
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            // inefficiency as sometimes there are two instance count entries with same hash. why? idk
-            var model = staticMap.TagData.Statics[c.StaticIndex].Static;
-            var parts = model.Load(ExportDetailLevel.MostDetailed);
-            for (int i = c.InstanceOffset; i < c.InstanceOffset + c.InstanceCount; i++)
+            if (staticMap.TagData.D1StaticMapData is not null)
             {
-                foreach (var part in parts)
+                var d1MapData = staticMap.TagData.D1StaticMapData;
+                var statics = d1MapData.GetStatics();
+                var instances = d1MapData.ParseTransforms();
+                Parallel.ForEach(statics, mesh =>
                 {
-                    MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
-                    displayPart.BasePart = part;
-                    displayPart.Translations.Add(staticMap.TagData.Instances[i].Position);
-                    displayPart.Rotations.Add(staticMap.TagData.Instances[i].Rotation);
-                    displayPart.Scales.Add(staticMap.TagData.Instances[i].Scale);
-                    displayParts.Add(displayPart);
-                }
-
+                    var parts = d1MapData.Load(mesh.Key, mesh.Value, instances);
+                    foreach (var info in mesh.Value)
+                    {
+                        for (int i = info.TransformIndex; i < info.TransformIndex + info.InstanceCount; i++)
+                        {
+                            foreach (var part in parts)
+                            {
+                                MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+                                displayPart.BasePart = part;
+                                displayPart.Translations.Add(instances[i].Translation.ToVec3());
+                                displayPart.Rotations.Add(instances[i].Rotation);
+                                displayPart.Scales.Add(instances[i].Scale.ToVec3());
+                                displayParts.Add(displayPart);
+                            }
+                        }
+                    }
+                });
             }
-        });
+        }
+        else
+        {
+            Parallel.ForEach(staticMap.TagData.InstanceCounts, c =>
+            {
+                // inefficiency as sometimes there are two instance count entries with same hash. why? idk
+                var model = staticMap.TagData.Statics[c.StaticIndex].Static;
+                var parts = model.Load(ExportDetailLevel.MostDetailed);
+                for (int i = c.InstanceOffset; i < c.InstanceOffset + c.InstanceCount; i++)
+                {
+                    foreach (var part in parts)
+                    {
+                        MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+                        displayPart.BasePart = part;
+                        displayPart.Translations.Add(staticMap.TagData.Instances[i].Position);
+                        displayPart.Rotations.Add(staticMap.TagData.Instances[i].Rotation);
+                        displayPart.Scales.Add(new Vector3(staticMap.TagData.Instances[i].Scale.X));
+                        displayParts.Add(displayPart);
+                    }
+
+                }
+            });
+        }
+
         return displayParts.ToList();
     }
 
-    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(Tag<SMapDataTable> dataentry, ExportDetailLevel detailLevel)
+    private List<MainViewModel.DisplayPart> MakeTerrainDisplayParts(Terrain terrain, ExportDetailLevel detailLevel)
     {
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
-        Parallel.ForEach(dataentry.TagData.DataEntries, entry =>
+        List<StaticPart> parts = new();
+        foreach (var partEntry in terrain.TagData.StaticParts)
+        {
+            if (partEntry.DetailLevel == 0)
+            {
+                var part = terrain.MakePart(partEntry);
+                terrain.TransformPositions(part);
+                terrain.TransformTexcoords(part);
+                parts.Add(part);
+            }
+        }
+
+        foreach (var part in parts)
+        {
+            MainViewModel.DisplayPart displayPart = new MainViewModel.DisplayPart();
+            displayPart.BasePart = part;
+            displayPart.Translations.Add(Vector3.Zero);
+            displayPart.Rotations.Add(Vector4.Zero);
+            displayPart.Scales.Add(Vector3.One);
+            displayParts.Add(displayPart);
+        }
+        return displayParts.ToList();
+    }
+
+    private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(FileHash hash, ExportDetailLevel detailLevel)
+    {
+        ConcurrentBag<MainViewModel.DisplayPart> displayParts = new ConcurrentBag<MainViewModel.DisplayPart>();
+
+        List<SMapDataEntry> dataEntries = new();
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && hash.GetReferenceHash().Hash32 == 0x808003F6) //F6038080
+            dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SF6038080>(hash).TagData.EntityResource.CollapseIntoDataEntry());
+        else
+            dataEntries.AddRange(FileResourcer.Get().GetSchemaTag<SMapDataTable>(hash).TagData.DataEntries);
+
+        Parallel.ForEach(dataEntries, entry =>
         {
             Entity entity = FileResourcer.Get().GetFile(typeof(Entity), entry.GetEntityHash());
             List<Entity> entities = new List<Entity> { entity };
             entities.AddRange(entity.GetEntityChildren());
-            foreach(var ent in entities)
+            foreach (var ent in entities)
             {
                 if (ent.HasGeometry())
                 {

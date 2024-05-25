@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+﻿using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Audio;
 
@@ -102,7 +102,7 @@ public struct D2Class_33978080
     public float Unk70;
     public Tag Unk74;
     public TigerHash Unk78;
-    public TigerHash NarratorString;
+    public StringHash NarratorString;
     public float Unk80;
 }
 
@@ -145,23 +145,30 @@ public struct D2Class_30978080
     public ResourcePointer Unk20; //33978080 or 2A978080
 }
 
-[SchemaStruct("38978080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "0A088080", 0x58)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "38978080", 0x38)]
 public struct D2Class_38978080
 {
     public long FileSize;
     public TigerHash Unk08;
     public TigerHash Unk0C;
     public TigerHash Unk10;
-    [SchemaField(0x14)]
-    public Tag<D2Class_418A8080> Unk14;
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    //[SchemaField(0x14)]
+    //public Tag<D2Class_418A8080> Unk14;
+
+    [SchemaField(0x34, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public BKHD SoundbankBL;
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<D2Class_63838080> Unk18;
-    [SchemaField(0x20)]
+
+    [SchemaField(0x38, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<Wem> Wems;
-    public Tag<D2Class_438A8080> Unk30;
+
+    //public Tag<D2Class_438A8080> Unk30;
 }
 
 [SchemaStruct("418A8080", 0x38)]
@@ -182,3 +189,20 @@ public struct D2Class_438A8080
 {
     public long FileSize;
 }
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "AA078080", 0x3C)]
+public struct SAA078080
+{
+    [SchemaField(0x20)]
+    public StringHash Narrator;
+    public Tag<D2Class_38978080> Dialogue;
+    public LocalizedStrings Strings;
+    public StringHash VoiceLine;
+    public Tag<D2Class_38978080> DialogueF; // Female
+    public LocalizedStrings StringsF;
+    public StringHash VoiceLineF;
+}
+
+
+
+
