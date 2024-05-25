@@ -127,32 +127,29 @@ public class UsfConverter
             dynamic data = null;
             if (bIsVertexShader)
             {
-                data = material.VS_CBuffers;
-            }
-            else
-            {
-                if (material.PSVector4Container.IsInvalid())
+                if (material.VSVector4Container.IsValid())
                 {
-                    data = material.PS_CBuffers;
+                    data = material.GetVec4Container(material.VSVector4Container.GetReferenceHash());
                 }
                 else
                 {
-                    if (material.PSVector4Container.IsValid())
+                    foreach (var vec in material.VS_CBuffers)
                     {
-                        // Try the Vector4 storage file
-                        TigerFile container = new(material.PSVector4Container.GetReferenceHash());
-                        byte[] containerData = container.GetData();
-                        int num = containerData.Length / 16;
-                        if (cbuffer.Count == num)
-                        {
-                            List<Vector4> float4s = new();
-                            for (int i = 0; i < containerData.Length / 16; i++)
-                            {
-                                float4s.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
-                            }
-
-                            data = float4s;
-                        }
+                        data.Add(vec.Vec);
+                    }
+                }
+            }
+            else
+            {
+                if (material.PSVector4Container.IsValid())
+                {
+                    data = material.GetVec4Container(material.PSVector4Container.GetReferenceHash());
+                }
+                else
+                {
+                    foreach (var vec in material.PS_CBuffers)
+                    {
+                        data.Add(vec.Vec);
                     }
                 }
             }

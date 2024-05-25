@@ -115,7 +115,7 @@ public partial class EntityView : UserControl
     public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null, ExporterScene scene = null)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
         string savePath = config.GetExportSavePath() + $"/{name}";
 
         if (scene == null)
@@ -160,14 +160,14 @@ public partial class EntityView : UserControl
     public static void ExportInventoryItem(ApiItem item)
     {
         string name = string.Join("_", $"{item.ItemName}".Split(Path.GetInvalidFileNameChars()));
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
+        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
 
         // Export the model
         // todo bad, should be replaced
         EntitySkeleton overrideSkeleton = null;
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent 
+            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent
             overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
         else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
@@ -188,8 +188,8 @@ public partial class EntityView : UserControl
 
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
-        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_");
-        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_").Replace(".", "_");
+        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
+        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
 

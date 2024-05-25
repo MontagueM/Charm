@@ -76,15 +76,14 @@ namespace Tiger.Schema.Shaders
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
-        public string Decompile(byte[] shaderBytecode, string name)
+        public string Decompile(byte[] shaderBytecode, string name, string savePath = "hlsl_temp")
         {
-            string directory = "hlsl_temp";
-            string binPath = $"{directory}/{name}.bin";
-            string hlslPath = $"{directory}/{name}.hlsl";
+            string binPath = $"{savePath}/{name}.bin";
+            string hlslPath = $"{savePath}/{name}.hlsl";
 
-            if (!Directory.Exists(directory))
+            if (!Directory.Exists(savePath))
             {
-                Directory.CreateDirectory("hlsl_temp/");
+                Directory.CreateDirectory($"{savePath}/");
             }
 
             lock (_lock)
@@ -102,7 +101,8 @@ namespace Tiger.Schema.Shaders
                 startInfo.UseShellExecute = false;
                 startInfo.FileName = "ThirdParty/3dmigoto_shader_decomp.exe";
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.Arguments = $"-D {binPath}";
+                Console.WriteLine(Path.GetFullPath(binPath));
+                startInfo.Arguments = $"-D \"{binPath}\"";
                 using (Process exeProcess = Process.Start(startInfo))
                 {
                     exeProcess.WaitForExit();
@@ -110,7 +110,7 @@ namespace Tiger.Schema.Shaders
 
                 if (!File.Exists(hlslPath))
                 {
-                    throw new FileNotFoundException($"Decompilation failed for {FileHash}");
+                    throw new FileNotFoundException($"Decompilation failed for {name}");
                 }
             }
 
@@ -151,9 +151,6 @@ namespace Tiger.Schema.Shaders
                     Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
                 }
 
-                //if (saveCBuffers)
-                //    SaveCbuffers(this, false, pixel, saveDirectory);
-
                 try
                 {
                     if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{FileHash}.usf"))
@@ -169,7 +166,7 @@ namespace Tiger.Schema.Shaders
                 {
                 }
 
-                //Need to save material after shader has be exported, to check if it exists
+                //Need to save vmat after shader has be exported, to check if it exists
                 if (Source2Handler.source2Shaders)
                     Source2Handler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
             }
@@ -195,9 +192,57 @@ namespace Tiger.Schema.Shaders
                 }
             }
         }
+
+        //Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
+        public void SaveMaterial(string saveDirectory)
+        {
+            var hlslPath = $"{saveDirectory}/Shaders/Raw";
+            var texturePath = $"{saveDirectory}/Textures";
+            Directory.CreateDirectory(hlslPath);
+            Directory.CreateDirectory(texturePath);
+
+            if (PixelShader != null)
+            {
+                Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}", hlslPath);
+                SavePixelShader($"{saveDirectory}/Shaders/");
+            }
+            if (VertexShader != null)
+            {
+                Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}", hlslPath);
+                SaveVertexShader($"{saveDirectory}/Shaders/");
+            }
+
+            foreach (STextureTag texture in EnumerateVSTextures())
+            {
+                if (texture.Texture == null)
+                    continue;
+
+                texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+            }
+            foreach (STextureTag texture in EnumeratePSTextures())
+            {
+                if (texture.Texture == null)
+                    continue;
+
+                texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+            }
+        }
+
+        public List<Vector4> GetVec4Container(FileHash containerHash)
+        {
+            List<Vector4> data = new();
+            TigerFile container = new(containerHash);
+            byte[] containerData = container.GetData();
+
+            for (int i = 0; i < containerData.Length / 16; i++)
+            {
+                data.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
+            }
+
+            return data;
+        }
     }
 }
-
 
 // public class RawMaterial
 // {

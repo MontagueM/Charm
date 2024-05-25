@@ -16,6 +16,8 @@ using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Investment;
+using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 
 namespace Charm;
@@ -42,20 +44,15 @@ public partial class DevView : UserControl
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R && e.Key != Key.E && e.Key != Key.L)
-        {
             return;
-        }
+
         string strHash = TagHashBox.Text.Replace(" ", "");
         strHash = Regex.Replace(strHash, @"(\s+|r|h)", "");
         if (strHash.Length == 16)
-        {
             strHash = Hash64Map.Get().GetHash32Checked(strHash);
-        }
+
         if (strHash == "")
-        {
-            TagHashBox.Text = "INVALID HASH";
             return;
-        }
 
         FileHash hash;
         if (strHash.Contains("-"))
@@ -72,8 +69,31 @@ public partial class DevView : UserControl
 
         if (!hash.IsValid())
         {
-            TagHashBox.Text = "INVALID HASH";
-            return;
+            if (uint.TryParse(strHash, out uint apiHash))
+            {
+                Investment.LazyInit();
+                var item = Investment.Get().TryGetInventoryItem(new TigerHash(apiHash));
+                if (item is not null)
+                {
+                    MainWindow.Progress.SetProgressStages(new() { "Starting investment system" });
+                    Investment.LazyInit();
+                    MainWindow.Progress.CompleteStage();
+
+                    item.Load();
+                    APIItemView apiItemView = new APIItemView(item);
+                    _mainWindow.MakeNewTab(Investment.Get().GetItemName(item), apiItemView);
+                    _mainWindow.SetNewestTabSelected();
+                }
+                else
+                    TagHashBox.Text = "INVALID API HASH";
+
+                return;
+            }
+            else
+            {
+                TagHashBox.Text = "INVALID HASH";
+                return;
+            }
         }
         //uint to int
         switch (e.Key)
@@ -212,6 +232,15 @@ public partial class DevView : UserControl
                     dialogueView.Load(hash, null);
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
+                    break;
+                case 0x808071E8:
+                case 0x80806DAA:
+                    var materialView = new MaterialView();
+                    materialView.Load(hash);
+                    _mainWindow.MakeNewTab(hash, materialView);
+                    _mainWindow.SetNewestTabSelected();
+                    IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
+                    material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
                     break;
                 case 0x80801AB5:
                 case 0x808073A5:

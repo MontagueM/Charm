@@ -140,7 +140,6 @@ public class EntityModel : Tag<SEntityModel>
                     TranslationOffset = TranslationOffset,
                     VertexLayoutIndex = mesh.GetInputLayoutForStage(TfxRenderStage.GenerateGbuffer)
                 };
-
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
                 if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)
