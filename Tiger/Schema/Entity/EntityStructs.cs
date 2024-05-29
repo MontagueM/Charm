@@ -548,28 +548,33 @@ public struct SEntityModelMesh
     ///
     ///     - Start = part_range_per_render_stage[stage]
     ///     - End = part_range_per_render_stage[stage + 1]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 20)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 24)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 25)] // ArraySizeConst being the number of elements
     public short[] PartRangePerRenderStage;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 19)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 24)]
     public byte[] InputLayoutPerRenderStageBL;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 23)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
     public short[] InputLayoutPerRenderStageSK;
 
-    public Range GetRangeForStage(TfxRenderStage stage)
+    public Range GetRangeForStage(int stage)
     {
-        int start = PartRangePerRenderStage[(int)stage];
-        int end = PartRangePerRenderStage[(int)stage + 1];
+        int start = PartRangePerRenderStage[stage];
+        int end = PartRangePerRenderStage[stage + 1];
         return new Range(start, end);
     }
 
-    public int GetInputLayoutForStage(TfxRenderStage stage)
+    public int GetInputLayoutForStage(int stage)
     {
-        return Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ?
-            InputLayoutPerRenderStageBL[(int)stage] : InputLayoutPerRenderStageSK[(int)stage];
+        return Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ||
+            Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON ?
+            InputLayoutPerRenderStageBL[stage] : InputLayoutPerRenderStageSK[stage];
     }
 }
 

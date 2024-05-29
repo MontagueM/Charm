@@ -4,17 +4,17 @@ import os
 RIP_LOCATION = None
 #Detail Texture Position and Scale
 armordetaildiffuseposition = (DiffTrans1.Z, DiffTrans1.W, 0.000)
-armordetaildiffusescale = (DiffTrans1.X, DiffTrans1.Y, 0.000)
+armordetaildiffusescale_raw = (DiffTrans1.X, DiffTrans1.Y, 0.000)
 armordetailnormalposition = (NormTrans1.Z, NormTrans1.W, 0.000)
-armordetailnormalscale = (NormTrans1.X, NormTrans1.Y, 0.000)
+armordetailnormalscale_raw = (NormTrans1.X, NormTrans1.Y, 0.000)
 clothdetaildiffuseposition = (DiffTrans2.Z, DiffTrans2.W, 0.000)
-clothdetaildiffusescale = (DiffTrans2.X, DiffTrans2.Y, 0.000)
+clothdetaildiffusescale_raw = (DiffTrans2.X, DiffTrans2.Y, 0.000)
 clothdetailnormalposition = (NormTrans2.Z, NormTrans2.W, 0.000)
-clothdetailnormalscale = (NormTrans2.X, NormTrans2.Y, 0.000)
+clothdetailnormalscale_raw = (NormTrans2.X, NormTrans2.Y, 0.000)
 suitdetaildiffuseposition = (DiffTrans3.Z, DiffTrans3.W, 0.000)
-suitdetaildiffusescale = (DiffTrans3.X, DiffTrans3.Y, 0.000)
+suitdetaildiffusescale_raw = (DiffTrans3.X, DiffTrans3.Y, 0.000)
 suitdetailnormalposition = (NormTrans3.Z, NormTrans3.W, 0.000)
-suitdetailnormalscale = (NormTrans3.X, NormTrans3.Y, 0.000)
+suitdetailnormalscale_raw = (NormTrans3.X, NormTrans3.Y, 0.000)
 
 #Armor Primary Slot
 armorprimarydyecolor = (CPrime1.X, CPrime1.Y, CPrime1.Z, 1.0)
@@ -26,9 +26,9 @@ armorprimarywearremapX = PrimeWearMap1.X
 armorprimarywearremapY = PrimeWearMap1.Y
 armorprimarywearremapZ = PrimeWearMap1.Z
 armorprimarywearremapW = PrimeWearMap1.W
-armorprimarydetaildiffuseblend = PrimeMatParams1.X
-armorprimarydetailnormalblend = PrimeMatParams1.Y
-armorprimarydetailroughnessblend = PrimeMatParams1.Z
+armorprimarydetaildiffuseblend_raw = PrimeMatParams1.X
+armorprimarydetailnormalblend_raw = PrimeMatParams1.Y
+armorprimarydetailroughnessblend_raw = PrimeMatParams1.Z
 armorprimarymetalness = PrimeMatParams1.W
 armorprimaryiridescence = PrimeAdvMatParams1.X
 armorprimaryfuzz = PrimeAdvMatParams1.Y
@@ -40,9 +40,9 @@ wornarmorprimaryroughnessremapX = PrimeWornRoughMap1.X
 wornarmorprimaryroughnessremapY = PrimeWornRoughMap1.Y
 wornarmorprimaryroughnessremapZ = PrimeWornRoughMap1.Z
 wornarmorprimaryroughnessremapW = PrimeWornRoughMap1.W
-wornarmorprimarydetaildiffuseblend = PrimeWornMatParams1.X
-wornarmorprimarydetailnormalblend = PrimeWornMatParams1.Y
-wornarmorprimarydetailroughnessblend = PrimeWornMatParams1.Z
+wornarmorprimarydetaildiffuseblend_raw = PrimeWornMatParams1.X
+wornarmorprimarydetailnormalblend_raw = PrimeWornMatParams1.Y
+wornarmorprimarydetailroughnessblend_raw = PrimeWornMatParams1.Z
 wornarmorprimarymetalness = PrimeWornMatParams1.W
 
 #Armor Secondary Slot
@@ -55,9 +55,9 @@ armorsecondarywearremapX = SeconWearMap1.X
 armorsecondarywearremapY = SeconWearMap1.Y
 armorsecondarywearremapZ = SeconWearMap1.Z
 armorsecondarywearremapW = SeconWearMap1.W
-armorsecondarydetaildiffuseblend = SeconMatParams1.X
-armorsecondarydetailnormalblend = SeconMatParams1.Y
-armorsecondarydetailroughnessblend = SeconMatParams1.Z
+armorsecondarydetaildiffuseblend_raw = SeconMatParams1.X
+armorsecondarydetailnormalblend_raw = SeconMatParams1.Y
+armorsecondarydetailroughnessblend_raw = SeconMatParams1.Z
 armorsecondarymetalness = SeconMatParams1.W
 armorsecondaryiridescence = SeconAdvMatParams1.X
 armorsecondaryfuzz = SeconAdvMatParams1.Y
@@ -69,9 +69,9 @@ wornarmorsecondaryroughnessremapX = SeconWornRoughMap1.X
 wornarmorsecondaryroughnessremapY = SeconWornRoughMap1.Y
 wornarmorsecondaryroughnessremapZ = SeconWornRoughMap1.Z
 wornarmorsecondaryroughnessremapW = SeconWornRoughMap1.W
-wornarmorsecondarydetaildiffuseblend = SeconWornMatParams1.X
-wornarmorsecondarydetailnormalblend = SeconWornMatParams1.Y
-wornarmorsecondarydetailroughnessblend = SeconWornMatParams1.Z
+wornarmorsecondarydetaildiffuseblend_raw = SeconWornMatParams1.X
+wornarmorsecondarydetailnormalblend_raw = SeconWornMatParams1.Y
+wornarmorsecondarydetailroughnessblend_raw = SeconWornMatParams1.Z
 wornarmorsecondarymetalness = SeconWornMatParams1.W
 
 #Cloth Primary Slot
@@ -84,9 +84,9 @@ clothprimarywearremapX = PrimeWearMap2.X
 clothprimarywearremapY = PrimeWearMap2.Y
 clothprimarywearremapZ = PrimeWearMap2.Z
 clothprimarywearremapW = PrimeWearMap2.W
-clothprimarydetaildiffuseblend = PrimeMatParams2.X
-clothprimarydetailnormalblend = PrimeMatParams2.Y
-clothprimarydetailroughnessblend = PrimeMatParams2.Z
+clothprimarydetaildiffuseblend_raw = PrimeMatParams2.X
+clothprimarydetailnormalblend_raw = PrimeMatParams2.Y
+clothprimarydetailroughnessblend_raw = PrimeMatParams2.Z
 clothprimarymetalness = PrimeMatParams2.W
 clothprimaryiridescence = PrimeAdvMatParams2.X
 clothprimaryfuzz = PrimeAdvMatParams2.Y
@@ -98,9 +98,9 @@ wornclothprimaryroughnessremapX = PrimeWornRoughMap2.X
 wornclothprimaryroughnessremapY = PrimeWornRoughMap2.Y
 wornclothprimaryroughnessremapZ = PrimeWornRoughMap2.Z
 wornclothprimaryroughnessremapW = PrimeWornRoughMap2.W
-wornclothprimarydetaildiffuseblend = PrimeWornMatParams1.X
-wornclothprimarydetailnormalblend = PrimeWornMatParams1.Y
-wornclothprimarydetailroughnessblend = PrimeWornMatParams1.Z
+wornclothprimarydetaildiffuseblend_raw = PrimeWornMatParams1.X
+wornclothprimarydetailnormalblend_raw = PrimeWornMatParams1.Y
+wornclothprimarydetailroughnessblend_raw = PrimeWornMatParams1.Z
 wornclothprimarymetalness = PrimeWornMatParams1.W
 
 #Cloth secondary Slot
@@ -113,9 +113,9 @@ clothsecondarywearremapX = SeconWearMap2.X
 clothsecondarywearremapY = SeconWearMap2.Y
 clothsecondarywearremapZ = SeconWearMap2.Z
 clothsecondarywearremapW = SeconWearMap2.W
-clothsecondarydetaildiffuseblend = SeconMatParams2.X
-clothsecondarydetailnormalblend = SeconMatParams2.Y
-clothsecondarydetailroughnessblend = SeconMatParams2.Z
+clothsecondarydetaildiffuseblend_raw = SeconMatParams2.X
+clothsecondarydetailnormalblend_raw = SeconMatParams2.Y
+clothsecondarydetailroughnessblend_raw = SeconMatParams2.Z
 clothsecondarymetalness = SeconMatParams2.W
 clothsecondaryiridescence = SeconAdvMatParams2.X
 clothsecondaryfuzz = SeconAdvMatParams2.Y
@@ -127,9 +127,9 @@ wornclothsecondaryroughnessremapX = SeconWornRoughMap2.X
 wornclothsecondaryroughnessremapY = SeconWornRoughMap2.Y
 wornclothsecondaryroughnessremapZ = SeconWornRoughMap2.Z
 wornclothsecondaryroughnessremapW = SeconWornRoughMap2.W
-wornclothsecondarydetaildiffuseblend = SeconWornMatParams2.X
-wornclothsecondarydetailnormalblend = SeconWornMatParams2.Y
-wornclothsecondarydetailroughnessblend = SeconWornMatParams2.Z
+wornclothsecondarydetaildiffuseblend_raw = SeconWornMatParams2.X
+wornclothsecondarydetailnormalblend_raw = SeconWornMatParams2.Y
+wornclothsecondarydetailroughnessblend_raw = SeconWornMatParams2.Z
 wornclothsecondarymetalness = SeconWornMatParams2.W
 
 #Suit Primary Slot
@@ -142,9 +142,9 @@ suitprimarywearremapX = PrimeWearMap3.X
 suitprimarywearremapY = PrimeWearMap3.Y
 suitprimarywearremapZ = PrimeWearMap3.Z
 suitprimarywearremapW = PrimeWearMap3.W
-suitprimarydetaildiffuseblend = PrimeMatParams3.X
-suitprimarydetailnormalblend = PrimeMatParams3.Y
-suitprimarydetailroughnessblend = PrimeMatParams3.Z
+suitprimarydetaildiffuseblend_raw = PrimeMatParams3.X
+suitprimarydetailnormalblend_raw = PrimeMatParams3.Y
+suitprimarydetailroughnessblend_raw = PrimeMatParams3.Z
 suitprimarymetalness = PrimeMatParams3.W
 suitprimaryiridescence = PrimeAdvMatParams3.X
 suitprimaryfuzz = PrimeAdvMatParams3.Y
@@ -156,9 +156,9 @@ wornsuitprimaryroughnessremapX = PrimeWornRoughMap3.X
 wornsuitprimaryroughnessremapY = PrimeWornRoughMap3.Y
 wornsuitprimaryroughnessremapZ = PrimeWornRoughMap3.Z
 wornsuitprimaryroughnessremapW = PrimeWornRoughMap3.W
-wornsuitprimarydetaildiffuseblend = PrimeWornMatParams3.X
-wornsuitprimarydetailnormalblend = PrimeWornMatParams3.Y
-wornsuitprimarydetailroughnessblend = PrimeWornMatParams3.Z
+wornsuitprimarydetaildiffuseblend_raw = PrimeWornMatParams3.X
+wornsuitprimarydetailnormalblend_raw = PrimeWornMatParams3.Y
+wornsuitprimarydetailroughnessblend_raw = PrimeWornMatParams3.Z
 wornsuitprimarymetalness = PrimeWornMatParams3.W
 
 #Suit Secondary Slot
@@ -171,9 +171,9 @@ suitsecondarywearremapX = SeconWearMap3.X
 suitsecondarywearremapY = SeconWearMap3.Y
 suitsecondarywearremapZ = SeconWearMap3.Z
 suitsecondarywearremapW = SeconWearMap3.W
-suitsecondarydetaildiffuseblend = SeconMatParams3.X
-suitsecondarydetailnormalblend = SeconMatParams3.Y
-suitsecondarydetailroughnessblend = SeconMatParams3.Z
+suitsecondarydetaildiffuseblend_raw = SeconMatParams3.X
+suitsecondarydetailnormalblend_raw = SeconMatParams3.Y
+suitsecondarydetailroughnessblend_raw = SeconMatParams3.Z
 suitsecondarymetalness = SeconMatParams3.W
 suitsecondaryiridescence = SeconAdvMatParams3.X
 suitsecondaryfuzz = SeconAdvMatParams3.Y
@@ -185,15 +185,18 @@ wornsuitsecondaryroughnessremapX = SeconWornRoughMap3.X
 wornsuitsecondaryroughnessremapY = SeconWornRoughMap3.Y
 wornsuitsecondaryroughnessremapZ = SeconWornRoughMap3.Z
 wornsuitsecondaryroughnessremapW = SeconWornRoughMap3.W
-wornsuitsecondarydetaildiffuseblend = SeconWornMatParams3.X
-wornsuitsecondarydetailnormalblend = SeconWornMatParams3.Y
-wornsuitsecondarydetailroughnessblend = SeconWornMatParams3.Z
+wornsuitsecondarydetaildiffuseblend_raw = SeconWornMatParams3.X
+wornsuitsecondarydetailnormalblend_raw = SeconWornMatParams3.Y
+wornsuitsecondarydetailroughnessblend_raw = SeconWornMatParams3.Z
 wornsuitsecondarymetalness = SeconWornMatParams3.W
 #########################################################
 
-class MAINPANEL(bpy.types.Panel):
-    bl_label = "D2 Shader Preset"
-    bl_idname = "MAINPANEL"
+#clear system console after hitting run button
+
+
+class NODE_PT_MAINPANEL(bpy.types.Panel):
+    bl_label = "SHADERNAMEENUM"
+    bl_idname = "NODE_PT_MAINPANEL"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = 'D2 Shader'
@@ -209,24 +212,287 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     bpy.context.scene.use_nodes = True
     
     Shader_Preset = bpy.data.node_groups.new(group_name, 'ShaderNodeTree')
-#Nodegroup Inputs
-    Shader_Preset.inputs.new('NodeSocketColor', 'Dyemap Color')
-    Shader_Preset.inputs.new('NodeSocketFloat', 'Dyemap Alpha')
-    Shader_Preset.inputs.new('NodeSocketFloat', 'Slot Override [1-6]')
-#Nodegroup Outputs
-    Shader_Preset.outputs.new('NodeSocketColor', 'Dye Color A')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Dye Color B')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Wear Remap_A')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Wear Remap_B')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Roughness Remap_A')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Roughness Remap_B')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Roughness Remap_C')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Detail Diffuse')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Detail Normal')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Detail Blends')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Worn Detail Blends')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Iridescence, Fuzz, Transmission')
-    Shader_Preset.outputs.new('NodeSocketColor', 'Emission')
+    
+    #clear system console after hitting the Generate button
+    
+    
+    #spacer for easy tech support
+    print("###################### SHADERNAMEENUM ##########################")
+    
+    #automatically set the material to use the newly generated shader preset, reposition it, and remove copies
+    try:  
+        for ReplaceShader in bpy.context.active_object.active_material.node_tree.nodes:
+            if ReplaceShader.name == "Shader Preset":
+                ReplaceShader.node_tree = bpy.data.node_groups.get("SHADERNAMEENUM")
+    except:
+        print("")
+       
+#hide any .001 copies of the shader preset
+    try:    
+        bpy.data.node_groups["SHADERNAMEENUM.001"].name = ".SHADERNAMEENUM.001"
+    except:
+        print("")
+        
+#automatically connect base textures to Main Shader
+    try:
+        for DiffuseSRGB in bpy.context.active_object.active_material.node_tree.nodes:
+            if DiffuseSRGB.label == "Diffuse Texture [Set this to sRGB]":
+                bpy.context.active_object.active_material.node_tree.links.new(DiffuseSRGB.outputs[0], bpy.context.active_object.active_material.node_tree.nodes['D2 PlayerGear Shader'].inputs[13])
+                if DiffuseSRGB.type == 'TEX_IMAGE' and DiffuseSRGB.image:
+                    DiffuseSRGB.image.colorspace_settings.name = "sRGB"
+    except:
+        print("")
+            
+    try:
+        for DiffuseNoncolor in bpy.context.active_object.active_material.node_tree.nodes:
+            if DiffuseNoncolor.label == "Diffuse Texture [Set this to Non-Color]":
+                bpy.context.active_object.active_material.node_tree.links.new(DiffuseNoncolor.outputs[0], bpy.context.active_object.active_material.node_tree.nodes['D2 PlayerGear Shader'].inputs[13])
+                DiffuseNoncolor.label = "Diffuse Texture [Set this to sRGB]"
+                if DiffuseNoncolor.type == 'TEX_IMAGE' and DiffuseNoncolor.image:
+                    DiffuseNoncolor.image.colorspace_settings.name = "sRGB"
+    except:
+        print("")
+
+    try:
+        for DiffuseRipArchives in bpy.context.active_object.active_material.node_tree.nodes:
+            if DiffuseRipArchives.label == "Diffuse Texture [Set to NonColor only for RipArchives textures]":
+                bpy.context.active_object.active_material.node_tree.links.new(DiffuseRipArchives.outputs[0], bpy.context.active_object.active_material.node_tree.nodes['D2 PlayerGear Shader'].inputs[13])
+                DiffuseRipArchives.label = "Diffuse Texture [Set this to sRGB]"
+                if DiffuseRipArchives.type == 'TEX_IMAGE' and DiffuseRipArchives.image:
+                    DiffuseRipArchives.image.colorspace_settings.name = "sRGB"
+    except:
+        print("")
+            
+    try:
+        for GstackNoncolor in bpy.context.active_object.active_material.node_tree.nodes:
+            if GstackNoncolor.label == "Gstack Texture [Set this to Non-Color]":
+                bpy.context.active_object.active_material.node_tree.links.new(GstackNoncolor.outputs[0], bpy.context.active_object.active_material.node_tree.nodes['D2 PlayerGear Shader'].inputs[14])
+                bpy.context.active_object.active_material.node_tree.links.new(GstackNoncolor.outputs[1], bpy.context.active_object.active_material.node_tree.nodes['D2 PlayerGear Shader'].inputs[15])
+                if GstackNoncolor.type == 'TEX_IMAGE' and GstackNoncolor.image:
+                    GstackNoncolor.image.colorspace_settings.name = "Non-Color"
+    except:
+        print("")
+            
+    try:
+        for NormalMapNoncolor in bpy.context.active_object.active_material.node_tree.nodes:
+            if NormalMapNoncolor.label == "Normal Map [Set this to Non-Color]":
+                bpy.context.active_object.active_material.node_tree.links.new(NormalMapNoncolor.outputs[0], bpy.context.active_object.active_material.node_tree.nodes['D2 PlayerGear Shader'].inputs[16])
+                if NormalMapNoncolor.type == 'TEX_IMAGE' and NormalMapNoncolor.image:
+                    NormalMapNoncolor.image.colorspace_settings.name = "Non-Color"
+    except:
+        print("")
+            
+    try:
+        for DyemapNonDashColor in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyemapNonDashColor.label == "Dyemap Texture [Set this to Non-Color]":
+                if DyemapNonDashColor.type == 'TEX_IMAGE' and DyemapNonDashColor.image:
+                    DyemapNonDashColor.image.colorspace_settings.name = "Non-Color"
+    except:
+        print("")
+            
+    try:
+        for DyemapNoncolor in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyemapNoncolor.label == "Dyemap Texture [Set this to NonColor]":
+                if DyemapNoncolor.type == 'TEX_IMAGE' and DyemapNoncolor.image:
+                    DyemapNoncolor.image.colorspace_settings.name = "Non-Color"
+    except:
+        print("")
+
+    try:
+        for DyeSSlotNonDashColor in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeSSlotNonDashColor.label == "DyeSlot Texture [Set this to Non-Color]":
+                DyeSSlotNonDashColor.label == "Dyemap Texture [Set this to Non-Color]"
+                if DyeSSlotNonDashColor.type == 'TEX_IMAGE' and DyeslotNonDashColor.image:
+                    DyeSSlotNonDashColor.image.colorspace_settings.name = "Non-Color"
+    except:
+        print("")
+        
+    try:
+        for DyeslotNonDashColor in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeslotNonDashColor.label == "Dyeslot Texture [Set this to Non-Color]":
+                DyeslotNonDashColor.label == "Dyemap Texture [Set this to Non-Color]"
+                if DyeslotNonDashColor.type == 'TEX_IMAGE' and DyeslotNonDashColor.image:
+                    DyeslotNonDashColor.image.colorspace_settings.name = "Non-Color"
+    except:
+        print("")
+            
+    try:         
+        for DyeSSlotSRGB in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeSSlotSRGB.label == "DyeSlot Texture [Set this to sRGB]":
+                DyeSSlotSRGB.label == "Dyemap Texture [Set this to Non-Color]"
+                if DyeSSlotSRGB.type == 'TEX_IMAGE' and DyeslotSRGB.image:
+                    DyeSSlotSRGB.image.colorspace_settings.name = "Non-Color"
+    except:
+        print("")
+        
+    try:         
+        for DyeslotSRGB in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeslotSRGB.label == "Dyeslot Texture [Set this to sRGB]":
+                DyeslotSRGB.label == "Dyemap Texture [Set this to Non-Color]"
+                if DyeslotSRGB.type == 'TEX_IMAGE' and DyeslotSRGB.image:
+                    DyeslotSRGB.image.colorspace_settings.name = "Non-Color"
+    except:
+        print("")
+        
+#delete arbitrary nodes
+    try:       
+        for DeleteFrame01 in bpy.context.active_object.active_material.node_tree.nodes:
+            if DeleteFrame01.label == "Do not connect these points if item":
+                bpy.context.active_object.active_material.node_tree.nodes.remove(bpy.context.active_object.active_material.node_tree.nodes['Frame'])
+                bpy.context.active_object.active_material.node_tree.nodes.remove(bpy.context.active_object.active_material.node_tree.nodes['Frame.001'])
+                bpy.context.active_object.active_material.node_tree.nodes.remove(bpy.context.active_object.active_material.node_tree.nodes['Reroute'])
+                bpy.context.active_object.active_material.node_tree.nodes.remove(bpy.context.active_object.active_material.node_tree.nodes['Reroute.001'])
+                bpy.context.active_object.active_material.node_tree.nodes.remove(bpy.context.active_object.active_material.node_tree.nodes['Group.002'])
+    except:
+        print("")
+
+    try:
+        for DeleteFrame02 in bpy.context.active_object.active_material.node_tree.nodes:
+            if DeleteFrame02.label == "was released before Beyond Light":
+                bpy.context.active_object.active_material.node_tree.nodes.remove(bpy.context.active_object.active_material.node_tree.nodes['Frame.007'])
+                bpy.context.active_object.active_material.node_tree.nodes.remove(bpy.context.active_object.active_material.node_tree.nodes['Frame.006'])
+    except:
+        print("")
+        
+#Fix Blender 4.0 interface
+    try:
+        if (4, 0, 0) < bpy.app.version:
+            Shader_Preset.interface.new_socket(name='Dyemap Color', in_out='INPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Dyemap Alpha', in_out='INPUT', socket_type='NodeSocketFloat')
+            Shader_Preset.interface.new_socket(name='Slot Override [1-6]', in_out='INPUT', socket_type='NodeSocketFloat')
+            Shader_Preset.interface.new_socket(name='Dye Color A', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Dye Color B', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Wear Remap_A', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Wear Remap_B', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Roughness Remap_A', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Roughness Remap_B', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Roughness Remap_C', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Detail Diffuse', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Detail Normal', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Detail Blends', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Worn Detail Blends', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Iridescence, Fuzz, Transmission', in_out='OUTPUT', socket_type='NodeSocketColor')
+            Shader_Preset.interface.new_socket(name='Emission', in_out='OUTPUT', socket_type='NodeSocketColor')
+        else:    
+            Shader_Preset.inputs.new('NodeSocketColor', 'Dyemap Color')
+            Shader_Preset.inputs.new('NodeSocketFloat', 'Dyemap Alpha')
+            Shader_Preset.inputs.new('NodeSocketFloat', 'Slot Override [1-6]')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Dye Color A')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Dye Color B')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Wear Remap_A')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Wear Remap_B')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Roughness Remap_A')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Roughness Remap_B')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Roughness Remap_C')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Detail Diffuse')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Detail Normal')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Detail Blends')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Worn Detail Blends')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Iridescence, Fuzz, Transmission')
+            Shader_Preset.outputs.new('NodeSocketColor', 'Emission')
+    except:
+        print("")
+
+    try:    
+        for DyemapNonDashColorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyemapNonDashColorConnections.label == "DyeMap Texture [Set this to Non-Color]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyemapNonDashColorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyemapNonDashColorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                        
+        for DyemapLowercaseNonDashColorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyemapLowercaseNonDashColorConnections.label == "Dyemap Texture [Set this to Non-Color]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyemapLowercaseNonDashColorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyemapLowercaseNonDashColorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                        
+        for DyemapNonColorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyemapNonColorConnections.label == "DyeMap Texture [Set this to NonColor]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyemapNonColorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyemapNonColorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                        
+        for DyemapLowercaseNonColorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyemapLowercaseNonColorConnections.label == "Dyemap Texture [Set this to NonColor]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyemapLowercaseNonColorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyemapLowercaseNonColorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                        
+        for DyeslotNoncolorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeslotNoncolorConnections.label == "DyeSlot Texture [Set this to NonColor]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotNoncolorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotNoncolorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                        
+        for DyeslotLowercaseNoncolorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeslotLowercaseNoncolorConnections.label == "Dyeslot Texture [Set this to NonColor]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotLowercaseNoncolorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotLowercaseNoncolorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+        
+        for DyeslotNonDashcolorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeslotNonDashcolorConnections.label == "DyeSlot Texture [Set this to Non-Color]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotNonDashcolorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotNonDashcolorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                        
+        for DyeslotLowercaseNonDashcolorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeslotLowercaseNonDashcolorConnections.label == "DyeSlot Texture [Set this to Non-Color]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotLowercaseNonDashcolorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotLowercaseNonDashcolorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                        
+        for DyeslotsrgbConnections in bpy.context.active_object.active_material.node_tree.nodes:
+            if DyeslotsrgbConnections.label == "DyeSlot Texture [Set this to sRGB]":
+                for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                    if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotsrgbConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                        bpy.context.active_object.active_material.node_tree.links.new(DyeslotsrgbConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+
+        for ShaderPreset in bpy.context.active_object.active_material.node_tree.nodes:
+            if ShaderPreset.name == "Shader Preset":
+                for MainShader in bpy.context.active_object.active_material.node_tree.nodes:
+                    if MainShader.name == "D2 PlayerGear Shader":
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Dye Color A'], MainShader.inputs['Dye Color A'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Dye Color B'], MainShader.inputs['Dye Color B'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Wear Remap_A'], MainShader.inputs['Wear Remap_A'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Wear Remap_B'], MainShader.inputs['Wear Remap_B'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Roughness Remap_A'], MainShader.inputs['Roughness Remap_A'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Roughness Remap_B'], MainShader.inputs['Roughness Remap_B'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Roughness Remap_C'], MainShader.inputs['Roughness Remap_C'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Detail Diffuse'], MainShader.inputs['Detail Diffuse'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Detail Normal'], MainShader.inputs['Detail Normal'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Detail Blends'], MainShader.inputs['Detail Blends'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Worn Detail Blends'], MainShader.inputs['Worn Detail Blends'])
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Iridescence, Fuzz, Transmission'], MainShader.inputs['Iridescence, Fuzz, Transmission'])    
+                        bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Emission'], MainShader.inputs['Emission'])
+    except:
+        print("")
+
+#Blender 4.0 Specular IOR fix
+    try:
+        if (4, 0, 0) <= bpy.app.version:    
+            for MainShaders in bpy.context.active_object.active_material.node_tree.nodes:
+                if MainShaders.name == "D2 PlayerGear Shader":
+                    node_group = bpy.data.node_groups[str==MainShaders.node_tree]
+                    try: 
+                        node_group.nodes['Principled BSDF'].inputs['IOR'].default_value = (1.450)
+                    except: 
+                        print("")
+                    try: 
+                        node_group.nodes['Principled BSDF.001'].inputs['IOR'].default_value = (1.450)
+                    except:("") 
+    except:
+        print("") 
+                                  
 #Frames
     ArmorPrimaryFrame = Shader_Preset.nodes.new("NodeFrame")
     ArmorPrimaryFrame.label = "Armor Primary"
@@ -289,7 +555,7 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     WornSuitSecondaryFrame.color = (CSeconWear3.X, CSeconWear3.Y, CSeconWear3.Z)
 
     DoNotTouchFrame = Shader_Preset.nodes.new("NodeFrame")
-    DoNotTouchFrame.label = "DO NOT TOUCH!"
+    DoNotTouchFrame.label = "      DO NOT TOUCH!"
     DoNotTouchFrame.use_custom_color = True
     DoNotTouchFrame.color = (0.0, 0.0, 0.0)
 #Texture nodes
@@ -302,11 +568,29 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     armor_primary_detail_diffuse_map.extension = 'REPEAT'
     armor_primary_detail_diffuse_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DiffMap1"), check_existing=False)
-    DetailDiffuse01 = bpy.data.images.get("DiffMap1")
-    DetailDiffuse01.colorspace_settings.name = "sRGB"
-    DetailDiffuse01.alpha_mode = "CHANNEL_PACKED"
-    armor_primary_detail_diffuse_map.image = DetailDiffuse01
+    try:
+        bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DiffMap1"), check_existing=True)
+        DetailDiffuse01 = bpy.data.images.get("DiffMap1")
+        DetailDiffuse01.colorspace_settings.name = "sRGB"
+        DetailDiffuse01.alpha_mode = "CHANNEL_PACKED"
+        armor_primary_detail_diffuse_map.image = DetailDiffuse01
+    except:
+        try:
+            bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/Gray25_Dummy.png"), check_existing=True)
+            DetailDiffuse01 = bpy.data.images.get("Gray25_Dummy.png")
+            DetailDiffuse01.colorspace_settings.name = "sRGB"
+            DetailDiffuse01.alpha_mode = "CHANNEL_PACKED"
+            armor_primary_detail_diffuse_map.image = DetailDiffuse01
+            print("Failed to get Armor Detail Diffuse Texture DiffMap1")
+        except:
+            try:
+                DetailDiffuse01 = bpy.data.images.get("Gray25_Dummy.png")
+                DetailDiffuse01.colorspace_settings.name = "sRGB"
+                DetailDiffuse01.alpha_mode = "CHANNEL_PACKED"
+                armor_primary_detail_diffuse_map.image = DetailDiffuse01
+                print("Failed to get Armor Detail Diffuse Texture DiffMap1")
+            except:
+                print("Failed to get Armor Detail Diffuse Texture DiffMap1 and dummy texture")
 
     armor_primary_detail_normal_map = Shader_Preset.nodes.new("ShaderNodeTexImage")
     armor_primary_detail_normal_map.label = "Detail Normal Map"
@@ -317,11 +601,29 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     armor_primary_detail_normal_map.extension = 'REPEAT'
     armor_primary_detail_normal_map.hide = True
     
-    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/NormMap1"), check_existing=False)
-    DetailNormal01 = bpy.data.images.get("NormMap1")
-    DetailNormal01.colorspace_settings.name = "Non-Color"
-    DetailNormal01.alpha_mode = "CHANNEL_PACKED"
-    armor_primary_detail_normal_map.image = DetailNormal01
+    try:
+        bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/NormMap1"), check_existing=True)
+        DetailNormal01 = bpy.data.images.get("NormMap1")
+        DetailNormal01.colorspace_settings.name = "Non-Color"
+        DetailNormal01.alpha_mode = "CHANNEL_PACKED"
+        armor_primary_detail_normal_map.image = DetailNormal01
+    except:
+        try:
+            bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/NormalMap_Dummy.png"), check_existing=True)
+            DetailNormal01 = bpy.data.images.get("NormalMap_Dummy.png")
+            DetailNormal01.colorspace_settings.name = "Non-Color"
+            DetailNormal01.alpha_mode = "CHANNEL_PACKED"
+            armor_primary_detail_normal_map.image = DetailNormal01
+            print("Failed to get Armor Detail Normal Map Texture NormMap1")
+        except:
+            try:
+                DetailNormal01 = bpy.data.images.get("NormalMap_Dummy.png")
+                DetailNormal01.colorspace_settings.name = "Non-Color"
+                DetailNormal01.alpha_mode = "CHANNEL_PACKED"
+                armor_primary_detail_normal_map.image = DetailNormal01
+                print("Failed to get Armor Detail Normal Map Texture NormMap1")
+            except:
+                print("Failed to get Armor Detail Normal Map Texture NormMap1 and dummy texture")
 
     cloth_primary_detail_diffuse_map = Shader_Preset.nodes.new("ShaderNodeTexImage")
     cloth_primary_detail_diffuse_map.label = "Detail Diffuse Map"
@@ -332,11 +634,29 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_detail_diffuse_map.extension = 'REPEAT'
     cloth_primary_detail_diffuse_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/DiffMap2"), check_existing=False)
-    DetailDiffuse02 = bpy.data.images.get("DiffMap2")
-    DetailDiffuse02.colorspace_settings.name = "sRGB"
-    DetailDiffuse02.alpha_mode = "CHANNEL_PACKED"
-    cloth_primary_detail_diffuse_map.image = DetailDiffuse02
+    try:
+        bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/DiffMap2"), check_existing=True)
+        DetailDiffuse02 = bpy.data.images.get("DiffMap2")
+        DetailDiffuse02.colorspace_settings.name = "sRGB"
+        DetailDiffuse02.alpha_mode = "CHANNEL_PACKED"
+        cloth_primary_detail_diffuse_map.image = DetailDiffuse02
+    except:
+        try:
+            bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/Gray25_Dummy.png"), check_existing=True)
+            DetailDiffuse02 = bpy.data.images.get("Gray25_Dummy.png")
+            DetailDiffuse02.colorspace_settings.name = "sRGB"
+            DetailDiffuse02.alpha_mode = "CHANNEL_PACKED"
+            cloth_primary_detail_diffuse_map.image = DetailDiffuse02
+            print("Failed to get Cloth Detail Diffuse Texture DiffMap2")
+        except:
+            try:
+                DetailDiffuse02 = bpy.data.images.get("Gray25_Dummy.png")
+                DetailDiffuse02.colorspace_settings.name = "sRGB"
+                DetailDiffuse02.alpha_mode = "CHANNEL_PACKED"
+                cloth_primary_detail_diffuse_map.image = DetailDiffuse02
+                print("Failed to get Cloth Detail Diffuse Texture DiffMap2")
+            except:
+                print("Failed to get Cloth Detail Diffuse Texture DiffMap2 and dummy texture")
 
     cloth_primary_detail_normal_map = Shader_Preset.nodes.new("ShaderNodeTexImage")
     cloth_primary_detail_normal_map.label = "Detail Normal Map"
@@ -347,11 +667,29 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_detail_normal_map.extension = 'REPEAT'
     cloth_primary_detail_normal_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/NormMap2"), check_existing=False)
-    DetailNormal02 = bpy.data.images.get("NormMap2")
-    DetailNormal02.colorspace_settings.name = "Non-Color"
-    DetailNormal02.alpha_mode = "CHANNEL_PACKED"
-    cloth_primary_detail_normal_map.image = DetailNormal02
+    try:
+        bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/NormMap2"), check_existing=True)
+        DetailNormal02 = bpy.data.images.get("NormMap2")
+        DetailNormal02.colorspace_settings.name = "Non-Color"
+        DetailNormal02.alpha_mode = "CHANNEL_PACKED"
+        cloth_primary_detail_normal_map.image = DetailNormal02
+    except:
+        try:
+            bpy.data.images.load(os.path.join(riplocation,"OUTPUTPATH/NormalMap_Dummy.png"), check_existing=True)
+            DetailNormal02 = bpy.data.images.get("NormalMap_Dummy.png")
+            DetailNormal02.colorspace_settings.name = "Non-Color"
+            DetailNormal02.alpha_mode = "CHANNEL_PACKED"
+            cloth_primary_detail_normal_map.image = DetailNormal02
+            print("Failed to get Cloth Detail Normal Map Texture NormMap2")
+        except:
+            try:
+                DetailNormal02 = bpy.data.images.get("NormalMap_Dummy.png")
+                DetailNormal02.colorspace_settings.name = "Non-Color"
+                DetailNormal02.alpha_mode = "CHANNEL_PACKED"
+                cloth_primary_detail_normal_map.image = DetailNormal02
+                print("Failed to get Cloth Detail Normal Map Texture NormMap2")
+            except:
+                print("Failed to get Cloth Detail Normal Map Texture NormMap2 and dummy texture")
     
     suit_primary_detail_diffuse_map = Shader_Preset.nodes.new("ShaderNodeTexImage")
     suit_primary_detail_diffuse_map.label = "Detail Diffuse Map"
@@ -362,11 +700,29 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_detail_diffuse_map.extension = 'REPEAT'
     suit_primary_detail_diffuse_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DiffMap3"), check_existing=False)
-    DetailDiffuse03 = bpy.data.images.get("DiffMap3")
-    DetailDiffuse03.colorspace_settings.name = "sRGB"
-    DetailDiffuse03.alpha_mode = "CHANNEL_PACKED"
-    suit_primary_detail_diffuse_map.image = DetailDiffuse03
+    try:
+        bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/DiffMap3"), check_existing=True)
+        DetailDiffuse03 = bpy.data.images.get("DiffMap3")
+        DetailDiffuse03.colorspace_settings.name = "sRGB"
+        DetailDiffuse03.alpha_mode = "CHANNEL_PACKED"
+        suit_primary_detail_diffuse_map.image = DetailDiffuse03
+    except:
+        try:
+            bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/Gray25_Dummy.png"), check_existing=True)
+            DetailDiffuse03 = bpy.data.images.get("Gray25_Dummy.png")
+            DetailDiffuse03.colorspace_settings.name = "sRGB"
+            DetailDiffuse03.alpha_mode = "CHANNEL_PACKED"
+            suit_primary_detail_diffuse_map.image = DetailDiffuse03
+            print("Failed to get Suit Detail Diffuse Texture DiffMap3")
+        except:
+            try:
+                DetailDiffuse03 = bpy.data.images.get("Gray25_Dummy.png")
+                DetailDiffuse03.colorspace_settings.name = "sRGB"
+                DetailDiffuse03.alpha_mode = "CHANNEL_PACKED"
+                suit_primary_detail_diffuse_map.image = DetailDiffuse03
+                print("Failed to get Suit Detail Diffuse Texture DiffMap3")
+            except:
+                print("Failed to get Suit Detail Diffuse Texture DiffMap3 and dummy texture")
 
     suit_primary_detail_normal_map = Shader_Preset.nodes.new("ShaderNodeTexImage")
     suit_primary_detail_normal_map.label = "Detail Normal Map"
@@ -377,27 +733,406 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_detail_normal_map.extension = 'REPEAT'
     suit_primary_detail_normal_map.hide = True
 
-    bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/NormMap3"), check_existing=False)
-    DetailNormal03 = bpy.data.images.get("NormMap3")
-    DetailNormal03.colorspace_settings.name = "Non-Color"
-    DetailNormal03.alpha_mode = "CHANNEL_PACKED"
-    suit_primary_detail_normal_map.image = DetailNormal03
+    try:
+        bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/NormMap3"), check_existing=True)
+        DetailNormal03 = bpy.data.images.get("NormMap3")
+        DetailNormal03.colorspace_settings.name = "Non-Color"
+        DetailNormal03.alpha_mode = "CHANNEL_PACKED"
+        suit_primary_detail_normal_map.image = DetailNormal03
+    except:
+        try:
+            bpy.data.images.load(os.path.join(riplocation, "OUTPUTPATH/NormalMap_Dummy.png"), check_existing=True)
+            DetailNormal03 = bpy.data.images.get("NormalMap_Dummy.png")
+            DetailNormal03.colorspace_settings.name = "Non-Color"
+            DetailNormal03.alpha_mode = "CHANNEL_PACKED"
+            suit_primary_detail_normal_map.image = DetailNormal03
+            print("Failed to get Suit Detail Normal Map Texture NormMap3")
+        except:
+            try:
+                DetailNormal03 = bpy.data.images.get("NormalMap_Dummy.png")
+                DetailNormal03.colorspace_settings.name = "Non-Color"
+                DetailNormal03.alpha_mode = "CHANNEL_PACKED"
+                suit_primary_detail_normal_map.image = DetailNormal03
+                print("Failed to get Suit Detail Normal Map Texture NormMap3")
+            except:
+                print("Failed to get Suit Detail Normal Map Texture NormMap3 and dummy texture")
+            
+#api value fixes
+    #armor slot fixes
+    if armordetaildiffusescale_raw == (0.000, 0.000, 0.000):
+        armordetaildiffusescale = (1.500, 1.500, 0.000)
+        armorprimarydetaildiffuseblend = (1.000)
+        armorprimarydetailroughnessblend = (0.500)
+        wornarmorprimarydetaildiffuseblend = (1.000)
+        wornarmorprimarydetailroughnessblend = (0.500)
+        armorsecondarydetaildiffuseblend = (1.000)
+        armorsecondarydetailroughnessblend = (0.500)
+        wornarmorsecondarydetaildiffuseblend = (1.000)
+        wornarmorsecondarydetailroughnessblend = (0.500)
+        print("Armor Diffuse is animated")
+    else:
+        armordetaildiffusescale = armordetaildiffusescale_raw
+        armorprimarydetaildiffuseblend = armorprimarydetaildiffuseblend_raw
+        armorprimarydetailroughnessblend = armorprimarydetailroughnessblend_raw
+        wornarmorprimarydetaildiffuseblend = wornarmorprimarydetaildiffuseblend_raw
+        wornarmorprimarydetailroughnessblend = wornarmorprimarydetailroughnessblend_raw
+        armorsecondarydetaildiffuseblend = armorsecondarydetaildiffuseblend_raw
+        armorsecondarydetailroughnessblend = armorsecondarydetailroughnessblend_raw
+        wornarmorsecondarydetaildiffuseblend = wornarmorsecondarydetaildiffuseblend_raw
+        wornarmorsecondarydetailroughnessblend = wornarmorsecondarydetailroughnessblend_raw
+        
+    if armordetailnormalscale_raw == (0.000, 0.000, 0.000):
+        armordetailnormalscale = (1.500, 1.500, 0.000)
+        armorprimarydetailnormalblend = (1.000)
+        wornarmorprimarydetailnormalblend = (1.000)
+        armorsecondarydetailnormalblend = (1.000)
+        wornarmorsecondarydetailnormalblend = (1.000)
+        print("Armor Normal is animated")
+    else:
+        armordetailnormalscale = armordetailnormalscale_raw
+        armorprimarydetailnormalblend = armorprimarydetailnormalblend_raw
+        wornarmorprimarydetailnormalblend = wornarmorprimarydetailnormalblend_raw
+        armorsecondarydetailnormalblend = armorsecondarydetailnormalblend_raw
+        wornarmorsecondarydetailnormalblend = wornarmorsecondarydetailnormalblend_raw
+    
+    #cloth slot fixes
+    if clothdetaildiffusescale_raw == (0.000, 0.000, 0.000):
+        clothdetaildiffusescale = (1.500, 1.500, 0.000)
+        clothprimarydetaildiffuseblend = (1.000)
+        clothprimarydetailroughnessblend = (0.500)
+        wornclothprimarydetaildiffuseblend = (1.000)
+        wornclothprimarydetailroughnessblend = (0.500)
+        clothsecondarydetaildiffuseblend = (1.000)
+        clothsecondarydetailroughnessblend = (0.500)
+        wornclothsecondarydetaildiffuseblend = (1.000)
+        wornclothsecondarydetailroughnessblend = (0.500)
+        print("Cloth Diffuse is animated")
+    else:
+        clothdetaildiffusescale = clothdetaildiffusescale_raw
+        clothprimarydetaildiffuseblend = clothprimarydetaildiffuseblend_raw
+        clothprimarydetailroughnessblend = clothprimarydetailroughnessblend_raw
+        wornclothprimarydetaildiffuseblend = wornclothprimarydetaildiffuseblend_raw
+        wornclothprimarydetailroughnessblend = wornclothprimarydetailroughnessblend_raw
+        clothsecondarydetaildiffuseblend = clothsecondarydetaildiffuseblend_raw
+        clothsecondarydetailroughnessblend = clothsecondarydetailroughnessblend_raw
+        wornclothsecondarydetaildiffuseblend = wornclothsecondarydetaildiffuseblend_raw
+        wornclothsecondarydetailroughnessblend = wornclothsecondarydetailroughnessblend_raw
+        
+    if clothdetailnormalscale_raw == (0.000, 0.000, 0.000):
+        clothdetailnormalscale = (1.500, 1.500, 0.000)
+        clothprimarydetailnormalblend = (1.000)
+        wornclothprimarydetailnormalblend = (1.000)
+        clothsecondarydetailnormalblend = (1.000)
+        wornclothsecondarydetailnormalblend = (1.000)
+        print("Cloth Normal is animated")
+    else:
+        clothdetailnormalscale = clothdetailnormalscale_raw
+        clothdetailnormalscale = clothdetailnormalscale_raw
+        clothprimarydetailnormalblend = clothprimarydetailnormalblend_raw
+        wornclothprimarydetailnormalblend = wornclothprimarydetailnormalblend_raw
+        clothsecondarydetailnormalblend = clothsecondarydetailnormalblend_raw
+        wornclothsecondarydetailnormalblend = wornclothsecondarydetailnormalblend_raw
+    
+    #suit slot fixes
+    if suitdetaildiffusescale_raw == (0.000, 0.000, 0.000):
+        suitdetaildiffusescale = (1.500, 1.500, 0.000)
+        suitprimarydetaildiffuseblend = (1.000)
+        suitprimarydetailroughnessblend = (0.500)
+        wornsuitprimarydetaildiffuseblend = (1.000)
+        wornsuitprimarydetailroughnessblend = (0.500)
+        suitsecondarydetaildiffuseblend = (1.000)
+        suitsecondarydetailroughnessblend = (0.500)
+        wornsuitsecondarydetaildiffuseblend = (1.000)
+        wornsuitsecondarydetailroughnessblend = (0.500)
+        print("Suit Diffuse is animated")
+    else:
+        suitdetaildiffusescale = suitdetaildiffusescale_raw
+        suitprimarydetaildiffuseblend = suitprimarydetaildiffuseblend_raw
+        suitprimarydetailroughnessblend = suitprimarydetailroughnessblend_raw
+        wornsuitprimarydetaildiffuseblend = wornsuitprimarydetaildiffuseblend_raw
+        wornsuitprimarydetailroughnessblend = wornsuitprimarydetailroughnessblend_raw
+        suitsecondarydetaildiffuseblend = suitsecondarydetaildiffuseblend_raw
+        suitsecondarydetailroughnessblend = suitsecondarydetailroughnessblend_raw
+        wornsuitsecondarydetaildiffuseblend = wornsuitsecondarydetaildiffuseblend_raw
+        wornsuitsecondarydetailroughnessblend = wornsuitsecondarydetailroughnessblend_raw
+        
+    if suitdetailnormalscale_raw == (0.000, 0.000, 0.000):
+        suitdetailnormalscale = (1.500, 1.500, 1.500)
+        suitprimarydetailnormalblend = (1.000)
+        wornsuitprimarydetailnormalblend = (1.000)
+        suitsecondarydetailnormalblend = (1.000)
+        wornsuitsecondarydetailnormalblend = (1.000)
+        print("Suit Normal is animated")
+    else:
+        suitdetailnormalscale = suitdetailnormalscale_raw
+        suitprimarydetailnormalblend = suitprimarydetailnormalblend_raw
+        wornsuitprimarydetailnormalblend = wornsuitprimarydetailnormalblend_raw
+        suitsecondarydetailnormalblend = suitsecondarydetailnormalblend_raw
+        wornsuitsecondarydetailnormalblend = wornsuitsecondarydetailnormalblend_raw
 
 #nodes
+        Slot_1 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Slot_1.label = 'Slot_1'
+    Slot_1.parent = DoNotTouchFrame
+    Slot_1.location = (-1880, -3702)
+    
+    Slot_2 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Slot_2.label = 'Slot_2'
+    Slot_2.parent = DoNotTouchFrame
+    Slot_2.location = (-1880, -3702)
+    
+    Slot_3 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Slot_3.label = 'Slot_3'
+    Slot_3.parent = DoNotTouchFrame
+    Slot_3.location = (-1880, -3702)
+    
+    Slot_4 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Slot_4.label = "Slot_4"
+    Slot_4.parent = DoNotTouchFrame
+    Slot_4.location = (-1880, -3702)
+    
+    Slot_5 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Slot_5.label = 'Slot_5'
+    Slot_5.parent = DoNotTouchFrame
+    Slot_5.location = (-1880, -3702)
+    
+    Switcher_1 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Switcher_1.label = 'Switcher_1'
+    Switcher_1.parent = DoNotTouchFrame
+    Switcher_1.location = (-1880, -3702)
+    
+    Switcher_2 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Switcher_2.label = 'Switcher_2'
+    Switcher_2.parent = DoNotTouchFrame
+    Switcher_2.location = (-1880, -3702)
+    
+    Switcher_3 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Switcher_3.label = 'Switcher_3'
+    Switcher_3.parent = DoNotTouchFrame
+    Switcher_3.location = (-1880, -3702)
+    
+    Switcher_4 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Switcher_4.label = "Switcher_4"
+    Switcher_4.parent = DoNotTouchFrame
+    Switcher_4.location = (-1880, -3702)
+    
+    Switcher_5 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
+    Switcher_5.label = 'Switcher_5'
+    Switcher_5.parent = DoNotTouchFrame
+    Switcher_5.location = (-1880, -3702)
+    
+    Add_1 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Add_1.operation = 'ADD'
+    Add_1.label = 'Add_1'
+    Add_1.inputs[1].default_value = (-1.000)
+    Add_1.parent = DoNotTouchFrame
+    Add_1.location = (-1880, -3702)
+    
+    Add_2 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Add_2.operation = 'ADD'
+    Add_2.label = 'Add_2'
+    Add_2.inputs[1].default_value = (-2.000)
+    Add_2.parent = DoNotTouchFrame
+    Add_2.location = (-1880, -3702)
+    
+    Add_3 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Add_3.operation = 'ADD'
+    Add_3.label = 'Add_3'
+    Add_3.inputs[1].default_value = (-3.000)
+    Add_3.parent = DoNotTouchFrame
+    Add_3.location = (-1880, -3702)
+    
+    Add_4 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Add_4.operation = 'ADD'
+    Add_4.label = "Add_4"
+    Add_4.inputs[1].default_value = (-4.000)
+    Add_4.parent = DoNotTouchFrame
+    Add_4.location = (-1880, -3702)
+    
+    Add_5 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Add_5.operation = 'ADD'
+    Add_5.label = 'Add_5'
+    Add_5.inputs[1].default_value = (-5.000)
+    Add_5.parent = DoNotTouchFrame
+    Add_5.location = (-1880, -3702)
+    
+    MultiplyAdd_01 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_01.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_01.label = 'MultiplyAdd_01'
+    MultiplyAdd_01.use_clamp = True
+    MultiplyAdd_01.inputs[1].default_value = (1000)
+    MultiplyAdd_01.inputs[2].default_value = (-333)
+    MultiplyAdd_01.parent = DoNotTouchFrame
+    MultiplyAdd_01.location = (-1880, -3702)
+    
+    MultiplyAdd_02 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_02.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_02.label = 'MultiplyAdd_02'
+    MultiplyAdd_02.use_clamp = True
+    MultiplyAdd_02.inputs[1].default_value = (1000)
+    MultiplyAdd_02.inputs[2].default_value = (-666)
+    MultiplyAdd_02.parent = DoNotTouchFrame
+    MultiplyAdd_02.location = (-1880, -3702)
+    
+    MultiplyAdd_03 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_03.operation = 'MULTIPLY'
+    MultiplyAdd_03.label = 'MultiplyAdd_03'
+    MultiplyAdd_03.use_clamp = True
+    MultiplyAdd_03.inputs[1].default_value = (1000)
+    MultiplyAdd_03.parent = DoNotTouchFrame
+    MultiplyAdd_03.location = (-1880, -3702)
+    
+    MultiplyAdd_04 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_04.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_04.label = "MultiplyAdd_04"
+    MultiplyAdd_04.use_clamp = True
+    MultiplyAdd_04.inputs[1].default_value = (1000)
+    MultiplyAdd_04.inputs[2].default_value = (-333)
+    MultiplyAdd_04.parent = DoNotTouchFrame
+    MultiplyAdd_04.location = (-1880, -3702)
+    
+    MultiplyAdd_05 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_05.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_05.label = 'MultiplyAdd_05'
+    MultiplyAdd_05.use_clamp = True
+    MultiplyAdd_05.inputs[1].default_value = (1000)
+    MultiplyAdd_05.inputs[2].default_value = (-666)
+    MultiplyAdd_05.parent = DoNotTouchFrame
+    MultiplyAdd_05.location = (-1880, -3702)
+    
+    MultiplyAdd_06 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_06.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_06.label = 'MultiplyAdd_06'
+    MultiplyAdd_06.use_clamp = True
+    MultiplyAdd_06.inputs[1].default_value = (1000000)
+    MultiplyAdd_06.inputs[2].default_value = (-500000)
+    MultiplyAdd_06.parent = DoNotTouchFrame
+    MultiplyAdd_06.location = (-1880, -3702)
+    
+    MultiplyAdd_07 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_07.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_07.label = "MultiplyAdd_07"
+    MultiplyAdd_07.use_clamp = True
+    MultiplyAdd_07.inputs[1].default_value = (1000000)
+    MultiplyAdd_07.inputs[2].default_value = (-500000)
+    MultiplyAdd_07.parent = DoNotTouchFrame
+    MultiplyAdd_07.location = (-1880, -3702)
+    
+    MultiplyAdd_08 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_08.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_08.label = 'MultiplyAdd_08'
+    MultiplyAdd_08.use_clamp = True
+    MultiplyAdd_08.inputs[1].default_value = (1000000)
+    MultiplyAdd_08.inputs[2].default_value = (-500000)
+    MultiplyAdd_08.parent = DoNotTouchFrame
+    MultiplyAdd_08.location = (-1880, -3702)
+    
+    Multiply_01 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Multiply_01.operation = 'MULTIPLY'
+    Multiply_01.label = "Multiply_01"
+    Multiply_01.parent = DoNotTouchFrame
+    Multiply_01.location = (-1880, -3702)
+    
+    Multiply_02 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Multiply_02.operation = 'MULTIPLY'
+    Multiply_02.label = 'Multiply_02'
+    Multiply_02.parent = DoNotTouchFrame
+    Multiply_02.location = (-1880, -3702)
+    
+    Floor_01 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Floor_01.operation = 'FLOOR'
+    Floor_01.label = 'Floor_01'
+    Floor_01.parent = DoNotTouchFrame
+    Floor_01.location = (-1880, -3702)
+    
+    Separate_XYZ_101 = Shader_Preset.nodes.new("ShaderNodeSeparateXYZ")
+    Separate_XYZ_101.label = 'Separate_XYZ_101'
+    Separate_XYZ_101.parent = DoNotTouchFrame
+    Separate_XYZ_101.location = (-1880, -3702)
+    
+    attribute = Shader_Preset.nodes.new("ShaderNodeAttribute")
+    attribute.label = 'Slots'
+    attribute.attribute_name = 'slots'
+    attribute.parent = DoNotTouchFrame
+    attribute.location = (-1880, -3702)
+    
+    Add_6 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Add_6.operation = 'ADD'
+    Add_6.use_clamp = True
+    Add_6.label = 'Add_6'
+    Add_6.inputs[1].default_value = (-2.000)
+    Add_6.parent = DoNotTouchFrame
+    Add_6.location = (-1880, -3702)
+    
+    MultiplyAdd_09 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_09.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_09.label = 'MultiplyAdd_09'
+    MultiplyAdd_09.use_clamp = True
+    MultiplyAdd_09.inputs[1].default_value = (-100000)
+    MultiplyAdd_09.inputs[2].default_value = (1)
+    MultiplyAdd_09.parent = DoNotTouchFrame
+    MultiplyAdd_09.location = (-1880, -3702)
+    
+    Multiply_03 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Multiply_03.operation = 'MULTIPLY'
+    Multiply_03.label = 'Multiply_03'
+    Multiply_03.parent = DoNotTouchFrame
+    Multiply_03.location = (-1880, -3702)
+    
+    Multiply_04 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Multiply_04.operation = 'MULTIPLY'
+    Multiply_04.label = 'Multiply_04'
+    Multiply_04.parent = DoNotTouchFrame
+    Multiply_04.location = (-1880, -3702)
+    
+    MultiplyAdd_10 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_10.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_10.label = 'MultiplyAdd_10'
+    MultiplyAdd_10.use_clamp = True
+    MultiplyAdd_10.inputs[1].default_value = (100000)
+    MultiplyAdd_10.inputs[2].default_value = (-99999.0)
+    MultiplyAdd_10.parent = DoNotTouchFrame
+    MultiplyAdd_10.location = (-1880, -3702)
+    
+    MultiplyAdd_11 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_11.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_11.label = 'MultiplyAdd_11'
+    MultiplyAdd_11.use_clamp = True
+    MultiplyAdd_11.inputs[1].default_value = (-100000)
+    MultiplyAdd_11.inputs[2].default_value = (1)
+    MultiplyAdd_11.parent = DoNotTouchFrame
+    MultiplyAdd_11.location = (-1880, -3702)
+    
+    MultiplyAdd_12 = Shader_Preset.nodes.new("ShaderNodeMath")
+    MultiplyAdd_12.operation = 'MULTIPLY_ADD'
+    MultiplyAdd_12.label = 'MultiplyAdd_12'
+    MultiplyAdd_12.use_clamp = True
+    MultiplyAdd_12.inputs[1].default_value = (100000)
+    MultiplyAdd_12.inputs[2].default_value = (-99999.0)
+    MultiplyAdd_12.parent = DoNotTouchFrame
+    MultiplyAdd_12.location = (-1880, -3702)
+    
+    Separate_XYZ_103 = Shader_Preset.nodes.new("ShaderNodeSeparateXYZ")
+    Separate_XYZ_103.label = 'Separate_XYZ_103'
+    Separate_XYZ_103.parent = DoNotTouchFrame
+    Separate_XYZ_103.location = (-1880, -3702)
+    
+    group_input = Shader_Preset.nodes.new("NodeGroupInput")
+    group_input.parent = DoNotTouchFrame
+    group_input.location = (-1880, -3702)
+    
+    Add_07 = Shader_Preset.nodes.new("ShaderNodeMath")
+    Add_07.operation = 'ADD'
+    Add_07.label = 'Add_07'
+    Add_07.parent = DoNotTouchFrame
+    Add_07.location = (-1880, -3702)
+    
     worn_suit_secondary_detail_diffuse_blend = Shader_Preset.nodes.new("ShaderNodeValue")
     worn_suit_secondary_detail_diffuse_blend.label = "Detail Diffuse Blend"
     worn_suit_secondary_detail_diffuse_blend.use_custom_color = True
     worn_suit_secondary_detail_diffuse_blend.color = (CSeconWear3.X, CSeconWear3.Y, CSeconWear3.Z)
     worn_suit_secondary_detail_diffuse_blend.hide = True
     worn_suit_secondary_detail_diffuse_blend.outputs[0].default_value = wornsuitsecondarydetaildiffuseblend
-
-    math_017 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_017.operation = 'MULTIPLY_ADD'
-    math_017.use_clamp = True
-
-    math_017.inputs[1].default_value = 100000.0
-
-    math_017.inputs[2].default_value = -99999.0
 
     suit_detail_diffuse_transform = Shader_Preset.nodes.new("ShaderNodeMapping")
     suit_detail_diffuse_transform.label = "Detail Diffuse Transform"
@@ -441,13 +1176,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_suit_primary_roughness_remap_z.hide = True
     worn_suit_primary_roughness_remap_z.outputs[0].default_value = wornsuitprimaryroughnessremapZ
 
-    math_008 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_008.operation = 'MULTIPLY_ADD'
-
-    math_008.inputs[1].default_value = 1000.0
-
-    math_008.inputs[2].default_value = -666.0
-
     reroute_190 = Shader_Preset.nodes.new("NodeReroute")
 
     combine_xyz_016 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
@@ -480,12 +1208,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_cloth_primary_dye_color.hide = True
     worn_cloth_primary_dye_color.outputs[0].default_value = wornclothprimarydyecolor
 
-    group_input = Shader_Preset.nodes.new("NodeGroupInput")
-
-    mix_065 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
-    mix_065.inputs[2].default_value = (4.0, 4.0, 4.0, 1.0)
-
     reroute_023 = Shader_Preset.nodes.new("NodeReroute")
 
     combine_xyz_017 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
@@ -508,32 +1230,15 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
 
     mix_005 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
 
-    math_010 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_010.operation = 'MULTIPLY'
-    math_010.inputs[2].default_value = -500.0
-
     reroute_196 = Shader_Preset.nodes.new("NodeReroute")
 
     reroute_026 = Shader_Preset.nodes.new("NodeReroute")
 
     mix_049 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
 
-    math_024 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_024.operation = 'MULTIPLY'
-    math_024.inputs[1].default_value = 0.3330000042915344
-    math_024.inputs[2].default_value = 0.5
-
     reroute_168 = Shader_Preset.nodes.new("NodeReroute")
 
     mix_028 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
-    math_015 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_015.operation = 'MULTIPLY_ADD'
-    math_015.use_clamp = True
-
-    math_015.inputs[1].default_value = 1000000.0
-
-    math_015.inputs[2].default_value = -500000.0
 
     reroute_192 = Shader_Preset.nodes.new("NodeReroute")
 
@@ -591,14 +1296,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
 
     combine_xyz_043 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
-    math_001 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_001.operation = 'MULTIPLY_ADD'
-    math_001.use_clamp = True
-
-    math_001.inputs[1].default_value = 1000.0
-
-    math_001.inputs[2].default_value = -666.0
-
     cloth_secondary_fuzz = Shader_Preset.nodes.new("ShaderNodeValue")
     cloth_secondary_fuzz.label = "Fuzz"
     cloth_secondary_fuzz.use_custom_color = True
@@ -643,16 +1340,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_armor_secondary_metalness.color = (CSeconWear1.X, CSeconWear1.Y, CSeconWear1.Z)
     worn_armor_secondary_metalness.hide = True
     worn_armor_secondary_metalness.outputs[0].default_value = wornarmorsecondarymetalness
-
-    math_012 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_012.operation = 'MULTIPLY'
-    math_012.inputs[2].default_value = -500.0
-
-    separate_xyz_002 = Shader_Preset.nodes.new("ShaderNodeSeparateXYZ")
-
-    math_003 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_003.operation = 'MULTIPLY'
-    math_003.inputs[2].default_value = 0.5
 
     suit_secondary_detail_roughness_blend = Shader_Preset.nodes.new("ShaderNodeValue")
     suit_secondary_detail_roughness_blend.label = "Detail Roughness Blend"
@@ -726,12 +1413,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_cloth_secondary_metalness.hide = True
     worn_cloth_secondary_metalness.outputs[0].default_value = wornclothsecondarymetalness
 
-    math_019 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_019.operation = 'MULTIPLY_ADD'
-    math_019.use_clamp = True
-    math_019.inputs[1].default_value = 100000.0
-    math_019.inputs[2].default_value = -99999.0
-
     combine_xyz_038 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
     suit_secondary_roughness_remap_w = Shader_Preset.nodes.new("ShaderNodeValue")
@@ -740,12 +1421,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_secondary_roughness_remap_w.color = (CSecon3.X, CSecon3.Y, CSecon3.Z)
     suit_secondary_roughness_remap_w.hide = True
     suit_secondary_roughness_remap_w.outputs[0].default_value = suitsecondaryroughnessremapW
-
-    math_007 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_007.label = "Suit_Primary_Slot"
-    math_007.operation = 'MULTIPLY_ADD'
-    math_007.inputs[1].default_value = 1000.0
-    math_007.inputs[2].default_value = -333.0
 
     reroute_095 = Shader_Preset.nodes.new("NodeReroute")
 
@@ -784,12 +1459,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
 
     combine_xyz_036 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
-    math_002 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_002.operation = 'MULTIPLY_ADD'
-    math_002.use_clamp = True
-    math_002.inputs[1].default_value = 1000000.0
-    math_002.inputs[2].default_value = -500000.0
-
     worn_cloth_secondary_detail_diffuse_blend = Shader_Preset.nodes.new("ShaderNodeValue")
     worn_cloth_secondary_detail_diffuse_blend.label = "Detail Diffuse Blend"
     worn_cloth_secondary_detail_diffuse_blend.use_custom_color = True
@@ -798,12 +1467,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_cloth_secondary_detail_diffuse_blend.outputs[0].default_value = wornclothsecondarydetaildiffuseblend
 
     reroute_068 = Shader_Preset.nodes.new("NodeReroute")
-
-    math_016 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_016.operation = 'MULTIPLY_ADD'
-    math_016.use_clamp = True
-    math_016.inputs[1].default_value = 1000000.0
-    math_016.inputs[2].default_value = -500000.0
 
     reroute_041 = Shader_Preset.nodes.new("NodeReroute")
     
@@ -883,9 +1546,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_cloth_secondary_detail_roughness_blend.color = (CSeconWear2.X, CSeconWear2.Y, CSeconWear2.Z)
     worn_cloth_secondary_detail_roughness_blend.hide = True
     worn_cloth_secondary_detail_roughness_blend.outputs[0].default_value = wornclothsecondarydetailroughnessblend
-
-    mix_066 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-    mix_066.inputs[2].default_value = (6.0, 6.0, 6.0, 1.0)
 
     combine_xyz_003 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
@@ -1112,12 +1772,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     armor_secondary_wear_remap_z.hide = True
     armor_secondary_wear_remap_z.outputs[0].default_value = armorsecondarywearremapZ
 
-    mix_069 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
-    mix_069.inputs[1].default_value = (1.0, 1.0, 1.0, 1.0)
-
-    mix_069.inputs[2].default_value = (2.0, 2.0, 2.0, 1.0)
-
     cloth_primary_roughness_remap_x = Shader_Preset.nodes.new("ShaderNodeValue")
     cloth_primary_roughness_remap_x.label = "Roughness Remap X"
     cloth_primary_roughness_remap_x.use_custom_color = True
@@ -1202,10 +1856,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
 
     reroute_084 = Shader_Preset.nodes.new("NodeReroute")
 
-    combine_xyz_048 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
-
-    combine_xyz_048.inputs[2].default_value = 0.0
-
     armor_primary_wear_remap_x = Shader_Preset.nodes.new("ShaderNodeValue")
     armor_primary_wear_remap_x.label = "Wear Remap X"
     armor_primary_wear_remap_x.use_custom_color = True
@@ -1266,14 +1916,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_roughness_remap_y.color = (CPrime2.X, CPrime2.Y, CPrime2.Z)
     cloth_primary_roughness_remap_y.hide = True
     cloth_primary_roughness_remap_y.outputs[0].default_value = clothprimaryroughnessremapY
-
-    mix_070 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
-    mix_070.inputs[2].default_value = (3.0, 3.0, 3.0, 1.0)
-
-    attribute = Shader_Preset.nodes.new("ShaderNodeAttribute")
-    attribute.attribute_type = 'GEOMETRY'
-    attribute.attribute_name = 'slots'
 
     mix_053 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
 
@@ -1426,8 +2068,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_dye_color.hide = True
     cloth_primary_dye_color.outputs[0].default_value = clothprimarydyecolor
 
-    mix_071 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
     reroute_197 = Shader_Preset.nodes.new("NodeReroute")
 
     armor_primary_detail_diffuse_blend = Shader_Preset.nodes.new("ShaderNodeValue")
@@ -1471,12 +2111,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_secondary_detail_diffuse_blend.outputs[0].default_value = suitsecondarydetaildiffuseblend
 
     combine_xyz_042 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
-
-    math_018 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_018.operation = 'MULTIPLY_ADD'
-    math_018.use_clamp = True
-    math_018.inputs[1].default_value = -100000.0
-    math_018.inputs[2].default_value = 1.0
 
     combine_xyz_018 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
@@ -1536,10 +2170,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_cloth_primary_detail_diffuse_blend.hide = True
     worn_cloth_primary_detail_diffuse_blend.outputs[0].default_value = wornclothprimarydetaildiffuseblend
 
-    mix_068 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
-    mix_068.inputs[2].default_value = (5.0, 5.0, 5.0, 1.0)
-
     mix_026 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
 
     combine_xyz = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
@@ -1589,12 +2219,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_detail_diffuse_blend.outputs[0].default_value = clothprimarydetaildiffuseblend
 
     combine_xyz_044 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
-
-    math = Shader_Preset.nodes.new("ShaderNodeMath")
-    math.operation = 'MULTIPLY_ADD'
-    math.use_clamp = True
-    math.inputs[1].default_value = 1000.0
-    math.inputs[2].default_value = -333.0
 
     worn_suit_primary_roughness_remap_x = Shader_Preset.nodes.new("ShaderNodeValue")
     worn_suit_primary_roughness_remap_x.label = "Roughness Remap X"
@@ -1755,22 +2379,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_cloth_primary_detail_roughness_blend.hide = True
     worn_cloth_primary_detail_roughness_blend.outputs[0].default_value = wornclothprimarydetailroughnessblend
 
-    math_021 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_021.operation = 'MULTIPLY_ADD'
-    math_021.use_clamp = True
-
-    math_021.inputs[1].default_value = -100000.0
-
-    math_021.inputs[2].default_value = 1.0
-
-    math_004 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_004.operation = 'MULTIPLY'
-    math_004.use_clamp = True
-
-    math_004.inputs[1].default_value = 1000.0
-
-    math_004.inputs[2].default_value = 0.0
-
     combine_xyz_031 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
     combine_xyz_023 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
@@ -1901,8 +2509,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
 
     reroute_045 = Shader_Preset.nodes.new("NodeReroute")
 
-    mix_072 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
     armor_secondary_wear_remap_w = Shader_Preset.nodes.new("ShaderNodeValue")
     armor_secondary_wear_remap_w.label = "Wear Remap W"
     armor_secondary_wear_remap_w.use_custom_color = True
@@ -1918,11 +2524,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_armor_secondary_dye_color.outputs[0].default_value = wornarmorsecondarydyecolor
 
     combine_xyz_035 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
-
-    math_013 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_013.operation = 'ADD'
-    math_013.use_clamp = True
-    math_013.inputs[2].default_value = -500.0
 
     combine_xyz_001 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
@@ -2003,11 +2604,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     combine_xyz_032 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
     combine_xyz_028 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
-
-    math_023 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_023.operation = 'SUBTRACT'
-    math_023.inputs[1].default_value = 3.0
-    math_023.inputs[2].default_value = 0.5
 
     mix_016 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
 
@@ -2158,8 +2754,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_secondary_wear_remap_z.hide = True
     suit_secondary_wear_remap_z.outputs[0].default_value = suitsecondarywearremapZ
 
-    separate_xyz_001 = Shader_Preset.nodes.new("ShaderNodeSeparateXYZ")
-
     reroute_093 = Shader_Preset.nodes.new("NodeReroute")
 
     reroute_061 = Shader_Preset.nodes.new("NodeReroute")
@@ -2174,11 +2768,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_051 = Shader_Preset.nodes.new("NodeReroute")
 
     mix_034 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
-    math_022 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_022.operation = 'MULTIPLY'
-    math_022.inputs[1].default_value = 0.3330000042915344
-    math_022.inputs[2].default_value = 0.5
 
     reroute_072 = Shader_Preset.nodes.new("NodeReroute")
 
@@ -2204,10 +2793,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_dye_color.outputs[0].default_value = suitprimarydyecolor
 
     mix_076 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
-    mix_067 = Shader_Preset.nodes.new("ShaderNodeMixRGB")
-
-    mix_067.inputs[2].default_value = (0.0, 0.0, 0.0, 0.0)
 
     worn_cloth_secondary_roughness_remap_w = Shader_Preset.nodes.new("ShaderNodeValue")
     worn_cloth_secondary_roughness_remap_w.label = "Roughness Remap W"
@@ -2277,37 +2862,26 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_armor_secondary_detail_diffuse_blend.hide = True
     worn_armor_secondary_detail_diffuse_blend.outputs[0].default_value = wornarmorsecondarydetaildiffuseblend
 
-    math_005 = Shader_Preset.nodes.new("ShaderNodeMath")
-    math_005.operation = 'MULTIPLY'
-    math_005.inputs[2].default_value = 0.5
-
     reroute_088 = Shader_Preset.nodes.new("NodeReroute")
 
     combine_xyz_022 = Shader_Preset.nodes.new("ShaderNodeCombineXYZ")
 
     worn_suit_secondary_detail_diffuse_blend.parent = WornSuitSecondaryFrame
-    math_017.parent = DoNotTouchFrame
     mix_047.parent = DoNotTouchFrame
     suit_primary_roughness_remap_w.parent = SuitPrimaryFrame
     armor_secondary_detail_roughness_blend.parent = ArmorSecondaryFrame
     worn_suit_primary_roughness_remap_z.parent = WornSuitPrimaryFrame
-    math_008.parent = DoNotTouchFrame
     combine_xyz_016.parent = DoNotTouchFrame
     mix_023.parent = DoNotTouchFrame
     suit_primary_wear_remap_z.parent = SuitPrimaryFrame
     worn_armor_secondary_roughness_remap_w.parent = WornArmorSecondaryFrame
     worn_cloth_primary_dye_color.parent = WornClothPrimaryFrame
-    group_input.parent = DoNotTouchFrame
-    mix_065.parent = DoNotTouchFrame
     combine_xyz_017.parent = DoNotTouchFrame
     worn_suit_secondary_roughness_remap_w.parent = WornSuitSecondaryFrame
     suit_primary_iridescence.parent = SuitPrimaryFrame
     mix_005.parent = DoNotTouchFrame
-    math_010.parent = DoNotTouchFrame
     mix_049.parent = DoNotTouchFrame
-    math_024.parent = DoNotTouchFrame
     mix_028.parent = DoNotTouchFrame
-    math_015.parent = DoNotTouchFrame
     cloth_primary_fuzz.parent = ClothPrimaryFrame
     armor_primary_wear_remap_w.parent = ArmorPrimaryFrame
     mix.parent = DoNotTouchFrame
@@ -2315,14 +2889,10 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_armor_secondary_roughness_remap_z.parent = WornArmorSecondaryFrame
     armor_secondary_transmission.parent = ArmorSecondaryFrame
     combine_xyz_043.parent = DoNotTouchFrame
-    math_001.parent = DoNotTouchFrame
     cloth_secondary_fuzz.parent = ClothSecondaryFrame
     mix_056.parent = DoNotTouchFrame
     cloth_secondary_metalness.parent = ClothSecondaryFrame
     worn_armor_secondary_metalness.parent = WornArmorSecondaryFrame
-    math_012.parent = DoNotTouchFrame
-    separate_xyz_002.parent = DoNotTouchFrame
-    math_003.parent = DoNotTouchFrame
     suit_secondary_detail_roughness_blend.parent = SuitSecondaryFrame
     cloth_secondary_wear_remap_z.parent = ClothSecondaryFrame
     armor_primary_fuzz.parent = ArmorPrimaryFrame
@@ -2332,18 +2902,14 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     mix_022.parent = DoNotTouchFrame
     suit_primary_roughness_remap_z.parent = SuitPrimaryFrame
     worn_cloth_secondary_metalness.parent = WornClothSecondaryFrame
-    math_019.parent = DoNotTouchFrame
     combine_xyz_038.parent = DoNotTouchFrame
     suit_secondary_roughness_remap_w.parent = SuitSecondaryFrame
-    math_007.parent = DoNotTouchFrame
     mix_048.parent = DoNotTouchFrame
     cloth_secondary_detail_roughness_blend.parent = ClothSecondaryFrame
     armor_secondary_detail_normal_blend.parent = ArmorSecondaryFrame
     worn_cloth_primary_roughness_remap_z.parent = WornClothPrimaryFrame
     combine_xyz_036.parent = DoNotTouchFrame
-    math_002.parent = DoNotTouchFrame
     worn_cloth_secondary_detail_diffuse_blend.parent = WornClothSecondaryFrame
-    math_016.parent = DoNotTouchFrame
     worn_suit_primary_detail_diffuse_blend.parent = WornSuitPrimaryFrame
     suit_secondary_wear_remap_x.parent = SuitSecondaryFrame
     armor_primary_transmission.parent = ArmorPrimaryFrame
@@ -2354,7 +2920,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_detail_normal_blend.parent = ClothPrimaryFrame
     armor_secondary_detail_diffuse_blend.parent = ArmorSecondaryFrame
     worn_cloth_secondary_detail_roughness_blend.parent = WornClothSecondaryFrame
-    mix_066.parent = DoNotTouchFrame
     combine_xyz_003.parent = DoNotTouchFrame
     armor_primary_emission_color.parent = ArmorPrimaryFrame
     suit_secondary_roughness_remap_z.parent = SuitSecondaryFrame
@@ -2385,7 +2950,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     armor_primary_roughness_remap_w.parent = ArmorPrimaryFrame
     cloth_secondary_roughness_remap_x.parent = ClothSecondaryFrame
     armor_secondary_wear_remap_z.parent = ArmorSecondaryFrame
-    mix_069.parent = DoNotTouchFrame
     cloth_primary_roughness_remap_x.parent = ClothPrimaryFrame
     armor_primary_dye_color.parent = ArmorPrimaryFrame
     mix_054.parent = DoNotTouchFrame
@@ -2397,7 +2961,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_armor_primary_roughness_remap_w.parent = WornArmorPrimaryFrame
     cloth_secondary_emission_color.parent = ClothSecondaryFrame
     mix_031.parent = DoNotTouchFrame
-    combine_xyz_048.parent = DoNotTouchFrame
     armor_primary_wear_remap_x.parent = ArmorPrimaryFrame
     combine_xyz_033.parent = DoNotTouchFrame
     suit_secondary_roughness_remap_y.parent = SuitSecondaryFrame
@@ -2411,8 +2974,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     mix_029.parent = DoNotTouchFrame
     node.parent = DoNotTouchFrame
     cloth_primary_roughness_remap_y.parent = ClothPrimaryFrame
-    mix_070.parent = DoNotTouchFrame
-    attribute.parent = DoNotTouchFrame
     mix_053.parent = DoNotTouchFrame
     combine_xyz_006.parent = DoNotTouchFrame
     suit_secondary_wear_remap_y.parent = SuitSecondaryFrame
@@ -2438,7 +2999,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     combine_xyz_046.parent = DoNotTouchFrame
     worn_armor_secondary_roughness_remap_y.parent = WornArmorSecondaryFrame
     cloth_primary_dye_color.parent = ClothPrimaryFrame
-    mix_071.parent = DoNotTouchFrame
     armor_primary_detail_diffuse_blend.parent = ArmorPrimaryFrame
     combine_xyz_002.parent = DoNotTouchFrame
     suit_secondary_iridescence.parent = SuitSecondaryFrame
@@ -2446,7 +3006,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     mix_033.parent = DoNotTouchFrame
     suit_secondary_detail_diffuse_blend.parent = SuitSecondaryFrame
     combine_xyz_042.parent = DoNotTouchFrame
-    math_018.parent = DoNotTouchFrame
     combine_xyz_018.parent = DoNotTouchFrame
     worn_suit_primary_roughness_remap_y.parent = WornSuitPrimaryFrame
     combine_xyz_008.parent = DoNotTouchFrame
@@ -2456,7 +3015,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_emission_color.parent = SuitPrimaryFrame
     cloth_primary_metalness.parent = ClothPrimaryFrame
     worn_cloth_primary_detail_diffuse_blend.parent = WornClothPrimaryFrame
-    mix_068.parent = DoNotTouchFrame
     mix_026.parent = DoNotTouchFrame
     combine_xyz.parent = DoNotTouchFrame
     armor_primary_metalness.parent = ArmorPrimaryFrame
@@ -2468,7 +3026,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_detail_diffuse_blend.parent = ClothPrimaryFrame
     cloth_primary_detail_diffuse_map.parent = ClothPrimaryFrame
     combine_xyz_044.parent = DoNotTouchFrame
-    math.parent = DoNotTouchFrame
     armor_primary_detail_normal_map.parent = ArmorPrimaryFrame
     worn_suit_primary_roughness_remap_x.parent = WornSuitPrimaryFrame
     combine_xyz_009.parent = DoNotTouchFrame
@@ -2499,8 +3056,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_secondary_wear_remap_x.parent = ClothSecondaryFrame
     armor_secondary_wear_remap_y.parent = ArmorSecondaryFrame
     worn_cloth_primary_detail_roughness_blend.parent = WornClothPrimaryFrame
-    math_021.parent = DoNotTouchFrame
-    math_004.parent = DoNotTouchFrame
     combine_xyz_031.parent = DoNotTouchFrame
     combine_xyz_023.parent = DoNotTouchFrame
     armor_secondary_iridescence.parent = ArmorSecondaryFrame
@@ -2521,11 +3076,9 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_fuzz.parent = SuitPrimaryFrame
     mix_032.parent = DoNotTouchFrame
     worn_cloth_primary_detail_normal_blend.parent = WornClothPrimaryFrame
-    mix_072.parent = DoNotTouchFrame
     armor_secondary_wear_remap_w.parent = ArmorSecondaryFrame
     worn_armor_secondary_dye_color.parent = WornArmorSecondaryFrame
     combine_xyz_035.parent = DoNotTouchFrame
-    math_013.parent = DoNotTouchFrame
     combine_xyz_001.parent = DoNotTouchFrame
     suit_secondary_dye_color.parent = SuitSecondaryFrame
     armor_primary_detail_normal_blend.parent = ArmorPrimaryFrame
@@ -2540,7 +3093,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_wear_remap_z.parent = ClothPrimaryFrame
     combine_xyz_032.parent = DoNotTouchFrame
     combine_xyz_028.parent = DoNotTouchFrame
-    math_023.parent = DoNotTouchFrame
     mix_016.parent = DoNotTouchFrame
     worn_suit_secondary_metalness.parent = WornSuitSecondaryFrame
     mix_014.parent = DoNotTouchFrame
@@ -2564,15 +3116,12 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     combine_xyz_005.parent = DoNotTouchFrame
     armor_primary_detail_roughness_blend.parent = ArmorPrimaryFrame
     suit_secondary_wear_remap_z.parent = SuitSecondaryFrame
-    separate_xyz_001.parent = DoNotTouchFrame
     worn_armor_secondary_detail_normal_blend.parent = WornArmorSecondaryFrame
     mix_034.parent = DoNotTouchFrame
-    math_022.parent = DoNotTouchFrame
     worn_suit_primary_metalness.parent = WornSuitPrimaryFrame
     cloth_primary_transmission.parent = ClothPrimaryFrame
     suit_primary_dye_color.parent = SuitPrimaryFrame
     mix_076.parent = DoNotTouchFrame
-    mix_067.parent = DoNotTouchFrame
     worn_cloth_secondary_roughness_remap_w.parent = WornClothSecondaryFrame
     combine_xyz_013.parent = DoNotTouchFrame
     combine_xyz_014.parent = DoNotTouchFrame
@@ -2586,7 +3135,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     mix_046.parent = DoNotTouchFrame
     armor_secondary_wear_remap_x.parent = ArmorSecondaryFrame
     worn_armor_secondary_detail_diffuse_blend.parent = WornArmorSecondaryFrame
-    math_005.parent = DoNotTouchFrame
     combine_xyz_022.parent = DoNotTouchFrame
 
     #Set locations
@@ -2604,7 +3152,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     WornSuitSecondaryFrame.location = (-700.0, -4440.0595703125)
     WornArmorPrimaryFrame.location = (-660.0, 450.19281005859375)
     worn_suit_secondary_detail_diffuse_blend.location = (40.0, -200.126953125)
-    math_017.location = (-1882.6395263671875, -3699.33740234375)
     suit_detail_diffuse_transform.location = (-913.1685180664062, -2939.849365234375)
     reroute_004.location = (-377.1822509765625, -3036.572998046875)
     mix_047.location = (-1880.0882568359375, -3704.32177734375)
@@ -2614,7 +3161,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_152.location = (-377.1822509765625, -3950.9873046875)
     reroute_053.location = (-377.1822509765625, -3348.07177734375)
     worn_suit_primary_roughness_remap_z.location = (20.0, -136.16259765625)
-    math_008.location = (-1880.5616455078125, -3701.11279296875)
     reroute_190.location = (-377.1822509765625, -1349.905029296875)
     combine_xyz_016.location = (-1881.3702392578125, -3702.39404296875)
     reroute_032.location = (-717.01171875, -3028.1875)
@@ -2623,22 +3169,17 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_armor_secondary_roughness_remap_w.location = (-1580.0, 271.220947265625)
     reroute_162.location = (-377.1822509765625, -4238.8603515625)
     worn_cloth_primary_dye_color.location = (20.0, 60.0)
-    group_input.location = (-2072.258544921875, -3667.01513671875)
-    mix_065.location = (-1882.0794677734375, -3698.79736328125)
     reroute_023.location = (-717.01171875, -1008.372314453125)
     combine_xyz_017.location = (-1881.3702392578125, -3702.51416015625)
     worn_suit_secondary_roughness_remap_w.location = (40.0, -167.92822265625)
     reroute_158.location = (-377.1822509765625, -4143.43115234375)
     suit_primary_iridescence.location = (20.0, -499.947509765625)
     mix_005.location = (-1880.0882568359375, -3701.37353515625)
-    math_010.location = (-1882.1995849609375, -3699.0576171875)
     reroute_196.location = (-377.1822509765625, -1446.5072021484375)
     reroute_026.location = (-717.01171875, -3246.12939453125)
     mix_049.location = (-1880.0882568359375, -3704.38232421875)
-    math_024.location = (-1880.9088134765625, -3699.49365234375)
     reroute_168.location = (-377.1822509765625, -4399.40869140625)
     mix_028.location = (-1880.0921630859375, -3702.17626953125)
-    math_015.location = (-1882.9595947265625, -3698.69775390625)
     reroute_192.location = (-377.1822509765625, -1286.6318359375)
     reroute_076.location = (-377.1822509765625, -300.3265380859375)
     cloth_primary_fuzz.location = (20.0, -512.628173828125)
@@ -2657,7 +3198,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_141.location = (-377.1822509765625, -2237.310546875)
     reroute_142.location = (-377.1822509765625, -2269.076171875)
     combine_xyz_043.location = (-1883.5101318359375, -3702.13427734375)
-    math_001.location = (-1880.5616455078125, -3700.99267578125)
     cloth_secondary_fuzz.location = (20.0, -468.169189453125)
     reroute_107.location = (-377.1822509765625, 589.4473876953125)
     reroute_365.location = (-377.1822509765625, -1414.7418212890625)
@@ -2669,9 +3209,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_102.location = (-377.1822509765625, 685.6102294921875)
     cloth_secondary_metalness.location = (20.0, -404.205322265625)
     worn_armor_secondary_metalness.location = (-1580.0, 143.1917724609375)
-    math_012.location = (-1882.3995361328125, -3698.99755859375)
-    separate_xyz_002.location = (-1883.2196044921875, -3699.0576171875)
-    math_003.location = (-1882.6995849609375, -3698.53759765625)
     suit_secondary_detail_roughness_blend.location = (40.0, -391.36962890625)
     cloth_secondary_wear_remap_z.location = (20.0, -243.600341796875)
     armor_primary_fuzz.location = (0.0, -153.38067626953125)
@@ -2689,10 +3226,8 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_roughness_remap_z.location = (20.0, -116.16259765625)
     reroute_081.location = (-377.1822509765625, -172.86279296875)
     worn_cloth_secondary_metalness.location = (20.0, -276.723388671875)
-    math_019.location = (-1882.6395263671875, -3698.9775390625)
     combine_xyz_038.location = (-1883.1702880859375, -3701.7138671875)
     suit_secondary_roughness_remap_w.location = (40.0, -167.49462890625)
-    math_007.location = (-1880.5616455078125, -3701.07275390625)
     reroute_095.location = (-377.1822509765625, 1006.5672607421875)
     reroute_160.location = (-377.1822509765625, -4175.72802734375)
     reroute_195.location = (-377.1822509765625, -1382.4083251953125)
@@ -2704,10 +3239,8 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     armor_secondary_detail_normal_blend.location = (20.0, -360.458984375)
     worn_cloth_primary_roughness_remap_z.location = (20.0, -36.42626953125)
     combine_xyz_036.location = (-1882.6102294921875, -3705.25390625)
-    math_002.location = (-1882.9595947265625, -3698.51708984375)
     worn_cloth_secondary_detail_diffuse_blend.location = (20.0, -180.560546875)
     reroute_068.location = (-377.1822509765625, -4650.48876953125)
-    math_016.location = (-1882.9595947265625, -3698.87744140625)
     reroute_041.location = (-377.1822509765625, -3060.040283203125)
     worn_suit_primary_detail_diffuse_blend.location = (20.0, -200.12646484375)
     suit_secondary_wear_remap_x.location = (40.0, -199.3896484375)
@@ -2725,7 +3258,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_171.location = (-377.1822509765625, 336.7640380859375)
     armor_secondary_detail_diffuse_blend.location = (20.0, -327.8268127441406)
     worn_cloth_secondary_detail_roughness_blend.location = (20.0, -244.091064453125)
-    mix_066.location = (-1881.8795166015625, -3698.79736328125)
     combine_xyz_003.location = (-1882.1102294921875, -3701.49365234375)
     armor_primary_emission_color.location = (0.0, -217.34481811523438)
     suit_secondary_roughness_remap_z.location = (40.0, -136.1630859375)
@@ -2779,7 +3311,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_secondary_roughness_remap_x.location = (20.0, -52.263916015625)
     reroute_178.location = (-377.1822509765625, 143.9346923828125)
     armor_secondary_wear_remap_z.location = (20.0, -264.27203369140625)
-    mix_069.location = (-1882.6395263671875, -3698.79736328125)
     cloth_primary_roughness_remap_x.location = (20.0, -32.303955078125)
     reroute_114.location = (-377.1822509765625, -3667.18017578125)
     armor_primary_dye_color.location = (0.0, 360.0)
@@ -2802,7 +3333,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_128.location = (-377.1822509765625, -777.0906982421875)
     reroute_111.location = (-377.1822509765625, -3570.987548828125)
     reroute_084.location = (-377.1822509765625, 51.98681640625)
-    combine_xyz_048.location = (-1880.6287841796875, -3699.41357421875)
     armor_primary_wear_remap_x.location = (0.888427734375, 166.59326171875)
     combine_xyz_033.location = (-1882.5701904296875, -3701.53369140625)
     reroute_079.location = (-377.1822509765625, -332.0384521484375)
@@ -2823,8 +3353,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     node.location = (-1880.0958251953125, -3703.15576171875)
     reroute_065.location = (-377.1822509765625, -2681.93701171875)
     cloth_primary_roughness_remap_y.location = (20.0, -64.001220703125)
-    mix_070.location = (-1882.4595947265625, -3698.79736328125)
-    attribute.location = (-1880.6160888671875, -3699.580078125)
     mix_053.location = (-1880.0882568359375, -3707.3896484375)
     combine_xyz_006.location = (-1882.1102294921875, -3703.97412109375)
     suit_secondary_wear_remap_y.location = (40.0, -232.02197265625)
@@ -2845,7 +3373,7 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     combine_xyz_041.location = (-1883.1702880859375, -3705.43408203125)
     mix_044.location = (-1880.0882568359375, -3703.49658203125)
     cloth_secondary_roughness_remap_w.location = (20.0, -147.92822265625)
-    group_output.location = (-1632.9449462890625, -3703.83984375)
+    group_output.location = (-1880, -3702)
     armor_primary_roughness_remap_z.location = (0.0, 262.97027587890625)
     combine_xyz_027.location = (-1881.3702392578125, -3706.35400390625)
     reroute_188.location = (-377.1822509765625, -1158.3216552734375)
@@ -2863,7 +3391,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_194.location = (-377.1822509765625, -1055.48974609375)
     worn_armor_secondary_roughness_remap_y.location = (-1580.0, 335.30712890625)
     cloth_primary_dye_color.location = (20.0, 0.0)
-    mix_071.location = (-1880.2335205078125, -3699.36474609375)
     reroute_197.location = (-377.1822509765625, -1478.7059326171875)
     armor_primary_detail_diffuse_blend.location = (0.0, 7.17987060546875)
     combine_xyz_002.location = (-1882.1102294921875, -3701.37353515625)
@@ -2876,7 +3403,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_080.location = (-377.1822509765625, -204.57470703125)
     suit_secondary_detail_diffuse_blend.location = (40.0, -327.4052734375)
     combine_xyz_042.location = (-1883.1702880859375, -3706.673828125)
-    math_018.location = (-1882.6395263671875, -3699.15771484375)
     combine_xyz_018.location = (-1881.3702392578125, -3703.61376953125)
     reroute_166.location = (-377.1822509765625, -4335.44482421875)
     reroute_070.location = (-377.1822509765625, -4714.06103515625)
@@ -2891,7 +3417,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     suit_primary_emission_color.location = (20.0, -596.1103515625)
     cloth_primary_metalness.location = (20.0, -447.7913818359375)
     worn_cloth_primary_detail_diffuse_blend.location = (20.0, -100.111328125)
-    mix_068.location = (-1882.2794189453125, -3698.79736328125)
     mix_026.location = (-1880.0921630859375, -3702.11669921875)
     combine_xyz.location = (-1882.1102294921875, -3700.13427734375)
     armor_primary_metalness.location = (0.0, -88.5496826171875)
@@ -2908,7 +3433,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_primary_detail_diffuse_blend.location = (20.0, -352.631591796875)
     cloth_primary_detail_diffuse_map.location = (20.0, -160.4803466796875)
     combine_xyz_044.location = (-1883.5101318359375, -3703.37353515625)
-    math.location = (-1880.5616455078125, -3700.95263671875)
     armor_primary_detail_normal_map.location = (0.0, 38.5118408203125)
     worn_suit_primary_roughness_remap_x.location = (20.0, -72.19873046875)
     combine_xyz_009.location = (-1882.1102294921875, -3705.2138671875)
@@ -2954,8 +3478,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     cloth_secondary_wear_remap_x.location = (20.0, -180.069580078125)
     armor_secondary_wear_remap_y.location = (20.0, -231.63986206054688)
     worn_cloth_primary_detail_roughness_blend.location = (20.0, -164.687744140625)
-    math_021.location = (-1882.6395263671875, -3699.517578125)
-    math_004.location = (-1880.5616455078125, -3701.03271484375)
     combine_xyz_031.location = (-1883.1702880859375, -3700.47412109375)
     combine_xyz_023.location = (-1881.3702392578125, -3703.85400390625)
     armor_secondary_iridescence.location = (20.0, -456.1883544921875)
@@ -2992,11 +3514,9 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     mix_032.location = (-1880.0882568359375, -3702.3017578125)
     worn_cloth_primary_detail_normal_blend.location = (20.0, -132.66552734375)
     reroute_045.location = (-377.1822509765625, -2777.66650390625)
-    mix_072.location = (-1881.4156494140625, -3699.21630859375)
     armor_secondary_wear_remap_w.location = (20.0, -296.4707946777344)
     worn_armor_secondary_dye_color.location = (-1580.0, 400.0)
     combine_xyz_035.location = (-1882.5902099609375, -3704.01416015625)
-    math_013.location = (-1881.9395751953125, -3699.11767578125)
     combine_xyz_001.location = (-1882.1102294921875, -3700.25390625)
     suit_secondary_dye_color.location = (40.0, -40.0)
     armor_primary_detail_normal_blend.location = (0.0, -25.0189208984375)
@@ -3018,7 +3538,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_008.location = (-377.1822509765625, -2617.10595703125)
     combine_xyz_032.location = (-1883.5101318359375, -3700.89404296875)
     combine_xyz_028.location = (-1881.3702392578125, -3706.11376953125)
-    math_023.location = (-1881.0887451171875, -3699.49365234375)
     mix_016.location = (-1880.0931396484375, -3701.75830078125)
     worn_suit_secondary_metalness.location = (40.0, -296.2900390625)
     mix_014.location = (-1880.0931396484375, -3701.69287109375)
@@ -3061,19 +3580,16 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     reroute_010.location = (-377.1822509765625, -4554.1396484375)
     reroute_184.location = (-377.1822509765625, -1070.7535400390625)
     suit_secondary_wear_remap_z.location = (40.0, -264.220703125)
-    separate_xyz_001.location = (-1880.8416748046875, -3700.99267578125)
     reroute_093.location = (-377.1822509765625, 940.8695068359375)
     reroute_061.location = (-377.1822509765625, -1570.7572021484375)
     worn_armor_secondary_detail_normal_blend.location = (-1580.0, 207.62841796875)
     reroute_051.location = (-377.1822509765625, -3021.773681640625)
     mix_034.location = (-1880.0882568359375, -3702.36181640625)
-    math_022.location = (-1880.9088134765625, -3699.33349609375)
     reroute_072.location = (-377.1822509765625, -396.0543212890625)
     worn_suit_primary_metalness.location = (20.0, -295.85546875)
     cloth_primary_transmission.location = (20.0, -544.3935546875)
     suit_primary_dye_color.location = (20.0, -20.0)
     mix_076.location = (-1880.0943603515625, -3703.18701171875)
-    mix_067.location = (-1881.6595458984375, -3698.87744140625)
     worn_cloth_secondary_roughness_remap_w.location = (20.0, -148.361572265625)
     combine_xyz_013.location = (-1881.3702392578125, -3700.03369140625)
     reroute_011.location = (-377.1822509765625, -4522.427734375)
@@ -3093,7 +3609,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     mix_046.location = (-1880.0882568359375, -3704.29248046875)
     armor_secondary_wear_remap_x.location = (20.0, -200.30789184570312)
     worn_armor_secondary_detail_diffuse_blend.location = (-1580.0, 239.5238037109375)
-    math_005.location = (-1882.6995849609375, -3698.37744140625)
     reroute_088.location = (-377.1822509765625, -12.029052734375)
     combine_xyz_022.location = (-1881.3702392578125, -3702.63427734375)
 
@@ -3268,97 +3783,160 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     worn_armor_secondary_detail_diffuse_blend.width, worn_armor_secondary_detail_diffuse_blend.height = 140.0, 100.0
 
 # Activate Node Connection usage
-    link = Shader_Preset.links.new
+    Shader_Preset.links.new(Switcher_1.outputs[0], Slot_1.inputs[1])
+    Shader_Preset.links.new(Switcher_2.outputs[0], Slot_2.inputs[1])
+    Shader_Preset.links.new(Switcher_3.outputs[0], Slot_3.inputs[1])
+    Shader_Preset.links.new(Switcher_4.outputs[0], Slot_4.inputs[1])
+    Shader_Preset.links.new(Switcher_5.outputs[0], Slot_5.inputs[1])
+    Shader_Preset.links.new(Add_1.outputs[0], Slot_1.inputs[2])
+    Shader_Preset.links.new(Add_2.outputs[0], Slot_2.inputs[2])
+    Shader_Preset.links.new(Add_3.outputs[0], Slot_3.inputs[2])
+    Shader_Preset.links.new(Add_4.outputs[0], Slot_4.inputs[2])
+    Shader_Preset.links.new(Add_5.outputs[0], Slot_5.inputs[2])
+    Shader_Preset.links.new(Floor_01.outputs[0], Add_1.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Add_2.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Add_3.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Add_4.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Add_5.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Slot_1.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Slot_2.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Slot_3.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Slot_4.inputs[0])
+    Shader_Preset.links.new(Floor_01.outputs[0], Slot_5.inputs[0])
+    Shader_Preset.links.new(MultiplyAdd_06.outputs[0], Switcher_1.inputs[1])
+    Shader_Preset.links.new(MultiplyAdd_07.outputs[0], Switcher_2.inputs[1])
+    Shader_Preset.links.new(MultiplyAdd_08.outputs[0], Switcher_4.inputs[1])
+    Shader_Preset.links.new(MultiplyAdd_06.outputs[0], Multiply_01.inputs[0])
+    Shader_Preset.links.new(MultiplyAdd_07.outputs[0], Multiply_01.inputs[1])
+    Shader_Preset.links.new(MultiplyAdd_06.outputs[0], Multiply_02.inputs[0])
+    Shader_Preset.links.new(MultiplyAdd_08.outputs[0], Multiply_02.inputs[1])
+    Shader_Preset.links.new(Multiply_01.outputs[0], Switcher_3.inputs[1])
+    Shader_Preset.links.new(Multiply_02.outputs[0], Switcher_5.inputs[1])
+    Shader_Preset.links.new(MultiplyAdd_01.outputs[0], Switcher_1.inputs[2])
+    Shader_Preset.links.new(MultiplyAdd_02.outputs[0], Switcher_2.inputs[2])
+    Shader_Preset.links.new(MultiplyAdd_03.outputs[0], Switcher_3.inputs[2])
+    Shader_Preset.links.new(MultiplyAdd_04.outputs[0], Switcher_4.inputs[2])
+    Shader_Preset.links.new(MultiplyAdd_05.outputs[0], Switcher_5.inputs[2])
+    Shader_Preset.links.new(Separate_XYZ_101.outputs[0], MultiplyAdd_01.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_101.outputs[0], MultiplyAdd_02.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_101.outputs[1], MultiplyAdd_03.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_101.outputs[1], MultiplyAdd_04.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_101.outputs[1], MultiplyAdd_05.inputs[0])
+    Shader_Preset.links.new(attribute.outputs[0], Separate_XYZ_101.inputs[0])
+    Shader_Preset.links.new(Add_6.outputs[0], Switcher_1.inputs[0])
+    Shader_Preset.links.new(Add_6.outputs[0], Switcher_2.inputs[0])
+    Shader_Preset.links.new(Add_6.outputs[0], Switcher_3.inputs[0])
+    Shader_Preset.links.new(Add_6.outputs[0], Switcher_4.inputs[0])
+    Shader_Preset.links.new(Add_6.outputs[0], Switcher_5.inputs[0])
+    Shader_Preset.links.new(MultiplyAdd_09.outputs[0], Add_6.inputs[0])
+    Shader_Preset.links.new(Multiply_03.outputs[0], Add_6.inputs[1])
+    Shader_Preset.links.new(Multiply_04.outputs[0], Multiply_03.inputs[0])
+    Shader_Preset.links.new(MultiplyAdd_12.outputs[0], Multiply_03.inputs[1])
+    Shader_Preset.links.new(MultiplyAdd_10.outputs[0], Multiply_04.inputs[0])
+    Shader_Preset.links.new(MultiplyAdd_11.outputs[0], Multiply_04.inputs[1])
+    Shader_Preset.links.new(Separate_XYZ_103.outputs[0], MultiplyAdd_10.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_103.outputs[1], MultiplyAdd_11.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_103.outputs[2], MultiplyAdd_12.inputs[0])
+    Shader_Preset.links.new(group_input.outputs[0], Separate_XYZ_103.inputs[0])
+    Shader_Preset.links.new(group_input.outputs[2], Floor_01.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_103.outputs[0], MultiplyAdd_06.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_103.outputs[1], MultiplyAdd_07.inputs[0])
+    Shader_Preset.links.new(Separate_XYZ_103.outputs[2], MultiplyAdd_08.inputs[0])
+    Shader_Preset.links.new(group_input.outputs[1], MultiplyAdd_09.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], Add_07.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], Add_07.inputs[1])
+    Shader_Preset.links.new(Add_07.outputs[0], mix_073.inputs[0])
+    Shader_Preset.links.new(Add_07.outputs[0], node.inputs[0])
     Shader_Preset.links.new(mix.outputs[0], mix_001.inputs[1])
     Shader_Preset.links.new(mix_001.outputs[0], mix_002.inputs[1])
     Shader_Preset.links.new(mix_002.outputs[0], mix_003.inputs[1])
     Shader_Preset.links.new(mix_003.outputs[0], mix_004.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_001.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_002.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_003.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_004.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_001.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_002.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_003.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_004.inputs[0])
     Shader_Preset.links.new(mix_005.outputs[0], mix_006.inputs[1])
     Shader_Preset.links.new(mix_006.outputs[0], mix_007.inputs[1])
     Shader_Preset.links.new(mix_007.outputs[0], mix_008.inputs[1])
     Shader_Preset.links.new(mix_008.outputs[0], mix_009.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_005.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_006.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_007.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_008.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_009.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_005.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_006.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_007.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_008.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_009.inputs[0])
     Shader_Preset.links.new(mix_010.outputs[0], mix_011.inputs[1])
     Shader_Preset.links.new(mix_011.outputs[0], mix_012.inputs[1])
     Shader_Preset.links.new(mix_012.outputs[0], mix_013.inputs[1])
     Shader_Preset.links.new(mix_013.outputs[0], mix_014.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_010.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_011.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_012.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_013.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_014.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_010.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_011.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_012.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_013.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_014.inputs[0])
     Shader_Preset.links.new(mix_015.outputs[0], mix_016.inputs[1])
     Shader_Preset.links.new(mix_016.outputs[0], mix_017.inputs[1])
     Shader_Preset.links.new(mix_017.outputs[0], mix_018.inputs[1])
     Shader_Preset.links.new(mix_018.outputs[0], mix_019.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_015.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_016.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_017.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_018.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_019.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_015.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_016.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_017.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_018.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_019.inputs[0])
     Shader_Preset.links.new(mix_020.outputs[0], mix_021.inputs[1])
     Shader_Preset.links.new(mix_021.outputs[0], mix_022.inputs[1])
     Shader_Preset.links.new(mix_022.outputs[0], mix_023.inputs[1])
     Shader_Preset.links.new(mix_023.outputs[0], mix_024.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_020.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_021.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_022.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_023.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_024.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_020.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_021.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_022.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_023.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_024.inputs[0])
     Shader_Preset.links.new(mix_025.outputs[0], mix_026.inputs[1])
     Shader_Preset.links.new(mix_026.outputs[0], mix_027.inputs[1])
     Shader_Preset.links.new(mix_027.outputs[0], mix_028.inputs[1])
     Shader_Preset.links.new(mix_028.outputs[0], mix_029.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_025.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_026.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_027.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_028.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_029.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_025.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_026.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_027.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_028.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_029.inputs[0])
     Shader_Preset.links.new(mix_030.outputs[0], mix_031.inputs[1])
     Shader_Preset.links.new(mix_031.outputs[0], mix_032.inputs[1])
     Shader_Preset.links.new(mix_032.outputs[0], mix_033.inputs[1])
     Shader_Preset.links.new(mix_033.outputs[0], mix_034.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_030.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_031.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_032.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_033.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_034.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_030.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_031.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_032.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_033.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_034.inputs[0])
     Shader_Preset.links.new(mix_040.outputs[0], mix_041.inputs[1])
     Shader_Preset.links.new(mix_041.outputs[0], mix_042.inputs[1])
     Shader_Preset.links.new(mix_042.outputs[0], mix_043.inputs[1])
     Shader_Preset.links.new(mix_043.outputs[0], mix_044.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_040.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_041.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_042.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_043.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_044.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_040.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_041.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_042.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_043.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_044.inputs[0])
     Shader_Preset.links.new(mix_045.outputs[0], mix_046.inputs[1])
     Shader_Preset.links.new(mix_046.outputs[0], mix_047.inputs[1])
     Shader_Preset.links.new(mix_047.outputs[0], mix_048.inputs[1])
     Shader_Preset.links.new(mix_048.outputs[0], mix_049.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_045.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_046.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_047.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_048.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_049.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_045.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_046.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_047.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_048.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_049.inputs[0])
     Shader_Preset.links.new(mix_050.outputs[0], mix_051.inputs[1])
     Shader_Preset.links.new(mix_051.outputs[0], mix_052.inputs[1])
     Shader_Preset.links.new(mix_052.outputs[0], mix_053.inputs[1])
     Shader_Preset.links.new(mix_053.outputs[0], mix_054.inputs[1])
-    Shader_Preset.links.new(math.outputs[0], mix_050.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_051.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_052.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_053.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_054.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_050.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_051.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_052.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_053.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_054.inputs[0])
     Shader_Preset.links.new(armor_primary_detail_normal_map.outputs[0], reroute_105.inputs[0])
     Shader_Preset.links.new(cloth_primary_detail_normal_map.outputs[0], reroute_179.inputs[0])
     Shader_Preset.links.new(suit_primary_detail_normal_map.outputs[0], reroute_052.inputs[0])
@@ -3474,11 +4052,11 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     Shader_Preset.links.new(worn_cloth_secondary_dye_color.outputs[0], reroute_027.inputs[0])
     Shader_Preset.links.new(worn_suit_primary_dye_color.outputs[0], reroute_115.inputs[0])
     Shader_Preset.links.new(worn_suit_secondary_dye_color.outputs[0], reroute_028.inputs[0])
-    Shader_Preset.links.new(math.outputs[0], mix_055.inputs[0])
-    Shader_Preset.links.new(math_001.outputs[0], mix_056.inputs[0])
-    Shader_Preset.links.new(math_004.outputs[0], mix_057.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_058.inputs[0])
-    Shader_Preset.links.new(math_008.outputs[0], mix_059.inputs[0])
+    Shader_Preset.links.new(Slot_1.outputs[0], mix_055.inputs[0])
+    Shader_Preset.links.new(Slot_2.outputs[0], mix_056.inputs[0])
+    Shader_Preset.links.new(Slot_3.outputs[0], mix_057.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_058.inputs[0])
+    Shader_Preset.links.new(Slot_5.outputs[0], mix_059.inputs[0])
     Shader_Preset.links.new(armor_primary_transmission.outputs[0], reroute_109.inputs[0])
     Shader_Preset.links.new(armor_primary_iridescence.outputs[0], reroute_107.inputs[0])
     Shader_Preset.links.new(armor_primary_metalness.outputs[0], reroute_106.inputs[0])
@@ -3741,56 +4319,12 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     Shader_Preset.links.new(reroute_091.outputs[0], mix_053.inputs[2])
     Shader_Preset.links.new(reroute_168.outputs[0], mix_054.inputs[2])
     Shader_Preset.links.new(armor_primary_fuzz.outputs[0], reroute_108.inputs[0])
-    Shader_Preset.links.new(math_023.outputs[0], math_024.inputs[0])
-    Shader_Preset.links.new(separate_xyz_001.outputs[0], math.inputs[0])
-    Shader_Preset.links.new(separate_xyz_001.outputs[0], math_001.inputs[0])
-    Shader_Preset.links.new(separate_xyz_001.outputs[1], math_008.inputs[0])
-    Shader_Preset.links.new(separate_xyz_001.outputs[1], math_007.inputs[0])
-    Shader_Preset.links.new(separate_xyz_001.outputs[1], math_004.inputs[0])
-    Shader_Preset.links.new(mix_071.outputs[0], separate_xyz_001.inputs[0])
-    Shader_Preset.links.new(math_022.outputs[0], combine_xyz_048.inputs[0])
-    Shader_Preset.links.new(math_024.outputs[0], combine_xyz_048.inputs[1])
-    Shader_Preset.links.new(combine_xyz_048.outputs[0], mix_071.inputs[2])
-    Shader_Preset.links.new(attribute.outputs[0], mix_071.inputs[1])
-    Shader_Preset.links.new(separate_xyz_002.outputs[0], math_002.inputs[0])
-    Shader_Preset.links.new(separate_xyz_002.outputs[1], math_015.inputs[0])
-    Shader_Preset.links.new(separate_xyz_002.outputs[2], math_016.inputs[0])
-    Shader_Preset.links.new(mix_069.outputs[0], mix_070.inputs[1])
-    Shader_Preset.links.new(mix_070.outputs[0], mix_068.inputs[1])
-    Shader_Preset.links.new(mix_065.outputs[0], mix_066.inputs[1])
-    Shader_Preset.links.new(math_002.outputs[0], mix_069.inputs[0])
-    Shader_Preset.links.new(math_015.outputs[0], mix_070.inputs[0])
-    Shader_Preset.links.new(math_002.outputs[0], math_003.inputs[0])
-    Shader_Preset.links.new(math_015.outputs[0], math_003.inputs[1])
-    Shader_Preset.links.new(math_002.outputs[0], math_005.inputs[0])
-    Shader_Preset.links.new(math_016.outputs[0], math_005.inputs[1])
-    Shader_Preset.links.new(math_005.outputs[0], mix_066.inputs[0])
-    Shader_Preset.links.new(math_016.outputs[0], mix_068.inputs[0])
-    Shader_Preset.links.new(mix_068.outputs[0], mix_065.inputs[1])
-    Shader_Preset.links.new(math_003.outputs[0], mix_065.inputs[0])
-    Shader_Preset.links.new(math_012.outputs[0], math_010.inputs[0])
-    Shader_Preset.links.new(math_010.outputs[0], math_013.inputs[0])
-    Shader_Preset.links.new(mix_066.outputs[0], mix_067.inputs[1])
-    Shader_Preset.links.new(mix_072.outputs[0], math_023.inputs[0])
-    Shader_Preset.links.new(mix_067.outputs[0], mix_071.inputs[0])
-    Shader_Preset.links.new(separate_xyz_002.outputs[2], math_017.inputs[0])
-    Shader_Preset.links.new(math_017.outputs[0], math_010.inputs[1])
-    Shader_Preset.links.new(separate_xyz_002.outputs[1], math_018.inputs[0])
-    Shader_Preset.links.new(math_018.outputs[0], math_012.inputs[1])
-    Shader_Preset.links.new(separate_xyz_002.outputs[0], math_019.inputs[0])
-    Shader_Preset.links.new(math_019.outputs[0], math_012.inputs[0])
-    Shader_Preset.links.new(math_013.outputs[0], mix_067.inputs[0])
-    Shader_Preset.links.new(mix_067.outputs[0], mix_072.inputs[1])
-    Shader_Preset.links.new(mix_072.outputs[0], math_022.inputs[0])
-    Shader_Preset.links.new(math_021.outputs[0], math_013.inputs[1])
     Shader_Preset.links.new(mix_073.outputs[0], mix_074.inputs[1])
-    Shader_Preset.links.new(math_001.outputs[0], mix_073.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_074.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_074.inputs[0])
     Shader_Preset.links.new(reroute_104.outputs[0], mix_073.inputs[1])
     Shader_Preset.links.new(reroute_194.outputs[0], mix_073.inputs[2])
     Shader_Preset.links.new(reroute_051.outputs[0], mix_074.inputs[2])
-    Shader_Preset.links.new(math_001.outputs[0], node.inputs[0])
-    Shader_Preset.links.new(math_007.outputs[0], mix_076.inputs[0])
+    Shader_Preset.links.new(Slot_4.outputs[0], mix_076.inputs[0])
     Shader_Preset.links.new(node.outputs[0], mix_076.inputs[1])
     Shader_Preset.links.new(reroute_105.outputs[0], node.inputs[1])
     Shader_Preset.links.new(reroute_179.outputs[0], node.inputs[2])
@@ -3828,11 +4362,6 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     Shader_Preset.links.new(reroute_033.outputs[0], suit_primary_detail_normal_map.inputs[0])
     Shader_Preset.links.new(reroute_025.outputs[0], reroute_030.inputs[0])
 
-#Group Input Connections
-    Shader_Preset.links.new(group_input.outputs[0], separate_xyz_002.inputs[0])
-    Shader_Preset.links.new(group_input.outputs[1], math_021.inputs[0])
-    Shader_Preset.links.new(group_input.outputs[2], mix_072.inputs[0])
-    Shader_Preset.links.new(group_input.outputs[2], mix_072.inputs[2])
 #Group Output connections
     Shader_Preset.links.new(mix_004.outputs[0], group_output.inputs[0])
     Shader_Preset.links.new(mix_009.outputs[0], group_output.inputs[1])
@@ -3847,22 +4376,130 @@ def create_Shader_Preset(context, operator, group_name, riplocation):
     Shader_Preset.links.new(mix_059.outputs[0], group_output.inputs[10])
     Shader_Preset.links.new(mix_049.outputs[0], group_output.inputs[11])
     Shader_Preset.links.new(mix_054.outputs[0], group_output.inputs[12])
-
+    
     return Shader_Preset
 
 class NODE(bpy.types.Operator):
-    bl_label = ("Generate SHADERNAMEENUM Shader Preset")
+    bl_label = ("Generate Shader")
     bl_idname = "node.test_operator"
 
     def execute(self, context):
-        custom_node_name = "SHADERNAMEENUM Shader Preset"
+        custom_node_name = "SHADERNAMEENUM"
         global RIP_LOCATION
         GroupNode = create_Shader_Preset(self, context, custom_node_name, RIP_LOCATION)
-        shaderpreset_node = context.view_layer.objects.active.active_material.node_tree.nodes.new('ShaderNodeGroup')
-        shaderpreset_node.node_tree = bpy.data.node_groups[GroupNode.name]
-        shaderpreset_node.use_custom_color = True
-        shaderpreset_node.color = (0.101, 0.170, 0.297)
-        shaderpreset_node.name = custom_node_name
+
+#create new shader preset if one isn't present already
+        try:            
+            if bpy.context.active_object.active_material.use_nodes:
+                ntree = bpy.context.active_object.active_material.node_tree
+                node = ntree.nodes.get("Shader Preset", None)
+                if node is not None:
+                    print("")
+                else:
+                    AddNewShaderPreset = context.view_layer.objects.active.active_material.node_tree.nodes.new('ShaderNodeGroup')
+                    AddNewShaderPreset.node_tree = bpy.data.node_groups[GroupNode.name]
+                    AddNewShaderPreset.name = "Shader Preset"
+                    AddNewShaderPreset.use_custom_color = True
+                    AddNewShaderPreset.color = (0.101, 0.170, 0.297)
+                    AddNewShaderPreset.width = 360
+                    AddNewShaderPreset.location = (-640, 640)
+                    AddNewShaderPreset.node_tree = bpy.data.node_groups.get("SHADERNAMEENUM")
+                    try:
+                        for MainShaders in bpy.context.active_object.active_material.node_tree.nodes:
+                            if MainShaders.name == "Frame.002":
+                                if MainShaders.label == "Shader Preset":
+                                    AddNewShaderPreset.parent = MainShaders
+                            else:
+                                print("")
+                    except:
+                        print("") 
+        except:
+            print("")
+
+#link new shader preset to main shader after it is newly generated
+        try:    
+            for DyemapNonDashColorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyemapNonDashColorConnections.label == "DyeMap Texture [Set this to Non-Color]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyemapNonDashColorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyemapNonDashColorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                            
+            for DyemapLowercaseNonDashColorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyemapLowercaseNonDashColorConnections.label == "Dyemap Texture [Set this to Non-Color]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyemapLowercaseNonDashColorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyemapLowercaseNonDashColorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                            
+            for DyemapNonColorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyemapNonColorConnections.label == "DyeMap Texture [Set this to NonColor]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyemapNonColorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyemapNonColorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                            
+            for DyemapLowercaseNonColorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyemapLowercaseNonColorConnections.label == "Dyemap Texture [Set this to NonColor]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyemapLowercaseNonColorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyemapLowercaseNonColorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                            
+            for DyeslotNoncolorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyeslotNoncolorConnections.label == "DyeSlot Texture [Set this to NonColor]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotNoncolorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotNoncolorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                            
+            for DyeslotLowercaseNoncolorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyeslotLowercaseNoncolorConnections.label == "Dyeslot Texture [Set this to NonColor]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotLowercaseNoncolorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotLowercaseNoncolorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+            
+            for DyeslotNonDashcolorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyeslotNonDashcolorConnections.label == "DyeSlot Texture [Set this to Non-Color]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotNonDashcolorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotNonDashcolorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                            
+            for DyeslotLowercaseNonDashcolorConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyeslotLowercaseNonDashcolorConnections.label == "DyeSlot Texture [Set this to Non-Color]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotLowercaseNonDashcolorConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotLowercaseNonDashcolorConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+                            
+            for DyeslotsrgbConnections in bpy.context.active_object.active_material.node_tree.nodes:
+                if DyeslotsrgbConnections.label == "DyeSlot Texture [Set this to sRGB]":
+                    for DyemapTOshaderpresetCONNECTIONS in bpy.context.active_object.active_material.node_tree.nodes:
+                        if DyemapTOshaderpresetCONNECTIONS.name == "Shader Preset":
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotsrgbConnections.outputs[0], DyemapTOshaderpresetCONNECTIONS.inputs[0])
+                            bpy.context.active_object.active_material.node_tree.links.new(DyeslotsrgbConnections.outputs[1], DyemapTOshaderpresetCONNECTIONS.inputs[1])
+
+            for ShaderPreset in bpy.context.active_object.active_material.node_tree.nodes:
+                if ShaderPreset.name == "Shader Preset":
+                    for MainShader in bpy.context.active_object.active_material.node_tree.nodes:
+                        if MainShader.name == "D2 PlayerGear Shader":
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Dye Color A'], MainShader.inputs['Dye Color A'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Dye Color B'], MainShader.inputs['Dye Color B'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Wear Remap_A'], MainShader.inputs['Wear Remap_A'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Wear Remap_B'], MainShader.inputs['Wear Remap_B'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Roughness Remap_A'], MainShader.inputs['Roughness Remap_A'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Roughness Remap_B'], MainShader.inputs['Roughness Remap_B'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Roughness Remap_C'], MainShader.inputs['Roughness Remap_C'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Detail Diffuse'], MainShader.inputs['Detail Diffuse'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Detail Normal'], MainShader.inputs['Detail Normal'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Detail Blends'], MainShader.inputs['Detail Blends'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Worn Detail Blends'], MainShader.inputs['Worn Detail Blends'])
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Iridescence, Fuzz, Transmission'], MainShader.inputs['Iridescence, Fuzz, Transmission'])    
+                            bpy.context.active_object.active_material.node_tree.links.new(ShaderPreset.outputs['Emission'], MainShader.inputs['Emission'])
+        except:
+            print("")
 
         return {'FINISHED'}
 
@@ -3875,11 +4512,12 @@ def get_script_filepath():
 def register():
     global RIP_LOCATION
     RIP_LOCATION = get_script_filepath()
-    bpy.utils.register_class(MAINPANEL)
+    bpy.utils.register_class(NODE_PT_MAINPANEL)
     bpy.utils.register_class(NODE)
 
+
 def unregister():
-    bpy.utils.unregister_class(MAINPANEL)
+    bpy.utils.unregister_class(NODE_PT_MAINPANEL)
     bpy.utils.unregister_class(NODE)
 
 if __name__ == "__main__":

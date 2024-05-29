@@ -305,7 +305,7 @@ public partial class MapView : UserControl
                 var instances = d1MapData.ParseTransforms();
                 Parallel.ForEach(statics, mesh =>
                 {
-                    var parts = d1MapData.Load(mesh.Key, mesh.Value, instances);
+                    var parts = d1MapData.Load(mesh.Value, instances);
                     foreach (var info in mesh.Value)
                     {
                         for (int i = info.TransformIndex; i < info.TransformIndex + info.InstanceCount; i++)

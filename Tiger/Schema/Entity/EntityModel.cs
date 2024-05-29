@@ -91,37 +91,16 @@ public class EntityModel : Tag<SEntityModel>
 
     private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts, EntityResource parentResource, bool hasSkeleton = false)
     {
+        var _strategy = Strategy.CurrentStrategy;
+
         List<DynamicMeshPart> parts = new();
         List<int> exportPartRange = new();
         if (_tag.Meshes.Count == 0) return parts;
         int meshIndex = 0;
         foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
-            Console.WriteLine($"Input Layout {mesh.GetInputLayoutForStage(TfxRenderStage.GenerateGbuffer)}");
-            foreach (TfxRenderStage stage in (TfxRenderStage[])Enum.GetValues(typeof(TfxRenderStage)))
-            {
-                if (stage == TfxRenderStage.ComputeSkinning && Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
-                    continue;
-
-                var range = mesh.GetRangeForStage(stage);
-                if (!(range.Start.Value < range.End.Value))
-                    continue;
-                Console.WriteLine($"Part Range: {mesh.GetRangeForStage(stage).Start.Value}-{mesh.GetRangeForStage(stage).End.Value - 1} : {stage}");
-            }
-
-            foreach (TfxRenderStage stage in VertexLayouts.ExportRenderStages)
-            {
-                var range = mesh.GetRangeForStage(stage);
-                if (!(range.Start.Value < range.End.Value))
-                    continue;
-
-                for (int i = range.Start.Value; i < range.End.Value; i++)
-                {
-                    exportPartRange.Add(i);
-                }
-
-                Console.WriteLine($"Export Part Range: {mesh.GetRangeForStage(stage).Start.Value}-{mesh.GetRangeForStage(stage).End.Value - 1} : {stage}");
-            }
+            Console.WriteLine($"Input Layout {mesh.GetInputLayoutForStage(0)}");
+            exportPartRange = GetExportRanges(mesh);
 
             foreach ((int i, D2Class_CB6E8080 part) in dynamicParts[meshIndex])
             {
@@ -138,7 +117,7 @@ public class EntityModel : Tag<SEntityModel>
                     HasSkeleton = hasSkeleton,
                     RotationOffset = RotationOffset,
                     TranslationOffset = TranslationOffset,
-                    VertexLayoutIndex = mesh.GetInputLayoutForStage(TfxRenderStage.GenerateGbuffer)
+                    VertexLayoutIndex = Strategy.CurrentStrategy < TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? -1 : mesh.GetInputLayoutForStage(0)
                 };
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
@@ -170,6 +149,46 @@ public class EntityModel : Tag<SEntityModel>
         }
 
         return parts;
+    }
+
+    public static List<int> GetExportRanges(SEntityModelMesh mesh)
+    {
+        List<int> exportPartRange = new();
+        // TODO: This is ugly
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            foreach (TfxRenderStageD1 stage in VertexLayouts.ExportRenderStagesD1)
+            {
+                var range = mesh.GetRangeForStage((int)stage);
+                if (!(range.Start.Value < range.End.Value))
+                    continue;
+
+                for (int i = range.Start.Value; i < range.End.Value; i++)
+                    exportPartRange.Add(i);
+            }
+        }
+        else
+        {
+            //foreach (TfxRenderStage stage in ExportRenderStages)
+            //{
+            //    var range = mesh.GetRangeForStage((int)stage);
+            //    if (!(range.Start.Value < range.End.Value))
+            //        continue;
+            //    Console.WriteLine($"Part Range: {mesh.GetRangeForStage((int)stage).Start.Value}-{mesh.GetRangeForStage((int)stage).End.Value - 1} : {stage}");
+            //}
+
+            foreach (TfxRenderStage stage in VertexLayouts.ExportRenderStages)
+            {
+                var range = mesh.GetRangeForStage((int)stage);
+                if (!(range.Start.Value < range.End.Value))
+                    continue;
+
+                for (int i = range.Start.Value; i < range.End.Value; i++)
+                    exportPartRange.Add(i);
+            }
+        }
+
+        return exportPartRange;
     }
 }
 
@@ -253,13 +272,11 @@ public class DynamicMeshPart : MeshPart
         }
         else
         {
-            mesh.Vertices1.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
-            mesh.Vertices2?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
 
             // Have to call it like this b/c we don't know the format of the vertex data here
-            //Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
-            //mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
-            //mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
+            Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
+            mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
+            mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
         }
 
 

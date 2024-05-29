@@ -203,6 +203,21 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
     private FieldInfo[] GetStrategyFields(FieldInfo[] getFields)
     {
+#if DEBUG
+        foreach (var field in getFields)
+        {
+            var attributes = field.GetCustomAttributes<SchemaFieldAttribute>().ToArray();
+            // Check if attributes array is null or empty
+            if (attributes == null || attributes.Length == 0)
+                continue;
+
+            var attribute = GetAttribute<SchemaFieldAttribute>(field);
+
+            // Check if attribute is null
+            if (attribute == null)
+                Console.WriteLine($"Attribute for field {field.Name} is null.");
+        }
+#endif
         // don't include fields that have a strategy assigned but are larger than us
         return getFields.Where(f => !f.GetCustomAttributes<SchemaFieldAttribute>().Any() || (_strategy >= GetAttribute<SchemaFieldAttribute>(f).Strategy && !GetAttribute<SchemaFieldAttribute>(f).Obsolete)).ToArray();
     }

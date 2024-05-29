@@ -44,7 +44,7 @@ public class MeshPart
     public Dictionary<int, List<Vector4>> VertexExtraData = new(); //TEXCOORD#, extra data
     public IMaterial? Material;
     public int GroupIndex = 0;
-    public int VertexLayoutIndex = 0;
+    public int VertexLayoutIndex = -1;
     public int MaxVertexColorIndex = -1;
 }
 

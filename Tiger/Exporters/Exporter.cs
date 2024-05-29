@@ -85,21 +85,21 @@ public class ExporterScene
     public ExportType Type { get; set; }
     public ConcurrentBag<ExporterMesh> StaticMeshes = new();
     public ConcurrentBag<ExporterEntity> Entities = new();
-    public ConcurrentDictionary<FileHash, List<Transform>> StaticMeshInstances = new();
-    public ConcurrentDictionary<FileHash, List<Transform>> ArrangedStaticMeshInstances = new();
-    public ConcurrentDictionary<FileHash, List<Transform>> EntityInstances = new();
+    public ConcurrentDictionary<string, List<Transform>> StaticMeshInstances = new();
+    public ConcurrentDictionary<string, List<Transform>> ArrangedStaticMeshInstances = new();
+    public ConcurrentDictionary<string, List<Transform>> EntityInstances = new();
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentBag<SMapDataEntry> EntityPoints = new();
     public ConcurrentBag<CubemapResource> Cubemaps = new();
     public ConcurrentBag<SMapLightResource> MapLights = new();
-    public ConcurrentDictionary<FileHash, List<Transform>> MapSpotLights = new();
+    public ConcurrentDictionary<string, List<Transform>> MapSpotLights = new();
     public ConcurrentBag<SMapDecalsResource> Decals = new();
-    private ConcurrentBag<FileHash> _addedEntities = new();
+    private ConcurrentBag<string> _addedEntities = new();
     public ConcurrentHashSet<Texture> Textures = new();
     public ConcurrentHashSet<ExportMaterial> Materials = new();
-    public ConcurrentDictionary<FileHash, List<FileHash>> TerrainDyemaps = new();
+    public ConcurrentDictionary<string, List<FileHash>> TerrainDyemaps = new();
 
-    public void AddStatic(FileHash meshHash, List<StaticPart> parts)
+    public void AddStatic(string meshHash, List<StaticPart> parts)
     {
         ExporterMesh mesh = new(meshHash);
         for (int i = 0; i < parts.Count; i++)
@@ -110,7 +110,7 @@ public class ExporterScene
         StaticMeshes.Add(mesh);
     }
 
-    public void AddStaticInstancesAndParts(FileHash meshHash, List<StaticPart> parts, IEnumerable<SStaticMeshInstanceTransform> instances)
+    public void AddStaticInstancesAndParts(string meshHash, List<StaticPart> parts, IEnumerable<SStaticMeshInstanceTransform> instances)
     {
         ExporterMesh mesh = new(meshHash);
         for (int i = 0; i < parts.Count; i++)
@@ -123,7 +123,7 @@ public class ExporterScene
         ArrangedStaticMeshInstances.TryAdd(meshHash, InstancesToTransforms(instances));
     }
 
-    public void AddStaticInstancesToMesh(FileHash modelHash, IEnumerable<SStaticMeshInstanceTransform> instances)
+    public void AddStaticInstancesToMesh(string modelHash, IEnumerable<SStaticMeshInstanceTransform> instances)
     {
         if (!StaticMeshInstances.ContainsKey(modelHash))
         {
@@ -139,7 +139,7 @@ public class ExporterScene
     }
 
     // D1
-    public void AddStaticInstancesToMesh(FileHash modelHash, IEnumerable<InstanceTransform> instances)
+    public void AddStaticInstancesToMesh(string modelHash, IEnumerable<InstanceTransform> instances)
     {
         if (!StaticMeshInstances.ContainsKey(modelHash))
         {
@@ -235,10 +235,10 @@ public class ExporterScene
                 DynamicMeshPart part = parts[i];
                 if (part.Material == null)
                     continue;
-                if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-                {
-                    mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
-                }
+                //if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                //{
+                //    mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
+                //}
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = entity.Skeleton?.GetBoneNodes() });
         }
@@ -273,10 +273,8 @@ public class ExporterScene
             {
                 DynamicMeshPart part = parts[i];
 
-                if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-                {
-                    continue;
-                }
+                //if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                //    continue;
 
                 mesh.AddPart(model.Hash, part, i);
             }
@@ -347,6 +345,31 @@ public class ExporterScene
         }
         TerrainDyemaps[modelHash].Add(dyemapHash);
     }
+
+    public void AddMapModelParts(string name, List<DynamicMeshPart> parts, Transform transform)
+    {
+        ExporterMesh mesh = new(name);
+
+        if (!_addedEntities.Contains(name)) //Dont want duplicate entities being added
+        {
+            _addedEntities.Add(name);
+            for (int i = 0; i < parts.Count; i++)
+            {
+                DynamicMeshPart part = parts[i];
+
+                //if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
+                //    continue;
+
+                mesh.AddPart(name, part, i);
+            }
+            Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
+        }
+
+        if (!EntityInstances.ContainsKey(name))
+            EntityInstances.TryAdd(name, new());
+
+        EntityInstances[name].Add(transform);
+    }
 }
 
 public class ExporterEntity
@@ -357,10 +380,14 @@ public class ExporterEntity
 
 public class ExporterMesh
 {
-    public FileHash Hash { get; set; }
+    public string Hash { get; set; }
     public List<ExporterPart> Parts { get; } = new();
 
     public ExporterMesh(FileHash hash)
+    {
+        Hash = hash;
+    }
+    public ExporterMesh(string hash)
     {
         Hash = hash;
     }
@@ -376,6 +403,7 @@ public class ExporterMesh
 public class ExporterPart
 {
     public readonly MeshPart MeshPart;
+    public readonly string SubName;
     public readonly string Name;
     public readonly int Index;
 
@@ -384,6 +412,7 @@ public class ExporterPart
     public ExporterPart(string name, MeshPart meshPart, int index)
     {
         MeshPart = meshPart;
+        SubName = name;
         Name = $"{name}_Group{meshPart.GroupIndex}_Index{meshPart.Index}_{index}_{meshPart.LodCategory}";
         Index = index;
     }
@@ -436,6 +465,7 @@ public enum ExportType
     Entity,
     Map,
     Terrain,
+    Decorator,
     EntityPoints,
     StaticInMap,
     EntityInMap,

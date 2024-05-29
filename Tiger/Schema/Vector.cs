@@ -3,6 +3,13 @@ using System.Runtime.InteropServices;
 
 namespace Tiger.Schema;
 
+[StructLayout(LayoutKind.Sequential, Size = 0x20)]
+public struct AABB
+{
+    public Vector4 Min;
+    public Vector4 Max;
+}
+
 [StructLayout(LayoutKind.Sequential, Size = 8)]
 public struct Vector2
 {

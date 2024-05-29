@@ -26,9 +26,9 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
     // Static tables will have multiple duplicate meshes since they are baked into the map.
     // Each static can have multiple parts that use the same Vertices0 data, so instead of filtering out duplicate hashes,
     // we will filter out duplicate entries that have the same hash and the same IndexOffset, that should (in theory) remove all dupes.
-    public Dictionary<SStaticMeshData_D1, List<MeshInfo>> GetStatics()
+    public Dictionary<FileHash, List<MeshInfo>> GetStatics()
     {
-        Dictionary<SStaticMeshData_D1, List<MeshInfo>> statics = new();
+        Dictionary<FileHash, List<MeshInfo>> statics = new();
         var staticEntries = CollapseStaticTables();
         for (int i = 0; i < staticEntries.Count; i++)
         {
@@ -45,8 +45,8 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
                     if (material.Unk08 != 1)
                         continue;
 
-                    if (!statics.ContainsKey(staticEntry))
-                        statics[staticEntry] = new();
+                    if (!statics.ContainsKey(staticEntry.Vertices0.Hash))
+                        statics[staticEntry.Vertices0.Hash] = new();
 
                     MeshInfo meshInfo = new()
                     {
@@ -54,9 +54,9 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
                         TransformIndex = infoEntry.TransformIndex,
                         MaterialIndex = infoEntry.MaterialIndex,
                         Material = material,
+                        Data = staticEntry
                     };
-
-                    statics[staticEntry].Add(meshInfo);
+                    statics[staticEntry.Vertices0.Hash].Add(meshInfo);
                 }
             }
         }
@@ -71,8 +71,8 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
 
         Parallel.ForEach(statics, mesh =>
         {
-            var parts = Load(mesh.Key, mesh.Value, instances);
-            scene.AddStatic(mesh.Key.Vertices0.Hash, parts);
+            var parts = Load(mesh.Value, instances);
+            scene.AddStatic(mesh.Key, parts);
             foreach (var part in parts)
             {
                 if (part.Material == null)
@@ -83,34 +83,38 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         });
 
         // I think this is working the way it should, but i feel like this isnt the right way..
-        foreach (var (mesh, info) in statics.DistinctBy(x => x.Key.Vertices0.Hash))
+        foreach (var (mesh, info) in statics.DistinctBy(x => x.Key))
         {
             foreach (var instance in info.DistinctBy(x => x.TransformIndex))
             {
-                scene.AddStaticInstancesToMesh(mesh.Vertices0.Hash, instances.Skip(instance.TransformIndex).Take(instance.InstanceCount).ToList());
+                scene.AddStaticInstancesToMesh(mesh, instances.Skip(instance.TransformIndex).Take(instance.InstanceCount).ToList());
             }
         }
     }
 
-
     // Static part loading will have to be done here since the statics aren't a seperate tag to build a class off of
-    public List<StaticPart> Load(SStaticMeshData_D1 meshData, List<MeshInfo> meshInfo, List<InstanceTransform> instances)
+    public List<StaticPart> Load(List<MeshInfo> meshInfo, List<InstanceTransform> instances)
     {
-        StaticPart part = new StaticPart(meshData);
-        part.Material = meshInfo[0].Material; // I hope this is fine
-        part.GetAllData(meshData);
-
-        // Why in the world Bungie would store UV transforms in here is beyond me
-        var texcoordTransform = instances[meshInfo[0].TransformIndex].UVTransform;
-        for (int i = 0; i < part.VertexTexcoords0.Count; i++)
+        List<StaticPart> parts = new();
+        foreach (var mesh in meshInfo)
         {
-            part.VertexTexcoords0[i] = new Vector2(
-                part.VertexTexcoords0[i].X * texcoordTransform.X + texcoordTransform.Y,
-                part.VertexTexcoords0[i].Y * -texcoordTransform.X + 1 - texcoordTransform.Z
-            );
-        }
+            StaticPart part = new StaticPart(mesh.Data);
+            part.Material = mesh.Material; // I hope this is fine
+            part.GetAllData(mesh.Data);
 
-        return new List<StaticPart> { part };
+            // Why in the world Bungie would store UV transforms in here is beyond me
+            var texcoordTransform = instances[mesh.TransformIndex].UVTransform;
+            for (int i = 0; i < part.VertexTexcoords0.Count; i++)
+            {
+                part.VertexTexcoords0[i] = new Vector2(
+                    part.VertexTexcoords0[i].X * texcoordTransform.X + texcoordTransform.Y,
+                    part.VertexTexcoords0[i].Y * -texcoordTransform.X + 1 - texcoordTransform.Z
+                );
+            }
+
+            parts.Add(part);
+        }
+        return parts;
     }
 
     // Statics1 seems to just be depth only meshes so I don't think it needs to be added, but ill do it just in case,
@@ -200,6 +204,7 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         public short TransformIndex; // Index in InstanceTransforms file
         public short MaterialIndex;
         public IMaterial Material;
+        public SStaticMeshData_D1 Data;
     }
 }
 

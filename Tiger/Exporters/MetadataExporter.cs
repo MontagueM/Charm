@@ -28,7 +28,7 @@ class MetadataScene
     {
         ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>> mats = new();
         _config.TryAdd("Materials", mats);
-        ConcurrentDictionary<string, string> parts = new();
+        ConcurrentDictionary<string, Dictionary<string, string>> parts = new();
         _config.TryAdd("Parts", parts);
         ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> instances = new();
         _config.TryAdd("Instances", instances);
@@ -196,7 +196,12 @@ class MetadataScene
 
     public void AddPart(ExporterPart part, string partName)
     {
-        _config["Parts"].TryAdd(partName, part.Material?.FileHash ?? "");
+        if (!_config["Parts"].ContainsKey(part.SubName))
+        {
+            _config["Parts"][part.SubName] = new Dictionary<string, string>();
+        }
+
+        _config["Parts"][part.SubName].TryAdd(partName, part.Material?.FileHash ?? "");
     }
 
     public void SetType(string type)
@@ -218,7 +223,7 @@ class MetadataScene
         }
     }
 
-    public void AddInstanced(FileHash meshHash, List<Transform> transforms)
+    public void AddInstanced(string meshHash, List<Transform> transforms)
     {
         if (!_config["Instances"].ContainsKey(meshHash))
         {
@@ -332,45 +337,42 @@ class MetadataScene
             return;
         }
 
+        // Are these needed anymore?
         // If theres only 1 part, we need to rename it + the instance to the name of the mesh (unreal imports to fbx name if only 1 mesh inside)
-        if (_config["Parts"].Count == 1)
-        {
-            var part = _config["Parts"][_config["Parts"].Keys[0]];
-            //I'm not sure what to do if it's 0, so I guess I'll leave that to fix it in the future if something breakes.
-            if (_config["Instances"].Count != 0)
-            {
-                var instance = _config["Instances"][_config["Instances"].Keys[0]];
-                _config["Instances"] = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
-                _config["Instances"][_config["MeshName"]] = instance;
-            }
-            _config["Parts"] = new ConcurrentDictionary<string, string>();
-            _config["Parts"][_config["MeshName"]] = part;
-        }
+        //if (_config["Parts"].Count == 1)
+        //{
+        //    var part = _config["Parts"][_config["Parts"].Keys[0]];
+        //    //I'm not sure what to do if it's 0, so I guess I'll leave that to fix it in the future if something breakes.
+        //    if (_config["Instances"].Count != 0)
+        //    {
+        //        var instance = _config["Instances"][_config["Instances"].Keys[0]];
+        //        _config["Instances"] = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
+        //        _config["Instances"][_config["MeshName"]] = instance;
+        //    }
+        //    _config["Parts"] = new ConcurrentDictionary<string, string>();
+        //    _config["Parts"][_config["MeshName"]] = part;
+        //}
 
 
-        //this just sorts the "instances" part of the cfg so its ordered by scale
-        //makes it easier for instancing models in Hammer/S&Box
-        var sortedDict = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
+        ////this just sorts the "instances" part of the cfg so its ordered by scale
+        ////makes it easier for instancing models in Hammer/S&Box
+        //var sortedDict = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
 
-        foreach (var keyValuePair in (ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>)_config["Instances"])
-        {
-            var array = keyValuePair.Value;
-            var sortedArray = array.OrderBy(x => x.Scale[0]);
+        //foreach (var keyValuePair in (ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>)_config["Instances"])
+        //{
+        //    var array = keyValuePair.Value;
+        //    var sortedArray = array.OrderBy(x => x.Scale[0]);
 
-            var sortedBag = new ConcurrentBag<JsonInstance>(sortedArray);
-            sortedDict.TryAdd(keyValuePair.Key, sortedBag);
-        }
-        _config["Instances"] = sortedDict;
+        //    var sortedBag = new ConcurrentBag<JsonInstance>(sortedArray);
+        //    sortedDict.TryAdd(keyValuePair.Key, sortedBag);
+        //}
+        //_config["Instances"] = sortedDict;
 
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
         if (_config.ContainsKey("MeshName"))
-        {
             File.WriteAllText($"{path}/{_config["MeshName"]}_info.cfg", s);
-        }
         else
-        {
             File.WriteAllText($"{path}/info.cfg", s);
-        }
     }
 
     private struct JsonInstance

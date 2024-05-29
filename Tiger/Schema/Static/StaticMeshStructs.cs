@@ -138,40 +138,53 @@ public struct SStaticMeshData_D1
 }
 
 #region Decorators
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "361C8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C36C8080", 0x18)]
 public struct SDecoratorMapResource
 {
-    [SchemaField(0x10)]
-    public Tag<SDecorator> Decorator;
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307), NoLoad]
+    public Decorator Decorator;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "CE1A8080", 0xA8)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "986C8080", 0xA8)]
 public struct SDecorator
 {
     public ulong Size;
     public DynamicArray<D2Class_B16C8080> DecoratorModels;
-    public DynamicArray<D2Class_07008080> Unk18;
+    public DynamicArray<D2Class_07008080> InstanceRanges;
     public DynamicArray<D2Class_07008080> Unk28;
     public DynamicArray<D2Class_07008080> Unk38;
     public Tag<D2Class_A46C8080> BufferData;
+    public Tag<SOcclusionBounds> OcculusionBounds;
+    public DynamicArray<D2Class_07008080> Unk50;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "17488080", 0x4)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B16C8080", 0x4)]
 public struct D2Class_B16C8080
 {
     public Tag<D2Class_B26C8080> DecoratorModel;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "221C8080", 0x100)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B26C8080", 0x100)]
 public struct D2Class_B26C8080
 {
     public long FileSize;
     public EntityModel Model;
-
-    [SchemaField(0x34)]
-    public Tag<D2Class_B86C8080> Unk34;
+    public int UnkC;
+    //public AABB BoundingBox; not in d1, dont really care about it tho
+    [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public Tag Unk30;  // D2Class_B46C8080
+    [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x34, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public Tag<D2Class_B86C8080> SpeedTreeData; // Used for actual trees
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D81B8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B86C8080", 0x18)]
 public struct D2Class_B86C8080
 {
@@ -179,10 +192,10 @@ public struct D2Class_B86C8080
     public DynamicArray<D2Class_BA6C8080> Unk08;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "9A1A8080", 0x50)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BA6C8080", 0x50)]
 public struct D2Class_BA6C8080
 {
-    //Matrix?
     public Vector4 Unk00;
     public Vector4 Unk10;
     public Vector4 Unk20;
@@ -190,6 +203,7 @@ public struct D2Class_BA6C8080
     public Vector4 Unk40;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "CB1A8080", 0x20)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A46C8080", 0x20)]
 public struct D2Class_A46C8080
 {
@@ -202,6 +216,7 @@ public struct D2Class_A46C8080
     public Tag<SDecoratorInstanceData> InstanceData;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "321B8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A76C8080", 0x18)]
 public struct SDecoratorInstanceData
 {
@@ -209,23 +224,29 @@ public struct SDecoratorInstanceData
     public DynamicArray<D2Class_A96C8080> InstanceElement;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "291B8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96C8080", 0x10)]
 public struct D2Class_A96C8080
 {
     // Normalized position
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, ArraySizeConst = 3)]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 4)]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, ArraySizeConst = 4)]
     public ushort[] Position;
     // Rotation represented as an 8-bit quaternion
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 4)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, ArraySizeConst = 4)]
     public byte[] Rotation;
     // RGBA color
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 4)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, ArraySizeConst = 4)]
     public byte[] Color;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "721A8080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "9F6C8080", 0x60)]
 public struct D2Class_9F6C8080
 {
+    // Speedtree[0-5] cbuffer
     public Vector4 Unk00;
     public Vector4 Unk10;
     public Vector4 Unk20;

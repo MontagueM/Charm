@@ -103,8 +103,8 @@ public class StaticPart : MeshPart
         }
         else
         {
-            buffers.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
-            buffers.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+            buffers.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0, buffers.Vertices1 != null ? buffers.Vertices1.TagData.Stride : -1, false);
+            buffers.Vertices1?.ReadVertexData(this, uniqueVertexIndices, 1, buffers.Vertices0.TagData.Stride, false);
             buffers.VertexColor?.ReadVertexData(this, uniqueVertexIndices);
         }
 
@@ -161,8 +161,8 @@ public class StaticPart : MeshPart
         }
         else
         {
-            mesh.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
-            mesh.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+            mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices1 != null ? mesh.Vertices1.TagData.Stride : -1, false);
+            mesh.Vertices1?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices0.TagData.Stride, false);
             mesh.VertexColor?.ReadVertexData(this, uniqueVertexIndices);
         }
 

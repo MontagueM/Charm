@@ -101,6 +101,27 @@ public enum TfxExtern : byte
     SoftDeform = 96,
 }
 
+public enum TfxRenderStageD1 // should be a total of 19?
+{
+    GenerateGbuffer = 0,
+    InvestmentDecals = 1,
+    ShadowGenerate = 2,
+    LightingApply = 3,
+    LightProbeApply = 4,
+    DecalsAdditive = 5,
+    Transparents = 6,
+    Distortion = 7,
+    LightShaftOcclusion = 8,
+    SkinPrepass = 9,
+    DepthPrepass = 10,
+    WaterReflection = 11,
+    PostprocessTransparentStencil = 12,
+    Impulse = 13,
+    Reticle = 14,
+    WaterRipples = 15,
+    MaskSunLight = 16,
+}
+
 public enum TfxRenderStage
 {
     GenerateGbuffer = 0,

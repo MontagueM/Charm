@@ -24,31 +24,27 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         var _strategy = Strategy.CurrentStrategy;
         _uvExists = part.VertexTexcoords0.Count > 0;
 
-        using var handle = GetReferenceReader();
-        foreach (var vertexIndex in uniqueVertexIndices)
+        if (part.VertexLayoutIndex != -1)
         {
-            if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-                ReadD1VertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
-            else
-                ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
+            ReadVertexDataFromLayout(part, uniqueVertexIndices, bufferIndex);
+        }
+        else
+        {
+            using var handle = GetReferenceReader();
+            foreach (var vertexIndex in uniqueVertexIndices)
+            {
+                if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                    ReadD1VertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
+                else
+                    ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
+            }
         }
     }
 
     public void ReadVertexDataFromLayout(MeshPart part, HashSet<uint> uniqueVertexIndices, int bufferIndex = -1)
     {
         var vertexLayout = VertexLayouts.InputLayouts[part.VertexLayoutIndex];
-        Console.WriteLine($"Vertex Layout {part.VertexLayoutIndex} (Current Buffer Index {bufferIndex})");
-        foreach (var data in vertexLayout.Elements)
-        {
-            Console.WriteLine("--------");
-            Console.WriteLine($"    SemanticName    {data.SemanticName}");
-            Console.WriteLine($"    SemanticIndex    {data.SemanticIndex}");
-            Console.WriteLine($"    HlslType    {data.HlslType}");
-            Console.WriteLine($"    Format    {data.Format}");
-            Console.WriteLine($"    Stride    {data.Stride}");
-            Console.WriteLine($"    BufferIndex    {data.BufferIndex}");
-            Console.WriteLine($"    IsInstanceData    {data.IsInstanceData}");
-        }
+        Console.WriteLine($"Vertex Layout {part.VertexLayoutIndex} (Current Buffer Index {bufferIndex}, Part index {part.Index})");
 
         using var handle = GetReferenceReader();
         foreach (var vertexIndex in uniqueVertexIndices)
@@ -1047,13 +1043,4 @@ public struct SVertexHeader
     public short Stride;
     public short Type;
     public int Deadbeef;
-}
-
-public class VertexLayoutJson
-{
-    public string Semantic { get; set; }
-    public int Index { get; set; }
-    public string Mask { get; set; }
-    public DXGI_FORMAT Format { get; set; }
-    public int Size { get; set; }
 }

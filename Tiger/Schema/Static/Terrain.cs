@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Arithmic;
 using Tiger.Exporters;
 using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
@@ -110,40 +109,11 @@ public class Terrain : Tag<STerrain>
         }
         part.VertexIndices = uniqueVertexIndices.ToList();
 
-        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-        {
-            _tag.Vertices1.ReadVertexDataFromLayout(part, uniqueVertexIndices, 0);
-            _tag.Vertices2.ReadVertexDataFromLayout(part, uniqueVertexIndices, 1);
+        //_tag.Vertices1.ReadVertexDataFromLayout(part, uniqueVertexIndices, 0);
+        //_tag.Vertices2.ReadVertexDataFromLayout(part, uniqueVertexIndices, 1);
 
-            // It's 2024, input signatures are a thing of the past (except they worked fine, mostly)
-            //List<InputSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
-            //int b0Stride = _tag.Vertices1.TagData.Stride;
-            //int b1Stride = _tag.Vertices2?.TagData.Stride ?? 0;
-            //List<InputSignature> inputSignatures0 = new();
-            //List<InputSignature> inputSignatures1 = new();
-            //int stride = 0;
-            //foreach (InputSignature inputSignature in inputSignatures)
-            //{
-            //    if (stride < b0Stride)
-            //        inputSignatures0.Add(inputSignature);
-            //    else
-            //        inputSignatures1.Add(inputSignature);
-
-            //    if (inputSignature.Semantic == InputSemantic.Colour)
-            //        stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
-            //    else
-            //        stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
-            //}
-
-            //Log.Debug($"Reading vertex buffers {_tag.Vertices1.Hash}/{_tag.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices2?.Hash}/{_tag.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-            //_tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures0, true);
-            //_tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures1, true);
-        }
-        else // Can't get input semantics (yet) for D1 / PS4
-        {
-            _tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, _tag.Vertices2 != null ? _tag.Vertices2.TagData.Stride : -1, true);
-            _tag.Vertices2?.ReadVertexData(part, uniqueVertexIndices, 1, _tag.Vertices1.TagData.Stride, true);
-        }
+        _tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, _tag.Vertices2 != null ? _tag.Vertices2.TagData.Stride : -1, false);
+        _tag.Vertices2?.ReadVertexData(part, uniqueVertexIndices, 1, _tag.Vertices1.TagData.Stride, false);
 
         return part;
     }

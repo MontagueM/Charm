@@ -19,6 +19,7 @@ using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
+using Decorator = Tiger.Schema.Static.Decorator;
 
 namespace Charm;
 
@@ -266,6 +267,13 @@ public partial class DevView : UserControl
                     Terrain terrain = FileResourcer.Get().GetFile<Terrain>(hash);
                     ExporterScene terrainScene = Exporter.Get().CreateScene(hash, ExportType.Terrain);
                     terrain.LoadIntoExporter(terrainScene, ConfigSubsystem.Get().GetExportSavePath(), false);
+                    Exporter.Get().Export();
+                    break;
+                case 0x80801ACE:
+                case 0x80806C98: // Decorator 986C8080
+                    Decorator decorator = FileResourcer.Get().GetFile<Decorator>(hash);
+                    ExporterScene decoratorScene = Exporter.Get().CreateScene(hash, ExportType.Map);
+                    decorator.LoadIntoExporter(decoratorScene, ConfigSubsystem.Get().GetExportSavePath());
                     Exporter.Get().Export();
                     break;
                 default:
