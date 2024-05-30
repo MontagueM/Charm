@@ -85,7 +85,7 @@ public class Decorator : Tag<SDecorator>
                 LodCategory = part.LodCategory,
                 bAlphaClip = (part.GetFlags() & 0x8) != 0,
                 VertexLayoutIndex = Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ?
-                mesh.GetInputLayoutForStage(0) : mesh.GetInputLayoutForStage(0) / 4
+                mesh.GetInputLayoutForStage(0) : mesh.GetInputLayoutForStage(0) / 4 // Not right, just a coincidence it works here
             };
 
             if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)

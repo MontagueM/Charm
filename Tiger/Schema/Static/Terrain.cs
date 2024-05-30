@@ -112,8 +112,8 @@ public class Terrain : Tag<STerrain>
         //_tag.Vertices1.ReadVertexDataFromLayout(part, uniqueVertexIndices, 0);
         //_tag.Vertices2.ReadVertexDataFromLayout(part, uniqueVertexIndices, 1);
 
-        _tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, _tag.Vertices2 != null ? _tag.Vertices2.TagData.Stride : -1, false);
-        _tag.Vertices2?.ReadVertexData(part, uniqueVertexIndices, 1, _tag.Vertices1.TagData.Stride, false);
+        _tag.Vertices1.ReadVertexDataFromLayout(part, uniqueVertexIndices, 0);
+        _tag.Vertices2?.ReadVertexDataFromLayout(part, uniqueVertexIndices, 1);
 
         return part;
     }

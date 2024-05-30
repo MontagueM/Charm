@@ -30,21 +30,9 @@ public static class VertexLayouts
         //TfxRenderStage.Reticle
     };
 
-    public static List<TfxRenderStageD1> ExportRenderStagesD1 = new List<TfxRenderStageD1>
+    public static TfxRenderStage[] GetRenderStages()
     {
-        TfxRenderStageD1.GenerateGbuffer,
-        TfxRenderStageD1.InvestmentDecals,
-        TfxRenderStageD1.DecalsAdditive,
-        TfxRenderStageD1.Transparents,
-        //TfxRenderStage.Reticle
-    };
-
-    public static dynamic GetRenderStages()
-    {
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-            return (TfxRenderStageD1[])Enum.GetValues(typeof(TfxRenderStageD1));
-        else
-            return (TfxRenderStage[])Enum.GetValues(typeof(TfxRenderStage));
+        return (TfxRenderStage[])Enum.GetValues(typeof(TfxRenderStage));
     }
 
     // yoinked from Alkahest (credit to Cohae obviously)

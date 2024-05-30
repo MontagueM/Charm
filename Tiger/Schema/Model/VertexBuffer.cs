@@ -24,20 +24,13 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
         var _strategy = Strategy.CurrentStrategy;
         _uvExists = part.VertexTexcoords0.Count > 0;
 
-        if (part.VertexLayoutIndex != -1)
+        using var handle = GetReferenceReader();
+        foreach (var vertexIndex in uniqueVertexIndices)
         {
-            ReadVertexDataFromLayout(part, uniqueVertexIndices, bufferIndex);
-        }
-        else
-        {
-            using var handle = GetReferenceReader();
-            foreach (var vertexIndex in uniqueVertexIndices)
-            {
-                if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-                    ReadD1VertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
-                else
-                    ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
-            }
+            if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                ReadD1VertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
+            else
+                ReadVertexData(handle, part, vertexIndex, bufferIndex, otherStride, isTerrain);
         }
     }
 
