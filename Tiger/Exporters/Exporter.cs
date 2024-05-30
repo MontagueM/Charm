@@ -239,6 +239,7 @@ public class ExporterScene
                 //{
                 //    mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
                 //}
+                mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = entity.Skeleton?.GetBoneNodes() });
         }
