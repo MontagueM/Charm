@@ -26,7 +26,7 @@ class MetadataScene
 
     public MetadataScene(ExporterScene scene)
     {
-        ConcurrentDictionary<string, Dictionary<string, Dictionary<int, TexInfo>>> mats = new();
+        ConcurrentDictionary<string, JsonMaterial> mats = new();
         _config.TryAdd("Materials", mats);
         ConcurrentDictionary<string, Dictionary<string, string>> parts = new();
         _config.TryAdd("Parts", parts);
@@ -166,32 +166,45 @@ class MetadataScene
     public void AddMaterial(IMaterial material)
     {
         if (!material.FileHash.IsValid())
-        {
             return;
-        }
-        Dictionary<string, Dictionary<int, TexInfo>> textures = new();
-        if (!_config["Materials"].TryAdd(material.FileHash, textures))
+
+        var matInfo = new JsonMaterial
         {
+            BackfaceCulling = material.Unk0C == 0,
+            Textures = new Dictionary<string, Dictionary<int, TexInfo>>()
+        };
+
+        if (!_config["Materials"].TryAdd(material.FileHash, matInfo))
             return;
-        }
+
         Dictionary<int, TexInfo> vstex = new();
-        textures.Add("VS", vstex);
+        matInfo.Textures.Add("VS", vstex);
         foreach (var vst in material.EnumerateVSTextures())
         {
             if (vst.Texture != null)
-            {
                 vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
-            }
         }
+
         Dictionary<int, TexInfo> pstex = new();
-        textures.Add("PS", pstex);
+        matInfo.Textures.Add("PS", pstex);
         foreach (var pst in material.EnumeratePSTextures())
         {
             if (pst.Texture != null)
-            {
                 pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
-            }
         }
+    }
+
+    public void AddTextureToMaterial(string material, int index, Texture texture)
+    {
+        if (!_config["Materials"].ContainsKey(material))
+        {
+            var matInfo = new JsonMaterial { BackfaceCulling = true, Textures = new Dictionary<string, Dictionary<int, TexInfo>>() };
+
+            Dictionary<int, TexInfo> pstex = new();
+            matInfo.Textures.Add("PS", pstex);
+            _config["Materials"][material] = matInfo;
+        }
+        _config["Materials"][material].Textures["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb() });
     }
 
     public void AddPart(ExporterPart part, string partName)
@@ -238,17 +251,6 @@ class MetadataScene
                 Scale = new[] { transform.Scale.X, transform.Scale.Y, transform.Scale.Z }
             });
         }
-    }
-
-    public void AddTextureToMaterial(string material, int index, Texture texture)
-    {
-        if (!_config["Materials"].ContainsKey(material))
-        {
-            var textures = new Dictionary<string, Dictionary<int, TexInfo>>();
-            textures.Add("PS", new Dictionary<int, TexInfo>());
-            _config["Materials"][material] = textures;
-        }
-        _config["Materials"][material]["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb() });
     }
 
     public void AddCubemap(string name, Vector3 scale, Vector4 quatRotation, Vector3 translation, string texHash)
@@ -406,6 +408,12 @@ class MetadataScene
         public float Scale;
         public float[] Corner1;
         public float[] Corner2;
+    }
+
+    private struct JsonMaterial
+    {
+        public bool BackfaceCulling;
+        public Dictionary<string, Dictionary<int, TexInfo>> Textures;
     }
 }
 

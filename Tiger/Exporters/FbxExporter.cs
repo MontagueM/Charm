@@ -24,11 +24,6 @@ public class FbxExporter : AbstractExporter
             }
             foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
             {
-                if (scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) != 1)
-                {
-                    var a = 0;
-                }
-                // Debug.Assert(scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) == 1);
                 AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
             }
             foreach (ExporterEntity entity in scene.Entities)
@@ -434,10 +429,10 @@ public static class FbxMeshExtensions
                 dataLayer.GetDirectArray().Add(new FbxColor(data.X, data.Y, data.Z, data.W));
             }
 
-            if (fbxMesh.GetLayer(entry.Key) == null)
+            if (fbxMesh.GetLayer(entry.Key + 1) == null)
             {
                 fbxMesh.CreateLayer();
-                fbxMesh.GetLayer(entry.Key).SetVertexColors(dataLayer);
+                fbxMesh.GetLayer(entry.Key + 1).SetVertexColors(dataLayer);
             }
         }
     }
