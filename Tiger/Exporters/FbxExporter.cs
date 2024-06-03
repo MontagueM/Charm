@@ -354,7 +354,7 @@ public static class FbxMeshExtensions
 
             if (Strategy.CurrentStrategy > TigerStrategy.DESTINY2_SHADOWKEEP_2999)
             {
-                Vector3 euler = isEntity ? new Vector3(normal.X, normal.Y, normal.Z) : Vector4.ConsiderQuatToEulerConvert(normal);
+                Vector3 euler = part.MeshPart is DynamicMeshPart ? new Vector3(normal.X, normal.Y, normal.Z) : Vector4.ConsiderQuatToEulerConvert(normal);
                 vec4 = new FbxVector4(euler.X, euler.Y, euler.Z);
             }
             else

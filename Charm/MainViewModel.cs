@@ -252,7 +252,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                     if (part.BasePart.VertexNormals.Count > 0)
                     {
                         var v4n = part.BasePart.VertexNormals[lookup[(int)vertexIndex]];
-                        var v3ne = ConsiderQuatToEulerConvert(v4n);
+                        var v3ne = part.BasePart is DynamicMeshPart ? new Vector3(v4n.X, v4n.Y, v4n.Z) : ConsiderQuatToEulerConvert(v4n);
                         SharpDX.Vector3 n = new SharpDX.Vector3(v3ne.X, v3ne.Y, v3ne.Z);
                         normals.Add(n);
                     }
