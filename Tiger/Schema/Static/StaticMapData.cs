@@ -829,6 +829,7 @@ public struct SMapSpotLightResource
 // /// Boss entity data resource?
 // /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "19808080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "19808080", 0x54)]
 public struct D2Class_19808080
 {
     // todo rest of this

@@ -516,9 +516,14 @@ public class StringIndexReference : ITigerDeserialize
         {
             return;
         }
+
         LocalizedStrings localizedStrings = Investment.Get().GetLocalizedStringsFromIndex(index);
         StringHash stringHash = new(reader.ReadUInt32());
-        Value = localizedStrings.GetStringFromHash(stringHash);
+
+        if (localizedStrings is null)
+            Value = new TigerString($"NotFound-{stringHash}");
+        else
+            Value = localizedStrings.GetStringFromHash(stringHash);
     }
 
     public static implicit operator string(StringIndexReference stringIndexReference) => stringIndexReference.Value.ToString();

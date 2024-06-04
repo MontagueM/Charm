@@ -30,6 +30,8 @@ public enum TigerStrategy
     DESTINY2_BEYONDLIGHT_3402 = 3402,
     [StrategyMetadata("w64", 1085660, 1085661, 6051526863119423207, 1085662, 1078048403901153652)]
     DESTINY2_WITCHQUEEN_6307 = 6307,
+    [StrategyMetadata("w64", 1085660, 1085661, 7707143404100984016, 1085662, 5226038440689554798)]
+    DESTINY2_LIGHTFALL_7366 = 7366,
     [StrategyMetadata("w64")]
     DESTINY2_LATEST = 20000,  // there probably wont be a tiger version higher than this
 }

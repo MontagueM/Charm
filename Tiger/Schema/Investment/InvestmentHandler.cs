@@ -475,8 +475,12 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     {
         // presume we want to read from it, so load it
         LocalizedStrings ls = _localizedStringsIndexMap[index];
-        ls.Load();
-        return ls;
+        if (ls is not null)
+        {
+            ls.Load();
+            return ls;
+        }
+        return null;
     }
 
     private void GetEntityAssignmentDict()

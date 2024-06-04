@@ -23,7 +23,7 @@ public struct SStringHash
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "BE088080", 0x58)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "8A9A8080", 0x58)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F1998080", 0x58)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "F1998080", 0x48)]
+[SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "F1998080", 0x48)]
 public struct SLocalizedStringsData
 {
     public long ThisSize;

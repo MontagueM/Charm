@@ -82,17 +82,17 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
         _addedLocalizedStrings.Add(localizedStrings.Hash);
         localizedStrings.GetAllStringViews().ForEach(s =>
+        {
+            if (!_strings.ContainsKey(s.StringHash))
             {
-                if (!_strings.ContainsKey(s.StringHash))
-                {
-                    _strings.TryAdd(s.StringHash, new List<StringBiasView>());
-                }
-                _strings[s.StringHash].Add(new StringBiasView
-                {
-                    String = s.RawString,
-                    ContainerHash = localizedStrings.Hash
-                });
+                _strings.TryAdd(s.StringHash, new List<StringBiasView>());
+            }
+            _strings[s.StringHash].Add(new StringBiasView
+            {
+                String = s.RawString,
+                ContainerHash = localizedStrings.Hash
             });
+        });
     }
 
     /// <summary>

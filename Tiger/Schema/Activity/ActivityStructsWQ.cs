@@ -6,6 +6,7 @@ namespace Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8E8E8080", 0xB4)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "8E8E8080", 0x78)]
+[SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "8E8E8080", 0x88)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "8E8E8080", 0x88)]
 public struct SActivity_WQ
 {
@@ -21,13 +22,15 @@ public struct SActivity_WQ
     public TigerHash Unk14;
     public ResourcePointer Unk18;  // 6A988080 + 20978080 (+ 19978080, beyondlight)
     public FileHash64 Unk20;  // some weird kind of parent thing with names, contains the string container for this tag
+    //[SchemaField(0x30, TigerStrategy.DESTINY2_LATEST)] // Doesnt look useful?
+    //public DynamicArray<D2Class_00978080> Unk30;
     [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_26898080> Unk40;
     public DynamicArray<D2Class_24898080> Unk50;
     [SchemaField(0x90, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x70, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x70, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
     public TigerHash Unk60;
     public FileHash Unk64;  // an entity thing
     //[SchemaField(0xA0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -78,7 +81,8 @@ public struct D2Class_2E898080
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "26898080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "26898080", 0x58)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "26898080", 0x68)]
+[SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "26898080", 0x68)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "26898080", 0x70)]
 public struct D2Class_26898080
 {
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -341,6 +345,7 @@ public struct D2Class_478F8080
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "24898080", 0x40)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "24898080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "24898080", 0x48)]
 public struct D2Class_24898080
 {
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -436,7 +441,8 @@ public struct D2Class_28898080
     public Tag<D2Class_C78E8080> DirectiveTable;
 }
 
-[SchemaStruct("B7978080", 0x14)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "B7978080", 0x14)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "B7978080", 0x10)]
 public struct D2Class_B7978080
 {
     [Tag64]
@@ -462,21 +468,25 @@ public struct D2Class_C98E8080
     [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference NameStringBL;
+
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public StringReference64 DescriptionString;
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference DescriptionStringBL;
+
     [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public StringReference64 ObjectiveString;
     [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference ObjectiveStringBL;
+
     [SchemaField(0x58, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public StringReference64 Unk58;
     [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference Unk58BL;
+
     [SchemaField(0x38, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public int ObjectiveTargetCount;

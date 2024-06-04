@@ -1664,6 +1664,7 @@ public struct S40238080
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F6B8080", 0x1C0)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7F6B8080", 0x1C0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "95668080", 0x1E0)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "95668080", 0x1DC)]
 public struct CubemapResource //Dataresource for cubemaps
 {
     [SchemaField(0x20)]
@@ -1681,16 +1682,19 @@ public struct CubemapResource //Dataresource for cubemaps
     [SchemaField(0x190, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x190, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x1B0, TigerStrategy.DESTINY2_LATEST, Obsolete = true)] // :(
     public StringPointer CubemapName;
 
     [SchemaField(0x198, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x198, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x1AC, TigerStrategy.DESTINY2_LATEST)]
     public Texture CubemapTexture;
 
     [SchemaField(0x1A0, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x1A0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x1B4, TigerStrategy.DESTINY2_LATEST)]
     public Texture Unk1C0; //Sometype of reflection tint texture idk
 }
 
