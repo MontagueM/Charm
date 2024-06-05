@@ -55,7 +55,7 @@ public partial class APIItemView : UserControl
             ItemSource = sourceString,
             ImageSource = image.Keys.First(),
             FoundryIconSource = foundryBanner,
-            ItemDamageType = ((DestinyDamageType)item.GetItemDamageTypeIndex()).GetEnumDescription(),
+            ItemDamageType = (DestinyDamageType.GetDamageType(item.GetItemDamageTypeIndex())).GetEnumDescription(),
             ItemPowerCap = item.GetItemPowerCap()
         };
         Load();
@@ -80,7 +80,7 @@ public partial class APIItemView : UserControl
             ItemSource = sourceString,
             ImageSource = apiItem.ImageSource,
             FoundryIconSource = foundryBanner,
-            ItemDamageType = ((DestinyDamageType)apiItem.Item.GetItemDamageTypeIndex()).GetEnumDescription(),
+            ItemDamageType = (DestinyDamageType.GetDamageType(apiItem.Item.GetItemDamageTypeIndex())).GetEnumDescription(),
             ItemPowerCap = apiItem.Item.GetItemPowerCap()
         };
         Load();

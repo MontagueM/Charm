@@ -257,11 +257,17 @@ public class DynamicMeshPart : MeshPart
         }
         else
         {
-
-            // Have to call it like this b/c we don't know the format of the vertex data here
-            Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
-            mesh.Vertices1.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
-            mesh.Vertices2?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            {
+                mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
+                mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
+            }
+            else
+            {
+                Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
+                mesh.Vertices1.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
+                mesh.Vertices2?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+            }
         }
 
 

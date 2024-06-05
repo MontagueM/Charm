@@ -270,7 +270,8 @@ public class FileHash64 : FileHash
     public override void Deserialize(TigerReader reader)
     {
         FallbackHash32 = reader.ReadUInt32();
-        IsHash32 = reader.ReadUInt32() == 1;
+        uint _isHash32 = reader.ReadUInt32();
+        IsHash32 = _isHash32 == 1 || _isHash32 == 2;
         Hash64 = reader.ReadUInt64();
         Hash32 = IsHash32 ? FallbackHash32 : GetHash32(Hash64);
     }

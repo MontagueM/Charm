@@ -114,7 +114,7 @@ class MetadataScene
                     "Point",
                     mapLight.Lights.TagData.Transforms[i].Translation,
                     mapLight.Lights.TagData.Transforms[i].Rotation,
-                    new Vector2(1, 1),
+                    new Vector2(1f, 1f),
                     color,
                     mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner2.X - mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner1.X);
             }

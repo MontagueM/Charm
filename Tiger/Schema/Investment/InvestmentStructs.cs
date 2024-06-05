@@ -78,6 +78,7 @@ public struct D2Class_9D798080
     [SchemaField(0xBC, TigerStrategy.DESTINY2_LATEST)]
     public byte ItemRarity;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0xBE, TigerStrategy.DESTINY2_LATEST)]
     public byte UnkC4; // 'isInstanceItem'?
@@ -438,11 +439,13 @@ public struct D2Class_9F548080
     public TigerHash UnkD4;
     public StringHash TooltipStyle; // 'tooltipStyle' as fnv hash
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xE0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0xE8, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_B2548080> TooltipNotifications;
     // ive missed lots of stuff here
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x120, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x128, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_59238080> Unk120;

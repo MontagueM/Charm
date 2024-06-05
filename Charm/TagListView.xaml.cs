@@ -1757,6 +1757,11 @@ public partial class TagListView : UserControl
                 if (res.Music != null)
                     musics.Add(res.Music.Hash);
             }
+            if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_20978080 res2)
+            {
+                if (res2.Music != null)
+                    musics.Add(res2.Music.Hash);
+            }
         }
 
         Parallel.ForEach(musics, hash =>

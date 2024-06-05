@@ -47,7 +47,7 @@ public partial class MusicView : UserControl
         }
         else if (resource is SUnkMusicE6BF8080 rese6bf)
         {
-            EventsControl.Load(rese6bf, music.TagData.MusicTemplateName.Value);
+            EventsControl.Load(rese6bf, music.TagData.MusicTemplateName?.Value);
         }
         else
         {

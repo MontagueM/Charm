@@ -291,7 +291,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         uint u32 = reader.ReadUInt32();
         int bIs32Bit = reader.ReadInt32();
         ulong u64 = reader.ReadUInt64();
-        if (bIs32Bit == 1)
+        if (bIs32Bit == 1 || bIs32Bit == 2) // TFS can have 2 instead of 1?
         {
             return new FileHash(u32);
         }

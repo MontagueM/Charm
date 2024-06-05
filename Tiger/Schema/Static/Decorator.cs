@@ -55,7 +55,7 @@ public class Decorator : Tag<SDecorator>
                     Position = (SpeedtreePlacements[2] * pos + SpeedtreePlacements[3]).ToVec3(),
                     Quaternion = (SpeedtreePlacements[4] * rot + SpeedtreePlacements[5]),
                     Rotation = Vector4.QuaternionToEulerAngles((SpeedtreePlacements[4] * rot + SpeedtreePlacements[5])),
-                    Scale = new((SpeedtreePlacements[0] * pos + SpeedtreePlacements[1]).W)
+                    Scale = new((SpeedtreePlacements[2] * pos + SpeedtreePlacements[3]).W)
                 };
 
                 scene.AddMapModelParts($"{model.Hash}_{dynID}", parts.Where(x => x.GroupIndex == dynID).ToList(), transform);

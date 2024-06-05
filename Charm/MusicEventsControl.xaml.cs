@@ -15,13 +15,13 @@ public partial class MusicEventsControl : UserControl
 
     public void Load(D2Class_F5458080 res)
     {
-        MusicLoopName.Text = res.WwiseMusicLoopName.Value;
+        MusicLoopName.Text = res.WwiseMusicLoopName?.Value;
         EventList.ItemsSource = GetEventItems(res.Unk18);
     }
 
     public void Load(D2Class_F7458080 res)
     {
-        MusicLoopName.Text = res.AmbientMusicSetName.Value;
+        MusicLoopName.Text = res.AmbientMusicSetName?.Value;
         EventList.ItemsSource = GetEventItems(res.Unk18);
     }
 
@@ -39,7 +39,7 @@ public partial class MusicEventsControl : UserControl
         {
             items.Add(new EventItem
             {
-                Name = entry.EventDescription.Value,
+                Name = entry.EventDescription?.Value,
                 Hash = entry.EventHash,
             });
         }
@@ -56,7 +56,7 @@ public partial class MusicEventsControl : UserControl
         {
             items.Add(new EventItem
             {
-                Name = entry.EventName.Value,
+                Name = entry.EventName?.Value,
                 Hash = entry.EventHash,
             });
         }
@@ -71,8 +71,8 @@ public partial class MusicEventsControl : UserControl
         {
             items.Add(new EventItem
             {
-                Name = entry.EventName?.Value ?? "",
-                Hash = $"{entry.Unk00}/{entry.Unk10}",
+                Name = entry.EventName?.Value,
+                Hash = entry.EventHash,
             });
         }
 

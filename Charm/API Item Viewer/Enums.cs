@@ -19,20 +19,52 @@ public enum DestinySocketCategoryStyle : uint
 }
 
 // TODO: Find where these indexes actually go?
-public enum DestinyDamageType : int
+
+public static class DestinyDamageType
 {
+    public static DestinyDamageTypeEnum GetDamageType(int index)
+    {
+        switch (index)
+        {
+            case 1319:
+            case 1373:
+                return DestinyDamageTypeEnum.Kinetic;
+            case 1320:
+            case 1374:
+                return DestinyDamageTypeEnum.Arc;
+            case 1321:
+            case 1375:
+                return DestinyDamageTypeEnum.Solar;
+            case 1322:
+            case 1376:
+                return DestinyDamageTypeEnum.Void;
+            case 1323:
+            case 1377:
+                return DestinyDamageTypeEnum.Stasis;
+            case 1324:
+            case 1378:
+                return DestinyDamageTypeEnum.Strand;
+            default:
+                return DestinyDamageTypeEnum.None;
+        }
+    }
+}
+
+public enum DestinyDamageTypeEnum : int
+{
+    None = -1,
     [Description("Kinetic")]
-    Kinetic = 1319,
+    Kinetic,
     [Description(" Arc")]
-    Arc = 1320,
+    Arc,
     [Description(" Solar")]
-    Solar = 1321,
+    Solar,
     [Description(" Void")]
-    Void = 1322,
+    Void,
     [Description(" Stasis")]
-    Stasis = 1323,
+    Stasis,
     [Description(" Strand")]
-    Strand = 1324
+    Strand
 }
 
 public enum DestinyTierType
