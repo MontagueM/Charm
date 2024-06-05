@@ -513,10 +513,11 @@ public abstract class Package : IPackage
         List<D2BlockEntry> blocks = GetBlockEntries(fileEntry.StartingBlockIndex, blockCount);
         foreach (D2BlockEntry blockEntry in blocks)
         {
-            if ((blockEntry.BitFlag & 0x8) == 8)
-            {
-                return new byte[fileEntry.FileSize];
-            }
+            //if ((blockEntry.BitFlag & 0x8) == 8)
+            //{
+            //    return new byte[fileEntry.FileSize];
+            //}
+
             // TigerReader packageHandle = GetPackageHandle(blockEntry.PatchId);
             // todo use spans
             byte[] blockBuffer;
@@ -630,12 +631,13 @@ public abstract class Package : IPackage
 
     private byte[] DecryptAndDecompressBlockBufferIfRequired(byte[] blockBuffer, D2BlockEntry blockEntry)
     {
-        if ((blockEntry.BitFlag & 0x8) == 8)
-        {
-            return new byte[blockBuffer.Length];
-        }
         byte[] decryptedBuffer;
-        if ((blockEntry.BitFlag & 0x2) == 2)
+        if ((blockEntry.BitFlag & 0x8) != 0)
+        {
+            decryptedBuffer = DecryptBuffer(blockBuffer, blockEntry, true);
+            //return new byte[blockBuffer.Length];
+        }
+        else if ((blockEntry.BitFlag & 0x2) == 2)
         {
             decryptedBuffer = DecryptBuffer(blockBuffer, blockEntry);
         }
@@ -657,11 +659,46 @@ public abstract class Package : IPackage
         return decompressedBuffer;
     }
 
-    private unsafe byte[] DecryptBuffer(byte[] buffer, D2BlockEntry block)
+    private unsafe byte[] DecryptBuffer(byte[] buffer, D2BlockEntry block, bool redacted = false)
     {
         byte[] decryptedBuffer = new byte[buffer.Length];
         byte[] key;
-        if ((block.BitFlag & 0x4) == 4)
+        byte[] iv = GenerateNonce();
+
+        if (redacted) // (block.BitFlag & 0x4) == 0 
+        {
+            switch (GetPackageMetadata().Id)
+            {
+                case 0x03da:
+                    key = new byte[] { 0x35, 0x4A, 0x90, 0x35, 0x24, 0xA2, 0xAE, 0xC3, 0x2D, 0xD7, 0x45, 0x36, 0xC0, 0xAC, 0x08, 0x86, };
+                    iv = new byte[] { 0x21, 0x12, 0xF6, 0x7C, 0x16, 0xDD, 0x3F, 0xA2, 0x1A, 0x7A, 0x45, 0xBC, };
+                    break;
+                case 0x03db:
+                    key = new byte[] { 0xB1, 0x17, 0x6C, 0x5A, 0x7B, 0xEA, 0x3A, 0x07, 0x6F, 0x8F, 0xB0, 0x5F, 0x90, 0x3C, 0x70, 0x59, };
+                    iv = new byte[] { 0xA0, 0x78, 0xF1, 0x3F, 0x36, 0x39, 0x09, 0x69, 0xD8, 0x3D, 0xDC, 0x31 };
+                    break;
+                case 0x0457:
+                case 0x047e:
+                    key = new byte[] { 0xca, 0xa7, 0x76, 0x59, 0x4e, 0x6f, 0x1d, 0x79, 0x49, 0x8d, 0x79, 0x6d, 0x14, 0x1b, 0x34, 0x3b, };
+                    iv = new byte[] { 0x6f, 0xd6, 0x50, 0x3b, 0x2a, 0xa8, 0x50, 0x63, 0x7b, 0x5c, 0x93, 0x8d, };
+                    break;
+                case 0x047d:
+                case 0x047c:
+                case 0x0455:
+                    key = new byte[] { 0x51, 0xe5, 0x4f, 0xa6, 0xee, 0x0e, 0x0d, 0x13, 0x23, 0xea, 0xd8, 0xa3, 0x6e, 0xf8, 0x33, 0x5d };
+                    iv = new byte[] { 0x60, 0x49, 0xcf, 0xac, 0x73, 0x59, 0xa9, 0x5f, 0x93, 0xe3, 0xc3, 0xeb, };
+                    break;
+                case 0x0456:
+                case 0x047a:
+                case 0x047b:
+                    key = new byte[] { 0xc0, 0xf5, 0x27, 0x35, 0x87, 0xd2, 0x14, 0xa6, 0x10, 0x47, 0x30, 0x30, 0x8d, 0xb4, 0xed, 0xf8, };
+                    iv = new byte[] { 0x35, 0x0d, 0x38, 0x86, 0x58, 0xba, 0x44, 0x38, 0xb6, 0x19, 0xc8, 0xbd, };
+                    break;
+                default:
+                    return decryptedBuffer;
+            }
+        }
+        else if ((block.BitFlag & 0x4) == 4)
         {
             key = AesKey1;
         }
@@ -670,7 +707,6 @@ public abstract class Package : IPackage
             key = AesKey0;
         }
 
-        byte[] iv = GenerateNonce();
         using var aes = new AesGcm(key);
         byte[] tag = new byte[0x10];
         Marshal.Copy((IntPtr)block.GCMTag, tag, 0, 0x10);
