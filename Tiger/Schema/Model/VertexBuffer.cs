@@ -37,7 +37,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     public void ReadVertexDataFromLayout(MeshPart part, HashSet<uint> uniqueVertexIndices, int bufferIndex = -1)
     {
         var vertexLayout = VertexLayouts.InputLayouts[part.VertexLayoutIndex];
-        Console.WriteLine($"Vertex Layout {part.VertexLayoutIndex} (Current Buffer Index {bufferIndex}, Part index {part.Index})");
+        //Console.WriteLine($"Vertex Layout {part.VertexLayoutIndex} (Current Buffer Index {bufferIndex}, Part index {part.Index})");
 
         using var handle = GetReferenceReader();
         foreach (var vertexIndex in uniqueVertexIndices)

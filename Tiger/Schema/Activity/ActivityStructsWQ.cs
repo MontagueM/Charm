@@ -305,16 +305,20 @@ public struct D2Class_44938080
 /// Generally used in ambients to provide dialogue and music together.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D5908080", 0x50)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "D5908080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "D5908080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "D5908080", 0x58)]
 public struct D2Class_D5908080
 {
-    [Tag64]
+    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x8, TigerStrategy.DESTINY2_LATEST), Tag64]
     public Tag DialogueTable;
     [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x14, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x14, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
+    [SchemaField(0x1C, TigerStrategy.DESTINY2_LATEST)]
     public Tag<SMusicTemplate> Music;
     [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_28998080> Unk20;
 }
 

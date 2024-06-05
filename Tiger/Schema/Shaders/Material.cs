@@ -101,7 +101,7 @@ namespace Tiger.Schema.Shaders
                 startInfo.UseShellExecute = false;
                 startInfo.FileName = "ThirdParty/3dmigoto_shader_decomp.exe";
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                Console.WriteLine(Path.GetFullPath(binPath));
+                //Console.WriteLine(Path.GetFullPath(binPath));
                 startInfo.Arguments = $"-D \"{binPath}\"";
                 using (Process exeProcess = Process.Start(startInfo))
                 {
@@ -184,7 +184,7 @@ namespace Tiger.Schema.Shaders
                     try
                     {
                         File.WriteAllText($"{saveDirectory}/VS_{FileHash}.usf", usf);
-                        Console.WriteLine($"Saved vertex shader {FileHash}");
+                        //Console.WriteLine($"Saved vertex shader {FileHash}");
                     }
                     catch (IOException) // threading error
                     {

@@ -99,7 +99,7 @@ public class EntityModel : Tag<SEntityModel>
         int meshIndex = 0;
         foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
-            Console.WriteLine($"{Hash}: Input Layout {mesh.GetInputLayoutForStage(0)}");
+            //Console.WriteLine($"{Hash}: Input Layout {mesh.GetInputLayoutForStage(0)}");
             exportPartRange = GetExportRanges(mesh);
 
             foreach ((int i, D2Class_CB6E8080 part) in dynamicParts[meshIndex])

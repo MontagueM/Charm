@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Packaging;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using NAudio.Vorbis;
-using NAudio.Wave;
 using Tiger;
-using Tiger.Schema;
-using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 
 namespace Charm;
@@ -26,12 +16,12 @@ public partial class MusicView : UserControl
     {
         Tag<SMusicTemplate> music = FileResourcer.Get().GetSchemaTag<SMusicTemplate>(fileHash);
 
-        if (music == null)
+        if (music == null || music.TagData.Unk28.Count == 0)
             return;
-        if (music.TagData.Unk28.Count != 1)
-        {
-            throw new NotImplementedException();
-        }
+        //if (music.TagData.Unk28.Count != 1)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         var resource = music.TagData.Unk28[0].Unk00.GetValue(music.GetReader());
         if (resource is D2Class_F5458080 f5458080)

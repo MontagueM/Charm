@@ -90,7 +90,7 @@ class MetadataScene
 
         foreach (CubemapResource cubemap in scene.Cubemaps)
         {
-            AddCubemap(cubemap.CubemapName,
+            AddCubemap(cubemap.CubemapName != null ? cubemap.CubemapName.Value : $"Cubemap_{cubemap.CubemapTexture?.Hash}",
                 cubemap.CubemapSize.ToVec3(),
                 cubemap.CubemapRotation,
                 cubemap.CubemapPosition.ToVec3(),

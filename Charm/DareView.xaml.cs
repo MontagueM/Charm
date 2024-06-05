@@ -122,7 +122,7 @@ public partial class DareView : UserControl
         if (_allItems.TryRemove(apiItem.Item.TagData.InventoryItemHash.Hash32, out _))
         {
             _selectedItems.Add(apiItem);
-            System.Console.WriteLine($"{Investment.Get().GetItemIconContainer(apiItem.Item).Hash}");
+            //System.Console.WriteLine($"{Investment.Get().GetItemIconContainer(apiItem.Item).Hash}");
         }
         else
         {
