@@ -39,7 +39,7 @@ public class MaterialExporter : AbstractExporter
                     if (saveShaders)
                     {
                         string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Shaders";
-                        material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
+                        material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain, scene.Dyes.ToList());
                         material.Material.SaveVertexShader(shaderSaveDirectory);
                     }
                 }

@@ -57,6 +57,22 @@ public class Exporter : Subsystem<Exporter>
     }
 }
 
+public struct ExportDyeGroup
+{
+    public List<Dye> Dyes { get; }
+    public List<Vector4> Data { get; }
+    public ExportDyeGroup(List<Dye> dyes)
+    {
+        Dyes = dyes;
+
+        Data = new();
+        foreach (var dye in dyes)
+        {
+            Data.AddRange(dye.TagData.DyeData.ToList().Select(x => x.Vec));
+        }
+    }
+}
+
 public struct ExportMaterial
 {
     public readonly IMaterial Material;
@@ -98,6 +114,7 @@ public class ExporterScene
     public ConcurrentHashSet<Texture> Textures = new();
     public ConcurrentHashSet<ExportMaterial> Materials = new();
     public ConcurrentDictionary<FileHash, List<FileHash>> TerrainDyemaps = new();
+    public ConcurrentBag<ExportDyeGroup> Dyes = new();
 
     public void AddStatic(FileHash meshHash, List<StaticPart> parts)
     {

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Tiger.Exporters;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
@@ -8,15 +9,20 @@ public class UsfConverter
     private StringReader hlsl;
     private StringBuilder usf;
     private bool bOpacityEnabled = false;
-    private readonly List<TextureView> textures = new List<TextureView>();
-    private readonly List<int> samplers = new List<int>();
-    private readonly List<Cbuffer> cbuffers = new List<Cbuffer>();
-    private readonly List<Input> inputs = new List<Input>();
-    private readonly List<Output> outputs = new List<Output>();
+    private bool bFixRoughness = false;
+    private List<TextureView> textures = new();
+    private List<int> samplers = new();
+    private List<Cbuffer> cbuffers = new();
+    private List<Input> inputs = new();
+    private List<Output> outputs = new();
 
-    public string HlslToUsf(IMaterial material, string hlslText, bool bIsVertexShader)
+    public string HlslToUsf(IMaterial material, string hlslText, bool bIsVertexShader, List<ExportDyeGroup> dyes = null)
     {
+        // remove the first two characters from each line
+        hlslText = hlslText.Split("\n").Select(x => x.Length > 2 && x.Substring(2) == "  " ? x.Substring(2) : x).Aggregate((x, y) => x + "\n" + y);
+
         hlsl = new StringReader(hlslText);
+
         usf = new StringBuilder();
         bOpacityEnabled = false;
         ProcessHlslData();
@@ -25,7 +31,7 @@ public class UsfConverter
             usf.AppendLine("// masked");
         }
         // WriteTextureComments(material, bIsVertexShader);
-        WriteCbuffers(material, bIsVertexShader);
+        WriteCbuffers(material, bIsVertexShader, dyes);
         WriteFunctionDefinition(bIsVertexShader);
         hlsl = new StringReader(hlslText);
         bool success = ConvertInstructions();
@@ -39,7 +45,6 @@ public class UsfConverter
             AddOutputs();
         }
 
-        WriteFooter(bIsVertexShader);
         return usf.ToString();
     }
 
@@ -103,7 +108,7 @@ public class UsfConverter
                 else if (line.Contains("out") && line.Contains(" : "))
                 {
                     Output output = new Output();
-                    output.Variable = "o" + line.Split(" o")[2].Split(" : ")[0];
+                    output.Variable = "o" + line.Split(" o")[1].Split(" : ")[0];
                     output.Index = Int32.TryParse(new string(output.Variable.Skip(1).ToArray()), out int index) ? index : -1;
                     output.Semantic = line.Split(" : ")[1].Split(",")[0];
                     output.Type = line.Split("out ")[1].Split(" o")[0];
@@ -114,7 +119,7 @@ public class UsfConverter
         } while (line != null);
     }
 
-    private void WriteCbuffers(IMaterial material, bool bIsVertexShader)
+    private void WriteCbuffers(IMaterial material, bool bIsVertexShader, List<ExportDyeGroup> dyes = null)
     {
         // Try to find matches, pixel shader has Unk2D0 Unk2E0 Unk2F0 Unk300 available
         foreach (var cbuffer in cbuffers)
@@ -124,7 +129,7 @@ public class UsfConverter
             else
                 usf.AppendLine($"static {cbuffer.Type} {cbuffer.Variable}[{cbuffer.Count}] = ").AppendLine("{");
 
-            dynamic data = null;
+            List<Vector4> data = new();
             if (bIsVertexShader)
             {
                 if (material.VSVector4Container.IsValid())
@@ -141,15 +146,31 @@ public class UsfConverter
             }
             else
             {
-                if (material.PSVector4Container.IsValid())
+                if (dyes != null)
                 {
-                    data = material.GetVec4Container(material.PSVector4Container.GetReferenceHash());
-                }
-                else
-                {
-                    foreach (var vec in material.PS_CBuffers)
+                    foreach (var dye in dyes)
                     {
-                        data.Add(vec.Vec);
+                        if (dye.Data.Count == cbuffer.Count)
+                        {
+                            data = dye.Data;
+                            material.DyeGroup = dye;
+                            break;
+                        }
+                    }
+                }
+
+                if (data.Count == 0)
+                {
+                    if (material.PSVector4Container.IsValid())
+                    {
+                        data = material.GetVec4Container(material.PSVector4Container.GetReferenceHash());
+                    }
+                    else
+                    {
+                        foreach (var vec in material.PS_CBuffers)
+                        {
+                            data.Add(vec.Vec);
+                        }
                     }
                 }
             }
@@ -164,38 +185,19 @@ public class UsfConverter
                         {
                             if (data == null)
                             {
-                                usf.AppendLine("    float4(1.0, 1.0, 1.0, 1.0),");
+                                usf.AppendLine("float4(1.0, 1.0, 1.0, 1.0),");
                             }
                             break;
                         }
 
-                        if (data == null)
+                        if (data == null || data.Count != cbuffer.Count)
                         {
-                            usf.AppendLine("    float4(0.0, 0.0, 0.0, 0.0),");
+                            usf.AppendLine("float4(0.0, 0.0, 0.0, 0.0),");
                         }
                         else
                         {
-                            try
-                            {
-                                if (data[i] is Vector4)
-                                {
-                                    usf.AppendLine($"    float4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}),");
-                                }
-                                else
-                                {
-                                    var x = data[i].Unk00.X; // really bad but required
-                                    usf.AppendLine($"    float4({x}, {data[i].Unk00.Y}, {data[i].Unk00.Z}, {data[i].Unk00.W}),");
-                                }
-                            }
-                            catch (Exception e)  // figure out whats up here, taniks breaks it
-                            {
-                                if (bIsVertexShader)
-                                {
-                                    usf.AppendLine("    float4(1.0, 1.0, 1.0, 1.0),");
-                                }
-                                else
-                                    usf.AppendLine("    float4(0.0, 0.0, 0.0, 0.0),");
-                            }
+                            // todo investigate deltas stuff here, i removed it all
+                            usf.AppendLine($"float4({data[i].X}, {data[i].Y}, {data[i].Z}, {data[i].W}),");
                         }
                         break;
                     case "float3":
@@ -203,24 +205,23 @@ public class UsfConverter
                         {
                             if (data == null)
                             {
-                                usf.AppendLine("    float3(1.0, 1.0, 1.0),");
+                                usf.AppendLine("float3(1.0, 1.0, 1.0),");
                             }
                             break;
                         }
-                        if (data == null) usf.AppendLine("    float3(0.0, 0.0, 0.0),");
-                        else usf.AppendLine($"    float3({data[i].Unk00.X}, {data[i].Unk00.Y}, {data[i].Unk00.Z}),");
+
+                        usf.AppendLine("float3(0.0, 0.0, 0.0),");
                         break;
                     case "float":
                         if (bIsVertexShader)
                         {
                             if (data == null)
                             {
-                                usf.AppendLine("    float(1.0),");
+                                usf.AppendLine("float(1.0),");
                             }
                             break;
                         }
-                        if (data == null) usf.AppendLine("    float(0.0),");
-                        else usf.AppendLine($"    float4({data[i].Unk00}),");
+                        usf.AppendLine("float(0.0),");
                         break;
                     default:
                         throw new NotImplementedException();
@@ -237,73 +238,39 @@ public class UsfConverter
         {
             foreach (var i in inputs)
             {
-                if (i.Type == "float4")
-                {
-                    usf.AppendLine($"static {i.Type} {i.Variable} = " + "{1, 1, 1, 1};\n");
-                }
-                else if (i.Type == "float3")
-                {
-                    usf.AppendLine($"static {i.Type} {i.Variable} = " + "{1, 1, 1};\n");
-                }
-                else if (i.Type == "uint")
+                if (i.Type == "uint")
                 {
                     usf.AppendLine($"static {i.Type} {i.Variable} = " + "1;\n");
                 }
             }
         }
-        usf.AppendLine("#define cmp -").AppendLine("struct shader {");
+        usf.AppendLine("#define cmp -");
         if (bIsVertexShader)
         {
             foreach (var output in outputs)
             {
                 usf.AppendLine($"{output.Type} {output.Variable};");
             }
-
-            usf.AppendLine().AppendLine("void main(");
-            foreach (var texture in textures)
-            {
-                usf.AppendLine($"   {texture.Type} {texture.Variable},");
-            }
-            for (var i = 0; i < inputs.Count; i++)
-            {
-                if (i == inputs.Count - 1)
-                {
-                    usf.AppendLine($"   {inputs[i].Type} {inputs[i].Variable}) // {inputs[i].Semantic}");
-                }
-                else
-                {
-                    usf.AppendLine($"   {inputs[i].Type} {inputs[i].Variable}, // {inputs[i].Semantic}");
-                }
-            }
         }
         else
         {
-            usf.AppendLine("FMaterialAttributes main(");
-            foreach (var texture in textures)
-            {
-                usf.AppendLine($"   {texture.Type} {texture.Variable},");
-            }
-
-            usf.AppendLine($"   float2 tx)");
-
-            usf.AppendLine("{").AppendLine("    FMaterialAttributes output;");
+            usf.AppendLine("FMaterialAttributes output;");
             // Output render targets, todo support vertex shader
-            usf.AppendLine("    float4 o0,o1,o2;");
+            usf.AppendLine("float4 o0,o1,o2;");
+
+            usf.AppendLine("float4 v0 = {vertexNorm, 1};");
+            usf.AppendLine("float4 v1 = {tangentU, 1};");
+            usf.AppendLine("float4 v2 = {tangentV, 1};");
+            usf.AppendLine("float4 v3 = {tx.xy, 1, 1};");
+            usf.AppendLine("float4 v4 = {viewDir.xyz, 1};");
+            usf.AppendLine("float4 v5 = {vc.xyz, vcw};");  //UE5 Vertex color node doesnt support RGBA output for some reason?
+
             foreach (var i in inputs)
             {
-                if (i.Type == "float4")
+                if (i.Type == "uint")
                 {
-                    usf.AppendLine($"    {i.Variable}.xyzw = {i.Variable}.xyzw * tx.xyxy;");
+                    usf.AppendLine($"{i.Variable}.x = {i.Variable}.x;");
                 }
-                else if (i.Type == "float3")
-                {
-                    usf.AppendLine($"    {i.Variable}.xyz = {i.Variable}.xyz * tx.xyx;");
-                }
-                else if (i.Type == "uint")
-                {
-                    usf.AppendLine($"    {i.Variable}.x = {i.Variable}.x * tx.x;");
-                }
-                usf.Replace("v0.xyzw = v0.xyzw * tx.xyxy;", "v0.xyzw = v0.xyzw;");
             }
         }
     }
@@ -349,12 +316,39 @@ public class UsfConverter
                     var sampleUv = line.Split(", ")[1].Split(")")[0];
                     var dotAfter = line.Split(").")[1];
                     // todo add dimension
-                    usf.AppendLine($"   {equal}= Material_Texture2D_{sortedIndices.IndexOf(texIndex)}.SampleLevel(Material_Texture2D_{sampleIndex - 1}Sampler, {sampleUv}, 0).{dotAfter}");
+                    usf.AppendLine($"{equal}= Texture2DSample(Material_Texture2D_{sortedIndices.IndexOf(texIndex)}, Material_Texture2D_{sampleIndex - 1}Sampler, {sampleUv}).{dotAfter}");
+                }
+                else if (line.Contains("CalculateLevelOfDetail"))
+                {
+                    var equal = line.Split("=")[0];
+                    var texIndex = Int32.Parse(line.Split(".CalculateLevelOfDetail")[0].Split("t")[1]);
+                    var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
+                    var sampleUv = line.Split(", ")[1].Split(")")[0];
+
+                    usf.AppendLine($"{equal}= Material_Texture2D_{texIndex}.CalculateLevelOfDetail(Material_Texture2D_{sampleIndex - 1}Sampler, {sampleUv});");
                 }
                 // todo add load, levelofdetail, o0.w, discard
                 else if (line.Contains("discard"))
                 {
                     usf.AppendLine(line.Replace("discard", "{ output.OpacityMask = 0; return output; }"));
+                }
+                else if (line.Contains("o0.w = r")) //o0.w = r(?)
+                {
+                    usf.AppendLine($"{line}");
+                    usf.AppendLine("{ output.OpacityMask = 1 - o0.w; }");
+                }
+                else if (line.Contains("Load"))
+                {
+                    var equal = line.Split("=")[0];
+                    var texIndex = Int32.Parse(line.Split(".Load")[0].Split("t")[1]);
+                    var sampleUv = line.Split("(")[1].Split(")")[0];
+
+                    usf.AppendLine($"{equal}= Material_Texture2D_{texIndex + 1}.Load({sampleUv});"); //Usually seen in decals, the texture isnt actually valid though?
+                }
+                else if (line.Contains("o1.xyzw = float4(0,0,0,0);"))
+                {
+                    usf.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "o1.xyzw = float4(1,1,1,0);")); //decals(?) have 0 normals sometimes, dont want that
+                    bFixRoughness = true;
                 }
                 else
                 {
@@ -368,41 +362,32 @@ public class UsfConverter
 
     private void AddOutputs()
     {
-        string outputString = @"
-        ///RT0
-        output.BaseColor = o0.xyz; // Albedo
+        string outputString = @$"
+///RT0
+output.BaseColor = o0.xyz; // Albedo
 
-        ///RT1
+///RT1
 
-        // Normal
-        float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
-        float normal_length = length(biased_normal);
-        float3 normal_in_world_space = biased_normal / normal_length;
-        normal_in_world_space.z = sqrt(1.0 - saturate(dot(normal_in_world_space.xy, normal_in_world_space.xy)));
-        output.Normal = normalize((normal_in_world_space * 2 - 1.35)*0.5 + 0.5);
+// Normal
+float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);
+float normal_length = length(biased_normal);
+float3 normal_in_world_space = biased_normal / normal_length;
 
-        // Roughness
-        float smoothness = saturate(8 * (normal_length - 0.375));
-        output.Roughness = 1 - smoothness;
+output.Normal = normal_in_world_space.xyz;
 
-        ///RT2
-        output.Metallic = saturate(o2.x);
-        output.EmissiveColor = clamp((o2.y - 0.5) * 2 * 5 * output.BaseColor, 0, 100);  // the *5 is a scale to make it look good
-        output.AmbientOcclusion = saturate(o2.y * 2); // Texture AO
+// Roughness
+float smoothness = saturate(8 * ({(bFixRoughness ? "0" : "normal_length")} - 0.375));
+output.Roughness = 1 - smoothness;
 
-        output.OpacityMask = 1;
+///RT2
+output.Metallic = saturate(o2.x);
+output.EmissiveColor = clamp((o2.y - 0.5) * 2 * 5 * output.BaseColor, 0, 100);  // the *5 is a scale to make it look good
+output.AmbientOcclusion = saturate(o2.y * 2); // Texture AO
 
-        return output;
+output.OpacityMask = 1;
+
+return output;
         ";
         usf.AppendLine(outputString);
-    }
-
-    private void WriteFooter(bool bIsVertexShader)
-    {
-        usf.AppendLine("}").AppendLine("};");
-        if (!bIsVertexShader)
-        {
-            usf.AppendLine("shader s;").AppendLine($"return s.main({String.Join(',', textures.Select(x => x.Variable))},tx);");
-        }
     }
 }

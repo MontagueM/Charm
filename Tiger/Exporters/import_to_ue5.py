@@ -9,11 +9,9 @@ class CharmImporter:
         info_name = f"{__file__.split('/')[-1].split('_')[0]}_info.cfg"
         self.config = json.load(open(self.folder_path + f"/{info_name}"))
         if b_unique_folder:
-            self.content_path = f"{self.config['UnrealInteropPath']}/{self.config['MeshName']}"
+            self.content_path = f"Charm/{self.config['MeshName']}"
         else:
-            self.content_path = f"{self.config['UnrealInteropPath']}"
-        if not unreal.EditorAssetLibrary.does_directory_exist(self.content_path):
-            unreal.EditorAssetLibrary.make_directory(self.content_path)
+            self.content_path = "Charm"
 
     def import_entity(self):
         self.make_materials()
@@ -33,11 +31,11 @@ class CharmImporter:
         self.assign_map_materials()
         self.assemble_map()
         unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
-        
+
     def assemble_map(self) -> None:
         # Create new level asset
-        unreal.EditorLevelLibrary.new_level(f'/Game/{self.content_path}/map_{self.config["MeshName"]}')
-        
+        unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).new_level(f'/Game/{self.content_path}/map_{self.config["MeshName"]}')
+
         static_names = {}
         for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.content_path}/Statics/', recursive=False):
             if "Group" in x:
@@ -54,6 +52,7 @@ class CharmImporter:
             except:
                 print(f"Failed on {static}")
             for part in parts:
+                print(f"Loading {part=} into level")
                 sm = unreal.EditorAssetLibrary.load_asset(part)
                 for instance in instances:
                     quat = unreal.Quat(instance["Rotation"][0], instance["Rotation"][1], instance["Rotation"][2], instance["Rotation"][3])
@@ -62,7 +61,7 @@ class CharmImporter:
                     location = [-instance["Translation"][0]*100, instance["Translation"][1]*100, instance["Translation"][2]*100]
                     s = unreal.EditorLevelLibrary.spawn_actor_from_object(sm, location=location, rotation=rotator)  # l must be UE4 Object
                     s.set_actor_label(s.get_actor_label() + f"_{instance['Scale']}")
-                    s.set_actor_relative_scale3d([instance["Scale"]]*3)
+                    s.set_actor_relative_scale3d(instance["Scale"])
 
 
         # for i, a in enumerate(assets):
@@ -89,14 +88,14 @@ class CharmImporter:
         #         # transforms.append(transform)
         #         s = unreal.EditorLevelLibrary.spawn_actor_from_object(sm, location=l, rotation=rotator)  # l must be UE4 Object
         #         s.set_actor_scale3d([d[2]]*3)
-        # 
+        #
         #     # instance_component.add_instances(transforms, False)
         #     # unreal.EditorAssetLibrary.duplicate_asset(template_path + "HLODTemplate", f"/Game/{data_path}/actors/{name}")
         #     # actorbp = unreal.EditorAssetLibrary.load_asset(f"/Game/{data_path}/actors/{name}")
         #     # actor_spawn = unreal.EditorAssetLibrary.load_blueprint_class(f"/Game/{data_path}/actors/{name}")
         #     # actor = unreal.EditorLevelLibrary.spawn_actor_from_class(actor_spawn, location=[0, 0, 0])
         #     # actor.set_actor_label(name, True)
-        # 
+        #
         #     # instance_component.attach_to_component(actor.root_component, ' ', unreal.AttachmentRule.KEEP_WORLD,
         #     #                                        unreal.AttachmentRule.KEEP_WORLD, unreal.AttachmentRule.KEEP_WORLD,
         #     #                                        False)
@@ -105,58 +104,36 @@ class CharmImporter:
 
     def assign_map_materials(self) -> None:
         for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.content_path}/Statics/', recursive=False):
-            # Identify static mesh
             mesh = unreal.load_asset(x)
-
-            # Check material slots and compare names from config
-            mesh_materials = mesh.get_editor_property("static_materials")
-            material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.config['UnrealInteropPath']}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
-            new_mesh_materials = []
-            for skeletal_material in mesh_materials:
-                slot_name = skeletal_material.get_editor_property("material_slot_name").__str__()
-                slot_name = '_'.join(slot_name.split('_')[:-1])
-                if slot_name in material_slot_name_dict.keys():
-                    if material_slot_name_dict[slot_name] != None:
-                        skeletal_material.set_editor_property("material_interface", material_slot_name_dict[slot_name])
-                new_mesh_materials.append(skeletal_material)
-            print(new_mesh_materials)
+            new_mesh_materials = self.get_unreal_materials(mesh)
             mesh.set_editor_property("static_materials", new_mesh_materials)
-    
-    def assign_static_materials(self) -> None:
-        # Identify static mesh
-        mesh = unreal.load_asset(f"/Game/{self.content_path}/{self.config['MeshName']}")
 
-        # Check material slots and compare names from config
-        mesh_materials = mesh.get_editor_property("static_materials")
-        material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.config['UnrealInteropPath']}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
-        new_mesh_materials = []
-        for skeletal_material in mesh_materials:
-            slot_name = skeletal_material.get_editor_property("material_slot_name").__str__()
-            slot_name = '_'.join(slot_name.split('_')[:-1])
-            if slot_name in material_slot_name_dict.keys():
-                if material_slot_name_dict[slot_name] != None:
-                    skeletal_material.set_editor_property("material_interface", material_slot_name_dict[slot_name])
-            new_mesh_materials.append(skeletal_material)
-        print(new_mesh_materials)
+    def assign_static_materials(self) -> None:
+        mesh = unreal.load_asset(f"/Game/{self.content_path}/Statics/{self.config['MeshName']}")
+        new_mesh_materials = self.get_unreal_materials(mesh)
         mesh.set_editor_property("static_materials", new_mesh_materials)
 
     def assign_entity_materials(self) -> None:
-        # Identify entity mesh
         mesh = unreal.load_asset(f"/Game/{self.content_path}/{self.config['MeshName']}")
+        new_mesh_materials = self.get_unreal_materials(mesh)
+        mesh.set_editor_property("materials", new_mesh_materials)
 
+    def get_unreal_materials(self, mesh):
         # Check material slots and compare names from config
-        mesh_materials = mesh.get_editor_property("materials")
-        material_slot_name_dict = {x: unreal.load_asset(f"/Game/{self.config['UnrealInteropPath']}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
+        mesh_materials = mesh.get_editor_property("static_materials")
+        material_slot_name_dict = {y: unreal.load_asset(f"/Game/{self.content_path}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
         new_mesh_materials = []
-        for skeletal_material in mesh_materials:
-            slot_name = skeletal_material.get_editor_property("material_slot_name").__str__()
-            slot_name = '_'.join(slot_name.split('_')[:-1])
+        for static_material in mesh_materials:
+            slot_name = static_material.get_editor_property("material_slot_name").__str__()
+            if '_' in slot_name:
+                slot_name = slot_name.split('_')[0]
             if slot_name in material_slot_name_dict.keys():
                 if material_slot_name_dict[slot_name] != None:
-                    skeletal_material.set_editor_property("material_interface", material_slot_name_dict[slot_name])
-            new_mesh_materials.append(skeletal_material)
-        print(new_mesh_materials)
-        mesh.set_editor_property("materials", new_mesh_materials)
+                    static_material.set_editor_property("material_interface", material_slot_name_dict[slot_name])
+            new_mesh_materials.append(static_material)
+
+        return new_mesh_materials
+
 
     def import_entity_mesh(self) -> None:
         task = unreal.AssetImportTask()
@@ -181,7 +158,7 @@ class CharmImporter:
         task.set_editor_property("options", options)
 
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
-        
+
     def import_static_mesh(self, combine) -> None:
         task = unreal.AssetImportTask()
         task.set_editor_property("automated", True)
@@ -189,7 +166,7 @@ class CharmImporter:
         task.set_editor_property("filename", f"{self.folder_path}/{self.config['MeshName']}.fbx")
         task.set_editor_property("replace_existing", True)
         task.set_editor_property("save", True)
-    
+
         options = unreal.FbxImportUI()
         options.set_editor_property('import_mesh', True)
         options.set_editor_property('import_textures', False)
@@ -204,7 +181,7 @@ class CharmImporter:
         options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
         options.static_mesh_import_data.set_editor_property("build_nanite", False)  # todo add nanite option
         task.set_editor_property("options", options)
-    
+
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
 
     def make_materials(self) -> None:
@@ -212,7 +189,7 @@ class CharmImporter:
         materials = list(self.config["Materials"].keys())
 
         # Check if materials exist already
-        existing_materials = [x.split('/')[-1].split('.')[0][2:] for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.config["UnrealInteropPath"]}/Materials/', recursive=False) if unreal.EditorAssetLibrary.find_asset_data(x).asset_class == 'Material']
+        existing_materials = [x.split('/')[-1].split('.')[0][2:] for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.content_path}/Materials/', recursive=False) if unreal.EditorAssetLibrary.find_asset_data(x).asset_class == 'Material']
         materials_to_make = list(set(materials)-set(existing_materials))
 
         # If doesn't exist, make
@@ -222,9 +199,10 @@ class CharmImporter:
 
     def make_material(self, matstr: str) -> unreal.Material:
         # Make base material
-        material = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_" + matstr, f"/Game/{self.config['UnrealInteropPath']}/Materials", unreal.Material, unreal.MaterialFactoryNew())
+        material = unreal.AssetToolsHelpers.get_asset_tools().create_asset("M_" + matstr, f"/Game/{self.content_path}/Materials", unreal.Material, unreal.MaterialFactoryNew())
+        material.set_editor_property("tangent_space_normal", False)
 
-        if os.path.exists(f"{self.folder_path}/Shaders/PS_{matstr}.usf"):
+        if os.path.exists(f"{self.folder_path}/Shaders/Unreal/PS_{matstr}.usf"):
             # Add textures
             texture_samples = self.add_textures(material, matstr)
 
@@ -263,22 +241,47 @@ class CharmImporter:
         # Definitions
 
         # Check the material shader exists
-        code = open(f"{self.folder_path}/Shaders/PS_{matstr}.usf", "r").read()
+        code = open(f"{self.folder_path}/Shaders/Unreal/PS_{matstr}.usf", "r").read()
 
         # If the material is masked, change its blend mode for alpha + make it two-sided
         if "// masked" in code:
             material.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
             material.set_editor_property("two_sided", True)
 
-        
+
         inputs = []
         for tvar in sorted_texture_vars:
             ci = unreal.CustomInput()
             ci.set_editor_property('input_name', tvar)
             inputs.append(ci)
-        ci = unreal.CustomInput()
-        ci.set_editor_property('input_name', 'tx')
-        inputs.append(ci)
+
+        tx = unreal.CustomInput()
+        tx.set_editor_property('input_name', 'tx')
+        inputs.append(tx)
+
+        vertexNorm = unreal.CustomInput()
+        vertexNorm.set_editor_property('input_name', 'vertexNorm')
+        inputs.append(vertexNorm)
+
+        tangentU = unreal.CustomInput()
+        tangentU.set_editor_property('input_name', 'tangentU')
+        inputs.append(tangentU)
+
+        tangentV = unreal.CustomInput()
+        tangentV.set_editor_property('input_name', 'tangentV')
+        inputs.append(tangentV)
+
+        vc = unreal.CustomInput()
+        vc.set_editor_property('input_name', 'vc')
+        inputs.append(vc)
+
+        viewdir = unreal.CustomInput()
+        viewdir.set_editor_property('input_name', 'viewDir')
+        inputs.append(viewdir)
+
+        vcw = unreal.CustomInput()
+        vcw.set_editor_property('input_name', 'vcw')
+        inputs.append(vcw)
 
         custom_node.set_editor_property('code', code)
         custom_node.set_editor_property('inputs', inputs)
@@ -286,8 +289,30 @@ class CharmImporter:
 
         for i, t in texture_samples.items():
             unreal.MaterialEditingLibrary.connect_material_expressions(t, 'RGBA', custom_node, f't{i}')
-        texcoord = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTextureCoordinate, -500, 300)
+
+        vertexNorm = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionVertexNormalWS, -500, 600)
+        unreal.MaterialEditingLibrary.connect_material_expressions(vertexNorm, '', custom_node, 'vertexNorm')
+
+        tangentU = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionMaterialFunctionCall, -500, 700)
+        tangent_function = unreal.EditorAssetLibrary.load_asset("/Engine/Functions/Engine_MaterialFunctions02/TangentBasis")
+        tangentU.set_material_function(tangent_function)
+        unreal.MaterialEditingLibrary.connect_material_expressions(tangentU, 'X U', custom_node, 'tangentU')
+        unreal.MaterialEditingLibrary.connect_material_expressions(tangentU, 'Y V', custom_node, 'tangentV')
+
+        texcoord = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTextureCoordinate, -500, 800)
         unreal.MaterialEditingLibrary.connect_material_expressions(texcoord, '', custom_node, 'tx')
+
+        vc = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionVertexColor, -500, 900)
+        unreal.MaterialEditingLibrary.connect_material_expressions(vc, '', custom_node, 'vc')
+        unreal.MaterialEditingLibrary.connect_material_expressions(vc, 'A', custom_node, 'vcw')
+
+        viewdir = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionCameraVectorWS, -500, 1100)
+        #vecTransform = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTransform, -500, 1200)
+        #vecTransform.set_editor_property('transform_source_type', unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD)
+        #vecTransform.set_editor_property('transform_type', unreal.MaterialVectorCoordTransform.TRANSFORM_TANGENT)
+        #unreal.MaterialEditingLibrary.connect_material_expressions(viewdir, '', vecTransform, '')
+        unreal.MaterialEditingLibrary.connect_material_expressions(viewdir, '', custom_node, 'viewDir')
+
 
         return custom_node
 
@@ -299,7 +324,7 @@ class CharmImporter:
         tex_factory = unreal.TextureFactory()
         tex_factory.set_editor_property('supported_class', unreal.Texture2D)
         # Only pixel shader for now, todo replace .dds with the extension
-        names = [f"{self.folder_path}/Textures/PS_{i}_{texstruct['Hash']}.dds" for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
+        names = [f"{self.folder_path}/Textures/{texstruct['Hash']}.dds" for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
         srgbs = {int(i): texstruct['SRGB'] for i, texstruct in self.config["Materials"][matstr]["PS"].items()}
         import_tasks = []
         for name in names:
@@ -318,7 +343,7 @@ class CharmImporter:
             i = int(i)
             texture_sample = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionTextureSample, -1000, -500 + 250 * i)
 
-            ts_TextureUePath = f"/Game/{self.content_path}/Textures/PS_{i}_{texstruct['Hash']}.PS_{i}_{texstruct['Hash']}"
+            ts_TextureUePath = f"/Game/{self.content_path}/Textures/{texstruct['Hash']}"
             ts_LoadedTexture = unreal.EditorAssetLibrary.load_asset(ts_TextureUePath)
             if not ts_LoadedTexture:  # some cubemaps and 3d textures cannot be loaded for now
                 continue
@@ -326,6 +351,7 @@ class CharmImporter:
             if srgbs[i] == True:
                 ts_LoadedTexture.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_DEFAULT)
             else:
+                # todo detect if normal map
                 ts_LoadedTexture.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_VECTOR_DISPLACEMENTMAP)
 
             texture_sample.set_editor_property('texture', ts_LoadedTexture)
@@ -348,12 +374,12 @@ class CharmImporter:
         materials = list(self.config["Materials"].keys())
 
         # For each material, find the code node and update it
-        mats = {unreal.EditorAssetLibrary.load_asset(f"/Game/{self.config['UnrealInteropPath']}/Materials/M_{matstr}"): matstr for matstr in materials}
+        mats = {unreal.EditorAssetLibrary.load_asset(f"/Game/{self.content_path}/Materials/M_{matstr}"): matstr for matstr in materials}
         it = unreal.ObjectIterator()
         for x in it:
             if x.get_outer() in mats:
                 if isinstance(x, unreal.MaterialExpressionCustom):
-                    code = open(f"{self.folder_path}/Shaders/PS_{mats[x.get_outer()]}.usf", "r").read()
+                    code = open(f"{self.folder_path}/Shaders/Unreal/PS_{mats[x.get_outer()]}.usf", "r").read()
                     x.set_editor_property('code', code)
                     print(f"Updated material {mats[x.get_outer()]}")
 
@@ -361,6 +387,6 @@ class CharmImporter:
 
 
 if __name__ == "__main__":
-    importer = CharmImporter(os.path.dirname(os.path.realpath(__file__)), b_unique_folder=False)
+    importer = CharmImporter(os.path.dirname(os.path.realpath(__file__)), b_unique_folder=True)
     importer.import_entity()
     # importer.update_material_code()

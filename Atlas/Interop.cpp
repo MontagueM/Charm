@@ -156,6 +156,60 @@ extern HRESULT __cdecl CreateStaticMeshPart(uint32_t hash, PartInfo partInfo)
     return hr;
 }
 
+extern HRESULT __cdecl BakeMaterial(uint32_t hash, PartMaterial material)
+{
+    if (renderer == nullptr)
+    {
+        return E_FAIL;
+    }
+
+    /// to bake a material we need to take the render targets created from executing the VS and PS and bake them into textures, done via bake.hlsl
+    /// for this we create new RTV and SRV for the textures (albedo, normal, roughness, metallic, ao, emission)
+    /// only issue is the VS is going to align the vertices from world to projection space
+    /// so we need to pass in a set of values that makes the texture appear perfectly with the correct size
+    /// 1. update projection matrix to account for texture size
+    /// 2. position camera to look at the object
+    /// 3. set object to be same as lighting, a square matching the aspect ratio?
+    /// 4. render
+    /// 5. take the output render targets and save them as textures
+
+    // create a static mesh with one part which is a square
+    std::vector<float> meshTransform = {0.f, 0.f, 0.f, 1.f};
+    std::vector<float> uvTransform = {1.f, 1.f, 0.f, 0.f};
+    byte* buffer[20];
+    memcpy(buffer, meshTransform.data(), meshTransform.size() * sizeof(float));
+    memcpy(buffer + meshTransform.size(), uvTransform.data(), uvTransform.size() * sizeof(float));
+    StaticMesh quad(hash, Blob(buffer, 0x20));
+    PartInfo partInfo;
+    partInfo.IndexCount = 6;
+    partInfo.IndexOffset = 0;
+    partInfo.PartMaterial = material;
+    if (FAILED(quad.AddPart(partInfo)))
+    {
+        Logger::Log("Failed to create static mesh part for static mesh %x", hash);
+        return E_FAIL;
+    }
+
+    //
+    //
+    // QuadVertex vertices[] = {
+    //     {XMFLOAT4(-1.0f, 1.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f)},
+    //     {XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f)},
+    //     {XMFLOAT4(1.0f, -1.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 1.0f)},
+    //     {XMFLOAT4(-1.0f, -1.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f)},
+    // };
+
+    BufferGroup bufferGroup;
+    bufferGroup.IndexBuffer = Blob();
+    if (FAILED(quad.AddStaticMeshBufferGroup(bufferGroup)))
+    {
+        Logger::Log("Failed to add buffer group for static mesh %x", hash);
+        return E_FAIL;
+    }
+
+    return S_OK;
+}
+
 extern void __cdecl ResizeWindow(int width, int height)
 {
     if (window == nullptr || renderer == nullptr)

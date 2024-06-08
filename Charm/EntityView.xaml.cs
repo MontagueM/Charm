@@ -167,7 +167,7 @@ public partial class EntityView : UserControl
         EntitySkeleton overrideSkeleton = null;
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent 
+            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent
             overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
         else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
@@ -182,10 +182,6 @@ public partial class EntityView : UserControl
             overrideSkeleton = val.Skeleton;
         }
 
-        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON ? ExportType.D1API : ExportType.API);
-        EntityView.Export(Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash),
-            name, ExportTypeFlag.Full, overrideSkeleton, scene);
-
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
         string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
@@ -193,12 +189,15 @@ public partial class EntityView : UserControl
         savePath += $"/{meshName}";
         Directory.CreateDirectory(savePath);
 
-        ExportGearShader(item, itemName, savePath);
+        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON ? ExportType.D1API : ExportType.API);
+        ExportGearShader(item, itemName, savePath, scene);
+        EntityView.Export(Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash),
+            name, ExportTypeFlag.Full, overrideSkeleton, scene);
     }
 
 
     // I don't like this
-    public static void ExportGearShader(ApiItem item, string itemName, string savePath)
+    public static void ExportGearShader(ApiItem item, string itemName, string savePath, ExporterScene scene)
     {
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
@@ -248,6 +247,9 @@ public partial class EntityView : UserControl
 
             AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
                 config.GetOutputTextureFormat(), dyes.Values.ToList());
+
+            // so the exporter can put dye data in for asset
+            scene.Dyes.Add(new ExportDyeGroup(dyes.Values.ToList()));
         }
 
     }

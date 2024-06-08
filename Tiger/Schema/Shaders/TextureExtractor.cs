@@ -21,6 +21,11 @@ public class TextureExtractor
                 return false;
             }
 
+            if (!Path.Exists(Path.GetDirectoryName(savePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(savePath));
+            }
+
             switch (_format)
             {
                 case TextureExportFormat.DDS_BGRA_UNCOMP_DX10:

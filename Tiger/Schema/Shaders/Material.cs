@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using Tiger.Exporters;
 
 namespace Tiger.Schema.Shaders
@@ -73,6 +74,7 @@ namespace Tiger.Schema.Shaders
         public IEnumerable<STextureTag> EnumerateCSTextures();
         public ShaderBytecode? ComputeShader { get; }
 
+        public ExportDyeGroup? DyeGroup { get; set; }
 
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
@@ -133,7 +135,7 @@ namespace Tiger.Schema.Shaders
             return hlsl;
         }
 
-        public void SavePixelShader(string saveDirectory, bool isTerrain = false)
+        public void SavePixelShader(string saveDirectory, bool isTerrain = false, List<ExportDyeGroup> dyes = null)
         {
             if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
                 return;
@@ -142,7 +144,7 @@ namespace Tiger.Schema.Shaders
             {
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
                 string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
+                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false, dyes) : "";
                 string vfx = Source2Handler.source2Shaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
 
                 Directory.CreateDirectory($"{saveDirectory}/Unreal");
@@ -229,6 +231,15 @@ namespace Tiger.Schema.Shaders
             }
         }
 
+        public void SaveBakedMaterial(string saveDirectory)
+        {
+            SaveMaterial(saveDirectory);
+
+            // render these textures out using Atlas
+
+        }
+
+
         public List<Vector4> GetVec4Container(FileHash containerHash)
         {
             List<Vector4> data = new();
@@ -278,6 +289,7 @@ namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
         public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
+        public ExportDyeGroup? DyeGroup { get; set; }
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {
@@ -328,6 +340,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
+        public ExportDyeGroup? DyeGroup { get; set; }
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {
@@ -381,6 +394,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(s => s.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(s => s.Samplers).ToList();
+        public ExportDyeGroup? DyeGroup { get; set; }
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {
@@ -435,6 +449,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
+        public ExportDyeGroup? DyeGroup { get; set; }
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {

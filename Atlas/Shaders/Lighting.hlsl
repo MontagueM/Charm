@@ -66,11 +66,27 @@ VertexShaderOutput2 VS2( VertexShaderInput2 input)
 //--------------------------------------------------------------------------------------
 // Pixel Shader
 //--------------------------------------------------------------------------------------
+// Decode a packed normal (0.0-1.0 -> -1.0-1.0)
+float3 DecodeNormal(float3 n) {
+    return n * 2.0 - 1.0;
+}
+
 float4 PS(VertexShaderOutput input) : SV_Target
 {
     int3 sampleIndices = int3( input.Position.xy, 0 );
-    float3 albedo = RT0.Load(sampleIndices).xyz;
-    float3 normal = RT1.Load(sampleIndices).xyz;
+    float4 rt0 = RT0.Load(sampleIndices);
+    float4 rt1 = RT1.Load(sampleIndices);
+    float4 rt2 = RT2.Load(sampleIndices);
+
+    float3 albedo = rt0.xyz;
+    float3 normal = DecodeNormal(rt1.xyz);
+
+    float smoothness = length(normal) * 4 - 3;
+    float roughness = 1.0 - saturate(smoothness);
+    float metallic = rt2.x;
+    float ao = rt2.y * 2.0;
+    float emission = rt2.y * 2.0 - 1.0;
+
     //
     float4 finalColor = 0;
     //

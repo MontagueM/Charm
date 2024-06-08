@@ -62,6 +62,19 @@ public class InfoConfigHandler
                 pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
             }
         }
+        if (material.DyeGroup != null)
+        {
+            foreach (Dye dye in material.DyeGroup.Value.Dyes)
+            {
+                foreach (var tex in dye.TagData.DyeTextures)
+                {
+                    if (tex.Texture != null)
+                    {
+                        pstex.Add((int)tex.TextureIndex, new TexInfo { Hash = tex.Texture.Hash, SRGB = tex.Texture.IsSrgb() });
+                    }
+                }
+            }
+        }
     }
 
     public void AddPart(MeshPart part, string partName)

@@ -258,12 +258,21 @@
                 </ListView.ItemsPanel>
             </ListView>
 
-            <Button
-                Grid.Row="2"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Click="ExportMaterial_OnClick"
-                Content="Export Material" />
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button
+                    Margin="0,0,50,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Click="ExportMaterial_OnClick"
+                    Content="Export Material" />
+
+                <Button
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Click="ExportBakedMaterial_OnClick"
+                    Content="Export Baked Material" />
+            </StackPanel>
+
         </Grid>
 
         <Grid Grid.Column="0">

@@ -33,9 +33,17 @@ public partial class MaterialView : UserControl
 
     private async void ExportMaterial_OnClick(object sender, RoutedEventArgs e)
     {
-        var s = sender as Button;
-        var dc = s.DataContext as CBufferDetail;
+        await Task.Run(() =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.FileHash}");
+            });
+        });
+    }
 
+    private async void ExportBakedMaterial_OnClick(object sender, RoutedEventArgs e)
+    {
         await Task.Run(() =>
         {
             Dispatcher.Invoke(() =>
@@ -65,8 +73,8 @@ public partial class MaterialView : UserControl
         if (material.PixelShader is not null)
         {
             PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
-            PS_CBufferList.ItemsSource = GetCBufferDetails(material); 
-        } 
+            PS_CBufferList.ItemsSource = GetCBufferDetails(material);
+        }
     }
 
     public List<TextureDetail> GetTextureDetails(IMaterial material)
@@ -159,7 +167,7 @@ public partial class MaterialView : UserControl
                 {
                     data.Add(vec.Vec);
                 }
-            }       
+            }
         }
         else
         {
@@ -208,7 +216,7 @@ public partial class MaterialView : UserControl
                 for (int i = 0; i < dc.Data.Count; i++)
                 {
                     CBufferDataDetail dataEntry = new();
-                    
+
                     dataEntry.Index = i;
                     if(bytecode_hlsl.ContainsKey(i))
                         dataEntry.Vector = $"Bytecode Assigned";
