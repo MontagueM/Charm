@@ -19,8 +19,8 @@ using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
+using Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
-using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
@@ -28,7 +28,7 @@ using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 using Tiger.Schema.Strings;
 using ActivityROI = Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON.Activity;
-using ActivityWQ = Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307.Activity;
+using ActivityWQ = Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402.Activity;
 
 namespace Charm;
 

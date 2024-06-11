@@ -116,7 +116,7 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
             return items.ToList();
         }
     }
-}
+} // I wonder what this is for
 
 namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
 {
@@ -224,57 +224,11 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
             return items.ToList();
         }
     }
-}
+} // Shadowkeep launch to SK last
 
-namespace Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307
+namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to Latest
 {
     public class Activity : Tag<SActivity_WQ>, IActivity
-    {
-        public FileHash FileHash => Hash;
-
-        public Activity(FileHash hash) : base(hash)
-        {
-        }
-
-        public IEnumerable<Bubble> EnumerateBubbles()
-        {
-            foreach (var mapEntry in _tag.Unk50)
-            {
-                foreach (var mapReference in mapEntry.MapReferences)
-                {
-                    if (mapReference.MapReference is null ||
-                        mapReference.MapReference.TagData.ChildMapReference == null)
-                    {
-                        continue;
-                    }
-                    yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
-                }
-            }
-        }
-
-        public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null)
-        {
-            throw new NotSupportedException();
-        }
-
-        // protected override void ParseStructs()
-        // {
-        //     // Getting the string container
-        //     LocalizedStrings sc;
-        //     using (var handle = GetHandle())
-        //     {
-        //         handle.BaseStream.Seek(0x28, SeekOrigin.Begin);
-        //         var tag = PackageHandler.GetTag<D2Class_8B8E8080>(new FileHash(handle.ReadUInt64()));
-        //         sc = tag._tag.LocalizedStrings;
-        //     }
-        //     Header = ReadHeader<D2Class_8E8E8080>(sc);
-        // }
-    }
-}
-
-namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
-{
-    public class Activity : Tag<DESTINY2_WITCHQUEEN_6307.SActivity_WQ>, IActivity
     {
         public FileHash FileHash => Hash;
 
@@ -297,6 +251,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                 }
                 else
                 {
+                    var stringContainer = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(_tag.Destination).TagData.StringContainer;
                     foreach (var mapReference in mapEntry.MapReferences)
                     {
 
@@ -305,7 +260,8 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                         {
                             continue;
                         }
-                        yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
+                        yield return new Bubble { Name = stringContainer.GetStringFromHash(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
+                        //yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
                     }
 
                 }
@@ -333,8 +289,8 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
         private List<FileHash> CollapseResourceParent(FileHash hash)
         {
             ConcurrentBag<FileHash> items = new();
-            var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_898E8080>(hash);
-            var Unk18 = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
+            var entry = FileResourcer.Get().GetSchemaTag<D2Class_898E8080>(hash);
+            var Unk18 = FileResourcer.Get().GetSchemaTag<D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
 
             foreach (var resource in Unk18.TagData.EntityResources)
             {
@@ -375,8 +331,8 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
         {
             Dictionary<ulong, ActivityEntity> items = new();
             Dictionary<uint, string> strings = new();
-            var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_898E8080>(hash);
-            var Unk18 = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
+            var entry = FileResourcer.Get().GetSchemaTag<D2Class_898E8080>(hash);
+            var Unk18 = FileResourcer.Get().GetSchemaTag<D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
 
             foreach (var resource in Unk18.TagData.EntityResources)
             {

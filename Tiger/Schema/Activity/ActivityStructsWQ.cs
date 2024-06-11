@@ -2,7 +2,7 @@
 using Tiger.Schema.Entity;
 using Tiger.Schema.Strings;
 
-namespace Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
+namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8E8E8080", 0xB4)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "8E8E8080", 0x78)]
@@ -21,7 +21,7 @@ public struct SActivity_WQ
     public TigerHash Unk10;
     public TigerHash Unk14;
     public ResourcePointer Unk18;  // 6A988080 + 20978080 (+ 19978080, beyondlight)
-    public FileHash64 Unk20;  // some weird kind of parent thing with names, contains the string container for this tag
+    public FileHash64 Destination;  // D2Class_8B8E8080
     //[SchemaField(0x30, TigerStrategy.DESTINY2_LATEST)] // Doesnt look useful?
     //public DynamicArray<D2Class_00978080> Unk30;
     [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -48,8 +48,8 @@ public struct D2Class_8B8E8080
     [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringPointer LocalizedStringsContentPath;
-    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402), Tag64]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
     public LocalizedStrings StringContainer;
     public FileHash Events;
     public FileHash Patrols;
@@ -57,8 +57,8 @@ public struct D2Class_8B8E8080
     public FileHash Unk2C;
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_DE448080> TagBags;
-    [SchemaField(0x48, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0xB8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<D2Class_2E898080> Activities;
     public StringPointer DestinationName;
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Controls;
 using Tiger;
-using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
+using Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
 
 namespace Charm;
 
