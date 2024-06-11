@@ -15,7 +15,7 @@ namespace Tiger.Schema.Activity
         public string ActivityPhaseName2;
         public FileHash Hash;
         public List<FileHash> DataTables;
-        public Dictionary<ulong, Dictionary<string, string>> WorldIDs; //World ID, name/subname
+        public Dictionary<ulong, ActivityEntity> WorldIDs; //World ID, name/subname
     }
 
     public interface IActivity : ISchema
@@ -23,6 +23,12 @@ namespace Tiger.Schema.Activity
         public FileHash FileHash { get; }
         public IEnumerable<Bubble> EnumerateBubbles();
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null);
+    }
+
+    public struct ActivityEntity
+    {
+        public string Name;
+        public string SubName;
     }
 }
 
@@ -365,9 +371,9 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
             return items.ToList();
         }
 
-        private Dictionary<ulong, Dictionary<string, string>> GetWorldIDs(FileHash hash)
+        private Dictionary<ulong, ActivityEntity> GetWorldIDs(FileHash hash)
         {
-            Dictionary<ulong, Dictionary<string, string>> items = new();
+            Dictionary<ulong, ActivityEntity> items = new();
             Dictionary<uint, string> strings = new();
             var entry = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_898E8080>(hash);
             var Unk18 = FileResourcer.Get().GetSchemaTag<DESTINY2_WITCHQUEEN_6307.D2Class_BE8E8080>(entry.TagData.Unk18.Hash);
@@ -400,16 +406,18 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402
                                 {
                                     if (strings.ContainsKey(worldid.FNVHash.Hash32) && strings.Any(kv => kv.Key == worldid.FNVHash.Hash32))
                                     {
-                                        Dictionary<string, string> name = new();
+                                        ActivityEntity ent = new();
                                         if (strings.ContainsKey(resourceValue.FNVHash.Hash32))
                                         {
-                                            name.TryAdd(strings[worldid.FNVHash.Hash32], strings[resourceValue.FNVHash.Hash32]);
-                                            items.TryAdd(worldid.WorldID, name);
+                                            ent.Name = strings[worldid.FNVHash.Hash32];
+                                            ent.SubName = strings[resourceValue.FNVHash.Hash32];
+                                            items.TryAdd(worldid.WorldID, ent);
                                         }
                                         else
                                         {
-                                            name.TryAdd(strings[worldid.FNVHash.Hash32], "");
-                                            items.TryAdd(worldid.WorldID, name);
+                                            ent.Name = strings[worldid.FNVHash.Hash32];
+                                            ent.SubName = "";
+                                            items.TryAdd(worldid.WorldID, ent);
                                         }
                                     }
                                 }

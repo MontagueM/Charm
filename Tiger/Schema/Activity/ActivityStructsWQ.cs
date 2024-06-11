@@ -33,10 +33,10 @@ public struct SActivity_WQ
     [SchemaField(0x70, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
     public TigerHash Unk60;
     public FileHash Unk64;  // an entity thing
-    //[SchemaField(0xA0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    //[SchemaField(0x68, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //[SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
-    //public FileHash64 UnkActivity68;  // todo this uses an unknown hash64 system in the package
+    [SchemaField(0xA0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402), Tag64]
+    [SchemaField(0x68, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_LIGHTFALL_7366), Tag64]
+    public Tag AmbientActivity;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8B8E8080", 0xD0)]
@@ -107,7 +107,8 @@ public struct D2Class_26898080
     public int Unk30;
     [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x48, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_48898080> Unk38;
 }
 

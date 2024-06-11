@@ -60,6 +60,17 @@ public partial class ActivityMapEntityView : UserControl
                 displayActivity.LoadType = DisplayEntBubble.Type.Activity;
                 displayActivity.Data = displayActivity;
                 maps.Add(displayActivity);
+
+                var ambient = (activity as Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402.Activity).TagData.AmbientActivity;
+                if (ambient is not null)
+                {
+                    DisplayEntBubble ambientActivity = new();
+                    ambientActivity.Name = $"{PackageResourcer.Get().GetActivityName(ambient.Hash)}";
+                    ambientActivity.Hash = $"{ambient.Hash}";
+                    ambientActivity.LoadType = DisplayEntBubble.Type.Activity;
+                    ambientActivity.Data = ambientActivity;
+                    maps.Add(ambientActivity);
+                }
                 break;
 
             case TigerStrategy.DESTINY2_SHADOWKEEP_2999 or TigerStrategy.DESTINY2_SHADOWKEEP_2601:
@@ -228,7 +239,7 @@ public partial class ActivityMapEntityView : UserControl
         EntityContainerList.ItemsSource = sortedItems;
     }
 
-    private void PopulateEntityList(List<FileHash> dataTables, Dictionary<ulong, Dictionary<string, string>>? worldIDs)
+    private void PopulateEntityList(List<FileHash> dataTables, Dictionary<ulong, ActivityEntity>? worldIDs)
     {
         ConcurrentBag<DisplayEntityList> items = new ConcurrentBag<DisplayEntityList>();
         ConcurrentDictionary<FileHash, ConcurrentBag<ulong>> entities = new();
@@ -260,18 +271,19 @@ public partial class ActivityMapEntityView : UserControl
                 {
                     if (worldIDs is not null && worldIDs.ContainsKey(namedEnt))
                     {
+                        var Name = worldIDs[namedEnt].Name;
+                        var SubName = worldIDs[namedEnt].SubName;
                         //This is gross
-                        if (!items.Any(item => item.CompareByName(new DisplayEntityList { Name = $"{worldIDs[namedEnt].Keys.ElementAt(0)}:{worldIDs[namedEnt].Values.ElementAt(0)}" })))
+                        if (!items.Any(item => item.CompareByName(new DisplayEntityList { Name = $"{Name}:{SubName}" })))
                         {
-                            var Name = worldIDs[namedEnt].Keys.ElementAt(0);
-                            var SubName = worldIDs[namedEnt].Values.ElementAt(0);
+                            int Count = worldIDs.Count(kvp => kvp.Value.Name == worldIDs[namedEnt].Name);
                             items.Add(new DisplayEntityList
                             {
-                                DisplayName = $"{Name}: {worldIDs.Count(kvp => kvp.Value == worldIDs[namedEnt])} Instances",
+                                DisplayName = $"{Name}: {Count} Instances",
                                 SubName = $"{SubName}",
                                 Name = $"{Name}:{SubName}",
                                 Hash = entity.Hash,
-                                Instances = worldIDs.Count(kvp => kvp.Value == worldIDs[namedEnt])
+                                Instances = Count
                             });
                         }
                     }
@@ -770,7 +782,7 @@ public class DisplayEntityMap
     public bool Selected { get; set; }
     public Type EntityType { get; set; }
     public List<FileHash> DataTables { get; set; }
-    public Dictionary<ulong, Dictionary<string, string>> WorldIDs { get; set; }
+    public Dictionary<ulong, ActivityEntity> WorldIDs { get; set; }
     public DisplayEntityMap Data { get; set; }
 
     public enum Type
