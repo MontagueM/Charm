@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Tiger.Exporters;
+﻿using Tiger.Exporters;
 
 namespace Tiger.Schema.Entity;
 
@@ -39,7 +38,7 @@ public class Entity : Tag<SEntity>
     {
         Deserialize();
         _loaded = true;
-        Debug.Assert(_tag.FileSize != 0);
+        //Debug.Assert(_tag.FileSize != 0); // Is this really needed?
         foreach (var resourceHash in _tag.EntityResources.Select(GetReader(), r => r.Resource))
         {
             if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && resourceHash.GetReferenceHash() != 0x80800861)

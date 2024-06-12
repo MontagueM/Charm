@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Arithmic;
@@ -62,6 +61,14 @@ public class PackagePathsCache
         if (IsCacheFileInvalid())
         {
             Log.Info($"Cache file is invalid, creating new from packages directory '{_packagesDirectory}'.");
+            if (File.Exists("./EntityNames.json")) // Surely this is fine
+            {
+                NamedEntities Ents = JsonConvert.DeserializeObject<NamedEntities>(File.ReadAllText($"./EntityNames.json"));
+                if (Ents.EntityNames.ContainsKey(Strategy.CurrentStrategy))
+                    Ents.EntityNames[Strategy.CurrentStrategy].Clear();
+
+                File.WriteAllText($"./EntityNames.json", JsonConvert.SerializeObject(Ents, Formatting.Indented));
+            }
             SaveCacheToFile();
         }
 
@@ -233,4 +240,10 @@ public class PackagePathsCache
     {
         return new Dictionary<ushort, string>(PackageIdToPathMap);
     }
+}
+
+// Idk where else to put this, or if this is even needed
+public struct NamedEntities
+{
+    public ConcurrentDictionary<TigerStrategy, ConcurrentDictionary<string, string>> EntityNames;
 }

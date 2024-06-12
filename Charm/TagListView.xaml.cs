@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Arithmic;
 using ConcurrentCollections;
+using Newtonsoft.Json;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
@@ -840,7 +841,7 @@ public partial class TagListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "Getting Entity Names",
+            "Caching Entity Names",
             "Loading Entities"
         });
 
@@ -860,10 +861,7 @@ public partial class TagListView : UserControl
 
                     // Most of the time the most specific entity name comes from a map resource (bosses usually)
                     if (NamedEntities.ContainsKey(entity.Hash))
-                    {
-                        entityName = NamedEntities[entity.Hash];
-                        entity.EntityName = entityName;
-                    }
+                        entity.EntityName = NamedEntities[entity.Hash];
 
                     _allTagItems.Add(new TagItem
                     {
@@ -880,66 +878,84 @@ public partial class TagListView : UserControl
         RefreshItemList();  // bc of async stuff
     }
 
-    private ConcurrentDictionary<FileHash, string> TryGetEntityNames()
+    private ConcurrentDictionary<string, string> TryGetEntityNames()
     {
-        ConcurrentDictionary<FileHash, string> NamedEntities = new();
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        NamedEntities Ents = new()
         {
-            var vals = PackageResourcer.Get().GetAllHashes<SD9128080>();
-            Parallel.ForEach(vals, val =>
+            EntityNames = new()
+        };
+
+        if (!File.Exists($"./EntityNames.json"))
+            File.WriteAllText($"./EntityNames.json", JsonConvert.SerializeObject(Ents, Formatting.Indented));
+
+        Ents = JsonConvert.DeserializeObject<NamedEntities>(File.ReadAllText($"./EntityNames.json"));
+        if (Ents.EntityNames.ContainsKey(Strategy.CurrentStrategy) && Ents.EntityNames[Strategy.CurrentStrategy].Count > 0)
+        {
+            return Ents.EntityNames[Strategy.CurrentStrategy];
+        }
+        else
+        {
+            Ents.EntityNames[Strategy.CurrentStrategy] = new();
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
             {
-                var entry = FileResourcer.Get().GetSchemaTag<SD9128080>(val);
-                foreach (var a in entry.TagData.Unk20)
+                var vals = PackageResourcer.Get().GetAllHashes<SD9128080>();
+                Parallel.ForEach(vals, val =>
                 {
-                    foreach (var b in a.Unk08)
+                    var entry = FileResourcer.Get().GetSchemaTag<SD9128080>(val);
+                    foreach (var a in entry.TagData.Unk20)
                     {
-                        if (b.Pointer.GetValue(entry.GetReader()) is SMapDataEntry datatable)
+                        foreach (var b in a.Unk08)
                         {
-                            if (datatable.DataResource.GetValue(entry.GetReader()) is S33138080 name)
+                            if (b.Pointer.GetValue(entry.GetReader()) is SMapDataEntry datatable)
                             {
-                                if (name.EntityName.IsValid())
-                                    NamedEntities.TryAdd(datatable.GetEntityHash(), GlobalStrings.Get().GetString(name.EntityName));
+                                if (datatable.DataResource.GetValue(entry.GetReader()) is S33138080 name)
+                                {
+                                    if (name.EntityName.IsValid())
+                                        Ents.EntityNames[Strategy.CurrentStrategy].TryAdd(datatable.GetEntityHash(), GlobalStrings.Get().GetString(name.EntityName));
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
 
-            var vals2 = PackageResourcer.Get().GetAllHashes<SF6038080>();
-            Parallel.ForEach(vals2, val =>
-            {
-                var entry = FileResourcer.Get().GetSchemaTag<SF6038080>(val);
-                if (entry.TagData.EntityResource is not null)
+                var vals2 = PackageResourcer.Get().GetAllHashes<SF6038080>();
+                Parallel.ForEach(vals2, val =>
                 {
-                    if (entry.TagData.EntityResource.TagData.Unk10.GetValue(entry.TagData.EntityResource.GetReader()) is S2E098080)
+                    var entry = FileResourcer.Get().GetSchemaTag<SF6038080>(val);
+                    if (entry.TagData.EntityResource is not null)
                     {
-                        var resource = (SDD078080)entry.TagData.EntityResource.TagData.Unk18.GetValue(entry.TagData.EntityResource.GetReader());
-                        foreach (var dataentry in resource.DataEntries)
+                        if (entry.TagData.EntityResource.TagData.Unk10.GetValue(entry.TagData.EntityResource.GetReader()) is S2E098080)
                         {
-                            if (dataentry.GetEntityHash().IsValid())
-                                NamedEntities.TryAdd(dataentry.GetEntityHash(), resource.DevName);
+                            var resource = (SDD078080)entry.TagData.EntityResource.TagData.Unk18.GetValue(entry.TagData.EntityResource.GetReader());
+                            foreach (var dataentry in resource.DataEntries)
+                            {
+                                if (dataentry.GetEntityHash().IsValid())
+                                    Ents.EntityNames[Strategy.CurrentStrategy].TryAdd(dataentry.GetEntityHash(), resource.DevName);
+                            }
                         }
                     }
-                }
-            });
-        }
-        else if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
-        {
-            var vals = PackageResourcer.Get().GetAllHashes<SMapDataTable>();
-            Parallel.ForEach(vals, val =>
+                });
+            }
+            else if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
             {
-                var entry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(val);
-                foreach (var dataEntry in entry.TagData.DataEntries)
+                var vals = PackageResourcer.Get().GetAllHashes<SMapDataTable>();
+                Parallel.ForEach(vals, val =>
                 {
-                    if (dataEntry.DataResource.GetValue(entry.GetReader()) is D2Class_19808080 name)
+                    var entry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(val);
+                    foreach (var dataEntry in entry.TagData.DataEntries)
                     {
-                        if (name.EntityName.IsValid())
-                            NamedEntities.TryAdd(dataEntry.GetEntityHash(), GlobalStrings.Get().GetString(name.EntityName));
+                        if (dataEntry.DataResource.GetValue(entry.GetReader()) is D2Class_19808080 name)
+                        {
+                            if (name.EntityName.IsValid())
+                                Ents.EntityNames[Strategy.CurrentStrategy].TryAdd(dataEntry.GetEntityHash(), GlobalStrings.Get().GetString(name.EntityName));
+                        }
                     }
-                }
-            });
+                });
+            }
+            File.WriteAllText($"./EntityNames.json", JsonConvert.SerializeObject(Ents, Formatting.Indented));
         }
-        return NamedEntities;
+
+        return Ents.EntityNames[Strategy.CurrentStrategy];
     }
 
     #endregion
