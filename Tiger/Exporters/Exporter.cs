@@ -4,6 +4,7 @@ using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
+using static Tiger.Schema.Lights;
 using static Tiger.Schema.StaticMapData_D1;
 
 namespace Tiger.Exporters;
@@ -90,9 +91,8 @@ public class ExporterScene
     public ConcurrentDictionary<string, List<Transform>> EntityInstances = new();
     public ConcurrentBag<MaterialTexture> ExternalMaterialTextures = new();
     public ConcurrentBag<SMapDataEntry> EntityPoints = new();
-    public ConcurrentBag<CubemapResource> Cubemaps = new();
-    public ConcurrentBag<SMapLightResource> MapLights = new();
-    public ConcurrentDictionary<string, List<Transform>> MapSpotLights = new();
+    public ConcurrentBag<SMapCubemapResource> Cubemaps = new();
+    public ConcurrentBag<LightData> MapLights = new();
     public ConcurrentBag<SMapDecalsResource> Decals = new();
     private ConcurrentBag<string> _addedEntities = new();
     public ConcurrentHashSet<Texture> Textures = new();
@@ -308,31 +308,16 @@ public class ExporterScene
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
     }
 
-    public void AddCubemap(CubemapResource cubemap)
+    public void AddCubemap(SMapCubemapResource cubemap)
     {
         Cubemaps.Add(cubemap);
     }
 
-    public void AddMapLight(SMapLightResource mapLight) //Point
+    public void AddMapLight(LightData light) //Point
     {
-        MapLights.Add(mapLight);
+        MapLights.Add(light);
     }
-    public void AddMapSpotLight(SMapDataEntry spotLightEntry, SMapSpotLightResource spotLightResource) //Spot
-    {
-        if (!MapSpotLights.ContainsKey(spotLightResource.Unk10.Hash))
-        {
-            MapSpotLights.TryAdd(spotLightResource.Unk10.Hash, new());
-        }
 
-        MapSpotLights[spotLightResource.Unk10.Hash].Add(new Transform
-        {
-            Position = spotLightEntry.Translation.ToVec3(),
-            Rotation = Vector4.QuaternionToEulerAngles(spotLightEntry.Rotation),
-            Quaternion = spotLightEntry.Rotation,
-            Scale = new Vector3(spotLightEntry.Translation.W, spotLightEntry.Translation.W, spotLightEntry.Translation.W)
-        });
-
-    }
     public void AddDecals(SMapDecalsResource decal)
     {
         Decals.Add(decal);

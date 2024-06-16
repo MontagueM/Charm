@@ -439,22 +439,21 @@ public partial class ActivityMapEntityView : UserControl
                     switch (entry.DataResource.GetValue(dataTable.GetReader()))
                     {
                         case SMapSkyEntResource skyResource:
-                            foreach (var element in skyResource.Unk10.TagData.Unk08)
+                            skyResource.SkyEntities.Load();
+                            if (skyResource.SkyEntities.TagData.Unk08 is null)
+                                return;
+
+                            foreach (var element in skyResource.SkyEntities.TagData.Unk08)
                             {
                                 if (element.Unk60.TagData.Unk08 is null)
                                     continue;
 
-                                Matrix4x4 matrix = new Matrix4x4(
-                                    element.Unk00.X, element.Unk00.Y, element.Unk00.Z, element.Unk00.W,
-                                    element.Unk10.X, element.Unk10.Y, element.Unk10.Z, element.Unk10.W,
-                                    element.Unk20.X, element.Unk20.Y, element.Unk20.Z, element.Unk20.W,
-                                    element.Unk30.X, element.Unk30.Y, element.Unk30.Z, element.Unk30.W
-                                );
+                                System.Numerics.Matrix4x4 matrix = element.Transform.ToSys();
 
                                 System.Numerics.Vector3 scale = new();
                                 System.Numerics.Vector3 trans = new();
                                 Quaternion quat = new();
-                                Matrix4x4.Decompose(matrix, out scale, out quat, out trans);
+                                System.Numerics.Matrix4x4.Decompose(matrix, out scale, out quat, out trans);
 
                                 skyScene.AddMapModel(element.Unk60.TagData.Unk08,
                                     new Tiger.Schema.Vector4(trans.X, trans.Y, trans.Z, 1.0f),
@@ -468,15 +467,18 @@ public partial class ActivityMapEntityView : UserControl
                                 }
                             }
                             break;
-                        case CubemapResource cubemap:
+                        case SMapCubemapResource cubemap:
                             dynamicScene.AddCubemap(cubemap);
                             break;
                         case SMapLightResource mapLight:
-                            dynamicScene.AddMapLight(mapLight);
+                            mapLight.Lights?.Load();
+                            if (mapLight.Lights is not null)
+                                mapLight.Lights.LoadIntoExporter(dynamicScene);
                             break;
-                        case SMapSpotLightResource spotLight:
-                            if (spotLight.Unk10 is not null)
-                                dynamicScene.AddMapSpotLight(entry, spotLight);
+                        case SMapShadowingLightResource shadowingLight:
+                            shadowingLight.ShadowingLight?.Load();
+                            if (shadowingLight.ShadowingLight is not null)
+                                shadowingLight.ShadowingLight.LoadIntoExporter(dynamicScene, entry);
                             break;
                         case SMapDecalsResource decals:
                             decals.MapDecals?.Load();
@@ -496,11 +498,11 @@ public partial class ActivityMapEntityView : UserControl
                             }
                             break;
                         case SMapTerrainResource terrain:
-                            terrain.Terrain.Load();
+                            terrain.Terrain?.Load();
                             terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                             break;
                         case SDecoratorMapResource decorator:
-                            decorator.Decorator.Load();
+                            decorator.Decorator?.Load();
                             decorator.Decorator.LoadIntoExporter(decoratorScene, savePath);
                             break;
                         default:
@@ -553,7 +555,7 @@ public partial class ActivityMapEntityView : UserControl
                     }
                     if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
                     {
-                        foreach (var element in skyResource.Unk10.TagData.Unk08)
+                        foreach (var element in skyResource.SkyEntities.TagData.Unk08)
                         {
                             if (element.Unk60.TagData.Unk08 is null)
                                 continue;

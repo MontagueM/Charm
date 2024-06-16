@@ -139,25 +139,20 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
             InstanceTransform transform = new();
             var b = a[i];
 
-            Matrix4x4 matrix = new Matrix4x4(
-                b.M0.X, b.M0.Y, b.M0.Z, b.M0.W,
-                b.M1.X, b.M1.Y, b.M1.Z, b.M1.W,
-                b.M2.X, b.M2.Y, b.M2.Z, b.M2.W,
-                b.M3.X, b.M3.Y, b.M3.Z, b.M3.W
-            );
+            System.Numerics.Matrix4x4 matrix = b.ToSys();
 
-            matrix = Matrix4x4.Transpose(matrix);
+            matrix = System.Numerics.Matrix4x4.Transpose(matrix);
             System.Numerics.Vector3 translation = new();
             Quaternion rotation = new Quaternion();
             System.Numerics.Vector3 scale = new();
-            Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+            System.Numerics.Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
 
             transform.Translation = new(translation.X, translation.Y, translation.Z, 0);
             transform.Rotation = new(rotation.X, rotation.Y, rotation.Z, rotation.W);
             transform.Scale = new(scale.X, scale.Y, scale.Z);
             // X = scale
             // Y, Z = TranslateX/Y
-            transform.UVTransform = a[i].M3;
+            transform.UVTransform = a[i].W_Axis;
 
             transforms.Add(transform);
         }
@@ -165,30 +160,30 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         return transforms;
     }
 
-    private List<InstanceMatrix> ParseInstances()
+    private List<Matrix4x4> ParseInstances()
     {
         byte[] instances = PackageResourcer.Get().GetFileData(_tag.InstanceTransforms);
-        List<InstanceMatrix> instanceTransforms = new();
-        int blockSize = Marshal.SizeOf<InstanceMatrix>();
+        List<Matrix4x4> instanceTransforms = new();
+        int blockSize = Marshal.SizeOf<Matrix4x4>();
 
         var reader = new TigerFile(_tag.InstanceTransforms).GetReader();
         for (int i = 0; i < _tag.InstanceCounts; i++)
         {
-            InstanceMatrix instance = reader.ReadSchemaStruct<InstanceMatrix>();
+            Matrix4x4 instance = reader.ReadSchemaStruct<Matrix4x4>();
             instanceTransforms.Add(instance);
         }
 
         return instanceTransforms;
     }
 
-    [NonSchemaStruct(0x40)]
-    public struct InstanceMatrix
-    {
-        public Vector4 M0;
-        public Vector4 M1;
-        public Vector4 M2;
-        public Vector4 M3;
-    }
+    //[NonSchemaStruct(0x40)]
+    //public struct InstanceMatrix
+    //{
+    //    public Vector4 M0;
+    //    public Vector4 M1;
+    //    public Vector4 M2;
+    //    public Vector4 M3;
+    //}
 
     public struct InstanceTransform
     {
@@ -231,21 +226,16 @@ public class StaticMapData : Tag<SStaticMapData>
         {
             Debug.Assert(decal.Transforms.Count == 1 && decal.Models.Count == 1);
 
-            var transform = decal.Transforms[0];
+            var transform = decal.Transforms[0].Transform;
             var model = decal.Models[0];
 
-            Matrix4x4 matrix = new Matrix4x4(
-                transform.M0.X, transform.M0.Y, transform.M0.Z, transform.M0.W,
-                transform.M1.X, transform.M1.Y, transform.M1.Z, transform.M1.W,
-                transform.M2.X, transform.M2.Y, transform.M2.Z, transform.M2.W,
-                transform.M3.X, transform.M3.Y, transform.M3.Z, transform.M3.W
-            );
+            System.Numerics.Matrix4x4 matrix = transform.ToSys();
 
             //matrix = Matrix4x4.Transpose(matrix);
             System.Numerics.Vector3 translation = new();
             Quaternion rotation = new Quaternion();
             System.Numerics.Vector3 scale = new();
-            Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+            System.Numerics.Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
 
             scene.AddMapModel(model.Model,
             new Tiger.Schema.Vector4(translation.X, translation.Y, translation.Z, 1.0f),
@@ -347,7 +337,7 @@ public struct SUnknownUInt
 public struct SOcclusionBounds
 {
     public long FileSize;
-    public DynamicArray<SMeshInstanceOcclusionBounds> InstanceBounds;
+    public DynamicArrayUnloaded<SMeshInstanceOcclusionBounds> InstanceBounds;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E2078080", 0x30)]
@@ -564,8 +554,8 @@ public struct SStaticMapParent
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B5678080", 0x1C)]
 public struct D2Class_B5678080
 {
-    [SchemaField(0x10)]
-    public Tag Unk10; // D2Class_786A8080
+    //[SchemaField(0x10)]
+    //public Tag Unk10; // D2Class_786A8080
 }
 
 /// <summary>
@@ -596,6 +586,104 @@ public struct D2Class_7D6A8080
 }
 
 /// <summary>
+/// Map Light
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EA1B8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5A6F8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "636A8080", 0x18)]
+public struct SMapLightResource
+{
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
+    public Lights Lights;
+}
+
+/// <summary>
+/// Map Shadowing Light (Casts shadows)
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C71B8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "33718080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "5E6C8080", 0x20)]
+public struct SMapShadowingLightResource
+{
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
+    public ShadowingLights ShadowingLight;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D91B8080", 0xB0)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "40718080", 0xC0)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "716C8080", 0x110)]
+public struct SMapShadowingLight
+{
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x60, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public Matrix4x4 LightToWorld;
+    public Vector4 Distance; // Unsure but only W is used?
+
+    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xC0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public float FarPlane;
+    public float HalfFOV; // * 2, radians->degrees
+
+    // Not really a point in even loading these
+    //[SchemaField(0x90, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    //[SchemaField(0xD0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public IMaterial Shading;
+    //public IMaterial Shading_Shadowing;
+    //public IMaterial Volumetric;
+    //public IMaterial Volumetric_Shadowing;
+    //public IMaterial Lightprobe;
+    //public IMaterial Lightprobe_Shadowing;
+
+    [SchemaField(0x98, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0xA0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xE8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public Tag<D2Class_A16D8080> BufferData;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xEC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public Tag<D2Class_A16D8080> BufferData2;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "5B1A8080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3A718080", 0x60)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "656C8080", 0x60)]
+public struct D2Class_656C8080
+{
+    [SchemaField(0x10)]
+    public Vector4 Unk10;
+    public Vector4 Unk20;
+    public DynamicArrayUnloaded<D2Class_706C8080> LightData;
+    public DynamicArrayUnloaded<D2Class_4F9F8080> Transforms;
+    [SchemaField(0x54, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public Tag<SOcclusionBounds> Bounds;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2F1C8080", 0x90)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3E718080", 0xA0)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "706C8080", 0xF0)]
+public struct D2Class_706C8080
+{
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x60, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public Matrix4x4 LightToWorld;
+    public Vector4 Distance; // Unsure but only W is used?
+    // Techniques between
+
+    [SchemaField(0x84, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_LATEST)]
+    public Tag<D2Class_A16D8080> BufferData;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0xC4, TigerStrategy.DESTINY2_LATEST)]
+    public Tag<D2Class_A16D8080> BufferData2; // used for outer light color? i dont really know
+}
+
+/// <summary>
 /// Unk data resource.
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F21A8080", 0x90)]
@@ -611,34 +699,6 @@ public struct D2Class_A16D8080
     public DynamicArray<Vec4> Buffer2;
 }
 
-/// <summary>
-/// Map Light
-/// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EA1B8080", 0x10)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5A6F8080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "636A8080", 0x18)]
-public struct SMapLightResource
-{
-    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    public Tag<D2Class_656C8080> Lights;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "5B1A8080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3A718080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "656C8080", 0x60)]
-public struct D2Class_656C8080
-{
-    [SchemaField(0x10)]
-    public Vector4 Unk10;
-    public Vector4 Unk20;
-    public DynamicArray<D2Class_706C8080> LightData;
-    public DynamicArray<D2Class_4F9F8080> Transforms;
-    [SchemaField(0x54, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    public Tag<SOcclusionBounds> Bounds;
-}
-
 /// </summary>
 /// Background entities/skybox resource
 /// </summary>
@@ -647,9 +707,9 @@ public struct D2Class_656C8080
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A36A8080", 0x18)]
 public struct SMapSkyEntResource
 {
-    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    public Tag<SMapSkyEntities> Unk10;  // A76A8080
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
+    public Tag<SMapSkyEntities> SkyEntities;  // A76A8080
 }
 
 /// <summary>
@@ -669,57 +729,13 @@ public struct SMapSkyEntities
     public Vector4 Unk50;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2F1C8080", 0x90)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3E718080", 0xA0)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "706C8080", 0xF0)]
-public struct D2Class_706C8080
-{
-    //public Vector4 Unk00;
-    //public Vector4 Unk10;
-
-    //Matrix4x4?
-    //[SchemaField(0x20)]
-    //public Vector4 Unk20;
-    //public Vector4 Unk30;
-    //public Vector4 Unk40;
-    //public Vector4 Unk50;
-
-    //[SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    //[SchemaField(0xC0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC0;
-    //[SchemaField(0x84, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    //[SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC4;
-    //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    //[SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial UnkC8;
-
-    [SchemaField(0x84, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0xD0, TigerStrategy.DESTINY2_LATEST)]
-    public Tag<D2Class_A16D8080> BufferData;
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
-    [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0xC4, TigerStrategy.DESTINY2_LATEST)]
-    public Tag<D2Class_A16D8080> BufferData2; // used for outer light color? i dont really know
-
-    //[SchemaField(0xDF)]
-    //public byte UnkDF; //color index? unlikely
-    //[SchemaField(0xE0)]
-    //public byte UnkE0; //light shape?
-}
-
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1E1C8080", 0x80)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "976F8080", 0x80)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]
 public struct D2Class_A96A8080
 {
     //Matrix4x4
-    public Vector4 Unk00;
-    public Vector4 Unk10;
-    public Vector4 Unk20;
-    public Vector4 Unk30;
+    public Matrix4x4 Transform;
 
     //Bounds
     public Vector4 Unk40;
@@ -819,14 +835,6 @@ public struct D2Class_B3938080
     public Vector4 Unk10;
 }
 
-[SchemaStruct("5E6C8080", 0x20)]
-public struct SMapSpotLightResource
-{
-    [SchemaField(0x10)]
-    public Tag Unk10;  // D2Class_716C8080, might be related to lights for entities?
-    [SchemaField(0x1C)]
-    public TigerHash Unk1C;
-}
 
 // /// <summary>
 // /// Boss entity data resource?
@@ -1053,10 +1061,7 @@ public struct D1Class_BA048080
 public struct D1Class_75018080
 {
     // Matrix4x4
-    public Vector4 M0;
-    public Vector4 M1;
-    public Vector4 M2;
-    public Vector4 M3;
+    public Matrix4x4 Transform;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C1018080", 0x10)]

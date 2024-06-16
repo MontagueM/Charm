@@ -861,7 +861,7 @@ public partial class TagListView : UserControl
 
                     // Most of the time the most specific entity name comes from a map resource (bosses usually)
                     if (NamedEntities.ContainsKey(entity.Hash))
-                        entity.EntityName = NamedEntities[entity.Hash];
+                        entityName = NamedEntities[entity.Hash];
 
                     _allTagItems.Add(new TagItem
                     {
@@ -930,7 +930,7 @@ public partial class TagListView : UserControl
                             foreach (var dataentry in resource.DataEntries)
                             {
                                 if (dataentry.GetEntityHash().IsValid())
-                                    Ents.EntityNames[Strategy.CurrentStrategy].TryAdd(dataentry.GetEntityHash(), resource.DevName);
+                                    Ents.EntityNames[Strategy.CurrentStrategy].TryAdd(dataentry.GetEntityHash(), resource.DevName?.Value);
                             }
                         }
                     }

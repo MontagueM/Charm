@@ -88,7 +88,7 @@ class MetadataScene
             AddTextureToMaterial(texture.Material, texture.Index, texture.Texture);
         }
 
-        foreach (CubemapResource cubemap in scene.Cubemaps)
+        foreach (SMapCubemapResource cubemap in scene.Cubemaps)
         {
             AddCubemap(cubemap.CubemapName != null ? cubemap.CubemapName.Value : $"Cubemap_{cubemap.CubemapTexture?.Hash}",
                 cubemap.CubemapSize.ToVec3(),
@@ -96,29 +96,12 @@ class MetadataScene
                 cubemap.CubemapPosition.ToVec3(),
                 cubemap.CubemapTexture != null ? cubemap.CubemapTexture.Hash : "");
         }
+
         foreach (var mapLight in scene.MapLights)
         {
-            for (int i = 0; i < mapLight.Lights.TagData.LightData.Count; i++)
-            {
-                var data = mapLight.Lights.TagData.LightData[i].BufferData;
-                if (data is null)
-                    continue;
-
-                // This sucks and is stupid
-                var color = data.TagData.Buffer1.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).Count() != 0 ?
-                    data.TagData.Buffer1.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).FirstOrDefault().Vec :
-                    data.TagData.Buffer2.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).FirstOrDefault().Vec;
-
-                AddLight(
-                    data.Hash,
-                    "Point",
-                    mapLight.Lights.TagData.Transforms[i].Translation,
-                    mapLight.Lights.TagData.Transforms[i].Rotation,
-                    new Vector2(1f, 1f),
-                    color,
-                    mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner2.X - mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner1.X);
-            }
+            AddLight(mapLight);
         }
+
         foreach (SMapDecalsResource decal in scene.Decals)
         {
             if (decal.MapDecals is not null)
@@ -132,7 +115,7 @@ class MetadataScene
                         for (int i = item.StartIndex; i < item.StartIndex + item.Count && i < decal.MapDecals.TagData.Locations.Count; i++)
                         {
                             var location = decal.MapDecals.TagData.Locations[i].Location;
-                            var boxCorners = decal.MapDecals.TagData.DecalProjectionBounds.TagData.InstanceBounds[i];
+                            var boxCorners = decal.MapDecals.TagData.DecalProjectionBounds.TagData.InstanceBounds.ElementAt(decal.MapDecals.TagData.DecalProjectionBounds.GetReader(), i);
 
                             AddDecal(boxCorners.Unk24.ToString(), item.Material.FileHash, location, boxCorners.Corner1, boxCorners.Corner2);
                             AddMaterial(item.Material);
@@ -141,19 +124,6 @@ class MetadataScene
                 }
             }
 
-        }
-        foreach (var mapLight in scene.MapSpotLights)
-        {
-            foreach (var entry in mapLight.Value)
-            {
-                AddLight(
-                    mapLight.Key,
-                    "Spot",
-                    new Vector4(entry.Position.X, entry.Position.Y, entry.Position.Z, 1),
-                    entry.Quaternion,
-                    new Vector2(1.0, 1.0),
-                    new Vector4(1.0, 1.0, 1.0, 1.0));
-            }
         }
 
         foreach (var dyemaps in scene.TerrainDyemaps)
@@ -268,25 +238,19 @@ class MetadataScene
         });
     }
 
-    public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color, float range = 13)
+    public void AddLight(Lights.LightData light)
     {
-        //Idk how color/intensity is handled, so if its above 1 just bring it down
-        //float R = color.X > 1 ? color.X / 100 : color.X;
-        //float G = color.Y > 1 ? color.Y / 100 : color.Y;
-        //float B = color.Z > 1 ? color.Z / 100 : color.Z;
+        if (!_config["Lights"].ContainsKey($"{light.LightType}_{light.Hash}"))
+            _config["Lights"][$"{light.LightType}_{light.Hash}"] = new ConcurrentBag<JsonLight>();
 
-        if (!_config["Lights"].ContainsKey(name))
+        _config["Lights"][$"{light.LightType}_{light.Hash}"].Add(new JsonLight
         {
-            _config["Lights"][name] = new ConcurrentBag<JsonLight>();
-        }
-        _config["Lights"][name].Add(new JsonLight
-        {
-            Type = type,
-            Translation = new[] { translation.X, translation.Y, translation.Z },
-            Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
-            Size = new[] { size.X, size.Y },
-            Color = new[] { color.X, color.Y, color.Z },
-            Range = range
+            Type = light.LightType.ToString(),
+            Translation = new[] { light.Transform.Position.X, light.Transform.Position.Y, light.Transform.Position.Z },
+            Rotation = new[] { light.Transform.Quaternion.X, light.Transform.Quaternion.Y, light.Transform.Quaternion.Z, light.Transform.Quaternion.W },
+            Size = new[] { light.Size.X, light.Size.Y },
+            Color = new[] { light.Color.X, light.Color.Y, light.Color.Z },
+            Range = light.Range
         });
     }
 

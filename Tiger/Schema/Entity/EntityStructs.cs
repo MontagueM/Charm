@@ -754,55 +754,55 @@ public struct D2Class_F8258080
     public FileHash[] UnkA8;
 }
 
-[SchemaStruct("41268080", 0xBA0)]
-public struct D2Class_41268080
-{
-    public ResourceInTagPointer Unk00;
-    // lots of array stuff
-    [SchemaField(0x1E0)]
-    public DynamicArray<D2Class_0B008080> Unk1E0;
-    public DynamicArray<D2Class_0F008080> Unk1F0;
-    public DynamicArray<D2Class_90008080> Unk200;
+//[SchemaStruct("41268080", 0xBA0)]
+//public struct D2Class_41268080
+//{
+//    public ResourceInTagPointer Unk00;
+//    // lots of array stuff
+//    [SchemaField(0x1E0)]
+//    public DynamicArray<D2Class_0B008080> Unk1E0;
+//    public DynamicArray<D2Class_0F008080> Unk1F0;
+//    public DynamicArray<D2Class_90008080> Unk200;
 
-    [SchemaField(0x240)]
-    public DynamicArray<D2Class_0B008080> Unk240;
-    public DynamicArray<D2Class_0F008080> Unk250;
-    public DynamicArray<D2Class_90008080> Unk260;
+//    [SchemaField(0x240)]
+//    public DynamicArray<D2Class_0B008080> Unk240;
+//    public DynamicArray<D2Class_0F008080> Unk250;
+//    public DynamicArray<D2Class_90008080> Unk260;
 
-    [SchemaField(0x5F8)]
-    public DynamicArray<D2Class_86268080> Unk5F8;
-    [SchemaField(0x658)]
-    public DynamicArray<D2Class_86268080> Unk658;
-    [SchemaField(0x6B8)]
-    public DynamicArray<D2Class_86268080> Unk6B8;
-    [SchemaField(0x718)]
-    public DynamicArray<D2Class_86268080> Unk718;
-    [SchemaField(0x778)]
-    public DynamicArray<D2Class_86268080> Unk778;
-    [SchemaField(0x7D8)]
-    public DynamicArray<D2Class_86268080> Unk7D8;
-    [SchemaField(0x838)]
-    public DynamicArray<D2Class_86268080> Unk838;
-    [SchemaField(0x898)]
-    public DynamicArray<D2Class_86268080> Unk898;
-    [SchemaField(0x8F8)]
-    public DynamicArray<D2Class_86268080> Unk8F8;
-    [SchemaField(0x958)]
-    public DynamicArray<D2Class_86268080> Unk958;
-    [SchemaField(0x9B8)]
-    public DynamicArray<D2Class_86268080> Unk9B8;
-    [SchemaField(0xA18)]
-    public DynamicArray<D2Class_86268080> UnkA18;
-    [SchemaField(0xA78)]
-    public DynamicArray<D2Class_86268080> UnkA78;
-    [SchemaField(0xAD8)]
-    public DynamicArray<D2Class_86268080> UnkAD8;
-    [SchemaField(0xB38)]
-    public DynamicArray<D2Class_86268080> UnkB38;
+//    [SchemaField(0x5F8)]
+//    public DynamicArray<D2Class_86268080> Unk5F8;
+//    [SchemaField(0x658)]
+//    public DynamicArray<D2Class_86268080> Unk658;
+//    [SchemaField(0x6B8)]
+//    public DynamicArray<D2Class_86268080> Unk6B8;
+//    [SchemaField(0x718)]
+//    public DynamicArray<D2Class_86268080> Unk718;
+//    [SchemaField(0x778)]
+//    public DynamicArray<D2Class_86268080> Unk778;
+//    [SchemaField(0x7D8)]
+//    public DynamicArray<D2Class_86268080> Unk7D8;
+//    [SchemaField(0x838)]
+//    public DynamicArray<D2Class_86268080> Unk838;
+//    [SchemaField(0x898)]
+//    public DynamicArray<D2Class_86268080> Unk898;
+//    [SchemaField(0x8F8)]
+//    public DynamicArray<D2Class_86268080> Unk8F8;
+//    [SchemaField(0x958)]
+//    public DynamicArray<D2Class_86268080> Unk958;
+//    [SchemaField(0x9B8)]
+//    public DynamicArray<D2Class_86268080> Unk9B8;
+//    [SchemaField(0xA18)]
+//    public DynamicArray<D2Class_86268080> UnkA18;
+//    [SchemaField(0xA78)]
+//    public DynamicArray<D2Class_86268080> UnkA78;
+//    [SchemaField(0xAD8)]
+//    public DynamicArray<D2Class_86268080> UnkAD8;
+//    [SchemaField(0xB38)]
+//    public DynamicArray<D2Class_86268080> UnkB38;
 
-    [SchemaField(0xB70)]
-    public DynamicArray<D2Class_72268080> Unk6E8;
-}
+//    [SchemaField(0xB70)]
+//    public DynamicArray<D2Class_72268080> Unk6E8;
+//}
 
 [SchemaStruct("0F008080", 4)]
 public struct D2Class_0F008080
@@ -838,24 +838,24 @@ public struct D2Class_3C268080
     public ResourceInTagPointer Unk00;
 }
 
-[SchemaStruct("B1288080", 0xC30)]
-public struct D2Class_B1288080
-{
-    public ResourceInTagPointer Unk00;
+//[SchemaStruct("B1288080", 0xC30)]
+//public struct D2Class_B1288080
+//{
+//    public ResourceInTagPointer Unk00;
 
-    [SchemaField(0xA8)]
-    public DynamicArray<D2Class_0F008080> UnkA8;
-    [SchemaField(0xB8)]
-    public DynamicArray<D2Class_BC288080> UnkB8;
-    [SchemaField(0xC8)]
-    public DynamicArray<D2Class_BE288080> UnkC8;
-    [SchemaField(0x790)]
-    public DynamicArray<D2Class_E4288080> Unk790;
-    [SchemaField(0x7D0)]
-    public DynamicArray<D2Class_E4288080> Unk7D0;
-    [SchemaField(0x810)]
-    public DynamicArray<D2Class_E4288080> Unk810;
-}
+//    [SchemaField(0xA8)]
+//    public DynamicArray<D2Class_0F008080> UnkA8;
+//    [SchemaField(0xB8)]
+//    public DynamicArray<D2Class_BC288080> UnkB8;
+//    [SchemaField(0xC8)]
+//    public DynamicArray<D2Class_BE288080> UnkC8;
+//    [SchemaField(0x790)]
+//    public DynamicArray<D2Class_E4288080> Unk790;
+//    [SchemaField(0x7D0)]
+//    public DynamicArray<D2Class_E4288080> Unk7D0;
+//    [SchemaField(0x810)]
+//    public DynamicArray<D2Class_E4288080> Unk810;
+//}
 
 [SchemaStruct("BC288080", 0xC)]
 public struct D2Class_BC288080
@@ -875,10 +875,10 @@ public struct D2Class_E4288080
 [SchemaStruct("9B288080", 0x4C0)]
 public struct D2Class_9B288080
 {
-    public ResourceInTagPointer Unk00;
+    //public ResourceInTagPointer Unk00;
 
-    [SchemaField(0x270)]
-    public DynamicArray<D2Class_2B948080> Unk270;
+    //[SchemaField(0x270)]
+    //public DynamicArray<D2Class_2B948080> Unk270;
 }
 
 [SchemaStruct("2B948080", 0x100)]
@@ -890,30 +890,30 @@ public struct D2Class_2B948080
 [SchemaStruct("32288080", 0x160)]
 public struct D2Class_32288080
 {
-    public ResourceInTagPointer Unk00;
+    //public ResourceInTagPointer Unk00;
 }
 
 [SchemaStruct("31288080", 0x108)]
 public struct D2Class_31288080
 {
-    public ResourceInTagPointer Unk00;
+    //public ResourceInTagPointer Unk00;
 }
 
 [SchemaStruct("9C818080", 0xE0)]
 public struct D2Class_9C818080
 {
-    public ResourceInTagPointer Unk00;
+    //public ResourceInTagPointer Unk00;
 }
 
 [SchemaStruct("9D818080", 0x108)]
 public struct D2Class_9D818080
 {
-    public ResourceInTagPointer Unk00;
+    //public ResourceInTagPointer Unk00;
 
-    [SchemaField(0x38)]
-    public DynamicArray<D2Class_F79A8080> Unk38;
-    [SchemaField(0xB8)]
-    public DynamicArray<D2Class_A9818080> UnkB8;
+    //[SchemaField(0x38)]
+    //public DynamicArray<D2Class_F79A8080> Unk38;
+    //[SchemaField(0xB8)]
+    //public DynamicArray<D2Class_A9818080> UnkB8;
 }
 
 [SchemaStruct("A9818080", 0x30)]
@@ -999,12 +999,12 @@ public struct D2Class_21868080
 [SchemaStruct("6A918080", 0x2C0)]
 public struct D2Class_6A918080
 {
-    public ResourceInTagPointer Unk00;
+    //public ResourceInTagPointer Unk00;
 
-    [SchemaField(0x1D0)]
-    public DynamicArray<D2Class_07008080> Unk1D0;
-    [SchemaField(0x1F0)]
-    public DynamicArray<D2Class_07008080> Unk1F0;
+    //[SchemaField(0x1D0)]
+    //public DynamicArray<D2Class_07008080> Unk1D0;
+    //[SchemaField(0x1F0)]
+    //public DynamicArray<D2Class_07008080> Unk1F0;
 }
 
 [SchemaStruct("07008080", 4)]
@@ -1016,14 +1016,14 @@ public struct D2Class_07008080
 [SchemaStruct("46868080", 0x4D8)]
 public struct D2Class_46868080
 {
-    public ResourceInTagPointer Unk00;
+    //public ResourceInTagPointer Unk00;
 
-    [SchemaField(0x38)]
-    public DynamicArray<D2Class_F79A8080> Unk38;
-    [SchemaField(0x480)]
-    public DynamicArray<D2Class_77878080> Unk480;
-    [SchemaField(0x4C0)]
-    public DynamicArray<D2Class_37878080> Unk4C0;
+    //[SchemaField(0x38)]
+    //public DynamicArray<D2Class_F79A8080> Unk38;
+    //[SchemaField(0x480)]
+    //public DynamicArray<D2Class_77878080> Unk480;
+    //[SchemaField(0x4C0)]
+    //public DynamicArray<D2Class_37878080> Unk4C0;
 }
 
 [SchemaStruct("77878080", 0x90)]
@@ -1050,7 +1050,7 @@ public struct D2Class_77878080
 [SchemaStruct("37878080", 4)]
 public struct D2Class_37878080
 {
-    public Tag Unk00;
+    // public Tag Unk00;
 }
 
 // [SchemaStruct("C96C8080", 0x800)]
@@ -1671,7 +1671,7 @@ public struct S40238080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7F6B8080", 0x1C0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "95668080", 0x1E0)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "95668080", 0x1DC)]
-public struct CubemapResource //Dataresource for cubemaps
+public struct SMapCubemapResource //Dataresource for cubemaps
 {
     [SchemaField(0x20)]
     public Vector4 CubemapSize; //XYZ, no W
@@ -1697,11 +1697,11 @@ public struct CubemapResource //Dataresource for cubemaps
     [SchemaField(0x1AC, TigerStrategy.DESTINY2_LATEST)]
     public Texture CubemapTexture;
 
-    [SchemaField(0x1A0, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
-    [SchemaField(0x1A0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x1C0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1B4, TigerStrategy.DESTINY2_LATEST)]
-    public Texture Unk1C0; //Sometype of reflection tint texture idk
+    //[SchemaField(0x1A0, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
+    //[SchemaField(0x1A0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    //[SchemaField(0x1C0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    //[SchemaField(0x1B4, TigerStrategy.DESTINY2_LATEST)]
+    //public Texture Unk1C0; //Sometype of reflection tint texture idk
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D99B8080", 0x190)]
@@ -1867,7 +1867,7 @@ public struct D2Class_B5468080
     public Vector4 Translation;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "0E478080", 0x80)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "96468080", 0x80)]
 public struct D2Class_96468080
 {
     [SchemaField(0x28), Tag64]

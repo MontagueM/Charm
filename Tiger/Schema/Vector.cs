@@ -3,25 +3,57 @@ using System.Runtime.InteropServices;
 
 namespace Tiger.Schema;
 
+[StructLayout(LayoutKind.Sequential, Size = 0x40)]
+public struct Matrix4x4
+{
+    public Vector4 X_Axis;
+    public Vector4 Y_Axis;
+    public Vector4 Z_Axis;
+    public Vector4 W_Axis;
+
+    /// <summary>
+    /// Converts a Tiger Matrix4x4 to System.Numerics.Matrix4x4
+    /// </summary>
+    /// <returns>System.Numerics.Matrix4x4</returns>
+    public System.Numerics.Matrix4x4 ToSys()
+    {
+        return new System.Numerics.Matrix4x4(
+        X_Axis.X, X_Axis.Y, X_Axis.Z, X_Axis.W,
+        Y_Axis.X, Y_Axis.Y, Y_Axis.Z, Y_Axis.W,
+        Z_Axis.X, Z_Axis.Y, Z_Axis.Z, Z_Axis.W,
+        W_Axis.X, W_Axis.Y, W_Axis.Z, W_Axis.W);
+    }
+
+    public static Vector3 Multiply(Matrix4x4 matrix, Vector3 vector)
+    {
+        float x = matrix.X_Axis.X * vector.X + matrix.X_Axis.Y * vector.Y + matrix.X_Axis.Z * vector.Z + matrix.X_Axis.W * 1.0f;
+        float y = matrix.Y_Axis.X * vector.X + matrix.Y_Axis.Y * vector.Y + matrix.Y_Axis.Z * vector.Z + matrix.Y_Axis.W * 1.0f;
+        float z = matrix.Z_Axis.X * vector.X + matrix.Z_Axis.Y * vector.Y + matrix.Z_Axis.Z * vector.Z + matrix.Z_Axis.W * 1.0f;
+        return new Vector3(x, y, z);
+    }
+
+    public override string ToString() =>
+        $"[{X_Axis.ToString()}\n" +
+        $"{Y_Axis.ToString()}\n" +
+        $"{Z_Axis.ToString()}\n" +
+        $"{W_Axis.ToString()}]";
+}
 [StructLayout(LayoutKind.Sequential, Size = 0x20)]
 public struct AABB
 {
     public Vector4 Min;
     public Vector4 Max;
 }
-
 [StructLayout(LayoutKind.Sequential, Size = 8)]
 public struct Vector2
 {
     public float X;
     public float Y;
-
     public Vector2(int x, int y)
     {
         X = x / 32_767.0f;
         Y = y / 32_767.0f;
     }
-
     public Vector2(float x, float y)
     {
         X = x;

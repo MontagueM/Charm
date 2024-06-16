@@ -241,6 +241,7 @@ public struct D2Class_A46C8080
     public int Unk10;
     public Tag<D2Class_9F6C8080> Unk14;
     public VertexBuffer InstanceBuffer;
+    [NoLoad]
     public Tag<SDecoratorInstanceData> InstanceData;
 }
 
@@ -250,7 +251,7 @@ public struct D2Class_A46C8080
 public struct SDecoratorInstanceData
 {
     [SchemaField(0x8)]
-    public DynamicArray<D2Class_A96C8080> InstanceElement;
+    public DynamicArrayUnloaded<D2Class_A96C8080> InstanceElement;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "291B8080", 0x10)]
