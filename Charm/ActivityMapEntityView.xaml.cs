@@ -505,6 +505,17 @@ public partial class ActivityMapEntityView : UserControl
                             decorator.Decorator?.Load();
                             decorator.Decorator.LoadIntoExporter(decoratorScene, savePath);
                             break;
+                        case SMapWaterDecal waterDecal:
+                            dynamicScene.AddMapModel(waterDecal.Model,
+                            entry.Translation,
+                            entry.Rotation,
+                            new Tiger.Schema.Vector3(entry.Translation.W));
+                            foreach (DynamicMeshPart part in waterDecal.Model.Load(ExportDetailLevel.MostDetailed, null))
+                            {
+                                if (part.Material == null) continue;
+                                dynamicScene.Materials.Add(new ExportMaterial(part.Material));
+                            }
+                            break;
                         default:
                             break;
                     }
