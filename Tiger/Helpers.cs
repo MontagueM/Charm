@@ -139,19 +139,6 @@ public static class NestedTypeHelpers
 
         return null;
     }
-
-    public static string GetEnumDescription(this Enum enumValue)
-    {
-        if (Convert.ToInt32(enumValue) == -1)
-            return string.Empty;
-
-        var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
-        if (fieldInfo == null)
-            return "";
-
-        var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
-        return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
-    }
 }
 
 public static class ColorUtility
@@ -296,5 +283,32 @@ public static class ColorUtility
     public static bool IsZero(this Color color)
     {
         return (color.R <= 0 && color.G <= 0 && color.B <= 0);
+    }
+}
+
+public static class EnumExtensions
+{
+    public static IEnumerable<Enum> GetFlags(Enum input)
+    {
+        foreach (Enum value in Enum.GetValues(input.GetType()))
+        {
+            if (input.HasFlag(value))
+            {
+                yield return value;
+            }
+        }
+    }
+
+    public static string GetEnumDescription(this Enum enumValue)
+    {
+        if (Convert.ToInt32(enumValue) == -1)
+            return string.Empty;
+
+        var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
+        if (fieldInfo == null)
+            return "";
+
+        var descriptionAttributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+        return descriptionAttributes.Length > 0 ? descriptionAttributes[0].Description : enumValue.ToString();
     }
 }

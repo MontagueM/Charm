@@ -50,10 +50,14 @@ public partial class MaterialView : UserControl
         Material = material;
         UnkDataList.ItemsSource = GetUnkDataDetails(material);
         TextureListView.ItemsSource = GetTextureDetails(material);
+        UsedScopesList.ItemsSource = material.EnumerateScopes();
 
         if (material.VertexShader is not null)
         {
-            VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"vs{material.VertexShader.Hash}");
+            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+                VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"vs{material.VertexShader.Hash}");
+            else
+                VertexShader.Text = "Shader decompilation not supported for Destiny 1";
             VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
 
             //var vs_test = material.VertexShader?.Resources;
@@ -78,7 +82,10 @@ public partial class MaterialView : UserControl
 
         if (material.PixelShader is not null)
         {
-            PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
+            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+                PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
+            else
+                PixelShader.Text = "Shader decompilation not supported for Destiny 1";
             PS_CBufferList.ItemsSource = GetCBufferDetails(material);
 
             //var ps_test = material.PixelShader?.Resources;
@@ -349,24 +356,6 @@ public partial class MaterialView : UserControl
                 Value = material.Unk10.ToString("X2")
             }
         };
-
-        if (material.VS_TFX_Bytecode.Count > 0)
-        {
-            items.Add(new UnkDataDetail
-            {
-                Name = "VS TFX Bytecode",
-                Value = material.VS_TFX_Bytecode.Count.ToString()
-            });
-        }
-
-        if (material.PS_TFX_Bytecode.Count > 0)
-        {
-            items.Add(new UnkDataDetail
-            {
-                Name = "PS TFX Bytecode",
-                Value = material.PS_TFX_Bytecode.Count.ToString()
-            });
-        }
 
         if (material.VS_Samplers.Count > 0)
         {

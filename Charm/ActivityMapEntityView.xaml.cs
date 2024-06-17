@@ -440,12 +440,12 @@ public partial class ActivityMapEntityView : UserControl
                     {
                         case SMapSkyEntResource skyResource:
                             skyResource.SkyEntities.Load();
-                            if (skyResource.SkyEntities.TagData.Unk08 is null)
+                            if (skyResource.SkyEntities.TagData.Entries is null)
                                 return;
 
-                            foreach (var element in skyResource.SkyEntities.TagData.Unk08)
+                            foreach (var element in skyResource.SkyEntities.TagData.Entries)
                             {
-                                if (element.Unk60.TagData.Unk08 is null)
+                                if (element.Model.TagData.Model is null)
                                     continue;
 
                                 System.Numerics.Matrix4x4 matrix = element.Transform.ToSys();
@@ -455,12 +455,12 @@ public partial class ActivityMapEntityView : UserControl
                                 Quaternion quat = new();
                                 System.Numerics.Matrix4x4.Decompose(matrix, out scale, out quat, out trans);
 
-                                skyScene.AddMapModel(element.Unk60.TagData.Unk08,
+                                skyScene.AddMapModel(element.Model.TagData.Model,
                                     new Tiger.Schema.Vector4(trans.X, trans.Y, trans.Z, 1.0f),
                                     new Tiger.Schema.Vector4(quat.X, quat.Y, quat.Z, quat.W),
                                     new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z));
 
-                                foreach (DynamicMeshPart part in element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null))
+                                foreach (DynamicMeshPart part in element.Model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null))
                                 {
                                     if (part.Material == null) continue;
                                     skyScene.Materials.Add(new ExportMaterial(part.Material));
@@ -566,17 +566,17 @@ public partial class ActivityMapEntityView : UserControl
                     }
                     if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
                     {
-                        foreach (var element in skyResource.SkyEntities.TagData.Unk08)
+                        foreach (var element in skyResource.SkyEntities.TagData.Entries)
                         {
-                            if (element.Unk60.TagData.Unk08 is null)
+                            if (element.Model.TagData.Model is null)
                                 continue;
 
-                            ExporterScene skyScene = Exporter.Get().CreateScene(element.Unk60.TagData.Unk08.Hash, ExportType.EntityInMap);
-                            skyScene.AddModel(element.Unk60.TagData.Unk08);
+                            ExporterScene skyScene = Exporter.Get().CreateScene(element.Model.TagData.Model.Hash, ExportType.EntityInMap);
+                            skyScene.AddModel(element.Model.TagData.Model);
 
                             if (_config.GetS2VMDLExportEnabled())
                             {
-                                Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
+                                Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Model.TagData.Model.Hash, element.Model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null));
                             }
                         }
                     }

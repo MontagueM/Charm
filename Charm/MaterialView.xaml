@@ -213,6 +213,24 @@
             </Grid>
         </ControlTemplate>
 
+        <ControlTemplate x:Key="ScopeViewTemplate">
+            <Grid Margin="0,0,0,0">
+                <Border
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="20"
+                        Text="{Binding}" />
+                </Border>
+            </Grid>
+        </ControlTemplate>
+
     </UserControl.Resources>
 
     <Grid>
@@ -358,7 +376,7 @@
             <Grid Grid.Row="1" Grid.Column="0">
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="45*" />
                     <ColumnDefinition Width="25*" />
                 </Grid.ColumnDefinitions>
 
@@ -476,8 +494,8 @@
 
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition Height="19*" />
+                        <RowDefinition Height="50*" />
+                        <RowDefinition Height="50*" />
                     </Grid.RowDefinitions>
 
                     <Border
@@ -486,27 +504,80 @@
                         BorderBrush="{StaticResource BackgroundColour30}"
                         BorderThickness="1" />
 
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="16"
-                        Text="Other Values" />
+                    <Grid Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="9*" />
+                        </Grid.RowDefinitions>
 
-                    <ListView x:Name="UnkDataList" Grid.Row="1">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="OverridesDefaultStyle" Value="True" />
-                                <Setter Property="Template" Value="{StaticResource UnkDataViewTemplate}" />
-                            </Style>
-                        </ListView.ItemContainerStyle>
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="16"
+                            Text="Other Values" />
 
-                        <ListView.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Vertical" />
-                            </ItemsPanelTemplate>
-                        </ListView.ItemsPanel>
-                    </ListView>
+                        <ListView
+                            x:Name="UnkDataList"
+                            Grid.Row="1"
+                            d:ItemsSource="{d:SampleData ItemCount=5}">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="OverridesDefaultStyle" Value="True" />
+                                    <Setter Property="Template" Value="{StaticResource UnkDataViewTemplate}" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical" />
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
+                        </ListView>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="9*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="16"
+                            Text="Used Scopes" />
+
+                        <Grid Grid.Row="1">
+                            <Grid Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition Height="36*" />
+                                </Grid.RowDefinitions>
+
+                                <ListView
+                                    x:Name="UsedScopesList"
+                                    Grid.Row="1"
+                                    d:ItemsSource="{d:SampleData ItemCount=5}">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="OverridesDefaultStyle" Value="True" />
+                                            <Setter Property="Template" Value="{StaticResource ScopeViewTemplate}" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Vertical" />
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+                                </ListView>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+
                 </Grid>
 
             </Grid>

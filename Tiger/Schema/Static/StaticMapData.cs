@@ -721,7 +721,7 @@ public struct SMapSkyEntResource
 public struct SMapSkyEntities
 {
     public long FileSize;
-    public DynamicArray<D2Class_A96A8080> Unk08;
+    public DynamicArray<D2Class_A96A8080> Entries;
     //public DynamicArray<D2Class_B3938080> Unk18;
     //public DynamicArray<D2Class_07008080> Unk28;
     [SchemaField(0x40)]
@@ -734,26 +734,11 @@ public struct SMapSkyEntities
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]
 public struct D2Class_A96A8080
 {
-    //Matrix4x4
     public Matrix4x4 Transform;
-
-    //Bounds
-    public Vector4 Unk40;
-    public Vector4 Unk50;
-
-    public Tag<D2Class_AE6A8080> Unk60;//80806aae
-
-    //public float Unk64;
-    //public int Unk68;
-    //public ushort Unk6C;
-    //public short Unk6E;
-    //public float Unk70;
-    //public int Unk74;
-    //public Tag Unk78;
-    //public int Unk7C;
-    //public long Unk80;
-    //public int Unk88;
-    //public int Unk8c;
+    public AABB Bounds;
+    public Tag<D2Class_AE6A8080> Model;
+    [SchemaField(0x70)]
+    public int Unk70;
 }
 
 /// </summary>
@@ -822,7 +807,7 @@ public struct D2Class_64698080
 public struct D2Class_AE6A8080
 {
     public long FileSize;
-    public EntityModel Unk08;
+    public EntityModel Model;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E2078080", 0x30)]

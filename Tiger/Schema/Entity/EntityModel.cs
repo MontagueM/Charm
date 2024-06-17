@@ -22,7 +22,7 @@ public class EntityModel : Tag<SEntityModel>
         Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts = GetPartsOfDetailLevel(detailLevel);
         List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource, hasSkeleton);
         if (transparentsOnly) // ROI decal/transparent mesh purposes. I hate this and its not the right way to do this
-            return parts.Where(x => x.Material.Unk20 != 0).ToList();
+            return parts.Where(x => (x.Material as Shaders.DESTINY1_RISE_OF_IRON.Material).TagData.Unk20 != 0).ToList();
         else
             return parts;
     }

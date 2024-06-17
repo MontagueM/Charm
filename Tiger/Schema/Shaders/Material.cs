@@ -49,7 +49,6 @@ namespace Tiger.Schema.Shaders
         public uint Unk08 { get; }
         public uint Unk10 { get; }
         public uint Unk0C { get; } //Seems to be backface culling
-        public ushort Unk20 { get; }
 
         // Vertex
         public ShaderBytecode? VertexShader { get; }
@@ -73,11 +72,16 @@ namespace Tiger.Schema.Shaders
         public IEnumerable<STextureTag> EnumerateCSTextures();
         public ShaderBytecode? ComputeShader { get; }
 
+        public IEnumerable<TfxScopes> EnumerateScopes();
+
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
         public string Decompile(byte[] shaderBytecode, string name, string savePath = "hlsl_temp")
         {
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                return "";
+
             string binPath = $"{savePath}/{name}.bin";
             string hlslPath = $"{savePath}/{name}.hlsl";
 
@@ -174,6 +178,9 @@ namespace Tiger.Schema.Shaders
 
         public void SaveVertexShader(string saveDirectory)
         {
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                return;
+
             Directory.CreateDirectory($"{saveDirectory}");
             if (VertexShader != null && VertexShader.Hash.IsValid())
             {
@@ -262,7 +269,7 @@ namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
-        public ushort Unk20 => _tag.Unk20;
+
         // Leaving shaders null until they (if ever) can be decompiled to hlsl
         public ShaderBytecode VertexShader => _tag.VertexShader; // null;
         public ShaderBytecode PixelShader => _tag.PixelShader; // null;
@@ -296,7 +303,18 @@ namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
 
         public IEnumerable<STextureTag> EnumerateCSTextures()
         {
-            return null;
+            yield return new();
+        }
+
+        public IEnumerable<TfxScopes> EnumerateScopes()
+        {
+            foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
+            {
+                if (Enum.TryParse(scopeBit.ToString(), out TfxScopes scope))
+                    yield return scope;
+                else
+                    throw new Exception($"Unknown scope value {scope.ToString()}");
+            }
         }
 
         public Material(FileHash fileHash) : base(fileHash)
@@ -313,7 +331,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
-        public ushort Unk20 => _tag.Unk18;
+
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
@@ -352,6 +370,17 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
             }
         }
 
+        public IEnumerable<TfxScopes> EnumerateScopes()
+        {
+            foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
+            {
+                if (Enum.TryParse(scopeBit.ToString(), out TfxScopes scope))
+                    yield return scope;
+                else
+                    throw new Exception($"Unknown scope value {scope.ToString()}");
+            }
+        }
+
         public Material(FileHash fileHash) : base(fileHash)
         {
         }
@@ -366,7 +395,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
-        public ushort Unk20 => _tag.Unk20;
+
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
@@ -405,57 +434,14 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
             }
         }
 
-        public Material(FileHash fileHash) : base(fileHash)
+        public IEnumerable<TfxScopes> EnumerateScopes()
         {
-        }
-    }
-}
-
-
-namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
-{
-    public class Material : Tag<SMaterial_WQ>, IMaterial
-    {
-        public FileHash FileHash => Hash;
-        public uint Unk08 => _tag.Unk08;
-        public uint Unk10 => _tag.Unk10;
-        public uint Unk0C => _tag.Unk0C;
-        public ushort Unk20 => _tag.Unk20;
-        public ShaderBytecode VertexShader => _tag.VertexShader;
-        public ShaderBytecode PixelShader => _tag.PixelShader;
-        public ShaderBytecode ComputeShader => _tag.ComputeShader;
-        public FileHash PSVector4Container => _tag.PSVector4Container;
-        public FileHash VSVector4Container => _tag.VSVector4Container;
-        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
-        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
-        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
-        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
-        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
-        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
-
-        public IEnumerable<STextureTag> EnumerateVSTextures()
-        {
-            foreach (STextureTag64 texture in _tag.VSTextures)
+            foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
             {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumeratePSTextures()
-        {
-            foreach (STextureTag64 texture in _tag.PSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumerateCSTextures()
-        {
-            foreach (STextureTag64 texture in _tag.CSTextures)
-            {
-                yield return texture;
+                if (Enum.TryParse(scopeBit.ToString(), out TfxScopes scope))
+                    yield return scope;
+                else
+                    throw new Exception($"Unknown scope value {scope.ToString()}");
             }
         }
 

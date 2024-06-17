@@ -367,8 +367,9 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             }
             else if (fieldType.IsEnum)
             {
-                fieldValue = Enum.ToObject(fieldType, reader.ReadByte());
-                fieldSize = 1;
+                // Seems to work fine? Mont, yell at me if this isnt okay
+                fieldValue = Enum.ToObject(fieldType, reader.ReadType(Enum.GetUnderlyingType(fieldInfo.FieldType)));
+                fieldSize = GetSchemaTypeSize(fieldType); //Marshal.SizeOf(Enum.GetUnderlyingType(fieldInfo.FieldType));
             }
             else if (fieldType.IsArray)
             {

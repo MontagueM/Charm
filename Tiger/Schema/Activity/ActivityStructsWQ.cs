@@ -597,7 +597,7 @@ public struct D2Class_318A8080
 public struct D2Class_FA458080
 {
     public TigerHash Unk00;
-    [SchemaField(8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_LATEST, Obsolete = true)]
     public StringPointer EventName;
 
