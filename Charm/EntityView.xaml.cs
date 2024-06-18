@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using Arithmic;
 using Tiger;
@@ -115,7 +114,7 @@ public partial class EntityView : UserControl
     public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null, ExporterScene scene = null)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
+        name = Helpers.SanitizeString(name);
         string savePath = config.GetExportSavePath() + $"/{name}";
 
         if (scene == null)
@@ -159,8 +158,7 @@ public partial class EntityView : UserControl
 
     public static void ExportInventoryItem(ApiItem item)
     {
-        string name = string.Join("_", $"{item.ItemName}".Split(Path.GetInvalidFileNameChars()));
-        name = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
+        string name = Helpers.SanitizeString(item.ItemName);
 
         // Export the model
         // todo bad, should be replaced
@@ -187,13 +185,12 @@ public partial class EntityView : UserControl
             name, ExportTypeFlag.Full, overrideSkeleton, scene);
 
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+
         string savePath = config.GetExportSavePath();
-        string meshName = Regex.Replace(name, @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
-        string itemName = Regex.Replace(string.Join("_", item.ItemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_").Replace(".", "_").TrimEnd();
-        savePath += $"/{meshName}";
+        savePath += $"/{name}";
         Directory.CreateDirectory(savePath);
 
-        ExportGearShader(item, itemName, savePath);
+        ExportGearShader(item, name, savePath);
     }
 
 

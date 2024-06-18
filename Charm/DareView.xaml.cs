@@ -169,11 +169,11 @@ public partial class DareView : UserControl
                     // shader
                     ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
                     string savePath = config.GetExportSavePath();
-                    string meshName = item.ItemName;
-                    savePath += $"/{meshName}";
+                    string itemName = Helpers.SanitizeString(item.ItemName);
+                    savePath += $"/{itemName}";
                     Directory.CreateDirectory(savePath);
                     Directory.CreateDirectory(savePath + "/Textures");
-                    Investment.Get().ExportShader(item.Item, savePath, meshName, config.GetOutputTextureFormat());
+                    Investment.Get().ExportShader(item.Item, savePath, itemName, config.GetOutputTextureFormat());
                 }
                 MainWindow.Progress.CompleteStage();
             });
@@ -206,8 +206,8 @@ public partial class DareView : UserControl
 
             shaderItems.ToList().ForEach(item =>
             {
-                string itemName = item.Value.ItemName;
-                itemName = Regex.Replace(string.Join("_", itemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
+                string itemName = Helpers.SanitizeString(item.Value.ItemName);
+                //itemName = Regex.Replace(string.Join("_", itemName.Split(Path.GetInvalidFileNameChars())), @"[^\u0000-\u007F]", "_");
                 Investment.Get().ExportShader(item.Value.Item, savePath, itemName, config.GetOutputTextureFormat());
 
                 item.Value.Item.GetIconPrimaryTexture().SavetoFile($"{savePath}/{itemName}");

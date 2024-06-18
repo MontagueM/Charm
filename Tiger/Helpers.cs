@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Tiger.Schema;
 
 namespace Tiger;
@@ -97,6 +98,12 @@ public static class Helpers
         }
         else
             return value;
+    }
+
+    public static string SanitizeString(string input, string replacement = "_")
+    {
+        var pattern = @"[^a-zA-Z0-9 ]";
+        return Regex.Replace(input, pattern, replacement).Trim();
     }
 }
 

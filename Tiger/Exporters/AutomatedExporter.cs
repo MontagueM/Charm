@@ -46,39 +46,6 @@ public class AutomatedExporter
         File.WriteAllText($"{saveDirectory}/{meshName}_import_to_ue5.py", textExtensions);
     }
 
-    public static void SaveInteropBlenderPythonFile(string saveDirectory, string meshName, ImportType importType, TextureExportFormat textureFormat)
-    {
-        //Not gonna delete just in case
-
-        //// Copy and rename file
-        //saveDirectory = saveDirectory.Replace("\\", "/");
-        //File.Copy("Exporters/import_to_blender.py", $"{saveDirectory}/{meshName}_import_to_blender.py", true);
-
-        ////Lets just make a py for all exports now because why not
-        //string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        //text = text.Replace("HASH", $"{meshName}");
-        //text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
-        //text = text.Replace("IMPORT_TYPE", $"{importType.ToString().Replace("ImportType.", "")}");
-        //File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
-
-        //// change extension
-        //string textExtensions = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        //switch (textureFormat)
-        //{
-        //    case ETextureFormat.PNG:
-        //        textExtensions = textExtensions.Replace("TEX_EXT", ".png");
-        //        break;
-        //    case ETextureFormat.TGA:
-        //        textExtensions = textExtensions.Replace("TEX_EXT", ".tga");
-        //        break;
-        //    default:
-        //        textExtensions = textExtensions.Replace("TEX_EXT", ".dds");
-        //        break;
-        //}
-        //File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", textExtensions);
-    }
-
-
     public static void SaveBlenderApiFile(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
     {
         File.Copy($"Exporters/blender_api_template.py", $"{saveDirectory}/{meshName}{fileSuffix}.py", true);
@@ -103,6 +70,13 @@ public class AutomatedExporter
                 for (int i = 0; i < 4; i++)
                 {
                     text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+
+                    // Rare case where dye list only has 1 dye?
+                    if (dyes.Count == 1)
+                    {
+                        text = text.Replace($"{valueName}{dyeIndex + 1}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+                        text = text.Replace($"{valueName}{dyeIndex + 2}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+                    }
                 }
             }
 
