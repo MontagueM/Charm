@@ -455,7 +455,7 @@ public class StringPointer : RelativePointer
     {
         base.Deserialize(reader);
 
-        if (_relativeOffset == 0)
+        if (_relativeOffset == 0 || _relativeOffset == -1)
         {
             Value = null;
             return;
@@ -512,11 +512,15 @@ public class StringIndexReference : ITigerDeserialize
     public void Deserialize(TigerReader reader)
     {
         int index = reader.ReadInt32();
-        if (index == 0xFF_FF)
+        if (index is -1 or 0xFF_FF)
         {
             return;
         }
-        LocalizedStrings localizedStrings = Investment.Get().GetLocalizedStringsFromIndex(index);
+        LocalizedStrings? localizedStrings = Investment.Get().GetLocalizedStringsFromIndex(index);
+        if (localizedStrings == null)
+        {
+            return;
+        }
         StringHash stringHash = new(reader.ReadUInt32());
         Value = localizedStrings.GetStringFromHash(stringHash);
     }

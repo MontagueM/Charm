@@ -30,6 +30,7 @@ public class UsfConverter
         {
             usf.AppendLine("// masked");
         }
+        usf.AppendLine($"// Material: {material.FileHash}, VS: {material.VertexShader.Hash}, PS: {material.PixelShader.Hash}");
         // WriteTextureComments(material, bIsVertexShader);
         WriteCbuffers(material, bIsVertexShader, dyes);
         WriteFunctionDefinition(bIsVertexShader);
@@ -238,10 +239,10 @@ public class UsfConverter
         {
             foreach (var i in inputs)
             {
-                if (i.Type == "uint")
-                {
-                    usf.AppendLine($"static {i.Type} {i.Variable} = " + "1;\n");
-                }
+                // if (i.Type == "uint")
+                // {
+                //     usf.AppendLine($"static {i.Type} {i.Variable} = " + "1;\n");
+                // }
             }
         }
         usf.AppendLine("#define cmp -");
@@ -264,6 +265,8 @@ public class UsfConverter
             usf.AppendLine("float4 v3 = {tx.xy, 1, 1};");
             usf.AppendLine("float4 v4 = {viewDir.xyz, 1};");
             usf.AppendLine("float4 v5 = {vc.xyz, vcw};");  //UE5 Vertex color node doesnt support RGBA output for some reason?
+            usf.AppendLine("float4 v6 = Parameters.SvPosition;");
+            usf.AppendLine("float v7 = Parameters.TwoSidedSign;");
 
             foreach (var i in inputs)
             {
@@ -277,12 +280,31 @@ public class UsfConverter
 
     private bool ConvertInstructions()
     {
-        Dictionary<int, TextureView> texDict = new();
+        Dictionary<int, TextureView> texDict2D = new();
+        Dictionary<int, TextureView> texDict3D = new();
+        Dictionary<int, TextureView> texDictCube = new();
         foreach (var texture in textures)
         {
-            texDict.Add(texture.Index, texture);
+            if (texture.Dimension.Contains("2D"))
+            {
+                texDict2D.Add(texture.Index, texture);
+            }
+            else if (texture.Dimension.Contains("3D"))
+            {
+                texDict3D.Add(texture.Index, texture);
+            }
+            else if (texture.Dimension.Contains("Cube"))
+            {
+                texDictCube.Add(texture.Index, texture);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
-        List<int> sortedIndices = texDict.Keys.OrderBy(x => x).ToList();
+        List<int> sortedIndices2D = texDict2D.Keys.OrderBy(x => x).ToList();
+        List<int> sortedIndices3D = texDict3D.Keys.OrderBy(x => x).ToList();
+        List<int> sortedIndicesCube = texDictCube.Keys.OrderBy(x => x).ToList();
         string line = hlsl.ReadLine();
         if (line == null)
         {
@@ -315,8 +337,26 @@ public class UsfConverter
                     var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
                     var sampleUv = line.Split(", ")[1].Split(")")[0];
                     var dotAfter = line.Split(").")[1];
-                    // todo add dimension
-                    usf.AppendLine($"{equal}= Texture2DSample(Material_Texture2D_{sortedIndices.IndexOf(texIndex)}, Material_Texture2D_{sampleIndex - 1}Sampler, {sampleUv}).{dotAfter}");
+                    // todo use samplers correctly
+                    if (sortedIndices2D.Contains(texIndex))
+                    {
+                        int index = sortedIndices2D.IndexOf(texIndex);
+                        usf.AppendLine($"{equal}= Texture2DSample(Material_Texture2D_{index}, Material_Texture2D_{index}Sampler, {sampleUv}).{dotAfter}");
+                    }
+                    else if (sortedIndices3D.Contains(texIndex))
+                    {
+                        int index = sortedIndices3D.IndexOf(texIndex);
+                        usf.AppendLine($"{equal}= Texture3DSample(Material_VolumeTexture_{index}, Material_VolumeTexture_{index}Sampler, {sampleUv}).{dotAfter}");
+                    }
+                    else if (sortedIndicesCube.Contains(texIndex))
+                    {
+                        int index = sortedIndicesCube.IndexOf(texIndex);
+                        usf.AppendLine($"{equal}= TextureCubeSample(Material_TextureCube_{index}, Material_TextureCube_{index}Sampler, {sampleUv}).{dotAfter}");
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
                 }
                 else if (line.Contains("CalculateLevelOfDetail"))
                 {

@@ -471,10 +471,14 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         }
     }
 
-    public LocalizedStrings GetLocalizedStringsFromIndex(int index)
+    public LocalizedStrings? GetLocalizedStringsFromIndex(int index)
     {
         // presume we want to read from it, so load it
         LocalizedStrings ls = _localizedStringsIndexMap[index];
+        if (ls == null)
+        {
+            return null;
+        }
         ls.Load();
         return ls;
     }

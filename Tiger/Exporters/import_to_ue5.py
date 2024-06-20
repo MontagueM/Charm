@@ -15,7 +15,7 @@ class CharmImporter:
 
     def import_entity(self):
         self.make_materials()
-        self.import_entity_mesh()
+        self.import_entity_mesh(combine=True)
         self.assign_entity_materials()
         unreal.EditorAssetLibrary.save_directory(f"/Game/{self.content_path}/", False)
 
@@ -105,22 +105,24 @@ class CharmImporter:
     def assign_map_materials(self) -> None:
         for x in unreal.EditorAssetLibrary.list_assets(f'/Game/{self.content_path}/Statics/', recursive=False):
             mesh = unreal.load_asset(x)
+            mesh_materials = mesh.get_editor_property("static_materials")
             new_mesh_materials = self.get_unreal_materials(mesh)
             mesh.set_editor_property("static_materials", new_mesh_materials)
 
     def assign_static_materials(self) -> None:
         mesh = unreal.load_asset(f"/Game/{self.content_path}/Statics/{self.config['MeshName']}")
+        mesh_materials = mesh.get_editor_property("static_materials")
         new_mesh_materials = self.get_unreal_materials(mesh)
         mesh.set_editor_property("static_materials", new_mesh_materials)
 
     def assign_entity_materials(self) -> None:
         mesh = unreal.load_asset(f"/Game/{self.content_path}/{self.config['MeshName']}")
-        new_mesh_materials = self.get_unreal_materials(mesh)
+        mesh_materials = mesh.get_editor_property("materials")
+        new_mesh_materials = self.get_unreal_materials(mesh_materials)
         mesh.set_editor_property("materials", new_mesh_materials)
 
-    def get_unreal_materials(self, mesh):
+    def get_unreal_materials(self, mesh_materials):
         # Check material slots and compare names from config
-        mesh_materials = mesh.get_editor_property("static_materials")
         material_slot_name_dict = {y: unreal.load_asset(f"/Game/{self.content_path}/Materials/M_{y}") for x, y in self.config["Parts"].items()}
         new_mesh_materials = []
         for static_material in mesh_materials:
@@ -135,7 +137,7 @@ class CharmImporter:
         return new_mesh_materials
 
 
-    def import_entity_mesh(self) -> None:
+    def import_entity_mesh(self, combine) -> None:
         task = unreal.AssetImportTask()
         task.set_editor_property("automated", True)
         task.set_editor_property("destination_path", f"/Game/{self.content_path}/")
@@ -149,12 +151,9 @@ class CharmImporter:
         options.set_editor_property('import_materials', False)
         options.set_editor_property('import_as_skeletal', True)
         # todo fix this, not static mesh import data
-        options.static_mesh_import_data.set_editor_property('convert_scene', False)
-        options.static_mesh_import_data.set_editor_property('combine_meshes', False)
-        options.static_mesh_import_data.set_editor_property('generate_lightmap_u_vs', False)
-        options.static_mesh_import_data.set_editor_property('auto_generate_collision', False)
-        options.static_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
-        options.static_mesh_import_data.set_editor_property("build_nanite", False)  # todo add nanite option
+        options.skeletal_mesh_import_data.set_editor_property('convert_scene', False)
+        options.skeletal_mesh_import_data.set_editor_property('import_uniform_scale', 100.0)
+        options.skeletal_mesh_import_data.set_editor_property("vertex_color_import_option", unreal.VertexColorImportOption.REPLACE)
         task.set_editor_property("options", options)
 
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
@@ -325,7 +324,6 @@ class CharmImporter:
         tex_factory.set_editor_property('supported_class', unreal.Texture2D)
         # Only pixel shader for now, todo replace .dds with the extension
         names = [f"{self.folder_path}/Textures/{texstruct['Hash']}.dds" for i, texstruct in self.config["Materials"][matstr]["PS"].items()]
-        srgbs = {int(i): texstruct['SRGB'] for i, texstruct in self.config["Materials"][matstr]["PS"].items()}
         import_tasks = []
         for name in names:
             asset_import_task = unreal.AssetImportTask()
@@ -347,21 +345,49 @@ class CharmImporter:
             ts_LoadedTexture = unreal.EditorAssetLibrary.load_asset(ts_TextureUePath)
             if not ts_LoadedTexture:  # some cubemaps and 3d textures cannot be loaded for now
                 continue
-            ts_LoadedTexture.set_editor_property('srgb', srgbs[i])
-            if srgbs[i] == True:
-                ts_LoadedTexture.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_DEFAULT)
-            else:
-                # todo detect if normal map
-                ts_LoadedTexture.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_VECTOR_DISPLACEMENTMAP)
 
+            srgb = texstruct['SRGB']
+            ts_LoadedTexture.set_editor_property('srgb', srgb)
+
+            # todo detect if normal map
+            ts_LoadedTexture.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_DEFAULT if srgb else unreal.TextureCompressionSettings.TC_VECTOR_DISPLACEMENTMAP)
             texture_sample.set_editor_property('texture', ts_LoadedTexture)
-            if texstruct['SRGB'] == True:
-                texture_sample.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
-            else:
-                texture_sample.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+
+            texture_sample.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_COLOR if srgb else unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+
             texture_samples[i] = texture_sample
 
             unreal.EditorAssetLibrary.save_loaded_asset(ts_LoadedTexture)
+
+            dimension = texstruct["Dimension"]
+            if dimension == "3D":
+                localpos = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionMaterialFunctionCall, -1000 - 400, -500 + 250 * i)
+                localpos_function = unreal.EditorAssetLibrary.load_asset("/Engine/Functions/Engine_MaterialFunctions02/WorldPositionOffset/LocalPosition")
+                localpos.set_material_function(localpos_function)
+
+                localbounds = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionMaterialFunctionCall, -1000 - 400, -500 + 250 * i + 200)
+                localbounds_function = unreal.EditorAssetLibrary.load_asset("/Engine/Functions/Engine_MaterialFunctions02/ObjectLocalBounds")
+                localbounds.set_material_function(localbounds_function)
+
+                # subtract
+                subtract = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionSubtract, -1000 - 200, -500 + 250 * i)
+                unreal.MaterialEditingLibrary.connect_material_expressions(localpos, 'Local Position', subtract, 'A')
+                unreal.MaterialEditingLibrary.connect_material_expressions(localbounds, 'Local Bounds Minimum', subtract, 'B')
+
+                # divide
+                divide = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionDivide, -1000 - 100, -500 + 250 * i)
+                unreal.MaterialEditingLibrary.connect_material_expressions(subtract, '', divide, 'A')
+                unreal.MaterialEditingLibrary.connect_material_expressions(localbounds, 'Local Bounds Size', divide, 'B')
+
+                # connect to UV
+                unreal.MaterialEditingLibrary.connect_material_expressions(divide, '', texture_sample, 'UVs')
+
+            elif dimension == "Cube":
+                # InteriorCubemap macro connected to UV of texturesample
+                interiorcubemap = unreal.MaterialEditingLibrary.create_material_expression(material, unreal.MaterialExpressionMaterialFunctionCall, -1000 - 200, -500 + 250 * i)
+                interiorcubemap_function = unreal.EditorAssetLibrary.load_asset("/Engine/Functions/Engine_MaterialFunctions01/Cubemaps/InteriorCubemap")
+                interiorcubemap.set_material_function(interiorcubemap_function)
+                unreal.MaterialEditingLibrary.connect_material_expressions(interiorcubemap, 'UVW', texture_sample, 'UVs')
 
         return texture_samples
 

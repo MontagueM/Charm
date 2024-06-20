@@ -348,6 +348,17 @@ public struct D2Class_F39A8080
 
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D5818080", 0xa0)]
+public struct D2Class_D5818080
+{
+    public ResourceInTagPointer Unk00;
+    [SchemaField(0x38)]
+    public DynamicArray<D2Class_07008080> Unk38;
+    public DynamicArray<D2Class_07008080> Unk48;
+    public DynamicArray<D2Class_4F9F8080> Unk58;
+    public DynamicArray<D2Class_40868080> Unk68;
+}
+
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "BD068080", 0x100)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "45858080", 0x100)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "DD818080", 0x100)]
@@ -420,6 +431,16 @@ public struct D2Class_DE818080
     [SchemaField(0xD8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xF0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArrayUnloaded<D2Class_E1818080> UnkF0; // lod distance?
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D6818080", 0xC0)]
+public struct D2Class_D6818080
+{
+    [SchemaField(0x90)]
+    public DynamicArrayUnloaded<D2Class_42868080> NodeHierarchy;
+    public DynamicArrayUnloaded<D2Class_4F9F8080> DefaultInverseObjectSpaceTransforms;
+    public DynamicArrayUnloaded<D2Class_06008080> RangeIndexMap;
+    public DynamicArrayUnloaded<D2Class_06008080> InnerIndexMap;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F4048080", 0x10)]
@@ -1616,6 +1637,7 @@ public struct S40238080
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F6B8080", 0x1C0)] // TEMP (FIX ME)
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7F6B8080", 0x1C0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "95668080", 0x1E0)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "95668080", 0x1D0)]
 public struct CubemapResource //Dataresource for cubemaps
 {
     [SchemaField(0x20)]
@@ -1633,7 +1655,13 @@ public struct CubemapResource //Dataresource for cubemaps
     [SchemaField(0x190, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x190, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x1B0, TigerStrategy.DESTINY2_LATEST, Obsolete = true)]
     public StringPointer CubemapName;
+
+    [SchemaField(0x1B0, TigerStrategy.DESTINY2_LATEST)]
+    public Texture CubemapTextureUnk1B0;
+    [SchemaField(0x1B8, TigerStrategy.DESTINY2_LATEST)]
+    public Texture CubemapTextureUnk1B8;
 
     [SchemaField(0x198, TigerStrategy.DESTINY1_RISE_OF_IRON)] // TEMP (FIX ME)
     [SchemaField(0x198, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]

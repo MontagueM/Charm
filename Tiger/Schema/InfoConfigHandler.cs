@@ -50,7 +50,7 @@ public class InfoConfigHandler
         {
             if (vst.Texture != null)
             {
-                vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
+                vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb(), Dimension = vst.Texture.GetDimension()});
             }
         }
         Dictionary<int, TexInfo> pstex = new Dictionary<int, TexInfo>();
@@ -59,7 +59,7 @@ public class InfoConfigHandler
         {
             if (pst.Texture != null)
             {
-                pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
+                pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb(), Dimension = pst.Texture.GetDimension() });
             }
         }
         if (material.DyeGroup != null)
@@ -70,7 +70,7 @@ public class InfoConfigHandler
                 {
                     if (tex.Texture != null)
                     {
-                        pstex.Add((int)tex.TextureIndex, new TexInfo { Hash = tex.Texture.Hash, SRGB = tex.Texture.IsSrgb() });
+                        pstex.Add((int)tex.TextureIndex, new TexInfo { Hash = tex.Texture.Hash, SRGB = tex.Texture.IsSrgb(), Dimension = tex.Texture.GetDimension() });
                     }
                 }
             }
@@ -202,4 +202,5 @@ public struct TexInfo
 {
     public string Hash { get; set; }
     public bool SRGB { get; set; }
+    public string Dimension { get; set; }
 }

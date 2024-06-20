@@ -416,18 +416,22 @@ public struct D2Class_9F548080
 
     [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x8C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x90, TigerStrategy.DESTINY2_LATEST)]
     public StringIndexReference ItemName;  // "displayProperties" -> "name"
 
     [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x9C, TigerStrategy.DESTINY2_LATEST)]
     public StringIndexReference ItemType;  // "itemTypeDisplayName"
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0xA4, TigerStrategy.DESTINY2_LATEST)]
     public StringIndexReference ItemDisplaySource; // "displaySource"
 
     [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xB0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0xB4, TigerStrategy.DESTINY2_LATEST)]
     public StringIndexReference ItemFlavourText;  // "flavorText"
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
@@ -441,10 +445,12 @@ public struct D2Class_9F548080
     public StringHash TooltipStyle; // 'tooltipStyle' as fnv hash
 
     [SchemaField(0xE0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0xC0, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_B2548080> TooltipNotifications;
     // ive missed lots of stuff here
 
     [SchemaField(0x120, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x128, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_59238080> Unk120;
 }
 
@@ -1031,7 +1037,7 @@ public struct D2Class_C0778080
 [SchemaStruct("C3778080", 0x58)]
 public struct D2Class_C3778080
 {
-    public short SocketTypeIndex; // 'socketTypeHash' 
+    public short SocketTypeIndex; // 'socketTypeHash'
     public short Unk02;
     public short Unk04;
     public short SingleInitialItemIndex; // 'singleInitialItemHash'

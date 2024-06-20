@@ -36,6 +36,10 @@ public class Entity : Tag<SEntity>
 
     public void Load()
     {
+        if (_tag.FileSize == 0)  // hack for redacted pkgs
+        {
+            return;
+        }
         Deserialize();
         _loaded = true;
         Debug.Assert(_tag.FileSize != 0);
@@ -55,6 +59,7 @@ public class Entity : Tag<SEntity>
                     PhysicsModel = ((D2Class_6C6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).PhysicsModel;
                     break;
                 case D2Class_DD818080:  // Entity skeleton FK
+                case D2Class_D5818080:
                     Skeleton = FileResourcer.Get().GetFile<EntitySkeleton>(resource.Hash);
                     break;
                 case D2Class_668B8080:  // Entity skeleton IK  todo shadowkeep
@@ -125,6 +130,10 @@ public class Entity : Tag<SEntity>
 
     public void SaveTexturePlates(string saveDirectory)
     {
+        if (ModelParentResource == null)
+        {
+            return;
+        }
         Directory.CreateDirectory($"{saveDirectory}/Textures/");
         var parentResource = (D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader());
 
