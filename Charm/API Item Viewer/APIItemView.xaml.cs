@@ -36,7 +36,7 @@ public partial class APIItemView : UserControl
     {
         InitializeComponent();
         string name = Investment.Get().GetItemName(item);
-        string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+        string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)).TagData.ItemType.Value;
         if (type == null)
             type = "";
 
@@ -50,7 +50,7 @@ public partial class APIItemView : UserControl
             Item = item,
             ItemName = name.ToUpper(),
             ItemType = type.ToUpper(),
-            ItemFlavorText = Investment.Get().GetItemStringThing(item.TagData.InventoryItemHash).TagData.ItemFlavourText.Value.ToString(),
+            ItemFlavorText = Investment.Get().GetItemStrings(item.TagData.InventoryItemHash).TagData.ItemFlavourText.Value.ToString(),
             ItemLore = Investment.Get().GetItemLore(item.TagData.InventoryItemHash)?.LoreDescription.Value.ToString(),
             ItemSource = sourceString,
             ImageSource = image.Keys.First(),
@@ -75,7 +75,7 @@ public partial class APIItemView : UserControl
             Item = apiItem.Item,
             ItemName = apiItem.ItemName.ToUpper(),
             ItemType = apiItem.ItemType.ToUpper(),
-            ItemFlavorText = Investment.Get().GetItemStringThing(hash).TagData.ItemFlavourText.Value.ToString(),
+            ItemFlavorText = Investment.Get().GetItemStrings(hash).TagData.ItemFlavourText.Value.ToString(),
             ItemLore = Investment.Get().GetItemLore(hash)?.LoreDescription.Value.ToString(),
             ItemSource = sourceString,
             ImageSource = apiItem.ImageSource,
@@ -89,7 +89,7 @@ public partial class APIItemView : UserControl
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         Console.WriteLine($"Item {ApiItem.Item.Hash}");
-        Console.WriteLine($"Strings {Investment.Get().GetItemStringThing(ApiItem.Item.TagData.InventoryItemHash).Hash}");
+        Console.WriteLine($"Strings {Investment.Get().GetItemStrings(ApiItem.Item.TagData.InventoryItemHash).Hash}");
         Console.WriteLine($"Icons {Investment.Get().GetItemIconContainer(ApiItem.Item.TagData.InventoryItemHash).Hash}");
         if (ApiItem.ItemLore != null)
         {
@@ -128,10 +128,11 @@ public partial class APIItemView : UserControl
             return null;
 
         var item = Investment.Get().GetInventoryItem(plugIndex);
+        var strings = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
         var icon = ApiImageUtils.MakeIcon(item);
         var name = Investment.Get().GetItemName(item).ToUpper();
-        var type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value.ToString();
-        var description = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemDisplaySource.Value.ToString();
+        var type = strings.TagData.ItemType.Value.ToString();
+        var description = strings.TagData.ItemDisplaySource.Value.ToString();
         //var socketName = Investment.Get().SocketCategoryStringThings[socketIndex].SocketName.Value.ToString();
         if (name == "" && type == "" && description == "")
             return null;
@@ -966,7 +967,7 @@ public static class ApiImageUtils
     public static Dictionary<DrawingImage, ImageBrush> MakeIcon(InventoryItem item)
     {
         Dictionary<DrawingImage, ImageBrush> icon = new();
-        string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+        string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)).TagData.ItemType.Value;
         if (type is null)
             type = "";
 
@@ -976,12 +977,11 @@ public static class ApiImageUtils
         var primaryStream = item.GetIconPrimaryStream();
         var overlayStream = item.GetIconOverlayStream();
 
-
         //sometimes only the primary icon is valid
         var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
 
         // Icon dyes
-        if (item.GetIconBackgroundOverlayStream() != null && Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        if (bgOverlayStream != null && Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
             primary = MakeDyedIcon(item);
 
         var bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
@@ -1065,7 +1065,7 @@ public static class ApiImageUtils
         return null;
     }
 
-    private static BitmapImage MakeDyedIcon(InventoryItem item)
+    public static BitmapImage MakeDyedIcon(InventoryItem item)
     {
         var iconContainer = Investment.Get().GetItemIconContainer(item);
         var primaryStream = item.GetIconPrimaryStream();

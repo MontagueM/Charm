@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -10,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Tiger;
 using Tiger.Schema.Investment;
 
@@ -41,7 +43,7 @@ public partial class DareView : UserControl
         int numToDisplay = AmountBox.Text.Length > 0 ? int.Parse(AmountBox.Text) : 0;
         ConcurrentBag<ApiItem> items = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 16 };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount };
         Parallel.ForEach(_allItems.Values, parallelOptions, item =>
         {
             if (items.Count <= numToDisplay && (item.ItemName.ToLower().Contains(searchTerm)
@@ -79,7 +81,7 @@ public partial class DareView : UserControl
             //}
 
             string name = Investment.Get().GetItemName(item);
-            string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+            string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)).TagData.ItemType.Value;
 
             if (type == null)
                 type = "";
@@ -94,18 +96,16 @@ public partial class DareView : UserControl
 
                 if ((isD1 && !isOrnament && isNameNotEmpty) || (!isD1 && isNameNotEmpty && !isWeaponOrnament))
                 {
-                    var image = ApiImageUtils.MakeIcon(item);
                     var newItem = new ApiItem
                     {
                         ItemName = name,
                         ItemType = type,
                         ItemRarity = (DestinyTierType)item.TagData.ItemRarity,
                         ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
-                        ImageSource = image.Keys.First(),
                         ImageHeight = 96,
                         ImageWidth = 96,
-                        GridBackground = image.Values.First(),
-                        Item = item
+                        Item = item,
+                        IsD1 = isD1,
                     };
                     _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
                 }
@@ -240,23 +240,23 @@ public partial class DareView : UserControl
             {
                 if (item.GetArtArrangementIndex() == -1)
                     continue;
+                var strings = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
+                if (!strings.IsLoaded())
+                    strings.Load();
 
-                string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+                string? type = strings.TagData.ItemType.Value;
                 if (type == null)
                     type = "";
 
                 string name = Investment.Get().GetItemName(item);
-                var icon = ApiImageUtils.MakeIcon(item);
                 var newItem = new ApiItem
                 {
                     ItemName = name,
                     ItemType = type,
                     ItemRarity = (DestinyTierType)parent.TagData.ItemRarity,
                     ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
-                    ImageSource = icon.Keys.First(),
                     ImageHeight = 96,
                     ImageWidth = 96,
-                    GridBackground = icon.Values.First(),
                     Item = item,
                     Parent = parent
                 };
@@ -268,27 +268,11 @@ public partial class DareView : UserControl
             for (int i = 0; i < ornaments.Count; i++)
             {
                 var item = ornaments[i];
-                string? type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+                var strings = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
+
+                string? type = strings.TagData.ItemType.Value;
                 if (type == null)
                     type = "";
-
-                var bgStream = type != "Armor Ornament" ? item.GetIconBackgroundStream() : parent.GetTextureFromHash(new FileHash("1935A680"));
-                var primaryStream = type != "Armor Ornament" ? item.GetIconPrimaryStream() : parent.GetIconPrimaryStream();
-                var overlayStream = type != "Armor Ornament" ? item.GetIconOverlayStream() : parent.GetIconOverlayStream(); //parent.GetTextureFromHash(new FileHash("E1DBA580"));
-
-                var primary = primaryStream != null ? ApiImageUtils.MakeBitmapImage(primaryStream, 96, 96) : null;
-                var overlay = overlayStream != null ? ApiImageUtils.MakeBitmapImage(overlayStream, 96, 96) : null;
-
-                var group = new DrawingGroup();
-                group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
-                group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
-
-                var dw = new DrawingImage(group);
-                dw.Freeze();
-
-                var background = bgStream != null ? ApiImageUtils.MakeBitmapImage(bgStream, 512, 256) : null;
-                ImageBrush brush = new ImageBrush(background);
-                brush.Freeze();
 
                 var name = type != "Armor Ornament" ? Investment.Get().GetItemName(item) : $"{Investment.Get().GetItemName(parent)} Ornament {i + 1}";
                 var newItem = new ApiItem
@@ -297,12 +281,11 @@ public partial class DareView : UserControl
                     ItemType = type,
                     ItemRarity = (DestinyTierType)parent.TagData.ItemRarity,
                     ItemHash = item.TagData.InventoryItemHash.Hash32.ToString(),
-                    ImageSource = dw,
                     ImageHeight = 96,
                     ImageWidth = 96,
-                    GridBackground = brush,
                     Item = item,
-                    Parent = parent
+                    Parent = parent,
+                    IsD1 = true
                 };
                 _allItems.TryAdd(item.TagData.InventoryItemHash.Hash32, newItem);
             }
@@ -311,7 +294,7 @@ public partial class DareView : UserControl
 
     private bool ShouldAddToList(InventoryItem item, string type)
     {
-        var a = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)];
+        var a = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
         return ((Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON && a.TagData.ItemType.Value.ToString() == "Artifact" && item.TagData.Unk28.GetValue(a.GetReader()) is D2Class_C5738080)
             || item.GetArtArrangementIndex() != -1 || type.Contains("Shader") || type.Contains("Ghost Shell")) && (!type.Contains("Finisher") && !type.Contains("Emote") && !type.Contains("Ship Schematics"));
     }
@@ -325,9 +308,84 @@ public class ApiItem
     public string ItemHash { get; set; }
     public double ImageWidth { get; set; }
     public double ImageHeight { get; set; }
-    public System.Windows.Media.ImageSource ImageSource { get; set; }
+    public bool IsD1 { get; set; }
 
-    public System.Windows.Media.ImageBrush GridBackground { get; set; }
+    private System.Windows.Media.ImageSource _ImageSource { get; set; }
+    private System.Windows.Media.ImageBrush _GridBackground { get; set; }
+    public System.Windows.Media.ImageSource ImageSource
+    {
+        get
+        {
+            if (_ImageSource != null)
+                return _ImageSource;
+
+            UnmanagedMemoryStream? bgStream = null;
+            UnmanagedMemoryStream? primaryStream = null;
+            UnmanagedMemoryStream? overlayStream = null;
+            UnmanagedMemoryStream? bgOverlayStream = Item.GetIconBackgroundOverlayStream();
+            var group = new DrawingGroup();
+
+            if (IsD1)
+            {
+                bgStream = ItemType != "Armor Ornament" ? Item.GetIconBackgroundStream() : Parent.GetTextureFromHash(new FileHash("1935A680"));
+                primaryStream = ItemType != "Armor Ornament" ? Item.GetIconPrimaryStream() : Parent.GetIconPrimaryStream();
+                overlayStream = ItemType != "Armor Ornament" ? Item.GetIconOverlayStream() : Parent.GetIconOverlayStream(); //parent.GetTextureFromHash(new FileHash("E1DBA580"));
+            }
+            else
+            {
+                bgStream = Item.GetIconBackgroundStream();
+                primaryStream = Item.GetIconPrimaryStream();
+                overlayStream = Item.GetIconOverlayStream();
+            }
+
+            var primary = primaryStream != null ? ApiImageUtils.MakeBitmapImage(primaryStream, 96, 96) : null;
+            var overlay = overlayStream != null ? ApiImageUtils.MakeBitmapImage(overlayStream, 96, 96) : null;
+            var bg = bgStream != null ? ApiImageUtils.MakeBitmapImage(bgStream, 96, 96) : null;
+
+            if (bgOverlayStream != null && Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                primary = ApiImageUtils.MakeDyedIcon(Item);
+
+            // Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
+            var bgOverlay = bgOverlayStream != null && ItemType.Contains("Ornament") ? ApiImageUtils.MakeBitmapImage(bgOverlayStream, 96, 96) : null;
+
+            group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
+            group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+            group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
+            group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
+            var dw = new DrawingImage(group);
+            dw.Freeze();
+            _ImageSource = dw;
+            return dw;
+        }
+    }
+
+    public System.Windows.Media.ImageBrush GridBackground
+    {
+        get
+        {
+            if (_GridBackground != null)
+                return _GridBackground;
+            BitmapImage bg = null;
+            UnmanagedMemoryStream? bgStream = Item.GetIconBackgroundStream();
+            if (IsD1)
+            {
+                bgStream = ItemType != "Armor Ornament" ? bgStream : Parent.GetTextureFromHash(new FileHash("1935A680"));
+                bg = bgStream != null ? ItemType != "Armor Ornament" ?
+                    ApiImageUtils.MakeBitmapImage(bgStream, 96, 96) :
+                    ApiImageUtils.MakeBitmapImage(bgStream, 256, 128) : null;
+            }
+            else
+            {
+                bg = bgStream != null ? ApiImageUtils.MakeBitmapImage(bgStream, 96, 96) : null;
+            }
+
+            System.Windows.Media.ImageBrush brush = new System.Windows.Media.ImageBrush(bg);
+            brush.Freeze();
+            _GridBackground = brush;
+
+            return brush;
+        }
+    }
 
     public InventoryItem Item { get; set; }
     public InventoryItem Parent { get; set; }

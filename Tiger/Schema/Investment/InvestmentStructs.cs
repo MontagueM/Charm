@@ -431,7 +431,7 @@ public struct D2Class_9F548080
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xB8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0xC0, TigerStrategy.DESTINY2_LATEST)]
-    public DynamicArray<D2Class_F1598080> UnkB8;
+    public DynamicArrayUnloaded<D2Class_F1598080> UnkB8;
 
     public TigerHash UnkC8;  // "bucketTypeHash" / "equipmentSlotTypeHash"
     public TigerHash UnkCC;  // DestinySandboxPatternDefinition hash
@@ -448,7 +448,7 @@ public struct D2Class_9F548080
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x120, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x128, TigerStrategy.DESTINY2_LATEST)]
-    public DynamicArray<D2Class_59238080> Unk120;
+    public DynamicArrayUnloaded<D2Class_59238080> Unk120;
 }
 
 [SchemaStruct("D8548080", 0x88)]

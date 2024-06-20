@@ -32,6 +32,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<D2Class_095A8080> _localizedStringsIndexTag = null;
     private Dictionary<int, LocalizedStrings> _localizedStringsIndexMap = null;
     private ConcurrentDictionary<uint, InventoryItem> _inventoryItems = null;
+    private ConcurrentDictionary<uint, InventoryItem> _collectableItems = null;
     private Tag<D2Class_015A8080> _inventoryItemIconTag = null;
     // private Tag<D2Class_8C978080> _dyeManifestTag = null;
     private Tag<D2Class_C2558080> _artDyeReferenceTag = null;
@@ -205,6 +206,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         Task.WaitAll(new[]
         {
             Task.Run(GetInventoryItemDict),
+            //Task.Run(GetCollectableItemDict),
             Task.Run(GetEntityAssignmentDict),
             Task.Run(GetInventoryItemStringThings),
             Task.Run(GetSocketCategoryStrings),
@@ -229,7 +231,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public string GetItemName(TigerHash hash)
     {
-        return InventoryItemStringThings[GetItemIndex(hash)].TagData.ItemName.Value.ToString();
+        var entry = GetItemStrings(GetItemIndex(hash));
+        return entry.TagData.ItemName.Value.ToString();
     }
 
     public D2Class_D3508080? GetItemLore(TigerHash hash)
@@ -241,9 +244,16 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             return null;
     }
 
-    public Tag<D2Class_9F548080>? GetItemStringThing(TigerHash hash)
+    public Tag<D2Class_9F548080>? GetItemStrings(TigerHash hash)
     {
-        return InventoryItemStringThings[GetItemIndex(hash)];
+        var entry = InventoryItemStringThings[GetItemIndex(hash)];
+        return entry;
+    }
+
+    public Tag<D2Class_9F548080>? GetItemStrings(int index)
+    {
+        var entry = InventoryItemStringThings[index];
+        return entry;
     }
 
     public Tag<D2Class_B83E8080>? GetItemIconContainer(InventoryItem item)
@@ -255,11 +265,11 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     {
         if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            return InventoryItemStringThings[GetItemIndex(hash)].TagData.IconContainer;
+            return GetItemStrings(GetItemIndex(hash)).TagData.IconContainer;
         }
         else
         {
-            int iconIndex = InventoryItemStringThings[GetItemIndex(hash)].TagData.IconIndex;
+            int iconIndex = GetItemStrings(GetItemIndex(hash)).TagData.IconIndex;
             if (iconIndex == -1)
                 return null;
             return _inventoryItemIconTag.TagData.InventoryItemIconsMap.ElementAt(_inventoryItemIconTag.GetReader(), iconIndex).IconContainer;
@@ -279,7 +289,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public Tag<D2Class_B83E8080>? GetFoundryItemIconContainer(TigerHash hash)
     {
-        int iconIndex = InventoryItemStringThings[GetItemIndex(hash)].TagData.FoundryIconIndex;
+        int iconIndex = GetItemStrings(GetItemIndex(hash)).TagData.FoundryIconIndex;
         if (iconIndex == -1)
             return null;
         return _inventoryItemIconTag.TagData.InventoryItemIconsMap.ElementAt(_inventoryItemIconTag.GetReader(), iconIndex).IconContainer;
@@ -307,7 +317,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     private int GetStatGroupIndex(InventoryItem item)
     {
-        var stringThing = GetItemStringThing(item.TagData.InventoryItemHash);
+        var stringThing = GetItemStrings(item.TagData.InventoryItemHash);
         if (stringThing.TagData.Unk78.GetValue(stringThing.GetReader()) is D2Class_B4548080 details)
             return details.StatGroupIndex;
         else
@@ -611,6 +621,31 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return _inventoryItems.Values;
     }
 
+    public void GetCollectableItemDict()
+    {
+        _collectableItems = new ConcurrentDictionary<uint, InventoryItem>();
+
+        using TigerReader reader = _collectableDefinitionMap.GetReader();
+        for (int i = 0; i < _collectableDefinitionMap.TagData.CollectibleDefinitionEntries.Count; i++)
+        {
+            short itemIndex = _collectableDefinitionMap.TagData.CollectibleDefinitionEntries[reader, i].InventoryItemIndex;
+            var itemEntry = _inventoryItemMap.TagData.InventoryItemDefinitionEntries.ElementAt(_inventoryItemMap.GetReader(), itemIndex);
+
+            _collectableItems.TryAdd(itemEntry.InventoryItemHash, itemEntry.InventoryItem);
+        }
+    }
+
+    public async Task<IEnumerable<InventoryItem>> GetInventoryItemsFromCollectables()
+    {
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = CancellationToken.None };
+        await Parallel.ForEachAsync(_collectableItems.Values, parallelOptions, async (item, ct) =>
+        {
+            // todo needs a proper consumer queue
+            item.Load();
+        });
+        return _collectableItems.Values;
+    }
+
     public TigerHash GetArtArrangementHash(InventoryItem item)
     {
         return _artArrangementMap.TagData.ArtArrangementHashes.ElementAt(_artArrangementMap.GetReader(), item.GetArtArrangementIndex()).ArtArrangementHash;
@@ -910,7 +945,7 @@ public class InventoryItem : Tag<D2Class_9D798080>
 
     public Tag<D2Class_9F548080> GetItemStrings()
     {
-        return Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(_tag.InventoryItemHash)];
+        return Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(_tag.InventoryItemHash));
     }
 
     public int GetItemDamageTypeIndex()
@@ -928,6 +963,7 @@ public class InventoryItem : Tag<D2Class_9D798080>
 
     public int GetArtArrangementIndex()
     {
+        if (_tag.Unk90 is null) return -1;
         if (_tag.Unk90.GetValue(GetReader()) is D2Class_77738080 entry)
         {
             if (entry.Arrangements.Count > 0)
