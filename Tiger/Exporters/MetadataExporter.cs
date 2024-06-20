@@ -141,6 +141,7 @@ class MetadataScene
         var matInfo = new JsonMaterial
         {
             BackfaceCulling = material.Unk0C == 0,
+            UsedScopes = material.EnumerateScopes().Select(x => x.ToString()).ToList(),
             Textures = new Dictionary<string, Dictionary<int, TexInfo>>()
         };
 
@@ -152,7 +153,7 @@ class MetadataScene
         foreach (var vst in material.EnumerateVSTextures())
         {
             if (vst.Texture != null)
-                vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb() });
+                vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb(), Dimension = vst.Texture.GetDimension() });
         }
 
         Dictionary<int, TexInfo> pstex = new();
@@ -160,7 +161,7 @@ class MetadataScene
         foreach (var pst in material.EnumeratePSTextures())
         {
             if (pst.Texture != null)
-                pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb() });
+                pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb(), Dimension = pst.Texture.GetDimension() });
         }
     }
 
@@ -174,7 +175,7 @@ class MetadataScene
             matInfo.Textures.Add("PS", pstex);
             _config["Materials"][material] = matInfo;
         }
-        _config["Materials"][material].Textures["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb() });
+        _config["Materials"][material].Textures["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb(), Dimension = texture.GetDimension() });
     }
 
     public void AddPart(ExporterPart part, string partName)
@@ -377,6 +378,7 @@ class MetadataScene
     private struct JsonMaterial
     {
         public bool BackfaceCulling;
+        public List<string> UsedScopes;
         public Dictionary<string, Dictionary<int, TexInfo>> Textures;
     }
 }
@@ -384,5 +386,6 @@ class MetadataScene
 public struct TexInfo
 {
     public string Hash { get; set; }
+    public string Dimension { get; set; }
     public bool SRGB { get; set; }
 }

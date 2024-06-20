@@ -102,25 +102,33 @@ public class Texture : TigerReferenceFile<STextureHeader>
         }
         else
         {
-            if (TexHelper.Instance.IsCompressed(format))
+            try
             {
-                if (TexHelper.Instance.IsSRGB(format))
+                if (TexHelper.Instance.IsCompressed(format))
                 {
-                    scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.B8G8R8A8_UNORM_SRGB);
+                    if (TexHelper.Instance.IsSRGB(format))
+                    {
+                        scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.B8G8R8A8_UNORM_SRGB);
+                    }
+                    else
+                    {
+                        scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.B8G8R8A8_UNORM);
+                    }
+                }
+                else if (TexHelper.Instance.IsSRGB(format))
+                {
+                    scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0);
                 }
                 else
                 {
-                    scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.B8G8R8A8_UNORM);
+                    scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
                 }
             }
-            else if (TexHelper.Instance.IsSRGB(format))
+            catch (Exception e)
             {
-                scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0);
+                Log.Error(e.Message);
             }
-            else
-            {
-                scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
-            }
+
         }
 
         // scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, TEX_FILTER_FLAGS.RGB_COPY_RED, 0);

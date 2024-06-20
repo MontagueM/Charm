@@ -84,6 +84,7 @@ public class ExporterScene
 {
     public string Name { get; set; }
     public ExportType Type { get; set; }
+    public ConcurrentBag<ExporterMesh> TerrainMeshes = new();
     public ConcurrentBag<ExporterMesh> StaticMeshes = new();
     public ConcurrentBag<ExporterEntity> Entities = new();
     public ConcurrentDictionary<string, List<Transform>> StaticMeshInstances = new();
@@ -355,6 +356,17 @@ public class ExporterScene
             EntityInstances.TryAdd(name, new());
 
         EntityInstances[name].Add(transform);
+    }
+
+    public void AddTerrain(string meshHash, List<StaticPart> parts)
+    {
+        ExporterMesh mesh = new(meshHash);
+        for (int i = 0; i < parts.Count; i++)
+        {
+            StaticPart part = parts[i];
+            mesh.AddPart(meshHash, part, i);
+        }
+        TerrainMeshes.Add(mesh);
     }
 }
 

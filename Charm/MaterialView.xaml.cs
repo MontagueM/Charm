@@ -126,7 +126,7 @@ public partial class MaterialView : UserControl
                 Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
                 Dimension = $"Dimension: {tex.Texture.GetDimension()}",
                 Format = $"Format: {(DXGI_FORMAT)tex.Texture.TagData.Format}",
-                Dimensions = $"Texture Dimensions: {tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
+                Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
                 Texture = LoadTexture(tex.Texture)
             });
         }

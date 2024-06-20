@@ -8,50 +8,111 @@ namespace Tiger.Exporters;
 public class FbxExporter : AbstractExporter
 {
     private readonly FbxManager _manager = FbxManager.Create();
+    private ConfigSubsystem _config => ConfigSubsystem.Get();
 
     /// <summary>
     /// Must be single-threaded
     /// </summary>
     public override void Export(Exporter.ExportEventArgs args)
     {
+        bool exportIndiv = _config.GetIndvidualStaticsEnabled();
         foreach (ExporterScene scene in args.Scenes)
         {
             FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
 
+            string outputDirectory = args.OutputDirectory;
+            string outputIndivDir = outputDirectory;
+            switch (scene.Type)
+            {
+                case ExportType.Map:
+                case ExportType.Terrain:
+                case ExportType.EntityPoints:
+                    outputDirectory = Path.Join(outputDirectory, "Maps");
+                    break;
+                case ExportType.StaticInMap:
+                    outputDirectory = Path.Join(outputDirectory, "Maps", "Statics");
+                    break;
+                case ExportType.EntityInMap:
+                    outputDirectory = Path.Join(outputDirectory, "Maps", "Entities");
+                    break;
+                default:
+                    outputDirectory = Path.Join(outputDirectory, scene.Name);
+                    outputIndivDir = outputDirectory;
+                    break;
+            }
+
             foreach (ExporterMesh mesh in scene.StaticMeshes)
             {
+                if (exportIndiv)
+                {
+                    if (scene.Type == ExportType.Map)
+                    {
+                        outputIndivDir = Path.Join(outputDirectory, "Models", "Statics");
+                        FbxScene fbxIndivScene = FbxScene.Create(_manager, mesh.Hash);
+                        AddMesh(fbxIndivScene, mesh);
+                        ExportScene(fbxIndivScene, Path.Join(outputIndivDir, mesh.Hash));
+                    }
+                    if (_config.GetS2VMDLExportEnabled())
+                    {
+                        string fbxPath = scene.Type == ExportType.Map ? "Models/Statics" : "Models";
+                        Source2Handler.SaveStaticVMDL(outputIndivDir, fbxPath, mesh);
+                    }
+                }
                 AddMesh(fbxScene, mesh);
             }
+
+            foreach (ExporterEntity entity in scene.Entities)
+            {
+                if (exportIndiv)
+                {
+                    if (scene.Type == ExportType.Map)
+                    {
+                        string modelSubDirectory = scene.Name.Contains("Decorators") ? "Decorators" :
+                                                   scene.Name.Contains("SkyEnts") ? "SkyEntities" :
+                                                   "Entities";
+
+                        outputIndivDir = Path.Join(outputDirectory, "Models", modelSubDirectory);
+
+                        FbxScene fbxIndivScene = FbxScene.Create(_manager, entity.Mesh.Hash);
+                        AddEntity(fbxIndivScene, entity);
+                        ExportScene(fbxIndivScene, Path.Join(outputIndivDir, entity.Mesh.Hash));
+                    }
+
+                    if (_config.GetS2VMDLExportEnabled())
+                    {
+                        string fbxPath = "Models";
+                        if (scene.Type == ExportType.Map)
+                        {
+                            fbxPath = scene.Name.Contains("Decorators") ? "Models/Decorators" :
+                                      scene.Name.Contains("SkyEnts") ? "Models/SkyEntities" :
+                                      "Models/Entities";
+                        }
+
+                        Source2Handler.SaveEntityVMDL(outputIndivDir, fbxPath, entity);
+                    }
+                }
+                AddEntity(fbxScene, entity);
+            }
+            // TODO: TerrainMeshes is kinda dumb just for individual exports
+            if (exportIndiv)
+            {
+                foreach (ExporterMesh mesh in scene.TerrainMeshes)
+                {
+                    outputIndivDir = Path.Join(outputDirectory, "Models", "Terrain");
+                    FbxScene fbxIndivScene = FbxScene.Create(_manager, mesh.Hash);
+                    AddMesh(fbxIndivScene, mesh);
+                    ExportScene(fbxIndivScene, Path.Join(outputIndivDir, mesh.Hash));
+                }
+            }
+
+
             foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
             {
                 AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
             }
-            foreach (ExporterEntity entity in scene.Entities)
-            {
-                AddEntity(fbxScene, entity);
-            }
-
             foreach (var p in scene.EntityPoints)
             {
                 AddDynamicPoint(fbxScene, p);
-            }
-
-            string outputDirectory = args.OutputDirectory;
-            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
-            {
-                outputDirectory = Path.Join(outputDirectory, scene.Name);
-            }
-            else if (scene.Type is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
-            {
-                outputDirectory = Path.Join(outputDirectory, "Maps");
-            }
-            else if (scene.Type is ExportType.StaticInMap)
-            {
-                outputDirectory = Path.Join(outputDirectory, "Maps", "Statics");
-            }
-            else if (scene.Type is ExportType.EntityInMap)
-            {
-                outputDirectory = Path.Join(outputDirectory, "Maps", "Entities");
             }
 
             ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));

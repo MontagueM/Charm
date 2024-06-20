@@ -14,35 +14,23 @@ public class Terrain : Tag<STerrain>
     }
 
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool bSaveShaders, bool exportStatic = false)
+    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool bSaveShaders)
     {
+        var _config = ConfigSubsystem.Get();
+        var _exportIndiv = _config.GetIndvidualStaticsEnabled();
+
         // Uses triangle strip + only using first set of vertices and indices
         Dictionary<StaticPart, IMaterial> parts = new Dictionary<StaticPart, IMaterial>();
         List<Texture> dyeMaps = new List<Texture>();
-        foreach (var partEntry in _tag.StaticParts)
-        {
-            if (partEntry.DetailLevel == 0)
-            {
-                if ((partEntry.Material is null || partEntry.Material.VertexShader is null) && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-                    continue;
-
-                var part = MakePart(partEntry);
-                parts.TryAdd(part, partEntry.Material);
-
-                scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
-                part.Material = partEntry.Material;
-
-                if (exportStatic) //Need access to material early, before scene system exports
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders", true);
-            }
-        }
 
         int terrainTextureIndex = 14;
         Texture lastValidEntry = null;
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
-            var partEntry = _tag.MeshGroups[i];
-            if (partEntry.Dyemap == null)
+            var meshGroup = _tag.MeshGroups[i];
+            // Check if the current Dyemap is null
+
+            if (meshGroup.Dyemap == null)
             {
                 if (lastValidEntry != null)
                 {
@@ -52,7 +40,7 @@ public class Terrain : Tag<STerrain>
                 }
                 else // Use the first valid dyemap if it gets to this point
                 {
-                    var firstValidDyemap = _tag.MeshGroups.FirstOrDefault(x => x.Dyemap != null).Dyemap;
+                    var firstValidDyemap = _tag.MeshGroups.First(x => x.Dyemap != null).Dyemap;
                     if (firstValidDyemap != null)
                     {
                         scene.Textures.Add(firstValidDyemap);
@@ -63,33 +51,51 @@ public class Terrain : Tag<STerrain>
             else
             {
                 // Update lastValidEntry with the current Dyemap
-                lastValidEntry = partEntry.Dyemap;
-                scene.Textures.Add(partEntry.Dyemap);
-                dyeMaps.Add(partEntry.Dyemap);
+                lastValidEntry = meshGroup.Dyemap;
+                scene.Textures.Add(meshGroup.Dyemap);
+                dyeMaps.Add(meshGroup.Dyemap);
             }
-        }
 
-        foreach (var part in parts)
-        {
-            TransformPositions(part.Key);
-            TransformTexcoords(part.Key);
-            TransformVertexColors(part.Key);
-        }
-
-        scene.AddStatic(Hash, parts.Keys.ToList());
-        // For now we pre-transform it
-        if (!exportStatic)
-        {
-            scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
-
-            for (int i = 0; i < dyeMaps.Count; i++)
+            foreach (var partEntry in _tag.StaticParts.Where(x => x.GroupIndex == i))
             {
-                scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
+                // MainGeom0 LOD0, GripStock0 LOD1, Stickers0 LOD2?
+                if ((ELodCategory)partEntry.DetailLevel == ELodCategory.MainGeom0)
+                {
+                    if (partEntry.Material != null || partEntry.Material.VertexShader != null)
+                    {
+                        var part = MakePart(partEntry);
+
+                        scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
+                        part.Material = partEntry.Material;
+
+                        TransformPositions(part);
+                        TransformTexcoords(part);
+                        TransformVertexColors(part);
+
+                        if (_config.GetS2VMATExportEnabled() && _exportIndiv)
+                            Source2Handler.SaveVMAT(saveDirectory, $"{part.Material.FileHash}", part.Material, dyeMaps);
+
+                        parts.TryAdd(part, partEntry.Material);
+                    }
+                }
             }
+
+            scene.AddStatic($"{Hash}", parts.Keys.ToList());
+
+            if (_exportIndiv)
+                scene.AddTerrain($"{Hash}_{i}", parts.Keys.ToList());
+
+            if (_config.GetS2VMDLExportEnabled() && _exportIndiv)
+                Source2Handler.SaveTerrainVMDL($"{Hash}_{i}", saveDirectory, parts.Keys.ToList());
+
+            parts.Clear();
         }
 
-        if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2VMDLExportEnabled())
-            Source2Handler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
+        scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
+        for (int i = 0; i < dyeMaps.Count; i++)
+        {
+            scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
+        }
     }
 
     public StaticPart MakePart(SStaticPart entry)

@@ -160,7 +160,7 @@ public enum TfxFeatureRenderer
     Cubemaps = 26,
 }
 
-public enum TfxScopes
+public enum TfxScope
 {
     FRAME,
     VIEW,

@@ -10,6 +10,7 @@ public class MaterialExporter : AbstractExporter
         ConcurrentHashSet<Texture> mapTextures = new();
         ConcurrentHashSet<ExportMaterial> mapMaterials = new();
         bool saveShaders = ConfigSubsystem.Get().GetUnrealInteropEnabled() || ConfigSubsystem.Get().GetS2ShaderExportEnabled();
+        bool saveIndiv = ConfigSubsystem.Get().GetIndvidualStaticsEnabled();
 
         Parallel.ForEach(args.Scenes, scene =>
         {
@@ -82,7 +83,7 @@ public class MaterialExporter : AbstractExporter
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
         }
 
-        if (saveShaders)
+        if (saveShaders && saveIndiv)
         {
             string shaderSaveDirectory = $"{args.OutputDirectory}/Maps/Shaders";
             Directory.CreateDirectory(shaderSaveDirectory);

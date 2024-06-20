@@ -379,11 +379,11 @@ public partial class ActivityMapEntityView : UserControl
 
         Directory.CreateDirectory(savePath);
         ExtractDataTables(dataTables, hash, savePath);
-        if (_config.GetIndvidualStaticsEnabled())
-        {
-            Directory.CreateDirectory(savePath + "/Entities");
-            ExportIndividual(dataTables, hash, savePath);
-        }
+        //if (_config.GetIndvidualStaticsEnabled())
+        //{
+        //    Directory.CreateDirectory(savePath + "/Entities");
+        //    ExportIndividual(dataTables, hash, savePath);
+        //}
 
         if (_config.GetUnrealInteropEnabled())
         {
@@ -524,72 +524,62 @@ public partial class ActivityMapEntityView : UserControl
         });
     }
 
-    private static void ExportIndividual(List<FileHash> dataTables, string hash, string savePath)
-    {
-        Parallel.ForEach(dataTables, data =>
-        {
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && data.GetReferenceHash().Hash32 == 0x808003F6)
-            {
-                var dataEntries = FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityResource.CollapseIntoDataEntry();
-                foreach (var entry in dataEntries)
-                {
-                    Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                    if (entity.HasGeometry())
-                    {
-                        ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
-                        dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
-                        entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
+    //private static void ExportIndividual(List<FileHash> dataTables, string hash, string savePath)
+    //{
+    //    Parallel.ForEach(dataTables, data =>
+    //    {
+    //        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && data.GetReferenceHash().Hash32 == 0x808003F6)
+    //        {
+    //            var dataEntries = FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityResource.CollapseIntoDataEntry();
+    //            foreach (var entry in dataEntries)
+    //            {
+    //                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
+    //                if (entity.HasGeometry())
+    //                {
+    //                    ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
+    //                    dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
+    //                    entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
+    //                }
+    //            }
+    //        }
+    //        else
+    //        {
+    //            var dataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
+    //            dataTable.TagData.DataEntries.ForEach(entry =>
+    //            {
+    //                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
+    //                if (entity.HasGeometry())
+    //                {
+    //                    ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
+    //                    dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
+    //                    entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
+    //                }
+    //                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
+    //                {
+    //                    foreach (var element in skyResource.SkyEntities.TagData.Entries)
+    //                    {
+    //                        if (element.Model.TagData.Model is null)
+    //                            continue;
 
-                        if (_config.GetS2VMDLExportEnabled())
-                        {
-                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var dataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
-                dataTable.TagData.DataEntries.ForEach(entry =>
-                {
-                    Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-                    if (entity.HasGeometry())
-                    {
-                        ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
-                        dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
-                        entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
+    //                        ExporterScene skyScene = Exporter.Get().CreateScene(element.Model.TagData.Model.Hash, ExportType.EntityInMap);
+    //                        skyScene.AddModel(element.Model.TagData.Model);
 
-                        if (_config.GetS2VMDLExportEnabled())
-                        {
-                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
-                        }
-                    }
-                    if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
-                    {
-                        foreach (var element in skyResource.SkyEntities.TagData.Entries)
-                        {
-                            if (element.Model.TagData.Model is null)
-                                continue;
-
-                            ExporterScene skyScene = Exporter.Get().CreateScene(element.Model.TagData.Model.Hash, ExportType.EntityInMap);
-                            skyScene.AddModel(element.Model.TagData.Model);
-
-                            if (_config.GetS2VMDLExportEnabled())
-                            {
-                                Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Model.TagData.Model.Hash, element.Model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null));
-                            }
-                        }
-                    }
-                    if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
-                    {
-                        ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.Load();
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
-                    }
-                });
-            }
-        });
-    }
+    //                        if (_config.GetS2VMDLExportEnabled())
+    //                        {
+    //                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Model.TagData.Model.Hash, element.Model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null));
+    //                        }
+    //                    }
+    //                }
+    //                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
+    //                {
+    //                    ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
+    //                    terrainArrangement.Terrain.Load();
+    //                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
+    //                }
+    //            });
+    //        }
+    //    });
+    //}
 
     private async void EntityMapView_OnClick(object sender, RoutedEventArgs e)
     {

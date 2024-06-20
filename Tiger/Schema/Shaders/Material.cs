@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Arithmic;
 using Tiger.Exporters;
 
 namespace Tiger.Schema.Shaders
@@ -72,7 +73,7 @@ namespace Tiger.Schema.Shaders
         public IEnumerable<STextureTag> EnumerateCSTextures();
         public ShaderBytecode? ComputeShader { get; }
 
-        public IEnumerable<TfxScopes> EnumerateScopes();
+        public IEnumerable<TfxScope> EnumerateScopes();
 
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
@@ -146,58 +147,55 @@ namespace Tiger.Schema.Shaders
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
                 string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
                 string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
-                string vfx = Source2Handler.source2Shaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
-
-                Directory.CreateDirectory($"{saveDirectory}/Unreal");
-                if (Source2Handler.source2Shaders)
-                {
-                    Directory.CreateDirectory($"{saveDirectory}/Source2");
-                    Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
-                }
+                string vfx = _config.GetS2ShaderExportEnabled() ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex) : "";
 
                 try
                 {
                     if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{FileHash}.usf"))
                     {
+                        Directory.CreateDirectory($"{saveDirectory}/Unreal");
                         File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
                     }
-                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader"))
+                    if (vfx != String.Empty)
                     {
+                        Directory.CreateDirectory($"{saveDirectory}/Source2");
+                        Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
+
                         File.WriteAllText($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader", vfx);
+                        if (!isTerrain)
+                            Source2Handler.SaveVMAT(saveDirectory, FileHash, this);
                     }
                 }
-                catch (IOException)  // threading error
+                catch (IOException e)  // threading error
                 {
+                    Log.Error(e.Message);
                 }
-
-                //Need to save vmat after shader has be exported, to check if it exists
-                if (Source2Handler.source2Shaders)
-                    Source2Handler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
             }
         }
 
+        // TODO: do this properly
         public void SaveVertexShader(string saveDirectory)
         {
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-                return;
+            //if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            //    return;
 
-            Directory.CreateDirectory($"{saveDirectory}");
-            if (VertexShader != null && VertexShader.Hash.IsValid())
-            {
-                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
-                if (usf != String.Empty)
-                {
-                    try
-                    {
-                        File.WriteAllText($"{saveDirectory}/VS_{FileHash}.usf", usf);
-                        //Console.WriteLine($"Saved vertex shader {FileHash}");
-                    }
-                    catch (IOException) // threading error
-                    {
-                    }
-                }
-            }
+            //Directory.CreateDirectory($"{saveDirectory}");
+            //if (VertexShader != null && VertexShader.Hash.IsValid())
+            //{
+            //    string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
+            //    string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
+            //    if (usf != String.Empty)
+            //    {
+            //        try
+            //        {
+            //            File.WriteAllText($"{saveDirectory}/VS_{FileHash}.usf", usf);
+            //            //Console.WriteLine($"Saved vertex shader {FileHash}");
+            //        }
+            //        catch (IOException) // threading error
+            //        {
+            //        }
+            //    }
+            //}
         }
 
         //Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
@@ -306,11 +304,11 @@ namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
             yield return new();
         }
 
-        public IEnumerable<TfxScopes> EnumerateScopes()
+        public IEnumerable<TfxScope> EnumerateScopes()
         {
             foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
             {
-                if (Enum.TryParse(scopeBit.ToString(), out TfxScopes scope))
+                if (Enum.TryParse(scopeBit.ToString(), out TfxScope scope))
                     yield return scope;
                 else
                     throw new Exception($"Unknown scope value {scope.ToString()}");
@@ -370,11 +368,11 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
             }
         }
 
-        public IEnumerable<TfxScopes> EnumerateScopes()
+        public IEnumerable<TfxScope> EnumerateScopes()
         {
             foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
             {
-                if (Enum.TryParse(scopeBit.ToString(), out TfxScopes scope))
+                if (Enum.TryParse(scopeBit.ToString(), out TfxScope scope))
                     yield return scope;
                 else
                     throw new Exception($"Unknown scope value {scope.ToString()}");
@@ -434,11 +432,11 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
             }
         }
 
-        public IEnumerable<TfxScopes> EnumerateScopes()
+        public IEnumerable<TfxScope> EnumerateScopes()
         {
             foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
             {
-                if (Enum.TryParse(scopeBit.ToString(), out TfxScopes scope))
+                if (Enum.TryParse(scopeBit.ToString(), out TfxScope scope))
                     yield return scope;
                 else
                     throw new Exception($"Unknown scope value {scope.ToString()}");

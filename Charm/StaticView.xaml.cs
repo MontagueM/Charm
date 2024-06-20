@@ -50,7 +50,6 @@ public partial class StaticView : UserControl
         ExporterScene scene = Exporter.Get().CreateScene(name, ExportType.Static);
         bool lodexport = false;
         ConfigSubsystem config = ConfigSubsystem.Get();
-        bool source2Models = config.GetS2VMDLExportEnabled();
 
         string savePath = config.GetExportSavePath() + "/" + extraPath + "/";
         string meshName = hash;
@@ -69,11 +68,6 @@ public partial class StaticView : UserControl
             if (config.GetUnrealInteropEnabled())
             {
                 AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Static, config.GetOutputTextureFormat());
-            }
-
-            if (source2Models)
-            {
-                Source2Handler.SaveStaticVMDL($"{savePath}", meshName, parts);
             }
         }
 
