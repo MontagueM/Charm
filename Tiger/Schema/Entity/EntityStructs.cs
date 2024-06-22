@@ -1406,18 +1406,18 @@ public struct D2Class_138C8080
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    public WwiseSound SoundD1;
+    public FileHash DataD1;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
-    public WwiseSound SoundD2;
+    public FileHash DataD2; // Can be WwiseSound or pattern entity
 
-    public WwiseSound GetSound()
+    public FileHash GetData()
     {
         if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-            return SoundD1;
+            return DataD1;
         else
-            return SoundD2;
+            return DataD2;
     }
 }
 
@@ -1594,7 +1594,7 @@ public struct D2Class_F1918080
 {
     [SchemaField(0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public ResourcePointer Unk10;
+    public ResourcePointer Unk10; // B9678080, 40668080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "001F8080", 0x54)]
@@ -1618,6 +1618,42 @@ public struct D2Class_40668080
         else
             return SoundD2;
     }
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B9678080", 0x110)]
+public struct D2Class_B9678080
+{
+    [SchemaField(0x28)]
+    public DynamicArray<D2Class_BB678080> Unk28;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BB678080", 0x18)]
+public struct D2Class_BB678080
+{
+    [SchemaField(0x10)]
+    public Tag<D2Class_20698080> FXContainer;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "20698080", 0x40)]
+public struct D2Class_20698080
+{
+    [SchemaField(0x18)]
+    public IMaterial UnkMat;
+    [SchemaField(0x20), Tag64]
+    public Tag<D2Class_29698080> ModelContainer;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "29698080", 0x18)]
+public struct D2Class_29698080
+{
+    [SchemaField(0x10)]
+    public DynamicArray<D2Class_066F8080> Models;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "066F8080", 4)]
+public struct D2Class_066F8080
+{
+    public EntityModel Model;
 }
 
 [SchemaStruct("72818080", 0x18)]

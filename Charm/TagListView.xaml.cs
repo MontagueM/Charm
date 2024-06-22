@@ -1883,12 +1883,13 @@ public partial class TagListView : UserControl
             {
                 foreach (var s in audio.Sounds)
                 {
-                    if (s.GetSound() == null)
+                    var sound = FileResourcer.Get().GetFile<WwiseSound>(s.GetData());
+                    if (sound == null)
                         continue;
 
                     _allTagItems.Add(new TagItem
                     {
-                        Hash = s.GetSound().Hash,
+                        Hash = sound.Hash,
                         Name = s.WwiseEventName,
                         Subname = audio.WwiseEventHash,
                         TagType = ETagListType.WeaponAudio

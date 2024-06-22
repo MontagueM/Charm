@@ -49,7 +49,8 @@ public partial class DareView : UserControl
             if (items.Count <= numToDisplay && (item.ItemName.ToLower().Contains(searchTerm)
             || item.ItemHash.Contains(searchTerm)
             || item.ItemType.ToLower().Contains(searchTerm)
-            || item.ItemRarity.ToString().ToLower().Contains(searchTerm)))
+            || item.ItemRarity.ToString().ToLower().Contains(searchTerm))
+            || (item.Parent != null && item.Parent.GetItemName().ToLower().Contains(searchTerm)))
             {
                 items.Add(item);
             }
@@ -122,7 +123,13 @@ public partial class DareView : UserControl
         if (_allItems.TryRemove(apiItem.Item.TagData.InventoryItemHash.Hash32, out _))
         {
             _selectedItems.Add(apiItem);
-            //System.Console.WriteLine($"{Investment.Get().GetItemIconContainer(apiItem.Item).Hash}");
+
+            //foreach (var a in Investment.Get().GetEntitiesFromHash(apiItem.Item.TagData.InventoryItemHash))
+            //{
+            //    if (a is null)
+            //        continue;
+            //    Console.WriteLine($"{a.Hash}");
+            //}
         }
         else
         {
@@ -294,9 +301,27 @@ public partial class DareView : UserControl
 
     private bool ShouldAddToList(InventoryItem item, string type)
     {
+        string[] blacklist = new[]
+        {
+            "Ghost Projection",
+            "Emote",
+            "Finisher",
+            "Ship Schematics"
+        };
+
+        string[] whitelist = new[]
+        {
+            // TODO: Add emotes and ghost projections for fx mesh exporting
+            "Shader",
+        };
+
         var a = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
         return ((Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON && a.TagData.ItemType.Value.ToString() == "Artifact" && item.TagData.Unk28.GetValue(a.GetReader()) is D2Class_C5738080)
-            || item.GetArtArrangementIndex() != -1 || type.Contains("Shader") || type.Contains("Ghost Shell")) && (!type.Contains("Finisher") && !type.Contains("Emote") && !type.Contains("Ship Schematics"));
+            || item.GetArtArrangementIndex() != -1 ||
+            // Whitelist
+            whitelist.Any(x => type.ToLower().Contains(x.ToLower()))) &&
+            // Blacklist
+            !blacklist.Any(x => type.ToLower().Contains(x.ToLower()));
     }
 }
 

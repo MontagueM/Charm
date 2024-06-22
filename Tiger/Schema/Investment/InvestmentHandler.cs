@@ -948,6 +948,11 @@ public class InventoryItem : Tag<D2Class_9D798080>
         return Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(_tag.InventoryItemHash));
     }
 
+    public string GetItemName()
+    {
+        return Investment.Get().GetItemName(this);
+    }
+
     public int GetItemDamageTypeIndex()
     {
         if (_tag.Unk78.GetValue(GetReader()) is D2Class_81738080 perks)

@@ -72,8 +72,7 @@
             FontSize="14"
             Foreground="{StaticResource ForegroundColour100}"
             Text="{Binding ItemType}"
-            TextAlignment="Left"
-            TextWrapping="Wrap" />
+            TextAlignment="Left" />
         <TextBlock
             Grid.Row="2"
             Grid.Column="1"
