@@ -105,6 +105,26 @@ public static class Helpers
         var pattern = @"[^a-zA-Z0-9 ]";
         return Regex.Replace(input, pattern, replacement).Trim();
     }
+
+    public static byte[] HexStringToByteArray(string hex)
+    {
+        // Ensure the string length is even
+        if (hex.Length % 2 != 0)
+        {
+            throw new ArgumentException("The hexadecimal string must have an even length.");
+        }
+
+        // Create a byte array with half the length of the hexadecimal string
+        byte[] bytes = new byte[hex.Length / 2];
+
+        for (int i = 0; i < hex.Length; i += 2)
+        {
+            // Parse each pair of hexadecimal characters
+            bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+        }
+
+        return bytes;
+    }
 }
 
 public static class NestedTypeHelpers

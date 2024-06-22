@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Globalization;
 using Arithmic;
 using ConcurrentCollections;
 using Tiger.Schema;
@@ -15,6 +16,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     private PackagePathsCache? _packagePathsCache;
     private Dictionary<uint, string> _activityNames = new();
     private Dictionary<FileHash, TagClassHash> _d1NamedTags = new();
+    private Dictionary<ulong, Dictionary<byte[], byte[]>> _keys = new();
 
     public PackagePathsCache PackagePathsCache
     {
@@ -25,6 +27,18 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
                 throw new NullReferenceException("PackagePathsCache has not been initialized.");
             }
             return _packagePathsCache;
+        }
+    }
+
+    public Dictionary<ulong, Dictionary<byte[], byte[]>> Keys
+    {
+        get
+        {
+            if (_keys == null)
+            {
+                throw new NullReferenceException("Package Keys have not been loaded");
+            }
+            return _keys;
         }
     }
 
@@ -40,6 +54,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         _packagePathsCache = new PackagePathsCache(_strategy);
         LoadAllPackages();
+        LoadPackageKeys();
         CacheAllActivityNames();
 
         if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
@@ -50,6 +65,48 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         _packagesCache.Clear();
         _packagePathsCache = new PackagePathsCache(_strategy);
+    }
+
+    /// <summary>
+    /// Loads keys for redacted packages from the keys.txt (if it exists) in the Charm folder 
+    /// </summary>
+    /// <returns>IPackage object, type determined by the selected strategy.</returns>
+    public void LoadPackageKeys()
+    {
+        if (!File.Exists("./keys.txt"))
+            return;
+
+        string[] txt = File.ReadAllLines("./keys.txt");
+        foreach (var entry in txt)
+        {
+            try
+            {
+                // Split the entry by ':' and trim any whitespace
+                var parts = entry.Split(':');
+                if (parts.Length < 3)
+                {
+                    Log.Error($"Invalid key entry format: {entry}");
+                    continue;
+                }
+
+                var pkgGroup = ulong.Parse(parts[0].Trim(), NumberStyles.HexNumber);
+                var key = Helpers.HexStringToByteArray(parts[1].Trim());
+                var nonce = Helpers.HexStringToByteArray(parts[2].Split("//")[0].Trim());
+
+                if (!_keys.ContainsKey(pkgGroup))
+                    _keys[pkgGroup] = new Dictionary<byte[], byte[]>();
+
+                var keyDict = _keys[pkgGroup];
+                if (!keyDict.ContainsKey(key))
+                    keyDict[key] = nonce;
+                else
+                    Log.Error($"Duplicate key for package group {pkgGroup:X}: {entry}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Error processing entry: {entry}\n{ex.Message}");
+            }
+        }
     }
 
     /// <summary>

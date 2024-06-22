@@ -5,6 +5,8 @@ namespace Tiger.DESTINY2_BEYONDLIGHT_3402;
 [StructLayout(LayoutKind.Explicit)]
 public struct PackageHeader : IPackageHeader
 {
+    [FieldOffset(0x8)]
+    public ulong PackageGroup;
     [FieldOffset(0x10)]
     public ushort PackageId;
     [FieldOffset(0x20)]
@@ -27,6 +29,11 @@ public struct PackageHeader : IPackageHeader
     public uint Hash64TableSize;
     [FieldOffset(0xBC)]
     public uint Hash64TableOffset;
+
+    public ulong GetPackageGroup()
+    {
+        return PackageGroup;
+    }
 
     public ushort GetPackageId()
     {

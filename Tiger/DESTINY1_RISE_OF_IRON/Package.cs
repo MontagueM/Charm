@@ -24,6 +24,11 @@ public struct PackageHeader : IPackageHeader
     [SchemaField(0xF0)]
     public uint NamedTagTableOffset;
 
+    public ulong GetPackageGroup()
+    {
+        return 0;
+    }
+
     public ushort GetPackageId()
     {
         return PackageId;

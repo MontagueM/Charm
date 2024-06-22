@@ -26,6 +26,11 @@ public struct PackageHeaderOld : IPackageHeader
     [SchemaField(0xF4)]
     public uint MiscTableDataSize;
 
+    public ulong GetPackageGroup()
+    {
+        return 0;
+    }
+
     public ushort GetPackageId()
     {
         return PackageId;
@@ -121,6 +126,11 @@ public struct PackageHeaderNew : IPackageHeader
     public GlobalPointer<SPackageTablesData> PackageTablesData;
     [SchemaField(0x114)]
     public uint PackageTablesDataSize;
+
+    public ulong GetPackageGroup()
+    {
+        return 0;
+    }
 
     public ushort GetPackageId()
     {
