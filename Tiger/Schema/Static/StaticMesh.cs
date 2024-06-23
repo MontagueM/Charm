@@ -1,5 +1,5 @@
-﻿
-using Tiger.Exporters;
+﻿using Tiger.Exporters;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 
@@ -93,6 +93,9 @@ public class StaticMesh : Tag<SStaticMesh>
         List<StaticPart> parts = new List<StaticPart>();
         foreach (var decalPartEntry in _tag.Decals)
         {
+            if (!VertexLayouts.ExportRenderStages.Contains((TfxRenderStage)decalPartEntry.RenderStage))
+                continue;
+
             if (detailLevel == ExportDetailLevel.MostDetailed)
             {
                 if (decalPartEntry.LODLevel != 1 && decalPartEntry.LODLevel != 2 && decalPartEntry.LODLevel != 10)

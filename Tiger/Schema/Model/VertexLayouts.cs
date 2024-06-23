@@ -27,6 +27,7 @@ public static class VertexLayouts
         TfxRenderStage.InvestmentDecals,
         TfxRenderStage.DecalsAdditive,
         TfxRenderStage.Transparents,
+        TfxRenderStage.Distortion
         //TfxRenderStage.Reticle
     };
 

@@ -135,7 +135,7 @@ PS
         outputs = material.PixelShader.OutputSignatures;
         resources = material.PixelShader.Resources;
 
-        bTranslucent = outputs.Count == 1 || scopes.Contains(TfxScope.TRANSPARENT) || scopes.Contains(TfxScope.TRANSPARENT_ADVANCED);
+        bTranslucent = outputs.Count == 1 || scopes.Contains(TfxScope.TRANSPARENT) || scopes.Contains(TfxScope.TRANSPARENT_ADVANCED) || scopes.Contains(TfxScope.DECAL);
         isTerrain = scopes.Contains(TfxScope.TERRAIN);
 
         //ProcessHlslData();
@@ -149,7 +149,7 @@ PS
                 continue;
 
             var sampler = material.PS_Samplers[i].Sampler;
-            texSamples.AppendLine($"\tSamplerState s_s{i + 1} < Filter({sampler.Filter}); AddressU({sampler.AddressU}); AddressV({sampler.AddressV}); AddressW({sampler.AddressW}); ComparisonFunc({sampler.ComparisonFunc}); MaxAniso({sampler.MaxAnisotropy}); >;");
+            texSamples.AppendLine($"\tSamplerState s{i + 1}_s < Filter({sampler.Filter}); AddressU({sampler.AddressU}); AddressV({sampler.AddressV}); AddressW({sampler.AddressW}); ComparisonFunc({sampler.ComparisonFunc}); MaxAniso({sampler.MaxAnisotropy}); >;");
         }
 
         vfxStructure = vfxStructure.Replace("//ps_samplers", texSamples.ToString());
@@ -272,7 +272,7 @@ PS
                 }
             }
 
-            if (isTerrain) //Terrain has 4 dyemaps per shader, from what ive seen
+            if (isTerrain)
             {
                 funcDef.AppendLine($"\tTexture2D g_t14 < Attribute( \"TerrainDyemap\" ); SrgbRead( false ); >;\r\n\n");
             }
@@ -352,7 +352,7 @@ PS
                         var dotAfter = line.Split(").")[1];
                         // todo add dimension
 
-                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= Tex2DS(g_t{texIndex}, s_s{sampleIndex}, {sampleUv}).{dotAfter}");
+                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= Tex2DS(g_t{texIndex}, s{sampleIndex}_s, {sampleUv}).{dotAfter}");
                     }
                     else if (line.Contains("Load"))
                     {
@@ -490,6 +490,8 @@ PS
                     {
                         var equal = line.Split("=")[0];
                         var equal_post = line.Split("=")[1];
+                        var equal_tex_post = equal_post.Substring(equal_post.IndexOf(".") + 1);
+
                         var texIndex = Int32.Parse(line.Split(".Sample")[0].Split("t")[1]);
                         var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
                         var sampleUv = line.Split(", ")[1].Split(").")[0];
@@ -520,7 +522,7 @@ PS
 
                         if (texIndex == 14 && isTerrain) // Terrain dyemap, not defined in the material itself
                         {
-                            funcDef.AppendLine($"\t\t{equal.TrimStart()} = g_t{texIndex}.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}");
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()} = g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
                         }
                         else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) // Some kind of buffer texture or not defined in the material
                         {
@@ -528,21 +530,27 @@ PS
                             {
                                 case 10: // Depth buffer
                                     bUsesDepthBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::Get({sampleUv}).xxxx; //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= 1-Depth::Get({sampleUv}).xxxx; //{equal_post}");
                                     break;
-                                case 11:
+                                case 11: // Atmostsphere lookup textures, useless in s&box
                                 case 13:
-                                case 23: // Framebuffer? Usually uses SampleLevel but shouldnt be an issue?
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
+                                    break;
+                                case 20: // Framebuffer
+                                case 23: // Unsure
                                     bUsesFrameBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter} //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.{equal_tex_post}");//.SampleLevel(s_s{sampleIndex}, {sampleUv}).{dotAfter} //{equal_post}");
                                     break;
                                 case 15:
-                                case 20: // Unknown
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.3137,0.3137,0.3137,0.3137).{dotAfter} //{equal_post}");
+                                case 16:
+                                case 17:
+                                case 18:
+                                case 19: // Gray textures
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.55078,0.55078,0.55078,0.55078).{dotAfter} //{equal_post}");
                                     break;
-                                case 0:
-                                case 21: // Unknown
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.1882,0.1882,0.1882,0.1882).{dotAfter} //{equal_post}");
+                                case 0: // Unknown
+                                case 21: // Black texture
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
                                     break;
                                 default: // Unknown
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.5,0.5,0.5,0.5).{dotAfter} //{equal_post}");
@@ -551,7 +559,7 @@ PS
                         }
                         else // Textures defined by the material
                         {
-                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s_s{sampleIndex}, {sampleUv}).{dotAfter}");
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
                         }
                     }
                     else if (line.Contains("CalculateLevelOfDetail"))
@@ -561,7 +569,7 @@ PS
                         var sampleIndex = Int32.Parse(line.Split("(s")[1].Split("_s,")[0]);
                         var sampleUv = line.Split(", ")[1].Split(")")[0];
 
-                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.CalculateLevelOfDetail(s_s{sampleIndex}, {sampleUv});");
+                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.CalculateLevelOfDetail(s{sampleIndex}_s, {sampleUv});");
                     }
                     else if (line.Contains("Load"))
                     {
@@ -581,7 +589,7 @@ PS
                                     break;
                                 case 10:
                                     bUsesDepthBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::Get({sampleUv}).xxxx; //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= 1-Depth::Get({sampleUv}).xxxx; //{equal_post}");
                                     break;
                                 case 11:
                                 case 13:
@@ -703,7 +711,7 @@ PS
         viewScope.AppendLine($"\t\tfloat4(0,0,1,0),");
         viewScope.AppendLine($"\t\tfloat4(-100,-100,-100,1),");
 
-        viewScope.AppendLine($"\t\tfloat4(g_vFrameBufferCopyInvSizeAndUvScale.xy, 1/g_vFrameBufferCopyInvSizeAndUvScale.xy),"); //12
+        viewScope.AppendLine($"\t\tfloat4(g_vFrameBufferCopyInvSizeAndUvScale.xy, g_vFrameBufferCopyInvSizeAndUvScale.xy * g_vInvViewportSize),"); //12
         viewScope.AppendLine($"\t\tfloat4(1,0,0,0),"); //13
         viewScope.AppendLine($"\t\tfloat4(g_vCameraPositionWs/39.37,1)"); //14
 

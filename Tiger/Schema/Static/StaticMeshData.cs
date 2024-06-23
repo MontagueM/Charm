@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static
@@ -199,7 +200,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             foreach (var (i, staticPartEntry) in staticPartEntries)
             {
                 var material = parent.Materials[i].Material;
-                if (material is null || material.Unk08 != 1)
+                if (material is null)// || material.Unk08 != 1)
                     continue;
 
                 StaticPart part = new StaticPart(staticPartEntry);
@@ -220,9 +221,11 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             {
                 var mat = _tag.MaterialAssignments[i];
                 var part = _tag.Parts[mat.PartIndex];
-                //if (!VertexLayouts.ExportRenderStages.Contains((TfxRenderStage)mat.RenderStage))
-                //    continue;
 
+                if (!VertexLayouts.ExportRenderStages.Contains((TfxRenderStage)mat.RenderStage))
+                    continue;
+
+                Debug.Assert(part.BufferIndex == 0, $"{Hash} has part with buffer index {part.BufferIndex}");
                 if (part.BufferIndex == 0)
                 {
                     switch (detailLevel)

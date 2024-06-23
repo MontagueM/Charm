@@ -219,7 +219,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
     public void SavetoFile(string savePath)
     {
         ScratchImage simg = GetScratchImage();
-        SavetoFile(savePath, simg, IsCubemap() || IsVolume());
+        SavetoFile(savePath, simg, IsCubemap() || (IsVolume() && !ConfigSubsystem.Get().GetS2ShaderExportEnabled()));
     }
 
     public UnmanagedMemoryStream GetTextureToDisplay()
