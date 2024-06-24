@@ -524,7 +524,7 @@ PS
                         {
                             funcDef.AppendLine($"\t\t{equal.TrimStart()} = g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
                         }
-                        else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex)) // Some kind of buffer texture or not defined in the material
+                        else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex && texture.Texture is not null)) // Some kind of buffer texture or not defined in the material
                         {
                             switch (texIndex)
                             {
@@ -584,8 +584,14 @@ PS
                             switch (texIndex)
                             {
                                 case 2:
-                                    bUsesNormalBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= v0.{dotAfter}");
+                                    if (scopes.Contains(TfxScope.DECAL))
+                                    {
+                                        bUsesNormalBuffer = true;
+                                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= v0.{dotAfter}");
+                                    }
+                                    else
+                                        funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.5,0.5,0.5,0.5).{dotAfter} //{equal_post}");
+
                                     break;
                                 case 10:
                                     bUsesDepthBuffer = true;

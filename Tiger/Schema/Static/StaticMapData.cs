@@ -169,7 +169,7 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         var reader = new TigerFile(_tag.InstanceTransforms).GetReader();
         for (int i = 0; i < _tag.InstanceCounts; i++)
         {
-            Matrix4x4 instance = reader.ReadSchemaStruct<Matrix4x4>();
+            Matrix4x4 instance = reader.ReadBytes(blockSize).ToType<Matrix4x4>();
             instanceTransforms.Add(instance);
         }
 
@@ -737,8 +737,8 @@ public struct D2Class_A96A8080
     public Matrix4x4 Transform;
     public AABB Bounds;
     public Tag<D2Class_AE6A8080> Model;
-    [SchemaField(0x70)]
-    public int Unk70;
+    [SchemaField(0x70, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public int Unk70; // if 5, skip the model?? 
 }
 
 /// </summary>

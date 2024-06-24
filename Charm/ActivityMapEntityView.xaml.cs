@@ -445,7 +445,7 @@ public partial class ActivityMapEntityView : UserControl
 
                             foreach (var element in skyResource.SkyEntities.TagData.Entries)
                             {
-                                if (element.Model.TagData.Model is null)
+                                if (element.Model.TagData.Model is null || (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307 && element.Unk70 == 5))
                                     continue;
 
                                 System.Numerics.Matrix4x4 matrix = element.Transform.ToSys();
