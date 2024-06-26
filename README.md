@@ -19,7 +19,8 @@ Charm currently supports:
 | 2.9.9.9 | Shadowkeep last update   | DepotDownloader | 4160053308690659072 | 4651412338057797072  |
 | 3.4.0.2 | Beyond Light last update | DepotDownloader | 5631185797932644936 | 3832609057880895101  |
 | 6.3.0.7 | Witch Queen last update  | DepotDownloader | 6051526863119423207 | 1078048403901153652  |
-| N/A     | Lightfall latest         | Steam           | N/A                 | N/A                  |
+| 7.3.6.6 | Lightfall last update    | DepotDownloader | 7707143404100984016 | 5226038440689554798  |
+| N/A     | The Final Shape latest   | Steam           | N/A                 | N/A                  |
 
 If you just want to look at the latest release, you only need Destiny 2 downloaded on Steam.
 
@@ -48,8 +49,8 @@ Also take a look at the [Charm wiki](https://github.com/MontagueM/DestinyDocs/bl
 
 ## Source 2: **Only supports S&Box**
  - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/Source-2-Importing)
- - Generates .shader files for semi-accurate game shaders (similar to UE5 shaders)
- - Generates .vmat (material) and .vmdl (model) files for statics and maps
+ - Generates .shader files for accurate game shaders
+ - Generates .vmat (material) and .vmdl (model) files
 
 ### Some tricks
 
