@@ -67,6 +67,9 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 
     private bool LoadAllFonts()
     {
+        if (!Directory.Exists(@"fonts"))
+            return false;
+
         foreach (var s in Directory.GetFiles(@"fonts/"))
         {
             var otfPath = Environment.CurrentDirectory + "/" + s;

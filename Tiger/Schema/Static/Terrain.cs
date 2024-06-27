@@ -40,7 +40,7 @@ public class Terrain : Tag<STerrain>
                 }
                 else // Use the first valid dyemap if it gets to this point
                 {
-                    var firstValidDyemap = _tag.MeshGroups.First(x => x.Dyemap != null).Dyemap;
+                    var firstValidDyemap = _tag.MeshGroups.FirstOrDefault(x => x.Dyemap != null).Dyemap;
                     if (firstValidDyemap != null)
                     {
                         scene.Textures.Add(firstValidDyemap);

@@ -69,25 +69,6 @@ public partial class MaterialView : UserControl
             else
                 VertexShader.Text = "Shader decompilation not supported for Destiny 1";
             VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
-
-            //var vs_test = material.VertexShader?.Resources;
-            //Console.WriteLine($"----Vertex----");
-            //foreach (var vsr in vs_test)
-            //{
-            //    Console.WriteLine($"Type: {vsr.ResourceType} | Index:{vsr.Index} | Count: {vsr.Count}");
-            //}
-
-            //var vs_in = material.VertexShader.InputSignatures;
-            //foreach (var b in vs_in)
-            //{
-            //    Console.WriteLine($"v{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
-            //}
-
-            //var vs_out = material.VertexShader.OutputSignatures;
-            //foreach (var b in vs_out)
-            //{
-            //    Console.WriteLine($"o{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
-            //}
         }
 
         if (material.PixelShader is not null)
@@ -97,25 +78,6 @@ public partial class MaterialView : UserControl
             else
                 PixelShader.Text = "Shader decompilation not supported for Destiny 1";
             PS_CBufferList.ItemsSource = GetCBufferDetails(material);
-
-            //var ps_test = material.PixelShader?.Resources;
-            //Console.WriteLine($"----Pixel----");
-            //foreach (var a in ps_test)
-            //{
-            //    Console.WriteLine($"Type: {a.ResourceType} | Index:{a.Index} | Count: {a.Count}");
-            //}
-
-            //var ps_in = material.PixelShader.InputSignatures;
-            //foreach (var b in ps_in)
-            //{
-            //    Console.WriteLine($"v{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
-            //}
-
-            //var ps_out = material.PixelShader.OutputSignatures;
-            //foreach (var b in ps_out)
-            //{
-            //    Console.WriteLine($"o{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
-            //}
         }
     }
 
