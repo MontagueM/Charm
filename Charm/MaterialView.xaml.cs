@@ -52,6 +52,13 @@ public partial class MaterialView : UserControl
         TextureListView.ItemsSource = GetTextureDetails(material);
         UsedScopesList.ItemsSource = material.EnumerateScopes();
 
+        System.Console.WriteLine($"{material.RenderStates.ToString()}");
+
+        System.Console.WriteLine($"BlendState: {material.RenderStates.BlendState()}");
+        System.Console.WriteLine($"RasterizerState: {material.RenderStates.RasterizerState()}");
+        System.Console.WriteLine($"DepthBiasState: {material.RenderStates.DepthBiasState()}");
+        System.Console.WriteLine($"DepthStencilState: {material.RenderStates.DepthStencilState()}");
+
         if (material.VertexShader is not null)
         {
             if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
@@ -191,7 +198,7 @@ public partial class MaterialView : UserControl
         {
             if (material.VSVector4Container.IsValid())
             {
-                data = material.GetVec4Container(material.VSVector4Container.GetReferenceHash());
+                data = material.GetVec4Container(true);
             }
             else
             {
@@ -205,7 +212,7 @@ public partial class MaterialView : UserControl
         {
             if (material.PSVector4Container.IsValid())
             {
-                data = material.GetVec4Container(material.PSVector4Container.GetReferenceHash());
+                data = material.GetVec4Container();
             }
             else
             {

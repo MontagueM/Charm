@@ -1,11 +1,14 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
+using SharpDX.Direct3D11;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
 public class S2ShaderConverter
 {
+    private IMaterial Material;
     private StringReader hlsl;
     private StringBuilder vfx;
     private List<TfxScope> scopes = new();
@@ -104,7 +107,6 @@ PS
     //#include ""raytracing/reflections.hlsl""
     #define CUSTOM_TEXTURE_FILTERING
     #define cmp -
-    //RenderState
 
     //#if ( S_MODE_REFLECTIONS )
 	//	#define FinalOutput ReflectionOutput
@@ -126,6 +128,7 @@ PS
 
     public string HlslToVfx(IMaterial material, string pixel, string vertex)
     {
+        Material = material;
         //Pixel Shader
         StringBuilder texSamples = new StringBuilder();
         hlsl = new StringReader(pixel);
@@ -257,6 +260,7 @@ PS
         }
         else
         {
+            funcDef.AppendLine($"{AddRenderStates()}");
             foreach (var e in material.EnumeratePSTextures())
             {
                 if (e.Texture != null)
@@ -663,7 +667,7 @@ PS
                 $"float3 normal_in_world_space = biased_normal / normal_length;\r\n\r\n        " +
                 $"float smoothness = saturate(8 * (normal_length - 0.375));\r\n        \r\n        " +
                 $"Material mat = Material::From(i,\r\n                    " +
-                $"float4(o0.xyz, alpha), //albedo, alpha\r\n                    " +
+                $"float4(o0.xyz, {(bTranslucent ? "o0.w" : "1")}), //albedo, alpha\r\n                    " +
                 $"float4(0.5, 0.5, 1, 1), //Normal, gets set later\r\n                    " +
                 $"float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao\r\n                    " +
                 $"float3(1.0f, 1.0f, 1.0f), //tint\r\n                    " +
@@ -688,7 +692,7 @@ PS
             if (a) //??
             {
                 //output.Append($"\t\treturn float4(o0.xyz, {(bUsesFrameBuffer ? "1" : "alpha")});");
-                output.Append($"\t\treturn float4(o0.xyz, 1);");
+                output.Append($"\t\treturn float4(o0.xyz, o0.w);");
             }
             else
             {
@@ -724,5 +728,85 @@ PS
         viewScope.AppendLine($"\t\t}};");
 
         return viewScope.ToString();
+    }
+
+    private string AddRenderStates()
+    {
+        StringBuilder renderStates = new();
+        if (Material.RenderStates.BlendState() != -1)
+        {
+            var blendState = RenderStates.BlendStates[Material.RenderStates.BlendState()];
+            renderStates.AppendLine($"\tRenderState(AlphaToCoverageEnable, {blendState.AlphaToCoverageEnable.ToString().ToLower()})");
+            renderStates.AppendLine($"\tRenderState(IndependentBlendEnable, {blendState.IndependentBlendEnable.ToString().ToLower()})");
+            renderStates.AppendLine($"\tRenderState(BlendEnable, {blendState.BlendDesc.IsBlendEnabled.ToString().ToLower()})");
+            renderStates.AppendLine($"\tRenderState(SrcBlend, {BlendOptionString(blendState.BlendDesc.SourceBlend)})");
+            renderStates.AppendLine($"\tRenderState(DstBlend, {BlendOptionString(blendState.BlendDesc.DestinationBlend)})");
+            renderStates.AppendLine($"\tRenderState(BlendOp, {BlendOpString(blendState.BlendDesc.BlendOperation)})");
+            renderStates.AppendLine($"\tRenderState(SrcBlendAlpha, {BlendOptionString(blendState.BlendDesc.SourceAlphaBlend)})");
+            renderStates.AppendLine($"\tRenderState(DstBlendAlpha, {BlendOptionString(blendState.BlendDesc.DestinationAlphaBlend)})");
+            renderStates.AppendLine($"\tRenderState(BlendOpAlpha, {BlendOpString(blendState.BlendDesc.AlphaBlendOperation)})");
+        }
+
+        return renderStates.ToString();
+    }
+
+    private string BlendOptionString(BlendOption blendOption)
+    {
+        switch (blendOption)
+        {
+            case (BlendOption.Zero):
+                return "ZERO";
+            case (BlendOption.One):
+                return "ONE";
+            case (BlendOption.SourceColor):
+                return "SRC_COLOR";
+            case (BlendOption.InverseSourceColor):
+                return "INV_SRC_COLOR";
+            case (BlendOption.SourceAlpha):
+                return "SRC_ALPHA";
+            case (BlendOption.InverseSourceAlpha):
+                return "INV_SRC_ALPHA";
+            case (BlendOption.DestinationAlpha):
+                return "DEST_ALPHA";
+            case (BlendOption.InverseDestinationAlpha):
+                return "INV_DEST_ALPHA";
+            case (BlendOption.DestinationColor):
+                return "DEST_COLOR";
+            case (BlendOption.InverseDestinationColor):
+                return "INV_DEST_COLOR";
+            case (BlendOption.SourceAlphaSaturate):
+                return "SRC_ALPHA_SAT";
+            case (BlendOption.BlendFactor):
+                return "BLEND_FACTOR";
+            case (BlendOption.SecondarySourceColor):
+                return "SRC1_COLOR";
+            case (BlendOption.InverseSecondarySourceColor):
+                return "INV_SRC1_COLOR";
+            case (BlendOption.SecondarySourceAlpha):
+                return "SRC1_ALPHA";
+            case (BlendOption.InverseSecondarySourceAlpha):
+                return "INV_SRC1_ALPHA";
+            default:
+                return "ONE";
+        }
+    }
+
+    private string BlendOpString(BlendOperation blendOp)
+    {
+        switch (blendOp)
+        {
+            case (BlendOperation.Add):
+                return "ADD";
+            case (BlendOperation.Subtract):
+                return "SUBTRACT";
+            case (BlendOperation.ReverseSubtract):
+                return "REV_SUBTRACT";
+            case (BlendOperation.Minimum):
+                return "MIN";
+            case (BlendOperation.Maximum):
+                return "MAX";
+            default:
+                return "ADD";
+        }
     }
 }

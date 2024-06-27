@@ -129,7 +129,7 @@ public class UsfConverter
             {
                 if (material.VSVector4Container.IsValid())
                 {
-                    data = material.GetVec4Container(material.VSVector4Container.GetReferenceHash());
+                    data = material.GetVec4Container(true);
                 }
                 else
                 {
@@ -143,7 +143,7 @@ public class UsfConverter
             {
                 if (material.PSVector4Container.IsValid())
                 {
-                    data = material.GetVec4Container(material.PSVector4Container.GetReferenceHash());
+                    data = material.GetVec4Container();
                 }
                 else
                 {

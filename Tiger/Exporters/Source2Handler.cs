@@ -142,23 +142,11 @@ public class Source2Handler
 
         vmat.AppendLine("Layer0\n{");
 
-        //If the shader doesnt exist, just use the default complex.shader
-        //if (!File.Exists($"{savePath}/Shaders/PS_{materialHeader.PixelShader?.Hash}.shader"))
-        //{
-        //    vmat.AppendLine($"  shader \"complex.shader\"");
-
-        //    //Use just the first texture for the diffuse
-        //    if (materialHeader.EnumeratePSTextures().Any())
-        //    {
-        //        if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
-        //            vmat.AppendLine($"  TextureColor \"Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
-        //    }
-        //}
-
         //Material parameters
         vmat.AppendLine($"\tshader \"ps_{material.PixelShader.Hash}.shader\"");
-        vmat.AppendLine($"\tF_ALPHA_TEST 1");
-        vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
+        //vmat.AppendLine($"\tF_ALPHA_TEST 1");
+        if ((material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)) && material.RenderStates.BlendState() == -1)
+            vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
         if (material.Unk0C != 0)
             vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
@@ -191,24 +179,54 @@ public class Source2Handler
             {
                 switch (resource.Index)
                 {
-                    case 2: //Transparent scope
-                        for (int i = 0; i < resource.Count; i++)
+                    case 2: // Transparent
+                        if (material.EnumerateScopes().Contains(TfxScope.TRANSPARENT))
                         {
-                            vmat.AppendLine($"\t\tcb2_{i} \"float4(0,1,1,1)\"");
+                            for (int i = 0; i < resource.Count; i++)
+                            {
+                                if (i == 0)
+                                    vmat.AppendLine($"\t\tcb2_{i} \"float4(0,100,0,0)\"");
+                                else
+                                    vmat.AppendLine($"\t\tcb2_{i} \"float4(1,1,1,1)\"");
+                            }
                         }
                         break;
-                    case 8: //??? scope
-                        for (int i = 0; i < resource.Count; i++)
+                    case 8: // Transparent_Advanced
+                        if (material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED))
                         {
-                            if (i < 5)
-                                vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
-                            else
-                                vmat.AppendLine($"\t\tcb8_{i} \"float4(1,1,1,1)\"");
+                            vmat.AppendLine($"\t\tcb8_0 \"float4(0.0009849314,0.0019836868,0.0007783567,0.0015586712)\"");
+                            vmat.AppendLine($"\t\tcb8_1 \"float4(0.00098604,0.002085914,0.0009838239,0.0018864698)\"");
+                            vmat.AppendLine($"\t\tcb8_2 \"float4(0.0011860824,0.0024346288,0.0009468408,0.001850187)\"");
+                            vmat.AppendLine($"\t\tcb8_3 \"float4(0.7903466, 0.7319064, 0.56213695, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_4 \"float4(0.0, 1.0, 0.109375, 0.046875)\"");
+                            vmat.AppendLine($"\t\tcb8_5 \"float4(0.0, 0.0, 0.0, 0.00086945295)\"");
+                            vmat.AppendLine($"\t\tcb8_6 \"float4(0.55, 0.41091052, 0.22670946, 0.50381273)\"");
+                            vmat.AppendLine($"\t\tcb8_7 \"float4(1.0, 1.0, 1.0, 0.9997778)\"");
+                            vmat.AppendLine($"\t\tcb8_8 \"float4(132.92885, 66.40444, 56.853416, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_9 \"float4(132.92885, 66.40444, 1000.0, 0.0001)\"");
+                            vmat.AppendLine($"\t\tcb8_10 \"float4(131.92885, 65.40444, 55.853416, 0.6784314)\"");
+                            vmat.AppendLine($"\t\tcb8_11 \"float4(131.92885, 65.40444, 999.0, 5.5)\"");
+                            vmat.AppendLine($"\t\tcb8_12 \"float4(0.0, 0.5, 25.575994, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_13 \"float4(0.0, 0.0, 0.0, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_14 \"float4(0.025, 10000.0, -9999.0, 1.0)\"");
+                            vmat.AppendLine($"\t\tcb8_15 \"float4(1.0, 1.0, 1.0, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_16 \"float4(0.0, 0.0, 0.0, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_17 \"float4(10.979255, 7.1482353, 6.3034935, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_18 \"float4(0.0037614072, 0.0, 0.0, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_19 \"float4(0.0, 0.0075296126, 0.0, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_20 \"float4(0.0, 0.0, 0.017589089, 0.0)\"");
+                            vmat.AppendLine($"\t\tcb8_21 \"float4(0.27266484, -0.31473818, -0.15603681, 1.0)\"");
+                            vmat.AppendLine($"\t\tcb8_36 \"float4(1.0, 0.0, 0.0, 0.0)\"");
+
+                            //for (int i = 0; i < resource.Count; i++)
+                            //{
+                            //    vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
+                            //}
                         }
                         break;
-                    case 13: //Frame scope
-                        vmat.AppendLine($"\t\tcb13_0 \"Time\"");
-                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.25,1,1,1)\"");
+                    case 13: // Frame
+                        vmat.AppendLine($"\t\tcb13_0 \"float4(Time, Time, 0.05, 1)\"");
+                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.25,8,1,1)\"");
                         break;
                 }
             }
@@ -232,40 +250,6 @@ public class Source2Handler
         }
     }
 
-    public static void SaveDecalVMAT(string savePath, string hash, IMaterial materialHeader) //Testing
-    {
-        StringBuilder vmat = new StringBuilder();
-        vmat.AppendLine("Layer0 \n{");
-
-        vmat.AppendLine($"  shader \"projected_decals.shader\"");
-
-        //Use just the first texture for the diffuse
-        if (materialHeader.EnumeratePSTextures().Any())
-        {
-            if (materialHeader.EnumeratePSTextures().ElementAt(0).Texture is not null)
-                vmat.AppendLine($"  TextureColor \"Textures/{materialHeader.EnumeratePSTextures().ElementAt(0).Texture.Hash}.png\"");
-        }
-
-        foreach (var e in materialHeader.EnumeratePSTextures())
-        {
-            if (e.Texture == null)
-                continue;
-
-            vmat.AppendLine($"  TextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
-        }
-
-        vmat.AppendLine("}");
-
-        try
-        {
-            Directory.CreateDirectory($"{savePath}/materials/");
-            File.WriteAllText($"{savePath}/materials/{hash}_decal.vmat", vmat.ToString());
-        }
-        catch (IOException)
-        {
-        }
-    }
-
     public static StringBuilder PopulateCBuffers(IMaterial materialHeader, bool isVertexShader = false)
     {
         StringBuilder cbuffers = new();
@@ -277,7 +261,7 @@ public class Source2Handler
         {
             if (materialHeader.VSVector4Container.IsValid())
             {
-                data = materialHeader.GetVec4Container(materialHeader.VSVector4Container.GetReferenceHash());
+                data = materialHeader.GetVec4Container(true);
             }
             else
             {
@@ -291,7 +275,7 @@ public class Source2Handler
         {
             if (materialHeader.PSVector4Container.IsValid())
             {
-                data = materialHeader.GetVec4Container(materialHeader.PSVector4Container.GetReferenceHash());
+                data = materialHeader.GetVec4Container();
             }
             else
             {

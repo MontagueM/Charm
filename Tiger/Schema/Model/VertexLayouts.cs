@@ -1,4 +1,5 @@
 ﻿using DirectXTexNet;
+using SharpDX.Direct3D11;
 
 namespace Tiger.Schema.Model;
 
@@ -5831,6 +5832,1710 @@ public static class VertexLayouts
                     IsInstanceData = false
                 },
             }
+        },
+    };
+}
+
+public static class RenderStates
+{
+    public class BungieBlendDesc
+    {
+        public bool AlphaToCoverageEnable;
+        public bool IndependentBlendEnable;
+        public RenderTargetBlendDescription BlendDesc;
+    }
+
+    public class BungieRasterizerDesc
+    {
+        public FillMode FillMode;
+        public CullMode CullMode;
+        public bool FrontCounterClockwise;
+        public bool DepthClipEnable;
+        public bool ScissorEnable;
+    }
+
+    public class BungieDepthBiasDesc
+    {
+        public int DepthBias;
+        public float SlopeScaledDepthBias;
+        public float DepthBiasClamp;
+    }
+
+
+    public static BungieBlendDesc[] BlendStates = new BungieBlendDesc[]
+    {
+	    // Blend State 0
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 1
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 2
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.One,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 3
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.DestinationColor,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.DestinationAlpha,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 4
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.DestinationColor,
+                DestinationBlend = BlendOption.SourceColor,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.DestinationAlpha,
+                DestinationAlphaBlend = BlendOption.SourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 5
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.SourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 6
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.DestinationAlpha,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 7
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.DestinationAlpha,
+                DestinationBlend = BlendOption.One,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.DestinationAlpha,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 8
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 9
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.One,
+                BlendOperation = BlendOperation.Minimum,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Minimum,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 10
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.One,
+                BlendOperation = BlendOperation.Maximum,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Maximum,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 11
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.DestinationColor,
+                DestinationBlend = BlendOption.One,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.DestinationAlpha,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 12
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.SourceAlpha,
+                DestinationBlend = BlendOption.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.SourceAlpha,
+                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 13
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.BlendFactor,
+                DestinationBlend = BlendOption.InverseBlendFactor,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.BlendFactor,
+                DestinationAlphaBlend = BlendOption.InverseBlendFactor,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 14
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.InverseSourceAlpha,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.InverseSourceAlpha,
+                DestinationAlphaBlend = BlendOption.SourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 15
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.DestinationAlpha,
+                DestinationBlend = BlendOption.InverseDestinationAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 16
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 17
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 18
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 19
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 20
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 21
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 22
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 23
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 24
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 25
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 26
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 27
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 28
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 29
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 30
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 31
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 32
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 33
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 34
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 35
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.SourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 36
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 37
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 38
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 39
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 40
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 41
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 42
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 43
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 44
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 45
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 46
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 47
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 48
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 49
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 50
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 51
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 52
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 53
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 54
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 55
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 56
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 57
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 58
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 59
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 60
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 61
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 62
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 63
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 64
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 65
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 66
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 67
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 68
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 69
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 70
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 71
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 72
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 73
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 74
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 75
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 76
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.DestinationColor,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 77
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.DestinationColor,
+                DestinationBlend = BlendOption.SourceColor,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 78
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = false,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.Zero,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.Zero,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 79
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.DestinationAlpha,
+                DestinationBlend = BlendOption.One,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 80
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.InverseDestinationAlpha,
+                DestinationBlend = BlendOption.One,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 81
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.Zero,
+                DestinationBlend = BlendOption.DestinationAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 82
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.Zero,
+                DestinationBlend = BlendOption.InverseDestinationAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 83
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.Zero,
+                DestinationBlend = BlendOption.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 84
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 85
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 86
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.SecondarySourceColor,
+                DestinationBlend = BlendOption.InverseSecondarySourceColor,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.SecondarySourceAlpha,
+                DestinationAlphaBlend = BlendOption.InverseSecondarySourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 87
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 88
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.InverseSourceAlpha,
+                BlendOperation = BlendOperation.Add,
+                SourceAlphaBlend = BlendOption.Zero,
+                DestinationAlphaBlend = BlendOption.InverseSourceAlpha,
+                AlphaBlendOperation = BlendOperation.Add,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+	    // Blend State 89
+	    new BungieBlendDesc
+        {
+            AlphaToCoverageEnable = false,
+            IndependentBlendEnable = true,
+            BlendDesc = new RenderTargetBlendDescription
+            {
+                IsBlendEnabled = true,
+                SourceBlend = BlendOption.One,
+                DestinationBlend = BlendOption.One,
+                BlendOperation = BlendOperation.ReverseSubtract,
+                SourceAlphaBlend = BlendOption.One,
+                DestinationAlphaBlend = BlendOption.One,
+                AlphaBlendOperation = BlendOperation.ReverseSubtract,
+                RenderTargetWriteMask = ColorWriteMaskFlags.All
+            }
+        },
+    };
+
+    public static BungieRasterizerDesc[] RasterizerStates = new BungieRasterizerDesc[]
+    {
+	    // Rasterizer State 0
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Solid,
+            CullMode = CullMode.None,
+            FrontCounterClockwise = true,
+            DepthClipEnable = true,
+            ScissorEnable = false
+        },
+	    // Rasterizer State 1
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Solid,
+            CullMode = CullMode.None,
+            FrontCounterClockwise = true,
+            DepthClipEnable = true,
+            ScissorEnable = false
+        },
+	    // Rasterizer State 2
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Solid,
+            CullMode = CullMode.Back,
+            FrontCounterClockwise = true,
+            DepthClipEnable = true,
+            ScissorEnable = false
+        },
+	    // Rasterizer State 3
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Solid,
+            CullMode = CullMode.Front,
+            FrontCounterClockwise = true,
+            DepthClipEnable = true,
+            ScissorEnable = false
+        },
+	    // Rasterizer State 4
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Wireframe,
+            CullMode = CullMode.Back,
+            FrontCounterClockwise = true,
+            DepthClipEnable = true,
+            ScissorEnable = false
+        },
+	    // Rasterizer State 5
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Wireframe,
+            CullMode = CullMode.None,
+            FrontCounterClockwise = true,
+            DepthClipEnable = true,
+            ScissorEnable = false
+        },
+	    // Rasterizer State 6
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Solid,
+            CullMode = CullMode.Back,
+            FrontCounterClockwise = true,
+            DepthClipEnable = false,
+            ScissorEnable = false
+        },
+	    // Rasterizer State 7
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Solid,
+            CullMode = CullMode.None,
+            FrontCounterClockwise = true,
+            DepthClipEnable = false,
+            ScissorEnable = false
+        },
+	    // Rasterizer State 8
+	    new BungieRasterizerDesc {
+            FillMode = FillMode.Solid,
+            CullMode = CullMode.Front,
+            FrontCounterClockwise = true,
+            DepthClipEnable = false,
+            ScissorEnable = false
+        },
+    };
+
+    public static BungieDepthBiasDesc[] DepthBiasStates = new BungieDepthBiasDesc[]
+    {
+	    // DepthBias 0
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  0,
+            SlopeScaledDepthBias =  0.0f,
+            DepthBiasClamp =  0.0f,
+        },
+	    // DepthBias 1
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  0,
+            SlopeScaledDepthBias =  0.0f,
+            DepthBiasClamp =  0.0f,
+        },
+	    // DepthBias 2
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  5,
+            SlopeScaledDepthBias =  2.0f,
+            DepthBiasClamp =  10000000000.0f,
+        },
+	    // DepthBias 3
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  10,
+            SlopeScaledDepthBias =  4.0f,
+            DepthBiasClamp =  10000000000.0f,
+        },
+	    // DepthBias 4
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  15,
+            SlopeScaledDepthBias =  6.0f,
+            DepthBiasClamp =  10000000000.0f,
+        },
+	    // DepthBias 5
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  20,
+            SlopeScaledDepthBias =  8.0f,
+            DepthBiasClamp =  10000000000.0f,
+        },
+	    // DepthBias 6
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  2,
+            SlopeScaledDepthBias =  2.0f,
+            DepthBiasClamp =  10000000000.0f,
+        },
+	    // DepthBias 7
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  -1,
+            SlopeScaledDepthBias =  -2.0f,
+            DepthBiasClamp =  10000000000.0f,
+        },
+	    // DepthBias 8
+	    new BungieDepthBiasDesc
+        {
+            DepthBias =  51,
+            SlopeScaledDepthBias =  2.0f,
+            DepthBiasClamp =  10000000000.0f,
         },
     };
 }

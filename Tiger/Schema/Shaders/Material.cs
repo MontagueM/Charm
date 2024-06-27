@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Arithmic;
 using Tiger.Exporters;
+using Tiger.Schema.Model;
 
 namespace Tiger.Schema.Shaders
 {
@@ -74,6 +76,7 @@ namespace Tiger.Schema.Shaders
         public ShaderBytecode? ComputeShader { get; }
 
         public IEnumerable<TfxScope> EnumerateScopes();
+        public StateSelection RenderStates { get; }
 
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
@@ -233,10 +236,10 @@ namespace Tiger.Schema.Shaders
             }
         }
 
-        public List<Vector4> GetVec4Container(FileHash containerHash)
+        public List<Vector4> GetVec4Container(bool vs = false)
         {
             List<Vector4> data = new();
-            TigerFile container = new(containerHash);
+            TigerFile container = new(vs ? VSVector4Container.GetReferenceHash() : PSVector4Container.GetReferenceHash());
             byte[] containerData = container.GetData();
 
             for (int i = 0; i < containerData.Length / 16; i++)
@@ -249,15 +252,73 @@ namespace Tiger.Schema.Shaders
     }
 }
 
-// public class RawMaterial
-// {
-//     public VertexShader VSBytecode;
-//     public PixelShader PSBytecode;
-//     public List<Texture> VSTextures;
-//     public List<Texture> PSTextures;
-//     public List<ConstantBuffer> PSConstantBuffers;
-//     public List<ConstantBuffer> VSConstantBuffers;
-// }
+[StructLayout(LayoutKind.Sequential, Size = 0x4)]
+public struct StateSelection
+{
+    public int inner;
+
+    public StateSelection(int value)
+    {
+        this.inner = value;
+    }
+
+    public int BlendState()
+    {
+        if ((inner & 0x80) != 0)
+        {
+            return (inner & 0x7F);
+        }
+        return -1;
+    }
+
+    public int DepthStencilState()
+    {
+        int v = (inner >> 8) & 0xFF;
+        if ((v & 0x80) != 0)
+        {
+            return (v & 0x7F);
+        }
+        return -1;
+    }
+
+    public int RasterizerState()
+    {
+        int v = (inner >> 16) & 0xFF;
+        if ((v & 0x80) != 0)
+        {
+            return (v & 0x7F);
+        }
+        return -1;
+    }
+
+    public int DepthBiasState()
+    {
+        int v = (inner >> 24) & 0xFF;
+        if ((v & 0x80) != 0)
+        {
+            return (v & 0x7F);
+        }
+        return -1;
+    }
+
+    public override string ToString()
+    {
+        if (BlendState() != -1)
+        {
+            var blendState = RenderStates.BlendStates[BlendState()];
+            return $"Blend State {BlendState()}:\n" +
+                $"\tIsBlendEnabled: {blendState.BlendDesc.IsBlendEnabled}\n" +
+                $"\tSourceBlend: {blendState.BlendDesc.SourceBlend}\n" +
+                $"\tDestinationBlend: {blendState.BlendDesc.DestinationBlend}\n" +
+                $"\tBlendOperation: {blendState.BlendDesc.BlendOperation}\n" +
+                $"\tSourceAlphaBlend: {blendState.BlendDesc.SourceAlphaBlend}\n" +
+                $"\tDestinationAlphaBlend: {blendState.BlendDesc.DestinationAlphaBlend}\n" +
+                $"\tAlphaBlendOperation: {blendState.BlendDesc.AlphaBlendOperation}\n" +
+                $"\tRenderTargetWriteMask: {blendState.BlendDesc.RenderTargetWriteMask}\n";
+        }
+        return "";
+    }
+}
 
 namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
 {
@@ -282,6 +343,7 @@ namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
         public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
+        public StateSelection RenderStates => _tag.RenderStates;
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {
@@ -343,6 +405,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
+        public StateSelection RenderStates => _tag.RenderStates;
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {
@@ -407,6 +470,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
         public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(s => s.Samplers).ToList();
         public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(s => s.Samplers).ToList();
+        public StateSelection RenderStates => _tag.RenderStates;
 
         public IEnumerable<STextureTag> EnumerateVSTextures()
         {

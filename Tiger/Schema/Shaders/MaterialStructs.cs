@@ -11,6 +11,7 @@ public struct SMaterial_ROI // PS4 / ORBIS shaders aren't able to be decompiled 
     [SchemaField(0x18)]
     public ScopeBitsD1 UsedScopes;
     public ScopeBitsD1 CompatibleScopes;
+    public StateSelection RenderStates;
 
     [SchemaField(0x20)]
     public uint Unk20;
@@ -63,6 +64,7 @@ public struct SMaterial_SK
     [SchemaField(0x18)]
     public ScopeBitsSK UsedScopes;
     public ScopeBitsSK CompatibleScopes;
+    public StateSelection RenderStates;
 
     [SchemaField(0x48)]
     public ShaderBytecode VertexShader;
@@ -111,6 +113,7 @@ public struct SMaterial_BL
     [SchemaField(0x20)]
     public ScopeBits UsedScopes;
     public ScopeBits CompatibleScopes;
+    public StateSelection RenderStates;
 
     [SchemaField(0x58, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
