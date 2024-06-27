@@ -1637,7 +1637,8 @@ public struct D2Class_BB678080
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "20698080", 0x40)]
 public struct D2Class_20698080
 {
-    [SchemaField(0x18)]
+    public FileHash Unk00;
+    [SchemaField(0x18)] // idfk why not having the above FileHash makes this read at 0x0??
     public IMaterial UnkMat;
     [SchemaField(0x20), Tag64]
     public Tag<D2Class_29698080> ModelContainer;
