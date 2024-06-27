@@ -1,8 +1,11 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using DirectXTexNet;
 using Tiger;
@@ -258,9 +261,40 @@ public partial class MaterialView : UserControl
 
                     dataEntry.Index = i;
                     if (bytecode_hlsl.ContainsKey(i))
-                        dataEntry.Vector = $"Bytecode Assigned";
+                        dataEntry.StringVector = $"Bytecode Assigned";
                     else
-                        dataEntry.Vector = $"{dc.Data[i].X}, {dc.Data[i].Y}, {dc.Data[i].Z}, {dc.Data[i].W}";
+                    {
+                        dataEntry.StringVector = $"{dc.Data[i].X}, {dc.Data[i].Y}, {dc.Data[i].Z}, {dc.Data[i].W}";
+                        dataEntry.Vector = dc.Data[i];
+
+                        float[] data = { dc.Data[i].X, dc.Data[i].Y, dc.Data[i].Z };
+
+                        if (data.All(v => v >= 0.0f))
+                        {
+                            bool needsNormalization = data.Any(v => v > 1.0f);
+                            float[] floats;
+
+                            if (needsNormalization)
+                            {
+                                float factor = data.Max();
+                                floats = new float[]
+                                {
+                                    data[0] / factor,
+                                    data[1] / factor,
+                                    data[2] / factor,
+                                };
+                            }
+                            else
+                            {
+                                floats = (float[])data.Clone();
+                            }
+
+                            byte r = (byte)(Math.Abs(floats[0]) * 255);
+                            byte g = (byte)(Math.Abs(floats[1]) * 255);
+                            byte b = (byte)(Math.Abs(floats[2]) * 255);
+                            dataEntry.Color = Color.FromArgb(255, r, g, b);
+                        }
+                    }
 
                     items.Add(dataEntry);
                 }
@@ -277,49 +311,12 @@ public partial class MaterialView : UserControl
         bitmapImage.BeginInit();
         bitmapImage.StreamSource = (textureHeader.IsCubemap() || textureHeader.IsVolume()) ? textureHeader.GetCubemapFace(0) : textureHeader.GetTexture();
         bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-        //// Divide aspect ratio to fit 960x1000
-        //float widthDivisionRatio = (float)textureHeader.TagData.Width / 512;
-        //float heightDivisionRatio = (float)textureHeader.TagData.Height / 512;
-        //float transformRatio = Math.Max(heightDivisionRatio, widthDivisionRatio);
-        //int imgWidth = (int)Math.Floor(textureHeader.TagData.Width / transformRatio);
-        //int imgHeight = (int)Math.Floor(textureHeader.TagData.Height / transformRatio);
         bitmapImage.DecodePixelWidth = 256;
         bitmapImage.DecodePixelHeight = 256;
         bitmapImage.EndInit();
         bitmapImage.Freeze();
         return bitmapImage;
     }
-
-    //public static List<Cbuffer> GetCBuffers(IMaterial material, bool isVertexShader = false)
-    //{
-    //    StringReader reader = new(material.Decompile((isVertexShader ? material.VertexShader : material.PixelShader).GetBytecode(),
-    //        $"{(isVertexShader ? $"vs{material.VertexShader.Hash}" : $"ps{material.PixelShader.Hash}")}"));
-
-    //    List<Cbuffer> buffers = new();
-
-    //    string line = string.Empty;
-    //    do
-    //    {
-    //        line = reader.ReadLine();
-    //        if (line != null)
-    //        {
-    //            if (line.Contains("cbuffer"))
-    //            {
-    //                reader.ReadLine();
-    //                line = reader.ReadLine();
-    //                Cbuffer cbuffer = new Cbuffer();
-    //                cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
-    //                cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
-    //                cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
-    //                cbuffer.Type = line.Split("cb")[0].Trim();
-    //                buffers.Add(cbuffer);
-    //            }
-    //        }
-
-    //    } while (line != null);
-
-    //    return buffers;
-    //}
 
     private void Texture_OnClick(object sender, RoutedEventArgs e)
     {
@@ -394,6 +391,18 @@ public partial class MaterialView : UserControl
         return items;
 
     }
+
+    private void CBufferColor_OnClick(object sender, RoutedEventArgs e)
+    {
+        var s = sender as Button;
+        var dc = s.DataContext as CBufferDataDetail;
+
+        //float r = dc.Color.R / 255;
+        //float g = dc.Color.R / 255;
+        //float b = dc.Color.R / 255;
+
+        Clipboard.SetText($"[{dc.Vector.X}, {dc.Vector.Y}, {dc.Vector.Z}, 1.0]");
+    }
 }
 
 public class TextureDetail
@@ -426,7 +435,9 @@ public class CBufferDetail
 public class CBufferDataDetail
 {
     public int Index { get; set; }
-    public string Vector { get; set; }
+    public string StringVector { get; set; }
+    public Vector4 Vector { get; set; }
+    public Color Color { get; set; } = Color.FromArgb(255, 0, 0, 0);
 }
 
 public class UnkDataDetail
