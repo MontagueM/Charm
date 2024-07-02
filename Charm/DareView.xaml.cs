@@ -50,7 +50,7 @@ public partial class DareView : UserControl
             || item.ItemHash.Contains(searchTerm)
             || item.ItemType.ToLower().Contains(searchTerm)
             || item.ItemRarity.ToString().ToLower().Contains(searchTerm))
-            || (item.Parent != null && item.Parent.GetItemName().ToLower().Contains(searchTerm)))
+            || (searchTerm != "" && item.Parent != null && item.Parent.GetItemName().ToLower().Contains(searchTerm)))
             {
                 items.Add(item);
             }

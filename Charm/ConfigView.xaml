@@ -1,23 +1,25 @@
-﻿<UserControl x:Class="Charm.ConfigView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Charm"
-             mc:Ignorable="d"
-             d:DesignHeight="1080" d:DesignWidth="1920">
+﻿<UserControl
+    x:Class="Charm.ConfigView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="1080"
+    d:DesignWidth="1920"
+    mc:Ignorable="d">
     <Grid>
         <TabControl x:Name="ConfigTabControl">
-            <TabItem Header="GENERAL" x:Name="ConfigTab">
-                <local:GeneralConfigView x:Name="ConfigControl"/>
+            <TabItem x:Name="ConfigTab" Header="GENERAL">
+                <local:GeneralConfigView x:Name="ConfigControl" />
             </TabItem>
-            <TabItem Header="SOURCE 2" x:Name="Source2Tab">
-                <local:Source2ConfigView x:Name="Source2Control"/>
+            <TabItem x:Name="Source2Tab" Header="SOURCE 2">
+                <local:Source2ConfigView x:Name="Source2Control" />
             </TabItem>
-            <TabItem Header="UNREAL ENGINE" x:Name="UnrealTab">
-                <local:UnrealConfigView x:Name="UnrealControl"/>
+            <TabItem x:Name="UnrealTab" Header="UNREAL ENGINE">
+                <local:UnrealConfigView x:Name="UnrealControl" />
             </TabItem>
-            
+
         </TabControl>
     </Grid>
 </UserControl>

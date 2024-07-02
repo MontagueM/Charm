@@ -1,18 +1,42 @@
-﻿<UserControl x:Class="Charm.ProgressView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:Charm"
-             mc:Ignorable="d"
-             d:DesignHeight="1080" d:DesignWidth="1920">
-    <Grid Width="1920" Height="1080" x:Name="Grid" Background="Transparent">
-        <!-- So we stop clicking on the main screen, need HitTestVisible -->
-        <Rectangle IsHitTestVisible="True" Fill="{StaticResource BackgroundColour14}" Opacity="0.95"/>
-        <StackPanel Orientation="Vertical" Height="105" Width="500" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource BackgroundColour14}">
-            <ProgressBar x:Name="ProgressBar" Height="50" Value="50" Background="{StaticResource BackgroundColour7}" Foreground="{StaticResource AccentColour}"></ProgressBar>
-            <Viewbox Height="50" Width="450">
-                <TextBlock x:Name="ProgressText" Text="LOADING" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></TextBlock>
+﻿<UserControl
+    x:Class="Charm.ProgressView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="1080"
+    d:DesignWidth="1920"
+    mc:Ignorable="d">
+    <Grid
+        x:Name="Grid"
+        Width="1920"
+        Height="1080"
+        Background="Transparent">
+        <!--  So we stop clicking on the main screen, need HitTestVisible  -->
+        <Rectangle
+            Fill="{StaticResource BackgroundColour14}"
+            IsHitTestVisible="True"
+            Opacity="0.95" />
+        <StackPanel
+            Width="500"
+            Height="105"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="{StaticResource BackgroundColour14}"
+            Orientation="Vertical">
+            <ProgressBar
+                x:Name="ProgressBar"
+                Height="50"
+                Background="{StaticResource BackgroundColour7}"
+                Foreground="{StaticResource AccentColour}"
+                Value="50" />
+            <Viewbox Width="450" Height="50">
+                <TextBlock
+                    x:Name="ProgressText"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Text="LOADING" />
             </Viewbox>
         </StackPanel>
     </Grid>

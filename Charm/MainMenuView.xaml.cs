@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using Tiger;
 using Tiger.Schema.Investment;
@@ -60,6 +61,7 @@ public partial class MainMenuView : UserControl
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
+        GameVersion.Text = $"Game Version: {_mainWindow.GameInfo.FileVersion}";
     }
 
     private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
@@ -160,5 +162,10 @@ public partial class MainMenuView : UserControl
         tagListView.LoadContent(ETagListType.MaterialList);
         _mainWindow.MakeNewTab("materials", tagListView);
         _mainWindow.SetNewestTabSelected();
+    }
+
+    private void GithubButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo { FileName = "https://github.com/MontagueM/Charm", UseShellExecute = true });
     }
 }

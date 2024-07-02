@@ -71,6 +71,9 @@ public class LocalizedStrings : Tag<SLocalizedStrings>
     {
         using (TigerReader reader = GetReader())
         {
+            if (_tag.StringHashes is null)
+                Deserialize(true);
+
             return _tag.StringHashes
                 .Select(reader, (hash, index) => new TigerString(hash.StringHash, _tag.EnglishStringsData.GetStringFromIndex(index)))
                 .Select((hash, index) => new LocalizedStringView

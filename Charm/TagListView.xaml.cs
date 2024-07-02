@@ -398,7 +398,7 @@ public partial class TagListView : UserControl
                     return;
                 }
             }
-            string name = item.Name;
+            string name = item.Name != "" ? item.Name : item.Hash;
             bool bWasTrimmed = false;
             if (item.Name.Contains("\\") && _bTrimName)
             {
@@ -411,7 +411,10 @@ public partial class TagListView : UserControl
                 || item.Hash.Hash32.ToString().Contains(searchStr)
                 || (item.Subname != null && item.Subname.ToLower().Contains(searchStr)))
             {
-                var pkg = (item.Hash as FileHash) is not null ? PackageResourcer.Get().PackagePathsCache.GetPackagePathFromId((item.Hash as FileHash).PackageId).Split("\\").Last().Split(".").First() : "";
+                Package pkg = (item.Hash as FileHash) is not null ? PackageResourcer.Get().GetPackage((item.Hash as FileHash).PackageId) : null;
+                if (pkg is not null && pkg.GetPackageMetadata().Name.Contains("redacted"))
+                    name = $"🔐 {name}";
+
                 displayItems.Add(new TagItem
                 {
                     Hash = item.Hash,
@@ -419,7 +422,7 @@ public partial class TagListView : UserControl
                     TagType = item.TagType,
                     Type = item.Type,
                     Subname = searchStr != string.Empty && item.Type != "Package" ?
-                            $"{item.Subname} {pkg}"
+                            $"{item.Subname}" + (pkg != null ? $" : [{pkg.GetPackageMetadata().Name}]" : "")
                             : item.Subname,
                     FontSize = _bTrimName || !bWasTrimmed ? 16 : 12,
                 });
@@ -516,12 +519,24 @@ public partial class TagListView : UserControl
         var btn = sender as ToggleButton;
         TagItem tagItem = btn.DataContext as TagItem;
         TigerHash tigerHash = tagItem.Hash;
+
         if (_previouslySelected != null)
             _previouslySelected.IsChecked = false;
         _selectedIndex = TagList.Items.IndexOf(tagItem);
         // if (_previouslySelected == btn)
         // _previouslySelected.IsChecked = !_previouslySelected.IsChecked;
         _previouslySelected = btn;
+
+        Package pkg = (tagItem.Hash as FileHash) is not null ? PackageResourcer.Get().GetPackage((tagItem.Hash as FileHash).PackageId) : null;
+        if (pkg is not null && pkg.GetPackageMetadata().Name.Contains("redacted"))
+        {
+            if (!PackageResourcer.Get().Keys.ContainsKey(pkg.GetPackageMetadata().PackageGroup))
+            {
+                MessageBox.Show($"No decryption key found, can not display content.", $"This item belongs to a redacted package.", MessageBoxButton.OK);
+                btn.IsChecked = false;
+                return;
+            }
+        }
         LoadContent(tagItem.TagType, tigerHash);
     }
 
