@@ -71,6 +71,18 @@ public class MaterialExporter : AbstractExporter
                         mapMaterials.Add(material);
                     }
                 }
+
+                if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+                {
+                    foreach (var cubemap in scene.Cubemaps)
+                    {
+                        if (cubemap.CubemapTexture is null)
+                            continue;
+
+                        mapTextures.Add(cubemap.CubemapTexture);
+                        Source2Handler.SaveVTEX(cubemap.CubemapTexture, $"{args.OutputDirectory}/Maps/Textures");
+                    }
+                }
             }
         });
 

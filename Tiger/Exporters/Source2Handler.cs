@@ -160,10 +160,10 @@ public class Source2Handler
             vmat.AppendLine($"\tTextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
         }
 
-        //vmat.AppendLine(PopulateCBuffers(materialHeader.Decompile(materialHeader.VertexShader.GetBytecode(), $"vs{materialHeader.VertexShader.Hash}"), materialHeader, true).ToString());
-        vmat.AppendLine(PopulateCBuffers(material).ToString());
+        vmat.AppendLine(PopulateCBuffers(material).ToString()); // PS
+        //vmat.AppendLine(PopulateCBuffers(material, true).ToString()); // VS
 
-        //Dynamic expressions
+        //PS Dynamic expressions
         TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(material.PS_TFX_Bytecode));
         var bytecode_hlsl = bytecode.Evaluate(material.PS_TFX_Bytecode_Constants);
 
@@ -172,6 +172,15 @@ public class Source2Handler
         {
             vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
         }
+
+        //VS Dynamic expressions
+        //bytecode = new(TfxBytecodeOp.ParseAll(material.VS_TFX_Bytecode));
+        //bytecode_hlsl = bytecode.Evaluate(material.VS_TFX_Bytecode_Constants);
+
+        //foreach (var entry in bytecode_hlsl)
+        //{
+        //    vmat.AppendLine($"\t\tvs_cb0_{entry.Key} \"{entry.Value}\"");
+        //}
 
         foreach (var resource in material.PixelShader.Resources)
         {
@@ -226,7 +235,7 @@ public class Source2Handler
                         break;
                     case 13: // Frame
                         vmat.AppendLine($"\t\tcb13_0 \"float4(Time, Time, 0.05, 1)\"");
-                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.25,8,1,1)\"");
+                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.4,8,1,1)\"");
                         break;
                 }
             }
@@ -299,7 +308,7 @@ public class Source2Handler
         if (!Directory.Exists(savePath))
             Directory.CreateDirectory(savePath);
 
-        var file = TextureFile.CreateDefault(tex, tex.IsCubemap() ? ImageDimension.CUBEARRAY : ImageDimension._2D);
+        var file = VTEX.Create(tex, tex.IsCubemap() ? ImageDimension.CUBEARRAY : ImageDimension._2D);
         var json = JsonSerializer.Serialize(file, JsonSerializerOptions.Default);
         File.WriteAllText($"{savePath}/{tex.Hash}.vtex", json);
     }
@@ -340,7 +349,7 @@ public class Source2Handler
     }
 }
 
-public class TextureFile
+public class VTEX
 {
     public List<string> Images { get; set; }
 
@@ -352,24 +361,16 @@ public class TextureFile
 
     public string OutputTypeString { get; set; }
 
-    public static TextureFile CreateDefault(Texture texture, ImageDimension dimension)
+    public static VTEX Create(Texture texture, ImageDimension dimension)
     {
-        return new TextureFile
+        return new VTEX
         {
             Images = new List<string> { $"textures/{texture.Hash}.png" },
             OutputFormat = ImageFormatType.RGBA8888.ToString(),
             OutputColorSpace = (texture.IsSrgb() ? GammaType.SRGB : GammaType.Linear).ToString(),
             InputColorSpace = (texture.IsSrgb() ? GammaType.SRGB : GammaType.Linear).ToString(),
-            OutputTypeString = GetDisplayName(dimension)
+            OutputTypeString = EnumExtensions.GetEnumDescription(dimension)
         };
-    }
-
-    private static string GetDisplayName(ImageDimension value)
-    {
-        var field = value.GetType().GetField(value.ToString());
-        var attribute = (DescriptionAttribute)Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute));
-
-        return attribute == null ? value.ToString() : attribute.Description;
     }
 }
 

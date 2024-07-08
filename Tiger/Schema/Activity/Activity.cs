@@ -260,7 +260,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
                         {
                             continue;
                         }
-                        yield return new Bubble { Name = stringContainer.GetStringFromHash(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
+                        yield return new Bubble { Name = stringContainer is null ? mapEntry.BubbleName : stringContainer.GetStringFromHash(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
                         //yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
                     }
 
