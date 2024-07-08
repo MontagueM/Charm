@@ -52,7 +52,7 @@ public class FbxExporter : AbstractExporter
                         AddMesh(fbxIndivScene, mesh);
                         ExportScene(fbxIndivScene, Path.Join(outputIndivDir, mesh.Hash));
                     }
-                    if (_config.GetS2VMDLExportEnabled())
+                    if (_config.GetS2VMDLExportEnabled() && scene.Type != ExportType.Terrain)
                     {
                         string fbxPath = scene.Type == ExportType.Map ? "Models/Statics" : "Models";
                         Source2Handler.SaveStaticVMDL(outputIndivDir, fbxPath, mesh);

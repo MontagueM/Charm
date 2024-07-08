@@ -117,6 +117,7 @@ PS
 //ps_samplers
 //ps_CBuffers
 //ps_Inputs
+//ps_additional
 
     float4 MainPs( PixelInput i ) : SV_Target0
     {{
@@ -157,6 +158,9 @@ PS
 
         vfxStructure = vfxStructure.Replace("//ps_samplers", texSamples.ToString());
         vfxStructure = vfxStructure.Replace("//ps_CBuffers", WriteCbuffers(material, false).ToString());
+
+        if (resources.Exists(cbuffer => cbuffer.ResourceType == ResourceType.CBuffer && cbuffer.Index == 12))
+            vfxStructure = vfxStructure.Replace("//ps_additional", AddTPToProj());
 
         hlsl = new StringReader(pixel);
         StringBuilder instructions = ConvertInstructions(material, false);
@@ -213,9 +217,9 @@ PS
         {
             switch (resource.ResourceType)
             {
-                case ResourceType.Buffer:
-                    CBuffers.AppendLine($"\tBuffer<float4> b_t{resource.Index} : register(t{resource.Index});");
-                    break;
+                //case ResourceType.Buffer:
+                //    CBuffers.AppendLine($"\tBuffer<float4> b_t{resource.Index} : register(t{resource.Index});");
+                //    break;
                 case ResourceType.CBuffer:
                     if (bIsVertexShader)
                     {
@@ -377,7 +381,8 @@ PS
         else //Pixel
         {
             //Need to divde by 39.37 to convert to meters
-            funcDef.AppendLine("\t\tfloat3 vPositionWs = (i.vPositionWithOffsetWs.xyz + g_vHighPrecisionLightingOffsetWs.xyz) / 39.37;");
+            funcDef.AppendLine("\t\tfloat3 vCameraPos = g_vCameraPositionWs/39.37;");
+            funcDef.AppendLine("\t\tfloat3 vPositionWs = (i.vPositionWithOffsetWs.xyz + g_vCameraPositionWs.xyz) / 39.37;");
             funcDef.AppendLine("\t\tfloat alpha = 1;");
 
             if (isTerrain) // Input variables are different for terrain
@@ -389,7 +394,7 @@ PS
                 funcDef.AppendLine("\t\tfloat4 v4 = {i.v4,1};"); // From VS, Used for normals
                 funcDef.AppendLine("\t\tfloat4 v5 = {i.v5,1};"); // From VS, Used for tri-planar mapping? Mainly seen on vertical terrain
             }
-            else
+            else // statics
             {
                 funcDef.AppendLine("\t\tfloat4 v0 = {i.vNormalWs,1};"); // Mesh world normals
                 funcDef.AppendLine("\t\tfloat4 v1 = {i.vTangentUWs,1};"); // Tangent U
@@ -534,7 +539,7 @@ PS
                             {
                                 case 10: // Depth buffer
                                     bUsesDepthBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= 1-Depth::Get({sampleUv}).xxxx; //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::GetNormalized({sampleUv})*0.3937.xxxx; //{equal_post}");
                                     break;
                                 case 11: // Atmostsphere lookup textures, useless in s&box
                                 case 13:
@@ -599,7 +604,7 @@ PS
                                     break;
                                 case 10:
                                     bUsesDepthBuffer = true;
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= 1-Depth::Get({sampleUv}).xxxx; //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::GetNormalized({sampleUv})*0.3937.xxxx; //{equal_post}");
                                     break;
                                 case 11:
                                 case 13:
@@ -709,25 +714,37 @@ PS
         StringBuilder viewScope = new StringBuilder();
         viewScope.AppendLine($"\t\tfloat4 cb12[15] = {{");
 
-        viewScope.AppendLine($"\t\tg_matWorldToProjection,"); //0
+        viewScope.AppendLine($"\t\t\tg_matWorldToProjection,"); //0 World To Proj
 
-        viewScope.AppendLine($"\t\tfloat4(1,0,0,0),"); //4
-        viewScope.AppendLine($"\t\tfloat4(0,1,0,0),");
-        viewScope.AppendLine($"\t\tfloat4(0,0,1,0),");
-        viewScope.AppendLine($"\t\tfloat4(g_vCameraPositionWs/39.37,1),");
+        viewScope.AppendLine($"\t\t\tfloat4(cross(g_vCameraUpDirWs, g_vCameraDirWs),0),"); //4 Camera To World
+        viewScope.AppendLine($"\t\t\tfloat4(g_vCameraUpDirWs,0),");
+        viewScope.AppendLine($"\t\t\tfloat4(-g_vCameraDirWs,0),");
+        viewScope.AppendLine($"\t\t\tfloat4(vCameraPos,1),");
 
-        viewScope.AppendLine($"\t\tfloat4(0.5,0,0,0),"); //8
-        viewScope.AppendLine($"\t\tfloat4(0,1,0,0),");
-        viewScope.AppendLine($"\t\tfloat4(0,0,1,0),");
-        viewScope.AppendLine($"\t\tfloat4(-100,-100,-100,1),");
+        viewScope.AppendLine($"\t\t\tg_matProjectionToView * TargetPixelToProjective( g_vViewportSize ),"); //8 TargetPixelToProjective
 
-        viewScope.AppendLine($"\t\tfloat4(g_vFrameBufferCopyInvSizeAndUvScale.xy, g_vFrameBufferCopyInvSizeAndUvScale.xy * g_vInvViewportSize),"); //12
-        viewScope.AppendLine($"\t\tfloat4(1,0,0,0),"); //13
-        viewScope.AppendLine($"\t\tfloat4(g_vCameraPositionWs/39.37,1)"); //14
+
+        viewScope.AppendLine($"\t\t\tfloat4(g_vViewportSize, g_vInvViewportSize),"); //12 Target
+        viewScope.AppendLine($"\t\t\tfloat4(1,0,0,0),"); //13 View Misc
+        viewScope.AppendLine($"\t\t\tfloat4(vCameraPos,1)"); //14
 
         viewScope.AppendLine($"\t\t}};");
 
         return viewScope.ToString();
+    }
+
+    private string AddTPToProj()
+    {
+        StringBuilder tp = new StringBuilder();
+        tp.AppendLine("\tfloat4x4 TargetPixelToProjective(float2 size)\n\t{");
+        tp.AppendLine("\t\treturn float4x4(");
+        tp.AppendLine("\t\t\t2.0f / size.x,  0.0f,          0.0f, \t0.0f,");
+        tp.AppendLine("\t\t\t0.0f,          -2.0f / size.y, 0.0f, \t0.0f,");
+        tp.AppendLine("\t\t\t0.0f,           0.0f,          1.0f,\t0.0f,");
+        tp.AppendLine("\t\t\t-1.0f,          1.0f,          0.0f, \t1.0f");
+        tp.AppendLine("\t\t);\n\t}");
+
+        return tp.ToString();
     }
 
     private string AddRenderStates()
