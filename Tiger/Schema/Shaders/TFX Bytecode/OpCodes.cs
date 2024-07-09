@@ -57,13 +57,13 @@ public class TfxBytecodeOp
                     break;
                 case TfxBytecode.Spline4Const:
                     Spline4ConstData Spline4ConstData = new();
-                    Spline4ConstData.unk1 = reader.ReadByte();
+                    Spline4ConstData.constant_index = reader.ReadByte();
                     tfxData.data = Spline4ConstData;
                     break;
-                case TfxBytecode.Unk38:
-                    Unk38Data Unk38Data = new();
-                    Unk38Data.unk1 = reader.ReadByte();
-                    tfxData.data = Unk38Data;
+                case TfxBytecode.Spline8Const:
+                    Spline8ConstData Spline8ConstData = new();
+                    Spline8ConstData.constant_index = reader.ReadByte();
+                    tfxData.data = Spline8ConstData;
                     break;
                 case TfxBytecode.Unk39:
                     Unk39Data Unk39Data = new();
@@ -98,8 +98,8 @@ public class TfxBytecodeOp
                     PushExternInputMat4Data.element = reader.ReadByte();
                     tfxData.data = PushExternInputMat4Data;
                     break;
-                case TfxBytecode.PushExternInputU64:
-                    PushExternInputU64Data Unk3fData = new();
+                case TfxBytecode.PushExternInputTextureView:
+                    PushExternInputTextureViewData Unk3fData = new();
                     Unk3fData.extern_ = (TfxExtern)reader.ReadByte();
                     Unk3fData.element = reader.ReadByte();
                     tfxData.data = Unk3fData;
@@ -141,9 +141,9 @@ public class TfxBytecodeOp
                     PopTempData.slot = reader.ReadByte();
                     tfxData.data = PopTempData;
                     break;
-                case TfxBytecode.Unk48:
-                    Unk48Data Unk48Data = new();
-                    Unk48Data.unk1 = reader.ReadByte();
+                case TfxBytecode.SetShaderTexture:
+                    SetShaderTextureData Unk48Data = new();
+                    Unk48Data.value = reader.ReadByte();
                     tfxData.data = Unk48Data;
                     break;
                 case TfxBytecode.Unk49:
@@ -151,14 +151,14 @@ public class TfxBytecodeOp
                     Unk49.unk1 = reader.ReadByte();
                     tfxData.data = Unk49;
                     break;
-                case TfxBytecode.Unk4a:
-                    Unk4aData Unk4aData = new();
-                    Unk4aData.unk1 = reader.ReadByte();
+                case TfxBytecode.SetShaderSampler:
+                    SetShaderSamplerData Unk4aData = new();
+                    Unk4aData.value = reader.ReadByte();
                     tfxData.data = Unk4aData;
                     break;
-                case TfxBytecode.Unk4b:
-                    Unk4bData Unk4bData = new();
-                    Unk4bData.unk1 = reader.ReadByte();
+                case TfxBytecode.SetShaderUav:
+                    SetShaderUavData Unk4bData = new();
+                    Unk4bData.value = reader.ReadByte();
                     tfxData.data = Unk4bData;
                     break;
                 case TfxBytecode.Unk4c:
@@ -166,23 +166,20 @@ public class TfxBytecodeOp
                     Unk4cData.unk1 = reader.ReadByte();
                     tfxData.data = Unk4cData;
                     break;
+                case TfxBytecode.PushSampler:
+                    PushSamplerData PushSampler = new();
+                    PushSampler.unk1 = reader.ReadByte();
+                    tfxData.data = PushSampler;
+                    break;
                 case TfxBytecode.PushObjectChannelVector:
-                    PushObjectChannelVectorData PushObjectChannelVectorData = new();
-                    PushObjectChannelVectorData.unk1 = reader.ReadByte();
-                    tfxData.data = PushObjectChannelVectorData;
+                    PushObjectChannelVectorData PushObjectChannelVector = new();
+                    PushObjectChannelVector.unk1 = reader.ReadInt32();
+                    tfxData.data = PushObjectChannelVector;
                     break;
-                case TfxBytecode.Unk4e:
-                    Unk4eData Unk4eData = new();
-                    Unk4eData.unk1 = reader.ReadByte();
-                    Unk4eData.unk2 = reader.ReadByte();
-                    Unk4eData.unk3 = reader.ReadByte();
-                    Unk4eData.unk4 = reader.ReadByte();
-                    tfxData.data = Unk4eData;
-                    break;
-                case TfxBytecode.Unk4f:
-                    Unk4fData Unk4fData = new();
-                    Unk4fData.unk1 = reader.ReadByte();
-                    tfxData.data = Unk4fData;
+                case TfxBytecode.PushGlobalChannelVector:
+                    PushGlobalChannelVectorData PushGlobalChannelVector = new();
+                    PushGlobalChannelVector.unk1 = reader.ReadByte();
+                    tfxData.data = PushGlobalChannelVector;
                     break;
                 case TfxBytecode.Unk50:
                     Unk50Data Unk50Data = new();
@@ -231,10 +228,10 @@ public class TfxBytecodeOp
                 output = $"constant_start {((LerpConstantData)tfxData.data).constant_start}: Constant 1: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: Constant 2: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
                 break;
             case Spline4ConstData:
-                output = $"unk1 {((Spline4ConstData)tfxData.data).unk1}";
+                output = $"unk1 {((Spline4ConstData)tfxData.data).constant_index}";
                 break;
-            case Unk38Data:
-                output = $"unk1 {((Unk38Data)tfxData.data).unk1}";
+            case Spline8ConstData:
+                output = $"unk1 {((Spline8ConstData)tfxData.data).constant_index}";
                 break;
             case Unk39Data:
                 output = $"unk1 {((Unk39Data)tfxData.data).unk1}";
@@ -254,8 +251,8 @@ public class TfxBytecodeOp
             case PushExternInputMat4Data:
                 output = $"extern {((PushExternInputMat4Data)tfxData.data).extern_}, element {((PushExternInputMat4Data)tfxData.data).element}";
                 break;
-            case PushExternInputU64Data:
-                output = $"extern {((PushExternInputU64Data)tfxData.data).extern_}, element {((PushExternInputU64Data)tfxData.data).element}";
+            case PushExternInputTextureViewData:
+                output = $"extern {((PushExternInputTextureViewData)tfxData.data).extern_}, element {((PushExternInputTextureViewData)tfxData.data).element}";
                 break;
             case PushExternInputU32Data:
                 output = $"extern {((PushExternInputU32Data)tfxData.data).extern_}, element {((PushExternInputU32Data)tfxData.data).element}";
@@ -281,29 +278,29 @@ public class TfxBytecodeOp
             case Unk47Data:
                 output = $"unk1 {((Unk47Data)tfxData.data).unk1}";
                 break;
-            case Unk48Data:
-                output = $"unk1 {((Unk48Data)tfxData.data).unk1}";
+            case SetShaderTextureData:
+                output = $"value {((SetShaderTextureData)tfxData.data).value}";
                 break;
             case Unk49Data:
                 output = $"unk1 {((Unk49Data)tfxData.data).unk1}";
                 break;
-            case Unk4aData:
-                output = $"unk1 {((Unk4aData)tfxData.data).unk1}";
+            case SetShaderSamplerData:
+                output = $"value {((SetShaderSamplerData)tfxData.data).value}";
                 break;
-            case Unk4bData:
-                output = $"unk1 {((Unk4bData)tfxData.data).unk1}";
+            case SetShaderUavData:
+                output = $"value {((SetShaderUavData)tfxData.data).value}";
                 break;
             case Unk4cData:
                 output = $"unk1 {((Unk4cData)tfxData.data).unk1}";
                 break;
+            case PushSamplerData:
+                output = $"unk1 {((PushSamplerData)tfxData.data).unk1}";
+                break;
             case PushObjectChannelVectorData:
                 output = $"unk1 {((PushObjectChannelVectorData)tfxData.data).unk1}";
                 break;
-            case Unk4eData:
-                output = $"unk1 {((Unk4eData)tfxData.data).unk1}, unk2 {((Unk4eData)tfxData.data).unk2}, unk3 {((Unk4eData)tfxData.data).unk3}, unk4 {((Unk4eData)tfxData.data).unk4},";
-                break;
-            case Unk4fData:
-                output = $"unk1 {((Unk4fData)tfxData.data).unk1}";
+            case PushGlobalChannelVectorData:
+                output = $"unk1 {((PushGlobalChannelVectorData)tfxData.data).unk1}";
                 break;
             case Unk50Data:
                 output = $"unk1 {((Unk50Data)tfxData.data).unk1}";
@@ -383,14 +380,14 @@ public enum TfxBytecode : byte
     PushConstantVec4 = 0x34, //{ constant_index: u8 }
     LerpConstant = 0x35, //{ unk1: u8 }
     Spline4Const = 0x37, //{ unk1: u8 }
-    Unk38 = 0x38, //{ unk1: u8 }
+    Spline8Const = 0x38, //{ unk1: u8 }
     Unk39 = 0x39, //{ unk1: u8 }
     Unk3a = 0x3a, //{ unk1: u8 }
     UnkLoadConstant = 0x3b, //{ constant_index: u8 }
     PushExternInputFloat = 0x3c, //{ extern_: TfxExtern, element: u8 }
     PushExternInputVec4 = 0x3d, //{ extern_: TfxExtern, unk2: u8 }
     PushExternInputMat4 = 0x3e, //{ extern_: TfxExtern, unk2: u8 }
-    PushExternInputU64 = 0x3f, //{ extern_: TfxExtern, unk2: u8 }
+    PushExternInputTextureView = 0x3f, //{ extern_: TfxExtern, unk2: u8 }
     PushExternInputU32 = 0x40, //{ extern_: TfxExtern, unk2: u8 }
     PushExternInputU64Unknown = 0x41, //{ extern_: TfxExtern, unk2: u8 }
     Unk42 = 0x42,
@@ -399,14 +396,14 @@ public enum TfxBytecode : byte
     PopOutputMat4 = 0x45, //{ slot: u8 }
     PushTemp = 0x46, //{ slot: u8 }
     PopTemp = 0x47, //{ unk1: u8 }
-    Unk48 = 0x48, //{ unk1: u8 }
+    SetShaderTexture = 0x48, //{ unk1: u8 }
     Unk49 = 0x49, //{ unk1: u8 }
-    Unk4a = 0x4a, //{ unk1: u8 }
-    Unk4b = 0x4b, //{ unk1: u8 }
+    SetShaderSampler = 0x4a, //{ unk1: u8 }
+    SetShaderUav = 0x4b, //{ unk1: u8 }
     Unk4c = 0x4c, //{ unk1: u8 }
-    PushObjectChannelVector = 0x4d, //{ unk1: u8 }
-    Unk4e = 0x4e, //{ unk1: u8, unk2: u8, unk3: u8, unk4: u8 }
-    Unk4f = 0x4f, //{ unk1: u8 }
+    PushSampler = 0x4d, //{ unk1: u8 }
+    PushObjectChannelVector = 0x4e, //{ unk1: u8, unk2: u8, unk3: u8, unk4: u8 }
+    PushGlobalChannelVector = 0x4f, //{ unk1: u8 }
     Unk50 = 0x50, //{ unk1: u8 }
     Unk51 = 0x51,
     Unk52 = 0x52, //{ unk1: u8, unk2: u8 }
@@ -441,12 +438,12 @@ public struct LerpConstantData
 
 public struct Spline4ConstData
 {
-    public byte unk1;
+    public byte constant_index;
 }
 
-public struct Unk38Data
+public struct Spline8ConstData
 {
-    public byte unk1;
+    public byte constant_index;
 }
 
 public struct Unk39Data
@@ -482,7 +479,7 @@ public struct PushExternInputMat4Data
     public byte element;
 }
 
-public struct PushExternInputU64Data
+public struct PushExternInputTextureViewData
 {
     public TfxExtern extern_;
     public byte element;
@@ -535,9 +532,9 @@ public struct Unk47Data
     public byte unk1;
 }
 
-public struct Unk48Data
+public struct SetShaderTextureData
 {
-    public byte unk1;
+    public byte value;
 }
 
 public struct Unk49Data
@@ -545,14 +542,14 @@ public struct Unk49Data
     public byte unk1;
 }
 
-public struct Unk4aData
+public struct SetShaderSamplerData
 {
-    public byte unk1;
+    public byte value;
 }
 
-public struct Unk4bData
+public struct SetShaderUavData
 {
-    public byte unk1;
+    public byte value;
 }
 
 public struct Unk4cData
@@ -560,20 +557,17 @@ public struct Unk4cData
     public byte unk1;
 }
 
+public struct PushSamplerData
+{
+    public byte unk1;
+}
+
 public struct PushObjectChannelVectorData
 {
-    public byte unk1;
+    public int unk1;
 }
 
-public struct Unk4eData
-{
-    public byte unk1;
-    public byte unk2;
-    public byte unk3;
-    public byte unk4;
-}
-
-public struct Unk4fData
+public struct PushGlobalChannelVectorData
 {
     public byte unk1;
 }

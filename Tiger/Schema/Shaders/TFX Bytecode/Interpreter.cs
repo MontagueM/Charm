@@ -116,7 +116,7 @@ public class TfxBytecodeInterpreter
                         break;
                     case TfxBytecode.Unk0f:
                         var Unk0f = StackPop(2);
-                        StackPush($"((({Unk0f[1]}.xxxx * {Unk0f[0]} + {Unk0f[1]}.yyyy) * ({Unk0f[0]} * {Unk0f[0]})) + ({Unk0f[1]}.zzzz * {Unk0f[0]} + {Unk0f[1]}.wwww))");
+                        StackPush($"((({Unk0f[1]}.xxxx * {Unk0f[0]} + {Unk0f[1]}.yyyy) * ({Unk0f[0]} * {Unk0f[0]}) + ({Unk0f[1]}.zzzz * {Unk0f[0]} + {Unk0f[1]}.wwww)))");
                         break;
                     case TfxBytecode.Lerp:
                         var lerp = StackPop(3);
@@ -219,6 +219,16 @@ public class TfxBytecodeInterpreter
 
                         StackPush($"(lerp(float4{a}, float4{b}, {t}))");
                         break;
+                    case TfxBytecode.Spline4Const:
+                        var X = StackTop();
+                        var threshold = $"float4{constants[((Spline4ConstData)op.data).constant_index + 4].Vec}";
+                        var C3 = $"float4{constants[((Spline4ConstData)op.data).constant_index].Vec}";
+                        var C2 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 1].Vec}";
+                        var C1 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 2].Vec}";
+                        var C0 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 3].Vec}";
+
+                        StackPush($"{bytecode_op_spline4_const(X, C3, C2, C1, C0, threshold)}");
+                        break;
                     case TfxBytecode.UnkLoadConstant: //Replaces the top of the stack instead of pushing?
                         var take = StackTop(); //Just take the top out then push
                         var UnkLoadConstant = constants[((UnkLoadConstantData)op.data).constant_index].Vec;
@@ -234,12 +244,12 @@ public class TfxBytecodeInterpreter
                         break;
                     case TfxBytecode.PushExternInputMat4:
                         //var Mat4 = Matrix4x4.Identity;
-                        StackPush($"(float4(1,0,0,0))");
-                        StackPush($"(float4(0,1,0,0))");
-                        StackPush($"(float4(0,0,1,0))");
-                        StackPush($"(float4(0,0,0,1))");
+                        StackPush($"float4(1,0,0,0)");
+                        StackPush($"float4(0,1,0,0)");
+                        StackPush($"float4(0,0,1,0)");
+                        StackPush($"float4(0,0,0,1)");
                         break;
-                    case TfxBytecode.PushExternInputU64:
+                    case TfxBytecode.PushExternInputTextureView:
                         //var PushExternInputU64 = GetExtern(((PushExternInputU64Data)op.data).extern_, ((PushExternInputU64Data)op.data).element);
                         StackPush($"float4(1, 1, 1, 1)");
                         break;
@@ -248,15 +258,41 @@ public class TfxBytecodeInterpreter
                         StackPush($"float4(1, 1, 1, 1)");
                         break;
 
+                    // Global channel stuff
                     case TfxBytecode.Unk4c:
-                    case TfxBytecode.PushObjectChannelVector:
-                    case TfxBytecode.Unk4e:
-                    case TfxBytecode.Unk4f:
+                        var global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk4cData)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
+                    case TfxBytecode.PushGlobalChannelVector:
+                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((PushGlobalChannelVectorData)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
                     case TfxBytecode.Unk50:
+                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk50Data)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
                     case TfxBytecode.Unk52:
+                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk52Data)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
                     case TfxBytecode.Unk53:
+                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk53Data)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
                     case TfxBytecode.Unk54:
-                        StackPush($"(float4(1, 1, 1, 1))");
+                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk54Data)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
+                    /////
+
+                    case TfxBytecode.SetShaderSampler:
+                        v = StackTop();
+                        break;
+                    case TfxBytecode.PushSampler:
+                        StackPush($"float4(0,0,0,0)");
+                        break;
+                    case TfxBytecode.PushObjectChannelVector:
+                        StackPush($"float4(1, 1, 1, 1)");
                         break;
                     case TfxBytecode.PushFromOutput:
                         StackPush($"{hlsl[((PushFromOutputData)op.data).element]}");
@@ -366,6 +402,32 @@ public class TfxBytecodeInterpreter
                 Log.Error($"Unsupported extern {extern_}[{element}]");
                 return $"float4(1, 1, 1, 1)";
         }
+    }
+
+    private string bytecode_op_spline4_const(string X, string C3, string C2, string C1, string C0, string thresholds)
+    {
+        string high = $"({C3}*{X}+{C2})"; // C3 * X + C2;
+        string low = $"({C1}*{X}+{C0})"; // C1 * X + C0;
+        string X2 = $"({X}*{X})"; // X * X;
+        string evaluated_spline = $"({high}*{X2}+{low})"; // high * X2 + low;
+
+        string threshold_mask = $"step({thresholds}, {X})";
+        string a = $"({_fake_bitwise_ops_fake_xor(threshold_mask, $"({threshold_mask}).yzww")})";
+        string channel_mask = $"float4(({a}).x, ({a}).y, ({a}).z, ({threshold_mask}).w)"; // float4(_fake_bitwise_ops_fake_xor(threshold_mask, threshold_mask.yzww).xyz, threshold_mask.w);
+        string spline_result_in_4 = $"({evaluated_spline} * {channel_mask})"; // evaluated_spline * channel_mask;
+        string spline_result = $"(({spline_result_in_4}).x + ({spline_result_in_4}).y + ({spline_result_in_4}).z + ({spline_result_in_4}).w)"; // spline_result_in_4.x + spline_result_in_4.y + spline_result_in_4.z + spline_result_in_4.w;
+
+        return $"(({spline_result}).xxxx)"; // spline_result.xxxx;
+    }
+
+    private string _fake_bitwise_ops_fake_xor(string a, string b)
+    {
+        return $"{fmod($"({a}+{b})", "2")}";
+    }
+
+    private string fmod(string x, string y)
+    {
+        return $"({x}-floor({x}/{y})*{y})";
     }
 
     private string bytecode_op_triangle(string x)

@@ -143,12 +143,12 @@ public class Source2Handler
         vmat.AppendLine("Layer0\n{");
 
         //Material parameters
-        vmat.AppendLine($"\tshader \"ps_{material.PixelShader.Hash}.shader\"");
-        //vmat.AppendLine($"\tF_ALPHA_TEST 1");
+        vmat.AppendLine($"\tshader \"shaders/ps_{material.PixelShader.Hash}.shader\"");
+
         if ((material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)) && material.RenderStates.BlendState() == -1)
             vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
-        if (material.Unk0C != 0)
+        if (material.Unk0C != 0 && (material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)))
             vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
 
         //Textures
