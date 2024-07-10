@@ -5,244 +5,384 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Charm"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="720"
-    d:DesignWidth="1280"
+    d:DesignHeight="945"
+    d:DesignWidth="1914"
     Loaded="OnControlLoaded"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style x:Key="ColumnHeaderBorder" TargetType="Border">
+            <Setter Property="BorderBrush" Value="#AEFFFFFF" />
+            <Setter Property="BorderThickness" Value="0,0,0,5" />
+            <Setter Property="Margin" Value="0,0,0,15" />
+            <Setter Property="MinWidth" Value="350" />
+        </Style>
+
+        <Style x:Key="ColumnHeader" TargetType="Grid">
+            <Setter Property="Background" Value="#30585867" />
+            <Style.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
+                    <Setter Property="FontFamily" Value="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="Margin" Value="15" />
+                    <Setter Property="FontSize" Value="36" />
+                    <d:Setter Property="FontFamily" Value="Haas Grot Text 55 Roman" />
+                </Style>
+            </Style.Resources>
+        </Style>
+        <Style TargetType="Button">
+            <Style.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
+                    <Setter Property="FontFamily" Value="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="Margin" Value="10" />
+                    <Setter Property="FontSize" Value="36" />
+                    <d:Setter Property="FontFamily" Value="Haas Grot Text 55 Roman" />
+                </Style>
+            </Style.Resources>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Margin="10" Cursor="Hand">
+                            <Border
+                                x:Name="Main"
+                                Background="#433C3C41"
+                                BorderBrush="#AEFFFFFF"
+                                BorderThickness="2">
+                                <ContentPresenter Margin="1" />
+                            </Border>
+                            <Border
+                                x:Name="outerBorder"
+                                Margin="-8"
+                                BorderBrush="#D9FFFFFF"
+                                BorderThickness="2"
+                                IsHitTestVisible="False"
+                                Opacity="0" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                                To="#403E3E3E"
+                                                Duration="0:0:0.1" />
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                                To="#AEFFFFFF"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0"
+                                                Duration="0:0:0.15" />
+                                            <ThicknessAnimation
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Margin"
+                                                To="-8"
+                                                Duration="0:0:0.15">
+                                                <ThicknessAnimation.EasingFunction>
+                                                    <BounceEase
+                                                        Bounces="1"
+                                                        Bounciness="3"
+                                                        EasingMode="EaseOut" />
+                                                </ThicknessAnimation.EasingFunction>
+                                            </ThicknessAnimation>
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                                To="#C34E4E4E"
+                                                Duration="0:0:0.1" />
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                                To="#DEDEDE"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                BeginTime="0:0:0.075"
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="1"
+                                                Duration="0:0:0.2" />
+                                            <ThicknessAnimation
+                                                BeginTime="0:0:0.075"
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Margin"
+                                                To="-5"
+                                                Duration="0:0:0.1">
+                                                <ThicknessAnimation.EasingFunction>
+                                                    <BounceEase
+                                                        Bounces="1"
+                                                        Bounciness="4"
+                                                        EasingMode="EaseOut" />
+                                                </ThicknessAnimation.EasingFunction>
+                                            </ThicknessAnimation>
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                                To="#90AAAAAA"
+                                                Duration="0:0:0.05" />
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                                To="White"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                AutoReverse="True"
+                                                BeginTime="0:0:0.075"
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0"
+                                                Duration="0:0:0.15" />
+                                            <ThicknessAnimation
+                                                BeginTime="0:0:0.075"
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Margin"
+                                                To="-5"
+                                                Duration="0:0:0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Trigger.Setters>
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Trigger.Setters>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="10*" />
-            <ColumnDefinition Width="80*" />
-            <ColumnDefinition Width="10*" />
-        </Grid.ColumnDefinitions>
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="10*" />
-            <RowDefinition Height="80*" />
+            <RowDefinition Height="90*" />
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
-        <!--  AB8FA380 variks  -->
-        <!--  3b00ab80 atraks  -->
-        <!--  4901ab80 taniks normal, 100bb780 abomination  -->
 
-        <StackPanel Grid.Row="1" Grid.Column="1">
-            <Button
-                Height="75"
-                Margin="20,0,20,40"
-                Padding="20,20,20,20"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Stretch"
-                Click="ActivitiesViewButton_OnClick"
-                Style="{StaticResource MaterialDesignPaperDarkButton}">
-                <TextBlock
-                    Padding="0,10,0,10"
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="0,0,0,0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+
+            <Grid Margin="0,0,0,10">
+                <Border
+                    Grid.Column="1"
+                    Margin="0,10,0,0"
+                    Background="Transparent"
+                    BorderBrush="#AEFFFFFF"
+                    BorderThickness="0,0,0,2" />
+                <Border
+                    Grid.Column="1"
+                    Height="10"
+                    Margin="0,0,0,-10"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                    FontSize="42"
-                    Text="MAPS AND ACTIVITIES" />
+                    VerticalAlignment="Top"
+                    Background="Transparent"
+                    BorderBrush="#AEFFFFFF"
+                    BorderThickness="1" />
+                <Border
+                    Grid.Column="1"
+                    Height="10"
+                    Margin="0,0,0,-10"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    Background="Transparent"
+                    BorderBrush="#AEFFFFFF"
+                    BorderThickness="1" />
+                <Border
+                    Grid.Column="1"
+                    Height="10"
+                    Margin="0,0,0,-10"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Background="Transparent"
+                    BorderBrush="#AEFFFFFF"
+                    BorderThickness="1" />
+            </Grid>
+
+            <Button Margin="0,0,0,30" Click="ActivitiesViewButton_OnClick">
+                <TextBlock Text="MAPS AND ACTIVITIES" TextWrapping="WrapWithOverflow" />
             </Button>
-            <StackPanel Orientation="Horizontal">
-                <StackPanel Grid.Column="0" Margin="10,0,0,0">
-                    <TextBlock
-                        Padding="0,0,0,50"
-                        HorizontalAlignment="Center"
-                        FontSize="64"
-                        Text="Dynamic" />
+
+            <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
+                <StackPanel
+                    Grid.Column="0"
+                    Margin="0,0,35,0"
+                    Background="#18585867">
+                    <Border Style="{StaticResource ColumnHeaderBorder}">
+                        <Grid Style="{StaticResource ColumnHeader}">
+                            <TextBlock Text="MODELS" />
+                        </Grid>
+                    </Border>
+
                     <Button
                         x:Name="ApiButton"
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="ApiViewButton_OnClick"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="42"
-                            Text="API" />
+                        Grid.Column="1"
+                        Click="ApiViewButton_OnClick">
+                        <TextBlock Text="API" />
                     </Button>
-                    <Button
-                        x:Name="BagsButton"
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalContentAlignment="Stretch"
-                        VerticalContentAlignment="Stretch"
-                        Click="NamedEntitiesBagsViewButton_OnClick"
-                        FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                        FontSize="64"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="36"
-                            Text="NAMED BAGS" />
+
+                    <Button x:Name="BagsButton" Click="NamedEntitiesBagsViewButton_OnClick">
+                        <TextBlock Text="NAMED BAGS" />
                     </Button>
-                    <Button
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="AllEntitiesViewButton_OnClick"
-                        FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                        FontSize="64"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="42"
-                            Text="LIST" />
+
+                    <Button Click="AllEntitiesViewButton_OnClick">
+                        <TextBlock Text="DYNAMICS" />
                     </Button>
+
+                    <Button x:Name="StaticsButton" Click="AllStaticsViewButton_OnClick">
+                        <TextBlock Text="STATICS" />
+                    </Button>
+
+                    <Grid Margin="10" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                    <TextBlock
-                        Padding="0,0,0,50"
-                        HorizontalAlignment="Center"
-                        FontSize="64"
-                        Text="Static" />
-                    <Button
-                        x:Name="StaticsButton"
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="AllStaticsViewButton_OnClick"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="40"
-                            Text="LIST" />
+                <StackPanel
+                    Grid.Column="2"
+                    Margin="35,0,35,0"
+                    Background="#18585867">
+                    <Border Style="{StaticResource ColumnHeaderBorder}">
+                        <Grid Style="{StaticResource ColumnHeader}">
+                            <TextBlock Text="AUDIO" />
+                        </Grid>
+                    </Border>
+
+                    <Button Click="AllAudioViewButton_OnClick">
+                        <TextBlock Text="ALL" />
                     </Button>
+
+                    <Button x:Name="WeaponAudioButton" Click="WeaponAudioViewButton_Click">
+                        <TextBlock Text="WEAPONS" />
+                    </Button>
+
+                    <Button x:Name="SoundBanksButton" Click="AllBKHDViewButton_OnClick">
+                        <TextBlock Text="SOUND BANKS" />
+                    </Button>
+
+                    <Grid Margin="10" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="2" Margin="10,0,0,0">
-                    <TextBlock
-                        Padding="0,0,0,50"
-                        HorizontalAlignment="Center"
-                        FontSize="64"
-                        Text="Audio" />
-                    <Button
-                        x:Name="WeaponAudioButton"
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="WeaponAudioViewButton_Click"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="42"
-                            Text="WEAPONS" />
-                    </Button>
-                    <Button
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="AllAudioViewButton_OnClick"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="42"
-                            Text="LIST" />
-                    </Button>
-                    <Button
-                        x:Name="SoundBanksButton"
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="AllBKHDViewButton_OnClick"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="42"
-                            Text="SOUND BANKS" />
-                    </Button>
-                </StackPanel>
+                <StackPanel
+                    Grid.Column="3"
+                    Margin="35,0,0,0"
+                    Background="#18585867">
+                    <Border Style="{StaticResource ColumnHeaderBorder}">
+                        <Grid Style="{StaticResource ColumnHeader}">
+                            <TextBlock Text="OTHER" />
+                        </Grid>
+                    </Border>
 
-                <StackPanel Grid.Column="3" Margin="10,0,0,0">
-                    <TextBlock
-                        Padding="0,0,0,50"
-                        HorizontalAlignment="Center"
-                        FontSize="64"
-                        Text="Other" />
-                    <Button
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="AllStringsViewButton_OnClick"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="42"
-                            Text="STRINGS" />
+                    <Button Click="AllStringsViewButton_OnClick">
+                        <TextBlock Text="STRINGS" />
                     </Button>
-                    <Button
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="AllTexturesViewButton_OnClick"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="42"
-                            Text="TEXTURES" />
+
+                    <Button Click="AllTexturesViewButton_OnClick">
+                        <TextBlock Text="TEXTURES" />
                     </Button>
-                    <Button
-                        Height="75"
-                        Margin="20,0,20,40"
-                        Padding="20,20,20,20"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Click="AllMaterialsViewButton_OnClick"
-                        Style="{StaticResource MaterialDesignPaperDarkButton}">
-                        <TextBlock
-                            Padding="0,10,0,10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                            FontSize="42"
-                            Text="MATERIALS" />
+
+                    <Button Click="AllMaterialsViewButton_OnClick">
+                        <TextBlock Text="MATERIALS" />
                     </Button>
+
+                    <Grid Margin="10" />
                 </StackPanel>
             </StackPanel>
+            <Grid Margin="0,10,0,0">
+                <Border
+                    Grid.Column="1"
+                    Margin="0,10,0,0"
+                    Background="Transparent"
+                    BorderBrush="#AEFFFFFF"
+                    BorderThickness="0,0,0,2" />
+                <Border
+                    Grid.Column="1"
+                    Height="10"
+                    Margin="0,0,0,-10"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Background="Transparent"
+                    BorderBrush="#AEFFFFFF"
+                    BorderThickness="1" />
+                <Border
+                    Grid.Column="1"
+                    Height="10"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Background="Transparent"
+                    BorderBrush="#AEFFFFFF"
+                    BorderThickness="1" />
+                <Border
+                    Grid.Column="1"
+                    Height="10"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Background="Transparent"
+                    BorderBrush="#AEFFFFFF"
+                    BorderThickness="1" />
+            </Grid>
+
         </StackPanel>
+
+        <Grid
+            Grid.Row="1"
+            Margin="0,40,0,0"
+            Background="#18585867">
+            <TextBlock
+                x:Name="GameVersion"
+                Margin="15,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                d:FontFamily="Haas Grot Text 55 Roman"
+                FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                FontSize="16"
+                Foreground="{StaticResource ForegroundColour80}"
+                Text="Game Version: " />
+
+            <StackPanel
+                Margin="0,0,15,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <Button Click="GithubButton_OnClick">
+                    <TextBlock
+                        Margin="5"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="GITHUB" />
+                </Button>
+
+            </StackPanel>
+        </Grid>
+
+
     </Grid>
 </UserControl>

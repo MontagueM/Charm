@@ -24,6 +24,7 @@ public partial class MainWindow
     private static LogView _logView = null;
     private static TabItem _logTab = null;
     private bool _bHasInitialised = false;
+    public FileVersionInfo GameInfo = null;
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
@@ -201,6 +202,7 @@ public partial class MainWindow
             var path = config.GetPackagesPath(Strategy.CurrentStrategy).Split("packages")[0] + "destiny2.exe";
             var versionInfo = FileVersionInfo.GetVersionInfo(path);
             string version = versionInfo.FileVersion;
+            GameInfo = versionInfo;
             Log.Info("Game version: " + version);
         }
         catch (Exception e)

@@ -9,10 +9,7 @@
     d:DesignWidth="288"
     Loaded="OnControlLoaded"
     mc:Ignorable="d">
-    <Grid
-        Name="Container"
-        Margin="1,1,1,1"
-        Background="{Binding GridBackground}">
+    <Grid Name="Container" Background="{Binding GridBackground}">
         <Grid.RowDefinitions>
             <RowDefinition Height="50*" />
             <RowDefinition Height="25*" />

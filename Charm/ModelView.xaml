@@ -1,15 +1,17 @@
-﻿<UserControl x:Class="Charm.ModelView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:HelixToolkit="clr-namespace:HelixToolkit.Wpf;assembly=HelixToolkit.Wpf"
-             xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
-             xmlns:scene="clr-namespace:HelixToolkit.Wpf.SharpDX.Model;assembly=HelixToolkit.Wpf.SharpDX"
-             xmlns:charm="clr-namespace:Charm"
-             mc:Ignorable="d"
-             Name="UCModelView"
-             d:DesignHeight="1080" d:DesignWidth="1920">
+﻿<UserControl
+    x:Class="Charm.ModelView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:HelixToolkit="clr-namespace:HelixToolkit.Wpf;assembly=HelixToolkit.Wpf"
+    xmlns:charm="clr-namespace:Charm"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:scene="clr-namespace:HelixToolkit.Wpf.SharpDX.Model;assembly=HelixToolkit.Wpf.SharpDX"
+    Name="UCModelView"
+    d:DesignHeight="1080"
+    d:DesignWidth="1920"
+    mc:Ignorable="d">
     <UserControl.Resources>
         <charm:MainViewModel x:Key="MVM" />
         <hx:RenderTechniqueConverter x:Key="RenderTechniqueConverter" />
@@ -28,42 +30,62 @@
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <CheckBox x:Name="GridCheckbox" Margin="10,0,10,0" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource MaterialDesignCheckBox}">Grid</CheckBox>
-            <ComboBox x:Name="LodCombobox" SelectionChanged="LodCombobox_OnSelectionChanged" Margin="10,0,10,0" Style="{StaticResource MaterialDesignComboBox}">
+        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+            <CheckBox
+                x:Name="GridCheckbox"
+                Margin="10,0,10,0"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                IsChecked="True"
+                Style="{StaticResource MaterialDesignCheckBox}">
+                Grid
+            </CheckBox>
+            <ComboBox
+                x:Name="LodCombobox"
+                Margin="10,0,10,0"
+                SelectionChanged="LodCombobox_OnSelectionChanged"
+                Style="{StaticResource MaterialDesignComboBox}">
                 <ComboBoxItem IsSelected="True">Most Detail</ComboBoxItem>
                 <ComboBoxItem>Least Detail</ComboBoxItem>
                 <ComboBoxItem>All Detail</ComboBoxItem>
             </ComboBox>
-            <ComboBox x:Name="GroupsCombobox" SelectionChanged="GroupsCombobox_OnSelectionChanged" Margin="10,0,10,0" Style="{StaticResource MaterialDesignComboBox}">
+            <ComboBox
+                x:Name="GroupsCombobox"
+                Margin="10,0,10,0"
+                SelectionChanged="GroupsCombobox_OnSelectionChanged"
+                Style="{StaticResource MaterialDesignComboBox}">
                 <!-- <ComboBoxItem IsSelected="True">Group 1/n</ComboBoxItem> -->
             </ComboBox>
         </StackPanel>
 
         <TextBlock
-            Grid.Column="1"
             Grid.Row="0"
+            Grid.Column="1"
             FontSize="12"
             Foreground="{StaticResource ForegroundColour90}"
             Text="{Binding ElementName=Viewport, Path=RenderDetailOutput}" />
 
-        <hx:Viewport3DX x:Name="ModelViewport" Grid.Row="1" Grid.ColumnSpan="1"
-                        EffectsManager="{Binding EffectsManager}"
-                        EnableDesignModeRendering="False"
-                        EnableSwapChainRendering="True"
-                        IsShadowMappingEnabled="False"
-                        ShowCoordinateSystem="False"
-                        ShowFrameRate="True"
-                        ShowTriangleCountInfo="False"
-                        EnableDeferredRendering="False" EnableRenderFrustum="True"
-                        Title="{Binding Title}"
-                        TextBrush="{StaticResource ForegroundColour75}"
-                        TitleFontFamily="Arial"
-                        ShowViewCube="False"
-                        SubTitle="{Binding SubTitle}"
-                        InfoForeground="{StaticResource ForegroundColour75}"
-                        InfoBackground="{StaticResource BackgroundColour14}"
-                        Camera="{Binding Camera}">
+        <hx:Viewport3DX
+            x:Name="ModelViewport"
+            Title="{Binding Title}"
+            Grid.Row="1"
+            Grid.ColumnSpan="1"
+            Camera="{Binding Camera}"
+            EffectsManager="{Binding EffectsManager}"
+            EnableDeferredRendering="False"
+            EnableDesignModeRendering="False"
+            EnableRenderFrustum="True"
+            EnableSwapChainRendering="True"
+            InfoBackground="{StaticResource BackgroundColour14}"
+            InfoForeground="{StaticResource ForegroundColour75}"
+            IsShadowMappingEnabled="False"
+            ShowCoordinateSystem="False"
+            ShowFrameRate="True"
+            ShowTriangleCountInfo="False"
+            ShowViewCube="False"
+            SubTitle="{Binding SubTitle}"
+            TextBrush="{StaticResource ForegroundColour75}"
+            TitleFontFamily="Arial">
             <hx:Viewport3DX.InputBindings>
                 <KeyBinding Key="R" Command="{Binding RotateCommand}" />
                 <KeyBinding Key="W" Command="{Binding ForwardCommand}" />
@@ -75,13 +97,11 @@
             <hx:Element3DPresenter Content="{Binding ModelGroup}" />
             <hx:LineGeometryModel3D
                 Geometry="{Binding Grid}"
-                Transform="{Binding GridTransform}"
                 Smoothness="2"
                 Thickness="1.0"
-                Color="{StaticResource BackgroundColour14C}"
-                Visibility="{Binding IsChecked,
-                                                     ElementName=GridCheckbox,
-                                                     Converter={StaticResource BoolToVisibility}}" />
+                Transform="{Binding GridTransform}"
+                Visibility="{Binding IsChecked, ElementName=GridCheckbox, Converter={StaticResource BoolToVisibility}}"
+                Color="{StaticResource BackgroundColour14C}" />
         </hx:Viewport3DX>
     </Grid>
 </UserControl>

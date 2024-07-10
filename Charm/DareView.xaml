@@ -11,13 +11,145 @@
     <UserControl.Resources>
         <DataTemplate x:Key="ItemTemplate">
             <Button
-                Width="288"
-                Height="96"
+                Width="300"
+                Height="110"
                 Margin="0"
-                Click="DareItemControl_OnClick">
+                Click="DareItemControl_OnClick"
+                Style="{DynamicResource DareItemButton}">
                 <local:DareItemControl />
             </Button>
         </DataTemplate>
+
+        <Style x:Key="DareItemButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Margin="5" Cursor="Hand">
+                            <Border
+                                x:Name="Main"
+                                Background="#432D2D7D"
+                                BorderBrush="#AEFFFFFF"
+                                BorderThickness="2">
+                                <ContentPresenter Margin="1" />
+                            </Border>
+                            <Border
+                                x:Name="outerBorder"
+                                Margin="-8"
+                                BorderBrush="#D9FFFFFF"
+                                BorderThickness="2"
+                                IsHitTestVisible="False"
+                                Opacity="0" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                                To="#403E3E3E"
+                                                Duration="0:0:0.1" />
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                                To="#AEFFFFFF"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0"
+                                                Duration="0:0:0.15" />
+                                            <ThicknessAnimation
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Margin"
+                                                To="-8"
+                                                Duration="0:0:0.15">
+                                                <ThicknessAnimation.EasingFunction>
+                                                    <BounceEase
+                                                        Bounces="1"
+                                                        Bounciness="3"
+                                                        EasingMode="EaseOut" />
+                                                </ThicknessAnimation.EasingFunction>
+                                            </ThicknessAnimation>
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                                To="#C34E4E4E"
+                                                Duration="0:0:0.1" />
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                                To="#DEDEDE"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                BeginTime="0:0:0.075"
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="1"
+                                                Duration="0:0:0.2" />
+                                            <ThicknessAnimation
+                                                BeginTime="0:0:0.075"
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Margin"
+                                                To="-5"
+                                                Duration="0:0:0.1">
+                                                <ThicknessAnimation.EasingFunction>
+                                                    <BounceEase
+                                                        Bounces="1"
+                                                        Bounciness="4"
+                                                        EasingMode="EaseOut" />
+                                                </ThicknessAnimation.EasingFunction>
+                                            </ThicknessAnimation>
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                                To="#90AAAAAA"
+                                                Duration="0:0:0.05" />
+                                            <ColorAnimation
+                                                Storyboard.TargetName="Main"
+                                                Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                                To="White"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                AutoReverse="True"
+                                                BeginTime="0:0:0.075"
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Opacity"
+                                                To="0"
+                                                Duration="0:0:0.15" />
+                                            <ThicknessAnimation
+                                                BeginTime="0:0:0.075"
+                                                Storyboard.TargetName="outerBorder"
+                                                Storyboard.TargetProperty="Margin"
+                                                To="-5"
+                                                Duration="0:0:0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Trigger.Setters>
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Trigger.Setters>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -26,7 +158,7 @@
             <RowDefinition Height="40*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="80*" />
+            <ColumnDefinition Width="75*" />
             <ColumnDefinition Width="20*" />
         </Grid.ColumnDefinitions>
         <Border
@@ -57,7 +189,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
             PreviewTextInput="NumberValidationTextBox"
-            Text="250"
+            Text="150"
             TextAlignment="Center"
             TextChanged="AmountBox_TextChanged" />
         <Button
@@ -141,7 +273,7 @@
             <ItemsControl Name="DareListView" ItemTemplate="{StaticResource ItemTemplate}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Rows="7" />
+                        <UniformGrid Margin="10,20,10,20" Rows="7" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
