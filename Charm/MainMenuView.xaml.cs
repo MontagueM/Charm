@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using Tiger;
 using Tiger.Schema.Investment;
 
@@ -19,6 +20,7 @@ public partial class MainMenuView : UserControl
         WeaponAudioButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy) || ShowIfD1(Strategy.CurrentStrategy);
         StaticsButton.IsEnabled = ShowIfD2(Strategy.CurrentStrategy);
         SoundBanksButton.Visibility = ShowIfD1(Strategy.CurrentStrategy) ? Visibility.Visible : Visibility.Hidden;
+        CollectionsButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy);
 
         Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
         {
@@ -29,6 +31,7 @@ public partial class MainMenuView : UserControl
                 WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy) || ShowIfD1(args.Strategy);
                 StaticsButton.IsEnabled = ShowIfD2(args.Strategy);
                 SoundBanksButton.Visibility = ShowIfD1(Strategy.CurrentStrategy) ? Visibility.Visible : Visibility.Hidden;
+                CollectionsButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy);
             });
         };
     }
@@ -50,7 +53,7 @@ public partial class MainMenuView : UserControl
 
     private bool ShowIfLatest(TigerStrategy strategy)
     {
-        return strategy == TigerStrategy.DESTINY2_LATEST;
+        return Strategy.CurrentStrategy == TigerStrategy.DESTINY2_LATEST;
     }
 
     private bool ShowAPIButton(TigerStrategy strategy)
@@ -61,7 +64,7 @@ public partial class MainMenuView : UserControl
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
-        GameVersion.Text = $"Game Version: {_mainWindow.GameInfo.FileVersion}";
+        GameVersion.Text = $"Game Version: {_mainWindow.GameInfo?.FileVersion}";
     }
 
     private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
@@ -76,6 +79,18 @@ public partial class MainMenuView : UserControl
         DareView apiView = new DareView();
         apiView.LoadContent();
         _mainWindow.MakeNewTab("api", apiView);
+        _mainWindow.SetNewestTabSelected();
+    }
+
+    private void CollectionsViewButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        MainWindow.Progress.SetProgressStages(new() { "Start investment system" });
+        Investment.LazyInit();
+        MainWindow.Progress.CompleteStage();
+
+        CollectionsView apiView2 = new CollectionsView();
+        apiView2.LoadContent();
+        _mainWindow.MakeNewTab("Collections", apiView2);
         _mainWindow.SetNewestTabSelected();
     }
 

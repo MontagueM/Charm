@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Drawing.Text;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace Charm
 {
@@ -81,6 +76,62 @@ namespace Charm
                     // //Shutdown();
                 }
             }
+        }
+    }
+
+    // Idk where else to put this, I don't want to make a whole new file
+    public static class StyleHelper
+    {
+        // BorderThickness attached property
+        public static readonly DependencyProperty BorderThicknessProperty =
+            DependencyProperty.RegisterAttached(
+                "BorderThickness",
+                typeof(Thickness),
+                typeof(StyleHelper),
+                new PropertyMetadata(new Thickness(1))); // Default thickness
+
+        public static void SetBorderThickness(UIElement element, Thickness value)
+        {
+            element.SetValue(BorderThicknessProperty, value);
+        }
+
+        public static Thickness GetBorderThickness(UIElement element)
+        {
+            return (Thickness)element.GetValue(BorderThicknessProperty);
+        }
+
+        // BackgroundColor attached property
+        public static readonly DependencyProperty BackgroundColorProperty =
+            DependencyProperty.RegisterAttached(
+                "BackgroundColor",
+                typeof(Brush),
+                typeof(StyleHelper),
+                new PropertyMetadata(new SolidColorBrush((Color)ColorConverter.ConvertFromString("#433C3C41")))); // Default background color
+
+        public static void SetBackgroundColor(UIElement element, Brush value)
+        {
+            element.SetValue(BackgroundColorProperty, value);
+        }
+
+        public static Brush GetBackgroundColor(UIElement element)
+        {
+            return (Brush)element.GetValue(BackgroundColorProperty);
+        }
+    }
+
+    public static class AnimationHelper
+    {
+        public static void AnimateFadeIn(dynamic obj, float seconds, float to = 1, float from = 0)
+        {
+            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
+            {
+                DoubleAnimation fadeInAnimation = new DoubleAnimation();
+                fadeInAnimation.From = from;
+                fadeInAnimation.To = to;
+                fadeInAnimation.Duration = TimeSpan.FromSeconds(seconds);
+                obj.BeginAnimation(UIElement.OpacityProperty, fadeInAnimation);
+
+            }), DispatcherPriority.Background);
         }
     }
 }

@@ -1,0 +1,112 @@
+﻿<UserControl
+    x:Class="Charm.CollectionItemControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="100"
+    d:DesignWidth="288"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+    <Grid Name="Container" Background="#8B595959">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Button
+            x:Name="ItemInspectButton"
+            Grid.Column="1"
+            Width="22"
+            Height="22"
+            Margin="2"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Panel.ZIndex="2"
+            Click="InspectAPIItem_OnClick"
+            Style="{StaticResource API Inspect Button}"
+            Visibility="Collapsed">
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="14"
+                Text="🔎" />
+        </Button>
+
+        <Border
+            Grid.RowSpan="3"
+            HorizontalAlignment="Left"
+            Panel.ZIndex="1"
+            BorderBrush="White"
+            BorderThickness="0">
+            <Image Source="{Binding ImageSource}" />
+        </Border>
+
+        <Grid
+            Grid.Column="1"
+            Margin="15,0,0,0"
+            Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50*" />
+                <RowDefinition Height="25*" />
+                <RowDefinition Height="25*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                Panel.ZIndex="1"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                FontSize="20"
+                Foreground="{StaticResource ForegroundColour90}"
+                Text="{Binding ItemName}"
+                TextAlignment="Left"
+                TextWrapping="Wrap" />
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Panel.ZIndex="1"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                FontSize="14"
+                Foreground="{StaticResource ForegroundColour90}"
+                Text="{Binding ItemType}"
+                TextAlignment="Left" />
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="1"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                Panel.ZIndex="1"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                FontSize="12"
+                Foreground="{StaticResource ForegroundColour90}"
+                Text="{Binding ItemRarity}"
+                TextAlignment="Left"
+                TextWrapping="Wrap" />
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="1"
+                Margin="0,0,5,0"
+                HorizontalAlignment="Right"
+                Panel.ZIndex="1"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                FontSize="12"
+                Foreground="{StaticResource ForegroundColour90}"
+                Text="{Binding ItemHash}"
+                TextAlignment="Left"
+                TextWrapping="Wrap" />
+        </Grid>
+
+    </Grid>
+</UserControl>
+
+
+
+

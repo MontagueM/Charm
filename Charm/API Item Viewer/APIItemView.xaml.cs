@@ -40,7 +40,7 @@ public partial class APIItemView : UserControl
         if (type == null)
             type = "";
 
-        var source = Investment.Get().GetCollectible(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
+        var source = Investment.Get().GetCollectibleStringsFromItemIndex(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
         var sourceString = source != null ? source.Value.SourceName.Value.ToString() : "";
 
         var foundryBanner = ApiImageUtils.MakeFoundryBanner(item);
@@ -65,7 +65,7 @@ public partial class APIItemView : UserControl
     {
         InitializeComponent();
 
-        var source = Investment.Get().GetCollectible(Investment.Get().GetItemIndex(apiItem.Item.TagData.InventoryItemHash));
+        var source = Investment.Get().GetCollectibleStringsFromItemIndex(Investment.Get().GetItemIndex(apiItem.Item.TagData.InventoryItemHash));
         var sourceString = source != null ? source.Value.SourceName.Value.ToString() : "";
 
         var hash = apiItem.Item.TagData.InventoryItemHash;
@@ -73,8 +73,8 @@ public partial class APIItemView : UserControl
         ApiItem = new ApiItemView
         {
             Item = apiItem.Item,
-            ItemName = apiItem.ItemName.ToUpper(),
-            ItemType = apiItem.ItemType.ToUpper(),
+            ItemName = apiItem.ItemName?.ToUpper(),
+            ItemType = apiItem.ItemType?.ToUpper(),
             ItemFlavorText = Investment.Get().GetItemStrings(hash).TagData.ItemFlavourText.Value.ToString(),
             ItemLore = Investment.Get().GetItemLore(hash)?.LoreDescription.Value.ToString(),
             ItemSource = sourceString,
@@ -118,6 +118,18 @@ public partial class APIItemView : UserControl
         _statItems = new();
         _plugItems = new();
 
+        if (ApiItem.ItemType == "EMBLEM")
+        {
+            var index = ApiItem.Item.GetItemStrings().TagData.EmblemContainerIndex;
+            EmblemItem emblem = new()
+            {
+                EmblemLarge = ApiImageUtils.MakeFullIcon(index, 5),
+                EmblemMedium = ApiImageUtils.MakeFullIcon(index),
+                EmblemSmall = ApiImageUtils.MakeFullIcon(index, 4),
+            };
+            EmblemContainer.DataContext = emblem;
+        }
+
         CreateSocketCategories();
         GetItemStats();
     }
@@ -129,9 +141,12 @@ public partial class APIItemView : UserControl
 
         var item = Investment.Get().GetInventoryItem(plugIndex);
         var strings = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
+        var type = strings.TagData.ItemType.Value.ToString();
+        if (type == "Shader") // Too slow atm, not really important either
+            return null;
+
         var icon = ApiImageUtils.MakeIcon(item);
         var name = Investment.Get().GetItemName(item).ToUpper();
-        var type = strings.TagData.ItemType.Value.ToString();
         var description = strings.TagData.ItemDisplaySource.Value.ToString();
         //var socketName = Investment.Get().SocketCategoryStringThings[socketIndex].SocketName.Value.ToString();
         if (name == "" && type == "" && description == "")
@@ -771,6 +786,13 @@ public partial class APIItemView : UserControl
         public SolidColorBrush SocketRarityColor { get; set; } // Only used for EnergyMeter
     }
 
+    public class EmblemItem
+    {
+        public ImageSource EmblemLarge { get; set; }
+        public ImageSource EmblemMedium { get; set; }
+        public ImageSource EmblemSmall { get; set; }
+    }
+
     private enum TooltipType
     {
         InfoBlock,
@@ -881,7 +903,7 @@ public partial class APIItemView : UserControl
         {
             PlugItem notifItem = new PlugItem
             {
-                Description = notif.DisplayString.Value,
+                Description = $"★ {notif.DisplayString.Value}",
                 PlugImageSource = null
             };
             AddToTooltip(notifItem, TooltipType.InfoBlock);
@@ -912,9 +934,12 @@ public partial class APIItemView : UserControl
                 InfoBoxStackPanel.Children.Add(gridUi);
                 break;
             case TooltipType.InfoBlock:
-                DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
-                FrameworkElement infoBlockSepUi = (FrameworkElement)infoBlockSepTemplate.LoadContent();
-                InfoBoxStackPanel.Children.Add(infoBlockSepUi);
+                if (InfoBoxStackPanel.Children.Count != 0)
+                {
+                    DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
+                    FrameworkElement infoBlockSepUi = (FrameworkElement)infoBlockSepTemplate.LoadContent();
+                    InfoBoxStackPanel.Children.Add(infoBlockSepUi);
+                }
 
                 DataTemplate infoBlockTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
                 FrameworkElement infoBlockUi = (FrameworkElement)infoBlockTemplate.LoadContent();
@@ -1045,22 +1070,50 @@ public static class ApiImageUtils
         return dw.ImageSource;
     }
 
-    private static Texture? GetTexture(Tag<D2Class_CF3E8080> iconContainer, int index = 0)
+    public static ImageSource MakeFullIcon(int index, int containerIndex = 0, int iconIndex = 0, int listIndex = 0)
+    {
+        var container = Investment.Get().GetItemIconContainer(index);
+        if (container == null)
+            return null;
+
+        List<Tag<D2Class_CF3E8080>> containers = new()
+        {
+            container.TagData.IconPrimaryContainer,
+            container.TagData.IconAdContainer,
+            container.TagData.IconBGOverlayContainer,
+            container.TagData.IconBackgroundContainer,
+            container.TagData.IconOverlayContainer,
+            container.TagData.IconSpecialContainer
+        };
+        if (containers[containerIndex] is null)
+            return null;
+
+        var texture = GetTexture(containers[containerIndex], iconIndex, listIndex);
+        var primaryStream = texture.GetTexture();
+        var primary = primaryStream != null ? MakeBitmapImage(primaryStream, texture.TagData.Width, texture.TagData.Height) : null;
+
+        var dw = new ImageBrush(primary);
+        dw.Freeze();
+
+        return dw.ImageSource;
+    }
+
+    private static Texture? GetTexture(Tag<D2Class_CF3E8080> iconContainer, int texIndex = 0, int listIndex = 0)
     {
         using TigerReader reader = iconContainer.GetReader();
         dynamic? prim = iconContainer.TagData.Unk10.GetValue(reader);
         if (prim is D2Class_CD3E8080 structCD3E8080)
         {
             // TextureList[0] is default, others are for colourblind modes
-            if (index >= structCD3E8080.Unk00[reader, 0].TextureList.Count)
+            if (texIndex >= structCD3E8080.Unk00[reader, listIndex].TextureList.Count)
                 return null;
-            return structCD3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
+            return structCD3E8080.Unk00[reader, listIndex].TextureList[reader, texIndex].IconTexture;
         }
         if (prim is D2Class_CB3E8080 structCB3E8080)
         {
-            if (index >= structCB3E8080.Unk00[reader, 0].TextureList.Count)
+            if (texIndex >= structCB3E8080.Unk00[reader, listIndex].TextureList.Count)
                 return null;
-            return structCB3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
+            return structCB3E8080.Unk00[reader, listIndex].TextureList[reader, texIndex].IconTexture;
         }
         return null;
     }

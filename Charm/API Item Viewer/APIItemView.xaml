@@ -73,7 +73,7 @@
                     d:FontFamily="Haas Grot Text 55 Roman"
                     d:Text="Causing a lightning strike with this weapon partially reloads the magazine from reserves."
                     FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="15"
+                    FontSize="16"
                     Foreground="{StaticResource ForegroundColour70}"
                     Text="{Binding Description}"
                     TextWrapping="WrapWithOverflow" />
@@ -637,6 +637,48 @@
     </UserControl.Resources>
 
     <Grid>
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+        <Grid
+            x:Name="EmblemContainer"
+            Margin="0,0,0,50"
+            Background="Transparent">
+            <Image
+                Width="auto"
+                Height="146"
+                Source="{Binding EmblemLarge}" />
+            <Image
+                Width="948"
+                Height="128"
+                Margin="300,-350,0,0"
+                Source="{Binding EmblemMedium}" />
+            <Image
+                Width="128"
+                Height="128"
+                Margin="-600,-350,0,0"
+                HorizontalAlignment="Center"
+                Source="{Binding EmblemSmall}" />
+
+            <Image
+                Width="128"
+                Height="128"
+                Margin="-1500,96,0,0"
+                HorizontalAlignment="Center"
+                Source="{Binding EmblemSmall}" />
+        </Grid>
+
         <Grid
             x:Name="MainContainer"
             Margin="0,50,0,0"
@@ -853,7 +895,8 @@
                         FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                         FontSize="20"
                         Foreground="{StaticResource ForegroundColour90}"
-                        Style="{StaticResource DropShadowMedium}">
+                        Style="{StaticResource DropShadowMedium}"
+                        Visibility="Hidden">
                         <Run Text="Power Cap: " />
                         <Run Text="{Binding ItemPowerCap}" />
                     </TextBlock>
@@ -1270,7 +1313,7 @@
                 <StackPanel Background="Transparent" Orientation="Vertical">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
-                            <Setter Property="Margin" Value="15,15,15,15" />
+                            <Setter Property="Margin" Value="15,10,15,10" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
                                     <Setter Property="Margin" Value="15,10,15,10" />
@@ -1362,7 +1405,6 @@
 
                 <StackPanel x:Name="InfoBoxStackPanel" Orientation="Vertical" />
             </Grid>
-
         </Grid>
 
         <!--  User Controls  -->

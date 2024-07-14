@@ -334,6 +334,8 @@ public class ApiItem
     public double ImageWidth { get; set; }
     public double ImageHeight { get; set; }
     public bool IsD1 { get; set; }
+    public bool IsPlaceholder { get; set; } = false;
+    public int Weight { get; set; } = -1; // For display ordering purposes
 
     private System.Windows.Media.ImageSource _ImageSource { get; set; }
     private System.Windows.Media.ImageBrush _GridBackground { get; set; }
@@ -414,4 +416,5 @@ public class ApiItem
 
     public InventoryItem Item { get; set; }
     public InventoryItem Parent { get; set; }
+    public int CollectableIndex { get; set; }
 }

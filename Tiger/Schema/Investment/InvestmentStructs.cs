@@ -20,7 +20,7 @@ public struct D2Class_9B798080
 {
     public TigerHash InventoryItemHash;
     [SchemaField(0x10), NoLoad]
-    public InventoryItem InventoryItem;  // I don't want to parse all these, should be Tag<D2Class_9D798080>, todo revisit this
+    public InventoryItem InventoryItem;
 }
 
 #region InventoryItemDefinition
@@ -396,6 +396,9 @@ public struct D2Class_9F548080
     [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ResourcePointer Unk38;  // D2Class_D8548080
 
+    [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public ResourcePointer Unk40;  // D2Class_D7548080
+
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public ResourcePointer Unk78;  // D2Class_B4548080
 
@@ -407,6 +410,7 @@ public struct D2Class_9F548080
     [SchemaField(0x88, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public short IconIndex;
     public short FoundryIconIndex; // the banner that appears on foundry weapons (Hakke, veist, etc)
+    public short EmblemContainerIndex;
 
     [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x8C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -462,6 +466,14 @@ public struct D2Class_D8548080
 public struct D2Class_DC548080
 {
     public StringIndexReference FailureMessage;
+}
+
+[SchemaStruct("D7548080", 0x20)]
+public struct D2Class_D7548080 // 'preview'
+{
+    public TigerHash ScreenStyleHash; // screenStyle
+    //public int PreviewVendorIndex; // previewVendorHash
+    //public StringIndexReference PreviewActionString; // previewActionString
 }
 
 [SchemaStruct("B2548080", 0x20)]
@@ -855,8 +867,9 @@ public struct D2Class_B83E8080
     [SchemaField(0x1C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x24, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Tag<D2Class_CF3E8080> IconOverlayContainer;
-    //public Tag Unk28; //Always null?
-    //public Tag EmblemContainer; //For Emblems, not worth loading atm
+
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public Tag<D2Class_CF3E8080> IconSpecialContainer;
 
     [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     public Vector4 DyeColorR;
@@ -1230,6 +1243,65 @@ public struct D2Class_B0738080
 public struct D2Class_15908080
 {
     public short ObjectiveIndex;
+}
+#endregion
+
+#region DestinyPresentationNodeDefinitions
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "D7788080", 0x18)]
+public struct D2Class_D7788080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_DB788080> PresentationNodeDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "DB788080", 0xC8)]
+public struct D2Class_DB788080
+{
+    [SchemaField(0x18)]
+    public DynamicArray<D2Class_F7788080> ParentNodes;
+    [SchemaField(0x2C)]
+    public int MaxCategoryRecordScore;
+    [SchemaField(0x30)]
+    public TigerHash Hash;
+    public byte NodeType;
+    public byte Scope;
+    [SchemaField(0x58)]
+    public short ObjectiveIndex;
+    public short CompletionRecordIndex; // completionRecordHash
+    [SchemaField(0x70)]
+    public DynamicArray<D2Class_ED788080> PresentationNodes; // children -> presentationNodes
+    public DynamicArray<D2Class_EA788080> Collectables; // children -> collectibles
+    public DynamicArray<D2Class_EA788080> Records; // children -> records
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "ED788080", 0x18)]
+public struct D2Class_ED788080
+{
+    public short Unk00; // nodeDisplayPriority? Always 0 in api though
+    public short PresentationNodeIndex; // presentationNodeHash
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "EA788080", 0x4)]
+public struct D2Class_EA788080
+{
+    public short Unk00;
+    public short Index; // Collectable index
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "03588080", 0x18)]
+public struct D2Class_03588080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_07588080> PresentationNodeDefinitionStrings;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "07588080", 0x2C)]
+public struct D2Class_07588080
+{
+    public TigerHash NodeHash;
+    public int IconIndex;
+    public StringIndexReference Name;
+    public StringIndexReference Description;
 }
 #endregion
 

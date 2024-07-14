@@ -52,6 +52,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<D2Class_3C758080> _objectiveDefinitionMap = null;
     private Tag<D2Class_4C588080> _objectiveStringsMap = null;
     public Tag<D2Class_C9798080> _powerCapDefinitionMap = null; // Literally 0 reason for this but fuck it we ball
+    public Tag<D2Class_D7788080> _presentationNodeDefinitionMap = null;
+    public Tag<D2Class_03588080> _presentationNodeDefinitionStringMap = null;
+
     public ConcurrentDictionary<int, D2Class_5D4F8080> SocketCategoryStringThings = null;
     public ConcurrentDictionary<int, D2Class_D3508080> InventoryItemLoreStrings = null;
     public ConcurrentDictionary<int, D2Class_33548080> SandboxPerkStrings = null;
@@ -199,6 +202,12 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     case 0x808079C9:
                         _powerCapDefinitionMap = FileResourcer.Get().GetSchemaTag<D2Class_C9798080>(val);
                         break;
+                    case 0x808078D7:
+                        _presentationNodeDefinitionMap = FileResourcer.Get().GetSchemaTag<D2Class_D7788080>(val);
+                        break;
+                    case 0x80805803:
+                        _presentationNodeDefinitionStringMap = FileResourcer.Get().GetSchemaTag<D2Class_03588080>(val);
+                        break;
                 }
             });
         }
@@ -333,7 +342,26 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return _statGroupDefinitionMap.TagData.StatGroupDefinitions.ElementAt(_statGroupDefinitionMap.GetReader(), index);
     }
 
-    public D2Class_C3598080? GetCollectible(int index)
+    public D2Class_2C788080? GetCollectible(int index)
+    {
+        if (index == -1 || index > _collectableDefinitionMap.TagData.CollectibleDefinitionEntries.Count)
+            return null;
+
+        var reader = _collectableDefinitionMap.GetReader();
+        var entry = _collectableDefinitionMap.TagData.CollectibleDefinitionEntries.ElementAt(reader, index);
+
+        return entry;
+    }
+
+    public D2Class_C3598080? GetCollectibleStrings(int index)
+    {
+        if (index == -1 || index > _collectableDefinitionMap.TagData.CollectibleDefinitionEntries.Count)
+            return null;
+
+        return CollectableStrings[index];
+    }
+
+    public D2Class_C3598080? GetCollectibleStringsFromItemIndex(int index)
     {
         int stringIndex = -1;
         var reader = _collectableDefinitionMap.GetReader();

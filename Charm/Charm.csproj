@@ -36,6 +36,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Page Update="Collections View\CollectionItemControl.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
       <Page Update="ConfigSettingControl.xaml">
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>ConfigView.xaml</DependentUpon>
@@ -113,6 +116,13 @@
         <Link>Shaders\Lighting.hlsl</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Compile Update="Collections View\CategoryView.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

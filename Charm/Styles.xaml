@@ -8,8 +8,8 @@
     <!--  https://material.io/design/color/dark-theme.html#ui-application  -->
 
     <!--  Numbers come from the luminance  -->
-    <Brush x:Key="BackgroundColour7">#121212</Brush>
-    <Color x:Key="BackgroundColour7C">#121212</Color>
+    <Brush x:Key="BackgroundColour7">#161616</Brush>
+    <Color x:Key="BackgroundColour7C">#161616</Color>
     <Brush x:Key="BackgroundColour14">#242424</Brush>
     <Color x:Key="BackgroundColour10C">#1a1a1a</Color>
     <Color x:Key="BackgroundColour14C">#242424</Color>
@@ -24,6 +24,26 @@
     <Brush x:Key="ForegroundColour50">#808080</Brush>
 
     <Brush x:Key="AccentColour">#4d56fc</Brush>
+
+    <Style x:Key="ColumnHeaderBorder" TargetType="Border">
+        <Setter Property="BorderBrush" Value="#AEFFFFFF" />
+        <Setter Property="BorderThickness" Value="0,0,0,5" />
+        <Setter Property="Margin" Value="0,0,0,15" />
+    </Style>
+
+    <Style x:Key="ColumnHeader" TargetType="Grid">
+        <Setter Property="Background" Value="#30585867" />
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
+                <Setter Property="FontFamily" Value="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="15" />
+                <Setter Property="FontSize" Value="36" />
+            </Style>
+        </Style.Resources>
+    </Style>
 
     <Style TargetType="Grid">
         <Setter Property="Background" Value="{StaticResource BackgroundColour7}" />
@@ -241,6 +261,320 @@
         </Setter>
     </Style>
 
+    <Style x:Key="D2StyleButton" TargetType="Button">
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
+                <Setter Property="FontFamily" Value="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="10" />
+                <Setter Property="FontSize" Value="36" />
+            </Style>
+        </Style.Resources>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent" Cursor="Hand">
+                        <Border
+                            x:Name="MainOverlay"
+                            Panel.ZIndex="-1"
+                            Background="Transparent">
+                            <ContentPresenter Margin="1" />
+                        </Border>
+                        <Border
+                            x:Name="Main"
+                            Background="Transparent"
+                            BorderBrush="#AEFFFFFF"
+                            BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}">
+                            <ContentPresenter Margin="1" />
+                        </Border>
+                        <Border
+                            x:Name="outerBorder"
+                            Margin="-8"
+                            BorderBrush="#D9FFFFFF"
+                            BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}"
+                            IsHitTestVisible="False"
+                            Opacity="0" />
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="Transparent"
+                                            Duration="0:0:0.1" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="#AEFFFFFF"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.15" />
+                                        <ThicknessAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-8"
+                                            Duration="0:0:0.15">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="3"
+                                                    EasingMode="EaseOut" />
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="MouseOver">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="#90D6D6D6"
+                                            Duration="0:0:0.1" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="#DEDEDE"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.2" />
+                                        <ThicknessAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-5"
+                                            Duration="0:0:0.1">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="4"
+                                                    EasingMode="EaseOut" />
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="#90AAAAAA"
+                                            Duration="0:0:0.05" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="White"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            AutoReverse="True"
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.15" />
+                                        <ThicknessAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-5"
+                                            Duration="0:0:0" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.Setters>
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Trigger.Setters>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="D2StyleRadioButton" TargetType="RadioButton">
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
+                <Setter Property="FontFamily" Value="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="10" />
+                <Setter Property="FontSize" Value="36" />
+            </Style>
+        </Style.Resources>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid Background="Transparent" Cursor="Hand">
+                        <Border
+                            x:Name="MainOverlay"
+                            Panel.ZIndex="-1"
+                            Background="Transparent">
+                            <ContentPresenter Margin="1" />
+                        </Border>
+                        <Border
+                            x:Name="Main"
+                            Background="Transparent"
+                            BorderBrush="#AEFFFFFF"
+                            BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}">
+                            <ContentPresenter Margin="1" />
+                        </Border>
+                        <Border
+                            x:Name="outerBorder"
+                            Margin="-8"
+                            BorderBrush="#D9FFFFFF"
+                            BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}"
+                            IsHitTestVisible="False"
+                            Opacity="0" />
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="Transparent"
+                                            Duration="0:0:0.1" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="#AEFFFFFF"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.15" />
+                                        <ThicknessAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-8"
+                                            Duration="0:0:0.15">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="3"
+                                                    EasingMode="EaseOut" />
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="MouseOver">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="#90D6D6D6"
+                                            Duration="0:0:0.1" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="#DEDEDE"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.2" />
+                                        <ThicknessAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-5"
+                                            Duration="0:0:0.1">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="4"
+                                                    EasingMode="EaseOut" />
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="#90AAAAAA"
+                                            Duration="0:0:0.05" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="White"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            AutoReverse="True"
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.15" />
+                                        <ThicknessAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-5"
+                                            Duration="0:0:0" />
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="Checked">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="#90AAAAAA"
+                                            Duration="0:0:0.05" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="White"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.Setters>
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Trigger.Setters>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
         <Grid>
