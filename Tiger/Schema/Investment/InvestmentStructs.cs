@@ -1206,10 +1206,12 @@ public struct D2Class_3C758080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "40758080", 0xB0)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "40758080", 0xA8)]
 public struct D2Class_40758080
 {
     public TigerHash ObjectiveHash;
-    [SchemaField(0x10)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x14, TigerStrategy.DESTINY2_LATEST)]
     public int CompletionValue;
 }
 

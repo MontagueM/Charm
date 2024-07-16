@@ -713,7 +713,7 @@
             d:Visibility="Visible"
             Background="Transparent"
             IsHitTestVisible="False"
-            Visibility="Visible">
+            Visibility="Collapsed">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
