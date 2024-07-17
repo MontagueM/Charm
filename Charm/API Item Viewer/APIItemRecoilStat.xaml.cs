@@ -60,13 +60,14 @@ public partial class APIItemRecoilStat : UserControl
         {
             recoilPath.Data = Geometry.Parse(d);
             // stupid dumb hacky fix for the position being wrong (works 70% of the time)
-            bool a = direction < 0;
-            recoilPath.RenderTransformOrigin = new Point(a ? 1.0 : 0.5, 0.5);
+            // bool a = direction < 0;
+            //recoilPath.RenderTransformOrigin = new Point(a ? 1.0 : 0.5, 0.5);
+            recoilPath.RenderTransformOrigin = new Point(0.5, 0.5);
         }
         else
         {
             recoilPath.Data = Geometry.Parse($"M1,1 L1.05,0 A1,1 0 0,0 0.95, 0 Z");
-            recoilPath.RenderTransformOrigin = new Point(1.0, 0.5);
+            recoilPath.RenderTransformOrigin = new Point(0.5, 0.5);
         }
 
     }
