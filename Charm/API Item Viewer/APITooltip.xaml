@@ -1,0 +1,422 @@
+﻿<UserControl
+    x:Class="Charm.APITooltip"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <local:TransparentColorConverter x:Key="TransparentColorConverter" />
+        <local:InfoBoxColorConverter x:Key="InfoBoxColorConverter" />
+
+        <DataTemplate x:Key="InfoBoxSeperatorTemplate">
+            <Rectangle
+                Height="2"
+                Fill="{StaticResource ForegroundColour70}"
+                Opacity="0.75" />
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxTextTemplate">
+            <TextBlock
+                Margin="15,10,15,10"
+                d:FontFamily="Haas Grot Text 55 Roman"
+                d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                FontSize="17"
+                Foreground="{StaticResource ForegroundColour80}"
+                Text="{Binding Description}"
+                TextWrapping="WrapWithOverflow" />
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxGridTemplate">
+            <Grid Margin="15,10,15,10" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="32"
+                    Height="32"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    d:Source="https://www.bungie.net/common/destiny2_content/icons/c577890c4a2d81e3c4ce1c803cdb9a3b.png"
+                    Source="{Binding PlugImageSource}">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlugImageSource}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    d:FontFamily="Haas Grot Text 55 Roman"
+                    d:Text="Causing a lightning strike with this weapon partially reloads the magazine from reserves."
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour70}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxWarningTextTemplate">
+            <TextBlock
+                Margin="15,5,15,5"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                FontSize="17"
+                Foreground="{StaticResource ForegroundColour90}"
+                Text="{Binding Description}"
+                TextWrapping="WrapWithOverflow" />
+        </DataTemplate>
+
+        <!--  Objective styles  -->
+        <DataTemplate x:Key="InfoBoxObjectivePercentageTemplate">
+            <Grid Margin="15,5,15,5" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Rectangle
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="24"
+                    Height="24"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Fill="#A1000000"
+                    Stroke="Gray"
+                    StrokeThickness="1.5" />
+
+                <Grid
+                    Grid.Column="1"
+                    Height="24"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Background="#A1000000">
+
+                    <TextBlock
+                        Margin="5,0,5,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="17"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Description}"
+                        TextWrapping="WrapWithOverflow" />
+                    <TextBlock
+                        Margin="5,0,5,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="17"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Type}"
+                        TextWrapping="WrapWithOverflow" />
+                </Grid>
+
+
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="InfoBoxObjectiveIntegerTemplate">
+            <Grid Margin="15,10,15,10" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Width="36"
+                    Height="36"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Source="{Binding PlugImageSource}">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlugImageSource}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour90}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour90}"
+                    Text="{Binding Type}"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="InfoBoxEmblemTemplate">
+            <Grid Margin="10,10,10,10" Background="Transparent">
+                <Image Source="{Binding PlugImageSource}" />
+            </Grid>
+        </DataTemplate>
+
+        <Storyboard x:Key="FadeIn 0.3">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.3" />
+        </Storyboard>
+        <Storyboard x:Key="FadeIn 0.2">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.2" />
+        </Storyboard>
+        <Storyboard x:Key="FadeIn 0.1">
+            <DoubleAnimation
+                Storyboard.TargetProperty="Opacity"
+                From="0"
+                To="1"
+                Duration="0:0:0.1" />
+        </Storyboard>
+
+    </UserControl.Resources>
+
+    <!--  InfoBox  -->
+    <Grid
+        x:Name="InfoBox"
+        Width="400"
+        HorizontalAlignment="Left"
+        VerticalAlignment="Bottom"
+        Panel.ZIndex="50"
+        d:Visibility="Visible"
+        Background="Transparent"
+        IsHitTestVisible="False"
+        Visibility="Collapsed">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid.RenderTransform>
+            <TranslateTransform X="0" Y="0" />
+        </Grid.RenderTransform>
+
+        <!--  Thin top bar  -->
+        <Rectangle
+            Grid.Row="0"
+            Width="400"
+            Height="5"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Fill="#AAAAAA">
+            <Rectangle.Style>
+                <Style TargetType="Rectangle">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Rectangle.Style>
+        </Rectangle>
+
+        <!--  Main header  -->
+        <Grid Grid.Row="1" d:Background="#F1020202">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.5}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                            <Setter Property="Background" Value="#F1020202" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <!--  Image is outside the canvas without margin for some reason?  -->
+            <Canvas
+                Margin="0,0,54,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Background="transparent">
+                <Image
+                    Width="54"
+                    Height="54"
+                    Source="{Binding PlugWatermark}" />
+            </Canvas>
+
+            <StackPanel Background="Transparent" Orientation="Vertical">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Margin" Value="15,10,15,10" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                                <Setter Property="Margin" Value="15,10,15,10" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock
+                    Margin="0,0,15,0"
+                    VerticalAlignment="Center"
+                    d:FontFamily="Haas Grot Text 65 Medium"
+                    d:Text="ITEM NAME "
+                    FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                    FontSize="26"
+                    Foreground="{StaticResource ForegroundColour100}"
+                    Text="{Binding Name}"
+                    TextWrapping="WrapWithOverflow" />
+
+                <Grid Background="Transparent">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Type}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        d:Text="Item Type"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="18"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Opacity="0.8"
+                        Text="{Binding Type}" />
+
+                    <TextBlock
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        d:Text="Item Rarity"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="18"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Opacity="0.5"
+                        Text="{Binding PlugRarity}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PlugRarity}" Value="Common">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+        <!--  Warning box  -->
+        <Grid Grid.Row="2">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Background" Value="#D6AE4141" />
+                </Style>
+            </Grid.Style>
+
+            <StackPanel x:Name="WarningBoxStackPanel" Orientation="Vertical" />
+        </Grid>
+
+        <!--  Subheader/Info  -->
+        <Grid Grid.Row="3">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.1}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
+                            <Setter Property="Background" Value="#D6202020" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <StackPanel x:Name="InfoBoxStackPanel" Orientation="Vertical" />
+        </Grid>
+
+        <!--  User input prompt  -->
+        <Grid
+            x:Name="UserInput"
+            Grid.Row="4"
+            Background="#E1000000"
+            Visibility="Collapsed">
+            <Grid
+                Margin="0,0,10,0"
+                HorizontalAlignment="Right"
+                Background="Transparent">
+                <TextBlock
+                    Margin="5"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text=""
+                    TextWrapping="WrapWithOverflow" />
+                <TextBlock
+                    Margin="5"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="#3396DA"
+                    Text=""
+                    TextWrapping="WrapWithOverflow" />
+                <TextBlock
+                    Margin="5"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text="    Details"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+
+        </Grid>
+    </Grid>
+
+</UserControl>
+
+
+
+

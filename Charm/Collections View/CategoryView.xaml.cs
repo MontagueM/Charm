@@ -21,7 +21,7 @@ namespace Charm;
 public partial class CategoryView : UserControl
 {
     private static MainWindow _mainWindow = null;
-    Button? ActivePlugItemButton;
+    private APITooltip ToolTip;
 
     private ConcurrentBag<ApiItem> _allItems;
     private ConcurrentBag<CollectableSet> _allItemSets;
@@ -40,10 +40,17 @@ public partial class CategoryView : UserControl
 
     public CategoryView(CollectionsView.ItemCategory itemCategory)
     {
+
         InitializeComponent();
         DataContext = itemCategory;
         LoadSubcategories(itemCategory);
         MouseMove += UserControl_MouseMove;
+
+        ToolTip = new();
+        ToolTip.UserInput.Visibility = Visibility.Visible;
+        MouseMove += ToolTip.UserControl_MouseMove;
+        Panel.SetZIndex(ToolTip, 50);
+        MainGrid.Children.Add(ToolTip);
 
         _allItemSets = new();
         _allItems = new();
@@ -103,6 +110,7 @@ public partial class CategoryView : UserControl
             itemsToShow.Add(new SubcategoryChild { IsPlaceholder = true });
         }
         SubcategoryChildren.ItemsSource = itemsToShow;
+        AnimationHelper.AnimateFadeIn(SubcategoryChildren, 0.15f, 1f, 0.1f);
     }
 
     private void DisplayItems()
@@ -120,7 +128,7 @@ public partial class CategoryView : UserControl
         }
 
         SingleItemList.ItemsSource = itemsToShow;
-        AnimationHelper.AnimateFadeIn(SingleItemList, 0.2f, 1f, 0.5f);
+        AnimationHelper.AnimateFadeIn(SingleItemList, 0.15f, 1f, 0.1f);
     }
 
     private void DisplayItemSets()
@@ -146,7 +154,7 @@ public partial class CategoryView : UserControl
         }
 
         ItemSetList.ItemsSource = itemsToShow;
-        AnimationHelper.AnimateFadeIn(ItemSetList, 0.2f, 1f, 0.5f);
+        AnimationHelper.AnimateFadeIn(ItemSetList, 0.15f, 1f, 0.1f);
     }
 
     private void LoadItems(int categoryIndex)
@@ -277,7 +285,7 @@ public partial class CategoryView : UserControl
 
     private async void SubcategoryChild_OnSelect(object sender, RoutedEventArgs e)
     {
-        Dispatcher.BeginInvoke(new Action(() =>
+        await Dispatcher.BeginInvoke(new Action(() =>
         {
             if ((sender as RadioButton) is null)
                 return;
@@ -469,164 +477,9 @@ public partial class CategoryView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // TODO: MOVE ALL TOOLTIP STUFF TO ITS OWN CLASS SO IT CAN BE USED ANYWHERE SO THIS SPAGHETTI CODE ISNT REUSED EVERYWHERE
-    // AAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHH
-    ////////////////////////////////////////////////////////////////////////////
-
-    private void MakeTooltip(PlugItem item)
-    {
-        InfoBox.Visibility = Visibility.Visible;
-        var fadeIn = FindResource("FadeIn 0.2") as Storyboard;
-        InfoBox.BeginStoryboard(fadeIn);
-        InfoBox.DataContext = item;
-
-        if (item.Item.GetItemStrings().TagData.Unk38.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D8548080 warning)
-        {
-            foreach (var rule in warning.InsertionRules)
-            {
-                if (rule.FailureMessage.Value is null)
-                    continue;
-
-                AddToTooltip(new PlugItem
-                {
-                    Description = rule.FailureMessage.Value,
-                    PlugRarityColor = System.Windows.Media.Color.FromArgb(255, 255, 0, 0)
-                }, TooltipType.WarningBlock);
-            }
-        }
-
-        if (item.Item.GetItemStrings().TagData.Unk40.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D7548080 preview)
-        {
-            if (preview.ScreenStyleHash.Hash32 == 3797307284) // 'screen_style_emblem'
-            {
-                AddToTooltip(new PlugItem
-                {
-                    PlugImageSource = ApiImageUtils.MakeFullIcon(item.Item.GetItemStrings().TagData.EmblemContainerIndex)
-                }, TooltipType.Emblem);
-            }
-        }
-
-        if (item.Description != "")
-            AddToTooltip(item, TooltipType.TextBlock);
-
-        if (item.Item.TagData.Unk38.GetValue(item.Item.GetReader()) is D2Class_B0738080 objectives)
-        {
-            foreach (var objective in objectives.Objectives)
-            {
-                var obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
-                if (obj is null)
-                    continue;
-
-                PlugItem objItem = new PlugItem
-                {
-                    Description = obj.Value.ProgressDescription.Value,
-                    Type = $"0/{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}",
-                    PlugImageSource = obj.Value.IconIndex != -1 ? ApiImageUtils.MakeIcon(obj.Value.IconIndex) : null
-                };
-
-                TooltipType tooltipType = TooltipType.ObjectiveInteger;
-                switch ((DestinyUnlockValueUIStyle)obj.Value.InProgressValueStyle)
-                {
-                    case DestinyUnlockValueUIStyle.Percentage:
-                        tooltipType = TooltipType.ObjectivePercentage;
-                        break;
-                    case DestinyUnlockValueUIStyle.Integer:
-                        objItem.Type = $"{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}";
-                        tooltipType = TooltipType.ObjectiveInteger;
-                        break;
-                }
-
-                if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                    AddToTooltip(null, TooltipType.Seperator);
-
-                AddToTooltip(objItem, tooltipType); // TODO: Other styles
-            }
-        }
-
-        foreach (var notif in item.Item.GetItemStrings().TagData.TooltipNotifications)
-        {
-            PlugItem notifItem = new PlugItem
-            {
-                Description = $"★ {notif.DisplayString.Value}",
-                PlugImageSource = null
-            };
-            AddToTooltip(notifItem, TooltipType.InfoBlock);
-        }
-    }
-
-    private void ClearTooltip()
-    {
-        InfoBoxStackPanel.Children.Clear();
-        WarningBoxStackPanel.Children.Clear();
-        InfoBox.Visibility = Visibility.Collapsed;
-    }
-
-    private void AddToTooltip(PlugItem item, TooltipType type)
-    {
-        switch (type)
-        {
-            case TooltipType.TextBlock:
-                DataTemplate infoTextTemplate = (DataTemplate)FindResource("InfoBoxTextTemplate");
-                FrameworkElement textUI = (FrameworkElement)infoTextTemplate.LoadContent();
-                textUI.DataContext = item;
-                InfoBoxStackPanel.Children.Add(textUI);
-                break;
-            case TooltipType.Grid:
-                DataTemplate infoGridTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
-                FrameworkElement gridUi = (FrameworkElement)infoGridTemplate.LoadContent();
-                gridUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(gridUi);
-                break;
-            case TooltipType.InfoBlock:
-                if (InfoBoxStackPanel.Children.Count != 0)
-                {
-                    DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
-                    FrameworkElement infoBlockSepUi = (FrameworkElement)infoBlockSepTemplate.LoadContent();
-                    InfoBoxStackPanel.Children.Add(infoBlockSepUi);
-                }
-
-                DataTemplate infoBlockTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
-                FrameworkElement infoBlockUi = (FrameworkElement)infoBlockTemplate.LoadContent();
-                infoBlockUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(infoBlockUi);
-                break;
-            case TooltipType.WarningBlock:
-                DataTemplate warningTextTemplate = (DataTemplate)FindResource("InfoBoxWarningTextTemplate");
-                FrameworkElement warningTextUI = (FrameworkElement)warningTextTemplate.LoadContent();
-                warningTextUI.DataContext = item;
-                WarningBoxStackPanel.Children.Add(warningTextUI);
-                break;
-            case TooltipType.Seperator:
-                DataTemplate seperatorTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
-                FrameworkElement seperatorUi = (FrameworkElement)seperatorTemplate.LoadContent();
-                InfoBoxStackPanel.Children.Add(seperatorUi);
-                break;
-            case TooltipType.Emblem:
-                DataTemplate emblemTemplate = (DataTemplate)FindResource("InfoBoxEmblemTemplate");
-                FrameworkElement emblemUi = (FrameworkElement)emblemTemplate.LoadContent();
-                emblemUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(emblemUi);
-                break;
-
-            case TooltipType.ObjectivePercentage:
-                DataTemplate objPercentTemplate = (DataTemplate)FindResource("InfoBoxObjectivePercentageTemplate");
-                FrameworkElement objPercentUi = (FrameworkElement)objPercentTemplate.LoadContent();
-                objPercentUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(objPercentUi);
-                break;
-            case TooltipType.ObjectiveInteger:
-                DataTemplate objIntTemplate = (DataTemplate)FindResource("InfoBoxObjectiveIntegerTemplate");
-                FrameworkElement objIntUi = (FrameworkElement)objIntTemplate.LoadContent();
-                objIntUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(objIntUi);
-                break;
-        }
-    }
-
     private void PlugItem_MouseEnter(object sender, MouseEventArgs e)
     {
-        ActivePlugItemButton = (sender as Button);
+        ToolTip.ActiveItem = (sender as Button);
         ApiItem item = (ApiItem)(sender as Button).DataContext;
 
         TigerHash plugCategoryHash = null;
@@ -649,61 +502,30 @@ public partial class CategoryView : UserControl
             PlugStyle = DestinySocketCategoryStyle.Consumable
         };
 
-        MakeTooltip(PlugItem);
+        ToolTip.MakeTooltip(PlugItem);
 
         PlugItem source = new PlugItem
         {
             Description = $"{Investment.Get().GetCollectibleStrings(item.CollectableIndex).Value.SourceName.Value}",
         };
         if (source.Description != string.Empty)
-            AddToTooltip(source, TooltipType.InfoBlock);
+            ToolTip.AddToTooltip(source, APITooltip.TooltipType.InfoBlock);
     }
 
-    private void PlugItem_MouseLeave(object sender, MouseEventArgs e)
+    public void PlugItem_MouseLeave(object sender, MouseEventArgs e)
     {
-        ClearTooltip();
-        ActivePlugItemButton = null;
+        ToolTip.ClearTooltip();
+        ToolTip.ActiveItem = null;
     }
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
-        System.Windows.Point position = e.GetPosition(this);
-        if (InfoBox.Visibility == Visibility.Visible && ActivePlugItemButton != null)
-        {
-            float xOffset = 25;
-            float yOffset = 25;
-            float padding = 25;
-
-            // this is stupid
-            if (position.X >= ActualWidth / 2)
-                xOffset = (-1 * xOffset) - (float)InfoBox.Width;
-
-            if (position.Y - yOffset - padding - (float)InfoBox.ActualHeight <= 0)
-                yOffset += (float)(position.Y - yOffset - padding - (float)InfoBox.ActualHeight);
-
-            TranslateTransform infoBoxtransform = (TranslateTransform)InfoBox.RenderTransform;
-            infoBoxtransform.X = position.X + xOffset;
-            infoBoxtransform.Y = position.Y - yOffset - ActualHeight;
-        }
+        Point position = e.GetPosition(this);
 
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
         gridTransform.X = position.X * -0.01;
         gridTransform.Y = position.Y * -0.01;
     }
-
-    private enum TooltipType
-    {
-        InfoBlock,
-        TextBlock,
-        Grid,
-        WarningBlock,
-        Seperator,
-        Emblem,
-
-        ObjectivePercentage,
-        ObjectiveInteger,
-    }
-
 }
 
 public class Subcategory

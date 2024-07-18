@@ -29,7 +29,8 @@ public partial class APIItemView : UserControl
     private ApiItemView ApiItem;
     private ObservableCollection<PlugItem> _plugItems;
     private ObservableCollection<StatItem> _statItems;
-    Button? ActivePlugItemButton;
+    private APITooltip ToolTip;
+
     Grid? ActiveStatItemGrid;
 
     public APIItemView(InventoryItem item)
@@ -88,9 +89,11 @@ public partial class APIItemView : UserControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        Console.WriteLine($"Item {ApiItem.Item.Hash}");
-        Console.WriteLine($"Strings {Investment.Get().GetItemStrings(ApiItem.Item.TagData.InventoryItemHash).Hash}");
-        Console.WriteLine($"Icons {Investment.Get().GetItemIconContainer(ApiItem.Item.TagData.InventoryItemHash).Hash}");
+#if DEBUG
+        Console.WriteLine($"Item {ApiItem.ItemName} {ApiItem.Item.Hash}");
+        Console.WriteLine($"Strings {Investment.Get().GetItemStrings(ApiItem.Item.TagData.InventoryItemHash)?.Hash}");
+        Console.WriteLine($"Icons {Investment.Get().GetItemIconContainer(ApiItem.Item.TagData.InventoryItemHash)?.Hash}");
+#endif
         if (ApiItem.ItemLore != null)
         {
             LoreEntry.DataContext = ApiItem;
@@ -115,6 +118,12 @@ public partial class APIItemView : UserControl
         KeyDown += UserControl_KeyDown;
         MainContainer.DataContext = ApiItem;
         BackgroundContainer.DataContext = ApiItem;
+
+        ToolTip = new();
+        MouseMove += ToolTip.UserControl_MouseMove;
+        Panel.SetZIndex(ToolTip, 50);
+        MainGrid.Children.Add(ToolTip);
+
         _statItems = new();
         _plugItems = new();
 
@@ -397,7 +406,8 @@ public partial class APIItemView : UserControl
         ItemNumericStatsControl.ItemsSource = _statItems.Where(x => x.StatDisplayNumeric);
 
         // For some unknown unholy reason, this breaks showing the lore tab if Visibility.Collapsed?????
-        StatsContainer.Visibility = _statItems.Count != 0 ? Visibility.Visible : Visibility.Collapsed;
+        //StatsContainer.Visibility = _statItems.Count != 0 ? Visibility.Visible : Visibility.Collapsed;
+        StatsContainer.Opacity = _statItems.Count != 0 ? 1 : 0;
     }
 
     private int MakeDisplayValue(int statIndex, int statValue)
@@ -461,16 +471,33 @@ public partial class APIItemView : UserControl
 
     private void PlugItem_MouseEnter(object sender, MouseEventArgs e)
     {
-        ActivePlugItemButton = (sender as Button);
+        ToolTip.ActiveItem = (sender as Button);
         PlugItem item = (PlugItem)(sender as Button).DataContext;
 
-        MakeTooltip(item);
+        if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
+        {
+            foreach (var stat in stats.InvestmentStats)
+            {
+                var statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
+                var adjustValue = MakeDisplayValue(stat.StatTypeIndex, stat.Value);
+
+                if (statItem.StatName.Value is not null)
+                {
+                    var _stat = _statItems.FirstOrDefault(x => x.Hash == statItem.StatHash);
+                    if (_stat is null)
+                        continue;
+                    _stat.StatAdjustValue = adjustValue;
+                }
+            }
+        }
+
+        ToolTip.MakeTooltip(item);
     }
 
     private void PlugItem_MouseLeave(object sender, MouseEventArgs e)
     {
-        ClearTooltip();
-        ActivePlugItemButton = null;
+        ToolTip.ClearTooltip();
+        ToolTip.ActiveItem = null;
 
         PlugItem item = (PlugItem)(sender as Button).DataContext;
         if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
@@ -493,8 +520,9 @@ public partial class APIItemView : UserControl
     private void PlugItem_OnClick(object sender, RoutedEventArgs e)
     {
         PlugItem item = (PlugItem)(sender as Button).DataContext;
-
+#if DEBUG
         Console.WriteLine($"{item.Name} {item.Item.Hash} ({item.PlugRarity})");
+#endif
 
         if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
         {
@@ -505,8 +533,9 @@ public partial class APIItemView : UserControl
                     continue;
 
                 var mainStat = ((D2Class_81738080)ApiItem.Item.TagData.Unk78.GetValue(ApiItem.Item.GetReader())).InvestmentStats.FirstOrDefault(x => x.StatTypeIndex == stat.StatTypeIndex);
+#if DEBUG
                 Console.WriteLine($"{statItem.StatName.Value.ToString()} : {stat.Value} ({MakeDisplayValue(stat.StatTypeIndex, stat.Value)}) (perk) + {mainStat.Value} ({MakeDisplayValue(mainStat.StatTypeIndex, mainStat.Value)}) (main) = {stat.Value + mainStat.Value}");
-
+#endif
                 if (!item.PlugSelected)
                 {
                     //TODO: Can only have one perk selected in each row, clear any added stats from current selected perk
@@ -541,10 +570,11 @@ public partial class APIItemView : UserControl
 
     private void StatItem_MouseEnter(object sender, MouseEventArgs e)
     {
-        InfoBox.Visibility = Visibility.Visible;
+        ToolTip.InfoBox.Visibility = Visibility.Visible;
         var fadeIn = FindResource("FadeIn 0.2") as Storyboard;
-        InfoBox.BeginStoryboard(fadeIn);
+        ToolTip.InfoBox.BeginStoryboard(fadeIn);
         ActiveStatItemGrid = (sender as Grid);
+        ToolTip.ActiveItem = ActiveStatItemGrid;
 
         var stat = (StatItem)ActiveStatItemGrid.DataContext;
         PlugItem statItem = new PlugItem
@@ -554,38 +584,22 @@ public partial class APIItemView : UserControl
             PlugStyle = DestinySocketCategoryStyle.Reusable,
             Description = stat.Description,
         };
-        InfoBox.DataContext = statItem;
-        AddToTooltip(statItem, TooltipType.TextBlock);
+
+        ToolTip.MakeTooltip(statItem);
+        //ToolTip.InfoBox.DataContext = statItem;
+        //ToolTip.AddToTooltip(statItem, APITooltip.TooltipType.TextBlock);
     }
 
     private void StatItem_MouseLeave(object sender, MouseEventArgs e)
     {
-        InfoBoxStackPanel.Children.Clear();
-        InfoBox.Visibility = Visibility.Collapsed;
+        ToolTip.InfoBoxStackPanel.Children.Clear();
+        ToolTip.InfoBox.Visibility = Visibility.Collapsed;
         ActiveStatItemGrid = null;
     }
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
         System.Windows.Point position = e.GetPosition(this);
-        if (InfoBox.Visibility == Visibility.Visible && (ActivePlugItemButton != null || ActiveStatItemGrid != null))
-        {
-            float xOffset = 25;
-            float yOffset = 25;
-            float padding = 25;
-
-            // this is stupid
-            if (position.X >= ActualWidth / 2)
-                xOffset = (-1 * xOffset) - (float)InfoBox.Width;
-
-            if (position.Y - yOffset - padding - (float)InfoBox.ActualHeight <= 0)
-                yOffset += (float)(position.Y - yOffset - padding - (float)InfoBox.ActualHeight);
-
-            TranslateTransform infoBoxtransform = (TranslateTransform)InfoBox.RenderTransform;
-            infoBoxtransform.X = position.X + xOffset;
-            infoBoxtransform.Y = position.Y - yOffset - ActualHeight;
-        }
-
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
         gridTransform.X = position.X * -0.01;
         gridTransform.Y = position.Y * -0.01;
@@ -791,186 +805,6 @@ public partial class APIItemView : UserControl
         public ImageSource EmblemLarge { get; set; }
         public ImageSource EmblemMedium { get; set; }
         public ImageSource EmblemSmall { get; set; }
-    }
-
-    private enum TooltipType
-    {
-        InfoBlock,
-        TextBlock,
-        Grid,
-        WarningBlock,
-        Seperator,
-
-        ObjectivePercentage,
-        ObjectiveInteger,
-    }
-
-    private void MakeTooltip(PlugItem item)
-    {
-        InfoBox.Visibility = Visibility.Visible;
-        var fadeIn = FindResource("FadeIn 0.2") as Storyboard;
-        InfoBox.BeginStoryboard(fadeIn);
-        InfoBox.DataContext = ActivePlugItemButton.DataContext;
-
-        if (item.Item.GetItemStrings().TagData.Unk38.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D8548080 warning)
-        {
-            foreach (var rule in warning.InsertionRules)
-            {
-                if (rule.FailureMessage.Value is null)
-                    continue;
-
-                AddToTooltip(new PlugItem
-                {
-                    Description = rule.FailureMessage.Value,
-                    PlugRarityColor = Color.FromArgb(255, 255, 0, 0)
-                }, TooltipType.WarningBlock);
-            }
-        }
-
-        if (item.Description != "")
-            AddToTooltip(item, TooltipType.TextBlock);
-
-        if (item.Item.TagData.Unk38.GetValue(item.Item.GetReader()) is D2Class_B0738080 objectives)
-        {
-            foreach (var objective in objectives.Objectives)
-            {
-                var obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
-                if (obj is null)
-                    continue;
-
-                PlugItem objItem = new PlugItem
-                {
-                    Description = obj.Value.ProgressDescription.Value,
-                    Type = $"0/{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}",
-                    PlugImageSource = obj.Value.IconIndex != -1 ? ApiImageUtils.MakeIcon(obj.Value.IconIndex) : null
-                };
-
-                TooltipType tooltipType = TooltipType.ObjectiveInteger;
-                switch ((DestinyUnlockValueUIStyle)obj.Value.InProgressValueStyle)
-                {
-                    case DestinyUnlockValueUIStyle.Percentage:
-                        tooltipType = TooltipType.ObjectivePercentage;
-                        break;
-                    case DestinyUnlockValueUIStyle.Integer:
-                        objItem.Type = $"{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}";
-                        tooltipType = TooltipType.ObjectiveInteger;
-                        break;
-                }
-
-                if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                    AddToTooltip(null, TooltipType.Seperator);
-
-                AddToTooltip(objItem, tooltipType); // TODO: Other styles
-            }
-        }
-
-        if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
-        {
-            foreach (var stat in stats.InvestmentStats)
-            {
-                var statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
-                var adjustValue = MakeDisplayValue(stat.StatTypeIndex, stat.Value);
-
-                if (statItem.StatName.Value is not null)
-                {
-                    var _stat = _statItems.FirstOrDefault(x => x.Hash == statItem.StatHash);
-                    if (_stat is null)
-                        continue;
-                    _stat.StatAdjustValue = adjustValue;
-                }
-            }
-            if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                return;
-
-            foreach (var perk in stats.Perks)
-            {
-                var perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
-                if (perkStrings.IconIndex == -1)
-                    continue;
-
-                PlugItem perkItem = new PlugItem
-                {
-                    Hash = perkStrings.SandboxPerkHash,
-                    Description = perkStrings.SandboxPerkDescription.Value,
-                    PlugImageSource = ApiImageUtils.MakeIcon(perkStrings.IconIndex)
-                };
-
-                AddToTooltip(perkItem, TooltipType.Grid);
-            }
-        }
-
-        foreach (var notif in item.Item.GetItemStrings().TagData.TooltipNotifications)
-        {
-            PlugItem notifItem = new PlugItem
-            {
-                Description = $"★ {notif.DisplayString.Value}",
-                PlugImageSource = null
-            };
-            AddToTooltip(notifItem, TooltipType.InfoBlock);
-        }
-    }
-
-    private void ClearTooltip()
-    {
-        InfoBoxStackPanel.Children.Clear();
-        WarningBoxStackPanel.Children.Clear();
-        InfoBox.Visibility = Visibility.Collapsed;
-    }
-
-    private void AddToTooltip(PlugItem item, TooltipType type)
-    {
-        switch (type)
-        {
-            case TooltipType.TextBlock:
-                DataTemplate infoTextTemplate = (DataTemplate)FindResource("InfoBoxTextTemplate");
-                FrameworkElement textUI = (FrameworkElement)infoTextTemplate.LoadContent();
-                textUI.DataContext = item;
-                InfoBoxStackPanel.Children.Add(textUI);
-                break;
-            case TooltipType.Grid:
-                DataTemplate infoGridTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
-                FrameworkElement gridUi = (FrameworkElement)infoGridTemplate.LoadContent();
-                gridUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(gridUi);
-                break;
-            case TooltipType.InfoBlock:
-                if (InfoBoxStackPanel.Children.Count != 0)
-                {
-                    DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
-                    FrameworkElement infoBlockSepUi = (FrameworkElement)infoBlockSepTemplate.LoadContent();
-                    InfoBoxStackPanel.Children.Add(infoBlockSepUi);
-                }
-
-                DataTemplate infoBlockTemplate = (DataTemplate)FindResource("InfoBoxGridTemplate");
-                FrameworkElement infoBlockUi = (FrameworkElement)infoBlockTemplate.LoadContent();
-                infoBlockUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(infoBlockUi);
-                break;
-            case TooltipType.WarningBlock:
-                DataTemplate warningTextTemplate = (DataTemplate)FindResource("InfoBoxWarningTextTemplate");
-                FrameworkElement warningTextUI = (FrameworkElement)warningTextTemplate.LoadContent();
-                warningTextUI.DataContext = item;
-                WarningBoxStackPanel.Children.Add(warningTextUI);
-                break;
-            case TooltipType.Seperator:
-                DataTemplate seperatorTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
-                FrameworkElement seperatorUi = (FrameworkElement)seperatorTemplate.LoadContent();
-                InfoBoxStackPanel.Children.Add(seperatorUi);
-                break;
-
-            case TooltipType.ObjectivePercentage:
-                DataTemplate objPercentTemplate = (DataTemplate)FindResource("InfoBoxObjectivePercentageTemplate");
-                FrameworkElement objPercentUi = (FrameworkElement)objPercentTemplate.LoadContent();
-                objPercentUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(objPercentUi);
-                break;
-            case TooltipType.ObjectiveInteger:
-                DataTemplate objIntTemplate = (DataTemplate)FindResource("InfoBoxObjectiveIntegerTemplate");
-                FrameworkElement objIntUi = (FrameworkElement)objIntTemplate.LoadContent();
-                objIntUi.DataContext = item;
-                InfoBoxStackPanel.Children.Add(objIntUi);
-                break;
-        }
     }
 }
 
@@ -1297,49 +1131,6 @@ public class FlipSignPercentageConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         throw new NotSupportedException();
-    }
-}
-
-public class TransparentColorConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is Color color && double.TryParse(parameter?.ToString(), out double alphaFactor))
-        {
-            byte alpha = (byte)(color.A * alphaFactor);
-            return Color.FromArgb(alpha, color.R, color.G, color.B);
-        }
-
-        return value;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class InfoBoxColorConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is Color color && float.TryParse(parameter?.ToString(), out float brightnessFactor))
-        {
-            // hacky 'fix'
-            if (brightnessFactor == 0.5f)
-                return new SolidColorBrush(Color.FromArgb(230, color.R, color.G, color.B));
-
-            System.Drawing.Color col = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
-            System.Drawing.Color newColor = ColorUtility.GenerateShades(col, 1, brightnessFactor).First();
-            return new SolidColorBrush(Color.FromArgb(230, newColor.R, newColor.G, newColor.B));
-        }
-
-        return value;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
     }
 }
 

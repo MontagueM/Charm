@@ -224,42 +224,68 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid
-        x:Name="MainContainer"
-        Background="#15161a"
-        RenderTransformOrigin="0.5,0.5">
+    <Grid>
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
 
-        <Grid.RenderTransform>
-            <TranslateTransform />
-        </Grid.RenderTransform>
+        <Grid.Background>
+            <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
+                <RadialGradientBrush.GradientStops>
+                    <GradientStop Offset="0" Color="#FF37393E" />
+                    <GradientStop Offset="0.8" Color="#111113" />
+                </RadialGradientBrush.GradientStops>
+            </RadialGradientBrush>
+        </Grid.Background>
 
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Border
-                Height="40"
-                BorderThickness="0,0,0,2"
-                Style="{StaticResource ColumnHeaderBorder}">
-                <Grid Style="{StaticResource ColumnHeader}">
-                    <TextBlock
-                        Margin="0"
-                        d:FontFamily="Haas Grot Text 55 Roman"
-                        FontSize="18">
-                        <Run Text="ITEMS -" />
-                        <Run Text="{Binding TotalItemAmount}" />
-                    </TextBlock>
-                </Grid>
-            </Border>
-            <UniformGrid
-                x:Name="MainItemsGrid"
-                Columns="3"
-                Rows="2">
-                <d:Button Style="{StaticResource MainItemsButton}" />
-                <d:Button Style="{StaticResource MainItemsButton}" />
-                <d:Button Style="{StaticResource MainItemsButton}" />
-                <d:Button Style="{StaticResource MainItemsButton}" />
-                <d:Button Style="{StaticResource MainItemsButton}" />
-                <d:Button Style="{StaticResource MainItemsButton}" />
-            </UniformGrid>
-        </StackPanel>
+        <Grid
+            x:Name="MainContainer"
+            Background="Transparent"
+            RenderTransformOrigin="0.5,0.5">
 
+            <Grid.RenderTransform>
+                <TranslateTransform />
+            </Grid.RenderTransform>
+
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border
+                    Height="40"
+                    BorderThickness="0,0,0,2"
+                    Style="{StaticResource ColumnHeaderBorder}">
+                    <Grid Style="{StaticResource ColumnHeader}">
+                        <TextBlock
+                            Margin="0"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontSize="18">
+                            <Run Text="ITEMS -" />
+                            <Run Text="{Binding TotalItemAmount}" />
+                        </TextBlock>
+                    </Grid>
+                </Border>
+                <UniformGrid
+                    x:Name="MainItemsGrid"
+                    Columns="3"
+                    Rows="2">
+                    <d:Button Style="{StaticResource MainItemsButton}" />
+                    <d:Button Style="{StaticResource MainItemsButton}" />
+                    <d:Button Style="{StaticResource MainItemsButton}" />
+                    <d:Button Style="{StaticResource MainItemsButton}" />
+                    <d:Button Style="{StaticResource MainItemsButton}" />
+                    <d:Button Style="{StaticResource MainItemsButton}" />
+                </UniformGrid>
+            </StackPanel>
+
+        </Grid>
     </Grid>
+
 </UserControl>

@@ -9,7 +9,7 @@
     d:DesignWidth="288"
     Loaded="OnControlLoaded"
     mc:Ignorable="d">
-    <Grid Name="Container" Background="#8B595959">
+    <Grid Name="Container" Background="#69696969">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
