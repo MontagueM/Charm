@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Tiger;
 using Tiger.Schema.Investment;
+using static Charm.APIItemView;
 
 namespace Charm;
 
@@ -327,10 +328,16 @@ public partial class DareView : UserControl
 
 public class ApiItem
 {
+    public InventoryItem Item { get; set; }
+    public InventoryItem Parent { get; set; }
+    public int CollectableIndex { get; set; }
+
     public string ItemName { get; set; }
     public string ItemType { get; set; }
     public DestinyTierType ItemRarity { get; set; }
+    public DestinyDamageTypeEnum ItemDamageType { get; set; }
     public string ItemHash { get; set; }
+
     public double ImageWidth { get; set; }
     public double ImageHeight { get; set; }
     public bool IsD1 { get; set; }
@@ -414,7 +421,5 @@ public class ApiItem
         }
     }
 
-    public InventoryItem Item { get; set; }
-    public InventoryItem Parent { get; set; }
-    public int CollectableIndex { get; set; }
+    public PlugItem PlugItem { get; set; }
 }

@@ -45,10 +45,10 @@ public class Tag<T> : TigerFile where T : struct
         _tag = SchemaDeserializer.Get().DeserializeSchema<T>(reader);
     }
 
-    public void Load()
+    public void Load(bool force = false)
     {
-        if (!_isLoaded)
-            Deserialize();
+        if (!_isLoaded || force)
+            Deserialize(force);
     }
 
     public bool IsLoaded()

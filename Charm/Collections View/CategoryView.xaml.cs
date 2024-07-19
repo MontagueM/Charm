@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -40,17 +39,9 @@ public partial class CategoryView : UserControl
 
     public CategoryView(CollectionsView.ItemCategory itemCategory)
     {
-
         InitializeComponent();
-        DataContext = itemCategory;
+        Header.DataContext = itemCategory;
         LoadSubcategories(itemCategory);
-        MouseMove += UserControl_MouseMove;
-
-        ToolTip = new();
-        ToolTip.UserInput.Visibility = Visibility.Visible;
-        MouseMove += ToolTip.UserControl_MouseMove;
-        Panel.SetZIndex(ToolTip, 50);
-        MainGrid.Children.Add(ToolTip);
 
         _allItemSets = new();
         _allItems = new();
@@ -59,6 +50,13 @@ public partial class CategoryView : UserControl
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
+        MouseMove += UserControl_MouseMove;
+
+        ToolTip = new();
+        ToolTip.UserInput.Visibility = Visibility.Visible;
+        MouseMove += ToolTip.UserControl_MouseMove;
+        Panel.SetZIndex(ToolTip, 50);
+        MainGrid.Children.Add(ToolTip);
     }
 
     public void LoadSubcategories(CollectionsView.ItemCategory itemCategory)
@@ -161,16 +159,21 @@ public partial class CategoryView : UserControl
     {
         Dictionary<int, InventoryItem> inventoryItems = GetInventoryItems(categoryIndex);
 
-        Parallel.ForEach(inventoryItems, item =>
+        foreach (var item in inventoryItems)
         {
             string name = Investment.Get().GetItemName(item.Value);
             string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.Value.TagData.InventoryItemHash)).TagData.ItemType.Value;
+
+            TigerHash plugCategoryHash = null;
+            if (item.Value.TagData.Unk48.GetValue(item.Value.GetReader()) is D2Class_A1738080 plug)
+                plugCategoryHash = plug.PlugCategoryHash;
 
             var newItem = new ApiItem
             {
                 ItemName = name,
                 ItemType = type,
                 ItemRarity = (DestinyTierType)item.Value.TagData.ItemRarity,
+                ItemDamageType = DestinyDamageType.GetDamageType(item.Value.GetItemDamageTypeIndex()),
                 ItemHash = item.Value.TagData.InventoryItemHash.Hash32.ToString(),
                 ImageHeight = 96,
                 ImageWidth = 96,
@@ -178,8 +181,48 @@ public partial class CategoryView : UserControl
                 Weight = item.Key,
                 CollectableIndex = item.Key
             };
+            if (newItem.ItemDamageType == DestinyDamageTypeEnum.None)
+            {
+                if (newItem.Item.TagData.Unk70.GetValue(newItem.Item.GetReader()) is D2Class_C0778080 sockets)
+                {
+                    sockets.SocketEntries.ForEach(entry =>
+                    {
+                        if (entry.SocketTypeIndex == -1)
+                            return;
+                        var socket = Investment.Get().GetSocketType(entry.SocketTypeIndex);
+                        foreach (var a in socket.PlugWhitelists)
+                        {
+                            if (a.PlugCategoryHash.Hash32 == 1466776700) // 'v300.weapon.damage_type.energy', Y1 weapon that uses a damage type mod from ye olden days
+                            {
+                                var item = Investment.Get().GetInventoryItem(entry.SingleInitialItemIndex);
+                                item.Load(true); // idk why the item sometimes isnt fully loaded
+                                var index = item.GetItemDamageTypeIndex();
+                                newItem.ItemDamageType = DestinyDamageType.GetDamageType(index);
+                            }
+                        }
+                    });
+                }
+            }
+
+            PlugItem plugItem = new PlugItem
+            {
+                Item = newItem.Item,
+                Hash = newItem.Item.TagData.InventoryItemHash,
+                Name = newItem.ItemName,
+                Type = newItem.ItemType,
+                Description = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(newItem.Item.TagData.InventoryItemHash)).TagData.ItemDisplaySource.Value.ToString(),
+                PlugCategoryHash = plugCategoryHash,
+                PlugWatermark = ApiImageUtils.GetPlugWatermark(newItem.Item),
+                PlugRarity = (DestinyTierType)newItem.Item.TagData.ItemRarity,
+                PlugRarityColor = ((DestinyTierType)newItem.Item.TagData.ItemRarity).GetColor(),
+                PlugStyle = DestinySocketCategoryStyle.Consumable,
+                PlugDamageType = newItem.ItemDamageType,
+                PlugSelected = false,
+            };
+            newItem.PlugItem = plugItem;
+
             _allItems.Add(newItem);
-        });
+        }
     }
 
     private void LoadItemSets(int categoryIndex)
@@ -200,10 +243,14 @@ public partial class CategoryView : UserControl
                 Index = i
             };
 
-            Parallel.ForEach(inventoryItems, item =>
+            foreach (var item in inventoryItems)
             {
                 string name = Investment.Get().GetItemName(item.Value);
                 string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.Value.TagData.InventoryItemHash)).TagData.ItemType.Value;
+
+                TigerHash plugCategoryHash = null;
+                if (item.Value.TagData.Unk48.GetValue(item.Value.GetReader()) is D2Class_A1738080 plug)
+                    plugCategoryHash = plug.PlugCategoryHash;
 
                 var newItem = new ApiItem
                 {
@@ -216,8 +263,25 @@ public partial class CategoryView : UserControl
                     Item = item.Value,
                     Weight = item.Key
                 };
+                PlugItem plugItem = new PlugItem
+                {
+                    Item = newItem.Item,
+                    Hash = newItem.Item.TagData.InventoryItemHash,
+                    Name = newItem.ItemName,
+                    Type = newItem.ItemType,
+                    Description = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(newItem.Item.TagData.InventoryItemHash)).TagData.ItemDisplaySource.Value.ToString(),
+                    PlugCategoryHash = plugCategoryHash,
+                    PlugWatermark = ApiImageUtils.GetPlugWatermark(newItem.Item),
+                    PlugRarity = (DestinyTierType)newItem.Item.TagData.ItemRarity,
+                    PlugRarityColor = ((DestinyTierType)newItem.Item.TagData.ItemRarity).GetColor(),
+                    PlugStyle = DestinySocketCategoryStyle.Consumable,
+                    PlugDamageType = newItem.ItemDamageType,
+                    PlugSelected = false,
+                };
+                newItem.PlugItem = plugItem;
+
                 collectableSet.Items.Add(newItem);
-            });
+            }
 
             int placeholderCount = 5 - collectableSet.Items.Count;
             for (int j = 0; j < placeholderCount; j++)
@@ -482,27 +546,7 @@ public partial class CategoryView : UserControl
         ToolTip.ActiveItem = (sender as Button);
         ApiItem item = (ApiItem)(sender as Button).DataContext;
 
-        TigerHash plugCategoryHash = null;
-        if (item.Item.TagData.Unk48.GetValue(item.Item.GetReader()) is D2Class_A1738080 plug)
-            plugCategoryHash = plug.PlugCategoryHash;
-
-        PlugItem PlugItem = new PlugItem
-        {
-            Item = item.Item,
-            Hash = item.Item.TagData.InventoryItemHash,
-            Name = item.ItemName,
-            Type = item.ItemType,
-            Description = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.Item.TagData.InventoryItemHash)).TagData.ItemDisplaySource.Value.ToString(),
-            //PlugSocketIndex = socketIndex,
-            PlugCategoryHash = plugCategoryHash,
-            PlugWatermark = ApiImageUtils.GetPlugWatermark(item.Item),
-            PlugRarity = (DestinyTierType)item.Item.TagData.ItemRarity,
-            PlugRarityColor = ((DestinyTierType)item.Item.TagData.ItemRarity).GetColor(),
-            PlugSelected = false,
-            PlugStyle = DestinySocketCategoryStyle.Consumable
-        };
-
-        ToolTip.MakeTooltip(PlugItem);
+        ToolTip.MakeTooltip(item.PlugItem);
 
         PlugItem source = new PlugItem
         {

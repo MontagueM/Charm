@@ -263,6 +263,7 @@
             </Grid.RowDefinitions>
 
             <Grid
+                x:Name="Header"
                 Grid.Row="1"
                 Margin="125,0,0,0"
                 HorizontalAlignment="Left"

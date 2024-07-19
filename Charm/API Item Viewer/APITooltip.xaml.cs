@@ -46,6 +46,11 @@ public partial class APITooltip : UserControl
             }
         }
 
+        //if (item.PlugDamageType != DestinyDamageTypeEnum.None)
+        //{
+        //    AddToTooltip(item, TooltipType.Element);
+        //}
+
         if (item.Item?.GetItemStrings().TagData.Unk40.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D7548080 preview)
         {
             if (preview.ScreenStyleHash.Hash32 == 3797307284) // 'screen_style_emblem'
@@ -88,7 +93,7 @@ public partial class APITooltip : UserControl
                 }
 
                 if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                    AddToTooltip(null, TooltipType.Seperator);
+                    AddToTooltip(null, TooltipType.Separator);
 
                 AddToTooltip(objItem, tooltipType); // TODO: Other styles
             }
@@ -156,7 +161,7 @@ public partial class APITooltip : UserControl
             case TooltipType.InfoBlock:
                 if (InfoBoxStackPanel.Children.Count != 0)
                 {
-                    DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
+                    DataTemplate infoBlockSepTemplate = (DataTemplate)FindResource("InfoBoxSeparatorTemplate");
                     FrameworkElement infoBlockSepUi = (FrameworkElement)infoBlockSepTemplate.LoadContent();
                     InfoBoxStackPanel.Children.Add(infoBlockSepUi);
                 }
@@ -172,10 +177,10 @@ public partial class APITooltip : UserControl
                 warningTextUI.DataContext = item;
                 WarningBoxStackPanel.Children.Add(warningTextUI);
                 break;
-            case TooltipType.Seperator:
-                DataTemplate seperatorTemplate = (DataTemplate)FindResource("InfoBoxSeperatorTemplate");
-                FrameworkElement seperatorUi = (FrameworkElement)seperatorTemplate.LoadContent();
-                InfoBoxStackPanel.Children.Add(seperatorUi);
+            case TooltipType.Separator:
+                DataTemplate separatorTemplate = (DataTemplate)FindResource("InfoBoxSeparatorTemplate");
+                FrameworkElement separatorUi = (FrameworkElement)separatorTemplate.LoadContent();
+                InfoBoxStackPanel.Children.Add(separatorUi);
                 break;
             case TooltipType.Emblem:
                 DataTemplate emblemTemplate = (DataTemplate)FindResource("InfoBoxEmblemTemplate");
@@ -183,7 +188,14 @@ public partial class APITooltip : UserControl
                 emblemUi.DataContext = item;
                 InfoBoxStackPanel.Children.Add(emblemUi);
                 break;
+            case TooltipType.Element:
+                DataTemplate elementTemplate = (DataTemplate)FindResource("InfoBoxElementTemplate");
+                FrameworkElement elementUi = (FrameworkElement)elementTemplate.LoadContent();
+                elementUi.DataContext = item;
+                InfoBoxStackPanel.Children.Add(elementUi);
+                break;
 
+            // Objective stuff
             case TooltipType.ObjectivePercentage:
                 DataTemplate objPercentTemplate = (DataTemplate)FindResource("InfoBoxObjectivePercentageTemplate");
                 FrameworkElement objPercentUi = (FrameworkElement)objPercentTemplate.LoadContent();
@@ -220,21 +232,22 @@ public partial class APITooltip : UserControl
                 if (position.Y - yOffset - padding - (float)InfoBox.ActualHeight <= 0)
                     yOffset += (float)(position.Y - yOffset - padding - (float)InfoBox.ActualHeight);
 
-                TranslateTransform infoBoxtransform = (TranslateTransform)InfoBox.RenderTransform;
-                infoBoxtransform.X = position.X + xOffset;
-                infoBoxtransform.Y = position.Y - yOffset - ActualHeight;
+                TranslateTransform infoBoxTransform = (TranslateTransform)InfoBox.RenderTransform;
+                infoBoxTransform.X = position.X + xOffset;
+                infoBoxTransform.Y = position.Y - yOffset - ActualHeight;
             }
         }), System.Windows.Threading.DispatcherPriority.Render);
     }
 
-    public enum TooltipType
+    public enum TooltipType // TODO: Simplify styles/templates
     {
         InfoBlock,
         TextBlock,
         Grid,
         WarningBlock,
-        Seperator,
+        Separator,
         Emblem,
+        Element,
 
         ObjectivePercentage,
         ObjectiveInteger,
@@ -277,6 +290,76 @@ public class InfoBoxColorConverter : IValueConverter
         }
 
         return value;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class DamageTypeConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        string damageType = value.ToString();
+
+        if (string.IsNullOrEmpty(damageType) || damageType == "Kinetic")
+        {
+            if (parameter.ToString() == "Visibility")
+                return Visibility.Collapsed;
+            if (parameter.ToString() == "Text")
+                return string.Empty;
+            if (parameter.ToString() == "Foreground")
+                return new SolidColorBrush(Colors.Transparent); // Or some default color
+        }
+
+        switch (damageType)
+        {
+            //case "Kinetic":
+            //    if (parameter.ToString() == "Text")
+            //        return "Kinetic";
+            //    if (parameter.ToString() == "Foreground")
+            //        return new SolidColorBrush(Color.FromRgb(0xFF, 0xFF, 0xFF));
+            //    break;
+            case "Arc":
+                if (parameter.ToString() == "Text")
+                    return "";
+                if (parameter.ToString() == "Foreground")
+                    return new SolidColorBrush(Color.FromRgb(0x85, 0xc5, 0xec)); // #85c5ec
+                break;
+            case "Solar":
+                if (parameter.ToString() == "Text")
+                    return "";
+                if (parameter.ToString() == "Foreground")
+                    return new SolidColorBrush(Color.FromRgb(0xf2, 0x71, 0x1b)); // #f2711b
+                break;
+            case "Void":
+                if (parameter.ToString() == "Text")
+                    return "";
+                if (parameter.ToString() == "Foreground")
+                    return new SolidColorBrush(Color.FromRgb(0xb1, 0x84, 0xc5)); // #b184c5
+                break;
+            case "Stasis":
+                if (parameter.ToString() == "Text")
+                    return "";
+                if (parameter.ToString() == "Foreground")
+                    return new SolidColorBrush(Color.FromRgb(0x4d, 0x88, 0xff)); // #4d88ff
+                break;
+            case "Strand":
+                if (parameter.ToString() == "Text")
+                    return "";
+                if (parameter.ToString() == "Foreground")
+                    return new SolidColorBrush(Color.FromRgb(0x35, 0xe3, 0x66)); // #35e366
+                break;
+            default:
+                return DependencyProperty.UnsetValue;
+        }
+
+        if (parameter.ToString() == "Visibility")
+            return Visibility.Visible;
+
+        return DependencyProperty.UnsetValue;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

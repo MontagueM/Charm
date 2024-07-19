@@ -10,8 +10,9 @@
     <UserControl.Resources>
         <local:TransparentColorConverter x:Key="TransparentColorConverter" />
         <local:InfoBoxColorConverter x:Key="InfoBoxColorConverter" />
+        <local:DamageTypeConverter x:Key="DamageTypeConverter" />
 
-        <DataTemplate x:Key="InfoBoxSeperatorTemplate">
+        <DataTemplate x:Key="InfoBoxSeparatorTemplate">
             <Rectangle
                 Height="2"
                 Fill="{StaticResource ForegroundColour70}"
@@ -188,6 +189,24 @@
             </Grid>
         </DataTemplate>
 
+        <DataTemplate x:Key="InfoBoxElementTemplate">
+            <Grid Margin="15,5,15,5" Background="Transparent">
+                <TextBlock
+                    x:Name="PlugDamageType"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 65 Medium"
+                    d:Text="DMGType"
+                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                    FontSize="36"
+                    Foreground="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Foreground}"
+                    Text="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Text}"
+                    Visibility="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Visibility}" />
+            </Grid>
+        </DataTemplate>
+
         <Storyboard x:Key="FadeIn 0.3">
             <DoubleAnimation
                 Storyboard.TargetProperty="Opacity"
@@ -314,15 +333,32 @@
                         </Style>
                     </Grid.Style>
 
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        d:FontFamily="Haas Grot Text 55 Roman"
-                        d:Text="Item Type"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="18"
-                        Foreground="{StaticResource ForegroundColour90}"
-                        Opacity="0.8"
-                        Text="{Binding Type}" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            d:Text="Item Type"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                            FontSize="18"
+                            Foreground="{StaticResource ForegroundColour90}"
+                            Opacity="0.8"
+                            Text="{Binding Type}" />
+                        <TextBlock
+                            x:Name="PlugDamageType"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Left"
+                            Panel.ZIndex="1"
+                            d:FontFamily="Haas Grot Text 65 Medium"
+                            d:Text="DMGType"
+                            FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                            FontSize="18"
+                            Foreground="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Foreground}"
+                            Text="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Text}"
+                            Visibility="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Visibility}" />
+                    </StackPanel>
+
 
                     <TextBlock
                         HorizontalAlignment="Right"

@@ -138,6 +138,28 @@ public partial class APIItemView : UserControl
             };
             EmblemContainer.DataContext = emblem;
         }
+        if (ApiItem.ItemDamageType == "")
+        {
+            if (ApiItem.Item.TagData.Unk70.GetValue(ApiItem.Item.GetReader()) is D2Class_C0778080 sockets)
+            {
+                sockets.SocketEntries.ForEach(entry =>
+                {
+                    if (entry.SocketTypeIndex == -1)
+                        return;
+                    var socket = Investment.Get().GetSocketType(entry.SocketTypeIndex);
+                    foreach (var a in socket.PlugWhitelists)
+                    {
+                        if (a.PlugCategoryHash.Hash32 == 1466776700) // 'v300.weapon.damage_type.energy', Y1 weapon that uses a damage type mod from ye olden days
+                        {
+                            var item = Investment.Get().GetInventoryItem(entry.SingleInitialItemIndex);
+                            item.Load(true); // idk why the item sometimes isnt fully loaded
+                            var index = item.GetItemDamageTypeIndex();
+                            ApiItem.ItemDamageType = DestinyDamageType.GetDamageType(index).GetEnumDescription();
+                        }
+                    }
+                });
+            }
+        }
 
         CreateSocketCategories();
         GetItemStats();
@@ -703,6 +725,7 @@ public partial class APIItemView : UserControl
         public ImageSource PlugWatermark { get; set; }
         public DestinyTierType PlugRarity { get; set; } = DestinyTierType.Common;
         public Color PlugRarityColor { get; set; }
+        public DestinyDamageTypeEnum PlugDamageType { get; set; }
 
         public DestinySocketCategoryStyle PlugStyle { get; set; }
 
