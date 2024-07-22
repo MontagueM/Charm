@@ -554,10 +554,10 @@ public partial class APIItemView : UserControl
                 if (statItem.StatName.Value is null)
                     continue;
 
-                var mainStat = ((D2Class_81738080)ApiItem.Item.TagData.Unk78.GetValue(ApiItem.Item.GetReader())).InvestmentStats.FirstOrDefault(x => x.StatTypeIndex == stat.StatTypeIndex);
-#if DEBUG
-                Console.WriteLine($"{statItem.StatName.Value.ToString()} : {stat.Value} ({MakeDisplayValue(stat.StatTypeIndex, stat.Value)}) (perk) + {mainStat.Value} ({MakeDisplayValue(mainStat.StatTypeIndex, mainStat.Value)}) (main) = {stat.Value + mainStat.Value}");
-#endif
+                //var mainStat = ((D2Class_81738080)ApiItem.Item.TagData.Unk78.GetValue(ApiItem.Item.GetReader())).InvestmentStats.FirstOrDefault(x => x.StatTypeIndex == stat.StatTypeIndex);
+                //#if DEBUG
+                //  Console.WriteLine($"{statItem.StatName.Value.ToString()} : {stat.Value} ({MakeDisplayValue(stat.StatTypeIndex, stat.Value)}) (perk) + {mainStat.Value} ({MakeDisplayValue(mainStat.StatTypeIndex, mainStat.Value)}) (main) = {stat.Value + mainStat.Value}");
+                //#endif
                 if (!item.PlugSelected)
                 {
                     //TODO: Can only have one perk selected in each row, clear any added stats from current selected perk
@@ -726,8 +726,8 @@ public partial class APIItemView : UserControl
         public DestinyTierType PlugRarity { get; set; } = DestinyTierType.Common;
         public Color PlugRarityColor { get; set; }
         public DestinyDamageTypeEnum PlugDamageType { get; set; }
-
         public DestinySocketCategoryStyle PlugStyle { get; set; }
+        public bool HasControls { get; set; } = false;
 
         private bool _plugSelected;
         public bool PlugSelected

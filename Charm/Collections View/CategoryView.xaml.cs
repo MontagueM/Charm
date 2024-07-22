@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -53,7 +54,6 @@ public partial class CategoryView : UserControl
         MouseMove += UserControl_MouseMove;
 
         ToolTip = new();
-        ToolTip.UserInput.Visibility = Visibility.Visible;
         MouseMove += ToolTip.UserControl_MouseMove;
         Panel.SetZIndex(ToolTip, 50);
         MainGrid.Children.Add(ToolTip);
@@ -179,7 +179,7 @@ public partial class CategoryView : UserControl
                 ImageWidth = 96,
                 Item = item.Value,
                 Weight = item.Key,
-                CollectableIndex = item.Key
+                CollectableIndex = item.Key,
             };
             if (newItem.ItemDamageType == DestinyDamageTypeEnum.None)
             {
@@ -218,6 +218,7 @@ public partial class CategoryView : UserControl
                 PlugStyle = DestinySocketCategoryStyle.Consumable,
                 PlugDamageType = newItem.ItemDamageType,
                 PlugSelected = false,
+                HasControls = true
             };
             newItem.PlugItem = plugItem;
 
@@ -261,7 +262,8 @@ public partial class CategoryView : UserControl
                     ImageHeight = 96,
                     ImageWidth = 96,
                     Item = item.Value,
-                    Weight = item.Key
+                    Weight = item.Key,
+                    CollectableIndex = item.Key,
                 };
                 PlugItem plugItem = new PlugItem
                 {
@@ -277,6 +279,7 @@ public partial class CategoryView : UserControl
                     PlugStyle = DestinySocketCategoryStyle.Consumable,
                     PlugDamageType = newItem.ItemDamageType,
                     PlugSelected = false,
+                    HasControls = true
                 };
                 newItem.PlugItem = plugItem;
 
@@ -554,6 +557,22 @@ public partial class CategoryView : UserControl
         };
         if (source.Description != string.Empty)
             ToolTip.AddToTooltip(source, APITooltip.TooltipType.InfoBlock);
+    }
+
+    private void CategoryButton_MouseEnter(object sender, MouseEventArgs e)
+    {
+        ToolTip.ActiveItem = (sender as ToggleButton);
+        Subcategory item = (Subcategory)(sender as ToggleButton).DataContext;
+
+        PlugItem plugItem = new()
+        {
+            Name = item.ItemCategoryName,
+            Description = item.ItemCategoryDescription,
+            PlugStyle = DestinySocketCategoryStyle.Reusable,
+            HasControls = false
+        };
+
+        ToolTip.MakeTooltip(plugItem);
     }
 
     public void PlugItem_MouseLeave(object sender, MouseEventArgs e)

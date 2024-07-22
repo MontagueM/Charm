@@ -14,12 +14,21 @@
             <ColumnDefinition Width="70*" />
             <ColumnDefinition Width="10*" />
         </Grid.ColumnDefinitions>
-        <TextBlock
-            Grid.Column="0"
-            Margin="0,0,20,0"
-            FontSize="24"
-            Text="{Binding SettingName}"
-            TextWrapping="Wrap" />
+        <StackPanel Orientation="Vertical">
+            <TextBlock
+                Grid.Column="0"
+                Margin="0,0,20,0"
+                FontSize="24"
+                Text="{Binding SettingName}"
+                TextWrapping="Wrap" />
+            <TextBlock
+                Grid.Column="0"
+                Margin="0,10,20,0"
+                FontSize="14"
+                Text="{Binding SettingLabel}"
+                TextWrapping="Wrap" />
+        </StackPanel>
+
         <ComboBox
             x:Name="SettingsCombobox"
             Grid.Column="1"
@@ -27,15 +36,17 @@
             FontSize="24"
             IsReadOnly="False"
             Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+
         <Button
             x:Name="ChangeButton"
             Grid.Column="2"
-            FontSize="24"
-            Style="{StaticResource MaterialDesignPaperDarkButton}">
+            Margin="10"
+            Style="{DynamicResource D2StyleButton}">
             <TextBlock
-                VerticalAlignment="Center"
-                Text="Change"
-                TextAlignment="Center" />
+                d:FontFamily="Haas Grot Text 55 Roman"
+                FontSize="24"
+                Text="Change" />
         </Button>
+
     </Grid>
 </UserControl>

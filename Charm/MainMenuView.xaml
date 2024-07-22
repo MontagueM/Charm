@@ -13,227 +13,278 @@
     <UserControl.Resources />
 
     <Grid>
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+        <Grid.Background>
+            <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
+                <RadialGradientBrush.GradientStops>
+                    <GradientStop Offset="0" Color="#FF37393E" />
+                    <GradientStop Offset="0.8" Color="#111113" />
+                </RadialGradientBrush.GradientStops>
+            </RadialGradientBrush>
+        </Grid.Background>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="90*" />
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
 
-        <StackPanel
+        <Grid
+            x:Name="MainContainer"
             Grid.Row="0"
             Grid.Column="1"
             Margin="0,0,0,0"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center">
+            VerticalAlignment="Center"
+            Background="Transparent">
+            <Grid.RenderTransform>
+                <TranslateTransform />
+            </Grid.RenderTransform>
 
-            <Grid Margin="0,0,0,10">
-                <Border
-                    Grid.Column="1"
-                    Margin="0,10,0,0"
-                    Background="Transparent"
-                    BorderBrush="#AEFFFFFF"
-                    BorderThickness="0,0,0,2" />
-                <Border
-                    Grid.Column="1"
-                    Height="10"
-                    Margin="0,0,0,-10"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    Background="Transparent"
-                    BorderBrush="#AEFFFFFF"
-                    BorderThickness="1" />
-                <Border
-                    Grid.Column="1"
-                    Height="10"
-                    Margin="0,0,0,-10"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom"
-                    Background="Transparent"
-                    BorderBrush="#AEFFFFFF"
-                    BorderThickness="1" />
-                <Border
-                    Grid.Column="1"
-                    Height="10"
-                    Margin="0,0,0,-10"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Background="Transparent"
-                    BorderBrush="#AEFFFFFF"
-                    BorderThickness="1" />
-            </Grid>
-
-            <Button
-                Margin="10,10,10,30"
-                Click="ActivitiesViewButton_OnClick"
-                Style="{DynamicResource D2StyleButton}">
-                <TextBlock
-                    d:FontFamily="Haas Grot Text 55 Roman"
-                    Text="MAPS AND ACTIVITIES"
-                    TextWrapping="WrapWithOverflow" />
-            </Button>
-
-            <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
-                <StackPanel
-                    Grid.Column="0"
-                    Margin="0,0,35,0"
-                    Background="#18585867">
-                    <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
-                        <Grid Style="{StaticResource ColumnHeader}">
-                            <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="MODELS" />
-                        </Grid>
-                    </Border>
-
-                    <Button
-                        x:Name="ApiButton"
+            <StackPanel>
+                <Grid Margin="0,0,0,10" Background="Transparent">
+                    <Border
                         Grid.Column="1"
-                        Margin="10"
-                        Click="ApiViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="API" />
-                    </Button>
-
-                    <Button
-                        x:Name="BagsButton"
-                        Margin="10"
-                        Click="NamedEntitiesBagsViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="NAMED BAGS" />
-                    </Button>
-
-                    <Button
-                        Margin="10"
-                        Click="AllEntitiesViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="DYNAMICS" />
-                    </Button>
-
-                    <Button
-                        x:Name="StaticsButton"
-                        Margin="10"
-                        Click="AllStaticsViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STATICS" />
-                    </Button>
-
-                    <Grid Margin="10" />
-                </StackPanel>
-
-                <StackPanel
-                    Grid.Column="2"
-                    Margin="35,0,35,0"
-                    Background="#18585867">
-                    <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
-                        <Grid Style="{StaticResource ColumnHeader}">
-                            <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="AUDIO" />
-                        </Grid>
-                    </Border>
-
-                    <Button
-                        Margin="10"
-                        Click="AllAudioViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="ALL" />
-                    </Button>
-
-                    <Button
-                        x:Name="WeaponAudioButton"
-                        Margin="10"
-                        Click="WeaponAudioViewButton_Click"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="WEAPONS" />
-                    </Button>
-
-                    <Button
-                        x:Name="SoundBanksButton"
-                        Margin="10"
-                        Click="AllBKHDViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="SOUND BANKS" />
-                    </Button>
-
-                    <Grid Margin="10" />
-                </StackPanel>
-
-                <StackPanel
-                    Grid.Column="3"
-                    Margin="35,0,0,0"
-                    Background="#18585867">
-                    <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
-                        <Grid Style="{StaticResource ColumnHeader}">
-                            <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="OTHER" />
-                        </Grid>
-                    </Border>
-
-                    <Button
-                        Margin="10"
-                        Click="AllStringsViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STRINGS" />
-                    </Button>
-
-                    <Button
-                        Margin="10"
-                        Click="AllTexturesViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="TEXTURES" />
-                    </Button>
-
-                    <Button
-                        Margin="10"
-                        Click="AllMaterialsViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="MATERIALS" />
-                    </Button>
-
-                    <Button
-                        x:Name="CollectionsButton"
+                        Margin="0,10,0,0"
+                        Background="Transparent"
+                        BorderBrush="#AEFFFFFF"
+                        BorderThickness="0,0,0,2" />
+                    <Border
                         Grid.Column="1"
-                        Margin="10"
-                        Click="CollectionsViewButton_OnClick"
-                        Style="{DynamicResource D2StyleButton}">
-                        <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="COLLECTIONS" />
-                    </Button>
+                        Height="10"
+                        Margin="0,0,0,-10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Background="Transparent"
+                        BorderBrush="#AEFFFFFF"
+                        BorderThickness="1" />
+                    <Border
+                        Grid.Column="1"
+                        Height="10"
+                        Margin="0,0,0,-10"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent"
+                        BorderBrush="#AEFFFFFF"
+                        BorderThickness="1" />
+                    <Border
+                        Grid.Column="1"
+                        Height="10"
+                        Margin="0,0,0,-10"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent"
+                        BorderBrush="#AEFFFFFF"
+                        BorderThickness="1" />
+                </Grid>
 
-                    <Grid Margin="10" />
+                <Button
+                    Margin="10,10,10,30"
+                    Click="ActivitiesViewButton_OnClick"
+                    Style="{DynamicResource D2StyleButton}">
+                    <Border Background="#22181818">
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            Text="MAPS AND ACTIVITIES"
+                            TextWrapping="WrapWithOverflow" />
+                    </Border>
+                </Button>
+
+                <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
+                    <StackPanel
+                        Grid.Column="0"
+                        Margin="0,0,35,0"
+                        Background="#18585867">
+                        <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
+                            <Grid Style="{StaticResource ColumnHeader}">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="MODELS" />
+                            </Grid>
+                        </Border>
+
+                        <Button
+                            x:Name="ApiButton"
+                            Grid.Column="1"
+                            Margin="10"
+                            Click="ApiViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="API" />
+                            </Border>
+                        </Button>
+
+                        <Button
+                            x:Name="BagsButton"
+                            Margin="10"
+                            Click="NamedEntitiesBagsViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="NAMED BAGS" />
+                            </Border>
+                        </Button>
+
+                        <Button
+                            Margin="10"
+                            Click="AllEntitiesViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="DYNAMICS" />
+                        </Button>
+
+                        <Button
+                            x:Name="StaticsButton"
+                            Margin="10"
+                            Click="AllStaticsViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STATICS" />
+                            </Border>
+                        </Button>
+
+                        <Grid Margin="10" />
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Column="2"
+                        Margin="35,0,35,0"
+                        Background="#18585867">
+                        <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
+                            <Grid Style="{StaticResource ColumnHeader}">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="AUDIO" />
+                            </Grid>
+                        </Border>
+
+                        <Button
+                            Margin="10"
+                            Click="AllAudioViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="ALL" />
+                            </Border>
+                        </Button>
+
+                        <Button
+                            x:Name="WeaponAudioButton"
+                            Margin="10"
+                            Click="WeaponAudioViewButton_Click"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="WEAPONS" />
+                            </Border>
+                        </Button>
+
+                        <Button
+                            x:Name="SoundBanksButton"
+                            Margin="10"
+                            Click="AllBKHDViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="SOUND BANKS" />
+                            </Border>
+                        </Button>
+
+                        <Grid Margin="10" />
+                    </StackPanel>
+
+                    <StackPanel
+                        Grid.Column="3"
+                        Margin="35,0,0,0"
+                        Background="#18585867">
+                        <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
+                            <Grid Style="{StaticResource ColumnHeader}">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="OTHER" />
+                            </Grid>
+                        </Border>
+
+                        <Button
+                            Margin="10"
+                            Click="AllStringsViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STRINGS" />
+                            </Border>
+                        </Button>
+
+                        <Button
+                            Margin="10"
+                            Click="AllTexturesViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="TEXTURES" />
+                            </Border>
+                        </Button>
+
+                        <Button
+                            Margin="10"
+                            Click="AllMaterialsViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="MATERIALS" />
+                            </Border>
+                        </Button>
+
+                        <Button
+                            x:Name="CollectionsButton"
+                            Grid.Column="1"
+                            Margin="10"
+                            Click="CollectionsViewButton_OnClick"
+                            Style="{DynamicResource D2StyleButton}">
+                            <Border Background="#22181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="COLLECTIONS" />
+                            </Border>
+                        </Button>
+
+                        <Grid Margin="10" />
+                    </StackPanel>
                 </StackPanel>
+                <Grid Margin="0,10,0,0" Background="Transparent">
+                    <Border
+                        Grid.Column="1"
+                        Margin="0,10,0,0"
+                        Background="Transparent"
+                        BorderBrush="#AEFFFFFF"
+                        BorderThickness="0,0,0,2" />
+                    <Border
+                        Grid.Column="1"
+                        Height="10"
+                        Margin="0,0,0,-10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent"
+                        BorderBrush="#AEFFFFFF"
+                        BorderThickness="1" />
+                    <Border
+                        Grid.Column="1"
+                        Height="10"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Background="Transparent"
+                        BorderBrush="#AEFFFFFF"
+                        BorderThickness="1" />
+                    <Border
+                        Grid.Column="1"
+                        Height="10"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Background="Transparent"
+                        BorderBrush="#AEFFFFFF"
+                        BorderThickness="1" />
+                </Grid>
             </StackPanel>
-            <Grid Margin="0,10,0,0">
-                <Border
-                    Grid.Column="1"
-                    Margin="0,10,0,0"
-                    Background="Transparent"
-                    BorderBrush="#AEFFFFFF"
-                    BorderThickness="0,0,0,2" />
-                <Border
-                    Grid.Column="1"
-                    Height="10"
-                    Margin="0,0,0,-10"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Bottom"
-                    Background="Transparent"
-                    BorderBrush="#AEFFFFFF"
-                    BorderThickness="1" />
-                <Border
-                    Grid.Column="1"
-                    Height="10"
-                    Margin="0,0,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Background="Transparent"
-                    BorderBrush="#AEFFFFFF"
-                    BorderThickness="1" />
-                <Border
-                    Grid.Column="1"
-                    Height="10"
-                    Margin="0,0,0,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    Background="Transparent"
-                    BorderBrush="#AEFFFFFF"
-                    BorderThickness="1" />
-            </Grid>
 
-        </StackPanel>
+        </Grid>
 
         <Grid
             Grid.Row="1"
@@ -267,7 +318,6 @@
 
             </StackPanel>
         </Grid>
-
 
     </Grid>
 </UserControl>

@@ -520,7 +520,7 @@
 
         <Grid
             x:Name="MainContainer"
-            Margin="0,50,0,0"
+            Margin="0,55,0,0"
             Background="Transparent"
             RenderTransformOrigin="0.5,0.5">
             <Grid.RenderTransform>
@@ -933,7 +933,7 @@
                 Background="Transparent">
 
                 <StackPanel
-                    Margin="125,0,125,0"
+                    Margin="125,0,125,50"
                     Background="Transparent"
                     Orientation="Horizontal">
                     <WrapPanel Name="SocketContainer" Orientation="Vertical" />
@@ -1086,9 +1086,9 @@
         </Grid>
 
         <!--  User Controls  -->
-        <Grid Margin="0,900,0,0" Background="#38000000">
+        <Grid VerticalAlignment="Bottom" Background="#38000000">
             <StackPanel
-                Margin="0,0,150,0"
+                Margin="0,10,150,10"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 FlowDirection="RightToLeft"

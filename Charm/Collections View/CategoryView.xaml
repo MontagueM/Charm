@@ -26,46 +26,41 @@
         </DataTemplate>
         <DataTemplate x:Key="ItemSetTemplate">
             <Grid Background="Transparent">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
                 <Button
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
                     Height="auto"
                     Margin="4"
                     local:StyleHelper.BorderThickness="0.75"
                     Style="{DynamicResource D2StyleButton}">
                     <Grid Name="Container" Background="#69696969">
-                        <ItemsControl
-                            Name="ItemSetList"
-                            ItemTemplateSelector="{DynamicResource ItemSetInnerTemplateSelector}"
-                            ItemsSource="{Binding Items}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid HorizontalAlignment="Left" Rows="1" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
+                        <StackPanel Orientation="Horizontal">
+                            <ItemsControl
+                                Name="ItemSetList"
+                                ItemTemplateSelector="{DynamicResource ItemSetInnerTemplateSelector}"
+                                ItemsSource="{Binding Items}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid HorizontalAlignment="Left" Rows="1" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="10,0,0,15"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Panel.ZIndex="1"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="20"
+                                Foreground="{StaticResource ForegroundColour90}"
+                                IsHitTestVisible="False"
+                                Text="{Binding ItemCategoryName}"
+                                TextAlignment="Left"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
                     </Grid>
                 </Button>
-
-                <TextBlock
-                    Grid.Column="1"
-                    Margin="500,0,0,15"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Panel.ZIndex="1"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                    FontSize="20"
-                    Foreground="{StaticResource ForegroundColour90}"
-                    IsHitTestVisible="False"
-                    Text="{Binding ItemCategoryName}"
-                    TextAlignment="Left"
-                    TextWrapping="Wrap" />
             </Grid>
-
         </DataTemplate>
         <DataTemplate x:Key="ItemSetInnerTemplate">
             <Button
@@ -92,6 +87,8 @@
                 Checked="Subcategory_OnSelect"
                 GroupName="Subcategory"
                 IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                MouseEnter="CategoryButton_MouseEnter"
+                MouseLeave="PlugItem_MouseLeave"
                 Style="{DynamicResource D2StyleRadioButton}">
                 <Border>
                     <Image Source="{Binding ItemCategoryIcon}" />
@@ -257,7 +254,7 @@
             </Grid.Triggers>
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="55" />
+                <RowDefinition Height="50" />
                 <RowDefinition Height="20*" />
                 <RowDefinition Height="125*" />
             </Grid.RowDefinitions>
@@ -534,7 +531,30 @@
             </Grid>
         </Grid>
 
+        <!--  User Controls  -->
+        <Grid VerticalAlignment="Bottom" Background="#38000000">
+            <StackPanel
+                Margin="0,10,150,10"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                FlowDirection="RightToLeft"
+                Orientation="Horizontal">
 
+                <TextBlock
+                    Margin="0,0,25,0"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text=" Dismiss"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap" />
+
+            </StackPanel>
+
+        </Grid>
     </Grid>
 
 </UserControl>

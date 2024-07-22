@@ -155,7 +155,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="10*" />
             <RowDefinition Height="50*" />
-            <RowDefinition Height="40*" />
+            <RowDefinition Height="60*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75*" />

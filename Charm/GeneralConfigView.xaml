@@ -5,8 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Charm"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="1280"
-    d:DesignWidth="1920"
+    d:DesignHeight="945"
+    d:DesignWidth="1914"
     Loaded="OnControlLoaded"
     mc:Ignorable="d">
     <Grid>

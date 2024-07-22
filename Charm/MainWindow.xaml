@@ -9,49 +9,56 @@
     Title="Charm"
     Width="1920"
     Height="1080"
-    Background="{DynamicResource MaterialDesignPaper}"
-    FontFamily="{materialDesign:MaterialDesignFont}"
     Loaded="OnControlLoaded"
     PreviewKeyDown="MainWindow_PreviewKeyDown"
-    TextElement.FontSize="14"
-    TextElement.FontWeight="Normal"
-    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
     mc:Ignorable="d">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="4*" />
-            <RowDefinition Height="100*" />
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="70*" />
-                <ColumnDefinition Width="30*" />
-            </Grid.ColumnDefinitions>
-            <Menu Style="{StaticResource MaterialDesignMenu}">
-                <MenuItem Header="Settings">
-                    <MenuItem Click="OpenConfigPanel_OnClick" Header="Config panel" />
-                    <MenuItem Click="OpenLogPanel_OnClick" Header="Log panel" />
-                </MenuItem>
-            </Menu>
+    <Grid Background="Transparent">
+
+        <StackPanel
+            Margin="0,5,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Panel.ZIndex="1"
+            Orientation="Horizontal">
+            <Image
+                x:Name="CharmIcon"
+                Width="20"
+                Height="20"
+                Margin="0,0,5,0"
+                VerticalAlignment="Center" />
             <TextBlock
                 x:Name="CurrentStrategyText"
-                Grid.Column="1"
-                Margin="0,4,4,0"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
+                VerticalAlignment="Center"
+                FontFamily="{StaticResource MaterialDesignFont}"
+                FontSize="16"
                 Text="NO GAME SELECTED" />
-        </Grid>
-        <TabControl x:Name="MainTabControl" Grid.Row="1">
+        </StackPanel>
+
+        <TabControl
+            x:Name="MainTabControl"
+            Background="Transparent"
+            FontFamily="{StaticResource MaterialDesignFont}">
+            <TabItem
+                x:Name="SettingsTab"
+                HorizontalAlignment="Left"
+                Header="SETTINGS">
+                <local:ConfigView />
+            </TabItem>
+            <TabItem
+                x:Name="Log"
+                HorizontalAlignment="Left"
+                Header="LOG">
+                <local:LogView />
+            </TabItem>
             <TabItem
                 x:Name="MainMenuTab"
                 HorizontalAlignment="Left"
-                Header="MAIN MENU">
+                Header="MAIN MENU"
+                IsSelected="True">
                 <local:MainMenuView />
             </TabItem>
         </TabControl>
+
         <local:ProgressView
             x:Name="ProgressView"
             Grid.Row="0"

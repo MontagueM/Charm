@@ -29,13 +29,12 @@
         <Button
             x:Name="ChangeButton"
             Grid.Column="2"
-            VerticalAlignment="Stretch"
-            FontSize="24"
-            Style="{StaticResource MaterialDesignPaperDarkButton}">
+            Margin="0"
+            Style="{DynamicResource D2StyleButton}">
             <TextBlock
-                VerticalAlignment="Center"
-                Text="Change"
-                TextAlignment="Center" />
+                d:FontFamily="Haas Grot Text 55 Roman"
+                FontSize="24"
+                Text="Change" />
         </Button>
     </Grid>
 </UserControl>

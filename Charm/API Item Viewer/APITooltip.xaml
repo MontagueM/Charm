@@ -416,8 +416,17 @@
         <Grid
             x:Name="UserInput"
             Grid.Row="4"
-            Background="#E1000000"
-            Visibility="Collapsed">
+            Background="#E1000000">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasControls}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Grid
                 Margin="0,0,10,0"
                 HorizontalAlignment="Right"

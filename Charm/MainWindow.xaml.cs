@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Arithmic;
+using System.Windows.Media.Imaging;
 using Tiger;
 using Tiger.Schema;
 using VersionChecker;
@@ -33,6 +34,9 @@ public partial class MainWindow
             Task.Run(InitialiseHandlers);
             _bHasInitialised = true;
         }
+
+        Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        CharmIcon.Source = GetBitmapSource(appIcon);
     }
 
     public MainWindow()
@@ -63,10 +67,6 @@ public partial class MainWindow
 
         _logView = new LogView();
         LogHandler.Initialise(_logView);
-
-        // Make log
-        MakeNewTab("Log", _logView);
-        _logTab = _newestTab;
 
         // Hide tab by default
         HideMainMenu();
@@ -186,11 +186,11 @@ public partial class MainWindow
 
     private void InitialiseSubsystems()
     {
-        Log.Info("Initialising Charm subsystems");
+        Arithmic.Log.Info("Initialising Charm subsystems");
         string[] args = Environment.GetCommandLineArgs();
         CharmInstance.Args = new CharmArgs(args);
         CharmInstance.InitialiseSubsystems();
-        Log.Info("Initialised Charm subsystems");
+        Arithmic.Log.Info("Initialised Charm subsystems");
 
     }
 
@@ -203,11 +203,11 @@ public partial class MainWindow
             var versionInfo = FileVersionInfo.GetVersionInfo(path);
             string version = versionInfo.FileVersion;
             GameInfo = versionInfo;
-            Log.Info("Game version: " + version);
+            Arithmic.Log.Info("Game version: " + version);
         }
         catch (Exception e)
         {
-            Log.Error($"Could not get game version error {e}.");
+            Arithmic.Log.Error($"Could not get game version error {e}.");
         }
     }
 
@@ -222,11 +222,11 @@ public partial class MainWindow
             if (!upToDate)
             {
                 MessageBox.Show($"New version available on GitHub! (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id})");
-                Log.Info($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
+                Arithmic.Log.Info($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
             }
             else
             {
-                Log.Info($"Version is up to date ({versionChecker.CurrentVersion.Id}).");
+                Arithmic.Log.Info($"Version is up to date ({versionChecker.CurrentVersion.Id}).");
             }
         }
         catch (Exception e)
@@ -235,53 +235,12 @@ public partial class MainWindow
 #if !DEBUG
             MessageBox.Show("Could not get version.");
 #endif
-            Log.Error($"Could not get version error {e}.");
+            Arithmic.Log.Error($"Could not get version error {e}.");
         }
     }
 
     private async void InitialiseHandlers()
     {
-        // Progress.SetProgressStages(new List<string>
-        // {
-        //     "packages cache",
-        //     "fonts",
-        //     "fnv hashes",
-        //     "hash 64",
-        //     "investment",
-        //     "global string cache",
-        //     "activity names",
-        // });
-        // to check if we need to update caches
-        // PackageHandler.Initialise();
-        // Progress.CompleteStage();
-
-        //Load all the fonts
-        //await Task.Run(() =>
-        //{
-        //    RegisterFonts();
-        //});
-        //Progress.CompleteStage();
-
-        // // Initialise FNV handler -- must be first bc my code is shit
-        // await Task.Run(FnvHandler.Initialise);
-        // Progress.CompleteStage();
-        //
-        // // Get all hash64 -- must be before InvestmentHandler
-        // await Task.Run(TagHash64Handler.Initialise);
-        // Progress.CompleteStage();
-        //
-        // // Initialise investment
-        // await Task.Run(InvestmentHandler.Initialise);
-        // Progress.CompleteStage();
-        //
-        // // Initialise global string cache
-        // await Task.Run(PackageHandler.GenerateGlobalStringContainerCache);
-        // Progress.CompleteStage();
-        //
-        // // Get all activity names
-        // await Task.Run(PackageHandler.GetAllActivityNames);
-        // Progress.CompleteStage();
-
         // Set texture format
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         TextureExtractor.SetTextureFormat(config.GetOutputTextureFormat());
@@ -387,8 +346,16 @@ public partial class MainWindow
         {
             var tab = (TabItem)MainTabControl.Items[MainTabControl.SelectedIndex];
             dynamic content = tab.Content;
-            if (content is APIItemView av)
+            if (content is APIItemView || content is CategoryView)
                 MainTabControl.Items.Remove(tab);
         }
+    }
+
+    private BitmapSource GetBitmapSource(Icon icon)
+    {
+        return System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
+                 icon.Handle,
+                 new Int32Rect(0, 0, icon.Width, icon.Height),
+                 BitmapSizeOptions.FromEmptyOptions());
     }
 }

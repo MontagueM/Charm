@@ -11,4 +11,5 @@ public partial class ConfigSettingComboControl : UserControl
     }
 
     public string SettingName { get; set; }
+    public string SettingLabel { get; set; }
 }

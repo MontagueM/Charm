@@ -89,13 +89,6 @@ public partial class GeneralConfigView : UserControl
         csp.ChangeButton.Click += ExportSavePath_OnClick;
         GeneralConfigPanel.Children.Add(csp);
 
-        // Enable Blender interop //force people to use the addon now >:)
-        //ConfigSettingControl cbe = new ConfigSettingControl();
-        //cbe.SettingName = "Generate Blender importing script";
-        //bool bval2 = _config.GetBlenderInteropEnabled();
-        //cbe.SettingValue = bval2.ToString();
-        //cbe.ChangeButton.Click += BlenderInteropEnabled_OnClick;
-        //GeneralConfigPanel.Children.Add(cbe);
 
         // Enable combined extraction folder for maps
         ConfigSettingControl cef = new ConfigSettingControl();
@@ -124,17 +117,13 @@ public partial class GeneralConfigView : UserControl
         // Output texture format
         ConfigSettingComboControl ctf = new ConfigSettingComboControl();
         ctf.SettingName = "Output texture format";
+        ctf.SettingLabel = "(Use PNG or TGA in Blender)";
         TextureExportFormat etfval = _config.GetOutputTextureFormat();
         ctf.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems<TextureExportFormat>();
         ctf.SettingsCombobox.SelectedIndex = (int)etfval;
         ctf.SettingsCombobox.SelectionChanged += OutputTextureFormat_OnSelectionChanged;
         ctf.ChangeButton.Visibility = Visibility.Hidden;
         GeneralConfigPanel.Children.Add(ctf);
-
-        TextBlock lbl = new TextBlock();
-        lbl.Text = "(Use PNG or TGA in Blender)";
-        lbl.FontSize = 15;
-        GeneralConfigPanel.Children.Add(lbl);
 
         // Strategy
         ConfigSettingComboControl cs = new ConfigSettingComboControl();

@@ -62,7 +62,7 @@ public partial class APITooltip : UserControl
             }
         }
 
-        if (item.Description != "")
+        if (item.Description is not null && item.Description != "")
             AddToTooltip(item, TooltipType.TextBlock);
 
         if (item.Item?.TagData.Unk38.GetValue(item.Item.GetReader()) is D2Class_B0738080 objectives)
@@ -213,7 +213,7 @@ public partial class APITooltip : UserControl
 
     public void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
-        Dispatcher.BeginInvoke(new Action(() =>
+        Dispatcher.InvokeAsync(new Action(() =>
         {
             Point position = Mouse.GetPosition(this);
             if (InfoBox.Visibility == Visibility.Visible && ActiveItem != null)
@@ -236,7 +236,7 @@ public partial class APITooltip : UserControl
                 infoBoxTransform.X = position.X + xOffset;
                 infoBoxTransform.Y = position.Y - yOffset - ActualHeight;
             }
-        }), System.Windows.Threading.DispatcherPriority.Render);
+        }), System.Windows.Threading.DispatcherPriority.Input);
     }
 
     public enum TooltipType // TODO: Simplify styles/templates
