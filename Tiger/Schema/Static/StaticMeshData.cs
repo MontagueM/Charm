@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Tiger.Schema.Model;
-using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Static
 {
@@ -53,41 +52,22 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
 
         public Blob GetTransformsBlob() => throw new NotImplementedException();
 
-        //TODO: Update to new method, this still works fine so not a big deal
         private List<StaticPart> GenerateParts(Dictionary<int, SStaticMeshPart> staticPartEntries, SStaticMesh parent)
         {
             List<StaticPart> parts = new();
             if (_tag.Buffers.Count == 0) return new List<StaticPart>();
 
-            // Get material map
-            int lowestDetail = 0xFF;
-            foreach (var d2Class386D8080 in _tag.MaterialAssignments)
-            {
-                if (d2Class386D8080.RenderStage < lowestDetail)
-                {
-                    lowestDetail = d2Class386D8080.RenderStage;
-                }
-            }
-
-            Dictionary<int, IMaterial> materialMap = new();
-            for (var i = 0; i < _tag.MaterialAssignments.Count; i++)
-            {
-                var entry = _tag.MaterialAssignments[i];
-                if (entry.RenderStage == lowestDetail)
-                {
-                    materialMap.Add(entry.PartIndex, parent.Materials[i].Material);
-                }
-            }
-
             foreach (var (i, staticPartEntry) in staticPartEntries)
             {
-                if (materialMap.ContainsKey(i))
-                {
-                    StaticPart part = new(staticPartEntry);
-                    part.Material = materialMap[i];
-                    part.GetAllData(_tag.Buffers[staticPartEntry.BufferIndex], parent);
-                    parts.Add(part);
-                }
+                var material = parent.Materials[i].Material;
+                if (material is null)// || material.Unk08 != 1)
+                    continue;
+
+                StaticPart part = new StaticPart(staticPartEntry);
+                part.VertexLayoutIndex = _tag.MaterialAssignments[i].VertexLayoutIndex;
+                part.Material = material;
+                part.GetAllData(_tag.Buffers[staticPartEntry.BufferIndex], parent);
+                parts.Add(part);
             }
 
             return parts;
@@ -97,34 +77,31 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
         {
             Dictionary<int, SStaticMeshPart> staticPartEntries = new Dictionary<int, SStaticMeshPart>();
 
-            if (detailLevel == ExportDetailLevel.MostDetailed)
+            for (int i = 0; i < _tag.MaterialAssignments.Count; i++)
             {
-                for (int i = 0; i < _tag.Parts.Count; i++)
+                var mat = _tag.MaterialAssignments[i];
+                var part = _tag.Parts[mat.PartIndex];
+
+                if (!Globals.Get().ExportRenderStages.Contains((TfxRenderStage)mat.RenderStage))
+                    continue;
+
+                switch (detailLevel)
                 {
-                    var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel == 1 || staticPartEntry.DetailLevel == 2 || staticPartEntry.DetailLevel == 10)
-                    {
-                        staticPartEntries.Add(i, staticPartEntry);
-                    }
-                }
-            }
-            else if (detailLevel == ExportDetailLevel.LeastDetailed)
-            {
-                for (int i = 0; i < _tag.Parts.Count; i++)
-                {
-                    var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel != 1 && staticPartEntry.DetailLevel != 2 && staticPartEntry.DetailLevel != 10)
-                    {
-                        staticPartEntries.Add(i, staticPartEntry);
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < _tag.Parts.Count; i++)
-                {
-                    var staticPartEntry = _tag.Parts[i];
-                    staticPartEntries.Add(i, staticPartEntry);
+                    case ExportDetailLevel.MostDetailed:
+                        if (part.DetailLevel == 1 || part.DetailLevel == 2 || part.DetailLevel == 10)
+                        {
+                            staticPartEntries.Add(i, part);
+                        }
+                        break;
+                    case ExportDetailLevel.LeastDetailed:
+                        if (part.DetailLevel != 1 && part.DetailLevel != 2 && part.DetailLevel != 10)
+                        {
+                            staticPartEntries.Add(i, part);
+                        }
+                        break;
+                    default:
+                        staticPartEntries.Add(i, part);
+                        break;
                 }
             }
 
@@ -222,7 +199,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                 var mat = _tag.MaterialAssignments[i];
                 var part = _tag.Parts[mat.PartIndex];
 
-                if (!VertexLayouts.ExportRenderStages.Contains((TfxRenderStage)mat.RenderStage))
+                if (!Globals.Get().ExportRenderStages.Contains((TfxRenderStage)mat.RenderStage))
                     continue;
 
                 Debug.Assert(part.BufferIndex == 0, $"{Hash} has part with buffer index {part.BufferIndex}");

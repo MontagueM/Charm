@@ -246,6 +246,13 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                 foreach (var vertexIndex in part.BasePart.VertexIndices)
                 {
                     var v4p = part.BasePart.VertexPositions[lookup[(int)vertexIndex]];
+                    if (float.IsInfinity(v4p.X) || float.IsNaN(v4p.X))
+                        v4p.X = 0;
+                    if (float.IsInfinity(v4p.Y) || float.IsNaN(v4p.Y))
+                        v4p.Y = 0;
+                    if (float.IsInfinity(v4p.Z) || float.IsNaN(v4p.Z))
+                        v4p.Z = 0;
+
                     SharpDX.Vector3 p = new SharpDX.Vector3(v4p.X, v4p.Y, v4p.Z);
                     positions.Add(p);
                     // We need to check if the normal is Euler or Quaternion

@@ -70,7 +70,6 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     /// <summary>
     /// Loads keys for redacted packages from the keys.txt (if it exists) in the Charm folder 
     /// </summary>
-    /// <returns>IPackage object, type determined by the selected strategy.</returns>
     public void LoadPackageKeys()
     {
         if (!File.Exists("./keys.txt"))
@@ -247,6 +246,20 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return fileHashes;
     }
 
+    public ConcurrentHashSet<FileHash> GetAllHashes<T>(Func<string, bool> packageFilterFunc)
+    {
+        ConcurrentHashSet<FileHash> fileHashes = new();
+
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        IEnumerable<Package> packages = _packagesCache.Values.Where(package => packageFilterFunc(package.PackagePath));
+        Parallel.ForEach(packages, parallelOptions, (package) =>
+        {
+            fileHashes.UnionWith(package.GetAllHashes(typeof(T)));
+        });
+
+        return fileHashes;
+    }
+
     public async Task<ConcurrentHashSet<FileHash>> GetAllHashesAsync(Func<string, bool> packageFilterFunc)
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
@@ -270,17 +283,26 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return "Activity name not found.";
     }
 
+    public FileHash GetNamedTag(string name)
+    {
+        if (_activityNames.ContainsValue(name))
+        {
+            return new FileHash(_activityNames.First(x => x.Value == name).Key);
+        }
+        throw new NullReferenceException($"Can not find Named Tag '{name}'");
+    }
+
     public Dictionary<FileHash, TagClassHash> GetD1Activities()
     {
         return _d1NamedTags;
     }
 
-    private async void CacheAllActivityNames()
+    private void CacheAllActivityNames()
     {
         ConcurrentHashSet<PackageActivityEntry> activityEntries = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
-        await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
+        Parallel.ForEach(_packagesCache.Values, parallelOptions, async (package, ct) =>
         {
             activityEntries.UnionWith(package.GetAllActivities());
         });

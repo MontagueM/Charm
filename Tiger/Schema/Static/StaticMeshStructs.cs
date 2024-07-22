@@ -36,11 +36,23 @@ public struct SMaterialHash
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2F6D8080", 0x24)]
 public struct SStaticMeshDecal
 {
-    public sbyte RenderStage;
-    public sbyte VertexLayoutIndex;
+    // ugh this is ugly
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    public short Unk02;
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    public short RenderStageSK;
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public short VertexLayoutIndexSK;
+
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public byte RenderStageBL;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public byte VertexLayoutIndexBL;
+
+    [SchemaField(4, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(2, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public sbyte LODLevel;
     public sbyte Unk03;
     public short PrimitiveType;
@@ -54,6 +66,22 @@ public struct SStaticMeshDecal
     public uint IndexOffset;
     public uint IndexCount;
     public IMaterial Material;
+
+    public int GetVertexLayoutIndex()
+    {
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+            return VertexLayoutIndexBL;
+        else
+            return VertexLayoutIndexSK;
+    }
+
+    public int GetRenderStage()
+    {
+        if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+            return RenderStageBL;
+        else
+            return RenderStageSK;
+    }
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "94718080", 0x40)]
@@ -86,7 +114,7 @@ public struct SStaticMeshMaterialAssignment_SK
 {
     public ushort PartIndex;
     public ushort RenderStage;  // TFX render stage
-    public ushort Unk04; // VertexLayoutIndex?
+    public short VertexLayoutIndex;
     public ushort Unk06;
 }
 
@@ -128,8 +156,8 @@ public struct SStaticMeshData_D1
     public VertexBuffer Vertices0;
     public VertexBuffer Vertices1;
     public IndexBuffer Indices;
-    public sbyte UnkC; // render stage?
-    public sbyte UnkD; // vertex layout index?
+    public sbyte UnkC;
+    public sbyte UnkD;
     public sbyte DetailLevel;
     public sbyte PrimitiveType;
     public uint IndexOffset;

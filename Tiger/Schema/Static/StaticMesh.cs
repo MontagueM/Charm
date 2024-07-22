@@ -93,7 +93,7 @@ public class StaticMesh : Tag<SStaticMesh>
         List<StaticPart> parts = new List<StaticPart>();
         foreach (var decalPartEntry in _tag.Decals)
         {
-            if (!VertexLayouts.ExportRenderStages.Contains((TfxRenderStage)decalPartEntry.RenderStage))
+            if (!Globals.Get().ExportRenderStages.Contains((TfxRenderStage)decalPartEntry.GetRenderStage()))
                 continue;
 
             if (detailLevel == ExportDetailLevel.MostDetailed)

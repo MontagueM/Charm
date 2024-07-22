@@ -117,29 +117,15 @@ public class EntityModel : Tag<SEntityModel>
                     HasSkeleton = hasSkeleton,
                     RotationOffset = RotationOffset,
                     TranslationOffset = TranslationOffset,
-                    VertexLayoutIndex = Strategy.CurrentStrategy < TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? -1 : mesh.GetInputLayoutForStage(0)
+                    VertexLayoutIndex = mesh.GetInputLayoutForStage(0)
                 };
+
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
-                if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)
-                {
-                    if (dynamicMeshPart.Material is null ||
-                    dynamicMeshPart.Material.VertexShader is null ||
-                    dynamicMeshPart.Material.PixelShader is null)
-                        //dynamicMeshPart.Material.Unk08 != 1 ||
-                        //(dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
-                        continue;
-                }
-                else
-                {
-                    if (dynamicMeshPart.Material is null ||
-                    dynamicMeshPart.Material.VertexShader is null ||
-                    dynamicMeshPart.Material.PixelShader is null) // || dynamicMeshPart.Material.Unk08 != 1)
-                        continue;
-
-                    //if (dynamicMeshPart.Material.Unk08 != 1)
-                    //    Console.WriteLine($"{dynamicMeshPart.Material.FileHash}");
-                }
+                if (dynamicMeshPart.Material is null ||
+                dynamicMeshPart.Material.VertexShader is null ||
+                dynamicMeshPart.Material.PixelShader is null) // || dynamicMeshPart.Material.Unk08 != 1)
+                    continue;
 
                 dynamicMeshPart.GetAllData(mesh, _tag);
                 parts.Add(dynamicMeshPart);
@@ -163,7 +149,7 @@ public class EntityModel : Tag<SEntityModel>
         //    Console.WriteLine($"Part Range: {mesh.GetRangeForStage((int)stage).Start.Value}-{mesh.GetRangeForStage((int)stage).End.Value - 1} : {stage}");
         //}
 
-        foreach (TfxRenderStage stage in VertexLayouts.ExportRenderStages)
+        foreach (TfxRenderStage stage in Globals.Get().ExportRenderStages)
         {
             var range = mesh.GetRangeForStage((int)stage);
             if (!(range.Start.Value < range.End.Value))
@@ -230,46 +216,9 @@ public class DynamicMeshPart : MeshPart
             VertexIndexMap.Add(VertexIndices[i], i);
         }
 
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999 && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-        {
-            DXBCIOSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
-            int b0Stride = mesh.Vertices1.TagData.Stride;
-            int b1Stride = mesh.Vertices2?.TagData.Stride ?? 0;
-            List<DXBCIOSignature> inputSignatures0 = new();
-            List<DXBCIOSignature> inputSignatures1 = new();
-            int stride = 0;
-            foreach (DXBCIOSignature inputSignature in inputSignatures)
-            {
-                if (stride < b0Stride)
-                    inputSignatures0.Add(inputSignature);
-                else
-                    inputSignatures1.Add(inputSignature);
-
-                if (inputSignature.Semantic == DXBCSemantic.Colour || inputSignature.Semantic == DXBCSemantic.BlendIndices || inputSignature.Semantic == DXBCSemantic.BlendWeight)
-                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
-                else
-                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
-            }
-
-            Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-            mesh.Vertices1.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0, false);
-            mesh.Vertices2?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1, false);
-        }
-        else
-        {
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-            {
-                mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
-                mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
-            }
-            else
-            {
-                Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
-                mesh.Vertices1.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
-                mesh.Vertices2?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
-            }
-        }
-
+        Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
+        mesh.Vertices1.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
+        mesh.Vertices2?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
 
         if (mesh.OldWeights != null)
             mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices, 2); // bufferIndex 2 is used for D1, shouldnt affect D2 I hope

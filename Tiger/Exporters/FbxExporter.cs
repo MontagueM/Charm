@@ -184,13 +184,10 @@ public class FbxExporter : AbstractExporter
                 fbxMesh.AddTexcoords1(part);
             }
 
-            if (dynamicMeshPart.VertexWeights.Count > 0)
+            if (dynamicMeshPart.VertexWeights.Count > 0 && skeletonNodes.Count > 0)
             {
                 Debug.Assert(dynamicMeshPart.VertexWeights.Count == dynamicMeshPart.VertexPositions.Count);
-                if (skeletonNodes.Count > 0)
-                {
-                    AddWeightsToMesh(fbxMesh, dynamicMeshPart, skeletonNodes);
-                }
+                AddWeightsToMesh(fbxMesh, dynamicMeshPart, skeletonNodes);
             }
         }
     }

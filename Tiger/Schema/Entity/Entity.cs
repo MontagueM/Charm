@@ -7,7 +7,7 @@ public class Entity : Tag<SEntity>
     public List<EntityResource> Resources = new();
 
     // Entity features
-    public EntitySkeleton? Skeleton { get; private set; }
+    public EntitySkeleton? Skeleton { get; set; }
     public EntityModel? Model { get; private set; }
     public EntityModel? ModelParent { get; private set; }
     public EntityResource? ModelParentResource { get; private set; }

@@ -103,7 +103,19 @@ public class Terrain : Tag<STerrain>
         StaticPart part = new(entry);
         part.GroupIndex = entry.GroupIndex;
         part.Indices = _tag.Indices1.GetIndexData(PrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
-        part.VertexLayoutIndex = 22; // I think 22 is always used for terrain, I dont see anything else that would say otherwise
+        part.VertexLayoutIndex = 22;
+        switch (Strategy.CurrentStrategy)
+        {
+            case TigerStrategy.DESTINY1_RISE_OF_IRON:
+                part.VertexLayoutIndex = 61;
+                break;
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2601:
+                part.VertexLayoutIndex = 60;
+                break;
+            default:
+                break;
+        }
 
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();

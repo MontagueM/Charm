@@ -54,14 +54,14 @@ public partial class MaterialView : UserControl
         UnkDataList.ItemsSource = GetUnkDataDetails(material);
         TextureListView.ItemsSource = GetTextureDetails(material);
         UsedScopesList.ItemsSource = material.EnumerateScopes();
-
+#if DEBUG
         System.Console.WriteLine($"{material.RenderStates.ToString()}");
 
         System.Console.WriteLine($"BlendState: {material.RenderStates.BlendState()}");
         System.Console.WriteLine($"RasterizerState: {material.RenderStates.RasterizerState()}");
         System.Console.WriteLine($"DepthBiasState: {material.RenderStates.DepthBiasState()}");
         System.Console.WriteLine($"DepthStencilState: {material.RenderStates.DepthStencilState()}");
-
+#endif
         if (material.VertexShader is not null)
         {
             if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)

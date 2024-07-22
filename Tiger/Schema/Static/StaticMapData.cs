@@ -40,9 +40,9 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
                 var staticEntry = entry.TagData.StaticMesh[infoEntry.StaticIndex];
                 if (staticEntry.DetailLevel == 0 || staticEntry.DetailLevel == 1 || staticEntry.DetailLevel == 2 || staticEntry.DetailLevel == 3 || staticEntry.DetailLevel == 10)
                 {
-                    var material = entry.TagData.MaterialTable[infoEntry.MaterialIndex].Material;
+                    var materialEntry = entry.TagData.MaterialTable[infoEntry.MaterialIndex];
                     // Material is (probably) used for depth pass, so ignore this mesh
-                    if (material.Unk08 != 1)
+                    if (materialEntry.Material.Unk08 != 1)
                         continue;
 
                     if (!statics.ContainsKey(staticEntry.Vertices0.Hash))
@@ -53,10 +53,12 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
                         InstanceCount = infoEntry.InstanceCount,
                         TransformIndex = infoEntry.TransformIndex,
                         MaterialIndex = infoEntry.MaterialIndex,
-                        Material = material,
+                        Material = materialEntry.Material,
+                        VertexLayoutIndex = materialEntry.VertexLayoutIndex,
                         Data = staticEntry
                     };
                     statics[staticEntry.Vertices0.Hash].Add(meshInfo);
+                    //Console.WriteLine($"{staticEntry.Vertices0.Hash}: {staticEntry.IndexCount} {staticEntry.IndexOffset}");
                 }
             }
         }
@@ -96,10 +98,11 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
     public List<StaticPart> Load(List<MeshInfo> meshInfo, List<InstanceTransform> instances)
     {
         List<StaticPart> parts = new();
-        foreach (var mesh in meshInfo)
+        foreach (var mesh in meshInfo.DistinctBy(x => x.Data))
         {
             StaticPart part = new StaticPart(mesh.Data);
-            part.Material = mesh.Material; // I hope this is fine
+            part.VertexLayoutIndex = mesh.VertexLayoutIndex;
+            part.Material = mesh.Material;
             part.GetAllData(mesh.Data);
 
             // Why in the world Bungie would store UV transforms in here is beyond me
@@ -176,15 +179,6 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         return instanceTransforms;
     }
 
-    //[NonSchemaStruct(0x40)]
-    //public struct InstanceMatrix
-    //{
-    //    public Vector4 M0;
-    //    public Vector4 M1;
-    //    public Vector4 M2;
-    //    public Vector4 M3;
-    //}
-
     public struct InstanceTransform
     {
         public Vector4 Translation;
@@ -199,6 +193,7 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         public short TransformIndex; // Index in InstanceTransforms file
         public short MaterialIndex;
         public IMaterial Material;
+        public int VertexLayoutIndex;
         public SStaticMeshData_D1 Data;
     }
 }
@@ -1026,7 +1021,7 @@ public struct D1Class_901A8080
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "AF1A8080", 0x8)]
 public struct D1Class_AF1A8080
 {
-    public int Unk00; // Unsure
+    public int VertexLayoutIndex;
     public IMaterial Material;
 }
 

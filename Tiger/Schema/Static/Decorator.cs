@@ -37,7 +37,7 @@ public class Decorator : Tag<SDecorator>
             if (model.TagData.SpeedTreeData != null)
                 continue; // TODO: Trees, skip for now
 
-            var parts = GenerateParts(model.TagData.Model, model.TagData.SpeedTreeData != null ? 19 : 26); //.Load(ExportDetailLevel.MostDetailed, null);
+            var parts = GenerateParts(model.TagData.Model); //.Load(ExportDetailLevel.MostDetailed, null);
             foreach (DynamicMeshPart part in parts)
             {
                 if (part.Material == null) continue;
@@ -95,7 +95,7 @@ public class Decorator : Tag<SDecorator>
     }
 
     // Should just use EntityModel.Load but we need to get just the first mesh entry in Meshes since the rest are LODs
-    private List<DynamicMeshPart> GenerateParts(EntityModel model, int layoutIndex)
+    private List<DynamicMeshPart> GenerateParts(EntityModel model)
     {
         var dynamicParts = GetPartsOfDetailLevel(model);
         List<DynamicMeshPart> parts = new();
@@ -116,8 +116,7 @@ public class Decorator : Tag<SDecorator>
                 GroupIndex = part.ExternalIdentifier,
                 LodCategory = part.LodCategory,
                 bAlphaClip = (part.GetFlags() & 0x8) != 0,
-                VertexLayoutIndex = Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ?
-                mesh.GetInputLayoutForStage(0) : layoutIndex
+                VertexLayoutIndex = mesh.GetInputLayoutForStage(0)
             };
 
             if (dynamicMeshPart.Material is null ||

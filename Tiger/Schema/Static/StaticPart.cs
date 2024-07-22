@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Arithmic;
 
 namespace Tiger.Schema.Static;
 
@@ -23,7 +22,7 @@ public class StaticPart : MeshPart
 
     public StaticPart(SStaticMeshDecal decalPartEntry) : base()
     {
-        VertexLayoutIndex = decalPartEntry.VertexLayoutIndex;
+        VertexLayoutIndex = decalPartEntry.GetVertexLayoutIndex();
         IndexOffset = decalPartEntry.IndexOffset;
         IndexCount = decalPartEntry.IndexCount;
         LodCategory = (ELodCategory)decalPartEntry.LODLevel;
@@ -51,9 +50,8 @@ public class StaticPart : MeshPart
         }
         VertexIndices = uniqueVertexIndices.ToList();
 
-        // Have to call it like this b/c we don't know the format of the vertex data here
-        mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices1 != null ? mesh.Vertices1.TagData.Stride : -1, false);
-        mesh.Vertices1?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices0.TagData.Stride, false);
+        mesh.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
+        mesh.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
     }
 
     public void GetAllData(SStaticMeshBuffers buffers, SStaticMesh container)
@@ -68,45 +66,10 @@ public class StaticPart : MeshPart
             uniqueVertexIndices.Add(index.Z);
         }
         VertexIndices = uniqueVertexIndices.ToList();
-        // Have to call it like this b/c we don't know the format of the vertex data here
 
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
-        {
-            DXBCIOSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
-            int b0Stride = buffers.Vertices0.TagData.Stride;
-            int b1Stride = buffers.Vertices1?.TagData.Stride ?? 0;
-            List<DXBCIOSignature> inputSignatures0 = new();
-            List<DXBCIOSignature> inputSignatures1 = new();
-            int stride = 0;
-            foreach (DXBCIOSignature inputSignature in inputSignatures)
-            {
-                if (stride < b0Stride)
-                    inputSignatures0.Add(inputSignature);
-                else
-                    inputSignatures1.Add(inputSignature);
-
-                if (inputSignature.Semantic == DXBCSemantic.Colour || inputSignature.Semantic == DXBCSemantic.BlendIndices || inputSignature.Semantic == DXBCSemantic.BlendWeight)
-                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
-                else
-                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
-            }
-
-            List<int> strides = new();
-            if (buffers.Vertices0 != null) strides.Add(buffers.Vertices0.TagData.Stride);
-            if (buffers.Vertices1 != null) strides.Add(buffers.Vertices1.TagData.Stride);
-            if (buffers.VertexColor != null) strides.Add(buffers.VertexColor.TagData.Stride);
-            Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
-
-            Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{buffers.Vertices0.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {buffers.Vertices1?.Hash}/{buffers.Vertices1?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-            buffers.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0, false);
-            buffers.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1, false);
-        }
-        else
-        {
-            buffers.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
-            buffers.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
-            buffers.VertexColor?.ReadVertexData(this, uniqueVertexIndices);
-        }
+        buffers.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
+        buffers.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+        buffers.VertexColor?.ReadVertexData(this, uniqueVertexIndices);
 
         TransformData(container);
     }
@@ -123,48 +86,10 @@ public class StaticPart : MeshPart
             uniqueVertexIndices.Add(index.Z);
         }
         VertexIndices = uniqueVertexIndices.ToList();
-        // Have to call it like this b/c we don't know the format of the vertex data here
-        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
-        {
-            List<DXBCIOSignature> inputSignatures = mesh.Material.VertexShader.InputSignatures;
-            int b0Stride = mesh.Vertices0.TagData.Stride;
-            int b1Stride = mesh.Vertices1?.TagData.Stride ?? 0;
-            List<DXBCIOSignature> inputSignatures0 = new();
-            List<DXBCIOSignature> inputSignatures1 = new();
-            int stride = 0;
-            foreach (DXBCIOSignature inputSignature in inputSignatures)
-            {
-                if (stride < b0Stride)
-                {
-                    inputSignatures0.Add(inputSignature);
-                }
-                else
-                {
-                    inputSignatures1.Add(inputSignature);
-                }
 
-                if (inputSignature.Semantic == DXBCSemantic.Colour)
-                {
-                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
-                }
-                else
-                {
-                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
-                }
-                // todo entities can have 4 bytes per component, although its isolated for cloth so we can probably account for it
-            }
-            Debug.Assert(b0Stride + b1Stride == stride);
-
-            Log.Debug($"Reading vertex buffers {mesh.Vertices0.Hash}/{b0Stride}/{inputSignatures0.DebugString()} and {mesh.Vertices1?.Hash}/{b1Stride}/{inputSignatures1.DebugString()}");
-            mesh.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0);
-            mesh.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1);
-        }
-        else
-        {
-            mesh.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
-            mesh.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
-            mesh.VertexColor?.ReadVertexData(this, uniqueVertexIndices);
-        }
+        mesh.Vertices0.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
+        mesh.Vertices1?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
+        mesh.VertexColor?.ReadVertexData(this, uniqueVertexIndices);
 
         TransformData(container);
     }
