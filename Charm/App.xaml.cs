@@ -119,7 +119,7 @@ namespace Charm
         }
     }
 
-    public static class AnimationHelper
+    public static class UIHelper
     {
         public static void AnimateFadeIn(dynamic obj, float seconds, float to = 1, float from = 0)
         {
@@ -132,6 +132,24 @@ namespace Charm
                 obj.BeginAnimation(UIElement.OpacityProperty, fadeInAnimation);
 
             }), DispatcherPriority.Background);
+        }
+
+        public static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t)
+                {
+                    return t;
+                }
+                var result = FindVisualChild<T>(child);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
     }
 }

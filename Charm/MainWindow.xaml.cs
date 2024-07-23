@@ -289,6 +289,25 @@ public partial class MainWindow
         _newestTab.Header = newName.Replace('_', '.');
     }
 
+    public bool SetCurrentTab(string name)
+    {
+        // Testing making it all caps
+        name = name.ToUpper();
+        name = name.Replace('_', '.');
+        // Check if the name already exists, if so set newest tab to that
+        var items = MainTabControl.Items;
+        foreach (TabItem item in items)
+        {
+            if (name == (string)item.Header)
+            {
+                _newestTab = item;
+                SetNewestTabSelected();
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void MakeNewTab(string name, UserControl content)
     {
         // Testing making it all caps

@@ -11,7 +11,6 @@ using Tiger;
 using Tiger.Schema;
 using ComboBox = System.Windows.Controls.ComboBox;
 using MessageBox = System.Windows.MessageBox;
-using Orientation = System.Windows.Controls.Orientation;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace Charm;
@@ -37,86 +36,80 @@ public partial class GeneralConfigView : UserControl
     {
         GeneralConfigPanel.Children.Clear();
 
-        TextBlock header = new TextBlock();
-        header.Text = "General Settings";
-        header.FontSize = 30;
-        GeneralConfigPanel.Children.Add(header);
-
-        StackPanel sp = new();
-        sp.Orientation = Orientation.Horizontal;
+        // Strategy
+        ConfigSettingComboControl cs = new ConfigSettingComboControl();
+        cs.SettingName = "Game Version";
+        TigerStrategy csval = _config.GetCurrentStrategy();
+        cs.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems<TigerStrategy>(); //MakeEnumComboBoxItems((TigerStrategy val) => Strategy.HasConfiguration(val));
+        cs.SettingsCombobox.SelectedIndex = cs.SettingsCombobox.ItemsSource.Cast<ComboBoxItem>().ToList().FindIndex(x => (TigerStrategy)x.Tag == csval);
+        if (cs.SettingsCombobox.SelectedIndex == -1)
+        {
+            cs.SettingsCombobox.SelectedIndex = 0;
+        }
+        cs.SettingsCombobox.SelectionChanged += PackagePathStrategyComboBox_OnSelectionChanged;
+        cs.SettingsCombobox.SelectionChanged += CurrentStrategy_OnSelectionChanged;
+        cs.ChangeButton.Visibility = Visibility.Hidden;
+        GeneralConfigPanel.Children.Add(cs);
 
         // Packages path
-        _packagePathStrategyComboBox = new ComboBox();
-        _packagePathStrategyComboBox.ItemsSource = MakeEnumComboBoxItems<TigerStrategy>();
         if (_packagePathStrategy == TigerStrategy.NONE)
         {
             _packagePathStrategy = _config.GetCurrentStrategy();
         }
 
-        _packagePathStrategyComboBox.SelectedIndex = _packagePathStrategyComboBox.ItemsSource.Cast<ComboBoxItem>().Select(c => (TigerStrategy)c.Tag).ToList().IndexOf(_packagePathStrategy);
-        if (_packagePathStrategyComboBox.SelectedIndex == -1)
-        {
-            _packagePathStrategyComboBox.SelectedIndex = 0;
-        }
-        _packagePathStrategyComboBox.SelectionChanged += PackagePathStrategyComboBox_OnSelectionChanged;
-        sp.Children.Add(_packagePathStrategyComboBox);
-
         ConfigSettingControl cpp = new ConfigSettingControl();
-        cpp.SettingName = "Packages path";
+        // cpp.Settings.Children.Add(_packagePathStrategyComboBox);
+        cpp.SettingName = "Packages Path";
         if (_packagePathStrategy == TigerStrategy.NONE)
         {
-            cpp.SettingValue = "Cannot set packages path without a strategy selected";
+            cpp.SettingValue = "Cannot set packages path without a version selected";
             cpp.ChangeButton.IsEnabled = false;
         }
         else
         {
             var packagesPath = _config.GetPackagesPath(_packagePathStrategy);
-            cpp.SettingValue = packagesPath == "" ? "Not set" : packagesPath;
+            cpp.SettingValue = packagesPath == "" ? "Not Set (Required)" : packagesPath;
             cpp.ChangeButton.Click += PackagesPath_OnClick;
         }
-
-        cpp.Margin = new Thickness(10, 0, 0, 0);
-        sp.Children.Add(cpp);
-
-        GeneralConfigPanel.Children.Add(sp);
+        GeneralConfigPanel.Children.Add(cpp);
 
 
         // Save path
         ConfigSettingControl csp = new ConfigSettingControl();
-        csp.SettingName = "Export save path";
+        csp.SettingName = "Export Save Path";
         string exportSavePath = _config.GetExportSavePath();
-        csp.SettingValue = exportSavePath == "" ? "Not set" : exportSavePath;
+        csp.SettingValue = exportSavePath == "" ? "Not Set (Required)" : exportSavePath;
         csp.ChangeButton.Click += ExportSavePath_OnClick;
         GeneralConfigPanel.Children.Add(csp);
 
-
         // Enable combined extraction folder for maps
-        ConfigSettingControl cef = new ConfigSettingControl();
-        cef.SettingName = "Use single folder extraction for maps";
+        ConfigSettingToggleControl cef = new ConfigSettingToggleControl();
+        cef.SettingName = "Single Folder Extraction For Maps";
         var bval = _config.GetSingleFolderMapsEnabled();
         cef.SettingValue = bval.ToString();
         cef.ChangeButton.Click += SingleFolderMapsEnabled_OnClick;
         GeneralConfigPanel.Children.Add(cef);
 
         // Enable individual static extraction with maps
-        ConfigSettingControl cfe = new ConfigSettingControl();
-        cfe.SettingName = "Export individual static meshes with maps";
+        ConfigSettingToggleControl cfe = new ConfigSettingToggleControl();
+        cfe.SettingName = "Export Individual Models With Maps";
         bval = _config.GetIndvidualStaticsEnabled();
         cfe.SettingValue = bval.ToString();
         cfe.ChangeButton.Click += IndvidualStaticsEnabled_OnClick;
         GeneralConfigPanel.Children.Add(cfe);
 
-        // Enable individual static extraction with maps
-        ConfigSettingControl cucr = new ConfigSettingControl();
-        cucr.SettingName = "Use custom renderer";
-        bval = _config.GetUseCustomRenderer();
-        cucr.SettingValue = bval.ToString();
-        cucr.ChangeButton.Click += UseCustomRenderer_OnClick;
-        GeneralConfigPanel.Children.Add(cucr);
+        // Disabled because it just doesn't work atm
+        _config.SetUseCustomRenderer(false);
+        //ConfigSettingControl cucr = new ConfigSettingControl();
+        //cucr.SettingName = "Use custom renderer";
+        //bval = _config.GetUseCustomRenderer();
+        //cucr.SettingValue = bval.ToString();
+        //cucr.ChangeButton.Click += UseCustomRenderer_OnClick;
+        //GeneralConfigPanel.Children.Add(cucr);
 
         // Output texture format
         ConfigSettingComboControl ctf = new ConfigSettingComboControl();
-        ctf.SettingName = "Output texture format";
+        ctf.SettingName = "Output Texture Format";
         ctf.SettingLabel = "(Use PNG or TGA in Blender)";
         TextureExportFormat etfval = _config.GetOutputTextureFormat();
         ctf.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems<TextureExportFormat>();
@@ -125,25 +118,11 @@ public partial class GeneralConfigView : UserControl
         ctf.ChangeButton.Visibility = Visibility.Hidden;
         GeneralConfigPanel.Children.Add(ctf);
 
-        // Strategy
-        ConfigSettingComboControl cs = new ConfigSettingComboControl();
-        cs.SettingName = "Game version";
-        TigerStrategy csval = _config.GetCurrentStrategy();
-        cs.SettingsCombobox.ItemsSource = MakeEnumComboBoxItems((TigerStrategy val) => Strategy.HasConfiguration(val));
-        cs.SettingsCombobox.SelectedIndex = cs.SettingsCombobox.ItemsSource.Cast<ComboBoxItem>().ToList().FindIndex(x => (TigerStrategy)x.Tag == csval);
-        if (cs.SettingsCombobox.SelectedIndex == -1)
-        {
-            cs.SettingsCombobox.SelectedIndex = 0;
-        }
-        cs.SettingsCombobox.SelectionChanged += CurrentStrategy_OnSelectionChanged;
-        cs.ChangeButton.Visibility = Visibility.Hidden;
-        GeneralConfigPanel.Children.Add(cs);
-
     }
 
     private void PackagePathStrategyComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        TigerStrategy strategy = (TigerStrategy)(_packagePathStrategyComboBox.SelectedItem as ComboBoxItem).Tag;
+        TigerStrategy strategy = (TigerStrategy)(((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedItem as ComboBoxItem).Tag;
         if (_packagePathStrategy != strategy)
         {
             _packagePathStrategy = strategy;
@@ -171,12 +150,12 @@ public partial class GeneralConfigView : UserControl
 
     private void PackagesPath_OnClick(object sender, RoutedEventArgs e)
     {
-        TigerStrategy strategy = (TigerStrategy)(_packagePathStrategyComboBox.SelectedItem as ComboBoxItem).Tag;
-        OpenPackagesPathDialog(strategy);
+        //TigerStrategy strategy = (TigerStrategy)(_packagePathStrategyComboBox.SelectedItem as ComboBoxItem).Tag;
+        OpenPackagesPathDialog(_packagePathStrategy);
         PopulateConfigPanel();
     }
 
-    private void OpenPackagesPathDialog(TigerStrategy strategy)
+    private bool OpenPackagesPathDialog(TigerStrategy strategy)
     {
         using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
         {
@@ -190,16 +169,17 @@ public partial class GeneralConfigView : UserControl
             }
             else
             {
-                return;
+                return false;
             }
 
             if (!success)
             {
                 MessageBox.Show("Directory selected is invalid, please select the correct packages directory.");
+                return false;
             }
             else
             {
-                Strategy.AddNewStrategy(strategy, _config.GetPackagesPath(strategy));
+                return Strategy.AddNewStrategy(strategy, _config.GetPackagesPath(strategy));
             }
         }
     }
@@ -208,16 +188,26 @@ public partial class GeneralConfigView : UserControl
     {
         OpenExportSavePathDialog();
         PopulateConfigPanel();
-        ConsiderShowingMainMenu();
+        if (ConsiderShowingMainMenu())
+        {
+            var _mainWindow = Window.GetWindow(this) as MainWindow;
+            _mainWindow.SetCurrentTab("MAIN MENU");
+        }
+
     }
 
-    private void ConsiderShowingMainMenu()
+    private bool ConsiderShowingMainMenu()
     {
         if (_config.GetPackagesPath(Strategy.CurrentStrategy) != "" && _config.GetExportSavePath() != "")
         {
             var _mainWindow = Window.GetWindow(this) as MainWindow;
+            if (_mainWindow.MainMenuTab.Visibility == Visibility.Visible) // already showing
+                return false;
+
             _mainWindow.ShowMainMenu();
+            return true;
         }
+        return false;
     }
 
     private void OpenExportSavePathDialog()
@@ -288,7 +278,13 @@ public partial class GeneralConfigView : UserControl
         TigerStrategy strategy = (TigerStrategy)(((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedItem as ComboBoxItem).Tag;
         if (!Strategy.HasConfiguration(strategy))
         {
-            Log.Warning($"Strategy {strategy} has no configuration so cannot select it.");
+            Log.Warning($"Strategy {strategy} has no configuration set.");
+            if (!OpenPackagesPathDialog(strategy))
+            {
+                Strategy.SetStrategy(TigerStrategy.NONE);
+                PopulateConfigPanel();
+                return;
+            }
         }
         _config.SetCurrentStrategy(strategy);
         Strategy.SetStrategy(_config.GetCurrentStrategy());

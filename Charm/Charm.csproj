@@ -39,7 +39,7 @@
       <Page Update="Collections View\CollectionItemControl.xaml">
         <Generator>MSBuild:Compile</Generator>
       </Page>
-      <Page Update="ConfigSettingControl.xaml">
+      <Page Update="Settings\ConfigSettingControl.xaml">
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>ConfigView.xaml</DependentUpon>
       </Page>
@@ -63,7 +63,7 @@
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>TagListViewerView.xaml</DependentUpon>
       </Page>
-      <Page Update="ConfigSettingComboControl.xaml">
+      <Page Update="Settings\ConfigSettingComboControl.xaml">
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>ConfigView.xaml</DependentUpon>
       </Page>

@@ -108,7 +108,7 @@ public partial class CategoryView : UserControl
             itemsToShow.Add(new SubcategoryChild { IsPlaceholder = true });
         }
         SubcategoryChildren.ItemsSource = itemsToShow;
-        AnimationHelper.AnimateFadeIn(SubcategoryChildren, 0.15f, 1f, 0.1f);
+        UIHelper.AnimateFadeIn(SubcategoryChildren, 0.15f, 1f, 0.1f);
     }
 
     private void DisplayItems()
@@ -126,7 +126,7 @@ public partial class CategoryView : UserControl
         }
 
         SingleItemList.ItemsSource = itemsToShow;
-        AnimationHelper.AnimateFadeIn(SingleItemList, 0.15f, 1f, 0.1f);
+        UIHelper.AnimateFadeIn(SingleItemList, 0.15f, 1f, 0.1f);
     }
 
     private void DisplayItemSets()
@@ -152,7 +152,7 @@ public partial class CategoryView : UserControl
         }
 
         ItemSetList.ItemsSource = itemsToShow;
-        AnimationHelper.AnimateFadeIn(ItemSetList, 0.15f, 1f, 0.1f);
+        UIHelper.AnimateFadeIn(ItemSetList, 0.15f, 1f, 0.1f);
     }
 
     private void LoadItems(int categoryIndex)
@@ -482,31 +482,13 @@ public partial class CategoryView : UserControl
         {
             if (itemsControl.ItemContainerGenerator.ContainerFromItem(item) is ContentPresenter contentPresenter)
             {
-                var radioButton = FindVisualChild<RadioButton>(contentPresenter);
+                var radioButton = UIHelper.FindVisualChild<RadioButton>(contentPresenter);
                 if (radioButton != null)
                 {
                     radioButton.IsChecked = false;
                 }
             }
         }
-    }
-
-    private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
-    {
-        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-        {
-            var child = VisualTreeHelper.GetChild(parent, i);
-            if (child is T t)
-            {
-                return t;
-            }
-            var result = FindVisualChild<T>(child);
-            if (result != null)
-            {
-                return result;
-            }
-        }
-        return null;
     }
 
     public void SelectRadioButton(ItemsControl itemsControl, int index)
@@ -519,7 +501,7 @@ public partial class CategoryView : UserControl
             var item = itemsControl.Items[index];
             if (itemsControl.ItemContainerGenerator.ContainerFromItem(item) is ContentPresenter contentPresenter)
             {
-                var radioButton = FindVisualChild<RadioButton>(contentPresenter);
+                var radioButton = UIHelper.FindVisualChild<RadioButton>(contentPresenter);
                 if (radioButton != null)
                 {
                     radioButton.IsChecked = true;

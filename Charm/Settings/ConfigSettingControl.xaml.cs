@@ -11,6 +11,5 @@ public partial class ConfigSettingControl : UserControl
     }
 
     public string SettingName { get; set; }
-
     public string SettingValue { get; set; }
 }

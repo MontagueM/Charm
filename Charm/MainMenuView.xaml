@@ -12,7 +12,7 @@
 
     <UserControl.Resources />
 
-    <Grid>
+    <Grid Style="{StaticResource GradientBackground}">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -26,15 +26,6 @@
                 </BeginStoryboard>
             </EventTrigger>
         </Grid.Triggers>
-
-        <Grid.Background>
-            <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
-                <RadialGradientBrush.GradientStops>
-                    <GradientStop Offset="0" Color="#FF37393E" />
-                    <GradientStop Offset="0.8" Color="#111113" />
-                </RadialGradientBrush.GradientStops>
-            </RadialGradientBrush>
-        </Grid.Background>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="90*" />

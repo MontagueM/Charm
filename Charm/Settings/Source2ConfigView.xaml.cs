@@ -23,33 +23,27 @@ public partial class Source2ConfigView : UserControl
     {
         S2ConfigPanel.Children.Clear();
 
+        //TextBlock header = new TextBlock();
+        //header.Text = "Source 2 Settings";
+        //header.FontSize = 30;
+        //S2ConfigPanel.Children.Add(header);
 
-        TextBlock header = new TextBlock();
-        header.Text = "Source 2 Settings";
-        header.FontSize = 30;
-        S2ConfigPanel.Children.Add(header);
-
-        TextBlock lbl = new TextBlock();
-        lbl.Text = "Currently, only S&Box is supported";
-        lbl.FontSize = 10;
-        S2ConfigPanel.Children.Add(lbl);
+        //TextBlock lbl = new TextBlock();
+        //lbl.Text = "Currently, only S&Box is supported";
+        //lbl.FontSize = 10;
+        //S2ConfigPanel.Children.Add(lbl);
 
         // Packages path
         ConfigSettingControl cpp = new ConfigSettingControl();
-        cpp.SettingName = "Source 2 tools path";
+        cpp.SettingName = "Source 2 Tools Path";
         var val = _config.GetSource2Path();
         cpp.SettingValue = val == "" ? "Not set" : val;
         cpp.ChangeButton.Click += Source2Path_OnClick;
         S2ConfigPanel.Children.Add(cpp);
 
-        TextBlock lbl2 = new TextBlock();
-        lbl2.Text = "Currently not used for anything";
-        lbl2.FontSize = 15;
-        S2ConfigPanel.Children.Add(lbl2);
-
         // Enable source 2 shader generation
-        ConfigSettingControl cbe = new ConfigSettingControl();
-        cbe.SettingName = "Generate shaders (vfx)";
+        ConfigSettingToggleControl cbe = new ConfigSettingToggleControl();
+        cbe.SettingName = "Generate Shaders";
         bool bval2 = _config.GetS2ShaderExportEnabled();
         cbe.SettingValue = bval2.ToString();
         cbe.ChangeButton.Click += S2ShaderExportEnabled_OnClick;
@@ -65,8 +59,8 @@ public partial class Source2ConfigView : UserControl
         // S2ConfigPanel.Children.Add(cef);
 
         // Enable vmdl model generation
-        ConfigSettingControl cfe = new ConfigSettingControl();
-        cfe.SettingName = "Generate models (vmdl)";
+        ConfigSettingToggleControl cfe = new ConfigSettingToggleControl();
+        cfe.SettingName = "Generate Models";
         bool bval = _config.GetS2VMDLExportEnabled();
         cfe.SettingValue = bval.ToString();
         cfe.ChangeButton.Click += S2VMDLExportEnabled_OnClick;

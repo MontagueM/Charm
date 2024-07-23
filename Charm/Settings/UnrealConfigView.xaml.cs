@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using Tiger;
 
@@ -26,22 +24,22 @@ public partial class UnrealConfigView : UserControl
     {
         UnrealConfigPanel.Children.Clear();
 
-        TextBlock header = new TextBlock();
-        header.Text = "Unreal Engine Settings";
-        header.FontSize = 30;
-        UnrealConfigPanel.Children.Add(header);
+        //TextBlock header = new TextBlock();
+        //header.Text = "Unreal Engine Settings";
+        //header.FontSize = 30;
+        //UnrealConfigPanel.Children.Add(header);
 
         // Unreal interop path
         ConfigSettingControl cui = new ConfigSettingControl();
-        cui.SettingName = "Unreal content path";
+        cui.SettingName = "Unreal Content Path";
         var val = _config.GetUnrealInteropPath();
         cui.SettingValue = val == "" ? "Not set" : val;
         cui.ChangeButton.Click += UnrealInteropPath_OnClick;
         UnrealConfigPanel.Children.Add(cui);
 
         // Enable UE5 interop
-        ConfigSettingControl cii = new ConfigSettingControl();
-        cii.SettingName = "Generate Unreal Engine importing files";
+        ConfigSettingToggleControl cii = new ConfigSettingToggleControl();
+        cii.SettingName = "Generate Unreal Engine Importing Files";
         bool bval = _config.GetUnrealInteropEnabled();
         cii.SettingValue = bval.ToString();
         cii.ChangeButton.Click += UnrealInteropEnabled_OnClick;
