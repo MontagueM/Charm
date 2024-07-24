@@ -120,7 +120,7 @@ public partial class APIItemView : UserControl
         BackgroundContainer.DataContext = ApiItem;
 
         ToolTip = new();
-        MouseMove += ToolTip.UserControl_MouseMove;
+        //MouseMove += ToolTip.UserControl_MouseMove;
         Panel.SetZIndex(ToolTip, 50);
         MainGrid.Children.Add(ToolTip);
 

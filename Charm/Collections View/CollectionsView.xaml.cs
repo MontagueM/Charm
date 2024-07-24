@@ -26,7 +26,7 @@ public partial class CollectionsView : UserControl
         MouseMove += UserControl_MouseMove;
     }
 
-    public async void LoadContent()
+    public void LoadContent()
     {
         LoadMainItemCategory();
     }

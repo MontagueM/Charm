@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -45,7 +46,7 @@ public partial class MainMenuView : UserControl
 
     private bool ShowIfD2(TigerStrategy strategy)
     {
-        return strategy >= TigerStrategy.DESTINY2_SHADOWKEEP_2601;
+        return strategy != TigerStrategy.DESTINY1_RISE_OF_IRON;
     }
 
     private bool ShowIfD1(TigerStrategy strategy)
@@ -70,14 +71,9 @@ public partial class MainMenuView : UserControl
         MouseMove += UserControl_MouseMove;
     }
 
-    private void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
+    private async void ApiViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        // TagListViewerView apiView = new TagListViewerView();
-        // apiView.LoadContent(ETagListType.ApiList);
-        // todo actually make this show the progress bar, cba rn
-        MainWindow.Progress.SetProgressStages(new() { "Start investment system" });
-        Investment.LazyInit();
-        MainWindow.Progress.CompleteStage();
+        await LoadInvestment();
 
         DareView apiView = new DareView();
         apiView.LoadContent();
@@ -85,11 +81,9 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    private void CollectionsViewButton_OnClick(object sender, RoutedEventArgs e)
+    private async void CollectionsViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        MainWindow.Progress.SetProgressStages(new() { "Start investment system" });
-        Investment.LazyInit();
-        MainWindow.Progress.CompleteStage();
+        await LoadInvestment();
 
         CollectionsView apiView2 = new CollectionsView();
         apiView2.LoadContent();
@@ -129,12 +123,9 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    private void WeaponAudioViewButton_Click(object sender, RoutedEventArgs e)
+    private async void WeaponAudioViewButton_Click(object sender, RoutedEventArgs e)
     {
-        // todo actually make this show the progress bar, cba rn
-        MainWindow.Progress.SetProgressStages(new() { "Start investment system" });
-        Investment.LazyInit();
-        MainWindow.Progress.CompleteStage();
+        await LoadInvestment();
 
         TagListViewerView tagListView = new TagListViewerView();
         tagListView.LoadContent(ETagListType.WeaponAudioGroupList);
@@ -193,5 +184,12 @@ public partial class MainMenuView : UserControl
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
         gridTransform.X = position.X * -0.01;
         gridTransform.Y = position.Y * -0.01;
+    }
+
+    private async Task LoadInvestment()
+    {
+        MainWindow.Progress.SetProgressStages(new() { "Loading Investment System" });
+        await Task.Run(() => Investment.LazyInit());
+        MainWindow.Progress.CompleteStage();
     }
 }

@@ -54,7 +54,7 @@ public partial class CategoryView : UserControl
         MouseMove += UserControl_MouseMove;
 
         ToolTip = new();
-        MouseMove += ToolTip.UserControl_MouseMove;
+        //MouseMove += ToolTip.UserControl_MouseMove;
         Panel.SetZIndex(ToolTip, 50);
         MainGrid.Children.Add(ToolTip);
     }
