@@ -351,7 +351,13 @@ public partial class ActivityMapEntityView : UserControl
         mapStages.Add("Finishing Export");
         MainWindow.Progress.SetProgressStages(mapStages);
 
-        Parallel.ForEach(maps, map =>
+        //Parallel.ForEach(maps, map =>
+        //{
+        //    ExportFull(map.Key, map.Value);
+        //    MainWindow.Progress.CompleteStage();
+        //});
+
+        maps.ToList().ForEach(map =>
         {
             ExportFull(map.Key, map.Value);
             MainWindow.Progress.CompleteStage();
