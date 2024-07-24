@@ -156,7 +156,19 @@ public partial class ActivityMapView : UserControl
         mapStages.Add("Finishing Export");
         MainWindow.Progress.SetProgressStages(mapStages);
 
-        Parallel.ForEach(maps, map =>
+        /// Parallel -> 5 Exports on Endless Vale 
+        /// Average 40-42 seconds (When it didn't miss something)
+        /// Missed an export 3/5 times :(
+        //Parallel.ForEach(maps, map =>
+        //{
+        //    MapView.ExportFullMap(map, info.ExportType);
+        //    MainWindow.Progress.CompleteStage();
+        //});
+
+        /// Normal -> 5 Exports on Endless Vale 
+        /// Average 44-45 seconds
+        /// Missed an export 0/5 times :)
+        maps.ForEach(map =>
         {
             MapView.ExportFullMap(map, info.ExportType);
             MainWindow.Progress.CompleteStage();
