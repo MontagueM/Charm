@@ -88,7 +88,7 @@ public partial class MusicPlayerControl : UserControl
         {
             MainWindow.Progress.SetProgressStages(new List<string>
             {
-                $"loading sound {sound.Hash}",
+                $"Loading Sound {sound.Hash}",
             });
             await Task.Run(() =>
             {

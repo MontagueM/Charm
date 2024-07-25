@@ -42,13 +42,21 @@
                 IsChecked="True"
                 Style="{StaticResource MaterialDesignCheckBox}"
                 Visibility="Hidden" />
-            <Button
-                x:Name="ExportButton"
+            <Border
                 Grid.Column="1"
-                Padding="5,5,5,5"
                 HorizontalAlignment="Center"
-                Content="EXPORT"
-                Style="{StaticResource MaterialDesignPaperDarkButton}" />
+                Background="{StaticResource BackgroundColour20}">
+                <Button x:Name="ExportButton" Style="{StaticResource D2StyleButton}">
+                    <TextBlock
+                        Margin="5"
+                        VerticalAlignment="Center"
+                        FontSize="16"
+                        IsHitTestVisible="False"
+                        Text="EXPORT"
+                        TextAlignment="Center" />
+                </Button>
+            </Border>
+
         </Grid>
     </Grid>
 </UserControl>

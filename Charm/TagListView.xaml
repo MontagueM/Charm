@@ -44,7 +44,6 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Center"
             FontSize="30"
-            FontWeight="36"
             TextChanged="SearchBox_TextChanged"
             TextWrapping="Wrap" />
 

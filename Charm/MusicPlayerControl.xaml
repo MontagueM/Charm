@@ -15,8 +15,8 @@
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="100*" />
-            <RowDefinition Height="100*" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBlock
             x:Name="PlayingText"
@@ -24,20 +24,25 @@
             VerticalAlignment="Center"
             Text="PLAYING: "
             TextAlignment="Left" />
-        <!--  TODO replace this with images, eg using C# Path with SVG https://jxnblk.github.io/paths/?d=M20%2016%20L20%2048%20L44%2032%20Z  -->
-        <!--  TODO fix only being able to click the button on the sides, where the text block isnt  -->
-        <Button
-            x:Name="PlayPause"
+
+        <Border
             Grid.Column="1"
-            Margin="5,5,5,5"
-            Click="PlayPause_OnClick"
-            Style="{StaticResource MaterialDesignPaperDarkButton}">
-            <TextBlock
-                VerticalAlignment="Center"
-                IsHitTestVisible="False"
-                Text="PLAY"
-                TextAlignment="Center" />
-        </Button>
+            Margin="5"
+            Background="{StaticResource BackgroundColour20}">
+            <Button
+                x:Name="PlayPause"
+                Click="PlayPause_OnClick"
+                Style="{StaticResource D2StyleButton}">
+                <TextBlock
+                    Margin="5"
+                    VerticalAlignment="Center"
+                    FontSize="16"
+                    IsHitTestVisible="False"
+                    Text="PLAY"
+                    TextAlignment="Center" />
+            </Button>
+        </Border>
+
         <Slider
             x:Name="VolumeBar"
             Grid.Column="2"

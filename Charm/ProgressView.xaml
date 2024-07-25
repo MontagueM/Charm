@@ -36,6 +36,7 @@
                     x:Name="ProgressText"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
+                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                     Text="LOADING" />
             </Viewbox>
         </StackPanel>

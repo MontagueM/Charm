@@ -17,25 +17,51 @@
     <UserControl.DataContext>
         <Binding Source="{StaticResource MVM}" />
     </UserControl.DataContext>
-    <Grid>
-        <hx:Viewport3DX
-            x:Name="CubemapViewport"
-            Title="{Binding Title}"
-            EffectsManager="{Binding EffectsManager}"
-            EnableDeferredRendering="False"
-            EnableDesignModeRendering="True"
-            EnableRenderFrustum="True"
-            EnableSwapChainRendering="True"
-            InfoBackground="{StaticResource BackgroundColour14}"
-            InfoForeground="{StaticResource ForegroundColour75}"
-            IsShadowMappingEnabled="False"
-            ShowCoordinateSystem="True"
-            ShowViewCube="False"
-            SubTitle="{Binding SubTitle}"
-            TextBrush="{StaticResource ForegroundColour75}">
-            <hx:Viewport3DX.Camera>
-                <hx:PerspectiveCamera Position="0,0,5" />
-            </hx:Viewport3DX.Camera>
-        </hx:Viewport3DX>
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Orientation="Vertical">
+            <hx:Viewport3DX
+                x:Name="CubemapViewport"
+                Title="{Binding Title}"
+                Width="800"
+                Height="800"
+                Margin="0,15,0,15"
+                EffectsManager="{Binding EffectsManager}"
+                EnableDeferredRendering="False"
+                EnableDesignModeRendering="True"
+                EnableRenderFrustum="True"
+                EnableSwapChainRendering="True"
+                InfoBackground="{StaticResource BackgroundColour14}"
+                InfoForeground="{StaticResource ForegroundColour75}"
+                IsShadowMappingEnabled="False"
+                ShowCoordinateSystem="True"
+                ShowViewCube="False"
+                SubTitle="{Binding SubTitle}"
+                TextBrush="{StaticResource ForegroundColour75}">
+                <hx:Viewport3DX.Camera>
+                    <hx:PerspectiveCamera Position="0,0,5" />
+                </hx:Viewport3DX.Camera>
+            </hx:Viewport3DX>
+
+            <StackPanel Orientation="Vertical">
+                <TextBlock
+                    x:Name="Dimensions"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                    FontSize="20"
+                    IsHitTestVisible="False"
+                    TextAlignment="Center" />
+
+                <TextBlock
+                    x:Name="Format"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                    FontSize="20"
+                    IsHitTestVisible="False"
+                    TextAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+
     </Grid>
 </UserControl>

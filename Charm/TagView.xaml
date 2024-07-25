@@ -10,8 +10,8 @@
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="95*" />
-            <RowDefinition Height="5*" />
+            <RowDefinition Height="92*" />
+            <RowDefinition Height="8*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*" />
@@ -25,7 +25,6 @@
             x:Name="StaticControl"
             Grid.ColumnSpan="2"
             Visibility="Hidden" />
-        <!-- <local:ActivityView Visibility="Hidden" x:Name="ActivityControl" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" /> -->
         <local:TextureView
             x:Name="TextureControl"
             Grid.ColumnSpan="2"

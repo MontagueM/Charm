@@ -9,7 +9,7 @@ using Tiger;
 
 namespace Charm;
 
-public enum ExportTypeFlag
+public enum ExportTypeFlag // This isn't really needed anymore
 {
     [Description("Everything")]
     Full = 1,

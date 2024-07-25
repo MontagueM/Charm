@@ -117,7 +117,7 @@
             <ListView
                 x:Name="MapList"
                 Grid.Row="0"
-                Grid.ColumnSpan="2">
+                Grid.ColumnSpan="2" d:ItemsSource="{d:SampleData ItemCount=5}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -133,7 +133,7 @@
             <ListView
                 x:Name="StaticList"
                 Grid.Row="1"
-                Grid.Column="0">
+                Grid.Column="0" d:ItemsSource="{d:SampleData ItemCount=5}">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="OverridesDefaultStyle" Value="True" />

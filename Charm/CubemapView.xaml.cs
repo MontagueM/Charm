@@ -1,9 +1,6 @@
-﻿using System.IO;
-using System.Windows.Controls;
-using System.Windows.Media.Imaging;
+﻿using System.Windows.Controls;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.Wpf.SharpDX;
-using Tiger;
 using Tiger.Schema;
 
 namespace Charm;
@@ -22,5 +19,9 @@ public partial class CubemapView : UserControl
         {
             Texture = TextureModel.Create(textureHeader.GetTexture()),
         });
+
+        // Can't use binding since DataContext is already taken up by something else 
+        Dimensions.Text = $"{textureHeader.GetDimension()}: {textureHeader.TagData.Width}x{textureHeader.TagData.Height}x{textureHeader.TagData.Depth}";
+        Format.Text = $"{textureHeader.TagData.GetFormat().ToString()} ({(textureHeader.IsSrgb() ? "Srgb" : "Linear")})";
     }
 }
