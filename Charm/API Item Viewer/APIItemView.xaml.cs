@@ -602,7 +602,7 @@ public partial class APIItemView : UserControl
         PlugItem statItem = new PlugItem
         {
             Hash = stat.Hash,
-            Name = stat.Name,
+            Name = stat.Name.ToUpper(),
             PlugStyle = DestinySocketCategoryStyle.Reusable,
             Description = stat.Description,
         };

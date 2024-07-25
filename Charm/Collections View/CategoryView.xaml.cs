@@ -162,7 +162,7 @@ public partial class CategoryView : UserControl
         foreach (var item in inventoryItems)
         {
             string name = Investment.Get().GetItemName(item.Value);
-            string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.Value.TagData.InventoryItemHash)).TagData.ItemType.Value;
+            var itemStrings = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.Value.TagData.InventoryItemHash)).TagData;
 
             TigerHash plugCategoryHash = null;
             if (item.Value.TagData.Unk48.GetValue(item.Value.GetReader()) is D2Class_A1738080 plug)
@@ -171,7 +171,8 @@ public partial class CategoryView : UserControl
             var newItem = new ApiItem
             {
                 ItemName = name,
-                ItemType = type,
+                ItemType = itemStrings.ItemType?.Value,
+                ItemFlavorText = itemStrings.ItemFlavourText?.Value,
                 ItemRarity = (DestinyTierType)item.Value.TagData.ItemRarity,
                 ItemDamageType = DestinyDamageType.GetDamageType(item.Value.GetItemDamageTypeIndex()),
                 ItemHash = item.Value.TagData.InventoryItemHash.Hash32.ToString(),
@@ -247,7 +248,7 @@ public partial class CategoryView : UserControl
             foreach (var item in inventoryItems)
             {
                 string name = Investment.Get().GetItemName(item.Value);
-                string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.Value.TagData.InventoryItemHash)).TagData.ItemType.Value;
+                var itemStrings = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.Value.TagData.InventoryItemHash)).TagData;
 
                 TigerHash plugCategoryHash = null;
                 if (item.Value.TagData.Unk48.GetValue(item.Value.GetReader()) is D2Class_A1738080 plug)
@@ -256,7 +257,8 @@ public partial class CategoryView : UserControl
                 var newItem = new ApiItem
                 {
                     ItemName = name,
-                    ItemType = type,
+                    ItemType = itemStrings.ItemType?.Value,
+                    ItemFlavorText = itemStrings.ItemFlavourText?.Value,
                     ItemRarity = (DestinyTierType)item.Value.TagData.ItemRarity,
                     ItemHash = item.Value.TagData.InventoryItemHash.Hash32.ToString(),
                     ImageHeight = 96,
@@ -531,13 +533,20 @@ public partial class CategoryView : UserControl
         ToolTip.ActiveItem = (sender as Button);
         ApiItem item = (ApiItem)(sender as Button).DataContext;
 
+        PlugItem flavorText = new PlugItem
+        {
+            Description = item.ItemFlavorText,
+        };
+        if (flavorText.Description != null && flavorText.Description != string.Empty)
+            ToolTip.AddToTooltip(flavorText, APITooltip.TooltipType.InfoBlock);
+
         ToolTip.MakeTooltip(item.PlugItem);
 
         PlugItem source = new PlugItem
         {
             Description = $"{Investment.Get().GetCollectibleStrings(item.CollectableIndex).Value.SourceName.Value}",
         };
-        if (source.Description != string.Empty)
+        if (source.Description != null && source.Description != string.Empty)
             ToolTip.AddToTooltip(source, APITooltip.TooltipType.InfoBlock);
     }
 

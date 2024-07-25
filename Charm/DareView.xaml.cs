@@ -334,6 +334,7 @@ public class ApiItem
 
     public string ItemName { get; set; }
     public string ItemType { get; set; }
+    public string ItemFlavorText { get; set; }
     public DestinyTierType ItemRarity { get; set; }
     public DestinyDamageTypeEnum ItemDamageType { get; set; }
     public string ItemHash { get; set; }

@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,131 +17,133 @@ namespace Charm;
 
 public partial class APITooltip : UserControl
 {
+    public ConcurrentDictionary<int, Dictionary<PlugItem, TooltipType>> ToolTipItems;
     public dynamic? ActiveItem;
 
     public APITooltip()
     {
+        ToolTipItems = new();
         InitializeComponent();
         CompositionTarget.Rendering += OnRender;
     }
 
     public async void MakeTooltip(PlugItem item) // TODO: Use a number ordering system instead
     {
+        item.Name = item.Name.ToUpper();
+
         // Idk if Task.Run is actually doing anything here but it maybeeee feels a little more responsive?
-        await Task.Run(() =>
+        // TODO: Downside of Task.Run is that adding stuff to the tooltip outside of this function causes ordering issues
+        //await Task.Run(() => {
+        Dispatcher.Invoke(() =>
         {
-            Dispatcher.Invoke(() =>
-            {
-                InfoBox.Visibility = Visibility.Visible;
-                var fadeIn = FindResource("FadeIn 0.2") as Storyboard;
-                InfoBox.BeginStoryboard(fadeIn);
-                InfoBox.DataContext = item;
-            });
-
-            item.Name = item.Name.ToUpper();
-            if (item.Item?.GetItemStrings().TagData.Unk38.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D8548080 warning)
-            {
-                foreach (var rule in warning.InsertionRules)
-                {
-                    if (rule.FailureMessage.Value is null)
-                        continue;
-
-                    AddToTooltip(new PlugItem
-                    {
-                        Description = rule.FailureMessage.Value,
-                        PlugRarityColor = Color.FromArgb(255, 255, 0, 0)
-                    }, TooltipType.WarningBlock);
-                }
-            }
-
-            //if (item.PlugDamageType != DestinyDamageTypeEnum.None)
-            //{
-            //    AddToTooltip(item, TooltipType.Element);
-            //}
-
-            if (item.Item?.GetItemStrings().TagData.Unk40.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D7548080 preview)
-            {
-                if (preview.ScreenStyleHash.Hash32 == 3797307284) // 'screen_style_emblem'
-                {
-                    AddToTooltip(new PlugItem
-                    {
-                        PlugImageSource = ApiImageUtils.MakeFullIcon(item.Item.GetItemStrings().TagData.EmblemContainerIndex)
-                    }, TooltipType.Emblem);
-                }
-            }
-
-            if (item.Description is not null && item.Description != "")
-                AddToTooltip(item, TooltipType.TextBlock);
-
-            if (item.Item?.TagData.Unk38.GetValue(item.Item.GetReader()) is D2Class_B0738080 objectives)
-            {
-                foreach (var objective in objectives.Objectives)
-                {
-                    var obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
-                    if (obj is null)
-                        continue;
-
-                    PlugItem objItem = new PlugItem
-                    {
-                        Description = obj.Value.ProgressDescription.Value,
-                        Type = $"0/{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}",
-                        PlugImageSource = obj.Value.IconIndex != -1 ? ApiImageUtils.MakeIcon(obj.Value.IconIndex) : null
-                    };
-
-                    TooltipType tooltipType = TooltipType.ObjectiveInteger;
-                    switch ((DestinyUnlockValueUIStyle)obj.Value.InProgressValueStyle)
-                    {
-                        case DestinyUnlockValueUIStyle.Percentage:
-                            tooltipType = TooltipType.ObjectivePercentage;
-                            break;
-                        case DestinyUnlockValueUIStyle.Integer:
-                            objItem.Type = $"{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}";
-                            tooltipType = TooltipType.ObjectiveInteger;
-                            break;
-                    }
-
-                    if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                        AddToTooltip(null, TooltipType.Separator);
-
-                    AddToTooltip(objItem, tooltipType); // TODO: Other styles
-                }
-            }
-
-            if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
-            {
-                if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                    return;
-
-                foreach (var perk in stats.Perks)
-                {
-                    var perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
-                    if (perkStrings.IconIndex == -1)
-                        continue;
-
-                    PlugItem perkItem = new PlugItem
-                    {
-                        Hash = perkStrings.SandboxPerkHash,
-                        Description = perkStrings.SandboxPerkDescription.Value,
-                        PlugImageSource = ApiImageUtils.MakeIcon(perkStrings.IconIndex)
-                    };
-
-                    AddToTooltip(perkItem, TooltipType.Grid);
-                }
-            }
-
-            if (item.Item is not null)
-            {
-                foreach (var notif in item.Item?.GetItemStrings().TagData.TooltipNotifications)
-                {
-                    PlugItem notifItem = new PlugItem
-                    {
-                        Description = $"★ {notif.DisplayString.Value}",
-                        PlugImageSource = null
-                    };
-                    AddToTooltip(notifItem, TooltipType.InfoBlock);
-                }
-            }
+            InfoBox.Visibility = Visibility.Visible;
+            var fadeIn = FindResource("FadeIn 0.2") as Storyboard;
+            InfoBox.BeginStoryboard(fadeIn);
+            InfoBox.DataContext = item;
         });
+        if (item.Item?.GetItemStrings().TagData.Unk38.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D8548080 warning)
+        {
+            foreach (var rule in warning.InsertionRules)
+            {
+                if (rule.FailureMessage.Value is null)
+                    continue;
+
+                AddToTooltip(new PlugItem
+                {
+                    Description = rule.FailureMessage.Value,
+                    PlugRarityColor = Color.FromArgb(255, 255, 0, 0)
+                }, TooltipType.WarningBlock);
+            }
+        }
+
+        //if (item.PlugDamageType != DestinyDamageTypeEnum.None)
+        //{
+        //    AddToTooltip(item, TooltipType.Element);
+        //}
+
+        if (item.Item?.GetItemStrings().TagData.Unk40.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D7548080 preview)
+        {
+            if (preview.ScreenStyleHash.Hash32 == 3797307284) // 'screen_style_emblem'
+            {
+                AddToTooltip(new PlugItem
+                {
+                    PlugImageSource = ApiImageUtils.MakeFullIcon(item.Item.GetItemStrings().TagData.EmblemContainerIndex)
+                }, TooltipType.Emblem);
+            }
+        }
+
+        if (item.Description is not null && item.Description != "")
+            AddToTooltip(item, TooltipType.TextBlock);
+
+        if (item.Item?.TagData.Unk38.GetValue(item.Item.GetReader()) is D2Class_B0738080 objectives)
+        {
+            foreach (var objective in objectives.Objectives)
+            {
+                var obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
+                if (obj is null)
+                    continue;
+
+                PlugItem objItem = new PlugItem
+                {
+                    Description = obj.Value.ProgressDescription.Value,
+                    Type = $"0/{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}",
+                    PlugImageSource = obj.Value.IconIndex != -1 ? ApiImageUtils.MakeIcon(obj.Value.IconIndex) : null
+                };
+
+                TooltipType tooltipType = TooltipType.ObjectiveInteger;
+                switch ((DestinyUnlockValueUIStyle)obj.Value.InProgressValueStyle)
+                {
+                    case DestinyUnlockValueUIStyle.Percentage:
+                        tooltipType = TooltipType.ObjectivePercentage;
+                        break;
+                    case DestinyUnlockValueUIStyle.Integer:
+                        objItem.Type = $"{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}";
+                        tooltipType = TooltipType.ObjectiveInteger;
+                        break;
+                }
+
+                if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
+                    AddToTooltip(null, TooltipType.Separator);
+
+                AddToTooltip(objItem, tooltipType); // TODO: Other styles
+            }
+        }
+
+        if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
+        {
+            if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
+                return;
+
+            foreach (var perk in stats.Perks)
+            {
+                var perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
+                if (perkStrings.IconIndex == -1)
+                    continue;
+
+                PlugItem perkItem = new PlugItem
+                {
+                    Hash = perkStrings.SandboxPerkHash,
+                    Description = perkStrings.SandboxPerkDescription.Value,
+                    PlugImageSource = ApiImageUtils.MakeIcon(perkStrings.IconIndex)
+                };
+
+                AddToTooltip(perkItem, TooltipType.Grid);
+            }
+        }
+
+        if (item.Item is not null)
+        {
+            foreach (var notif in item.Item?.GetItemStrings().TagData.TooltipNotifications)
+            {
+                PlugItem notifItem = new PlugItem
+                {
+                    Description = $"★ {notif.DisplayString.Value}",
+                    PlugImageSource = null
+                };
+                AddToTooltip(notifItem, TooltipType.InfoBlock);
+            }
+        }
+        //});
     }
 
     public void ClearTooltip()
