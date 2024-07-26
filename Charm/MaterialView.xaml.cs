@@ -365,6 +365,11 @@ public partial class MaterialView : UserControl
 
         Clipboard.SetText($"[{dc.Vector.X}, {dc.Vector.Y}, {dc.Vector.Z}, 1.0]");
     }
+
+    private void OpenMaterial_OnClick(object sender, RoutedEventArgs e)
+    {
+        DevView.OpenHxD(Material.FileHash);
+    }
 }
 
 public class TextureDetail

@@ -287,7 +287,7 @@ public partial class DevView : UserControl
         }
     }
 
-    private void OpenHxD(FileHash hash)
+    public static void OpenHxD(FileHash hash)
     {
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath() + "/temp";

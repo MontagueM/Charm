@@ -289,12 +289,23 @@
                 </ListView.ItemsPanel>
             </ListView>
 
-            <Button
+            <StackPanel
                 Grid.Row="2"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Click="ExportMaterial_OnClick"
-                Content="Export Material" />
+                Orientation="Horizontal">
+                <Button
+                    Margin="10,0,10,0"
+                    Click="ExportMaterial_OnClick"
+                    Content="Export Material" />
+                <Button
+                    Margin="10,0,10,0"
+                    Click="OpenMaterial_OnClick"
+                    Content="Open In HxD" />
+            </StackPanel>
+
+
+
         </Grid>
 
         <Grid Grid.Column="0">
