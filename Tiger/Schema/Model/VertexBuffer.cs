@@ -50,6 +50,11 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
             IntVector4 WeightIndex = new();
 
             handle.BaseStream.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
+
+            Debug.Assert(handle.BaseStream.Length >= handle.BaseStream.Position);
+            if (handle.BaseStream.Length <= handle.BaseStream.Position)
+                handle.BaseStream.Position = handle.BaseStream.Length - _tag.Stride;
+
             foreach (var element in vertexLayout.Elements)
             {
                 if (element.BufferIndex != bufferIndex || element.IsInstanceData || element.Format == DXGI_FORMAT.UNKNOWN)

@@ -332,6 +332,9 @@ public partial class TagListView : UserControl
     private void LoadPackage(FileHash pkgHash)
     {
         int pkgId = pkgHash.PackageId;
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && pkgId == 0x0180)
+            MessageBox.Show($"This pkg contains entries that CAN/WILL cause crashes!!\nNot worth fixing at the moment, sorry. Blame Bungie.", "¯\\_(ツ)_/¯", MessageBoxButton.OK, MessageBoxImage.Warning);
+
         SetBulkGroup(pkgId.ToString("x4"));
         var collection = _allTagItems.Where(x => (x.Hash as FileHash).PackageId == pkgId && x.TagType != ETagListType.Package).ToList();
         _allTagItems = new ConcurrentBag<TagItem>(collection);
