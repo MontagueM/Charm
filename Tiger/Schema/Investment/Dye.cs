@@ -174,8 +174,10 @@ public class DyeD1 : Tag<SDye_D1>
     public void ExportTextures(string savePath, TextureExportFormat outputTextureFormat)
     {
         TextureExtractor.SetTextureFormat(outputTextureFormat);
-        TextureExtractor.SaveTextureToFile($"{savePath}/{_tag.DetailDiffuse.Hash}", _tag.DetailDiffuse.GetScratchImage());
-        TextureExtractor.SaveTextureToFile($"{savePath}/{_tag.DetailNormal.Hash}", _tag.DetailNormal.GetScratchImage());
+        if (_tag.DetailDiffuse is not null)
+            TextureExtractor.SaveTextureToFile($"{savePath}/{_tag.DetailDiffuse.Hash}", _tag.DetailDiffuse.GetScratchImage());
+        if (_tag.DetailNormal is not null)
+            TextureExtractor.SaveTextureToFile($"{savePath}/{_tag.DetailNormal.Hash}", _tag.DetailNormal.GetScratchImage());
     }
 }
 

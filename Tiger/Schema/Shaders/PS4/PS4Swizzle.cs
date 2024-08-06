@@ -58,7 +58,7 @@ public static class PS4SwizzleAlgorithm
                         {
                             int src = unswizzle ? dataIndex : destIndex;
                             int dst = unswizzle ? destIndex : dataIndex;
-                            if ((src + blockSize) < data.Length && (dst + blockSize) < processed.Length)
+                            if ((src + blockSize) <= data.Length && (dst + blockSize) <= processed.Length)
                                 Array.Copy(data, src, processed, dst, blockSize);
                         }
                         catch (Exception e)
@@ -66,7 +66,6 @@ public static class PS4SwizzleAlgorithm
                             throw new ArgumentException(e.Message);
                         }
                     }
-
                     dataIndex += blockSize;
                 }
             }
