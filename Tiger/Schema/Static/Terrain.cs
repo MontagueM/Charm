@@ -72,8 +72,8 @@ public class Terrain : Tag<STerrain>
                         TransformTexcoords(part);
                         TransformVertexColors(part);
 
-                        if (_config.GetS2VMATExportEnabled() && _exportIndiv)
-                            Source2Handler.SaveVMAT(saveDirectory, $"{part.Material.FileHash}", part.Material, dyeMaps);
+                        if (_config.GetS2ShaderExportEnabled() && _exportIndiv)
+                            Source2Handler.SaveVMAT($"{saveDirectory}", $"{part.Material.FileHash}", part.Material, dyeMaps);
 
                         parts.TryAdd(part, partEntry.Material);
                     }

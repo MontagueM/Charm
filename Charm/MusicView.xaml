@@ -21,6 +21,7 @@
         <TextBlock
             x:Name="SoundbankHash"
             HorizontalAlignment="Center"
+            VerticalAlignment="Top"
             Text="" />
     </Grid>
 </UserControl>

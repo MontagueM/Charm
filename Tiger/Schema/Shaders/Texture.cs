@@ -86,7 +86,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             }
             if (TexHelper.Instance.IsCompressed(format))
             {
-                scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.R8G8B8A8_UNORM);
+                scratchImage = DecompressScratchImage(scratchImage, IsSrgb() ? DXGI_FORMAT.R8G8B8A8_UNORM_SRGB : DXGI_FORMAT.R8G8B8A8_UNORM);
             }
             var s1 = scratchImage.FlipRotate(2, TEX_FR_FLAGS.FLIP_VERTICAL).FlipRotate(0, TEX_FR_FLAGS.FLIP_HORIZONTAL);
             var s2 = scratchImage.FlipRotate(0, TEX_FR_FLAGS.ROTATE90);
@@ -105,24 +105,11 @@ public class Texture : TigerReferenceFile<STextureHeader>
             try
             {
                 if (TexHelper.Instance.IsCompressed(format))
-                {
-                    if (TexHelper.Instance.IsSRGB(format))
-                    {
-                        scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.B8G8R8A8_UNORM_SRGB);
-                    }
-                    else
-                    {
-                        scratchImage = DecompressScratchImage(scratchImage, DXGI_FORMAT.B8G8R8A8_UNORM);
-                    }
-                }
-                else if (TexHelper.Instance.IsSRGB(format))
-                {
+                    scratchImage = DecompressScratchImage(scratchImage, IsSrgb() ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM);
+                else if (IsSrgb())
                     scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0);
-                }
                 else
-                {
                     scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
-                }
             }
             catch (Exception e)
             {
@@ -160,12 +147,39 @@ public class Texture : TigerReferenceFile<STextureHeader>
         }
 
         bool bSrgb = TexHelper.Instance.IsSRGB(image.Format);
-        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM, image.Width * input.GetImageCount(), image.Height, 1, 0, 0);
+        int faceWidth = image.Width;
+        int faceHeight = image.Height;
+
+        // Define the dimensions for the output image (4x3 layout)
+        int outputWidth = faceWidth * 4;
+        int outputHeight = faceHeight * 3;
+
+        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(
+            bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM,
+            outputWidth, outputHeight, 1, 0, 0);
+
+        // Arrange the faces in a 4x3 layout
+        // Define the positions for each cubemap face
+        var facePositions = new (int x, int y)[]
+        {
+            (faceWidth * 2, faceHeight),       // +Z (Front) 
+            (0, faceHeight),                   // -X (Left)
+            (faceWidth, 0),                    // +Y (Up)
+            (faceWidth, faceHeight * 2),       // -Y (Down)
+            (faceWidth, faceHeight),           // +X (Right)
+            (faceWidth * 3, faceHeight)        // -Z (Back)
+        };
 
         for (int i = 0; i < input.GetImageCount(); i++)
         {
-            TexHelper.Instance.CopyRectangle(input.GetImage(i), 0, 0, image.Width, image.Height, outputPlate.GetImage(0), bSrgb ? TEX_FILTER_FLAGS.SEPARATE_ALPHA : 0, image.Width * i, 0);
+            var (x, y) = facePositions[i];
+            TexHelper.Instance.CopyRectangle(
+                input.GetImage(i), 0, 0, faceWidth, faceHeight,
+                outputPlate.GetImage(0),
+                bSrgb ? TEX_FILTER_FLAGS.SEPARATE_ALPHA : 0,
+                x, y);
         }
+
         input.Dispose();
         return outputPlate;
     }
@@ -219,7 +233,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
     public void SavetoFile(string savePath)
     {
         ScratchImage simg = GetScratchImage();
-        SavetoFile(savePath, simg, IsCubemap() || (IsVolume() && !ConfigSubsystem.Get().GetS2ShaderExportEnabled()));
+        SavetoFile(savePath, simg, IsCubemap());// || (IsVolume() && !ConfigSubsystem.Get().GetS2ShaderExportEnabled()));
     }
 
     public UnmanagedMemoryStream GetTextureToDisplay()

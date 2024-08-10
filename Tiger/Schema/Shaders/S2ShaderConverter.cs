@@ -17,6 +17,7 @@ public class S2ShaderConverter
     private List<DXBCShaderResource> resources = new();
 
     private bool isTerrain = false;
+    private bool isDecorator = false;
     private bool bRT0 = true;
     private bool bTranslucent = false;
     private bool bFixRoughness = false;
@@ -141,7 +142,7 @@ PS
 
         bTranslucent = outputs.Count == 1 || scopes.Contains(TfxScope.TRANSPARENT) || scopes.Contains(TfxScope.TRANSPARENT_ADVANCED) || scopes.Contains(TfxScope.DECAL);
         isTerrain = scopes.Contains(TfxScope.TERRAIN);
-
+        isDecorator = scopes.Contains(TfxScope.INSTANCES);
         //ProcessHlslData();
 
         if (inputs.Exists(input => input.Semantic == DXBCSemantic.SystemIsFrontFace))
@@ -394,7 +395,16 @@ PS
                 funcDef.AppendLine("\t\tfloat4 v4 = {i.v4,1};"); // From VS, Used for normals
                 funcDef.AppendLine("\t\tfloat4 v5 = {i.v5,1};"); // From VS, Used for tri-planar mapping? Mainly seen on vertical terrain
             }
-            else // statics
+            else if (isDecorator)
+            {
+                funcDef.AppendLine("\t\tfloat4 v0 = {i.vTextureCoords,0,0};");
+                funcDef.AppendLine("\t\tfloat4 v1 = {i.vNormalWs,1};");
+                funcDef.AppendLine("\t\tfloat4 v2 = {i.vTangentUWs,1};");
+                funcDef.AppendLine("\t\tfloat4 v3 = {i.vTangentVWs,1};");
+                funcDef.AppendLine("\t\tfloat4 v4 = {0,0,0,0};"); // Unsure
+                funcDef.AppendLine("\t\tfloat4 v5 = {vPositionWs,0};");
+            }
+            else // statics, normal entities
             {
                 funcDef.AppendLine("\t\tfloat4 v0 = {i.vNormalWs,1};"); // Mesh world normals
                 funcDef.AppendLine("\t\tfloat4 v1 = {i.vTangentUWs,1};"); // Tangent U
@@ -411,18 +421,26 @@ PS
                         if (i.Semantic == DXBCSemantic.SystemIsFrontFace)
                             funcDef.AppendLine($"\t\tint v{i.RegisterIndex} = i.face;");
                         else
-                            funcDef.AppendLine($"\t\tint v{i.RegisterIndex} = 1;");
+                        {
+                            if (isDecorator)
+                                funcDef.AppendLine($"\t\tint w{i.RegisterIndex} = 1;");
+                            else
+                                funcDef.AppendLine($"\t\tint v{i.RegisterIndex} = 1;");
+                        }
                         break;
                     case "float4":
                         if (i.Semantic == DXBCSemantic.SystemPosition)
                             funcDef.AppendLine($"\t\tfloat4 v{i.RegisterIndex} = i.vPositionSs;");
-                        else if (i.RegisterIndex == 5 && i.Semantic == DXBCSemantic.Texcoord && !isTerrain)
+                        else if (i.RegisterIndex == 5 && i.Semantic == DXBCSemantic.Texcoord && !isTerrain && !isDecorator)
                             funcDef.AppendLine($"\t\tfloat4 v5 = i.vBlendValues;");
                         //else
                         //    funcDef.AppendLine($"\t\tfloat4 {i.Variable} = float4(1,1,1,1);");
                         break;
                     case "float":
-                        funcDef.AppendLine($"\t\tfloat v{i.RegisterIndex} = 1;");
+                        if (isDecorator)
+                            funcDef.AppendLine($"\t\tfloat w{i.RegisterIndex} = 1;");
+                        else
+                            funcDef.AppendLine($"\t\tfloat v{i.RegisterIndex} = 1;");
                         break;
                 }
             }
@@ -541,28 +559,33 @@ PS
                                     bUsesDepthBuffer = true;
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::GetNormalized({sampleUv})*0.3937.xxxx; //{equal_post}");
                                     break;
-                                case 11: // Atmostsphere lookup textures, useless in s&box
+                                case 11: // Atmossphere lookup textures, useless in s&box atm
                                 case 13:
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.1,0.1,0.1,0.1).{dotAfter} //{equal_post}");
                                     break;
-                                case 20: // Framebuffer
+                                case 20: // Framebuffer?
                                 case 23: // Unsure
                                     bUsesFrameBuffer = true;
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.{equal_tex_post}");//.SampleLevel(s_s{sampleIndex}, {sampleUv}).{dotAfter} //{equal_post}");
                                     break;
-                                case 15:
-                                case 16:
+                                case 15: // Gray textures
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.21191,0.21191,0.21191,0.49804).{dotAfter} //{equal_post}");
+                                    break;
+                                case 16: // Specular related..?
                                 case 17:
                                 case 18:
-                                case 19: // Gray textures
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.55078,0.55078,0.55078,0.55078).{dotAfter} //{equal_post}");
+                                case 19:
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,0,1).{dotAfter} //{equal_post}");
                                     break;
                                 case 0: // Unknown
                                 case 21: // Black texture
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
                                     break;
+                                case 22: // Light gray textures
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.55078,0.55078,0.55078,0.49804).{dotAfter} //{equal_post}");
+                                    break;
                                 default: // Unknown
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.5,0.5,0.5,0.5).{dotAfter} //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
                                     break;
                             }
                         }
@@ -621,7 +644,7 @@ PS
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.1882,0.1882,0.1882,0.1882).{dotAfter} //{equal_post}");
                                     break;
                                 default:
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.5,0.5,0.5,0.5).{dotAfter} //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
                                     break;
                             }
                         }

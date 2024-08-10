@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Text;
-using System.Text.Json;
 using Arithmic;
+using Newtonsoft.Json;
 using Tiger.Schema;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
@@ -34,7 +34,7 @@ public class Source2Handler
                     else
                     {
                         mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
-                        mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                        mats.AppendLine($"    to = \"Shaders/Source2/materials/{part.Material.FileHash}.vmat\"");
                     }
                     mats.AppendLine("},\n");
                     i++;
@@ -82,7 +82,7 @@ public class Source2Handler
                     else
                     {
                         mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
-                        mats.AppendLine($"    to = \"materials/{part.Material.FileHash}.vmat\"");
+                        mats.AppendLine($"    to = \"Shaders/Source2/materials/{part.Material.FileHash}.vmat\"");
                     }
                     mats.AppendLine("},\n");
                     i++;
@@ -116,7 +116,7 @@ public class Source2Handler
             {
                 mats.AppendLine("{");
                 mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
-                mats.AppendLine($"    to = \"materials/Terrain/{staticpart.Material.FileHash}.vmat\"");
+                mats.AppendLine($"    to = \"Shaders/Source2/materials/Terrain/{staticpart.Material.FileHash}.vmat\"");
                 mats.AppendLine("},\n");
                 i++;
             }
@@ -133,7 +133,7 @@ public class Source2Handler
     {
         string path;
         if (material.EnumerateScopes().Contains(TfxScope.TERRAIN))
-            path = $"{savePath}/Source2/Materials/Terrain";
+            path = $"{savePath}/Shaders/Source2/Materials/Terrain";
         else
             path = $"{savePath}/Source2/Materials";
 
@@ -143,7 +143,7 @@ public class Source2Handler
         vmat.AppendLine("Layer0\n{");
 
         //Material parameters
-        vmat.AppendLine($"\tshader \"shaders/ps_{material.PixelShader.Hash}.shader\"");
+        vmat.AppendLine($"\tshader \"Shaders/Source2/ps_{material.PixelShader.Hash}.shader\"");
 
         if ((material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)) && material.RenderStates.BlendState() == -1)
             vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
@@ -309,8 +309,14 @@ public class Source2Handler
             Directory.CreateDirectory(savePath);
 
         var file = VTEX.Create(tex, tex.IsCubemap() ? ImageDimension.CUBEARRAY : ImageDimension._2D);
-        var json = JsonSerializer.Serialize(file, JsonSerializerOptions.Default);
-        File.WriteAllText($"{savePath}/{tex.Hash}.vtex", json);
+        var json = JsonConvert.SerializeObject(file, Formatting.Indented);
+        try
+        {
+            File.WriteAllText($"{savePath}/{tex.Hash}.vtex", json);
+        }
+        catch
+        {
+        }
     }
 
     public static void SaveGearVMAT(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
@@ -366,7 +372,7 @@ public class VTEX
         return new VTEX
         {
             Images = new List<string> { $"textures/{texture.Hash}.png" },
-            OutputFormat = ImageFormatType.RGBA8888.ToString(),
+            OutputFormat = texture.IsCubemap() ? ImageFormatType.BC6H.ToString() : ImageFormatType.RGBA8888.ToString(),
             OutputColorSpace = (texture.IsSrgb() ? GammaType.SRGB : GammaType.Linear).ToString(),
             InputColorSpace = (texture.IsSrgb() ? GammaType.SRGB : GammaType.Linear).ToString(),
             OutputTypeString = EnumExtensions.GetEnumDescription(dimension)
