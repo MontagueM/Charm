@@ -6,6 +6,7 @@ using ConcurrentCollections;
 using Newtonsoft.Json;
 using Tiger.Exporters;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Model;
 using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Investment;
@@ -948,6 +949,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["SparrowUpper"], dyes["SparrowEngine"], dyes["SparrowLower"] }, "_sparrow");
             // weapon
             AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["Weapon1"], dyes["Weapon2"], dyes["Weapon3"] }, "_weapon");
+
+            var iridesceneLookup = Globals.Get().RenderGlobals.TagData.Textures.TagData.IridescenceLookup;
+            TextureExtractor.SaveTextureToFile($"{savePath}/Textures/Iridescence_Lookup", iridesceneLookup.GetScratchImage());
         }
     }
 }

@@ -12,7 +12,7 @@ public class TextureExtractor
         _format = textureExportFormat;
     }
 
-    public static bool SaveTextureToFile(string savePath, ScratchImage scratchImage, bool isCubemap = false)
+    public static bool SaveTextureToFile(string savePath, ScratchImage scratchImage, bool isCubemap = false, TextureExportFormat? overrideFormat = null)
     {
         lock (_lock)
         {
@@ -21,7 +21,7 @@ public class TextureExtractor
                 return false;
             }
 
-            switch (_format)
+            switch (overrideFormat != null ? overrideFormat : _format)
             {
                 case TextureExportFormat.DDS_BGRA_UNCOMP_DX10:
                     scratchImage.SaveToDDSFile(DDS_FLAGS.FORCE_DX10_EXT, savePath + ".dds");

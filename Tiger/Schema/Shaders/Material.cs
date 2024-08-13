@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using Arithmic;
 using Tiger.Exporters;
-using Tiger.Schema.Model;
+using Tiger.Schema;
 
 namespace Tiger.Schema.Shaders
 {

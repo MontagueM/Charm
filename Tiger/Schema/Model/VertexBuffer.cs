@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using DirectXTexNet;
 using Tiger.Schema.Entity;
-using static Tiger.Schema.Model.Globals;
+using static Tiger.Schema.Globals;
 
 namespace Tiger.Schema.Model;
 

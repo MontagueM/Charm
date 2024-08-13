@@ -9,6 +9,7 @@ using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
+using Tiger.Schema.Model;
 
 namespace Charm;
 
@@ -244,8 +245,10 @@ public partial class EntityView : UserControl
 
             AutomatedExporter.SaveBlenderApiFile(savePath, itemName,
                 config.GetOutputTextureFormat(), dyes.Values.ToList());
-        }
 
+            var iridesceneLookup = Globals.Get().RenderGlobals.TagData.Textures.TagData.IridescenceLookup;
+            TextureExtractor.SaveTextureToFile($"{savePath}/Textures/Iridescence_Lookup", iridesceneLookup.GetScratchImage());
+        }
     }
 
     private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(Entity entity, ExportDetailLevel detailLevel)
