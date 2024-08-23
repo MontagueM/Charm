@@ -276,6 +276,18 @@ public partial class DevView : UserControl
                     decorator.LoadIntoExporter(decoratorScene, ConfigSubsystem.Get().GetExportSavePath());
                     Exporter.Get().Export();
                     break;
+
+                //Testing
+                case 0x80806DA1:
+                    Tag<D2Class_A16D8080> lightData = FileResourcer.Get().GetSchemaTag<D2Class_A16D8080>(hash);
+                    TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(lightData.TagData.Bytecode));
+                    var bytecode_hlsl = bytecode.Evaluate(lightData.TagData.Buffer1, true);
+
+                    foreach (var a in bytecode_hlsl)
+                    {
+                        Console.WriteLine($"\n{a.Key} : {a.Value}\n");
+                    }
+                    break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
                     break;

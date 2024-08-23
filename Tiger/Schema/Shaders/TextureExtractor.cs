@@ -12,7 +12,7 @@ public class TextureExtractor
         _format = textureExportFormat;
     }
 
-    public static bool SaveTextureToFile(string savePath, ScratchImage scratchImage, bool isCubemap = false, TextureExportFormat? overrideFormat = null)
+    public static bool SaveTextureToFile(string savePath, ScratchImage scratchImage, TextureDimension dimension = TextureDimension.D2, TextureExportFormat? overrideFormat = null)
     {
         lock (_lock)
         {
@@ -39,16 +39,32 @@ public class TextureExtractor
                     break;
                 case TextureExportFormat.PNG:
                     Guid guid = TexHelper.Instance.GetWICCodec(WICCodecs.PNG);
-                    if (isCubemap)
-                        Texture.FlattenCubemap(scratchImage).SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
-                    else
-                        scratchImage.SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
+                    switch (dimension)
+                    {
+                        //case TextureDimension.D3 when ConfigSubsystem.Get().GetS2ShaderExportEnabled():
+                        //    Texture.FlattenVolume(scratchImage).SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
+                        //    break;
+                        case TextureDimension.CUBE:
+                            Texture.FlattenCubemap(scratchImage).SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
+                            break;
+                        default:
+                            scratchImage.SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
+                            break;
+                    }
                     break;
                 case TextureExportFormat.TGA:
-                    if (isCubemap)
-                        Texture.FlattenCubemap(scratchImage).SaveToTGAFile(0, savePath + ".tga");
-                    else
-                        scratchImage.SaveToTGAFile(0, savePath + ".tga");
+                    switch (dimension)
+                    {
+                        //case TextureDimension.D3 when ConfigSubsystem.Get().GetS2ShaderExportEnabled():
+                        //    Texture.FlattenVolume(scratchImage).SaveToTGAFile(0, savePath + ".tga");
+                        //    break;
+                        case TextureDimension.CUBE:
+                            Texture.FlattenCubemap(scratchImage).SaveToTGAFile(0, savePath + ".tga");
+                            break;
+                        default:
+                            scratchImage.SaveToTGAFile(0, savePath + ".tga");
+                            break;
+                    }
                     break;
             }
             scratchImage.Dispose();

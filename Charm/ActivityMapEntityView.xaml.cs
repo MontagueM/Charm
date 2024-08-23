@@ -347,8 +347,8 @@ public partial class ActivityMapEntityView : UserControl
             return;
         }
 
-        List<string> mapStages = maps.Select((x, i) => $"Exporting {i + 1}/{maps.Count}").ToList();
-        mapStages.Add("Finishing Export");
+        List<string> mapStages = maps.Select((x, i) => $"Preparing {i + 1}/{maps.Count}").ToList();
+        mapStages.Add("Exporting");
         MainWindow.Progress.SetProgressStages(mapStages);
 
         //Parallel.ForEach(maps, map =>
@@ -473,19 +473,23 @@ public partial class ActivityMapEntityView : UserControl
                                 }
                             }
                             break;
+
                         case SMapCubemapResource cubemap:
                             dynamicScene.AddCubemap(cubemap);
                             break;
+
                         case SMapLightResource mapLight:
                             mapLight.Lights?.Load();
                             if (mapLight.Lights is not null)
-                                mapLight.Lights.LoadIntoExporter(dynamicScene);
+                                mapLight.Lights.LoadIntoExporter(dynamicScene, savePath);
                             break;
+
                         case SMapShadowingLightResource shadowingLight:
                             shadowingLight.ShadowingLight?.Load();
                             if (shadowingLight.ShadowingLight is not null)
-                                shadowingLight.ShadowingLight.LoadIntoExporter(dynamicScene, entry);
+                                shadowingLight.ShadowingLight.LoadIntoExporter(dynamicScene, entry, savePath);
                             break;
+
                         case SMapDecalsResource decals:
                             decals.MapDecals?.Load();
                             if (decals.MapDecals is null)
@@ -503,14 +507,17 @@ public partial class ActivityMapEntityView : UserControl
                                 }
                             }
                             break;
+
                         case SMapTerrainResource terrain:
                             terrain.Terrain?.Load();
                             terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                             break;
+
                         case SDecoratorMapResource decorator:
                             decorator.Decorator?.Load();
                             decorator.Decorator.LoadIntoExporter(decoratorScene, savePath);
                             break;
+
                         case SMapWaterDecal waterDecal:
                             dynamicScene.AddMapModel(waterDecal.Model,
                             entry.Translation,
@@ -520,6 +527,32 @@ public partial class ActivityMapEntityView : UserControl
                             {
                                 if (part.Material == null) continue;
                                 dynamicScene.Materials.Add(new ExportMaterial(part.Material));
+                            }
+                            break;
+
+                        case SMapAtmosphere atmosphere:
+                            skyScene.AddAtmosphere(atmosphere);
+
+                            List<Texture> AtmosTextures = new();
+                            if (atmosphere.AtmosFarLookup != null)
+                                AtmosTextures.Add(atmosphere.AtmosFarLookup);
+                            if (atmosphere.AtmosFarLookupDS != null)
+                                AtmosTextures.Add(atmosphere.AtmosFarLookupDS);
+                            if (atmosphere.AtmosNearLookup != null)
+                                AtmosTextures.Add(atmosphere.AtmosNearLookup);
+                            if (atmosphere.AtmosNearLookupDS != null)
+                                AtmosTextures.Add(atmosphere.AtmosNearLookupDS);
+                            if (atmosphere.AtmosDensityLookup != null)
+                                AtmosTextures.Add(atmosphere.AtmosDensityLookup);
+
+                            foreach (var tex in AtmosTextures)
+                            {
+                                if (!Directory.Exists($"{savePath}/Textures"))
+                                    Directory.CreateDirectory($"{savePath}/Textures");
+                                // Not ideal but it works
+                                Texture.SavetoFile($"{savePath}/Textures/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage()) : tex.GetScratchImage());
+                                if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+                                    Source2Handler.SaveVTEX(tex, $"{savePath}/Textures");
                             }
                             break;
                         default:

@@ -96,8 +96,8 @@ public partial class MaterialView : UserControl
                 Hash = $"{tex.Texture.Hash}",
                 Index = $"Index: {tex.TextureIndex}",
                 Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
-                Dimension = $"Dimension: {tex.Texture.GetDimension()}",
-                Format = $"Format: {(DXGI_FORMAT)tex.Texture.TagData.Format}",
+                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
+                Format = $"Format: {tex.Texture.TagData.GetFormat()}",
                 Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
                 Texture = LoadTexture(tex.Texture)
             });
@@ -114,7 +114,7 @@ public partial class MaterialView : UserControl
                 Hash = $"{tex.Texture.Hash}",
                 Index = $"Index: {tex.TextureIndex}",
                 Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
-                Dimension = $"Dimension: {tex.Texture.GetDimension()}",
+                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
                 Format = $"Format: {(DXGI_FORMAT)tex.Texture.TagData.Format}",
                 Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
                 Texture = LoadTexture(tex.Texture)
@@ -132,7 +132,7 @@ public partial class MaterialView : UserControl
                 Hash = $"{tex.Texture.Hash}",
                 Index = $"Index: {tex.TextureIndex}",
                 Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
-                Dimension = $"Dimension: {tex.Texture.GetDimension()}",
+                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
                 Format = $"Format: {(DXGI_FORMAT)tex.Texture.TagData.Format}",
                 Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
                 Texture = LoadTexture(tex.Texture)

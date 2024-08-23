@@ -452,6 +452,14 @@ public struct Vector4
             x.W * y.W);
     }
 
+    public static Vector4 operator /(Vector4 x, Vector4 y)
+    {
+        return new Vector4(x.X / y.X,
+            x.Y / y.Y,
+            x.Z / y.Z,
+            x.W / y.W);
+    }
+
     public static Vector4 Cross(Vector4 vector1, Vector4 vector2)
     {
         return new Vector4(

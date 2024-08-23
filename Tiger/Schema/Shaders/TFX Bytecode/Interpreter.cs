@@ -110,9 +110,9 @@ public class TfxBytecodeInterpreter
                         var merge2_2 = StackPop(2);
                         StackPush($"(float4({merge2_2[0]}.x, {merge2_2[0]}.y, {merge2_2[1]}.x, {merge2_2[1]}.y))");
                         break;
-                    case TfxBytecode.Unk0e: //Not correct
-                        var Unk0e = StackPop(2);
-                        StackPush($"(({Unk0e[0]} + {Unk0e[1]}) / 2.0)");
+                    case TfxBytecode.Merge_3_1:
+                        var merge3_1 = StackPop(2);
+                        StackPush($"(float4({merge3_1[0]}.x, {merge3_1[0]}.y, {merge3_1[0]}.z, {merge3_1[1]}.x))");
                         break;
                     case TfxBytecode.Unk0f:
                         var Unk0f = StackPop(2);

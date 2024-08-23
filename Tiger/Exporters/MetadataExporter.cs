@@ -40,6 +40,9 @@ class MetadataScene
         _config.TryAdd("Decals", decals);
         ConcurrentDictionary<string, ConcurrentBag<string>> terrainDyemaps = new ConcurrentDictionary<string, ConcurrentBag<string>>();
         _config.TryAdd("TerrainDyemaps", terrainDyemaps);
+        ConcurrentDictionary<string, string> atmosphere = new();
+        _config.TryAdd("Atmosphere", atmosphere);
+
 
         if (ConfigSubsystem.Get().GetUnrealInteropEnabled())
         {
@@ -131,6 +134,11 @@ class MetadataScene
             foreach (var dyemap in dyemaps.Value)
                 AddTerrainDyemap(dyemaps.Key, dyemap);
         }
+
+        foreach (var atmos in scene.Atmosphere)
+        {
+            AddAtmosphere(atmos);
+        }
     }
 
     public void AddMaterial(IMaterial material)
@@ -153,7 +161,7 @@ class MetadataScene
         foreach (var vst in material.EnumerateVSTextures())
         {
             if (vst.Texture != null)
-                vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb(), Dimension = vst.Texture.GetDimension() });
+                vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb(), Dimension = EnumExtensions.GetEnumDescription(vst.Texture.GetDimension()) });
         }
 
         Dictionary<int, TexInfo> pstex = new();
@@ -161,7 +169,7 @@ class MetadataScene
         foreach (var pst in material.EnumeratePSTextures())
         {
             if (pst.Texture != null)
-                pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb(), Dimension = pst.Texture.GetDimension() });
+                pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb(), Dimension = EnumExtensions.GetEnumDescription(pst.Texture.GetDimension()) });
         }
     }
 
@@ -175,7 +183,7 @@ class MetadataScene
             matInfo.Textures.Add("PS", pstex);
             _config["Materials"][material] = matInfo;
         }
-        _config["Materials"][material].Textures["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb(), Dimension = texture.GetDimension() });
+        _config["Materials"][material].Textures["PS"].TryAdd(index, new TexInfo { Hash = texture.Hash, SRGB = texture.IsSrgb(), Dimension = EnumExtensions.GetEnumDescription(texture.GetDimension()) });
     }
 
     public void AddPart(ExporterPart part, string partName)
@@ -280,6 +288,15 @@ class MetadataScene
         _config["TerrainDyemaps"][modelHash].Add(dyemapHash);
     }
 
+    public void AddAtmosphere(SMapAtmosphere atmosphere)
+    {
+        _config["Atmosphere"].TryAdd("AtmosFarLookup", $"{atmosphere.AtmosFarLookup?.Hash}");
+        _config["Atmosphere"].TryAdd("AtmosFarLookupDS", $"{atmosphere.AtmosFarLookupDS?.Hash}");
+        _config["Atmosphere"].TryAdd("AtmosNearLookup", $"{atmosphere.AtmosNearLookup?.Hash}");
+        _config["Atmosphere"].TryAdd("AtmosNearLookupDS", $"{atmosphere.AtmosNearLookupDS?.Hash}");
+        _config["Atmosphere"].TryAdd("AtmosDensityLookup", $"{atmosphere.AtmosDensityLookup?.Hash}");
+    }
+
     public void WriteToFile(string path)
     {
         if (_config["Lights"].Count == 0
@@ -288,6 +305,7 @@ class MetadataScene
             && _config["Instances"].Count == 0
             && _config["Parts"].Count == 0
             && _config["Decals"].Count == 0
+            && _config["Atmosphere"].Count == 0
             && _exportType is not ExportType.EntityPoints)
             return; //Dont export if theres nothing in the cfg (this is kind of a mess though)
 

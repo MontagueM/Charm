@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using SharpDX.Direct3D11;
-using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
@@ -77,30 +76,7 @@ struct PixelInput
 	#include ""common/pixelinput.hlsl""
 }};
 
-VS
-{{
-	#include ""common/vertex.hlsl""
-    #define CUSTOM_TEXTURE_FILTERING
-    #define cmp -
-
-//vs_samplers
-//vs_CBuffers
-//vs_Inputs
-
-	PixelInput MainVs( VertexInput i )
-	{{
-		PixelInput o = ProcessVertex( i );
-        float4 r0,r1,r2;
-        o.vBlendValues = i.vColorBlendValues;
-		o.vBlendValues.a = i.vColorBlendValues.a;
-        o.vPositionOs = i.vPositionOs.xyz;
-        VS_DecodeObjectSpaceNormalAndTangent( i, o.vNormalOs, o.vTangentUOs_flTangentVSign );
-
-//vs_Function
-
-		return FinalizeVertex( o );
-	}}
-}}
+//Vertex Shader
 
 PS
 {{
@@ -176,12 +152,13 @@ PS
 
         vfxStructure = vfxStructure.Replace("//ps_output", AddOutput(material).ToString());
 
+        //------------------------------Vertex Shader-----------------------------------
+
+        vfxStructure = vfxStructure.Replace("//Vertex Shader", AddVertexShader());
+
         if (isTerrain)
             vfxStructure = vfxStructure.Replace("//vs_Function", "// Terrain specific\r\n\t\tr1.xyz = float3(0,1,0) * i.vNormalOs.yzx;\r\n\t\tr1.xyz = i.vNormalOs.zxy * float3(0,0,1) + -r1.xyz;\r\n\t\tr0.z = dot(r1.yz, r1.yz);\r\n\t\tr0.z = rsqrt(r0.z);\r\n\t\tr1.xyz = r1.xyz * r0.zzz;\r\n\t\tr2.xyz = i.vNormalOs.zxy * r1.yzx;\r\n\t\tr2.xyz = i.vNormalOs.yzx * r1.zxy + -r2.xyz;\r\n\t\to.v4.xyz = r1.xyz;\r\n\t\tr0.z = dot(r2.xyz, r2.xyz);\r\n\t\tr0.z = rsqrt(r0.z);\r\n\t\to.v3.xyz = r2.xyz * r0.zzz;\r\n\t\tr1.xyz = abs(i.vNormalOs.xyz) * abs(i.vNormalOs.xyz);\r\n\t\tr1.xyz = r1.xyz * r1.xyz;\r\n\t\tr2.xyz = r1.xyz * r1.xyz;\r\n\t\tr2.xyz = r2.xyz * r2.xyz;\r\n\t\tr1.xyz = r2.xyz * r1.xyz;\r\n\t\tr0.z = dot(r1.xyz, float3(1,1,1));\r\n\t\to.v5.xyz = r1.xyz / r0.zzz;");
 
-        //------------------------------------------------------------------------------
-
-        //Vertex Shader - Commented out for now
         //texSamples = new StringBuilder();
         //hlsl = new StringReader(vertex);
 
@@ -271,9 +248,17 @@ PS
                 if (e.Texture != null)
                 {
                     string type = e.Texture.IsSrgb() ? "Srgb" : "Linear";
-                    string dimension = e.Texture.GetDimension();
-                    if (dimension == "3D")
-                        dimension = "2D"; // 3D textures are STILL broken in s&box...
+                    string dimension = "2D";
+
+                    switch (e.Texture.GetDimension())
+                    {
+                        case TextureDimension.CUBE:
+                            dimension = "Cube";
+                            break;
+                        case TextureDimension.D3:
+                            dimension = "2D";
+                            break;
+                    }
 
                     funcDef.AppendLine($"\tCreateInputTexture{dimension}( TextureT{e.TextureIndex}, {type}, 8, \"\", \"\",  \"Textures,10/{e.TextureIndex}\", Default3( 1.0, 1.0, 1.0 ));");
                     funcDef.AppendLine($"\tTexture{dimension} g_t{e.TextureIndex} < Channel( RGBA,  Box( TextureT{e.TextureIndex} ), {type} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; ");
@@ -291,6 +276,11 @@ PS
                 funcDef.AppendLine($"\tBoolAttribute( bWantsFBCopyTexture, true );");
                 funcDef.AppendLine($"\tTexture2D g_tFrameBufferCopyTexture < Attribute( \"FrameBufferCopyTexture\" ); SrgbRead( true ); Filter( MIN_MAG_MIP_LINEAR ); AddressU( CLAMP ); AddressV( CLAMP ); >;");
             }
+
+            //if (scopes.Contains(TfxScope.TRANSPARENT) && resources.Exists(x => (x.ResourceType == ResourceType.Texture3D && x.Index == 11)))
+            //    funcDef.AppendLine($"\tTexture3D g_t11 < Attribute( \"AtmosFarLookup\" ); SrgbRead( false ); >;\r\n\n");
+            //if (scopes.Contains(TfxScope.TRANSPARENT) && resources.Exists(x => (x.ResourceType == ResourceType.Texture3D && x.Index == 13)))
+            //    funcDef.AppendLine($"\tTexture3D g_t13 < Attribute( \"AtmosNearLookup\" ); SrgbRead( false ); >;\r\n\n");
         }
         return funcDef;
     }
@@ -535,6 +525,7 @@ PS
 
                                 if (group1 != "12")
                                 {
+                                    equal_tex_post = equal_tex_post.Replace($"cb{group1}[{group2}]", $"cb{group1}_{group2}");
                                     // Replace with the actual values of group1 and group2
                                     return isVertexShader ? $"vs_cb{group1}_{group2}" : $"cb{group1}_{group2}";
                                 }
@@ -559,31 +550,41 @@ PS
                                     bUsesDepthBuffer = true;
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::GetNormalized({sampleUv})*0.3937.xxxx; //{equal_post}");
                                     break;
-                                case 11: // Atmossphere lookup textures, useless in s&box atm
+
+                                case 11: // Atmosphere lookup textures
                                 case 13:
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.1,0.1,0.1,0.1).{dotAfter} //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.05,0.05,0.05,0.05).{dotAfter} //{equal_post}");
+                                    //funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
                                     break;
+
                                 case 20: // Framebuffer?
                                 case 23: // Unsure
+                                case 7:
                                     bUsesFrameBuffer = true;
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.{equal_tex_post}");//.SampleLevel(s_s{sampleIndex}, {sampleUv}).{dotAfter} //{equal_post}");
                                     break;
+
+                                case 1:
                                 case 15: // Gray textures
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.21191,0.21191,0.21191,0.49804).{dotAfter} //{equal_post}");
                                     break;
+
                                 case 16: // Specular related..?
                                 case 17:
                                 case 18:
                                 case 19:
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,0,1).{dotAfter} //{equal_post}");
                                     break;
+
                                 case 0: // Unknown
                                 case 21: // Black texture
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
                                     break;
+
                                 case 22: // Light gray textures
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.55078,0.55078,0.55078,0.49804).{dotAfter} //{equal_post}");
                                     break;
+
                                 default: // Unknown
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
                                     break;
@@ -591,7 +592,7 @@ PS
                         }
                         else // Textures defined by the material
                         {
-                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
+                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.{equal_tex_post}");
                         }
                     }
                     else if (line.Contains("CalculateLevelOfDetail"))
@@ -731,6 +732,15 @@ PS
 
         return output;
     }
+
+    private string AddVertexShader() // I hate this
+    {
+        if (isDecorator) // Surely this is fine...
+            return $"VS\r\n{{\r\n\t#include \"common/vertex.hlsl\"\r\n\r\n    float g_flEdgeFrequency < Default( 0.17 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flEdgeAmplitude < Default( 0.15 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flBranchFrequency < Default( 0.17 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flBranchAmplitude < Default( 0.15 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flTrunkDeflection < Default( 0.0 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flTrunkDeflectionStart < Default( 0.0 ); Range( 0.0, 1000.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n\r\n    float4 SmoothCurve( float4 x )\r\n    {{  \r\n        return x * x * ( 3.0 - 2.0 * x );  \r\n    }}  \r\n\r\n    float4 TriangleWave( float4 x )\r\n    {{\r\n        return abs( frac( x + 0.5 ) * 2.0 - 1.0 );  \r\n    }}  \r\n\r\n    float4 SmoothTriangleWave( float4 x )\r\n    {{  \r\n        return SmoothCurve( TriangleWave( x ) );  \r\n    }}\r\n\r\n    // High-frequency displacement used in Unity's TerrainEngine; based on \"Vegetation Procedural Animation and Shading in Crysis\"\r\n    // http://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch16.html\r\n    void FoliageDetailBending( inout float3 vPositionOs, float3 vNormalOs, float3 vVertexColor, float3x4 matObjectToWorld, float3 vWind )\r\n    {{\r\n        // 1.975, 0.793, 0.375, 0.193 are good frequencies   \r\n        const float4 vFoliageFreqs = float4( 1.975, 0.793, 0.375, 0.193 );\r\n\r\n        // Attenuation and phase offset is encoded in the vertex color\r\n        const float flEdgeAtten = vVertexColor.r;\r\n        const float flBranchAtten = vVertexColor.b;\r\n        const float flDetailPhase = vVertexColor.g;\r\n\r\n        // Material defined frequency and amplitude\r\n        const float2 vTime = g_flTime.xx * float2( g_flEdgeFrequency, g_flBranchFrequency );\r\n        const float flEdgeAmp = g_flEdgeAmplitude;\r\n        const float flBranchAmp = g_flBranchAmplitude;\r\n\r\n        // Phases\r\n        float flObjPhase = dot( mul( matObjectToWorld, float4( 0, 0, 0, 1 ) ), 1 );\r\n        float flBranchPhase = flDetailPhase + flObjPhase;\r\n        float flVtxPhase = dot( vPositionOs.xyz, flDetailPhase + flBranchPhase );\r\n\r\n        // fmod max phase avoid imprecision at high phases\r\n        const float maxPhase = 50000.0f;\r\n\r\n        // x is used for edges; y is used for branches\r\n        float2 vWavesIn = ( vTime.xy + fmod( float2( flVtxPhase, flBranchPhase ), maxPhase ) ) * length( vWind );\r\n        \r\n        float4 vWaves = ( frac( vWavesIn.xxyy * vFoliageFreqs ) * 2.0 - 1.0 );\r\n        vWaves = SmoothTriangleWave( vWaves );\r\n        float2 vWavesSum = vWaves.xz + vWaves.yw;\r\n\r\n        // Edge (xy) and branch bending (z)\r\n        float flBranchWindBend = 1.0f - abs( dot( normalize( vWind.xyz ), normalize( float3( vPositionOs.xy, 0.0f ) ) ) );\r\n        flBranchWindBend *= flBranchWindBend;\r\n\r\n        vPositionOs.xyz += vWavesSum.x * flEdgeAtten * flEdgeAmp * vNormalOs.xyz;\r\n        vPositionOs.xyz += vWavesSum.y * flBranchAtten * flBranchAmp * float3( 0.0f, 0.0f, 1.0f );\r\n        vPositionOs.xyz += vWavesSum.y * flBranchAtten * flBranchAmp * flBranchWindBend * vWind.xyz;\r\n    }}\r\n\r\n    // Main vegetation bending - displace verticies' xy positions along the wind direction\r\n    // using normalized height to scale the amount of deformation.\r\n    void FoliageMainBending( inout float3 vPositionOs, float3 vWind )\r\n    {{\r\n        if ( g_flTrunkDeflection <= 0.0 ) return;\r\n\r\n        float flLength = length( vPositionOs.xyz );\r\n        // Bend factor - Wind variation is done on the CPU.  \r\n        float flBF = 0.01f * max( vPositionOs.z - g_flTrunkDeflectionStart, 0 ) * g_flTrunkDeflection;  \r\n        // Smooth bending factor and increase its nearby height limit.  \r\n        flBF += 1.0f;\r\n        flBF *= flBF;\r\n        flBF = flBF * flBF - flBF;\r\n\r\n        // Back and forth\r\n        float flBend = pow( max( 0.0f, length( vWind ) - 1.0f ) / 4.0f, 2 ) * 4.0f;\r\n        flBend = flBend + 0.7f * sqrt( flBend ) * sin( g_flTime );\r\n        flBF *= flBend;\r\n\r\n        // Displace position  \r\n        float3 vNewPos = vPositionOs;\r\n        vNewPos.xy += vWind.xy * flBF;\r\n\r\n        // Rescale (reduces stretch)\r\n        vPositionOs.xyz = normalize( vNewPos.xyz ) * flLength;\r\n    }}\r\n\r\n\t//\r\n\t// Main\r\n\t//\r\n\tPixelInput MainVs( VertexInput i )\r\n\t{{\r\n\t\tPixelInput o = ProcessVertex( i );\r\n\r\n        //o.vColor = i.vColor;\r\n\t\to.vBlendValues = i.vColorBlendValues;\r\n\t\to.vBlendValues.a = i.vColorBlendValues.a;\r\n\r\n        float3 vNormalOs;\r\n        float4 vTangentUOs_flTangentVSign;\r\n\r\n        VS_DecodeObjectSpaceNormalAndTangent( i, vNormalOs, vTangentUOs_flTangentVSign );\r\n\t\t\r\n        float3 vPositionOs = i.vPositionOs.xyz;\r\n        float3x4 matObjectToWorld = CalculateInstancingObjectToWorldMatrix( i );\r\n\r\n\t\tif(!all(i.vColorBlendValues.xyz == float3(1, 1, 1)))\r\n\t\t{{\r\n\t\t\tfloat3 vWind = float3(1,0,0) * 5.0f; //g_vWindDirection.xyz * g_vWindStrengthFreqMulHighStrength.x;\r\n\t\t\tFoliageDetailBending( vPositionOs, vNormalOs, i.vColorBlendValues.xyz, matObjectToWorld, vWind );\r\n\t\t\tFoliageMainBending( vPositionOs, vWind );\r\n\t\t}}\r\n\r\n        o.vPositionWs = mul( matObjectToWorld, float4( vPositionOs.xyz, 1.0 ) );\r\n\t    o.vPositionPs.xyzw = Position3WsToPs( o.vPositionWs.xyz );\r\n\r\n\t\t// Add your vertex manipulation functions here\r\n\t\treturn FinalizeVertex( o );\r\n\t}}\r\n}}";
+        else // Basic vertex shader
+            return $"VS\r\n{{\r\n\t#include \"common/vertex.hlsl\"\r\n    #define CUSTOM_TEXTURE_FILTERING\r\n    #define cmp -\r\n\r\n//vs_samplers\r\n//vs_CBuffers\r\n//vs_Inputs\r\n\r\n\tPixelInput MainVs( VertexInput i )\r\n\t{{\r\n\t\tPixelInput o = ProcessVertex( i );\r\n        float4 r0,r1,r2;\r\n        o.vBlendValues = i.vColorBlendValues;\r\n\t\to.vBlendValues.a = i.vColorBlendValues.a;\r\n        o.vPositionOs = i.vPositionOs.xyz;\r\n        VS_DecodeObjectSpaceNormalAndTangent( i, o.vNormalOs, o.vTangentUOs_flTangentVSign );\r\n\r\n//vs_Function\r\n\r\n\t\treturn FinalizeVertex( o );\r\n\t}}\r\n}}";
+    }
+
 
     private string AddViewScope()
     {

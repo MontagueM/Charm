@@ -672,10 +672,11 @@ public struct D2Class_706C8080
     [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0xD0, TigerStrategy.DESTINY2_LATEST)]
     public Tag<D2Class_A16D8080> BufferData;
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0xC4, TigerStrategy.DESTINY2_LATEST)]
-    public Tag<D2Class_A16D8080> BufferData2; // used for outer light color? i dont really know
+    [SchemaField(0xD4, TigerStrategy.DESTINY2_LATEST)]
+    public Tag<D2Class_A16D8080> BufferData2;
 }
 
 /// <summary>
@@ -841,6 +842,20 @@ public struct SMapWaterDecal
     [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public EntityModel Model;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C16B8080", 0x130)]
+public struct SMapAtmosphere
+{
+    [SchemaField(0x90), Tag64]
+    public Texture AtmosFarLookup; // atmos_ss_far_lookup
+    [Tag64]
+    public Texture AtmosNearLookup; // atmos_ss_near_lookup 
+    [Tag64]
+    public Texture AtmosFarLookupDS; // atmos_ss_far_lookup_downsampled
+    [Tag64]
+    public Texture AtmosNearLookupDS; // atmos_ss_near_lookup_downsampled
+    public Texture AtmosDensityLookup; // surf_atmosphere_depth_angle_density_lookup
 }
 
 // /// <summary>

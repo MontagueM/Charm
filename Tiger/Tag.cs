@@ -61,6 +61,15 @@ public class Tag<T> : TigerFile where T : struct
         byte[] data = GetData();
         File.WriteAllBytes($"TempFiles/{Hash}.bin", data);
     }
+
+    public void Dump(string savePath)
+    {
+        byte[] data = GetData();
+        if (!Directory.Exists(savePath))
+            Directory.CreateDirectory(savePath);
+
+        File.WriteAllBytes($"{savePath}/{Hash}.bin", data);
+    }
 }
 
 /// <summary>

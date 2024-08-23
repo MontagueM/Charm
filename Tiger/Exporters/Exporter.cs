@@ -99,6 +99,7 @@ public class ExporterScene
     public ConcurrentHashSet<Texture> Textures = new();
     public ConcurrentHashSet<ExportMaterial> Materials = new();
     public ConcurrentDictionary<string, List<FileHash>> TerrainDyemaps = new();
+    public ConcurrentBag<SMapAtmosphere> Atmosphere = new();
 
     public void AddStatic(string meshHash, List<StaticPart> parts)
     {
@@ -367,6 +368,11 @@ public class ExporterScene
             mesh.AddPart(meshHash, part, i);
         }
         TerrainMeshes.Add(mesh);
+    }
+
+    public void AddAtmosphere(SMapAtmosphere atmosphere)
+    {
+        Atmosphere.Add(atmosphere);
     }
 }
 

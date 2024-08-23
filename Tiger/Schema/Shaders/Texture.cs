@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using Arithmic;
 using DirectXTex;
 using DirectXTexNet;
@@ -21,14 +23,14 @@ public class Texture : TigerReferenceFile<STextureHeader>
         return _tag.Depth != 1;
     }
 
-    public string GetDimension()
+    public TextureDimension GetDimension()
     {
         if (IsCubemap())
-            return "Cube";
+            return TextureDimension.CUBE;
         else if (IsVolume())
-            return "3D";
+            return TextureDimension.D3;
         else
-            return "2D";
+            return TextureDimension.D2;
     }
 
     public byte[] GetDDSBytes(DXGI_FORMAT format)
@@ -184,6 +186,25 @@ public class Texture : TigerReferenceFile<STextureHeader>
         return outputPlate;
     }
 
+    public static ScratchImage FlattenVolume(ScratchImage input)
+    {
+        var image = input.GetImage(0);
+        if (image.Width == 0)
+        {
+            return null;
+        }
+
+        bool bSrgb = TexHelper.Instance.IsSRGB(image.Format);
+        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM, image.Width * input.GetImageCount(), image.Height, 1, 0, 0);
+
+        for (int i = 0; i < input.GetImageCount(); i++)
+        {
+            TexHelper.Instance.CopyRectangle(input.GetImage(i), 0, 0, image.Width, image.Height, outputPlate.GetImage(0), bSrgb ? TEX_FILTER_FLAGS.SEPARATE_ALPHA : 0, image.Width * i, 0);
+        }
+        input.Dispose();
+        return outputPlate;
+    }
+
     public bool IsSrgb()
     {
         return TexHelper.Instance.IsSRGB(_tag.GetFormat());
@@ -204,7 +225,6 @@ public class Texture : TigerReferenceFile<STextureHeader>
             ms = scratchImage.SaveToWICMemory(0, WIC_FLAGS.NONE, guid);
         }
         scratchImage.Dispose();
-        // ms.Dispose();
         return ms;
     }
 
@@ -219,21 +239,25 @@ public class Texture : TigerReferenceFile<STextureHeader>
         return ms;
     }
 
-    public static void SavetoFile(string savePath, ScratchImage simg, bool isCubemap = false)
+    public static void SavetoFile(string savePath, ScratchImage simg, TextureDimension dimension = TextureDimension.D2)
     {
         try
         {
-            TextureExtractor.SaveTextureToFile(savePath, simg, isCubemap);
+            TextureExtractor.SaveTextureToFile(savePath, simg, dimension);
         }
-        catch (FileLoadException)
+        catch (FileLoadException e)
         {
+            Log.Error(e.Message);
         }
     }
 
     public void SavetoFile(string savePath)
     {
         ScratchImage simg = GetScratchImage();
-        SavetoFile(savePath, simg, IsCubemap());// || (IsVolume() && !ConfigSubsystem.Get().GetS2ShaderExportEnabled()));
+        if (ConfigSubsystem.Get().GetS2TexPow2Enabled())
+            simg = ResizeToNearestPowerOf2(simg);
+
+        SavetoFile(savePath, simg, GetDimension());// || (IsVolume() && !ConfigSubsystem.Get().GetS2ShaderExportEnabled()));
     }
 
     public UnmanagedMemoryStream GetTextureToDisplay()
@@ -254,6 +278,46 @@ public class Texture : TigerReferenceFile<STextureHeader>
         scratchImage.Dispose();
         return ms;
     }
+
+    public ScratchImage ResizeToNearestPowerOf2(ScratchImage image)
+    {
+        var metadata = image.GetMetadata();
+        int width = metadata.Width;
+        int height = metadata.Height;
+
+        int newWidth = NearestPowerOfTwo(width);
+        int newHeight = NearestPowerOfTwo(height);
+
+        if (newWidth == width && newHeight == height)
+            return image;
+
+        return image.Resize(newWidth, newHeight, TEX_FILTER_FLAGS.SEPARATE_ALPHA);
+    }
+
+    private static int NearestPowerOfTwo(int value)
+    {
+        return 1 << (sizeof(uint) * 8 - BitOperations.LeadingZeroCount((uint)(value - 1)));
+    }
+}
+
+public enum TextureDimension
+{
+    [Description("1D")]
+    D1,
+    [Description("2D")]
+    D2,
+    [Description("3D")]
+    D3,
+    [Description("1DArray")]
+    D1ARRAY,
+    [Description("2DArray")]
+    D2ARRAY,
+    [Description("3DArray")]
+    D3ARRAY,
+    [Description("CUBE")]
+    CUBE,
+    [Description("CUBEARRAY")]
+    CUBEARRAY
 }
 
 // Adding D1 stuff to everything is gonna become an ugly mess...

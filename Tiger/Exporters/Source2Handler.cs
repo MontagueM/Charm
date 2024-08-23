@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Text;
+﻿using System.Text;
 using Arithmic;
 using Newtonsoft.Json;
 using Tiger.Schema;
@@ -168,9 +167,11 @@ public class Source2Handler
         var bytecode_hlsl = bytecode.Evaluate(material.PS_TFX_Bytecode_Constants);
 
         vmat.AppendLine($"\tDynamicParams\r\n\t{{");
+        string temp_time_fix = $"CurTime = exists(CurrentTime) ? CurrentTime : Time;";
         foreach (var entry in bytecode_hlsl)
         {
-            vmat.AppendLine($"\t\tcb0_{entry.Key} \"{entry.Value}\"");
+            var expression = entry.Value.Contains("Time") ? $"{temp_time_fix} return {entry.Value.Replace("Time", "CurTime")};" : entry.Value;
+            vmat.AppendLine($"\t\tcb0_{entry.Key} \"{expression}\"");
         }
 
         //VS Dynamic expressions
@@ -209,8 +210,8 @@ public class Source2Handler
                             vmat.AppendLine($"\t\tcb8_3 \"float4(0.7903466, 0.7319064, 0.56213695, 0.0)\"");
                             vmat.AppendLine($"\t\tcb8_4 \"float4(0.0, 1.0, 0.109375, 0.046875)\"");
                             vmat.AppendLine($"\t\tcb8_5 \"float4(0.0, 0.0, 0.0, 0.00086945295)\"");
-                            vmat.AppendLine($"\t\tcb8_6 \"float4(0.55, 0.41091052, 0.22670946, 0.50381273)\"");
-                            vmat.AppendLine($"\t\tcb8_7 \"float4(1.0, 1.0, 1.0, 0.9997778)\"");
+                            vmat.AppendLine($"\t\tcb8_6 \"float4(0.05, 0.05, 0.05, 0.5)\""); // Main Tint? // float4(0.55, 0.41091052, 0.22670946, 0.50381273)
+                            vmat.AppendLine($"\t\tcb8_7 \"float4(1.0, 1.0, 1.0, 0.9997778)\""); // Cubemap Reflection Tint?
                             vmat.AppendLine($"\t\tcb8_8 \"float4(132.92885, 66.40444, 56.853416, 0.0)\"");
                             vmat.AppendLine($"\t\tcb8_9 \"float4(132.92885, 66.40444, 1000.0, 0.0001)\"");
                             vmat.AppendLine($"\t\tcb8_10 \"float4(131.92885, 65.40444, 55.853416, 0.6784314)\"");
@@ -234,8 +235,8 @@ public class Source2Handler
                         }
                         break;
                     case 13: // Frame
-                        vmat.AppendLine($"\t\tcb13_0 \"float4(Time, Time, 0.05, 1)\"");
-                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.4,8,1,1)\"");
+                        vmat.AppendLine($"\t\tcb13_0 \"float4(Time, Time, 0.05, 0.016)\"");
+                        vmat.AppendLine($"\t\tcb13_1 \"float4(1,16,0.5,1.5)\"");
                         break;
                 }
             }
@@ -308,7 +309,7 @@ public class Source2Handler
         if (!Directory.Exists(savePath))
             Directory.CreateDirectory(savePath);
 
-        var file = VTEX.Create(tex, tex.IsCubemap() ? ImageDimension.CUBEARRAY : ImageDimension._2D);
+        var file = VTEX.Create(tex, tex.GetDimension());
         var json = JsonConvert.SerializeObject(file, Formatting.Indented);
         try
         {
@@ -367,12 +368,12 @@ public class VTEX
 
     public string OutputTypeString { get; set; }
 
-    public static VTEX Create(Texture texture, ImageDimension dimension)
+    public static VTEX Create(Texture texture, TextureDimension dimension)
     {
         return new VTEX
         {
             Images = new List<string> { $"textures/{texture.Hash}.png" },
-            OutputFormat = texture.IsCubemap() ? ImageFormatType.BC6H.ToString() : ImageFormatType.RGBA8888.ToString(),
+            OutputFormat = dimension == TextureDimension.CUBE ? ImageFormatType.BC6H.ToString() : ImageFormatType.RGBA8888.ToString(),
             OutputColorSpace = (texture.IsSrgb() ? GammaType.SRGB : GammaType.Linear).ToString(),
             InputColorSpace = (texture.IsSrgb() ? GammaType.SRGB : GammaType.Linear).ToString(),
             OutputTypeString = EnumExtensions.GetEnumDescription(dimension)
@@ -393,24 +394,4 @@ public enum ImageFormatType
     RGBA8888,
     BC7,
     BC6H,
-}
-
-public enum ImageDimension
-{
-    [Description("1D")]
-    _1D,
-    [Description("2D")]
-    _2D,
-    [Description("3D")]
-    _3D,
-    [Description("1DArray")]
-    _1DARRAY,
-    [Description("2DArray")]
-    _2DARRAY,
-    [Description("3DArray")]
-    _3DARRAY,
-    [Description("CUBE")]
-    CUBE,
-    [Description("CUBEARRAY")]
-    CUBEARRAY
 }

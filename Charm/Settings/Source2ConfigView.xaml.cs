@@ -49,15 +49,6 @@ public partial class Source2ConfigView : UserControl
         cbe.ChangeButton.Click += S2ShaderExportEnabled_OnClick;
         S2ConfigPanel.Children.Add(cbe);
 
-        // Enable vmat material generation
-        // ### Might as well just make vmats by default
-        // ConfigSettingControl cef = new ConfigSettingControl();
-        // cef.SettingName = "Generate materials (vmat)";
-        // bool bval = ConfigSubsystem.GetS2VMATExportEnabled();
-        // cef.SettingValue = bval.ToString();
-        // cef.ChangeButton.Click += S2VMATExportEnabled_OnClick;
-        // S2ConfigPanel.Children.Add(cef);
-
         // Enable vmdl model generation
         ConfigSettingToggleControl cfe = new ConfigSettingToggleControl();
         cfe.SettingName = "Generate Models";
@@ -65,6 +56,14 @@ public partial class Source2ConfigView : UserControl
         cfe.SettingValue = bval.ToString();
         cfe.ChangeButton.Click += S2VMDLExportEnabled_OnClick;
         S2ConfigPanel.Children.Add(cfe);
+
+        // Resize textures to nearest power of 2
+        ConfigSettingToggleControl pw2 = new ConfigSettingToggleControl();
+        pw2.SettingName = "Resize Textures to Nearest Power of 2";
+        bool bval3 = _config.GetS2TexPow2Enabled();
+        pw2.SettingValue = bval3.ToString();
+        pw2.ChangeButton.Click += S2TexPow2Enabled_OnClick;
+        S2ConfigPanel.Children.Add(pw2);
     }
 
     private void Source2Path_OnClick(object sender, RoutedEventArgs e)
@@ -105,13 +104,10 @@ public partial class Source2ConfigView : UserControl
     {
         _config.SetS2ShaderExportEnabled(!_config.GetS2ShaderExportEnabled());
         if (_config.GetS2ShaderExportEnabled())
+        {
             _config.SetIndvidualStaticsEnabled(true);
-        PopulateConfigPanel();
-    }
-
-    private void S2VMATExportEnabled_OnClick(object sender, RoutedEventArgs e)
-    {
-        _config.SetS2VMATExportEnabled(!_config.GetS2VMATExportEnabled());
+            _config.SetS2TexPow2Enabled(true);
+        }
         PopulateConfigPanel();
     }
 
@@ -120,6 +116,12 @@ public partial class Source2ConfigView : UserControl
         _config.SetS2VMDLExportEnabled(!_config.GetS2VMDLExportEnabled());
         if (_config.GetS2VMDLExportEnabled())
             _config.SetIndvidualStaticsEnabled(true);
+        PopulateConfigPanel();
+    }
+
+    private void S2TexPow2Enabled_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetS2TexPow2Enabled(!_config.GetS2TexPow2Enabled());
         PopulateConfigPanel();
     }
 }

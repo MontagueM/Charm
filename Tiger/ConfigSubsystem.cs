@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Windows;
-using Arithmic;
+﻿using Arithmic;
 using Newtonsoft.Json;
 // using MessageBox = System.Windows.Forms.MessageBox;
-using Tiger;
 using Tiger.Schema;
 
 namespace Tiger;
@@ -56,9 +47,9 @@ public class BlenderSettings
 // [ConfigSubsystem]
 public class Source2Settings
 {
-    public bool Source2VShaderExportsEnabled { get; set; } = false;
-    public bool Source2VMATExportsEnabled { get; set; } = false;
+    public bool Source2ShaderExportsEnabled { get; set; } = false;
     public bool Source2VMDLExportsEnabled { get; set; } = false;
+    public bool Source2ResizeTexPow2Enabled { get; set; } = false;
     public string Source2Path { get; set; } = "";
 }
 
@@ -206,25 +197,13 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     public void SetS2ShaderExportEnabled(bool bS2ShaderExportEnabled)
     {
-        _settings.Source2.Source2VShaderExportsEnabled = bS2ShaderExportEnabled;
+        _settings.Source2.Source2ShaderExportsEnabled = bS2ShaderExportEnabled;
         Save();
     }
 
     public bool GetS2ShaderExportEnabled()
     {
-        return _settings.Source2.Source2VShaderExportsEnabled;
-    }
-
-    //
-    public void SetS2VMATExportEnabled(bool bS2VMATExportEnabled)
-    {
-        _settings.Source2.Source2VMATExportsEnabled = bS2VMATExportEnabled;
-        Save();
-    }
-
-    public bool GetS2VMATExportEnabled()
-    {
-        return _settings.Source2.Source2VMATExportsEnabled;
+        return _settings.Source2.Source2ShaderExportsEnabled;
     }
 
     public void SetS2VMDLExportEnabled(bool bS2VMDLExportEnabled)
@@ -236,6 +215,17 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     public bool GetS2VMDLExportEnabled()
     {
         return _settings.Source2.Source2VMDLExportsEnabled;
+    }
+
+    public void SetS2TexPow2Enabled(bool bS2TexPow2Enabled)
+    {
+        _settings.Source2.Source2ResizeTexPow2Enabled = bS2TexPow2Enabled;
+        Save();
+    }
+
+    public bool GetS2TexPow2Enabled()
+    {
+        return _settings.Source2.Source2ResizeTexPow2Enabled;
     }
 
     #endregion

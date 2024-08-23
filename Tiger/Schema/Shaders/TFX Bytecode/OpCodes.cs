@@ -300,7 +300,8 @@ public class TfxBytecodeOp
                 output = $"unk1 {((PushObjectChannelVectorData)tfxData.data).unk1}";
                 break;
             case PushGlobalChannelVectorData:
-                output = $"unk1 {((PushGlobalChannelVectorData)tfxData.data).unk1}";
+                var index = ((PushGlobalChannelVectorData)tfxData.data).unk1;
+                output = $"value {index} {GlobalChannelDefaults.GetGlobalChannelDefaults()[index]}";
                 break;
             case Unk50Data:
                 output = $"unk1 {((Unk50Data)tfxData.data).unk1}";
@@ -346,7 +347,7 @@ public enum TfxBytecode : byte
     Dot = 0x0b,
     Merge_1_3 = 0x0c,
     Merge_2_2 = 0x0d,
-    Unk0e = 0x0e,
+    Merge_3_1 = 0x0e,
     Unk0f = 0x0f,
     Lerp = 0x10,
     Unk11 = 0x11,

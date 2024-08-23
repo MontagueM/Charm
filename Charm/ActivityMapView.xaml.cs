@@ -152,8 +152,8 @@ public partial class ActivityMapView : UserControl
             return;
         }
 
-        List<string> mapStages = maps.Select((x, i) => $"Exporting {i + 1}/{maps.Count}").ToList();
-        mapStages.Add("Finishing Export");
+        List<string> mapStages = maps.Select((x, i) => $"Preparing {i + 1}/{maps.Count}").ToList();
+        mapStages.Add("Exporting");
         MainWindow.Progress.SetProgressStages(mapStages);
 
         /// Parallel -> 5 Exports on Endless Vale 
