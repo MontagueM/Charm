@@ -4,9 +4,9 @@ using Tiger.Schema;
 
 public class TfxBytecodeInterpreter
 {
-    public static List<TfxData> Opcodes { get; set; }
-    public static List<string> Stack { get; set; }
-    public static List<string> Temp { get; set; }
+    public List<TfxData> Opcodes { get; set; }
+    public List<string> Stack { get; set; }
+    public List<string> Temp { get; set; }
 
     public TfxBytecodeInterpreter(List<TfxData> opcodes)
     {
@@ -58,7 +58,7 @@ public class TfxBytecodeInterpreter
             foreach ((int _ip, var op) in Opcodes.Select((value, index) => (index, value)))
             {
                 if (print)
-                    Console.WriteLine($"{op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                    Console.WriteLine($"0x{op.op:X} {op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
                 switch (op.op)
                 {
                     case TfxBytecode.Add:
@@ -235,11 +235,11 @@ public class TfxBytecodeInterpreter
                         StackPush($"(float4{UnkLoadConstant})");
                         break;
                     case TfxBytecode.PushExternInputFloat:
-                        var v = GetExternFloat(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element);
+                        var v = GetExternFloat(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element * 4);
                         StackPush(v);
                         break;
                     case TfxBytecode.PushExternInputVec4:
-                        var PushExternInputVec4 = GetExternVec4(((PushExternInputVec4Data)op.data).extern_, ((PushExternInputVec4Data)op.data).element);
+                        var PushExternInputVec4 = GetExternVec4(((PushExternInputVec4Data)op.data).extern_, ((PushExternInputVec4Data)op.data).element * 16);
                         StackPush(PushExternInputVec4);
                         break;
                     case TfxBytecode.PushExternInputMat4:
@@ -253,8 +253,8 @@ public class TfxBytecodeInterpreter
                         //var PushExternInputU64 = GetExtern(((PushExternInputU64Data)op.data).extern_, ((PushExternInputU64Data)op.data).element);
                         StackPush($"float4(1, 1, 1, 1)");
                         break;
-                    case TfxBytecode.PushExternInputU64Unknown:
-                        //var PushExternInputU64Unknown = GetExtern(((PushExternInputU64UnknownData)op.data).extern_, ((PushExternInputU64UnknownData)op.data).element);
+                    case TfxBytecode.PushExternInputUav:
+                        //var PushExternInputUav = GetExtern(((PushExternInputUavData)op.data).extern_, ((PushExternInputUavData)op.data).element);
                         StackPush($"float4(1, 1, 1, 1)");
                         break;
 
@@ -351,7 +351,7 @@ public class TfxBytecodeInterpreter
         return hlsl;
     }
 
-    private string GetExternFloat(TfxExtern extern_, byte element)
+    private string GetExternFloat(TfxExtern extern_, int element)
     {
         switch (extern_)
         {
@@ -359,47 +359,74 @@ public class TfxBytecodeInterpreter
                 switch (element)
                 {
                     case 0:
-                        return $"float4(Time, Time, Time, Time)";
-                    case 1:
-                        return $"float4(Time, Time, Time, Time)"; //Wrong?
-                    case 4:
-                        return $"float4(Time, Time, Time, Time)"; //Wrong?
+                        return $"(Time)"; // game_time
+                    case 0x04:
+                        return $"(Time)"; // render_time
+                    case 0x14:
+                        return $"(0.16)"; // delta_game_time
+                    case 0x1C:
+                        return $"(16)"; // exposure_scale
+
                     default:
-                        Log.Error($"Unsupported element {element} for extern {extern_}");
-                        return $"float4(0, 0, 0, 0)";
+                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_}");
+                        return $"(1)";
+                }
+            case TfxExtern.Atmosphere:
+                switch (element)
+                {
+                    case 0x70:
+                        return $"(exists(AtmosTimeOfDay) ? (AtmosTimeOfDay) : (0.5))";
+                    case 0x198:
+                    case 0x170:
+                        return $"(0.0001)";
+                    case 0x1b4:
+                        return $"(exists(AtmosRotation) ? (AtmosRotation) : (0))";
+                    case 0x1b8:
+                        return $"(exists(AtmosTimeOfDay) ? (AtmosTimeOfDay) : (1))";
+                    case 0x1bc:
+                        return $"(0.5)";
+                    case 0x1e8:
+                        return $"(0)";
+                    default:
+                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_} ");
+                        return $"(1)";
                 }
             default:
-                Log.Error($"Unsupported extern {extern_}[{element}]");
-                return $"float4(1, 1, 1, 1)";
+                Log.Error($"Unsupported extern {extern_}[{element} (0x{(element):X})]");
+                return $"(1)";
         }
     }
 
-    private string GetExternVec4(TfxExtern extern_, byte element)
+    private string GetExternVec4(TfxExtern extern_, int element)
     {
         switch (extern_)
         {
             case TfxExtern.Frame:
                 switch (element)
                 {
-                    case 26:
+                    case 0x1A0:
                         return $"float4(0, 0, 0, 0)";
-                    case 27:
-                        return $"float4(1, 1, 1, 1)";
+                    case 0x1C0:
+                        return $"float4(1, 1, 0, 1)";
                     default:
-                        Log.Error($"Unsupported element {element} for extern {extern_}");
-                        return $"float4(0, 0, 0, 0)";
+                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_}");
+                        return $"float4(1,1,1,1)";
                 }
             case TfxExtern.Atmosphere:
                 switch (element)
                 {
-                    case 7:
-                        return $"float4(1, 1, 1, 1)";
+                    case 0x110:
+                        return $"float4(0,0,-1.5,0)";
+                    case 0x140:
+                        return $"float4(0,0,0,0)";
+                    case 0x1D0:
+                        return $"float4(0,0,0,0)";
                     default:
-                        Log.Error($"Unsupported element {element} for extern {extern_}");
-                        return $"float4(0, 0, 0, 0)";
+                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_} ");
+                        return $"float4(1,1,1,1)";
                 }
             default:
-                Log.Error($"Unsupported extern {extern_}[{element}]");
+                Log.Error($"Unsupported extern {extern_}[{element} (0x{(element):X})]");
                 return $"float4(1, 1, 1, 1)";
         }
     }

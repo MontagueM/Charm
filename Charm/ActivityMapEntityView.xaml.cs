@@ -534,25 +534,25 @@ public partial class ActivityMapEntityView : UserControl
                             skyScene.AddAtmosphere(atmosphere);
 
                             List<Texture> AtmosTextures = new();
-                            if (atmosphere.AtmosFarLookup != null)
-                                AtmosTextures.Add(atmosphere.AtmosFarLookup);
-                            if (atmosphere.AtmosFarLookupDS != null)
-                                AtmosTextures.Add(atmosphere.AtmosFarLookupDS);
-                            if (atmosphere.AtmosNearLookup != null)
-                                AtmosTextures.Add(atmosphere.AtmosNearLookup);
-                            if (atmosphere.AtmosNearLookupDS != null)
-                                AtmosTextures.Add(atmosphere.AtmosNearLookupDS);
-                            if (atmosphere.AtmosDensityLookup != null)
-                                AtmosTextures.Add(atmosphere.AtmosDensityLookup);
+                            if (atmosphere.Texture0 != null)
+                                AtmosTextures.Add(atmosphere.Texture0);
+                            if (atmosphere.TextureUnk0 != null)
+                                AtmosTextures.Add(atmosphere.TextureUnk0);
+                            if (atmosphere.Texture1 != null)
+                                AtmosTextures.Add(atmosphere.Texture1);
+                            if (atmosphere.TextureUnk1 != null)
+                                AtmosTextures.Add(atmosphere.TextureUnk1);
+                            if (atmosphere.Texture2 != null)
+                                AtmosTextures.Add(atmosphere.Texture2);
 
                             foreach (var tex in AtmosTextures)
                             {
-                                if (!Directory.Exists($"{savePath}/Textures"))
-                                    Directory.CreateDirectory($"{savePath}/Textures");
+                                if (!Directory.Exists($"{savePath}/Textures/Atmosphere"))
+                                    Directory.CreateDirectory($"{savePath}/Textures/Atmosphere");
                                 // Not ideal but it works
-                                Texture.SavetoFile($"{savePath}/Textures/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage()) : tex.GetScratchImage());
+                                TextureExtractor.SaveTextureToFile($"{savePath}/Textures/Atmosphere/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
                                 if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
-                                    Source2Handler.SaveVTEX(tex, $"{savePath}/Textures");
+                                    Source2Handler.SaveVTEX(tex, $"{savePath}/Textures/Atmosphere", "Atmosphere");
                             }
                             break;
                         default:

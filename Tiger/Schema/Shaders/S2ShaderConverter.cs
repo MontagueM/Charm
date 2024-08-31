@@ -10,10 +10,12 @@ public class S2ShaderConverter
     private IMaterial Material;
     private StringReader hlsl;
     private StringBuilder vfx;
-    private List<TfxScope> scopes = new();
-    private List<DXBCIOSignature> inputs = new();
-    private List<DXBCIOSignature> outputs = new();
-    private List<DXBCShaderResource> resources = new();
+    private List<TfxScope> Scopes = new();
+    private List<TfxExtern> Externs = new();
+    private List<STextureTag> Textures = new();
+    private List<DXBCIOSignature> Inputs = new();
+    private List<DXBCIOSignature> Outputs = new();
+    private List<DXBCShaderResource> Resources = new();
 
     private bool isTerrain = false;
     private bool isDecorator = false;
@@ -111,17 +113,19 @@ PS
         StringBuilder texSamples = new StringBuilder();
         hlsl = new StringReader(pixel);
         vfx = new StringBuilder();
-        scopes = material.EnumerateScopes().ToList();
-        inputs = material.PixelShader.InputSignatures;
-        outputs = material.PixelShader.OutputSignatures;
-        resources = material.PixelShader.Resources;
+        Scopes = material.EnumerateScopes().ToList();
+        Externs = material.GetExterns();
+        Inputs = material.PixelShader.InputSignatures;
+        Outputs = material.PixelShader.OutputSignatures;
+        Resources = material.PixelShader.Resources;
+        Textures = material.EnumeratePSTextures().ToList();
 
-        bTranslucent = outputs.Count == 1 || scopes.Contains(TfxScope.TRANSPARENT) || scopes.Contains(TfxScope.TRANSPARENT_ADVANCED) || scopes.Contains(TfxScope.DECAL);
-        isTerrain = scopes.Contains(TfxScope.TERRAIN);
-        isDecorator = scopes.Contains(TfxScope.INSTANCES);
+        bTranslucent = Outputs.Count == 1 || Scopes.Contains(TfxScope.TRANSPARENT) || Scopes.Contains(TfxScope.TRANSPARENT_ADVANCED) || Scopes.Contains(TfxScope.DECAL);
+        isTerrain = Scopes.Contains(TfxScope.TERRAIN);
+        isDecorator = Scopes.Contains(TfxScope.INSTANCES);
         //ProcessHlslData();
 
-        if (inputs.Exists(input => input.Semantic == DXBCSemantic.SystemIsFrontFace))
+        if (Inputs.Exists(input => input.Semantic == DXBCSemantic.SystemIsFrontFace))
             vfxStructure = vfxStructure.Replace("//frontface", "#define S_RENDER_BACKFACES 1");
 
         for (int i = 0; i < material.PS_Samplers.Count; i++)
@@ -136,7 +140,7 @@ PS
         vfxStructure = vfxStructure.Replace("//ps_samplers", texSamples.ToString());
         vfxStructure = vfxStructure.Replace("//ps_CBuffers", WriteCbuffers(material, false).ToString());
 
-        if (resources.Exists(cbuffer => cbuffer.ResourceType == ResourceType.CBuffer && cbuffer.Index == 12))
+        if (Resources.Exists(cbuffer => cbuffer.ResourceType == ResourceType.CBuffer && cbuffer.Index == 12))
             vfxStructure = vfxStructure.Replace("//ps_additional", AddTPToProj());
 
         hlsl = new StringReader(pixel);
@@ -191,7 +195,7 @@ PS
     {
         StringBuilder CBuffers = new();
 
-        foreach (var resource in resources)
+        foreach (var resource in Resources)
         {
             switch (resource.ResourceType)
             {
@@ -243,7 +247,7 @@ PS
         else
         {
             funcDef.AppendLine($"{AddRenderStates()}");
-            foreach (var e in material.EnumeratePSTextures())
+            foreach (var e in Textures)
             {
                 if (e.Texture != null)
                 {
@@ -277,10 +281,38 @@ PS
                 funcDef.AppendLine($"\tTexture2D g_tFrameBufferCopyTexture < Attribute( \"FrameBufferCopyTexture\" ); SrgbRead( true ); Filter( MIN_MAG_MIP_LINEAR ); AddressU( CLAMP ); AddressV( CLAMP ); >;");
             }
 
-            //if (scopes.Contains(TfxScope.TRANSPARENT) && resources.Exists(x => (x.ResourceType == ResourceType.Texture3D && x.Index == 11)))
-            //    funcDef.AppendLine($"\tTexture3D g_t11 < Attribute( \"AtmosFarLookup\" ); SrgbRead( false ); >;\r\n\n");
-            //if (scopes.Contains(TfxScope.TRANSPARENT) && resources.Exists(x => (x.ResourceType == ResourceType.Texture3D && x.Index == 13)))
-            //    funcDef.AppendLine($"\tTexture3D g_t13 < Attribute( \"AtmosNearLookup\" ); SrgbRead( false ); >;\r\n\n");
+
+            foreach (var scope in Scopes)
+            {
+                foreach (var resource in Resources)
+                {
+                    switch (scope)
+                    {
+                        case TfxScope.TRANSPARENT when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 11) && !Textures.Exists(texture => texture.TextureIndex == 11 && texture.Texture is not null)):
+                            funcDef.AppendLine($"\tTexture2D g_t11 < Attribute( \"AtmosFar\" ); >;\r\n\n");
+                            break;
+                        case TfxScope.TRANSPARENT when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 13) && !Textures.Exists(texture => texture.TextureIndex == 13 && texture.Texture is not null)):
+                            funcDef.AppendLine($"\tTexture2D g_t13 < Attribute( \"AtmosNear\" ); >;\r\n\n");
+                            break;
+                    }
+                }
+            }
+
+            foreach (var extern_ in Externs)
+            {
+                foreach (var resource in Resources)
+                {
+                    switch (extern_)
+                    {
+                        case TfxExtern.Atmosphere when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 1) && !Textures.Exists(texture => texture.TextureIndex == 1 && texture.Texture is not null)):
+                            funcDef.AppendLine($"\tTexture2D g_t1 < Attribute( \"AtmosFar\" ); >;\r\n\n");
+                            break;
+                        case TfxExtern.Atmosphere when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 2) && !Textures.Exists(texture => texture.TextureIndex == 2 && texture.Texture is not null)):
+                            funcDef.AppendLine($"\tTexture2D g_t2 < Attribute( \"AtmosNear\" ); >;\r\n\n");
+                            break;
+                    }
+                }
+            }
         }
         return funcDef;
     }
@@ -291,7 +323,7 @@ PS
 
         if (isVertexShader)
         {
-            foreach (var i in inputs)
+            foreach (var i in Inputs)
             {
                 switch (i.Semantic)
                 {
@@ -403,7 +435,7 @@ PS
                 funcDef.AppendLine("\t\tfloat4 v4 = {vPositionWs,0};"); // World Pos
             }
 
-            foreach (var i in inputs)
+            foreach (var i in Inputs)
             {
                 switch (i.GetMaskType())
                 {
@@ -439,7 +471,7 @@ PS
             funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);");
             funcDef.AppendLine("\t\tfloat4 o3 = float4(0,0,0,0);\n");
 
-            if (resources.Exists(cbuffer => (cbuffer.ResourceType == ResourceType.CBuffer && cbuffer.Index == 12)))
+            if (Resources.Exists(cbuffer => (cbuffer.ResourceType == ResourceType.CBuffer && cbuffer.Index == 12)))
             {
                 funcDef.AppendLine(AddViewScope());
             }
@@ -542,24 +574,30 @@ PS
                         {
                             funcDef.AppendLine($"\t\t{equal.TrimStart()} = g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
                         }
-                        else if (!material.EnumeratePSTextures().Any(texture => texture.TextureIndex == texIndex && texture.Texture is not null)) // Some kind of buffer texture or not defined in the material
+                        else if (!Textures.Exists(texture => texture.TextureIndex == texIndex && texture.Texture is not null)) // Some kind of buffer texture or not defined in the material
                         {
                             switch (texIndex)
                             {
+                                case 1 when Externs.Contains(TfxExtern.Atmosphere):
+                                case 2 when Externs.Contains(TfxExtern.Atmosphere):
+                                    //funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.05,0.05,0.05,0.05).{dotAfter} //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
+                                    break;
+
                                 case 10: // Depth buffer
                                     bUsesDepthBuffer = true;
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::GetNormalized({sampleUv})*0.3937.xxxx; //{equal_post}");
                                     break;
 
-                                case 11: // Atmosphere lookup textures
-                                case 13:
-                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.05,0.05,0.05,0.05).{dotAfter} //{equal_post}");
-                                    //funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
+                                case 11 when Scopes.Contains(TfxScope.TRANSPARENT): // Atmosphere lookup textures
+                                case 13 when Scopes.Contains(TfxScope.TRANSPARENT):
+                                    //funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.05,0.05,0.05,0.05).{dotAfter} //{equal_post}");
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
                                     break;
 
                                 case 20: // Framebuffer?
                                 case 23: // Unsure
-                                case 7:
+                                case 7 when Externs.Contains(TfxExtern.Water):
                                     bUsesFrameBuffer = true;
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.{equal_tex_post}");//.SampleLevel(s_s{sampleIndex}, {sampleUv}).{dotAfter} //{equal_post}");
                                     break;
@@ -583,6 +621,10 @@ PS
 
                                 case 22: // Light gray textures
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.55078,0.55078,0.55078,0.49804).{dotAfter} //{equal_post}");
+                                    break;
+
+                                case 6 when Externs.Contains(TfxExtern.Deferred):
+                                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.01,0.01,0.02,1).{dotAfter} //{equal_post}");
                                     break;
 
                                 default: // Unknown
@@ -617,7 +659,7 @@ PS
                             switch (texIndex)
                             {
                                 case 2:
-                                    if (scopes.Contains(TfxScope.DECAL))
+                                    if (Scopes.Contains(TfxScope.DECAL))
                                     {
                                         bUsesNormalBuffer = true;
                                         funcDef.AppendLine($"\t\t{equal.TrimStart()}= v0.{dotAfter}");
@@ -736,7 +778,7 @@ PS
     private string AddVertexShader() // I hate this
     {
         if (isDecorator) // Surely this is fine...
-            return $"VS\r\n{{\r\n\t#include \"common/vertex.hlsl\"\r\n\r\n    float g_flEdgeFrequency < Default( 0.17 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flEdgeAmplitude < Default( 0.15 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flBranchFrequency < Default( 0.17 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flBranchAmplitude < Default( 0.15 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flTrunkDeflection < Default( 0.0 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flTrunkDeflectionStart < Default( 0.0 ); Range( 0.0, 1000.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n\r\n    float4 SmoothCurve( float4 x )\r\n    {{  \r\n        return x * x * ( 3.0 - 2.0 * x );  \r\n    }}  \r\n\r\n    float4 TriangleWave( float4 x )\r\n    {{\r\n        return abs( frac( x + 0.5 ) * 2.0 - 1.0 );  \r\n    }}  \r\n\r\n    float4 SmoothTriangleWave( float4 x )\r\n    {{  \r\n        return SmoothCurve( TriangleWave( x ) );  \r\n    }}\r\n\r\n    // High-frequency displacement used in Unity's TerrainEngine; based on \"Vegetation Procedural Animation and Shading in Crysis\"\r\n    // http://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch16.html\r\n    void FoliageDetailBending( inout float3 vPositionOs, float3 vNormalOs, float3 vVertexColor, float3x4 matObjectToWorld, float3 vWind )\r\n    {{\r\n        // 1.975, 0.793, 0.375, 0.193 are good frequencies   \r\n        const float4 vFoliageFreqs = float4( 1.975, 0.793, 0.375, 0.193 );\r\n\r\n        // Attenuation and phase offset is encoded in the vertex color\r\n        const float flEdgeAtten = vVertexColor.r;\r\n        const float flBranchAtten = vVertexColor.b;\r\n        const float flDetailPhase = vVertexColor.g;\r\n\r\n        // Material defined frequency and amplitude\r\n        const float2 vTime = g_flTime.xx * float2( g_flEdgeFrequency, g_flBranchFrequency );\r\n        const float flEdgeAmp = g_flEdgeAmplitude;\r\n        const float flBranchAmp = g_flBranchAmplitude;\r\n\r\n        // Phases\r\n        float flObjPhase = dot( mul( matObjectToWorld, float4( 0, 0, 0, 1 ) ), 1 );\r\n        float flBranchPhase = flDetailPhase + flObjPhase;\r\n        float flVtxPhase = dot( vPositionOs.xyz, flDetailPhase + flBranchPhase );\r\n\r\n        // fmod max phase avoid imprecision at high phases\r\n        const float maxPhase = 50000.0f;\r\n\r\n        // x is used for edges; y is used for branches\r\n        float2 vWavesIn = ( vTime.xy + fmod( float2( flVtxPhase, flBranchPhase ), maxPhase ) ) * length( vWind );\r\n        \r\n        float4 vWaves = ( frac( vWavesIn.xxyy * vFoliageFreqs ) * 2.0 - 1.0 );\r\n        vWaves = SmoothTriangleWave( vWaves );\r\n        float2 vWavesSum = vWaves.xz + vWaves.yw;\r\n\r\n        // Edge (xy) and branch bending (z)\r\n        float flBranchWindBend = 1.0f - abs( dot( normalize( vWind.xyz ), normalize( float3( vPositionOs.xy, 0.0f ) ) ) );\r\n        flBranchWindBend *= flBranchWindBend;\r\n\r\n        vPositionOs.xyz += vWavesSum.x * flEdgeAtten * flEdgeAmp * vNormalOs.xyz;\r\n        vPositionOs.xyz += vWavesSum.y * flBranchAtten * flBranchAmp * float3( 0.0f, 0.0f, 1.0f );\r\n        vPositionOs.xyz += vWavesSum.y * flBranchAtten * flBranchAmp * flBranchWindBend * vWind.xyz;\r\n    }}\r\n\r\n    // Main vegetation bending - displace verticies' xy positions along the wind direction\r\n    // using normalized height to scale the amount of deformation.\r\n    void FoliageMainBending( inout float3 vPositionOs, float3 vWind )\r\n    {{\r\n        if ( g_flTrunkDeflection <= 0.0 ) return;\r\n\r\n        float flLength = length( vPositionOs.xyz );\r\n        // Bend factor - Wind variation is done on the CPU.  \r\n        float flBF = 0.01f * max( vPositionOs.z - g_flTrunkDeflectionStart, 0 ) * g_flTrunkDeflection;  \r\n        // Smooth bending factor and increase its nearby height limit.  \r\n        flBF += 1.0f;\r\n        flBF *= flBF;\r\n        flBF = flBF * flBF - flBF;\r\n\r\n        // Back and forth\r\n        float flBend = pow( max( 0.0f, length( vWind ) - 1.0f ) / 4.0f, 2 ) * 4.0f;\r\n        flBend = flBend + 0.7f * sqrt( flBend ) * sin( g_flTime );\r\n        flBF *= flBend;\r\n\r\n        // Displace position  \r\n        float3 vNewPos = vPositionOs;\r\n        vNewPos.xy += vWind.xy * flBF;\r\n\r\n        // Rescale (reduces stretch)\r\n        vPositionOs.xyz = normalize( vNewPos.xyz ) * flLength;\r\n    }}\r\n\r\n\t//\r\n\t// Main\r\n\t//\r\n\tPixelInput MainVs( VertexInput i )\r\n\t{{\r\n\t\tPixelInput o = ProcessVertex( i );\r\n\r\n        //o.vColor = i.vColor;\r\n\t\to.vBlendValues = i.vColorBlendValues;\r\n\t\to.vBlendValues.a = i.vColorBlendValues.a;\r\n\r\n        float3 vNormalOs;\r\n        float4 vTangentUOs_flTangentVSign;\r\n\r\n        VS_DecodeObjectSpaceNormalAndTangent( i, vNormalOs, vTangentUOs_flTangentVSign );\r\n\t\t\r\n        float3 vPositionOs = i.vPositionOs.xyz;\r\n        float3x4 matObjectToWorld = CalculateInstancingObjectToWorldMatrix( i );\r\n\r\n\t\tif(!all(i.vColorBlendValues.xyz == float3(1, 1, 1)))\r\n\t\t{{\r\n\t\t\tfloat3 vWind = float3(1,0,0) * 5.0f; //g_vWindDirection.xyz * g_vWindStrengthFreqMulHighStrength.x;\r\n\t\t\tFoliageDetailBending( vPositionOs, vNormalOs, i.vColorBlendValues.xyz, matObjectToWorld, vWind );\r\n\t\t\tFoliageMainBending( vPositionOs, vWind );\r\n\t\t}}\r\n\r\n        o.vPositionWs = mul( matObjectToWorld, float4( vPositionOs.xyz, 1.0 ) );\r\n\t    o.vPositionPs.xyzw = Position3WsToPs( o.vPositionWs.xyz );\r\n\r\n\t\t// Add your vertex manipulation functions here\r\n\t\treturn FinalizeVertex( o );\r\n\t}}\r\n}}";
+            return $"VS\r\n{{\r\n\t#include \"common/vertex.hlsl\"\r\n\r\n    float g_flEdgeFrequency < Default( 0.17 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flEdgeAmplitude < Default( 0.15 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flBranchFrequency < Default( 0.17 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flBranchAmplitude < Default( 0.15 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flTrunkDeflection < Default( 0.0 ); Range( 0.0, 1.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n    float g_flTrunkDeflectionStart < Default( 0.0 ); Range( 0.0, 1000.0 ); UiGroup( \"Foliage Animation\" ); >;\r\n\r\n    float4 SmoothCurve( float4 x )\r\n    {{  \r\n        return x * x * ( 3.0 - 2.0 * x );  \r\n    }}  \r\n\r\n    float4 TriangleWave( float4 x )\r\n    {{\r\n        return abs( frac( x + 0.5 ) * 2.0 - 1.0 );  \r\n    }}  \r\n\r\n    float4 SmoothTriangleWave( float4 x )\r\n    {{  \r\n        return SmoothCurve( TriangleWave( x ) );  \r\n    }}\r\n\r\n    // High-frequency displacement used in Unity's TerrainEngine; based on \"Vegetation Procedural Animation and Shading in Crysis\"\r\n    // http://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch16.html\r\n    void FoliageDetailBending( inout float3 vPositionOs, float3 vNormalOs, float3 vVertexColor, float3x4 matObjectToWorld, float3 vWind )\r\n    {{\r\n        // 1.975, 0.793, 0.375, 0.193 are good frequencies   \r\n        const float4 vFoliageFreqs = float4( 1.975, 0.793, 0.375, 0.193 );\r\n\r\n        // Attenuation and phase offset is encoded in the vertex color\r\n        const float flEdgeAtten = vVertexColor.r;\r\n        const float flBranchAtten = vVertexColor.b;\r\n        const float flDetailPhase = vVertexColor.g;\r\n\r\n        // Material defined frequency and amplitude\r\n        const float2 vTime = g_flTime.xx * float2( g_flEdgeFrequency, g_flBranchFrequency );\r\n        const float flEdgeAmp = g_flEdgeAmplitude;\r\n        const float flBranchAmp = g_flBranchAmplitude;\r\n\r\n        // Phases\r\n        float flObjPhase = dot( mul( matObjectToWorld, float4( 0, 0, 0, 1 ) ), 1 );\r\n        float flBranchPhase = flDetailPhase + flObjPhase;\r\n        float flVtxPhase = dot( vPositionOs.xyz, flDetailPhase + flBranchPhase );\r\n\r\n        // fmod max phase avoid imprecision at high phases\r\n        const float maxPhase = 50000.0f;\r\n\r\n        // x is used for edges; y is used for branches\r\n        float2 vWavesIn = ( vTime.xy + fmod( float2( flVtxPhase, flBranchPhase ), maxPhase ) ) * length( vWind );\r\n        \r\n        float4 vWaves = ( frac( vWavesIn.xxyy * vFoliageFreqs ) * 2.0 - 1.0 );\r\n        vWaves = SmoothTriangleWave( vWaves );\r\n        float2 vWavesSum = vWaves.xz + vWaves.yw;\r\n\r\n        // Edge (xy) and branch bending (z)\r\n        float flBranchWindBend = 1.0f - abs( dot( normalize( vWind.xyz ), normalize( float3( vPositionOs.xy, 0.0f ) ) ) );\r\n        flBranchWindBend *= flBranchWindBend;\r\n\r\n        vPositionOs.xyz += vWavesSum.x * flEdgeAtten * flEdgeAmp * vNormalOs.xyz;\r\n        vPositionOs.xyz += vWavesSum.y * flBranchAtten * flBranchAmp * float3( 0.0f, 0.0f, 1.0f );\r\n        vPositionOs.xyz += vWavesSum.y * flBranchAtten * flBranchAmp * flBranchWindBend * vWind.xyz;\r\n    }}\r\n\r\n    // Main vegetation bending - displace verticies' xy positions along the wind direction\r\n    // using normalized height to scale the amount of deformation.\r\n    void FoliageMainBending( inout float3 vPositionOs, float3 vWind )\r\n    {{\r\n        if ( g_flTrunkDeflection <= 0.0 ) return;\r\n\r\n        float flLength = length( vPositionOs.xyz );\r\n        // Bend factor - Wind variation is done on the CPU.  \r\n        float flBF = 0.01f * max( vPositionOs.z - g_flTrunkDeflectionStart, 0 ) * g_flTrunkDeflection;  \r\n        // Smooth bending factor and increase its nearby height limit.  \r\n        flBF += 1.0f;\r\n        flBF *= flBF;\r\n        flBF = flBF * flBF - flBF;\r\n\r\n        // Back and forth\r\n        float flBend = pow( max( 0.0f, length( vWind ) - 1.0f ) / 4.0f, 2 ) * 4.0f;\r\n        flBend = flBend + 0.7f * sqrt( flBend ) * sin( g_flTime );\r\n        flBF *= flBend;\r\n\r\n        // Displace position  \r\n        float3 vNewPos = vPositionOs;\r\n        vNewPos.xy += vWind.xy * flBF;\r\n\r\n        // Rescale (reduces stretch)\r\n        vPositionOs.xyz = normalize( vNewPos.xyz ) * flLength;\r\n    }}\r\n\r\n\t//\r\n\t// Main\r\n\t//\r\n\tPixelInput MainVs( VertexInput i )\r\n\t{{\r\n\t\tPixelInput o = ProcessVertex( i );\r\n\r\n        //o.vColor = i.vColor;\r\n\t\to.vBlendValues = i.vColorBlendValues;\r\n\t\to.vBlendValues.a = i.vColorBlendValues.a;\r\n\r\n        float3 vNormalOs;\r\n        float4 vTangentUOs_flTangentVSign;\r\n\r\n        VS_DecodeObjectSpaceNormalAndTangent( i, vNormalOs, vTangentUOs_flTangentVSign );\r\n\t\t\r\n        float3 vPositionOs = i.vPositionOs.xyz;\r\n        float3x4 matObjectToWorld = CalculateInstancingObjectToWorldMatrix( i );\r\n\r\n\t\tif(!all(i.vColorBlendValues.xyz == float3(1, 1, 1)))\r\n\t\t{{\r\n\t\t\tfloat3 vWind = float3(1,1,0.1) * 4.0f; //g_vWindDirection.xyz * g_vWindStrengthFreqMulHighStrength.x;\r\n\t\t\tFoliageDetailBending( vPositionOs, vNormalOs, i.vColorBlendValues.xyz, matObjectToWorld, vWind );\r\n\t\t\tFoliageMainBending( vPositionOs, vWind );\r\n\t\t}}\r\n\r\n        o.vPositionWs = mul( matObjectToWorld, float4( vPositionOs.xyz, 1.0 ) );\r\n\t    o.vPositionPs.xyzw = Position3WsToPs( o.vPositionWs.xyz );\r\n\r\n\t\t// Add your vertex manipulation functions here\r\n\t\treturn FinalizeVertex( o );\r\n\t}}\r\n}}";
         else // Basic vertex shader
             return $"VS\r\n{{\r\n\t#include \"common/vertex.hlsl\"\r\n    #define CUSTOM_TEXTURE_FILTERING\r\n    #define cmp -\r\n\r\n//vs_samplers\r\n//vs_CBuffers\r\n//vs_Inputs\r\n\r\n\tPixelInput MainVs( VertexInput i )\r\n\t{{\r\n\t\tPixelInput o = ProcessVertex( i );\r\n        float4 r0,r1,r2;\r\n        o.vBlendValues = i.vColorBlendValues;\r\n\t\to.vBlendValues.a = i.vColorBlendValues.a;\r\n        o.vPositionOs = i.vPositionOs.xyz;\r\n        VS_DecodeObjectSpaceNormalAndTangent( i, o.vNormalOs, o.vTangentUOs_flTangentVSign );\r\n\r\n//vs_Function\r\n\r\n\t\treturn FinalizeVertex( o );\r\n\t}}\r\n}}";
     }
@@ -795,6 +837,22 @@ PS
             renderStates.AppendLine($"\tRenderState(SrcBlendAlpha, {BlendOptionString(blendState.BlendDesc.SourceAlphaBlend)})");
             renderStates.AppendLine($"\tRenderState(DstBlendAlpha, {BlendOptionString(blendState.BlendDesc.DestinationAlphaBlend)})");
             renderStates.AppendLine($"\tRenderState(BlendOpAlpha, {BlendOpString(blendState.BlendDesc.AlphaBlendOperation)})");
+        }
+
+        if (Material.RenderStates.RasterizerState() != -1)
+        {
+            var rasState = RenderStates.RasterizerStates[Material.RenderStates.RasterizerState()];
+            renderStates.AppendLine($"\tRenderState(FillMode, {rasState.FillMode.ToString().ToUpper()})");
+            renderStates.AppendLine($"\tRenderState(CullMode, {rasState.CullMode.ToString().ToUpper()})");
+            renderStates.AppendLine($"\tRenderState(DepthClipEnable, {rasState.DepthClipEnable.ToString().ToLower()})");
+        }
+
+        if (Material.RenderStates.DepthBiasState() != -1)
+        {
+            var depthState = RenderStates.DepthBiasStates[Material.RenderStates.DepthBiasState()];
+            renderStates.AppendLine($"\tRenderState(DepthBias, {depthState.DepthBias})");
+            renderStates.AppendLine($"\tRenderState(SlopeScaleDepthBias, {depthState.SlopeScaledDepthBias})");
+            renderStates.AppendLine($"\tRenderState(DepthBiasClamp, {depthState.DepthBiasClamp})");
         }
 
         return renderStates.ToString();

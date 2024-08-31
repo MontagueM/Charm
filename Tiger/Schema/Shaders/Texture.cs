@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Arithmic;
 using DirectXTex;
 using DirectXTexNet;
+using Newtonsoft.Json;
 
 namespace Tiger.Schema;
 
@@ -69,7 +70,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
         return final;
     }
 
-    public ScratchImage GetScratchImage()
+    public ScratchImage GetScratchImage(bool overrideConvert = false)
     {
         DXGI_FORMAT format = _tag.GetFormat();
 
@@ -106,12 +107,15 @@ public class Texture : TigerReferenceFile<STextureHeader>
         {
             try
             {
-                if (TexHelper.Instance.IsCompressed(format))
-                    scratchImage = DecompressScratchImage(scratchImage, IsSrgb() ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM);
-                else if (IsSrgb())
-                    scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0);
-                else
-                    scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
+                if (!overrideConvert)
+                {
+                    if (TexHelper.Instance.IsCompressed(format))
+                        scratchImage = DecompressScratchImage(scratchImage, IsSrgb() ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM);
+                    else if (IsSrgb())
+                        scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM_SRGB, TEX_FILTER_FLAGS.SEPARATE_ALPHA, 0);
+                    else
+                        scratchImage = scratchImage.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, 0, 0);
+                }
             }
             catch (Exception e)
             {
@@ -195,7 +199,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
         }
 
         bool bSrgb = TexHelper.Instance.IsSRGB(image.Format);
-        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM, image.Width * input.GetImageCount(), image.Height, 1, 0, 0);
+        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(image.Format, image.Width * input.GetImageCount(), image.Height, 1, 0, 0);
 
         for (int i = 0; i < input.GetImageCount(); i++)
         {
@@ -256,6 +260,20 @@ public class Texture : TigerReferenceFile<STextureHeader>
         ScratchImage simg = GetScratchImage();
         if (ConfigSubsystem.Get().GetS2TexPow2Enabled())
             simg = ResizeToNearestPowerOf2(simg);
+
+        if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+        {
+            if (_tag.LargeTextureBuffer == null) // ??
+            {
+                try
+                {
+                    File.WriteAllText($"{savePath}.{ConfigSubsystem.Get().GetOutputTextureFormat().ToString().ToLower()}.meta", JsonConvert.SerializeObject(new { nomip = 1 }));
+                }
+                catch (IOException)
+                {
+                }
+            }
+        }
 
         SavetoFile(savePath, simg, GetDimension());// || (IsVolume() && !ConfigSubsystem.Get().GetS2ShaderExportEnabled()));
     }

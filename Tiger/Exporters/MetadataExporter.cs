@@ -259,7 +259,8 @@ class MetadataScene
             Rotation = new[] { light.Transform.Quaternion.X, light.Transform.Quaternion.Y, light.Transform.Quaternion.Z, light.Transform.Quaternion.W },
             Size = new[] { light.Size.X, light.Size.Y },
             Color = new[] { light.Color.X, light.Color.Y, light.Color.Z },
-            Range = light.Range
+            Range = light.Range,
+            Attenuation = light.Attenuation,
         });
     }
 
@@ -290,11 +291,11 @@ class MetadataScene
 
     public void AddAtmosphere(SMapAtmosphere atmosphere)
     {
-        _config["Atmosphere"].TryAdd("AtmosFarLookup", $"{atmosphere.AtmosFarLookup?.Hash}");
-        _config["Atmosphere"].TryAdd("AtmosFarLookupDS", $"{atmosphere.AtmosFarLookupDS?.Hash}");
-        _config["Atmosphere"].TryAdd("AtmosNearLookup", $"{atmosphere.AtmosNearLookup?.Hash}");
-        _config["Atmosphere"].TryAdd("AtmosNearLookupDS", $"{atmosphere.AtmosNearLookupDS?.Hash}");
-        _config["Atmosphere"].TryAdd("AtmosDensityLookup", $"{atmosphere.AtmosDensityLookup?.Hash}");
+        _config["Atmosphere"].TryAdd("Texture0", $"{atmosphere.Texture0?.Hash}");
+        _config["Atmosphere"].TryAdd("TextureUnk0", $"{atmosphere.TextureUnk0?.Hash}");
+        _config["Atmosphere"].TryAdd("Texture1", $"{atmosphere.Texture1?.Hash}");
+        _config["Atmosphere"].TryAdd("TextureUnk1", $"{atmosphere.TextureUnk1?.Hash}");
+        _config["Atmosphere"].TryAdd("Texture2", $"{atmosphere.Texture2?.Hash}");
     }
 
     public void WriteToFile(string path)
@@ -383,6 +384,7 @@ class MetadataScene
         public float[] Size;
         public float[] Color;
         public float Range;
+        public float Attenuation;
     }
     private struct JsonDecal
     {

@@ -1,6 +1,24 @@
 ﻿using Tiger.Schema;
+using Tiger.Schema.Shaders;
 
 namespace Tiger;
+
+public static class Externs
+{
+    public static List<TfxExtern> GetExterns(IMaterial material)
+    {
+        var bytecode = material.GetPSBytecode();
+        var list = new List<TfxExtern>();
+
+        foreach (var op in bytecode.Opcodes.Where(x => x.op.ToString().Contains("Extern")))
+        {
+            if (!list.Contains(op.data.extern_))
+                list.Add(op.data.extern_);
+        }
+
+        return list;
+    }
+}
 
 public enum TfxExtern : byte
 {

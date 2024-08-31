@@ -5,7 +5,7 @@ public class Tag<T> : TigerFile where T : struct
 {
     protected T _tag;
     // separated as it should be a red flag if we're using this
-    [Obsolete("Use TagData sparingly as it breaks the Law of Demeter; instead isolate code in owning structures.")]
+    //[Obsolete("Use TagData sparingly as it breaks the Law of Demeter; instead isolate code in owning structures.")]
     public T TagData => _tag;
     private bool _isLoaded = false;
 

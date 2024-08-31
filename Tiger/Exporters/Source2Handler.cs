@@ -147,8 +147,8 @@ public class Source2Handler
         if ((material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)) && material.RenderStates.BlendState() == -1)
             vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
-        if (material.Unk0C != 0 && (material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)))
-            vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
+        //if (material.Unk0C != 0 && (material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)) && material.RenderStates.RasterizerState() == -1)
+        //    vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
 
         //Textures
         foreach (var e in material.EnumeratePSTextures())
@@ -304,12 +304,12 @@ public class Source2Handler
         return cbuffers;
     }
 
-    public static void SaveVTEX(Texture tex, string savePath)
+    public static void SaveVTEX(Texture tex, string savePath, string vtexPath = "")
     {
         if (!Directory.Exists(savePath))
             Directory.CreateDirectory(savePath);
 
-        var file = VTEX.Create(tex, tex.GetDimension());
+        var file = VTEX.Create(tex, tex.GetDimension(), vtexPath);
         var json = JsonConvert.SerializeObject(file, Formatting.Indented);
         try
         {
@@ -368,15 +368,18 @@ public class VTEX
 
     public string OutputTypeString { get; set; }
 
-    public static VTEX Create(Texture texture, TextureDimension dimension)
+    public static VTEX Create(Texture texture, TextureDimension dimension, string vtexPath = "")
     {
+        if (vtexPath != "" && !vtexPath.EndsWith('/'))
+            vtexPath = $"{vtexPath}/";
         return new VTEX
         {
-            Images = new List<string> { $"textures/{texture.Hash}.png" },
-            OutputFormat = dimension == TextureDimension.CUBE ? ImageFormatType.BC6H.ToString() : ImageFormatType.RGBA8888.ToString(),
+            Images = new List<string> { $"textures/{vtexPath}{texture.Hash}.png" },
+            OutputFormat = dimension == TextureDimension.CUBE
+            ? ImageFormatType.BC6H.ToString() : ImageFormatType.RGBA8888.ToString(),
             OutputColorSpace = (texture.IsSrgb() ? GammaType.SRGB : GammaType.Linear).ToString(),
             InputColorSpace = (texture.IsSrgb() ? GammaType.SRGB : GammaType.Linear).ToString(),
-            OutputTypeString = EnumExtensions.GetEnumDescription(dimension)
+            OutputTypeString = dimension == TextureDimension.CUBE ? "CUBE" : "2D"
         };
     }
 }
@@ -392,6 +395,8 @@ public enum ImageFormatType
     DXT5,
     DXT1,
     RGBA8888,
+    RGBA16161616,
+    RGBA16161616F,
     BC7,
     BC6H,
 }

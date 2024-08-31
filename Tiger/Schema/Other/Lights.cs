@@ -19,18 +19,9 @@ public class Lights : Tag<D2Class_656C8080>
             if (bufferData is null)
                 continue;
 
-            // This sucks and is stupid
-            //Vector4 color = data.BufferData.TagData.Buffer1.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).Count() != 0 ?
-            //    data.BufferData.TagData.Buffer1.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).FirstOrDefault().Vec :
-            //    data.BufferData.TagData.Buffer2.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0)).FirstOrDefault().Vec;
-
-            List<Vec4> possibleColors = bufferData.TagData.Buffer1.ToList();
-            possibleColors.AddRange(bufferData.TagData.Buffer2.ToList());
-
-            // This also isn't great but it's slightly better...?
-            Vector4 color = possibleColors.Count == 0 ? Vector4.Zero : possibleColors.MaxBy(v => v.Vec.Magnitude).Vec;
-
+            Vector4 color = GetColor(bufferData);
             LightType lightType = LightType.Point;
+
             if (MathF.Abs(data.LightToWorld.X_Axis.X) == 0.0)
                 lightType = LightType.Spot;
             else if (MathF.Abs(data.LightToWorld.X_Axis.X) != MathF.Abs(data.LightToWorld.Y_Axis.Y) || MathF.Abs(data.LightToWorld.Y_Axis.Y) != MathF.Abs(data.LightToWorld.Z_Axis.Z))
@@ -45,7 +36,8 @@ public class Lights : Tag<D2Class_656C8080>
                 LightType = lightType,
                 Color = color,
                 Size = new(size.X, size.Y),
-                Range = size.Z, //data.Distance.W, //bounds.Corner2.X - bounds.Corner1.X, // Not right
+                Range = size.Z,
+                Attenuation = data.BufferData.TagData.Buffer2[1].Vec.W, // Completely unsure, just testing
                 Transform = new()
                 {
                     Position = transforms.Translation.ToVec3(),
@@ -55,16 +47,33 @@ public class Lights : Tag<D2Class_656C8080>
 
             scene.AddMapLight(lightData);
 
-            bufferData.Dump($"{savePath}/Shaders/Source2/Lights");
+            if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+                bufferData.Dump($"{savePath}/Shaders/Source2/Lights");
+        }
+    }
 
-            //TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(bufferData.TagData.Bytecode));
-            //var bytecode_hlsl = bytecode.Evaluate(bufferData.TagData.Buffer1, true);
+    public Vector4 GetColor(Tag<D2Class_A16D8080> data)
+    {
+        //Console.WriteLine($"{data.TagData.Buffer2[0].Vec} : {data.TagData.Buffer2[1].Vec} : {data.TagData.Buffer2.Count(x => x.Vec.Magnitude != 0)}");
+        if (data.TagData.Bytecode.Count != 0)
+        {
+            return data.TagData.Buffer1.Find(x => x.Vec != Vector4.Zero).Vec;
+        }
+        else if (data.TagData.Buffer2.Count(x => x.Vec.Magnitude != 0) == 2)
+        {
+            var sorted = data.TagData.Buffer2.OrderByDescending(v => v.Vec.Magnitude).ToList();
+            return sorted[0].Vec; //* sorted[1].Vec;
+        }
+        else
+        {
+            List<Vec4> possibleColors = data.TagData.Buffer1.ToList();
+            possibleColors.AddRange(data.TagData.Buffer2.ToList());
+            return possibleColors.Count == 0 ? Vector4.Zero : possibleColors.MaxBy(v => v.Vec.Magnitude).Vec;
         }
     }
 
     public Vector3 GetSize(Matrix4x4 matrix, LightType lightType, string a)
     {
-        //StringBuilder sb = new();
         // 2x2x2 Cube
         Vector3[] cubePoints = new Vector3[] {
             new Vector3(-1f, -1f, -1f),
@@ -94,9 +103,7 @@ public class Lights : Tag<D2Class_656C8080>
             var b = (matrix.W_Axis + r0);
 
             cubePoints[i] = (b / new Vector4(b.W)).ToVec3();
-            //sb.AppendLine($"v {cubePoints[i].X} {cubePoints[i].Y} {cubePoints[i].Z}");
         }
-        //File.WriteAllText($"C:\\Users\\Michael\\Desktop\\test\\{a}.obj", sb.ToString());
 
         switch (lightType)
         {
@@ -122,6 +129,7 @@ public class Lights : Tag<D2Class_656C8080>
         public Vector2 Size;
         public Vector4 Color;
         public float Range;
+        public float Attenuation;
     }
 
     public enum LightType

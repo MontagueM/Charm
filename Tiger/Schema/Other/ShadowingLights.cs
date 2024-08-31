@@ -14,15 +14,10 @@ public class ShadowingLights : Tag<SMapShadowingLight>
         if (data is null)
             return;
 
-        // This sucks and is stupid
-        //var color = data.TagData.Buffer1.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0 && x.Vec.W != 0)).Count() != 0 ?
-        //    data.TagData.Buffer1.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0 && x.Vec.W != 0)).FirstOrDefault().Vec :
-        //    data.TagData.Buffer2.Where(x => (x.Vec.X != 0 && x.Vec.Y != 0 && x.Vec.Z != 0 && x.Vec.W != 0)).FirstOrDefault().Vec;
-
         List<Vec4> possibleColors = data.TagData.Buffer1.ToList();
         possibleColors.AddRange(data.TagData.Buffer2.ToList());
 
-        Vector4 color = possibleColors.Count == 0 ? Vector4.Zero : possibleColors.MaxBy(v => v.Vec.Magnitude).Vec;
+        Vector4 color = GetColor(data);
         Vector2 size = GetSize();
 
         Lights.LightData lightData = new()
@@ -31,7 +26,8 @@ public class ShadowingLights : Tag<SMapShadowingLight>
             LightType = Lights.LightType.Shadowing,
             Color = color,
             Size = new Vector2(_tag.HalfFOV * 2.0f, 1f),
-            Range = size.Y, //_tag.Distance.W,
+            Range = size.Y,
+            Attenuation = _tag.BufferData.TagData.Buffer2[1].Vec.W,
             Transform = new()
             {
                 Position = mapEntry.Translation.ToVec3(),
@@ -39,21 +35,35 @@ public class ShadowingLights : Tag<SMapShadowingLight>
             }
         };
 
-        //Console.WriteLine($"{Hash}");
-        //Console.WriteLine($"FOV: {_tag.HalfFOV * 2.0f} (Calculated {size.X})");
-        //Console.WriteLine($"Distance: {_tag.Distance.W} (Calculated {size.Y})\n");
-
         scene.AddMapLight(lightData);
-        data.Dump($"{savePath}/Shaders/Source2/Lights");
 
-        //TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(data.TagData.Bytecode));
-        //var bytecode_hlsl = bytecode.Evaluate(data.TagData.Buffer2, true);
+        if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+            data.Dump($"{savePath}/Shaders/Source2/Lights");
+    }
+
+    public Vector4 GetColor(Tag<D2Class_A16D8080> data)
+    {
+        if (data.TagData.Bytecode.Count != 0)
+        {
+            return data.TagData.Buffer1.Find(x => x.Vec != Vector4.Zero).Vec;
+        }
+        else if (data.TagData.Buffer2.Count(x => x.Vec.Magnitude != 0) == 2)
+        {
+            var sorted = data.TagData.Buffer2.OrderByDescending(v => v.Vec.Magnitude).ToList();
+            return sorted[0].Vec;// * sorted[1].Vec;
+        }
+        else
+        {
+            List<Vec4> possibleColors = data.TagData.Buffer1.ToList();
+            possibleColors.AddRange(data.TagData.Buffer2.ToList());
+            return possibleColors.Count == 0 ? Vector4.Zero : possibleColors.MaxBy(v => v.Vec.Magnitude).Vec;
+        }
     }
 
     public Vector2 GetSize()
     {
         Matrix4x4 matrix = _tag.LightToWorld;
-        //StringBuilder sb = new();
+
         // 2x2x2 Cube
         Vector3[] cubePoints = new Vector3[] {
             new Vector3(-1f, -1f, -1f),
@@ -83,9 +93,7 @@ public class ShadowingLights : Tag<SMapShadowingLight>
             var b = (matrix.W_Axis + r0);
 
             cubePoints[i] = (b / new Vector4(b.W)).ToVec3();
-            //sb.AppendLine($"v {cubePoints[i].X} {cubePoints[i].Y} {cubePoints[i].Z}");
         }
-        //File.WriteAllText($"C:\\Users\\Michael\\Desktop\\test\\{Hash}.obj", sb.ToString());
 
         float baseWH = cubePoints[1].Y * 2f; // Width of the base
         float coneHeight = cubePoints[1].X - cubePoints[0].X;

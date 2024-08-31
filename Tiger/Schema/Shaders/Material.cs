@@ -249,6 +249,21 @@ namespace Tiger.Schema.Shaders
 
             return data;
         }
+
+        public TfxBytecodeInterpreter GetPSBytecode()
+        {
+            return new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(PS_TFX_Bytecode));
+        }
+
+        public TfxBytecodeInterpreter GetVSBytecode()
+        {
+            return new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(VS_TFX_Bytecode));
+        }
+
+        public List<TfxExtern> GetExterns()
+        {
+            return Externs.GetExterns(this);
+        }
     }
 }
 

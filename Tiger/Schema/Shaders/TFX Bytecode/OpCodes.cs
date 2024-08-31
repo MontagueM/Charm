@@ -2,7 +2,7 @@
 using Tiger;
 using Tiger.Schema;
 
-public class TfxBytecodeOp
+public static class TfxBytecodeOp
 {
     public static List<TfxData> ParseAll(DynamicArray<D2Class_09008080> bytecode)
     {
@@ -30,6 +30,7 @@ public class TfxBytecodeOp
 
     public static TfxData ReadTfxBytecodeOp(BinaryReader reader)
     {
+        var _strat = Strategy.CurrentStrategy;
         TfxData tfxData = new()
         {
             op = (TfxBytecode)reader.ReadByte(),
@@ -110,95 +111,149 @@ public class TfxBytecodeOp
                     PushExternInputU32Data.element = reader.ReadByte();
                     tfxData.data = PushExternInputU32Data;
                     break;
-                case TfxBytecode.PushExternInputU64Unknown:
-                    PushExternInputU64UnknownData Unk41Data = new();
+                case TfxBytecode.PushExternInputUav:
+                    PushExternInputUavData Unk41Data = new();
                     Unk41Data.extern_ = (TfxExtern)reader.ReadByte();
                     Unk41Data.element = reader.ReadByte();
                     tfxData.data = Unk41Data;
                     break;
-                case TfxBytecode.PopOutput:
-                    PopOutputData PopOutputData = new();
-                    PopOutputData.slot = reader.ReadByte();
-                    tfxData.data = PopOutputData;
-                    break;
-                case TfxBytecode.PushFromOutput:
+
+                // From here forward, Pre-BL is op-1 so its gonna get ugly
+
+                case TfxBytecode.PushFromOutput - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.PushFromOutput when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushFromOutput;
+
                     PushFromOutputData Unk43Data = new();
                     Unk43Data.element = reader.ReadByte();
                     tfxData.data = Unk43Data;
                     break;
-                case TfxBytecode.PopOutputMat4:
+                case TfxBytecode.PopOutput - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.PopOutput when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PopOutput;
+
+                    PopOutputData PopOutputData = new();
+                    PopOutputData.slot = reader.ReadByte();
+                    tfxData.data = PopOutputData;
+                    break;
+                case TfxBytecode.PopOutputMat4 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.PopOutputMat4 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PopOutputMat4;
+
                     PopOutputMat4Data Unk45Data = new();
                     Unk45Data.slot = reader.ReadByte();
                     tfxData.data = Unk45Data;
                     break;
-                case TfxBytecode.PushTemp:
+                case TfxBytecode.PushTemp - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.PushTemp when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushTemp;
+
                     PushTempData PushTempData = new();
                     PushTempData.slot = reader.ReadByte();
                     tfxData.data = PushTempData;
                     break;
-                case TfxBytecode.PopTemp:
+                case TfxBytecode.PopTemp - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.PopTemp when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PopTemp;
+
                     PopTempData PopTempData = new();
                     PopTempData.slot = reader.ReadByte();
                     tfxData.data = PopTempData;
                     break;
-                case TfxBytecode.SetShaderTexture:
+                case TfxBytecode.SetShaderTexture - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.SetShaderTexture when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.SetShaderTexture;
+
                     SetShaderTextureData Unk48Data = new();
                     Unk48Data.value = reader.ReadByte();
                     tfxData.data = Unk48Data;
                     break;
-                case TfxBytecode.Unk49:
+                case TfxBytecode.Unk49 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.Unk49 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk49;
+
                     Unk49Data Unk49 = new();
                     Unk49.unk1 = reader.ReadByte();
                     tfxData.data = Unk49;
                     break;
-                case TfxBytecode.SetShaderSampler:
+                case TfxBytecode.SetShaderSampler - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.SetShaderSampler when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.SetShaderSampler;
+
                     SetShaderSamplerData Unk4aData = new();
                     Unk4aData.value = reader.ReadByte();
                     tfxData.data = Unk4aData;
                     break;
-                case TfxBytecode.SetShaderUav:
+                case TfxBytecode.SetShaderUav - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.SetShaderUav when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.SetShaderUav;
+
                     SetShaderUavData Unk4bData = new();
                     Unk4bData.value = reader.ReadByte();
                     tfxData.data = Unk4bData;
                     break;
-                case TfxBytecode.Unk4c:
+                case TfxBytecode.Unk4c - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.Unk4c when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk4c;
+
                     Unk4cData Unk4cData = new();
                     Unk4cData.unk1 = reader.ReadByte();
                     tfxData.data = Unk4cData;
                     break;
-                case TfxBytecode.PushSampler:
+                case TfxBytecode.PushSampler - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.PushSampler when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushSampler;
+
                     PushSamplerData PushSampler = new();
                     PushSampler.unk1 = reader.ReadByte();
                     tfxData.data = PushSampler;
                     break;
-                case TfxBytecode.PushObjectChannelVector:
+                case TfxBytecode.PushObjectChannelVector - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.PushObjectChannelVector when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushObjectChannelVector;
+
                     PushObjectChannelVectorData PushObjectChannelVector = new();
                     PushObjectChannelVector.unk1 = reader.ReadInt32();
                     tfxData.data = PushObjectChannelVector;
                     break;
-                case TfxBytecode.PushGlobalChannelVector:
+                case TfxBytecode.PushGlobalChannelVector - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.PushGlobalChannelVector when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushGlobalChannelVector;
+
                     PushGlobalChannelVectorData PushGlobalChannelVector = new();
                     PushGlobalChannelVector.unk1 = reader.ReadByte();
                     tfxData.data = PushGlobalChannelVector;
                     break;
-                case TfxBytecode.Unk50:
+                case TfxBytecode.Unk50 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.Unk50 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk50;
+
                     Unk50Data Unk50Data = new();
                     Unk50Data.unk1 = reader.ReadByte();
                     tfxData.data = Unk50Data;
                     break;
-                case TfxBytecode.Unk52:
+                case TfxBytecode.Unk52 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.Unk52 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk52;
+
                     Unk52Data Unk52Data = new();
                     Unk52Data.unk1 = reader.ReadByte();
                     Unk52Data.unk2 = reader.ReadByte();
                     tfxData.data = Unk52Data;
                     break;
-                case TfxBytecode.Unk53:
+                case TfxBytecode.Unk53 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.Unk53 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk53;
+
                     Unk53Data Unk53Data = new();
                     Unk53Data.unk1 = reader.ReadByte();
                     Unk53Data.unk2 = reader.ReadByte();
                     tfxData.data = Unk53Data;
                     break;
-                case TfxBytecode.Unk54:
+                case TfxBytecode.Unk54 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                case TfxBytecode.Unk54 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk54;
+
                     Unk54Data Unk54Data = new();
                     Unk54Data.unk1 = reader.ReadByte();
                     Unk54Data.unk2 = reader.ReadByte();
@@ -228,10 +283,10 @@ public class TfxBytecodeOp
                 output = $"constant_start {((LerpConstantData)tfxData.data).constant_start}: Constant 1: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: Constant 2: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
                 break;
             case Spline4ConstData:
-                output = $"unk1 {((Spline4ConstData)tfxData.data).constant_index}";
+                output = $"index {((Spline4ConstData)tfxData.data).constant_index}";
                 break;
             case Spline8ConstData:
-                output = $"unk1 {((Spline8ConstData)tfxData.data).constant_index}";
+                output = $"index {((Spline8ConstData)tfxData.data).constant_index}";
                 break;
             case Unk39Data:
                 output = $"unk1 {((Unk39Data)tfxData.data).unk1}";
@@ -242,24 +297,32 @@ public class TfxBytecodeOp
             case UnkLoadConstantData:
                 output = $"constant_index {((UnkLoadConstantData)tfxData.data).constant_index}: Constant value: {constants[((UnkLoadConstantData)tfxData.data).constant_index].Vec}";
                 break;
+
             case PushExternInputFloatData:
-                output = $"extern {((PushExternInputFloatData)tfxData.data).extern_}, element {((PushExternInputFloatData)tfxData.data).element}";
+                var pFloat = ((PushExternInputFloatData)tfxData.data).element;
+                output = $"extern {((PushExternInputFloatData)tfxData.data).extern_}, element {pFloat} (0x{(pFloat * 4):X})";
                 break;
             case PushExternInputVec4Data:
-                output = $"extern {((PushExternInputVec4Data)tfxData.data).extern_}, element {((PushExternInputVec4Data)tfxData.data).element}";
+                var pVec = ((PushExternInputVec4Data)tfxData.data).element;
+                output = $"extern {((PushExternInputVec4Data)tfxData.data).extern_}, element {pVec} (0x{(pVec * 16):X})";
                 break;
             case PushExternInputMat4Data:
-                output = $"extern {((PushExternInputMat4Data)tfxData.data).extern_}, element {((PushExternInputMat4Data)tfxData.data).element}";
+                var pMat = ((PushExternInputMat4Data)tfxData.data).element;
+                output = $"extern {((PushExternInputMat4Data)tfxData.data).extern_}, element {pMat} (0x{(pMat * 16):X})";
                 break;
             case PushExternInputTextureViewData:
-                output = $"extern {((PushExternInputTextureViewData)tfxData.data).extern_}, element {((PushExternInputTextureViewData)tfxData.data).element}";
+                var pTex = ((PushExternInputTextureViewData)tfxData.data).element;
+                output = $"extern {((PushExternInputTextureViewData)tfxData.data).extern_}, element {pTex} (0x{(pTex * 8):X})";
                 break;
             case PushExternInputU32Data:
-                output = $"extern {((PushExternInputU32Data)tfxData.data).extern_}, element {((PushExternInputU32Data)tfxData.data).element}";
+                var pU32 = ((PushExternInputU32Data)tfxData.data).element;
+                output = $"extern {((PushExternInputU32Data)tfxData.data).extern_}, element {pU32} (0x{(pU32 * 4):X})";
                 break;
-            case PushExternInputU64UnknownData:
-                output = $"extern {((PushExternInputU64UnknownData)tfxData.data).extern_}, element {((PushExternInputU64UnknownData)tfxData.data).element}";
+            case PushExternInputUavData:
+                var pUav = ((PushExternInputUavData)tfxData.data).element;
+                output = $"extern {((PushExternInputUavData)tfxData.data).extern_}, element {pUav} (0x{(pUav * 8):X})";
                 break;
+
             case PopOutputData:
                 output = $"slot {((PopOutputData)tfxData.data).slot}";
                 break;
@@ -270,22 +333,24 @@ public class TfxBytecodeOp
                 output = $"element {((StoreToBufferData)tfxData.data).element}";
                 break;
             case PushTempData:
-                output = $"unk1 {((PushTempData)tfxData.data).slot}";
+                output = $"index {((PushTempData)tfxData.data).slot}";
                 break;
             case PopTempData:
-                output = $"unk1 {((PopTempData)tfxData.data).slot}";
+                output = $"index {((PopTempData)tfxData.data).slot}";
                 break;
             case Unk47Data:
                 output = $"unk1 {((Unk47Data)tfxData.data).unk1}";
                 break;
             case SetShaderTextureData:
-                output = $"value {((SetShaderTextureData)tfxData.data).value}";
+                var texSlot = ((SetShaderTextureData)tfxData.data).value;
+                output = $"Texture Slot {texSlot & 0x1F}";
                 break;
             case Unk49Data:
                 output = $"unk1 {((Unk49Data)tfxData.data).unk1}";
                 break;
             case SetShaderSamplerData:
-                output = $"value {((SetShaderSamplerData)tfxData.data).value}";
+                var sampSlot = ((SetShaderSamplerData)tfxData.data).value;
+                output = $"Sampler Slot {sampSlot & 0x1F}";
                 break;
             case SetShaderUavData:
                 output = $"value {((SetShaderUavData)tfxData.data).value}";
@@ -294,14 +359,14 @@ public class TfxBytecodeOp
                 output = $"unk1 {((Unk4cData)tfxData.data).unk1}";
                 break;
             case PushSamplerData:
-                output = $"unk1 {((PushSamplerData)tfxData.data).unk1}";
+                output = $"index {((PushSamplerData)tfxData.data).unk1}";
                 break;
             case PushObjectChannelVectorData:
-                output = $"unk1 {((PushObjectChannelVectorData)tfxData.data).unk1}";
+                output = $"index {((PushObjectChannelVectorData)tfxData.data).unk1}";
                 break;
             case PushGlobalChannelVectorData:
                 var index = ((PushGlobalChannelVectorData)tfxData.data).unk1;
-                output = $"value {index} {GlobalChannelDefaults.GetGlobalChannelDefaults()[index]}";
+                output = $"index {index} {GlobalChannelDefaults.GetGlobalChannelDefaults()[index]}";
                 break;
             case Unk50Data:
                 output = $"unk1 {((Unk50Data)tfxData.data).unk1}";
@@ -390,8 +455,9 @@ public enum TfxBytecode : byte
     PushExternInputMat4 = 0x3e, //{ extern_: TfxExtern, unk2: u8 }
     PushExternInputTextureView = 0x3f, //{ extern_: TfxExtern, unk2: u8 }
     PushExternInputU32 = 0x40, //{ extern_: TfxExtern, unk2: u8 }
-    PushExternInputU64Unknown = 0x41, //{ extern_: TfxExtern, unk2: u8 }
-    Unk42 = 0x42,
+    PushExternInputUav = 0x41, //{ extern_: TfxExtern, unk2: u8 }
+
+    Unk42 = 0x42, // Not in Pre-BL, everything further down is shifted - 1
     PushFromOutput = 0x43, //{ unk1: u8 }
     PopOutput = 0x44, //{ element: u8 }
     PopOutputMat4 = 0x45, //{ slot: u8 }
@@ -492,7 +558,7 @@ public struct PushExternInputU32Data
     public byte element;
 }
 
-public struct PushExternInputU64UnknownData
+public struct PushExternInputUavData
 {
     public TfxExtern extern_;
     public byte element;

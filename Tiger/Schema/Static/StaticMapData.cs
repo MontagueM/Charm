@@ -664,7 +664,6 @@ public struct D2Class_706C8080
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Matrix4x4 LightToWorld;
-    public Vector4 Distance; // Unsure but only W is used?
     // Techniques between
 
     [SchemaField(0x84, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -848,14 +847,14 @@ public struct SMapWaterDecal
 public struct SMapAtmosphere
 {
     [SchemaField(0x90), Tag64]
-    public Texture AtmosFarLookup; // atmos_ss_far_lookup
+    public Texture Texture0; // 
     [Tag64]
-    public Texture AtmosNearLookup; // atmos_ss_near_lookup 
+    public Texture TextureUnk0; //  
     [Tag64]
-    public Texture AtmosFarLookupDS; // atmos_ss_far_lookup_downsampled
+    public Texture Texture1; // 
     [Tag64]
-    public Texture AtmosNearLookupDS; // atmos_ss_near_lookup_downsampled
-    public Texture AtmosDensityLookup; // surf_atmosphere_depth_angle_density_lookup
+    public Texture TextureUnk1; // 
+    public Texture Texture2; // 
 }
 
 // /// <summary>
