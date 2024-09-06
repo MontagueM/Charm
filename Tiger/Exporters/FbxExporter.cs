@@ -43,6 +43,9 @@ public class FbxExporter : AbstractExporter
 
             foreach (ExporterMesh mesh in scene.StaticMeshes)
             {
+                if (mesh.Parts.Count == 0)
+                    continue;
+
                 if (exportIndiv)
                 {
                     if (scene.Type == ExportType.Map)
@@ -63,6 +66,9 @@ public class FbxExporter : AbstractExporter
 
             foreach (ExporterEntity entity in scene.Entities)
             {
+                if (entity.Mesh.Parts.Count == 0)
+                    continue;
+
                 if (exportIndiv)
                 {
                     if (scene.Type == ExportType.Map)
@@ -165,7 +171,8 @@ public class FbxExporter : AbstractExporter
     {
         foreach (ExporterPart part in mesh.Parts)
         {
-            AddPart(fbxScene, part);
+            if (part.Material != null)
+                AddPart(fbxScene, part);
         }
     }
 

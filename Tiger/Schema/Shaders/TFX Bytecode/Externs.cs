@@ -137,22 +137,24 @@ public static class GlobalChannelDefaults
 
         // Sun related
         channels[82] = Vector4.Zero;
+        channels[83] = Vector4.Zero;
         channels[98] = Vector4.Zero;
         channels[100] = Vector4.Zero;
 
-        channels[27] = new Vector4(1.0f, 0.0f, 0.0f, 0.0f); // specular tint intensity
+        channels[27] = Vector4.One; // specular tint intensity
         channels[28] = Vector4.One; // specular tint
 
         channels[31] = Vector4.One; // diffuse tint 1
-        channels[32] = new Vector4(1.0f, 0.0f, 0.0f, 0.0f); // diffuse tint 1 intensity
+        channels[32] = Vector4.One; // diffuse tint 1 intensity
         channels[33] = Vector4.One; // diffuse tint 2
-        channels[34] = new Vector4(1.0f, 0.0f, 0.0f, 0.0f); // diffuse tint 2 intensity
+        channels[34] = Vector4.One; // diffuse tint 2 intensity
 
         channels[37] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog start
         channels[41] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog falloff
 
         // Misc lights
         channels[93] = new Vector4(1.0f, 0.0f, 0.0f, 0.0f);
+        channels[113] = Vector4.Zero;
         channels[127] = Vector4.Zero;
         channels[131] = new Vector4(0.5f, 0.0f, 0.3f, 0.0f); // Seems related to line lights
 
