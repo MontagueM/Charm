@@ -623,9 +623,9 @@ public struct SMapShadowingLight
     public float HalfFOV; // * 2, radians->degrees
 
     // Not really a point in even loading these
-    //[SchemaField(0x90, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    //[SchemaField(0xD0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    //public IMaterial Shading;
+    [SchemaField(0x90, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public FileHash Shading; // For some reason using IMaterial breaks tag reading....?
     //public IMaterial Shading_Shadowing;
     //public IMaterial Volumetric;
     //public IMaterial Volumetric_Shadowing;
@@ -665,6 +665,10 @@ public struct D2Class_706C8080
     [SchemaField(0x60, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Matrix4x4 LightToWorld;
     // Techniques between
+
+    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0xC4, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public FileHash Shading; // For some reason using IMaterial breaks tag reading....?
 
     [SchemaField(0x84, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]

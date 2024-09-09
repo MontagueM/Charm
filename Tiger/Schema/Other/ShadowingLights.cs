@@ -1,4 +1,5 @@
 ﻿using Tiger.Exporters;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
@@ -19,6 +20,16 @@ public class ShadowingLights : Tag<SMapShadowingLight>
 
         Vector4 color = GetColor(data);
         Vector2 size = GetSize();
+        Texture cookie = null;
+
+        IMaterial shading = FileResourcer.Get().GetFileInterface<IMaterial>(_tag.Shading);
+        if (shading.EnumeratePSTextures().Any())
+        {
+            cookie = shading.EnumeratePSTextures().First().Texture;
+            cookie.SavetoFile($"{savePath}/Textures/{cookie.Hash}");
+            if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+                Source2Handler.SaveVTEX(cookie, $"{savePath}/Textures");
+        }
 
         Lights.LightData lightData = new()
         {
@@ -32,7 +43,8 @@ public class ShadowingLights : Tag<SMapShadowingLight>
             {
                 Position = mapEntry.Translation.ToVec3(),
                 Quaternion = mapEntry.Rotation
-            }
+            },
+            Cookie = cookie != null ? cookie.Hash : null
         };
 
         scene.AddMapLight(lightData);

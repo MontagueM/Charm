@@ -50,10 +50,14 @@ public class TigerReader : BinaryReader
 
     public void DumpToFile()
     {
+        DateTime curTime = DateTime.Now;
+        string dump = $"dump_{curTime.Date.ToShortDateString().Replace('/', '-')}_{curTime.Hour}.{curTime.Minute}.{curTime.Second}";
+        Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}/dumps/");
+
         long pos = Position;
         Seek(0, SeekOrigin.Begin);
         byte[] data = ReadBytes((int)BaseStream.Length);
-        File.WriteAllBytes("dump.bin", data);
+        File.WriteAllBytes($"{Directory.GetCurrentDirectory()}/dumps/{dump}.bin", data);
         Seek(pos, SeekOrigin.Begin);
     }
 

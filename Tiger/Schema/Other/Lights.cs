@@ -1,4 +1,5 @@
 ﻿using Tiger.Exporters;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
@@ -27,6 +28,19 @@ public class Lights : Tag<D2Class_656C8080>
             else if (MathF.Abs(data.LightToWorld.X_Axis.X) != MathF.Abs(data.LightToWorld.Y_Axis.Y) || MathF.Abs(data.LightToWorld.Y_Axis.Y) != MathF.Abs(data.LightToWorld.Z_Axis.Z))
                 lightType = LightType.Line;
 
+            Texture cookie = null;
+            if (lightType == LightType.Spot)
+            {
+                IMaterial shading = FileResourcer.Get().GetFileInterface<IMaterial>(data.Shading);
+                if (shading.EnumeratePSTextures().Any())
+                {
+                    cookie = shading.EnumeratePSTextures().First().Texture;
+                    cookie.SavetoFile($"{savePath}/Textures/{cookie.Hash}");
+                    if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+                        Source2Handler.SaveVTEX(cookie, $"{savePath}/Textures");
+                }
+            }
+
             Vector3 size = GetSize(data.LightToWorld, lightType, $"{lightType}_{data.BufferData.Hash}_{i}");
             var bounds = _tag.Bounds.TagData.InstanceBounds.ElementAt(_tag.Bounds.GetReader(), i);
             var transforms = _tag.Transforms.ElementAt(reader, i);
@@ -42,7 +56,8 @@ public class Lights : Tag<D2Class_656C8080>
                 {
                     Position = transforms.Translation.ToVec3(),
                     Quaternion = transforms.Rotation
-                }
+                },
+                Cookie = cookie != null ? cookie.Hash : null
             };
 
             scene.AddMapLight(lightData);
@@ -128,6 +143,7 @@ public class Lights : Tag<D2Class_656C8080>
         public Transform Transform;
         public Vector2 Size;
         public Vector4 Color;
+        public FileHash Cookie;
         public float Range;
         public float Attenuation;
     }

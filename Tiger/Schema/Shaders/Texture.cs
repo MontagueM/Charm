@@ -267,7 +267,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             {
                 try
                 {
-                    File.WriteAllText($"{savePath}.{ConfigSubsystem.Get().GetOutputTextureFormat().ToString().ToLower()}.meta", JsonConvert.SerializeObject(new { nomip = 1 }));
+                    File.WriteAllText($"{savePath}.{ConfigSubsystem.Get().GetOutputTextureFormat().ToString().ToLower()}.meta", JsonConvert.SerializeObject(new { nomip = 1 }, Formatting.Indented));
                 }
                 catch (IOException)
                 {

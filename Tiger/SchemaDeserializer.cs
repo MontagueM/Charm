@@ -291,6 +291,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         uint u32 = reader.ReadUInt32();
         int bIs32Bit = reader.ReadInt32();
         ulong u64 = reader.ReadUInt64();
+        //Console.WriteLine($"{u32:X} : {bIs32Bit:X} : {u64:X}");
         if (bIs32Bit == 1 || bIs32Bit == 2) // TFS can have 2 instead of 1?
         {
             return new FileHash(u32);
@@ -301,6 +302,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         }
         else
         {
+            reader.DumpToFile();
             throw new Exception("Invalid bIs32Bit value");
         }
     }

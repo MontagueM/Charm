@@ -261,6 +261,7 @@ class MetadataScene
             Color = new[] { light.Color.X, light.Color.Y, light.Color.Z },
             Range = light.Range,
             Attenuation = light.Attenuation,
+            Cookie = light.Cookie ?? ""
         });
     }
 
@@ -385,6 +386,7 @@ class MetadataScene
         public float[] Color;
         public float Range;
         public float Attenuation;
+        public string Cookie;
     }
     private struct JsonDecal
     {

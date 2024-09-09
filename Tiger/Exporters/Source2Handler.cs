@@ -8,26 +8,26 @@ using Texture = Tiger.Schema.Texture;
 
 namespace Tiger.Exporters;
 
-public class Source2Handler
+public static class Source2Handler
 {
-    public static void SaveStaticVMDL(string savePath, string fbxPath, ExporterMesh mesh)
+    private static void SaveVMDL(string name, string savePath, string fbxPath, List<MeshPart> parts)
     {
         try
         {
-            if (!File.Exists($"{savePath}/{mesh.Hash}.vmdl"))
+            if (!File.Exists($"{savePath}/{name}.vmdl"))
             {
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{mesh.Hash}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{mesh.Hash}.vmdl");
+                File.Copy("Exporters/template.vmdl", $"{savePath}/{name}.vmdl", true);
+                string text = File.ReadAllText($"{savePath}/{name}.vmdl");
 
                 StringBuilder mats = new StringBuilder();
 
                 int i = 0;
-                foreach (var part in mesh.Parts)
+                foreach (var part in parts)
                 {
                     mats.AppendLine("{");
                     if (part.Material == null)
                     {
-                        mats.AppendLine($"    from = \"{mesh.Hash}_Group{part.MeshPart.GroupIndex}_Index{part.Index}_{i}_{part.MeshPart.LodCategory}.vmat\"");
+                        mats.AppendLine($"    from = \"{name}_Group{part.GroupIndex}_Index{part.Index}_{i}_{part.LodCategory}.vmat\"");
                         mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
                     }
                     else
@@ -40,10 +40,10 @@ public class Source2Handler
                 }
 
                 text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"{fbxPath}/{mesh.Hash}.fbx");
-                text = text.Replace("%MESHNAME%", mesh.Hash);
+                text = text.Replace("%FILENAME%", $"{fbxPath}/{name}.fbx");
+                text = text.Replace("%MESHNAME%", name);
 
-                File.WriteAllText($"{savePath}/{mesh.Hash}.vmdl", text);
+                File.WriteAllText($"{savePath}/{name}.vmdl", text);
             }
         }
         catch (Exception e)
@@ -52,87 +52,28 @@ public class Source2Handler
         }
     }
 
-    //public static void SaveEntityVMDL(string savePath, Entity entity)
-    //{
-    //    var parts = entity.Load(ExportDetailLevel.MostDetailed);
-    //    SaveEntityVMDL(savePath, entity.Hash, parts);
-    //}
+    public static void SaveStaticVMDL(string savePath, string fbxPath, ExporterMesh mesh)
+    {
+        SaveVMDL(mesh.Hash, savePath, fbxPath, mesh.Parts.Select(x => x.MeshPart).ToList());
+    }
 
     public static void SaveEntityVMDL(string savePath, string fbxPath, ExporterEntity entity)
     {
-        try
-        {
-            if (!File.Exists($"{savePath}/{entity.Mesh.Hash}.vmdl"))
-            {
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{entity.Mesh.Hash}.vmdl", true);
-                string text = File.ReadAllText($"{savePath}/{entity.Mesh.Hash}.vmdl");
-
-                StringBuilder mats = new StringBuilder();
-
-                int i = 0;
-                foreach (var part in entity.Mesh.Parts)
-                {
-                    mats.AppendLine("{");
-                    if (part.Material == null)
-                    {
-                        mats.AppendLine($"    from = \"{entity.Mesh.Hash}_Group{part.MeshPart.GroupIndex}_Index{part.MeshPart.Index}_{i}_{part.MeshPart.LodCategory}.vmat\"");
-                        mats.AppendLine($"    to = \"materials/black_matte.vmat\"");
-                    }
-                    else
-                    {
-                        mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
-                        mats.AppendLine($"    to = \"Shaders/Source2/materials/{part.Material.FileHash}.vmat\"");
-                    }
-                    mats.AppendLine("},\n");
-                    i++;
-                }
-
-                text = text.Replace("%MATERIALS%", mats.ToString());
-                text = text.Replace("%FILENAME%", $"{fbxPath}/{entity.Mesh.Hash}.fbx");
-                text = text.Replace("%MESHNAME%", entity.Mesh.Hash);
-
-                File.WriteAllText($"{savePath}/{entity.Mesh.Hash}.vmdl", text);
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-        }
+        SaveVMDL(entity.Mesh.Hash, savePath, fbxPath, entity.Mesh.Parts.Select(x => x.MeshPart).ToList());
     }
 
     public static void SaveTerrainVMDL(string name, string savePath, List<StaticPart> parts)
     {
         Directory.CreateDirectory($"{savePath}/Models/Terrain/");
-        File.Copy("Exporters/template.vmdl", $"{savePath}/Models/Terrain/{name}.vmdl", true);
-        if (File.Exists($"{savePath}/Models/Terrain/{name}.vmdl"))
-        {
-            string text = File.ReadAllText($"{savePath}/Models/Terrain/{name}.vmdl");
-
-            StringBuilder mats = new StringBuilder();
-
-            int i = 0;
-            foreach (var staticpart in parts)
-            {
-                mats.AppendLine("{");
-                mats.AppendLine($"    from = \"{staticpart.Material.FileHash}.vmat\"");
-                mats.AppendLine($"    to = \"Shaders/Source2/materials/Terrain/{staticpart.Material.FileHash}.vmat\"");
-                mats.AppendLine("},\n");
-                i++;
-            }
-
-            text = text.Replace("%MATERIALS%", mats.ToString());
-            text = text.Replace("%FILENAME%", $"Models/Terrain/{name}.fbx");
-            text = text.Replace("%MESHNAME%", name);
-
-            File.WriteAllText($"{savePath}/Models/Terrain/{name}.vmdl", text);
-        }
+        string fbxPath = $"Models/Terrain";
+        SaveVMDL(name, $"{savePath}/Models/Terrain", fbxPath, parts.ToList<MeshPart>());
     }
 
     public static void SaveVMAT(string savePath, string hash, IMaterial material, List<Texture> terrainDyemaps = null)
     {
         string path;
-        if (material.EnumerateScopes().Contains(TfxScope.TERRAIN))
-            path = $"{savePath}/Shaders/Source2/Materials/Terrain";
+        if (material.EnumerateScopes().Contains(TfxScope.TERRAIN)) // TODO: Fix this shit
+            path = $"{savePath}/Shaders/Source2/Materials";
         else
             path = $"{savePath}/Source2/Materials";
 
@@ -146,9 +87,6 @@ public class Source2Handler
 
         if ((material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)) && material.RenderStates.BlendState() == -1)
             vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
-
-        //if (material.Unk0C != 0 && (material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)) && material.RenderStates.RasterizerState() == -1)
-        //    vmat.AppendLine($"\tF_RENDER_BACKFACES 1");
 
         //Textures
         foreach (var e in material.EnumeratePSTextures())

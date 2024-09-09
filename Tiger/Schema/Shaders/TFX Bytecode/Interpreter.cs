@@ -401,6 +401,15 @@ public class TfxBytecodeInterpreter
     {
         switch (extern_)
         {
+            case TfxExtern.Deferred:
+                switch (element)
+                {
+                    case 0:
+                        return $"float4(0.0, 100, 0.0, 0.0)";
+                    default:
+                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_}");
+                        return $"float4(1,1,1,1)";
+                }
             case TfxExtern.Frame:
                 switch (element)
                 {
