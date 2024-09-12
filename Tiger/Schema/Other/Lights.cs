@@ -70,6 +70,11 @@ public class Lights : Tag<D2Class_656C8080>
     public Vector4 GetColor(Tag<D2Class_A16D8080> data)
     {
         //Console.WriteLine($"{data.TagData.Buffer2[0].Vec} : {data.TagData.Buffer2[1].Vec} : {data.TagData.Buffer2.Count(x => x.Vec.Magnitude != 0)}");
+        if (Strategy.IsD1() && data.TagData.Buffer2.Count != 0 && !data.TagData.Buffer2[2].Vec.IsZero())
+        {
+            return data.TagData.Buffer2[2].Vec; // Always color in D1?
+        }
+
         if (data.TagData.Bytecode.Count != 0)
         {
             return data.TagData.Buffer1.Find(x => x.Vec != Vector4.Zero).Vec;

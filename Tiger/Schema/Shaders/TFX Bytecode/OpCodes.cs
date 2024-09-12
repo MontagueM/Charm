@@ -111,148 +111,174 @@ public static class TfxBytecodeOp
                     PushExternInputU32Data.element = reader.ReadByte();
                     tfxData.data = PushExternInputU32Data;
                     break;
-                case TfxBytecode.PushExternInputUav:
+                case TfxBytecode.PushExternInputUav when !Strategy.IsD1():
                     PushExternInputUavData Unk41Data = new();
                     Unk41Data.extern_ = (TfxExtern)reader.ReadByte();
                     Unk41Data.element = reader.ReadByte();
                     tfxData.data = Unk41Data;
                     break;
 
-                // From here forward, Pre-BL is op-1 so its gonna get ugly
+                // From here forward, Pre-BL is op-1 and D1 is op-2....so its gonna get ugly
 
-                case TfxBytecode.PushFromOutput - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.PushFromOutput when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushFromOutput;
+                case TfxBytecode.PushFromOutput - 2 when Strategy.IsD1():
+                case TfxBytecode.PushFromOutput - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushFromOutput when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PushFromOutput;
 
                     PushFromOutputData Unk43Data = new();
                     Unk43Data.element = reader.ReadByte();
                     tfxData.data = Unk43Data;
                     break;
-                case TfxBytecode.PopOutput - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.PopOutput when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PopOutput;
+                case TfxBytecode.PopOutput - 2 when Strategy.IsD1():
+                case TfxBytecode.PopOutput - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PopOutput when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PopOutput;
 
                     PopOutputData PopOutputData = new();
                     PopOutputData.slot = reader.ReadByte();
                     tfxData.data = PopOutputData;
                     break;
-                case TfxBytecode.PopOutputMat4 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.PopOutputMat4 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PopOutputMat4;
+                case TfxBytecode.PopOutputMat4 - 2 when Strategy.IsD1():
+                case TfxBytecode.PopOutputMat4 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PopOutputMat4 when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PopOutputMat4;
 
                     PopOutputMat4Data Unk45Data = new();
                     Unk45Data.slot = reader.ReadByte();
                     tfxData.data = Unk45Data;
                     break;
-                case TfxBytecode.PushTemp - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.PushTemp when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushTemp;
+
+                case TfxBytecode.PushTemp - 2 when Strategy.IsD1():
+                case TfxBytecode.PushTemp - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushTemp when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PushTemp;
 
                     PushTempData PushTempData = new();
                     PushTempData.slot = reader.ReadByte();
                     tfxData.data = PushTempData;
                     break;
-                case TfxBytecode.PopTemp - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.PopTemp when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PopTemp;
+
+                case TfxBytecode.PopTemp - 2 when Strategy.IsD1():
+                case TfxBytecode.PopTemp - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PopTemp when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PopTemp;
 
                     PopTempData PopTempData = new();
                     PopTempData.slot = reader.ReadByte();
                     tfxData.data = PopTempData;
                     break;
-                case TfxBytecode.SetShaderTexture - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.SetShaderTexture when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.SetShaderTexture;
+                case TfxBytecode.SetShaderTexture - 2 when Strategy.IsD1():
+                case TfxBytecode.SetShaderTexture - 1 when Strategy.IsPreBL():
+                case TfxBytecode.SetShaderTexture when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.SetShaderTexture;
 
                     SetShaderTextureData Unk48Data = new();
                     Unk48Data.value = reader.ReadByte();
                     tfxData.data = Unk48Data;
                     break;
-                case TfxBytecode.Unk49 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.Unk49 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk49;
+                case TfxBytecode.Unk49 - 2 when Strategy.IsD1():
+                case TfxBytecode.Unk49 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk49 when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.Unk49;
 
                     Unk49Data Unk49 = new();
                     Unk49.unk1 = reader.ReadByte();
                     tfxData.data = Unk49;
                     break;
-                case TfxBytecode.SetShaderSampler - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.SetShaderSampler when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.SetShaderSampler;
+                case TfxBytecode.SetShaderSampler - 2 when Strategy.IsD1():
+                case TfxBytecode.SetShaderSampler - 1 when Strategy.IsPreBL():
+                case TfxBytecode.SetShaderSampler when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.SetShaderSampler;
 
                     SetShaderSamplerData Unk4aData = new();
                     Unk4aData.value = reader.ReadByte();
                     tfxData.data = Unk4aData;
                     break;
-                case TfxBytecode.SetShaderUav - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.SetShaderUav when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.SetShaderUav;
+                case TfxBytecode.SetShaderUav - 2 when Strategy.IsD1():
+                case TfxBytecode.SetShaderUav - 1 when Strategy.IsPreBL():
+                case TfxBytecode.SetShaderUav when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.SetShaderUav;
 
                     SetShaderUavData Unk4bData = new();
                     Unk4bData.value = reader.ReadByte();
                     tfxData.data = Unk4bData;
                     break;
-                case TfxBytecode.Unk4c - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.Unk4c when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk4c;
+                case TfxBytecode.Unk4c - 2 when Strategy.IsD1():
+                case TfxBytecode.Unk4c - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk4c when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.Unk4c;
 
                     Unk4cData Unk4cData = new();
                     Unk4cData.unk1 = reader.ReadByte();
                     tfxData.data = Unk4cData;
                     break;
-                case TfxBytecode.PushSampler - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.PushSampler when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushSampler;
+
+                case TfxBytecode.PushSampler - 2 when Strategy.IsD1():
+                case TfxBytecode.PushSampler - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushSampler when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PushSampler;
 
                     PushSamplerData PushSampler = new();
                     PushSampler.unk1 = reader.ReadByte();
                     tfxData.data = PushSampler;
                     break;
-                case TfxBytecode.PushObjectChannelVector - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.PushObjectChannelVector when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushObjectChannelVector;
+
+                case TfxBytecode.PushObjectChannelVector - 2 when Strategy.IsD1():
+                case TfxBytecode.PushObjectChannelVector - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushObjectChannelVector when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PushObjectChannelVector;
 
                     PushObjectChannelVectorData PushObjectChannelVector = new();
                     PushObjectChannelVector.unk1 = reader.ReadInt32();
                     tfxData.data = PushObjectChannelVector;
                     break;
-                case TfxBytecode.PushGlobalChannelVector - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.PushGlobalChannelVector when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.PushGlobalChannelVector;
+
+                case TfxBytecode.PushGlobalChannelVector - 2 when Strategy.IsD1():
+                case TfxBytecode.PushGlobalChannelVector - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushGlobalChannelVector when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PushGlobalChannelVector;
 
                     PushGlobalChannelVectorData PushGlobalChannelVector = new();
                     PushGlobalChannelVector.unk1 = reader.ReadByte();
                     tfxData.data = PushGlobalChannelVector;
                     break;
-                case TfxBytecode.Unk50 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.Unk50 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk50;
+
+                case TfxBytecode.Unk50 - 2 when Strategy.IsD1():
+                case TfxBytecode.Unk50 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk50 when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.Unk50;
 
                     Unk50Data Unk50Data = new();
                     Unk50Data.unk1 = reader.ReadByte();
                     tfxData.data = Unk50Data;
                     break;
-                case TfxBytecode.Unk52 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.Unk52 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk52;
+
+                case TfxBytecode.Unk52 - 2 when Strategy.IsD1():
+                case TfxBytecode.Unk52 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk52 when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.Unk52;
 
                     Unk52Data Unk52Data = new();
                     Unk52Data.unk1 = reader.ReadByte();
                     Unk52Data.unk2 = reader.ReadByte();
                     tfxData.data = Unk52Data;
                     break;
-                case TfxBytecode.Unk53 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.Unk53 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk53;
+
+                case TfxBytecode.Unk53 - 2 when Strategy.IsD1():
+                case TfxBytecode.Unk53 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk53 when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.Unk53;
 
                     Unk53Data Unk53Data = new();
                     Unk53Data.unk1 = reader.ReadByte();
                     Unk53Data.unk2 = reader.ReadByte();
                     tfxData.data = Unk53Data;
                     break;
-                case TfxBytecode.Unk54 - 1 when _strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                case TfxBytecode.Unk54 when _strat > TigerStrategy.DESTINY2_SHADOWKEEP_2999:
-                    if (_strat <= TigerStrategy.DESTINY2_SHADOWKEEP_2999) tfxData.op = TfxBytecode.Unk54;
+
+                case TfxBytecode.Unk54 - 2 when Strategy.IsD1():
+                case TfxBytecode.Unk54 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk54 when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.Unk54;
 
                     Unk54Data Unk54Data = new();
                     Unk54Data.unk1 = reader.ReadByte();

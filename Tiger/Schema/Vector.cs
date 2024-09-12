@@ -550,6 +550,11 @@ public struct Vector4
         $"{Decimal.Parse(Y.ToString(), NumberStyles.Float)}, " +
         $"{Decimal.Parse(Z.ToString(), NumberStyles.Float)}, " +
         $"{Decimal.Parse(W.ToString(), NumberStyles.Float)})";
+
+    public bool IsZero()
+    {
+        return X == 0 && Y == 0 && Z == 0 && W == 0;
+    }
 }
 
 public struct IntVector4

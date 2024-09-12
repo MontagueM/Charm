@@ -74,6 +74,11 @@ public class Strategy
 
     static Strategy() { SetStrategy(_defaultStrategy); }
 
+    public static bool IsLatest() => CurrentStrategy == TigerStrategy.DESTINY2_LATEST;
+    public static bool IsPostBL() => CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402;
+    public static bool IsPreBL() => CurrentStrategy == TigerStrategy.DESTINY2_SHADOWKEEP_2601 || CurrentStrategy == TigerStrategy.DESTINY2_SHADOWKEEP_2999;
+    public static bool IsD1() => CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
+
     /// <exception cref="ArgumentException">'strategyString' does not exist.</exception>
     public static void SetStrategy(string strategyString)
     {

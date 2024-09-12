@@ -55,6 +55,11 @@ public class ShadowingLights : Tag<SMapShadowingLight>
 
     public Vector4 GetColor(Tag<D2Class_A16D8080> data)
     {
+        if (Strategy.IsD1() && data.TagData.Buffer2.Count != 0 && !data.TagData.Buffer2[2].Vec.IsZero())
+        {
+            return data.TagData.Buffer2[2].Vec; // Almost always color in D1?
+        }
+
         if (data.TagData.Bytecode.Count != 0)
         {
             return data.TagData.Buffer1.Find(x => x.Vec != Vector4.Zero).Vec;

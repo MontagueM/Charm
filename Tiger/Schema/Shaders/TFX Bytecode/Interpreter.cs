@@ -301,7 +301,7 @@ public class TfxBytecodeInterpreter
                         //Temp.AddRange(Stack);
 
                         if (print)
-                            Console.WriteLine($"----Output Stack Count: {Stack.Count}");
+                            Console.WriteLine($"----Output Stack Count: {Stack.Count}\n");
 
                         if (Stack.Count == 0) //Shouldnt happen
                             hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(0, 0, 0, 0)");

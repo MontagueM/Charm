@@ -278,6 +278,7 @@ public partial class DevView : UserControl
                     break;
 
                 //Testing
+                case 0x80801AF2:
                 case 0x808071DC:
                 case 0x80806DA1:
                     Tag<D2Class_A16D8080> lightData = FileResourcer.Get().GetSchemaTag<D2Class_A16D8080>(hash);
