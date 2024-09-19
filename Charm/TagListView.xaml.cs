@@ -896,7 +896,7 @@ public partial class TagListView : UserControl
         RefreshItemList();  // bc of async stuff
     }
 
-    private ConcurrentDictionary<string, string> TryGetEntityNames()
+    private ConcurrentDictionary<string, string> TryGetEntityNames() // TODO: allow multiple names for entity
     {
         NamedEntities Ents = new()
         {

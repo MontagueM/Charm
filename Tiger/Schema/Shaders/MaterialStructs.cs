@@ -75,6 +75,10 @@ public struct SMaterial_SK
     public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
     public DynamicArray<Vec4> VS_CBuffers;
+
+    [SchemaField(0xBC)]
+    public int UnkBC;
+
     [SchemaField(0xCC)]
     public FileHash VSVector4Container;
 
@@ -129,6 +133,10 @@ public struct SMaterial_BL
     public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTagBL> VS_Samplers;
     public DynamicArray<Vec4> VS_CBuffers;
+
+    [SchemaField(0xBC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0xD4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public int UnkD4;
 
     [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0xE4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]

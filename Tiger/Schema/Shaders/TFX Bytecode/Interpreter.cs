@@ -363,7 +363,7 @@ public class TfxBytecodeInterpreter
                     case 0x04:
                         return $"(Time)"; // render_time
                     case 0x14:
-                        return $"(0.16)"; // delta_game_time
+                        return $"(0.016)"; // delta_game_time
                     case 0x1C:
                         return $"(16)"; // exposure_scale
 
@@ -489,11 +489,11 @@ public class TfxBytecodeInterpreter
 
     private string bytecode_op_wander(string x)
     {
-        string rot0 = $"({x}.xxxx * float4(4.08, 1.02, 3.0 / 5.37, 3.0 / 9.67))";
+        string rot0 = $"({x}.xxxx * float4(4.08, 1.02, 3.0 / 5.37, 3.0 / 9.67) + float4(0.92, 0.33, 0.26, 0.54))";
         string rot1 = $"({x}.xxxx * float4(1.83, 3.09, 0.39, 0.87) + float4(0.12, 0.37, 0.16, 0.79))";
-        string sines0 = $"({_trig_helper_vector_pseudo_sin_rotations(rot0)})";
+        string sines0 = $"{_trig_helper_vector_pseudo_sin_rotations(rot0)}";
         string sines1 = $"({_trig_helper_vector_pseudo_sin_rotations(rot1)} * float4(0.02, 0.02, 0.28, 0.28))";
-        string wander_result = $"(0.5 + dot4({sines0}, {sines1}))";
+        string wander_result = $"(0.5 + dot4({sines0}, {sines1})).xxxx";
 
         return wander_result;
     }

@@ -25,6 +25,9 @@ public class ShadowingLights : Tag<SMapShadowingLight>
         IMaterial shading = FileResourcer.Get().GetFileInterface<IMaterial>(_tag.Shading);
         if (shading.EnumeratePSTextures().Any())
         {
+            if (!Directory.Exists($"{savePath}/Textures"))
+                Directory.CreateDirectory($"{savePath}/Textures");
+
             cookie = shading.EnumeratePSTextures().First().Texture;
             cookie.SavetoFile($"{savePath}/Textures/{cookie.Hash}");
             if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())

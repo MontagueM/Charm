@@ -52,6 +52,7 @@ namespace Tiger.Schema.Shaders
         public uint Unk08 { get; }
         public uint Unk10 { get; }
         public uint Unk0C { get; } //Seems to be backface culling
+        public int UnkD4 { get; } // Determines if the vertex shader uses vertex animation..?
 
         // Vertex
         public ShaderBytecode? VertexShader { get; }
@@ -343,6 +344,7 @@ namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public int UnkD4 => 0;
 
         // Leaving shaders null until they (if ever) can be decompiled to hlsl
         public ShaderBytecode VertexShader => _tag.VertexShader; // null;
@@ -406,6 +408,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public int UnkD4 => _tag.UnkBC;
 
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
@@ -471,6 +474,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
+        public int UnkD4 => _tag.UnkD4;
 
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;

@@ -80,9 +80,9 @@ public class AutomatedExporter
                 }
             }
 
-            var diff = dye.TagData.DyeTextures[0];
+            var diff = dye.TagData.Textures[0];
             text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
-            var norm = dye.TagData.DyeTextures[1];
+            var norm = dye.TagData.Textures[1];
             text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
             dyeIndex++;
         }

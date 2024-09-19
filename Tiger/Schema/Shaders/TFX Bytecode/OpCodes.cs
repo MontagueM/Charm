@@ -118,10 +118,10 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk41Data;
                     break;
 
-                // From here forward, Pre-BL is op-1 and D1 is op-2....so its gonna get ugly
+                // From here forward, SK and BL is op-1, D1 is op-2....so its gonna get ugly
 
                 case TfxBytecode.PushFromOutput - 2 when Strategy.IsD1():
-                case TfxBytecode.PushFromOutput - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushFromOutput - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PushFromOutput when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PushFromOutput;
 
@@ -130,7 +130,7 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk43Data;
                     break;
                 case TfxBytecode.PopOutput - 2 when Strategy.IsD1():
-                case TfxBytecode.PopOutput - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PopOutput - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PopOutput when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PopOutput;
 
@@ -139,7 +139,7 @@ public static class TfxBytecodeOp
                     tfxData.data = PopOutputData;
                     break;
                 case TfxBytecode.PopOutputMat4 - 2 when Strategy.IsD1():
-                case TfxBytecode.PopOutputMat4 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PopOutputMat4 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PopOutputMat4 when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PopOutputMat4;
 
@@ -149,7 +149,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.PushTemp - 2 when Strategy.IsD1():
-                case TfxBytecode.PushTemp - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushTemp - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PushTemp when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PushTemp;
 
@@ -159,7 +159,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.PopTemp - 2 when Strategy.IsD1():
-                case TfxBytecode.PopTemp - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PopTemp - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PopTemp when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PopTemp;
 
@@ -168,7 +168,7 @@ public static class TfxBytecodeOp
                     tfxData.data = PopTempData;
                     break;
                 case TfxBytecode.SetShaderTexture - 2 when Strategy.IsD1():
-                case TfxBytecode.SetShaderTexture - 1 when Strategy.IsPreBL():
+                case TfxBytecode.SetShaderTexture - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.SetShaderTexture when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.SetShaderTexture;
 
@@ -177,7 +177,7 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk48Data;
                     break;
                 case TfxBytecode.Unk49 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk49 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk49 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.Unk49 when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.Unk49;
 
@@ -186,7 +186,7 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk49;
                     break;
                 case TfxBytecode.SetShaderSampler - 2 when Strategy.IsD1():
-                case TfxBytecode.SetShaderSampler - 1 when Strategy.IsPreBL():
+                case TfxBytecode.SetShaderSampler - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.SetShaderSampler when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.SetShaderSampler;
 
@@ -195,7 +195,7 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk4aData;
                     break;
                 case TfxBytecode.SetShaderUav - 2 when Strategy.IsD1():
-                case TfxBytecode.SetShaderUav - 1 when Strategy.IsPreBL():
+                case TfxBytecode.SetShaderUav - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.SetShaderUav when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.SetShaderUav;
 
@@ -204,7 +204,7 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk4bData;
                     break;
                 case TfxBytecode.Unk4c - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk4c - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk4c - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.Unk4c when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.Unk4c;
 
@@ -214,7 +214,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.PushSampler - 2 when Strategy.IsD1():
-                case TfxBytecode.PushSampler - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushSampler - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PushSampler when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PushSampler;
 
@@ -224,7 +224,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.PushObjectChannelVector - 2 when Strategy.IsD1():
-                case TfxBytecode.PushObjectChannelVector - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushObjectChannelVector - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PushObjectChannelVector when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PushObjectChannelVector;
 
@@ -234,7 +234,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.PushGlobalChannelVector - 2 when Strategy.IsD1():
-                case TfxBytecode.PushGlobalChannelVector - 1 when Strategy.IsPreBL():
+                case TfxBytecode.PushGlobalChannelVector - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PushGlobalChannelVector when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PushGlobalChannelVector;
 
@@ -244,7 +244,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.Unk50 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk50 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk50 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.Unk50 when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.Unk50;
 
@@ -254,7 +254,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.Unk52 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk52 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk52 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.Unk52 when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.Unk52;
 
@@ -265,7 +265,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.Unk53 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk53 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk53 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.Unk53 when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.Unk53;
 
@@ -276,7 +276,7 @@ public static class TfxBytecodeOp
                     break;
 
                 case TfxBytecode.Unk54 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk54 - 1 when Strategy.IsPreBL():
+                case TfxBytecode.Unk54 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.Unk54 when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.Unk54;
 

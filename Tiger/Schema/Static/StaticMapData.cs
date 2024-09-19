@@ -701,7 +701,7 @@ public struct D2Class_A16D8080
 /// </summary>
 /// Background entities/skybox resource
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DA1B8080", 0x10)] // TODO: SK, Pre-BL, BL (all probably work the same)
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DA1B8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "916F8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A36A8080", 0x18)]
 public struct SMapSkyEntResource

@@ -94,11 +94,22 @@ public static class Source2Handler
             if (e.Texture == null)
                 continue;
 
-            vmat.AppendLine($"\tTextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
+            vmat.AppendLine($"\tPS_TextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
+        }
+
+        if (material.UnkD4 != 0) // Vertex animation?
+        {
+            foreach (var e in material.EnumerateVSTextures())
+            {
+                if (e.Texture == null)
+                    continue;
+
+                vmat.AppendLine($"\tVS_TextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
+            }
         }
 
         vmat.AppendLine(PopulateCBuffers(material).ToString()); // PS
-        //vmat.AppendLine(PopulateCBuffers(material, true).ToString()); // VS
+        vmat.AppendLine(PopulateCBuffers(material, true).ToString()); // VS
 
         //PS Dynamic expressions
         TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(material.PS_TFX_Bytecode));
@@ -111,15 +122,6 @@ public static class Source2Handler
             var expression = entry.Value.Contains("Time") ? $"{temp_time_fix} return {entry.Value.Replace("Time", "CurTime")};" : entry.Value;
             vmat.AppendLine($"\t\tcb0_{entry.Key} \"{expression}\"");
         }
-
-        //VS Dynamic expressions
-        //bytecode = new(TfxBytecodeOp.ParseAll(material.VS_TFX_Bytecode));
-        //bytecode_hlsl = bytecode.Evaluate(material.VS_TFX_Bytecode_Constants);
-
-        //foreach (var entry in bytecode_hlsl)
-        //{
-        //    vmat.AppendLine($"\t\tvs_cb0_{entry.Key} \"{entry.Value}\"");
-        //}
 
         foreach (var resource in material.PixelShader.Resources)
         {
@@ -137,6 +139,9 @@ public static class Source2Handler
                                 else
                                     vmat.AppendLine($"\t\tcb2_{i} \"float4(1,1,1,1)\"");
                             }
+
+                            vmat.AppendLine($"\t\tPS_TextureT11 \"AtmosFar\"");
+                            vmat.AppendLine($"\t\tPS_TextureT13 \"AtmosNear\"");
                         }
                         break;
                     case 8: // Transparent_Advanced
@@ -179,6 +184,34 @@ public static class Source2Handler
                 }
             }
         }
+
+        if (material.UnkD4 != 0) // Vertex animation?
+        {
+            //VS Dynamic expressions
+            bytecode = new(TfxBytecodeOp.ParseAll(material.VS_TFX_Bytecode));
+            bytecode_hlsl = bytecode.Evaluate(material.VS_TFX_Bytecode_Constants);
+
+            foreach (var entry in bytecode_hlsl)
+            {
+                var expression = entry.Value.Contains("Time") ? $"{temp_time_fix} return {entry.Value.Replace("Time", "CurTime")};" : entry.Value;
+                vmat.AppendLine($"\t\tvs_cb0_{entry.Key} \"{expression}\"");
+            }
+
+            foreach (var resource in material.VertexShader.Resources)
+            {
+                if (resource.ResourceType == Schema.ResourceType.CBuffer)
+                {
+                    switch (resource.Index)
+                    {
+                        case 13: // Frame
+                            vmat.AppendLine($"\t\tvs_cb13_0 \"float4(Time, Time, 0.05, 0.016)\"");
+                            vmat.AppendLine($"\t\tvs_cb13_1 \"float4(1,16,0.5,1.5)\"");
+                            break;
+                    }
+                }
+            }
+        }
+
 
         vmat.AppendLine($"\t}}");
         vmat.AppendLine("}");
@@ -281,9 +314,9 @@ public static class Source2Handler
                 }
             }
 
-            var diff = dye.TagData.DyeTextures[0];
+            var diff = dye.TagData.Textures[0];
             text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
-            var norm = dye.TagData.DyeTextures[1];
+            var norm = dye.TagData.Textures[1];
             text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
             dyeIndex++;
         }

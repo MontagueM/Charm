@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Tiger.Schema;
 
 
-public class Dye : Tag<SDye>
+public class Dye : Tag<SScope>
 {
     public Dye(FileHash hash) : base(hash) { }
 
@@ -14,7 +14,7 @@ public class Dye : Tag<SDye>
         //TigerFile tag = FileResourcer.Get().GetFile(_tag.DyeInfoHeader.GetReferenceHash());
         //return tag.GetData().ToType<DyeInfo>();
 
-        var values = _tag.DyeData;
+        var values = _tag.CBufferData;
         DyeInfo dyeInfo = new DyeInfo();
 
         dyeInfo.DetailDiffuseTransform = values[0].Vec;
@@ -69,7 +69,7 @@ public class Dye : Tag<SDye>
     public void ExportTextures(string savePath, TextureExportFormat outputTextureFormat)
     {
         TextureExtractor.SetTextureFormat(outputTextureFormat);
-        foreach (var entry in _tag.DyeTextures)
+        foreach (var entry in _tag.Textures)
         {
             TextureExtractor.SaveTextureToFile($"{savePath}/{entry.Texture.Hash}", entry.Texture.GetScratchImage());
         }
@@ -124,23 +124,25 @@ public struct DyeInfo
 
 
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "BA6D8080", 0x378)]
-public struct SDye
+public struct SScope
 {
     public long FileSize;
     public StringPointer DevName;
     public long Unk10;
 
     [SchemaField(0x48)]
-    public DynamicArray<STextureTag64> DyeTextures;
+    public DynamicArray<STextureTag64> Textures;
     public TigerHash Unk58;
     public TigerHash Unk5C;
+    public DynamicArray<D2Class_09008080> Bytecode;
+    public DynamicArray<Vec4> BytecodeConstants;
 
     [SchemaField(0x90)]
-    public DynamicArray<Vec4> DyeData;
+    public DynamicArray<Vec4> CBufferData;
 
     [SchemaField(0xB0)]
-    public int UnkB0;
-    public FileHash DyeInfoHeader;
+    public int CBufferSlot;
+    public FileHash Vec4Container; // Is just empty sometimes for some reason
 }
 
 public class DyeD1 : Tag<SDye_D1>

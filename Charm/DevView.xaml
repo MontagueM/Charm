@@ -20,14 +20,6 @@
             <RowDefinition Height="30*" />
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
-        <Button
-            Grid.Row="0"
-            Grid.Column="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Click="ExportDevMapButton_OnClick"
-            Content="export dev map"
-            Style="{StaticResource MaterialDesignPaperDarkButton}" />
 
         <TextBox
             x:Name="HashLocation"

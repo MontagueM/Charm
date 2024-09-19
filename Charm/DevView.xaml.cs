@@ -277,18 +277,25 @@ public partial class DevView : UserControl
                     Exporter.Get().Export();
                     break;
 
-                //Testing
+                // Testing
                 case 0x80801AF2:
                 case 0x808071DC:
                 case 0x80806DA1:
                     Tag<D2Class_A16D8080> lightData = FileResourcer.Get().GetSchemaTag<D2Class_A16D8080>(hash);
                     TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(lightData.TagData.Bytecode));
-                    var bytecode_hlsl = bytecode.Evaluate(lightData.TagData.Buffer1, true);
+                    _ = bytecode.Evaluate(lightData.TagData.Buffer1, true);
 
                     //foreach (var a in bytecode_hlsl)
                     //{
                     //    Console.WriteLine($"\n{a.Key} : {a.Value}\n");
                     //}
+                    break;
+
+                // Scopes / gear dye (which is a scope)
+                case 0x80806DBA:
+                    Dye scope_data = FileResourcer.Get().GetFile<Dye>(hash);
+                    bytecode = new(TfxBytecodeOp.ParseAll(scope_data.TagData.Bytecode));
+                    _ = bytecode.Evaluate(scope_data.TagData.BytecodeConstants, true);
                     break;
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
@@ -333,29 +340,29 @@ public partial class DevView : UserControl
         }.Start();
     }
 
-    private void ExportDevMapButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        // Not actually a map, but a list of assets that are good for testing
-        // The assets are assembled in UE5 so just have to rip the list
-        var assets = new List<string>()
-        {
-            "6C24BB80",
-            "a237be80",
-            "b540be80",
-            "68a8b480",
-            "fba4b480",
-            "e1c5b280",
-            "0F3CBE80",
-            "A229BE80",
-            "B63BBE80",
-            "CB32BE80",
-        };
+    //private void ExportDevMapButton_OnClick(object sender, RoutedEventArgs e)
+    //{
+    //    // Not actually a map, but a list of assets that are good for testing
+    //    // The assets are assembled in UE5 so just have to rip the list
+    //    var assets = new List<string>()
+    //    {
+    //        "6C24BB80",
+    //        "a237be80",
+    //        "b540be80",
+    //        "68a8b480",
+    //        "fba4b480",
+    //        "e1c5b280",
+    //        "0F3CBE80",
+    //        "A229BE80",
+    //        "B63BBE80",
+    //        "CB32BE80",
+    //    };
 
-        foreach (var asset in assets)
-        {
-            StaticView.ExportStatic(new FileHash(asset), asset, ExportTypeFlag.Full, "devmap");
-        }
-    }
+    //    foreach (var asset in assets)
+    //    {
+    //        StaticView.ExportStatic(new FileHash(asset), asset, ExportTypeFlag.Full, "devmap");
+    //    }
+    //}
 
     // Cleaverly done (insert name) but you're not supposed to be here. As a matter of fact, you're not.
     // Get back where you belong and forget about all this...Until we meet again.
