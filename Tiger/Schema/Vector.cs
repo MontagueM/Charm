@@ -71,6 +71,11 @@ public struct Vector2
         X = (float)x;
         Y = (float)y;
     }
+
+    public static Vector2 operator *(Vector2 x, float y)
+    {
+        return new Vector2(x.X * y, x.Y * y);
+    }
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 8)]

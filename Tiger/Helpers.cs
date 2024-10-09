@@ -125,6 +125,44 @@ public static class Helpers
 
         return bytes;
     }
+
+    public static float DecodeF16(ushort half)
+    {
+        // Extract the exponent and mantissa from the half-precision float
+        ushort exp = (ushort)((half >> 10) & 0x1F);
+        ushort mant = (ushort)(half & 0x3FF);
+
+        // Convert to a single-precision float based on the exponent and mantissa
+        float val;
+        if (exp == 0)
+        {
+            // Subnormal number
+            val = (float)(mant * Math.Pow(2.0, -24));
+        }
+        else if (exp != 31)
+        {
+            // Normalized number
+            val = (float)((mant + 1024) * Math.Pow(2.0, exp - 25));
+        }
+        else if (mant == 0)
+        {
+            // Infinity
+            val = float.PositiveInfinity;
+        }
+        else
+        {
+            // NaN
+            val = float.NaN;
+        }
+
+        // Apply the sign bit (if set)
+        if ((half & 0x8000) != 0)
+        {
+            val = -val;
+        }
+
+        return val;
+    }
 }
 
 public static class NestedTypeHelpers

@@ -149,7 +149,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 (part as DynamicMeshPart).VertexWeights.Add(vw);
             }
 
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && part is DynamicMeshPart)
+            if (Strategy.IsD1() && part is DynamicMeshPart)
                 DynamicMeshPart.AddVertexColourSlotInfo(part as DynamicMeshPart, (part as DynamicMeshPart).GearDyeChangeColorIndex);
         }
     }

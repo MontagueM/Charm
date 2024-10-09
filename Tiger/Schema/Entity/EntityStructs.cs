@@ -538,11 +538,6 @@ public struct SEntityModelMesh
     public int Zeros1C;
     public DynamicArrayUnloaded<D2Class_CB6E8080> Parts;
 
-    //[SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 30)]
-    //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 48)]
-    //[SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 37)]
-    //public short[] StagePartOffsets;
-
     /// Range of parts to render per render stage
     /// Can be obtained as follows:
     ///
@@ -572,9 +567,7 @@ public struct SEntityModelMesh
 
     public int GetInputLayoutForStage(int stage)
     {
-        return Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ||
-            Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON ?
-            InputLayoutPerRenderStageBL[stage] : InputLayoutPerRenderStageSK[stage];
+        return Strategy.IsPreBL() ? InputLayoutPerRenderStageSK[stage] : InputLayoutPerRenderStageBL[stage];
     }
 }
 
@@ -617,7 +610,7 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
 
     public int GetFlags()
     {
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        if (Strategy.IsD1())
             return FlagsD1;
         else
             return FlagsD2;

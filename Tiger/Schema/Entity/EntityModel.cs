@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Arithmic;
-using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
@@ -184,13 +183,9 @@ public class DynamicMeshPart : MeshPart
         IndexCount = part.IndexCount;
         PrimitiveType = (PrimitiveType)part.PrimitiveType;
         if (part.VariantShaderIndex == -1)
-        {
             Material = part.Material;
-        }
         else
-        {
             Material = GetMaterialFromExternalMaterial(part.VariantShaderIndex, parentResource);
-        }
     }
 
     public DynamicMeshPart() : base()
@@ -237,27 +232,64 @@ public class DynamicMeshPart : MeshPart
 
     private void TransformTexcoords(SEntityModelMesh mesh, SEntityModel header)
     {
-        Vector2 texcoordScale = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.TexcoordScale : mesh.TexcoordScale;
-        Vector2 texcoordTranslation = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.TexcoordTranslation : mesh.TexcoordTranslation;
+        Vector2 texcoordScale = !Strategy.IsD1() ? header.TexcoordScale : mesh.TexcoordScale;
+        Vector2 texcoordTranslation = !Strategy.IsD1() ? header.TexcoordTranslation : mesh.TexcoordTranslation;
+        float yOffset = 5f / 3f; // idfk
 
         for (int i = 0; i < VertexTexcoords0.Count; i++)
         {
             var tx = VertexTexcoords0[i];
             VertexTexcoords0[i] = new Vector2(
                 tx.X * texcoordScale.X + texcoordTranslation.X,
-                tx.Y * -texcoordScale.Y + 1 - texcoordTranslation.Y
+                tx.Y * texcoordScale.Y + texcoordTranslation.Y
             );
-            VertexTexcoords1.Add(new Vector2(
-                tx.X * texcoordScale.X * 5 + texcoordTranslation.X * 5,
-                tx.Y * -texcoordScale.Y * 5 + 1 - texcoordTranslation.Y * 5
-            ));
+        }
+
+        // Detail UVs
+        if (mesh.SinglePassSkinningBuffer != null)
+        {
+            try
+            {
+                var skinBuffer = mesh.SinglePassSkinningBuffer.GetReferenceData();
+                using var handle = mesh.SinglePassSkinningBuffer.GetReferenceReader();
+                for (int i = 0; i < VertexPositions.Count; i++)
+                {
+                    int normalW = (int)(VertexNormals[i].W * 32767.0996);
+                    int uvIndex = (int)((uint)normalW >> 3) & 4095;
+
+                    Half UVX = BitConverter.ToHalf(BitConverter.GetBytes((ushort)((uint)(skinBuffer[uvIndex * 4 + 1] << 8) | (int)skinBuffer[uvIndex * 4 + 0])));
+                    Half UVY = BitConverter.ToHalf(BitConverter.GetBytes((ushort)((uint)(skinBuffer[uvIndex * 4 + 3] << 8) | (int)skinBuffer[uvIndex * 4 + 2])));
+                    var tx = VertexTexcoords0[i];
+
+                    var tx1 = new Vector2(tx.X * (float)UVX, tx.Y * (float)UVY);
+                    VertexTexcoords1.Add(tx1);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error($"{mesh.SinglePassSkinningBuffer.Hash}: {e.Message}");
+            }
+        }
+        else
+        {
+            yOffset = 0f;
+            VertexTexcoords1 = VertexTexcoords0.Select(tx1 => tx1 * 5).ToList();
+        }
+
+        // Flip Y axis, fix detail UV offest
+        for (int i = 0; i < VertexTexcoords0.Count; i++)
+        {
+            var tx = VertexTexcoords0[i];
+            var tx1 = VertexTexcoords1[i];
+            VertexTexcoords0[i] = new Vector2(tx.X, 1 - tx.Y);
+            VertexTexcoords1[i] = new Vector2(tx1.X, (1 - tx1.Y) + yOffset);
         }
     }
 
     private void TransformPositions(SEntityModelMesh mesh, SEntityModel header)
     {
-        Vector4 modelScale = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.ModelScale : mesh.ModelScale;
-        Vector4 modelTranslation = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.ModelTranslation : mesh.ModelTranslation;
+        Vector4 modelScale = !Strategy.IsD1() ? header.ModelScale : mesh.ModelScale;
+        Vector4 modelTranslation = !Strategy.IsD1() ? header.ModelTranslation : mesh.ModelTranslation;
 
         for (int i = 0; i < VertexPositions.Count; i++)
         {
