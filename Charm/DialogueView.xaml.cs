@@ -103,15 +103,14 @@ public partial class DialogueView : UserControl
                 }
                 else
                 {
-                    D2Class_33978080 a = dyn;
-                    dynamic? unk28 = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? a.Unk28BL : a.Unk28;
+                    D2Class_33978080 entry = dyn;
                     result.Add(new VoicelineItem
                     {
-                        Narrator = GlobalStrings.Get().GetString(a.NarratorString),
-                        Voiceline = unk28.Value.ToString(),
-                        Wem = a.Sound1.TagData.Wems[0],
+                        Narrator = GlobalStrings.Get().GetString(entry.NarratorString),
+                        Voiceline = entry.GetVoiceline(),
+                        Wem = entry.SoundM.TagData.Wems[0],
                         RecursionDepth = recursionDepth,
-                        Duration = a.Sound1.TagData.Wems[0].Duration
+                        Duration = entry.SoundM.TagData.Wems[0].Duration
                     });
                 }
             }

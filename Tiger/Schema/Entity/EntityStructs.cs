@@ -1387,7 +1387,7 @@ public struct D2Class_0F8C8080
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "0E068080", 0x24)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "138C8080", 0x28)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "138C8080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "138C8080", 0x40)]
 public struct D2Class_138C8080
 {
     public short Unk00;
@@ -1575,9 +1575,11 @@ public struct D2Class_79818080
 {
     [SchemaField(0x110, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1A8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x1C8, TigerStrategy.DESTINY2_LATEST)] // BUNGIE PLEASE STOP CHANGING AUDIO  IM GOING INSANE
     public DynamicArray<D2Class_F1918080> WwiseSounds1;
     [SchemaField(0x130, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1B8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x1D8, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_F1918080> WwiseSounds2;
 }
 

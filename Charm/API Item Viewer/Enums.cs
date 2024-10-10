@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Media;
+using Arithmic;
 
 // https://bungie-net.github.io/multi/schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition.html#schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition
 // https://bungie-net.github.io/multi/schema_Destiny-DestinySocketCategoryStyle.html#schema_Destiny-DestinySocketCategoryStyle
@@ -26,25 +26,34 @@ public static class DestinyDamageType
     {
         switch (index)
         {
+            case -1:
+                return DestinyDamageTypeEnum.None;
             case 1319:
             case 1373:
+            case 1404:
                 return DestinyDamageTypeEnum.Kinetic;
             case 1320:
             case 1374:
+            case 1405:
                 return DestinyDamageTypeEnum.Arc;
             case 1321:
             case 1375:
+            case 1406:
                 return DestinyDamageTypeEnum.Solar;
             case 1322:
             case 1376:
+            case 1407:
                 return DestinyDamageTypeEnum.Void;
             case 1323:
             case 1377:
+            case 1408:
                 return DestinyDamageTypeEnum.Stasis;
             case 1324:
             case 1378:
+            case 1409:
                 return DestinyDamageTypeEnum.Strand;
             default:
+                Log.Error($"Unknown DestinyDamageTypeEnum {index}");
                 return DestinyDamageTypeEnum.None;
         }
     }
@@ -113,6 +122,6 @@ public static class DestinyTierTypeColor
         if (Colors.ContainsKey(tierType))
             return Colors[tierType];
         else
-            throw new ArgumentException("Invalid DestinyTierType");
+            return Colors[DestinyTierType.Unknown];
     }
 }

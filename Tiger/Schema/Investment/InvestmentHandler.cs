@@ -6,7 +6,6 @@ using ConcurrentCollections;
 using Newtonsoft.Json;
 using Tiger.Exporters;
 using Tiger.Schema.Entity;
-using Tiger.Schema.Model;
 using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Investment;
@@ -328,10 +327,17 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private int GetStatGroupIndex(InventoryItem item)
     {
         var stringThing = GetItemStrings(item.TagData.InventoryItemHash);
-        if (stringThing.TagData.Unk78.GetValue(stringThing.GetReader()) is D2Class_B4548080 details)
-            return details.StatGroupIndex;
+        if (Strategy.IsLatest()) // Don't like this but oh well
+        {
+            if (stringThing.TagData.Unk78.GetValue(stringThing.GetReader()) is D2Class_CA548080 details)
+                return details.StatGroupIndex;
+        }
         else
-            return -1;
+        {
+            if (stringThing.TagData.Unk78.GetValue(stringThing.GetReader()) is D2Class_B4548080 details)
+                return details.StatGroupIndex;
+        }
+        return -1;
     }
 
     public D2Class_C4548080? GetStatGroup(InventoryItem item)

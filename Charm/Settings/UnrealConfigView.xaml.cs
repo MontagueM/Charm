@@ -75,6 +75,11 @@ public partial class UnrealConfigView : UserControl
 
     private void UnrealInteropEnabled_OnClick(object sender, RoutedEventArgs e)
     {
+        _config.SetUnrealInteropEnabled(false);
+        MessageBox.Show("Unreal Engine exporting is currently broken.\nNo ETA on a fix, I'm sorry.");
+        PopulateConfigPanel();
+        return;
+
         if (_config.GetUnrealInteropPath() == "")
         {
             MessageBox.Show("Please set the path to the Unreal Engine content folder first.");

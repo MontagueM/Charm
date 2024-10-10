@@ -3,7 +3,7 @@
 namespace Tiger.Schema.Audio;
 
 [SchemaStruct("B8978080", 0x28)]
-public struct D2Class_B8978080
+public struct SDialogueTable
 {
     public long FileSize;
     public DynamicArray<D2Class_28978080> Unk08;
@@ -46,85 +46,77 @@ public struct D2Class_2F978080
 // rest is wrong for latest but the array is correct
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2A978080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "2A978080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "2A978080", 0x40)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "2A978080", 0x40)]
 public struct D2Class_2A978080
 {
-    public TigerHash Unk00;
-    public TigerHash Unk04;
-    public TigerHash Unk08;
-    public TigerHash Unk0C;
-    public long Unk10;
-    public long Unk18;
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public TigerHash Unk20;
     [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x30, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
     public DynamicArray<D2Class_2F978080> Unk28;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "33978080", 0x68)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "33978080", 0x88)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "33978080", 0x90)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "33978080", 0x8C)]
+[SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "33978080", 0x94)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "33978080", 0xA4)]
 public struct D2Class_33978080
 {
-    public TigerHash Unk00;
-    public TigerHash Unk04;
-    public TigerHash Unk08;
-    public TigerHash Unk0C;
-    [SchemaField(TigerStrategy.DESTINY2_LATEST)]
-    public TigerHash Unk10;
+    // Male
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402), Tag64]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST), Tag64]
-    public WwiseSound Sound1;
+    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_LIGHTFALL_7366), Tag64]
+    public WwiseSound SoundM;
+
     [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    public StringReference Unk28BL;
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public StringReference64 Unk28;
-    [SchemaField(0x30, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x48, TigerStrategy.DESTINY2_LATEST)]
-    public float Unk40;
-    public Tag Unk44;
+    public StringReference VoicelineM_BL;
+
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
+    public StringReference64 VoicelineM;
+
+    // Female
     [SchemaField(0x38, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x48, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64]
-    [SchemaField(0x50, TigerStrategy.DESTINY2_LATEST), Tag64]
-    public WwiseSound Sound2;
+    [SchemaField(0x50, TigerStrategy.DESTINY2_LIGHTFALL_7366), Tag64]
+    [SchemaField(0x58, TigerStrategy.DESTINY2_LATEST), Tag64]
+    public WwiseSound SoundF;
+
     [SchemaField(0x48, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    public StringReference Unk58BL;
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public StringReference64 Unk58;
-    [SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x70, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
-    public float Unk70;
-    public Tag Unk74;
-    public TigerHash Unk78;
+    public StringReference VoicelineF_BL;
+
+    [SchemaField(0x58, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x60, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
+    [SchemaField(0x68, TigerStrategy.DESTINY2_LATEST)]
+    public StringReference64 VoicelineF;
+
+    [SchemaField(0x5C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x7C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x84, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
+    [SchemaField(0x94, TigerStrategy.DESTINY2_LATEST)]
     public StringHash NarratorString;
-    public float Unk80;
+
+
+    public string GetVoiceline()
+    {
+        if (Strategy.IsBL())
+            return VoicelineM_BL.Value.ToString();
+        else
+            return VoicelineM.Value.ToString();
+    }
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2D978080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "2D978080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "2D978080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "2D978080", 0x38)]
 public struct D2Class_2D978080
 {
-    public TigerHash Unk00;
-    public TigerHash Unk04;
-    [SchemaField(TigerStrategy.DESTINY2_LATEST)]
-    public uint UnkLatest;
-    public Tag Unk08;
-    public TigerHash Unk0C;
-    public float Unk10;
-    [SchemaField(0x14, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST)]
-    public TigerHash Unk18;
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
     public DynamicArray<D2Class_30978080> Unk20;
 }
 
@@ -195,10 +187,14 @@ public struct SAA078080
 {
     [SchemaField(0x20)]
     public StringHash Narrator;
+
+    // Male
     public Tag<D2Class_38978080> Dialogue;
     public LocalizedStrings Strings;
     public StringHash VoiceLine;
-    public Tag<D2Class_38978080> DialogueF; // Female
+
+    // Female
+    public Tag<D2Class_38978080> DialogueF;
     public LocalizedStrings StringsF;
     public StringHash VoiceLineF;
 }

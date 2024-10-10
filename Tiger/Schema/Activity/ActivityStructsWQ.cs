@@ -166,7 +166,7 @@ public struct D2Class_19978080
 
     [SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402), Tag64]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    public Tag<D2Class_B8978080> DialogueTableBL;
+    public Tag<SDialogueTable> DialogueTableBL;
 
     [SchemaField(0x60, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
@@ -453,7 +453,7 @@ public struct D2Class_28898080
 public struct D2Class_B7978080
 {
     [Tag64]
-    public Tag<D2Class_B8978080> DialogueTable;
+    public Tag<SDialogueTable> DialogueTable;
 }
 
 [SchemaStruct("C78E8080", 0x18)]
@@ -468,31 +468,31 @@ public struct D2Class_C78E8080
 public struct D2Class_C98E8080
 {
     public TigerHash Hash;
-    public int Unk04;
 
-    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public StringReference64 NameString;
     [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference NameStringBL;
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public StringReference64 NameString;
 
-    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public StringReference64 DescriptionString;
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference DescriptionStringBL;
+    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public StringReference64 DescriptionString;
 
-    [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public StringReference64 ObjectiveString;
     [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference ObjectiveStringBL;
+    [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public StringReference64 ObjectiveString;
 
-    [SchemaField(0x58, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public StringReference64 Unk58;
     [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference Unk58BL;
+    [SchemaField(0x58, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public StringReference64 Unk58;
+
 
     [SchemaField(0x38, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]

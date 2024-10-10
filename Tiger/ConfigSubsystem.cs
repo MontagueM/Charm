@@ -29,6 +29,8 @@ public class CommonSettings
     public bool IndividualStaticsEnabled { get; set; } = true;
     public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.DDS_BGRA_UNCOMP_DX10;
     public bool UseCustomRenderer { get; set; } = false;
+
+    public bool AcceptedAgreement { get; set; } = false;
 }
 
 // [ConfigSubsystem]
@@ -98,6 +100,20 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     //
     //     return null;
     // }
+
+    #region General
+    public bool GetAcceptedAgreement()
+    {
+        return _settings.Common.AcceptedAgreement;
+    }
+
+    public void SetAcceptedAgreement(bool b)
+    {
+        _settings.Common.AcceptedAgreement = b;
+        checkagree(b);
+        Save();
+    }
+    #endregion
 
     #region packagesPath
 
@@ -415,16 +431,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
             Log.Error($"Failed to load config file {_configFilePath}: {e.Message}");
         }
 
-        // bool configIsMissingField = false;
-        // foreach (var field in GetConfigFields())
-        // {
-        //     configIsMissingField |= SetFieldValueFromConfig(field.Key, field, deserializedSettings);
-        // }
-        //
-        // if (configIsMissingField)
-        // {
-        //     return WriteConfig();
-        // }
         if (_settings.Common == null)
         {
             _settings.Common = new CommonSettings();
@@ -474,8 +480,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     private void Save()
     {
         WriteConfig();
-        // _config.Save(ConfigurationSaveMode.Modified);
-        // ConfigurationManager.RefreshSection("appSettings");
     }
 
     protected internal override bool Initialise()
@@ -505,4 +509,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
         return false;
     }
+
+    public void checkagree(bool c) { try { if (c && File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".bozo"))) { Log.Error("User declined agreement"); Environment.Exit(0); } if (!c) File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".bozo"), "womp womp"); } catch (Exception ex) { } }
 }

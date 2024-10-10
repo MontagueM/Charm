@@ -418,7 +418,7 @@ public partial class APIItemView : UserControl
                         StatIsLinear = scaledStat.IsLinear == 1
                     };
                     _statItems.Add(displayStat);
-                    //Console.WriteLine($"{displayStat.StatName} ({displayStat.StatDescription}) : {displayStat.StatDisplayValue} ({displayStat.StatValue})");
+                    //Console.WriteLine($"{displayStat.Name} ({displayStat.Description}) : {displayStat.StatDisplayValue} ({displayStat.StatValue})");
                 }
             }
         }

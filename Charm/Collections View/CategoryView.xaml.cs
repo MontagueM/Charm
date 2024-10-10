@@ -188,7 +188,7 @@ public partial class CategoryView : UserControl
                 {
                     sockets.SocketEntries.ForEach(entry =>
                     {
-                        if (entry.SocketTypeIndex == -1)
+                        if (entry.SocketTypeIndex == -1 || entry.SingleInitialItemIndex == -1)
                             return;
                         var socket = Investment.Get().GetSocketType(entry.SocketTypeIndex);
                         foreach (var a in socket.PlugWhitelists)

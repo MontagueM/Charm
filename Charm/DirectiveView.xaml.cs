@@ -36,15 +36,15 @@ public partial class DirectiveView : UserControl
         foreach (var directive in directiveTable)
         {
             // TODO: this looks ugly, but eh?
-            string nameString = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? directive.NameStringBL.Value.ToString() : directive.NameString.Value.ToString();
-            string descString = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? directive.DescriptionStringBL.Value.ToString() : directive.DescriptionString.Value.ToString();
-            string objString = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? directive.ObjectiveStringBL.Value.ToString() : directive.ObjectiveString.Value.ToString();
-            string unk58String = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? directive.Unk58BL.Value.ToString() : directive.Unk58.Value.ToString();
+            string nameString = Strategy.IsBL() ? directive.NameStringBL.Value.ToString() : directive.NameString.Value.ToString();
+            string descString = Strategy.IsBL() ? directive.DescriptionStringBL.Value.ToString() : directive.DescriptionString.Value.ToString();
+            string objString = Strategy.IsBL() ? directive.ObjectiveStringBL.Value.ToString() : directive.ObjectiveString.Value.ToString();
+            string unk58String = Strategy.IsBL() ? directive.Unk58BL.Value.ToString() : directive.Unk58.Value.ToString();
             items.Add(new DirectiveItem
             {
                 Name = nameString,
                 Description = descString,
-                Objective = $"{objString} 0/{directive.ObjectiveTargetCount}",
+                Objective = $"{objString}" + (directive.ObjectiveTargetCount != 0 ? $" 0/{directive.ObjectiveTargetCount}" : ""),
                 Unknown = unk58String,
                 Hash = directive.Hash
             });

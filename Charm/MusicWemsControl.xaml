@@ -59,7 +59,7 @@
             Grid.Row="0"
             HorizontalAlignment="Center"
             FontSize="40"
-            Text="wems" />
+            Text="WEMs" />
         <ListView
             x:Name="WemList"
             Grid.Row="1"

@@ -303,7 +303,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         else
         {
             reader.DumpToFile();
-            throw new Exception("Invalid bIs32Bit value");
+            throw new Exception($"Invalid bIs32Bit value ({bIs32Bit}) at Position {(reader.Position - 0x8 - 0x4).ToString("X")}");
         }
     }
 

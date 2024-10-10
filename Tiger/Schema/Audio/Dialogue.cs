@@ -3,7 +3,7 @@ using Tiger.Schema.Entity;
 
 namespace Tiger.Schema.Audio;
 
-public class Dialogue : Tag<D2Class_B8978080>
+public class Dialogue : Tag<SDialogueTable>
 {
     public Dialogue(FileHash hash) : base(hash)
     {
@@ -26,24 +26,16 @@ public class Dialogue : Tag<D2Class_B8978080>
                 {
                     case D2Class_2D978080:
                         List<dynamic?> res2d = Collapse2D97(entry);
-                        if (res2d.Count > 1)
+                        if (res2d.Count > 0)
                         {
-                            result.Add(res2d);
-                        }
-                        else if (res2d.Count == 1)
-                        {
-                            result.Add(res2d[0]);
+                            result.Add(res2d.Count > 1 ? res2d : res2d[0]);
                         }
                         break;
                     case D2Class_2A978080:
                         List<dynamic?> res2a = Collapse2A97(entry);
-                        if (res2a.Count > 1)
+                        if (res2a.Count > 0)
                         {
-                            result.Add(res2a);
-                        }
-                        else if (res2a.Count == 1)
-                        {
-                            result.Add(res2a[0]);
+                            result.Add(res2a.Count > 1 ? res2a : res2a[0]);
                         }
                         break;
                     case D2Class_33978080:
@@ -66,13 +58,9 @@ public class Dialogue : Tag<D2Class_B8978080>
             {
                 case D2Class_2A978080:
                     List<dynamic?> result = Collapse2A97(e);
-                    if (result.Count > 1)
+                    if (result.Count > 0)
                     {
-                        sounds.Add(result);
-                    }
-                    else if (result.Count == 1)
-                    {
-                        sounds.Add(result[0]);
+                        sounds.Add(result.Count > 1 ? result : result[0]);
                     }
                     break;
                 case D2Class_33978080:
@@ -98,24 +86,16 @@ public class Dialogue : Tag<D2Class_B8978080>
             {
                 case D2Class_2A978080:
                     List<dynamic?> result = Collapse2A97(e);
-                    if (result.Count > 1)
+                    if (result.Count > 0)
                     {
-                        sounds.Add(result);
-                    }
-                    else if (result.Count == 1)
-                    {
-                        sounds.Add(result[0]);
+                        sounds.Add(result.Count > 1 ? result : result[0]);
                     }
                     break;
                 case D2Class_2D978080:
                     List<dynamic?> result2 = Collapse2D97(e);
-                    if (result2.Count > 1)
+                    if (result2.Count > 0)
                     {
-                        sounds.Add(result2);
-                    }
-                    else if (result2.Count == 1)
-                    {
-                        sounds.Add(result2[0]);
+                        sounds.Add(result2.Count > 1 ? result2 : result2[0]);
                     }
                     break;
                 case D2Class_33978080:
@@ -182,11 +162,9 @@ public class DialogueD1
                                         h1.AddRange(h.WwiseSounds2);
                                         foreach (var h2 in h1)
                                         {
-                                            if (h2.Unk10.GetValue(resource.GetReader()) is SAA078080 dialogue)
+                                            if ((h2.Unk10.GetValue(resource.GetReader()) is SAA078080 dialogue) && !sounds.Contains(dialogue))
                                             {
-                                                //if (!sounds.Select(x => dialogue.Dialogue.Hash).Any())
-                                                if (!sounds.Contains(dialogue))
-                                                    sounds.Add(dialogue);
+                                                sounds.Add(dialogue);
                                             }
                                         }
                                     }

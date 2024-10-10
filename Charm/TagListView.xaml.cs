@@ -797,11 +797,22 @@ public partial class TagListView : UserControl
                 Log.Error($"BudgetSet {budgetSetHeader.TagData.Unk00.Hash} has an invalid tag hash.");
                 return;
             }
+            ETagListType tagType = ETagListType.None;
+            FileHash reference = val.Tag.Hash.GetReferenceHash();
+            switch (reference.Hash32)
+            {
+                case 0x80809ad8:
+                    tagType = ETagListType.Entity;
+                    break;
+                default:
+                    tagType = ETagListType.Texture;
+                    break;
+            }
             _allTagItems.Add(new TagItem
             {
                 Hash = val.Tag.Hash,
                 Name = val.TagPath,
-                TagType = ETagListType.Entity,
+                TagType = tagType,
             });
         });
     }
