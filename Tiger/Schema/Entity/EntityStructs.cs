@@ -174,7 +174,8 @@ public struct D2Class_8F6D8080
 
 // Physics model resource, same layout as normal model resource?
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F61B8080", 0x840)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6D8080", 0x480)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "86728080", 0x360)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "6C6D8080", 0x480)]
 public struct D2Class_6C6D8080
 {
     [SchemaField(0x15C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -618,7 +619,8 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "791A8080", 0x210)]
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5B6D8080", 0x320)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "73728080", 0x240)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "5B6D8080", 0x320)]
 public struct D2Class_5B6D8080
 {
     // Full of relative pointer shit
@@ -964,11 +966,12 @@ public struct D2Class_0E848080
     public DynamicArray<D2Class_1B848080> Unk88;
 }
 
-[SchemaStruct("1B848080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "1B848080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "1B848080", 0x38)]
 public struct D2Class_1B848080
 {
-    public int Unk00;
-    public float Unk04;
+    [SchemaField(0x8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<D2Class_1D848080> Unk08;
 }
 
@@ -979,9 +982,6 @@ public struct D2Class_1D848080
     public int Unk04;
     [Tag64]
     public Tag Unk08;
-    public int Unk0C;
-    public int Unk10;
-    public int Unk14;
 }
 
 [SchemaStruct("21868080", 0x40)]

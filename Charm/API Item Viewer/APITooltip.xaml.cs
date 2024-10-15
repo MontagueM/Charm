@@ -73,30 +73,27 @@ public partial class APITooltip : UserControl
                 }, TooltipType.Emblem);
             }
 
-            if (preview.PreviewActionString.Value.HasValue)
+            PlugItem inputItem = new PlugItem
             {
-                PlugItem inputItem = new PlugItem
-                {
-                    Name = $"", // Key glyph
-                    Type = $"", // 2nd key glyph (mouse left/right)
-                    Description = $"{preview.PreviewActionString.Value}"
-                };
-                AddToTooltip(inputItem, TooltipType.Input);
-            }
+                Name = $"", // Key glyph
+                Type = $"", // 2nd key glyph (mouse left/right)
+                Description = $"{(preview.PreviewActionString.Value ?? "Details")}"
+            };
+            AddToTooltip(inputItem, TooltipType.Input);
         }
-        else if (itemStrings?.TagData.Unk60.GetValue(itemStrings.GetReader()) is D2Class_CF548080 details)
-        {
-            if (details.DetailsActionString.Value.HasValue)
-            {
-                PlugItem inputItem = new PlugItem
-                {
-                    Name = $"", // Key glyph
-                    Type = $"", // 2nd key glyph (mouse left/right)
-                    Description = $"{details.DetailsActionString.Value}"
-                };
-                AddToTooltip(inputItem, TooltipType.Input);
-            }
-        }
+        //else if (itemStrings?.TagData.Unk60.GetValue(itemStrings.GetReader()) is D2Class_CF548080 details)
+        //{
+        //    if (details.DetailsActionString.Value.HasValue)
+        //    {
+        //        PlugItem inputItem = new PlugItem
+        //        {
+        //            Name = $"", // Key glyph
+        //            Type = $"", // 2nd key glyph (mouse left/right)
+        //            Description = $"{details.DetailsActionString.Value}"
+        //        };
+        //        AddToTooltip(inputItem, TooltipType.Input);
+        //    }
+        //}
 
         if (item.Description is not null && item.Description != "")
             AddToTooltip(item, TooltipType.TextBlock);
