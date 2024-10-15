@@ -17,6 +17,7 @@
                 Height="auto"
                 Margin="4"
                 local:StyleHelper.BorderThickness="0.75"
+                Focusable="False"
                 MouseEnter="PlugItem_MouseEnter"
                 MouseLeave="PlugItem_MouseLeave"
                 MouseRightButtonDown="Button_MouseRightButtonDown"
@@ -85,6 +86,7 @@
             <RadioButton
                 Margin="0,0,3,0"
                 Checked="Subcategory_OnSelect"
+                Focusable="False"
                 GroupName="Subcategory"
                 IsChecked="{Binding IsSelected, Mode=TwoWay}"
                 MouseEnter="CategoryButton_MouseEnter"
@@ -99,6 +101,7 @@
             <RadioButton
                 Margin="0,6,0,0"
                 Checked="SubcategoryChild_OnSelect"
+                Focusable="False"
                 GroupName="SubcategoryChild"
                 IsChecked="{Binding IsSelected, Mode=TwoWay}"
                 Style="{DynamicResource D2StyleRadioButton}">
@@ -196,7 +199,7 @@
 
     </UserControl.Resources>
 
-    <Grid x:Name="MainGrid">
+    <Grid x:Name="MainGrid" Focusable="False">
         <Grid.Background>
             <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
                 <RadialGradientBrush.GradientStops>
@@ -347,6 +350,7 @@
                             HorizontalAlignment="Left"
                             local:StyleHelper.BorderThickness="1"
                             Click="PreviousChildPage_Click"
+                            Focusable="False"
                             Style="{DynamicResource D2StyleButton}"
                             Visibility="Collapsed">
                             <Polygon
@@ -388,6 +392,7 @@
                             HorizontalAlignment="Left"
                             local:StyleHelper.BorderThickness="1"
                             Click="NextChildPage_Click"
+                            Focusable="False"
                             Style="{DynamicResource D2StyleButton}"
                             Visibility="Hidden">
                             <Polygon

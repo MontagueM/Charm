@@ -30,6 +30,7 @@ public partial class APITooltip : UserControl
     public async void MakeTooltip(PlugItem item) // TODO: Use a number ordering system instead
     {
         item.Name = item.Name.ToUpper();
+        var itemStrings = item.Item?.GetItemStrings();
 
         // Idk if Task.Run is actually doing anything here but it maybeeee feels a little more responsive?
         // TODO: Downside of Task.Run is that adding stuff to the tooltip outside of this function causes ordering issues
@@ -41,7 +42,8 @@ public partial class APITooltip : UserControl
             InfoBox.BeginStoryboard(fadeIn);
             InfoBox.DataContext = item;
         });
-        if (item.Item?.GetItemStrings().TagData.Unk38.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D8548080 warning)
+
+        if (itemStrings?.TagData.Unk38.GetValue(itemStrings.GetReader()) is D2Class_D8548080 warning)
         {
             foreach (var rule in warning.InsertionRules)
             {
@@ -61,79 +63,104 @@ public partial class APITooltip : UserControl
         //    AddToTooltip(item, TooltipType.Element);
         //}
 
-        if (item.Item?.GetItemStrings().TagData.Unk40.GetValue(item.Item.GetItemStrings().GetReader()) is D2Class_D7548080 preview)
+        if (itemStrings?.TagData.Unk40.GetValue(itemStrings.GetReader()) is D2Class_D7548080 preview)
         {
             if (preview.ScreenStyleHash.Hash32 == 3797307284) // 'screen_style_emblem'
             {
                 AddToTooltip(new PlugItem
                 {
-                    PlugImageSource = ApiImageUtils.MakeFullIcon(item.Item.GetItemStrings().TagData.EmblemContainerIndex)
+                    PlugImageSource = ApiImageUtils.MakeFullIcon(itemStrings.TagData.EmblemContainerIndex)
                 }, TooltipType.Emblem);
+            }
+
+            if (preview.PreviewActionString.Value.HasValue)
+            {
+                PlugItem inputItem = new PlugItem
+                {
+                    Name = $"", // Key glyph
+                    Type = $"", // 2nd key glyph (mouse left/right)
+                    Description = $"{preview.PreviewActionString.Value}"
+                };
+                AddToTooltip(inputItem, TooltipType.Input);
+            }
+        }
+        else if (itemStrings?.TagData.Unk60.GetValue(itemStrings.GetReader()) is D2Class_CF548080 details)
+        {
+            if (details.DetailsActionString.Value.HasValue)
+            {
+                PlugItem inputItem = new PlugItem
+                {
+                    Name = $"", // Key glyph
+                    Type = $"", // 2nd key glyph (mouse left/right)
+                    Description = $"{details.DetailsActionString.Value}"
+                };
+                AddToTooltip(inputItem, TooltipType.Input);
             }
         }
 
         if (item.Description is not null && item.Description != "")
             AddToTooltip(item, TooltipType.TextBlock);
 
-        if (item.Item?.TagData.Unk38.GetValue(item.Item.GetReader()) is D2Class_B0738080 objectives)
-        {
-            foreach (var objective in objectives.Objectives)
-            {
-                var obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
-                if (obj is null)
-                    continue;
-
-                PlugItem objItem = new PlugItem
-                {
-                    Description = obj.Value.ProgressDescription.Value,
-                    Type = $"0/{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}",
-                    PlugImageSource = obj.Value.IconIndex != -1 ? ApiImageUtils.MakeIcon(obj.Value.IconIndex) : null
-                };
-
-                TooltipType tooltipType = TooltipType.ObjectiveInteger;
-                switch ((DestinyUnlockValueUIStyle)obj.Value.InProgressValueStyle)
-                {
-                    case DestinyUnlockValueUIStyle.Percentage:
-                        tooltipType = TooltipType.ObjectivePercentage;
-                        break;
-                    case DestinyUnlockValueUIStyle.Integer:
-                        objItem.Type = $"{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}";
-                        tooltipType = TooltipType.ObjectiveInteger;
-                        break;
-                }
-
-                if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                    AddToTooltip(null, TooltipType.Separator);
-
-                AddToTooltip(objItem, tooltipType); // TODO: Other styles
-            }
-        }
-
-        if (item.Item?.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
-        {
-            if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
-                return;
-
-            foreach (var perk in stats.Perks)
-            {
-                var perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
-                if (perkStrings.IconIndex == -1)
-                    continue;
-
-                PlugItem perkItem = new PlugItem
-                {
-                    Hash = perkStrings.SandboxPerkHash,
-                    Description = perkStrings.SandboxPerkDescription.Value,
-                    PlugImageSource = ApiImageUtils.MakeIcon(perkStrings.IconIndex)
-                };
-
-                AddToTooltip(perkItem, TooltipType.Grid);
-            }
-        }
-
         if (item.Item is not null)
         {
-            foreach (var notif in item.Item?.GetItemStrings().TagData.TooltipNotifications)
+            if (item.Item.TagData.Unk38.GetValue(item.Item.GetReader()) is D2Class_B0738080 objectives)
+            {
+                foreach (var objective in objectives.Objectives)
+                {
+                    var obj = Investment.Get().GetObjective(objective.ObjectiveIndex);
+                    if (obj is null)
+                        continue;
+
+                    PlugItem objItem = new PlugItem
+                    {
+                        Description = obj.Value.ProgressDescription.Value,
+                        Type = $"0/{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}",
+                        PlugImageSource = obj.Value.IconIndex != -1 ? ApiImageUtils.MakeIcon(obj.Value.IconIndex) : null
+                    };
+
+                    TooltipType tooltipType = TooltipType.ObjectiveInteger;
+                    switch ((DestinyUnlockValueUIStyle)obj.Value.InProgressValueStyle)
+                    {
+                        case DestinyUnlockValueUIStyle.Percentage:
+                            tooltipType = TooltipType.ObjectivePercentage;
+                            break;
+                        case DestinyUnlockValueUIStyle.Integer:
+                            objItem.Type = $"{Investment.Get().GetObjectiveValue(objective.ObjectiveIndex)}";
+                            tooltipType = TooltipType.ObjectiveInteger;
+                            break;
+                    }
+
+                    if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
+                        AddToTooltip(null, TooltipType.Separator);
+
+                    AddToTooltip(objItem, tooltipType); // TODO: Other styles
+                }
+            }
+
+            if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
+            {
+                if (item.PlugStyle == DestinySocketCategoryStyle.Reusable)
+                    return;
+
+                foreach (var perk in stats.Perks)
+                {
+                    var perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
+                    if (perkStrings.IconIndex == -1)
+                        continue;
+
+                    PlugItem perkItem = new PlugItem
+                    {
+                        Hash = perkStrings.SandboxPerkHash,
+                        Description = perkStrings.SandboxPerkDescription.Value,
+                        PlugImageSource = ApiImageUtils.MakeIcon(perkStrings.IconIndex)
+                    };
+
+                    AddToTooltip(perkItem, TooltipType.Grid);
+                }
+            }
+
+
+            foreach (var notif in itemStrings.TagData.TooltipNotifications)
             {
                 PlugItem notifItem = new PlugItem
                 {
@@ -143,12 +170,12 @@ public partial class APITooltip : UserControl
                 AddToTooltip(notifItem, TooltipType.InfoBlock);
             }
         }
-        //});
     }
 
     public void ClearTooltip()
     {
         InfoBoxStackPanel.Children.Clear();
+        UserInputStackPanel.Children.Clear();
         WarningBoxStackPanel.Children.Clear();
         InfoBox.Visibility = Visibility.Collapsed;
     }
@@ -207,6 +234,12 @@ public partial class APITooltip : UserControl
                     elementUi.DataContext = item;
                     InfoBoxStackPanel.Children.Add(elementUi);
                     break;
+                case TooltipType.Input:
+                    DataTemplate inputTemplate = (DataTemplate)FindResource("InfoBoxInputTemplate");
+                    FrameworkElement inputUi = (FrameworkElement)inputTemplate.LoadContent();
+                    inputUi.DataContext = item;
+                    UserInputStackPanel.Children.Add(inputUi);
+                    break;
 
                 // Objective stuff
                 case TooltipType.ObjectivePercentage:
@@ -259,6 +292,7 @@ public partial class APITooltip : UserControl
         Separator,
         Emblem,
         Element,
+        Input,
 
         ObjectivePercentage,
         ObjectiveInteger,

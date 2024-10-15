@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Charm"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Focusable="False"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -204,6 +205,42 @@
                     Foreground="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Foreground}"
                     Text="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Text}"
                     Visibility="{Binding PlugDamageType, Converter={StaticResource DamageTypeConverter}, ConverterParameter=Visibility}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="InfoBoxInputTemplate">
+            <Grid
+                Margin="15,0,0,0"
+                HorizontalAlignment="Center"
+                Background="Transparent">
+                <StackPanel FlowDirection="LeftToRight" Orientation="Horizontal">
+                    <Grid Margin="0,5,5,5" Background="Transparent">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="18"
+                            Foreground="{StaticResource ForegroundColour80}"
+                            Text="{Binding Name}"
+                            TextWrapping="WrapWithOverflow" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="18"
+                            Foreground="#3396DA"
+                            Text="{Binding Type}"
+                            TextWrapping="WrapWithOverflow" />
+                    </Grid>
+
+                    <TextBlock
+                        Margin="0,0,0,0"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="18"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="{Binding Description}"
+                        TextWrapping="WrapWithOverflow" />
+                </StackPanel>
+
             </Grid>
         </DataTemplate>
 
@@ -419,43 +456,16 @@
             Background="#E1000000">
             <Grid.Style>
                 <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding HasControls}" Value="True">
-                            <Setter Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                    </Style.Triggers>
+                    <Setter Property="Visibility" Value="Visible" />
+
                 </Style>
             </Grid.Style>
-            <Grid
-                Margin="0,0,10,0"
+            <StackPanel
+                x:Name="UserInputStackPanel"
                 HorizontalAlignment="Right"
-                Background="Transparent">
-                <TextBlock
-                    Margin="5"
-                    VerticalAlignment="Center"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="20"
-                    Foreground="{StaticResource ForegroundColour80}"
-                    Text=""
-                    TextWrapping="WrapWithOverflow" />
-                <TextBlock
-                    Margin="5"
-                    VerticalAlignment="Center"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="20"
-                    Foreground="#3396DA"
-                    Text=""
-                    TextWrapping="WrapWithOverflow" />
-                <TextBlock
-                    Margin="5"
-                    VerticalAlignment="Center"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="20"
-                    Foreground="{StaticResource ForegroundColour80}"
-                    Text="    Details"
-                    TextWrapping="WrapWithOverflow" />
-            </Grid>
+                VerticalAlignment="Center"
+                FlowDirection="RightToLeft"
+                Orientation="Horizontal" />
 
         </Grid>
     </Grid>

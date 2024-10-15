@@ -108,6 +108,7 @@
                 Click="PlugItem_OnClick"
                 MouseEnter="PlugItem_MouseEnter"
                 MouseLeave="PlugItem_MouseLeave"
+                MouseRightButtonDown="PlugItem_OnRightClick"
                 Style="{DynamicResource ReusableButton}">
                 <local:APIItemPerk />
             </Button>
@@ -163,6 +164,7 @@
                 Click="PlugItem_OnClick"
                 MouseEnter="PlugItem_MouseEnter"
                 MouseLeave="PlugItem_MouseLeave"
+                MouseRightButtonDown="PlugItem_OnRightClick"
                 Style="{DynamicResource ConsumableButton}">
                 <local:APIItemMod />
             </Button>

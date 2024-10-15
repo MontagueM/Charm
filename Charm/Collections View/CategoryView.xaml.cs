@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -13,6 +15,7 @@ using System.Windows.Threading;
 using Tiger;
 using Tiger.Schema.Investment;
 using static Charm.APIItemView;
+using static Charm.APITooltip;
 
 namespace Charm;
 
@@ -38,6 +41,9 @@ public partial class CategoryView : UserControl
     private int SubcategoryChildrenPerPage = 9;
     private int CurrentSubcategoryChildrenPage = 0;
 
+    private Subcategory CurrentSubcategory = null;
+    private SubcategoryChild CurrentSubcategoryChild = null;
+
     public CategoryView(CollectionsView.ItemCategory itemCategory)
     {
         InitializeComponent();
@@ -52,6 +58,7 @@ public partial class CategoryView : UserControl
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
         MouseMove += UserControl_MouseMove;
+        KeyDown += Button_KeyDown;
 
         ToolTip = new();
         //MouseMove += ToolTip.UserControl_MouseMove;
@@ -322,6 +329,7 @@ public partial class CategoryView : UserControl
                 return;
 
             Subcategory item = ((RadioButton)sender).DataContext as Subcategory;
+            CurrentSubcategory = item;
 
             var nodes = PresentationNodes.TagData.PresentationNodeDefinitions;
             var strings = PresentationNodeStrings.TagData.PresentationNodeDefinitionStrings;
@@ -360,6 +368,7 @@ public partial class CategoryView : UserControl
                 return;
 
             SubcategoryChild item = ((RadioButton)sender).DataContext as SubcategoryChild;
+            CurrentSubcategoryChild = item;
             CurrentPage = 0;
 
             // Not ideal but it works for what it needs to do
@@ -548,6 +557,17 @@ public partial class CategoryView : UserControl
         };
         if (source.Description != null && source.Description != string.Empty)
             ToolTip.AddToTooltip(source, APITooltip.TooltipType.InfoBlock);
+
+        if (DareView.ShouldAddToList(item.Item, item.ItemType))
+        {
+            PlugItem inputItem2 = new PlugItem
+            {
+                Name = $"", // Key glyph
+                Type = $"", // 2nd key glyph (mouse left/right)
+                Description = $"Export"
+            };
+            ToolTip.AddToTooltip(inputItem2, TooltipType.Input);
+        }
     }
 
     private void CategoryButton_MouseEnter(object sender, MouseEventArgs e)
@@ -577,8 +597,49 @@ public partial class CategoryView : UserControl
         Point position = e.GetPosition(this);
 
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
-        gridTransform.X = position.X * -0.01;
-        gridTransform.Y = position.Y * -0.01;
+        gridTransform.X = position.X * -0.0075;
+        gridTransform.Y = position.Y * -0.0075;
+    }
+
+    private async void Button_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (ToolTip.ActiveItem == null || ToolTip.ActiveItem is not Button)
+            return;
+
+        e.Handled = true;
+        if (e.Key == Key.Return)
+        {
+            ApiItem item = (ApiItem)(ToolTip.ActiveItem).DataContext;
+            if (!DareView.ShouldAddToList(item.Item, item.ItemType))
+                return;
+
+            MainWindow.Progress.SetProgressStages(new() { $"Exporting {item.ItemName}" });
+            await Task.Run(() =>
+            {
+                if ((item.ItemType == "Artifact" || item.ItemType == "Seasonal Artifact") && item.Item.TagData.Unk28.GetValue(item.Item.GetReader()) is D2Class_C5738080 gearSet)
+                {
+                    if (gearSet.ItemList.Count != 0)
+                        item.Item = Investment.Get().GetInventoryItem(gearSet.ItemList.First().ItemIndex);
+                }
+
+                if (item.Item.GetArtArrangementIndex() != -1)
+                {
+                    EntityView.ExportInventoryItem(item);
+                }
+                else
+                {
+                    // shader
+                    ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+                    string savePath = config.GetExportSavePath();
+                    string itemName = Helpers.SanitizeString(item.ItemName);
+                    savePath += $"/{itemName}";
+                    Directory.CreateDirectory(savePath);
+                    Directory.CreateDirectory(savePath + "/Textures");
+                    Investment.Get().ExportShader(item.Item, savePath, itemName, config.GetOutputTextureFormat());
+                }
+            });
+            MainWindow.Progress.CompleteStage();
+        }
     }
 }
 

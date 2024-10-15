@@ -182,8 +182,8 @@ public partial class MainMenuView : UserControl
     {
         System.Windows.Point position = e.GetPosition(this);
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
-        gridTransform.X = position.X * -0.01;
-        gridTransform.Y = position.Y * -0.01;
+        gridTransform.X = position.X * -0.0075;
+        gridTransform.Y = position.Y * -0.0075;
     }
 
     private async Task LoadInvestment()

@@ -406,6 +406,10 @@ public struct D2Class_9F548080
     [SchemaField(0x48, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk40;  // D2Class_D7548080
 
+    [SchemaField(0x60, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x68, TigerStrategy.DESTINY2_LATEST)]
+    public ResourcePointer Unk60;  // D2Class_CF548080
+
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk78;  // D2Class_B4548080
@@ -481,8 +485,14 @@ public struct D2Class_DC548080
 public struct D2Class_D7548080 // 'preview'
 {
     public TigerHash ScreenStyleHash; // screenStyle
-    //public int PreviewVendorIndex; // previewVendorHash
-    //public StringIndexReference PreviewActionString; // previewActionString
+    public int PreviewVendorIndex; // previewVendorHash
+    public StringIndexReference PreviewActionString; // previewActionString
+}
+
+[SchemaStruct("CF548080", 0x8)]
+public struct D2Class_CF548080 // 'details'
+{
+    public StringIndexReference DetailsActionString;
 }
 
 [SchemaStruct("B2548080", 0x20)]
@@ -1014,7 +1024,6 @@ public struct D2Class_0E5A8080
 
     [SchemaField(0x8, TigerStrategy.DESTINY2_WITCHQUEEN_6307), Tag64, NoLoad]
     public LocalizedStrings LocalizedStrings;
-    public short Unk18;
 
     public LocalizedStrings GetLocalizedStrings()
     {

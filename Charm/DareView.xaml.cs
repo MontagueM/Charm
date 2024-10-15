@@ -300,8 +300,11 @@ public partial class DareView : UserControl
         }
     }
 
-    private bool ShouldAddToList(InventoryItem item, string type)
+    public static bool ShouldAddToList(InventoryItem item, string type)
     {
+        if (type is null)
+            return false;
+
         string[] blacklist = new[]
         {
             "Ghost Projection",
@@ -317,8 +320,12 @@ public partial class DareView : UserControl
         };
 
         var a = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
-        return ((Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON && a.TagData.ItemType.Value.ToString() == "Artifact" && item.TagData.Unk28.GetValue(a.GetReader()) is D2Class_C5738080)
-            || item.GetArtArrangementIndex() != -1 ||
+        var b = a.TagData.ItemType.Value.ToString();
+        return ((Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON
+            && (b == "Artifact" || b == "Seasonal Artifact")
+            && item.TagData.Unk28.GetValue(a.GetReader()) is D2Class_C5738080)
+            || item.GetArtArrangementIndex() != -1
+            ||
             // Whitelist
             whitelist.Any(x => type.ToLower().Contains(x.ToLower()))) &&
             // Blacklist

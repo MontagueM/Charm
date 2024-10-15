@@ -151,6 +151,12 @@ public partial class APIItemView : UserControl
                     {
                         if (a.PlugCategoryHash.Hash32 == 1466776700) // 'v300.weapon.damage_type.energy', Y1 weapon that uses a damage type mod from ye olden days
                         {
+                            if (entry.SingleInitialItemIndex == -1)
+                            {
+                                ApiItem.ItemDamageType = DestinyDamageTypeEnum.Kinetic.GetEnumDescription();
+                                continue;
+                            }
+
                             var item = Investment.Get().GetInventoryItem(entry.SingleInitialItemIndex);
                             item.Load(true); // idk why the item sometimes isnt fully loaded
                             var index = item.GetItemDamageTypeIndex();
@@ -173,7 +179,7 @@ public partial class APIItemView : UserControl
         var item = Investment.Get().GetInventoryItem(plugIndex);
         var strings = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
         var type = strings.TagData.ItemType.Value.ToString();
-        if (type == "Shader") // Too slow atm, not really important either
+        if (type == "Shader" || type == "Ghost Projection" || type == "Transmat Effect") // Too slow atm, not really important either
             return null;
 
         var icon = ApiImageUtils.MakeIcon(item);
@@ -569,6 +575,13 @@ public partial class APIItemView : UserControl
             }
         }
 
+        item.PlugSelected = !item.PlugSelected;
+    }
+
+    private void PlugItem_OnRightClick(object sender, RoutedEventArgs e)
+    {
+        PlugItem item = (PlugItem)(sender as Button).DataContext;
+
         if (item.Type.ToLower().Contains("ornament") || item.Name.ToLower() == "default ornament")
         {
             var hash = item.Item.TagData.InventoryItemHash.Hash32;
@@ -586,8 +599,6 @@ public partial class APIItemView : UserControl
                 Log.Error($"Failed to get background for {item.Item.Hash}: {ex.Message}");
             }
         }
-
-        item.PlugSelected = !item.PlugSelected;
     }
 
     private void StatItem_MouseEnter(object sender, MouseEventArgs e)
@@ -623,8 +634,8 @@ public partial class APIItemView : UserControl
     {
         System.Windows.Point position = e.GetPosition(this);
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
-        gridTransform.X = position.X * -0.01;
-        gridTransform.Y = position.Y * -0.01;
+        gridTransform.X = position.X * -0.0075;
+        gridTransform.Y = position.Y * -0.0075;
     }
 
     private void UserControl_KeyDown(object sender, KeyEventArgs e)

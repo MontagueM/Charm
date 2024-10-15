@@ -53,7 +53,7 @@ public static class DestinyDamageType
             case 1409:
                 return DestinyDamageTypeEnum.Strand;
             default:
-                Log.Error($"Unknown DestinyDamageTypeEnum {index}");
+                Log.Warning($"Unknown DestinyDamageTypeEnum {index}");
                 return DestinyDamageTypeEnum.None;
         }
     }
