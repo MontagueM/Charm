@@ -72,6 +72,7 @@ public struct D2Class_33978080
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference VoicelineM_BL;
 
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x30, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
     public StringReference64 VoicelineM;
@@ -87,6 +88,7 @@ public struct D2Class_33978080
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     public StringReference VoicelineF_BL;
 
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
     [SchemaField(0x68, TigerStrategy.DESTINY2_LATEST)]

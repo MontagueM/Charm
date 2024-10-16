@@ -31,7 +31,8 @@ public partial class CollectionsView : UserControl
         LoadMainItemCategory();
     }
 
-    public void LoadMainItemCategory(int i = 0, int depth = 0)
+    // Badges -> hash 498211331
+    public void LoadMainItemCategory(int i = 0)
     {
         var nodes = PresentationNodes.TagData.PresentationNodeDefinitions;
         var strings = PresentationNodeStrings.TagData.PresentationNodeDefinitionStrings;

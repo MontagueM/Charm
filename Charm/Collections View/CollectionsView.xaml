@@ -33,7 +33,7 @@
                                 Background="#42464F"
                                 BorderBrush="#B69D5D"
                                 BorderThickness="6,0,0,0"
-                                CornerRadius="0,75,0,0" />
+                                CornerRadius="0,50,0,0" />
 
                             <Border
                                 x:Name="innerBorder"
@@ -41,7 +41,7 @@
                                 Margin="0"
                                 BorderBrush="#D9FFFFFF"
                                 BorderThickness="1"
-                                CornerRadius="0,75,0,0"
+                                CornerRadius="0,50,0,0"
                                 IsHitTestVisible="False"
                                 Opacity="0" />
 
@@ -51,7 +51,7 @@
                                 Margin="-4"
                                 BorderBrush="#D9FFFFFF"
                                 BorderThickness="1"
-                                CornerRadius="0,75,0,0"
+                                CornerRadius="0,50,0,0"
                                 IsHitTestVisible="False"
                                 Opacity="0" />
 
@@ -62,7 +62,7 @@
 
                             <Grid
                                 Grid.Row="2"
-                                MaxWidth="210"
+                                MaxWidth="230"
                                 MaxHeight="100"
                                 Background="Transparent">
                                 <Grid.RowDefinitions>
@@ -89,7 +89,7 @@
                                     d:FontFamily="Haas Grot Text 55 Roman"
                                     d:Text="777"
                                     FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                                    FontSize="17"
+                                    FontSize="18"
                                     FontWeight="Normal"
                                     Foreground="{DynamicResource ForegroundColour80}"
                                     Text="{Binding ItemCategoryAmount}" />

@@ -215,7 +215,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
             // Check if attribute is null
             if (attribute == null)
-                Console.WriteLine($"Attribute for field {field.Name} is null.");
+                Console.WriteLine($"Attribute for field {field.Name} is null. ({field.FieldType}, {field.ReflectedType.Name})");
         }
 #endif
         // don't include fields that have a strategy assigned but are larger than us

@@ -364,6 +364,7 @@ public partial class DevView : UserControl
     //    }
     //}
 
+#if DEBUG
     // Cleaverly done (insert name) but you're not supposed to be here. As a matter of fact, you're not.
     // Get back where you belong and forget about all this...Until we meet again.
     public void RipAndTear()
@@ -386,4 +387,5 @@ public partial class DevView : UserControl
             }
         });
     }
+#endif
 }

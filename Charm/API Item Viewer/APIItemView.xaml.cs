@@ -957,7 +957,7 @@ public static class ApiImageUtils
             return null;
 
         var texture = GetTexture(containers[containerIndex], iconIndex, listIndex);
-        var primaryStream = texture.GetTexture();
+        var primaryStream = texture?.GetTexture();
         var primary = primaryStream != null ? MakeBitmapImage(primaryStream, texture.TagData.Width, texture.TagData.Height) : null;
 
         var dw = new ImageBrush(primary);
@@ -973,13 +973,13 @@ public static class ApiImageUtils
         if (prim is D2Class_CD3E8080 structCD3E8080)
         {
             // TextureList[0] is default, others are for colourblind modes
-            if (texIndex >= structCD3E8080.Unk00[reader, listIndex].TextureList.Count)
+            if (listIndex >= structCD3E8080.Unk00.Count || texIndex >= structCD3E8080.Unk00[reader, listIndex].TextureList.Count)
                 return null;
             return structCD3E8080.Unk00[reader, listIndex].TextureList[reader, texIndex].IconTexture;
         }
         if (prim is D2Class_CB3E8080 structCB3E8080)
         {
-            if (texIndex >= structCB3E8080.Unk00[reader, listIndex].TextureList.Count)
+            if (listIndex >= structCB3E8080.Unk00.Count || texIndex >= structCB3E8080.Unk00[reader, listIndex].TextureList.Count)
                 return null;
             return structCB3E8080.Unk00[reader, listIndex].TextureList[reader, texIndex].IconTexture;
         }

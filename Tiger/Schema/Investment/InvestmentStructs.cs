@@ -398,22 +398,22 @@ public struct D2Class_9F548080
 {
     public long FileSize;
 
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x40, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk38;  // D2Class_D8548080
 
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x40, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x48, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk40;  // D2Class_D7548080
 
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x68, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk60;  // D2Class_CF548080
 
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk78;  // D2Class_B4548080

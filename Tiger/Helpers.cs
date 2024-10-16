@@ -250,7 +250,7 @@ public static class ColorUtility
         // Convert HSL to RGB with the new brightness
         HSLToColor(hue, saturation, newBrightness, out r, out g, out b);
 
-        return Color.FromArgb(color.A, r, g, b);
+        return Color.FromArgb(Math.Clamp(color.A, (byte)0, (byte)255), Math.Clamp(r, 0, 255), Math.Clamp(g, 0, 255), Math.Clamp(b, 0, 255));
     }
 
     private static void ColorToHSL(Color color, out float hue, out float saturation, out float lightness)
