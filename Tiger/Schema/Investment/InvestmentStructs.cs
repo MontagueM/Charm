@@ -427,7 +427,7 @@ public struct D2Class_9F548080
     [SchemaField(0x80, TigerStrategy.DESTINY2_LATEST)]
     public short IconIndex;
     public short FoundryIconIndex; // the banner that appears on foundry weapons (Hakke, veist, etc)
-    public short EmblemContainerIndex;
+    public short EmblemContainerIndex; // Can be the emblem or foundry container post-TFS
 
     [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x8C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -459,6 +459,7 @@ public struct D2Class_9F548080
     public TigerHash UnkD0;  // DestinySandboxPatternDefinition hash
     public TigerHash UnkD4;
     public StringHash TooltipStyle; // 'tooltipStyle' as fnv hash
+    public StringHash DisplayStyle; // 'uiItemDisplayStyle'
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xE0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
@@ -1299,7 +1300,7 @@ public struct D2Class_DB788080
     [SchemaField(0x70)]
     public DynamicArray<D2Class_ED788080> PresentationNodes; // children -> presentationNodes
     public DynamicArray<D2Class_EA788080> Collectables; // children -> collectibles
-    public DynamicArray<D2Class_EA788080> Records; // children -> records
+    public DynamicArray<D2Class_E7788080> Records; // children -> records
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "ED788080", 0x18)]
@@ -1313,7 +1314,14 @@ public struct D2Class_ED788080
 public struct D2Class_EA788080
 {
     public short Unk00;
-    public short Index; // Collectable index
+    public short CollectableIndex; // Collectable index
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "E7788080", 0x6)]
+public struct D2Class_E7788080
+{
+    public short Unk00;
+    public short RecordDefinitionIndex; // RecordDefinition index
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "03588080", 0x18)]
@@ -1330,6 +1338,67 @@ public struct D2Class_07588080
     public int IconIndex;
     public StringIndexReference Name;
     public StringIndexReference Description;
+}
+#endregion
+
+#region DestinyRecordDefinition
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "1F718080", 0x18)]
+public struct D2Class_1F718080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_C16F8080> RecordDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "C16F8080", 0xE8)]
+public struct D2Class_C16F8080
+{
+    [SchemaField(0x18)]
+    public DynamicArray<D2Class_F7788080> ParentNodeHashes;
+
+    [SchemaField(0x30)]
+    public TigerHash Hash;
+    public short LoreIndex;
+
+    [SchemaField(0x38)]
+    public DynamicArray<D2Class_C96F8080> ObjectiveHashes;
+
+    [SchemaField(0x64)]
+    public int ScoreValue;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "C96F8080", 0x2)]
+public struct D2Class_C96F8080
+{
+    public short ObjectiveIndex;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "87588080", 0x18)]
+public struct D2Class_87588080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_8B588080> RecordDefinitionStrings;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "8B588080", 0x90)]
+public struct D2Class_8B588080
+{
+    public TigerHash Hash;
+    public int IconIndex;
+    public StringIndexReference Name;
+    public StringIndexReference Description;
+    public StringIndexReference RecordTypeName;
+    public StringIndexReference ObscuredName;
+    public StringIndexReference ObscuredDescription;
+
+    [SchemaField(0x50)]
+    public DynamicArray<D2Class_93588080> RewardItems;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "93588080", 0x18)]
+public struct D2Class_93588080
+{
+    public int ItemIndex; // InventoryItem index
+    public int Quantity;
 }
 #endregion
 

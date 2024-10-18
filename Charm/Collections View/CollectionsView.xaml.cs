@@ -37,7 +37,7 @@ public partial class CollectionsView : UserControl
         var nodes = PresentationNodes.TagData.PresentationNodeDefinitions;
         var strings = PresentationNodeStrings.TagData.PresentationNodeDefinitionStrings;
 
-        foreach (var node in nodes[i].PresentationNodes)
+        foreach (var node in nodes[0].PresentationNodes)
         {
             var curNode = nodes[node.PresentationNodeIndex];
             var curNodeStrings = strings[node.PresentationNodeIndex];

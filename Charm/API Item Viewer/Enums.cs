@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows.Media;
 using Arithmic;
+using Tiger;
 
 // https://bungie-net.github.io/multi/schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition.html#schema_Destiny-Definitions-Sockets-DestinySocketCategoryDefinition
 // https://bungie-net.github.io/multi/schema_Destiny-DestinySocketCategoryStyle.html#schema_Destiny-DestinySocketCategoryStyle
@@ -18,8 +19,24 @@ public enum DestinySocketCategoryStyle : uint
     Supers = 497024337, // 8
 }
 
-// TODO: Find where these indexes actually go?
+public enum DestinyTooltipStyle : uint
+{
+    None = StringHash.InvalidHash32, // C59D1C81
+    Build = 3284755031, // 'build'
+    Record = 3918064370, // 'record'
+    VendorAction = 4278229900 // 'vendor_action'
+}
 
+public enum DestinyUIDisplayStyle : uint
+{
+    None = StringHash.InvalidHash32, // C59D1C81
+    Info = 3556713801, // 'ui_display_style_info'
+    PerkInfo = 900809780, // 'ui_display_style_perk_info'
+    ItemAddon = 1366836148, // 'ui_display_style_item_add_on'
+    EnergyMod = 3201739904 // 'ui_display_style_energy_mod'
+}
+
+// TODO: Find where these indexes actually go?
 public static class DestinyDamageType
 {
     public static DestinyDamageTypeEnum GetDamageType(int index)
@@ -108,13 +125,13 @@ public static class DestinyTierTypeColor
 {
     private static readonly Dictionary<DestinyTierType, Color> Colors = new Dictionary<DestinyTierType, Color>
     {
-        { DestinyTierType.Unknown, Color.FromArgb(255, 66, 66, 66) },
-        { DestinyTierType.Currency, Color.FromArgb(255, 195, 188, 180) },
-        { DestinyTierType.Common, Color.FromArgb(255, 66, 66, 66) },
-        { DestinyTierType.Uncommon, Color.FromArgb(255, 55, 113, 67) },
-        { DestinyTierType.Rare, Color.FromArgb(255, 80, 118, 164) },
-        { DestinyTierType.Legendary, Color.FromArgb(255, 82, 47, 100) },
-        { DestinyTierType.Exotic, Color.FromArgb(255, 206, 174, 51) }
+        { DestinyTierType.Unknown, Color.FromArgb(255, 56, 56, 56) },
+        { DestinyTierType.Currency, Color.FromArgb(255, 56, 56, 56) },
+        { DestinyTierType.Common, Color.FromArgb(255, 194, 187, 179) },
+        { DestinyTierType.Uncommon, Color.FromArgb(255, 51, 107, 62) },
+        { DestinyTierType.Rare, Color.FromArgb(255, 85, 125, 155) },
+        { DestinyTierType.Legendary, Color.FromArgb(255, 79, 55, 99) },
+        { DestinyTierType.Exotic, Color.FromArgb(255, 203, 171, 54) }
     };
 
     public static Color GetColor(this DestinyTierType tierType)

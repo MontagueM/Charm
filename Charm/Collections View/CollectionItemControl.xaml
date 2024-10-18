@@ -62,7 +62,7 @@
                 Panel.ZIndex="1"
                 FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                 FontSize="20"
-                Foreground="{StaticResource ForegroundColour90}"
+                Foreground="{StaticResource ForegroundColour100}"
                 Text="{Binding ItemName}"
                 TextAlignment="Left"
                 TextWrapping="Wrap" />
@@ -75,7 +75,7 @@
                 Panel.ZIndex="1"
                 FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                 FontSize="14"
-                Foreground="{StaticResource ForegroundColour80}"
+                Foreground="{StaticResource ForegroundColour90}"
                 Text="{Binding ItemType}"
                 TextAlignment="Left" />
             <TextBlock

@@ -298,7 +298,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public Tag<D2Class_B83E8080>? GetFoundryItemIconContainer(TigerHash hash)
     {
-        int iconIndex = GetItemStrings(GetItemIndex(hash)).TagData.FoundryIconIndex;
+        int iconIndex = Strategy.IsLatest() ? GetItemStrings(GetItemIndex(hash)).TagData.EmblemContainerIndex : GetItemStrings(GetItemIndex(hash)).TagData.FoundryIconIndex;
         if (iconIndex == -1)
             return null;
         return _inventoryItemIconTag.TagData.InventoryItemIconsMap.ElementAt(_inventoryItemIconTag.GetReader(), iconIndex).IconContainer;

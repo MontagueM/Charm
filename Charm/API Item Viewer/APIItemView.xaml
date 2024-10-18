@@ -18,7 +18,7 @@
         <local:FlipSignPercentageConverter x:Key="FlipSignPercentageConverter" />
         <local:TransparentColorConverter x:Key="TransparentColorConverter" />
         <local:InfoBoxColorConverter x:Key="InfoBoxColorConverter" />
-
+        <local:ToUpperConverter x:Key="ToUpperConverter" />
 
         <DataTemplate x:Key="ReusableTemplate">
             <Grid
@@ -99,6 +99,7 @@
                 </Grid>
             </Grid>
         </DataTemplate>
+
         <DataTemplate x:Key="ReusableItemTemplate">
             <Button
                 x:Name="PlugItemButton"
@@ -155,6 +156,7 @@
                 </Grid>
             </Grid>
         </DataTemplate>
+
         <DataTemplate x:Key="ConsumableItemTemplate">
             <Button
                 x:Name="PlugItemButton"
@@ -184,7 +186,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="10" />
-                    <RowDefinition />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
                 <TextBlock
@@ -250,6 +252,7 @@
                 </Grid>
             </Grid>
         </DataTemplate>
+
         <DataTemplate x:Key="LargePerkItemTemplate">
             <Grid Background="Transparent">
                 <Grid.ColumnDefinitions>
@@ -283,7 +286,7 @@
                         FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                         FontSize="22"
                         Foreground="{StaticResource ForegroundColour100}"
-                        Style="{StaticResource DropShadowMedium}"
+                        Style="{StaticResource DropShadowLight}"
                         Text="{Binding Name}"
                         TextAlignment="Left" />
                     <TextBlock
@@ -294,8 +297,8 @@
                         Panel.ZIndex="1"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                         FontSize="19"
-                        Foreground="{StaticResource ForegroundColour90}"
-                        Style="{StaticResource DropShadowMedium}"
+                        Foreground="{StaticResource ForegroundColour95}"
+                        Style="{StaticResource DropShadowLight}"
                         Text="{Binding Description}"
                         TextAlignment="Left"
                         TextWrapping="Wrap" />
@@ -445,8 +448,9 @@
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Panel.ZIndex" Value="1" />
+            <Setter Property="FontWeight" Value="Light" />
             <Setter Property="FontFamily" Value="{DynamicResource Haas Grot Text 55 Roman Keys}" />
-            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontSize" Value="22" />
             <Setter Property="Foreground" Value="{StaticResource ForegroundColour70}" />
             <Setter Property="TextAlignment" Value="Left" />
             <Setter Property="TextWrapping" Value="Wrap" />
@@ -468,7 +472,7 @@
         </Storyboard>
     </UserControl.Resources>
 
-    <Grid x:Name="MainGrid">
+    <Grid x:Name="MainGrid" Focusable="True">
         <Grid.Background>
             <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
                 <RadialGradientBrush.GradientStops>
@@ -520,6 +524,7 @@
                 Source="{Binding EmblemSmall}" />
         </Grid>
 
+        <!--  Main Container + Sockets  -->
         <Grid
             x:Name="MainContainer"
             Margin="0,55,0,0"
@@ -736,7 +741,7 @@
                         FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                         FontSize="20"
                         Foreground="{StaticResource ForegroundColour90}"
-                        Style="{StaticResource DropShadowMedium}"
+                        Style="{StaticResource DropShadowLight}"
                         Visibility="Hidden">
                         <Run Text="Power Cap: " />
                         <Run Text="{Binding ItemPowerCap}" />
@@ -751,7 +756,8 @@
                     Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource AncestorType=Grid}}"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    Fill="Silver" />
+                    Fill="Silver"
+                    Visibility="Hidden" />
 
                 <ItemsControl
                     x:Name="ItemStatsControl"
@@ -781,8 +787,8 @@
                                     Panel.ZIndex="1"
                                     FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                     FontSize="20"
-                                    Foreground="{StaticResource ForegroundColour90}"
-                                    Style="{StaticResource DropShadowMedium}"
+                                    Foreground="{StaticResource ForegroundColour95}"
+                                    Style="{StaticResource DropShadowLight}"
                                     Text="{Binding Name}"
                                     TextAlignment="Right"
                                     TextWrapping="Wrap" />
@@ -844,7 +850,7 @@
                                     FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                                     FontSize="20"
                                     Foreground="{StaticResource ForegroundColour90}"
-                                    Style="{StaticResource DropShadowMedium}"
+                                    Style="{StaticResource DropShadowLight}"
                                     Text="{Binding StatDisplayValue}"
                                     TextAlignment="Right"
                                     TextWrapping="Wrap" />
@@ -883,8 +889,8 @@
                                     Panel.ZIndex="1"
                                     FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                     FontSize="20"
-                                    Foreground="{StaticResource ForegroundColour90}"
-                                    Style="{StaticResource DropShadowMedium}"
+                                    Foreground="{StaticResource ForegroundColour95}"
+                                    Style="{StaticResource DropShadowLight}"
                                     Text="{Binding Name}"
                                     TextAlignment="Right"
                                     TextWrapping="Wrap" />
@@ -900,7 +906,7 @@
                                     FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
                                     FontSize="20"
                                     Foreground="{StaticResource ForegroundColour90}"
-                                    Style="{StaticResource DropShadowMedium}"
+                                    Style="{StaticResource DropShadowLight}"
                                     Text="{Binding StatDisplayValue}"
                                     TextAlignment="Right"
                                     TextWrapping="Wrap" />
@@ -943,18 +949,46 @@
             </Grid>
         </Grid>
 
-        <!--  Background + Foundry Banner + Rarity Fade  -->
+        <!--  Rarity gradient  -->
+        <Grid
+            Name="ItemRarityBanner"
+            Grid.ColumnSpan="3"
+            Width="auto"
+            Height="55"
+            VerticalAlignment="Top"
+            Panel.ZIndex="-2"
+            Background="Transparent">
+            <Rectangle>
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                        <GradientStop d:Color="#B0BE9F28" Offset="1" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.7}" />
+                        <GradientStop d:Color="#33BE9F28" Offset="0" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.2}" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <Rectangle Margin="0,45,0,0">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                        <GradientStop d:Color="#B0BE9F28" Offset="1" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.7}" />
+                        <GradientStop d:Color="#33BE9F28" Offset="0" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.2}" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+        </Grid>
+
+        <!--  Gear Background Image  -->
         <Grid
             x:Name="BackgroundContainer"
             Panel.ZIndex="-5"
             Background="Transparent">
+
             <Image
                 Name="FoundryBanner"
                 Grid.Row="0"
                 Grid.RowSpan="2"
                 Grid.Column="0"
-                Width="569"
-                Height="569"
+                Width="525"
+                Height="525"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Panel.ZIndex="-1"
@@ -978,40 +1012,24 @@
                     <ImageBrush d:ImageSource="https://bungie.net/common/destiny2_content/screenshots/3824673936.jpg" />
                 </Grid.Background>
             </Grid>
-
-            <Grid
-                Name="ItemRarityBanner"
-                Width="auto"
-                Height="55"
-                VerticalAlignment="Top"
-                Background="Transparent">
-                <Rectangle>
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
-                            <GradientStop d:Color="#B0BE9F28" Offset="1" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.7}" />
-                            <GradientStop d:Color="#33BE9F28" Offset="0" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.2}" />
-                        </LinearGradientBrush>
-                    </Rectangle.Fill>
-                </Rectangle>
-                <Rectangle Margin="0,45,0,0">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
-                            <GradientStop d:Color="#B0BE9F28" Offset="1" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.7}" />
-                            <GradientStop d:Color="#33BE9F28" Offset="0" Color="{Binding ItemRarityColor, Converter={StaticResource TransparentColorConverter}, ConverterParameter=0.2}" />
-                        </LinearGradientBrush>
-                    </Rectangle.Fill>
-                </Rectangle>
-            </Grid>
         </Grid>
 
         <!--  LoreEntry  -->
         <Grid
             x:Name="LoreEntry"
             Grid.Row="0"
-            HorizontalAlignment="Left"
+            Panel.ZIndex="10"
             Background="Transparent"
             Visibility="Collapsed">
-            <Grid Margin="0,0,1100,0" Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="47*" />
+                <ColumnDefinition Width="60*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid
+                Grid.Column="0"
+                Margin="0,0,0,0"
+                Background="Transparent">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="100*" />
@@ -1020,10 +1038,10 @@
 
                 <Border
                     Grid.RowSpan="3"
-                    Background="#DE14141B"
+                    Background="#DE252529"
                     BorderBrush="#DE717171"
-                    BorderThickness="2"
-                    CornerRadius="5" />
+                    BorderThickness="0,0,2,0"
+                    CornerRadius="0" />
 
                 <Grid Background="Transparent">
                     <Grid.RowDefinitions>
@@ -1039,37 +1057,48 @@
                         VerticalAlignment="Center"
                         Panel.ZIndex="1"
                         d:Text="ITEM NAME"
-                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                        FontSize="40"
-                        Foreground="{StaticResource ForegroundColour100}"
+                        FontFamily="{DynamicResource Haas Grot Disp 75 Bold}"
+                        FontSize="32"
+                        Foreground="{StaticResource ForegroundColour90}"
                         Text="{Binding ItemName}"
                         TextWrapping="WrapWithOverflow" />
 
-                    <Rectangle
+                    <StackPanel
                         Grid.Row="1"
-                        Height="2"
-                        Margin="70,10,70,20"
-                        VerticalAlignment="Center"
-                        Fill="#C6717171" />
+                        Margin="70,0,40,0"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent"
+                        Orientation="Vertical">
+                        <Border
+                            Width="30"
+                            VerticalAlignment="Bottom"
+                            BorderBrush="#C6717171"
+                            BorderThickness="0,0,0,5" />
+                        <Border
+                            VerticalAlignment="Bottom"
+                            BorderBrush="#C6717171"
+                            BorderThickness="0,2,0,0" />
+
+                    </StackPanel>
 
                     <TextBlock
                         Grid.Row="2"
                         Grid.RowSpan="1"
-                        Margin="70,10,70,20"
+                        Margin="70,40,70,40"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Panel.ZIndex="1"
                         d:Text="ITEM FLAVORTEXT"
-                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontFamily="{DynamicResource Haas Grot Disp 75 Bold}"
                         FontSize="22"
-                        Foreground="{StaticResource ForegroundColour100}"
-                        Text="{Binding ItemFlavorText}"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding ItemFlavorText, Converter={StaticResource ToUpperConverter}}"
                         TextWrapping="WrapWithOverflow" />
                 </Grid>
 
                 <ScrollViewer
                     Grid.Row="1"
-                    Margin="0,20,35,0"
+                    Margin="0,0,30,45"
                     HorizontalScrollBarVisibility="Disabled"
                     VerticalScrollBarVisibility="Auto">
                     <TextBlock
@@ -1084,13 +1113,34 @@
                         <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">4</sys:Double>
                     </ScrollViewer.Resources>
                 </ScrollViewer>
+
+                <StackPanel
+                    Grid.Row="1"
+                    Margin="70,0,40,0"
+                    VerticalAlignment="Bottom"
+                    Background="Transparent"
+                    Orientation="Vertical">
+                    <Border
+                        VerticalAlignment="Bottom"
+                        BorderBrush="#C6717171"
+                        BorderThickness="0,0,0,2" />
+                    <Border
+                        Width="30"
+                        VerticalAlignment="Bottom"
+                        BorderBrush="#C6717171"
+                        BorderThickness="0,5,0,0" />
+
+                </StackPanel>
             </Grid>
         </Grid>
 
         <!--  User Controls  -->
-        <Grid VerticalAlignment="Bottom" Background="#38000000">
+        <Grid
+            VerticalAlignment="Bottom"
+            Background="#38000000"
+            Focusable="False">
             <StackPanel
-                Margin="0,10,150,10"
+                Margin="0,10,100,10"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 FlowDirection="RightToLeft"
@@ -1105,6 +1155,18 @@
                     FontSize="20"
                     Foreground="{StaticResource ForegroundColour80}"
                     Text=" Dismiss"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    x:Name="HideMenuHint"
+                    Margin="0,0,25,0"
+                    VerticalAlignment="Center"
+                    Panel.ZIndex="1"
+                    d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text=" Hide Menu"
                     TextAlignment="Left"
                     TextWrapping="Wrap" />
                 <TextBlock

@@ -15,7 +15,7 @@
         <DataTemplate x:Key="ItemTemplate">
             <Button
                 Height="auto"
-                Margin="4"
+                Margin="0"
                 local:StyleHelper.BorderThickness="0.75"
                 Focusable="False"
                 MouseEnter="PlugItem_MouseEnter"
@@ -29,7 +29,7 @@
             <Grid Background="Transparent">
                 <Button
                     Height="auto"
-                    Margin="4"
+                    Margin="0"
                     local:StyleHelper.BorderThickness="0.75"
                     Style="{DynamicResource D2StyleButton}">
                     <Grid Name="Container" Background="#69696969">
@@ -43,6 +43,12 @@
                                         <UniformGrid HorizontalAlignment="Left" Rows="1" />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Margin" Value="0,0,5,0" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
                             </ItemsControl>
 
                             <TextBlock
@@ -66,7 +72,7 @@
         <DataTemplate x:Key="ItemSetInnerTemplate">
             <Button
                 Height="auto"
-                Margin="0,0,5,0"
+                Margin="0,0,0,0"
                 local:StyleHelper.BorderThickness="1"
                 MouseEnter="PlugItem_MouseEnter"
                 MouseLeave="PlugItem_MouseLeave"
@@ -84,7 +90,7 @@
 
         <DataTemplate x:Key="SubcategoryItemTemplate">
             <RadioButton
-                Margin="0,0,3,0"
+                Margin="0,0,0,0"
                 Checked="Subcategory_OnSelect"
                 Focusable="False"
                 GroupName="Subcategory"
@@ -93,36 +99,67 @@
                 MouseLeave="PlugItem_MouseLeave"
                 Style="{DynamicResource D2StyleRadioButton}">
                 <Border>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <!--  Trigger when IsSelected (IsChecked) is false  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                    <Setter Property="Opacity" Value="0.5" />
+                                </DataTrigger>
+                                <!--  Trigger when IsSelected (IsChecked) is true  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
                     <Image Source="{Binding ItemCategoryIcon}" />
                 </Border>
             </RadioButton>
         </DataTemplate>
         <DataTemplate x:Key="SubcategoryChildItemTemplate">
             <RadioButton
-                Margin="0,6,0,0"
+                Margin="0,0,0,0"
                 Checked="SubcategoryChild_OnSelect"
                 Focusable="False"
                 GroupName="SubcategoryChild"
                 IsChecked="{Binding IsSelected, Mode=TwoWay}"
                 Style="{DynamicResource D2StyleRadioButton}">
                 <TextBlock
-                    Margin="12"
+                    Margin="15"
                     HorizontalAlignment="Left"
                     d:FontFamily="Haas Grot Text 55 Roman"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                     FontSize="20"
-                    Text="{Binding ItemCategoryName}" />
+                    Foreground="{StaticResource ForegroundColour100}"
+                    Text="{Binding ItemCategoryName}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <!--  Trigger when IsSelected (IsChecked) is false  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                    <Setter Property="Opacity" Value="0.5" />
+                                </DataTrigger>
+                                <!--  Trigger when IsSelected (IsChecked) is true  -->
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </RadioButton>
         </DataTemplate>
 
         <DataTemplate x:Key="PlaceholderTemplate">
-            <Border Margin="3" Background="#58515151" />
+            <Border Margin="0" Background="#50505055" />
         </DataTemplate>
         <DataTemplate x:Key="PlaceholderTemplate2">
-            <Border Margin="0,6,0,0" Background="#58515151" />
+            <Border Margin="0" Background="#50505055" />
         </DataTemplate>
         <DataTemplate x:Key="PlaceholderTemplate3">
             <Border
-                Margin="0,0,5,0"
+                Margin="0,0,0,0"
                 Panel.ZIndex="1"
                 BorderBrush="#AEFFFFFF"
                 BorderThickness="1">
@@ -265,7 +302,7 @@
             <Grid
                 x:Name="Header"
                 Grid.Row="1"
-                Margin="125,0,0,0"
+                Margin="115,0,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 Background="Transparent">
@@ -274,19 +311,23 @@
                         Height="100"
                         d:Source="https://www.bungie.net/common/destiny2_content/icons/67ac44db37a28df7458586b90eac56d1.png"
                         Source="{Binding ItemCategoryIcon2}" />
+
                     <Grid Margin="15,0,0,0" Background="Transparent">
-                        <StackPanel>
+                        <StackPanel VerticalAlignment="Center">
                             <TextBlock
                                 x:Name="SubcategoryName"
+                                Margin="0,0,0,-4"
                                 Panel.ZIndex="1"
                                 d:FontFamily="Haas Grot Text 65 Medium"
                                 d:Text="WEAPONS"
                                 FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                                FontSize="45"
+                                FontSize="44"
                                 Foreground="{StaticResource ForegroundColour90}"
-                                Text="{Binding ItemCategoryName}" />
+                                Text="{Binding ItemCategoryName}"
+                                TextWrapping="Wrap" />
                             <TextBlock
                                 x:Name="SubcategoryType"
+                                Margin="0,-4,0,0"
                                 Panel.ZIndex="1"
                                 d:FontFamily="Haas Grot Text 55 Roman"
                                 d:Text="PRIMARY"
@@ -303,51 +344,64 @@
                 Margin="50,0,50,50"
                 Background="Transparent">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="25*" />
-                    <ColumnDefinition Width="55*" />
+                    <ColumnDefinition Width="35*" />
+                    <ColumnDefinition Width="85*" />
                 </Grid.ColumnDefinitions>
+
+                <Border
+                    Grid.RowSpan="1"
+                    Grid.Column="1"
+                    Height="auto"
+                    Margin="40,15,0,15"
+                    HorizontalAlignment="Left"
+                    BorderBrush="{StaticResource BackgroundColour50}"
+                    BorderThickness="0,0,2,0"
+                    Visibility="Visible" />
 
                 <Grid
                     Grid.Column="0"
-                    Margin="25,0,0,0"
+                    Margin="60,15,15,15"
                     Background="Transparent">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="20*" />
-                        <RowDefinition Height="90*" />
+                        <RowDefinition Height="15*" />
+                        <RowDefinition Height="80*" />
                     </Grid.RowDefinitions>
-
-                    <Border
-                        Grid.RowSpan="2"
-                        Height="auto"
-                        Margin="15,15,0,15"
-                        BorderBrush="{StaticResource BackgroundColour50}"
-                        BorderThickness="0,0,2,0" />
 
                     <ItemsControl x:Name="Subcategories" ItemTemplate="{StaticResource SubcategoryItemTemplate}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <UniformGrid
                                     Grid.Row="0"
-                                    Width="440"
-                                    Height="96"
-                                    Margin="50,0,0,0"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Stretch"
+                                    Width="auto"
+                                    Height="95"
+                                    Margin="0,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Top"
                                     Background="Transparent"
                                     Rows="1" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Margin" Value="4,0,4,0" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
                     </ItemsControl>
 
                     <StackPanel
                         Grid.Row="1"
-                        Margin="50,15,0,0"
+                        Margin="0,0,0,0"
+                        VerticalAlignment="Bottom"
                         Orientation="Vertical">
+
                         <Button
                             x:Name="PreviousChildPage"
-                            Width="440"
+                            Width="auto"
                             Height="35"
-                            HorizontalAlignment="Left"
+                            Margin="4,0,4,4"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
                             local:StyleHelper.BorderThickness="1"
                             Click="PreviousChildPage_Click"
                             Focusable="False"
@@ -374,22 +428,30 @@
                                 <ItemsPanelTemplate>
                                     <UniformGrid
                                         Grid.Row="0"
-                                        Width="440"
+                                        Width="auto"
                                         Height="auto"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center"
                                         Background="Transparent"
                                         Columns="1" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Margin" Value="4" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
                         </ItemsControl>
 
                         <Button
                             x:Name="NextChildPage"
-                            Width="440"
+                            Width="auto"
                             Height="35"
-                            Margin="0,6,0,0"
-                            HorizontalAlignment="Left"
+                            Margin="4,4,4,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
                             local:StyleHelper.BorderThickness="1"
                             Click="NextChildPage_Click"
                             Focusable="False"
@@ -414,8 +476,8 @@
                 </Grid>
 
                 <Grid
-                    Grid.Column="1"
-                    Margin="15"
+                    Grid.Column="2"
+                    Margin="50,15,15,15"
                     Background="Transparent">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -427,6 +489,7 @@
                     <Button
                         x:Name="PreviousPage"
                         Width="40"
+                        Margin="0,0,5,0"
                         local:StyleHelper.BorderThickness="1"
                         Click="PreviousPage_Click"
                         Style="{DynamicResource D2StyleButton}"
@@ -453,13 +516,19 @@
                     <ItemsControl
                         Name="SingleItemList"
                         Grid.Column="1"
-                        Margin="5,-5,5,-5"
+                        Margin="0"
                         ItemTemplateSelector="{StaticResource ItemTemplateSelector}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <UniformGrid Columns="3" />
+                                <UniformGrid Margin="0,-4,0,-4" Columns="3" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Margin" Value="4" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
                     </ItemsControl>
 
                     <ItemsControl
@@ -469,9 +538,15 @@
                         ItemTemplateSelector="{StaticResource ItemSetTemplateSelector}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <UniformGrid Columns="1" />
+                                <UniformGrid Margin="0" Columns="1" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Margin" Value="0,4,0,4" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
                     </ItemsControl>
 
                     <!--  Right Navigation Button  -->
@@ -479,6 +554,7 @@
                         x:Name="NextPage"
                         Grid.Column="2"
                         Width="40"
+                        Margin="5,0,0,0"
                         local:StyleHelper.BorderThickness="1"
                         Click="NextPage_Click"
                         Style="{DynamicResource D2StyleButton}"
@@ -518,7 +594,7 @@
                     BorderBrush="{StaticResource ForegroundColour50}"
                     BorderThickness="0,1,1,0" />
                 <Border
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Width="10"
                     Height="10"
                     HorizontalAlignment="Right"
@@ -526,7 +602,7 @@
                     BorderBrush="{StaticResource ForegroundColour50}"
                     BorderThickness="1,1,0,0" />
                 <Border
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Width="10"
                     Height="10"
                     HorizontalAlignment="Right"

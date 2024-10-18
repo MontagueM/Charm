@@ -42,9 +42,9 @@ public partial class APIItemView : UserControl
             type = "";
 
         var source = Investment.Get().GetCollectibleStringsFromItemIndex(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
-        var sourceString = source != null ? source.Value.SourceName.Value.ToString() : "";
+        var sourceString = source.Value.SourceName.Value ?? "";
 
-        var foundryBanner = ApiImageUtils.MakeFoundryBanner(item);
+        ImageSource foundryBanner = type != "EMBLEM" ? ApiImageUtils.MakeFoundryBanner(item) : null;
         var image = ApiImageUtils.MakeIcon(item);
         ApiItem = new ApiItemView
         {
@@ -70,7 +70,7 @@ public partial class APIItemView : UserControl
         var sourceString = source != null ? source.Value.SourceName.Value.ToString() : "";
 
         var hash = apiItem.Item.TagData.InventoryItemHash;
-        var foundryBanner = ApiImageUtils.MakeFoundryBanner(apiItem.Item);
+        ImageSource foundryBanner = apiItem.ItemType?.ToUpper() != "EMBLEM" ? ApiImageUtils.MakeFoundryBanner(apiItem.Item) : null;
         ApiItem = new ApiItemView
         {
             Item = apiItem.Item,
@@ -89,6 +89,10 @@ public partial class APIItemView : UserControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        MouseMove += UserControl_MouseMove;
+        KeyDown += UserControl_KeyDown;
+        //KeyUp += UserControl_KeyDown;
+
 #if DEBUG
         Console.WriteLine($"Item {ApiItem.ItemName} {ApiItem.Item.Hash}");
         Console.WriteLine($"Strings {Investment.Get().GetItemStrings(ApiItem.Item.TagData.InventoryItemHash)?.Hash}");
@@ -114,13 +118,11 @@ public partial class APIItemView : UserControl
 
     private void Load()
     {
-        MouseMove += UserControl_MouseMove;
-        KeyDown += UserControl_KeyDown;
         MainContainer.DataContext = ApiItem;
+        ItemRarityBanner.DataContext = ApiItem;
         BackgroundContainer.DataContext = ApiItem;
 
         ToolTip = new();
-        //MouseMove += ToolTip.UserControl_MouseMove;
         Panel.SetZIndex(ToolTip, 50);
         MainGrid.Children.Add(ToolTip);
 
@@ -552,28 +554,28 @@ public partial class APIItemView : UserControl
         Console.WriteLine($"{item.Name} {item.Item.Hash} ({item.PlugRarity})");
 #endif
 
-        if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
-        {
-            foreach (var stat in stats.InvestmentStats)
-            {
-                var statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
-                if (statItem.StatName.Value is null)
-                    continue;
+        //        if (item.Item.TagData.Unk78.GetValue(item.Item.GetReader()) is D2Class_81738080 stats)
+        //        {
+        //            foreach (var stat in stats.InvestmentStats)
+        //            {
+        //                var statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
+        //                if (statItem.StatName.Value is null)
+        //                    continue;
 
-                //var mainStat = ((D2Class_81738080)ApiItem.Item.TagData.Unk78.GetValue(ApiItem.Item.GetReader())).InvestmentStats.FirstOrDefault(x => x.StatTypeIndex == stat.StatTypeIndex);
-                //#if DEBUG
-                //  Console.WriteLine($"{statItem.StatName.Value.ToString()} : {stat.Value} ({MakeDisplayValue(stat.StatTypeIndex, stat.Value)}) (perk) + {mainStat.Value} ({MakeDisplayValue(mainStat.StatTypeIndex, mainStat.Value)}) (main) = {stat.Value + mainStat.Value}");
-                //#endif
-                if (!item.PlugSelected)
-                {
-                    //TODO: Can only have one perk selected in each row, clear any added stats from current selected perk
-                    var statToChange = _statItems.FirstOrDefault(x => x.Hash == statItem.StatHash);
-                    if (statToChange is null)
-                        continue;
-                    statToChange.StatDisplayValue += MakeDisplayValue(stat.StatTypeIndex, stat.Value);
-                }
-            }
-        }
+        //                var mainStat = ((D2Class_81738080)ApiItem.Item.TagData.Unk78.GetValue(ApiItem.Item.GetReader())).InvestmentStats.FirstOrDefault(x => x.StatTypeIndex == stat.StatTypeIndex);
+        //#if DEBUG
+        //                Console.WriteLine($"{statItem.StatName.Value.ToString()} : {stat.Value} ({MakeDisplayValue(stat.StatTypeIndex, stat.Value)}) (perk) + {mainStat.Value} ({MakeDisplayValue(mainStat.StatTypeIndex, mainStat.Value)}) (main) = {stat.Value + mainStat.Value}");
+        //#endif
+        //                if (!item.PlugSelected)
+        //                {
+        //                    //TODO: Can only have one perk selected in each row, clear any added stats from current selected perk
+        //                    var statToChange = _statItems.FirstOrDefault(x => x.Hash == statItem.StatHash);
+        //                    if (statToChange is null)
+        //                        continue;
+        //                    statToChange.StatDisplayValue += MakeDisplayValue(stat.StatTypeIndex, stat.Value);
+        //                }
+        //            }
+        //        }
 
         item.PlugSelected = !item.PlugSelected;
     }
@@ -619,8 +621,6 @@ public partial class APIItemView : UserControl
         };
 
         ToolTip.MakeTooltip(statItem);
-        //ToolTip.InfoBox.DataContext = statItem;
-        //ToolTip.AddToTooltip(statItem, APITooltip.TooltipType.TextBlock);
     }
 
     private void StatItem_MouseLeave(object sender, MouseEventArgs e)
@@ -640,8 +640,12 @@ public partial class APIItemView : UserControl
 
     private void UserControl_KeyDown(object sender, KeyEventArgs e)
     {
+        if (e.IsRepeat)
+            return;
+
         if (e.Key == Key.A && ApiItem.ItemLore != null)
         {
+            ShowLoreHint.Text = LoreEntry.IsVisible ? " Show Lore" : " Hide Lore";
             if (LoreEntry.Visibility != Visibility.Visible)
             {
                 // Fade in LoreEntry
@@ -694,6 +698,38 @@ public partial class APIItemView : UserControl
                 }
             }
         }
+
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            HideMenuHint.Text = MainContainer.IsVisible ? " Show Menu" : " Hide Menu";
+            if (MainContainer.Visibility != Visibility.Visible)
+            {
+                // Fade in
+                MainContainer.Visibility = Visibility.Visible;
+                ItemRarityBanner.Visibility = Visibility.Visible;
+                DoubleAnimation fadeInAnimation = new DoubleAnimation();
+                fadeInAnimation.From = MainContainer.Opacity;
+                fadeInAnimation.To = 1;
+                fadeInAnimation.Duration = TimeSpan.FromSeconds(0.1);
+                MainContainer.BeginAnimation(OpacityProperty, fadeInAnimation);
+                ItemRarityBanner.BeginAnimation(OpacityProperty, fadeInAnimation);
+            }
+            else
+            {
+                // Fade out
+                DoubleAnimation fadeOutAnimation = new DoubleAnimation();
+                fadeOutAnimation.From = MainContainer.Opacity;
+                fadeOutAnimation.To = 0;
+                fadeOutAnimation.Duration = TimeSpan.FromSeconds(0.1);
+                fadeOutAnimation.Completed += (s, args) =>
+                {
+                    MainContainer.Visibility = Visibility.Collapsed;
+                    ItemRarityBanner.Visibility = Visibility.Collapsed;
+                };
+                MainContainer.BeginAnimation(OpacityProperty, fadeOutAnimation);
+                ItemRarityBanner.BeginAnimation(OpacityProperty, fadeOutAnimation);
+            }
+        }
     }
 
 
@@ -731,7 +767,7 @@ public partial class APIItemView : UserControl
 
         public int PlugSocketIndex { get; set; }
         public TigerHash PlugCategoryHash { get; set; }
-        public int PlugOrderIndex { get; set; }
+        public int PlugOrderIndex { get; set; } = 0;
         public ImageSource PlugImageSource { get; set; }
         public ImageSource PlugWatermark { get; set; }
         public DestinyTierType PlugRarity { get; set; } = DestinyTierType.Common;
@@ -739,6 +775,8 @@ public partial class APIItemView : UserControl
         public DestinyDamageTypeEnum PlugDamageType { get; set; }
         public DestinySocketCategoryStyle PlugStyle { get; set; }
         public bool HasControls { get; set; } = false;
+
+        public DestinyUIDisplayStyle TooltipNotificationStyle { get; set; } = DestinyUIDisplayStyle.None;
 
         private bool _plugSelected;
         public bool PlugSelected
@@ -923,13 +961,13 @@ public static class ApiImageUtils
         return dw.ImageSource;
     }
 
-    public static ImageSource MakeIcon(int index)
+    public static ImageSource MakeIcon(int index, int texIndex = 0, int listIndex = 0)
     {
         var container = Investment.Get().GetItemIconContainer(index);
         if (container == null || container.TagData.IconPrimaryContainer == null)
             return null;
 
-        var primaryStream = GetTexture(container.TagData.IconPrimaryContainer).GetTexture();
+        var primaryStream = GetTexture(container.TagData.IconPrimaryContainer, texIndex, listIndex).GetTexture();
         var primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
 
         var dw = new ImageBrush(primary);
@@ -1165,6 +1203,20 @@ public class FlipSignPercentageConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         throw new NotSupportedException();
+    }
+}
+
+public class ToUpperConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var str = value as string;
+        return string.IsNullOrEmpty(str) ? string.Empty : str.ToUpper();
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return null;
     }
 }
 

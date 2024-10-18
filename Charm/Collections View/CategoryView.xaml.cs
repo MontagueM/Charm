@@ -219,6 +219,7 @@ public partial class CategoryView : UserControl
                 Name = newItem.ItemName,
                 Type = newItem.ItemType,
                 Description = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(newItem.Item.TagData.InventoryItemHash)).TagData.ItemDisplaySource.Value.ToString(),
+
                 PlugCategoryHash = plugCategoryHash,
                 PlugWatermark = ApiImageUtils.GetPlugWatermark(newItem.Item),
                 PlugRarity = (DestinyTierType)newItem.Item.TagData.ItemRarity,
@@ -281,6 +282,7 @@ public partial class CategoryView : UserControl
                     Name = newItem.ItemName,
                     Type = newItem.ItemType,
                     Description = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(newItem.Item.TagData.InventoryItemHash)).TagData.ItemDisplaySource.Value.ToString(),
+
                     PlugCategoryHash = plugCategoryHash,
                     PlugWatermark = ApiImageUtils.GetPlugWatermark(newItem.Item),
                     PlugRarity = (DestinyTierType)newItem.Item.TagData.ItemRarity,
@@ -313,8 +315,8 @@ public partial class CategoryView : UserControl
         for (int i = 0; i < nodes[index].Collectables.Count; i++)
         {
             var item = nodes[index].Collectables[i];
-            InventoryItem invItem = Investment.Get().GetInventoryItem(Investment.Get().GetCollectible(item.Index).Value.InventoryItemIndex);
-            inventoryItems.Add(item.Index, invItem);
+            InventoryItem invItem = Investment.Get().GetInventoryItem(Investment.Get().GetCollectible(item.CollectableIndex).Value.InventoryItemIndex);
+            inventoryItems.Add(item.CollectableIndex, invItem);
         }
 
         return inventoryItems;
@@ -450,6 +452,10 @@ public partial class CategoryView : UserControl
         NextPage.IsEnabled =
             _allItemSets.Count > 0 ? (CurrentPage + 1) * ItemSetsPerPage < _allItemSets.Count :
             _allItems.Count > 0 ? (CurrentPage + 1) * ItemsPerPage < _allItems.Count : false;
+
+        PreviousChildPage.IsEnabled = CurrentSubcategoryChildrenPage != 0;
+        NextChildPage.IsEnabled =
+            _subcategoriesChildren.Count > 0 ? (CurrentSubcategoryChildrenPage + 1) * SubcategoryChildrenPerPage < _subcategoriesChildren.Count : false;
     }
 
     // Subcategory Children
@@ -542,26 +548,34 @@ public partial class CategoryView : UserControl
         ToolTip.ActiveItem = (sender as Button);
         ApiItem item = (ApiItem)(sender as Button).DataContext;
 
-        PlugItem flavorText = new PlugItem
+        if (item.ItemFlavorText != null && item.ItemFlavorText != string.Empty)
         {
-            Description = item.ItemFlavorText,
-        };
-        if (flavorText.Description != null && flavorText.Description != string.Empty)
-            ToolTip.AddToTooltip(flavorText, APITooltip.TooltipType.InfoBlock);
+            PlugItem flavorText = new PlugItem
+            {
+                PlugOrderIndex = 0, // Flavor text is always first
+                Description = item.ItemFlavorText,
+            };
+            ToolTip.AddToTooltip(flavorText, APITooltip.TooltipType.TextBlockItalic);
+        }
+
+        var sourceString = Investment.Get().GetCollectibleStrings(item.CollectableIndex).Value.SourceName.Value;
+        if (sourceString != null && sourceString != string.Empty)
+        {
+            PlugItem source = new PlugItem
+            {
+                PlugOrderIndex = 3,
+                Description = $"{sourceString}",
+            };
+            ToolTip.AddToTooltip(source, APITooltip.TooltipType.Source);
+        }
 
         ToolTip.MakeTooltip(item.PlugItem);
-
-        PlugItem source = new PlugItem
-        {
-            Description = $"{Investment.Get().GetCollectibleStrings(item.CollectableIndex).Value.SourceName.Value}",
-        };
-        if (source.Description != null && source.Description != string.Empty)
-            ToolTip.AddToTooltip(source, APITooltip.TooltipType.InfoBlock);
 
         if (DareView.ShouldAddToList(item.Item, item.ItemType))
         {
             PlugItem inputItem2 = new PlugItem
             {
+                PlugOrderIndex = 1,
                 Name = $"", // Key glyph
                 Type = $"", // 2nd key glyph (mouse left/right)
                 Description = $"Export"

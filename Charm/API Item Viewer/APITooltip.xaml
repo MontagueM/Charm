@@ -16,20 +16,116 @@
         <DataTemplate x:Key="InfoBoxSeparatorTemplate">
             <Rectangle
                 Height="2"
-                Fill="{StaticResource ForegroundColour70}"
-                Opacity="0.75" />
+                Fill="#9b9b9b"
+                Opacity="0.5" />
         </DataTemplate>
+
         <DataTemplate x:Key="InfoBoxTextTemplate">
             <TextBlock
                 Margin="15,10,15,10"
                 d:FontFamily="Haas Grot Text 55 Roman"
                 d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                FontSize="17"
+                FontSize="18"
                 Foreground="{StaticResource ForegroundColour80}"
                 Text="{Binding Description}"
                 TextWrapping="WrapWithOverflow" />
         </DataTemplate>
+
+        <DataTemplate x:Key="InfoBoxSourceTemplate">
+            <StackPanel>
+                <Rectangle
+                    Height="2"
+                    Fill="#9b9b9b"
+                    Opacity="0.5" />
+                <TextBlock
+                    Margin="15,10,15,10"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="18"
+                    Foreground="{StaticResource ForegroundColour80}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="InfoBoxTextItalicTemplate">
+            <TextBlock
+                Margin="15,10,15,10"
+                d:FontFamily="Haas Grot Text 55 Roman"
+                d:Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                FontFamily="{DynamicResource Haas Grot Text 56 Italic Keys}"
+                FontSize="18"
+                Foreground="{StaticResource ForegroundColour80}"
+                Text="{Binding Description}"
+                TextWrapping="WrapWithOverflow" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="InfoBoxCostTemplate">
+            <Grid Margin="15,10,15,10" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    Background="Transparent"
+                    Orientation="Horizontal">
+                    <Image
+                        Width="22"
+                        Height="22"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        d:Source="https://www.bungie.net/common/destiny2_content/icons/c577890c4a2d81e3c4ce1c803cdb9a3b.png"
+                        Source="{Binding PlugImageSource}">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PlugImageSource}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        FontFamily="{DynamicResource Haas Grot Disp 75 Bold}"
+                        FontSize="28"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="{Binding Name}"
+                        TextAlignment="Center"
+                        TextWrapping="WrapWithOverflow">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Name}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="10,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="18"
+                    Foreground="{StaticResource ForegroundColour90}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="InfoBoxGridTemplate">
             <Grid Margin="15,10,15,10" Background="Transparent">
                 <Grid.ColumnDefinitions>
@@ -39,8 +135,8 @@
                 <Image
                     Grid.RowSpan="2"
                     Grid.Column="0"
-                    Width="32"
-                    Height="32"
+                    Width="36"
+                    Height="36"
                     Margin="0,0,10,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Top"
@@ -58,29 +154,174 @@
                     </Image.Style>
                 </Image>
 
+                <TextBlock
+                    Grid.Column="0"
+                    Width="36"
+                    Height="36"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    d:FontFamily="Haas Grot Text 55 Roman"
+                    d:Text="✦"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="36"
+                    Foreground="{StaticResource ForegroundColour100}"
+                    Text="{Binding Name}"
+                    TextAlignment="Center"
+                    TextWrapping="WrapWithOverflow">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Name}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
                 <TextBlock
                     Grid.Column="1"
                     Margin="0,0,0,0"
                     HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
+                    VerticalAlignment="Center"
                     d:FontFamily="Haas Grot Text 55 Roman"
                     d:Text="Causing a lightning strike with this weapon partially reloads the magazine from reserves."
                     FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="17"
+                    FontSize="18"
                     Foreground="{StaticResource ForegroundColour70}"
                     Text="{Binding Description}"
                     TextWrapping="WrapWithOverflow" />
             </Grid>
         </DataTemplate>
+
+        <DataTemplate x:Key="InfoBoxNotificationTemplate">
+            <StackPanel>
+                <Rectangle
+                    Height="2"
+                    Fill="#9b9b9b"
+                    Opacity="0.25" />
+                <Grid Margin="15,10,15,10" Background="Transparent">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Image
+                        Grid.RowSpan="2"
+                        Grid.Column="0"
+                        Width="36"
+                        Height="36"
+                        Margin="0,0,10,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        d:Source="https://www.bungie.net/common/destiny2_content/icons/c577890c4a2d81e3c4ce1c803cdb9a3b.png"
+                        Source="{Binding PlugImageSource}">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PlugImageSource}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Width="36"
+                        Height="36"
+                        Margin="0,0,10,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        d:Text="✦"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        TextAlignment="Center"
+                        TextWrapping="WrapWithOverflow">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="ⓘ" />
+                                <Setter Property="FontSize" Value="26" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TooltipNotificationStyle}" Value="ItemAddon">
+                                        <Setter Property="Text" Value="✦" />
+                                        <Setter Property="FontSize" Value="36" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!--  ItemAddon style upper right star (this is dumb)  -->
+                    <TextBlock
+                        Grid.Column="0"
+                        Width="36"
+                        Height="36"
+                        Margin="0,0,10,0"
+                        VerticalAlignment="Top"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour100}"
+                        Text="✦"
+                        TextAlignment="Right"
+                        TextWrapping="WrapWithOverflow">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Hidden" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TooltipNotificationStyle}" Value="ItemAddon">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        d:Text="Causing a lightning strike with this weapon partially reloads the magazine from reserves."
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="18"
+                        Text="{Binding Description}"
+                        TextWrapping="WrapWithOverflow">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource ForegroundColour60}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding TooltipNotificationStyle}" Value="ItemAddon">
+                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColour70}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding TooltipNotificationStyle}" Value="PerkInfo">
+                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColour60}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+
+        </DataTemplate>
+
         <DataTemplate x:Key="InfoBoxWarningTextTemplate">
-            <TextBlock
-                Margin="15,5,15,5"
-                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                FontSize="17"
-                Foreground="{StaticResource ForegroundColour90}"
-                Text="{Binding Description}"
-                TextWrapping="WrapWithOverflow" />
+            <Grid Background="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.5}">
+                <TextBlock
+                    Margin="15,5,15,5"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="17"
+                    Foreground="{StaticResource ForegroundColour90}"
+                    Text="{Binding Description}"
+                    TextWrapping="WrapWithOverflow" />
+            </Grid>
         </DataTemplate>
 
         <!--  Objective styles  -->
@@ -271,14 +512,13 @@
     <!--  InfoBox  -->
     <Grid
         x:Name="InfoBox"
-        Width="400"
+        Width="420"
         HorizontalAlignment="Left"
         VerticalAlignment="Bottom"
         Panel.ZIndex="50"
         d:Visibility="Visible"
         Background="Transparent"
-        IsHitTestVisible="False"
-        Visibility="Collapsed">
+        IsHitTestVisible="False">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -294,9 +534,8 @@
         <!--  Thin top bar  -->
         <Rectangle
             Grid.Row="0"
-            Width="400"
             Height="5"
-            HorizontalAlignment="Left"
+            HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
             Fill="#AAAAAA">
             <Rectangle.Style>
@@ -326,13 +565,13 @@
 
             <!--  Image is outside the canvas without margin for some reason?  -->
             <Canvas
-                Margin="0,0,54,0"
+                Margin="0,0,45,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
                 Background="transparent">
                 <Image
-                    Width="54"
-                    Height="54"
+                    Width="45"
+                    Height="45"
                     Source="{Binding PlugWatermark}" />
             </Canvas>
 
@@ -354,9 +593,25 @@
                     d:Text="ITEM NAME "
                     FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
                     FontSize="26"
-                    Foreground="{StaticResource ForegroundColour100}"
                     Text="{Binding Name}"
-                    TextWrapping="WrapWithOverflow" />
+                    TextWrapping="WrapWithOverflow">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource ForegroundColour100}" />
+                            <Style.Triggers>
+
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding PlugRarity}" Value="Common" />
+                                        <Condition Binding="{Binding PlugStyle}" Value="Consumable" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Foreground" Value="#000000" />
+                                </MultiDataTrigger>
+
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
 
                 <Grid Background="Transparent">
                     <Grid.Style>
@@ -377,9 +632,25 @@
                             d:Text="Item Type"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                             FontSize="18"
-                            Foreground="{StaticResource ForegroundColour90}"
                             Opacity="0.8"
-                            Text="{Binding Type}" />
+                            Text="{Binding Type}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource ForegroundColour90}" />
+                                    <Style.Triggers>
+
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding PlugRarity}" Value="Common" />
+                                                <Condition Binding="{Binding PlugStyle}" Value="Consumable" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Foreground" Value="#0C0C0C" />
+                                        </MultiDataTrigger>
+
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         <TextBlock
                             x:Name="PlugDamageType"
                             Grid.Row="0"
@@ -411,6 +682,12 @@
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Visible" />
                                 <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PlugRarity}" Value="Unknown">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding PlugRarity}" Value="Currency">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding PlugRarity}" Value="Common">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                     </DataTrigger>
@@ -423,13 +700,7 @@
         </Grid>
 
         <!--  Warning box  -->
-        <Grid Grid.Row="2">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Background" Value="#D6AE4141" />
-                </Style>
-            </Grid.Style>
-
+        <Grid Grid.Row="2" Background="Transparent">
             <StackPanel x:Name="WarningBoxStackPanel" Orientation="Vertical" />
         </Grid>
 
