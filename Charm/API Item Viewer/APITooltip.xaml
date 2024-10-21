@@ -122,6 +122,7 @@
                     FontSize="18"
                     Foreground="{StaticResource ForegroundColour90}"
                     Text="{Binding Description}"
+                    TextAlignment="Center"
                     TextWrapping="WrapWithOverflow" />
             </Grid>
         </DataTemplate>
@@ -375,6 +376,7 @@
 
             </Grid>
         </DataTemplate>
+
         <DataTemplate x:Key="InfoBoxObjectiveIntegerTemplate">
             <Grid Margin="15,10,15,10" Background="Transparent">
                 <Grid.ColumnDefinitions>
@@ -512,7 +514,7 @@
     <!--  InfoBox  -->
     <Grid
         x:Name="InfoBox"
-        Width="420"
+        Width="430"
         HorizontalAlignment="Left"
         VerticalAlignment="Bottom"
         Panel.ZIndex="50"
@@ -592,7 +594,7 @@
                     d:FontFamily="Haas Grot Text 65 Medium"
                     d:Text="ITEM NAME "
                     FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
-                    FontSize="26"
+                    FontSize="28"
                     Text="{Binding Name}"
                     TextWrapping="WrapWithOverflow">
                     <TextBlock.Style>
@@ -708,7 +710,7 @@
         <Grid Grid.Row="3">
             <Grid.Style>
                 <Style TargetType="Grid">
-                    <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.1}" />
+                    <Setter Property="Background" Value="{Binding PlugRarityColor, Converter={StaticResource InfoBoxColorConverter}, ConverterParameter=0.09}" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding PlugStyle}" Value="Reusable">
                             <Setter Property="Background" Value="#D6202020" />

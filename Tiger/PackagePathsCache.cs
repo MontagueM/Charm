@@ -63,11 +63,19 @@ public class PackagePathsCache
             Log.Info($"Cache file is invalid, creating new from packages directory '{_packagesDirectory}'.");
             if (File.Exists("./EntityNames.json")) // Surely this is fine
             {
-                NamedEntities Ents = JsonConvert.DeserializeObject<NamedEntities>(File.ReadAllText($"./EntityNames.json"));
-                if (Ents.EntityNames.ContainsKey(Strategy.CurrentStrategy))
-                    Ents.EntityNames[Strategy.CurrentStrategy].Clear();
+                NamedEntities Ents;
+                try
+                {
+                    Ents = JsonConvert.DeserializeObject<NamedEntities>(File.ReadAllText($"./EntityNames.json"));
+                    if (Ents.EntityNames.ContainsKey(Strategy.CurrentStrategy))
+                        Ents.EntityNames[Strategy.CurrentStrategy].Clear();
 
-                File.WriteAllText($"./EntityNames.json", JsonConvert.SerializeObject(Ents, Formatting.Indented));
+                    File.WriteAllText($"./EntityNames.json", JsonConvert.SerializeObject(Ents, Formatting.Indented));
+                }
+                catch (JsonSerializationException e) // Likely old version of the json
+                {
+                    File.Delete($"./EntityNames.json");
+                }
             }
             SaveCacheToFile();
         }
@@ -245,5 +253,38 @@ public class PackagePathsCache
 // Idk where else to put this, or if this is even needed
 public struct NamedEntities
 {
-    public ConcurrentDictionary<TigerStrategy, ConcurrentDictionary<string, string>> EntityNames;
+    public ConcurrentDictionary<TigerStrategy, ConcurrentDictionary<string, List<string>>> EntityNames;
+
+    public NamedEntities(TigerStrategy version, FileHash entityHash, List<string> entityNames)
+    {
+        var innerDictionary = new ConcurrentDictionary<string, List<string>>();
+        innerDictionary[entityHash] = entityNames;
+
+        EntityNames = new ConcurrentDictionary<TigerStrategy, ConcurrentDictionary<string, List<string>>>();
+        EntityNames[version] = innerDictionary;
+    }
+
+    public void AddEntityName(TigerStrategy strategy, string entityHash, string entityName)
+    {
+        EntityNames.AddOrUpdate(
+            strategy,
+            _ => new ConcurrentDictionary<string, List<string>>(),  // Add a new inner dictionary if not present
+            (_, existingDict) =>
+            {
+                // Update the inner dictionary (for this entity hash)
+                existingDict.AddOrUpdate(
+                    entityHash,
+                    _ => new List<string> { entityName }, // Add a new entry if the entity hash is new
+                    (_, existingList) =>
+                    {
+                        // Check if the name is already in the list to avoid duplicates
+                        if (!existingList.Contains(entityName))
+                        {
+                            existingList.Add(entityName);
+                        }
+                        return existingList;
+                    });
+                return existingDict;
+            });
+    }
 }

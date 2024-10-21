@@ -454,9 +454,10 @@ public partial class TagListView : UserControl
         }
         else
         {
-            tagItems.Sort((a, b) => a.Hash.Hash32 > b.Hash.Hash32 ? 1 : -1);
+            //tagItems.Sort((a, b) => a.Hash.Hash32 > b.Hash.Hash32 ? 1 : -1);
+            tagItems = tagItems.OrderBy(x => x.Hash.Hash32).ToList();
         }
-        tagItems = tagItems.DistinctBy(t => t.Hash).ToList();
+        //tagItems = tagItems.DistinctBy(t => t.Hash).ToList();
         // If we have a parent, add a TagItem that is actually a back button as first
         if (_parentStack.Count > 0)
         {
@@ -766,6 +767,11 @@ public partial class TagListView : UserControl
                     tagType = ETagListType.Entity;
                     break;
                 default:
+                    if (val.Tag.Hash.GetFileMetadata().Type == 32)
+                    {
+                        tagType = ETagListType.Texture;
+                        break;
+                    }
                     tagType = ETagListType.None;
                     overrideType = reference;
                     break;
@@ -799,13 +805,20 @@ public partial class TagListView : UserControl
             }
             ETagListType tagType = ETagListType.None;
             FileHash reference = val.Tag.Hash.GetReferenceHash();
+            string overrideType = String.Empty;
             switch (reference.Hash32)
             {
                 case 0x80809ad8:
                     tagType = ETagListType.Entity;
                     break;
                 default:
-                    tagType = ETagListType.Texture;
+                    if (val.Tag.Hash.GetFileMetadata().Type == 32)
+                    {
+                        tagType = ETagListType.Texture;
+                        break;
+                    }
+                    tagType = ETagListType.None;
+                    overrideType = reference;
                     break;
             }
             _allTagItems.Add(new TagItem
@@ -813,6 +826,7 @@ public partial class TagListView : UserControl
                 Hash = val.Tag.Hash,
                 Name = val.TagPath,
                 TagType = tagType,
+                Type = overrideType
             });
         });
     }
@@ -870,14 +884,14 @@ public partial class TagListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "Caching Entity Names",
+            "Caching Entity Names\nFirst time process, may take some time",
             "Loading Entities"
         });
 
         await Task.Run(() =>
         {
             _allTagItems = new ConcurrentBag<TagItem>();
-            var NamedEntities = TryGetEntityNames();
+            var NamedEntities = TryGetEntityNames().Result;
             MainWindow.Progress.CompleteStage();
 
             var eVals = PackageResourcer.Get().GetAllFiles<Entity>();
@@ -890,14 +904,30 @@ public partial class TagListView : UserControl
 
                     // Most of the time the most specific entity name comes from a map resource (bosses usually)
                     if (NamedEntities.ContainsKey(entity.Hash))
-                        entityName = NamedEntities[entity.Hash];
-
-                    _allTagItems.Add(new TagItem
                     {
-                        Hash = entity.Hash,
-                        Name = entityName,
-                        TagType = ETagListType.Entity
-                    });
+                        if (!NamedEntities[entity.Hash].Contains(entityName) && entityName != entity.Hash)
+                            NamedEntities[entity.Hash].Add(entityName);
+
+                        foreach (var entry in NamedEntities[entity.Hash])
+                        {
+                            _allTagItems.Add(new TagItem
+                            {
+                                Hash = entity.Hash,
+                                Name = entry,
+                                TagType = ETagListType.Entity
+                            });
+                        }
+                    }
+                    else
+                    {
+                        _allTagItems.Add(new TagItem
+                        {
+                            Hash = entity.Hash,
+                            Name = entityName,
+                            TagType = ETagListType.Entity
+                        });
+                    }
+
                 }
             });
             MainWindow.Progress.CompleteStage();
@@ -907,7 +937,7 @@ public partial class TagListView : UserControl
         RefreshItemList();  // bc of async stuff
     }
 
-    private ConcurrentDictionary<string, string> TryGetEntityNames() // TODO: allow multiple names for entity
+    private async Task<ConcurrentDictionary<string, List<String>>> TryGetEntityNames()
     {
         NamedEntities Ents = new()
         {
@@ -917,7 +947,16 @@ public partial class TagListView : UserControl
         if (!File.Exists($"./EntityNames.json"))
             File.WriteAllText($"./EntityNames.json", JsonConvert.SerializeObject(Ents, Formatting.Indented));
 
-        Ents = JsonConvert.DeserializeObject<NamedEntities>(File.ReadAllText($"./EntityNames.json"));
+        try
+        {
+            Ents = JsonConvert.DeserializeObject<NamedEntities>(File.ReadAllText($"./EntityNames.json"));
+        }
+        catch (JsonSerializationException e) // Likely old version of the json
+        {
+            File.Delete($"./EntityNames.json");
+            File.WriteAllText($"./EntityNames.json", JsonConvert.SerializeObject(Ents, Formatting.Indented));
+        }
+
         if (Ents.EntityNames.ContainsKey(Strategy.CurrentStrategy) && Ents.EntityNames[Strategy.CurrentStrategy].Count > 0)
         {
             return Ents.EntityNames[Strategy.CurrentStrategy];
@@ -927,7 +966,8 @@ public partial class TagListView : UserControl
             Ents.EntityNames[Strategy.CurrentStrategy] = new();
             if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
             {
-                var vals = PackageResourcer.Get().GetAllHashes<SD9128080>();
+                // Name and entity is in a map data table
+                var vals = await PackageResourcer.Get().GetAllHashesAsync<SD9128080>();
                 Parallel.ForEach(vals, val =>
                 {
                     var entry = FileResourcer.Get().GetSchemaTag<SD9128080>(val);
@@ -940,14 +980,20 @@ public partial class TagListView : UserControl
                                 if (datatable.DataResource.GetValue(entry.GetReader()) is S33138080 name)
                                 {
                                     if (name.EntityName.IsValid())
-                                        Ents.EntityNames[Strategy.CurrentStrategy].TryAdd(datatable.GetEntityHash(), GlobalStrings.Get().GetString(name.EntityName));
+                                    {
+                                        var entityHash = datatable.GetEntityHash();
+                                        var entityName = GlobalStrings.Get().GetString(name.EntityName);
+
+                                        Ents.AddEntityName(Strategy.CurrentStrategy, entityHash, entityName);
+                                    }
                                 }
                             }
                         }
                     }
                 });
 
-                var vals2 = PackageResourcer.Get().GetAllHashes<SF6038080>();
+                // Name is in an EntityResource, with the entity in a map data table in that EntityResource
+                var vals2 = await PackageResourcer.Get().GetAllHashesAsync<SF6038080>();
                 Parallel.ForEach(vals2, val =>
                 {
                     var entry = FileResourcer.Get().GetSchemaTag<SF6038080>(val);
@@ -959,7 +1005,12 @@ public partial class TagListView : UserControl
                             foreach (var dataentry in resource.DataEntries)
                             {
                                 if (dataentry.GetEntityHash().IsValid())
-                                    Ents.EntityNames[Strategy.CurrentStrategy].TryAdd(dataentry.GetEntityHash(), resource.DevName?.Value);
+                                {
+                                    var entityHash = dataentry.GetEntityHash();
+                                    var entityName = resource.DevName.Value ?? entityHash.ToString();
+
+                                    Ents.AddEntityName(Strategy.CurrentStrategy, entityHash, entityName);
+                                }
                             }
                         }
                     }
@@ -967,16 +1018,65 @@ public partial class TagListView : UserControl
             }
             else if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
             {
-                var vals = PackageResourcer.Get().GetAllHashes<SMapDataTable>();
+                // Name and entity is in a map data table
+                var vals = await PackageResourcer.Get().GetAllHashesAsync<SMapDataTable>();
                 Parallel.ForEach(vals, val =>
                 {
+                    if (!val.ContainsHash(0x80808019))
+                        return;
+
                     var entry = FileResourcer.Get().GetSchemaTag<SMapDataTable>(val);
                     foreach (var dataEntry in entry.TagData.DataEntries)
                     {
                         if (dataEntry.DataResource.GetValue(entry.GetReader()) is D2Class_19808080 name)
                         {
                             if (name.EntityName.IsValid())
-                                Ents.EntityNames[Strategy.CurrentStrategy].TryAdd(dataEntry.GetEntityHash(), GlobalStrings.Get().GetString(name.EntityName));
+                            {
+                                var entityHash = dataEntry.GetEntityHash();
+                                var entityName = GlobalStrings.Get().GetString(name.EntityName);
+
+                                Ents.AddEntityName(Strategy.CurrentStrategy, entityHash, entityName);
+                            }
+                        }
+                    }
+                });
+
+
+                // Name is in an EntityResource, with the entity in a map data table in that EntityResource
+                var resources = await PackageResourcer.Get().GetAllHashesAsync<EntityResource>();
+                Parallel.ForEach(resources, val =>
+                {
+                    // don't want to load the resource but need to check it first
+                    //var data = PackageResourcer.Get().GetFileData(val);
+
+                    //using TigerReader reader = new(data);
+                    //reader.Seek(0x10, SeekOrigin.Begin);
+                    //var offset = reader.ReadInt32() - 0x8;
+
+                    //reader.Seek(offset, SeekOrigin.Current);
+                    //var reference = reader.ReadUInt32();
+
+                    if (val.ContainsHash(0x8080470E))//if (reference == 0x8080470E)
+                    {
+                        var resource = FileResourcer.Get().GetFile<EntityResource>(val);
+                        foreach (var entry in ((D2Class_B5468080)resource.TagData.Unk18.GetValue(resource.GetReader())).Unk80)
+                        {
+                            if (entry.DataTable is null)
+                                continue;
+
+                            foreach (var dataEntry in entry.DataTable.TagData.DataEntries)
+                            {
+                                if (dataEntry.DataResource.GetValue(entry.DataTable.GetReader()) is D2Class_19808080 name)
+                                {
+                                    if (entry.Name.IsValid())
+                                    {
+                                        var entityHash = dataEntry.GetEntityHash();
+                                        var entityName = GlobalStrings.Get().GetString(entry.Name);
+
+                                        Ents.AddEntityName(Strategy.CurrentStrategy, entityHash, entityName);
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -2183,6 +2283,8 @@ public class TagItem
     }
 
     public ETagListType TagType { get; set; }
+
+    public List<string> Names { get; set; } = new();
 
     public static string GetEnumDescription(Enum value)
     {

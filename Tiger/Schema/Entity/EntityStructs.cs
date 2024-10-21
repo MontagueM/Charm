@@ -1904,6 +1904,7 @@ public struct D2Class_96468080
 {
     [SchemaField(0x28), Tag64]
     public Tag<SMapDataTable> DataTable;
+    public StringHash Name;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "B9268080", 0x1D8)]

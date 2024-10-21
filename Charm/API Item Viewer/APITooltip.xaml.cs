@@ -24,7 +24,7 @@ public partial class APITooltip : UserControl
         CompositionTarget.Rendering += OnRender;
     }
 
-    public async void MakeTooltip(PlugItem item) // TODO: Use a number ordering system instead
+    public async void MakeTooltip(PlugItem item)
     {
         item.Name = item.Name.ToUpper();
         var itemStrings = item.Item?.GetItemStrings();
@@ -39,7 +39,6 @@ public partial class APITooltip : UserControl
         }
 
         // Idk if Task.Run is actually doing anything here but it maybeeee feels a little more responsive?
-        // TODO: Downside of Task.Run is that adding stuff to the tooltip outside of this function causes ordering issues
         await Task.Run(() =>
         {
             Dispatcher.Invoke(() =>

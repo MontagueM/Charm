@@ -126,6 +126,9 @@ public class Entity : Tag<SEntity>
 
     public void SaveTexturePlates(string saveDirectory)
     {
+        if (ModelParentResource is null)
+            return;
+
         Directory.CreateDirectory($"{saveDirectory}/Textures/");
         var parentResource = (D2Class_8F6D8080)ModelParentResource.TagData.Unk18.GetValue(ModelParentResource.GetReader());
 

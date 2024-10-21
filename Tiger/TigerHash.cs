@@ -240,6 +240,26 @@ public static class FileHashExtensions
         var temp = FileResourcer.Get().GetSchemaTag<S48018080>(fileHash.GetReferenceHash());
         return new FileHash(temp.TagData.Reference.Hash32);
     }
+
+    public static bool ContainsHash(this FileHash fileHash, uint searchValue)
+    {
+        var data = PackageResourcer.Get().GetFileData(fileHash);
+        using (TigerReader br = new TigerReader(data))
+        {
+            long position = 0;
+            long length = data.Length;
+            while (position + sizeof(uint) <= length)
+            {
+                uint value = br.ReadUInt32();
+                if (value == searchValue)
+                {
+                    return true;
+                }
+                position += sizeof(uint);
+            }
+            return false;
+        }
+    }
 }
 
 /// <summary>
