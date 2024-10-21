@@ -17,11 +17,13 @@ public class Exporter : Subsystem<Exporter>
     {
         public List<ExporterScene> Scenes { get; }
         public string OutputDirectory { get; set; }
+        public bool AggregateOutput { get; set; }
 
-        public ExportEventArgs(List<ExporterScene> scenes, string outputDirectory)
+        public ExportEventArgs(List<ExporterScene> scenes, string outputDirectory, bool aggregateOutput)
         {
             Scenes = scenes;
             OutputDirectory = outputDirectory;
+            AggregateOutput = aggregateOutput;
         }
     }
 
@@ -50,10 +52,13 @@ public class Exporter : Subsystem<Exporter>
     /// We let each exporter handle its exporting itself, e.g.
     /// exporting info to json can be done threaded but FBX cannot
     /// </summary>
-    public void Export()
+    public void Export(string? outputDirectory = null)
     {
-        string outputDirectory = CharmInstance.GetSubsystem<ConfigSubsystem>().GetExportSavePath();
-        ExportEvent(new ExportEventArgs(_scenes, outputDirectory));
+        bool aggregateOutput = outputDirectory is not null;
+        if (outputDirectory is null)
+            outputDirectory = CharmInstance.GetSubsystem<ConfigSubsystem>().GetExportSavePath();
+
+        ExportEvent(new ExportEventArgs(_scenes, outputDirectory, aggregateOutput));
         Reset();
     }
 }
@@ -205,21 +210,17 @@ public class ExporterScene
         EntityPoints.Add(points);
     }
 
-    public void AddEntity(FileHash entityHash, List<DynamicMeshPart> parts, List<BoneNode> boneNodes)
+    public void AddEntity(FileHash entityHash, List<DynamicMeshPart> parts, List<BoneNode> boneNodes, DestinyGenderDefinition gender = DestinyGenderDefinition.None)
     {
         ExporterMesh mesh = new(entityHash);
+        string name = $"{entityHash}" + (gender == DestinyGenderDefinition.None ? "" : $"_{gender}");
         for (int i = 0; i < parts.Count; i++)
         {
             DynamicMeshPart part = parts[i];
             if (part.Material == null)
                 continue;
 
-            //No longer needed because of EntityModel.cs line 107?
-            //if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-            //{
-            //    mesh.AddPart(entityHash, part, i);
-            //}
-            mesh.AddPart(entityHash, part, i);
+            mesh.AddPart(name, part, i);
         }
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
     }
@@ -469,11 +470,9 @@ public enum ExportType
     Entity,
     Map,
     Terrain,
-    Decorator,
     EntityPoints,
     StaticInMap,
     EntityInMap,
     API,
-    D1API,
-    MapResource
+    D1API
 }

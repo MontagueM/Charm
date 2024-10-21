@@ -36,6 +36,7 @@ public enum DestinyUIDisplayStyle : uint
     EnergyMod = 3201739904 // 'ui_display_style_energy_mod'
 }
 
+
 // TODO: Find where these indexes actually go?
 public static class DestinyDamageType
 {

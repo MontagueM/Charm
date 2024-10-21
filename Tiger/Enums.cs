@@ -35,3 +35,10 @@ public enum TigerLanguage
     Latin_American_Spanish = 12,
     Korean = 13,
 }
+
+public enum DestinyGenderDefinition
+{
+    Masculine = 0,
+    Feminine = 1,
+    None = 2
+}

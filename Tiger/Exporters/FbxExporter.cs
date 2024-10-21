@@ -5,6 +5,7 @@ using Tiger.Schema.Entity;
 
 namespace Tiger.Exporters;
 
+// TODO: Clean this up
 public class FbxExporter : AbstractExporter
 {
     private readonly FbxManager _manager = FbxManager.Create();
@@ -22,23 +23,26 @@ public class FbxExporter : AbstractExporter
 
             string outputDirectory = args.OutputDirectory;
             string outputIndivDir = outputDirectory;
-            switch (scene.Type)
+            if (!args.AggregateOutput)
             {
-                case ExportType.Map:
-                case ExportType.Terrain:
-                case ExportType.EntityPoints:
-                    outputDirectory = Path.Join(outputDirectory, "Maps");
-                    break;
-                case ExportType.StaticInMap:
-                    outputDirectory = Path.Join(outputDirectory, "Maps", "Statics");
-                    break;
-                case ExportType.EntityInMap:
-                    outputDirectory = Path.Join(outputDirectory, "Maps", "Entities");
-                    break;
-                default:
-                    outputDirectory = Path.Join(outputDirectory, scene.Name);
-                    outputIndivDir = outputDirectory;
-                    break;
+                switch (scene.Type)
+                {
+                    case ExportType.Map:
+                    case ExportType.Terrain:
+                    case ExportType.EntityPoints:
+                        outputDirectory = Path.Join(outputDirectory, "Maps");
+                        break;
+                    case ExportType.StaticInMap:
+                        outputDirectory = Path.Join(outputDirectory, "Maps", "Statics");
+                        break;
+                    case ExportType.EntityInMap:
+                        outputDirectory = Path.Join(outputDirectory, "Maps", "Entities");
+                        break;
+                    default:
+                        outputDirectory = Path.Join(outputDirectory, scene.Name);
+                        outputIndivDir = outputDirectory;
+                        break;
+                }
             }
 
             foreach (ExporterMesh mesh in scene.StaticMeshes)
@@ -94,7 +98,8 @@ public class FbxExporter : AbstractExporter
                                       "Models/Entities";
                         }
 
-                        Source2Handler.SaveEntityVMDL(outputIndivDir, fbxPath, entity);
+                        if (scene.Type != ExportType.API && scene.Type != ExportType.D1API)
+                            Source2Handler.SaveEntityVMDL(outputIndivDir, fbxPath, entity);
                     }
                 }
                 AddEntity(fbxScene, entity);

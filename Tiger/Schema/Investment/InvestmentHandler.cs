@@ -702,11 +702,15 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             if (entry.FeminineSingleEntityAssignment.IsValid())
             {
-                entities.Add(GetEntityFromAssignmentHash(entry.FeminineSingleEntityAssignment));
+                var entity = GetEntityFromAssignmentHash(entry.FeminineSingleEntityAssignment);
+                entity.Gender = DestinyGenderDefinition.Feminine;
+                entities.Add(entity);
             }
             if (entry.MasculineSingleEntityAssignment.IsValid())
             {
-                entities.Add(GetEntityFromAssignmentHash(entry.MasculineSingleEntityAssignment));
+                var entity = GetEntityFromAssignmentHash(entry.MasculineSingleEntityAssignment);
+                entity.Gender = DestinyGenderDefinition.Masculine;
+                entities.Add(entity);
             }
         }
         else

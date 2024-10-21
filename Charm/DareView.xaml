@@ -192,19 +192,44 @@
             Text="150"
             TextAlignment="Center"
             TextChanged="AmountBox_TextChanged" />
-        <Button
+        <StackPanel
             Grid.Row="0"
             Grid.Column="0"
             Margin="5,0,5,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Click="RipAllShaders_OnClick"
-            Style="{StaticResource MaterialDesignPaperDarkButton}">
-            <TextBlock
-                Text="Rip All Shaders"
-                TextAlignment="Center"
-                TextWrapping="Wrap" />
-        </Button>
+            Orientation="Horizontal">
+            <Button
+                Margin="5,0,5,0"
+                Click="RipAllShaders_OnClick"
+                Style="{StaticResource MaterialDesignPaperDarkButton}">
+                <TextBlock
+                    Text="Rip All Shaders"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </Button>
+            <Border
+                BorderBrush="White"
+                BorderThickness="1"
+                ToolTip="Outputs everything, except shaders, to the same directory">
+                <CheckBox
+                    x:Name="AggregateOutput"
+                    Margin="5,0,5,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    BorderBrush="White"
+                    BorderThickness="1"
+                    IsChecked="False"
+                    Style="{StaticResource MaterialDesignCheckBox}">
+                    <TextBlock
+                        Text="Aggregate Output"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
+                </CheckBox>
+            </Border>
+
+        </StackPanel>
+
         <StackPanel
             Grid.Row="0"
             Grid.Column="1"

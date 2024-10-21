@@ -6,15 +6,15 @@ using Tiger.Schema.Shaders;
 
 namespace Tiger.Exporters;
 
+// TODO: Clean this up
 public class MetadataExporter : AbstractExporter
 {
-
     public override void Export(Exporter.ExportEventArgs args)
     {
         Parallel.ForEach(args.Scenes, scene =>
         {
             MetadataScene metadataScene = new(scene);
-            metadataScene.WriteToFile(args.OutputDirectory);
+            metadataScene.WriteToFile(args);
         });
     }
 }
@@ -299,8 +299,10 @@ class MetadataScene
         _config["Atmosphere"].TryAdd("Texture2", $"{atmosphere.Texture2?.Hash}");
     }
 
-    public void WriteToFile(string path)
+    public void WriteToFile(Exporter.ExportEventArgs args)
     {
+        string path = args.OutputDirectory;
+
         if (_config["Lights"].Count == 0
             && _config["Materials"].Count == 0
             && _config["Cubemaps"].Count == 0
@@ -311,17 +313,20 @@ class MetadataScene
             && _exportType is not ExportType.EntityPoints)
             return; //Dont export if theres nothing in the cfg (this is kind of a mess though)
 
-        if (_exportType is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
+        if (!args.AggregateOutput)
         {
-            path = Path.Join(path, _config["MeshName"]);
-        }
-        else if (_exportType is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
-        {
-            path = Path.Join(path, "Maps");
-        }
-        else if (_exportType is ExportType.StaticInMap or ExportType.EntityInMap)
-        {
-            return;
+            if (_exportType is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
+            {
+                path = Path.Join(path, _config["MeshName"]);
+            }
+            else if (_exportType is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
+            {
+                path = Path.Join(path, "Maps");
+            }
+            else if (_exportType is ExportType.StaticInMap or ExportType.EntityInMap)
+            {
+                return;
+            }
         }
 
         // Are these needed anymore?

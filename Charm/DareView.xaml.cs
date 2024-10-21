@@ -155,12 +155,20 @@ public partial class DareView : UserControl
     private void ExecuteQueue_OnClick(object sender, RoutedEventArgs e)
     {
         List<string> apiStages = _selectedItems.Select((_, i) => $"exporting {i + 1}/{_selectedItems.Count}").ToList();
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        string savePath = config.GetExportSavePath();
+        bool aggregateOutput = (bool)AggregateOutput.IsChecked;
+
+        if (aggregateOutput)
+            savePath = CreateNextOutputFolder(config.GetExportSavePath());
+
         MainWindow.Progress.SetProgressStages(apiStages);
         Task.Run(() =>
         {
             _selectedItems.ToList().ForEach(item =>
             // Parallel.ForEach(_selectedItems, item =>
             {
+
                 if (item.ItemType == "Artifact" && item.Item.TagData.Unk28.GetValue(item.Item.GetReader()) is D2Class_C5738080 gearSet)
                 {
                     if (gearSet.ItemList.Count != 0)
@@ -170,13 +178,11 @@ public partial class DareView : UserControl
                 if (item.Item.GetArtArrangementIndex() != -1)
                 {
                     // if has a model
-                    EntityView.ExportInventoryItem(item);
+                    EntityView.ExportInventoryItem(item, savePath, aggregateOutput);
                 }
                 else
                 {
                     // shader
-                    ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-                    string savePath = config.GetExportSavePath();
                     string itemName = Helpers.SanitizeString(item.ItemName);
                     savePath += $"/{itemName}";
                     Directory.CreateDirectory(savePath);
@@ -330,6 +336,42 @@ public partial class DareView : UserControl
             whitelist.Any(x => type.ToLower().Contains(x.ToLower()))) &&
             // Blacklist
             !blacklist.Any(x => type.ToLower().Contains(x.ToLower()));
+    }
+
+
+    // For aggregated outputs
+    public static string CreateNextOutputFolder(string baseDirectory)
+    {
+        // Get all subdirectories that match the "Output#" pattern
+        string[] existingFolders = Directory.GetDirectories(baseDirectory, "ApiOutput*");
+        int maxNumber = 0;
+
+        // Regex to capture the numeric part of "Output#"
+        Regex regex = new Regex(@"ApiOutput(\d+)$");
+
+        foreach (string folder in existingFolders)
+        {
+            Match match = regex.Match(Path.GetFileName(folder));
+            if (match.Success)
+            {
+                // Parse the number from the folder name
+                int folderNumber = int.Parse(match.Groups[1].Value);
+                if (folderNumber > maxNumber)
+                {
+                    maxNumber = folderNumber;
+                }
+            }
+        }
+
+        // Increment the max number to get the next available folder
+        int nextNumber = maxNumber + 1;
+        string newFolderName = $"ApiOutput{nextNumber}";
+        string newFolderPath = Path.Combine(baseDirectory, newFolderName);
+
+        // Create the new directory
+        Directory.CreateDirectory(newFolderPath);
+
+        return newFolderPath;
     }
 }
 

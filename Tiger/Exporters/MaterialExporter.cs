@@ -3,6 +3,7 @@ using Tiger.Schema;
 
 namespace Tiger.Exporters;
 
+// TODO: Clean this up
 public class MaterialExporter : AbstractExporter
 {
     public override void Export(Exporter.ExportEventArgs args)
@@ -40,12 +41,18 @@ public class MaterialExporter : AbstractExporter
                     if (saveShaders)
                     {
                         string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Shaders";
+                        if (args.AggregateOutput)
+                            shaderSaveDirectory = $"{args.OutputDirectory}/Shaders";
+
                         material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
                         material.Material.SaveVertexShader(shaderSaveDirectory);
                     }
                 }
 
                 string textureSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Textures";
+                if (args.AggregateOutput)
+                    textureSaveDirectory = $"{args.OutputDirectory}/Textures";
+
                 Directory.CreateDirectory(textureSaveDirectory);
                 foreach (Texture texture in textures)
                 {
@@ -86,10 +93,10 @@ public class MaterialExporter : AbstractExporter
             }
         });
 
-        string textureSaveDirectory = $"{args.OutputDirectory}/Maps/Textures";
-        Directory.CreateDirectory(textureSaveDirectory);
         foreach (Texture texture in mapTextures)
         {
+            string textureSaveDirectory = $"{args.OutputDirectory}/Maps/Textures";
+            Directory.CreateDirectory(textureSaveDirectory);
             if (texture is null)
                 continue;
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
@@ -97,10 +104,11 @@ public class MaterialExporter : AbstractExporter
 
         if (saveShaders && saveIndiv)
         {
-            string shaderSaveDirectory = $"{args.OutputDirectory}/Maps/Shaders";
-            Directory.CreateDirectory(shaderSaveDirectory);
             foreach (ExportMaterial material in mapMaterials)
             {
+                string shaderSaveDirectory = $"{args.OutputDirectory}/Maps/Shaders";
+                Directory.CreateDirectory(shaderSaveDirectory);
+
                 material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
                 material.Material.SaveVertexShader(shaderSaveDirectory);
             }

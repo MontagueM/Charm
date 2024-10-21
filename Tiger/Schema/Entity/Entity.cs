@@ -18,6 +18,7 @@ public class Entity : Tag<SEntity>
     public EntityControlRig? ControlRig { get; private set; }
     public EntityResource? EntityChildren { get; private set; }
     public string? EntityName { get; set; } // Usually just the generic name (Ogre, Vandal, etc)
+    public DestinyGenderDefinition Gender { get; set; } = DestinyGenderDefinition.None; // Only used for player armor
 
     private bool _loaded = false;
 

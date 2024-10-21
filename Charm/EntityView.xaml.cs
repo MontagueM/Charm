@@ -9,7 +9,6 @@ using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
-using Tiger.Schema.Model;
 
 namespace Charm;
 
@@ -134,7 +133,7 @@ public partial class EntityView : UserControl
             {
                 boneNodes = entity.Skeleton.GetBoneNodes();
             }
-            scene.AddEntity(entity.Hash, dynamicParts, boneNodes);
+            scene.AddEntity(entity.Hash, dynamicParts, boneNodes, entity.Gender);
             if (exportType == ExportTypeFlag.Full)
             {
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
@@ -156,9 +155,14 @@ public partial class EntityView : UserControl
         Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 
-    public static void ExportInventoryItem(ApiItem item)
+    public static void ExportInventoryItem(ApiItem item, string savePath, bool aggregateOutput = false)
     {
+        ConfigSubsystem config = ConfigSubsystem.Get();
         string name = Helpers.SanitizeString(item.ItemName);
+        if (!aggregateOutput)
+            savePath = config.GetExportSavePath() + $"/{name}";
+
+        var scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON ? ExportType.D1API : ExportType.API);
 
         // Export the model
         // todo bad, should be replaced
@@ -180,19 +184,46 @@ public partial class EntityView : UserControl
             overrideSkeleton = val.Skeleton;
         }
 
-        ExporterScene scene = Tiger.Exporters.Exporter.Get().CreateScene(name, Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON ? ExportType.D1API : ExportType.API);
-        EntityView.Export(Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash),
-            name, ExportTypeFlag.Full, overrideSkeleton, scene);
+        var entities = Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash);
 
-        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        Log.Verbose($"Exporting entity model name: {name}");
 
-        string savePath = config.GetExportSavePath();
-        savePath += $"/{name}";
+        foreach (var entity in entities)
+        {
+            if (entity.Skeleton == null && overrideSkeleton != null)
+                entity.Skeleton = overrideSkeleton;
+
+            var dynamicParts = entity.Load(ExportDetailLevel.MostDetailed);
+            List<BoneNode> boneNodes = overrideSkeleton != null ? overrideSkeleton.GetBoneNodes() : new List<BoneNode>();
+            if (entity.Skeleton != null && overrideSkeleton == null)
+            {
+                boneNodes = entity.Skeleton.GetBoneNodes();
+            }
+            scene.AddEntity(entity.Hash, dynamicParts, boneNodes, entity.Gender);
+            entity.SaveMaterialsFromParts(scene, dynamicParts);
+            entity.SaveTexturePlates(savePath);
+        }
+
+        //if (exportType == ExportTypeFlag.Full)
+        //{
+        //    if (config.GetUnrealInteropEnabled())
+        //    {
+        //        AutomatedExporter.SaveInteropUnrealPythonFile(savePath, name, AutomatedExporter.ImportType.Entity, config.GetOutputTextureFormat());
+        //    }
+        //}
+
+        // Scale and rotate
+        // fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
+        if (!aggregateOutput)
+            Tiger.Exporters.Exporter.Get().Export();
+        else
+            Tiger.Exporters.Exporter.Get().Export(savePath);
+
+        Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
+
         Directory.CreateDirectory(savePath);
-
         ExportGearShader(item, name, savePath);
     }
-
 
     // I don't like this
     public static void ExportGearShader(ApiItem item, string itemName, string savePath)
