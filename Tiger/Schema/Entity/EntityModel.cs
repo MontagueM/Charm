@@ -306,8 +306,6 @@ public class DynamicMeshPart : MeshPart
     {
         using TigerReader reader = parentResource.GetReader();
 
-        List<IMaterial> materials = new();
-
         var map = parentResource is EntityPhysicsModelParent ?
             ((D2Class_6C6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap :
             ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;

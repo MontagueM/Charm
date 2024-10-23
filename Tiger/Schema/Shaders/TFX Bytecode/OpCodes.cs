@@ -71,7 +71,7 @@ public static class TfxBytecodeOp
                     Unk39Data.unk1 = reader.ReadByte();
                     tfxData.data = Unk39Data;
                     break;
-                case TfxBytecode.Unk3a:
+                case TfxBytecode.Unk3a: // Gradient4Const
                     Unk3aData Unk3aData = new();
                     Unk3aData.unk1 = reader.ReadByte();
                     tfxData.data = Unk3aData;
@@ -317,7 +317,7 @@ public static class TfxBytecodeOp
             case Unk39Data:
                 output = $"unk1 {((Unk39Data)tfxData.data).unk1}";
                 break;
-            case Unk3aData:
+            case Unk3aData: // Gradient4Const
                 output = $"unk1 {((Unk3aData)tfxData.data).unk1}";
                 break;
             case UnkLoadConstantData:
@@ -474,7 +474,7 @@ public enum TfxBytecode : byte
     Spline4Const = 0x37, //{ unk1: u8 }
     Spline8Const = 0x38, //{ unk1: u8 }
     Unk39 = 0x39, //{ unk1: u8 }
-    Unk3a = 0x3a, //{ unk1: u8 }
+    Unk3a = 0x3a, //{ unk1: u8 } Gradient4Const
     UnkLoadConstant = 0x3b, //{ constant_index: u8 }
     PushExternInputFloat = 0x3c, //{ extern_: TfxExtern, element: u8 }
     PushExternInputVec4 = 0x3d, //{ extern_: TfxExtern, unk2: u8 }

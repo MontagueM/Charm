@@ -492,6 +492,7 @@
                         Margin="0,0,5,0"
                         local:StyleHelper.BorderThickness="1"
                         Click="PreviousPage_Click"
+                        Focusable="False"
                         Style="{DynamicResource D2StyleButton}"
                         Visibility="Hidden">
                         <Border Background="#9E6C6C6C">
@@ -557,6 +558,7 @@
                         Margin="5,0,0,0"
                         local:StyleHelper.BorderThickness="1"
                         Click="NextPage_Click"
+                        Focusable="False"
                         Style="{DynamicResource D2StyleButton}"
                         Visibility="Collapsed">
                         <Border Background="#9E6C6C6C">

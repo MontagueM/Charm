@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using DirectXTexNet;
+﻿using DirectXTexNet;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Model;
@@ -13,26 +12,14 @@ namespace Tiger.Schema.Entity;
 public struct SEntity
 {
     public long FileSize;
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public ResourcePointer Unk08; // D1 06098080
+    //[SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    //public ResourcePointer Unk08; // D1 06098080
 
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x08, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArrayUnloaded<D2Class_CD9A8080> EntityResources;
-    public DynamicArrayUnloaded<D2Class_8F9A8080> Unk18;
-    public long Zeros28;
-    public long Zeros30;
-    public TigerHash Unk38;
-    public int Zeros3C;
-    public DynamicArrayUnloaded<D2Class_F09A8080> Unk40;
-    public DynamicArrayUnloaded<D2Class_ED9A8080> Unk50;
-    public DynamicArrayUnloaded<D2Class_EB9A8080> Unk60;
-    public DynamicArrayUnloaded<D2Class_06008080> Unk70;
-    public TigerHash Unk80;
-    public TigerHash Unk84;
-    public TigerHash Unk88;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "61038080", 8)]
@@ -93,17 +80,11 @@ public struct D2Class_CD9A8080  // entity resource entry
 public struct D2Class_069B8080  // Entity resource
 {
     public long FileSize;
-    public ResourcePointer Unk08;
+
+    [SchemaField(0x10)]
     public ResourcePointer Unk10; // this isnt any of the ones in Entity.Load in beyond light
     public ResourcePointer Unk18;
 
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
-    [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    public DynamicArrayUnloaded<D2Class_7C908080> ResourceTable40;
-
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
-    [SchemaField(0x60, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    public DynamicArrayUnloaded<D2Class_6E908080> ResourceTable60;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -124,11 +105,6 @@ public struct D2Class_7C908080
     public short Unk0E;
 }
 
-[SchemaStruct("6E908080", 8)]
-public struct D2Class_6E908080
-{
-    public RelativePointer RelativePointer00;
-}
 
 /*
  * The external material map provides the mapping of external material index -> material tag
@@ -659,9 +635,8 @@ public struct D2Class_9E958080
 [SchemaStruct("668B8080", 0x70)]
 public struct D2Class_668B8080
 {
-    public ResourceInTagPointer Unk00;
     [SchemaField(0x30)]
-    public DynamicArray<D2Class_628B8080> Unk30;
+    public DynamicArrayUnloaded<D2Class_628B8080> Unk30;
 }
 
 [SchemaStruct("628B8080", 0x30)]
@@ -673,81 +648,81 @@ public struct D2Class_628B8080
 [SchemaStruct("5F8B8080", 0x140)]
 public struct D2Class_5F8B8080
 {
-    public ResourceInTagPointer Unk00;
-    [SchemaField(0xA8)]
-    public DynamicArray<D2Class_5F8C8080> UnkA8;
-    public DynamicArray<D2Class_568C8080> UnkB8;
-    public DynamicArray<D2Class_4F9F8080> UnkC8;
-    public DynamicArray<D2Class_06008080> UnkD8;
-    [SchemaField(0xF0)]
-    public DynamicArray<D2Class_06008080> UnkF0;
-    public DynamicArray<D2Class_06008080> Unk100;
-    [SchemaField(0x128)]
-    public DynamicArray<D2Class_DA8B8080> Unk128;
-    public int Unk138;
-    public short Unk13C;
-    public short Unk13E;
+    //public ResourceInTagPointer Unk00;
+    //[SchemaField(0xA8)]
+    //public DynamicArray<D2Class_5F8C8080> UnkA8;
+    //public DynamicArray<D2Class_568C8080> UnkB8;
+    //public DynamicArray<D2Class_4F9F8080> UnkC8;
+    //public DynamicArray<D2Class_06008080> UnkD8;
+    //[SchemaField(0xF0)]
+    //public DynamicArray<D2Class_06008080> UnkF0;
+    //public DynamicArray<D2Class_06008080> Unk100;
+    //[SchemaField(0x128)]
+    //public DynamicArray<D2Class_DA8B8080> Unk128;
+    //public int Unk138;
+    //public short Unk13C;
+    //public short Unk13E;
 }
 
-[SchemaStruct("5F8C8080", 8)]
-public struct D2Class_5F8C8080
-{
-    public TigerHash Unk00;
-    public int Unk04;
-}
+//[SchemaStruct("5F8C8080", 8)]
+//public struct D2Class_5F8C8080
+//{
+//    public TigerHash Unk00;
+//    public int Unk04;
+//}
 
-[SchemaStruct("568C8080", 0x34)]
-public struct D2Class_568C8080
-{
-    public TigerHash Unk00;
-    public short Unk04;
-    public short Unk06;
-    public short Unk08;
-    public short Unk0A;
-    public short Unk0C;
-    public short Unk0E;
-    public float Unk10;
-    public int Unk14;
+//[SchemaStruct("568C8080", 0x34)]
+//public struct D2Class_568C8080
+//{
+//    public TigerHash Unk00;
+//    public short Unk04;
+//    public short Unk06;
+//    public short Unk08;
+//    public short Unk0A;
+//    public short Unk0C;
+//    public short Unk0E;
+//    public float Unk10;
+//    public int Unk14;
 
-    public short Unk18;
-    public short Unk1A;
-    public short Unk1C;
-    public short Unk1E;
-    public short Unk20;
-    public short Unk22;
-    public float Unk24;
-    public int Unk28;
+//    public short Unk18;
+//    public short Unk1A;
+//    public short Unk1C;
+//    public short Unk1E;
+//    public short Unk20;
+//    public short Unk22;
+//    public float Unk24;
+//    public int Unk28;
 
-    public short Unk2C;
-    public short Unk2E;
-    public sbyte Unk30;
-    public sbyte Unk31;
-    public sbyte Unk32;
-    public sbyte Unk33;
-}
+//    public short Unk2C;
+//    public short Unk2E;
+//    public sbyte Unk30;
+//    public sbyte Unk31;
+//    public sbyte Unk32;
+//    public sbyte Unk33;
+//}
 
-[SchemaStruct("DA8B8080", 8)]
-public struct D2Class_DA8B8080
-{
-    public TigerHash Unk00;
-    public int Unk04;
-}
+//[SchemaStruct("DA8B8080", 8)]
+//public struct D2Class_DA8B8080
+//{
+//    public TigerHash Unk00;
+//    public int Unk04;
+//}
 
-[SchemaStruct("13268080", 0x830)]
-public struct D2Class_13268080
-{
-    public ResourceInTagPointer Unk00;
-    // lots of array stuff
-}
+//[SchemaStruct("13268080", 0x830)]
+//public struct D2Class_13268080
+//{
+//    public ResourceInTagPointer Unk00;
+//    // lots of array stuff
+//}
 
-[SchemaStruct("F8258080", 0x830)]
-public struct D2Class_F8258080
-{
-    public ResourceInTagPointer Unk00;
-    // lots of array stuff
-    [SchemaField(0xA8), MarshalAs(UnmanagedType.ByValArray, SizeConst = 33)]
-    public FileHash[] UnkA8;
-}
+//[SchemaStruct("F8258080", 0x830)]
+//public struct D2Class_F8258080
+//{
+//    public ResourceInTagPointer Unk00;
+//    // lots of array stuff
+//    [SchemaField(0xA8), MarshalAs(UnmanagedType.ByValArray, SizeConst = 33)]
+//    public FileHash[] UnkA8;
+//}
 
 //[SchemaStruct("41268080", 0xBA0)]
 //public struct D2Class_41268080

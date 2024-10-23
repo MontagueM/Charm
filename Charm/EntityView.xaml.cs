@@ -169,14 +169,17 @@ public partial class EntityView : UserControl
         EntitySkeleton overrideSkeleton = null;
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent
-            overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
+            string skeleHash = item.ItemType == "Ghost Shell" ? "0000603046D31C68" : "0000670F342E9595";
+            Entity skele = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked(skeleHash))); // 64 bit more permanent
+            overrideSkeleton = new EntitySkeleton(skele.Skeleton.Hash);
         }
         else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
             Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash("0AE18481"));
             overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
+
+
 
         var val = Investment.Get().GetPatternEntityFromHash(item.Parent != null ? item.Parent.TagData.InventoryItemHash : item.Item.TagData.InventoryItemHash);
         if (val != null && val.Skeleton != null)

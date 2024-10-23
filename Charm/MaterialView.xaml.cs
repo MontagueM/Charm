@@ -159,6 +159,7 @@ public partial class MaterialView : UserControl
 
         //Only material provided cbuffer (cb0) is useful to show
         List<Vector4> data = new();
+        List<Vector4> const_data = new();
         if (bVertexShader)
         {
             if (material.VSVector4Container.IsValid())
@@ -170,6 +171,10 @@ public partial class MaterialView : UserControl
                 foreach (var vec in material.VS_CBuffers)
                 {
                     data.Add(vec.Vec);
+                }
+                foreach (var vec in material.VS_TFX_Bytecode_Constants)
+                {
+                    const_data.Add(vec.Vec);
                 }
             }
         }
@@ -185,6 +190,10 @@ public partial class MaterialView : UserControl
                 {
                     data.Add(vec.Vec);
                 }
+                foreach (var vec in material.PS_TFX_Bytecode_Constants)
+                {
+                    const_data.Add(vec.Vec);
+                }
             }
         }
 
@@ -193,8 +202,18 @@ public partial class MaterialView : UserControl
             items.Add(new CBufferDetail
             {
                 Index = "CB0",
-                Count = $"Count: {data.Count}",
+                Count = $"{data.Count}",
                 Data = data,
+                Stage = bVertexShader ? CBufferDetail.Shader.Vertex : CBufferDetail.Shader.Pixel
+            });
+        }
+        if (const_data.Count > 0)
+        {
+            items.Add(new CBufferDetail
+            {
+                Index = "TFX Constants",
+                Count = $"{const_data.Count}",
+                Data = const_data,
                 Stage = bVertexShader ? CBufferDetail.Shader.Vertex : CBufferDetail.Shader.Pixel
             });
         }
@@ -222,7 +241,7 @@ public partial class MaterialView : UserControl
                     CBufferDataDetail dataEntry = new();
 
                     dataEntry.Index = i;
-                    if (bytecode_hlsl.ContainsKey(i))
+                    if (bytecode_hlsl.ContainsKey(i) && dc.Index != "TFX Constants")
                         dataEntry.StringVector = $"Bytecode Assigned";
                     else
                     {

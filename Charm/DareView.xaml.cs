@@ -154,12 +154,12 @@ public partial class DareView : UserControl
 
     private void ExecuteQueue_OnClick(object sender, RoutedEventArgs e)
     {
-        List<string> apiStages = _selectedItems.Select((_, i) => $"exporting {i + 1}/{_selectedItems.Count}").ToList();
+        List<string> apiStages = _selectedItems.Select((_, i) => $"Exporting {_selectedItems[i].ItemName} ({i + 1}/{_selectedItems.Count})").ToList();
         ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
         string savePath = config.GetExportSavePath();
         bool aggregateOutput = (bool)AggregateOutput.IsChecked;
 
-        if (aggregateOutput)
+        if (aggregateOutput && _selectedItems.Any(x => !x.ItemType.Contains("Shader")))
             savePath = CreateNextOutputFolder(config.GetExportSavePath());
 
         MainWindow.Progress.SetProgressStages(apiStages);
@@ -184,6 +184,7 @@ public partial class DareView : UserControl
                 {
                     // shader
                     string itemName = Helpers.SanitizeString(item.ItemName);
+                    string savePath = config.GetExportSavePath(); // need to set again here
                     savePath += $"/{itemName}";
                     Directory.CreateDirectory(savePath);
                     Directory.CreateDirectory(savePath + "/Textures");

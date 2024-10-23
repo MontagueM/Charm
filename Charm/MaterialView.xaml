@@ -111,8 +111,8 @@
             <Button Click="LoadCBufferData">
                 <Grid Margin="0,0,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="50*" />
-                        <ColumnDefinition Width="50*" />
+                        <ColumnDefinition Width="80*" />
+                        <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
 
                     <TextBlock
@@ -120,8 +120,9 @@
                         Margin="10,0,0,0"
                         HorizontalAlignment="Left"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="26"
-                        Text="{Binding Index}" />
+                        FontSize="24"
+                        Text="{Binding Index}"
+                        TextWrapping="WrapWithOverflow" />
 
                     <TextBlock
                         Grid.Column="1"
@@ -129,7 +130,7 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="16"
+                        FontSize="18"
                         Text="{Binding Count}" />
 
                 </Grid>
@@ -248,7 +249,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="125*" />
+            <ColumnDefinition Width="145*" />
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
 
@@ -400,14 +401,14 @@
             <Grid Grid.Row="1" Grid.Column="0">
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="45*" />
-                    <ColumnDefinition Width="25*" />
+                    <ColumnDefinition Width="40*" />
+                    <ColumnDefinition Width="20*" />
                 </Grid.ColumnDefinitions>
 
                 <Grid Grid.Column="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="20*" />
-                        <ColumnDefinition Width="50*" />
+                        <ColumnDefinition Width="25*" />
+                        <ColumnDefinition Width="55*" />
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0">

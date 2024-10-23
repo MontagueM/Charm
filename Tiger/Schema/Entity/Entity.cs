@@ -52,19 +52,24 @@ public class Entity : Tag<SEntity>
                     ModelParent = Model; // could just use ModelParentResource but im lazy
                     ModelParentResource = resource;
                     break;
+
                 case D2Class_5B6D8080:  // Entity physics model
                     PhysicsModel = ((D2Class_6C6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).PhysicsModel;
                     PhysicsModelParentResource = FileResourcer.Get().GetFile<EntityPhysicsModelParent>(resource.Hash);
                     break;
+
                 case D2Class_DD818080:  // Entity skeleton FK
                     Skeleton = FileResourcer.Get().GetFile<EntitySkeleton>(resource.Hash);
                     break;
-                case D2Class_668B8080:  // Entity skeleton IK  todo shadowkeep
-                    ControlRig = FileResourcer.Get().GetFile<EntityControlRig>(resource.Hash);
-                    break;
+
+                //case D2Class_668B8080:  // Entity skeleton IK  todo shadowkeep
+                //    ControlRig = FileResourcer.Get().GetFile<EntityControlRig>(resource.Hash);
+                //    break;
+
                 case D2Class_97318080: // todo shadowkeep
                     PatternAudio = resource;
                     break;
+
                 case D2Class_F62C8080: // todo shadowkeep
                     PatternAudioUnnamed = resource;
                     break;
@@ -90,6 +95,7 @@ public class Entity : Tag<SEntity>
                 case D2Class_12848080:
                     EntityChildren = resource;
                     break;
+
                 default:
                     //Console.WriteLine($"{resource.TagData.Unk18.GetValue(resource.GetReader())}");
                     // throw new NotImplementedException($"Implement parsing for {resource.Resource._tag.Unk08}");
@@ -157,9 +163,20 @@ public class Entity : Tag<SEntity>
             if (!_loaded)
             {
                 Load();
+                //Deserialize();
+                //_loaded = true;
             }
         }
         return Model != null;
+
+        //// saves about 10 seconds when loading dynamics list, but its not really worth it since
+        //// the entity will need to be fully loaded after anyways, which adds time
+        //foreach (var resourceHash in _tag.EntityResources.Select(GetReader(), r => r.Resource))
+        //{
+        //    if (resourceHash.ContainsHash(0x80806D8A)) // 8A6D8080
+        //        return true;
+        //}
+        //return false;
     }
 
     public List<Entity> GetEntityChildren()
