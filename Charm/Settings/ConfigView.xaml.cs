@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Tiger;
 
 namespace Charm;
 
@@ -38,6 +39,17 @@ public partial class ConfigView : UserControl
     private void UserControl_Loaded(object sender, RoutedEventArgs e)
     {
         SelectRadioButton(Settings, 0);
+
+        if (ConfigSubsystem.Get().GetAnimatedBackground())
+        {
+            SpinnerShader _spinner = new SpinnerShader();
+            Spinner.Effect = _spinner;
+            SizeChanged += _spinner.OnSizeChanged;
+            _spinner.ScreenWidth = (float)ActualWidth;
+            _spinner.ScreenHeight = (float)ActualHeight;
+            _spinner.Scale = new(4, 4);
+            _spinner.Offset = new(-3.6, -3.3);
+        }
     }
 
     // Not ideal but it works

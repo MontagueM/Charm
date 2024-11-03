@@ -12,4 +12,5 @@ public partial class ConfigSettingToggleControl : UserControl
 
     public string SettingName { get; set; }
     public string SettingValue { get; set; }
+    public string SettingLabel { get; set; }
 }

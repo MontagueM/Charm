@@ -118,6 +118,13 @@ public partial class GeneralConfigView : UserControl
         ctf.ChangeButton.Visibility = Visibility.Hidden;
         GeneralConfigPanel.Children.Add(ctf);
 
+        ConfigSettingToggleControl disBg = new ConfigSettingToggleControl();
+        disBg.SettingName = "Animated Background";
+        disBg.SettingLabel = "(Requires Restart)";
+        bval = _config.GetAnimatedBackground();
+        disBg.SettingValue = bval.ToString();
+        disBg.ChangeButton.Click += AnimatedBackground_OnClick;
+        GeneralConfigPanel.Children.Add(disBg);
     }
 
     private void PackagePathStrategyComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -295,6 +302,12 @@ public partial class GeneralConfigView : UserControl
     private void UseCustomRenderer_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetUseCustomRenderer(!_config.GetUseCustomRenderer());
+        PopulateConfigPanel();
+    }
+
+    private void AnimatedBackground_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetAnimatedBackground(!_config.GetAnimatedBackground());
         PopulateConfigPanel();
     }
 }

@@ -269,11 +269,17 @@ public partial class EntityView : UserControl
                 {
                     Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
                     dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+#if DEBUG
+                    System.Console.WriteLine($"{item.ItemName}: DefaultDye {dye.Hash}");
+#endif
                 }
                 foreach (var dyeEntry in translationBlock.LockedDyes)
                 {
                     Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
                     dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
+#if DEBUG
+                    System.Console.WriteLine($"{item.ItemName}: LockedDye {dye.Hash}");
+#endif
                 }
             }
 

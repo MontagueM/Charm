@@ -29,6 +29,7 @@ public class CommonSettings
     public bool IndividualStaticsEnabled { get; set; } = true;
     public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.DDS_BGRA_UNCOMP_DX10;
     public bool UseCustomRenderer { get; set; } = false;
+    public bool AnimatedBackground { get; set; } = true;
 
     public bool AcceptedAgreement { get; set; } = false;
 }
@@ -390,6 +391,17 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     public bool GetUseCustomRenderer()
     {
         return _settings.Common.UseCustomRenderer;
+    }
+
+    public void SetAnimatedBackground(bool bg)
+    {
+        _settings.Common.AnimatedBackground = bg;
+        Save();
+    }
+
+    public bool GetAnimatedBackground()
+    {
+        return _settings.Common.AnimatedBackground;
     }
 
     private string _configFilePath = "./config.json";

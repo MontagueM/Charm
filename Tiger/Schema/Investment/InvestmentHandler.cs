@@ -947,6 +947,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     Dye dye = GetDyeFromIndex(dyeEntry.DyeIndex);
                     dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
                     dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
+#if DEBUG
+                    System.Console.WriteLine($"{item.GetItemName()}: DefaultDye {dye.Hash}");
+#endif
                 }
             }
             // armor

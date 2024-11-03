@@ -13,14 +13,26 @@
             <ColumnDefinition Width="80*" />
             <ColumnDefinition Width="20*" />
         </Grid.ColumnDefinitions>
-        <TextBlock
+        <StackPanel
             Grid.Column="0"
             Margin="20,0,20,0"
-            VerticalAlignment="Center"
-            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-            FontSize="22"
-            Text="{Binding SettingName}"
-            TextWrapping="Wrap" />
+            Orientation="Horizontal">
+            <TextBlock
+                VerticalAlignment="Center"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                FontSize="22"
+                Text="{Binding SettingName}"
+                TextWrapping="Wrap" />
+            <TextBlock
+                Grid.Column="1"
+                Margin="10,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                FontSize="16"
+                Text="{Binding SettingLabel}"
+                TextWrapping="Wrap" />
+        </StackPanel>
 
         <Button
             x:Name="ChangeButton"

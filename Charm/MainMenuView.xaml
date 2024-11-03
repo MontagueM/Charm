@@ -31,6 +31,16 @@
             <RowDefinition Height="90*" />
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
+        <Grid
+            Grid.RowSpan="2"
+            Background="Transparent"
+            Opacity="1">
+            <Border
+                x:Name="Spinner"
+                Background="Transparent"
+                BorderThickness="0"
+                Opacity="1" />
+        </Grid>
 
         <Grid
             x:Name="MainContainer"
@@ -85,7 +95,7 @@
                     Margin="10,10,10,30"
                     Click="ActivitiesViewButton_OnClick"
                     Style="{DynamicResource D2StyleButton}">
-                    <Border Background="#22181818">
+                    <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"
                             Text="MAPS AND ACTIVITIES"
@@ -110,7 +120,7 @@
                             Margin="10"
                             Click="ApiViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="API" />
                             </Border>
                         </Button>
@@ -120,7 +130,7 @@
                             Margin="10"
                             Click="NamedEntitiesBagsViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="NAMED BAGS" />
                             </Border>
                         </Button>
@@ -129,7 +139,9 @@
                             Margin="10"
                             Click="AllEntitiesViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="DYNAMICS" />
+                            <Border Background="#BB181818">
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="DYNAMICS" />
+                            </Border>
                         </Button>
 
                         <Button
@@ -137,7 +149,7 @@
                             Margin="10"
                             Click="AllStaticsViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STATICS" />
                             </Border>
                         </Button>
@@ -159,7 +171,7 @@
                             Margin="10"
                             Click="AllAudioViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="ALL" />
                             </Border>
                         </Button>
@@ -169,7 +181,7 @@
                             Margin="10"
                             Click="WeaponAudioViewButton_Click"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="WEAPONS" />
                             </Border>
                         </Button>
@@ -179,7 +191,7 @@
                             Margin="10"
                             Click="AllBKHDViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="SOUND BANKS" />
                             </Border>
                         </Button>
@@ -201,7 +213,7 @@
                             Margin="10"
                             Click="AllStringsViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STRINGS" />
                             </Border>
                         </Button>
@@ -210,7 +222,7 @@
                             Margin="10"
                             Click="AllTexturesViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="TEXTURES" />
                             </Border>
                         </Button>
@@ -219,7 +231,7 @@
                             Margin="10"
                             Click="AllMaterialsViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="MATERIALS" />
                             </Border>
                         </Button>
@@ -230,7 +242,7 @@
                             Margin="10"
                             Click="CollectionsViewButton_OnClick"
                             Style="{DynamicResource D2StyleButton}">
-                            <Border Background="#22181818">
+                            <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="COLLECTIONS" />
                             </Border>
                         </Button>
@@ -280,7 +292,7 @@
         <Grid
             Grid.Row="1"
             Margin="0,40,0,0"
-            Background="#18585867">
+            Background="#66121212">
             <TextBlock
                 x:Name="GameVersion"
                 Margin="15,0,0,0"

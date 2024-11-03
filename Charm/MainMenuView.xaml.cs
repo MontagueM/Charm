@@ -69,6 +69,17 @@ public partial class MainMenuView : UserControl
         _mainWindow = Window.GetWindow(this) as MainWindow;
         GameVersion.Text = $"Game Version: {_mainWindow.GameInfo?.FileVersion}";
         MouseMove += UserControl_MouseMove;
+
+        if (ConfigSubsystem.Get().GetAnimatedBackground())
+        {
+            SpinnerShader _spinner = new SpinnerShader();
+            Spinner.Effect = _spinner;
+            SizeChanged += _spinner.OnSizeChanged;
+            _spinner.ScreenWidth = (float)ActualWidth;
+            _spinner.ScreenHeight = (float)ActualHeight;
+            _spinner.Scale = new(2, 2);
+            _spinner.Offset = new(-1, -1);
+        }
     }
 
     private async void ApiViewButton_OnClick(object sender, RoutedEventArgs e)

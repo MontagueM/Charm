@@ -71,9 +71,9 @@ public static class TfxBytecodeOp
                     Unk39Data.unk1 = reader.ReadByte();
                     tfxData.data = Unk39Data;
                     break;
-                case TfxBytecode.Unk3a: // Gradient4Const
-                    Unk3aData Unk3aData = new();
-                    Unk3aData.unk1 = reader.ReadByte();
+                case TfxBytecode.Gradient4Const: // Gradient4Const
+                    Gradient4ConstData Unk3aData = new();
+                    Unk3aData.index_start = reader.ReadByte();
                     tfxData.data = Unk3aData;
                     break;
                 case TfxBytecode.UnkLoadConstant:
@@ -229,7 +229,7 @@ public static class TfxBytecodeOp
                     tfxData.op = TfxBytecode.PushObjectChannelVector;
 
                     PushObjectChannelVectorData PushObjectChannelVector = new();
-                    PushObjectChannelVector.unk1 = reader.ReadInt32();
+                    PushObjectChannelVector.hash = reader.ReadUInt32();
                     tfxData.data = PushObjectChannelVector;
                     break;
 
@@ -317,8 +317,8 @@ public static class TfxBytecodeOp
             case Unk39Data:
                 output = $"unk1 {((Unk39Data)tfxData.data).unk1}";
                 break;
-            case Unk3aData: // Gradient4Const
-                output = $"unk1 {((Unk3aData)tfxData.data).unk1}";
+            case Gradient4ConstData: // Gradient4Const
+                output = $"index_start {((Gradient4ConstData)tfxData.data).index_start}";
                 break;
             case UnkLoadConstantData:
                 output = $"constant_index {((UnkLoadConstantData)tfxData.data).constant_index}: Constant value: {constants[((UnkLoadConstantData)tfxData.data).constant_index].Vec}";
@@ -388,7 +388,7 @@ public static class TfxBytecodeOp
                 output = $"index {((PushSamplerData)tfxData.data).unk1}";
                 break;
             case PushObjectChannelVectorData:
-                output = $"index {((PushObjectChannelVectorData)tfxData.data).unk1}";
+                output = $"hash {((PushObjectChannelVectorData)tfxData.data).hash:X}";
                 break;
             case PushGlobalChannelVectorData:
                 var index = ((PushGlobalChannelVectorData)tfxData.data).unk1;
@@ -441,7 +441,7 @@ public enum TfxBytecode : byte
     Merge_3_1 = 0x0e,
     Unk0f = 0x0f,
     Lerp = 0x10,
-    Unk11 = 0x11,
+    LerpSaturated = 0x11,
     MultiplyAdd = 0x12,
     Clamp = 0x13,
     Abs = 0x15,
@@ -471,10 +471,11 @@ public enum TfxBytecode : byte
     TransformVec4 = 0x2e,
     PushConstantVec4 = 0x34, //{ constant_index: u8 }
     LerpConstant = 0x35, //{ unk1: u8 }
+    LerpConstantSaturated = 0x36,
     Spline4Const = 0x37, //{ unk1: u8 }
     Spline8Const = 0x38, //{ unk1: u8 }
     Unk39 = 0x39, //{ unk1: u8 }
-    Unk3a = 0x3a, //{ unk1: u8 } Gradient4Const
+    Gradient4Const = 0x3a, //{ unk1: u8 } Gradient4Const
     UnkLoadConstant = 0x3b, //{ constant_index: u8 }
     PushExternInputFloat = 0x3c, //{ extern_: TfxExtern, element: u8 }
     PushExternInputVec4 = 0x3d, //{ extern_: TfxExtern, unk2: u8 }
@@ -544,9 +545,9 @@ public struct Unk39Data
     public byte unk1;
 }
 
-public struct Unk3aData
+public struct Gradient4ConstData
 {
-    public byte unk1;
+    public byte index_start;
 }
 
 public struct UnkLoadConstantData
@@ -657,7 +658,7 @@ public struct PushSamplerData
 
 public struct PushObjectChannelVectorData
 {
-    public int unk1;
+    public uint hash;
 }
 
 public struct PushGlobalChannelVectorData

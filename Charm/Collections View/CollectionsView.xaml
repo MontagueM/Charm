@@ -249,6 +249,18 @@
         </Grid.Background>
 
         <Grid
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Background="Transparent"
+            Opacity="1">
+            <Border
+                x:Name="Spinner"
+                Background="Transparent"
+                BorderThickness="0"
+                Opacity="1" />
+        </Grid>
+
+        <Grid
             x:Name="MainContainer"
             Background="Transparent"
             RenderTransformOrigin="0.5,0.5">

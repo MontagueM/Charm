@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Tiger;
 using Tiger.Schema;
 using VersionChecker;
@@ -124,6 +125,7 @@ public partial class MainWindow
             }
         }
     }
+
 
     private int InitialiseStrategistSingletons()
     {

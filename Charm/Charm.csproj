@@ -18,6 +18,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Shaders\Spinner.fx" />
+      <None Remove="Shaders\Spinner.hlsl" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
       <PackageReference Include="HelixToolkit" Version="2.24.0" />
       <PackageReference Include="HelixToolkit.SharpDX.Assimp" Version="2.24.0" />
@@ -87,6 +92,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="Shaders\Spinner.ps">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="ThirdParty\3dmigoto_shader_decomp.exe">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -116,6 +124,16 @@
         <Link>Shaders\Lighting.hlsl</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Resource Include="Shaders\Spinner.fx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+      <Resource Include="Shaders\Spinner.hlsl">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
     </ItemGroup>
 
 
