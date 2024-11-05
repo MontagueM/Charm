@@ -114,7 +114,7 @@ public class TfxBytecodeInterpreter
                         var merge3_1 = StackPop(2);
                         StackPush($"(float4({merge3_1[0]}.x, {merge3_1[0]}.y, {merge3_1[0]}.z, {merge3_1[1]}.x))");
                         break;
-                    case TfxBytecode.Unk0f:
+                    case TfxBytecode.Cubic:
                         var Unk0f = StackPop(2);
                         StackPush($"((({Unk0f[1]}.xxxx * {Unk0f[0]} + {Unk0f[1]}.yyyy) * ({Unk0f[0]} * {Unk0f[0]}) + ({Unk0f[1]}.zzzz * {Unk0f[0]} + {Unk0f[1]}.wwww)))");
                         break;
@@ -221,11 +221,11 @@ public class TfxBytecodeInterpreter
                         break;
                     case TfxBytecode.Spline4Const:
                         var X = StackTop();
-                        var threshold = $"float4{constants[((Spline4ConstData)op.data).constant_index + 4].Vec}";
                         var C3 = $"float4{constants[((Spline4ConstData)op.data).constant_index].Vec}";
                         var C2 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 1].Vec}";
                         var C1 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 2].Vec}";
                         var C0 = $"float4{constants[((Spline4ConstData)op.data).constant_index + 3].Vec}";
+                        var threshold = $"float4{constants[((Spline4ConstData)op.data).constant_index + 4].Vec}";
 
                         StackPush($"{bytecode_op_spline4_const(X, C3, C2, C1, C0, threshold)}");
                         break;

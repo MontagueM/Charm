@@ -297,29 +297,81 @@ public static class TfxBytecodeOp
     public static string TfxToString(TfxData tfxData, DynamicArray<Vec4> constants)
     {
         string output = "";
+        byte index = 0;
         switch (tfxData.data)
         {
             case PermuteData:
-                output = $"permute({DecodePermuteParam(((PermuteData)tfxData.data).fields)}), fields {((PermuteData)tfxData.data).fields}";
+                output = $"{DecodePermuteParam(((PermuteData)tfxData.data).fields).ToUpper()}";
                 break;
             case PushConstantVec4Data:
-                output = $"constant_index {((PushConstantVec4Data)tfxData.data).constant_index}: Constant value: {constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString()}";
+                output = $"Constant value: {constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString()}";
                 break;
             case LerpConstantData:
-                output = $"constant_start {((LerpConstantData)tfxData.data).constant_start}: Constant 1: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: Constant 2: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
+                output = $"A: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: B: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
                 break;
             case Spline4ConstData:
-                output = $"index {((Spline4ConstData)tfxData.data).constant_index}";
+                index = ((Spline4ConstData)tfxData.data).constant_index;
+                var C3 = $"{constants[index].Vec}";
+                var C2 = $"{constants[index + 1].Vec}";
+                var C1 = $"{constants[index + 2].Vec}";
+                var C0 = $"{constants[index + 3].Vec}";
+                var threshold = $"{constants[index + 4].Vec}";
+
+                output = $"Index {index}:" +
+                    $"\n\tC3: {C3}" +
+                    $"\n\tC2: {C2}" +
+                    $"\n\tC1: {C1}" +
+                    $"\n\tC0: {C0}" +
+                    $"\n\tThreshold: {threshold}";
                 break;
+
             case Spline8ConstData:
-                output = $"index {((Spline8ConstData)tfxData.data).constant_index}";
+                index = ((Spline8ConstData)tfxData.data).constant_index;
+                var s8_C3 = $"{constants[index].Vec}";
+                var s8_C2 = $"{constants[index + 1].Vec}";
+                var s8_C1 = $"{constants[index + 2].Vec}";
+                var s8_C0 = $"{constants[index + 3].Vec}";
+                var s8_D3 = $"{constants[index + 4].Vec}";
+                var s8_D2 = $"{constants[index + 5].Vec}";
+                var s8_D1 = $"{constants[index + 6].Vec}";
+                var s8_D0 = $"{constants[index + 7].Vec}";
+                var C_thresholds = $"{constants[index + 8].Vec}";
+                var D_thresholds = $"{constants[index + 9].Vec}";
+
+                output = $"Index {index}:" +
+                    $"\n\tC3: {s8_C3}" +
+                    $"\n\tC2: {s8_C2}" +
+                    $"\n\tC1: {s8_C1}" +
+                    $"\n\tC0: {s8_C0}" +
+                    $"\n\tD3: {s8_D3}" +
+                    $"\n\tD2: {s8_D2}" +
+                    $"\n\tD1: {s8_D1}" +
+                    $"\n\tD0: {s8_D0}" +
+                    $"\n\tC_thresholds: {C_thresholds}" +
+                    $"\n\tD_thresholds: {D_thresholds}";
                 break;
+
             case Unk39Data:
                 output = $"unk1 {((Unk39Data)tfxData.data).unk1}";
                 break;
             case Gradient4ConstData: // Gradient4Const
-                output = $"index_start {((Gradient4ConstData)tfxData.data).index_start}";
+                index = ((Gradient4ConstData)tfxData.data).index_start;
+                var BaseColor = $"{constants[index].Vec}";
+                var Cred = $"{constants[index + 1].Vec}";
+                var Cgreen = $"{constants[index + 2].Vec}";
+                var Cblue = $"{constants[index + 3].Vec}";
+                var Calpha = $"{constants[index + 4].Vec}";
+                var Cthresholds = $"{constants[index + 5].Vec}";
+
+                output = $"Index {index}:" +
+                    $"\n\tBaseColor: {BaseColor}" +
+                    $"\n\tCred: {Cred}" +
+                    $"\n\tCgreen: {Cgreen}" +
+                    $"\n\tCblue: {Cblue}" +
+                    $"\n\tCalpha: {Calpha}" +
+                    $"\n\tCthresholds: {Cthresholds}";
                 break;
+
             case UnkLoadConstantData:
                 output = $"constant_index {((UnkLoadConstantData)tfxData.data).constant_index}: Constant value: {constants[((UnkLoadConstantData)tfxData.data).constant_index].Vec}";
                 break;
@@ -391,7 +443,7 @@ public static class TfxBytecodeOp
                 output = $"hash {((PushObjectChannelVectorData)tfxData.data).hash:X}";
                 break;
             case PushGlobalChannelVectorData:
-                var index = ((PushGlobalChannelVectorData)tfxData.data).unk1;
+                index = ((PushGlobalChannelVectorData)tfxData.data).unk1;
                 output = $"index {index} {GlobalChannelDefaults.GetGlobalChannelDefaults()[index]}";
                 break;
             case Unk50Data:
@@ -439,7 +491,7 @@ public enum TfxBytecode : byte
     Merge_1_3 = 0x0c,
     Merge_2_2 = 0x0d,
     Merge_3_1 = 0x0e,
-    Unk0f = 0x0f,
+    Cubic = 0x0f,
     Lerp = 0x10,
     LerpSaturated = 0x11,
     MultiplyAdd = 0x12,
