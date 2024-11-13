@@ -1,6 +1,7 @@
 ﻿using Arithmic;
 using Tiger;
 using Tiger.Schema;
+using Tiger.Schema.Shaders;
 
 public class TfxBytecodeInterpreter
 {
@@ -48,7 +49,7 @@ public class TfxBytecodeInterpreter
         return top;
     }
 
-    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants, bool print = false)
+    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants, bool print = false, IMaterial? material = null)
     {
         Dictionary<int, string> hlsl = new();
         try
@@ -58,7 +59,7 @@ public class TfxBytecodeInterpreter
             foreach ((int _ip, var op) in Opcodes.Select((value, index) => (index, value)))
             {
                 if (print)
-                    Console.WriteLine($"0x{op.op:X} {op.op} : {TfxBytecodeOp.TfxToString(op, constants)}");
+                    Console.WriteLine($"0x{op.op:X} {op.op} : {TfxBytecodeOp.TfxToString(op, constants, material)}");
                 switch (op.op)
                 {
                     case TfxBytecode.Add:
@@ -271,17 +272,22 @@ public class TfxBytecodeInterpreter
                         global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk50Data)op.data).unk1];
                         StackPush($"float4{global_channel}");
                         break;
-                    case TfxBytecode.Unk52:
-                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk52Data)op.data).unk1];
-                        StackPush($"float4{global_channel}");
+
+                    // Texture stuff
+                    case TfxBytecode.PushTexDimensions:
+                        var ptd = ((PushTexDimensionsData)op.data);
+                        Texture tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[ptd.index].Hash);
+                        StackPush($"float4({tex.TagData.Width},{tex.TagData.Height}, {tex.TagData.Depth}, {tex.TagData.ArraySize}){TfxBytecodeOp.DecodePermuteParam(ptd.fields)}");
                         break;
-                    case TfxBytecode.Unk53:
-                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk53Data)op.data).unk1];
-                        StackPush($"float4{global_channel}");
+                    case TfxBytecode.PushTexTileParams:
+                        var ptt = ((PushTexTileParamsData)op.data);
+                        tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[ptt.index].Hash);
+                        StackPush($"float4{tex.TagData.TilingScaleOffset}{TfxBytecodeOp.DecodePermuteParam(ptt.fields)}");
                         break;
-                    case TfxBytecode.Unk54:
-                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk54Data)op.data).unk1];
-                        StackPush($"float4{global_channel}");
+                    case TfxBytecode.PushTexTileCount:
+                        var pttc = ((PushTexTileCountData)op.data);
+                        tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[pttc.index].Hash);
+                        StackPush($"float4({tex.TagData.TileCount},{tex.TagData.ArraySize}, 0, 0){TfxBytecodeOp.DecodePermuteParam(pttc.fields)}");
                         break;
                     /////
 

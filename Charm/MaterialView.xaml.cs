@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using DirectXTexNet;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Shaders;
@@ -51,7 +50,7 @@ public partial class MaterialView : UserControl
             return;
 
         Material = material;
-        UnkDataList.ItemsSource = GetUnkDataDetails(material);
+        SamplerDataList.ItemsSource = GetSamplerData(material);
         TextureListView.ItemsSource = GetTextureDetails(material);
         UsedScopesList.ItemsSource = material.EnumerateScopes();
 #if DEBUG
@@ -115,7 +114,7 @@ public partial class MaterialView : UserControl
                 Index = $"Index: {tex.TextureIndex}",
                 Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
                 Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
-                Format = $"Format: {(DXGI_FORMAT)tex.Texture.TagData.Format}",
+                Format = $"Format: {tex.Texture.TagData.GetFormat()}",
                 Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
                 Texture = LoadTexture(tex.Texture)
             });
@@ -133,7 +132,7 @@ public partial class MaterialView : UserControl
                 Index = $"Index: {tex.TextureIndex}",
                 Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
                 Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
-                Format = $"Format: {(DXGI_FORMAT)tex.Texture.TagData.Format}",
+                Format = $"Format: {tex.Texture.TagData.GetFormat()}",
                 Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
                 Texture = LoadTexture(tex.Texture)
             });
@@ -233,7 +232,7 @@ public partial class MaterialView : UserControl
             Dispatcher.Invoke(() =>
             {
                 TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode : Material.VS_TFX_Bytecode));
-                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants, true);
+                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants, dc.Index != "TFX Constants", Material);
 
                 ConcurrentBag<CBufferDataDetail> items = new ConcurrentBag<CBufferDataDetail>();
                 for (int i = 0; i < dc.Data.Count; i++)
@@ -320,57 +319,25 @@ public partial class MaterialView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    public List<UnkDataDetail> GetUnkDataDetails(IMaterial material)
+    public List<SamplerDataDetail> GetSamplerData(IMaterial material)
     {
-        //Theres gotta be a better way of doing all this
-        var items = new List<UnkDataDetail>
+        List<SamplerDataDetail> items = new();
+        for (int i = 0; i < material.PS_Samplers.Count; i++)
         {
-            new UnkDataDetail
-            {
-                Name = "Unk08",
-                Value = material.Unk08.ToString("X2")
-            },
-            new UnkDataDetail
-            {
-                Name = "Unk0C",
-                Value = material.Unk0C.ToString("X2")
-            },
-            new UnkDataDetail
-            {
-                Name = "Unk10",
-                Value = material.Unk10.ToString("X2")
-            }
-        };
+            if (material.PS_Samplers[i].Hash.GetFileMetadata().Type != 34)
+                continue;
 
-        if (material.VS_Samplers.Count > 0)
-        {
-            items.Add(new UnkDataDetail
+            var sampler = material.PS_Samplers[i].Sampler;
+            items.Add(new SamplerDataDetail
             {
-                Name = "VS Samplers",
-                Value = material.VS_Samplers.Count.ToString()
-            });
-        }
-
-        if (material.PS_Samplers.Count > 0)
-        {
-            items.Add(new UnkDataDetail
-            {
-                Name = "PS Samplers",
-                Value = material.PS_Samplers.Count.ToString()
-            });
-        }
-
-        if (material.ComputeShader != null)
-        {
-            items.Add(new UnkDataDetail
-            {
-                Name = "Compute Shader",
-                Value = material.ComputeShader.Hash.ToString()
+                Slot = i + 1,
+                Filter = sampler.Filter.ToString(),
+                AddressU = sampler.AddressU.ToString(),
+                AddressV = sampler.AddressV.ToString(),
             });
         }
 
         return items;
-
     }
 
     private void CBufferColor_OnClick(object sender, RoutedEventArgs e)
@@ -426,8 +393,10 @@ public class CBufferDataDetail
     public Color Color { get; set; } = Color.FromArgb(255, 0, 0, 0);
 }
 
-public class UnkDataDetail
+public class SamplerDataDetail
 {
-    public string Name { get; set; }
-    public string Value { get; set; }
+    public int Slot { get; set; }
+    public string Filter { get; set; }
+    public string AddressU { get; set; }
+    public string AddressV { get; set; }
 }

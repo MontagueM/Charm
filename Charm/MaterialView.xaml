@@ -189,42 +189,67 @@
             </Grid>
         </ControlTemplate>
 
-        <ControlTemplate x:Key="UnkDataViewTemplate">
-            <Grid Margin="0,0,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50*" />
-                    <ColumnDefinition Width="50*" />
-                </Grid.ColumnDefinitions>
+        <ControlTemplate x:Key="SamplerDataViewTemplate">
+            <UniformGrid
+                Grid.Row="1"
+                HorizontalAlignment="Stretch"
+                Columns="4"
+                Rows="0">
                 <Border
-                    Grid.RowSpan="3"
-                    Grid.ColumnSpan="2"
-                    Panel.ZIndex="1"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
                     BorderBrush="{StaticResource BackgroundColour30}"
-                    BorderThickness="1" />
-
-                <Border
-                    Panel.ZIndex="1"
-                    BorderBrush="{StaticResource BackgroundColour30}"
-                    BorderThickness="1">
+                    BorderThickness="1,1,0,1">
                     <TextBlock
                         Grid.Column="0"
-                        Margin="0,0,0,0"
+                        Margin="2,0,0,0"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="20"
-                        Text="{Binding Name}" />
+                        FontSize="16"
+                        Text="{Binding Slot}" />
                 </Border>
 
-                <TextBlock
-                    Grid.Column="1"
-                    Margin="5,0,0,0"
-                    HorizontalAlignment="Left"
+                <Border
+                    Margin="0,0,0,0"
                     VerticalAlignment="Center"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                    FontSize="18"
-                    Text="{Binding Value}" />
-            </Grid>
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1,1,0,1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="2,0,0,0"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Text="{Binding Filter}" />
+                </Border>
+
+                <Border
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Center"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1,1,0,1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="2,0,0,0"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Text="{Binding AddressU}" />
+                </Border>
+
+                <Border
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Center"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1,1,1,1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="2,0,0,0"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Text="{Binding AddressV}" />
+                </Border>
+
+            </UniformGrid>
         </ControlTemplate>
 
         <ControlTemplate x:Key="ScopeViewTemplate">
@@ -311,7 +336,7 @@
 
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="100*" />
+                <RowDefinition Height="80*" />
                 <RowDefinition Height="100*" />
             </Grid.RowDefinitions>
 
@@ -404,6 +429,11 @@
                     <ColumnDefinition Width="40*" />
                     <ColumnDefinition Width="20*" />
                 </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40*" />
+                    <RowDefinition Height="20*" />
+                </Grid.RowDefinitions>
 
                 <Grid Grid.Column="0">
                     <Grid.ColumnDefinitions>
@@ -518,58 +548,21 @@
                 </Grid>
 
                 <Grid Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="50*" />
-                        <RowDefinition Height="50*" />
-                    </Grid.RowDefinitions>
-
                     <Border
                         Grid.RowSpan="2"
                         Panel.ZIndex="0"
                         BorderBrush="{StaticResource BackgroundColour30}"
                         BorderThickness="1" />
 
-                    <Grid Grid.Row="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition Height="9*" />
-                        </Grid.RowDefinitions>
-
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                            FontSize="16"
-                            Text="Other Values" />
-
-                        <ListView
-                            x:Name="UnkDataList"
-                            Grid.Row="1"
-                            d:ItemsSource="{d:SampleData ItemCount=5}">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="OverridesDefaultStyle" Value="True" />
-                                    <Setter Property="Template" Value="{StaticResource UnkDataViewTemplate}" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-
-                            <ListView.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Vertical" />
-                                </ItemsPanelTemplate>
-                            </ListView.ItemsPanel>
-                        </ListView>
-                    </Grid>
-
                     <Grid Grid.Row="1">
                         <Grid.RowDefinitions>
                             <RowDefinition />
-                            <RowDefinition Height="9*" />
+                            <RowDefinition Height="19*" />
                         </Grid.RowDefinitions>
 
                         <TextBlock
                             Margin="5,0,0,0"
-                            HorizontalAlignment="Left"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                             FontSize="16"
@@ -578,7 +571,6 @@
                         <Grid Grid.Row="1">
                             <Grid Grid.Column="0">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition />
                                     <RowDefinition Height="36*" />
                                 </Grid.RowDefinitions>
 
@@ -602,7 +594,108 @@
                             </Grid>
                         </Grid>
                     </Grid>
+                </Grid>
 
+                <Grid
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="5,0,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="19*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Text="Texture Samplers" />
+
+                    <UniformGrid
+                        Grid.Row="1"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        Columns="4"
+                        Rows="0">
+                        <Border
+                            Margin="0,0,0,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="1,1,0,1">
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="2,0,0,0"
+                                HorizontalAlignment="Center"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="16"
+                                Text="Sampler Slot" />
+                        </Border>
+
+                        <Border
+                            Margin="0,0,0,0"
+                            VerticalAlignment="Center"
+                            BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="1,1,0,1">
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="2,0,0,0"
+                                HorizontalAlignment="Center"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="16"
+                                Text="Filter" />
+                        </Border>
+
+                        <Border
+                            Margin="0,0,0,0"
+                            VerticalAlignment="Center"
+                            BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="1,1,0,1">
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="2,0,0,0"
+                                HorizontalAlignment="Center"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="16"
+                                Text="AddressU" />
+                        </Border>
+
+                        <Border
+                            Margin="0,0,0,0"
+                            VerticalAlignment="Center"
+                            BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="1,1,1,1">
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="2,0,0,0"
+                                HorizontalAlignment="Center"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="16"
+                                Text="AddressV" />
+                        </Border>
+
+                    </UniformGrid>
+
+                    <ListView
+                        x:Name="SamplerDataList"
+                        Grid.Row="2"
+                        d:ItemsSource="{d:SampleData ItemCount=3}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="OverridesDefaultStyle" Value="True" />
+                                <Setter Property="Template" Value="{StaticResource SamplerDataViewTemplate}" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical" />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
                 </Grid>
 
             </Grid>

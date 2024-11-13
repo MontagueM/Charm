@@ -113,7 +113,7 @@ public static class Source2Handler
 
         //PS Dynamic expressions
         TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(material.PS_TFX_Bytecode));
-        var bytecode_hlsl = bytecode.Evaluate(material.PS_TFX_Bytecode_Constants);
+        var bytecode_hlsl = bytecode.Evaluate(material.PS_TFX_Bytecode_Constants, false, material);
 
         vmat.AppendLine($"\tDynamicParams\r\n\t{{");
         string temp_time_fix = $"CurTime = exists(CurrentTime) ? CurrentTime : Time;";
@@ -189,7 +189,7 @@ public static class Source2Handler
         {
             //VS Dynamic expressions
             bytecode = new(TfxBytecodeOp.ParseAll(material.VS_TFX_Bytecode));
-            bytecode_hlsl = bytecode.Evaluate(material.VS_TFX_Bytecode_Constants);
+            bytecode_hlsl = bytecode.Evaluate(material.VS_TFX_Bytecode_Constants, false, material);
 
             foreach (var entry in bytecode_hlsl)
             {

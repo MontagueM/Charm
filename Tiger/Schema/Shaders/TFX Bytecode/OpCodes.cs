@@ -1,6 +1,7 @@
 ﻿using Arithmic;
 using Tiger;
 using Tiger.Schema;
+using Tiger.Schema.Shaders;
 
 public static class TfxBytecodeOp
 {
@@ -253,36 +254,36 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk50Data;
                     break;
 
-                case TfxBytecode.Unk52 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk52 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.Unk52 when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.Unk52;
+                case TfxBytecode.PushTexDimensions - 2 when Strategy.IsD1():
+                case TfxBytecode.PushTexDimensions - 1 when Strategy.IsPreBL() || Strategy.IsBL():
+                case TfxBytecode.PushTexDimensions when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PushTexDimensions;
 
-                    Unk52Data Unk52Data = new();
-                    Unk52Data.unk1 = reader.ReadByte();
-                    Unk52Data.unk2 = reader.ReadByte();
+                    PushTexDimensionsData Unk52Data = new();
+                    Unk52Data.index = reader.ReadByte();
+                    Unk52Data.fields = reader.ReadByte();
                     tfxData.data = Unk52Data;
                     break;
 
-                case TfxBytecode.Unk53 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk53 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.Unk53 when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.Unk53;
+                case TfxBytecode.PushTexTileParams - 2 when Strategy.IsD1():
+                case TfxBytecode.PushTexTileParams - 1 when Strategy.IsPreBL() || Strategy.IsBL():
+                case TfxBytecode.PushTexTileParams when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PushTexTileParams;
 
-                    Unk53Data Unk53Data = new();
-                    Unk53Data.unk1 = reader.ReadByte();
-                    Unk53Data.unk2 = reader.ReadByte();
+                    PushTexTileParamsData Unk53Data = new();
+                    Unk53Data.index = reader.ReadByte();
+                    Unk53Data.fields = reader.ReadByte();
                     tfxData.data = Unk53Data;
                     break;
 
-                case TfxBytecode.Unk54 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk54 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.Unk54 when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.Unk54;
+                case TfxBytecode.PushTexTileCount - 2 when Strategy.IsD1():
+                case TfxBytecode.PushTexTileCount - 1 when Strategy.IsPreBL() || Strategy.IsBL():
+                case TfxBytecode.PushTexTileCount when Strategy.IsPostBL():
+                    tfxData.op = TfxBytecode.PushTexTileCount;
 
-                    Unk54Data Unk54Data = new();
-                    Unk54Data.unk1 = reader.ReadByte();
-                    Unk54Data.unk2 = reader.ReadByte();
+                    PushTexTileCountData Unk54Data = new();
+                    Unk54Data.index = reader.ReadByte();
+                    Unk54Data.fields = reader.ReadByte();
                     tfxData.data = Unk54Data;
                     break;
             }
@@ -294,7 +295,7 @@ public static class TfxBytecodeOp
         return tfxData;
     }
 
-    public static string TfxToString(TfxData tfxData, DynamicArray<Vec4> constants)
+    public static string TfxToString(TfxData tfxData, DynamicArray<Vec4> constants, IMaterial? material = null)
     {
         string output = "";
         byte index = 0;
@@ -304,7 +305,7 @@ public static class TfxBytecodeOp
                 output = $"{DecodePermuteParam(((PermuteData)tfxData.data).fields).ToUpper()}";
                 break;
             case PushConstantVec4Data:
-                output = $"Constant value: {constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString()}";
+                output = $"{constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString()}";
                 break;
             case LerpConstantData:
                 output = $"A: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: B: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
@@ -449,15 +450,29 @@ public static class TfxBytecodeOp
             case Unk50Data:
                 output = $"unk1 {((Unk50Data)tfxData.data).unk1}";
                 break;
-            case Unk52Data:
-                output = $"unk1 {((Unk52Data)tfxData.data).unk1}";
+
+            case PushTexDimensionsData:
+                var ptd = ((PushTexDimensionsData)tfxData.data);
+                Texture tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[ptd.index].Hash);
+
+                output = $"{DecodePermuteParam(ptd.fields).ToUpper()}: " +
+                    $"({tex.TagData.Width}, {tex.TagData.Height}, {tex.TagData.Depth}, {tex.TagData.ArraySize})";
                 break;
-            case Unk53Data:
-                output = $"unk1 {((Unk53Data)tfxData.data).unk1}";
+
+            case PushTexTileParamsData:
+                var ptt = ((PushTexTileParamsData)tfxData.data);
+                tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[ptt.index].Hash);
+
+                output = $"{DecodePermuteParam(ptt.fields).ToUpper()}: " +
+                    $"{tex.TagData.TilingScaleOffset}";
                 break;
-            case Unk54Data:
-                output = $"unk1 {((Unk54Data)tfxData.data).unk1}";
-                break;
+
+            case PushTexTileCountData:
+                var pttc = ((PushTexTileCountData)tfxData.data);
+                tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[pttc.index].Hash);
+
+                output = $"{DecodePermuteParam(pttc.fields).ToUpper()}: " +
+                    $"({tex.TagData.TileCount}, {tex.TagData.ArraySize}, 0, 0)"; break;
         }
 
         return output;
@@ -502,14 +517,14 @@ public enum TfxBytecode : byte
     Ceil = 0x18,
     Round = 0x19,
     Frac = 0x1a,
-    Unk1b = 0x1b,
-    Unk1c = 0x1c,
+    Unk1b = 0x1b, // Normalize()?
+    Unk1c = 0x1c, // Maybe also normalize, but slightly different?
     Negate = 0x1d,
     VecRotSin = 0x1e,
     VecRotCos = 0x1f,
     VecRotSinCos = 0x20,
     PermuteAllX = 0x21,
-    Permute = 0x22, //{ fields: u8 }
+    Permute = 0x22,
     Saturate = 0x23,
     Unk25 = 0x25,
     Unk26 = 0x26,
@@ -521,40 +536,40 @@ public enum TfxBytecode : byte
     Unk2c = 0x2c,
     Unk2d = 0x2d,
     TransformVec4 = 0x2e,
-    PushConstantVec4 = 0x34, //{ constant_index: u8 }
-    LerpConstant = 0x35, //{ unk1: u8 }
+    PushConstantVec4 = 0x34,
+    LerpConstant = 0x35,
     LerpConstantSaturated = 0x36,
-    Spline4Const = 0x37, //{ unk1: u8 }
-    Spline8Const = 0x38, //{ unk1: u8 }
-    Unk39 = 0x39, //{ unk1: u8 }
-    Gradient4Const = 0x3a, //{ unk1: u8 } Gradient4Const
+    Spline4Const = 0x37,
+    Spline8Const = 0x38,
+    Unk39 = 0x39, // Spline8ConstChain?
+    Gradient4Const = 0x3a,
     UnkLoadConstant = 0x3b, //{ constant_index: u8 }
-    PushExternInputFloat = 0x3c, //{ extern_: TfxExtern, element: u8 }
-    PushExternInputVec4 = 0x3d, //{ extern_: TfxExtern, unk2: u8 }
-    PushExternInputMat4 = 0x3e, //{ extern_: TfxExtern, unk2: u8 }
-    PushExternInputTextureView = 0x3f, //{ extern_: TfxExtern, unk2: u8 }
-    PushExternInputU32 = 0x40, //{ extern_: TfxExtern, unk2: u8 }
-    PushExternInputUav = 0x41, //{ extern_: TfxExtern, unk2: u8 }
+    PushExternInputFloat = 0x3c,
+    PushExternInputVec4 = 0x3d,
+    PushExternInputMat4 = 0x3e,
+    PushExternInputTextureView = 0x3f,
+    PushExternInputU32 = 0x40,
+    PushExternInputUav = 0x41,
 
     Unk42 = 0x42, // Not in Pre-BL, everything further down is shifted - 1
-    PushFromOutput = 0x43, //{ unk1: u8 }
-    PopOutput = 0x44, //{ element: u8 }
-    PopOutputMat4 = 0x45, //{ slot: u8 }
-    PushTemp = 0x46, //{ slot: u8 }
-    PopTemp = 0x47, //{ unk1: u8 }
-    SetShaderTexture = 0x48, //{ unk1: u8 }
+    PushFromOutput = 0x43,
+    PopOutput = 0x44,
+    PopOutputMat4 = 0x45,
+    PushTemp = 0x46,
+    PopTemp = 0x47,
+    SetShaderTexture = 0x48,
     Unk49 = 0x49, //{ unk1: u8 }
-    SetShaderSampler = 0x4a, //{ unk1: u8 }
-    SetShaderUav = 0x4b, //{ unk1: u8 }
+    SetShaderSampler = 0x4a,
+    SetShaderUav = 0x4b,
     Unk4c = 0x4c, //{ unk1: u8 }
-    PushSampler = 0x4d, //{ unk1: u8 }
-    PushObjectChannelVector = 0x4e, //{ unk1: u8, unk2: u8, unk3: u8, unk4: u8 }
-    PushGlobalChannelVector = 0x4f, //{ unk1: u8 }
+    PushSampler = 0x4d,
+    PushObjectChannelVector = 0x4e,
+    PushGlobalChannelVector = 0x4f,
     Unk50 = 0x50, //{ unk1: u8 }
     Unk51 = 0x51,
-    Unk52 = 0x52, //{ unk1: u8, unk2: u8 }
-    Unk53 = 0x53, //{ unk1: u8, unk2: u8 }
-    Unk54 = 0x54, //{ unk1: u8, unk2: u8 }
+    PushTexDimensions = 0x52, //{ unk1: u8, unk2: u8 }
+    PushTexTileParams = 0x53, //{ unk1: u8, unk2: u8 }
+    PushTexTileCount = 0x54, //{ unk1: u8, unk2: u8 }
     Unk55 = 0x55,
     Unk56 = 0x56,
     Unk57 = 0x57,
@@ -723,21 +738,21 @@ public struct Unk50Data
     public byte unk1;
 }
 
-public struct Unk52Data
+public struct PushTexDimensionsData // Width, Height, Depth, Mip count
 {
-    public byte unk1;
-    public byte unk2;
+    public byte index; // Index in the Samplers array
+    public byte fields; // Swizzle
 }
 
-public struct Unk53Data
+public struct PushTexTileParamsData // Vec4 at 0x10 in texture header
 {
-    public byte unk1;
-    public byte unk2;
+    public byte index;
+    public byte fields;
 }
 
-public struct Unk54Data
+public struct PushTexTileCountData // 0x28 (Array Size), 0x2A (Tile Count) in texture header
 {
-    public byte unk1;
-    public byte unk2;
+    public byte index;
+    public byte fields;
 }
 

@@ -350,10 +350,9 @@ public struct STextureHeader
     [SchemaField(0x04, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public uint Format;  // DXGI_FORMAT, ushort GcnSurfaceFormat for ROI
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public float Unk10;
-    [SchemaField(0x14, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public float Unk14;
+    public Vector4 TilingScaleOffset;
 
     [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)] // is BEEFCAFE (uint32) in D1
     [SchemaField(0x0C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -367,6 +366,10 @@ public struct STextureHeader
     public ushort Height;
     public ushort Depth;
     public ushort ArraySize;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public ushort TileCount;
 
     [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
