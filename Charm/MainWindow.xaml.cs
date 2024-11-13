@@ -237,32 +237,35 @@ public partial class MainWindow
         }
     }
 
+
+    // Disabling update checking for now since the last github release is a fossil at this point
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("2.0.0");
-        var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
-        versionChecker.LatestVersionName = "version";
-        try
-        {
-            var upToDate = await versionChecker.IsUpToDate();
-            if (!upToDate)
-            {
-                MessageBox.Show($"New version available on GitHub! (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id})");
-                Arithmic.Log.Info($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
-            }
-            else
-            {
-                Arithmic.Log.Info($"Version is up to date ({versionChecker.CurrentVersion.Id}).");
-            }
-        }
-        catch (Exception e)
-        {
-            // Could not get or parse version file
-#if !DEBUG
-            MessageBox.Show("Could not get version.");
-#endif
-            Arithmic.Log.Error($"Could not get version error {e}.");
-        }
+        var currentVersion = new ApplicationVersion("2.2.5");
+        Arithmic.Log.Info($"Charm Version: {currentVersion.Id}");
+        //var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
+        //versionChecker.LatestVersionName = "version";
+        //        try
+        //        {
+        //            var upToDate = await versionChecker.IsUpToDate();
+        //            if (!upToDate)
+        //            {
+        //                MessageBox.Show($"New version available on GitHub! (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id})");
+        //                Arithmic.Log.Info($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id}).");
+        //            }
+        //            else
+        //            {
+        //                Arithmic.Log.Info($"Version is up to date ({versionChecker.CurrentVersion.Id}).");
+        //            }
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            // Could not get or parse version file
+        //#if !DEBUG
+        //                    MessageBox.Show("Could not get version.");
+        //#endif
+        //            Arithmic.Log.Error($"Could not get version error {e}.");
+        //        }
     }
 
     private async void InitialiseHandlers()
