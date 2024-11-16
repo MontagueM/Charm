@@ -104,7 +104,7 @@ public class FileResourcer : Strategy.StrategistSingleton<FileResourcer>
         }
         else
         {
-            throw new Exception($"Invalid constructor for {type}");
+            throw new Exception($"Invalid constructor for {type} with hash {hash}");
         }
 
         _fileCache.TryAdd(hash.Hash32, file);

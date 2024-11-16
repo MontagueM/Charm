@@ -388,7 +388,7 @@ public partial class MainWindow
                  && (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift
                  && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
         {
-            throw new ExternalException("Crash induced.");
+            throw new ExternalException("Crash induced. I don't know why you did that but good job.");
         }
         else if (e.Key == Key.Escape)
         {

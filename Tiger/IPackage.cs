@@ -578,7 +578,7 @@ public abstract class Package : IPackage
     {
         if (fileHash.PackageId != Header.GetPackageId())
         {
-            throw new ArgumentException($"The provided file hash has an invalid package id: {fileHash.PackageId}");
+            throw new ArgumentException($"The provided file hash '{fileHash}' has an invalid package id: {fileHash.PackageId}");
         }
         return GetFileMetadata(fileHash.FileIndex);
     }

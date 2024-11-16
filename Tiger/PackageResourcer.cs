@@ -109,7 +109,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     }
 
     /// <summary>
-    /// Gets a package which represents a .pkg disk file. Blocking call.
+    /// Gets a package from a given ID which represents a .pkg disk file. Blocking call.
     /// </summary>
     /// <returns>IPackage object, type determined by the selected strategy.</returns>
     public Package GetPackage(ushort packageId)
@@ -122,6 +122,20 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return LoadPackageIntoCacheFromDisk(packageId);
     }
 
+    /// <summary>
+    /// Gets a package from a given FileHash which represents a .pkg disk file. Blocking call.
+    /// </summary>
+    /// <returns>IPackage object, type determined by the selected strategy.</returns>
+    public Package GetPackage(FileHash hash)
+    {
+        if (_packagesCache.TryGetValue(hash.PackageId, out Package package))
+        {
+            return package;
+        }
+
+        return LoadPackageIntoCacheFromDisk(hash.PackageId, hash);
+    }
+
     // // this method is used by PackagePathsCache, so cannot use itself
     public Package GetPackage(string packagePath)
     {
@@ -132,9 +146,9 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     // todo this needs to be a producer-consumer style queue thing to avoid locking maybe
     // could try it this way first then compare performance with a queue approach
 
-    private Package LoadPackageIntoCacheFromDisk(ushort packageId)
+    private Package LoadPackageIntoCacheFromDisk(ushort packageId, FileHash? hash = null)
     {
-        string packagePath = PackagePathsCache.GetPackagePathFromId(packageId);
+        string packagePath = PackagePathsCache.GetPackagePathFromId(packageId, hash);
         return LoadPackageIntoCacheFromDisk(packageId, packagePath);
     }
 
@@ -163,7 +177,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
         return package;
     }
 
-    public byte[] GetFileData(FileHash fileHash) { return GetPackage(fileHash.PackageId).GetFileBytes(fileHash); }
+    public byte[] GetFileData(FileHash fileHash) { return GetPackage(fileHash).GetFileBytes(fileHash); }
 
     private void LoadAllPackages()
     {

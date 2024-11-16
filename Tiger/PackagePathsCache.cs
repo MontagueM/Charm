@@ -184,7 +184,7 @@ public class PackagePathsCache
             PackageIdToNameMap = GetPackagePathCacheEntries()
         };
 
-        string jsonString = JsonConvert.SerializeObject(cacheData);
+        string jsonString = JsonConvert.SerializeObject(cacheData, Formatting.Indented);
         File.WriteAllText(_cacheFilePath, jsonString);
     }
 
@@ -218,13 +218,13 @@ public class PackagePathsCache
         return highestName;
     }
 
-    public string GetPackagePathFromId(ushort packageId)
+    public string GetPackagePathFromId(ushort packageId, FileHash? hash = null)
     {
         if (PackageIdToPathMap.TryGetValue(packageId, out string packagePath))
         {
             return packagePath;
         }
-        throw new ArgumentException($"The package id '{packageId:x4}' is not in the package paths cache");
+        throw new ArgumentException($"The package id '{packageId:x4}' from Hash '{(hash ?? "NULL")}' is not in the package paths cache");
     }
 
     private static readonly string PackageStringNotInPackagePathsCacheMessage = "The package string is not in the package paths cache: ";
