@@ -22,27 +22,64 @@
         </Grid.RowDefinitions>
 
         <TextBox
-            x:Name="HashLocation"
-            Grid.Row="2"
-            Grid.Column="1"
-            Width="950"
-            Height="280"
-            Margin="0,10,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            FontSize="36"
-            IsReadOnly="True"
-            TextWrapping="Wrap" />
-        <TextBox
             x:Name="TagHashBox"
             Grid.Row="1"
             Grid.Column="1"
             FontSize="96"
             KeyDown="TagHashBoxKeydown"
-            Text="40E8BC80"
+            Text="Input File Hash"
             TextAlignment="Center" />
-        <!--  AB8FA380 variks  -->
-        <!--  3b00ab80 atraks  -->
-        <!--  4901ab80 taniks normal, 100bb780 abomination  -->
+
+        <StackPanel
+            Grid.Row="2"
+            Grid.Column="1"
+            Orientation="Vertical">
+            <TextBox
+                x:Name="HashLocation"
+                Width="950"
+                Height="280"
+                Margin="0,25,0,25"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                FontSize="36"
+                IsReadOnly="True"
+                TextWrapping="Wrap" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80*" />
+                    <ColumnDefinition Width="20*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox
+                    x:Name="BatchList"
+                    Grid.Column="0"
+                    FontSize="32"
+                    KeyDown="TagHashBoxKeydown"
+                    Text="Path to batch list"
+                    TextAlignment="Center" />
+                <Button
+                    Grid.Column="1"
+                    Margin="10,0,10,0"
+                    Click="BatchExport_Click">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="24"
+                        Text="Batch Export" />
+                </Button>
+            </Grid>
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="18"
+                Text="Only supports materials currently, text file has to be just a hash on each line" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="12"
+                Text="You really shouldn't use this anyways, I added it for my own convenience" />
+
+        </StackPanel>
+
     </Grid>
 </UserControl>

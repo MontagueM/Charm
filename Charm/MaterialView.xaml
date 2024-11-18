@@ -364,8 +364,10 @@
                         VerticalAlignment="Center"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="25"
-                        Text="Pixel Shader"
-                        TextWrapping="Wrap" />
+                        TextWrapping="Wrap">
+                        <Run Text="Pixel Shader" />
+                        <Run Text="{Binding PixelShaderHash}" />
+                    </TextBlock>
 
                     <ScrollViewer
                         Grid.Row="1"
@@ -373,12 +375,12 @@
                         VerticalContentAlignment="Center"
                         HorizontalScrollBarVisibility="Auto">
                         <TextBox
-                            x:Name="PixelShader"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                             FontSize="16"
                             IsReadOnly="True"
+                            Text="{Binding PixelShader}"
                             TextWrapping="Wrap" />
                     </ScrollViewer>
                 </Grid>
@@ -401,8 +403,10 @@
                         VerticalAlignment="Center"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                         FontSize="25"
-                        Text="Vertex Shader"
-                        TextWrapping="Wrap" />
+                        TextWrapping="Wrap">
+                        <Run Text="Vertex Shader" />
+                        <Run Text="{Binding VertexShaderHash}" />
+                    </TextBlock>
 
                     <ScrollViewer
                         Grid.Row="1"
@@ -410,12 +414,12 @@
                         VerticalContentAlignment="Center"
                         HorizontalScrollBarVisibility="Auto">
                         <TextBox
-                            x:Name="VertexShader"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                             FontSize="16"
                             IsReadOnly="True"
+                            Text="{Binding VertexShader}"
                             TextWrapping="Wrap" />
                     </ScrollViewer>
                 </Grid>

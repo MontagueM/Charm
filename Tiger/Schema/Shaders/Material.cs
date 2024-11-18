@@ -202,7 +202,8 @@ namespace Tiger.Schema.Shaders
             //}
         }
 
-        //Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
+        // Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
+        // Also exports cbuffer0 data
         public void SaveMaterial(string saveDirectory)
         {
             var hlslPath = $"{saveDirectory}/Shaders/Raw";
@@ -235,6 +236,8 @@ namespace Tiger.Schema.Shaders
 
                 texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
             }
+            File.WriteAllLines($"{saveDirectory}/PS_CB0.txt", GetCBuffer0().ConvertAll(v => v.ToString()));
+            File.WriteAllLines($"{saveDirectory}/VS_CB0.txt", GetCBuffer0(true).ConvertAll(v => v.ToString()));
         }
 
         public List<Vector4> GetVec4Container(bool vs = false)
@@ -264,6 +267,40 @@ namespace Tiger.Schema.Shaders
         public List<TfxExtern> GetExterns()
         {
             return Externs.GetExterns(this);
+        }
+
+        public List<Vector4> GetCBuffer0(bool bVS = false)
+        {
+            List<Vector4> data = new();
+            if (bVS)
+            {
+                if (VSVector4Container.IsValid())
+                {
+                    data = GetVec4Container(true);
+                }
+                else
+                {
+                    foreach (var vec in VS_CBuffers)
+                    {
+                        data.Add(vec.Vec);
+                    }
+                }
+            }
+            else
+            {
+                if (PSVector4Container.IsValid())
+                {
+                    data = GetVec4Container();
+                }
+                else
+                {
+                    foreach (var vec in PS_CBuffers)
+                    {
+                        data.Add(vec.Vec);
+                    }
+                }
+            }
+            return data;
         }
     }
 }

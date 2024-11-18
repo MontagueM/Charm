@@ -340,29 +340,21 @@ public partial class DevView : UserControl
         }.Start();
     }
 
-    //private void ExportDevMapButton_OnClick(object sender, RoutedEventArgs e)
-    //{
-    //    // Not actually a map, but a list of assets that are good for testing
-    //    // The assets are assembled in UE5 so just have to rip the list
-    //    var assets = new List<string>()
-    //    {
-    //        "6C24BB80",
-    //        "a237be80",
-    //        "b540be80",
-    //        "68a8b480",
-    //        "fba4b480",
-    //        "e1c5b280",
-    //        "0F3CBE80",
-    //        "A229BE80",
-    //        "B63BBE80",
-    //        "CB32BE80",
-    //    };
-
-    //    foreach (var asset in assets)
-    //    {
-    //        StaticView.ExportStatic(new FileHash(asset), asset, ExportTypeFlag.Full, "devmap");
-    //    }
-    //}
+    private void BatchExport_Click(object sender, RoutedEventArgs e)
+    {
+        if (!File.Exists(BatchList.Text))
+        {
+            BatchList.Text = "Invalid file or does not exist";
+            return;
+        }
+        var hashes = File.ReadAllLines(BatchList.Text);
+        foreach (var hash in hashes)
+        {
+            IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
+            material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
+        }
+        MessageBox.Show($"Batch export of {hashes.Length} materials completed");
+    }
 
 #if DEBUG
     // Cleaverly done (insert name) but you're not supposed to be here. As a matter of fact, you're not.

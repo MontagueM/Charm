@@ -30,9 +30,6 @@ public partial class MaterialView : UserControl
 
     private async void ExportMaterial_OnClick(object sender, RoutedEventArgs e)
     {
-        var s = sender as Button;
-        var dc = s.DataContext as CBufferDetail;
-
         await Task.Run(() =>
         {
             Dispatcher.Invoke(() =>
@@ -45,6 +42,7 @@ public partial class MaterialView : UserControl
     public void Load(FileHash hash)
     {
         IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
+        ShaderDetail shaderDetail = new();
 
         if (material is null)
             return;
@@ -53,6 +51,31 @@ public partial class MaterialView : UserControl
         SamplerDataList.ItemsSource = GetSamplerData(material);
         TextureListView.ItemsSource = GetTextureDetails(material);
         UsedScopesList.ItemsSource = material.EnumerateScopes();
+
+        if (material.VertexShader is not null)
+        {
+            shaderDetail.VertexShaderHash = material.VertexShader.Hash.ToString();
+
+            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+                shaderDetail.VertexShader = material.Decompile(material.VertexShader.GetBytecode(), $"vs{material.VertexShader.Hash}");
+            else
+                shaderDetail.VertexShader = "Shader decompilation not supported for Destiny 1";
+            VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
+        }
+
+        if (material.PixelShader is not null)
+        {
+            shaderDetail.PixelShaderHash = material.PixelShader.Hash.ToString();
+
+            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+                shaderDetail.PixelShader = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
+            else
+                shaderDetail.PixelShader = "Shader decompilation not supported for Destiny 1";
+            PS_CBufferList.ItemsSource = GetCBufferDetails(material);
+        }
+
+        DataContext = shaderDetail;
+
 #if DEBUG
         System.Console.WriteLine($"{material.RenderStates.ToString()}");
 
@@ -61,23 +84,6 @@ public partial class MaterialView : UserControl
         System.Console.WriteLine($"DepthBiasState: {material.RenderStates.DepthBiasState()}");
         System.Console.WriteLine($"DepthStencilState: {material.RenderStates.DepthStencilState()}");
 #endif
-        if (material.VertexShader is not null)
-        {
-            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-                VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"vs{material.VertexShader.Hash}");
-            else
-                VertexShader.Text = "Shader decompilation not supported for Destiny 1";
-            VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
-        }
-
-        if (material.PixelShader is not null)
-        {
-            if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-                PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
-            else
-                PixelShader.Text = "Shader decompilation not supported for Destiny 1";
-            PS_CBufferList.ItemsSource = GetCBufferDetails(material);
-        }
     }
 
     public List<TextureDetail> GetTextureDetails(IMaterial material)
@@ -144,17 +150,6 @@ public partial class MaterialView : UserControl
     public List<CBufferDetail> GetCBufferDetails(IMaterial material, bool bVertexShader = false)
     {
         var items = new List<CBufferDetail>();
-
-        //foreach (var cbuffer in GetCBuffers(material, bVertexShader))
-        //{
-        //    items.Add(new CBufferDetail
-        //    {
-        //        Index = $"CB{cbuffer.Key.Index}",
-        //        Count = $"Count: {cbuffer.Key.Count}",
-        //        Data = cbuffer.Value,
-        //        Stage = bVertexShader ? CBufferDetail.Shader.Vertex : CBufferDetail.Shader.Pixel
-        //    });
-        //}
 
         //Only material provided cbuffer (cb0) is useful to show
         List<Vector4> data = new();
@@ -356,6 +351,18 @@ public partial class MaterialView : UserControl
     {
         DevView.OpenHxD(Material.FileHash);
     }
+}
+
+public class ShaderDetail
+{
+    public string PixelShaderHash { get; set; }
+    public string PixelShader { get; set; }
+
+    public string VertexShaderHash { get; set; }
+    public string VertexShader { get; set; }
+
+    public string ComputeShaderHash { get; set; }
+    public string ComputeShader { get; set; }
 }
 
 public class TextureDetail
