@@ -22,9 +22,8 @@ public struct SMaterial_ROI // PS4 / ORBIS shaders aren't able to be decompiled 
     public DynamicArray<STextureTag> VSTextures;
     [SchemaField(0x50)]
     public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
-    [SchemaField(0x70)]
-    public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
     public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
+    public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
     public DynamicArray<Vec4> VS_CBuffers;
     [SchemaField(0xAC)]
     public FileHash VSVector4Container;
@@ -35,10 +34,10 @@ public struct SMaterial_ROI // PS4 / ORBIS shaders aren't able to be decompiled 
     public DynamicArray<STextureTag> PSTextures;
     [SchemaField(0x2D0)]
     public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
-    [SchemaField(0x2F0)]
-    public DynamicArray<SDirectXSamplerTagSK> PS_Samplers;
     public DynamicArray<Vec4> PS_TFX_Bytecode_Constants;
+    public DynamicArray<SDirectXSamplerTagSK> PS_Samplers;
     public DynamicArray<Vec4> PS_CBuffers;
+
     [SchemaField(0x32C)]
     public FileHash PSVector4Container;
 

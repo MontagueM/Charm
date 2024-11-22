@@ -250,28 +250,6 @@ public class TfxBytecodeInterpreter
                         StackPush($"float4(0,0,1,0)");
                         StackPush($"float4(0,0,0,1)");
                         break;
-                    case TfxBytecode.PushExternInputTextureView:
-                        //var PushExternInputU64 = GetExtern(((PushExternInputU64Data)op.data).extern_, ((PushExternInputU64Data)op.data).element);
-                        StackPush($"float4(1, 1, 1, 1)");
-                        break;
-                    case TfxBytecode.PushExternInputUav:
-                        //var PushExternInputUav = GetExtern(((PushExternInputUavData)op.data).extern_, ((PushExternInputUavData)op.data).element);
-                        StackPush($"float4(1, 1, 1, 1)");
-                        break;
-
-                    // Global channel stuff
-                    case TfxBytecode.Unk4c:
-                        var global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk4cData)op.data).unk1];
-                        StackPush($"float4{global_channel}");
-                        break;
-                    case TfxBytecode.PushGlobalChannelVector:
-                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((PushGlobalChannelVectorData)op.data).unk1];
-                        StackPush($"float4{global_channel}");
-                        break;
-                    case TfxBytecode.Unk50:
-                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk50Data)op.data).unk1];
-                        StackPush($"float4{global_channel}");
-                        break;
 
                     // Texture stuff
                     case TfxBytecode.PushTexDimensions:
@@ -291,34 +269,18 @@ public class TfxBytecodeInterpreter
                         break;
                     /////
 
+                    case TfxBytecode.PushExternInputTextureView:
+                    case TfxBytecode.PushExternInputUav:
+                    case TfxBytecode.SetShaderTexture:
                     case TfxBytecode.SetShaderSampler:
-                        v = StackTop();
-                        break;
                     case TfxBytecode.PushSampler:
-                        StackPush($"float4(0,0,0,0)");
                         break;
-                    case TfxBytecode.PushObjectChannelVector:
-                        StackPush($"float4(1, 1, 1, 1)");
-                        break;
+
                     case TfxBytecode.PushFromOutput:
                         StackPush($"{hlsl[((PushFromOutputData)op.data).element]}");
                         break;
-                    case TfxBytecode.PopOutput:
-                        //Temp.AddRange(Stack);
 
-                        if (print)
-                            Console.WriteLine($"----Output Stack Count: {Stack.Count}\n");
-
-                        if (Stack.Count == 0) //Shouldnt happen
-                            hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(0, 0, 0, 0)");
-                        else if (Stack.Count > 1) //Shouldnt happen
-                            hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
-                        else
-                            hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
-
-                        Stack.Clear(); //Does this matter?
-                        break;
-                    case TfxBytecode.PopOutputMat4: //uhhhhh, im 100% doing this wrong
+                    case TfxBytecode.PopOutputMat4:
                         var PopOutputMat4 = StackPop(4);
                         var Mat4_1 = PopOutputMat4[0];
                         var Mat4_2 = PopOutputMat4[1];
@@ -341,6 +303,35 @@ public class TfxBytecodeInterpreter
                         Temp.Insert(PopTemp, PopTemp_v);
                         break;
 
+
+                    // channel stuff
+                    case TfxBytecode.Unk4c:
+                        var global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk4cData)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
+                    case TfxBytecode.PushGlobalChannelVector:
+                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((PushGlobalChannelVectorData)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
+                    case TfxBytecode.Unk50:
+                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk50Data)op.data).unk1];
+                        StackPush($"float4{global_channel}");
+                        break;
+                    case TfxBytecode.PushObjectChannelVector:
+                        StackPush($"float4(1, 1, 1, 1)");
+                        break;
+
+                    case TfxBytecode.PopOutput:
+                        if (print)
+                            Console.WriteLine($"----Output Stack Count: {Stack.Count}\n");
+
+                        if (Stack.Count == 0) // Shouldnt happen
+                            hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(0, 0, 0, 0)");
+                        else
+                            hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
+
+                        Stack.Clear(); // Does this matter?
+                        break;
                     default:
                         if (print)
                             Console.WriteLine($"Not Implemented: {op.op}");
@@ -374,7 +365,7 @@ public class TfxBytecodeInterpreter
                         return $"(16)"; // exposure_scale
 
                     default:
-                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_}");
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_}");
                         return $"(1)";
                 }
             case TfxExtern.Atmosphere:
@@ -394,11 +385,11 @@ public class TfxBytecodeInterpreter
                     case 0x1e8:
                         return $"(0)";
                     default:
-                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_} ");
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_} ");
                         return $"(1)";
                 }
             default:
-                Log.Error($"Unsupported extern {extern_}[{element} (0x{(element):X})]");
+                Log.Error($"Unimplemented extern {extern_}[{element} (0x{(element):X})]");
                 return $"(1)";
         }
     }
@@ -413,7 +404,7 @@ public class TfxBytecodeInterpreter
                     case 0:
                         return $"float4(0.0, 100, 0.0, 0.0)";
                     default:
-                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_}");
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_}");
                         return $"float4(1,1,1,1)";
                 }
             case TfxExtern.Frame:
@@ -424,7 +415,7 @@ public class TfxBytecodeInterpreter
                     case 0x1C0:
                         return $"float4(1, 1, 0, 1)";
                     default:
-                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_}");
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_}");
                         return $"float4(1,1,1,1)";
                 }
             case TfxExtern.Atmosphere:
@@ -437,11 +428,11 @@ public class TfxBytecodeInterpreter
                     case 0x1D0:
                         return $"float4(0,0,0,0)";
                     default:
-                        Log.Error($"Unsupported element {element} (0x{(element):X}) for extern {extern_} ");
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_} ");
                         return $"float4(1,1,1,1)";
                 }
             default:
-                Log.Error($"Unsupported extern {extern_}[{element} (0x{(element):X})]");
+                Log.Error($"Unimplemented extern {extern_}[{element} (0x{(element):X})]");
                 return $"float4(1, 1, 1, 1)";
         }
     }

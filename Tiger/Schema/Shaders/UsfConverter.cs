@@ -5,6 +5,38 @@ namespace Tiger.Schema;
 
 public class UsfConverter
 {
+    private struct TextureView
+    {
+        public string Dimension;
+        public string Type;
+        public string Variable;
+        public int Index;
+    }
+
+    private struct Cbuffer
+    {
+        public string Variable;
+        public string Type;
+        public int Count;
+        public int Index;
+    }
+
+    private struct Input
+    {
+        public string Variable;
+        public string Type;
+        public int Index;
+        public string Semantic;
+    }
+
+    private struct Output
+    {
+        public string Variable;
+        public string Type;
+        public int Index;
+        public string Semantic;
+    }
+
     private StringReader hlsl;
     private StringBuilder usf;
     private bool bOpacityEnabled = false;

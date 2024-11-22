@@ -119,7 +119,7 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk41Data;
                     break;
 
-                // From here forward, SK and BL is op-1, D1 is op-2....so its gonna get ugly
+                // From here forward, SK and BL is op-1, D1 is all over the place....so its gonna get ugly
 
                 case TfxBytecode.PushFromOutput - 2 when Strategy.IsD1():
                 case TfxBytecode.PushFromOutput - 1 when Strategy.IsPreBL() || Strategy.IsBL():
@@ -168,6 +168,7 @@ public static class TfxBytecodeOp
                     PopTempData.slot = reader.ReadByte();
                     tfxData.data = PopTempData;
                     break;
+
                 case TfxBytecode.SetShaderTexture - 2 when Strategy.IsD1():
                 case TfxBytecode.SetShaderTexture - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.SetShaderTexture when Strategy.IsPostBL():
@@ -177,7 +178,8 @@ public static class TfxBytecodeOp
                     Unk48Data.value = reader.ReadByte();
                     tfxData.data = Unk48Data;
                     break;
-                case TfxBytecode.Unk49 - 2 when Strategy.IsD1():
+
+                //case TfxBytecode.Unk49 - 2 when Strategy.IsD1():
                 case TfxBytecode.Unk49 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.Unk49 when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.Unk49;
@@ -186,7 +188,8 @@ public static class TfxBytecodeOp
                     Unk49.unk1 = reader.ReadByte();
                     tfxData.data = Unk49;
                     break;
-                case TfxBytecode.SetShaderSampler - 2 when Strategy.IsD1():
+
+                case TfxBytecode.SetShaderSampler - 3 when Strategy.IsD1(): // 0x47
                 case TfxBytecode.SetShaderSampler - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.SetShaderSampler when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.SetShaderSampler;
@@ -195,7 +198,8 @@ public static class TfxBytecodeOp
                     Unk4aData.value = reader.ReadByte();
                     tfxData.data = Unk4aData;
                     break;
-                case TfxBytecode.SetShaderUav - 2 when Strategy.IsD1():
+
+                //case TfxBytecode.SetShaderUav - 2 when Strategy.IsD1():
                 case TfxBytecode.SetShaderUav - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.SetShaderUav when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.SetShaderUav;
@@ -204,7 +208,8 @@ public static class TfxBytecodeOp
                     Unk4bData.value = reader.ReadByte();
                     tfxData.data = Unk4bData;
                     break;
-                case TfxBytecode.Unk4c - 2 when Strategy.IsD1():
+
+                //case TfxBytecode.Unk4c - 2 when Strategy.IsD1():
                 case TfxBytecode.Unk4c - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.Unk4c when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.Unk4c;
@@ -214,7 +219,7 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk4cData;
                     break;
 
-                case TfxBytecode.PushSampler - 2 when Strategy.IsD1():
+                case TfxBytecode.PushSampler - 4 when Strategy.IsD1(): // 0x49
                 case TfxBytecode.PushSampler - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PushSampler when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PushSampler;
@@ -224,17 +229,17 @@ public static class TfxBytecodeOp
                     tfxData.data = PushSampler;
                     break;
 
-                case TfxBytecode.PushObjectChannelVector - 2 when Strategy.IsD1():
+                case TfxBytecode.PushObjectChannelVector - 4 when Strategy.IsD1(): // I think...?? Uses an index instead of hash?
                 case TfxBytecode.PushObjectChannelVector - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PushObjectChannelVector when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PushObjectChannelVector;
 
                     PushObjectChannelVectorData PushObjectChannelVector = new();
-                    PushObjectChannelVector.hash = reader.ReadUInt32();
+                    PushObjectChannelVector.hash = Strategy.IsD1() ? reader.ReadByte() : reader.ReadUInt32();
                     tfxData.data = PushObjectChannelVector;
                     break;
 
-                case TfxBytecode.PushGlobalChannelVector - 2 when Strategy.IsD1():
+                case TfxBytecode.PushGlobalChannelVector - 4 when Strategy.IsD1():
                 case TfxBytecode.PushGlobalChannelVector - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PushGlobalChannelVector when Strategy.IsPostBL():
                     tfxData.op = TfxBytecode.PushGlobalChannelVector;

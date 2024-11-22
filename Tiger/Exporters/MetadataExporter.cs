@@ -408,11 +408,11 @@ class MetadataScene
         public List<string> UsedScopes;
         public Dictionary<string, Dictionary<int, TexInfo>> Textures;
     }
-}
 
-public struct TexInfo
-{
-    public string Hash { get; set; }
-    public string Dimension { get; set; }
-    public bool SRGB { get; set; }
+    public struct TexInfo
+    {
+        public string Hash { get; set; }
+        public string Dimension { get; set; }
+        public bool SRGB { get; set; }
+    }
 }

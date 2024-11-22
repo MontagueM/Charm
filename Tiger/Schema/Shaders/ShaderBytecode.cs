@@ -71,6 +71,9 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
 
     public byte[] GetBytecode()
     {
+        if (Strategy.IsD1())
+            return Array.Empty<byte>();
+
         using TigerReader reader = GetReferenceReader();
         return reader.ReadBytes((int)_tag.BytecodeSize);
     }

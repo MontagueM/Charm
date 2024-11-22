@@ -15,8 +15,8 @@ namespace Charm;
 
 public partial class MaterialView : UserControl
 {
-    private static MainWindow _mainWindow = null;
-    private static IMaterial Material;
+    private MainWindow _mainWindow = null;
+    private IMaterial Material;
 
     public MaterialView()
     {
@@ -86,7 +86,7 @@ public partial class MaterialView : UserControl
 #endif
     }
 
-    public List<TextureDetail> GetTextureDetails(IMaterial material)
+    private List<TextureDetail> GetTextureDetails(IMaterial material)
     {
         var items = new List<TextureDetail>();
 
@@ -147,7 +147,7 @@ public partial class MaterialView : UserControl
         return items;
     }
 
-    public List<CBufferDetail> GetCBufferDetails(IMaterial material, bool bVertexShader = false)
+    private List<CBufferDetail> GetCBufferDetails(IMaterial material, bool bVertexShader = false)
     {
         var items = new List<CBufferDetail>();
 
@@ -314,7 +314,7 @@ public partial class MaterialView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    public List<SamplerDataDetail> GetSamplerData(IMaterial material)
+    private List<SamplerDataDetail> GetSamplerData(IMaterial material)
     {
         List<SamplerDataDetail> items = new();
         for (int i = 0; i < material.PS_Samplers.Count; i++)
@@ -351,59 +351,60 @@ public partial class MaterialView : UserControl
     {
         DevView.OpenHxD(Material.FileHash);
     }
-}
 
-public class ShaderDetail
-{
-    public string PixelShaderHash { get; set; }
-    public string PixelShader { get; set; }
-
-    public string VertexShaderHash { get; set; }
-    public string VertexShader { get; set; }
-
-    public string ComputeShaderHash { get; set; }
-    public string ComputeShader { get; set; }
-}
-
-public class TextureDetail
-{
-    public string Shader { get; set; }
-    public string Hash { get; set; }
-    public string Index { get; set; }
-    public string Type { get; set; }
-    public string Dimension { get; set; }
-    public string Format { get; set; }
-    public string Dimensions { get; set; }
-
-    public BitmapImage Texture { get; set; }
-}
-
-public class CBufferDetail
-{
-    public string Index { get; set; }
-    public string Count { get; set; }
-    public Shader Stage { get; set; }
-    public List<Vector4> Data { get; set; }
-
-    public enum Shader
+    private class ShaderDetail
     {
-        Pixel,
-        Vertex
+        public string PixelShaderHash { get; set; }
+        public string PixelShader { get; set; }
+
+        public string VertexShaderHash { get; set; }
+        public string VertexShader { get; set; }
+
+        public string ComputeShaderHash { get; set; }
+        public string ComputeShader { get; set; }
+    }
+
+    private class TextureDetail
+    {
+        public string Shader { get; set; }
+        public string Hash { get; set; }
+        public string Index { get; set; }
+        public string Type { get; set; }
+        public string Dimension { get; set; }
+        public string Format { get; set; }
+        public string Dimensions { get; set; }
+
+        public BitmapImage Texture { get; set; }
+    }
+
+    private class CBufferDetail
+    {
+        public string Index { get; set; }
+        public string Count { get; set; }
+        public Shader Stage { get; set; }
+        public List<Vector4> Data { get; set; }
+
+        public enum Shader
+        {
+            Pixel,
+            Vertex
+        }
+    }
+
+    private class CBufferDataDetail
+    {
+        public int Index { get; set; }
+        public string StringVector { get; set; }
+        public Vector4 Vector { get; set; }
+        public Color Color { get; set; } = Color.FromArgb(255, 0, 0, 0);
+    }
+
+    private class SamplerDataDetail
+    {
+        public int Slot { get; set; }
+        public string Filter { get; set; }
+        public string AddressU { get; set; }
+        public string AddressV { get; set; }
     }
 }
 
-public class CBufferDataDetail
-{
-    public int Index { get; set; }
-    public string StringVector { get; set; }
-    public Vector4 Vector { get; set; }
-    public Color Color { get; set; } = Color.FromArgb(255, 0, 0, 0);
-}
-
-public class SamplerDataDetail
-{
-    public int Slot { get; set; }
-    public string Filter { get; set; }
-    public string AddressU { get; set; }
-    public string AddressV { get; set; }
-}

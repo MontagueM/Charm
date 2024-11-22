@@ -13,7 +13,6 @@ public class FbxHandler
     private readonly FbxManager _manager;
     private readonly FbxScene _scene;
     private readonly List<FileHash> addedEntities = new();
-    public InfoConfigHandler InfoHandler;
     private static object _fbxLock = new object();
 
     public FbxHandler(bool bMakeInfoHandler = true)
@@ -23,9 +22,6 @@ public class FbxHandler
             _manager = FbxManager.Create();
             _scene = FbxScene.Create(_manager, "");
         }
-
-        if (bMakeInfoHandler)
-            InfoHandler = new InfoConfigHandler();
     }
 
     public FbxMesh AddMeshPartToScene(MeshPart part, int index, string meshName)
@@ -70,11 +66,6 @@ public class FbxHandler
         if (part.Material != null) // todo consider why some materials are null
         {
             AddMaterial(mesh, node, index, part.Material);
-            if (InfoHandler != null) // for importing to other engines
-            {
-                InfoHandler.AddMaterial(part.Material);
-                InfoHandler.AddPart(part, node.GetName());
-            }
         }
 
         AddSmoothing(mesh);
@@ -397,9 +388,6 @@ public class FbxHandler
             exporter.Destroy();
         }
         _scene.Clear();
-        if (InfoHandler != null)
-            InfoHandler.WriteToFile(directory);
-
     }
 
     public void AddEntityToScene(Entity.Entity entity, List<DynamicMeshPart> dynamicParts, ExportDetailLevel detailLevel, List<FbxNode> skeletonNodes = null)
@@ -451,8 +439,6 @@ public class FbxHandler
             _scene.Destroy();
             _manager.Destroy();
         }
-        if (InfoHandler != null)
-            InfoHandler.Dispose();
     }
 
     public void AddStaticInstancesToScene(List<StaticPart> parts, List<SStaticMeshInstanceTransform> instances, string meshName)

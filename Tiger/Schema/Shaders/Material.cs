@@ -1,51 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Arithmic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Tiger.Exporters;
 using Tiger.Schema;
+using static Tiger.Schema.DirectXSampler;
+using static Tiger.Schema.RenderStates;
 
 namespace Tiger.Schema.Shaders
 {
-
-    public struct TextureView
-    {
-        public string Dimension;
-        public string Type;
-        public string Variable;
-        public int Index;
-    }
-
-    public struct Buffer
-    {
-        public string Variable;
-        public string Type;
-        public int Index;
-    }
-
-    public struct Cbuffer
-    {
-        public string Variable;
-        public string Type;
-        public int Count;
-        public int Index;
-    }
-
-    public struct Input
-    {
-        public string Variable;
-        public string Type;
-        public int Index;
-        public string Semantic;
-    }
-
-    public struct Output
-    {
-        public string Variable;
-        public string Type;
-        public int Index;
-        public string Semantic;
-    }
-
     public interface IMaterial : ISchema
     {
         public FileHash FileHash { get; }
@@ -84,7 +48,7 @@ namespace Tiger.Schema.Shaders
 
         public string Decompile(byte[] shaderBytecode, string name, string savePath = "hlsl_temp")
         {
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+            if (Strategy.IsD1() || shaderBytecode.Length == 0)
                 return "";
 
             string binPath = $"{savePath}/{name}.bin";
@@ -202,8 +166,7 @@ namespace Tiger.Schema.Shaders
             //}
         }
 
-        // Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
-        // Also exports cbuffer0 data
+        // TODO: Remove material data from cfg and use this instead, cfg is too cluttered 
         public void SaveMaterial(string saveDirectory)
         {
             var hlslPath = $"{saveDirectory}/Shaders/Raw";
@@ -211,15 +174,84 @@ namespace Tiger.Schema.Shaders
             Directory.CreateDirectory(hlslPath);
             Directory.CreateDirectory(texturePath);
 
+            JsonMaterial material = new()
+            {
+                Scopes = EnumerateScopes().ToList(),
+                Externs = GetExterns().ToList(),
+                RenderStates = RenderStates
+            };
             if (PixelShader != null)
             {
                 Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}", hlslPath);
                 SavePixelShader($"{saveDirectory}/Shaders/");
+
+                ShaderDetails psCB = new ShaderDetails();
+                psCB.CBuffers = GetCBuffer0();
+                psCB.Bytecode = PS_TFX_Bytecode.Select(x => x.Value).ToList();
+                psCB.Constants = PS_TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
+
+                psCB.Textures = new();
+                foreach (var texture in EnumeratePSTextures())
+                {
+                    psCB.Textures.TryAdd((int)texture.TextureIndex, new()
+                    {
+                        Hash = texture.Texture.Hash,
+                        Colorspace = texture.Texture.IsSrgb() ? "Srgb" : "Non-Color",
+                        Dimension = texture.Texture.GetDimension().GetEnumDescription(),
+                        Format = texture.Texture.TagData.GetFormat().ToString()
+                    });
+                }
+
+                psCB.TileTextureDetails = new();
+                psCB.Samplers = new();
+                foreach (var item in PS_Samplers.Select((sampler, index) => new { sampler, index }))
+                {
+                    if (item.sampler.Hash.GetFileMetadata().Type != 34)
+                    {
+                        var tex = FileResourcer.Get().GetFile<Texture>(item.sampler.Hash);
+                        psCB.TileTextureDetails.Add(new()
+                        {
+                            Hash = item.sampler.Hash,
+                            Width = tex.TagData.Width,
+                            Height = tex.TagData.Height,
+                            Depth = tex.TagData.Depth,
+                            ArraySize = tex.TagData.ArraySize,
+                            TileCount = tex.TagData.TileCount,
+                            TilingScaleOffset = tex.TagData.TilingScaleOffset
+                        });
+                    }
+                    else
+                    {
+                        psCB.Samplers.TryAdd(item.index + 1, item.sampler.GetSampler());
+                    }
+                }
+
+                material.Material.TryAdd(JsonMaterial.ShaderStage.Pixel, psCB);
             }
+
             if (VertexShader != null)
             {
                 Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}", hlslPath);
                 SaveVertexShader($"{saveDirectory}/Shaders/");
+
+                ShaderDetails vsCB = new ShaderDetails();
+                vsCB.CBuffers = GetCBuffer0(true);
+                vsCB.Bytecode = VS_TFX_Bytecode.Select(x => x.Value).ToList();
+                vsCB.Constants = VS_TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
+
+                vsCB.Textures = new();
+                foreach (var texture in EnumerateVSTextures())
+                {
+                    vsCB.Textures.TryAdd((int)texture.TextureIndex, new()
+                    {
+                        Hash = texture.Texture.Hash,
+                        Colorspace = texture.Texture.IsSrgb() ? "Srgb" : "Non-Color",
+                        Dimension = texture.Texture.GetDimension().GetEnumDescription(),
+                        Format = texture.Texture.TagData.GetFormat().ToString()
+                    });
+                }
+
+                material.Material.TryAdd(JsonMaterial.ShaderStage.Vertex, vsCB);
             }
 
             foreach (STextureTag texture in EnumerateVSTextures())
@@ -236,8 +268,14 @@ namespace Tiger.Schema.Shaders
 
                 texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
             }
-            File.WriteAllLines($"{saveDirectory}/PS_CB0.txt", GetCBuffer0().ConvertAll(v => v.ToString()));
-            File.WriteAllLines($"{saveDirectory}/VS_CB0.txt", GetCBuffer0(true).ConvertAll(v => v.ToString()));
+
+
+            var jsonSettings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                Converters = new List<JsonConverter> { new StringEnumConverter() }
+            };
+            File.WriteAllText($"{saveDirectory}/{FileHash}.json", JsonConvert.SerializeObject(material, jsonSettings));
         }
 
         public List<Vector4> GetVec4Container(bool vs = false)
@@ -302,13 +340,64 @@ namespace Tiger.Schema.Shaders
             }
             return data;
         }
+
+        private struct JsonMaterial
+        {
+            public JsonMaterial() { }
+
+            public List<TfxScope> Scopes { get; set; } = new();
+            public List<TfxExtern> Externs { get; set; } = new();
+            public StateSelection RenderStates { get; set; } = new();
+            public Dictionary<ShaderStage, ShaderDetails> Material { get; set; } = new();
+
+            public enum ShaderStage
+            {
+                Vertex,
+                Pixel
+            }
+        }
+
+        private struct ShaderDetails
+        {
+            public ShaderDetails() { }
+
+            public Dictionary<int, TextureDetails> Textures { get; set; } = new();
+            public List<Vector4> CBuffers { get; set; } = new();
+            public List<byte> Bytecode { get; set; } = new();
+            public List<Vector4> Constants { get; set; } = new();
+            public Dictionary<int, D3D11_SAMPLER_DESC> Samplers { get; set; } = new();
+            public List<TileTextureDetails> TileTextureDetails { get; set; } = new();
+        }
+
+        private struct TextureDetails
+        {
+            public string Hash;
+            public string Dimension;
+            public string Format;
+            public string Colorspace;
+        }
+
+        private struct TileTextureDetails
+        {
+            public string Hash;
+            public int Width;
+            public int Height;
+            public int Depth;
+            public int ArraySize;
+            public int TileCount;
+            public Vector4 TilingScaleOffset;
+        }
     }
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 0x4)]
 public struct StateSelection
 {
-    public int inner;
+    private int inner;
+
+    public BungieBlendDesc? Blend => BlendState() != -1 ? RenderStates.BlendStates[BlendState()] : null;
+    public BungieRasterizerDesc? Rasterizer => RasterizerState() != -1 ? RenderStates.RasterizerStates[RasterizerState()] : null;
+    public BungieDepthBiasDesc? DepthBias => DepthBiasState() != -1 ? RenderStates.DepthBiasStates[DepthBiasState()] : null;
 
     public StateSelection(int value)
     {
