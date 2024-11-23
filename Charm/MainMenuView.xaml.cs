@@ -186,7 +186,7 @@ public partial class MainMenuView : UserControl
 
     private void GithubButton_OnClick(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo { FileName = "https://github.com/MontagueM/Charm", UseShellExecute = true });
+        Process.Start(new ProcessStartInfo { FileName = "https://github.com/MontagueM/Charm/tree/delta/TFS%2Bmisc", UseShellExecute = true });
     }
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)

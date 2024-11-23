@@ -10,7 +10,6 @@ public partial class ProgressView : UserControl
     private Queue<string> _progressStages;
     private int TotalStageCount;
     private bool bLogProgress = true;
-    private bool bUseFullBar = false;
 
     public ProgressView()
     {
@@ -38,7 +37,7 @@ public partial class ProgressView : UserControl
     public void SetProgressStages(List<string> progressStages, bool bLogProgress = true, bool bUseFullBar = false)
     {
         this.bLogProgress = bLogProgress;
-        this.bUseFullBar = bUseFullBar;
+        //this.bUseFullBar = bUseFullBar;
         Dispatcher.Invoke(() =>
         {
             TotalStageCount = progressStages.Count;
@@ -87,10 +86,9 @@ public partial class ProgressView : UserControl
 
     public int GetProgressPercentage()
     {
-        // We want to artificially make it more meaningful, so we pad by 15% on each side
-        if (bUseFullBar)
-            return 100 - 100 * _progressStages.Count / TotalStageCount;
+        if (TotalStageCount == 1)
+            return 50;
         else
-            return 95 - 90 * _progressStages.Count / TotalStageCount;
+            return 100 - 95 * _progressStages.Count / TotalStageCount;
     }
 }

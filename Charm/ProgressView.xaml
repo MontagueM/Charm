@@ -8,37 +8,126 @@
     d:DesignHeight="1080"
     d:DesignWidth="1920"
     mc:Ignorable="d">
-    <Grid
-        x:Name="Grid"
-        Width="1920"
-        Height="1080"
-        Background="Transparent">
+
+    <UserControl.Resources>
+        <Style TargetType="ProgressBar">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="TemplateRoot" SnapsToDevicePixels="true">
+                            <!--  Background  -->
+                            <Border
+                                x:Name="PART_Track"
+                                Background="{TemplateBinding Background}"
+                                SnapsToDevicePixels="True" />
+                            <!--  Progress Bar  -->
+                            <Border
+                                x:Name="PART_Indicator"
+                                Width="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                HorizontalAlignment="Left"
+                                Background="{TemplateBinding Foreground}"
+                                SnapsToDevicePixels="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <!--  Trigger for Fade-In Animation  -->
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="PART_Indicator"
+                                            Storyboard.TargetProperty="Opacity"
+                                            From="0"
+                                            To="1"
+                                            Duration="0:0:2.5" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid x:Name="Grid" Background="Transparent">
         <!--  So we stop clicking on the main screen, need HitTestVisible  -->
         <Rectangle
             Fill="{StaticResource BackgroundColour14}"
             IsHitTestVisible="True"
             Opacity="0.95" />
         <StackPanel
-            Width="500"
-            Height="105"
+            Width="600"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="{StaticResource BackgroundColour14}"
+            Background="Transparent"
             Orientation="Vertical">
-            <ProgressBar
-                x:Name="ProgressBar"
-                Height="50"
-                Background="{StaticResource BackgroundColour7}"
-                Foreground="{StaticResource AccentColour}"
-                Value="50" />
-            <Viewbox Width="450" Height="50">
+            <Viewbox Width="450">
                 <TextBlock
                     x:Name="ProgressText"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
                     FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                    Text="LOADING" />
+                    Text="LOADING">
+                    <TextBlock.Effect>
+                        <DropShadowEffect
+                            BlurRadius="3"
+                            Direction="320"
+                            Opacity="0.5"
+                            ShadowDepth="2"
+                            Color="#1B1B1B" />
+                    </TextBlock.Effect>
+                </TextBlock>
             </Viewbox>
+            <Border
+                Margin="10"
+                BorderBrush="White"
+                BorderThickness="0,1,0,0" />
+            <Border
+                Width="500"
+                Height="20"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="Transparent"
+                BorderBrush="#45FFFFFF"
+                BorderThickness="2">
+                <ProgressBar
+                    x:Name="ProgressBar"
+                    Height="auto"
+                    Background="Transparent"
+                    BorderBrush="#80FFFFFF"
+                    BorderThickness="0"
+                    Maximum="100"
+                    Value="50">
+                    <ProgressBar.Foreground>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <LinearGradientBrush.Transform>
+                                <TransformGroup>
+                                    <TranslateTransform x:Name="GradientTransform" X="1000" />
+                                </TransformGroup>
+                            </LinearGradientBrush.Transform>
+                            <GradientStop Offset="0.0" Color="#FF6D99FF" />
+                            <GradientStop Offset="0.5" Color="#FFCEDDFF" />
+                            <GradientStop Offset="1.0" Color="#FF6D99FF" />
+                        </LinearGradientBrush>
+                    </ProgressBar.Foreground>
+                </ProgressBar>
+
+                <Border.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    RepeatBehavior="Forever"
+                                    Storyboard.TargetName="GradientTransform"
+                                    Storyboard.TargetProperty="X"
+                                    From="-1000"
+                                    To="1000"
+                                    Duration="0:0:2" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Border.Triggers>
+            </Border>
         </StackPanel>
     </Grid>
 </UserControl>
