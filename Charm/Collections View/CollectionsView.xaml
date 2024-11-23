@@ -13,6 +13,8 @@
     <UserControl.Resources>
         <Style x:Key="MainItemsButton" TargetType="Button">
             <EventSetter Event="Click" Handler="ItemCategory_OnClick" />
+            <EventSetter Event="MouseEnter" Handler="ItemCategory_MouseEnter" />
+            <EventSetter Event="MouseLeave" Handler="ItemCategory_MouseLeave" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">

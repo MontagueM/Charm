@@ -94,7 +94,10 @@
                 <Button
                     Margin="10,10,10,30"
                     Click="ActivitiesViewButton_OnClick"
-                    Style="{DynamicResource D2StyleButton}">
+                    MouseEnter="CategoryButton_MouseEnter"
+                    MouseLeave="CategoryButton_MouseLeave"
+                    Style="{DynamicResource D2StyleButton}"
+                    Tag="MAPS AND ACTIVITIES:View Maps and Activity related content.">
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"
@@ -119,7 +122,10 @@
                             Grid.Column="1"
                             Margin="10"
                             Click="ApiViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="API VIEWER:View and export any Player Gear.">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="API" />
                             </Border>
@@ -129,7 +135,10 @@
                             x:Name="BagsButton"
                             Margin="10"
                             Click="NamedEntitiesBagsViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="NAMED BAGS:View and export entities contained in developer named 'bags', like a collection of prefabs.">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="NAMED BAGS" />
                             </Border>
@@ -138,7 +147,10 @@
                         <Button
                             Margin="10"
                             Click="AllEntitiesViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="DYNAMICS:View and export entities, some are even named!">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="DYNAMICS" />
                             </Border>
@@ -148,7 +160,10 @@
                             x:Name="StaticsButton"
                             Margin="10"
                             Click="AllStaticsViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="STATICS:View and export static models. These are what make a map.">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STATICS" />
                             </Border>
@@ -170,9 +185,12 @@
                         <Button
                             Margin="10"
                             Click="AllAudioViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="ALL SOUNDS:View and export any audio in the game.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="ALL" />
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="ALL SOUNDS" />
                             </Border>
                         </Button>
 
@@ -180,9 +198,12 @@
                             x:Name="WeaponAudioButton"
                             Margin="10"
                             Click="WeaponAudioViewButton_Click"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="WEAPON SOUNDS:View and export specific weapon sounds.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="WEAPONS" />
+                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="WEAPON AUDIO" />
                             </Border>
                         </Button>
 
@@ -190,7 +211,10 @@
                             x:Name="SoundBanksButton"
                             Margin="10"
                             Click="AllBKHDViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="SOUND BANKS:View and export specific sounds from a named collection">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="SOUND BANKS" />
                             </Border>
@@ -212,7 +236,10 @@
                         <Button
                             Margin="10"
                             Click="AllStringsViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="STRINGS:View and export strings.">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STRINGS" />
                             </Border>
@@ -221,7 +248,10 @@
                         <Button
                             Margin="10"
                             Click="AllTexturesViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="TEXTURES:View and export textures.">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="TEXTURES" />
                             </Border>
@@ -230,7 +260,10 @@
                         <Button
                             Margin="10"
                             Click="AllMaterialsViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="MATERIALS:View and export materials. These make everything look pretty.">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="MATERIALS" />
                             </Border>
@@ -241,7 +274,10 @@
                             Grid.Column="1"
                             Margin="10"
                             Click="CollectionsViewButton_OnClick"
-                            Style="{DynamicResource D2StyleButton}">
+                            MouseEnter="CategoryButton_MouseEnter"
+                            MouseLeave="CategoryButton_MouseLeave"
+                            Style="{DynamicResource D2StyleButton}"
+                            Tag="COLLECTIONS:View and inspect Player Gear in detail, just like in-game!">
                             <Border Background="#BB181818">
                                 <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="COLLECTIONS" />
                             </Border>
@@ -309,7 +345,12 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Orientation="Horizontal">
-                <Button Click="GithubButton_OnClick" Style="{DynamicResource D2StyleButton}">
+                <Button
+                    Click="GithubButton_OnClick"
+                    MouseEnter="CategoryButton_MouseEnter"
+                    MouseLeave="CategoryButton_MouseLeave"
+                    Style="{DynamicResource D2StyleButton}"
+                    Tag="GITHUB:View the source code for Charm">
                     <TextBlock
                         Margin="5"
                         d:FontFamily="Haas Grot Text 55 Roman"

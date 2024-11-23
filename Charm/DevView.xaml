@@ -54,7 +54,6 @@
                     x:Name="BatchList"
                     Grid.Column="0"
                     FontSize="32"
-                    KeyDown="TagHashBoxKeydown"
                     Text="Path to batch list"
                     TextAlignment="Center" />
                 <Button

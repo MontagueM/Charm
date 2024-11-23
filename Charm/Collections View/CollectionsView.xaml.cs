@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Tiger;
 using Tiger.Schema.Investment;
+using static Charm.APIItemView;
 
 namespace Charm;
 
@@ -14,6 +15,7 @@ public partial class CollectionsView : UserControl
     public Tag<D2Class_D7788080> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap;
     public Tag<D2Class_03588080> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap;
     public int TotalItemAmount { get; set; }
+    private APITooltip ToolTip;
 
     public CollectionsView()
     {
@@ -24,6 +26,10 @@ public partial class CollectionsView : UserControl
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
         MouseMove += UserControl_MouseMove;
+
+        ToolTip = new();
+        Panel.SetZIndex(ToolTip, 50);
+        MainContainer.Children.Add(ToolTip);
 
         if (ConfigSubsystem.Get().GetAnimatedBackground())
         {
@@ -96,6 +102,27 @@ public partial class CollectionsView : UserControl
         CategoryView categoryView = new(item);
         _mainWindow.MakeNewTab(item.ItemCategoryName, categoryView);
         _mainWindow.SetNewestTabSelected();
+    }
+
+    private void ItemCategory_MouseEnter(object sender, RoutedEventArgs e)
+    {
+        ToolTip.ActiveItem = (sender as Button);
+        ItemCategory item = ((Button)sender).DataContext as ItemCategory;
+
+        PlugItem plugItem = new()
+        {
+            Name = $"{item.ItemCategoryName}",
+            Description = $"{item.ItemCategoryDescription}",
+            PlugStyle = DestinySocketCategoryStyle.Reusable
+        };
+
+        ToolTip.MakeTooltip(plugItem);
+    }
+
+    public void ItemCategory_MouseLeave(object sender, MouseEventArgs e)
+    {
+        ToolTip.ClearTooltip();
+        ToolTip.ActiveItem = null;
     }
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
