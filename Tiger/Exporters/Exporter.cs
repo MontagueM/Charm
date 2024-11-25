@@ -100,11 +100,11 @@ public class ExporterScene
     public ConcurrentBag<SMapCubemapResource> Cubemaps = new();
     public ConcurrentBag<LightData> MapLights = new();
     public ConcurrentBag<SMapDecalsResource> Decals = new();
-    private ConcurrentBag<string> _addedEntities = new();
     public ConcurrentHashSet<Texture> Textures = new();
     public ConcurrentHashSet<ExportMaterial> Materials = new();
     public ConcurrentDictionary<string, List<FileHash>> TerrainDyemaps = new();
     public ConcurrentBag<SMapAtmosphere> Atmosphere = new();
+    private ConcurrentDictionary<string, bool> _addedEntities = new();
 
     public void AddStatic(string meshHash, List<StaticPart> parts)
     {
@@ -227,31 +227,22 @@ public class ExporterScene
 
     public void AddMapEntity(SMapDataEntry dynamicResource, Entity entity, Transform? transform = null)
     {
-        if (!_addedEntities.Contains(entity.Hash)) //Dont want duplicate entities being added
+        if (_addedEntities.TryAdd(entity.Hash, true)) // Dont want duplicate entities being added
         {
             ExporterMesh mesh = new(dynamicResource.GetEntityHash());
-
-            _addedEntities.Add(entity.Hash);
             var parts = entity.Model.Load(ExportDetailLevel.MostDetailed, entity.ModelParentResource);
             for (int i = 0; i < parts.Count; i++)
             {
                 DynamicMeshPart part = parts[i];
                 if (part.Material == null)
                     continue;
-                //if (part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-                //{
-                //    mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
-                //}
+
                 mesh.AddPart(dynamicResource.GetEntityHash(), part, i);
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = entity.Skeleton?.GetBoneNodes() });
         }
 
-        if (!EntityInstances.ContainsKey(dynamicResource.GetEntityHash()))
-        {
-            EntityInstances.TryAdd(dynamicResource.GetEntityHash(), new());
-        }
-
+        EntityInstances.TryAdd(dynamicResource.GetEntityHash(), new());
         if (transform is null)
         {
             transform = new Transform
@@ -269,27 +260,18 @@ public class ExporterScene
     {
         ExporterMesh mesh = new(model.Hash);
 
-        if (!_addedEntities.Contains(model.Hash)) //Dont want duplicate entities being added
+        if (_addedEntities.TryAdd(model.Hash, true)) // Dont want duplicate entities being added
         {
-            _addedEntities.Add(model.Hash);
             var parts = model.Load(ExportDetailLevel.MostDetailed, null, transparentsOnly);
             for (int i = 0; i < parts.Count; i++)
             {
                 DynamicMeshPart part = parts[i];
-
-                //if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-                //    continue;
-
                 mesh.AddPart(model.Hash, part, i);
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
         }
 
-        if (!EntityInstances.ContainsKey(model.Hash))
-        {
-            EntityInstances.TryAdd(model.Hash, new());
-        }
-
+        EntityInstances.TryAdd(model.Hash, new());
         EntityInstances[model.Hash].Add(new Transform
         {
             Position = translation.ToVec3(),
@@ -316,7 +298,7 @@ public class ExporterScene
         Cubemaps.Add(cubemap);
     }
 
-    public void AddMapLight(LightData light) //Point
+    public void AddMapLight(LightData light) // Point
     {
         MapLights.Add(light);
     }
@@ -339,24 +321,17 @@ public class ExporterScene
     {
         ExporterMesh mesh = new(name);
 
-        if (!_addedEntities.Contains(name)) //Dont want duplicate entities being added
+        if (_addedEntities.TryAdd(name, true)) // Dont want duplicate entities being added
         {
-            _addedEntities.Add(name);
             for (int i = 0; i < parts.Count; i++)
             {
                 DynamicMeshPart part = parts[i];
-
-                //if (part.Material != null && !part.Material.EnumeratePSTextures().Any()) //Dont know if this will 100% "fix" the duplicate meshs that come with entities
-                //    continue;
-
                 mesh.AddPart(name, part, i);
             }
             Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = null });
         }
 
-        if (!EntityInstances.ContainsKey(name))
-            EntityInstances.TryAdd(name, new());
-
+        EntityInstances.TryAdd(name, new());
         EntityInstances[name].Add(transform);
     }
 

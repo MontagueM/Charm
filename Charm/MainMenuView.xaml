@@ -31,10 +31,13 @@
             <RowDefinition Height="90*" />
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
+
         <Grid
+            x:Name="SpinnerContainer"
             Grid.RowSpan="2"
             Background="Transparent"
-            Opacity="1">
+            Opacity="1"
+            Visibility="Hidden">
             <Border
                 x:Name="Spinner"
                 Background="Transparent"
@@ -101,6 +104,7 @@
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                             Text="MAPS AND ACTIVITIES"
                             TextWrapping="WrapWithOverflow" />
                     </Border>
@@ -113,7 +117,10 @@
                         Background="#18585867">
                         <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
                             <Grid Style="{StaticResource ColumnHeader}">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="MODELS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="MODELS" />
                             </Grid>
                         </Border>
 
@@ -127,7 +134,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="API VIEWER:View and export any Player Gear.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="API" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="API" />
                             </Border>
                         </Button>
 
@@ -140,7 +150,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="NAMED BAGS:View and export entities contained in developer named 'bags', like a collection of prefabs.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="NAMED BAGS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="NAMED BAGS" />
                             </Border>
                         </Button>
 
@@ -152,7 +165,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="DYNAMICS:View and export entities, some are even named!">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="DYNAMICS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="DYNAMICS" />
                             </Border>
                         </Button>
 
@@ -165,7 +181,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="STATICS:View and export static models. These are what make a map.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STATICS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="STATICS" />
                             </Border>
                         </Button>
 
@@ -178,7 +197,10 @@
                         Background="#18585867">
                         <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
                             <Grid Style="{StaticResource ColumnHeader}">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="AUDIO" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="AUDIO" />
                             </Grid>
                         </Border>
 
@@ -190,7 +212,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="ALL SOUNDS:View and export any audio in the game.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="ALL SOUNDS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="ALL SOUNDS" />
                             </Border>
                         </Button>
 
@@ -203,7 +228,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="WEAPON SOUNDS:View and export specific weapon sounds.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="WEAPON AUDIO" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="WEAPON AUDIO" />
                             </Border>
                         </Button>
 
@@ -216,7 +244,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="SOUND BANKS:View and export specific sounds from a named collection">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="SOUND BANKS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="SOUND BANKS" />
                             </Border>
                         </Button>
 
@@ -229,7 +260,10 @@
                         Background="#18585867">
                         <Border MinWidth="350" Style="{StaticResource ColumnHeaderBorder}">
                             <Grid Style="{StaticResource ColumnHeader}">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="OTHER" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="OTHER" />
                             </Grid>
                         </Border>
 
@@ -241,7 +275,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="STRINGS:View and export strings.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="STRINGS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="STRINGS" />
                             </Border>
                         </Button>
 
@@ -253,7 +290,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="TEXTURES:View and export textures.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="TEXTURES" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="TEXTURES" />
                             </Border>
                         </Button>
 
@@ -265,7 +305,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="MATERIALS:View and export materials. These make everything look pretty.">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="MATERIALS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="MATERIALS" />
                             </Border>
                         </Button>
 
@@ -279,7 +322,10 @@
                             Style="{DynamicResource D2StyleButton}"
                             Tag="COLLECTIONS:View and inspect Player Gear in detail, just like in-game!">
                             <Border Background="#BB181818">
-                                <TextBlock d:FontFamily="Haas Grot Text 55 Roman" Text="COLLECTIONS" />
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    Text="COLLECTIONS" />
                             </Border>
                         </Button>
 
@@ -335,7 +381,7 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 d:FontFamily="Haas Grot Text 55 Roman"
-                FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                 FontSize="16"
                 Foreground="{StaticResource ForegroundColour80}"
                 Text="Game Version: " />
@@ -354,7 +400,7 @@
                     <TextBlock
                         Margin="5"
                         d:FontFamily="Haas Grot Text 55 Roman"
-                        FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                         FontSize="16"
                         Foreground="{StaticResource ForegroundColour80}"
                         Text="GITHUB" />

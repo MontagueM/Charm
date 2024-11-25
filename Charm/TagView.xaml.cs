@@ -17,10 +17,10 @@ public partial class TagView : UserControl
         Entity,
         [Description("Static")]
         Static,
-        [Description("Texture1D")]
-        Texture1D,
         [Description("Texture2D")]
         Texture2D,
+        [Description("TextureCube")]
+        TextureCube,
         [Description("Dialogue")]
         Dialogue,
         [Description("Directive")]
@@ -38,8 +38,8 @@ public partial class TagView : UserControl
         EntityControl.Visibility = eViewerType == EViewerType.Entity ? Visibility.Visible : Visibility.Hidden;
         // ActivityControl.Visibility = eViewerType == EViewerType.Activity ? Visibility.Visible : Visibility.Hidden;
         StaticControl.Visibility = eViewerType == EViewerType.Static ? Visibility.Visible : Visibility.Hidden;
-        TextureControl.Visibility = eViewerType == EViewerType.Texture1D ? Visibility.Visible : Visibility.Hidden;
-        CubemapControl.Visibility = eViewerType == EViewerType.Texture2D ? Visibility.Visible : Visibility.Hidden;
+        TextureControl.Visibility = eViewerType == EViewerType.Texture2D ? Visibility.Visible : Visibility.Hidden;
+        CubemapControl.Visibility = eViewerType == EViewerType.TextureCube ? Visibility.Visible : Visibility.Hidden;
         DialogueControl.Visibility = eViewerType == EViewerType.Dialogue ? Visibility.Visible : Visibility.Hidden;
         DirectiveControl.Visibility = eViewerType == EViewerType.Directive ? Visibility.Visible : Visibility.Hidden;
         MusicControl.Visibility = eViewerType == EViewerType.Music ? Visibility.Visible : Visibility.Hidden;

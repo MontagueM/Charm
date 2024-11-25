@@ -740,6 +740,7 @@ public partial class TagListView : UserControl
                 {
                     Hash = destinationGlobalTagBag.DestinationGlobalTagBag,
                     Name = destinationGlobalTagBag.DestinationGlobalTagBagName,
+                    Subname = $"{Helpers.GetReadableSize(destinationGlobalTagBag.DestinationGlobalTagBag.GetFileMetadata().Size)}",
                     TagType = ETagListType.DestinationGlobalTagBag
                 });
             }
@@ -901,6 +902,7 @@ public partial class TagListView : UserControl
                 if (entity.HasGeometry())
                 {
                     var entityName = entity.EntityName != null ? entity.EntityName : entity.Hash;
+                    string subname = $"{Helpers.GetReadableSize(entity.GetStream().Length)} | {entity.TagData.EntityResources.Count} Resources";
 
                     // Most of the time the most specific entity name comes from a map resource (bosses usually)
                     if (NamedEntities.ContainsKey(entity.Hash))
@@ -914,6 +916,7 @@ public partial class TagListView : UserControl
                             {
                                 Hash = entity.Hash,
                                 Name = entry,
+                                Subname = subname,
                                 TagType = ETagListType.Entity
                             });
                         }
@@ -924,6 +927,7 @@ public partial class TagListView : UserControl
                         {
                             Hash = entity.Hash,
                             Name = entityName,
+                            Subname = subname,
                             TagType = ETagListType.Entity
                         });
                     }
@@ -1222,6 +1226,14 @@ public partial class TagListView : UserControl
                 var first = Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402
                 ? activityName.Split(".").First() : activityName.Split(":")[1];
 
+                // These are silly
+                if (activityName.EndsWith("_ls") || activityName.Contains("_ls_"))
+                    activityName = $" {activityName}"; // Lost sector icon
+                if (activityName.Contains("exotic"))
+                    activityName = $" {activityName}"; // Quest crown icon
+                if (activityName.Contains("dungeon") || activityName.Contains("raid") || activityName.Contains("kingsfall"))
+                    activityName = $" {activityName}"; // Revive token icon (could do 💀 if people dont like it)
+
                 _allTagItems.Add(new TagItem
                 {
                     Hash = val,
@@ -1262,7 +1274,7 @@ public partial class TagListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            $"loading static list",
+            $"Loading Statics List",
         });
 
         await Task.Run(async () =>
@@ -1271,9 +1283,12 @@ public partial class TagListView : UserControl
             var eVals = await PackageResourcer.Get().GetAllHashesAsync<SStaticMesh>();
             Parallel.ForEach(eVals, val =>
             {
+                var metadata = val.GetFileMetadata();
                 _allTagItems.Add(new TagItem
                 {
                     Hash = val,
+                    Name = $"Static {metadata.FileIndex}",
+                    Subname = $"{Helpers.GetReadableSize(metadata.Size)}",
                     TagType = ETagListType.Static
                 });
             });
@@ -1314,31 +1329,25 @@ public partial class TagListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "caching textures",
-            "adding textures to ui",
+            "Caching Textures",
+            "Adding Textures to UI",
         });
 
         await Task.Run(() =>
         {
             _allTagItems = new ConcurrentBag<TagItem>();
-            // var tex1d = PackageHandler.GetAllTagsWithTypes(32, 1);
-            // var tex2d = PackageHandler.GetAllTagsWithTypes(32, 2);
-            // var tex3d = PackageHandler.GetAllTagsWithTypes(32, 3);
             var tex = PackageResourcer.Get().GetAllHashes<Texture>();
-
-            // PackageHandler.CacheHashDataList(tex1d.Select(x => x.Hash).ToArray());
             MainWindow.Progress.CompleteStage();
-            // PackageHandler.CacheHashDataList(tex2d.Select(x => x.Hash).ToArray());
-            // MainWindow.Progress.CompleteStage();
-            // PackageHandler.CacheHashDataList(tex3d.Select(x => x.Hash).ToArray());
-            // MainWindow.Progress.CompleteStage();
 
-            tex.ToList().ForEach(val => //Doesnt really need to be parrellizedm, loads quick enough without it and fixes(?) missing entries
+            // Could use 'BitConverter.ToInt32(val.GetFileData(), 0))' to get the full file size from the header but this takes too long.
+            // Just gonna use the reference hash file metadata size...it really doesnt matter showing the file size anyways..
+            Parallel.ForEach(tex, val =>
             {
                 _allTagItems.Add(new TagItem
                 {
                     Hash = val,
-                    Name = $"Texture",
+                    Name = $"Texture {val.GetFileMetadata().FileIndex}",
+                    Subname = $"{Helpers.GetReadableSize(val.GetReferenceHash().GetFileMetadata().Size)}",
                     TagType = ETagListType.Texture
                 });
             });
@@ -1359,17 +1368,12 @@ public partial class TagListView : UserControl
         Texture textureHeader = FileResourcer.Get().GetFile<Texture>(fileHash);
         if (textureHeader.IsCubemap())
         {
-            SetViewer(TagView.EViewerType.Texture2D);
+            SetViewer(TagView.EViewerType.TextureCube);
             viewer.CubemapControl.LoadCubemap(textureHeader);
-        }
-        else if (textureHeader.IsVolume())
-        {
-            SetViewer(TagView.EViewerType.Texture1D);
-            viewer.TextureControl.LoadTexture(textureHeader);
         }
         else
         {
-            SetViewer(TagView.EViewerType.Texture1D);
+            SetViewer(TagView.EViewerType.Texture2D);
             viewer.TextureControl.LoadTexture(textureHeader);
         }
         SetExportFunction(ExportTexture, (int)ExportTypeFlag.Full);
@@ -1589,23 +1593,24 @@ public partial class TagListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "caching string tags",
-            "load string list",
+            "Caching String Tags",
+            "Loading String List",
         });
 
         await Task.Run(async () =>
         {
             _allTagItems = new ConcurrentBag<TagItem>();
             var vals = await PackageResourcer.Get().GetAllHashesAsync<LocalizedStrings>();
-            // PackageHandler.CacheHashDataList(vals.Select(x => x.Hash).ToArray());
             MainWindow.Progress.CompleteStage();
 
             Parallel.ForEach(vals, val =>
             {
+                var metadata = val.GetFileMetadata();
                 _allTagItems.Add(new TagItem
                 {
                     Hash = val,
-                    Name = $"{val}",
+                    Name = $"String Container {metadata.FileIndex}",
+                    Subname = $"{Helpers.GetReadableSize(metadata.Size)}",
                     TagType = ETagListType.StringContainer
                 });
             });
@@ -1676,8 +1681,8 @@ public partial class TagListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "caching sound tags",
-            "load sound packages list",
+            "Caching Sound Tags",
+            "Loading Sound Packages List",
         });
 
         await Task.Run(() =>
@@ -1719,7 +1724,7 @@ public partial class TagListView : UserControl
     {
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "loading sounds",
+            "Loading Sounds",
         });
 
         await Task.Run(() =>
@@ -1729,14 +1734,15 @@ public partial class TagListView : UserControl
             _allTagItems = new ConcurrentBag<TagItem>();
             Parallel.ForEach(vals, wem =>
             {
-                if (wem.GetData().Length == 1)
+                if (wem.GetData().Length <= 1)
                     return;
 
+                var metadata = wem.Hash.GetFileMetadata();
                 _allTagItems.Add(new TagItem
                 {
-                    Name = wem.Hash,
                     Hash = wem.Hash,
-                    Subname = wem.Duration,
+                    Name = $"WEM {metadata.FileIndex}",
+                    Subname = $"{Helpers.GetReadableSize(metadata.Size)} | Duration: {wem.Duration}",
                     TagType = ETagListType.Sound
                 });
             });
@@ -1748,26 +1754,35 @@ public partial class TagListView : UserControl
 
     private async Task LoadBKHDGroupList()
     {
-        var banks = PackageResourcer.Get().GetAllFiles<WwiseSound>();
-        _allTagItems = new ConcurrentBag<TagItem>();
-
-        Parallel.ForEach(banks, bank =>
+        MainWindow.Progress.SetProgressStages(new List<string>
         {
-            if (bank.TagData.Wems.Count > 0)
-            {
-                string name = bank.TagData.SoundbankBL.GetNameFromBank();
-
-                _allTagItems.Add(new TagItem
-                {
-                    Hash = bank.Hash,
-                    Name = name,
-                    Subname = $"{bank.TagData.Wems.Count} sounds",
-                    TagType = ETagListType.BKHDGroup
-                });
-            }
+            "Loading Sound Banks",
         });
 
-        _allTagItems.OrderBy(x => x.Name);
+        await Task.Run(() =>
+        {
+            var banks = PackageResourcer.Get().GetAllFiles<WwiseSound>();
+            _allTagItems = new ConcurrentBag<TagItem>();
+
+            Parallel.ForEach(banks, bank =>
+            {
+                if (bank.TagData.Wems.Count > 0)
+                {
+                    string name = bank.TagData.SoundbankBL.GetNameFromBank();
+
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = bank.Hash,
+                        Name = name,
+                        Subname = $"{bank.TagData.Wems.Count} Sounds",
+                        TagType = ETagListType.BKHDGroup
+                    });
+                }
+            });
+        });
+
+        MainWindow.Progress.CompleteStage();
+        RefreshItemList();
     }
 
     private void LoadBKHDAudioGroup(FileHash hash)
@@ -1819,23 +1834,6 @@ public partial class TagListView : UserControl
         string saveDirectory = config.GetExportSavePath() + $"/Sound/{(_weaponItemName == null ? "" : $"{_weaponItemName}/")}{info.Hash}_{info.Name}/";
         Directory.CreateDirectory(saveDirectory);
         sound.ExportSound(saveDirectory);
-    }
-
-    private void ExportWem(ExportInfo info)
-    {
-        // exporting while playing the audio causes a hang
-        var viewer = GetViewer();
-        Dispatcher.Invoke(() =>
-        {
-            if (viewer.MusicPlayer.IsPlaying())
-                viewer.MusicPlayer.Pause();
-        });
-
-        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-        Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash);
-        string saveDirectory = config.GetExportSavePath() + $"/Sound/{info.Hash}_{info.Name}/";
-        Directory.CreateDirectory(saveDirectory);
-        wem.SaveToFile($"{saveDirectory}/{info.Name}.wem");
     }
 
     private void ExportWav(ExportInfo info)
@@ -2197,8 +2195,8 @@ public partial class TagListView : UserControl
 
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "caching materials",
-            "adding materials to ui",
+            "Caching Materials",
+            "Adding Materials to UI",
         });
 
         await Task.Run(() =>
@@ -2210,10 +2208,12 @@ public partial class TagListView : UserControl
 
             Parallel.ForEach(mats, val =>
             {
+                var metadata = val.GetFileMetadata();
                 _allTagItems.Add(new TagItem
                 {
                     Hash = val,
-                    Name = $"Material",
+                    Name = $"Material {metadata.FileIndex}",
+                    Subname = $"{Helpers.GetReadableSize(metadata.Size)}",
                     TagType = ETagListType.Material
                 });
             });
@@ -2283,8 +2283,6 @@ public class TagItem
     }
 
     public ETagListType TagType { get; set; }
-
-    public List<string> Names { get; set; } = new();
 
     public static string GetEnumDescription(Enum value)
     {

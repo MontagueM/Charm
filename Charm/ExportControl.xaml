@@ -8,7 +8,7 @@
     d:DesignHeight="100"
     d:DesignWidth="1000"
     mc:Ignorable="d">
-    <Grid>
+    <Grid Background="{StaticResource BackgroundColour14a}">
         <!--  If exporting is not allowed, we hide the options with this red error quad  -->
         <Rectangle
             x:Name="DisabledOverlay"
@@ -21,27 +21,36 @@
             Panel.ZIndex="1"
             BorderBrush="{StaticResource BackgroundColour30}"
             BorderThickness="1" />
-        <Grid VerticalAlignment="Center">
+
+        <Grid VerticalAlignment="Center" Background="Transparent">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100*" />
                 <ColumnDefinition Width="100*" />
-                <ColumnDefinition Width="150*" />
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="100*" />
-            </Grid.RowDefinitions>
+
+            <!--  This really isnt needed anymore, at least not right now  -->
             <ComboBox
                 x:Name="ExportComboBox"
                 HorizontalAlignment="Center"
-                Style="{StaticResource MaterialDesignComboBox}" />
+                Style="{StaticResource MaterialDesignComboBox}"
+                Visibility="Hidden" />
+
             <CheckBox
                 x:Name="ExportChildrenBox"
-                Grid.Column="2"
+                Grid.Column="0"
                 HorizontalAlignment="Center"
-                Content="Export Entity Children"
+                VerticalAlignment="Center"
                 IsChecked="True"
                 Style="{StaticResource MaterialDesignCheckBox}"
-                Visibility="Hidden" />
+                Visibility="Hidden">
+                <TextBlock
+                    Margin="5"
+                    VerticalAlignment="Center"
+                    FontSize="18"
+                    IsHitTestVisible="False"
+                    Text="Export Entity Children"
+                    TextAlignment="Center" />
+            </CheckBox>
             <Border
                 Grid.Column="1"
                 HorizontalAlignment="Center"

@@ -14,7 +14,7 @@
                 Width="880"
                 Height="70"
                 Margin="0,5,0,5">
-                <Grid>
+                <Grid Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="60*" />
                         <RowDefinition Height="40*" />
@@ -41,7 +41,8 @@
             </Button>
         </ControlTemplate>
     </UserControl.Resources>
-    <Grid>
+
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="5*" />
             <RowDefinition Height="5*" />
@@ -52,12 +53,14 @@
         <Viewbox Grid.ColumnSpan="2">
             <TextBlock x:Name="MusicLoopName" HorizontalAlignment="Center" />
         </Viewbox>
+
         <TextBlock
             Grid.Row="0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             FontSize="40"
             Text="Dev Events" />
+
         <TextBlock
             Grid.Row="1"
             HorizontalAlignment="Center"
@@ -66,7 +69,10 @@
             <Run Text="Raw strings are no longer visible in versions post Lightfall" />
             <Run FontSize="10" Text="(womp womp leakers)" /></TextBlock>
 
-        <ListView x:Name="EventList" Grid.Row="2">
+        <ListView
+            x:Name="EventList"
+            Grid.Row="2"
+            Background="Transparent">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="OverridesDefaultStyle" Value="True" />

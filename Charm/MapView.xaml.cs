@@ -153,7 +153,7 @@ public partial class MapView : UserControl
         MVM.Dispose();
     }
 
-    public static void ExportFullMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
+    public static void ExportFullMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag = ExportTypeFlag.Full)
     {
         ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.Map);
 

@@ -163,6 +163,17 @@ public static class Helpers
 
         return val;
     }
+
+    public static string GetReadableSize(long byteLength)
+    {
+        string[] sizeSuffixes = { "B", "KB", "MB", "GB" };
+        if (byteLength == 0 || byteLength < 0) return "0 B";
+
+        int suffixIndex = (int)Math.Floor(Math.Log(byteLength, 1024));
+        double readableValue = byteLength / Math.Pow(1024, suffixIndex);
+
+        return $"{readableValue:0.##} {sizeSuffixes[suffixIndex]}";
+    }
 }
 
 public static class NestedTypeHelpers

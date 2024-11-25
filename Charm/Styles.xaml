@@ -11,6 +11,7 @@
     <Brush x:Key="BackgroundColour7">#161616</Brush>
     <Color x:Key="BackgroundColour7C">#161616</Color>
     <Brush x:Key="BackgroundColour14">#242424</Brush>
+    <Brush x:Key="BackgroundColour14a">#90242424</Brush>
     <Color x:Key="BackgroundColour10C">#1a1a1a</Color>
     <Color x:Key="BackgroundColour14C">#242424</Color>
     <Brush x:Key="BackgroundColour20">#333333</Brush>
@@ -116,9 +117,9 @@
     </Style>
 
     <Style TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource BackgroundColour20}" />
-        <Setter Property="BorderBrush" Value="{StaticResource ForegroundColour90}" />
-        <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
+        <Setter Property="Background" Value="{StaticResource BackgroundColour14a}" />
+        <Setter Property="BorderBrush" Value="{StaticResource ForegroundColour60}" />
+        <Setter Property="Foreground" Value="{StaticResource ForegroundColour90}" />
     </Style>
 
     <Style TargetType="RichTextBox">
@@ -149,7 +150,7 @@
                         <Border
                             Name="Border"
                             Margin="2,0,2,0"
-                            Background="{StaticResource BackgroundColour14}"
+                            Background="Transparent"
                             BorderBrush="{StaticResource ForegroundColour80}"
                             BorderThickness="0"
                             CornerRadius="0"
@@ -167,9 +168,9 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Panel.ZIndex" Value="100" />
                             <Setter TargetName="Border" Property="Opacity" Value="1" />
-                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BackgroundColour30}" />
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BackgroundColour20}" />
                             <Setter TargetName="Border" Property="CornerRadius" Value="0" />
-                            <Setter TargetName="Border" Property="BorderThickness" Value="0,0,0,3" />
+                            <Setter TargetName="Border" Property="BorderThickness" Value="0,0,0,2" />
                             <Setter Property="Background" Value="{StaticResource BackgroundColour30}" />
                             <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
                         </Trigger>
@@ -250,15 +251,16 @@
         <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
     </Style>
     <Style TargetType="ListViewItem">
+        <Setter Property="Margin" Value="3" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListViewItem}">
                     <Border
                         x:Name="ButtonBackground"
-                        Background="{StaticResource BackgroundColour14}"
+                        Background="{StaticResource BackgroundColour14a}"
                         BorderBrush="{StaticResource BackgroundColour30}"
                         BorderThickness="1">
-                        <ContentPresenter Margin="1,1,1,1" />
+                        <ContentPresenter Margin="0" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -628,6 +630,161 @@
         </Setter>
     </Style>
 
+    <Style x:Key="D2StyleTagListButton" TargetType="ToggleButton">
+        <Style.Resources />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid Background="Transparent" Cursor="Hand">
+                        <Border
+                            x:Name="MainOverlay"
+                            Panel.ZIndex="-1"
+                            Background="Transparent">
+                            <ContentPresenter Margin="1" />
+                        </Border>
+                        <Border
+                            x:Name="Main"
+                            Background="Transparent"
+                            BorderBrush="#40FFFFFF"
+                            BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}">
+                            <ContentPresenter Margin="0" />
+                        </Border>
+                        <Border
+                            x:Name="outerBorder"
+                            Margin="-6"
+                            BorderBrush="#D9FFFFFF"
+                            BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}"
+                            IsHitTestVisible="False"
+                            Opacity="0" />
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="Transparent"
+                                            Duration="0:0:0.1" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="#40FFFFFF"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.15" />
+                                        <ThicknessAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-6"
+                                            Duration="0:0:0.15">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="3"
+                                                    EasingMode="EaseOut" />
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="MouseOver">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="#90D6D6D6"
+                                            Duration="0:0:0.1" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="#DEDEDE"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.2" />
+                                        <ThicknessAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-3"
+                                            Duration="0:0:0.1">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="4"
+                                                    EasingMode="EaseOut" />
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="#90AAAAAA"
+                                            Duration="0:0:0.05" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="White"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            AutoReverse="True"
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.15" />
+                                        <ThicknessAnimation
+                                            BeginTime="0:0:0.075"
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Margin"
+                                            To="-3"
+                                            Duration="0:0:0" />
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="Checked">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="MainOverlay"
+                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                            To="#90909090"
+                                            Duration="0:0:0.05" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="Main"
+                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
+                                            To="#DEDEDE"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.Setters>
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Trigger.Setters>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
         <Grid>

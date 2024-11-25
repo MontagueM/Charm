@@ -50,10 +50,12 @@
         </Grid.ColumnDefinitions>
 
         <Grid
+            x:Name="SpinnerContainer"
             Grid.Column="0"
             Grid.ColumnSpan="2"
             Background="Transparent"
-            Opacity="1">
+            Opacity="1"
+            Visibility="Hidden">
             <Border
                 x:Name="Spinner"
                 Background="Transparent"

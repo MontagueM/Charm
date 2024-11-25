@@ -67,6 +67,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                    FontSize="18"
                     Text="LOADING">
                     <TextBlock.Effect>
                         <DropShadowEffect

@@ -226,6 +226,9 @@ public partial class MusicPlayerControl : UserControl
 
     private void ProgressBar_OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
     {
+        if (_sound is null)
+            return;
+
         _prevPositionValue = 0;
         var duration = _wem == null ? _sound.GetDuration() : _wem.GetDuration();
         var s = sender as Slider;
@@ -244,6 +247,9 @@ public partial class MusicPlayerControl : UserControl
 
     private void ProgressBar_OnDragCompleted(object sender, DragCompletedEventArgs e)
     {
+        if (_sound is null)
+            return;
+
         _prevPositionValue = 0;
         var duration = _wem == null ? _sound.GetDuration() : _wem.GetDuration();
         var s = sender as Slider;

@@ -40,6 +40,15 @@
                 Style="{StaticResource MaterialDesignCheckBox}">
                 Grid
             </CheckBox>
+            <CheckBox
+                x:Name="InfoCheckbox"
+                Margin="10,0,10,0"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                IsChecked="False"
+                Style="{StaticResource MaterialDesignCheckBox}">
+                Render Details
+            </CheckBox>
             <ComboBox
                 x:Name="LodCombobox"
                 Margin="10,0,10,0"
@@ -79,19 +88,16 @@
             InfoBackground="{StaticResource BackgroundColour14}"
             InfoForeground="{StaticResource ForegroundColour75}"
             IsShadowMappingEnabled="False"
-            ShowCoordinateSystem="False"
-            ShowFrameRate="True"
-            ShowTriangleCountInfo="False"
+            ShowCameraInfo="{Binding IsChecked, ElementName=InfoCheckbox}"
+            ShowCoordinateSystem="{Binding IsChecked, ElementName=InfoCheckbox}"
+            ShowFrameDetails="{Binding IsChecked, ElementName=InfoCheckbox}"
+            ShowFrameRate="{Binding IsChecked, ElementName=InfoCheckbox}"
             ShowViewCube="False"
             SubTitle="{Binding SubTitle}"
             TextBrush="{StaticResource ForegroundColour75}"
             TitleFontFamily="Arial">
             <hx:Viewport3DX.InputBindings>
-                <KeyBinding Key="R" Command="{Binding RotateCommand}" />
-                <KeyBinding Key="W" Command="{Binding ForwardCommand}" />
-                <KeyBinding Key="A" Command="{Binding LeftCommand}" />
-                <KeyBinding Key="S" Command="{Binding BackCommand}" />
-                <KeyBinding Key="D" Command="{Binding RightCommand}" />
+                <KeyBinding Key="R" Command="{Binding ResetCameraTransforms}" />
             </hx:Viewport3DX.InputBindings>
             <hx:AmbientLight3D Color="#ffffffff" />
             <hx:Element3DPresenter Content="{Binding ModelGroup}" />

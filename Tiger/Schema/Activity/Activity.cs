@@ -21,6 +21,7 @@ namespace Tiger.Schema.Activity
     public interface IActivity : ISchema
     {
         public FileHash FileHash { get; }
+        public string GetDestinationName();
         public IEnumerable<Bubble> EnumerateBubbles();
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null);
     }
@@ -41,6 +42,11 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
 
         public Activity(FileHash hash) : base(hash)
         {
+        }
+
+        public string GetDestinationName()
+        {
+            return "";
         }
 
         public IEnumerable<Bubble> EnumerateBubbles()
@@ -126,6 +132,11 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
 
         public Activity(FileHash hash) : base(hash)
         {
+        }
+
+        public string GetDestinationName()
+        {
+            return "";
         }
 
         public IEnumerable<Bubble> EnumerateBubbles()
@@ -236,6 +247,11 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
         {
         }
 
+        public string GetDestinationName()
+        {
+            return GlobalStrings.Get().GetString(new StringHash(_tag.LocationName.Hash32));
+        }
+
         public IEnumerable<Bubble> EnumerateBubbles()
         {
             foreach (var mapEntry in _tag.Unk50)
@@ -301,23 +317,17 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
                     {
                         case D2Class_D8928080:
                             var tag = (D2Class_D8928080)resourceValue;
-                            if (tag.Unk84 is not null)
+                            if (tag.Unk84 is not null && tag.Unk84.TagData.DataEntries.Count > 0)
                             {
-                                if (tag.Unk84.TagData.DataEntries.Count > 0)
-                                {
-                                    items.Add(tag.Unk84.Hash);
-                                }
+                                items.Add(tag.Unk84.Hash);
                             }
                             break;
 
                         case D2Class_EF8C8080:
                             var tag2 = (D2Class_EF8C8080)resourceValue;
-                            if (tag2.Unk58 is not null)
+                            if (tag2.Unk58 is not null && tag2.Unk58.TagData.DataEntries.Count > 0)
                             {
-                                if (tag2.Unk58.TagData.DataEntries.Count > 0)
-                                {
-                                    items.Add(tag2.Unk58.Hash);
-                                }
+                                items.Add(tag2.Unk58.Hash);
                             }
                             break;
                     }

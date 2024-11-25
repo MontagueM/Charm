@@ -4,8 +4,6 @@ namespace Tiger.Schema.Entity;
 
 public class Entity : Tag<SEntity>
 {
-    public List<EntityResource> Resources = new();
-
     // Entity features
     public EntitySkeleton? Skeleton { get; set; }
     public EntityModel? Model { get; private set; }

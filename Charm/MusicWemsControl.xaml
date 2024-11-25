@@ -11,59 +11,70 @@
     <UserControl.Resources>
         <ControlTemplate x:Key="WemTemplate">
             <Button
-                Width="880"
-                Height="70"
-                Margin="0,5,0,5"
-                Click="Play_OnClick">
-                <Grid>
+                Height="90"
+                Margin="5"
+                Click="Play_OnClick"
+                Style="{StaticResource D2StyleButton}">
+                <Grid Background="Transparent">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="60*" />
-                        <RowDefinition Height="40*" />
+                        <RowDefinition Height="80*" />
+                        <RowDefinition Height="30*" />
                     </Grid.RowDefinitions>
                     <Border
-                        Grid.RowSpan="3"
+                        Grid.RowSpan="2"
                         Panel.ZIndex="1"
                         BorderBrush="{StaticResource BackgroundColour30}"
                         BorderThickness="1" />
                     <TextBlock
                         Grid.Row="0"
-                        Margin="10,0,0,0"
+                        Margin="5,5,0,0"
                         HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Text="{Binding Name}" />
+                        VerticalAlignment="Top"
+                        FontSize="16"
+                        Text="{Binding Name}"
+                        TextWrapping="WrapWithOverflow" />
                     <TextBlock
                         Grid.Row="1"
-                        Margin="10,0,0,0"
+                        Margin="5,0,0,5"
                         HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
+                        FontSize="14"
                         Foreground="{StaticResource ForegroundColour75}"
                         Text="{Binding Duration}" />
                     <TextBlock
-                        Grid.Row="0"
-                        Margin="0,0,10,0"
+                        Grid.Row="1"
+                        Margin="0,0,5,5"
                         HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
+                        FontSize="14"
                         Foreground="{StaticResource ForegroundColour75}"
                         Text="{Binding Hash}" />
                 </Grid>
             </Button>
         </ControlTemplate>
     </UserControl.Resources>
-    <Grid>
+
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="5*" />
             <RowDefinition Height="85*" />
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
+
         <TextBlock
             Grid.Row="0"
             HorizontalAlignment="Center"
             FontSize="40"
             Text="WEMs" />
+
         <ListView
             x:Name="WemList"
             Grid.Row="1"
-            Grid.Column="0">
+            Grid.Column="0"
+            Background="Transparent"
+            BorderThickness="0">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -76,6 +87,7 @@
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
         </ListView>
+
         <local:MusicPlayerControl
             x:Name="MusicPlayer"
             Grid.Row="2"

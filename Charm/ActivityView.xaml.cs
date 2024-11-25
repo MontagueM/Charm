@@ -20,12 +20,12 @@ public partial class ActivityView : UserControl
     {
         MainWindow.Progress.SetProgressStages(new List<string>
         {
-            "loading activity tag",
-            "loading static map ui",
-            "loading map resources ui",
-            "loading dialogue ui",
-            "loading directive ui",
-            "loading music ui",
+            "Loading Activity Tag",
+            "Loading Static Map UI",
+            "Loading Map Resources UI",
+            "Loading Dialogue UI",
+            "Loading Directive UI",
+            "Loading Music UI",
         });
         MapControl.Visibility = Visibility.Hidden;
         _activity = null;
