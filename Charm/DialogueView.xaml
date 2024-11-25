@@ -11,11 +11,11 @@
     <UserControl.Resources>
         <ControlTemplate x:Key="DialogueTemplate">
             <Button
-                Width="880"
-                Height="70"
-                Margin="0,5,0,5"
-                Click="PlayWem_OnClick">
-                <Grid>
+                Height="90"
+                Margin="5"
+                Click="PlayWem_OnClick"
+                Style="{StaticResource D2StyleButton}">
+                <Grid Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="80*" />
                         <RowDefinition Height="30*" />
@@ -29,6 +29,8 @@
                         Grid.Row="0"
                         Margin="5,5,0,0"
                         HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        FontSize="16"
                         Text="{Binding Voiceline}"
                         TextWrapping="WrapWithOverflow" />
                     <TextBlock
@@ -37,7 +39,7 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Bottom"
                         FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
-                        FontSize="12"
+                        FontSize="14"
                         Foreground="{StaticResource ForegroundColour75}"
                         Text="{Binding Narrator}" />
                     <TextBlock
@@ -46,7 +48,7 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
                         FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
-                        FontSize="8"
+                        FontSize="12"
                         Foreground="{StaticResource ForegroundColour75}"
                         Text="{Binding RecursionDepth}" />
                     <TextBlock
@@ -55,19 +57,25 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
                         FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
-                        FontSize="12"
+                        FontSize="14"
                         Foreground="{StaticResource ForegroundColour75}"
                         Text="{Binding Duration}" />
                 </Grid>
             </Button>
         </ControlTemplate>
     </UserControl.Resources>
-    <Grid>
+
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="90*" />
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
-        <ListView x:Name="ListView" Grid.Row="0">
+
+        <ListView
+            x:Name="ListView"
+            Grid.Row="0"
+            Background="Transparent"
+            BorderThickness="0">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="OverridesDefaultStyle" Value="True" />

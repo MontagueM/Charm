@@ -8,8 +8,7 @@
     d:DesignHeight="1080"
     d:DesignWidth="1920"
     mc:Ignorable="d">
-    <Grid>
-
+    <Grid Background="Transparent">
         <TabControl x:Name="MusicTabControl">
             <TabItem Header="WEMS">
                 <local:MusicWemsControl x:Name="WemsControl" />

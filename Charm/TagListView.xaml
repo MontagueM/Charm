@@ -10,7 +10,7 @@
     Loaded="OnControlLoaded"
     PreviewKeyDown="Window_PreviewKeyDown"
     mc:Ignorable="d">
-    <Grid>
+    <Grid Background="Transparent">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="15*" />
             <ColumnDefinition Width="70*" />
@@ -76,22 +76,31 @@
                 Unchecked="ShowNamedCheckbox_OnUnchecked" />
         </StackPanel>
 
+        <Border
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Grid.ColumnSpan="3"
+            BorderBrush="{StaticResource BackgroundColour20}"
+            BorderThickness="0,0,2,0" />
 
         <ListView
             x:Name="TagList"
             Grid.Row="1"
             Grid.RowSpan="2"
             Grid.ColumnSpan="3"
+            Background="Transparent"
+            BorderThickness="0,0,0,0"
             SelectionChanged="TagList_OnSelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ToggleButton
                         x:Name="btn"
-                        Height="60"
+                        Height="70"
                         HorizontalContentAlignment="Stretch"
                         Click="TagItem_OnClick"
+                        Style="{StaticResource D2StyleTagListButton}"
                         Tag="{Binding Hash}">
-                        <Grid Background="Transparent">
+                        <Grid Margin="5,5,5,5" Background="Transparent">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="12*" />
                                 <ColumnDefinition Width="68*" />
@@ -124,7 +133,7 @@
                                 Grid.ColumnSpan="2"
                                 VerticalAlignment="Bottom"
                                 FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
-                                FontSize="12"
+                                FontSize="14"
                                 Foreground="{StaticResource ForegroundColour75}"
                                 Text="{Binding Subname}" />
                             <TextBlock
@@ -132,9 +141,10 @@
                                 Grid.Column="2"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Top"
-                                FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                 FontSize="14"
                                 Foreground="{StaticResource ForegroundColour75}"
+                                Opacity=".75"
                                 Text="{Binding Type}"
                                 TextAlignment="Right" />
                         </Grid>

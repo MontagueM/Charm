@@ -1,5 +1,5 @@
-﻿using System;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
+using Arithmic;
 using Tiger;
 using Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
 
@@ -53,7 +53,8 @@ public partial class MusicView : UserControl
         {
             if (resource is not D2Class_F7458080)
             {
-                throw new NotImplementedException();
+                //throw new NotImplementedException();
+                Log.Error($"Music Resource F7458080 Not Implemented");
             }
         }
     }

@@ -49,6 +49,7 @@ public partial class ConfigView : UserControl
             _spinner.ScreenHeight = (float)ActualHeight;
             _spinner.Scale = new(4, 4);
             _spinner.Offset = new(-3.6, -3.3);
+            SpinnerContainer.Visibility = Visibility.Visible;
         }
     }
 

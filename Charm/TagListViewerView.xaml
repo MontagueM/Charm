@@ -7,12 +7,45 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="1080"
     d:DesignWidth="1920"
+    Loaded="OnControlLoaded"
     mc:Ignorable="d">
-    <Grid>
+
+    <Grid Style="{StaticResource GradientBackground}">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*" />
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
+
+        <Grid
+            x:Name="SpinnerContainer"
+            Grid.ColumnSpan="2"
+            Background="#AE5C5C5C"
+            Opacity="0.75"
+            Visibility="Hidden">
+            <Grid.Effect>
+                <BlurEffect Radius="5" />
+            </Grid.Effect>
+            <Border
+                x:Name="Spinner"
+                Background="Transparent"
+                BorderThickness="0"
+                Opacity="1" />
+        </Grid>
+
         <local:TagListView x:Name="TagList" Grid.Column="0" />
         <local:TagView x:Name="TagView" Grid.Column="1" />
     </Grid>

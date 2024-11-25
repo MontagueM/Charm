@@ -11,7 +11,7 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <ControlTemplate x:Key="MaterialViewTemplate">
-            <Grid Margin="5,0,0,10">
+            <Grid Margin="5,0,0,10" Background="{StaticResource BackgroundColour14a}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30*" />
                     <RowDefinition Height="30*" />
@@ -109,7 +109,7 @@
 
         <ControlTemplate x:Key="CBufferViewTemplate">
             <Button Click="LoadCBufferData">
-                <Grid Margin="0,0,0,0">
+                <Grid Margin="0,0,0,0" Background="Transparent">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="80*" />
                         <ColumnDefinition Width="auto" />
@@ -138,7 +138,7 @@
         </ControlTemplate>
 
         <ControlTemplate x:Key="CBufferDataViewTemplate">
-            <Grid Margin="0,0,0,0">
+            <Grid Margin="0,0,0,0" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="5*" />
                     <ColumnDefinition Width="50*" />
@@ -193,6 +193,7 @@
             <UniformGrid
                 Grid.Row="1"
                 HorizontalAlignment="Stretch"
+                Background="Transparent"
                 Columns="4"
                 Rows="0">
                 <Border
@@ -253,7 +254,7 @@
         </ControlTemplate>
 
         <ControlTemplate x:Key="ScopeViewTemplate">
-            <Grid Margin="0,0,0,0">
+            <Grid Margin="0,0,0,0" Background="Transparent">
                 <Border
                     Panel.ZIndex="1"
                     BorderBrush="{StaticResource BackgroundColour30}"
@@ -272,13 +273,43 @@
 
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Style="{StaticResource GradientBackground}">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="145*" />
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="1">
+        <Grid
+            x:Name="SpinnerContainer"
+            Grid.ColumnSpan="2"
+            Background="#AE5C5C5C"
+            Opacity="0.75"
+            Visibility="Hidden">
+            <Grid.Effect>
+                <BlurEffect Radius="5" />
+            </Grid.Effect>
+            <Border
+                x:Name="Spinner"
+                Background="Transparent"
+                BorderThickness="0"
+                Opacity="1" />
+        </Grid>
+
+        <Grid Grid.Column="1" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition Height="21*" />
@@ -300,7 +331,10 @@
                 Text="Textures"
                 TextWrapping="Wrap" />
 
-            <ListView x:Name="TextureListView" Grid.Row="1">
+            <ListView
+                x:Name="TextureListView"
+                Grid.Row="1"
+                Background="Transparent">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -334,19 +368,19 @@
 
         </Grid>
 
-        <Grid Grid.Column="0">
+        <Grid Grid.Column="0" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="80*" />
                 <RowDefinition Height="100*" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Column="0">
+            <Grid Grid.Column="0" Background="Transparent">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100*" />
                     <ColumnDefinition Width="100*" />
                 </Grid.ColumnDefinitions>
 
-                <Grid Grid.Column="0">
+                <Grid Grid.Column="0" Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10*" />
                         <RowDefinition Height="100*" />
@@ -385,7 +419,7 @@
                     </ScrollViewer>
                 </Grid>
 
-                <Grid Grid.Column="1">
+                <Grid Grid.Column="1" Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10*" />
                         <RowDefinition Height="100*" />
@@ -427,7 +461,10 @@
 
             </Grid>
 
-            <Grid Grid.Row="1" Grid.Column="0">
+            <Grid
+                Grid.Row="1"
+                Grid.Column="0"
+                Background="Transparent">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="40*" />
@@ -439,19 +476,19 @@
                     <RowDefinition Height="20*" />
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Column="0">
+                <Grid Grid.Column="0" Background="Transparent">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="25*" />
                         <ColumnDefinition Width="55*" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0">
+                    <Grid Grid.Column="0" Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="10*" />
                             <RowDefinition Height="10*" />
                         </Grid.RowDefinitions>
 
-                        <Grid Grid.Row="0">
+                        <Grid Grid.Row="0" Background="Transparent">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="10*" />
                                 <RowDefinition Height="90*" />
@@ -466,7 +503,10 @@
                                 Text="Pixel Shader CBuffers"
                                 TextWrapping="Wrap" />
 
-                            <ListView x:Name="PS_CBufferList" Grid.Row="1">
+                            <ListView
+                                x:Name="PS_CBufferList"
+                                Grid.Row="1"
+                                Background="Transparent">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -482,7 +522,7 @@
                             </ListView>
                         </Grid>
 
-                        <Grid Grid.Row="1">
+                        <Grid Grid.Row="1" Background="Transparent">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="10*" />
                                 <RowDefinition Height="90*" />
@@ -497,7 +537,10 @@
                                 Text="Vertex Shader CBuffers"
                                 TextWrapping="Wrap" />
 
-                            <ListView x:Name="VS_CBufferList" Grid.Row="1">
+                            <ListView
+                                x:Name="VS_CBufferList"
+                                Grid.Row="1"
+                                Background="Transparent">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -515,7 +558,7 @@
 
                     </Grid>
 
-                    <Grid Grid.Column="1">
+                    <Grid Grid.Column="1" Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition Height="19*" />
@@ -525,7 +568,7 @@
                             Grid.RowSpan="2"
                             Panel.ZIndex="0"
                             BorderBrush="{StaticResource BackgroundColour30}"
-                            BorderThickness="1" />
+                            BorderThickness="0" />
 
                         <TextBlock
                             HorizontalAlignment="Center"
@@ -534,7 +577,10 @@
                             FontSize="16"
                             Text="CBuffer Values" />
 
-                        <ListView x:Name="CBufferDataList" Grid.Row="1">
+                        <ListView
+                            x:Name="CBufferDataList"
+                            Grid.Row="1"
+                            Background="Transparent">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -551,14 +597,14 @@
                     </Grid>
                 </Grid>
 
-                <Grid Grid.Column="1">
+                <Grid Grid.Column="1" Background="Transparent">
                     <Border
                         Grid.RowSpan="2"
                         Panel.ZIndex="0"
                         BorderBrush="{StaticResource BackgroundColour30}"
-                        BorderThickness="1" />
+                        BorderThickness="0" />
 
-                    <Grid Grid.Row="1">
+                    <Grid Grid.Row="1" Background="Transparent">
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition Height="19*" />
@@ -572,8 +618,8 @@
                             FontSize="16"
                             Text="Used Scopes" />
 
-                        <Grid Grid.Row="1">
-                            <Grid Grid.Column="0">
+                        <Grid Grid.Row="1" Background="Transparent">
+                            <Grid Grid.Column="0" Background="Transparent">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="36*" />
                                 </Grid.RowDefinitions>
@@ -581,7 +627,8 @@
                                 <ListView
                                     x:Name="UsedScopesList"
                                     Grid.Row="1"
-                                    d:ItemsSource="{d:SampleData ItemCount=5}">
+                                    d:ItemsSource="{d:SampleData ItemCount=5}"
+                                    Background="Transparent">
                                     <ListView.ItemContainerStyle>
                                         <Style TargetType="ListViewItem">
                                             <Setter Property="OverridesDefaultStyle" Value="True" />
@@ -604,7 +651,8 @@
                     Grid.Row="1"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
-                    Margin="5,0,0,0">
+                    Margin="5,0,0,0"
+                    Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
@@ -622,6 +670,7 @@
                         Grid.Row="1"
                         Margin="0,0,0,0"
                         HorizontalAlignment="Stretch"
+                        Background="Transparent"
                         Columns="4"
                         Rows="0">
                         <Border
@@ -686,7 +735,8 @@
                     <ListView
                         x:Name="SamplerDataList"
                         Grid.Row="2"
-                        d:ItemsSource="{d:SampleData ItemCount=3}">
+                        d:ItemsSource="{d:SampleData ItemCount=3}"
+                        Background="Transparent">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="OverridesDefaultStyle" Value="True" />

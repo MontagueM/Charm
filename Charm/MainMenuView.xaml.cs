@@ -41,6 +41,29 @@ public partial class MainMenuView : UserControl
         };
     }
 
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        _mainWindow = Window.GetWindow(this) as MainWindow;
+        GameVersion.Text = $"Game Version: {_mainWindow.GameInfo?.FileVersion}";
+        MouseMove += UserControl_MouseMove;
+
+        ToolTip = new();
+        Panel.SetZIndex(ToolTip, 50);
+        MainContainer.Children.Add(ToolTip);
+
+        if (ConfigSubsystem.Get().GetAnimatedBackground())
+        {
+            SpinnerShader _spinner = new SpinnerShader();
+            Spinner.Effect = _spinner;
+            SizeChanged += _spinner.OnSizeChanged;
+            _spinner.ScreenWidth = (float)ActualWidth;
+            _spinner.ScreenHeight = (float)ActualHeight;
+            _spinner.Scale = new(2, 2);
+            _spinner.Offset = new(-1, -1);
+            SpinnerContainer.Visibility = Visibility.Visible;
+        }
+    }
+
     private bool ShowWQButtons(TigerStrategy strategy)
     {
         return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402;
@@ -64,28 +87,6 @@ public partial class MainMenuView : UserControl
     private bool ShowAPIButton(TigerStrategy strategy)
     {
         return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402 || strategy == TigerStrategy.DESTINY1_RISE_OF_IRON;
-    }
-
-    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
-    {
-        _mainWindow = Window.GetWindow(this) as MainWindow;
-        GameVersion.Text = $"Game Version: {_mainWindow.GameInfo?.FileVersion}";
-        MouseMove += UserControl_MouseMove;
-
-        ToolTip = new();
-        Panel.SetZIndex(ToolTip, 50);
-        MainContainer.Children.Add(ToolTip);
-
-        if (ConfigSubsystem.Get().GetAnimatedBackground())
-        {
-            SpinnerShader _spinner = new SpinnerShader();
-            Spinner.Effect = _spinner;
-            SizeChanged += _spinner.OnSizeChanged;
-            _spinner.ScreenWidth = (float)ActualWidth;
-            _spinner.ScreenHeight = (float)ActualHeight;
-            _spinner.Scale = new(2, 2);
-            _spinner.Offset = new(-1, -1);
-        }
     }
 
     private void CategoryButton_MouseEnter(object sender, MouseEventArgs e)

@@ -38,6 +38,21 @@ public partial class ActivityMapEntityView : UserControl
         ExportControl.SetExportInfo(activity.FileHash);
     }
 
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        if (ConfigSubsystem.Get().GetAnimatedBackground())
+        {
+            SpinnerShader _spinner = new SpinnerShader();
+            Spinner.Effect = _spinner;
+            SizeChanged += _spinner.OnSizeChanged;
+            _spinner.ScreenWidth = (float)ActualWidth;
+            _spinner.ScreenHeight = (float)ActualHeight;
+            _spinner.Scale = new(0, 0);
+            _spinner.Offset = new(-1, -1);
+            SpinnerContainer.Visibility = Visibility.Visible;
+        }
+    }
+
     private ObservableCollection<DisplayEntBubble> GetMapList(IActivity activity)
     {
         var maps = new ObservableCollection<DisplayEntBubble>();
@@ -124,31 +139,38 @@ public partial class ActivityMapEntityView : UserControl
         return maps;
     }
 
-    private void GetBubbleContentsButton_OnClick(object sender, RoutedEventArgs e)
+    private async void GetBubbleContentsButton_OnClick(object sender, RoutedEventArgs e)
     {
-        DisplayEntBubble tagData = (sender as Button).Tag as DisplayEntBubble; //apparently this works..?
+        Dispatcher.Invoke(() => MapControl.Visibility = Visibility.Hidden);
+
+        DisplayEntBubble tagData = (sender as RadioButton).Tag as DisplayEntBubble; //apparently this works..?
         if (tagData.LoadType == DisplayEntBubble.Type.Bubble)
         {
+            MainWindow.Progress.SetProgressStages(new() { $"Loading Resources for {tagData.Name}" });
             FileHash hash = new FileHash(tagData.Hash);
             Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
-            PopulateEntityContainerList(bubbleMaps);
+            await Task.Run(() => PopulateEntityContainerList(bubbleMaps));
         }
         else
         {
+            MainWindow.Progress.SetProgressStages(new() { $"Loading Activity Entities for {tagData.Name}" });
             FileHash hash = new FileHash(tagData.Hash);
             if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
             {
                 FileHash parentHash = new FileHash(tagData.ParentHash);
                 IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(parentHash);
-                PopulateActivityEntityContainerList(activity, hash);
+                await Task.Run(() => PopulateActivityEntityContainerList(activity, hash));
             }
             else
             {
                 IActivity activity = FileResourcer.Get().GetFileInterface<IActivity>(hash);
-                PopulateActivityEntityContainerList(activity);
+                await Task.Run(() => PopulateActivityEntityContainerList(activity));
             }
 
         }
+
+        MainWindow.Progress.CompleteStage();
+        Dispatcher.Invoke(() => MapControl.Visibility = Visibility.Visible);
     }
 
     private void EntityMapPart_OnCheck(object sender, RoutedEventArgs e)
@@ -206,7 +228,7 @@ public partial class ActivityMapEntityView : UserControl
         {
             Name = "Select all"
         });
-        EntityContainerList.ItemsSource = sortedItems;
+        Dispatcher.Invoke(() => EntityContainerList.ItemsSource = sortedItems);
     }
 
     private void PopulateActivityEntityContainerList(IActivity activity, FileHash UnkActivity = null)
@@ -236,7 +258,7 @@ public partial class ActivityMapEntityView : UserControl
         {
             Name = "Select all"
         });
-        EntityContainerList.ItemsSource = sortedItems;
+        Dispatcher.Invoke(() => EntityContainerList.ItemsSource = sortedItems);
     }
 
     private void PopulateEntityList(List<FileHash> dataTables, Dictionary<ulong, ActivityEntity>? worldIDs)
@@ -351,12 +373,6 @@ public partial class ActivityMapEntityView : UserControl
         mapStages.Add("Exporting");
         MainWindow.Progress.SetProgressStages(mapStages);
 
-        //Parallel.ForEach(maps, map =>
-        //{
-        //    ExportFull(map.Key, map.Value);
-        //    MainWindow.Progress.CompleteStage();
-        //});
-
         maps.ToList().ForEach(map =>
         {
             ExportFull(map.Key, map.Value);
@@ -385,11 +401,6 @@ public partial class ActivityMapEntityView : UserControl
 
         Directory.CreateDirectory(savePath);
         ExtractDataTables(dataTables, hash, savePath);
-        //if (_config.GetIndvidualStaticsEnabled())
-        //{
-        //    Directory.CreateDirectory(savePath + "/Entities");
-        //    ExportIndividual(dataTables, hash, savePath);
-        //}
 
         if (_config.GetUnrealInteropEnabled())
         {
@@ -563,63 +574,6 @@ public partial class ActivityMapEntityView : UserControl
         });
     }
 
-    //private static void ExportIndividual(List<FileHash> dataTables, string hash, string savePath)
-    //{
-    //    Parallel.ForEach(dataTables, data =>
-    //    {
-    //        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON && data.GetReferenceHash().Hash32 == 0x808003F6)
-    //        {
-    //            var dataEntries = FileResourcer.Get().GetSchemaTag<SF6038080>(data).TagData.EntityResource.CollapseIntoDataEntry();
-    //            foreach (var entry in dataEntries)
-    //            {
-    //                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-    //                if (entity.HasGeometry())
-    //                {
-    //                    ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
-    //                    dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
-    //                    entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
-    //                }
-    //            }
-    //        }
-    //        else
-    //        {
-    //            var dataTable = FileResourcer.Get().GetSchemaTag<SMapDataTable>(data);
-    //            dataTable.TagData.DataEntries.ForEach(entry =>
-    //            {
-    //                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.GetEntityHash());
-    //                if (entity.HasGeometry())
-    //                {
-    //                    ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
-    //                    dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
-    //                    entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
-    //                }
-    //                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
-    //                {
-    //                    foreach (var element in skyResource.SkyEntities.TagData.Entries)
-    //                    {
-    //                        if (element.Model.TagData.Model is null)
-    //                            continue;
-
-    //                        ExporterScene skyScene = Exporter.Get().CreateScene(element.Model.TagData.Model.Hash, ExportType.EntityInMap);
-    //                        skyScene.AddModel(element.Model.TagData.Model);
-
-    //                        if (_config.GetS2VMDLExportEnabled())
-    //                        {
-    //                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Model.TagData.Model.Hash, element.Model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null));
-    //                        }
-    //                    }
-    //                }
-    //                if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
-    //                {
-    //                    ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-    //                    terrainArrangement.Terrain.Load();
-    //                    terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
-    //                }
-    //            });
-    //        }
-    //    });
-    //}
-
     private async void EntityMapView_OnClick(object sender, RoutedEventArgs e)
     {
         var s = sender as Button;
@@ -631,7 +585,7 @@ public partial class ActivityMapEntityView : UserControl
         if (dc.Name == "Select all")
         {
             var items = EntityContainerList.Items.Cast<DisplayEntityMap>().Where(x => x.Name != "Select all");
-            List<string> mapStages = items.Select(x => $"loading to ui: {x.Hash}").ToList();
+            List<string> mapStages = items.Select(x => $"Loading to UI: {x.Hash}").ToList();
             if (mapStages.Count == 0)
             {
                 Log.Error("No entries available for viewing.");

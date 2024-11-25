@@ -7,39 +7,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="1000"
     d:DesignWidth="1900"
+    Loaded="OnControlLoaded"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <ControlTemplate x:Key="bubbleTemplate">
-            <Grid Height="50">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100*" />
-                    <ColumnDefinition Width="100*" />
-                </Grid.ColumnDefinitions>
-                <Border
-                    Grid.RowSpan="2"
-                    Grid.ColumnSpan="2"
-                    Panel.ZIndex="1"
-                    BorderBrush="{StaticResource BackgroundColour30}"
-                    BorderThickness="1" />
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Margin="5,2,0,0"
-                    HorizontalAlignment="Left"
-                    Text="{Binding Name}" />
-                <Button
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Click="GetBubbleContentsButton_OnClick"
-                    Content="View contents"
-                    Style="{StaticResource MaterialDesignPaperDarkButton}"
-                    Tag="{Binding Hash}" />
-            </Grid>
-        </ControlTemplate>
-
-        <ControlTemplate x:Key="staticTemplate">
-            <Grid Height="25" Margin="0,1,0,1">
+        <ControlTemplate x:Key="StaticTemplate">
+            <Grid
+                Height="40"
+                Margin="5,3,5,3"
+                Background="{StaticResource BackgroundColour14a}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80*" />
                     <ColumnDefinition Width="20*" />
@@ -51,93 +27,163 @@
                     BorderThickness="1" />
                 <CheckBox
                     Grid.Column="0"
+                    Margin="5"
                     HorizontalAlignment="Left"
                     HorizontalContentAlignment="Left"
                     IsChecked="{Binding Selected}"
                     Style="{StaticResource MaterialDesignCheckBox}"
                     Tag="{Binding Hash}">
-                    <TextBlock Text="{Binding Name}" TextAlignment="Center" />
+                    <TextBlock
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="16"
+                        Text="{Binding Name}"
+                        TextAlignment="Center"
+                        TextWrapping="WrapWithOverflow" />
                 </CheckBox>
                 <Button
                     Grid.Column="1"
+                    Height="auto"
+                    Margin="2"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Click="StaticMap_OnClick"
-                    Style="{StaticResource MaterialDesignPaperDarkButton}">
-                    <TextBlock Text="View" TextAlignment="Center" />
-                </Button>
-            </Grid>
-        </ControlTemplate>
-
-        <ControlTemplate x:Key="dynamicTemplate">
-            <Grid Height="20" Margin="0,1,0,1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="80*" />
-                    <ColumnDefinition Width="20*" />
-                </Grid.ColumnDefinitions>
-                <Border
-                    Grid.ColumnSpan="2"
-                    Panel.ZIndex="1"
-                    BorderBrush="{StaticResource BackgroundColour30}"
-                    BorderThickness="1" />
-                <CheckBox
-                    Grid.Column="0"
-                    HorizontalAlignment="Left"
-                    HorizontalContentAlignment="Left"
-                    IsChecked="{Binding Selected}"
-                    Style="{StaticResource MaterialDesignCheckBox}"
-                    Tag="{Binding Hash}">
-                    <TextBlock Text="{Binding Name}" TextAlignment="Center" />
-                </CheckBox>
-                <Button
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Style="{StaticResource MaterialDesignPaperDarkButton}">
-                    <TextBlock Text="Export" TextAlignment="Center" />
+                    Style="{StaticResource D2StyleButton}">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="16"
+                        Text="View"
+                        TextAlignment="Center"
+                        TextWrapping="WrapWithOverflow" />
                 </Button>
             </Grid>
         </ControlTemplate>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid x:Name="MainContainer" Style="{StaticResource GradientBackground}">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="100*" />
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0">
+
+        <Grid
+            x:Name="SpinnerContainer"
+            Grid.ColumnSpan="2"
+            Background="#AE5C5C5C"
+            Opacity="0.75"
+            Visibility="Hidden">
+            <Grid.Effect>
+                <BlurEffect Radius="5" />
+            </Grid.Effect>
+            <Border
+                x:Name="Spinner"
+                Background="Transparent"
+                BorderThickness="0"
+                Opacity="1" />
+        </Grid>
+
+        <Grid Grid.Column="0" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="45*" />
                 <RowDefinition Height="50*" />
                 <RowDefinition Height="5*" />
             </Grid.RowDefinitions>
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100*" />
                 <ColumnDefinition Width="100*" />
             </Grid.ColumnDefinitions>
+            <Border
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                Grid.ColumnSpan="3"
+                BorderBrush="{StaticResource BackgroundColour20}"
+                BorderThickness="0,0,2,0" />
+
             <ListView
                 x:Name="MapList"
                 Grid.Row="0"
-                Grid.ColumnSpan="2" d:ItemsSource="{d:SampleData ItemCount=5}">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="OverridesDefaultStyle" Value="True" />
-                        <Setter Property="Template" Value="{StaticResource bubbleTemplate}" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Vertical" />
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
+                Grid.RowSpan="1"
+                Grid.ColumnSpan="3"
+                Background="Transparent"
+                BorderThickness="0,0,0,2">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton
+                            x:Name="btn"
+                            Height="60"
+                            HorizontalContentAlignment="Stretch"
+                            Checked="GetBubbleContentsButton_OnClick"
+                            GroupName="Bubbles"
+                            Style="{StaticResource D2StyleTagListButton}"
+                            Tag="{Binding Hash}">
+                            <Grid Margin="5,2,5,2" Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="12*" />
+                                    <ColumnDefinition Width="68*" />
+                                    <ColumnDefinition Width="20*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontSize="16"
+                                    Foreground="{StaticResource ForegroundColour70}"
+                                    Text="{Binding Hash}" />
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.RowSpan="3"
+                                    Grid.Column="1"
+                                    Grid.ColumnSpan="2"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="18"
+                                    Text="{Binding Name}"
+                                    TextWrapping="WrapWithOverflow" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="14"
+                                    Foreground="{StaticResource ForegroundColour75}"
+                                    Opacity=".75"
+                                    Text="Bubble"
+                                    TextAlignment="Right" />
+                            </Grid>
+                        </RadioButton>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
             </ListView>
+
             <ListView
                 x:Name="StaticList"
                 Grid.Row="1"
-                Grid.Column="0" d:ItemsSource="{d:SampleData ItemCount=5}">
+                Grid.Column="1"
+                d:ItemsSource="{d:SampleData ItemCount=5}"
+                Background="Transparent"
+                BorderThickness="0,0,2,0">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="OverridesDefaultStyle" Value="True" />
-                        <Setter Property="Template" Value="{StaticResource staticTemplate}" />
+                        <Setter Property="Template" Value="{StaticResource StaticTemplate}" />
                     </Style>
                 </ListView.ItemContainerStyle>
                 <ListView.ItemsPanel>
@@ -146,24 +192,117 @@
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
             </ListView>
+
+            <Border
+                Grid.Row="1"
+                Grid.RowSpan="2"
+                Grid.Column="0"
+                BorderBrush="{StaticResource BackgroundColour20}"
+                BorderThickness="0,0,2,0" />
+
             <local:ExportControl
                 x:Name="ExportControl"
                 Grid.Row="2"
-                Grid.ColumnSpan="2" />
-            <TextBlock
-                Grid.Row="1"
                 Grid.Column="1"
-                Margin="10,10,10,0"
-                FontSize="20"
-                TextWrapping="Wrap">
-                <Run Text="Note: This section is for map statics only." />
-                <LineBreak />
-                <LineBreak />
-                <Run Text="Exporting Terrain or Entities will need to be done through the" />
-                <Run FontWeight="Bold" Text="'Map Resources'" />
-                <Run Text="tab." />
-            </TextBlock>
+                Grid.ColumnSpan="1"
+                MouseEnter="ExportButton_MouseEnter"
+                MouseLeave="ExportButton_MouseLeave"
+                Tag="EXPORT SELECTED:Export the selected static map parts" />
+
+
+            <StackPanel
+                x:Name="QuickControls"
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="15"
+                Orientation="Vertical"
+                Visibility="Hidden">
+
+                <Border Style="{StaticResource ColumnHeaderBorder}">
+                    <Grid Style="{StaticResource ColumnHeader}">
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="24"
+                            Text="QUICK EXPORT" />
+                    </Grid>
+                </Border>
+
+                <Button
+                    Margin="0,0,0,15"
+                    Click="QuickControl_OnClick"
+                    DataContext="0"
+                    MouseEnter="ExportButton_MouseEnter"
+                    MouseLeave="ExportButton_MouseLeave"
+                    Style="{DynamicResource D2StyleButton}"
+                    Tag="EXPORT ALL:Export everything from this map. &#x0a;(Static Map and Resources only)">
+                    <Border Background="#BB181818">
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="24"
+                            Text="EXPORT ALL"
+                            TextWrapping="WrapWithOverflow" />
+                    </Border>
+                </Button>
+
+                <Button
+                    Margin="0,0,0,15"
+                    Click="QuickControl_OnClick"
+                    DataContext="1"
+                    MouseEnter="ExportButton_MouseEnter"
+                    MouseLeave="ExportButton_MouseLeave"
+                    Style="{DynamicResource D2StyleButton}"
+                    Tag="EXPORT STATIC MAP:Export only the static parts of this map">
+                    <Border Background="#BB181818">
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="24"
+                            Text="EXPORT STATIC MAP"
+                            TextWrapping="WrapWithOverflow" />
+                    </Border>
+                </Button>
+
+                <Button
+                    Margin="0,0,0,15"
+                    Click="QuickControl_OnClick"
+                    DataContext="2"
+                    MouseEnter="ExportButton_MouseEnter"
+                    MouseLeave="ExportButton_MouseLeave"
+                    Style="{DynamicResource D2StyleButton}"
+                    Tag="EXPORT RESOURCES:Export this maps resources. These include...&#x0a; Entities&#x0a; Terrain&#x0a; Sky Objects&#x0a; Decorators (foliage, small rocks, etc)&#x0a; Lights&#x0a; Decal and Cubemap information">
+                    <Border Background="#BB181818">
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="24"
+                            Text="EXPORT MAP RESOURCES"
+                            TextWrapping="WrapWithOverflow" />
+                    </Border>
+                </Button>
+
+                <Button
+                    Margin="0,0,0,15"
+                    Click="QuickControl_OnClick"
+                    DataContext="3"
+                    MouseEnter="ExportButton_MouseEnter"
+                    MouseLeave="ExportButton_MouseLeave"
+                    Style="{DynamicResource D2StyleButton}"
+                    Tag="EXPORT ACTIVITY ENTITIES:Export entities specific to the current activity and its ambient version.&#x0a;These entities aren't included in the base map.">
+                    <Border Background="#BB181818">
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="24"
+                            Text="EXPORT ACTIVITY ENTITIES"
+                            TextWrapping="WrapWithOverflow" />
+                    </Border>
+                </Button>
+            </StackPanel>
+
         </Grid>
+
         <local:MapView x:Name="MapControl" Grid.Column="1" />
     </Grid>
 

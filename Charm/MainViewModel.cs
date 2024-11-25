@@ -65,12 +65,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     private Point3D _cameraPosition;
     private Vector3D _cameraLookDirection;
 
-    public RelayCommand RotateCommand { get; set; }
-    public RelayCommand LeftCommand { get; set; }
-    public RelayCommand ForwardCommand { get; set; }
-    public RelayCommand BackCommand { get; set; }
-    public RelayCommand RightCommand { get; set; }
-
+    public RelayCommand ResetCameraTransforms { get; set; }
 
     public PerspectiveCamera Camera { get; set; }
 
@@ -83,7 +78,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         Scene = new HelixToolkitScene(new GroupNode());
         ModelGroup.AddNode(Scene.Root);
 
-        RotateCommand = new RelayCommand(ResetCamera);
+        ResetCameraTransforms = new RelayCommand(ResetCamera);
         // ForwardCommand = new RelayCommand(MoveCameraForward);
 
         Camera = new PerspectiveCamera
@@ -91,7 +86,8 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             Position = new Point3D(0, 0, 5),
             UpDirection = new Vector3D(0, 1, 0),
             LookDirection = new Vector3D(-0, -0, -5),
-            FarPlaneDistance = 100000000,
+            FarPlaneDistance = 1000000,
+            FieldOfView = 60
         };
 
         Grid = LineBuilder.GenerateGrid();
@@ -224,9 +220,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         foreach (var part in parts)
         {
             MeshNode model = new MeshNode();
-            MeshGeometry3D Model = new MeshGeometry3D();
             Matrix[] ModelInstances = new Matrix[part.Translations.Count];
-            PhongMaterial ModelMaterial = new PhongMaterial();
 
             HelixToolkit.SharpDX.Core.MeshGeometry3D mesh = new HelixToolkit.SharpDX.Core.MeshGeometry3D();
             IntCollection triangleIndices = new IntCollection();
@@ -234,6 +228,8 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             Vector3Collection normals = new Vector3Collection();
             Vector2Collection textureCoordinates = new Vector2Collection();
             mesh.SetAsTransient();
+            //Random rand = new();
+
             if (part.BasePart.Indices.Count > 0)
             {
                 // Conversion lookup table
@@ -242,7 +238,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
                 {
                     lookup[(int)part.BasePart.VertexIndices[i]] = i;
                 }
-                var a = 0;
+
                 foreach (var vertexIndex in part.BasePart.VertexIndices)
                 {
                     var v4p = part.BasePart.VertexPositions[lookup[(int)vertexIndex]];
@@ -283,12 +279,15 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             mesh.TextureCoordinates = textureCoordinates;
             mesh.TriangleIndices = triangleIndices;
             model.Geometry = mesh;
+
             model.Material = new DiffuseMaterial
             {
                 DiffuseColor = new Color4(0.9f, 0.9f, 0.9f, 1.0f)
+                //DiffuseColor = rand.NextColor()
             };
-            List<Matrix> instances = new List<Matrix>();
+            model.CullMode = SharpDX.Direct3D11.CullMode.Back;
 
+            List<Matrix> instances = new List<Matrix>();
             for (int i = 0; i < part.Translations.Count; i++)
             {
                 SharpDX.Vector3 scale = new SharpDX.Vector3(part.Scales[i].X, part.Scales[i].Y, part.Scales[i].Z);

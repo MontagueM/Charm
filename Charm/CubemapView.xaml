@@ -24,7 +24,7 @@
                 Title="{Binding Title}"
                 Width="800"
                 Height="800"
-                Margin="0,15,0,15"
+                Margin="0,10,0,10"
                 EffectsManager="{Binding EffectsManager}"
                 EnableDeferredRendering="False"
                 EnableDesignModeRendering="True"
@@ -42,26 +42,27 @@
                 </hx:Viewport3DX.Camera>
             </hx:Viewport3DX>
 
-            <StackPanel Orientation="Vertical">
-                <TextBlock
-                    x:Name="Dimensions"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                    FontSize="20"
-                    IsHitTestVisible="False"
-                    TextAlignment="Center" />
+            <Border BorderBrush="{StaticResource ForegroundColour50}" BorderThickness="1">
+                <StackPanel Margin="5" Orientation="Vertical">
+                    <TextBlock
+                        x:Name="Dimensions"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="20"
+                        IsHitTestVisible="False"
+                        TextAlignment="Center" />
 
-                <TextBlock
-                    x:Name="Format"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                    FontSize="20"
-                    IsHitTestVisible="False"
-                    TextAlignment="Center" />
-            </StackPanel>
+                    <TextBlock
+                        x:Name="Format"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="20"
+                        IsHitTestVisible="False"
+                        TextAlignment="Center" />
+                </StackPanel>
+            </Border>
         </StackPanel>
-
     </Grid>
 </UserControl>
