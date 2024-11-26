@@ -33,6 +33,10 @@ public class Entity : Tag<SEntity>
         }
     }
 
+
+    // TODO: Figure out a way to make Dynamics view not take 10gb of ram and almost a minute to load.
+    // Tried setting most things to NoLoad but it made little difference. I'm not entirely sure what's being the
+    // resource hog. Thought it was EntityModel but I guess not.
     public void Load()
     {
         Deserialize();

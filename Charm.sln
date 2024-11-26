@@ -5,17 +5,11 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tiger", "Tiger\Tiger.csproj", "{33040C46-022F-43E5-981F-03BD68C1587D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tomograph", "Tomograph\Tomograph.csproj", "{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TomographData", "TomographData\TomographData.csproj", "{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arithmic", "Arithmic\Arithmic.csproj", "{F7EE1308-38FF-4803-82DD-F2CC7EED58BE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Charm", "Charm\Charm.csproj", "{DEF8D711-F6F5-4718-BB1B-AC624DB582AB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RevorbStd", "ThirdParty\revorbstd\RevorbStd.csproj", "{C407B28F-077C-41C2-8C16-277CB9681E92}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharmDepotDownloader", "CharmDepotDownloader\CharmDepotDownloader.csproj", "{D22CC98B-DE19-460A-B661-3155C55024AE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AtlasSharp", "AtlasSharp\AtlasSharp.csproj", "{161DFC33-8147-4BD1-B72C-A08D53D831A3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -34,14 +28,6 @@ Global
 		{33040C46-022F-43E5-981F-03BD68C1587D}.Debug|x64.Build.0 = Debug|x64
 		{33040C46-022F-43E5-981F-03BD68C1587D}.Release|x64.ActiveCfg = Release|x64
 		{33040C46-022F-43E5-981F-03BD68C1587D}.Release|x64.Build.0 = Release|x64
-		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Debug|x64.Build.0 = Debug|Any CPU
-		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Release|x64.ActiveCfg = Release|Any CPU
-		{A97F0D38-DB66-4EB1-B400-4C1B67BDD179}.Release|x64.Build.0 = Release|Any CPU
-		{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}.Debug|x64.Build.0 = Debug|Any CPU
-		{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}.Release|x64.ActiveCfg = Release|Any CPU
-		{86698BD9-3B65-41E3-BBDB-9BCE52D9EF41}.Release|x64.Build.0 = Release|Any CPU
 		{F7EE1308-38FF-4803-82DD-F2CC7EED58BE}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{F7EE1308-38FF-4803-82DD-F2CC7EED58BE}.Debug|x64.Build.0 = Debug|Any CPU
 		{F7EE1308-38FF-4803-82DD-F2CC7EED58BE}.Release|x64.ActiveCfg = Release|Any CPU
@@ -54,10 +40,6 @@ Global
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Debug|x64.Build.0 = Debug|Any CPU
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Release|x64.ActiveCfg = Release|Any CPU
 		{C407B28F-077C-41C2-8C16-277CB9681E92}.Release|x64.Build.0 = Release|Any CPU
-		{D22CC98B-DE19-460A-B661-3155C55024AE}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D22CC98B-DE19-460A-B661-3155C55024AE}.Debug|x64.Build.0 = Debug|Any CPU
-		{D22CC98B-DE19-460A-B661-3155C55024AE}.Release|x64.ActiveCfg = Release|Any CPU
-		{D22CC98B-DE19-460A-B661-3155C55024AE}.Release|x64.Build.0 = Release|Any CPU
 		{161DFC33-8147-4BD1-B72C-A08D53D831A3}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{161DFC33-8147-4BD1-B72C-A08D53D831A3}.Debug|x64.Build.0 = Debug|Any CPU
 		{161DFC33-8147-4BD1-B72C-A08D53D831A3}.Release|x64.ActiveCfg = Release|Any CPU
