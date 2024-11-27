@@ -169,7 +169,7 @@ public partial class TagListView : UserControl
     }
 
     public async void LoadContent(ETagListType tagListType, TigerHash contentValue = null, bool bFromBack = false,
-        ConcurrentBag<TagItem> overrideItems = null)
+        ConcurrentBag<TagItem> overrideItems = null, TagItem fullTag = null)
     {
         Log.Verbose($"Loading content type {tagListType} contentValue {contentValue} from back {bFromBack}");
         if (overrideItems != null)
@@ -275,7 +275,7 @@ public partial class TagListView : UserControl
                     LoadMusicList(contentValue as FileHash);
                     break;
                 case ETagListType.Music:
-                    LoadMusic(contentValue as FileHash);
+                    LoadMusic(contentValue as FileHash, fullTag);
                     break;
                 case ETagListType.WeaponAudioGroupList:
                     await LoadWeaponAudioGroupList();
@@ -428,6 +428,7 @@ public partial class TagListView : UserControl
                             $"{item.Subname}" + (pkg != null ? $" : [{pkg.GetPackageMetadata().Name}]" : "")
                             : item.Subname,
                     FontSize = _bTrimName || !bWasTrimmed ? 16 : 12,
+                    Extra = item.Extra
                 });
             }
         });
@@ -541,7 +542,7 @@ public partial class TagListView : UserControl
                 return;
             }
         }
-        LoadContent(tagItem.TagType, tigerHash);
+        LoadContent(tagItem.TagType, tigerHash, fullTag: tagItem);
     }
 
     public static T GetChildOfType<T>(DependencyObject depObj)
@@ -1172,6 +1173,7 @@ public partial class TagListView : UserControl
                     }
                 });
                 break;
+
             case TigerStrategy.DESTINY2_SHADOWKEEP_2601 or TigerStrategy.DESTINY2_SHADOWKEEP_2999:
                 var valsChild = await PackageResourcer.Get().GetAllHashesAsync<SUnkActivity_SK>();
                 Parallel.ForEach(valsChild, val =>
@@ -1181,6 +1183,7 @@ public partial class TagListView : UserControl
                     GlobalStrings.Get().AddStrings(tag.TagData.LocalizedStrings);
                 });
                 break;
+
             default:
                 valsChild = await PackageResourcer.Get().GetAllHashesAsync<D2Class_8B8E8080>();
                 Parallel.ForEach(valsChild, val =>
@@ -1899,6 +1902,28 @@ public partial class TagListView : UserControl
             {
                 if (res.Music != null)
                     musics.Add(res.Music.Hash);
+
+                if (res.Music2 is not null)
+                {
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = res.Music2.Hash,
+                        Name = res.Music2.Hash,
+                        TagType = ETagListType.Music,
+                        Extra = res.Music2
+                    });
+                }
+
+                if (res.DescentMusic is not null)
+                {
+                    _allTagItems.Add(new TagItem
+                    {
+                        Hash = res.DescentMusic.Hash,
+                        Name = res.DescentMusicPath.Value,
+                        TagType = ETagListType.Music,
+                        Extra = res.DescentMusic
+                    });
+                }
             }
             if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_20978080 res2)
             {
@@ -1918,11 +1943,14 @@ public partial class TagListView : UserControl
         });
     }
 
-    private void LoadMusic(FileHash fileHash)
+    private void LoadMusic(FileHash fileHash, TagItem extra = null)
     {
         var viewer = GetViewer();
         SetViewer(TagView.EViewerType.Music);
-        viewer.MusicControl.Load(fileHash);
+        if (extra is not null)
+            viewer.MusicControl.Load(fileHash, extra.Extra);
+        else
+            viewer.MusicControl.Load(fileHash);
     }
 
     #endregion
@@ -2283,6 +2311,8 @@ public class TagItem
     }
 
     public ETagListType TagType { get; set; }
+
+    public dynamic? Extra { get; set; } // This is dumb and should only be used sparingly
 
     public static string GetEnumDescription(Enum value)
     {

@@ -82,18 +82,19 @@ public partial class GeneralConfigView : UserControl
         csp.ChangeButton.Click += ExportSavePath_OnClick;
         GeneralConfigPanel.Children.Add(csp);
 
-        // Enable combined extraction folder for maps
-        ConfigSettingToggleControl cef = new ConfigSettingToggleControl();
-        cef.SettingName = "Single Folder Extraction For Maps";
-        var bval = _config.GetSingleFolderMapsEnabled();
-        cef.SettingValue = bval.ToString();
-        cef.ChangeButton.Click += SingleFolderMapsEnabled_OnClick;
-        GeneralConfigPanel.Children.Add(cef);
+        // Don't really see the point of this anymore, just export to 'Maps/(name)'
+        // Enable combined extraction folder for maps 
+        //ConfigSettingToggleControl cef = new ConfigSettingToggleControl();
+        //cef.SettingName = "Single Folder Extraction For Maps";
+        //var bval = _config.GetSingleFolderMapsEnabled();
+        //cef.SettingValue = bval.ToString();
+        //cef.ChangeButton.Click += SingleFolderMapsEnabled_OnClick;
+        //GeneralConfigPanel.Children.Add(cef);
 
         // Enable individual static extraction with maps
         ConfigSettingToggleControl cfe = new ConfigSettingToggleControl();
         cfe.SettingName = "Export Individual Models With Maps";
-        bval = _config.GetIndvidualStaticsEnabled();
+        var bval = _config.GetIndvidualStaticsEnabled();
         cfe.SettingValue = bval.ToString();
         cfe.ChangeButton.Click += IndvidualStaticsEnabled_OnClick;
         GeneralConfigPanel.Children.Add(cfe);

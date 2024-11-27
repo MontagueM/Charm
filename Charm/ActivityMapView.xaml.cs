@@ -75,7 +75,7 @@ public partial class ActivityMapView : UserControl
 
     public void LoadUI(IActivity activity)
     {
-        _destinationName = activity.GetDestinationName();
+        _destinationName = activity.DestinationName;
         _currentActivity = activity;
 
         MapList.ItemsSource = GetMapList(activity);
@@ -84,6 +84,9 @@ public partial class ActivityMapView : UserControl
 
         QuickControls.Visibility = Visibility.Hidden;
         ExportControl.Visibility = Visibility.Hidden;
+
+        if (Strategy.IsD1() || Strategy.IsPreBL())
+            ActivityEntsButton.Visibility = Visibility.Hidden;
     }
 
     private ObservableCollection<DisplayBubble> GetMapList(IActivity activity)
@@ -102,8 +105,8 @@ public partial class ActivityMapView : UserControl
     private async void GetBubbleContentsButton_OnClick(object sender, RoutedEventArgs e)
     {
         var bubble = (sender as ToggleButton).DataContext as DisplayBubble;
-        FileHash hash = new FileHash(bubble.Hash);
         _currentBubble = bubble;
+        FileHash hash = new FileHash(bubble.Hash);
 
         Dispatcher.Invoke(() => MapControl.Visibility = Visibility.Hidden);
         MainWindow.Progress.SetProgressStages(new() { $"Loading Map Parts for {bubble.Name}" });
@@ -244,13 +247,14 @@ public partial class ActivityMapView : UserControl
         mapStages.Add("Exporting Static Map");
         MainWindow.Progress.SetProgressStages(mapStages);
 
+        string savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/Maps/{_currentActivity.DestinationName}/";
         maps.ForEach(map =>
         {
-            MapView.ExportFullMap(map);
+            MapView.ExportFullMap(map, savePath);
             MainWindow.Progress.CompleteStage();
         });
 
-        Tiger.Exporters.Exporter.Get().Export();
+        Tiger.Exporters.Exporter.Get().Export(savePath);
         MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>
@@ -293,13 +297,14 @@ public partial class ActivityMapView : UserControl
         mapStages.Add($"Exporting {type}");
         MainWindow.Progress.SetProgressStages(mapStages);
 
+        string savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/Maps/{_currentActivity.DestinationName}/";
         foreach ((FileHash container, List<FileHash> hashes) in maps)
         {
-            ActivityMapEntityView.ExportFull(hashes, container);
+            ActivityMapEntityView.ExportFull(hashes, container, savePath);
             MainWindow.Progress.CompleteStage();
         };
 
-        Tiger.Exporters.Exporter.Get().Export();
+        Tiger.Exporters.Exporter.Get().Export(savePath);
         MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>
@@ -349,13 +354,14 @@ public partial class ActivityMapView : UserControl
         mapStages.Add("Exporting");
         MainWindow.Progress.SetProgressStages(mapStages);
 
+        string savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/Maps/{_currentActivity.DestinationName}/";
         maps.ForEach(map =>
         {
-            MapView.ExportFullMap(map, info.ExportType);
+            MapView.ExportFullMap(map, savePath);
             MainWindow.Progress.CompleteStage();
         });
 
-        Tiger.Exporters.Exporter.Get().Export();
+        Tiger.Exporters.Exporter.Get().Export(savePath);
 
         MainWindow.Progress.CompleteStage();
 

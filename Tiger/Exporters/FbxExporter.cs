@@ -20,29 +20,31 @@ public class FbxExporter : AbstractExporter
         foreach (ExporterScene scene in args.Scenes)
         {
             FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
-
             string outputDirectory = args.OutputDirectory;
             string outputIndivDir = outputDirectory;
-            if (!args.AggregateOutput)
+
+            string baseDirectory = args.AggregateOutput ? outputDirectory : Path.Join(outputDirectory, "Maps");
+            string modelSubDirectory = scene.Name.Contains("Decorators") ? "Decorators" :
+                                       scene.Name.Contains("SkyEnts") ? "SkyEntities" : "Entities";
+
+            switch (scene.Type)
             {
-                switch (scene.Type)
-                {
-                    case ExportType.Map:
-                    case ExportType.Terrain:
-                    case ExportType.EntityPoints:
-                        outputDirectory = Path.Join(outputDirectory, "Maps");
-                        break;
-                    case ExportType.StaticInMap:
-                        outputDirectory = Path.Join(outputDirectory, "Maps", "Statics");
-                        break;
-                    case ExportType.EntityInMap:
-                        outputDirectory = Path.Join(outputDirectory, "Maps", "Entities");
-                        break;
-                    default:
-                        outputDirectory = Path.Join(outputDirectory, scene.Name);
+                case ExportType.Map:
+                case ExportType.Terrain:
+                case ExportType.EntityPoints:
+                    outputDirectory = baseDirectory;
+                    break;
+                case ExportType.StaticInMap:
+                    outputDirectory = Path.Join(baseDirectory, args.AggregateOutput ? "Statics" : "Maps/Statics");
+                    break;
+                case ExportType.EntityInMap:
+                    outputDirectory = Path.Join(baseDirectory, args.AggregateOutput ? "Entities" : "Maps/Entities");
+                    break;
+                default:
+                    outputDirectory = args.AggregateOutput ? outputDirectory : Path.Join(outputDirectory, scene.Name);
+                    if (!args.AggregateOutput)
                         outputIndivDir = outputDirectory;
-                        break;
-                }
+                    break;
             }
 
             foreach (ExporterMesh mesh in scene.StaticMeshes)
@@ -77,33 +79,22 @@ public class FbxExporter : AbstractExporter
                 {
                     if (scene.Type == ExportType.Map)
                     {
-                        string modelSubDirectory = scene.Name.Contains("Decorators") ? "Decorators" :
-                                                   scene.Name.Contains("SkyEnts") ? "SkyEntities" :
-                                                   "Entities";
-
                         outputIndivDir = Path.Join(outputDirectory, "Models", modelSubDirectory);
-
                         FbxScene fbxIndivScene = FbxScene.Create(_manager, entity.Mesh.Hash);
                         AddEntity(fbxIndivScene, entity);
                         ExportScene(fbxIndivScene, Path.Join(outputIndivDir, entity.Mesh.Hash));
                     }
 
-                    if (_config.GetS2VMDLExportEnabled())
+                    if (_config.GetS2VMDLExportEnabled() && scene.Type != ExportType.API && scene.Type != ExportType.D1API)
                     {
-                        string fbxPath = "Models";
-                        if (scene.Type == ExportType.Map)
-                        {
-                            fbxPath = scene.Name.Contains("Decorators") ? "Models/Decorators" :
-                                      scene.Name.Contains("SkyEnts") ? "Models/SkyEntities" :
-                                      "Models/Entities";
-                        }
-
-                        if (scene.Type != ExportType.API && scene.Type != ExportType.D1API)
-                            Source2Handler.SaveEntityVMDL(outputIndivDir, fbxPath, entity);
+                        string fbxPath = scene.Type == ExportType.Map ? Path.Join("Models", modelSubDirectory) : "Models";
+                        Source2Handler.SaveEntityVMDL(outputIndivDir, fbxPath, entity);
                     }
                 }
+
                 AddEntity(fbxScene, entity);
             }
+
             // TODO: TerrainMeshes is kinda dumb just for individual exports
             if (exportIndiv)
             {
@@ -138,9 +129,6 @@ public class FbxExporter : AbstractExporter
         node.LclTranslation.Set(new FbxDouble3(point.Translation.X * 100, point.Translation.Z * 100, -point.Translation.Y * 100));
         node.LclRotation.Set(new FbxDouble3(eulerRot.X, eulerRot.Y, eulerRot.Z));
         node.LclScaling.Set(new FbxDouble3(100, 100, 100));
-
-        // Scale and rotate
-        //ScaleAndRotateForBlender(node);
 
         fbxScene.GetRootNode().AddChild(node);
     }

@@ -427,6 +427,29 @@ public struct D2Class_6A988080
     public TigerHash Unk24;
     [SchemaField(0x2C)]
     public Tag<SMusicTemplate> Music;
+    public Tag<D2Class_A4BC8080> Music2;
+
+    [SchemaField(0x60)]
+    public StringPointer DescentMusicPath;
+    [Tag64]
+    public Entity.Entity DescentMusic;
+
+    [SchemaField(0x7C)]
+    public Tag DescentMisc; // C7978080, contains anim clips and models used when loading into destination
+}
+
+[SchemaStruct("A4BC8080", 0x18)]
+public struct D2Class_A4BC8080
+{
+    [SchemaField(0x8)]
+    public DynamicArray<D2Class_A6BC8080> Unk08;
+}
+
+[SchemaStruct("A6BC8080", 0x18)]
+public struct D2Class_A6BC8080
+{
+    [Tag64]
+    public WwiseSound Sound;
 }
 
 /// <summary>

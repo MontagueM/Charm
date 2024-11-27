@@ -21,7 +21,7 @@ namespace Tiger.Schema.Activity
     public interface IActivity : ISchema
     {
         public FileHash FileHash { get; }
-        public string GetDestinationName();
+        public string DestinationName { get; }
         public IEnumerable<Bubble> EnumerateBubbles();
         public IEnumerable<ActivityEntities> EnumerateActivityEntities(FileHash UnkActivity = null);
     }
@@ -40,13 +40,43 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
     {
         public FileHash FileHash => Hash;
 
+        private string _destinationName;
+        public string DestinationName
+        {
+            get
+            {
+                if (_destinationName != null)
+                    return _destinationName;
+
+                _destinationName = GetDestinationName();
+                return _destinationName;
+            }
+        }
+
         public Activity(FileHash hash) : base(hash)
         {
         }
 
         public string GetDestinationName()
         {
-            return "";
+            var activityName = PackageResourcer.Get().GetActivityName(Hash);
+            var first = activityName.Split(":")[1];
+
+            var activities = PackageResourcer.Get().GetD1Activities();
+            foreach (var activity in activities)
+            {
+                if (activity.Value == "16068080")
+                {
+                    Tag<SUnkActivity_ROI> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_ROI>(activity.Key);
+                    if (tag.TagData.ActivityDevName == first)
+                        if (GlobalStrings.Get().GetString(tag.TagData.DestinationName) == tag.TagData.DestinationName)
+                            return EnumerateBubbles().Count() == 1 ? EnumerateBubbles().FirstOrDefault().Name : first;
+                        else
+                            return GlobalStrings.Get().GetString(tag.TagData.DestinationName);
+                }
+            }
+
+            return $"{Hash}";
         }
 
         public IEnumerable<Bubble> EnumerateBubbles()
@@ -129,14 +159,41 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
     public class Activity : Tag<SActivity_SK>, IActivity
     {
         public FileHash FileHash => Hash;
+        private string _destinationName;
+
+        public string DestinationName
+        {
+            get
+            {
+                if (_destinationName != null)
+                    return _destinationName;
+
+                _destinationName = GetDestinationName();
+                return _destinationName;
+            }
+        }
 
         public Activity(FileHash hash) : base(hash)
         {
         }
 
-        public string GetDestinationName()
+        private string GetDestinationName()
         {
-            return "";
+            var valsChild = PackageResourcer.Get().GetAllHashes<SUnkActivity_SK>();
+            var mapRoot = PackageResourcer.Get().GetActivityName(Hash);
+            var first = mapRoot.Split(":")[1];
+
+            foreach (var val in valsChild)
+            {
+                Tag<SUnkActivity_SK> tag = FileResourcer.Get().GetSchemaTag<SUnkActivity_SK>(val);
+                if (tag.TagData.ActivityDevName == first)
+                    if (GlobalStrings.Get().GetString(tag.TagData.DestinationName) == tag.TagData.DestinationName)
+                        return EnumerateBubbles().Count() == 1 ? EnumerateBubbles().FirstOrDefault().Name : first;
+                    else
+                        return GlobalStrings.Get().GetString(tag.TagData.DestinationName);
+            }
+
+            return $"{Hash}";
         }
 
         public IEnumerable<Bubble> EnumerateBubbles()
@@ -243,11 +300,24 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
     {
         public FileHash FileHash => Hash;
 
+        private string _destinationName;
+        public string DestinationName
+        {
+            get
+            {
+                if (_destinationName != null)
+                    return _destinationName;
+
+                _destinationName = GetDestinationName();
+                return _destinationName;
+            }
+        }
+
         public Activity(FileHash hash) : base(hash)
         {
         }
 
-        public string GetDestinationName()
+        private string GetDestinationName()
         {
             return GlobalStrings.Get().GetString(new StringHash(_tag.LocationName.Hash32));
         }

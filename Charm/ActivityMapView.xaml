@@ -215,6 +215,7 @@
                 Grid.Row="1"
                 Grid.Column="0"
                 Margin="15"
+                d:Visibility="Visible"
                 Orientation="Vertical"
                 Visibility="Hidden">
 
@@ -283,6 +284,7 @@
                 </Button>
 
                 <Button
+                    x:Name="ActivityEntsButton"
                     Margin="0,0,0,15"
                     Click="QuickControl_OnClick"
                     DataContext="3"

@@ -25,6 +25,10 @@ public partial class ActivityMapEntityView : UserControl
     private FbxHandler _globalFbxHandler = null;
     private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
+    private IActivity _currentActivity;
+    private DisplayEntBubble _currentBubble;
+    private string _destinationName;
+
     public ActivityMapEntityView()
     {
         InitializeComponent();
@@ -33,6 +37,9 @@ public partial class ActivityMapEntityView : UserControl
 
     public void LoadUI(IActivity activity)
     {
+        _destinationName = activity.DestinationName;
+        _currentActivity = activity;
+
         MapList.ItemsSource = GetMapList(activity);
         ExportControl.SetExportFunction(Export, (int)ExportTypeFlag.Full, true);
         ExportControl.SetExportInfo(activity.FileHash);
@@ -148,6 +155,8 @@ public partial class ActivityMapEntityView : UserControl
         {
             MainWindow.Progress.SetProgressStages(new() { $"Loading Resources for {tagData.Name}" });
             FileHash hash = new FileHash(tagData.Hash);
+            _currentBubble = tagData;
+
             Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
             await Task.Run(() => PopulateEntityContainerList(bubbleMaps));
         }
@@ -373,13 +382,14 @@ public partial class ActivityMapEntityView : UserControl
         mapStages.Add("Exporting");
         MainWindow.Progress.SetProgressStages(mapStages);
 
+        string savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/Maps/{_currentActivity.DestinationName}/";
         maps.ToList().ForEach(map =>
         {
-            ExportFull(map.Key, map.Value);
+            ExportFull(map.Key, map.Value, savePath);
             MainWindow.Progress.CompleteStage();
         });
 
-        Tiger.Exporters.Exporter.Get().Export();
+        Tiger.Exporters.Exporter.Get().Export(savePath);
 
         MainWindow.Progress.CompleteStage();
 
@@ -391,14 +401,8 @@ public partial class ActivityMapEntityView : UserControl
         MessageBox.Show("Activity map data exported completed.");
     }
 
-    public static void ExportFull(List<FileHash> dataTables, string hash)
+    public static void ExportFull(List<FileHash> dataTables, string hash, string savePath)
     {
-        string savePath = _config.GetExportSavePath() + $"/{hash}";
-        if (_config.GetSingleFolderMapsEnabled())
-        {
-            savePath = _config.GetExportSavePath() + "/Maps";
-        }
-
         Directory.CreateDirectory(savePath);
         ExtractDataTables(dataTables, hash, savePath);
 

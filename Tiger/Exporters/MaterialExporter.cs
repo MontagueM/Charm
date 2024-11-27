@@ -40,18 +40,16 @@ public class MaterialExporter : AbstractExporter
 
                     if (saveShaders)
                     {
-                        string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Shaders";
-                        if (args.AggregateOutput)
-                            shaderSaveDirectory = $"{args.OutputDirectory}/Shaders";
+                        string shaderSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, scene.Name);
+                        shaderSaveDirectory = $"{shaderSaveDirectory}/Shaders";
 
                         material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
                         material.Material.SaveVertexShader(shaderSaveDirectory);
                     }
                 }
 
-                string textureSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Textures";
-                if (args.AggregateOutput)
-                    textureSaveDirectory = $"{args.OutputDirectory}/Textures";
+                string textureSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, scene.Name);
+                textureSaveDirectory = $"{textureSaveDirectory}/Textures";
 
                 Directory.CreateDirectory(textureSaveDirectory);
                 foreach (Texture texture in textures)
@@ -87,7 +85,10 @@ public class MaterialExporter : AbstractExporter
                             continue;
 
                         mapTextures.Add(cubemap.CubemapTexture);
-                        Source2Handler.SaveVTEX(cubemap.CubemapTexture, $"{args.OutputDirectory}/Maps/Textures");
+
+                        string saveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, $"Maps");
+                        saveDirectory = $"{saveDirectory}/Textures";
+                        Source2Handler.SaveVTEX(cubemap.CubemapTexture, saveDirectory);
                     }
                 }
             }
@@ -95,10 +96,13 @@ public class MaterialExporter : AbstractExporter
 
         foreach (Texture texture in mapTextures)
         {
-            string textureSaveDirectory = $"{args.OutputDirectory}/Maps/Textures";
-            Directory.CreateDirectory(textureSaveDirectory);
             if (texture is null)
                 continue;
+
+            string textureSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, $"Maps");
+            textureSaveDirectory = $"{textureSaveDirectory}/Textures";
+            Directory.CreateDirectory(textureSaveDirectory);
+
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
         }
 
@@ -106,7 +110,8 @@ public class MaterialExporter : AbstractExporter
         {
             foreach (ExportMaterial material in mapMaterials)
             {
-                string shaderSaveDirectory = $"{args.OutputDirectory}/Maps/Shaders";
+                string shaderSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, $"Maps");
+                shaderSaveDirectory = $"{shaderSaveDirectory}/Shaders";
                 Directory.CreateDirectory(shaderSaveDirectory);
 
                 material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);

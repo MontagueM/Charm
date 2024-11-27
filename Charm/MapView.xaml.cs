@@ -153,20 +153,14 @@ public partial class MapView : UserControl
         MVM.Dispose();
     }
 
-    public static void ExportFullMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag = ExportTypeFlag.Full)
+    public static void ExportFullMap(Tag<SMapContainer> map, string savePath)
     {
         ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.Map);
 
         string meshName = map.Hash.ToString();
-        string savePath = _config.GetExportSavePath() + $"/{meshName}";
-        if (_config.GetSingleFolderMapsEnabled())
-        {
-            savePath = _config.GetExportSavePath() + "/Maps";
-        }
-
         Directory.CreateDirectory(savePath);
 
-        ExtractDataTables(map, savePath, scene, ExportTypeFlag.Full);
+        ExtractDataTables(map, scene, ExportTypeFlag.Full);
 
         if (_config.GetUnrealInteropEnabled())
         {
@@ -174,7 +168,7 @@ public partial class MapView : UserControl
         }
     }
 
-    private static void ExtractDataTables(Tag<SMapContainer> map, string savePath, ExporterScene scene, ExportTypeFlag exportTypeFlag)
+    private static void ExtractDataTables(Tag<SMapContainer> map, ExporterScene scene, ExportTypeFlag exportTypeFlag)
     {
         Parallel.ForEach(map.TagData.MapDataTables, data =>
         {

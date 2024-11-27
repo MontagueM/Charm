@@ -10,6 +10,9 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
     {
         get
         {
+            if (Strategy.IsD1())
+                return new();
+
             if (_inputSignatures != null)
             {
                 return _inputSignatures;
@@ -30,6 +33,9 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
     {
         get
         {
+            if (Strategy.IsD1())
+                return new();
+
             if (_outputSignatures != null)
             {
                 return _outputSignatures;
@@ -50,6 +56,9 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
     {
         get
         {
+            if (Strategy.IsD1())
+                return new();
+
             if (_resources != null)
             {
                 return _resources;

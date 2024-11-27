@@ -1,7 +1,11 @@
-﻿using System.Windows.Controls;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Controls;
 using Arithmic;
 using Tiger;
 using Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
+using Tiger.Schema.Audio;
+using Tiger.Schema.Entity;
 
 namespace Charm;
 
@@ -12,8 +16,45 @@ public partial class MusicView : UserControl
         InitializeComponent();
     }
 
-    public void Load(FileHash fileHash)
+    public void Load(FileHash fileHash, dynamic extra = null)
     {
+        if (extra is Entity entity)
+        {
+            List<D2Class_40668080> sounds = new();
+            foreach (var resourceHash in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
+            {
+                EntityResource e = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
+                if (e.TagData.Unk18.GetValue(e.GetReader()) is D2Class_79818080 a)
+                {
+                    foreach (var d2ClassF1918080 in a.WwiseSounds1)
+                    {
+                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is D2Class_40668080 b)
+                        {
+                            sounds.Add(b);
+                        }
+                    }
+                    foreach (var d2ClassF1918080 in a.WwiseSounds2)
+                    {
+                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is D2Class_40668080 b)
+                        {
+                            sounds.Add(b);
+                        }
+                    }
+                }
+            }
+            WemsControl.Load(sounds);
+            return;
+        }
+        else if (extra is Tag<D2Class_A4BC8080> cine)
+        {
+            List<WwiseSound> sounds = new();
+            if (cine.TagData.Unk08.Count != 0)
+                sounds.AddRange(cine.TagData.Unk08.Select(x => x.Sound));
+
+            WemsControl.Load(sounds);
+            return;
+        }
+
         Tag<SMusicTemplate> music = FileResourcer.Get().GetSchemaTag<SMusicTemplate>(fileHash);
 
         if (music == null || music.TagData.Unk28.Count == 0)

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Tiger;
-using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
 using Tiger.Schema.Audio;
+using Tiger.Schema.Entity;
 
 namespace Charm;
 
@@ -57,6 +57,24 @@ public partial class MusicWemsControl : UserControl
     {
         WwiseSound loop = res.MusicLoopSound;
         WemList.ItemsSource = GetWemItems(loop);
+    }
+
+    public void Load(List<D2Class_40668080> res)
+    {
+        var sounds = new ConcurrentBag<WemItem>(
+            res.SelectMany(x => GetWemItems(x.GetSound()))
+        );
+
+        WemList.ItemsSource = sounds;
+    }
+
+    public void Load(List<WwiseSound> res)
+    {
+        var sounds = new ConcurrentBag<WemItem>(
+            res.SelectMany(x => GetWemItems(x))
+        );
+
+        WemList.ItemsSource = sounds;
     }
 
     public async void Load(D2Class_F7458080 res)
