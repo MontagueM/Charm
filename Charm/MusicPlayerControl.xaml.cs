@@ -165,6 +165,8 @@ public partial class MusicPlayerControl : UserControl
 
     public bool IsPlaying()
     {
+        if (_output is null)
+            return false;
         return _output.PlaybackState == PlaybackState.Playing;
     }
 
@@ -190,23 +192,23 @@ public partial class MusicPlayerControl : UserControl
 
     private void ProgressBar_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        // var s = sender as Slider;
-        // // depends on the size of the song, so we scale the value to the duration of the song
-        // var newPosition = _wem.GetDuration().TotalMilliseconds * s.Value;
-        // if (Math.Abs(newPosition - _prevPositionValue) > 300 && IsPlaying() && s.Value != 0)  // To only take manual changes
-        // {
-        //     _prevPositionValue = newPosition;
-        //     _output.Stop();
-        //     _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
-        //     SetPosition(_waveProvider.Position);
-        //     Play();
-        // }
-        // else if (Math.Abs(newPosition - _prevPositionValue) > 300)
-        // {
-        //     _prevPositionValue = newPosition;
-        //     _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
-        // }
-        // _prevPositionValue = newPosition;
+        //var s = sender as Slider;
+        //// depends on the size of the song, so we scale the value to the duration of the song
+        //var newPosition = _wem.GetDuration().TotalMilliseconds * s.Value;
+        //if (Math.Abs(newPosition - _prevPositionValue) > 300 && IsPlaying() && s.Value != 0)  // To only take manual changes
+        //{
+        //    _prevPositionValue = newPosition;
+        //    _output.Stop();
+        //    _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
+        //    SetPosition(_waveProvider.Position);
+        //    Play();
+        //}
+        //else if (Math.Abs(newPosition - _prevPositionValue) > 300)
+        //{
+        //    _prevPositionValue = newPosition;
+        //    _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
+        //}
+        //_prevPositionValue = newPosition;
     }
 
     private void PlayPause_OnClick(object sender, RoutedEventArgs e)
@@ -226,44 +228,30 @@ public partial class MusicPlayerControl : UserControl
 
     private void ProgressBar_OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
     {
-        if (_sound is null)
+        if (_wem == null && _sound == null)
             return;
 
+        Pause();
         _prevPositionValue = 0;
         var duration = _wem == null ? _sound.GetDuration() : _wem.GetDuration();
         var s = sender as Slider;
-        if (IsPlaying())  // To only take manual changes
-        {
-            _output.Stop();
-            _waveProvider.Position = (long)(s.Value * duration.TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
-            SetPosition(_waveProvider.Position, true);
-            Play();
-        }
-        else
-        {
-            _waveProvider.Position = (long)(s.Value * duration.TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
-        }
+        _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
+        SetPosition(_waveProvider.Position);
+        Play();
     }
 
     private void ProgressBar_OnDragCompleted(object sender, DragCompletedEventArgs e)
     {
-        if (_sound is null)
+        if (_wem == null && _sound == null)
             return;
 
+        Pause();
         _prevPositionValue = 0;
         var duration = _wem == null ? _sound.GetDuration() : _wem.GetDuration();
         var s = sender as Slider;
-        if (IsPlaying())  // To only take manual changes
-        {
-            _output.Stop();
-            _waveProvider.Position = (long)(s.Value * duration.TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
-            SetPosition(_waveProvider.Position, true);
-            Play();
-        }
-        else
-        {
-            _waveProvider.Position = (long)(s.Value * duration.TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
-        }
+        _waveProvider.Position = (long)(s.Value * _wem.GetDuration().TotalSeconds * _waveProvider.WaveFormat.AverageBytesPerSecond);
+        SetPosition(_waveProvider.Position);
+        Play();
     }
 
     public void Dispose()
@@ -273,5 +261,10 @@ public partial class MusicPlayerControl : UserControl
         _waveProvider?.Dispose();
         _output?.Dispose();
         _wem?.Dispose();
+    }
+
+    private void ProgressBar_MouseUp(object sender, MouseButtonEventArgs e)
+    {
+
     }
 }

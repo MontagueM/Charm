@@ -18,27 +18,6 @@ public static class ResourcerStrategyExtensions
     {
         _strategyPackageTypes = GetPackageTypesMap();
         _strategyPackageTypes.GetFullStrategyMap();
-
-        // Type? packageType = null;
-        // foreach (TigerStrategy strategy in Enum.GetValues(typeof(TigerStrategy)).Cast<TigerStrategy>())
-        // {
-        //     if (strategy == TigerStrategy.NONE)
-        //     {
-        //         continue;
-        //     }
-        //
-        //     if (typeMap.TryGetValue(strategy, out Type outPackageType))
-        //     {
-        //         packageType = outPackageType;
-        //     }
-        //
-        //     if (packageType == null)
-        //     {
-        //         throw new Exception($"No package type found for strategy {strategy}");
-        //     }
-        //
-        //     _strategyPackageTypes.Add(strategy, packageType);
-        // }
     }
 
     private static bool ImplementsIPackage(this Type classType)

@@ -63,6 +63,14 @@
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
 
+        <CheckBox
+            x:Name="ExportAll"
+            Margin="10,0,0,0"
+            VerticalAlignment="Center"
+            Content="Select All for Export"
+            IsChecked="False"
+            Style="{StaticResource MaterialDesignCheckBox}" />
+
         <TextBlock
             Grid.Row="0"
             HorizontalAlignment="Center"

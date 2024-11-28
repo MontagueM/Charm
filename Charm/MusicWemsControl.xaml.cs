@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,6 +18,8 @@ public partial class MusicWemsControl : UserControl
     {
         InitializeComponent();
     }
+
+    private WemItem _currentWem;
 
     private ConcurrentBag<WemItem> GetWemItems(WwiseSound tag)
     {
@@ -38,25 +41,33 @@ public partial class MusicWemsControl : UserControl
     private void Play_OnClick(object sender, RoutedEventArgs e)
     {
         WemItem item = (WemItem)(sender as Button).DataContext;
-        PlayWem(item.Wem);
+        PlayWem(item);
     }
 
-    public void PlaySound(WwiseSound sound)
+    public async void PlaySound(WwiseSound sound)
     {
-        MusicPlayer.SetSound(sound);
+        await MusicPlayer.SetSound(sound);
         MusicPlayer.Play();
     }
 
-    public void PlayWem(Wem wem)
+    public void PlayWem(WemItem wem)
     {
-        if (MusicPlayer.SetWem(wem))
+        if (MusicPlayer.SetWem(wem.Wem))
+        {
             MusicPlayer.Play();
+            _currentWem = wem;
+        }
+    }
+
+    public WemItem GetWem()
+    {
+        return _currentWem;
     }
 
     public void Load(D2Class_F5458080 res)
     {
         WwiseSound loop = res.MusicLoopSound;
-        WemList.ItemsSource = GetWemItems(loop);
+        WemList.ItemsSource = GetWemItems(loop).OrderByDescending(x => x.Wem.GetDuration());
     }
 
     public void Load(List<D2Class_40668080> res)
@@ -65,7 +76,7 @@ public partial class MusicWemsControl : UserControl
             res.SelectMany(x => GetWemItems(x.GetSound()))
         );
 
-        WemList.ItemsSource = sounds;
+        WemList.ItemsSource = sounds.OrderByDescending(x => x.Wem.GetDuration());
     }
 
     public void Load(List<WwiseSound> res)
@@ -74,7 +85,7 @@ public partial class MusicWemsControl : UserControl
             res.SelectMany(x => GetWemItems(x))
         );
 
-        WemList.ItemsSource = sounds;
+        WemList.ItemsSource = sounds.OrderByDescending(x => x.Wem.GetDuration());
     }
 
     public async void Load(D2Class_F7458080 res)
@@ -99,7 +110,38 @@ public partial class MusicWemsControl : UserControl
             });
         });
 
-        WemList.ItemsSource = wemItems;
+        WemList.ItemsSource = wemItems.OrderByDescending(x => x.Wem.GetDuration());
+    }
+
+    public void Export()
+    {
+        List<WemItem> wemItems = new();
+        Dispatcher.Invoke(() =>
+        {
+            var wemItem = GetWem();
+            if ((wemItem is null && !ExportAll.IsChecked.Value) || WemList.Items.Count == 0)
+            {
+                MessageBox.Show("Nothing selected to export");
+                return;
+            }
+            wemItems.Add(wemItem);
+            if (ExportAll.IsChecked.Value)
+                wemItems = WemList.Items.Cast<WemItem>().ToList();
+
+            List<string> stages = wemItems.Select((x, i) => $"Exporting {x.Hash}_{x.Name} ({i + 1}/{wemItems.Count()})").ToList();
+            MainWindow.Progress.SetProgressStages(stages);
+
+            if (MusicPlayer.IsPlaying())
+                MusicPlayer.Pause();
+        });
+
+        var saveDirectory = $"{ConfigSubsystem.Get().GetExportSavePath()}/Sound/Music";
+        Directory.CreateDirectory(saveDirectory);
+        wemItems.ForEach(wemItem =>
+        {
+            wemItem.Wem.SaveToFile($"{saveDirectory}/{wemItem.Hash}_{wemItem.Name}.wav");
+            MainWindow.Progress.CompleteStage();
+        });
     }
 }
 

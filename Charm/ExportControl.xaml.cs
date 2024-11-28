@@ -83,7 +83,7 @@ public partial class ExportControl : UserControl
         {
             MainWindow.Progress.SetProgressStages(new List<string>
             {
-                $"exporting {info.Name} {info.Hash}"
+                $"Exporting {info.Name} {info.Hash}"
             });
         }
         await Task.Run(() =>

@@ -1130,10 +1130,10 @@ public partial class TagListView : UserControl
         });
     }
 
-    private void SetExportFunction(Action<ExportInfo> function, int exportTypeFlags)
+    private void SetExportFunction(Action<ExportInfo> function, int exportTypeFlags, bool disableLoadingBar = false)
     {
         var viewer = GetViewer();
-        viewer.ExportControl.SetExportFunction(function, exportTypeFlags);
+        viewer.ExportControl.SetExportFunction(function, exportTypeFlags, disableLoadingBar);
         ShowBulkExportButton();
     }
 
@@ -1896,6 +1896,13 @@ public partial class TagListView : UserControl
                             musics.Add(res.Music.Hash);
                         }
                     }
+                    else if (resource is D2Class_18978080 res2)
+                    {
+                        if (res2.Unk1C != null)
+                        {
+                            musics.Add(res2.Unk1C.Hash);
+                        }
+                    }
                 }
             });
             if (activity.TagData.Unk18.GetValue(activity.GetReader()) is D2Class_6A988080 res)
@@ -1932,7 +1939,7 @@ public partial class TagListView : UserControl
             }
         }
 
-        Parallel.ForEach(musics, hash =>
+        Parallel.ForEach(musics.Distinct(), hash =>
         {
             _allTagItems.Add(new TagItem
             {
@@ -1951,6 +1958,9 @@ public partial class TagListView : UserControl
             viewer.MusicControl.Load(fileHash, extra.Extra);
         else
             viewer.MusicControl.Load(fileHash);
+
+        SetExportFunction(viewer.MusicControl.Export, (int)ExportTypeFlag.Full, true);
+        viewer.ExportControl.SetExportInfo(fileHash);
     }
 
     #endregion

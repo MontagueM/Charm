@@ -222,8 +222,8 @@ public struct D2Class_18978080 //uhh
     public TigerHash Unk18;
 
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public int Unk1C;
+    [SchemaField(0x1C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    public Tag<SMusicTemplate> Unk1C;
 
     //Beyond Light only below
 

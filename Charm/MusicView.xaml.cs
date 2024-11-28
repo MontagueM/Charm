@@ -99,4 +99,11 @@ public partial class MusicView : UserControl
             }
         }
     }
+
+    // This is bit of a hack since music stuff isnt actually a part of TagListView so gotta jump through some hoops to
+    // export fully. (At least I don't think there's a way of doing it right in TagListView?)
+    public void Export(ExportInfo info)
+    {
+        WemsControl.Export();
+    }
 }
