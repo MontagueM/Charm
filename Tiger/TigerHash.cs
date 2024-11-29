@@ -221,7 +221,7 @@ public static class FileHashExtensions
     {
         if (fileHash.IsInvalid())
         {
-            throw new Exception("Cannot get reference hash for invalid file hash.");
+            throw new Exception($"Cannot get reference hash for invalid file hash {fileHash}.");
         }
         return new FileHash(fileHash.GetFileMetadata().Reference.Hash32);
     }

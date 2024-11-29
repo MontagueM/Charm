@@ -303,7 +303,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         else
         {
             reader.DumpToFile();
-            throw new Exception($"Invalid bIs32Bit value ({bIs32Bit}) at Position {(reader.Position - 0x8 - 0x4).ToString("X")}");
+            throw new Exception($"Invalid bIs32Bit value ({bIs32Bit}) at Position {reader.Position - 0x8 - 0x4:X} in {reader.Hash:X}");
         }
     }
 
@@ -358,7 +358,12 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             else if (IsTigerDeserializeType(fieldType))
             {
                 fieldValue = DeserializeTigerType(reader, fieldType);
-                fieldSize = GetSchemaTypeSize(fieldType);
+
+                // fieldSize for DynamicStruct has to be the size of the type given, this seems to work fine, but idk if its optimal or not
+                if (fieldType.IsGenericType && fieldType.GetGenericTypeDefinition() == typeof(DynamicStruct<>))
+                    fieldSize = GetSchemaTypeSize(fieldType.GetGenericArguments()[0]); // Needs to be the type inside DynamicStruct<T>
+                else
+                    fieldSize = GetSchemaTypeSize(fieldType);
             }
             else if (IsTigerFileType(fieldType))
             {
@@ -371,14 +376,14 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
             {
                 // Seems to work fine? Mont, yell at me if this isnt okay
                 fieldValue = Enum.ToObject(fieldType, reader.ReadType(Enum.GetUnderlyingType(fieldInfo.FieldType)));
-                fieldSize = GetSchemaTypeSize(fieldType); //Marshal.SizeOf(Enum.GetUnderlyingType(fieldInfo.FieldType));
+                fieldSize = GetSchemaTypeSize(fieldType);
             }
             else if (fieldType.IsArray)
             {
                 var attr = GetAttribute<SchemaFieldAttribute>(fieldInfo);
                 if (attr == null)
                 {
-                    throw new Exception("Array type must have SchemaFieldAttribute to define array size.");
+                    throw new Exception($"Array type must have SchemaFieldAttribute to define array size. ({reader.Hash:X})");
                 }
                 int arraySize = attr.ArraySizeConst;
                 fieldValue = Activator.CreateInstance(fieldType, arraySize);
@@ -415,7 +420,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
 
             if (fieldSize == -1)
             {
-                throw new Exception($"Failed to get field size for field {fieldInfo.Name} of type {fieldType}");
+                throw new Exception($"Failed to get field size for field {fieldInfo.Name} of type {fieldType} ({reader.Hash:X})");
             }
             fieldOffset += fieldSize;
         }
@@ -473,7 +478,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         ITigerDeserialize? fieldValue = (ITigerDeserialize?)Activator.CreateInstance(fieldType);
         if (fieldValue == null)
         {
-            throw new Exception($"Failed to create schema field instance of type {fieldType}");
+            throw new Exception($"Failed to create schema field instance of type {fieldType} ({reader.Hash:X})");
         }
 
         fieldValue.Deserialize(reader);
@@ -485,7 +490,7 @@ public class SchemaDeserializer : Strategy.StrategistSingleton<SchemaDeserialize
         T fieldValue = Activator.CreateInstance<T>();
         if (fieldValue == null)
         {
-            throw new Exception($"Failed to create schema field instance of type {typeof(T)}");
+            throw new Exception($"Failed to create schema field instance of type {typeof(T)} ({reader.Hash:X})");
         }
 
         fieldValue.Deserialize(reader);

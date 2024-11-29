@@ -8,13 +8,15 @@ namespace Tiger;
 // could just be BinaryReader extensions but I like renaming it and bundling the changes together
 public class TigerReader : BinaryReader
 {
-    public TigerReader(Stream stream) : base(stream) { }
+    public TigerReader(Stream stream, uint hash = 0xFFFFFFFF) : base(stream) { Hash = hash; }
 
     public TigerReader(byte[] data) : base(new MemoryStream(data)) { }
 
     public TigerReader(string filePath) : base(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
     {
     }
+
+    public uint Hash { get; set; } = 0xFFFFFFFF;
 
     public long Position => BaseStream.Position;
 
@@ -122,7 +124,7 @@ public class DynamicArray<T> : List<T>, ITigerDeserialize
         }
         else
         {
-            throw new NotSupportedException("T must be a struct or a type that implements ITigerDeserialize");
+            throw new NotSupportedException($"T must be a struct or a type that implements ITigerDeserialize ({reader.Hash:X})");
         }
     }
 }
@@ -204,7 +206,7 @@ public class DynamicArrayUnloaded<T> : DynamicArray<T>
     {
         if (index < 0 || index >= Count)
         {
-            throw new IndexOutOfRangeException("Index out of range");
+            throw new IndexOutOfRangeException($"Index ({index}) out of range ({reader.Hash:X})");
         }
 
         return ReadElement(reader, index);
@@ -229,7 +231,7 @@ public class DynamicArrayUnloaded<T> : DynamicArray<T>
         }
         else
         {
-            throw new NotSupportedException("T must be a struct or a type that implements ITigerDeserialize");
+            throw new NotSupportedException($"T must be a struct or a type that implements ITigerDeserialize ({reader.Hash:X})");
         }
     }
 
@@ -592,6 +594,22 @@ public class ResourceInTablePointer<T> : ITigerDeserialize where T : struct
     {
         long resourcePointer = reader.ReadInt64();
         reader.Seek(resourcePointer - 8, SeekOrigin.Current);
+        Value = reader.ReadSchemaStruct<T>();
+    }
+}
+
+/// <summary>
+///  A structure inline with data, the defined structure should use NonSchemaStruct
+/// </summary> 
+// I really hope this is fine, im not good with this 'lower level' (is that the right way to put it?) stuff.
+// SchemaType Size has to be the size of the given struct, done in DeserializeSchema()
+[SchemaType(0x0)]
+public class DynamicStruct<T> : ITigerDeserialize where T : struct
+{
+    public T Value;
+
+    public void Deserialize(TigerReader reader)
+    {
         Value = reader.ReadSchemaStruct<T>();
     }
 }

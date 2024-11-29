@@ -24,7 +24,7 @@ public class TigerFile
 
     public TigerReader GetReader()
     {
-        return new TigerReader(GetStream());
+        return new TigerReader(GetStream(), Hash);
     }
 
     public MemoryStream GetStream()
@@ -102,7 +102,7 @@ public class TigerReferenceFile<THeader> : Tag<THeader> where THeader : struct
 
     public TigerReader GetReferenceReader()
     {
-        return new TigerReader(GetReferenceStream());
+        return new TigerReader(GetReferenceStream(), ReferenceHash);
     }
 
     public MemoryStream GetReferenceStream()
