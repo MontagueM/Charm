@@ -95,18 +95,20 @@ public class FbxExporter : AbstractExporter
                 AddEntity(fbxScene, entity);
             }
 
-            // TODO: TerrainMeshes is kinda dumb just for individual exports
-            if (exportIndiv)
+            foreach (ExporterMesh mesh in scene.TerrainMeshes)
             {
-                foreach (ExporterMesh mesh in scene.TerrainMeshes)
+                if (mesh.ID != null)
+                    AddVertexAO(mesh, (ulong)mesh.ID);
+
+                if (exportIndiv)
                 {
                     outputIndivDir = Path.Join(outputDirectory, "Models", "Terrain");
-                    FbxScene fbxIndivScene = FbxScene.Create(_manager, mesh.Hash);
+                    FbxScene fbxIndivScene = FbxScene.Create(_manager, $"{mesh.Hash}_{mesh.Index}");
                     AddMesh(fbxIndivScene, mesh);
-                    ExportScene(fbxIndivScene, Path.Join(outputIndivDir, mesh.Hash));
+                    ExportScene(fbxIndivScene, Path.Join(outputIndivDir, $"{mesh.Hash}_{mesh.Index}"));
                 }
+                AddMesh(fbxScene, mesh);
             }
-
 
             foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
             {
@@ -119,6 +121,28 @@ public class FbxExporter : AbstractExporter
 
             ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
         }
+    }
+
+    public void AddVertexAO(ExporterMesh mesh, ulong identifier)
+    {
+        if (!Exporter.Get().GetOrCreateGlobalScene().TryGetItem<SStaticAOResource>(out SStaticAOResource mapAOHash))
+            return;
+
+        var mapAO = FileResourcer.Get().GetSchemaTag<SStaticAmbientOcclusion>(mapAOHash.MapAO);
+        var offset = mapAO.TagData.AO_1.Value.Mappings.First(x => x.Identifier == identifier).Offset;
+        using TigerReader handle = mapAO.TagData.AO_1.Value.Buffer.GetReferenceReader();
+
+        foreach (var part in mesh.Parts.Select(x => x.MeshPart))
+        {
+            for (int i = 0; i < part.VertexIndices.Count; i++)
+            {
+                int index = (int)part.VertexIndices[i];
+                handle.BaseStream.Seek(index + offset, SeekOrigin.Begin);
+                byte value = handle.ReadByte();
+                part.VertexAO.Add(new Vector4((byte)1, (byte)1, (byte)1, value));
+            }
+        }
+
     }
 
     private void AddDynamicPoint(FbxScene fbxScene, SMapDataEntry point)
@@ -312,6 +336,7 @@ public class FbxExporter : AbstractExporter
         fbxMesh.AddNormals(part, isEntity);
         fbxMesh.AddTangents(part);
         fbxMesh.AddColours(part);
+        fbxMesh.AddVertexAO(part);
         fbxMesh.AddExtraData(part);
 
         if (part.Material != null)
@@ -525,6 +550,25 @@ public static class FbxMeshExtensions
         {
             fbxMesh.CreateLayer();
         }
+
+        fbxMesh.GetLayer(1).SetVertexColors(colLayer);
+    }
+
+    public static void AddVertexAO(this FbxMesh fbxMesh, ExporterPart part)
+    {
+        if (!part.MeshPart.VertexAO.Any())
+            return;
+
+        FbxLayerElementVertexColor colLayer = FbxLayerElementVertexColor.Create(fbxMesh, "VertexAO");
+        colLayer.SetMappingMode(FbxLayerElement.EMappingMode.eByControlPoint);
+        colLayer.SetReferenceMode(FbxLayerElement.EReferenceMode.eDirect);
+        foreach (var colour in part.MeshPart.VertexAO)
+        {
+            colLayer.GetDirectArray().Add(new FbxColor(colour.X, colour.Y, colour.Z, colour.W));
+        }
+
+        if (fbxMesh.GetLayer(1) == null)
+            fbxMesh.CreateLayer();
 
         fbxMesh.GetLayer(1).SetVertexColors(colLayer);
     }

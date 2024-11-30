@@ -418,7 +418,6 @@ public partial class ActivityMapEntityView : UserControl
         ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{hash}_EntityPoints", ExportType.EntityPoints);
         ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.Map);
         ExporterScene skyScene = Exporter.Get().CreateScene($"{hash}_SkyEnts", ExportType.Map);
-        ExporterScene terrainScene = Exporter.Get().CreateScene($"{hash}_Terrain", ExportType.Terrain);
         ExporterScene decoratorScene = Exporter.Get().CreateScene($"{hash}_Decorators", ExportType.Map);
 
         Parallel.ForEach(dataTables, data =>
@@ -455,7 +454,6 @@ public partial class ActivityMapEntityView : UserControl
                         //    System.Console.WriteLine($"World origin resource {dataTable.Hash} Resource? {entry.DataResource.GetValue(dataTable.GetReader())}");
                         dynamicPointScene.AddEntityPoints(entry);
                     }
-
 
                     switch (entry.DataResource.GetValue(dataTable.GetReader()))
                     {
@@ -521,11 +519,6 @@ public partial class ActivityMapEntityView : UserControl
                                     }
                                 }
                             }
-                            break;
-
-                        case SMapTerrainResource terrain:
-                            terrain.Terrain?.Load();
-                            terrain.Terrain.LoadIntoExporter(terrainScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
                             break;
 
                         case SDecoratorMapResource decorator:

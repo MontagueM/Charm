@@ -156,20 +156,20 @@ public partial class MapView : UserControl
     public static void ExportFullMap(Tag<SMapContainer> map, string savePath)
     {
         ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.Map);
-
-        string meshName = map.Hash.ToString();
         Directory.CreateDirectory(savePath);
 
-        ExtractDataTables(map, scene, ExportTypeFlag.Full);
+        ExtractDataTables(map, scene, savePath);
 
         if (_config.GetUnrealInteropEnabled())
         {
-            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, meshName, AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
+            AutomatedExporter.SaveInteropUnrealPythonFile(savePath, map.Hash.ToString(), AutomatedExporter.ImportType.Map, _config.GetOutputTextureFormat(), _config.GetSingleFolderMapsEnabled());
         }
     }
 
-    private static void ExtractDataTables(Tag<SMapContainer> map, ExporterScene scene, ExportTypeFlag exportTypeFlag)
+    private static void ExtractDataTables(Tag<SMapContainer> map, ExporterScene scene, string savePath)
     {
+        ExporterScene terrainScene = Exporter.Get().CreateScene($"{map.Hash}_Terrain", ExportType.Terrain);
+
         Parallel.ForEach(map.TagData.MapDataTables, data =>
         {
             if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
@@ -185,14 +185,21 @@ public partial class MapView : UserControl
             {
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
                 {
-                    if (exportTypeFlag == ExportTypeFlag.Full)
-                    {
-                        staticMapResource.StaticMapParent.Load();
-                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene);
-                    }
+                    staticMapResource.StaticMapParent.Load();
+                    staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene);
+                }
+                else if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SStaticAOResource AO)
+                {
+                    Exporter.Get().GetOrCreateGlobalScene().AddToGlobalScene(AO);
+                }
+                else if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrain)
+                {
+                    terrain.Terrain?.Load();
+                    terrain.Terrain.LoadIntoExporter(terrainScene, savePath, terrain.Identifier);
                 }
             });
         });
+
     }
 
     // TODO: Merge all this into one, or simplify it?

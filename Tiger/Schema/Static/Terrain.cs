@@ -14,7 +14,7 @@ public class Terrain : Tag<STerrain>
     }
 
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool bSaveShaders)
+    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, ulong? identifier = null)
     {
         var _config = ConfigSubsystem.Get();
         var _exportIndiv = _config.GetIndvidualStaticsEnabled();
@@ -61,7 +61,7 @@ public class Terrain : Tag<STerrain>
                 // MainGeom0 LOD0, GripStock0 LOD1, Stickers0 LOD2?
                 if ((ELodCategory)partEntry.DetailLevel == ELodCategory.MainGeom0)
                 {
-                    if (partEntry.Material != null || partEntry.Material.VertexShader != null)
+                    if (partEntry.Material != null && partEntry.Material.VertexShader != null)
                     {
                         var part = MakePart(partEntry);
 
@@ -80,10 +80,7 @@ public class Terrain : Tag<STerrain>
                 }
             }
 
-            scene.AddStatic($"{Hash}", parts.Keys.ToList());
-
-            if (_exportIndiv)
-                scene.AddTerrain($"{Hash}_{i}", parts.Keys.ToList());
+            scene.AddTerrain($"{Hash}", parts.Keys.ToList(), identifier, i);
 
             if (_config.GetS2VMDLExportEnabled() && _exportIndiv)
                 Source2Handler.SaveTerrainVMDL($"{Hash}_{i}", saveDirectory, parts.Keys.ToList());
@@ -126,9 +123,6 @@ public class Terrain : Tag<STerrain>
             uniqueVertexIndices.Add(index.Z);
         }
         part.VertexIndices = uniqueVertexIndices.ToList();
-
-        //_tag.Vertices1.ReadVertexDataFromLayout(part, uniqueVertexIndices, 0);
-        //_tag.Vertices2.ReadVertexDataFromLayout(part, uniqueVertexIndices, 1);
 
         _tag.Vertices1.ReadVertexDataFromLayout(part, uniqueVertexIndices, 0);
         _tag.Vertices2?.ReadVertexDataFromLayout(part, uniqueVertexIndices, 1);
@@ -230,9 +224,7 @@ public class Terrain : Tag<STerrain>
 public struct SMapTerrainResource
 {
     [SchemaField(0x10)]
-    public short Unk10;  // tile x-y coords?
-    public short Unk12;
-    public TigerHash Unk14;
+    public ulong Identifier;
     [NoLoad]
     public Terrain Terrain;
     public Tag<SOcclusionBounds> TerrainBounds;

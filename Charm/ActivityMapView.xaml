@@ -254,7 +254,7 @@
                     MouseEnter="ExportButton_MouseEnter"
                     MouseLeave="ExportButton_MouseLeave"
                     Style="{DynamicResource D2StyleButton}"
-                    Tag="EXPORT STATIC MAP:Export only the static parts of this map">
+                    Tag="EXPORT STATIC MAP:Export this maps statics + terrain">
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"
@@ -272,7 +272,7 @@
                     MouseEnter="ExportButton_MouseEnter"
                     MouseLeave="ExportButton_MouseLeave"
                     Style="{DynamicResource D2StyleButton}"
-                    Tag="EXPORT RESOURCES:Export this maps resources. These include...&#x0a; Entities&#x0a; Terrain&#x0a; Sky Objects&#x0a; Decorators (foliage, small rocks, etc)&#x0a; Lights&#x0a; Decal and Cubemap information">
+                    Tag="EXPORT RESOURCES:Export this maps resources. These include...&#x0a; Entities&#x0a; Sky Objects&#x0a; Decorators (foliage, small rocks, etc)&#x0a; Lights&#x0a; Decal and Cubemap information">
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"

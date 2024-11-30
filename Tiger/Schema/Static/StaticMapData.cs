@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Tiger.Exporters;
 using Tiger.Schema.Entity;
+using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
 
@@ -859,6 +860,37 @@ public struct SMapAtmosphere
     [Tag64]
     public Texture TextureUnk1; // 
     public Texture Texture2; // 
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "406A8080", 0x18)]
+public struct SStaticAOResource
+{
+    [SchemaField(0x10)]
+    public FileHash MapAO;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "196D8080", 0x78)]
+public struct SStaticAmbientOcclusion
+{
+    [SchemaField(0x8)]
+    public DynamicStruct<SAmbientOcclusionBuffer> AO_1;
+    public DynamicStruct<SAmbientOcclusionBuffer> AO_2;
+    public DynamicStruct<SAmbientOcclusionBuffer> AO_3;
+}
+
+[NonSchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x18)]
+public struct SAmbientOcclusionBuffer
+{
+    public VertexBuffer Buffer;
+    [SchemaField(0x8)]
+    public DynamicArray<SStaticAmbientOcclusionMappings> Mappings;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "216D8080", 0x20)]
+public struct SStaticAmbientOcclusionMappings
+{
+    public ulong Identifier;
+    public uint Offset;
 }
 
 // /// <summary>

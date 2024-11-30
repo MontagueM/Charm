@@ -65,6 +65,18 @@ class MetadataScene
             }
         }
 
+        foreach (var mesh in scene.TerrainMeshes)
+        {
+            foreach (var part in mesh.Parts)
+            {
+                if (part.Material != null)
+                {
+                    AddMaterial(part.Material);
+                }
+                AddPart(part, part.Name);
+            }
+        }
+
         foreach (var meshInstanced in scene.StaticMeshInstances)
         {
             AddInstanced(meshInstanced.Key, meshInstanced.Value);

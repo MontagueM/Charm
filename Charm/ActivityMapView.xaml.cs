@@ -236,21 +236,24 @@ public partial class ActivityMapView : UserControl
             MapControl.Visibility = Visibility.Hidden;
         });
 
-        var staticmaps = StaticList.Items.Cast<DisplayStaticMap>().Where(x => x.Name != "Select all");
-        var maps = new List<Tag<SMapContainer>>();
-        foreach (DisplayStaticMap item in staticmaps)
+        Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(_currentBubble.Hash);
+        var maps = new List<FileHash>();
+        bubbleMaps.TagData.MapResources.ForEach(m =>
         {
-            maps.Add(FileResourcer.Get().GetSchemaTag<SMapContainer>(item.Hash));
-        }
+            var containerHash = m.GetMapContainer().Hash;
+            if (!maps.Contains(containerHash))
+                maps.Add(containerHash);
+        });
 
-        List<string> mapStages = staticmaps.Select((x, i) => $"Preparing {x.Name} ({i + 1}/{staticmaps.Count()})").ToList();
+        List<string> mapStages = maps.Select((x, i) => $"Preparing {x} ({i + 1}/{maps.Count()})").ToList();
         mapStages.Add("Exporting Static Map");
         MainWindow.Progress.SetProgressStages(mapStages);
 
+        Tiger.Exporters.Exporter.Get().GetOrCreateGlobalScene();
         string savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/Maps/{_currentActivity.DestinationName}/";
         maps.ForEach(map =>
         {
-            MapView.ExportFullMap(map, savePath);
+            MapView.ExportFullMap(FileResourcer.Get().GetSchemaTag<SMapContainer>(map), savePath);
             MainWindow.Progress.CompleteStage();
         });
 
@@ -354,6 +357,7 @@ public partial class ActivityMapView : UserControl
         mapStages.Add("Exporting");
         MainWindow.Progress.SetProgressStages(mapStages);
 
+        Tiger.Exporters.Exporter.Get().GetOrCreateGlobalScene();
         string savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/Maps/{_currentActivity.DestinationName}/";
         maps.ForEach(map =>
         {

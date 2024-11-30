@@ -12,6 +12,7 @@ namespace Tiger.Exporters;
 public class Exporter : Subsystem<Exporter>
 {
     private readonly List<ExporterScene> _scenes = new();
+    private GlobalExporterScene? _globalScene = null;
 
     public class ExportEventArgs : EventArgs
     {
@@ -43,9 +44,25 @@ public class Exporter : Subsystem<Exporter>
         return scene;
     }
 
+    /// <summary>
+    /// Gets or creates a Global Exporter scene. 
+    /// A Global scene can be used to store anything that needs to be accessed across other scenes.
+    /// Map Vertex AO for Terrain being one example. (Map AO and Terrain are stored in different data tables)
+    /// The Global Scene gets reset with each full export, and does not actually export anything itself.
+    /// </summary>
+    /// <returns>The Global Scene</returns>
+    public GlobalExporterScene GetOrCreateGlobalScene()
+    {
+        if (_globalScene == null)
+            _globalScene = new GlobalExporterScene();
+
+        return _globalScene;
+    }
+
     public void Reset()
     {
         _scenes.Clear();
+        _globalScene = null;
     }
 
     /// <summary>
@@ -335,9 +352,9 @@ public class ExporterScene
         EntityInstances[name].Add(transform);
     }
 
-    public void AddTerrain(string meshHash, List<StaticPart> parts)
+    public void AddTerrain(string meshHash, List<StaticPart> parts, ulong? id = null, int index = 0)
     {
-        ExporterMesh mesh = new(meshHash);
+        ExporterMesh mesh = new(meshHash, id, index);
         for (int i = 0; i < parts.Count; i++)
         {
             StaticPart part = parts[i];
@@ -352,6 +369,55 @@ public class ExporterScene
     }
 }
 
+public class GlobalExporterScene : ExporterScene
+{
+    private ConcurrentBag<dynamic> _objects = new();
+
+    public GlobalExporterScene()
+    {
+        Name = "Global";
+        Type = ExportType.Global;
+    }
+
+    /// <summary>
+    /// Adds an item to the Global Scene's objects.
+    /// Ensures only one of each type exists in the bag.
+    /// </summary>
+    /// <param name="item">The dynamic item to add.</param>
+    public void AddToGlobalScene(dynamic item)
+    {
+        if (_objects == null)
+            _objects = new ConcurrentBag<dynamic>();
+
+        // Check if an item of the same type already exists
+        var type = item.GetType();
+        if (_objects.Any(existing => existing.GetType() == type))
+            throw new InvalidOperationException($"An item of type {type.Name} already exists in the Global Scene.");
+
+        _objects.Add(item);
+    }
+
+    /// <summary>
+    /// Attempts to get an item of a specific type from the Global Scene's objects.
+    /// </summary>
+    /// <typeparam name="T">The type of the item to retrieve.</typeparam>
+    /// <param name="item">The retrieved item if found.</param>
+    /// <returns>True if an item of the specified type was found; otherwise, false.</returns>
+    public bool TryGetItem<T>(out T item)
+    {
+        item = default;
+
+        var matchingItem = _objects.FirstOrDefault(existing => existing is T);
+        if (!EqualityComparer<T>.Default.Equals(matchingItem, default(T)))
+        {
+            item = (T)matchingItem;
+            return true;
+        }
+
+        return false;
+    }
+}
+
 public class ExporterEntity
 {
     public ExporterMesh Mesh { get; set; }
@@ -363,13 +429,21 @@ public class ExporterMesh
     public string Hash { get; set; }
     public List<ExporterPart> Parts { get; } = new();
 
-    public ExporterMesh(FileHash hash)
+    // These are currently only used on Terrain, might be useful later for other things?
+    public ulong? ID { get; set; }
+    public int Index { get; set; } = 0;
+
+    public ExporterMesh(FileHash hash, ulong? id = null, int index = 0)
     {
         Hash = hash;
+        ID = id;
+        Index = index;
     }
-    public ExporterMesh(string hash)
+    public ExporterMesh(string hash, ulong? id = null, int index = 0)
     {
         Hash = hash;
+        ID = id;
+        Index = index;
     }
 
     public void AddPart(string name, MeshPart part, int index)
@@ -398,32 +472,6 @@ public class ExporterPart
     }
 }
 
-// /// <summary>
-// /// A wrapper for any exporter type that can be instanced.
-// /// Side effect is can also be used to place objects in the world at not-origin.
-// /// </summary>
-// public class ExporterInstanced<T> where T : class
-// {
-//     public T Object { get; }
-//     public List<Transform> Transforms { get; set; } = new();
-//
-//     public ExporterInstanced(FileHash hash)
-//     {
-//         Object = (T)Activator.CreateInstance(typeof(T), new object[]{hash});
-//     }
-//
-//     public void AddTransforms(IEnumerable<SStaticMeshInstanceTransform> transforms)
-//     {
-//         Transforms.AddRange(transforms.Select(t => new Transform
-//         {
-//             Position = t.Position,
-//             Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
-//             Quaternion = t.Rotation,
-//             Scale = t.Scale
-//         }));
-//     }
-// }
-
 public struct Transform
 {
     public Vector3 Position { get; set; }
@@ -441,6 +489,7 @@ public struct MaterialTexture
 
 public enum ExportType
 {
+    Global,
     Static,
     Entity,
     Map,
