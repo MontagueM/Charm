@@ -6,7 +6,12 @@ A new, flashier, fully C# version of my previous tool Phonon.
 
 It is designed to support many versions of the Tiger engine, including many game versions of Destiny 2.
 
-The tool focuses on providing as much access to the information in the game files as possible, ideal for artists and content preservation.
+The tool focuses on providing as much access to the information in the game files as possible, **ideal for artists and content preservation**.
+> [!CAUTION]
+> # Disclaimer
+> * Before you go any further, understand that Charm ***IS NOT*** a datamining tool! While it can access many things in the game files, it's main purpose is focused towards **3D artists, content preservation and learning**!
+> * Please **DO NOT** use this tool to spread leaks and spoilers or anything that may break Bungie's TOS. Don't ruin the experience for yourself and others. Uncover things the way they were intended!
+> * Seeing this tool used for such acts can and will result in fewer and fewer public updates and releases. I enjoy maintaining and updating this for others, don't be the one to ruin it.
 
 ## How do I install and use it?
 
@@ -47,19 +52,34 @@ Feel free to raise an issue on this repository on in DMR `#charm-tool-help` if y
 
 Also take a look at the [Charm wiki](https://github.com/MontagueM/DestinyDocs/blob/main/Charm/Home.md) for more info.
 
-## Source 2: **Only supports S&Box**
- - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/Source-2-Importing)
- - Generates .shader files for accurate game shaders
- - Generates .vmat (material) and .vmdl (model) files
-
-### Some tricks
-
-* Middle click tabs to close them.
-* In a packages view, you can type in any hash and it will take you to it. No need to look through all the packages.
+> [!TIP]
+> ## Some tips and tricks
+> * Middle click tabs to close them.
+> * In a packages view, you can type in any hash and it will take you to it. No need to look through all the packages.
+> * If you already have the hash of an Entity (Dynamic), you can press CTRL+D to enter 'Dev' view. Paste the hash into the box and press enter. It will open in a viewer and be exported
 
 ## Reporting issues
 
 If you experience any issue, you can register an issue in this repository. If the program has crashed, it is extremely valuable to provide the charm.log file.
+
+## Screenshots
+<p float="left">
+    <img src="https://github.com/user-attachments/assets/e93e3c4d-9ec4-4829-a94c-c650d03cffc4" width="400" />
+    <img src="https://github.com/user-attachments/assets/ecc2c483-717f-4412-a7c1-e42764af3fe7" width="400" /> 
+    <img src="https://github.com/user-attachments/assets/a1b1a6ee-17be-4872-ab7c-dd0116229a64" width="400" />
+    <img src="https://github.com/user-attachments/assets/926a6112-1aad-48e7-9a79-63ff5c30873d" width="400" />
+    <img src="https://github.com/user-attachments/assets/4cd8abfd-3eda-4d90-874f-5a2da36f2dc5" width="400" />
+    <img src="https://github.com/user-attachments/assets/da13a70b-4d89-4e4a-af97-b4e56c7920d7" width="400" />
+</p>
+
+
+## S&Box
+ - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/Source-2-Importing)
+ - Generates .shader files for accurate game shaders
+ - Generates .vmat (material) and .vmdl (model) files
+
+## Unreal Engine
+- Unreal Engine importing isn't supported at this current moment. All the discoveries with maps (skyboxes, lights, etc) and rendering and what not have made things a little complicated and I (Delta) personally have little experience in scripting for UE
 
 ## Learning and Contributing
 
