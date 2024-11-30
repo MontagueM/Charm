@@ -9,7 +9,7 @@ It is designed to support many versions of the Tiger engine, including many game
 The tool focuses on providing as much access to the information in the game files as possible, **ideal for artists and content preservation**.
 > [!CAUTION]
 > # Disclaimer
-> * Before you go any further, understand that Charm ***IS NOT*** a datamining tool! While it can access many things in the game files, it's main purpose is focused towards **3D artists, content preservation and learning**!
+> * Before you go any further, understand that Charm ***IS NOT*** a datamining tool! While it can access many things in the game files, it's main purpose is focused towards **3D artists, content preservation and learning how the game works**!
 > * Please **DO NOT** use this tool to spread leaks and spoilers or anything that may break Bungie's TOS. Don't ruin the experience for yourself and others. Uncover things the way they were intended!
 > * Seeing this tool used for such acts can and will result in fewer and fewer public updates and releases. I enjoy maintaining and updating this for others, don't be the one to ruin it.
 
