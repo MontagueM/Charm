@@ -284,13 +284,13 @@ public class FbxHandler
         mesh.AddDeformer(skin);
     }
 
-    private void AddMaterial(FbxMesh mesh, FbxNode node, int index, IMaterial material)
+    private void AddMaterial(FbxMesh mesh, FbxNode node, int index, Material material)
     {
         FbxSurfacePhong fbxMaterial;
         FbxLayerElementMaterial materialLayer;
         lock (_fbxLock)
         {
-            fbxMaterial = FbxSurfacePhong.Create(_scene, material.FileHash.ToString());
+            fbxMaterial = FbxSurfacePhong.Create(_scene, material.Hash.ToString());
             materialLayer = FbxLayerElementMaterial.Create(mesh, $"matlayer_{node.GetName()}_{index}");
         }
         fbxMaterial.DiffuseFactor.Set(1);

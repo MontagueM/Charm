@@ -240,7 +240,7 @@ public partial class DevView : UserControl
                     materialView.Load(hash);
                     _mainWindow.MakeNewTab(hash, materialView);
                     _mainWindow.SetNewestTabSelected();
-                    IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
+                    Material material = FileResourcer.Get().GetFile<Material>(hash);
                     material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
                     break;
                 case 0x80801AB5:
@@ -350,7 +350,7 @@ public partial class DevView : UserControl
         var hashes = File.ReadAllLines(BatchList.Text);
         foreach (var hash in hashes)
         {
-            IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
+            Material material = FileResourcer.Get().GetFile<Material>(hash);
             material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
         }
         MessageBox.Show($"Batch export of {hashes.Length} materials completed");

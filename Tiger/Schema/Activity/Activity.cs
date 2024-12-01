@@ -48,7 +48,7 @@ namespace Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON
                 if (_destinationName != null)
                     return _destinationName;
 
-                _destinationName = GetDestinationName();
+                _destinationName = Helpers.SanitizeString(GetDestinationName()); ;
                 return _destinationName;
             }
         }
@@ -168,7 +168,7 @@ namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601
                 if (_destinationName != null)
                     return _destinationName;
 
-                _destinationName = GetDestinationName();
+                _destinationName = Helpers.SanitizeString(GetDestinationName());
                 return _destinationName;
             }
         }
@@ -308,7 +308,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
                 if (_destinationName != null)
                     return _destinationName;
 
-                _destinationName = GetDestinationName();
+                _destinationName = Helpers.SanitizeString(GetDestinationName()); ;
                 return _destinationName;
             }
         }

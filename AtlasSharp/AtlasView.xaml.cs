@@ -243,7 +243,7 @@ public partial class AtlasView : UserControl
                 continue;
             }
 
-            // part.Material.VertexShader.TempDumpRef();
+            // part.Material.Vertex.Shader.TempDumpRef();
 
             PartMaterial partMaterial = new(part.Material, strides);
             PartInfo partInfo = new() { IndexOffset = part.IndexOffset, IndexCount = part.IndexCount, Material = partMaterial };
@@ -284,24 +284,24 @@ public partial class AtlasView : UserControl
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public Blob[] PSSamplers;
 
-        public PartMaterial(IMaterial material, List<int> strides)
+        public PartMaterial(Material material, List<int> strides)
         {
-            if (material.VertexShader == null || material.PixelShader == null)
+            if (material.Vertex.Shader == null || material.Pixel.Shader == null)
             {
                 throw new Exception();
             }
-            VSBytecode = new Blob(material.VertexShader.GetBytecode());
-            PSBytecode = new Blob(material.PixelShader.GetBytecode());
+            VSBytecode = new Blob(material.Vertex.Shader.GetBytecode());
+            PSBytecode = new Blob(material.Pixel.Shader.GetBytecode());
 
             InputSignatures = new InputSignature[8];
             int sigIndex = 0;
 
-            if (material.VertexShader.InputSignatures.Count > 8)
+            if (material.Vertex.Shader.InputSignatures.Count > 8)
             {
                 throw new Exception();
             }
 
-            Tiger.Schema.DXBCIOSignature[] inputSignatures = material.VertexShader.InputSignatures.ToArray();
+            Tiger.Schema.DXBCIOSignature[] inputSignatures = material.Vertex.Shader.InputSignatures.ToArray();
             Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
 
             foreach (Tiger.Schema.DXBCIOSignature signature in inputSignatures)
@@ -358,17 +358,17 @@ public partial class AtlasView : UserControl
             }
 
             VSTextures = new Blob[16];
-            if (material.EnumerateVSTextures().ToList().Count > 16)
+            if (material.Vertex.EnumerateTextures().ToList().Count > 16)
             {
                 throw new Exception();
             }
-            foreach (STextureTag vsTexture in material.EnumerateVSTextures())
+            foreach (STextureTag vsTexture in material.Vertex.EnumerateTextures())
             {
-                if (vsTexture.Texture == null)
+                if (vsTexture.GetTexture() == null)
                 {
                     continue;
                 }
-                byte[] final = vsTexture.Texture.GetDDSBytes((DXGI_FORMAT)vsTexture.Texture.TagData.Format);
+                byte[] final = vsTexture.GetTexture().GetDDSBytes((DXGI_FORMAT)vsTexture.GetTexture().TagData.Format);
                 if (vsTexture.TextureIndex >= 16)
                 {
                     throw new Exception();
@@ -377,17 +377,17 @@ public partial class AtlasView : UserControl
             }
 
             PSTextures = new Blob[32];
-            if (material.EnumeratePSTextures().ToList().Count > 32)
+            if (material.Pixel.EnumerateTextures().ToList().Count > 32)
             {
                 throw new Exception();
             }
-            foreach (STextureTag psTexture in material.EnumeratePSTextures())
+            foreach (STextureTag psTexture in material.Pixel.EnumerateTextures())
             {
-                if (psTexture.Texture == null)
+                if (psTexture.GetTexture() == null)
                 {
                     continue;
                 }
-                byte[] final = psTexture.Texture.GetDDSBytes((DXGI_FORMAT)psTexture.Texture.TagData.Format);
+                byte[] final = psTexture.GetTexture().GetDDSBytes((DXGI_FORMAT)psTexture.GetTexture().TagData.Format);
                 if (psTexture.TextureIndex >= 32)
                 {
                     throw new Exception();
@@ -395,9 +395,9 @@ public partial class AtlasView : UserControl
                 PSTextures[psTexture.TextureIndex] = new Blob(final);
             }
 
-            if (material.PSVector4Container.IsValid())
+            if (material.Pixel.Vector4Container.IsValid())
             {
-                TigerFile container = FileResourcer.Get().GetFile(material.PSVector4Container.GetReferenceHash());
+                TigerFile container = FileResourcer.Get().GetFile(material.Pixel.Vector4Container.GetReferenceHash());
                 PScb0 = new Blob(container.GetData());
             }
             else
@@ -406,13 +406,13 @@ public partial class AtlasView : UserControl
             }
 
             VSSamplers = new Blob[16];
-            if (material.VS_Samplers.Count > 16)
+            if (material.VSSamplers.Count > 16)
             {
                 throw new Exception();
             }
-            for (int i = 0; i < material.VS_Samplers.Count; i++)
+            for (int i = 0; i < material.VSSamplers.Count; i++)
             {
-                DirectXSampler vsSampler = material.VS_Samplers[i];
+                DirectXSampler vsSampler = material.VSSamplers[i];
 
                 // for some reason samplers can actually be textures too? idk
                 if (PackageResourcer.Get().GetFileMetadata(vsSampler.Hash).Type == 32)
@@ -424,17 +424,17 @@ public partial class AtlasView : UserControl
             }
 
             PSSamplers = new Blob[16];
-            if (material.PS_Samplers.Count > 16)
+            if (material.PSSamplers.Count > 16)
             {
                 throw new Exception();
             }
 
-            // File.WriteAllText($"TempFiles/PSBytecode_{material.FileHash}.txt", material.Decompile(material.PixelShader.GetBytecode(), material.FileHash));
+            // File.WriteAllText($"TempFiles/PSBytecode_{material.FileHash}.txt", material.Decompile(material.Pixel.Shader.GetBytecode(), material.FileHash));
             // PSBytecode.TempDump(material.FileHash);
 
-            for (int i = 0; i < material.PS_Samplers.Count; i++)
+            for (int i = 0; i < material.PSSamplers.Count; i++)
             {
-                DirectXSampler psSampler = material.PS_Samplers[i];
+                DirectXSampler psSampler = material.PSSamplers[i];
 
                 // for some reason samplers can actually be textures too? idk
                 if (PackageResourcer.Get().GetFileMetadata(psSampler.Hash).Type == 32)

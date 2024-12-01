@@ -31,13 +31,16 @@ public class Lights : Tag<D2Class_656C8080>
             Texture cookie = null;
             if (lightType == LightType.Spot)
             {
-                IMaterial shading = FileResourcer.Get().GetFileInterface<IMaterial>(data.Shading);
-                if (shading.EnumeratePSTextures().Any())
+                Material shading = FileResourcer.Get().GetFile<Material>(data.Shading);
+                if (shading is null)
+                    continue;
+
+                if (shading.Pixel.EnumerateTextures().Any())
                 {
                     if (!Directory.Exists($"{savePath}/Textures"))
                         Directory.CreateDirectory($"{savePath}/Textures");
 
-                    cookie = shading.EnumeratePSTextures().First().Texture;
+                    cookie = shading.Pixel.EnumerateTextures().First().GetTexture();
                     cookie.SavetoFile($"{savePath}/Textures/{cookie.Hash}");
                     if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
                         Source2Handler.SaveVTEX(cookie, $"{savePath}/Textures");

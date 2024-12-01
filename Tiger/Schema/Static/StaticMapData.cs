@@ -43,7 +43,7 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
                 {
                     var materialEntry = entry.TagData.MaterialTable[infoEntry.MaterialIndex];
                     // Material is (probably) used for depth pass, so ignore this mesh
-                    if (materialEntry.Material.Unk08 != 1)
+                    if (materialEntry.Material.TagData.Unk08 != 1)
                         continue;
 
                     if (!statics.ContainsKey(staticEntry.Vertices0.Hash))
@@ -193,7 +193,7 @@ public class StaticMapData_D1 : Tag<SStaticMapData_D1>
         public short InstanceCount; // Instance count for this static
         public short TransformIndex; // Index in InstanceTransforms file
         public short MaterialIndex;
-        public IMaterial Material;
+        public Material Material;
         public int VertexLayoutIndex;
         public SStaticMeshData_D1 Data;
     }
@@ -538,9 +538,6 @@ public struct SStaticMapParent
     // no filesize
     [SchemaField(0x8)]
     public StaticMapData StaticMap;  // could make it StaticMapData but dont want it to load it, could have a NoLoad option
-    [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x2C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public TigerHash Unk2C;
 }
 
 /// <summary>
@@ -576,7 +573,7 @@ public struct D2Class_786A8080
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "7D6A8080", 0xC)]
 public struct D2Class_7D6A8080
 {
-    public IMaterial Unk00;
+    public Material Unk00;
     public Tag<D2Class_A16D8080> Unk04;
     public int Unk08;
 }
@@ -626,12 +623,12 @@ public struct SMapShadowingLight
     // Not really a point in even loading these
     [SchemaField(0x90, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public FileHash Shading; // For some reason using IMaterial breaks tag reading....?
-    //public IMaterial Shading_Shadowing;
-    //public IMaterial Volumetric;
-    //public IMaterial Volumetric_Shadowing;
-    //public IMaterial Lightprobe;
-    //public IMaterial Lightprobe_Shadowing;
+    public FileHash Shading; // For some reason using Material breaks tag reading....?
+    //public Material Shading_Shadowing;
+    //public Material Volumetric;
+    //public Material Volumetric_Shadowing;
+    //public Material Lightprobe;
+    //public Material Lightprobe_Shadowing;
 
     [SchemaField(0x98, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -669,7 +666,7 @@ public struct D2Class_706C8080
 
     [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xC4, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public FileHash Shading; // For some reason using IMaterial breaks tag reading....?
+    public FileHash Shading; // For some reason using Material breaks tag reading....?
 
     [SchemaField(0x84, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -785,7 +782,7 @@ public struct SMapDecals
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "63698080", 0x8)]
 public struct D2Class_63698080
 {
-    public IMaterial Material;
+    public Material Material;
     public short StartIndex;
     public short Count; //Number of entries to read
 }
@@ -1072,7 +1069,7 @@ public struct D1Class_901A8080
 public struct D1Class_AF1A8080
 {
     public int VertexLayoutIndex;
-    public IMaterial Material;
+    public Material Material;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "861B8080", 0x18)]

@@ -313,7 +313,7 @@ public struct SExternalMaterialMapEntry
 [SchemaStruct("14008080", 0x4)]
 public struct D2Class_14008080
 {
-    public IMaterial Material;
+    public Material Material;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "4E058080", 0x5C)]
@@ -553,7 +553,7 @@ public struct SEntityModelMesh
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "CB6E8080", 0x24)]
 public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
 {
-    public IMaterial Material;  // AA6D8080
+    public Material Material;  // AA6D8080
     public short VariantShaderIndex;  // variant_shader_index
     public short PrimitiveType;
     public uint IndexOffset;
@@ -1609,7 +1609,7 @@ public struct D2Class_20698080
 {
     public FileHash Unk00;
     [SchemaField(0x18)] // idfk why not having the above FileHash makes this read at 0x0??
-    public IMaterial UnkMat;
+    public Material UnkMat;
     [SchemaField(0x20), Tag64]
     public Tag<D2Class_29698080> ModelContainer;
 }

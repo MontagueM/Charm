@@ -2241,7 +2241,7 @@ public partial class TagListView : UserControl
         {
             _allTagItems = new ConcurrentBag<TagItem>();
 
-            var mats = PackageResourcer.Get().GetAllHashes<IMaterial>();
+            var mats = PackageResourcer.Get().GetAllHashes<Material>();
             MainWindow.Progress.CompleteStage();
 
             Parallel.ForEach(mats, val =>

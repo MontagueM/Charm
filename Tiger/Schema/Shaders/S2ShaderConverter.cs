@@ -7,7 +7,7 @@ namespace Tiger.Schema;
 
 public class S2ShaderConverter
 {
-    private IMaterial Material;
+    private Material Material;
     private StringReader hlsl;
     private StringBuilder vfx;
     private List<TfxScope> Scopes = new();
@@ -99,7 +99,7 @@ PS
     }}
 }}";
 
-    public string HlslToVfx(IMaterial material, string pixel, string vertex)
+    public string HlslToVfx(Material material, string pixel, string vertex)
     {
         Material = material;
         //Pixel Shader
@@ -109,10 +109,10 @@ PS
 
         Scopes = material.EnumerateScopes().ToList();
         Externs = material.GetExterns();
-        Inputs = material.PixelShader.InputSignatures;
-        Outputs = material.PixelShader.OutputSignatures;
-        Resources = material.PixelShader.Resources;
-        Textures = material.EnumeratePSTextures().ToList();
+        Inputs = material.Pixel.Shader.InputSignatures;
+        Outputs = material.Pixel.Shader.OutputSignatures;
+        Resources = material.Pixel.Shader.Resources;
+        Textures = material.Pixel.EnumerateTextures().ToList();
 
         bTranslucent = Outputs.Count == 1 || Scopes.Contains(TfxScope.TRANSPARENT) || Scopes.Contains(TfxScope.TRANSPARENT_ADVANCED) || Scopes.Contains(TfxScope.DECAL);
         isTerrain = Scopes.Contains(TfxScope.TERRAIN);
@@ -121,12 +121,12 @@ PS
         if (Inputs.Exists(input => input.Semantic == DXBCSemantic.SystemIsFrontFace))
             vfxStructure = vfxStructure.Replace("//frontface", "#define S_RENDER_BACKFACES 1");
 
-        for (int i = 0; i < material.PS_Samplers.Count; i++)
+        for (int i = 0; i < material.PSSamplers.Count; i++)
         {
-            if (material.PS_Samplers[i] is null)
+            if (material.PSSamplers[i] is null)
                 continue;
 
-            var sampler = material.PS_Samplers[i].Sampler;
+            var sampler = material.PSSamplers[i].Sampler;
             texSamples.AppendLine($"\tSamplerState s{i + 1}_s < Filter({sampler.Filter}); AddressU({sampler.AddressU}); AddressV({sampler.AddressV}); AddressW({sampler.AddressW}); ComparisonFunc({sampler.ComparisonFunc}); MaxAniso({sampler.MaxAnisotropy}); >;");
         }
 
@@ -154,10 +154,10 @@ PS
 
         //------------------------------Vertex Shader-----------------------------------
 
-        Inputs = material.VertexShader.InputSignatures;
-        Outputs = material.VertexShader.OutputSignatures;
-        Resources = material.VertexShader.Resources;
-        Textures = material.EnumerateVSTextures().ToList();
+        Inputs = material.Vertex.Shader.InputSignatures;
+        Outputs = material.Vertex.Shader.OutputSignatures;
+        Resources = material.Vertex.Shader.Resources;
+        Textures = material.Vertex.EnumerateTextures().ToList();
 
         vfxStructure = vfxStructure.Replace("//Vertex Shader", AddVertexShader());
 
@@ -165,17 +165,17 @@ PS
             vfxStructure = vfxStructure.Replace("//vs_Function", "\t\tfloat4 r0,r1,r2,r3,r4,r5;\r\n\t\t// Terrain specific\r\n\t\tr1.xyz = float3(0,1,0) * i.vNormalOs.yzx;\r\n\t\tr1.xyz = i.vNormalOs.zxy * float3(0,0,1) + -r1.xyz;\r\n\t\tr0.z = dot(r1.yz, r1.yz);\r\n\t\tr0.z = rsqrt(r0.z);\r\n\t\tr1.xyz = r1.xyz * r0.zzz;\r\n\t\tr2.xyz = i.vNormalOs.zxy * r1.yzx;\r\n\t\tr2.xyz = i.vNormalOs.yzx * r1.zxy + -r2.xyz;\r\n\t\to.v4.xyz = r1.xyz;\r\n\t\tr0.z = dot(r2.xyz, r2.xyz);\r\n\t\tr0.z = rsqrt(r0.z);\r\n\t\to.v3.xyz = r2.xyz * r0.zzz;\r\n\t\tr1.xyz = abs(i.vNormalOs.xyz) * abs(i.vNormalOs.xyz);\r\n\t\tr1.xyz = r1.xyz * r1.xyz;\r\n\t\tr2.xyz = r1.xyz * r1.xyz;\r\n\t\tr2.xyz = r2.xyz * r2.xyz;\r\n\t\tr1.xyz = r2.xyz * r1.xyz;\r\n\t\tr0.z = dot(r1.xyz, float3(1,1,1));\r\n\t\to.v5.xyz = r1.xyz / r0.zzz;");
 
         // Only gonna add vertex shaders for basic statics/entities with vertex animation
-        if (material.UnkD4 != 0 && !isDecorator && !isTerrain && (Scopes.Contains(TfxScope.RIGID_MODEL) || Scopes.Contains(TfxScope.CHUNK_MODEL)))
+        if (material.Vertex.Unk64 != 0 && !isDecorator && !isTerrain && (Scopes.Contains(TfxScope.RIGID_MODEL) || Scopes.Contains(TfxScope.CHUNK_MODEL)))
         {
             texSamples = new StringBuilder();
             hlsl = new StringReader(vertex);
 
-            for (int i = 0; i < material.VS_Samplers.Count; i++)
+            for (int i = 0; i < material.Vertex.Samplers.Count; i++)
             {
-                if (material.VS_Samplers[i] is null)
+                if (material.VSSamplers[i] is null)
                     continue;
 
-                var sampler = material.VS_Samplers[i].Sampler;
+                var sampler = material.VSSamplers[i].Sampler;
                 texSamples.AppendLine($"\tSamplerState s{i + 1}_s < Filter({sampler.Filter}); AddressU({sampler.AddressU}); AddressV({sampler.AddressV}); AddressW({sampler.AddressW}); ComparisonFunc({sampler.ComparisonFunc}); MaxAniso({sampler.MaxAnisotropy}); >;");
             }
 
@@ -198,7 +198,7 @@ PS
         return vfx.ToString();
     }
 
-    private StringBuilder WriteCbuffers(IMaterial material, bool isVertexShader)
+    private StringBuilder WriteCbuffers(Material material, bool isVertexShader)
     {
         StringBuilder CBuffers = new();
 
@@ -225,7 +225,7 @@ PS
         return CBuffers;
     }
 
-    private StringBuilder WriteFunctionDefinition(IMaterial material, bool isVertexShader)
+    private StringBuilder WriteFunctionDefinition(Material material, bool isVertexShader)
     {
         StringBuilder funcDef = new();
 
@@ -236,13 +236,13 @@ PS
 
         foreach (var e in Textures)
         {
-            if (e.Texture != null)
+            if (e.GetTexture() != null)
             {
                 string type = isVertexShader ? "VS" : "PS";
-                string colSpace = e.Texture.IsSrgb() ? "Srgb" : "Linear";
+                string colSpace = e.GetTexture().IsSrgb() ? "Srgb" : "Linear";
                 string dimension = "2D";
 
-                switch (e.Texture.GetDimension())
+                switch (e.GetTexture().GetDimension())
                 {
                     case TextureDimension.CUBE:
                         dimension = "Cube";
@@ -254,7 +254,7 @@ PS
 
                 string tex = isVertexShader ? $"g_vt{e.TextureIndex}" : $"g_t{e.TextureIndex}";
                 funcDef.AppendLine($"\tCreateInputTexture{dimension}( {type}_TextureT{e.TextureIndex}, {colSpace}, 8, \"\", \"\",  \"{type} Textures,10/{e.TextureIndex}\", Default3( 1.0, 1.0, 1.0 ));");
-                funcDef.AppendLine($"\tTexture{dimension} {tex} < Channel( RGBA,  Box( {type}_TextureT{e.TextureIndex} ), {colSpace} ); OutputFormat( BC7 ); SrgbRead( {e.Texture.IsSrgb()} ); >; ");
+                funcDef.AppendLine($"\tTexture{dimension} {tex} < Channel( RGBA,  Box( {type}_TextureT{e.TextureIndex} ), {colSpace} ); OutputFormat( BC7 ); SrgbRead( {e.GetTexture().IsSrgb()} ); >; ");
                 //funcDef.AppendLine($"\tTextureAttribute(g_t{e.TextureIndex}, g_t{e.TextureIndex});\n"); //Prevents some inputs not appearing for some reason
             }
         }
@@ -280,12 +280,12 @@ PS
                 switch (scope)
                 {
                     // Gonna use input texture for these since "Default4" works on it, wont be the magenta checkerboard if missing, idk if this is bad or not
-                    case TfxScope.TRANSPARENT when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 11) && !Textures.Exists(texture => texture.TextureIndex == 11 && texture.Texture is not null)):
+                    case TfxScope.TRANSPARENT when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 11) && !Textures.Exists(texture => texture.TextureIndex == 11 && texture.GetTexture() is not null)):
                         //funcDef.AppendLine($"\tTexture2D g_t11 < Attribute( \"AtmosFar\" ); >;\n");
                         funcDef.AppendLine($"\tCreateInputTexture2D( PS_TextureT11, Srgb, 8, \"\", \"\",  \"PS Textures,10/11\", Default4( 0.0, 0.0, 0.0, 0.0 ));");
                         funcDef.AppendLine($"\tTexture2D g_t11 < Channel( RGBA,  Box( PS_TextureT11 ), Srgb ); OutputFormat( RGBA8888 ); SrgbRead( True ); >;");
                         break;
-                    case TfxScope.TRANSPARENT when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 13) && !Textures.Exists(texture => texture.TextureIndex == 13 && texture.Texture is not null)):
+                    case TfxScope.TRANSPARENT when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 13) && !Textures.Exists(texture => texture.TextureIndex == 13 && texture.GetTexture() is not null)):
                         //funcDef.AppendLine($"\tTexture2D g_t13 < Attribute( \"AtmosNear\" ); >;\n");
                         funcDef.AppendLine($"\tCreateInputTexture2D( PS_TextureT13, Srgb, 8, \"\", \"\",  \"PS Textures,10/13\", Default4( 0.0, 0.0, 0.0, 0.0 ));");
                         funcDef.AppendLine($"\tTexture2D g_t13 < Channel( RGBA,  Box( PS_TextureT13 ), Srgb ); OutputFormat( RGBA8888 ); SrgbRead( True ); >;");
@@ -300,12 +300,12 @@ PS
             {
                 switch (extern_)
                 {
-                    case TfxExtern.Atmosphere when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 1) && !Textures.Exists(texture => texture.TextureIndex == 1 && texture.Texture is not null)):
+                    case TfxExtern.Atmosphere when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 1) && !Textures.Exists(texture => texture.TextureIndex == 1 && texture.GetTexture() is not null)):
                         //funcDef.AppendLine($"\tTexture2D g_t1 < Attribute( \"AtmosFar\" ); >;\r\n\n");
                         funcDef.AppendLine($"\tCreateInputTexture2D( PS_TextureT1, Srgb, 8, \"\", \"\",  \"PS Textures,10/1\", Default4( 0.0, 0.0, 0.0, 0.0 ));");
                         funcDef.AppendLine($"\tTexture2D g_t1 < Channel( RGBA,  Box( PS_TextureT1 ), Srgb ); OutputFormat( RGBA8888 ); SrgbRead( True ); >;");
                         break;
-                    case TfxExtern.Atmosphere when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 2) && !Textures.Exists(texture => texture.TextureIndex == 2 && texture.Texture is not null)):
+                    case TfxExtern.Atmosphere when ((resource.ResourceType == ResourceType.Texture2D && resource.Index == 2) && !Textures.Exists(texture => texture.TextureIndex == 2 && texture.GetTexture() is not null)):
                         //funcDef.AppendLine($"\tTexture2D g_t2 < Attribute( \"AtmosNear\" ); >;\r\n\n");
                         funcDef.AppendLine($"\tCreateInputTexture2D( PS_TextureT2, Srgb, 8, \"\", \"\",  \"PS Textures,10/2\", Default4( 0.0, 0.0, 0.0, 0.0 ));");
                         funcDef.AppendLine($"\tTexture2D g_t2 < Channel( RGBA,  Box( PS_TextureT2 ), Srgb ); OutputFormat( RGBA8888 ); SrgbRead( True ); >;");
@@ -317,7 +317,7 @@ PS
         return funcDef;
     }
 
-    private StringBuilder ConvertInstructions(IMaterial material, bool isVertexShader)
+    private StringBuilder ConvertInstructions(Material material, bool isVertexShader)
     {
         StringBuilder funcDef = new();
 
@@ -548,7 +548,7 @@ PS
                     {
                         funcDef.AppendLine($"\t\t{equal.TrimStart()} = g_t{texIndex}.Sample(s{sampleIndex}_s, {sampleUv}).{dotAfter}");
                     }
-                    else if (!Textures.Exists(texture => texture.TextureIndex == texIndex && texture.Texture is not null)) // Some kind of buffer texture or not defined in the material
+                    else if (!Textures.Exists(texture => texture.TextureIndex == texIndex && texture.GetTexture() is not null)) // Some kind of buffer texture or not defined in the material
                     {
                         switch (texIndex)
                         {
@@ -631,7 +631,7 @@ PS
 
                     if (!isVertexShader)
                     {
-                        if (!Textures.Exists(texture => texture.TextureIndex == texIndex && texture.Texture is not null)) //Some kind of buffer texture
+                        if (!Textures.Exists(texture => texture.TextureIndex == texIndex && texture.GetTexture() is not null)) //Some kind of buffer texture
                         {
                             switch (texIndex)
                             {
@@ -684,7 +684,7 @@ PS
                                 funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(1,1,1,1).{dotAfter}");
                                 break;
                             default:
-                                if (!Textures.Exists(texture => texture.TextureIndex == texIndex && texture.Texture is not null)) //Some kind of buffer texture
+                                if (!Textures.Exists(texture => texture.TextureIndex == texIndex && texture.GetTexture() is not null)) //Some kind of buffer texture
                                 {
                                     funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
                                 }

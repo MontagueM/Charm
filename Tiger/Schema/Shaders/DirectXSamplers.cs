@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Tiger;
+﻿using System.Runtime.InteropServices;
 
 namespace Tiger.Schema;
 
@@ -17,7 +10,7 @@ public class DirectXSampler : TigerReferenceFile<SSamplerHeader>
     {
     }
 
-    public D3D11_SAMPLER_DESC GetSampler()
+    private D3D11_SAMPLER_DESC GetSampler()
     {
         using TigerReader reader = GetReferenceReader();
         return reader.ReadType<D3D11_SAMPLER_DESC>();

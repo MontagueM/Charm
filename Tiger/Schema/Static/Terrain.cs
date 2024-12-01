@@ -20,7 +20,7 @@ public class Terrain : Tag<STerrain>
         var _exportIndiv = _config.GetIndvidualStaticsEnabled();
 
         // Uses triangle strip + only using first set of vertices and indices
-        Dictionary<StaticPart, IMaterial> parts = new Dictionary<StaticPart, IMaterial>();
+        Dictionary<StaticPart, Material> parts = new Dictionary<StaticPart, Material>();
         List<Texture> dyeMaps = new List<Texture>();
 
         int terrainTextureIndex = 14;
@@ -61,7 +61,7 @@ public class Terrain : Tag<STerrain>
                 // MainGeom0 LOD0, GripStock0 LOD1, Stickers0 LOD2?
                 if ((ELodCategory)partEntry.DetailLevel == ELodCategory.MainGeom0)
                 {
-                    if (partEntry.Material != null && partEntry.Material.VertexShader != null)
+                    if (partEntry.Material != null && partEntry.Material.Vertex.Shader != null)
                     {
                         var part = MakePart(partEntry);
 
@@ -73,7 +73,7 @@ public class Terrain : Tag<STerrain>
                         TransformVertexColors(part);
 
                         if (_config.GetS2ShaderExportEnabled() && _exportIndiv)
-                            Source2Handler.SaveVMAT($"{saveDirectory}", $"{part.Material.FileHash}", part.Material, dyeMaps);
+                            Source2Handler.SaveVMAT($"{saveDirectory}", $"{part.Material.Hash}", part.Material, dyeMaps);
 
                         parts.TryAdd(part, partEntry.Material);
                     }
@@ -250,8 +250,8 @@ public struct STerrain
     public VertexBuffer Vertices1;
     public VertexBuffer Vertices2;
     public IndexBuffer Indices1;
-    public IMaterial Unk6C;
-    public IMaterial Unk70;
+    public Material Unk6C;
+    public Material Unk70;
     [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<SStaticPart> StaticParts;
@@ -261,7 +261,7 @@ public struct STerrain
 
     [SchemaField(0xA4, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public IMaterial UnkA4;
+    public Material UnkA4;
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
     public Texture UnkA8; // A top down view of the terrain in-game (assuming for LOD)
 }
@@ -293,7 +293,7 @@ public struct SMeshGroup
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "846C8080", 0x0C)]
 public struct SStaticPart
 {
-    public IMaterial Material;
+    public Material Material;
     public uint IndexOffset;
     public ushort IndexCount;
     public byte GroupIndex;

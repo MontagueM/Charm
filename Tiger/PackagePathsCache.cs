@@ -224,7 +224,7 @@ public class PackagePathsCache
         {
             return packagePath;
         }
-        throw new ArgumentException($"The package id '{packageId:x4}' from Hash '{(hash ?? "NULL")}' is not in the package paths cache");
+        throw new ArgumentException($"The package id '{packageId:x4}' from Hash '{(hash ?? "NULL")} ({hash?.Hash32})' is not in the package paths cache");
     }
 
     private static readonly string PackageStringNotInPackagePathsCacheMessage = "The package string is not in the package paths cache: ";

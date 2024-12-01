@@ -82,10 +82,10 @@ public class Exporter : Subsystem<Exporter>
 
 public struct ExportMaterial
 {
-    public readonly IMaterial Material;
+    public readonly Material Material;
     public readonly bool IsTerrain;
 
-    public ExportMaterial(IMaterial material, bool isTerrain = false)
+    public ExportMaterial(Material material, bool isTerrain = false)
     {
         Material = material;
         IsTerrain = isTerrain;
@@ -93,12 +93,12 @@ public struct ExportMaterial
 
     public override int GetHashCode()
     {
-        return (int)Material.FileHash.Hash32;
+        return (int)Material.Hash.Hash32;
     }
 
     public override bool Equals(object? obj)
     {
-        return obj is ExportMaterial material && material.Material.FileHash == Material.FileHash;
+        return obj is ExportMaterial material && material.Material.Hash == Material.Hash;
     }
 }
 
@@ -407,11 +407,13 @@ public class GlobalExporterScene : ExporterScene
     {
         item = default;
 
-        var matchingItem = _objects.FirstOrDefault(existing => existing is T);
-        if (!EqualityComparer<T>.Default.Equals(matchingItem, default(T)))
+        foreach (var existing in _objects)
         {
-            item = (T)matchingItem;
-            return true;
+            if (existing is T)
+            {
+                item = (T)existing; // Safely cast to T
+                return true;
+            }
         }
 
         return false;
@@ -461,7 +463,7 @@ public class ExporterPart
     public readonly string Name;
     public readonly int Index;
 
-    public IMaterial? Material { get; set; }
+    public Material? Material { get; set; }
 
     public ExporterPart(string name, MeshPart meshPart, int index)
     {

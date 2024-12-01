@@ -29,7 +29,7 @@ public struct SStaticMesh
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "14008080", 0x4)]
 public struct SMaterialHash
 {
-    public IMaterial Material;
+    public Material Material;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "93718080", 0x20)]
@@ -40,8 +40,8 @@ public struct SStaticMeshDecal
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
     public short RenderStageSK;
-    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
     public short VertexLayoutIndexSK;
 
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
@@ -56,7 +56,7 @@ public struct SStaticMeshDecal
     public sbyte LODLevel;
     public sbyte Unk03;
     public short PrimitiveType;
-    [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public short Unk06;
     public IndexBuffer Indices;
     public VertexBuffer Vertices0;
@@ -65,7 +65,7 @@ public struct SStaticMeshDecal
     public VertexBuffer? VertexColor;
     public uint IndexOffset;
     public uint IndexCount;
-    public IMaterial Material;
+    public Material Material;
 
     public int GetVertexLayoutIndex()
     {

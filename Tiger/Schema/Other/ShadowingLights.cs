@@ -22,13 +22,13 @@ public class ShadowingLights : Tag<SMapShadowingLight>
         Vector2 size = GetSize();
         Texture cookie = null;
 
-        IMaterial shading = FileResourcer.Get().GetFileInterface<IMaterial>(_tag.Shading);
-        if (shading.EnumeratePSTextures().Any())
+        Material shading = FileResourcer.Get().GetFile<Material>(_tag.Shading);
+        if (shading.Pixel.EnumerateTextures().Any())
         {
             if (!Directory.Exists($"{savePath}/Textures"))
                 Directory.CreateDirectory($"{savePath}/Textures");
 
-            cookie = shading.EnumeratePSTextures().First().Texture;
+            cookie = shading.Pixel.EnumerateTextures().First().GetTexture();
             cookie.SavetoFile($"{savePath}/Textures/{cookie.Hash}");
             if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
                 Source2Handler.SaveVTEX(cookie, $"{savePath}/Textures");

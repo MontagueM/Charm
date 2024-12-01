@@ -10,38 +10,34 @@ using static Tiger.Schema.RenderStates;
 
 namespace Tiger.Schema.Shaders
 {
-    public interface IMaterial : ISchema
+    public class Material : Tag<SMaterial>
     {
-        public FileHash FileHash { get; }
-        public uint Unk08 { get; }
-        public uint Unk10 { get; }
-        public uint Unk0C { get; } //Seems to be backface culling
-        public int UnkD4 { get; } // Determines if the vertex shader uses vertex animation..?
+        public Material(FileHash fileHash) : base(fileHash)
+        {
+        }
 
-        // Vertex
-        public ShaderBytecode? VertexShader { get; }
-        public FileHash VSVector4Container { get; }
-        public List<DirectXSampler> VS_Samplers { get; }
-        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode { get; }
-        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants { get; }
-        public DynamicArray<Vec4> VS_CBuffers { get; }
-        public IEnumerable<STextureTag> EnumerateVSTextures();
+        public StateSelection RenderStates => _tag.RenderStates;
 
-        // Pixel
-        public ShaderBytecode? PixelShader { get; }
-        public FileHash PSVector4Container { get; }
-        public List<DirectXSampler> PS_Samplers { get; }
-        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode { get; }
-        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants { get; }
-        public DynamicArray<Vec4> PS_CBuffers { get; }
-        public IEnumerable<STextureTag> EnumeratePSTextures();
+        public SMaterialShader Pixel => _tag.Pixel.Value;
+        public List<DirectXSampler> PSSamplers => _tag.Pixel.Value.EnumerateSamplers().ToList();
 
-        // Compute
-        public IEnumerable<STextureTag> EnumerateCSTextures();
-        public ShaderBytecode? ComputeShader { get; }
+        public SMaterialShader Vertex => _tag.Vertex.Value;
+        public List<DirectXSampler> VSSamplers => _tag.Vertex.Value.EnumerateSamplers().ToList();
 
-        public IEnumerable<TfxScope> EnumerateScopes();
-        public StateSelection RenderStates { get; }
+        public SMaterialShader Compute => _tag.Compute.Value;
+
+        public IEnumerable<TfxScope> EnumerateScopes()
+        {
+            foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.GetScopeBits()))
+            {
+                if (Enum.TryParse(scopeBit.ToString(), out TfxScope scope))
+                    yield return scope;
+                else
+                    throw new Exception($"Unknown scope value {scope.ToString()}");
+            }
+        }
+
+
 
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
@@ -110,28 +106,28 @@ namespace Tiger.Schema.Shaders
             if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
                 return;
 
-            if (PixelShader != null && PixelShader.Hash.IsValid())
+            if (Pixel.Shader != null && Pixel.Shader.Hash.IsValid())
             {
-                string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
-                string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
+                string pixel = Decompile(Pixel.Shader.GetBytecode(), $"ps{Pixel.Shader.Hash}");
+                string vertex = Decompile(Vertex.Shader.GetBytecode(), $"vs{Vertex.Shader.Hash}");
                 string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
                 string vfx = _config.GetS2ShaderExportEnabled() ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex) : "";
 
                 try
                 {
-                    if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{FileHash}.usf"))
+                    if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{Hash}.usf"))
                     {
                         Directory.CreateDirectory($"{saveDirectory}/Unreal");
-                        File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
+                        File.WriteAllText($"{saveDirectory}/Unreal/PS_{Hash}.usf", usf);
                     }
                     if (vfx != String.Empty)
                     {
                         Directory.CreateDirectory($"{saveDirectory}/Source2");
                         Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
 
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader", vfx);
+                        File.WriteAllText($"{saveDirectory}/Source2/PS_{Pixel.Shader.Hash}.shader", vfx);
                         if (!isTerrain)
-                            Source2Handler.SaveVMAT(saveDirectory, FileHash, this);
+                            Source2Handler.SaveVMAT(saveDirectory, Hash, this);
                     }
                 }
                 catch (IOException e)  // threading error
@@ -148,9 +144,9 @@ namespace Tiger.Schema.Shaders
             //    return;
 
             //Directory.CreateDirectory($"{saveDirectory}");
-            //if (VertexShader != null && VertexShader.Hash.IsValid())
+            //if (VertexShader != null && Vertex.Shader.Hash.IsValid())
             //{
-            //    string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
+            //    string hlsl = Decompile(Vertex.Shader.GetBytecode(), $"vs{Vertex.Shader.Hash}");
             //    string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
             //    if (usf != String.Empty)
             //    {
@@ -180,38 +176,39 @@ namespace Tiger.Schema.Shaders
                 Externs = GetExterns().ToList(),
                 RenderStates = RenderStates
             };
-            if (PixelShader != null)
+            if (Pixel.Shader != null)
             {
-                Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}", hlslPath);
+                Decompile(Pixel.Shader.GetBytecode(), $"ps{Pixel.Shader.Hash}", hlslPath);
                 SavePixelShader($"{saveDirectory}/Shaders/");
 
                 ShaderDetails psCB = new ShaderDetails();
-                psCB.CBuffers = GetCBuffer0();
-                psCB.Bytecode = PS_TFX_Bytecode.Select(x => x.Value).ToList();
-                psCB.Constants = PS_TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
+                psCB.CBuffers = Pixel.GetCBuffer0();
+                psCB.Bytecode = Pixel.TFX_Bytecode.Select(x => x.Value).ToList();
+                psCB.Constants = Pixel.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
 
                 psCB.Textures = new();
-                foreach (var texture in EnumeratePSTextures())
+                foreach (var texture in Pixel.EnumerateTextures())
                 {
                     psCB.Textures.TryAdd((int)texture.TextureIndex, new()
                     {
-                        Hash = texture.Texture.Hash,
-                        Colorspace = texture.Texture.IsSrgb() ? "Srgb" : "Non-Color",
-                        Dimension = texture.Texture.GetDimension().GetEnumDescription(),
-                        Format = texture.Texture.TagData.GetFormat().ToString()
+                        Hash = texture.GetTexture().Hash,
+                        Colorspace = texture.GetTexture().IsSrgb() ? "Srgb" : "Non-Color",
+                        Dimension = texture.GetTexture().GetDimension().GetEnumDescription(),
+                        Format = texture.GetTexture().TagData.GetFormat().ToString()
                     });
                 }
 
                 psCB.TileTextureDetails = new();
                 psCB.Samplers = new();
-                foreach (var item in PS_Samplers.Select((sampler, index) => new { sampler, index }))
+                foreach (var item in Pixel.Samplers.Select((sampler, index) => new { sampler, index }))
                 {
-                    if (item.sampler.Hash.GetFileMetadata().Type != 34)
+                    var sampler = item.sampler.GetSampler();
+                    if (sampler.Hash.GetFileMetadata().Type != 34)
                     {
-                        var tex = FileResourcer.Get().GetFile<Texture>(item.sampler.Hash);
+                        var tex = FileResourcer.Get().GetFile<Texture>(sampler.Hash);
                         psCB.TileTextureDetails.Add(new()
                         {
-                            Hash = item.sampler.Hash,
+                            Hash = sampler.Hash,
                             Width = tex.TagData.Width,
                             Height = tex.TagData.Height,
                             Depth = tex.TagData.Depth,
@@ -222,51 +219,51 @@ namespace Tiger.Schema.Shaders
                     }
                     else
                     {
-                        psCB.Samplers.TryAdd(item.index + 1, item.sampler.GetSampler());
+                        psCB.Samplers.TryAdd(item.index + 1, sampler.Sampler);
                     }
                 }
 
                 material.Material.TryAdd(JsonMaterial.ShaderStage.Pixel, psCB);
             }
 
-            if (VertexShader != null)
+            if (Vertex.Shader != null)
             {
-                Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}", hlslPath);
+                Decompile(Vertex.Shader.GetBytecode(), $"vs{Vertex.Shader.Hash}", hlslPath);
                 SaveVertexShader($"{saveDirectory}/Shaders/");
 
                 ShaderDetails vsCB = new ShaderDetails();
-                vsCB.CBuffers = GetCBuffer0(true);
-                vsCB.Bytecode = VS_TFX_Bytecode.Select(x => x.Value).ToList();
-                vsCB.Constants = VS_TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
+                vsCB.CBuffers = Vertex.GetCBuffer0();
+                vsCB.Bytecode = Vertex.TFX_Bytecode.Select(x => x.Value).ToList();
+                vsCB.Constants = Vertex.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
 
                 vsCB.Textures = new();
-                foreach (var texture in EnumerateVSTextures())
+                foreach (var texture in Vertex.EnumerateTextures())
                 {
                     vsCB.Textures.TryAdd((int)texture.TextureIndex, new()
                     {
-                        Hash = texture.Texture.Hash,
-                        Colorspace = texture.Texture.IsSrgb() ? "Srgb" : "Non-Color",
-                        Dimension = texture.Texture.GetDimension().GetEnumDescription(),
-                        Format = texture.Texture.TagData.GetFormat().ToString()
+                        Hash = texture.GetTexture().Hash,
+                        Colorspace = texture.GetTexture().IsSrgb() ? "Srgb" : "Non-Color",
+                        Dimension = texture.GetTexture().GetDimension().GetEnumDescription(),
+                        Format = texture.GetTexture().TagData.GetFormat().ToString()
                     });
                 }
 
                 material.Material.TryAdd(JsonMaterial.ShaderStage.Vertex, vsCB);
             }
 
-            foreach (STextureTag texture in EnumerateVSTextures())
+            foreach (STextureTag texture in Vertex.EnumerateTextures())
             {
-                if (texture.Texture == null)
+                if (texture.GetTexture() == null)
                     continue;
 
-                texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+                texture.GetTexture().SavetoFile($"{saveDirectory}/Textures/{texture.GetTexture().Hash}");
             }
-            foreach (STextureTag texture in EnumeratePSTextures())
+            foreach (STextureTag texture in Pixel.EnumerateTextures())
             {
-                if (texture.Texture == null)
+                if (texture.GetTexture() == null)
                     continue;
 
-                texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+                texture.GetTexture().SavetoFile($"{saveDirectory}/Textures/{texture.GetTexture().Hash}");
             }
 
 
@@ -275,70 +272,12 @@ namespace Tiger.Schema.Shaders
                 Formatting = Formatting.Indented,
                 Converters = new List<JsonConverter> { new StringEnumConverter() }
             };
-            File.WriteAllText($"{saveDirectory}/{FileHash}.json", JsonConvert.SerializeObject(material, jsonSettings));
-        }
-
-        public List<Vector4> GetVec4Container(bool vs = false)
-        {
-            List<Vector4> data = new();
-            TigerFile container = new(vs ? VSVector4Container.GetReferenceHash() : PSVector4Container.GetReferenceHash());
-            byte[] containerData = container.GetData();
-
-            for (int i = 0; i < containerData.Length / 16; i++)
-            {
-                data.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
-            }
-
-            return data;
-        }
-
-        public TfxBytecodeInterpreter GetPSBytecode()
-        {
-            return new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(PS_TFX_Bytecode));
-        }
-
-        public TfxBytecodeInterpreter GetVSBytecode()
-        {
-            return new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(VS_TFX_Bytecode));
+            File.WriteAllText($"{saveDirectory}/{Hash}.json", JsonConvert.SerializeObject(material, jsonSettings));
         }
 
         public List<TfxExtern> GetExterns()
         {
             return Externs.GetExterns(this);
-        }
-
-        public List<Vector4> GetCBuffer0(bool bVS = false)
-        {
-            List<Vector4> data = new();
-            if (bVS)
-            {
-                if (VSVector4Container.IsValid())
-                {
-                    data = GetVec4Container(true);
-                }
-                else
-                {
-                    foreach (var vec in VS_CBuffers)
-                    {
-                        data.Add(vec.Vec);
-                    }
-                }
-            }
-            else
-            {
-                if (PSVector4Container.IsValid())
-                {
-                    data = GetVec4Container();
-                }
-                else
-                {
-                    foreach (var vec in PS_CBuffers)
-                    {
-                        data.Add(vec.Vec);
-                    }
-                }
-            }
-            return data;
         }
 
         private struct JsonMaterial
@@ -459,201 +398,5 @@ public struct StateSelection
                 $"\tRenderTargetWriteMask: {blendState.BlendDesc.RenderTargetWriteMask}\n";
         }
         return "";
-    }
-}
-
-namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
-{
-    public class Material : Tag<SMaterial_ROI>, IMaterial
-    {
-        public FileHash FileHash => Hash;
-        public uint Unk08 => _tag.Unk08;
-        public uint Unk10 => _tag.Unk10;
-        public uint Unk0C => _tag.Unk0C;
-        public int UnkD4 => 0;
-
-        // Leaving shaders null until they (if ever) can be decompiled to hlsl
-        public ShaderBytecode VertexShader => _tag.VertexShader; // null;
-        public ShaderBytecode PixelShader => _tag.PixelShader; // null;
-        public ShaderBytecode ComputeShader => null;
-        public FileHash PSVector4Container => _tag.PSVector4Container;
-        public FileHash VSVector4Container => _tag.VSVector4Container;
-        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
-        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
-        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
-        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
-        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
-        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
-        public StateSelection RenderStates => _tag.RenderStates;
-
-        public IEnumerable<STextureTag> EnumerateVSTextures()
-        {
-            foreach (STextureTag texture in _tag.VSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumeratePSTextures()
-        {
-            foreach (STextureTag texture in _tag.PSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumerateCSTextures()
-        {
-            yield return new();
-        }
-
-        public IEnumerable<TfxScope> EnumerateScopes()
-        {
-            foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
-            {
-                if (Enum.TryParse(scopeBit.ToString(), out TfxScope scope))
-                    yield return scope;
-                else
-                    throw new Exception($"Unknown scope value {scope.ToString()}");
-            }
-        }
-
-        public Material(FileHash fileHash) : base(fileHash)
-        {
-        }
-    }
-}
-
-namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
-{
-    public class Material : Tag<SMaterial_SK>, IMaterial
-    {
-        public FileHash FileHash => Hash;
-        public uint Unk08 => _tag.Unk08;
-        public uint Unk10 => _tag.Unk10;
-        public uint Unk0C => _tag.Unk0C;
-        public int UnkD4 => _tag.UnkBC;
-
-        public ShaderBytecode VertexShader => _tag.VertexShader;
-        public ShaderBytecode PixelShader => _tag.PixelShader;
-        public ShaderBytecode ComputeShader => _tag.ComputeShader;
-        public FileHash PSVector4Container => _tag.PSVector4Container;
-        public FileHash VSVector4Container => _tag.VSVector4Container;
-        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
-        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
-        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
-        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
-        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
-        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
-        public StateSelection RenderStates => _tag.RenderStates;
-
-        public IEnumerable<STextureTag> EnumerateVSTextures()
-        {
-            foreach (STextureTag texture in _tag.VSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumeratePSTextures()
-        {
-            foreach (STextureTag texture in _tag.PSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumerateCSTextures()
-        {
-            foreach (STextureTag texture in _tag.CSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<TfxScope> EnumerateScopes()
-        {
-            foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
-            {
-                if (Enum.TryParse(scopeBit.ToString(), out TfxScope scope))
-                    yield return scope;
-                else
-                    throw new Exception($"Unknown scope value {scope.ToString()}");
-            }
-        }
-
-        public Material(FileHash fileHash) : base(fileHash)
-        {
-        }
-    }
-}
-
-namespace Tiger.Schema.Shaders.DESTINY2_BEYONDLIGHT_3402
-{
-    public class Material : Tag<SMaterial_BL>, IMaterial
-    {
-        public FileHash FileHash => Hash;
-        public uint Unk08 => _tag.Unk08;
-        public uint Unk10 => _tag.Unk10;
-        public uint Unk0C => _tag.Unk0C;
-        public int UnkD4 => _tag.UnkD4;
-
-        public ShaderBytecode VertexShader => _tag.VertexShader;
-        public ShaderBytecode PixelShader => _tag.PixelShader;
-        public ShaderBytecode ComputeShader => _tag.ComputeShader;
-        public FileHash PSVector4Container => _tag.PSVector4Container;
-        public FileHash VSVector4Container => _tag.VSVector4Container;
-        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
-        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
-        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
-        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
-        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(s => s.Samplers).ToList();
-        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(s => s.Samplers).ToList();
-        public StateSelection RenderStates => _tag.RenderStates;
-
-        public IEnumerable<STextureTag> EnumerateVSTextures()
-        {
-            foreach (STextureTag64 texture in _tag.VSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumeratePSTextures()
-        {
-            foreach (STextureTag64 texture in _tag.PSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumerateCSTextures()
-        {
-            foreach (STextureTag64 texture in _tag.CSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<TfxScope> EnumerateScopes()
-        {
-            foreach (Enum scopeBit in EnumExtensions.GetFlags(_tag.UsedScopes))
-            {
-                if (Enum.TryParse(scopeBit.ToString(), out TfxScope scope))
-                    yield return scope;
-                else
-                    throw new Exception($"Unknown scope value {scope.ToString()}");
-            }
-        }
-
-        public Material(FileHash fileHash) : base(fileHash)
-        {
-        }
     }
 }

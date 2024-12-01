@@ -120,8 +120,8 @@ public class Decorator : Tag<SDecorator>
             };
 
             if (dynamicMeshPart.Material is null ||
-            dynamicMeshPart.Material.VertexShader is null ||
-            dynamicMeshPart.Material.PixelShader is null)
+            dynamicMeshPart.Material.Vertex.Shader is null ||
+            dynamicMeshPart.Material.Pixel.Shader is null)
                 continue;
 
             dynamicMeshPart.GetAllData(mesh, model.TagData);

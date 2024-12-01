@@ -49,7 +49,7 @@ public class TfxBytecodeInterpreter
         return top;
     }
 
-    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants, bool print = false, IMaterial? material = null)
+    public Dictionary<int, string> Evaluate(DynamicArray<Vec4> constants, bool print = false, Material? material = null)
     {
         Dictionary<int, string> hlsl = new();
         try
@@ -254,17 +254,17 @@ public class TfxBytecodeInterpreter
                     // Texture stuff
                     case TfxBytecode.PushTexDimensions:
                         var ptd = ((PushTexDimensionsData)op.data);
-                        Texture tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[ptd.index].Hash);
+                        Texture tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptd.index].Hash);
                         StackPush($"float4({tex.TagData.Width},{tex.TagData.Height}, {tex.TagData.Depth}, {tex.TagData.ArraySize}){TfxBytecodeOp.DecodePermuteParam(ptd.fields)}");
                         break;
                     case TfxBytecode.PushTexTileParams:
                         var ptt = ((PushTexTileParamsData)op.data);
-                        tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[ptt.index].Hash);
+                        tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptt.index].Hash);
                         StackPush($"float4{tex.TagData.TilingScaleOffset}{TfxBytecodeOp.DecodePermuteParam(ptt.fields)}");
                         break;
                     case TfxBytecode.PushTexTileCount:
                         var pttc = ((PushTexTileCountData)op.data);
-                        tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[pttc.index].Hash);
+                        tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[pttc.index].Hash);
                         StackPush($"float4({tex.TagData.TileCount},{tex.TagData.ArraySize}, 0, 0){TfxBytecodeOp.DecodePermuteParam(pttc.fields)}");
                         break;
                     /////

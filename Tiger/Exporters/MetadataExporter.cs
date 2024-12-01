@@ -132,7 +132,7 @@ class MetadataScene
                             var location = decal.MapDecals.TagData.Locations[i].Location;
                             var boxCorners = decal.MapDecals.TagData.DecalProjectionBounds.TagData.InstanceBounds.ElementAt(decal.MapDecals.TagData.DecalProjectionBounds.GetReader(), i);
 
-                            AddDecal(boxCorners.Unk24.ToString(), item.Material.FileHash, location, boxCorners.Corner1, boxCorners.Corner2);
+                            AddDecal(boxCorners.Unk24.ToString(), item.Material.Hash, location, boxCorners.Corner1, boxCorners.Corner2);
                             AddMaterial(item.Material);
                         }
                     }
@@ -153,35 +153,35 @@ class MetadataScene
         }
     }
 
-    public void AddMaterial(IMaterial material)
+    public void AddMaterial(Material material)
     {
-        if (!material.FileHash.IsValid())
+        if (!material.Hash.IsValid())
             return;
 
         var matInfo = new JsonMaterial
         {
-            BackfaceCulling = material.Unk0C == 0,
+            BackfaceCulling = material.RenderStates.Rasterizer?.CullMode != SharpDX.Direct3D11.CullMode.None,
             UsedScopes = material.EnumerateScopes().Select(x => x.ToString()).ToList(),
             Textures = new Dictionary<string, Dictionary<int, TexInfo>>()
         };
 
-        if (!_config["Materials"].TryAdd(material.FileHash, matInfo))
+        if (!_config["Materials"].TryAdd(material.Hash, matInfo))
             return;
 
         Dictionary<int, TexInfo> vstex = new();
         matInfo.Textures.Add("VS", vstex);
-        foreach (var vst in material.EnumerateVSTextures())
+        foreach (var vst in material.Vertex.EnumerateTextures())
         {
-            if (vst.Texture != null)
-                vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.Texture.Hash, SRGB = vst.Texture.IsSrgb(), Dimension = EnumExtensions.GetEnumDescription(vst.Texture.GetDimension()) });
+            if (vst.GetTexture() != null)
+                vstex.Add((int)vst.TextureIndex, new TexInfo { Hash = vst.GetTexture().Hash, SRGB = vst.GetTexture().IsSrgb(), Dimension = EnumExtensions.GetEnumDescription(vst.GetTexture().GetDimension()) });
         }
 
         Dictionary<int, TexInfo> pstex = new();
         matInfo.Textures.Add("PS", pstex);
-        foreach (var pst in material.EnumeratePSTextures())
+        foreach (var pst in material.Pixel.EnumerateTextures())
         {
-            if (pst.Texture != null)
-                pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.Texture.Hash, SRGB = pst.Texture.IsSrgb(), Dimension = EnumExtensions.GetEnumDescription(pst.Texture.GetDimension()) });
+            if (pst.GetTexture() != null)
+                pstex.Add((int)pst.TextureIndex, new TexInfo { Hash = pst.GetTexture().Hash, SRGB = pst.GetTexture().IsSrgb(), Dimension = EnumExtensions.GetEnumDescription(pst.GetTexture().GetDimension()) });
         }
     }
 
@@ -205,7 +205,7 @@ class MetadataScene
             _config["Parts"][part.SubName] = new Dictionary<string, string>();
         }
 
-        _config["Parts"][part.SubName].TryAdd(partName, part.Material?.FileHash ?? "");
+        _config["Parts"][part.SubName].TryAdd(partName, part.Material?.Hash ?? "");
     }
 
     public void SetType(string type)
@@ -416,7 +416,11 @@ class MetadataScene
 
     private struct JsonMaterial
     {
-        public bool BackfaceCulling;
+        public JsonMaterial()
+        {
+        }
+
+        public bool BackfaceCulling { get; set; } = true;
         public List<string> UsedScopes;
         public Dictionary<string, Dictionary<int, TexInfo>> Textures;
     }

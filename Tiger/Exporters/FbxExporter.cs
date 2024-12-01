@@ -341,7 +341,7 @@ public class FbxExporter : AbstractExporter
 
         if (part.Material != null)
         {
-            fbxMesh.AddMaterial(fbxScene, part.Material.FileHash, node, part.Index);
+            fbxMesh.AddMaterial(fbxScene, part.Material.Hash, node, part.Index);
         }
 
         fbxMesh.AddSmoothing();

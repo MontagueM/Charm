@@ -81,7 +81,7 @@ public partial class StaticView : UserControl
             foreach (StaticPart lodpart in lodparts)
             {
                 Console.WriteLine($"Exporting LOD {lodpart.LodCategory}");
-                Console.WriteLine(lodpart.Material.FileHash.ToString());
+                Console.WriteLine(lodpart.Material.Hash.ToString());
             }
 
             lodScene.AddStatic(hash, lodparts);

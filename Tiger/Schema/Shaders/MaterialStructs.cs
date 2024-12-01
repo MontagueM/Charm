@@ -1,210 +1,192 @@
 ﻿namespace Tiger.Schema;
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D71A8080", 0x488)]
-public struct SMaterial_ROI // PS4 / ORBIS shaders aren't able to be decompiled :(
-{
-    public long FileSize;
-    public uint Unk08;
-    public uint Unk0C;
-    public uint Unk10;
-
-    [SchemaField(0x18)]
-    public ScopeBitsD1 UsedScopes;
-    public ScopeBitsD1 CompatibleScopes;
-    public StateSelection RenderStates;
-
-    [SchemaField(0x20)]
-    public uint Unk20;
-
-    [SchemaField(0x28)]
-    public ShaderBytecode? VertexShader;
-    [SchemaField(0x38)]
-    public DynamicArray<STextureTag> VSTextures;
-    [SchemaField(0x50)]
-    public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
-    public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
-    public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
-    public DynamicArray<Vec4> VS_CBuffers;
-    [SchemaField(0xAC)]
-    public FileHash VSVector4Container;
-
-    [SchemaField(0x2A8)]
-    public ShaderBytecode? PixelShader;
-    [SchemaField(0x2B8)]
-    public DynamicArray<STextureTag> PSTextures;
-    [SchemaField(0x2D0)]
-    public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
-    public DynamicArray<Vec4> PS_TFX_Bytecode_Constants;
-    public DynamicArray<SDirectXSamplerTagSK> PS_Samplers;
-    public DynamicArray<Vec4> PS_CBuffers;
-
-    [SchemaField(0x32C)]
-    public FileHash PSVector4Container;
-
-    //[SchemaField(0x368)]
-    //public ShaderBytecode? ComputeShader;
-    //[SchemaField(0x370)]
-    //public DynamicArray<STextureTag> CSTextures;
-    //[SchemaField(0x388)]
-    //public DynamicArray<D2Class_09008080> CS_TFX_Bytecode;
-    //public DynamicArray<Vec4> CS_TFX_Bytecode_Constants;
-    //public DynamicArray<SDirectXSamplerTagSK> CS_Samplers;
-    //public DynamicArray<Vec4> CS_CBuffers;
-}
-
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E8718080", 0x400)]
-public struct SMaterial_SK
-{
-    public long FileSize;
-    public uint Unk08;
-    public uint Unk0C;
-    public uint Unk10;
-
-    [SchemaField(0x18)]
-    public ScopeBitsSK UsedScopes;
-    public ScopeBitsSK CompatibleScopes;
-    public StateSelection RenderStates;
-
-    [SchemaField(0x48)]
-    public ShaderBytecode VertexShader;
-    [SchemaField(0x50)]
-    public DynamicArray<STextureTag> VSTextures;
-    [SchemaField(0x68)]
-    public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
-    public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
-    public DynamicArray<SDirectXSamplerTagSK> VS_Samplers;
-    public DynamicArray<Vec4> VS_CBuffers;
-
-    [SchemaField(0xBC)]
-    public int UnkBC;
-
-    [SchemaField(0xCC)]
-    public FileHash VSVector4Container;
-
-    [SchemaField(0x2C8)]
-    public ShaderBytecode? PixelShader;
-    [SchemaField(0x2D0)]
-    public DynamicArray<STextureTag> PSTextures;
-    [SchemaField(0x2E8)]
-    public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
-    public DynamicArray<Vec4> PS_TFX_Bytecode_Constants;
-    public DynamicArray<SDirectXSamplerTagSK> PS_Samplers;
-    public DynamicArray<Vec4> PS_CBuffers;
-    [SchemaField(0x34C)]
-    public FileHash PSVector4Container;
-
-    [SchemaField(0x368)]
-    public ShaderBytecode? ComputeShader;
-    [SchemaField(0x370)]
-    public DynamicArray<STextureTag> CSTextures;
-    [SchemaField(0x388)]
-    public DynamicArray<D2Class_09008080> CS_TFX_Bytecode;
-    public DynamicArray<Vec4> CS_TFX_Bytecode_Constants;
-    public DynamicArray<SDirectXSamplerTagSK> CS_Samplers;
-    public DynamicArray<Vec4> CS_CBuffers;
-}
-
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "AA6D8080", 0x3B0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AA6D8080", 0x3D0)]
-public struct SMaterial_BL
+public struct SMaterial // Errm Ackchyually its called "technique" 🤓
 {
     public long FileSize;
     public uint Unk08;
     public uint Unk0C;
     public uint Unk10;
 
-    [SchemaField(0x20)]
-    public ScopeBits UsedScopes;
-    public ScopeBits CompatibleScopes;
+    [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public ScopeBitsD1 UsedScopesD1;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public ScopeBitsSK UsedScopesSK;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public ScopeBitsBL UsedScopesBL;
+
+    //public ScopeBitsD1 CompatibleScopesD1; // Not really important, but they are there after each UsedScopes
+    //public ScopeBitsSK CompatibleScopesSK;
+    //public ScopeBitsBL CompatibleScopesBL;
+
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x40, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public StateSelection RenderStates;
 
+    [SchemaField(0x28, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x48, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public ShaderBytecode VertexShader;
+    public DynamicStruct<SMaterialShader> Vertex;
 
-    [SchemaField(0x60, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<STextureTag64> VSTextures;
-
-    [SchemaField(0x78, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x90, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<D2Class_09008080> VS_TFX_Bytecode;
-    public DynamicArray<Vec4> VS_TFX_Bytecode_Constants;
-    public DynamicArray<SDirectXSamplerTagBL> VS_Samplers;
-    public DynamicArray<Vec4> VS_CBuffers;
-
-    [SchemaField(0xBC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0xD4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public int UnkD4;
-
-    [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0xE4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public FileHash VSVector4Container;
-
+    [SchemaField(0x2A8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x2C8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x298, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x2B0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public ShaderBytecode? PixelShader;
+    public DynamicStruct<SMaterialShader> Pixel;
 
-    [SchemaField(0x2A0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x2B8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<STextureTag64> PSTextures;
-
-    [SchemaField(0x2B8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x2D0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<D2Class_09008080> PS_TFX_Bytecode;
-    public DynamicArray<Vec4> PS_TFX_Bytecode_Constants;
-    public DynamicArray<SDirectXSamplerTagBL> PS_Samplers;
-    public DynamicArray<Vec4> PS_CBuffers;
-
-    [SchemaField(0x30C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x324, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public FileHash PSVector4Container;
-
+    [SchemaField(0x348, TigerStrategy.DESTINY1_RISE_OF_IRON)] // Unsure, everything else has 6 shader stages, D1 has 7? (Doesnt matter anyways)
+    [SchemaField(0x368, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x328, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x340, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public ShaderBytecode? ComputeShader;
+    public DynamicStruct<SMaterialShader> Compute;
 
-    [SchemaField(0x330, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x348, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<STextureTag64> CSTextures;
-
-    [SchemaField(0x348, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x360, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<D2Class_09008080> CS_TFX_Bytecode;
-    public DynamicArray<Vec4> CS_TFX_Bytecode_Constants;
-    public DynamicArray<SDirectXSamplerTagBL> CS_Samplers;
-    public DynamicArray<Vec4> CS_CBuffers;
+    public dynamic GetScopeBits()
+    {
+        if (Strategy.IsD1())
+            return UsedScopesD1;
+        else if (Strategy.IsPreBL())
+            return UsedScopesSK;
+        else
+            return UsedScopesBL;
+    }
 }
 
-[SchemaStruct("11728080", 0x8)]
+[NonSchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, 0xA0)]
+[NonSchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 0x90)]
+public struct SMaterialShader
+{
+    [SchemaField(0x0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    public ShaderBytecode Shader;
+
+    [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public DynamicArray<STextureTag> Textures;
+
+    [SchemaField(0x28, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public DynamicArray<D2Class_09008080> TFX_Bytecode;
+    public DynamicArray<Vec4> TFX_Bytecode_Constants;
+    public DynamicArray<SDirectXSamplerTag> Samplers;
+    public DynamicArray<Vec4> CBuffers; // Fallback if Vector4Container doesn't exist, I guess..?
+
+    [SchemaField(0x7C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x74, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x64, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public int Unk64;
+
+    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public int BufferSlot;
+    public FileHash Vector4Container;
+
+    public IEnumerable<STextureTag> EnumerateTextures()
+    {
+        foreach (STextureTag texture in Textures)
+        {
+            yield return texture;
+        }
+    }
+
+    public IEnumerable<DirectXSampler> EnumerateSamplers()
+    {
+        foreach (SDirectXSamplerTag sampler in Samplers)
+        {
+            yield return sampler.GetSampler();
+        }
+    }
+
+    public List<Vector4> GetCBuffer0()
+    {
+        List<Vector4> data = new();
+        if (Vector4Container.IsValid())
+        {
+            data = GetVec4Container();
+        }
+        else
+        {
+            foreach (var vec in CBuffers)
+            {
+                data.Add(vec.Vec);
+            }
+        }
+        return data;
+    }
+
+    public List<Vector4> GetVec4Container()
+    {
+        List<Vector4> data = new();
+        TigerFile container = new(Vector4Container.GetReferenceHash());
+        byte[] containerData = container.GetData();
+
+        for (int i = 0; i < containerData.Length / 16; i++)
+        {
+            data.Add(containerData.Skip(i * 16).Take(16).ToArray().ToType<Vector4>());
+        }
+
+        return data;
+    }
+
+    public TfxBytecodeInterpreter GetBytecode()
+    {
+        return new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(TFX_Bytecode));
+    }
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "281B8080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "11728080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "CF6D8080", 0x18)]
 public struct STextureTag
 {
     public uint TextureIndex;
-    public Texture Texture;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    public Texture TextureSK;
 
-    public static implicit operator STextureTag(STextureTag64 tag) => new() { TextureIndex = (uint)tag.TextureIndex, Texture = tag.Texture };
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402), Tag64]
+    public Texture TextureBL;
+
+    public Texture GetTexture()
+    {
+        if (Strategy.IsPreBL() || Strategy.IsD1())
+            return TextureSK;
+        else
+            return TextureBL;
+    }
 }
 
-[SchemaStruct("CF6D8080", 0x18)]
-public struct STextureTag64
-{
-    public long TextureIndex;
-    [Tag64]
-    public Texture Texture;
-}
-
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "CC1A8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F3738080", 0x10)]
-public struct SDirectXSamplerTagSK
-{
-    public DirectXSampler Samplers;
-}
-
-// todo make tag64 bound to strategy
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "3F018080", 0x10)]
-public struct SDirectXSamplerTagBL
+public struct SDirectXSamplerTag
 {
-    [Tag64]
-    public DirectXSampler Samplers;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
+    public DirectXSampler SamplerSK;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402), Tag64]
+    public DirectXSampler SamplerBL;
+
+    public DirectXSampler GetSampler()
+    {
+        if (Strategy.IsD1())
+            return null;
+        else if (Strategy.IsPreBL())
+            return SamplerSK;
+        else
+            return SamplerBL;
+    }
 }
 
 
@@ -221,7 +203,7 @@ public struct Vec4
 }
 
 [Flags]
-public enum ScopeBits : ulong
+public enum ScopeBitsBL : ulong
 {
     FRAME = 1UL << 0,
     VIEW = 1UL << 1,

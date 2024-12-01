@@ -21,21 +21,21 @@ public class MaterialExporter : AbstractExporter
 
                 foreach (ExportMaterial material in scene.Materials)
                 {
-                    foreach (STextureTag texture in material.Material.EnumerateVSTextures())
+                    foreach (STextureTag texture in material.Material.Vertex.EnumerateTextures())
                     {
-                        if (texture.Texture == null)
+                        if (texture.GetTexture() == null)
                         {
                             continue;
                         }
-                        textures.Add(texture.Texture);
+                        textures.Add(texture.GetTexture());
                     }
-                    foreach (STextureTag texture in material.Material.EnumeratePSTextures())
+                    foreach (STextureTag texture in material.Material.Pixel.EnumerateTextures())
                     {
-                        if (texture.Texture == null)
+                        if (texture.GetTexture() == null)
                         {
                             continue;
                         }
-                        textures.Add(texture.Texture);
+                        textures.Add(texture.GetTexture());
                     }
 
                     if (saveShaders)
@@ -62,16 +62,16 @@ public class MaterialExporter : AbstractExporter
                 mapTextures.UnionWith(scene.Textures);
                 foreach (ExportMaterial material in scene.Materials)
                 {
-                    foreach (STextureTag texture in material.Material.EnumerateVSTextures())
+                    foreach (STextureTag texture in material.Material.Vertex.EnumerateTextures())
                     {
-                        mapTextures.Add(texture.Texture);
+                        mapTextures.Add(texture.GetTexture());
                     }
-                    foreach (STextureTag texture in material.Material.EnumeratePSTextures())
+                    foreach (STextureTag texture in material.Material.Pixel.EnumerateTextures())
                     {
-                        mapTextures.Add(texture.Texture);
+                        mapTextures.Add(texture.GetTexture());
                     }
 
-                    if (material.Material.VertexShader != null || material.Material.PixelShader != null)
+                    if (material.Material.Vertex.Shader != null || material.Material.Pixel.Shader != null)
                     {
                         mapMaterials.Add(material);
                     }

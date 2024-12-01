@@ -46,7 +46,7 @@ public class UsfConverter
     private readonly List<Input> inputs = new List<Input>();
     private readonly List<Output> outputs = new List<Output>();
 
-    public string HlslToUsf(IMaterial material, string hlslText, bool bIsVertexShader)
+    public string HlslToUsf(Material material, string hlslText, bool bIsVertexShader)
     {
         hlsl = new StringReader(hlslText);
         usf = new StringBuilder();
@@ -146,7 +146,7 @@ public class UsfConverter
         } while (line != null);
     }
 
-    private void WriteCbuffers(IMaterial material, bool bIsVertexShader)
+    private void WriteCbuffers(Material material, bool bIsVertexShader)
     {
         // Try to find matches, pixel shader has Unk2D0 Unk2E0 Unk2F0 Unk300 available
         foreach (var cbuffer in cbuffers)
@@ -159,31 +159,11 @@ public class UsfConverter
             dynamic data = null;
             if (bIsVertexShader)
             {
-                if (material.VSVector4Container.IsValid())
-                {
-                    data = material.GetVec4Container(true);
-                }
-                else
-                {
-                    foreach (var vec in material.VS_CBuffers)
-                    {
-                        data.Add(vec.Vec);
-                    }
-                }
+                data = material.Vertex.GetCBuffer0();
             }
             else
             {
-                if (material.PSVector4Container.IsValid())
-                {
-                    data = material.GetVec4Container();
-                }
-                else
-                {
-                    foreach (var vec in material.PS_CBuffers)
-                    {
-                        data.Add(vec.Vec);
-                    }
-                }
+                data = material.Pixel.GetCBuffer0();
             }
 
 

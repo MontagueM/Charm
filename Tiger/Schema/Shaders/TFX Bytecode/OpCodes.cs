@@ -300,7 +300,7 @@ public static class TfxBytecodeOp
         return tfxData;
     }
 
-    public static string TfxToString(TfxData tfxData, DynamicArray<Vec4> constants, IMaterial? material = null)
+    public static string TfxToString(TfxData tfxData, DynamicArray<Vec4> constants, Material? material = null)
     {
         string output = "";
         byte index = 0;
@@ -458,7 +458,7 @@ public static class TfxBytecodeOp
 
             case PushTexDimensionsData:
                 var ptd = ((PushTexDimensionsData)tfxData.data);
-                Texture tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[ptd.index].Hash);
+                Texture tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptd.index].Hash);
 
                 output = $"{DecodePermuteParam(ptd.fields).ToUpper()}: " +
                     $"({tex.TagData.Width}, {tex.TagData.Height}, {tex.TagData.Depth}, {tex.TagData.ArraySize})";
@@ -466,7 +466,7 @@ public static class TfxBytecodeOp
 
             case PushTexTileParamsData:
                 var ptt = ((PushTexTileParamsData)tfxData.data);
-                tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[ptt.index].Hash);
+                tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptt.index].Hash);
 
                 output = $"{DecodePermuteParam(ptt.fields).ToUpper()}: " +
                     $"{tex.TagData.TilingScaleOffset}";
@@ -474,7 +474,7 @@ public static class TfxBytecodeOp
 
             case PushTexTileCountData:
                 var pttc = ((PushTexTileCountData)tfxData.data);
-                tex = FileResourcer.Get().GetFile<Texture>(material.PS_Samplers[pttc.index].Hash);
+                tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[pttc.index].Hash);
 
                 output = $"{DecodePermuteParam(pttc.fields).ToUpper()}: " +
                     $"({tex.TagData.TileCount}, {tex.TagData.ArraySize}, 0, 0)"; break;

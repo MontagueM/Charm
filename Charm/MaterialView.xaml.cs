@@ -16,7 +16,7 @@ namespace Charm;
 public partial class MaterialView : UserControl
 {
     private MainWindow _mainWindow = null;
-    private IMaterial Material;
+    private Material Material;
 
     public MaterialView()
     {
@@ -45,14 +45,14 @@ public partial class MaterialView : UserControl
         {
             Dispatcher.Invoke(() =>
             {
-                Material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.FileHash}");
+                Material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.Hash}");
             });
         });
     }
 
     public void Load(FileHash hash)
     {
-        IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
+        Material material = FileResourcer.Get().GetFile<Material>(hash);
         ShaderDetail shaderDetail = new();
 
         if (material is null)
@@ -63,23 +63,23 @@ public partial class MaterialView : UserControl
         TextureListView.ItemsSource = GetTextureDetails(material);
         UsedScopesList.ItemsSource = material.EnumerateScopes();
 
-        if (material.VertexShader is not null)
+        if (material.Vertex.Shader is not null)
         {
-            shaderDetail.VertexShaderHash = material.VertexShader.Hash.ToString();
+            shaderDetail.VertexShaderHash = material.Vertex.Shader.Hash.ToString();
 
             if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-                shaderDetail.VertexShader = material.Decompile(material.VertexShader.GetBytecode(), $"vs{material.VertexShader.Hash}");
+                shaderDetail.VertexShader = material.Decompile(material.Vertex.Shader.GetBytecode(), $"vs{material.Vertex.Shader.Hash}");
             else
                 shaderDetail.VertexShader = "Shader decompilation not supported for Destiny 1";
             VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
         }
 
-        if (material.PixelShader is not null)
+        if (material.Pixel.Shader is not null)
         {
-            shaderDetail.PixelShaderHash = material.PixelShader.Hash.ToString();
+            shaderDetail.PixelShaderHash = material.Pixel.Shader.Hash.ToString();
 
             if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-                shaderDetail.PixelShader = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
+                shaderDetail.PixelShader = material.Decompile(material.Pixel.Shader.GetBytecode(), $"ps{material.Pixel.Shader.Hash}");
             else
                 shaderDetail.PixelShader = "Shader decompilation not supported for Destiny 1";
             PS_CBufferList.ItemsSource = GetCBufferDetails(material);
@@ -97,68 +97,68 @@ public partial class MaterialView : UserControl
 #endif
     }
 
-    private List<TextureDetail> GetTextureDetails(IMaterial material)
+    private List<TextureDetail> GetTextureDetails(Material material)
     {
         var items = new List<TextureDetail>();
 
-        foreach (var tex in material.EnumerateVSTextures())
+        foreach (var tex in material.Vertex.EnumerateTextures())
         {
-            if (tex.Texture is null)
+            if (tex.GetTexture() is null)
                 continue;
 
             items.Add(new TextureDetail
             {
                 Shader = "Vertex Shader",
-                Hash = $"{tex.Texture.Hash}",
+                Hash = $"{tex.GetTexture().Hash}",
                 Index = $"Index: {tex.TextureIndex}",
-                Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
-                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
-                Format = $"Format: {tex.Texture.TagData.GetFormat()}",
-                Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
-                Texture = LoadTexture(tex.Texture)
+                Type = $"Colorspace: {(tex.GetTexture().IsSrgb() ? "Srgb" : "Non-Color")}",
+                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.GetTexture().GetDimension())}",
+                Format = $"Format: {tex.GetTexture().TagData.GetFormat()}",
+                Dimensions = $"{tex.GetTexture().TagData.Width}x{tex.GetTexture().TagData.Height}",
+                Texture = LoadTexture(tex.GetTexture())
             });
         }
 
-        foreach (var tex in material.EnumeratePSTextures())
+        foreach (var tex in material.Pixel.EnumerateTextures())
         {
-            if (tex.Texture is null)
+            if (tex.GetTexture() is null)
                 continue;
 
             items.Add(new TextureDetail
             {
                 Shader = "Pixel Shader",
-                Hash = $"{tex.Texture.Hash}",
+                Hash = $"{tex.GetTexture().Hash}",
                 Index = $"Index: {tex.TextureIndex}",
-                Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
-                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
-                Format = $"Format: {tex.Texture.TagData.GetFormat()}",
-                Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
-                Texture = LoadTexture(tex.Texture)
+                Type = $"Colorspace: {(tex.GetTexture().IsSrgb() ? "Srgb" : "Non-Color")}",
+                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.GetTexture().GetDimension())}",
+                Format = $"Format: {tex.GetTexture().TagData.GetFormat()}",
+                Dimensions = $"{tex.GetTexture().TagData.Width}x{tex.GetTexture().TagData.Height}",
+                Texture = LoadTexture(tex.GetTexture())
             });
         }
 
-        foreach (var tex in material.EnumerateCSTextures())
+        foreach (var tex in material.Compute.EnumerateTextures())
         {
-            if (tex.Texture is null)
+            if (tex.GetTexture() is null)
                 continue;
 
             items.Add(new TextureDetail
             {
                 Shader = "Compute Shader",
-                Hash = $"{tex.Texture.Hash}",
+                Hash = $"{tex.GetTexture().Hash}",
                 Index = $"Index: {tex.TextureIndex}",
-                Type = $"Colorspace: {(tex.Texture.IsSrgb() ? "Srgb" : "Non-Color")}",
-                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.Texture.GetDimension())}",
-                Format = $"Format: {tex.Texture.TagData.GetFormat()}",
-                Dimensions = $"{tex.Texture.TagData.Width}x{tex.Texture.TagData.Height}",
-                Texture = LoadTexture(tex.Texture)
+                Type = $"Colorspace: {(tex.GetTexture().IsSrgb() ? "Srgb" : "Non-Color")}",
+                Dimension = $"Dimension: {EnumExtensions.GetEnumDescription(tex.GetTexture().GetDimension())}",
+                Format = $"Format: {tex.GetTexture().TagData.GetFormat()}",
+                Dimensions = $"{tex.GetTexture().TagData.Width}x{tex.GetTexture().TagData.Height}",
+                Texture = LoadTexture(tex.GetTexture())
             });
         }
 
         return items;
     }
 
-    private List<CBufferDetail> GetCBufferDetails(IMaterial material, bool bVertexShader = false)
+    private List<CBufferDetail> GetCBufferDetails(Material material, bool bVertexShader = false)
     {
         var items = new List<CBufferDetail>();
 
@@ -167,38 +167,18 @@ public partial class MaterialView : UserControl
         List<Vector4> const_data = new();
         if (bVertexShader)
         {
-            if (material.VSVector4Container.IsValid())
+            data = material.Vertex.GetCBuffer0();
+            foreach (var vec in material.Vertex.TFX_Bytecode_Constants)
             {
-                data = material.GetVec4Container(true);
-            }
-            else
-            {
-                foreach (var vec in material.VS_CBuffers)
-                {
-                    data.Add(vec.Vec);
-                }
-                foreach (var vec in material.VS_TFX_Bytecode_Constants)
-                {
-                    const_data.Add(vec.Vec);
-                }
+                const_data.Add(vec.Vec);
             }
         }
         else
         {
-            if (material.PSVector4Container.IsValid())
+            data = material.Pixel.GetCBuffer0();
+            foreach (var vec in material.Pixel.TFX_Bytecode_Constants)
             {
-                data = material.GetVec4Container();
-            }
-            else
-            {
-                foreach (var vec in material.PS_CBuffers)
-                {
-                    data.Add(vec.Vec);
-                }
-                foreach (var vec in material.PS_TFX_Bytecode_Constants)
-                {
-                    const_data.Add(vec.Vec);
-                }
+                const_data.Add(vec.Vec);
             }
         }
 
@@ -237,8 +217,8 @@ public partial class MaterialView : UserControl
         {
             Dispatcher.Invoke(() =>
             {
-                TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode : Material.VS_TFX_Bytecode));
-                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants, dc.Index != "TFX Constants", Material);
+                TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.Pixel.TFX_Bytecode : Material.Vertex.TFX_Bytecode));
+                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.Pixel.TFX_Bytecode_Constants : Material.Vertex.TFX_Bytecode_Constants, dc.Index != "TFX Constants", Material);
 
                 ConcurrentBag<CBufferDataDetail> items = new ConcurrentBag<CBufferDataDetail>();
                 for (int i = 0; i < dc.Data.Count; i++)
@@ -325,15 +305,18 @@ public partial class MaterialView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    private List<SamplerDataDetail> GetSamplerData(IMaterial material)
+    private List<SamplerDataDetail> GetSamplerData(Material material)
     {
         List<SamplerDataDetail> items = new();
-        for (int i = 0; i < material.PS_Samplers.Count; i++)
+        if (Strategy.IsD1())
+            return items;
+
+        for (int i = 0; i < material.PSSamplers.Count; i++)
         {
-            if (material.PS_Samplers[i].Hash.GetFileMetadata().Type != 34)
+            if (material.PSSamplers[i].Hash.GetFileMetadata().Type != 34)
                 continue;
 
-            var sampler = material.PS_Samplers[i].Sampler;
+            var sampler = material.PSSamplers[i].Sampler;
             items.Add(new SamplerDataDetail
             {
                 Slot = i + 1,
@@ -360,7 +343,7 @@ public partial class MaterialView : UserControl
 
     private void OpenMaterial_OnClick(object sender, RoutedEventArgs e)
     {
-        DevView.OpenHxD(Material.FileHash);
+        DevView.OpenHxD(Material.Hash);
     }
 
     private class ShaderDetail

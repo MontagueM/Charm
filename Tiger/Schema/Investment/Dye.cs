@@ -71,7 +71,7 @@ public class Dye : Tag<SScope>
         TextureExtractor.SetTextureFormat(outputTextureFormat);
         foreach (var entry in _tag.Textures)
         {
-            TextureExtractor.SaveTextureToFile($"{savePath}/{entry.Texture.Hash}", entry.Texture.GetScratchImage());
+            TextureExtractor.SaveTextureToFile($"{savePath}/{entry.GetTexture().Hash}", entry.GetTexture().GetScratchImage());
         }
     }
 }
@@ -131,7 +131,7 @@ public struct SScope
     public long Unk10;
 
     [SchemaField(0x48)]
-    public DynamicArray<STextureTag64> Textures;
+    public DynamicArray<STextureTag> Textures;
     public TigerHash Unk58;
     public TigerHash Unk5C;
     public DynamicArray<D2Class_09008080> Bytecode;

@@ -32,8 +32,8 @@ public static class Source2Handler
                     }
                     else
                     {
-                        mats.AppendLine($"    from = \"{part.Material.FileHash}.vmat\"");
-                        mats.AppendLine($"    to = \"Shaders/Source2/materials/{part.Material.FileHash}.vmat\"");
+                        mats.AppendLine($"    from = \"{part.Material.Hash}.vmat\"");
+                        mats.AppendLine($"    to = \"Shaders/Source2/materials/{part.Material.Hash}.vmat\"");
                     }
                     mats.AppendLine("},\n");
                     i++;
@@ -69,7 +69,7 @@ public static class Source2Handler
         SaveVMDL(name, $"{savePath}/Models/Terrain", fbxPath, parts.ToList<MeshPart>());
     }
 
-    public static void SaveVMAT(string savePath, string hash, IMaterial material, List<Texture> terrainDyemaps = null)
+    public static void SaveVMAT(string savePath, string hash, Material material, List<Texture> terrainDyemaps = null)
     {
         string path;
         if (material.EnumerateScopes().Contains(TfxScope.TERRAIN)) // TODO: Fix this shit
@@ -83,28 +83,28 @@ public static class Source2Handler
         vmat.AppendLine("Layer0\n{");
 
         //Material parameters
-        vmat.AppendLine($"\tshader \"Shaders/Source2/ps_{material.PixelShader.Hash}.shader\"");
+        vmat.AppendLine($"\tshader \"Shaders/Source2/ps_{material.Pixel.Shader.Hash}.shader\"");
 
         if ((material.EnumerateScopes().Contains(TfxScope.TRANSPARENT) || material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED)) && material.RenderStates.BlendState() == -1)
             vmat.AppendLine($"\tF_ADDITIVE_BLEND 1");
 
         //Textures
-        foreach (var e in material.EnumeratePSTextures())
+        foreach (var e in material.Pixel.EnumerateTextures())
         {
-            if (e.Texture == null)
+            if (e.GetTexture() == null)
                 continue;
 
-            vmat.AppendLine($"\tPS_TextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
+            vmat.AppendLine($"\tPS_TextureT{e.TextureIndex} \"Textures/{e.GetTexture().Hash}.png\"");
         }
 
-        if (material.UnkD4 != 0) // Vertex animation?
+        if (material.Vertex.Unk64 != 0) // Vertex animation?
         {
-            foreach (var e in material.EnumerateVSTextures())
+            foreach (var e in material.Vertex.EnumerateTextures())
             {
-                if (e.Texture == null)
+                if (e.GetTexture() == null)
                     continue;
 
-                vmat.AppendLine($"\tVS_TextureT{e.TextureIndex} \"Textures/{e.Texture.Hash}.png\"");
+                vmat.AppendLine($"\tVS_TextureT{e.TextureIndex} \"Textures/{e.GetTexture().Hash}.png\"");
             }
         }
 
@@ -112,8 +112,8 @@ public static class Source2Handler
         vmat.AppendLine(PopulateCBuffers(material, true).ToString()); // VS
 
         //PS Dynamic expressions
-        TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(material.PS_TFX_Bytecode));
-        var bytecode_hlsl = bytecode.Evaluate(material.PS_TFX_Bytecode_Constants, false, material);
+        TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(material.Pixel.TFX_Bytecode));
+        var bytecode_hlsl = bytecode.Evaluate(material.Pixel.TFX_Bytecode_Constants, false, material);
 
         vmat.AppendLine($"\tDynamicParams\r\n\t{{");
         string temp_time_fix = $"CurTime = exists(CurrentTime) ? CurrentTime : Time;";
@@ -123,7 +123,7 @@ public static class Source2Handler
             vmat.AppendLine($"\t\tcb0_{entry.Key} \"{expression}\"");
         }
 
-        foreach (var resource in material.PixelShader.Resources)
+        foreach (var resource in material.Pixel.Shader.Resources)
         {
             if (resource.ResourceType == Schema.ResourceType.CBuffer)
             {
@@ -185,11 +185,11 @@ public static class Source2Handler
             }
         }
 
-        if (material.UnkD4 != 0) // Vertex animation?
+        if (material.Vertex.Unk64 != 0) // Vertex animation?
         {
             //VS Dynamic expressions
-            bytecode = new(TfxBytecodeOp.ParseAll(material.VS_TFX_Bytecode));
-            bytecode_hlsl = bytecode.Evaluate(material.VS_TFX_Bytecode_Constants, false, material);
+            bytecode = new(TfxBytecodeOp.ParseAll(material.Vertex.TFX_Bytecode));
+            bytecode_hlsl = bytecode.Evaluate(material.Vertex.TFX_Bytecode_Constants, false, material);
 
             foreach (var entry in bytecode_hlsl)
             {
@@ -197,7 +197,7 @@ public static class Source2Handler
                 vmat.AppendLine($"\t\tvs_cb0_{entry.Key} \"{expression}\"");
             }
 
-            foreach (var resource in material.VertexShader.Resources)
+            foreach (var resource in material.Vertex.Shader.Resources)
             {
                 if (resource.ResourceType == Schema.ResourceType.CBuffer)
                 {
@@ -231,7 +231,7 @@ public static class Source2Handler
         }
     }
 
-    public static StringBuilder PopulateCBuffers(IMaterial materialHeader, bool isVertexShader = false)
+    public static StringBuilder PopulateCBuffers(Material material, bool isVertexShader = false)
     {
         StringBuilder cbuffers = new();
 
@@ -240,31 +240,11 @@ public static class Source2Handler
 
         if (isVertexShader)
         {
-            if (materialHeader.VSVector4Container.IsValid())
-            {
-                data = materialHeader.GetVec4Container(true);
-            }
-            else
-            {
-                foreach (var vec in materialHeader.VS_CBuffers)
-                {
-                    data.Add(vec.Vec);
-                }
-            }
+            data = material.Vertex.GetCBuffer0();
         }
         else
         {
-            if (materialHeader.PSVector4Container.IsValid())
-            {
-                data = materialHeader.GetVec4Container();
-            }
-            else
-            {
-                foreach (var vec in materialHeader.PS_CBuffers)
-                {
-                    data.Add(vec.Vec);
-                }
-            }
+            data = material.Pixel.GetCBuffer0();
         }
 
         for (int i = 0; i < data.Count; i++)
@@ -315,9 +295,9 @@ public static class Source2Handler
             }
 
             var diff = dye.TagData.Textures[0];
-            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            text = text.Replace($"DiffMap{dyeIndex}", $"{diff.GetTexture().Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
             var norm = dye.TagData.Textures[1];
-            text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+            text = text.Replace($"NormMap{dyeIndex}", $"{norm.GetTexture().Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
             dyeIndex++;
         }
 
