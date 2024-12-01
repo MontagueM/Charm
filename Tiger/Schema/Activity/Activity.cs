@@ -324,30 +324,37 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
 
         public IEnumerable<Bubble> EnumerateBubbles()
         {
+            var stringContainer = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(_tag.Destination).TagData.StringContainer;
             foreach (var mapEntry in _tag.Unk50)
             {
                 if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
                 {
-                    if (mapEntry.Unk30 is null ||
-                        mapEntry.Unk30.TagData.ChildMapReference == null)
-                    {
+                    if (mapEntry.Unk30 is null || mapEntry.Unk30.TagData.ChildMapReference == null)
                         continue;
-                    }
-                    yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapEntry.Unk30.TagData.ChildMapReference };
+
+                    string name = stringContainer is null ? mapEntry.BubbleName : stringContainer.GetStringFromHash(mapEntry.BubbleName);
+                    if ((name.Contains("NotFound") || mapEntry.BubbleName.ToString() == name) && mapEntry.UnkBubbleName.Value is not null) // this is dumb
+                        name = mapEntry.UnkBubbleName.Value;
+
+                    yield return new Bubble
+                    {
+                        Name = name,
+                        ChildMapReference = mapEntry.Unk30.TagData.ChildMapReference
+                    };
                 }
                 else
                 {
-                    var stringContainer = FileResourcer.Get().GetSchemaTag<D2Class_8B8E8080>(_tag.Destination).TagData.StringContainer;
                     foreach (var mapReference in mapEntry.MapReferences)
                     {
 
-                        if (mapReference.MapReference is null ||
-                            mapReference.MapReference.TagData.ChildMapReference == null)
-                        {
+                        if (mapReference.MapReference is null || mapReference.MapReference.TagData.ChildMapReference == null)
                             continue;
-                        }
-                        yield return new Bubble { Name = stringContainer is null ? mapEntry.BubbleName : stringContainer.GetStringFromHash(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
-                        //yield return new Bubble { Name = GlobalStrings.Get().GetString(mapEntry.BubbleName), ChildMapReference = mapReference.MapReference.TagData.ChildMapReference };
+
+                        yield return new Bubble
+                        {
+                            Name = stringContainer is null ? mapEntry.BubbleName : stringContainer.GetStringFromHash(mapEntry.BubbleName),
+                            ChildMapReference = mapReference.MapReference.TagData.ChildMapReference
+                        };
                     }
 
                 }

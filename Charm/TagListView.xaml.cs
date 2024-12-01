@@ -1538,14 +1538,14 @@ public partial class TagListView : UserControl
                 ActivityWQ activityBL = FileResourcer.Get().GetFile<ActivityWQ>(fileHash);
                 if (activityBL.TagData.Unk18.GetValue(activityBL.GetReader()) is D2Class_19978080 resource)
                 {
-                    var directiveTables = resource.DirectiveTables.Select(x => x.DirectiveTable.Hash);
+                    var directiveTables = resource.DirectiveTables.Where(x => x.DirectiveTable is not null).Select(x => x.DirectiveTable?.Hash);
 
                     Parallel.ForEach(directiveTables, hash =>
                     {
                         _allTagItems.Add(new TagItem
                         {
                             Hash = hash,
-                            Name = hash,
+                            Name = hash ?? "",
                             TagType = ETagListType.Directive
                         });
                     });

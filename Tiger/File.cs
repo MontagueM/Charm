@@ -34,7 +34,6 @@ public class TigerFile
 
     public byte[] GetData(bool shouldCache = true)
     {
-        Console.WriteLine($"{Hash}");
         if (shouldCache)
         {
             if (_data == null)
