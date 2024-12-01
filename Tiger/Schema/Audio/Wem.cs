@@ -11,7 +11,7 @@ namespace Tiger.Schema.Audio;
 /// </summary>
 [NonSchemaType(TigerStrategy.DESTINY1_RISE_OF_IRON, 8, new[] { 21 })]
 [NonSchemaType(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 26, new[] { 6 })]
-[NonSchemaType(TigerStrategy.DESTINY2_WITCHQUEEN_6307, 26, new[] { 7 })]
+[NonSchemaType(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, 26, new[] { 7 })]
 public class Wem : TigerFile
 {
     private MemoryStream _wemStream = null;

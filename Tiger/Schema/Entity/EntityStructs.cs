@@ -1858,12 +1858,12 @@ public struct D2Class_4D7E8080
     public StringHash EntityName;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "0E478080", 0x110)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "0E478080", 0x110)]
 public struct D2Class_0E478080
 {
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B5468080", 0x150)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "B5468080", 0x150)]
 public struct D2Class_B5468080
 {
     [SchemaField(0x80)]
@@ -1874,6 +1874,7 @@ public struct D2Class_B5468080
     public Vector4 Translation;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "96468080", 0x78)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "96468080", 0x80)]
 public struct D2Class_96468080
 {
