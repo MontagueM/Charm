@@ -52,7 +52,7 @@
 
         <ControlTemplate x:Key="staticTemplate">
             <Grid
-                Height="40"
+                Height="50"
                 Margin="5,3,5,3"
                 Background="{StaticResource BackgroundColour14a}">
                 <Grid.ColumnDefinitions>
@@ -75,9 +75,9 @@
                     Tag="{Binding Data}">
                     <TextBlock
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                        FontSize="14"
+                        FontSize="15"
                         Text="{Binding Name}"
-                        TextAlignment="Center"
+                        TextAlignment="Left"
                         TextWrapping="WrapWithOverflow" />
                 </CheckBox>
 

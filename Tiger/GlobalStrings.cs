@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using Arithmic;
 using Tiger.Schema;
 using Tiger.Schema.Strings;
 
@@ -16,10 +18,13 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
     private readonly ConcurrentDictionary<StringHash, List<StringBiasView>> _strings = new();
     private readonly ConcurrentBag<TigerHash> _addedLocalizedStrings = new();
     private readonly ConcurrentBag<TigerHash> _localizedStringsBias = new();
+    private ConcurrentDictionary<uint, string> _wordlistStrings { get; set; } = new();
 
 
     protected override void Initialise()
     {
+        AddFromWordlist();
+
         if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
             var vals = PackageResourcer.Get().GetAllHashes<S50058080>();
@@ -52,6 +57,26 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
     {
         _strings.Clear();
         _localizedStringsBias.Clear();
+        _wordlistStrings.Clear();
+    }
+
+    private void AddFromWordlist()
+    {
+        if (!File.Exists("./wordlist.txt"))
+            return;
+
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        string line;
+        using (FileStream fs = new FileStream("./wordlist.txt", FileMode.Open, FileAccess.Read, FileShare.Read, 65536, true))
+        using (StreamReader sr = new StreamReader(fs))
+        {
+            while ((line = sr.ReadLine()) != null)
+            {
+                _wordlistStrings.TryAdd(Helpers.Fnv(line), line);
+            }
+        }
+        stopwatch.Stop();
+        Log.Info($"Parsed Wordlist: {stopwatch.ElapsedMilliseconds}ms ({_wordlistStrings.Count} lines)");
     }
 
     public string GetString(StringHash hash)
@@ -69,6 +94,8 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
             return sv[0].String;
         }
+        else if (_wordlistStrings.TryGetValue(hash.Hash32, out string value))
+            return value;
 
         return hash;
     }

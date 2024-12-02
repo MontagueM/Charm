@@ -249,7 +249,7 @@ public partial class ActivityMapEntityView : UserControl
             if (entry.DataTables.Count > 0)
             {
                 DisplayEntityMap entityMap = new();
-                entityMap.Name = $"{entry.BubbleName} {entry.ActivityPhaseName2}: {entry.DataTables.Count} Entries";
+                entityMap.Name = $"{entry.BubbleName}: {entry.ActivityPhaseName2}: {entry.DataTables.Count} Entries";
                 entityMap.Hash = entry.Hash;
                 entityMap.Count = entry.DataTables.Count;
                 entityMap.EntityType = DisplayEntityMap.Type.Activity;
