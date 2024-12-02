@@ -27,7 +27,7 @@ public class CommonSettings
     public string ExportPath { get; set; } = "";
     public bool SingleFolderMapsEnabled { get; set; } = true;
     public bool IndividualStaticsEnabled { get; set; } = true;
-    public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.DDS_BGRA_UNCOMP_DX10;
+    public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.PNG;
     public bool UseCustomRenderer { get; set; } = false;
     public bool AnimatedBackground { get; set; } = true;
 
