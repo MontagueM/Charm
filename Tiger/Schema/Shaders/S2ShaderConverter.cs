@@ -99,7 +99,7 @@ PS
     }}
 }}";
 
-    public string HlslToVfx(Material material, string pixel, string vertex)
+    public string HlslToVfx(Material material, string pixel)
     {
         Material = material;
         //Pixel Shader
@@ -153,6 +153,8 @@ PS
         vfxStructure = vfxStructure.Replace("//ps_output", AddOutput().ToString());
 
         //------------------------------Vertex Shader-----------------------------------
+
+        string vertex = material.Vertex.Shader.Decompile($"vs{material.Vertex.Shader.Hash}");
 
         Inputs = material.Vertex.Shader.InputSignatures;
         Outputs = material.Vertex.Shader.OutputSignatures;

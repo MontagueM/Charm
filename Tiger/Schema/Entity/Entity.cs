@@ -7,7 +7,6 @@ public class Entity : Tag<SEntity>
     // Entity features
     public EntitySkeleton? Skeleton { get; set; }
     public EntityModel? Model { get; private set; }
-    public EntityModel? ModelParent { get; private set; }
     public EntityResource? ModelParentResource { get; private set; }
     public EntityModel? PhysicsModel { get; private set; }
     public EntityPhysicsModelParent? PhysicsModelParentResource { get; private set; }
@@ -51,7 +50,6 @@ public class Entity : Tag<SEntity>
             {
                 case D2Class_8A6D8080:  // Entity model
                     Model = ((D2Class_8F6D8080)resource.TagData.Unk18.GetValue(resource.GetReader())).Model;
-                    ModelParent = Model; // could just use ModelParentResource but im lazy
                     ModelParentResource = resource;
                     break;
 
@@ -165,8 +163,6 @@ public class Entity : Tag<SEntity>
             if (!_loaded)
             {
                 Load();
-                //Deserialize();
-                //_loaded = true;
             }
         }
         return Model != null;

@@ -234,7 +234,7 @@ public class DynamicMeshPart : MeshPart
     {
         Vector2 texcoordScale = !Strategy.IsD1() ? header.TexcoordScale : mesh.TexcoordScale;
         Vector2 texcoordTranslation = !Strategy.IsD1() ? header.TexcoordTranslation : mesh.TexcoordTranslation;
-        float yOffset = 5f / 3f; // idfk
+        float yOffset = 0f;//5f / 3f; // idfk
 
         for (int i = 0; i < VertexTexcoords0.Count; i++)
         {
@@ -250,19 +250,25 @@ public class DynamicMeshPart : MeshPart
         {
             try
             {
-                var skinBuffer = mesh.SinglePassSkinningBuffer.GetReferenceData();
-                using var handle = mesh.SinglePassSkinningBuffer.GetReferenceReader();
+                var stride = mesh.SinglePassSkinningBuffer.TagData.Stride;
+                using TigerReader handle = mesh.SinglePassSkinningBuffer.GetReferenceReader();
+                //var data = mesh.SinglePassSkinningBuffer.GetReferenceData();
                 for (int i = 0; i < VertexPositions.Count; i++)
                 {
-                    int normalW = (int)(VertexNormals[i].W * 32767.0996);
-                    int uvIndex = (int)((uint)normalW >> 3) & 4095;
+                    int normW = (int)(32767.0996f * VertexNormals[i].W);
+                    uint index = (uint)normW >> 3;
+                    index = index & 4095;
 
-                    Half UVX = BitConverter.ToHalf(BitConverter.GetBytes((ushort)((uint)(skinBuffer[uvIndex * 4 + 1] << 8) | (int)skinBuffer[uvIndex * 4 + 0])));
-                    Half UVY = BitConverter.ToHalf(BitConverter.GetBytes((ushort)((uint)(skinBuffer[uvIndex * 4 + 3] << 8) | (int)skinBuffer[uvIndex * 4 + 2])));
+                    handle.Seek(index * stride, SeekOrigin.Begin);
+                    float UVX = (float)handle.ReadHalf();
+                    float UVY = (float)handle.ReadHalf();
+
                     var tx = VertexTexcoords0[i];
-
-                    var tx1 = new Vector2(tx.X * (float)UVX, tx.Y * (float)UVY);
+                    var tx1 = new Vector2(tx.X * UVX, ((tx.Y * UVY) * -1) - 0.65); // idfk whats going wrong here
                     VertexTexcoords1.Add(tx1);
+
+                    Console.WriteLine($"({i}) {mesh.SinglePassSkinningBuffer.Hash} {index} ({(index * 0x4):X}): XY ({tx.X}, {tx.Y}) ZW ({tx1.X}, {tx1.Y})");
+
                 }
             }
             catch (Exception e)
@@ -273,16 +279,16 @@ public class DynamicMeshPart : MeshPart
         else
         {
             yOffset = 0f;
-            VertexTexcoords1 = VertexTexcoords0.Select(tx1 => tx1 * 5).ToList();
+            VertexTexcoords1 = VertexTexcoords0.Select(tx1 => new Vector2(tx1.X * 5, (1 - tx1.Y) * 5)).ToList();
         }
 
-        // Flip Y axis, fix detail UV offest
+        // Flip Y axis, fix detail UV offset
         for (int i = 0; i < VertexTexcoords0.Count; i++)
         {
             var tx = VertexTexcoords0[i];
             var tx1 = VertexTexcoords1[i];
-            VertexTexcoords0[i] = new Vector2(tx.X, 1 - tx.Y);
-            VertexTexcoords1[i] = new Vector2(tx1.X, (1 - tx1.Y) + yOffset);
+            VertexTexcoords0[i] = new Vector2(tx.X, 1f - tx.Y);
+            // VertexTexcoords1[i] = new Vector2(tx1.X, tx1.Y);
         }
     }
 

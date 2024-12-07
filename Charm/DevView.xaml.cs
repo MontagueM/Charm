@@ -202,6 +202,7 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, entityView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+
                 case 0x808071a7:
                 case 0x80806D44:
                     StaticView staticView = new StaticView();
@@ -209,18 +210,21 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, staticView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+
                 case 0x808093AD:
                     MapView mapView = new MapView();
                     mapView.LoadMap(hash, ExportDetailLevel.LeastDetailed);
                     _mainWindow.MakeNewTab(hash, mapView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+
                 case 0x80808E8E:
                     ActivityView activityView = new ActivityView();
                     activityView.LoadActivity(hash);
                     _mainWindow.MakeNewTab(hash, activityView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+
                 case 0x808099EF:
                     var stringView = new TagView();
                     stringView.SetViewer(TagView.EViewerType.TagList);
@@ -228,12 +232,14 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, stringView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+
                 case 0x808097B8:
                     var dialogueView = new DialogueView();
                     dialogueView.Load(hash, null);
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+
                 case 0x808071E8:
                 case 0x80806DAA:
                     var materialView = new MaterialView();
@@ -241,8 +247,9 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, materialView);
                     _mainWindow.SetNewestTabSelected();
                     Material material = FileResourcer.Get().GetFile<Material>(hash);
-                    material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
+                    material.Export($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
                     break;
+
                 case 0x80801AB5:
                 case 0x808073A5:
                 case 0x80806F07: //Entity model
@@ -262,6 +269,7 @@ public partial class DevView : UserControl
                     _mainWindow.MakeNewTab(hash, entityModelView);
                     _mainWindow.SetNewestTabSelected();
                     break;
+
                 case 0x8080714F:
                 case 0x80806C81:
                     Terrain terrain = FileResourcer.Get().GetFile<Terrain>(hash);
@@ -269,6 +277,7 @@ public partial class DevView : UserControl
                     terrain.LoadIntoExporter(terrainScene, ConfigSubsystem.Get().GetExportSavePath());
                     Exporter.Get().Export();
                     break;
+
                 case 0x80801ACE:
                 case 0x80806C98: // Decorator 986C8080
                     Decorator decorator = FileResourcer.Get().GetFile<Decorator>(hash);
@@ -351,7 +360,7 @@ public partial class DevView : UserControl
         foreach (var hash in hashes)
         {
             Material material = FileResourcer.Get().GetFile<Material>(hash);
-            material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
+            material.Export($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
         }
         MessageBox.Show($"Batch export of {hashes.Length} materials completed");
     }

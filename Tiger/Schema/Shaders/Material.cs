@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Arithmic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -37,69 +36,7 @@ namespace Tiger.Schema.Shaders
             }
         }
 
-
-
-        public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-
-        public string Decompile(byte[] shaderBytecode, string name, string savePath = "hlsl_temp")
-        {
-            if (Strategy.IsD1() || shaderBytecode.Length == 0)
-                return "";
-
-            string binPath = $"{savePath}/{name}.bin";
-            string hlslPath = $"{savePath}/{name}.hlsl";
-
-            if (!Directory.Exists(savePath))
-            {
-                Directory.CreateDirectory($"{savePath}/");
-            }
-
-            lock (_lock)
-            {
-                if (!File.Exists(binPath))
-                {
-                    File.WriteAllBytes(binPath, shaderBytecode);
-                }
-            }
-
-            if (!File.Exists(hlslPath))
-            {
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.CreateNoWindow = false;
-                startInfo.UseShellExecute = false;
-                startInfo.FileName = "ThirdParty/3dmigoto_shader_decomp.exe";
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                //Console.WriteLine(Path.GetFullPath(binPath));
-                startInfo.Arguments = $"-D \"{binPath}\"";
-                using (Process exeProcess = Process.Start(startInfo))
-                {
-                    exeProcess.WaitForExit();
-                }
-
-                if (!File.Exists(hlslPath))
-                {
-                    throw new FileNotFoundException($"Decompilation failed for {name}");
-                }
-            }
-
-            string hlsl = "";
-            lock (_lock)
-            {
-                while (hlsl == "")
-                {
-                    try  // needed for slow machines
-                    {
-                        hlsl = File.ReadAllText(hlslPath);
-                    }
-                    catch (IOException)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
-            }
-            return hlsl;
-        }
 
         public void SavePixelShader(string saveDirectory, bool isTerrain = false)
         {
@@ -108,10 +45,9 @@ namespace Tiger.Schema.Shaders
 
             if (Pixel.Shader != null && Pixel.Shader.Hash.IsValid())
             {
-                string pixel = Decompile(Pixel.Shader.GetBytecode(), $"ps{Pixel.Shader.Hash}");
-                string vertex = Decompile(Vertex.Shader.GetBytecode(), $"vs{Vertex.Shader.Hash}");
+                string pixel = Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}");
                 string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
-                string vfx = _config.GetS2ShaderExportEnabled() ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex) : "";
+                string vfx = _config.GetS2ShaderExportEnabled() ? new S2ShaderConverter().HlslToVfx(this, pixel) : "";
 
                 try
                 {
@@ -163,7 +99,7 @@ namespace Tiger.Schema.Shaders
         }
 
         // TODO: Remove material data from cfg and use this instead, cfg is too cluttered 
-        public void SaveMaterial(string saveDirectory)
+        public void Export(string saveDirectory)
         {
             var hlslPath = $"{saveDirectory}/Shaders/Raw";
             var texturePath = $"{saveDirectory}/Textures";
@@ -172,13 +108,14 @@ namespace Tiger.Schema.Shaders
 
             JsonMaterial material = new()
             {
+                Hash = Hash,
                 Scopes = EnumerateScopes().ToList(),
                 Externs = GetExterns().ToList(),
                 RenderStates = RenderStates
             };
             if (Pixel.Shader != null)
             {
-                Decompile(Pixel.Shader.GetBytecode(), $"ps{Pixel.Shader.Hash}", hlslPath);
+                Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}", hlslPath);
                 SavePixelShader($"{saveDirectory}/Shaders/");
 
                 ShaderDetails psCB = new ShaderDetails();
@@ -228,7 +165,7 @@ namespace Tiger.Schema.Shaders
 
             if (Vertex.Shader != null)
             {
-                Decompile(Vertex.Shader.GetBytecode(), $"vs{Vertex.Shader.Hash}", hlslPath);
+                Vertex.Shader.Decompile($"vs{Vertex.Shader.Hash}", hlslPath);
                 SaveVertexShader($"{saveDirectory}/Shaders/");
 
                 ShaderDetails vsCB = new ShaderDetails();
@@ -277,13 +214,24 @@ namespace Tiger.Schema.Shaders
 
         public List<TfxExtern> GetExterns()
         {
-            return Externs.GetExterns(this);
+            var opcodes = Pixel.GetBytecode().Opcodes;
+            opcodes.AddRange(Vertex.GetBytecode().Opcodes);
+
+            var list = new List<TfxExtern>();
+            foreach (var op in opcodes.Where(x => x.op.ToString().Contains("Extern")))
+            {
+                if (!list.Contains(op.data.extern_))
+                    list.Add(op.data.extern_);
+            }
+
+            return list;
         }
 
         private struct JsonMaterial
         {
             public JsonMaterial() { }
 
+            public string Hash { get; set; }
             public List<TfxScope> Scopes { get; set; } = new();
             public List<TfxExtern> Externs { get; set; } = new();
             public StateSelection RenderStates { get; set; } = new();

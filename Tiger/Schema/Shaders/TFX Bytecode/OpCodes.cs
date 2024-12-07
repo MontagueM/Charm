@@ -446,7 +446,8 @@ public static class TfxBytecodeOp
                 output = $"index {((PushSamplerData)tfxData.data).unk1}";
                 break;
             case PushObjectChannelVectorData:
-                output = $"hash {((PushObjectChannelVectorData)tfxData.data).hash:X}";
+                var hash = new StringHash(((PushObjectChannelVectorData)tfxData.data).hash);
+                output = $"hash {GlobalStrings.Get().GetString(hash)}";
                 break;
             case PushGlobalChannelVectorData:
                 index = ((PushGlobalChannelVectorData)tfxData.data).unk1;

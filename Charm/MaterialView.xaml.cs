@@ -45,7 +45,7 @@ public partial class MaterialView : UserControl
         {
             Dispatcher.Invoke(() =>
             {
-                Material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.Hash}");
+                Material.Export($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.Hash}");
             });
         });
     }
@@ -68,7 +68,7 @@ public partial class MaterialView : UserControl
             shaderDetail.VertexShaderHash = material.Vertex.Shader.Hash.ToString();
 
             if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-                shaderDetail.VertexShader = material.Decompile(material.Vertex.Shader.GetBytecode(), $"vs{material.Vertex.Shader.Hash}");
+                shaderDetail.VertexShader = material.Vertex.Shader.Decompile($"vs{material.Vertex.Shader.Hash}");
             else
                 shaderDetail.VertexShader = "Shader decompilation not supported for Destiny 1";
             VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
@@ -79,7 +79,7 @@ public partial class MaterialView : UserControl
             shaderDetail.PixelShaderHash = material.Pixel.Shader.Hash.ToString();
 
             if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-                shaderDetail.PixelShader = material.Decompile(material.Pixel.Shader.GetBytecode(), $"ps{material.Pixel.Shader.Hash}");
+                shaderDetail.PixelShader = material.Pixel.Shader.Decompile($"ps{material.Pixel.Shader.Hash}");
             else
                 shaderDetail.PixelShader = "Shader decompilation not supported for Destiny 1";
             PS_CBufferList.ItemsSource = GetCBufferDetails(material);

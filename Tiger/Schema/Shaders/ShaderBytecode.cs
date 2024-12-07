@@ -1,10 +1,15 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Arithmic;
 
 namespace Tiger.Schema;
 
 public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
 {
+    public ShaderBytecode(FileHash hash) : base(hash)
+    {
+    }
+
     private List<DXBCIOSignature>? _inputSignatures;
     public List<DXBCIOSignature> InputSignatures
     {
@@ -74,10 +79,6 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         }
     }
 
-    public ShaderBytecode(FileHash hash) : base(hash)
-    {
-    }
-
     public byte[] GetBytecode()
     {
         if (Strategy.IsD1())
@@ -87,16 +88,72 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
         return reader.ReadBytes((int)_tag.BytecodeSize);
     }
 
+    private static object _lock = new object();
+    public string Decompile(string name, string savePath = "hlsl_temp")
+    {
+        var shaderBytecode = GetBytecode();
+        if (Strategy.IsD1() || shaderBytecode.Length == 0)
+            return "";
+
+        string binPath = $"{savePath}/{name}.bin";
+        string hlslPath = $"{savePath}/{name}.hlsl";
+
+        if (!Directory.Exists(savePath))
+        {
+            Directory.CreateDirectory($"{savePath}/");
+        }
+
+        lock (_lock)
+        {
+            if (!File.Exists(binPath))
+            {
+                File.WriteAllBytes(binPath, shaderBytecode);
+            }
+        }
+
+        if (!File.Exists(hlslPath))
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = false;
+            startInfo.UseShellExecute = false;
+            startInfo.FileName = "ThirdParty/3dmigoto_shader_decomp.exe";
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.Arguments = $"-D \"{binPath}\"";
+
+            using (Process exeProcess = Process.Start(startInfo))
+            {
+                exeProcess.WaitForExit();
+            }
+
+            if (!File.Exists(hlslPath))
+            {
+                throw new FileNotFoundException($"Decompilation failed for {name}");
+            }
+        }
+
+        string hlsl = "";
+        lock (_lock)
+        {
+            while (hlsl == "")
+            {
+                try  // needed for slow machines
+                {
+                    hlsl = File.ReadAllText(hlslPath);
+                }
+                catch (IOException)
+                {
+                    Thread.Sleep(100);
+                }
+            }
+        }
+        return hlsl;
+    }
+
     //These are kinda messy and can probably be simplified
     public List<DXBCIOSignature> GetInputSignatures()
     {
         using TigerReader reader = GetReferenceReader();
-        //#if DEBUG
-        //        reader.Seek(0x2C, SeekOrigin.Begin);
-        //        uint inputSignatureCC = reader.ReadUInt32();
-        //        Debug.Assert(inputSignatureCC == 1313297225);
-        //        uint chunkSize = reader.ReadUInt32();
-        //#endif
+
         reader.Seek(0x34, SeekOrigin.Begin);
         uint inputSignatureCount = reader.ReadUInt32();
         reader.Seek(0x4, SeekOrigin.Current);
