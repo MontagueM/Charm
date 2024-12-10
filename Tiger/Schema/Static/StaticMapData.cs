@@ -849,14 +849,14 @@ public struct SMapWaterDecal
 public struct SMapAtmosphere
 {
     [SchemaField(0x90), Tag64]
-    public Texture Texture0; // 
+    public Texture Lookup0;
     [Tag64]
-    public Texture TextureUnk0; //  
+    public Texture Lookup1;
     [Tag64]
-    public Texture Texture1; // 
+    public Texture Lookup2;
     [Tag64]
-    public Texture TextureUnk1; // 
-    public Texture Texture2; // 
+    public Texture Lookup3;
+    public Texture UnkD0;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "406A8080", 0x18)]

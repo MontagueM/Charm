@@ -300,6 +300,7 @@ public partial class ActivityMapView : UserControl
         mapStages.Add($"Exporting {type}");
         MainWindow.Progress.SetProgressStages(mapStages);
 
+        Tiger.Exporters.Exporter.Get().GetOrCreateGlobalScene();
         string savePath = $"{ConfigSubsystem.Get().GetExportSavePath()}/Maps/{_currentActivity.DestinationName}/";
         foreach ((FileHash container, List<FileHash> hashes) in maps)
         {

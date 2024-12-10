@@ -40,9 +40,6 @@ class MetadataScene
         _config.TryAdd("Decals", decals);
         ConcurrentDictionary<string, ConcurrentBag<string>> terrainDyemaps = new ConcurrentDictionary<string, ConcurrentBag<string>>();
         _config.TryAdd("TerrainDyemaps", terrainDyemaps);
-        ConcurrentDictionary<string, string> atmosphere = new();
-        _config.TryAdd("Atmosphere", atmosphere);
-
 
         if (ConfigSubsystem.Get().GetUnrealInteropEnabled())
         {
@@ -145,11 +142,6 @@ class MetadataScene
         {
             foreach (var dyemap in dyemaps.Value)
                 AddTerrainDyemap(dyemaps.Key, dyemap);
-        }
-
-        foreach (var atmos in scene.Atmosphere)
-        {
-            AddAtmosphere(atmos);
         }
     }
 
@@ -302,15 +294,6 @@ class MetadataScene
         _config["TerrainDyemaps"][modelHash].Add(dyemapHash);
     }
 
-    public void AddAtmosphere(SMapAtmosphere atmosphere)
-    {
-        _config["Atmosphere"].TryAdd("Texture0", $"{atmosphere.Texture0?.Hash}");
-        _config["Atmosphere"].TryAdd("TextureUnk0", $"{atmosphere.TextureUnk0?.Hash}");
-        _config["Atmosphere"].TryAdd("Texture1", $"{atmosphere.Texture1?.Hash}");
-        _config["Atmosphere"].TryAdd("TextureUnk1", $"{atmosphere.TextureUnk1?.Hash}");
-        _config["Atmosphere"].TryAdd("Texture2", $"{atmosphere.Texture2?.Hash}");
-    }
-
     public void WriteToFile(Exporter.ExportEventArgs args)
     {
         string path = args.OutputDirectory;
@@ -321,7 +304,6 @@ class MetadataScene
             && _config["Instances"].Count == 0
             && _config["Parts"].Count == 0
             && _config["Decals"].Count == 0
-            && _config["Atmosphere"].Count == 0
             && _exportType is not ExportType.EntityPoints)
             return; //Dont export if theres nothing in the cfg (this is kind of a mess though)
 

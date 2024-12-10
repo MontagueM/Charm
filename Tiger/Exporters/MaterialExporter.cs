@@ -8,10 +8,12 @@ public class MaterialExporter : AbstractExporter
 {
     public override void Export(Exporter.ExportEventArgs args)
     {
+        var _config = ConfigSubsystem.Get();
+
         ConcurrentHashSet<Texture> mapTextures = new();
         ConcurrentHashSet<ExportMaterial> mapMaterials = new();
-        bool saveShaders = ConfigSubsystem.Get().GetUnrealInteropEnabled() || ConfigSubsystem.Get().GetS2ShaderExportEnabled();
-        bool saveIndiv = ConfigSubsystem.Get().GetIndvidualStaticsEnabled();
+        bool saveShaders = _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled() || _config.GetExportHLSL();
+        bool saveIndiv = _config.GetIndvidualStaticsEnabled();
 
         Parallel.ForEach(args.Scenes, scene =>
         {
@@ -116,6 +118,35 @@ public class MaterialExporter : AbstractExporter
 
                 material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
                 material.Material.SaveVertexShader(shaderSaveDirectory);
+            }
+        }
+
+        // TODO?: Move this to a global AbstractExporter?
+
+        if (Exporter.Get().GetOrCreateGlobalScene().TryGetItem<SMapAtmosphere>(out SMapAtmosphere atmosphere))
+        {
+            List<Texture> AtmosTextures = new();
+            if (atmosphere.Lookup0 != null)
+                AtmosTextures.Add(atmosphere.Lookup0);
+            if (atmosphere.Lookup1 != null)
+                AtmosTextures.Add(atmosphere.Lookup1);
+            if (atmosphere.Lookup2 != null)
+                AtmosTextures.Add(atmosphere.Lookup2);
+            if (atmosphere.Lookup3 != null)
+                AtmosTextures.Add(atmosphere.Lookup3);
+            if (atmosphere.UnkD0 != null)
+                AtmosTextures.Add(atmosphere.UnkD0);
+
+            string savePath = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, $"Maps");
+            savePath = $"{savePath}/Textures/Atmosphere";
+            Directory.CreateDirectory(savePath);
+
+            foreach (var tex in AtmosTextures)
+            {
+                // Not ideal but it works
+                TextureExtractor.SaveTextureToFile($"{savePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
+                if (_config.GetS2ShaderExportEnabled())
+                    Source2Handler.SaveVTEX(tex, $"{savePath}", "Atmosphere");
             }
         }
     }

@@ -103,43 +103,52 @@ public enum TfxExtern : byte
     SoftDeform = 96,
 }
 
-public static class GlobalChannelDefaults
+public static class GlobalChannels
 {
-    public static Vector4[] GetGlobalChannelDefaults()
-    {
-        Vector4[] channels = new Vector4[256];
+    private static Vector4[] Channels = null;
 
-        for (int i = 0; i < channels.Length; i++)
+    public static Vector4 Get(int index)
+    {
+        if (Channels == null)
+            Fill();
+
+        return Channels[index];
+    }
+
+    public static Vector4[] Fill()
+    {
+        Channels = new Vector4[256];
+
+        for (int i = 0; i < Channels.Length; i++)
         {
-            channels[i] = Vector4.One;
+            Channels[i] = Vector4.One;
         }
 
-        channels[10] = Vector4.Zero;
-        channels[97] = Vector4.Zero;
 
-        // Sun related
-        channels[82] = Vector4.Zero;
-        channels[83] = Vector4.Zero;
-        channels[98] = Vector4.Zero;
-        channels[100] = Vector4.Zero;
+        Channels[10] = Vector4.One;
+        Channels[25] = new Vector4(40.0f);
+        Channels[26] = new Vector4(0.90f); // Atmos intensity but a channel?
+        Channels[27] = Vector4.One; // specular tint intensity
+        Channels[28] = Vector4.One; // specular tint
+        Channels[31] = Vector4.One; // diffuse tint 1
+        Channels[32] = Vector4.One; // diffuse tint 1 intensity
+        Channels[33] = Vector4.One; // diffuse tint 2
+        Channels[34] = Vector4.One; // diffuse tint 2 intensity
+        Channels[35] = new Vector4(0.55f);
+        Channels[37] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog start
+        Channels[40] = Vector4.Zero;
+        Channels[41] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog falloff
+        Channels[43] = Vector4.Zero;
+        Channels[82] = Vector4.Zero;
+        Channels[83] = Vector4.Zero;
+        Channels[93] = new Vector4(1.0f, 0.0f, 0.0f, 0.0f);
+        Channels[97] = Vector4.Zero;
+        Channels[98] = Vector4.Zero;
+        Channels[100] = new Vector4(0.41105f, 0.71309f, 0.56793f, 0.56793f);
+        Channels[113] = Vector4.Zero;
+        Channels[127] = Vector4.Zero;
+        Channels[131] = new Vector4(0.5f, 0.0f, 0.3f, 0.0f); // Seems related to line lights
 
-        channels[27] = Vector4.One; // specular tint intensity
-        channels[28] = Vector4.One; // specular tint
-
-        channels[31] = Vector4.One; // diffuse tint 1
-        channels[32] = Vector4.One; // diffuse tint 1 intensity
-        channels[33] = Vector4.One; // diffuse tint 2
-        channels[34] = Vector4.One; // diffuse tint 2 intensity
-
-        channels[37] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog start
-        channels[41] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog falloff
-
-        // Misc lights
-        channels[93] = new Vector4(1.0f, 0.0f, 0.0f, 0.0f);
-        channels[113] = Vector4.Zero;
-        channels[127] = Vector4.Zero;
-        channels[131] = new Vector4(0.5f, 0.0f, 0.3f, 0.0f); // Seems related to line lights
-
-        return channels;
+        return Channels;
     }
 }

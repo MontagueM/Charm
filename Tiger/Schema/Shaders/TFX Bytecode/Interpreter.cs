@@ -306,15 +306,15 @@ public class TfxBytecodeInterpreter
 
                     // channel stuff
                     case TfxBytecode.Unk4c:
-                        var global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk4cData)op.data).unk1];
+                        var global_channel = GlobalChannels.Get(((Unk4cData)op.data).unk1);
                         StackPush($"float4{global_channel}");
                         break;
                     case TfxBytecode.PushGlobalChannelVector:
-                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((PushGlobalChannelVectorData)op.data).unk1];
+                        global_channel = GlobalChannels.Get(((PushGlobalChannelVectorData)op.data).unk1);
                         StackPush($"float4{global_channel}");
                         break;
                     case TfxBytecode.Unk50:
-                        global_channel = GlobalChannelDefaults.GetGlobalChannelDefaults()[((Unk50Data)op.data).unk1];
+                        global_channel = GlobalChannels.Get(((Unk50Data)op.data).unk1);
                         StackPush($"float4{global_channel}");
                         break;
                     case TfxBytecode.PushObjectChannelVector:

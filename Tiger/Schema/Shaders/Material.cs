@@ -45,25 +45,31 @@ namespace Tiger.Schema.Shaders
 
             if (Pixel.Shader != null && Pixel.Shader.Hash.IsValid())
             {
-                string pixel = Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}");
-                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
-                string vfx = _config.GetS2ShaderExportEnabled() ? new S2ShaderConverter().HlslToVfx(this, pixel) : "";
-
                 try
                 {
-                    if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{Hash}.usf"))
+                    if (_config.GetUnrealInteropEnabled())
                     {
+                        string usf = new UsfConverter().HlslToUsf(this, false);
                         Directory.CreateDirectory($"{saveDirectory}/Unreal");
                         File.WriteAllText($"{saveDirectory}/Unreal/PS_{Hash}.usf", usf);
                     }
-                    if (vfx != String.Empty)
+
+                    if (_config.GetS2ShaderExportEnabled())
                     {
+                        string vfx = new S2ShaderConverter().HlslToVfx(this);
                         Directory.CreateDirectory($"{saveDirectory}/Source2");
                         Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
 
                         File.WriteAllText($"{saveDirectory}/Source2/PS_{Pixel.Shader.Hash}.shader", vfx);
                         if (!isTerrain)
                             Source2Handler.SaveVMAT(saveDirectory, Hash, this);
+                    }
+
+                    if (_config.GetExportHLSL())
+                    {
+                        string pixel = Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}");
+                        Directory.CreateDirectory($"{saveDirectory}/HLSL");
+                        File.WriteAllText($"{saveDirectory}/HLSL/PS_{Hash}.hlsl", pixel);
                     }
                 }
                 catch (IOException e)  // threading error
@@ -76,26 +82,25 @@ namespace Tiger.Schema.Shaders
         // TODO: do this properly
         public void SaveVertexShader(string saveDirectory)
         {
-            //if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-            //    return;
+            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+                return;
 
-            //Directory.CreateDirectory($"{saveDirectory}");
-            //if (VertexShader != null && Vertex.Shader.Hash.IsValid())
-            //{
-            //    string hlsl = Decompile(Vertex.Shader.GetBytecode(), $"vs{Vertex.Shader.Hash}");
-            //    string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
-            //    if (usf != String.Empty)
-            //    {
-            //        try
-            //        {
-            //            File.WriteAllText($"{saveDirectory}/VS_{FileHash}.usf", usf);
-            //            //Console.WriteLine($"Saved vertex shader {FileHash}");
-            //        }
-            //        catch (IOException) // threading error
-            //        {
-            //        }
-            //    }
-            //}
+            if (Vertex.Shader != null && Vertex.Shader.Hash.IsValid())
+            {
+                try
+                {
+                    if (_config.GetExportHLSL())
+                    {
+                        string vertex = Vertex.Shader.Decompile($"vs{Vertex.Shader.Hash}");
+                        Directory.CreateDirectory($"{saveDirectory}/HLSL");
+                        File.WriteAllText($"{saveDirectory}/HLSL/VS_{Hash}.hlsl", vertex);
+                    }
+                }
+                catch (IOException e)  // threading error
+                {
+                    Log.Error(e.Message);
+                }
+            }
         }
 
         // TODO: Remove material data from cfg and use this instead, cfg is too cluttered 

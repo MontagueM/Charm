@@ -21,7 +21,6 @@ public class S2ShaderConverter
     private bool isDecorator = false;
     private bool bRT0 = true;
     private bool bTranslucent = false;
-    private bool bFixRoughness = false;
 
     private bool bUsesNormalBuffer = false;
     private bool bUsesFrameBuffer = false;
@@ -99,12 +98,12 @@ PS
     }}
 }}";
 
-    public string HlslToVfx(Material material, string pixel)
+    public string HlslToVfx(Material material)
     {
         Material = material;
         //Pixel Shader
         StringBuilder texSamples = new StringBuilder();
-        hlsl = new StringReader(pixel);
+        hlsl = new StringReader(material.Pixel.Shader.Decompile($"ps{material.Pixel.Shader.Hash}"));
         vfx = new StringBuilder();
 
         Scopes = material.EnumerateScopes().ToList();
@@ -136,7 +135,6 @@ PS
         if (Resources.Exists(cbuffer => cbuffer.ResourceType == ResourceType.CBuffer && cbuffer.Index == 12))
             vfxStructure = vfxStructure.Replace("//ps_additional", AddTPToProj());
 
-        hlsl = new StringReader(pixel);
         StringBuilder instructions = ConvertInstructions(material, false);
         if (instructions.ToString().Length == 0)
             return "";
@@ -184,7 +182,6 @@ PS
             vfxStructure = vfxStructure.Replace("//vs_samplers", texSamples.ToString());
             vfxStructure = vfxStructure.Replace("//vs_CBuffers", WriteCbuffers(material, true).ToString());
 
-            hlsl = new StringReader(vertex);
             instructions = ConvertInstructions(material, true);
             if (instructions.ToString().Length == 0)
                 return "";
@@ -422,7 +419,7 @@ PS
                         break;
                 }
             }
-            funcDef.AppendLine("\t\tfloat4 o0 = float4(0,0,0,0);");
+            funcDef.AppendLine("\t\tfloat4 o0 = float4(0,0,0,1);");
             funcDef.AppendLine("\t\tfloat4 o1 = float4(PackNormal3D(v0.xyz),1);");
             funcDef.AppendLine("\t\tfloat4 o2 = float4(0,0.5,0,0);");
             funcDef.AppendLine("\t\tfloat4 o3 = float4(0,0,0,0);\n");
@@ -571,15 +568,14 @@ PS
                                 funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.{equal_tex_post}");
                                 break;
 
-                            case 20: // Framebuffer?
-                            case 23: // Unsure
+                            case 23: // Unknown
                             case 7 when Externs.Contains(TfxExtern.Water):
                                 bUsesFrameBuffer = true;
                                 funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_tFrameBufferCopyTexture.{equal_tex_post}");//.SampleLevel(s_s{sampleIndex}, {sampleUv}).{dotAfter} //{equal_post}");
                                 break;
 
-                            case 1:
-                            case 15: // Gray textures
+                            case 1: // Unknown
+                            case 15: // Unknown
                                 funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.21191,0.21191,0.21191,0.49804).{dotAfter} //{equal_post}");
                                 break;
 
@@ -591,15 +587,16 @@ PS
                                 break;
 
                             case 0: // Unknown
-                            case 21: // Black texture
+                            case 20: // Some kind of modified depth?
+                            case 21: // Volumetric lighting?
                                 funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,0,0,0).{dotAfter} //{equal_post}");
                                 break;
 
-                            case 22: // Light gray textures
+                            case 22: // Unknown
                                 funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.55078,0.55078,0.55078,0.49804).{dotAfter} //{equal_post}");
                                 break;
 
-                            case 6 when Externs.Contains(TfxExtern.Deferred):
+                            case 6 when Externs.Contains(TfxExtern.Deferred): // Hemisphere/Sky texture?
                                 funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.01,0.01,0.02,1).{dotAfter} //{equal_post}");
                                 break;
 
@@ -703,7 +700,6 @@ PS
                 else if (line.Contains("o1.xyzw = float4(0,0,0,0);") && !isVertexShader)
                 {
                     funcDef.AppendLine(line.Replace("o1.xyzw = float4(0,0,0,0);", "\t\to1.xyzw = float4(PackNormal3D(v0.xyz),0);")); //decals(?) have 0 normals sometimes, dont want that
-                    bFixRoughness = true;
                 }
                 else if (line.Contains("GetDimensions")) // Uhhhh
                 {
@@ -734,29 +730,50 @@ PS
             if (!bRT0) //uses o1,o2
             {
                 //this is fine...
-                output.Append($"\t\t// Normal\r\n        " +
-                    $"float3 biased_normal = o1.xyz - float3(0.5, 0.5, 0.5);\r\n        " +
-                    $"float normal_length = length(biased_normal);\r\n        " +
-                    $"float3 normal_in_world_space = biased_normal / normal_length;\r\n\r\n        " +
-                    $"float smoothness = saturate(8 * (normal_length - 0.375));\r\n        \r\n        " +
-                    $"Material mat = Material::From(i,\r\n                    " +
-                    $"float4(o0.xyz, {(bTranslucent ? "o0.w" : "1")}), //albedo, alpha\r\n                    " +
-                    $"float4(0.5, 0.5, 1, 1), //Normal, gets set later\r\n                    " +
-                    $"float4(1 - smoothness, saturate(o2.x), saturate(o2.y * 2), 1), //rough, metal, ao\r\n                    " +
-                    $"float3(1.0f, 1.0f, 1.0f), //tint\r\n                    " +
-                    $"clamp((o2.y - 0.5) * 2 * 6 * o0.xyz, 0, 100)); //emission\r\n\r\n        " +
-                    $"mat.Transmission = o2.z;\r\n        " +
-                    $"mat.Normal = normal_in_world_space; //Normal is already in world space so no need to convert in Material::From\n");
+                output.Append($@"
+        // Normal
+		float3 normal = o1.xyz * float3(2,2,2) + float3(-1,-1,-1);
+		float length = sqrt(dot(normal.xyz, normal.xyz));
+		normal = normal.xyz / length;
+        
+		// Roughness
+		r0.x = length * 4 + -3;
+		r0.y = saturate(-0.5 * r0.x);
+		r0.z = r0.x * r0.x;
+		r0.x = cmp(r0.x < -0.0105999997);
+		float roughness = r0.x ? r0.y : r0.z;
 
-                output.AppendLine($"\n\t\t// for some toolvis stuff\r\n\t\tmat.WorldTangentU = i.vTangentUWs;\r\n\t\tmat.WorldTangentV = i.vTangentVWs;\r\n        mat.TextureCoords = i.vTextureCoords.xy;");
+		// Emission
+		r0.x = o2.y;
+		r0.x = saturate(r0.x * 2 + -1.00784314);
+		r0.x = r0.x * 13 + -7;
+		r0.x = exp2(r0.x);
+		r0.x = -0.0078125 + r0.x;
+		r0.y = 1;
+		r0.x = r0.y * r0.x;
+		float3 emission = r0.xxx * o0.xyz;
 
-                output.Append($"\n\t\treturn ShadingModelStandard::Shade(i, mat);");
+		Material mat = Material::Init();
+        mat.Albedo = o0.xyz;
+        mat.Normal = {(bUsesNormalBuffer ? "i.vNormalWs.xyz" : "normal")};
+        mat.Roughness = 1 - roughness;
+        mat.Metalness = saturate(o2.x);
+        mat.AmbientOcclusion = saturate(o2.y * 2);
+        mat.TintMask = 1;
+        mat.Opacity = {(bTranslucent ? "o0.w" : "1")};
+        mat.Emission = emission;       
+        mat.Transmission = o2.z;
 
-                if (bFixRoughness)
-                    output = output.Replace("float smoothness = saturate(8 * (normal_length - 0.375));", "float smoothness = saturate(8 * (0 - 0.375));");
+        // Misc
+        mat.WorldPosition = i.vPositionWithOffsetWs + g_vHighPrecisionLightingOffsetWs.xyz;
+        mat.WorldPositionWithOffset = i.vPositionWithOffsetWs;
+        mat.ScreenPosition = i.vPositionSs;
+		mat.WorldTangentU = i.vTangentUWs;
+		mat.WorldTangentV = i.vTangentVWs;
+        mat.TextureCoords = i.vTextureCoords.xy;
 
-                if (bUsesNormalBuffer) //Cant get normal buffer in forward rendering so just use world normal ig...
-                    output = output.Replace("mat.Normal = normal_in_world_space;", $"mat.Normal = v0;");
+		return ShadingModelStandard::Shade(i, mat);");
+
             }
             else //only uses o0
             {

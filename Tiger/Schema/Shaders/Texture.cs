@@ -148,9 +148,10 @@ public class Texture : TigerReferenceFile<STextureHeader>
     {
         var image = input.GetImage(0);
         if (image.Width == 0)
-        {
             return null;
-        }
+
+        if (input.GetImageCount() != 6)
+            return input;
 
         bool bSrgb = TexHelper.Instance.IsSRGB(image.Format);
         int faceWidth = image.Width;

@@ -40,7 +40,39 @@
 
             <StackPanel
                 x:Name="GeneralConfigPanel"
-                Margin="0,10,0,0"
+                Margin="0,10,0,20"
+                Orientation="Vertical" />
+
+            <Grid VerticalAlignment="Top" Background="Transparent">
+                <TextBlock
+                    Margin="-50,0,0,10"
+                    VerticalAlignment="Center"
+                    d:FontFamily="Haas Grot Text 55 Roman"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                    FontSize="26"
+                    Foreground="{StaticResource ForegroundColour70}"
+                    Text="⚙️"
+                    TextWrapping="Wrap" />
+                <Border
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Center"
+                    BorderBrush="{StaticResource ForegroundColour70}"
+                    BorderThickness="0,0,0,2">
+                    <TextBlock
+                        Margin="0,0,0,10"
+                        VerticalAlignment="Center"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="34"
+                        Foreground="{StaticResource ForegroundColour70}"
+                        Text="MISC"
+                        TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+
+            <StackPanel
+                x:Name="MiscConfigPanel"
+                Margin="0,10,0,20"
                 Orientation="Vertical" />
         </StackPanel>
     </Grid>

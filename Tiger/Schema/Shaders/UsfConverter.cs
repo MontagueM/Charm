@@ -46,9 +46,9 @@ public class UsfConverter
     private readonly List<Input> inputs = new List<Input>();
     private readonly List<Output> outputs = new List<Output>();
 
-    public string HlslToUsf(Material material, string hlslText, bool bIsVertexShader)
+    public string HlslToUsf(Material material, bool bIsVertexShader)
     {
-        hlsl = new StringReader(hlslText);
+        hlsl = new StringReader(material.Pixel.Shader.Decompile($"ps{material.Pixel.Shader.Hash}"));
         usf = new StringBuilder();
         bOpacityEnabled = false;
         ProcessHlslData();
@@ -59,7 +59,6 @@ public class UsfConverter
         // WriteTextureComments(material, bIsVertexShader);
         WriteCbuffers(material, bIsVertexShader);
         WriteFunctionDefinition(bIsVertexShader);
-        hlsl = new StringReader(hlslText);
         bool success = ConvertInstructions();
         if (!success)
         {

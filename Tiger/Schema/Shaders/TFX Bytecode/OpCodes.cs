@@ -451,7 +451,7 @@ public static class TfxBytecodeOp
                 break;
             case PushGlobalChannelVectorData:
                 index = ((PushGlobalChannelVectorData)tfxData.data).unk1;
-                output = $"index {index} {GlobalChannelDefaults.GetGlobalChannelDefaults()[index]}";
+                output = $"index {index} {GlobalChannels.Get(index)}";
                 break;
             case Unk50Data:
                 output = $"unk1 {((Unk50Data)tfxData.data).unk1}";

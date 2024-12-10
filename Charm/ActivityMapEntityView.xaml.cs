@@ -414,6 +414,7 @@ public partial class ActivityMapEntityView : UserControl
 
     private static void ExtractDataTables(List<FileHash> dataTables, string hash, string savePath)
     {
+        GlobalExporterScene globalScene = Tiger.Exporters.Exporter.Get().GetOrCreateGlobalScene();
         // todo these scenes can be combined
         ExporterScene dynamicPointScene = Exporter.Get().CreateScene($"{hash}_EntityPoints", ExportType.EntityPoints);
         ExporterScene dynamicScene = Exporter.Get().CreateScene($"{hash}_Entities", ExportType.Map);
@@ -539,29 +540,7 @@ public partial class ActivityMapEntityView : UserControl
                             break;
 
                         case SMapAtmosphere atmosphere:
-                            skyScene.AddAtmosphere(atmosphere);
-
-                            List<Texture> AtmosTextures = new();
-                            if (atmosphere.Texture0 != null)
-                                AtmosTextures.Add(atmosphere.Texture0);
-                            if (atmosphere.TextureUnk0 != null)
-                                AtmosTextures.Add(atmosphere.TextureUnk0);
-                            if (atmosphere.Texture1 != null)
-                                AtmosTextures.Add(atmosphere.Texture1);
-                            if (atmosphere.TextureUnk1 != null)
-                                AtmosTextures.Add(atmosphere.TextureUnk1);
-                            if (atmosphere.Texture2 != null)
-                                AtmosTextures.Add(atmosphere.Texture2);
-
-                            foreach (var tex in AtmosTextures)
-                            {
-                                if (!Directory.Exists($"{savePath}/Textures/Atmosphere"))
-                                    Directory.CreateDirectory($"{savePath}/Textures/Atmosphere");
-                                // Not ideal but it works
-                                TextureExtractor.SaveTextureToFile($"{savePath}/Textures/Atmosphere/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
-                                if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
-                                    Source2Handler.SaveVTEX(tex, $"{savePath}/Textures/Atmosphere", "Atmosphere");
-                            }
+                            globalScene.AddToGlobalScene(atmosphere);
                             break;
                         default:
                             break;

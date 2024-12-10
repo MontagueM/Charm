@@ -34,6 +34,7 @@ public partial class GeneralConfigView : UserControl
 
     private void PopulateConfigPanel()
     {
+        // ---- General settings panel ----
         GeneralConfigPanel.Children.Clear();
 
         // Strategy
@@ -91,13 +92,6 @@ public partial class GeneralConfigView : UserControl
         //cef.ChangeButton.Click += SingleFolderMapsEnabled_OnClick;
         //GeneralConfigPanel.Children.Add(cef);
 
-        // Enable individual static extraction with maps
-        ConfigSettingToggleControl cfe = new ConfigSettingToggleControl();
-        cfe.SettingName = "Export Individual Models With Maps";
-        var bval = _config.GetIndvidualStaticsEnabled();
-        cfe.SettingValue = bval.ToString();
-        cfe.ChangeButton.Click += IndvidualStaticsEnabled_OnClick;
-        GeneralConfigPanel.Children.Add(cfe);
 
         // Disabled because it just doesn't work atm
         _config.SetUseCustomRenderer(false);
@@ -119,13 +113,32 @@ public partial class GeneralConfigView : UserControl
         ctf.ChangeButton.Visibility = Visibility.Hidden;
         GeneralConfigPanel.Children.Add(ctf);
 
+        // ---- Misc settings panel ----
+        MiscConfigPanel.Children.Clear();
+
+        // Enable individual static extraction with maps
+        ConfigSettingToggleControl cfe = new ConfigSettingToggleControl();
+        cfe.SettingName = "Export Individual Models With Maps";
+        var bval = _config.GetIndvidualStaticsEnabled();
+        cfe.SettingValue = bval.ToString();
+        cfe.ChangeButton.Click += IndvidualStaticsEnabled_OnClick;
+        MiscConfigPanel.Children.Add(cfe);
+
+        // Enable shader HLSL exporting
+        ConfigSettingToggleControl exportHlsl = new ConfigSettingToggleControl();
+        exportHlsl.SettingName = "Export Shader HLSL";
+        var bhlsl = _config.GetExportHLSL();
+        exportHlsl.SettingValue = bhlsl.ToString();
+        exportHlsl.ChangeButton.Click += ExportHLSL_OnClick;
+        MiscConfigPanel.Children.Add(exportHlsl);
+
         ConfigSettingToggleControl disBg = new ConfigSettingToggleControl();
         disBg.SettingName = "Animated Background";
         disBg.SettingLabel = "(Requires Restart)";
         bval = _config.GetAnimatedBackground();
         disBg.SettingValue = bval.ToString();
         disBg.ChangeButton.Click += AnimatedBackground_OnClick;
-        GeneralConfigPanel.Children.Add(disBg);
+        MiscConfigPanel.Children.Add(disBg);
     }
 
     private void PackagePathStrategyComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -309,6 +322,12 @@ public partial class GeneralConfigView : UserControl
     private void AnimatedBackground_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetAnimatedBackground(!_config.GetAnimatedBackground());
+        PopulateConfigPanel();
+    }
+
+    private void ExportHLSL_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetExportHLSL(!_config.GetExportHLSL());
         PopulateConfigPanel();
     }
 }

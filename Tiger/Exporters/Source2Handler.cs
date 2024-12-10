@@ -14,6 +14,7 @@ public static class Source2Handler
     {
         try
         {
+            fbxPath = fbxPath.Replace(@"\", @"/");
             if (!File.Exists($"{savePath}/{name}.vmdl"))
             {
                 File.Copy("Exporters/template.vmdl", $"{savePath}/{name}.vmdl", true);
