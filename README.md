@@ -20,6 +20,7 @@ Charm currently supports:
 
 | Version | Description              | Where           |  Main manifest id   | Language manifest id |
 |---------|--------------------------|-----------------|---------------------|----------------------|
+| ?.?.?.? | Rise Of Iron last update | Ask in DMR      |                     |                      |
 | 2.6.0.1 | Shadowkeep first update  | DepotDownloader | 7002268313830901797 | 2399965969279284756  |
 | 2.9.9.9 | Shadowkeep last update   | DepotDownloader | 4160053308690659072 | 4651412338057797072  |
 | 3.4.0.2 | Beyond Light last update | DepotDownloader | 5631185797932644936 | 3832609057880895101  |
