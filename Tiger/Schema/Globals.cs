@@ -423,6 +423,20 @@ public static class RenderStates
         public bool AlphaToCoverageEnable;
         public bool IndependentBlendEnable;
         public RenderTargetBlendDescription BlendDesc;
+
+        public override string ToString()
+        {
+            return $"\tAlphaToCoverageEnable: {AlphaToCoverageEnable}\n" +
+                $"\tIndependentBlendEnable: {IndependentBlendEnable}\n" +
+                $"\tIsBlendEnabled: {BlendDesc.IsBlendEnabled}\n" +
+                $"\tSourceBlend: {BlendDesc.SourceBlend}\n" +
+                $"\tDestinationBlend: {BlendDesc.DestinationBlend}\n" +
+                $"\tBlendOperation: {BlendDesc.BlendOperation}\n" +
+                $"\tSourceAlphaBlend: {BlendDesc.SourceAlphaBlend}\n" +
+                $"\tDestinationAlphaBlend: {BlendDesc.DestinationAlphaBlend}\n" +
+                $"\tAlphaBlendOperation: {BlendDesc.AlphaBlendOperation}\n" +
+                $"\tRenderTargetWriteMask: {BlendDesc.RenderTargetWriteMask}\n";
+        }
     }
 
     public class BungieRasterizerDesc
@@ -432,6 +446,15 @@ public static class RenderStates
         public bool FrontCounterClockwise;
         public bool DepthClipEnable;
         public bool ScissorEnable;
+
+        public override string ToString()
+        {
+            return $"\tFillMode: {FillMode}\n" +
+                $"\tCullMode: {CullMode}\n" +
+                $"\tFrontCounterClockwise: {FrontCounterClockwise}\n" +
+                $"\tDepthClipEnable: {DepthClipEnable}\n" +
+                $"\tScissorEnable: {ScissorEnable}\n";
+        }
     }
 
     public class BungieDepthBiasDesc
@@ -439,10 +462,82 @@ public static class RenderStates
         public int DepthBias;
         public float SlopeScaledDepthBias;
         public float DepthBiasClamp;
+
+        public override string ToString()
+        {
+            return $"\tDepthBias: {DepthBias}\n" +
+                $"\tSlopeScaledDepthBias: {SlopeScaledDepthBias}\n" +
+                $"\tDepthBiasClamp: {DepthBiasClamp}\n";
+        }
     }
 
+    public class BungieStencilDesc
+    {
+        public bool StencilEnable;
+        public ColorWriteMaskFlags StencilReadMask;
+        public ColorWriteMaskFlags StencilWriteMask;
+        public BungieStencilOpDesc FrontFace;
+        public BungieStencilOpDesc BackFace;
 
-    public static BungieBlendDesc[] BlendStates = new BungieBlendDesc[]
+        public override string ToString()
+        {
+            return $"\tStencilEnable: {StencilEnable}\n" +
+                $"\tStencilReadMask: {StencilReadMask}\n" +
+                $"\tStencilWriteMask: {StencilWriteMask}\n" +
+                $"\tFrontFace:\n{FrontFace}\n" +
+                $"\tBackFace:\n{BackFace}\n";
+        }
+    }
+
+    public class BungieStencilOpDesc
+    {
+        public Comparison Func;
+        public StencilOperation PassOp;
+        public StencilOperation FailOp;
+        public StencilOperation DepthFailOp;
+
+        public override string ToString()
+        {
+            return $"\tFunc: {Func}\n" +
+                $"\tPassOp: {PassOp}\n" +
+                $"\tFailOp: {FailOp}\n" +
+                $"\tDepthFailOp: {DepthFailOp}\n";
+        }
+    }
+
+    public class BungieDepthDesc
+    {
+        public bool Enable;
+        public int WriteMask;
+        public Comparison Func;
+        public bool EnableAlt;
+        public int WriteMaskAlt;
+        public Comparison FuncAlt;
+
+        public override string ToString()
+        {
+            return $"\tEnable: {Enable}\n" +
+                $"\tWriteMask: {WriteMask}\n" +
+                $"\tFunc: {Func}\n" +
+                $"\tEnableAlt: {EnableAlt}\n" +
+                $"\tWriteMaskAlt: {WriteMaskAlt}\n" +
+                $"\tFuncAlt: {FuncAlt}\n";
+        }
+    }
+
+    public class BungieDepthStencilDesc
+    {
+        public BungieDepthDesc Depth;
+        public BungieStencilDesc Stencil;
+
+        public override string ToString()
+        {
+            return $"\tDepth:\n{Depth}\n" +
+                   $"\tStencil:\n{Stencil}\n";
+        }
+    }
+
+    public static readonly BungieBlendDesc[] BlendStates = new BungieBlendDesc[]
     {
 	    // Blend State 0
 	    new BungieBlendDesc
@@ -1976,7 +2071,7 @@ public static class RenderStates
         },
     };
 
-    public static BungieRasterizerDesc[] RasterizerStates = new BungieRasterizerDesc[]
+    public static readonly BungieRasterizerDesc[] RasterizerStates = new BungieRasterizerDesc[]
     {
 	    // Rasterizer State 0
 	    new BungieRasterizerDesc {
@@ -2052,7 +2147,7 @@ public static class RenderStates
         },
     };
 
-    public static BungieDepthBiasDesc[] DepthBiasStates = new BungieDepthBiasDesc[]
+    public static readonly BungieDepthBiasDesc[] DepthBiasStates = new BungieDepthBiasDesc[]
     {
 	    // DepthBias 0
 	    new BungieDepthBiasDesc
@@ -2118,6 +2213,1128 @@ public static class RenderStates
             DepthBiasClamp =  10000000000.0f,
         },
     };
+
+    private static readonly (int, int)[] DEPTH_STENCIL_COMBOS = new (int, int)[]
+    {
+        (0, 0), // 0
+        (1, 1),
+        (2, 1), // 2
+        (8, 1),
+        (2, 2), // 4
+        (1, 3),
+        (1, 4), // 6
+        (2, 5),
+        (2, 6), // 8
+        (2, 9),
+        (2, 10), // 10
+        (2, 0xb),
+        (2, 0xc), // 12
+        (4, 1),
+        (6, 1), // 14
+        (3, 1),
+        (7, 1), // 16
+        (3, 0x10),
+        (9, 0x10),
+        (3, 0x11),
+        (3, 0x12),
+        (7, 0x13),
+        (7, 0x1b),
+        (3, 0x13),
+        (3, 0x19),
+        (3, 0x1b),
+        (6, 0x14),
+        (2, 0x15),
+        (3, 0x15),
+        (3, 0x18),
+        (3, 0x1a),
+        (1, 0x1d),
+        (1, 0x12),
+        (1, 0x13),
+        (10, 1),
+        (0xb, 1),
+        (3, 0x1e),
+        (0xc, 0x1f),
+        (1, 0x1f),
+        (1, 0x20),
+        (1, 0x21),
+        (3, 0x21),
+        (2, 0x21),
+        (6, 0x20),
+        (3, 0x20),
+        (3, 6),
+        (3, 10),
+        (3, 0xb),
+        (3, 0xc),
+        (3, 9),
+        (0xd, 0x22),
+        (1, 0x23),
+        (3, 0x1c),
+        (7, 0x1c),
+        (0xd, 0x10),
+        (0xd, 0x25),
+        (9, 0x24),
+        (3, 0x26),
+        (1, 0x26),
+        (3, 0x27),
+        (1, 0x27),
+        (3, 0x14),
+        (1, 0x14),
+        (3, 0x28),
+        (3, 8),
+        (2, 8),
+        (1, 2),
+        (1, 8),
+        (3, 7),
+        (3, 0x17),
+        (3, 0xd),
+        (3, 0xe),
+        (3, 0xf),
+        (1, 0x29),
+        (1, 0x2a),
+        (1, 0x2b),
+        (1, 0x2c),
+        (1, 0x2d),
+        (1, 0x2e),
+        (1, 0x2f),
+        (1, 0x30),
+        (1, 0x1a),
+        (2, 0x16),
+        (5, 1),
+        (5, 0x29),
+        (5, 0x2a),
+        (10, 0x16),
+        (1, 0x16),
+    };
+
+    private static readonly BungieDepthDesc[] DEPTH_STATES = new BungieDepthDesc[]
+    {
+        // Depth 0
+        new BungieDepthDesc {
+        Enable = false,
+        WriteMask = 0,
+        Func = Comparison.Always,
+        EnableAlt = false,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.Always,
+        },
+        // Depth 1
+        new BungieDepthDesc {
+        Enable = false,
+        WriteMask = 0,
+        Func = Comparison.Always,
+        EnableAlt = false,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.Always,
+        },
+        // Depth 2
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 1,
+        Func = Comparison.GreaterEqual,
+        EnableAlt = true,
+        WriteMaskAlt = 1,
+        FuncAlt = Comparison.LessEqual,
+        },
+        // Depth 3
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 0,
+        Func = Comparison.GreaterEqual,
+        EnableAlt = true,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.LessEqual,
+        },
+        // Depth 4
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 1,
+        Func = Comparison.LessEqual,
+        EnableAlt = true,
+        WriteMaskAlt = 1,
+        FuncAlt = Comparison.GreaterEqual,
+        },
+        // Depth 5
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 1,
+        Func = Comparison.Less,
+        EnableAlt = true,
+        WriteMaskAlt = 1,
+        FuncAlt = Comparison.Greater,
+        },
+        // Depth 6
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 0,
+        Func = Comparison.LessEqual,
+        EnableAlt = true,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.GreaterEqual,
+        },
+        // Depth 7
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 0,
+        Func = Comparison.Less,
+        EnableAlt = true,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.Greater,
+        },
+        // Depth 8
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 1,
+        Func = Comparison.GreaterEqual,
+        EnableAlt = true,
+        WriteMaskAlt = 1,
+        FuncAlt = Comparison.LessEqual,
+        },
+        // Depth 9
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 0,
+        Func = Comparison.GreaterEqual,
+        EnableAlt = true,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.LessEqual,
+        },
+        // Depth 10
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 1,
+        Func = Comparison.Always,
+        EnableAlt = true,
+        WriteMaskAlt = 1,
+        FuncAlt = Comparison.Always,
+        },
+        // Depth 11
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 0,
+        Func = Comparison.Never,
+        EnableAlt = true,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.Never,
+        },
+        // Depth 12
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 0,
+        Func = Comparison.Always,
+        EnableAlt = true,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.Always,
+        },
+        // Depth 13
+        new BungieDepthDesc {
+        Enable = true,
+        WriteMask = 0,
+        Func = Comparison.GreaterEqual,
+        EnableAlt = true,
+        WriteMaskAlt = 0,
+        FuncAlt = Comparison.LessEqual,
+        },
+    };
+
+    private static readonly BungieStencilDesc[] STENCIL_STATES = new BungieStencilDesc[]
+    {
+    // Stencil 0
+    new BungieStencilDesc {
+    StencilEnable =  false,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 1
+    new BungieStencilDesc {
+    StencilEnable =  false,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 2
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)175,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 3
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)2,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 4
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)1,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 5
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 6
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)4,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 7
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)20,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 8
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)4,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 9
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 10
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)6,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 11
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)7,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.LessEqual,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.LessEqual,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 12
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)3,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Greater,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Greater,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 13
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)22,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 14
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)23,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.LessEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.LessEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 15
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)19,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Greater,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Greater,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 16
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 17
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Zero,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Zero,
+    },
+    },
+    // Stencil 18
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 19
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 20
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)32,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 21
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 22
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)255,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 23
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)184,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 24
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Invert,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Invert,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 25
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Invert,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Invert,
+    },
+    },
+    // Stencil 26
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 27
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 28
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 29
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 30
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 31
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)255,
+    StencilWriteMask = (ColorWriteMaskFlags)255,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 32
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)255,
+    StencilWriteMask = (ColorWriteMaskFlags)255,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 33
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)255,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 34
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Zero,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Zero,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 35
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)0,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.NotEqual,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 36
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Replace,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Replace,
+    },
+    },
+    // Stencil 37
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 38
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Keep,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 39
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)16,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Equal,
+    PassOp = StencilOperation.Zero,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 40
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)64,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 41
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)1,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 42
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)2,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 43
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)4,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 44
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)8,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 45
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)16,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 46
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)32,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 47
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)64,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    },
+    // Stencil 48
+    new BungieStencilDesc {
+    StencilEnable =  true,
+    StencilReadMask = (ColorWriteMaskFlags)0,
+    StencilWriteMask = (ColorWriteMaskFlags)128,
+    FrontFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    BackFace = new BungieStencilOpDesc {
+    Func = Comparison.Always,
+    PassOp = StencilOperation.Replace,
+    FailOp = StencilOperation.Keep,
+    DepthFailOp = StencilOperation.Keep,
+    },
+    }
+    };
+
+    public static readonly BungieDepthStencilDesc[] DepthStencilStates = DEPTH_STENCIL_COMBOS.Select(combo =>
+    {
+        var depth = DEPTH_STATES[combo.Item1];
+        var stencil = STENCIL_STATES[combo.Item2];
+
+        BungieDepthStencilDesc d3dDesc = new BungieDepthStencilDesc
+        {
+            Depth = depth,
+            Stencil = stencil
+        };
+
+        return d3dDesc;
+    }).ToArray();
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "41038080", 0x40)] // reference from shared_manifest

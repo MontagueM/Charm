@@ -88,7 +88,7 @@ public class Terrain : Tag<STerrain>
             parts.Clear();
         }
 
-        scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
+        scene.AddStaticInstance(Hash, Vector3.One, Vector4.Zero, Vector3.Zero);
         for (int i = 0; i < dyeMaps.Count; i++)
         {
             scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);

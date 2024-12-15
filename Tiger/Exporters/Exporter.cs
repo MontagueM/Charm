@@ -59,6 +59,18 @@ public class Exporter : Subsystem<Exporter>
         return _globalScene;
     }
 
+    /// <summary>
+    /// Only returns the Global Scene instead of creating then returning
+    /// </summary>
+    /// <returns>The Global Scene if it exists, null if not</returns>
+    public GlobalExporterScene? GetGlobalScene()
+    {
+        if (_globalScene == null)
+            return null;
+
+        return _globalScene;
+    }
+
     public void Reset()
     {
         _scenes.Clear();
@@ -200,7 +212,7 @@ public class ExporterScene
         }).ToList();
     }
 
-    public void AddStaticInstance(FileHash modelHash, float scale, Vector4 quatRotation, Vector3 translation)
+    public void AddStaticInstance(FileHash modelHash, Vector3 scale, Vector4 quatRotation, Vector3 translation)
     {
         if (!StaticMeshInstances.ContainsKey(modelHash))
         {
@@ -212,7 +224,7 @@ public class ExporterScene
             Position = translation,
             Rotation = Vector4.QuaternionToEulerAngles(quatRotation),
             Quaternion = quatRotation,
-            Scale = new Vector3(scale, scale, scale)
+            Scale = scale
         });
     }
 
@@ -349,6 +361,22 @@ public class ExporterScene
 
         EntityInstances.TryAdd(name, new());
         EntityInstances[name].Add(transform);
+    }
+
+    public void AddMapModelParts(string name, List<MeshPart> parts, Transform transform)
+    {
+        ExporterMesh mesh = new(name);
+        for (int i = 0; i < parts.Count; i++)
+        {
+            MeshPart part = parts[i];
+            mesh.AddPart(name, part, i);
+        }
+        StaticMeshes.Add(mesh);
+
+        if (!StaticMeshInstances.ContainsKey(name))
+            StaticMeshInstances.TryAdd(name, new());
+
+        StaticMeshInstances[name].Add(transform);
     }
 
     public void AddTerrain(string meshHash, List<StaticPart> parts, ulong? id = null, int index = 0)

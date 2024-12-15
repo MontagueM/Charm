@@ -1682,10 +1682,10 @@ public struct SMapCubemapResource //Dataresource for cubemaps
 {
     [SchemaField(0x20)]
     public Vector4 CubemapSize; //XYZ, no W
-    public Vector4 CubemapPosition; //Cubemap texture lines up with this one
+    public Vector4 CubemapPosition; // Not actually right afaik
 
     [SchemaField(0xF0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public Vector4 UnkF0; //This might actually be position? Similar to other but in GDC image this one looked more correct
+    public Vector4 UnkF0; // This is 98% position but its rarely sometimes not?? Just use the datatable position instead
 
     [SchemaField(0x140, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x140, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]

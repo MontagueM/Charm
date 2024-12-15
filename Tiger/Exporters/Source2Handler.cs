@@ -17,10 +17,11 @@ public static class Source2Handler
             fbxPath = fbxPath.Replace(@"\", @"/");
             if (!File.Exists($"{savePath}/{name}.vmdl"))
             {
-                File.Copy("Exporters/template.vmdl", $"{savePath}/{name}.vmdl", true);
+                File.Copy("Exporters/sbox_model_template.vmdl", $"{savePath}/{name}.vmdl", true);
                 string text = File.ReadAllText($"{savePath}/{name}.vmdl");
 
                 StringBuilder mats = new StringBuilder();
+                StringBuilder exceptions = new();
 
                 int i = 0;
                 foreach (var part in parts)
@@ -37,12 +38,19 @@ public static class Source2Handler
                         mats.AppendLine($"    to = \"Shaders/Source2/materials/{part.Material.Hash}.vmat\"");
                     }
                     mats.AppendLine("},\n");
+
+                    if (part.Material.Vertex.Unk64 != 0)
+                    {
+                        exceptions.AppendLine($"\"{name}_Group{part.GroupIndex}_Index{part.Index}_{i}_{part.LodCategory}\",");
+                    }
+
                     i++;
                 }
 
                 text = text.Replace("%MATERIALS%", mats.ToString());
                 text = text.Replace("%FILENAME%", $"{fbxPath}/{name}.fbx");
                 text = text.Replace("%MESHNAME%", name);
+                text = text.Replace("%EXCEPTIONS%", exceptions.ToString());
 
                 File.WriteAllText($"{savePath}/{name}.vmdl", text);
             }
@@ -72,14 +80,11 @@ public static class Source2Handler
 
     public static void SaveVMAT(string savePath, string hash, Material material, List<Texture> terrainDyemaps = null)
     {
-        string path;
-        if (material.EnumerateScopes().Contains(TfxScope.TERRAIN)) // TODO: Fix this shit
-            path = $"{savePath}/Shaders/Source2/Materials";
-        else
-            path = $"{savePath}/Source2/Materials";
+        string path = $"{savePath}/Shaders/Source2/Materials";
 
         Directory.CreateDirectory(path);
         StringBuilder vmat = new StringBuilder();
+        StringBuilder expressions = new StringBuilder();
 
         vmat.AppendLine("Layer0\n{");
 
@@ -109,6 +114,61 @@ public static class Source2Handler
             }
         }
 
+        var opcodes = material.Pixel.GetBytecode().Opcodes;
+        foreach ((int i, var op) in opcodes.Select((value, index) => (index, value)))
+        {
+            switch (op.op)
+            {
+                case TfxBytecode.PushExternInputTextureView:
+                    var data = (PushExternInputTextureViewData)op.data;
+                    var slot = ((SetShaderTextureData)opcodes[i + 1].data).value & 0x1F;
+                    var index = data.element * 8;
+                    switch (data.extern_)
+                    {
+                        case TfxExtern.Frame:
+                            switch (index)
+                            {
+                                case 0xB8: // SGlobalTextures SpecularTintLookup
+                                    var specTint = Globals.Get().RenderGlobals.TagData.Textures.TagData.SpecularTintLookup;
+                                    specTint.SavetoFile($"{savePath}/Textures/{specTint.Hash}");
+
+                                    vmat.AppendLine($"\tPS_tSpecularTintLookup \"Textures/{specTint.Hash}.png\"");
+                                    break;
+                            }
+                            break;
+
+                        case TfxExtern.Atmosphere:
+                            switch (index)
+                            {
+                                case 0x80: // SMapAtmosphere Lookup4
+                                    if (Exporter.Get().GetGlobalScene() is not null && Exporter.Get().GetGlobalScene().TryGetItem<SMapAtmosphere>(out SMapAtmosphere atmos))
+                                        vmat.AppendLine($"\tPS_TextureT{slot} \"Textures/Atmosphere/{atmos.Lookup4.Hash}.png\"");
+                                    else
+                                        vmat.AppendLine($"\tPS_TextureT{slot} \"[1.000000 1.000000 1.000000 1.000000]\"");
+                                    break;
+                                case 0xE0:
+                                    expressions.AppendLine($"\t\tPS_TextureT1 \"AtmosFar\"");
+                                    break;
+                                case 0xF0:
+                                    expressions.AppendLine($"\t\tPS_TextureT2 \"AtmosNear\"");
+                                    break;
+                            }
+                            break;
+
+                        case TfxExtern.Deferred:
+                            switch (index)
+                            {
+                                case 0x98: // Generated sky hemisphere
+                                    vmat.AppendLine($"\tPS_TextureT{slot} \"Pipelines/Textures/sky_hemisphere_temp.png\"");
+                                    break;
+                            }
+                            break;
+
+                    }
+                    break;
+            }
+        }
+
         vmat.AppendLine(PopulateCBuffers(material).ToString()); // PS
         vmat.AppendLine(PopulateCBuffers(material, true).ToString()); // VS
 
@@ -122,6 +182,18 @@ public static class Source2Handler
         {
             var expression = entry.Value.Contains("Time") ? $"{temp_time_fix} return {entry.Value.Replace("Time", "CurTime")};" : entry.Value;
             vmat.AppendLine($"\t\tcb0_{entry.Key} \"{expression}\"");
+        }
+
+        foreach (var scope in material.EnumerateScopes())
+        {
+            switch (scope)
+            {
+                case TfxScope.TRANSPARENT:
+                    vmat.AppendLine($"\t\tPS_TextureT11 \"AtmosFar\"");
+                    vmat.AppendLine($"\t\tPS_TextureT13 \"AtmosNear\"");
+                    vmat.AppendLine($"\t\tPS_TextureT15 \"AtmosDensity\"");
+                    break;
+            }
         }
 
         foreach (var resource in material.Pixel.Shader.Resources)
@@ -140,9 +212,6 @@ public static class Source2Handler
                                 else
                                     vmat.AppendLine($"\t\tcb2_{i} \"float4(1,1,1,1)\"");
                             }
-
-                            vmat.AppendLine($"\t\tPS_TextureT11 \"AtmosFar\"");
-                            vmat.AppendLine($"\t\tPS_TextureT13 \"AtmosNear\"");
                         }
                         break;
                     case 8: // Transparent_Advanced
@@ -181,6 +250,11 @@ public static class Source2Handler
                     case 13: // Frame
                         vmat.AppendLine($"\t\tcb13_0 \"float4(Time, Time, 0.05, 0.016)\"");
                         vmat.AppendLine($"\t\tcb13_1 \"float4(1,16,0.5,1.5)\"");
+                        vmat.AppendLine($"\t\tcb13_2 \"float4((Time + 33.75) * 1.258699, (Time + 60.0) * 0.9583125, (Time + 60.0) * 8.789123, (Time + 33.75) * 2.311535)\"");
+                        vmat.AppendLine($"\t\tcb13_4 \"float4(1,1,0,1)\"");
+                        vmat.AppendLine($"\t\tcb13_5 \"float4(0,0,512,0)\"");
+                        vmat.AppendLine($"\t\tcb13_6 \"float4(0,1,sin(Time * 6.0) * 0.5 + 0.5,0)\"");
+                        vmat.AppendLine($"\t\tcb13_7 \"float4(0,0.5,180,0)\"");
                         break;
                 }
             }
@@ -213,6 +287,7 @@ public static class Source2Handler
             }
         }
 
+        vmat.AppendLine(expressions.ToString());
 
         vmat.AppendLine($"\t}}");
         vmat.AppendLine("}");

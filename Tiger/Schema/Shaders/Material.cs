@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 using Arithmic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -50,17 +51,17 @@ namespace Tiger.Schema.Shaders
                     if (_config.GetUnrealInteropEnabled())
                     {
                         string usf = new UsfConverter().HlslToUsf(this, false);
-                        Directory.CreateDirectory($"{saveDirectory}/Unreal");
-                        File.WriteAllText($"{saveDirectory}/Unreal/PS_{Hash}.usf", usf);
+                        Directory.CreateDirectory($"{saveDirectory}/Shaders/Unreal");
+                        File.WriteAllText($"{saveDirectory}/Shaders/Unreal/PS_{Hash}.usf", usf);
                     }
 
                     if (_config.GetS2ShaderExportEnabled())
                     {
                         string vfx = new S2ShaderConverter().HlslToVfx(this);
-                        Directory.CreateDirectory($"{saveDirectory}/Source2");
-                        Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
+                        Directory.CreateDirectory($"{saveDirectory}/Shaders/Source2");
+                        Directory.CreateDirectory($"{saveDirectory}/Shaders/Source2/materials");
 
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{Pixel.Shader.Hash}.shader", vfx);
+                        File.WriteAllText($"{saveDirectory}/Shaders/Source2/PS_{Pixel.Shader.Hash}.shader", vfx);
                         if (!isTerrain)
                             Source2Handler.SaveVMAT(saveDirectory, Hash, this);
                     }
@@ -68,8 +69,8 @@ namespace Tiger.Schema.Shaders
                     if (_config.GetExportHLSL())
                     {
                         string pixel = Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}");
-                        Directory.CreateDirectory($"{saveDirectory}/HLSL");
-                        File.WriteAllText($"{saveDirectory}/HLSL/PS_{Hash}.hlsl", pixel);
+                        Directory.CreateDirectory($"{saveDirectory}/Shaders/HLSL");
+                        File.WriteAllText($"{saveDirectory}/Shaders/HLSL/PS_{Hash}.hlsl", pixel);
                     }
                 }
                 catch (IOException e)  // threading error
@@ -121,7 +122,7 @@ namespace Tiger.Schema.Shaders
             if (Pixel.Shader != null)
             {
                 Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}", hlslPath);
-                SavePixelShader($"{saveDirectory}/Shaders/");
+                SavePixelShader($"{saveDirectory}");
 
                 ShaderDetails psCB = new ShaderDetails();
                 psCB.CBuffers = Pixel.GetCBuffer0();
@@ -337,19 +338,18 @@ public struct StateSelection
 
     public override string ToString()
     {
+        StringBuilder states = new();
         if (BlendState() != -1)
         {
             var blendState = RenderStates.BlendStates[BlendState()];
-            return $"Blend State {BlendState()}:\n" +
-                $"\tIsBlendEnabled: {blendState.BlendDesc.IsBlendEnabled}\n" +
-                $"\tSourceBlend: {blendState.BlendDesc.SourceBlend}\n" +
-                $"\tDestinationBlend: {blendState.BlendDesc.DestinationBlend}\n" +
-                $"\tBlendOperation: {blendState.BlendDesc.BlendOperation}\n" +
-                $"\tSourceAlphaBlend: {blendState.BlendDesc.SourceAlphaBlend}\n" +
-                $"\tDestinationAlphaBlend: {blendState.BlendDesc.DestinationAlphaBlend}\n" +
-                $"\tAlphaBlendOperation: {blendState.BlendDesc.AlphaBlendOperation}\n" +
-                $"\tRenderTargetWriteMask: {blendState.BlendDesc.RenderTargetWriteMask}\n";
+            states.AppendLine($"Blend State {BlendState()}:\n {blendState.ToString()}");
         }
-        return "";
+        if (DepthStencilState() != -1)
+        {
+            var dsState = RenderStates.DepthStencilStates[DepthStencilState()];
+            states.AppendLine($"Depth Stencil State {DepthStencilState()}:\n {dsState.ToString()}");
+        }
+
+        return states.ToString();
     }
 }

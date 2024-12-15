@@ -848,6 +848,11 @@ public struct SMapWaterDecal
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C16B8080", 0x130)]
 public struct SMapAtmosphere
 {
+    // 0 and 1 used in...
+    // sky_lookup_generate_near/far, result used in 'Sky' and set to T11 and T13 (transparent scope)
+    // full_hemisphere_sky_color_generate,
+    // hemisphere_sky_color_generate,
+    // water_sky_color_generate,
     [SchemaField(0x90), Tag64]
     public Texture Lookup0;
     [Tag64]
@@ -856,7 +861,13 @@ public struct SMapAtmosphere
     public Texture Lookup2;
     [Tag64]
     public Texture Lookup3;
-    public Texture UnkD0;
+    public Texture Lookup4; // used in atmo_depth_angle_density_lookup_generate, result set to T15 (transparent scope)
+    public FileHash UnkD4;
+
+    public Vector4 UnkD8;
+    public Vector4 UnkE8;
+    public Vector4 UnkF8;
+    public Vector4 Unk108;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "406A8080", 0x18)]
@@ -889,6 +900,40 @@ public struct SStaticAmbientOcclusionMappings
     public ulong Identifier;
     public uint Offset;
 }
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "E8688080", 0x18)]
+public struct SMapRoadDecalsResource
+{
+    [SchemaField(0x10)]
+    public Tag<SMapRoadDecals> RoadDecals; // Contrary to the name, it is more than just decals on roads
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EA688080", 0x58)]
+public struct SMapRoadDecals
+{
+    public ulong FileSize;
+    public DynamicArray<D2Class_E3688080> Entries;
+    public FileHash OcclusionBounds;
+    [SchemaField(0x20)]
+    public AABB UnkBounds;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "E3688080", 0x60)]
+public struct D2Class_E3688080
+{
+    public Material Material;
+    public IndexBuffer IndexBuffer;
+    public VertexBuffer VertexBuffer;
+    public ushort IndexCount; // Is actually face count, needs multiplied by 3
+    public ushort IndexOffset; // Always 0, so idk if IndexCount is an int then
+    public Vector4 Rotation;
+    public Vector4 Position;
+    public Vector4 Scale;
+    public Vector4 Offset;
+    public Vector2 TexcoordScale;
+    public Vector2 TexcoordOffset;
+}
+
 
 // /// <summary>
 // /// Unk data resource, maybe lights for entities?

@@ -98,9 +98,7 @@ public class EntityModel : Tag<SEntityModel>
         int meshIndex = 0;
         foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
-            //Console.WriteLine($"{Hash}: Input Layout {mesh.GetInputLayoutForStage(0)}");
             exportPartRange = GetExportRanges(mesh);
-
             foreach ((int i, D2Class_CB6E8080 part) in dynamicParts[meshIndex])
             {
                 if (!exportPartRange.Contains(i))
@@ -139,14 +137,6 @@ public class EntityModel : Tag<SEntityModel>
     public static List<int> GetExportRanges(SEntityModelMesh mesh)
     {
         List<int> exportPartRange = new();
-
-        //foreach (TfxRenderStage stage in ExportRenderStages)
-        //{
-        //    var range = mesh.GetRangeForStage((int)stage);
-        //    if (!(range.Start.Value < range.End.Value))
-        //        continue;
-        //    Console.WriteLine($"Part Range: {mesh.GetRangeForStage((int)stage).Start.Value}-{mesh.GetRangeForStage((int)stage).End.Value - 1} : {stage}");
-        //}
 
         foreach (TfxRenderStage stage in Globals.Get().ExportRenderStages)
         {
@@ -286,7 +276,6 @@ public class DynamicMeshPart : MeshPart
             var tx = VertexTexcoords0[i];
             var tx1 = VertexTexcoords1[i];
             VertexTexcoords0[i] = new Vector2(tx.X, 1f - tx.Y);
-            // VertexTexcoords1[i] = new Vector2(tx1.X, tx1.Y);
         }
     }
 

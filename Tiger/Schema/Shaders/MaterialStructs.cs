@@ -29,7 +29,7 @@ public struct SMaterial // Errm Ackchyually its called "technique" 🤓
 
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x40, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public StateSelection RenderStates;
 
     [SchemaField(0x28, TigerStrategy.DESTINY1_RISE_OF_IRON)]

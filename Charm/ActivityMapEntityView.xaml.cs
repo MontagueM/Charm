@@ -489,6 +489,7 @@ public partial class ActivityMapEntityView : UserControl
                             break;
 
                         case SMapCubemapResource cubemap:
+                            cubemap.CubemapPosition = entry.Translation; // Shouldn't be modifiying things like this but eh
                             dynamicScene.AddCubemap(cubemap);
                             break;
 

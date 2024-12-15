@@ -34,7 +34,7 @@
       <None Remove="Audio\**" />
       <None Remove="import_to_ue5.py" />
       <None Remove="Strings\**" />
-      <None Remove="template.vmdl" />
+      <None Remove="sbox_model_template.vmdl" />
       <None Remove="Statics\**" />
       <None Remove="Textures\**" />
       <None Remove="Models\**" />
@@ -49,7 +49,7 @@
       <None Update="Exporters\import_to_ue5.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Exporters\template.vmdl">
+      <None Update="Exporters\sbox_model_template.vmdl">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

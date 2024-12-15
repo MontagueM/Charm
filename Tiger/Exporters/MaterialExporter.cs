@@ -1,4 +1,6 @@
 ﻿using ConcurrentCollections;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Tiger.Schema;
 
 namespace Tiger.Exporters;
@@ -43,7 +45,7 @@ public class MaterialExporter : AbstractExporter
                     if (saveShaders)
                     {
                         string shaderSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, scene.Name);
-                        shaderSaveDirectory = $"{shaderSaveDirectory}/Shaders";
+                        shaderSaveDirectory = $"{shaderSaveDirectory}";
 
                         material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
                         material.Material.SaveVertexShader(shaderSaveDirectory);
@@ -113,7 +115,7 @@ public class MaterialExporter : AbstractExporter
             foreach (ExportMaterial material in mapMaterials)
             {
                 string shaderSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, $"Maps");
-                shaderSaveDirectory = $"{shaderSaveDirectory}/Shaders";
+                shaderSaveDirectory = $"{shaderSaveDirectory}";
                 Directory.CreateDirectory(shaderSaveDirectory);
 
                 material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
@@ -134,20 +136,30 @@ public class MaterialExporter : AbstractExporter
                 AtmosTextures.Add(atmosphere.Lookup2);
             if (atmosphere.Lookup3 != null)
                 AtmosTextures.Add(atmosphere.Lookup3);
-            if (atmosphere.UnkD0 != null)
-                AtmosTextures.Add(atmosphere.UnkD0);
+            if (atmosphere.Lookup4 != null)
+                AtmosTextures.Add(atmosphere.Lookup4);
 
             string savePath = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, $"Maps");
-            savePath = $"{savePath}/Textures/Atmosphere";
-            Directory.CreateDirectory(savePath);
+            string texSavePath = $"{savePath}/Textures/Atmosphere";
+            Directory.CreateDirectory(texSavePath);
 
             foreach (var tex in AtmosTextures)
             {
                 // Not ideal but it works
-                TextureExtractor.SaveTextureToFile($"{savePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
+                TextureExtractor.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
                 if (_config.GetS2ShaderExportEnabled())
-                    Source2Handler.SaveVTEX(tex, $"{savePath}", "Atmosphere");
+                    Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Atmosphere");
             }
+
+            string dataSavePath = $"{savePath}/Rendering";
+            Directory.CreateDirectory(dataSavePath);
+
+            var jsonSettings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                Converters = new List<JsonConverter> { new StringEnumConverter() }
+            };
+            File.WriteAllText($"{dataSavePath}/Atmosphere.json", JsonConvert.SerializeObject(atmosphere, jsonSettings));
         }
     }
 }

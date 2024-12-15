@@ -67,14 +67,14 @@ public static class TfxBytecodeOp
                     Spline8ConstData.constant_index = reader.ReadByte();
                     tfxData.data = Spline8ConstData;
                     break;
-                case TfxBytecode.Unk39:
-                    Unk39Data Unk39Data = new();
-                    Unk39Data.unk1 = reader.ReadByte();
+                case TfxBytecode.Spline8ConstChain:
+                    Spline8ConstChainData Unk39Data = new();
+                    Unk39Data.constant_index = reader.ReadByte();
                     tfxData.data = Unk39Data;
                     break;
                 case TfxBytecode.Gradient4Const: // Gradient4Const
                     Gradient4ConstData Unk3aData = new();
-                    Unk3aData.index_start = reader.ReadByte();
+                    Unk3aData.constant_index = reader.ReadByte();
                     tfxData.data = Unk3aData;
                     break;
                 case TfxBytecode.UnkLoadConstant:
@@ -357,11 +357,11 @@ public static class TfxBytecodeOp
                     $"\n\tD_thresholds: {D_thresholds}";
                 break;
 
-            case Unk39Data:
-                output = $"unk1 {((Unk39Data)tfxData.data).unk1}";
+            case Spline8ConstChainData:
+                output = $"Index {((Spline8ConstChainData)tfxData.data).constant_index}";
                 break;
             case Gradient4ConstData: // Gradient4Const
-                index = ((Gradient4ConstData)tfxData.data).index_start;
+                index = ((Gradient4ConstData)tfxData.data).constant_index;
                 var BaseColor = $"{constants[index].Vec}";
                 var Cred = $"{constants[index + 1].Vec}";
                 var Cgreen = $"{constants[index + 2].Vec}";
@@ -517,6 +517,7 @@ public enum TfxBytecode : byte
     LerpSaturated = 0x11,
     MultiplyAdd = 0x12,
     Clamp = 0x13,
+    Unk14 = 0x14,
     Abs = 0x15,
     Sign = 0x16,
     Floor = 0x17,
@@ -547,7 +548,7 @@ public enum TfxBytecode : byte
     LerpConstantSaturated = 0x36,
     Spline4Const = 0x37,
     Spline8Const = 0x38,
-    Unk39 = 0x39, // Spline8ConstChain?
+    Spline8ConstChain = 0x39, // Spline8ConstChain?
     Gradient4Const = 0x3a,
     UnkLoadConstant = 0x3b, //{ constant_index: u8 }
     PushExternInputFloat = 0x3c,
@@ -613,14 +614,14 @@ public struct Spline8ConstData
     public byte constant_index;
 }
 
-public struct Unk39Data
+public struct Spline8ConstChainData
 {
-    public byte unk1;
+    public byte constant_index;
 }
 
 public struct Gradient4ConstData
 {
-    public byte index_start;
+    public byte constant_index;
 }
 
 public struct UnkLoadConstantData

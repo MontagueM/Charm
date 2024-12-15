@@ -1,4 +1,5 @@
-﻿using Tiger.Schema;
+﻿using Arithmic;
+using Tiger.Schema;
 
 namespace Tiger;
 
@@ -103,6 +104,102 @@ public enum TfxExtern : byte
     SoftDeform = 96,
 }
 
+public static class Externs
+{
+    public static string GetExternFloat(TfxExtern extern_, int element)
+    {
+        switch (extern_)
+        {
+            case TfxExtern.Frame:
+                switch (element)
+                {
+                    case 0:
+                        return $"(Time)"; // game_time
+                    case 0x04:
+                        return $"(Time)"; // render_time
+                    case 0x10:
+                        return $"(0.5)";
+                    case 0x14:
+                        return $"(0.016)"; // delta_game_time
+                    case 0x1C:
+                        return $"(16)"; // exposure_scale
+
+                    default:
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_}");
+                        return $"(1)";
+                }
+            case TfxExtern.Atmosphere:
+                switch (element)
+                {
+                    case 0x70:
+                        return $"(exists(AtmosTimeOfDay) ? (AtmosTimeOfDay) : (0.5))";
+                    case 0x198:
+                    case 0x170:
+                        return $"(0.0001)";
+                    case 0x1b4:
+                        return $"(exists(AtmosRotation) ? (AtmosRotation) : (0))";
+                    case 0x1b8:
+                        return $"(exists(AtmosTimeOfDay) ? (AtmosTimeOfDay) : (1))";
+                    case 0x1bc:
+                        return $"(0.5)";
+                    case 0x1e8:
+                        return $"(0)";
+                    default:
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_} ");
+                        return $"(1)";
+                }
+            default:
+                Log.Error($"Unimplemented extern {extern_}[{element} (0x{(element):X})]");
+                return $"(1)";
+        }
+    }
+
+    public static string GetExternVec4(TfxExtern extern_, int element)
+    {
+        switch (extern_)
+        {
+            case TfxExtern.Deferred:
+                switch (element)
+                {
+                    case 0:
+                        return $"float4(0.0, 100, 0.0, 0.0)";
+                    default:
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_}");
+                        return $"float4(1,1,1,1)";
+                }
+            case TfxExtern.Frame:
+                switch (element)
+                {
+                    case 0x1A0:
+                        return $"float4(0, 0, 0, 0)";
+                    case 0x1C0:
+                        return $"float4(1, 1, 0, 1)";
+                    default:
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_}");
+                        return $"float4(1,1,1,1)";
+                }
+            case TfxExtern.Atmosphere:
+                switch (element)
+                {
+                    case 0xD0:
+                        return $"float4(512.0, 512.0, 1.0 / 512.0, 1.0 / 512.0)";
+                    case 0x110:
+                        return $"float4(0,0,-1.5,0)";
+                    case 0x140:
+                        return $"float4(0,0,0,0)";
+                    case 0x1D0:
+                        return $"float4(0,0,0,0)";
+                    default:
+                        Log.Warning($"Unimplemented element {element} (0x{(element):X}) for extern {extern_} ");
+                        return $"float4(1,1,1,1)";
+                }
+            default:
+                Log.Error($"Unimplemented extern {extern_}[{element} (0x{(element):X})]");
+                return $"float4(1, 1, 1, 1)";
+        }
+    }
+}
+
 public static class GlobalChannels
 {
     private static Vector4[] Channels = null;
@@ -145,6 +242,7 @@ public static class GlobalChannels
         Channels[97] = Vector4.Zero;
         Channels[98] = Vector4.Zero;
         Channels[100] = new Vector4(0.41105f, 0.71309f, 0.56793f, 0.56793f);
+        Channels[102] = Vector4.One; // Seems like sun angle
         Channels[113] = Vector4.Zero;
         Channels[127] = Vector4.Zero;
         Channels[131] = new Vector4(0.5f, 0.0f, 0.3f, 0.0f); // Seems related to line lights

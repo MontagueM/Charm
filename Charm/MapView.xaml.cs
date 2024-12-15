@@ -183,23 +183,44 @@ public partial class MapView : UserControl
 
             data.MapDataTable.TagData.DataEntries.ForEach(entry =>
             {
-                if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapDataResource staticMapResource)  // Static map
+                switch (entry.DataResource.GetValue(data.MapDataTable.GetReader()))
                 {
-                    staticMapResource.StaticMapParent.Load();
-                    staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene);
-                }
-                else if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SStaticAOResource AO)
-                {
-                    Exporter.Get().GetOrCreateGlobalScene().AddToGlobalScene(AO);
-                }
-                else if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrain)
-                {
-                    terrain.Terrain?.Load();
-                    terrain.Terrain.LoadIntoExporter(terrainScene, savePath, terrain.Identifier);
+                    case SMapDataResource staticMapResource:
+                        staticMapResource.StaticMapParent.Load();
+                        staticMapResource.StaticMapParent.TagData.StaticMap.LoadIntoExporterScene(scene);
+                        break;
+                    case SStaticAOResource AO:
+                        Exporter.Get().GetOrCreateGlobalScene().AddToGlobalScene(AO);
+                        break;
+                    case SMapTerrainResource terrain:
+                        terrain.Terrain?.Load();
+                        terrain.Terrain.LoadIntoExporter(terrainScene, savePath, terrain.Identifier);
+                        break;
+                    case SMapRoadDecalsResource roadDecals:
+                        foreach (var a in roadDecals.RoadDecals.TagData.Entries)
+                        {
+                            Transform transform = new Transform
+                            {
+                                Position = a.Position.ToVec3(),
+                                Quaternion = a.Rotation,
+                                Rotation = Vector4.QuaternionToEulerAngles(a.Rotation),
+                                Scale = new(a.Position.W)
+                            };
+
+                            var len = a.IndexCount * 3; //  Is actually face count
+                            var part = MeshPart.CreateFromBuffers<DynamicMeshPart>(a.IndexBuffer, a.VertexBuffer, a.Material, PrimitiveType.Triangles, 9, (uint)len, a.IndexOffset);
+                            part.TransformPosition(a.Offset, a.Scale);
+                            part.TransformTexcoord(a.TexcoordOffset, a.TexcoordScale);
+
+                            scene.AddMapModelParts($"{a.VertexBuffer.Hash}", new List<MeshPart> { part }, transform);
+                            scene.Materials.Add(new ExportMaterial(part.Material));
+                        }
+                        break;
+                    default:
+                        break;
                 }
             });
         });
-
     }
 
     // TODO: Merge all this into one, or simplify it?

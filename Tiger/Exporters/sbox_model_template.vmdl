@@ -50,7 +50,7 @@
 						import_filter = 
 						{
 							exclude_by_default = false
-							exception_list = [  ]
+							exception_list = [ ]
 						}
 					},
 				]
@@ -73,6 +73,11 @@
 						align_origin_z_type = "None"
 						filename = "%FILENAME%"
 						import_scale = 39.369999
+						import_filter = 
+						{
+							exclude_by_default = false
+							exception_list = [ %EXCEPTIONS% ]
+						}
 					},
 				]
 			},

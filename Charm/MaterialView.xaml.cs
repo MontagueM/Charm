@@ -88,12 +88,12 @@ public partial class MaterialView : UserControl
         DataContext = shaderDetail;
 
 #if DEBUG
-        System.Console.WriteLine($"{material.RenderStates.ToString()}");
-
         System.Console.WriteLine($"BlendState: {material.RenderStates.BlendState()}");
         System.Console.WriteLine($"RasterizerState: {material.RenderStates.RasterizerState()}");
         System.Console.WriteLine($"DepthBiasState: {material.RenderStates.DepthBiasState()}");
         System.Console.WriteLine($"DepthStencilState: {material.RenderStates.DepthStencilState()}");
+
+        System.Console.WriteLine($"{material.RenderStates.ToString()}");
 #endif
     }
 
