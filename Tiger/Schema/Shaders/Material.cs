@@ -126,6 +126,9 @@ namespace Tiger.Schema.Shaders
                 psCB.Textures = new();
                 foreach (var texture in Pixel.EnumerateTextures())
                 {
+                    if (texture.GetTexture() is null)
+                        continue;
+
                     psCB.Textures.TryAdd((int)texture.TextureIndex, new()
                     {
                         Hash = texture.GetTexture().Hash,
@@ -143,6 +146,9 @@ namespace Tiger.Schema.Shaders
                     if (sampler.Hash.GetFileMetadata().Type != 34)
                     {
                         var tex = FileResourcer.Get().GetFile<Texture>(sampler.Hash);
+                        if (tex is null)
+                            continue;
+
                         psCB.TileTextureDetails.Add(new()
                         {
                             Hash = sampler.Hash,
@@ -176,6 +182,9 @@ namespace Tiger.Schema.Shaders
                 vsCB.Textures = new();
                 foreach (var texture in Vertex.EnumerateTextures())
                 {
+                    if (texture.GetTexture() is null)
+                        continue;
+
                     vsCB.Textures.TryAdd((int)texture.TextureIndex, new()
                     {
                         Hash = texture.GetTexture().Hash,
