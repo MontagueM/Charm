@@ -30,7 +30,7 @@ public class CommonSettings
     public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.PNG;
     public bool UseCustomRenderer { get; set; } = false;
     public bool AnimatedBackground { get; set; } = true;
-    public bool ExportHLSL { get; set; } = false;
+    public bool ExportMaterials { get; set; } = false;
 
     public bool AcceptedAgreement { get; set; } = false;
 }
@@ -405,15 +405,15 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
         return _settings.Common.AnimatedBackground;
     }
 
-    public void SetExportHLSL(bool b)
+    public void SetExportMaterials(bool b)
     {
-        _settings.Common.ExportHLSL = b;
+        _settings.Common.ExportMaterials = b;
         Save();
     }
 
-    public bool GetExportHLSL()
+    public bool GetExportMaterials()
     {
-        return _settings.Common.ExportHLSL;
+        return _settings.Common.ExportMaterials;
     }
 
     private string _configFilePath = "./config.json";

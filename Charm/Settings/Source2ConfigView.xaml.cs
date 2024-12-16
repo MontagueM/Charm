@@ -107,6 +107,7 @@ public partial class Source2ConfigView : UserControl
         {
             _config.SetIndvidualStaticsEnabled(true);
             _config.SetS2TexPow2Enabled(true);
+            _config.SetExportMaterials(true);
         }
         PopulateConfigPanel();
     }

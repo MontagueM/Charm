@@ -48,6 +48,10 @@ namespace Tiger.Schema.Shaders
             {
                 try
                 {
+                    string pixel = Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}");
+                    Directory.CreateDirectory($"{saveDirectory}/Shaders/HLSL");
+                    File.WriteAllText($"{saveDirectory}/Shaders/HLSL/PS_{Hash}.hlsl", pixel);
+
                     if (_config.GetUnrealInteropEnabled())
                     {
                         string usf = new UsfConverter().HlslToUsf(this, false);
@@ -64,13 +68,6 @@ namespace Tiger.Schema.Shaders
                         File.WriteAllText($"{saveDirectory}/Shaders/Source2/PS_{Pixel.Shader.Hash}.shader", vfx);
                         if (!isTerrain)
                             Source2Handler.SaveVMAT(saveDirectory, Hash, this);
-                    }
-
-                    if (_config.GetExportHLSL())
-                    {
-                        string pixel = Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}");
-                        Directory.CreateDirectory($"{saveDirectory}/Shaders/HLSL");
-                        File.WriteAllText($"{saveDirectory}/Shaders/HLSL/PS_{Hash}.hlsl", pixel);
                     }
                 }
                 catch (IOException e)  // threading error
@@ -90,12 +87,9 @@ namespace Tiger.Schema.Shaders
             {
                 try
                 {
-                    if (_config.GetExportHLSL())
-                    {
-                        string vertex = Vertex.Shader.Decompile($"vs{Vertex.Shader.Hash}");
-                        Directory.CreateDirectory($"{saveDirectory}/HLSL");
-                        File.WriteAllText($"{saveDirectory}/HLSL/VS_{Hash}.hlsl", vertex);
-                    }
+                    string vertex = Vertex.Shader.Decompile($"vs{Vertex.Shader.Hash}");
+                    Directory.CreateDirectory($"{saveDirectory}/HLSL");
+                    File.WriteAllText($"{saveDirectory}/HLSL/VS_{Hash}.hlsl", vertex);
                 }
                 catch (IOException e)  // threading error
                 {
@@ -107,10 +101,10 @@ namespace Tiger.Schema.Shaders
         // TODO: Remove material data from cfg and use this instead, cfg is too cluttered 
         public void Export(string saveDirectory)
         {
-            var hlslPath = $"{saveDirectory}/Shaders/Raw";
-            var texturePath = $"{saveDirectory}/Textures";
-            Directory.CreateDirectory(hlslPath);
+            string texturePath = $"{saveDirectory}/Textures";
+            string materialPath = $"{saveDirectory}/Materials";
             Directory.CreateDirectory(texturePath);
+            Directory.CreateDirectory(materialPath);
 
             JsonMaterial material = new()
             {
@@ -121,10 +115,10 @@ namespace Tiger.Schema.Shaders
             };
             if (Pixel.Shader != null)
             {
-                Pixel.Shader.Decompile($"ps{Pixel.Shader.Hash}", hlslPath);
                 SavePixelShader($"{saveDirectory}");
 
                 ShaderDetails psCB = new ShaderDetails();
+                psCB.Hash = Pixel.Shader.Hash;
                 psCB.CBuffers = Pixel.GetCBuffer0();
                 psCB.Bytecode = Pixel.TFX_Bytecode.Select(x => x.Value).ToList();
                 psCB.Constants = Pixel.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
@@ -171,10 +165,10 @@ namespace Tiger.Schema.Shaders
 
             if (Vertex.Shader != null)
             {
-                Vertex.Shader.Decompile($"vs{Vertex.Shader.Hash}", hlslPath);
                 SaveVertexShader($"{saveDirectory}/Shaders/");
 
                 ShaderDetails vsCB = new ShaderDetails();
+                vsCB.Hash = Vertex.Shader.Hash;
                 vsCB.CBuffers = Vertex.GetCBuffer0();
                 vsCB.Bytecode = Vertex.TFX_Bytecode.Select(x => x.Value).ToList();
                 vsCB.Constants = Vertex.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
@@ -196,14 +190,14 @@ namespace Tiger.Schema.Shaders
 
             foreach (STextureTag texture in Vertex.EnumerateTextures())
             {
-                if (texture.GetTexture() == null)
+                if (texture.GetTexture() == null || File.Exists($"{saveDirectory}/Textures/{texture.GetTexture().Hash}.{_config.GetOutputTextureFormat()}"))
                     continue;
 
                 texture.GetTexture().SavetoFile($"{saveDirectory}/Textures/{texture.GetTexture().Hash}");
             }
             foreach (STextureTag texture in Pixel.EnumerateTextures())
             {
-                if (texture.GetTexture() == null)
+                if (texture.GetTexture() == null || File.Exists($"{saveDirectory}/Textures/{texture.GetTexture().Hash}.{_config.GetOutputTextureFormat()}"))
                     continue;
 
                 texture.GetTexture().SavetoFile($"{saveDirectory}/Textures/{texture.GetTexture().Hash}");
@@ -215,7 +209,7 @@ namespace Tiger.Schema.Shaders
                 Formatting = Formatting.Indented,
                 Converters = new List<JsonConverter> { new StringEnumConverter() }
             };
-            File.WriteAllText($"{saveDirectory}/{Hash}.json", JsonConvert.SerializeObject(material, jsonSettings));
+            File.WriteAllText($"{materialPath}/{Hash}.json", JsonConvert.SerializeObject(material, jsonSettings));
         }
 
         public List<TfxExtern> GetExterns()
@@ -254,6 +248,7 @@ namespace Tiger.Schema.Shaders
         {
             public ShaderDetails() { }
 
+            public string Hash { get; set; }
             public Dictionary<int, TextureDetails> Textures { get; set; } = new();
             public List<Vector4> CBuffers { get; set; } = new();
             public List<byte> Bytecode { get; set; } = new();

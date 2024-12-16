@@ -10,6 +10,8 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
     {
     }
 
+    private string? _decompiled = null;
+
     private List<DXBCIOSignature>? _inputSignatures;
     public List<DXBCIOSignature> InputSignatures
     {
@@ -91,6 +93,9 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
     private static object _lock = new object();
     public string Decompile(string name, string savePath = "hlsl_temp")
     {
+        if (_decompiled is not null)
+            return _decompiled;
+
         var shaderBytecode = GetBytecode();
         if (Strategy.IsD1() || shaderBytecode.Length == 0)
             return "";
@@ -139,6 +144,7 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
                 try  // needed for slow machines
                 {
                     hlsl = File.ReadAllText(hlslPath);
+                    _decompiled = hlsl;
                 }
                 catch (IOException)
                 {

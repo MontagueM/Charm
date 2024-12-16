@@ -124,13 +124,13 @@ public partial class GeneralConfigView : UserControl
         cfe.ChangeButton.Click += IndvidualStaticsEnabled_OnClick;
         MiscConfigPanel.Children.Add(cfe);
 
-        // Enable shader HLSL exporting
-        ConfigSettingToggleControl exportHlsl = new ConfigSettingToggleControl();
-        exportHlsl.SettingName = "Export Shader HLSL";
-        var bhlsl = _config.GetExportHLSL();
-        exportHlsl.SettingValue = bhlsl.ToString();
-        exportHlsl.ChangeButton.Click += ExportHLSL_OnClick;
-        MiscConfigPanel.Children.Add(exportHlsl);
+        // Enable full material data exporting
+        ConfigSettingToggleControl exportMaterials = new ConfigSettingToggleControl();
+        exportMaterials.SettingName = "Export Full Material Data";
+        var bhlsl = _config.GetExportMaterials();
+        exportMaterials.SettingValue = bhlsl.ToString();
+        exportMaterials.ChangeButton.Click += ExportMaterials_OnClick;
+        MiscConfigPanel.Children.Add(exportMaterials);
 
         ConfigSettingToggleControl disBg = new ConfigSettingToggleControl();
         disBg.SettingName = "Animated Background";
@@ -325,9 +325,9 @@ public partial class GeneralConfigView : UserControl
         PopulateConfigPanel();
     }
 
-    private void ExportHLSL_OnClick(object sender, RoutedEventArgs e)
+    private void ExportMaterials_OnClick(object sender, RoutedEventArgs e)
     {
-        _config.SetExportHLSL(!_config.GetExportHLSL());
+        _config.SetExportMaterials(!_config.GetExportMaterials());
         PopulateConfigPanel();
     }
 }

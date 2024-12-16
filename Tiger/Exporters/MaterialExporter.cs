@@ -14,7 +14,9 @@ public class MaterialExporter : AbstractExporter
 
         ConcurrentHashSet<Texture> mapTextures = new();
         ConcurrentHashSet<ExportMaterial> mapMaterials = new();
-        bool saveShaders = _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled() || _config.GetExportHLSL();
+        ConcurrentHashSet<ExportMaterial> materials = new();
+
+        bool saveMats = _config.GetExportMaterials();
         bool saveIndiv = _config.GetIndvidualStaticsEnabled();
 
         Parallel.ForEach(args.Scenes, scene =>
@@ -25,30 +27,20 @@ public class MaterialExporter : AbstractExporter
 
                 foreach (ExportMaterial material in scene.Materials)
                 {
+                    materials.Add(material);
                     foreach (STextureTag texture in material.Material.Vertex.EnumerateTextures())
                     {
                         if (texture.GetTexture() == null)
-                        {
                             continue;
-                        }
+
                         textures.Add(texture.GetTexture());
                     }
                     foreach (STextureTag texture in material.Material.Pixel.EnumerateTextures())
                     {
                         if (texture.GetTexture() == null)
-                        {
                             continue;
-                        }
+
                         textures.Add(texture.GetTexture());
-                    }
-
-                    if (saveShaders)
-                    {
-                        string shaderSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, scene.Name);
-                        shaderSaveDirectory = $"{shaderSaveDirectory}";
-
-                        material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
-                        material.Material.SaveVertexShader(shaderSaveDirectory);
                     }
                 }
 
@@ -60,36 +52,44 @@ public class MaterialExporter : AbstractExporter
                 {
                     texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
                 }
+                foreach (ExportMaterial material in materials)
+                {
+                    string shaderSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, scene.Name);
+                    Directory.CreateDirectory(shaderSaveDirectory);
+                    material.Material.Export(shaderSaveDirectory);
+                }
             }
             else
             {
                 mapTextures.UnionWith(scene.Textures);
                 foreach (ExportMaterial material in scene.Materials)
                 {
+                    mapMaterials.Add(material);
                     foreach (STextureTag texture in material.Material.Vertex.EnumerateTextures())
                     {
+                        if (texture.GetTexture() == null)
+                            continue;
+
                         mapTextures.Add(texture.GetTexture());
                     }
                     foreach (STextureTag texture in material.Material.Pixel.EnumerateTextures())
                     {
-                        mapTextures.Add(texture.GetTexture());
-                    }
+                        if (texture.GetTexture() == null)
+                            continue;
 
-                    if (material.Material.Vertex.Shader != null || material.Material.Pixel.Shader != null)
-                    {
-                        mapMaterials.Add(material);
+                        mapTextures.Add(texture.GetTexture());
                     }
                 }
 
-                if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+                foreach (var cubemap in scene.Cubemaps)
                 {
-                    foreach (var cubemap in scene.Cubemaps)
+                    if (cubemap.CubemapTexture is null)
+                        continue;
+
+                    mapTextures.Add(cubemap.CubemapTexture);
+
+                    if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
                     {
-                        if (cubemap.CubemapTexture is null)
-                            continue;
-
-                        mapTextures.Add(cubemap.CubemapTexture);
-
                         string saveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, $"Maps");
                         saveDirectory = $"{saveDirectory}/Textures";
                         Source2Handler.SaveVTEX(cubemap.CubemapTexture, saveDirectory);
@@ -110,16 +110,13 @@ public class MaterialExporter : AbstractExporter
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
         }
 
-        if (saveShaders && saveIndiv)
+        if (saveMats)
         {
             foreach (ExportMaterial material in mapMaterials)
             {
                 string shaderSaveDirectory = args.AggregateOutput ? args.OutputDirectory : Path.Join(args.OutputDirectory, $"Maps");
-                shaderSaveDirectory = $"{shaderSaveDirectory}";
                 Directory.CreateDirectory(shaderSaveDirectory);
-
-                material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
-                material.Material.SaveVertexShader(shaderSaveDirectory);
+                material.Material.Export(shaderSaveDirectory);
             }
         }
 
