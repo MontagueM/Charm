@@ -1,11 +1,13 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
-                    xmlns:charm="clr-namespace:Charm"
-                    xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.AeroLite">
-    <!-- https://material.io/design/color/dark-theme.html#ui-application -->
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:charm="clr-namespace:Charm"
+    xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.AeroLite">
+    <!--  https://material.io/design/color/dark-theme.html#ui-application  -->
 
-    <!-- Numbers come from the luminance -->
+    <!--  Numbers come from the luminance  -->
     <Brush x:Key="BackgroundColour7">#121212</Brush>
     <Color x:Key="BackgroundColour7C">#121212</Color>
     <Brush x:Key="BackgroundColour14">#242424</Brush>
@@ -25,6 +27,57 @@
 
     <Style TargetType="Grid">
         <Setter Property="Background" Value="{StaticResource BackgroundColour7}" />
+    </Style>
+
+    <Style TargetType="ListBoxItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="Transparent" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border
+                        x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="100">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="transparent" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ListBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Margin" Value="0,0,0,0" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBox">
+                    <Border>
+                        <ScrollViewer
+                            x:Name="ScrollViewer"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer.Resources>
+                                <sys:Double x:Key="{x:Static SystemParameters.VerticalScrollBarWidthKey}">4</sys:Double>
+                            </ScrollViewer.Resources>
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="TextBox">
@@ -62,35 +115,31 @@
                             Name="Border"
                             Margin="0,0,-4,0"
                             Background="{StaticResource BackgroundColour14}"
-                            BorderBrush="{StaticResource  BackgroundColour14}"
+                            BorderBrush="{StaticResource BackgroundColour14}"
                             BorderThickness="1,1,1,1"
                             CornerRadius="2,2,0,0">
-                            <ContentPresenter x:Name="ContentSite"
-                                              VerticalAlignment="Center"
-                                              HorizontalAlignment="Center"
-                                              ContentSource="Header"
-                                              Margin="12,2,12,2"
-                                              RecognizesAccessKey="True" />
+                            <ContentPresenter
+                                x:Name="ContentSite"
+                                Margin="12,2,12,2"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                ContentSource="Header"
+                                RecognizesAccessKey="True" />
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Panel.ZIndex" Value="100" />
-                            <Setter TargetName="Border" Property="Background"
-                                    Value="{StaticResource BackgroundColour30}" />
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BackgroundColour30}" />
                             <Setter TargetName="Border" Property="BorderThickness" Value="1,1,1,0" />
                             <Setter Property="Background" Value="{StaticResource BackgroundColour30}" />
                             <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="Border" Property="Background"
-                                    Value="{StaticResource BackgroundColour14}" />
-                            <Setter TargetName="Border" Property="BorderBrush"
-                                    Value="{StaticResource BackgroundColour14}" />
-                            <Setter Property="Foreground"
-                                    Value="{StaticResource ForegroundColour75}" />
-                            <Setter Property="Background"
-                                    Value="{StaticResource BackgroundColour14}" />
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BackgroundColour14}" />
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource BackgroundColour14}" />
+                            <Setter Property="Foreground" Value="{StaticResource ForegroundColour75}" />
+                            <Setter Property="Background" Value="{StaticResource BackgroundColour14}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -105,15 +154,17 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border x:Name="ButtonBackground" BorderBrush="{StaticResource BackgroundColour30}"
-                            Background="{StaticResource BackgroundColour14}" BorderThickness="1">
+                    <Border
+                        x:Name="ButtonBackground"
+                        Background="{StaticResource BackgroundColour14}"
+                        BorderBrush="{StaticResource BackgroundColour30}"
+                        BorderThickness="1">
                         <ContentPresenter Margin="1,1,1,1" />
                     </Border>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ButtonBackground" Property="Background"
-                                    Value="{StaticResource BackgroundColour50}" />
+                            <Setter TargetName="ButtonBackground" Property="Background" Value="{StaticResource BackgroundColour50}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -128,19 +179,20 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
-                    <Border x:Name="ButtonBackground" BorderBrush="{StaticResource BackgroundColour30}"
-                            Background="{StaticResource BackgroundColour14}" BorderThickness="1">
+                    <Border
+                        x:Name="ButtonBackground"
+                        Background="{StaticResource BackgroundColour14}"
+                        BorderBrush="{StaticResource BackgroundColour30}"
+                        BorderThickness="1">
                         <ContentPresenter Margin="1,1,1,1" />
                     </Border>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ButtonBackground" Property="Background"
-                                    Value="{StaticResource BackgroundColour50}" />
+                            <Setter TargetName="ButtonBackground" Property="Background" Value="{StaticResource BackgroundColour50}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="ButtonBackground" Property="Background"
-                                    Value="{StaticResource BackgroundColour30}" />
+                            <Setter TargetName="ButtonBackground" Property="Background" Value="{StaticResource BackgroundColour30}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -161,8 +213,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListViewItem}">
-                    <Border x:Name="ButtonBackground" BorderBrush="{StaticResource BackgroundColour30}"
-                            Background="{StaticResource BackgroundColour14}" BorderThickness="1">
+                    <Border
+                        x:Name="ButtonBackground"
+                        Background="{StaticResource BackgroundColour14}"
+                        BorderBrush="{StaticResource BackgroundColour30}"
+                        BorderThickness="1">
                         <ContentPresenter Margin="1,1,1,1" />
                     </Border>
                 </ControlTemplate>
@@ -176,61 +231,54 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Thumb}">
-                    <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                               Fill="{StaticResource BackgroundColour50}"
-                               SnapsToDevicePixels="True" />
+                    <Rectangle
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Fill="{StaticResource BackgroundColour50}"
+                        SnapsToDevicePixels="True" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
 
-    <ControlTemplate x:Key="VerticalScrollBar"
-                     TargetType="{x:Type ScrollBar}">
+    <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition MaxHeight="18" />
                 <RowDefinition Height="0.00001*" />
                 <RowDefinition MaxHeight="18" />
             </Grid.RowDefinitions>
-            <Border Grid.RowSpan="3"
-                    CornerRadius="2"
-                    Background="{StaticResource BackgroundColour30}" />
-            <Track x:Name="PART_Track"
-                   Grid.Row="1"
-                   IsDirectionReversed="true">
+            <Border
+                Grid.RowSpan="3"
+                Background="{StaticResource BackgroundColour30}"
+                CornerRadius="2" />
+            <Track
+                x:Name="PART_Track"
+                Grid.Row="1"
+                IsDirectionReversed="true">
                 <Track.Thumb>
-                    <Thumb Style="{StaticResource ScrollBarThumb}"
-                           Margin="1,0,1,0">
+                    <Thumb Margin="0,0,0,0" Style="{StaticResource ScrollBarThumb}">
                         <Thumb.BorderBrush>
-
-                            <LinearGradientBrush StartPoint="0,0"
-                                                 EndPoint="1,0">
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <LinearGradientBrush.GradientStops>
                                     <GradientStopCollection>
-                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
-                                                      Offset="0.0" />
-                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
-                                                      Offset="1.0" />
+                                        <GradientStop Offset="0.0" Color="{StaticResource BackgroundColour14C}" />
+                                        <GradientStop Offset="1.0" Color="{StaticResource BackgroundColour14C}" />
                                     </GradientStopCollection>
                                 </LinearGradientBrush.GradientStops>
                             </LinearGradientBrush>
-
                         </Thumb.BorderBrush>
-                        <Thumb.Background>
 
-                            <LinearGradientBrush StartPoint="0,0"
-                                                 EndPoint="1,0">
+                        <Thumb.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <LinearGradientBrush.GradientStops>
                                     <GradientStopCollection>
-                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
-                                                      Offset="0.0" />
-                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
-                                                      Offset="1.0" />
+                                        <GradientStop Offset="0.0" Color="{StaticResource BackgroundColour14C}" />
+                                        <GradientStop Offset="1.0" Color="{StaticResource BackgroundColour14C}" />
                                     </GradientStopCollection>
                                 </LinearGradientBrush.GradientStops>
                             </LinearGradientBrush>
-
                         </Thumb.Background>
                     </Thumb>
                 </Track.Thumb>
@@ -238,34 +286,31 @@
         </Grid>
     </ControlTemplate>
 
-    <ControlTemplate x:Key="HorizontalScrollBar"
-                     TargetType="{x:Type ScrollBar}">
+    <ControlTemplate x:Key="HorizontalScrollBar" TargetType="{x:Type ScrollBar}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition MaxWidth="18" />
                 <ColumnDefinition Width="0.00001*" />
                 <ColumnDefinition MaxWidth="18" />
             </Grid.ColumnDefinitions>
-            <Border Grid.ColumnSpan="3"
-                    CornerRadius="2"
-                    Background="{StaticResource BackgroundColour30}" />
-            <Track x:Name="PART_Track"
-                   Grid.Column="1"
-                   IsDirectionReversed="False">
+            <Border
+                Grid.ColumnSpan="3"
+                Background="{StaticResource BackgroundColour30}"
+                CornerRadius="2" />
+            <Track
+                x:Name="PART_Track"
+                Grid.Column="1"
+                IsDirectionReversed="False">
                 <Track.Thumb>
-                    <Thumb Style="{StaticResource ScrollBarThumb}"
-                           Margin="0,1,0,1">
+                    <Thumb Margin="0,1,0,1" Style="{StaticResource ScrollBarThumb}">
 
                         <Thumb.BorderBrush>
 
-                            <LinearGradientBrush StartPoint="0,0"
-                                                 EndPoint="1,0">
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <LinearGradientBrush.GradientStops>
                                     <GradientStopCollection>
-                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
-                                                      Offset="0.0" />
-                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
-                                                      Offset="1.0" />
+                                        <GradientStop Offset="0.0" Color="{StaticResource BackgroundColour14C}" />
+                                        <GradientStop Offset="1.0" Color="{StaticResource BackgroundColour14C}" />
                                     </GradientStopCollection>
                                 </LinearGradientBrush.GradientStops>
                             </LinearGradientBrush>
@@ -273,14 +318,11 @@
                         </Thumb.BorderBrush>
                         <Thumb.Background>
 
-                            <LinearGradientBrush StartPoint="0,0"
-                                                 EndPoint="0,1">
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                 <LinearGradientBrush.GradientStops>
                                     <GradientStopCollection>
-                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
-                                                      Offset="0.0" />
-                                        <GradientStop Color="{StaticResource BackgroundColour14C}"
-                                                      Offset="1.0" />
+                                        <GradientStop Offset="0.0" Color="{StaticResource BackgroundColour14C}" />
+                                        <GradientStop Offset="1.0" Color="{StaticResource BackgroundColour14C}" />
                                     </GradientStopCollection>
                                 </LinearGradientBrush.GradientStops>
                             </LinearGradientBrush>
@@ -302,11 +344,16 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ScrollBar}">
-                    <Grid x:Name="Bg" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
-                        <Track x:Name="PART_Track" IsDirectionReversed="true" IsEnabled="{TemplateBinding IsMouseOver}">
+                    <Grid
+                        x:Name="Bg"
+                        Background="{TemplateBinding Background}"
+                        SnapsToDevicePixels="true">
+                        <Track
+                            x:Name="PART_Track"
+                            IsDirectionReversed="true"
+                            IsEnabled="{TemplateBinding IsMouseOver}">
                             <Track.Thumb>
-                                <Thumb Style="{StaticResource ScrollBarThumb}"
-                                       themes:ScrollChrome.ScrollGlyph="VerticalGripper" />
+                                <Thumb themes:ScrollChrome.ScrollGlyph="VerticalGripper" Style="{StaticResource ScrollBarThumb}" />
                             </Track.Thumb>
                         </Track>
                     </Grid>
@@ -314,23 +361,15 @@
             </Setter.Value>
         </Setter>
         <Style.Triggers>
-            <Trigger Property="Orientation"
-                     Value="Horizontal">
-                <Setter Property="Width"
-                        Value="Auto" />
-                <Setter Property="Height"
-                        Value="18" />
-                <Setter Property="Template"
-                        Value="{StaticResource HorizontalScrollBar}" />
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="Height" Value="18" />
+                <Setter Property="Template" Value="{StaticResource HorizontalScrollBar}" />
             </Trigger>
-            <Trigger Property="Orientation"
-                     Value="Vertical">
-                <Setter Property="Width"
-                        Value="18" />
-                <Setter Property="Height"
-                        Value="Auto" />
-                <Setter Property="Template"
-                        Value="{StaticResource VerticalScrollBar}" />
+            <Trigger Property="Orientation" Value="Vertical">
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="Height" Value="Auto" />
+                <Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -362,24 +401,24 @@
             <Border
                 x:Name="Border"
                 Grid.ColumnSpan="2"
-                CornerRadius="0"
                 Background="{StaticResource BackgroundColour30}"
-                BorderBrush="{StaticResource  ForegroundColour80}"
-                BorderThickness="1" />
+                BorderBrush="{StaticResource ForegroundColour80}"
+                BorderThickness="1"
+                CornerRadius="0" />
             <Border
                 Grid.Column="0"
-                CornerRadius="0"
                 Margin="1"
                 Background="{StaticResource BackgroundColour30}"
-                BorderBrush="{StaticResource  ForegroundColour80}"
-                BorderThickness="0,0,1,0" />
+                BorderBrush="{StaticResource ForegroundColour80}"
+                BorderThickness="0,0,1,0"
+                CornerRadius="0" />
             <Path
                 x:Name="Arrow"
                 Grid.Column="1"
-                Fill="{StaticResource ForegroundColour80}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z" />
+                Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+                Fill="{StaticResource ForegroundColour80}" />
         </Grid>
     </ControlTemplate>
 
@@ -398,36 +437,38 @@
                     <Grid>
                         <ToggleButton
                             Name="ToggleButton"
-                            Template="{StaticResource ComboBoxToggleButton}"
                             Grid.Column="2"
+                            ClickMode="Press"
                             Focusable="false"
-                            IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
-                            ClickMode="Press">
-                        </ToggleButton>
-                        <ContentPresenter Name="ContentSite" IsHitTestVisible="False"
-                                          Content="{TemplateBinding SelectionBoxItem}"
-                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                          Margin="3,3,23,3"
-                                          VerticalAlignment="Center"
-                                          HorizontalAlignment="Left" />
+                            IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                            Template="{StaticResource ComboBoxToggleButton}" />
+                        <ContentPresenter
+                            Name="ContentSite"
+                            Margin="3,3,23,3"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                            IsHitTestVisible="False" />
                         <Popup
                             Name="Popup"
-                            Placement="Bottom"
-                            IsOpen="{TemplateBinding IsDropDownOpen}"
                             AllowsTransparency="True"
                             Focusable="False"
+                            IsOpen="{TemplateBinding IsDropDownOpen}"
+                            Placement="Bottom"
                             PopupAnimation="Slide">
 
-                            <Grid Name="DropDown"
-                                  SnapsToDevicePixels="True"
-                                  MinWidth="{TemplateBinding ActualWidth}"
-                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                            <Grid
+                                Name="DropDown"
+                                MinWidth="{TemplateBinding ActualWidth}"
+                                MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                SnapsToDevicePixels="True">
                                 <Border
                                     x:Name="DropDownBorder"
                                     Background="{StaticResource BackgroundColour30}"
-                                    BorderThickness="1"
-                                    BorderBrush="{StaticResource BackgroundColour50}" />
+                                    BorderBrush="{StaticResource BackgroundColour50}"
+                                    BorderThickness="1" />
                                 <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
@@ -456,8 +497,7 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers>
-        </Style.Triggers>
+        <Style.Triggers />
     </Style>
 
 
@@ -468,15 +508,15 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBoxItem}">
-                    <Border Name="Border"
-                            Padding="2"
-                            SnapsToDevicePixels="true">
+                    <Border
+                        Name="Border"
+                        Padding="2"
+                        SnapsToDevicePixels="true">
                         <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="true">
-                            <Setter TargetName="Border" Property="Background"
-                                    Value="{StaticResource BackgroundColour20}" />
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BackgroundColour20}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{StaticResource BackgroundColour50}" />
@@ -493,26 +533,29 @@
                 <ControlTemplate TargetType="CheckBox">
                     <BulletDecorator Background="Transparent">
                         <BulletDecorator.Bullet>
-                            <Border x:Name="Border"
-                                    Width="13"
-                                    Height="13"
-                                    CornerRadius="0"
-                                    Background="{StaticResource BackgroundColour14}"
-                                    BorderThickness="1"
-                                    BorderBrush="{StaticResource BackgroundColour20}">
+                            <Border
+                                x:Name="Border"
+                                Width="13"
+                                Height="13"
+                                Background="{StaticResource BackgroundColour14}"
+                                BorderBrush="{StaticResource BackgroundColour20}"
+                                BorderThickness="1"
+                                CornerRadius="0">
                                 <Path
-                                    Width="7" Height="7"
                                     x:Name="CheckMark"
+                                    Width="7"
+                                    Height="7"
+                                    Data="M 0 0 L 7 7 M 0 7 L 7 0"
                                     SnapsToDevicePixels="False"
                                     Stroke="{StaticResource ForegroundColour90}"
-                                    StrokeThickness="2"
-                                    Data="M 0 0 L 7 7 M 0 7 L 7 0" />
+                                    StrokeThickness="2" />
                             </Border>
                         </BulletDecorator.Bullet>
-                        <ContentPresenter Margin="4,0,0,0"
-                                          VerticalAlignment="Center"
-                                          HorizontalAlignment="Left"
-                                          RecognizesAccessKey="True" />
+                        <ContentPresenter
+                            Margin="4,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            RecognizesAccessKey="True" />
                     </BulletDecorator>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="false">
@@ -523,6 +566,306 @@
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="API Inspect Button" TargetType="Button">
+        <Setter Property="Background" Value="#55000000" />
+        <Setter Property="BorderBrush" Value="#A9000000" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="border"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="2">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#008DFF" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#00579D" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ReusableButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="#AEFFFFFF" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent">
+                        <Grid x:Name="LayoutRoot" Background="Transparent">
+                            <!--  Outer circle  -->
+                            <Border
+                                x:Name="outerBorder"
+                                Margin="0"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="100"
+                                IsHitTestVisible="False"
+                                Opacity="0"
+                                RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                                </Border.RenderTransform>
+                            </Border>
+                            <!--  Content  -->
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
+                        </Grid>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <!--  Trigger for mouse over  -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <!--  Fade in and scale animation for the outer circle  -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!--  Color animation for mainBorder background  -->
+                                        <ColorAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="#33FFFFFF"
+                                            Duration="0:0:0.1" />
+                                        <!--  Other animations for outerBorder  -->
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                            To="1.15"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                            To="1.15"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <!--  Fade out and scale animation for the outer circle  -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!--  Color animation for mainBorder background  -->
+                                        <ColorAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="Transparent"
+                                            Duration="0:0:0.1" />
+                                        <!--  Other animations for outerBorder  -->
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                            To="1"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                            To="1"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ConsumableButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="#A3FFFFFF" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid Background="Transparent">
+                        <Grid x:Name="LayoutRoot" Background="Transparent">
+                            <!--  Outer  -->
+                            <Border
+                                x:Name="outerBorder"
+                                Margin="0"
+                                Padding="{TemplateBinding Padding}"
+                                Panel.ZIndex="1"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="White"
+                                BorderThickness="2"
+                                CornerRadius="0"
+                                IsHitTestVisible="False"
+                                Opacity="0"
+                                RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1" />
+                                </Border.RenderTransform>
+                            </Border>
+                            <!--  Content  -->
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
+                        </Grid>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <!--  Trigger for mouse over  -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <!--  Fade in and scale animation for the outer circle  -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!--  Color animation for mainBorder background  -->
+                                        <ColorAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="#45FFFFFF"
+                                            Duration="0:0:0.2" />
+                                        <!--  Other animations for outerBorder  -->
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.2" />
+
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                            From="1.2"
+                                            To="1.1"
+                                            Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="3"
+                                                    EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                            From="1.2"
+                                            To="1.1"
+                                            Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BounceEase
+                                                    Bounces="1"
+                                                    Bounciness="3"
+                                                    EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <!--  Fade out and scale animation for the outer circle  -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!--  Color animation for mainBorder background  -->
+                                        <ColorAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="Transparent"
+                                            Duration="0:0:0.2" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.2" />
+
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleX)"
+                                            To="1.2"
+                                            Duration="0:0:0.1" />
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="outerBorder"
+                                            Storyboard.TargetProperty="(Border.RenderTransform).(ScaleTransform.ScaleY)"
+                                            To="1.2"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="LargePerkButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="border"
+                        Padding="{TemplateBinding Padding}"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="0">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="transparent" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="transparent" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DropShadowMedium" TargetType="TextBlock">
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect
+                    BlurRadius="2"
+                    Direction="320"
+                    Opacity="0.7"
+                    ShadowDepth="2"
+                    Color="#1B1B1B" />
             </Setter.Value>
         </Setter>
     </Style>

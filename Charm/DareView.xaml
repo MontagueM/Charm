@@ -162,6 +162,7 @@
                         Style="{StaticResource MaterialDesignPaperDarkButton}">
                         <local:DareItemControl />
                     </Button>
+
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

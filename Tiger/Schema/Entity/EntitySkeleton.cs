@@ -1,4 +1,6 @@
 ﻿
+using Internal.Fbx;
+
 namespace Tiger.Schema.Entity;
 
 public class EntitySkeleton : EntityResource
@@ -48,4 +50,5 @@ public struct BoneNode
     public ObjectSpaceTransform DefaultInverseObjectSpaceTransform;
     public int ParentNodeIndex;
     public TigerHash Hash;
+    public FbxNode Node;
 }

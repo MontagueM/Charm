@@ -19,7 +19,7 @@
                     <TextBlock Grid.Row="0" TextWrapping="WrapWithOverflow"
                                HorizontalAlignment="Left" Text="{Binding Name}" />
                     <TextBlock Grid.Row="1"  HorizontalAlignment="Left"
-                               FontFamily="{DynamicResource Neue Haas Grotesk Text Pro 56 Italic}"
+                               FontFamily="{DynamicResource Haas Grot Text 56 Italic}"
                                VerticalAlignment="Center" FontSize="16"
                                Foreground="{StaticResource ForegroundColour75}" Text="{Binding Hash}" />
                 </Grid>

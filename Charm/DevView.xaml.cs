@@ -4,21 +4,23 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using ConcurrentCollections;
 using Arithmic;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
 using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
-using Tiger.Schema.Havok;
+using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
-using Tiger.Schema.Static;
+using Tiger.Schema.Havok;
++using Tiger.Schema.Static;
 
 namespace Charm;
 
@@ -42,20 +44,15 @@ public partial class DevView : UserControl
     private void TagHashBoxKeydown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Return && e.Key != Key.H && e.Key != Key.R && e.Key != Key.E && e.Key != Key.L)
-        {
             return;
-        }
+
         string strHash = TagHashBox.Text.Replace(" ", "");
         strHash = Regex.Replace(strHash, @"(\s+|r|h)", "");
         if (strHash.Length == 16)
-        {
             strHash = Hash64Map.Get().GetHash32Checked(strHash);
-        }
+
         if (strHash == "")
-        {
-            TagHashBox.Text = "INVALID HASH";
             return;
-        }
 
         FileHash hash;
         if (strHash.Contains("-"))
@@ -72,8 +69,31 @@ public partial class DevView : UserControl
 
         if (!hash.IsValid())
         {
-            TagHashBox.Text = "INVALID HASH";
-            return;
+            if (uint.TryParse(strHash, out uint apiHash))
+            {
+                Investment.LazyInit();
+                var item = Investment.Get().TryGetInventoryItem(new TigerHash(apiHash));
+                if (item is not null)
+                {
+                    MainWindow.Progress.SetProgressStages(new() { "Starting investment system" });
+                    Investment.LazyInit();
+                    MainWindow.Progress.CompleteStage();
+
+                    item.Load();
+                    APIItemView apiItemView = new APIItemView(item);
+                    _mainWindow.MakeNewTab(Investment.Get().GetItemName(item), apiItemView);
+                    _mainWindow.SetNewestTabSelected();
+                }
+                else
+                    TagHashBox.Text = "INVALID API HASH";
+
+                return;
+            }
+            else
+            {
+                TagHashBox.Text = "INVALID HASH";
+                return;
+            }
         }
         //uint to int
         switch (e.Key)
@@ -139,7 +159,7 @@ public partial class DevView : UserControl
         // Adds a new tab to the tab control
         TigerHash reference = hash.GetReferenceHash();
         FileMetadata fileMetadata = PackageResourcer.Get().GetFileMetadata(hash);
-        if (fileMetadata.Type == 26 && fileMetadata.SubType == 7)
+        if ((fileMetadata.Type == 26 && fileMetadata.SubType == 7) || (fileMetadata.Type == 8 && fileMetadata.SubType == 21))
         {
             var audioView = new TagView();
             audioView.SetViewer(TagView.EViewerType.TagList);
@@ -176,7 +196,7 @@ public partial class DevView : UserControl
                 TagHashBox.Text = "NULL";
                 return;
             }
-                
+
             Directory.CreateDirectory($"{ConfigSubsystem.Get().GetExportSavePath()}/HavokShapes");
             int i = 0;
             foreach (var shape in shapeCollection)
@@ -202,6 +222,7 @@ public partial class DevView : UserControl
         {
             switch (reference.Hash32)
             {
+                case 0x80800734:
                 case 0x80809C0F:
                 case 0x80809AD8:
                     EntityView entityView = new EntityView();
@@ -239,7 +260,7 @@ public partial class DevView : UserControl
                     break;
                 case 0x808097B8:
                     var dialogueView = new DialogueView();
-                    dialogueView.Load(hash);
+                    dialogueView.Load(hash, null);
                     _mainWindow.MakeNewTab(hash, dialogueView);
                     _mainWindow.SetNewestTabSelected();
                     break;
@@ -252,6 +273,7 @@ public partial class DevView : UserControl
                     IMaterial material = FileResourcer.Get().GetFileInterface<IMaterial>(hash);
                     material.SaveMaterial($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{hash}");
                     break;
+                case 0x80801AB5:
                 case 0x808073A5:
                 case 0x80806F07: //Entity model
                     EntityModel entityModel = FileResourcer.Get().GetFile<EntityModel>(hash);
@@ -264,6 +286,11 @@ public partial class DevView : UserControl
                         scene.Materials.Add(new ExportMaterial(part.Material, MaterialType.Opaque));
                     }
                     Exporter.Get().Export();
+
+                    EntityView entityModelView = new EntityView();
+                    entityModelView.LoadEntityModel(hash, _fbxHandler);
+                    _mainWindow.MakeNewTab(hash, entityModelView);
+                    _mainWindow.SetNewestTabSelected();
                     break;
                 case 0x8080714F:
                 case 0x80806C81:

@@ -4,6 +4,7 @@ using Tiger.Schema;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
 using Tiger.Schema.Static;
+using static Tiger.Schema.StaticMapData_D1;
 
 namespace Tiger.Exporters;
 
@@ -151,11 +152,39 @@ public class ExporterScene
         }
     }
 
+    // D1
+    public void AddStaticInstancesToMesh(FileHash modelHash, IEnumerable<InstanceTransform> instances)
+    {
+        if (!StaticMeshInstances.ContainsKey(modelHash))
+        {
+            StaticMeshInstances.TryAdd(modelHash, InstancesToTransforms(instances));
+        }
+        else
+        {
+            foreach (Transform transform in InstancesToTransforms(instances))
+            {
+                StaticMeshInstances[modelHash].Add(transform);
+            }
+        }
+    }
+
     private static List<Transform> InstancesToTransforms(IEnumerable<SStaticMeshInstanceTransform> instances)
     {
         return instances.Select(t => new Transform
         {
             Position = t.Position,
+            Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
+            Quaternion = t.Rotation,
+            Scale = new Vector3(t.Scale.X, t.Scale.X, t.Scale.X)
+        }).ToList();
+    }
+
+    // D1
+    private static List<Transform> InstancesToTransforms(IEnumerable<InstanceTransform> instances)
+    {
+        return instances.Select(t => new Transform
+        {
+            Position = t.Translation.ToVec3(),
             Rotation = Vector4.QuaternionToEulerAngles(t.Rotation),
             Quaternion = t.Rotation,
             Scale = new Vector3(t.Scale.X, t.Scale.X, t.Scale.X)
@@ -207,7 +236,7 @@ public class ExporterScene
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
     }
 
-    public void AddMapEntity(SMapDataEntry dynamicResource, Entity entity)
+    public void AddMapEntity(SMapDataEntry dynamicResource, Entity entity, Transform? transform = null)
     {
         if (!_addedEntities.Contains(entity.Hash)) //Dont want duplicate entities being added
         {
@@ -234,20 +263,24 @@ public class ExporterScene
 
         EntityInstances[entity.Hash].Add(new Transform
         {
-            Position = dynamicResource.Translation.ToVec3(),
-            Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
-            Quaternion = dynamicResource.Rotation,
-            Scale = new Vector3(dynamicResource.Translation.W, dynamicResource.Translation.W, dynamicResource.Translation.W)
-        });
+            transform = new Transform
+            {
+                Position = dynamicResource.Translation.ToVec3(),
+                Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
+                Quaternion = dynamicResource.Rotation,
+                Scale = new Vector3(dynamicResource.Translation.W, dynamicResource.Translation.W, dynamicResource.Translation.W)
+            };
+        }
+        EntityInstances[dynamicResource.GetEntityHash()].Add((Transform)transform);
     }
 
-    public void AddMapModel(EntityModel model, Vector4 translation, Vector4 rotation, Vector3 scale)
+    public void AddMapModel(EntityModel model, Vector4 translation, Vector4 rotation, Vector3 scale, bool transparentsOnly = false)
     {
         ExporterMesh mesh = new(model.Hash);
         if (!_addedEntities.Contains(model.Hash)) //Dont want duplicate entities being added
         {
             _addedEntities.Add(model.Hash);
-            var parts = model.Load(ExportDetailLevel.MostDetailed, null);
+            var parts = model.Load(ExportDetailLevel.MostDetailed, null, transparentsOnly);
             for (int i = 0; i < parts.Count; i++)
             {
                 DynamicMeshPart part = parts[i];
@@ -423,5 +456,6 @@ public enum ExportType
     StaticInMap,
     EntityInMap,
     API,
+    D1API,
     MapResource
 }

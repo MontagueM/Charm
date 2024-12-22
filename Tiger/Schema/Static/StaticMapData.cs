@@ -1,8 +1,10 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.VisualBasic.FileIO;
+﻿using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using Tiger.Exporters;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Shaders;
+using Tiger.Schema.Static;
 
 namespace Tiger.Schema;
 
@@ -10,6 +12,194 @@ public class Map : Tag<SMapContainer>
 {
     public Map(FileHash fileHash) : base(fileHash)
     {
+    }
+}
+
+public class StaticMapData_D1 : Tag<SStaticMapData_D1>
+{
+    public StaticMapData_D1(FileHash hash) : base(hash)
+    {
+    }
+
+    // Statics in D1 aren't there own tag, the data for them is just shoved into a table, so the 'Hash' that we will
+    // assign to them will just be their Vertices0 hash.
+    // Static tables will have multiple duplicate meshes since they are baked into the map.
+    // Each static can have multiple parts that use the same Vertices0 data, so instead of filtering out duplicate hashes,
+    // we will filter out duplicate entries that have the same hash and the same IndexOffset, that should (in theory) remove all dupes.
+    public Dictionary<SStaticMeshData_D1, List<MeshInfo>> GetStatics()
+    {
+        Dictionary<SStaticMeshData_D1, List<MeshInfo>> statics = new();
+        var staticEntries = CollapseStaticTables();
+        for (int i = 0; i < staticEntries.Count; i++)
+        {
+            var entry = staticEntries[i].Entry;
+
+            for (int j = 0; j < entry.TagData.StaticInfoTable.Count; j++)
+            {
+                var infoEntry = entry.TagData.StaticInfoTable[j];
+                var staticEntry = entry.TagData.StaticMesh[infoEntry.StaticIndex];
+                if (staticEntry.DetailLevel == 0 || staticEntry.DetailLevel == 1 || staticEntry.DetailLevel == 2 || staticEntry.DetailLevel == 3 || staticEntry.DetailLevel == 10)
+                {
+                    var material = entry.TagData.MaterialTable[infoEntry.MaterialIndex].Material;
+                    // Material is (probably) used for depth pass, so ignore this mesh
+                    if (material.Unk08 != 1)
+                        continue;
+
+                    if (!statics.ContainsKey(staticEntry))
+                        statics[staticEntry] = new();
+
+                    MeshInfo meshInfo = new()
+                    {
+                        InstanceCount = infoEntry.InstanceCount,
+                        TransformIndex = infoEntry.TransformIndex,
+                        MaterialIndex = infoEntry.MaterialIndex,
+                        Material = material,
+                    };
+
+                    statics[staticEntry].Add(meshInfo);
+                }
+            }
+        }
+
+        return statics;
+    }
+
+    public void LoadIntoExporterScene(ExporterScene scene)
+    {
+        var instances = ParseTransforms();
+        var statics = GetStatics();
+
+        Parallel.ForEach(statics, mesh =>
+        {
+            var parts = Load(mesh.Key, mesh.Value, instances);
+            scene.AddStatic(mesh.Key.Vertices0.Hash, parts);
+            foreach (var part in parts)
+            {
+                if (part.Material == null)
+                    continue;
+
+                scene.Materials.Add(new ExportMaterial(part.Material));
+            }
+        });
+
+        // I think this is working the way it should, but i feel like this isnt the right way..
+        foreach (var (mesh, info) in statics.DistinctBy(x => x.Key.Vertices0.Hash))
+        {
+            foreach (var instance in info.DistinctBy(x => x.TransformIndex))
+            {
+                scene.AddStaticInstancesToMesh(mesh.Vertices0.Hash, instances.Skip(instance.TransformIndex).Take(instance.InstanceCount).ToList());
+            }
+        }
+    }
+
+
+    // Static part loading will have to be done here since the statics aren't a seperate tag to build a class off of
+    public List<StaticPart> Load(SStaticMeshData_D1 meshData, List<MeshInfo> meshInfo, List<InstanceTransform> instances)
+    {
+        StaticPart part = new StaticPart(meshData);
+        part.Material = meshInfo[0].Material; // I hope this is fine
+        part.GetAllData(meshData);
+
+        // Why in the world Bungie would store UV transforms in here is beyond me
+        var texcoordTransform = instances[meshInfo[0].TransformIndex].UVTransform;
+        for (int i = 0; i < part.VertexTexcoords0.Count; i++)
+        {
+            part.VertexTexcoords0[i] = new Vector2(
+                part.VertexTexcoords0[i].X * texcoordTransform.X + texcoordTransform.Y,
+                part.VertexTexcoords0[i].Y * -texcoordTransform.X + 1 - texcoordTransform.Z
+            );
+        }
+
+        return new List<StaticPart> { part };
+    }
+
+    // Statics1 seems to just be depth only meshes so I don't think it needs to be added, but ill do it just in case,
+    // they should get filtered out anyways.
+    public List<D1Class_A6488080> CollapseStaticTables()
+    {
+        List<D1Class_A6488080> collapsed = _tag.Statics1.ToList();
+        collapsed.AddRange(_tag.Statics2.ToList());
+        collapsed.AddRange(_tag.Statics3.ToList());
+        collapsed.AddRange(_tag.Statics4.ToList());
+
+        return collapsed;
+    }
+
+    // https://github.com/MontagueM/MontevenDynamicExtractor/blob/d1/d1map.cpp#L273
+    public List<InstanceTransform> ParseTransforms()
+    {
+        var a = ParseInstances();
+        List<InstanceTransform> transforms = new();
+        for (int i = 0; i < a.Count; i++)
+        {
+            InstanceTransform transform = new();
+            var b = a[i];
+
+            Matrix4x4 matrix = new Matrix4x4(
+                b.M0.X, b.M0.Y, b.M0.Z, b.M0.W,
+                b.M1.X, b.M1.Y, b.M1.Z, b.M1.W,
+                b.M2.X, b.M2.Y, b.M2.Z, b.M2.W,
+                b.M3.X, b.M3.Y, b.M3.Z, b.M3.W
+            );
+
+            matrix = Matrix4x4.Transpose(matrix);
+            System.Numerics.Vector3 translation = new();
+            Quaternion rotation = new Quaternion();
+            System.Numerics.Vector3 scale = new();
+            Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+
+            transform.Translation = new(translation.X, translation.Y, translation.Z, 0);
+            transform.Rotation = new(rotation.X, rotation.Y, rotation.Z, rotation.W);
+            transform.Scale = new(scale.X, scale.Y, scale.Z);
+            // X = scale
+            // Y, Z = TranslateX/Y
+            transform.UVTransform = a[i].M3;
+
+            transforms.Add(transform);
+        }
+
+        return transforms;
+    }
+
+    private List<InstanceMatrix> ParseInstances()
+    {
+        byte[] instances = PackageResourcer.Get().GetFileData(_tag.InstanceTransforms);
+        List<InstanceMatrix> instanceTransforms = new();
+        int blockSize = Marshal.SizeOf<InstanceMatrix>();
+
+        var reader = new TigerFile(_tag.InstanceTransforms).GetReader();
+        for (int i = 0; i < _tag.InstanceCounts; i++)
+        {
+            InstanceMatrix instance = reader.ReadSchemaStruct<InstanceMatrix>();
+            instanceTransforms.Add(instance);
+        }
+
+        return instanceTransforms;
+    }
+
+    [NonSchemaStruct(0x40)]
+    public struct InstanceMatrix
+    {
+        public Vector4 M0;
+        public Vector4 M1;
+        public Vector4 M2;
+        public Vector4 M3;
+    }
+
+    public struct InstanceTransform
+    {
+        public Vector4 Translation;
+        public Vector4 Rotation;
+        public Vector4 Scale;
+        public Vector4 UVTransform;
+    }
+
+    public struct MeshInfo
+    {
+        public short InstanceCount; // Instance count for this static
+        public short TransformIndex; // Index in InstanceTransforms file
+        public short MaterialIndex;
+        public IMaterial Material;
     }
 }
 
@@ -30,56 +220,123 @@ public class StaticMapData : Tag<SStaticMapData>
         });
     }
 
-    public void LoadIntoExporterScene(ExporterScene scene, string savePath, bool bSaveShaders)
+    public void LoadDecalsIntoExporterScene(ExporterScene scene)
     {
-        List<SStaticMeshHash> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
-        // todo this loads statics twice
-        Parallel.ForEach(extractedStatics, s =>
+        foreach (var decal in _tag.Decals)
         {
-            var parts = s.Static.Load(ExportDetailLevel.MostDetailed);
-            scene.AddStatic(s.Static.Hash, parts);
+            Debug.Assert(decal.Transforms.Count == 1 && decal.Models.Count == 1);
 
-            s.Static.SaveMaterialsFromParts(scene, parts);
-        });
+            var transform = decal.Transforms[0];
+            var model = decal.Models[0];
 
-        foreach (var c in _tag.InstanceCounts)
-        {
-            var model = _tag.Statics[c.StaticIndex].Static;
-            scene.AddStaticInstancesToMesh(model.Hash, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList());
+            Matrix4x4 matrix = new Matrix4x4(
+                transform.M0.X, transform.M0.Y, transform.M0.Z, transform.M0.W,
+                transform.M1.X, transform.M1.Y, transform.M1.Z, transform.M1.W,
+                transform.M2.X, transform.M2.Y, transform.M2.Z, transform.M2.W,
+                transform.M3.X, transform.M3.Y, transform.M3.Z, transform.M3.W
+            );
+
+            //matrix = Matrix4x4.Transpose(matrix);
+            System.Numerics.Vector3 translation = new();
+            Quaternion rotation = new Quaternion();
+            System.Numerics.Vector3 scale = new();
+            Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+
+            scene.AddMapModel(model.Model,
+            new Tiger.Schema.Vector4(translation.X, translation.Y, translation.Z, 1.0f),
+            new Tiger.Schema.Vector4(rotation.X, rotation.Y, rotation.Z, rotation.W),
+            new Tiger.Schema.Vector3(scale.X, scale.Y, scale.Z), true);
+
+            foreach (DynamicMeshPart part in model.Model.Load(ExportDetailLevel.MostDetailed, null, true))
+            {
+                if (part.Material == null) continue;
+                scene.Materials.Add(new ExportMaterial(part.Material));
+            }
         }
+    }
+
+    public void LoadIntoExporterScene(ExporterScene scene)
+    {
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            if (_tag.D1StaticMapData is not null)
+                _tag.D1StaticMapData.LoadIntoExporterScene(scene);
+        }
+        else
+        {
+            List<SStaticMeshHash> extractedStatics = _tag.Statics.DistinctBy(x => x.Static.Hash).ToList();
+
+            // todo this loads statics twice
+            Parallel.ForEach(extractedStatics, s =>
+            {
+                var parts = s.Static.Load(ExportDetailLevel.MostDetailed);
+                scene.AddStatic(s.Static.Hash, parts);
+                s.Static.SaveMaterialsFromParts(scene, parts);
+            });
+
+            foreach (var c in _tag.InstanceCounts)
+            {
+                var model = _tag.Statics[c.StaticIndex].Static;
+                scene.AddStaticInstancesToMesh(model.Hash, _tag.Instances.Skip(c.InstanceOffset).Take(c.InstanceCount).ToList());
+            }
+        }
+
     }
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "B4088080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D968080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "AD938080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AD938080", 0xC0)]
 public struct SStaticMapData
 {
     public long FileSize;
-    [SchemaField(0x18)]
+
+    [SchemaField(0x8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public DynamicArray<D1Class_BA048080> Decals; // Transparent/Decal meshes for ROI
+
+    [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     public Tag<SOcclusionBounds> ModelOcclusionBounds;
-    [SchemaField(0x40)]
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public StaticMapData_D1 D1StaticMapData; // Contains the actual static map data in ROI
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SStaticMeshInstanceTransform> Instances;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SUnknownUInt> Unk50;
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<SStaticMeshHash> Statics;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SStaticMeshInstanceMap> InstanceCounts;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk98;
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 UnkA0; // likely a bound corner
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Vector4 UnkB0; // likely the other bound corner
 }
 
-[SchemaStruct("0B008080", 0x04)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "0B008080", 0x04)]
 public struct SUnknownUInt
 {
     public uint Unk00;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "83058080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "71968080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B1938080", 0x18)]
 public struct SOcclusionBounds
@@ -88,6 +345,7 @@ public struct SOcclusionBounds
     public DynamicArray<SMeshInstanceOcclusionBounds> InstanceBounds;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E2078080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "73968080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B3938080", 0x30)]
 public struct SMeshInstanceOcclusionBounds
@@ -161,6 +419,8 @@ public struct D2Class_C9968080
 /// The one below the top reference, actually contains useful information.
 /// First of MapResources is what I call "ambient entities", second is always the static map.
 /// </summary>
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E0918080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E0918080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "01878080", 0x60)]
 public struct SBubbleDefinition
@@ -169,28 +429,44 @@ public struct SBubbleDefinition
     public DynamicArray<SMapContainerEntry> MapResources;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "67078080", 0x4)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C1848080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "03878080", 0x10)]
 public struct SMapContainerEntry
 {
-    [Tag64]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public Tag<SMapContainer> MapContainerROI;
+
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601), Tag64]
     public Tag<SMapContainer> MapContainer;
+
+    public Tag<SMapContainer> GetMapContainer()
+    {
+        if (MapContainerROI != null)
+            return MapContainerROI;
+        else
+            return MapContainer;
+    }
 }
 
 /// <summary>
 /// A map resource, contains data used to make a map.
 /// This is quite similar to EntityResource, but with more children.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "548A8080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "548A8080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "07878080", 0x38)]
 public struct SMapContainer
 {
     public long FileSize;
     public long Unk08;
-    [SchemaField(0x28)]
+    [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SMapDataTableEntry> MapDataTables;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "09418080", 4)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B08B8080", 4)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "09878080", 4)]
 public struct SMapDataTableEntry
@@ -201,6 +477,7 @@ public struct SMapDataTableEntry
 /// <summary>
 /// A map data table, containing data entries.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A2098080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D6998080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "83988080", 0x18)]
 public struct SMapDataTable
@@ -213,15 +490,17 @@ public struct SMapDataTable
 /// <summary>
 /// A data entry. Can be static maps, entities, etc. with a defined world transform.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "06048080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D8998080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "85988080", 0x90)]
 public struct SMapDataEntry
 {
     // for now we'll process both entities as if they were the same
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true), NoLoad]
     public Entity.Entity EntitySK;
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Vector4 Rotation;
     public Vector4 Translation;
@@ -229,9 +508,11 @@ public struct SMapDataEntry
     public Entity.Entity EntityWQ;
     [SchemaField(0x68)]
     public uint Unk68;
+    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public ulong WorldID;
-    [SchemaField(0x78)]
+    [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public ResourcePointer DataResource;
 
     public FileHash GetEntityHash()
@@ -246,16 +527,19 @@ public struct SMapDataEntry
 /// <summary>
 /// Data resource containing a static map.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EA1A8080", 0x14)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B3718080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C96C8080", 0x18)]
 public struct SMapDataResource
 {
-    [SchemaField(0x8)]
+    [SchemaField(0x8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public TigerHash Unk08;
-    [SchemaField(0x10)]
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
     public Tag<SStaticMapParent> StaticMapParent;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C61A8080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F46E8080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "0D6A8080", 0x30)]
 public struct SStaticMapParent
@@ -263,7 +547,7 @@ public struct SStaticMapParent
     // no filesize
     [SchemaField(0x8)]
     public StaticMapData StaticMap;  // could make it StaticMapData but dont want it to load it, could have a NoLoad option
-    [SchemaField(0x24, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x24, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x2C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public TigerHash Unk2C;
 }
@@ -276,7 +560,7 @@ public struct SStaticMapParent
 public struct D2Class_B5678080
 {
     [SchemaField(0x10)]
-    public Tag<D2Class_786A8080> Unk10;
+    public Tag Unk10; // D2Class_786A8080
 }
 
 /// <summary>
@@ -309,28 +593,33 @@ public struct D2Class_7D6A8080
 /// <summary>
 /// Unk data resource.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F21A8080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "DC718080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "A16D8080", 0x80)]
 public struct D2Class_A16D8080
 {
     public ulong FileSize;
-    [SchemaField(0x40)]
-    public DynamicArray<Vec4> Unk40; //first entry might be color?
+    [SchemaField(0x30)]
+    public DynamicArray<D2Class_09008080> Bytecode;
+    public DynamicArray<Vec4> Buffer1; // bytecode constants?
     [SchemaField(0x60)]
-    public DynamicArray<Vec4> Unk60; //if first doesnt exist then use this one?
+    public DynamicArray<Vec4> Buffer2;
 }
 
 /// <summary>
 /// Map Light
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "EA1B8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "5A6F8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "636A8080", 0x18)]
 public struct SMapLightResource
 {
-    [SchemaField(0x10)]
-    public Tag<D2Class_656C8080> Unk10;
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public Tag<D2Class_656C8080> Lights;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "5B1A8080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3A718080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "656C8080", 0x60)]
 public struct D2Class_656C8080
@@ -338,37 +627,44 @@ public struct D2Class_656C8080
     [SchemaField(0x10)]
     public Vector4 Unk10;
     public Vector4 Unk20;
-    public DynamicArray<D2Class_706C8080> Unk30;
-    public DynamicArray<D2Class_4F9F8080> Unk40;
-    [SchemaField(0x58)]
-    public Tag<SOcclusionBounds> Unk58;
+    public DynamicArray<D2Class_706C8080> LightData;
+    public DynamicArray<D2Class_4F9F8080> Transforms;
+    [SchemaField(0x54, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public Tag<SOcclusionBounds> Bounds;
 }
 
 /// </summary>
 /// Background entities/skybox resource
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "DA1B8080", 0x10)] // TODO: SK, Pre-BL, BL (all probably work the same)
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "916F8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A36A8080", 0x18)]
 public struct SMapSkyEntResource
 {
-    [SchemaField(0x10)]
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Tag<SMapSkyEntities> Unk10;  // A76A8080
 }
 
 /// <summary>
 /// Background entities/skybox
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1F1C8080", 0x68)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "956F8080", 0x68)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A76A8080", 0x60)]
 public struct SMapSkyEntities
 {
     public long FileSize;
     public DynamicArray<D2Class_A96A8080> Unk08;
-    public DynamicArray<D2Class_B3938080> Unk18;
-    public DynamicArray<D2Class_07008080> Unk28;
+    //public DynamicArray<D2Class_B3938080> Unk18;
+    //public DynamicArray<D2Class_07008080> Unk28;
     [SchemaField(0x40)]
     public Vector4 Unk40;
     public Vector4 Unk50;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2F1C8080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "3E718080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "706C8080", 0xF0)]
 public struct D2Class_706C8080
@@ -383,27 +679,31 @@ public struct D2Class_706C8080
     //public Vector4 Unk40;
     //public Vector4 Unk50;
 
-    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0xC0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public FileHash Shading;
-    [SchemaField(0x84, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0xC4, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public FileHash Volumetric;
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    [SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public FileHash Lightprobe;
+    //[SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    //[SchemaField(0xC0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public IMaterial UnkC0;
+    //[SchemaField(0x84, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    //[SchemaField(0xC4, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public IMaterial UnkC4;
+    //[SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    //[SchemaField(0xC8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    //public IMaterial UnkC8;
 
+    [SchemaField(0x84, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public Tag<D2Class_A16D8080> UnkCC;
+    public Tag<D2Class_A16D8080> BufferData;
     [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public Tag<D2Class_A16D8080> UnkD0;
+    public Tag<D2Class_A16D8080> BufferData2; // used for outer light color? i dont really know
+
     //[SchemaField(0xDF)]
     //public byte UnkDF; //color index? unlikely
     //[SchemaField(0xE0)]
     //public byte UnkE0; //light shape?
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "1E1C8080", 0x80)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "976F8080", 0x80)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "A96A8080", 0x90)]
 public struct D2Class_A96A8080
 {
@@ -418,33 +718,37 @@ public struct D2Class_A96A8080
     public Vector4 Unk50;
 
     public Tag<D2Class_AE6A8080> Unk60;//80806aae
-    public float Unk64;
-    public int Unk68;
-    public ushort Unk6C;
-    public short Unk6E;
-    public float Unk70;
-    public int Unk74;
-    public Tag Unk78;
-    public int Unk7C;
-    public long Unk80;
-    public int Unk88;
-    public int Unk8c;
+
+    //public float Unk64;
+    //public int Unk68;
+    //public ushort Unk6C;
+    //public short Unk6E;
+    //public float Unk70;
+    //public int Unk74;
+    //public Tag Unk78;
+    //public int Unk7C;
+    //public long Unk80;
+    //public int Unk88;
+    //public int Unk8c;
 }
 
 /// </summary>
 /// Map Decals Resource
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "701A8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "626E8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "55698080", 0x18)]
 public struct SMapDecalsResource
 {
-    [SchemaField(0x10)]
+    [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
     public Tag<SMapDecals> MapDecals;
 }
 
 /// <summary>
 /// Map Decals
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "401B8080", 0x68)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "686E8080", 0x78)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "5B698080", 0x78)]
 public struct SMapDecals
@@ -467,6 +771,7 @@ public struct SMapDecals
 /// <summary>
 /// Decal resources
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "831A8080", 0x8)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6C6E8080", 0x8)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "63698080", 0x8)]
 public struct D2Class_63698080
@@ -479,6 +784,7 @@ public struct D2Class_63698080
 /// <summary>
 /// Decal Location
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "531A8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "6D6E8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "64698080", 0x10)]
 public struct D2Class_64698080
@@ -486,6 +792,8 @@ public struct D2Class_64698080
     public Vector4 Location;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "3A1B8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "9B6F8080", 0x10)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "AE6A8080", 0x10)]
 public struct D2Class_AE6A8080
 {
@@ -493,6 +801,8 @@ public struct D2Class_AE6A8080
     public EntityModel Unk08;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E2078080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "73968080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "B3938080", 0x30)]
 public struct D2Class_B3938080
 {
@@ -541,85 +851,29 @@ public struct D2Class_BA6C8080
     public Vector4 Unk40;
 }
 
-/// <summary>
-/// A light that casts shadows
-/// </summary>
 [SchemaStruct("5E6C8080", 0x20)]
-public struct SMapShadowingLightResource
+public struct SMapSpotLightResource
 {
     [SchemaField(0x10)]
-    public Tag<D2Class_716C8080> Unk10;  // D2Class_716C8080, might be related to lights for entities?
+    public Tag Unk10;  // D2Class_716C8080, might be related to lights for entities?
     [SchemaField(0x1C)]
     public TigerHash Unk1C;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "716C8080", 0x110)]
-public struct D2Class_716C8080
-{
-    [SchemaField(0xE8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public Tag<D2Class_A16D8080> UnkE8;
-    [SchemaField(0xEC, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public Tag<D2Class_A16D8080> UnkEC;
-}
-
-/// <summary>
-/// Usually a flat plane for screen-space reflected water
-/// </summary>
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D4688080", 0x70)]
-public struct SMapWaterDecal
-{
-    [SchemaField(0x10)]
-    public EntityModel Model;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "7B918080", 0x1C)]
-public struct D2Class_7B918080
-{
-    public ResourcePointer Pointer; //21918080
-}
-
-/// <summary>
-/// Havok volume data resource.
-/// </summary>
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "21918080", 0x20)]
-public struct D2Class_21918080
-{
-    [SchemaField(0x10)]
-    public FileHash HavokVolume;  // type 27 subtype 0
-    public TigerHash Unk14;
-}
-
-/// <summary>
-/// Unk Havok data resource.
-/// </summary>
-[SchemaStruct("C26A8080", 0x18)]
-public struct D2Class_C26A8080
-{
-    [SchemaField(0x10)]
-    public Tag<D2Class_C46A8080> Unk10;  // C46A8080
-}
-
-[SchemaStruct("C46A8080", 0x18)]
-public struct D2Class_C46A8080
-{
-    [SchemaField(0x8)]
-    public FileHash Unk08;  // Havok Volume
 }
 
 // /// <summary>
 // /// Boss entity data resource?
 // /// </summary>
-// [SchemaStruct("19808080", 0x50)]
-// public struct D2Class_19808080
-// {
-//     // todo rest of this
-//     // [DestinyField(FieldType.ResourcePointer)]
-//     // public dynamic? Unk00;
-//     [SchemaField(0x24)]
-//     public TigerHash EntityName;
-// }
-//
-//
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "19808080", 0x50)]
+public struct D2Class_19808080
+{
+    // todo rest of this
+    // [DestinyField(FieldType.ResourcePointer)]
+    // public dynamic? Unk00;
+    [SchemaField(0x24)]
+    public StringHash EntityName;
+}
+
+
 // /// <summary>
 // /// Unk data resource, maybe lights for entities?
 // /// </summary>
@@ -690,6 +944,16 @@ public struct D2Class_C46A8080
 //     public dynamic? Unk00;
 // }
 //
+// /// <summary>
+// /// Havok volume data resource.
+// /// </summary>
+// [SchemaStruct("21918080", 0x20)]
+// public struct D2Class_21918080
+// {
+//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
+//     public Tag HavokVolume;  // type 27 subtype 0
+//     public TigerHash Unk14;
+// }
 //
 // /// <summary>
 // /// Unk data resource.
@@ -701,6 +965,15 @@ public struct D2Class_C46A8080
 //     public Tag Unk10;  // C2858080
 // }
 //
+// /// <summary>
+// /// Unk data resource.
+// /// </summary>
+// [SchemaStruct("C26A8080", 0x18)]
+// public struct D2Class_C26A8080
+// {
+//     [SchemaField(0x10), DestinyField(FieldType.FileHash)]
+//     public Tag Unk10;  // C46A8080
+// }
 //
 //
 // /// <summary>
@@ -723,5 +996,110 @@ public struct D2Class_C46A8080
 //     public Tag Unk10;  // 24878080, smth related to havok volumes
 // }
 
+
+#endregion
+
+#region Destiny 1 specific structs
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "751B8080", 0xD8)]
+public struct SStaticMapData_D1
+{
+    public long FileSize;
+    public int Unk08;
+    [SchemaField(0x10)]
+    public DynamicArray<D1Class_E71A8080> Unk10;
+    public int InstanceCounts; // Total instances
+    public FileHash InstanceTransforms; // Ref FFFFFFFF, Matrix4x4s
+    public TigerHash Unk28;
+
+    [SchemaField(0x38)]
+    public DynamicArray<D1Class_A6488080> Statics1;  // Is this one just for depth purposes? I've only ever seen materials with just vertex shaders
+    [SchemaField(0x50)]
+    public DynamicArray<D1Class_A6488080> Statics2;
+    [SchemaField(0x68)]
+    public DynamicArray<D1Class_A6488080> Statics3;
+    [SchemaField(0x80)]
+    public DynamicArray<D1Class_A6488080> Statics4;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E71A8080", 0x70)]
+public struct D1Class_E71A8080 // ????
+{
+    public Vector4 Unk00;
+    public Vector4 Unk10;
+    public Vector4 Unk20;
+    public Vector4 Unk30;
+    public Vector4 Unk40;
+    public Vector4 Unk50;
+    public Vector4 Unk60;
+    public Vector4 Unk70;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A6488080", 0x4)]
+public struct D1Class_A6488080
+{
+    public Tag<D1Class_901A8080> Entry;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "901A8080", 0x38)]
+public struct D1Class_901A8080
+{
+    public long FileSize;
+    public DynamicArray<D1Class_AF1A8080> MaterialTable;
+    public DynamicArray<SStaticMeshData_D1> StaticMesh;
+    public DynamicArray<D1Class_861B8080> StaticInfoTable;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "AF1A8080", 0x8)]
+public struct D1Class_AF1A8080
+{
+    public int Unk00; // Unsure
+    public IMaterial Material;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "861B8080", 0x18)]
+public struct D1Class_861B8080
+{
+    public short InstanceCount; // Instance count for this static
+    [SchemaField(0x4)]
+    public short MaterialIndex; // Index in MaterialTable
+    [SchemaField(0x8)]
+    public short StaticIndex; // Index in StaticMesh table
+    public short TransformIndex; // Index in InstanceTransforms file
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "BA048080", 0x80)]
+public struct D1Class_BA048080
+{
+    public long Size; // Just the size of the entry I think
+    public DynamicArray<D1Class_75018080> Transforms;
+    public DynamicArray<D1Class_C1018080> Unk18; // Similar to the location from Transforms but slightly different
+    public DynamicArray<D1Class_A5438080> Models;
+    [SchemaField(0x50)]
+    public Vector4 Unk50; // Bounding box?
+    public Vector4 Unk60;
+    public Vector4 Unk70;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "75018080", 0x40)]
+public struct D1Class_75018080
+{
+    // Matrix4x4
+    public Vector4 M0;
+    public Vector4 M1;
+    public Vector4 M2;
+    public Vector4 M3;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C1018080", 0x10)]
+public struct D1Class_C1018080
+{
+    public Vector4 Unk00;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A5438080", 0x4)]
+public struct D1Class_A5438080
+{
+    public EntityModel Model;
+}
 
 #endregion

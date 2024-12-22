@@ -62,6 +62,17 @@ public class FbxExporter : AbstractExporter
                     SBoxHandler.SaveEntityVMDL(outputDirectory, entity);
                 }
             }
+
+            string outputDirectory = args.OutputDirectory;
+            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
+            {
+                outputDirectory = Path.Join(outputDirectory, scene.Name);
+            }
+            else if (scene.Type is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
+            {
+                outputDirectory = Path.Join(outputDirectory, "Maps");
+            }
+            else if (scene.Type is ExportType.StaticInMap)
             if (scene.Type == ExportType.API)
             {
                 FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
@@ -123,7 +134,7 @@ public class FbxExporter : AbstractExporter
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
         var exporter = Internal.Fbx.FbxExporter.Create(_manager, "");
-        exporter.Initialize(outputPath + ".fbx", -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient                                         
+        exporter.Initialize(outputPath + ".fbx", -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient
         if (fbxScene.GetRootNode().GetChildCount() > 0) // Only export if theres actually something to export
             exporter.Export(fbxScene);
         exporter.Destroy();
@@ -168,30 +179,41 @@ public class FbxExporter : AbstractExporter
     {
         FbxNode rootNode = null;
         List<FbxNode> skeletonNodes = new();
+        List<BoneNode> nodes = new();
         foreach (var boneNode in boneNodes)
         {
+            BoneNode newNode = boneNode;
             FbxSkeleton skeleton = FbxSkeleton.Create(_manager, boneNode.Hash.ToString());
-            FbxNode node = FbxNode.Create(_manager, boneNode.Hash.ToString());
+            newNode.Node = FbxNode.Create(_manager, boneNode.Hash.ToString());
             skeleton.SetSkeletonType(FbxSkeleton.EType.eLimbNode);
-            node.SetNodeAttribute(skeleton);
+            newNode.Node.SetNodeAttribute(skeleton);
             Vector3 location = boneNode.DefaultObjectSpaceTransform.Translation;
             if (boneNode.ParentNodeIndex != -1)
             {
-                location -= boneNodes[boneNode.ParentNodeIndex].DefaultObjectSpaceTransform.Translation;
+                location -= boneNodes[newNode.ParentNodeIndex].DefaultObjectSpaceTransform.Translation;
             }
-            node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
-            if (rootNode == null)
-            {
-                //skeleton.SetSkeletonType(FbxSkeleton.EType.eRoot); Not sure if needed? Just Makes the root bone/root weights dissappear in blender
-                rootNode = node;
-            }
+            newNode.Node.LclTranslation.Set(new FbxDouble3(location.X, location.Y, location.Z));
+            nodes.Add(newNode);
+        }
+
+        foreach (var node in nodes)
+        {
+            if (node.ParentNodeIndex != -1)
+                nodes[node.ParentNodeIndex].Node.AddChild(node.Node);
             else
             {
-                skeletonNodes[boneNode.ParentNodeIndex].AddChild(node);
+                FbxSkeleton nodeatt = FbxSkeleton.Create(_manager, node.Hash);
+                nodeatt.SetSkeletonType(FbxSkeleton.EType.eRoot);
+                rootNode = FbxNode.Create(_manager, "Armature");
+                rootNode.AddChild(node.Node);
+                rootNode.SetNodeAttribute(nodeatt);
             }
-            skeletonNodes.Add(node);
+            if (rootNode != null)
+                fbxScene.GetRootNode().AddChild(rootNode);
+            else
+                skeletonNodes[node.ParentNodeIndex].AddChild(node.Node);
+            skeletonNodes.Add(node.Node);
         }
-        fbxScene.GetRootNode().AddChild(rootNode);
         return skeletonNodes;
     }
 

@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 namespace Tiger.DESTINY2_SHADOWKEEP_2601;
 
@@ -82,14 +81,26 @@ public struct PackageHeaderOld : IPackageHeader
         return new List<SHash64Definition>();
     }
 
-    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader)
+    public List<PackageActivityEntry> GetAllActivities(TigerReader reader)
     {
         if (MiscTableData.Value.Activities == null)
         {
-            return new List<SPackageActivityEntry>();
+            return new List<PackageActivityEntry>();
         }
 
-        return MiscTableData.Value.Activities;
+        List<PackageActivityEntry> activities = new List<PackageActivityEntry>();
+
+        foreach (var activity in MiscTableData.Value.Activities)
+        {
+            activities.Add(new PackageActivityEntry
+            {
+                TagHash = activity.TagHash,
+                TagClassHash = activity.TagClassHash,
+                Name = activity.Name.Value,
+            });
+        }
+
+        return activities;
     }
 }
 
@@ -163,14 +174,26 @@ public struct PackageHeaderNew : IPackageHeader
         return MiscTableData.Value.Hash64s;
     }
 
-    public List<SPackageActivityEntry> GetAllActivities(TigerReader reader)
+    public List<PackageActivityEntry> GetAllActivities(TigerReader reader)
     {
         if (MiscTableData.Value.Activities == null)
         {
-            return new List<SPackageActivityEntry>();
+            return new List<PackageActivityEntry>();
         }
 
-        return MiscTableData.Value.Activities;
+        List<PackageActivityEntry> activities = new List<PackageActivityEntry>();
+
+        foreach (var activity in MiscTableData.Value.Activities)
+        {
+            activities.Add(new PackageActivityEntry
+            {
+                TagHash = activity.TagHash,
+                TagClassHash = activity.TagClassHash,
+                Name = activity.Name.Value,
+            });
+        }
+
+        return activities;
     }
 }
 
@@ -179,7 +202,7 @@ public struct SMiscTableDataOld
 {
     [SchemaField(0x00)]
     public long ThisSize;
-    public DynamicArray<SPackageActivityEntry> Activities;
+    public DynamicArray<SD2PackageActivityEntry> Activities;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, 0x60)]
@@ -188,7 +211,7 @@ public struct SMiscTableDataNew
     [SchemaField(0x00)]
     public long ThisSize;
     [SchemaField(0x10)]
-    public DynamicArray<SPackageActivityEntry> Activities;
+    public DynamicArray<SD2PackageActivityEntry> Activities;
     [SchemaField(0x30)]
     public DynamicArray<SHash64Definition> Hash64s;
 }

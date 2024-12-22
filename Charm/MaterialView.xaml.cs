@@ -104,7 +104,7 @@ public partial class MaterialView : UserControl
             {
                 Console.WriteLine($"o{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
             }
-        } 
+        }
     }
 
     public List<TextureDetail> GetTextureDetails(IMaterial material)
@@ -197,7 +197,7 @@ public partial class MaterialView : UserControl
                 {
                     data.Add(vec.Vec);
                 }
-            }       
+            }
         }
         else
         {
@@ -246,7 +246,7 @@ public partial class MaterialView : UserControl
                 for (int i = 0; i < dc.Data.Count; i++)
                 {
                     CBufferDataDetail dataEntry = new();
-                    
+
                     dataEntry.Index = i;
                     if(bytecode_hlsl.ContainsKey(i))
                         dataEntry.Vector = $"Bytecode Assigned";
@@ -281,36 +281,36 @@ public partial class MaterialView : UserControl
         return bitmapImage;
     }
 
-    //public static List<Cbuffer> GetCBuffers(IMaterial material, bool isVertexShader = false)
-    //{
-    //    StringReader reader = new(material.Decompile((isVertexShader ? material.VertexShader : material.PixelShader).GetBytecode(),
-    //        $"{(isVertexShader ? $"vs{material.VertexShader.Hash}" : $"ps{material.PixelShader.Hash}")}"));
+    public static List<Cbuffer> GetCBuffers(IMaterial material, bool isVertexShader = false)
+    {
+        StringReader reader = new(material.Decompile((isVertexShader ? material.VertexShader : material.PixelShader).GetBytecode(),
+            $"{(isVertexShader ? $"vs{material.VertexShader.Hash}" : $"ps{material.PixelShader.Hash}")}"));
 
-    //    List<Cbuffer> buffers = new();
+        List<Cbuffer> buffers = new();
 
-    //    string line = string.Empty;
-    //    do
-    //    {
-    //        line = reader.ReadLine();
-    //        if (line != null)
-    //        {
-    //            if (line.Contains("cbuffer"))
-    //            {
-    //                reader.ReadLine();
-    //                line = reader.ReadLine();
-    //                Cbuffer cbuffer = new Cbuffer();
-    //                cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
-    //                cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
-    //                cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
-    //                cbuffer.Type = line.Split("cb")[0].Trim();
-    //                buffers.Add(cbuffer);
-    //            }
-    //        }
+        string line = string.Empty;
+        do
+        {
+            line = reader.ReadLine();
+            if (line != null)
+            {
+                if (line.Contains("cbuffer"))
+                {
+                    reader.ReadLine();
+                    line = reader.ReadLine();
+                    Cbuffer cbuffer = new Cbuffer();
+                    cbuffer.Variable = "cb" + line.Split("cb")[1].Split("[")[0];
+                    cbuffer.Index = Int32.TryParse(new string(cbuffer.Variable.Skip(2).ToArray()), out int index) ? index : -1;
+                    cbuffer.Count = Int32.TryParse(new string(line.Split("[")[1].Split("]")[0]), out int count) ? count : -1;
+                    cbuffer.Type = line.Split("cb")[0].Trim();
+                    buffers.Add(cbuffer);
+                }
+            }
 
-    //    } while (line != null);
+        } while (line != null);
 
-    //    return buffers;
-    //}
+        return buffers;
+    }
 
     private void Texture_OnClick(object sender, RoutedEventArgs e)
     {

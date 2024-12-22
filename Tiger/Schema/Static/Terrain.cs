@@ -144,12 +144,16 @@ public class Terrain : Tag<STerrain>
                 stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
         }
 
-        Log.Debug($"Reading vertex buffers {_tag.Vertices1.Hash}/{_tag.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices2?.Hash}/{_tag.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-        _tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures0, true);
-        _tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures1, true);
+            Log.Debug($"Reading vertex buffers {_tag.Vertices1.Hash}/{_tag.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices2?.Hash}/{_tag.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+            _tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures0, true);
+            _tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures1, true);
 
-        //_tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
-        //_tag.Vertices2.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+        }
+        else // Can't get input semantics (yet) for D1 / PS4
+        {
+            _tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, _tag.Vertices2 != null ? _tag.Vertices2.TagData.Stride : -1, true);
+            _tag.Vertices2?.ReadVertexData(part, uniqueVertexIndices, 1, _tag.Vertices1.TagData.Stride, true);
+        }
 
         return part;
     }
@@ -241,7 +245,7 @@ public class Terrain : Tag<STerrain>
         }
     }
 
-    private void TransformTexcoords(StaticPart part)
+    public void TransformTexcoords(StaticPart part)
     {
         for (int i = 0; i < part.VertexTexcoords0.Count; i++)
         {
@@ -251,31 +255,14 @@ public class Terrain : Tag<STerrain>
         }
     }
 
-    private void TransformVertexColors(StaticPart part)
+    public void TransformVertexColors(StaticPart part)
     {
         //Helper for dyemap assignment
-        //SK can have up to index 15, maybe more?
+        //ROI and Pre-BL can have a max of 16 per terrain part
+        float alpha = part.GroupIndex / 15.0f;
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
-            int colorIndex = part.GroupIndex % 4;
-            switch (colorIndex)
-            {
-                case 0:
-                    part.VertexColours.Add(new Vector4(1.0f, 0.0f, 0.0f, 1.0f));
-                    break;
-                case 1:
-                    part.VertexColours.Add(new Vector4(0.0f, 1.0f, 0.0f, 1.0f));
-                    break;
-                case 2:
-                    part.VertexColours.Add(new Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-                    break;
-                case 3:
-                    part.VertexColours.Add(new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-                    break;
-                default:
-                    part.VertexColours.Add(new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
-                    break;
-            };
+            part.VertexColours.Add(new Vector4(0.0f, 0.0f, 0.0f, alpha));
         }
     }
 }
@@ -283,6 +270,7 @@ public class Terrain : Tag<STerrain>
 /// <summary>
 /// Terrain data resource.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "371C8080", 0x20)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4B718080", 0x20)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "7D6C8080", 0x20)]
 public struct SMapTerrainResource
@@ -291,6 +279,7 @@ public struct SMapTerrainResource
     public short Unk10;  // tile x-y coords?
     public short Unk12;
     public TigerHash Unk14;
+    [NoLoad]
     public Terrain Terrain;
     public Tag<SOcclusionBounds> TerrainBounds;
 }
@@ -298,6 +287,7 @@ public struct SMapTerrainResource
 /// <summary>
 /// Terrain _tag.
 /// </summary>
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2E1B8080", 0xB0)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4F718080", 0xB0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "816C8080", 0xB0)]
 public struct STerrain
@@ -307,7 +297,7 @@ public struct STerrain
     public Vector4 Unk10;
     public Vector4 Unk20;
     public Vector4 Unk30;
-    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<SMeshGroup> MeshGroups;
 
@@ -316,19 +306,21 @@ public struct STerrain
     public IndexBuffer Indices1;
     public IMaterial Unk6C;
     public IMaterial Unk70;
-    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<SStaticPart> StaticParts;
     public VertexBuffer Vertices3;
     public VertexBuffer Vertices4;
     public IndexBuffer Indices2;
-    [SchemaField(0xA0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x98, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public int Unk98;
-    public int Unk9C;
-    public int UnkA0;
+
+    [SchemaField(0xA4, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public IMaterial UnkA4;
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
+    public Texture UnkA8; // A top down view of the terrain in-game (assuming for LOD)
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F1A8080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "54718080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "866C8080", 0x60)]
 public struct SMeshGroup
@@ -345,9 +337,12 @@ public struct SMeshGroup
     public uint Unk44;
     public uint IndexOffset; // 75% sure this is right
     public uint IndexCount;
+    [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Texture Dyemap;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "481A8080", 0x0C)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "52718080", 0x0C)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "846C8080", 0x0C)]
 public struct SStaticPart

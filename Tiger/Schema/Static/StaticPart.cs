@@ -41,6 +41,32 @@ public class StaticPart : MeshPart
         MaterialType = Shaders.MaterialType.Transparent;
     }
 
+    public StaticPart(SStaticMeshData_D1 staticPartEntry) : base()
+    {
+        IndexOffset = staticPartEntry.IndexOffset;
+        IndexCount = staticPartEntry.IndexCount;
+        LodCategory = (ELodCategory)staticPartEntry.DetailLevel;
+        PrimitiveType = (PrimitiveType)staticPartEntry.PrimitiveType;
+    }
+
+    public void GetAllData(SStaticMeshData_D1 mesh) // D1
+    {
+        Indices = mesh.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
+        // Get unique vertex indices we need to get data for
+        HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
+        foreach (UIntVector3 index in Indices)
+        {
+            uniqueVertexIndices.Add(index.X);
+            uniqueVertexIndices.Add(index.Y);
+            uniqueVertexIndices.Add(index.Z);
+        }
+        VertexIndices = uniqueVertexIndices.ToList();
+
+        // Have to call it like this b/c we don't know the format of the vertex data here
+        mesh.Vertices0.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices1 != null ? mesh.Vertices1.TagData.Stride : -1, false);
+        mesh.Vertices1?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices0.TagData.Stride, false);
+    }
+
     public void GetAllData(SStaticMeshBuffers buffers, SStaticMesh container)
     {
         Indices = buffers.Indices.GetIndexData(PrimitiveType, IndexOffset, IndexCount);
@@ -66,8 +92,8 @@ public class StaticPart : MeshPart
             Helpers.DecorateSignaturesWithBufferIndex(ref inputSignatures, strides); // absorb into the getter probs
 
             Log.Debug($"Reading vertex buffers {buffers.Vertices0.Hash}/{buffers.Vertices0.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {buffers.Vertices1?.Hash}/{buffers.Vertices1?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-            buffers.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures.Where(s => s.BufferIndex == 0).ToList());
-            buffers.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures.Where(s => s.BufferIndex == 1).ToList());
+            buffers.Vertices0.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0, false);
+            buffers.Vertices1?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1, false);
         }
         else
         {

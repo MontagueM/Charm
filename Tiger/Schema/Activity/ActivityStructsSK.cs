@@ -1,5 +1,4 @@
-﻿using Tiger.Schema.Audio;
-using Tiger.Schema.Strings;
+﻿using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
 
@@ -67,12 +66,12 @@ public struct S80978080
 public struct SUnkActivity_SK
 {
     public long FileSize;
-    public TigerHash LocationName;  // these all have actual string hashes but have no string container given directly
+    public StringHash LocationName;  // these all have actual string hashes but have no string container given directly
     [SchemaField(0x18)]
     public uint Unk18;
-    public TigerHash Unk1C;
-    public TigerHash Unk20;
-    public TigerHash Unk24;
+    public StringHash Unk1C;
+    public StringHash DestinationName;
+    public StringHash Unk24;
     public LocalizedStrings LocalizedStrings;
     [SchemaField(0x30)]
     public StringPointer ActivityDevName;
@@ -152,7 +151,7 @@ public struct S62948080
     public DynamicArray<S64948080> Unk38;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "64948080", 0x1C)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "64948080", 0x18)]
 public struct S64948080
 {
     [SchemaField(0x8)]

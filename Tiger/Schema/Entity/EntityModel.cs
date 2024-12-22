@@ -1,4 +1,3 @@
-﻿
 using System;
 using System.Diagnostics;
 using Arithmic;
@@ -12,14 +11,20 @@ public class EntityModel : Tag<SEntityModel>
     {
     }
 
+    public Vector4 RotationOffset = new();
+    public Vector4 TranslationOffset = new();
+
     /*
      * We need the parent resource to get access to the external materials
      */
-    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource)
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource, bool transparentsOnly = false, bool hasSkeleton = false)
     {
         Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts = GetPartsOfDetailLevel(detailLevel);
-        List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource);
-        return parts;
+        List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource, hasSkeleton);
+        if (transparentsOnly) // ROI decal/transparent mesh purposes. I hate this and its not the right way to do this
+            return parts.Where(x => x.Material.Unk20 != 0).ToList();
+        else
+            return parts;
     }
 
     /// <summary>
@@ -47,6 +52,19 @@ public class EntityModel : Tag<SEntityModel>
             for (int i = 0; i < mesh.Parts.Count; i++)
             {
                 D2Class_CB6E8080 part = mesh.Parts[reader, i];
+                //Console.WriteLine($"{i}--------------");
+                //Console.WriteLine($"Material {part.Material?.FileHash}");
+                //Console.WriteLine($"VariantShaderIndex {part.VariantShaderIndex}");
+                //Console.WriteLine($"PrimitiveType {part.PrimitiveType}");
+                //Console.WriteLine($"IndexOffset {part.IndexOffset}");
+                //Console.WriteLine($"IndexCount {part.IndexCount}");
+                //Console.WriteLine($"Unk10 {part.Unk10}");
+                //Console.WriteLine($"ExternalIdentifier {part.ExternalIdentifier}");
+                //Console.WriteLine($"Unk16 {part.Unk16}");
+                //Console.WriteLine($"FlagsD1 {part.FlagsD1}");
+                //Console.WriteLine($"GearDyeChangeColorIndex {part.GearDyeChangeColorIndex}");
+                //Console.WriteLine($"LodCategory {part.LodCategory}");
+
                 if (eDetailLevel == ExportDetailLevel.AllLevels)
                 {
                     parts[meshIndex].Add(partIndex++, part);
@@ -70,11 +88,10 @@ public class EntityModel : Tag<SEntityModel>
         return parts;
     }
 
-    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts, EntityResource parentResource)
+    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, D2Class_CB6E8080>> dynamicParts, EntityResource parentResource, bool hasSkeleton = false)
     {
         List<DynamicMeshPart> parts = new();
         if (_tag.Meshes.Count == 0) return parts;
-
         int meshIndex = 0;
         foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
@@ -82,7 +99,9 @@ public class EntityModel : Tag<SEntityModel>
             Dictionary<int, int> partGroups = new();
             HashSet<short> groups = new(mesh.StagePartOffsets.AsEnumerable());
             var groupList = groups.ToList();
-            groupList.Remove(0x707);
+            // Idk what this is actually supposed to do but Ill just leave it for BL+ since its stage part offset size is an odd number?
+            if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
+                groupList.Remove(0x707);
             groupList.Sort();
             for (int i = 0; i < groupList.Count - 1; i++)
             {
@@ -100,9 +119,11 @@ public class EntityModel : Tag<SEntityModel>
                     GroupIndex = partGroups[i],
                     LodCategory = part.Lod.DetailLevel,
                     bAlphaClip = (part.Flags & 0x8) != 0,
-                    GearDyeChangeColorIndex = part.GearDyeChangeColorIndex
+                    GearDyeChangeColorIndex = part.GearDyeChangeColorIndex,
+                    HasSkeleton = hasSkeleton,
+                    RotationOffset = RotationOffset,
+                    TranslationOffset = TranslationOffset
                 };
-
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
                 if (dynamicMeshPart.Material is null ||
@@ -111,6 +132,10 @@ public class EntityModel : Tag<SEntityModel>
                     dynamicMeshPart.Material.Unk08 != 1 ||
                     (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
                     continue;
+
+                    //if (dynamicMeshPart.Material.Unk08 != 1)
+                    //    Console.WriteLine($"{dynamicMeshPart.Material.FileHash}");
+                }
 
                 dynamicMeshPart.GetAllData(mesh, _tag);
                 parts.Add(dynamicMeshPart);
@@ -133,7 +158,11 @@ public class DynamicMeshPart : MeshPart
 
     public List<Vector4> VertexColourSlots = new List<Vector4>();
     public bool bAlphaClip;
+    public bool HasSkeleton;
     public byte GearDyeChangeColorIndex = 0xFF;
+
+    public Vector4 RotationOffset = new();
+    public Vector4 TranslationOffset = new();
 
     public DynamicMeshPart(D2Class_CB6E8080 part, EntityResource parentResource) : base()
     {
@@ -173,13 +202,43 @@ public class DynamicMeshPart : MeshPart
             VertexIndexMap.Add(VertexIndices[i], i);
         }
 
-        // Have to call it like this b/c we don't know the format of the vertex data here
-        Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
-        mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
-        mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
+        if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999 && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            InputSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
+            int b0Stride = mesh.Vertices1.TagData.Stride;
+            int b1Stride = mesh.Vertices2?.TagData.Stride ?? 0;
+            List<InputSignature> inputSignatures0 = new();
+            List<InputSignature> inputSignatures1 = new();
+            int stride = 0;
+            foreach (InputSignature inputSignature in inputSignatures)
+            {
+                if (stride < b0Stride)
+                    inputSignatures0.Add(inputSignature);
+                else
+                    inputSignatures1.Add(inputSignature);
+
+                if (inputSignature.Semantic == InputSemantic.Colour || inputSignature.Semantic == InputSemantic.BlendIndices || inputSignature.Semantic == InputSemantic.BlendWeight)
+                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+                else
+                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
+            }
+
+            Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+            mesh.Vertices1.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures0, false);
+            mesh.Vertices2?.ReadVertexDataSignatures(this, uniqueVertexIndices, inputSignatures1, false);
+        }
+        else
+        {
+            // Have to call it like this b/c we don't know the format of the vertex data here
+            Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
+            mesh.Vertices1.ReadVertexData(this, uniqueVertexIndices, 0, mesh.Vertices2 != null ? mesh.Vertices2.TagData.Stride : -1, false);
+            mesh.Vertices2?.ReadVertexData(this, uniqueVertexIndices, 1, mesh.Vertices1.TagData.Stride, false);
+        }
+
+
         if (mesh.OldWeights != null)
         {
-            mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices);
+            mesh.OldWeights.ReadVertexData(this, uniqueVertexIndices, 2); // bufferIndex 2 is used for D1, shouldnt affect D2 I hope
         }
         if (mesh.VertexColour != null)
         {
@@ -192,34 +251,40 @@ public class DynamicMeshPart : MeshPart
 
         Debug.Assert(VertexPositions.Count == VertexTexcoords0.Count && VertexPositions.Count == VertexNormals.Count);
 
-        TransformPositions(model);
-        TransformTexcoords(model);
+        TransformPositions(mesh, model);
+        TransformTexcoords(mesh, model);
     }
 
-    private void TransformTexcoords(SEntityModel header)
+    private void TransformTexcoords(SEntityModelMesh mesh, SEntityModel header)
     {
+        Vector2 texcoordScale = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.TexcoordScale : mesh.TexcoordScale;
+        Vector2 texcoordTranslation = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.TexcoordTranslation : mesh.TexcoordTranslation;
+
         for (int i = 0; i < VertexTexcoords0.Count; i++)
         {
             var tx = VertexTexcoords0[i];
             VertexTexcoords0[i] = new Vector2(
-                tx.X * header.TexcoordScale.X + header.TexcoordTranslation.X,
-                tx.Y * -header.TexcoordScale.Y + 1 - header.TexcoordTranslation.Y
+                tx.X * texcoordScale.X + texcoordTranslation.X,
+                tx.Y * -texcoordScale.Y + 1 - texcoordTranslation.Y
             );
             VertexTexcoords1.Add(new Vector2(
-                tx.X * header.TexcoordScale.X * 5 + header.TexcoordTranslation.X * 5,
-                tx.Y * -header.TexcoordScale.Y * 5 + 1 - header.TexcoordTranslation.Y * 5
+                tx.X * texcoordScale.X * 5 + texcoordTranslation.X * 5,
+                tx.Y * -texcoordScale.Y * 5 + 1 - texcoordTranslation.Y * 5
             ));
         }
     }
 
-    private void TransformPositions(SEntityModel header)
+    private void TransformPositions(SEntityModelMesh mesh, SEntityModel header)
     {
+        Vector4 modelScale = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.ModelScale : mesh.ModelScale;
+        Vector4 modelTranslation = Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON ? header.ModelTranslation : mesh.ModelTranslation;
+
         for (int i = 0; i < VertexPositions.Count; i++)
         {
             VertexPositions[i] = new Vector4(
-                VertexPositions[i].X * header.ModelScale.X + header.ModelTranslation.X,
-                VertexPositions[i].Y * header.ModelScale.Y + header.ModelTranslation.Y,
-                VertexPositions[i].Z * header.ModelScale.Z + header.ModelTranslation.Z,
+                VertexPositions[i].X * modelScale.X + modelTranslation.X + TranslationOffset.X,
+                VertexPositions[i].Y * modelScale.Y + modelTranslation.Y + TranslationOffset.Y,
+                VertexPositions[i].Z * modelScale.Z + modelTranslation.Z + TranslationOffset.Z,
                 VertexPositions[i].W
             );
         }
@@ -230,7 +295,7 @@ public class DynamicMeshPart : MeshPart
         using TigerReader reader = parentResource.GetReader();
 
         List<IMaterial> materials = new();
-        
+
         var map = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterialsMap;
         var mats = ((D2Class_8F6D8080)parentResource.TagData.Unk18.GetValue(reader)).ExternalMaterials;
         if (map.Count == 0 || mats.Count == 0)

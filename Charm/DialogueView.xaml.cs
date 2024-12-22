@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Media;
-using System.Threading.Tasks;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using NAudio.Vorbis;
-using NAudio.Wave;
 using Tiger;
 using Tiger.Schema.Audio;
 
@@ -18,16 +14,32 @@ namespace Charm;
 public partial class DialogueView : UserControl
 {
     private Dialogue _dialogue;
+    private DialogueD1 _dialogueD1;
+
+    // Kind of a hacky way but it works
+    private TagView _viewer;
+    private VoicelineItem _activeItem;
 
     public DialogueView()
     {
         InitializeComponent();
     }
 
-    public void Load(FileHash hash)
+    public void Load(FileHash hash, TagView viewer)
     {
-        _dialogue = new Dialogue(hash);
-        List<dynamic?> result = _dialogue.Load();
+        List<dynamic?> result = new();
+        _viewer = viewer;
+        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            _dialogueD1 = new DialogueD1(hash);
+            result = _dialogueD1.Load();
+        }
+        else
+        {
+            _dialogue = new Dialogue(hash);
+            result = _dialogue.Load();
+        }
+
         GenerateUI(result);
     }
 
@@ -51,27 +63,109 @@ public partial class DialogueView : UserControl
             }
             else
             {
-                D2Class_33978080 a = dyn;
-                dynamic? unk28 = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? a.Unk28BL : a.Unk28;
-                result.Add(new VoicelineItem
+                if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
                 {
-                    Narrator = a.NarratorString,
-                    Voiceline = unk28.Value.ToString(),
-                    Wem = a.Sound1.TagData.Wems[0],
-                    RecursionDepth = recursionDepth,
-                    Duration = a.Sound1.TagData.Wems[0].Duration
-                });
+                    SAA078080 a = dyn;
+
+                    if (a.Dialogue is null)
+                        continue;
+
+                    if (a.Strings is not null)
+                        GlobalStrings.Get().AddStrings(a.Strings);
+
+                    if (a.StringsF is not null)
+                        GlobalStrings.Get().AddStrings(a.StringsF);
+
+                    result.Add(new VoicelineItem
+                    {
+                        Narrator = GlobalStrings.Get().GetString(a.Narrator),
+                        Voiceline = GlobalStrings.Get().GetString(a.VoiceLine),
+                        Wem = a.Dialogue.TagData.Wems[0],
+                        RecursionDepth = recursionDepth,
+                        Duration = a.Dialogue.TagData.Wems[0].Duration
+                    });
+
+                    if (a.DialogueF is null)
+                        continue;
+
+                    // A lot of times the Male and Female voice lines are the exact same, so just skip
+                    if (GlobalStrings.Get().GetString(a.VoiceLineF) == GlobalStrings.Get().GetString(a.VoiceLine))
+                        continue;
+
+                    result.Add(new VoicelineItem
+                    {
+                        Narrator = GlobalStrings.Get().GetString(a.Narrator),
+                        Voiceline = GlobalStrings.Get().GetString(a.VoiceLineF),
+                        Wem = a.DialogueF.TagData.Wems[0],
+                        RecursionDepth = recursionDepth,
+                        Duration = a.DialogueF.TagData.Wems[0].Duration
+                    });
+                }
+                else
+                {
+                    D2Class_33978080 a = dyn;
+                    dynamic? unk28 = Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402 ? a.Unk28BL : a.Unk28;
+                    result.Add(new VoicelineItem
+                    {
+                        Narrator = GlobalStrings.Get().GetString(a.NarratorString),
+                        Voiceline = unk28.Value.ToString(),
+                        Wem = a.Sound1.TagData.Wems[0],
+                        RecursionDepth = recursionDepth,
+                        Duration = a.Sound1.TagData.Wems[0].Duration
+                    });
+                }
             }
         }
 
-        return result;
+        // Filter out duplicates
+        return new ObservableCollection<VoicelineItem>(result.GroupBy(x => x.Wem.Hash)
+                                                      .Select(group => group.First()));
     }
 
     private void PlayWem_OnClick(object sender, RoutedEventArgs e)
     {
         VoicelineItem item = (VoicelineItem)(sender as Button).DataContext;
+        _activeItem = item;
         MusicPlayer.SetWem(item.Wem);
         MusicPlayer.Play();
+
+        if (_viewer is not null)
+        {
+            _viewer.ExportControl.SetExportFunction(ExportWav, (int)ExportTypeFlag.Full);
+            _viewer.ExportControl.SetExportInfo(item.Narrator, MusicPlayer.GetWem());
+        }
+    }
+
+    private void ExportWav(ExportInfo info)
+    {
+        // exporting while playing the audio causes a hang
+        Dispatcher.Invoke(() =>
+        {
+            if (MusicPlayer.IsPlaying())
+                MusicPlayer.Pause();
+        });
+
+        ConfigSubsystem config = CharmInstance.GetSubsystem<ConfigSubsystem>();
+        Wem wem = FileResourcer.Get().GetFile<Wem>(info.Hash);
+        string saveDirectory = config.GetExportSavePath() + $"/Sound/Dialogue/{info.Name}/";
+        Directory.CreateDirectory(saveDirectory);
+        wem.SaveToFile($"{saveDirectory}/{info.Hash}.wav");
+
+        StringBuilder dialogueBuilder = new StringBuilder();
+        if (File.Exists($"{saveDirectory}/Dialogue.txt"))
+        {
+            using (StreamReader reader = new StreamReader($"{saveDirectory}/Dialogue.txt"))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line != $"[{info.Hash}]: \"{_activeItem.Voiceline}\"")
+                        dialogueBuilder.AppendLine(line);
+                }
+            }
+        }
+        dialogueBuilder.AppendLine($"[{info.Hash}]: \"{_activeItem.Voiceline}\"");
+        File.WriteAllText($"{saveDirectory}/Dialogue.txt", dialogueBuilder.ToString());
     }
 }
 

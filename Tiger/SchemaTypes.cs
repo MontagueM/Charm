@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Arithmic;
-using Tiger.Schema;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Strings;
 
@@ -547,6 +545,31 @@ public class StringReference64 : ITigerDeserialize
 
     public static implicit operator string(StringReference64 stringReference64) => stringReference64.Value.ToString();
 }
+
+/// <summary>
+/// A string that ends when a null character is reached
+/// </summary>
+//public class StringNullTerminated : ITigerDeserialize
+//{
+//    public string? Value;
+
+//    public void Deserialize(TigerReader reader)
+//    {
+//        StringBuilder sb = new();
+//        while (true)
+//        {
+//            char c = reader.ReadChar();
+//            if (c == '\0')
+//            {
+//                break;
+//            }
+//            sb.Append(c);
+//        }
+//        Value = sb.ToString();
+//    }
+
+//    public static implicit operator string?(StringNullTerminated stringNullTerminated) => stringNullTerminated.Value;
+//}
 
 /// <summary>
 ///  A pointer to a resource in a specified table (has a constant type)

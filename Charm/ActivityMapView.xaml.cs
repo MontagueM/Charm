@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO.Packaging;
 using System.Linq;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
-using HelixToolkit.Wpf.SharpDX;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
-using Tiger.Schema.Entity;
 
 namespace Charm;
 
 public partial class ActivityMapView : UserControl
 {
+    private IActivity _currentActivity;
+    private Tag<SBubbleDefinition> _currentBubble;
     public ActivityMapView()
     {
         InitializeComponent();
@@ -28,8 +24,9 @@ public partial class ActivityMapView : UserControl
     public void LoadUI(IActivity activity)
     {
         MapList.ItemsSource = GetMapList(activity);
-        ExportControl.SetExportFunction(ExportFull, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.ArrangedMap, true);
+        ExportControl.SetExportFunction(ExportFull, (int)ExportTypeFlag.Full, true); //| (int)ExportTypeFlag.ArrangedMap, true);
         ExportControl.SetExportInfo(activity.FileHash);
+        _currentActivity = activity;
     }
 
     private ObservableCollection<DisplayBubble> GetMapList(IActivity activity)
@@ -39,7 +36,7 @@ public partial class ActivityMapView : UserControl
         {
             DisplayBubble displayMap = new();
             displayMap.Name = bubble.Name;
-            displayMap.Hash = bubble.MapReference.TagData.ChildMapReference.Hash;
+            displayMap.Hash = bubble.ChildMapReference.Hash;
             maps.Add(displayMap);
         }
         return maps;
@@ -50,38 +47,74 @@ public partial class ActivityMapView : UserControl
         FileHash hash = new FileHash((sender as Button).Tag as string);
         Tag<SBubbleDefinition> bubbleMaps = FileResourcer.Get().GetSchemaTag<SBubbleDefinition>(hash);
         PopulateStaticList(bubbleMaps);
+        _currentBubble = bubbleMaps;
     }
 
     private void PopulateStaticList(Tag<SBubbleDefinition> bubbleMaps)
     {
         ConcurrentBag<DisplayStaticMap> items = new ConcurrentBag<DisplayStaticMap>();
-        Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
-        {
-            if (m.MapContainer.TagData.MapDataTables.Count > 1)
-            {
-                Tag<SMapDataTable> mapDataTable = m.MapContainer.TagData.MapDataTables[1].MapDataTable;
-                if (mapDataTable.TagData.DataEntries.Count > 0)
-                {
-                    StaticMapData? tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent.TagData.StaticMap;
-                    if (tag == null)
-                        return; // todo sk broke this
 
-                    items.Add(new DisplayStaticMap
+        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        {
+            Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
+            {
+                if (m.GetMapContainer().TagData.MapDataTables.Count > 1)
+                {
+                    Tag<SMapDataTable> mapDataTable = m.GetMapContainer().TagData.MapDataTables[1].MapDataTable;
+                    if (mapDataTable.TagData.DataEntries.Count > 0)
                     {
-                        Hash = m.MapContainer.Hash,
-                        Name = $"{m.MapContainer.Hash}: {tag.TagData.Instances.Count} instances, {tag.TagData.Statics.Count} uniques",
-                        Instances = tag.TagData.Instances.Count
-                    });
+                        mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent?.Load();
+                        StaticMapData? tag = mapDataTable.TagData.DataEntries[0].DataResource.GetValue(mapDataTable.GetReader())?.StaticMapParent.TagData.StaticMap;
+                        if (tag == null)
+                            return; // todo sk broke this
+
+                        items.Add(new DisplayStaticMap
+                        {
+                            Hash = m.GetMapContainer().Hash,
+                            Name = $"{m.GetMapContainer().Hash}: {tag.TagData.Instances.Count} instances, {tag.TagData.Statics.Count} uniques",
+                            Instances = tag.TagData.Instances.Count
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
+        else
+        {
+            Parallel.ForEach(bubbleMaps.TagData.MapResources, m =>
+            {
+                foreach (var dataTable in m.GetMapContainer().TagData.MapDataTables)
+                {
+                    foreach (var entry in dataTable.MapDataTable.TagData.DataEntries)
+                    {
+                        if (entry.DataResource.GetValue(dataTable.MapDataTable.GetReader()) is SMapDataResource resource)
+                        {
+                            resource.StaticMapParent?.Load();
+                            if (resource.StaticMapParent is null || resource.StaticMapParent.TagData.StaticMap is null)
+                                continue;
+
+                            var tag = resource.StaticMapParent.TagData.StaticMap;
+                            int instanceCount = tag.TagData.D1StaticMapData != null ? tag.TagData.D1StaticMapData.TagData.InstanceCounts : tag.TagData.Decals.Count;
+                            items.Add(new DisplayStaticMap
+                            {
+                                Hash = m.GetMapContainer().Hash,
+                                Name = $"{m.GetMapContainer().Hash}: {instanceCount} instances",
+                                Instances = instanceCount
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
         var sortedItems = new List<DisplayStaticMap>(items);
         sortedItems.Sort((a, b) => b.Instances.CompareTo(a.Instances));
         sortedItems.Insert(0, new DisplayStaticMap
         {
             Name = "Select all"
         });
-        StaticList.ItemsSource = sortedItems;
+        // Shouldnt be a problem in D2, but in D1 a map container can have multiple static map parents
+        // it still exports fine (I think) but having multiple of the same map container entries can cause info.cfg read/write crashes
+        StaticList.ItemsSource = sortedItems.DistinctBy(x => x.Hash);
     }
 
     public async void ExportFull(ExportInfo info)
@@ -122,17 +155,15 @@ public partial class ActivityMapView : UserControl
         List<string> mapStages = maps.Select((x, i) => $"Exporting {i + 1}/{maps.Count}").ToList();
         mapStages.Add("Finishing Export");
         MainWindow.Progress.SetProgressStages(mapStages);
-        // MainWindow.Progress.SetProgressStages(new List<string> { "exporting activity map data parallel" });
+
         Parallel.ForEach(maps, map =>
         {
             MapView.ExportFullMap(map, info.ExportType);
             MainWindow.Progress.CompleteStage();
         });
-        // MapView.ExportFullMap(staticMapData);
-        // MainWindow.Progress.CompleteStage();
 
         Tiger.Exporters.Exporter.Get().Export();
-        
+
         MainWindow.Progress.CompleteStage();
 
         Dispatcher.Invoke(() =>
@@ -164,11 +195,11 @@ public partial class ActivityMapView : UserControl
             MainWindow.Progress.SetProgressStages(mapStages);
             await Task.Run(() =>
             {
-                foreach (DisplayStaticMap item in items)
+                _currentBubble.TagData.MapResources.ForEach(m =>
                 {
-                    MapControl.LoadMap(new FileHash(item.Hash), lod);
+                    MapControl.LoadMap(m.GetMapContainer().Hash, lod);
                     MainWindow.Progress.CompleteStage();
-                }
+                });
             });
         }
         else

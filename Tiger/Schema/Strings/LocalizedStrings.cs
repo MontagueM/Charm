@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Arithmic;
 
 namespace Tiger.Schema.Strings;
 
@@ -62,6 +61,9 @@ public class LocalizedStrings : Tag<SLocalizedStrings>
     private int FindIndexOfStringHash(StringHash hash)
     {
         using TigerReader reader = GetReader();
+        if (_tag.StringHashes is null) // idk why this happens but its so annoying
+            Deserialize(true);
+
         return _tag.StringHashes.InterpolationSearchIndex(reader, hash);
     }
 
