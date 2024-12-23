@@ -216,6 +216,15 @@ class MetadataScene
         _config["MeshName"] = meshName;
     }
 
+    public void SetUnrealInteropPath(string interopPath)
+    {
+        _config["UnrealInteropPath"] = new string(interopPath.Split("\\Content").Last().ToArray()).TrimStart('\\');
+        if (_config["UnrealInteropPath"] == "")
+        {
+            _config["UnrealInteropPath"] = "Content";
+        }
+    }
+
     public void AddInstanced(FileHash meshHash, List<Transform> transforms)
     {
         if (!_config["Instances"].ContainsKey(meshHash))
