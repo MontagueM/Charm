@@ -117,11 +117,11 @@ class MetadataScene
                 AddLight(
                     data.Hash,
                     "Point",
-                    mapLight.Unk10.TagData.Unk40[i].Translation,
-                    mapLight.Unk10.TagData.Unk40[i].Rotation,
+                    mapLight.Lights.TagData.Transforms[i].Translation,
+                    mapLight.Lights.TagData.Transforms[i].Rotation,
                     new Vector2(1,1), //new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
-                    (data.TagData.Unk40.Count > 0 ? data.TagData.Unk40[0].Vec : data.TagData.Unk60[0].Vec),
-                    mapLight.Unk10.TagData.Unk58.TagData.InstanceBounds[i].Corner2.X - mapLight.Unk10.TagData.Unk58.TagData.InstanceBounds[i].Corner1.X);
+                    (data.TagData.Buffer1.Count > 0 ? data.TagData.Buffer1[0].Vec : data.TagData.Buffer2[0].Vec),
+                    mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner2.X - mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner1.X);
             }
         }
         foreach (SMapDecalsResource decal in scene.Decals)
@@ -158,7 +158,7 @@ class MetadataScene
                     new Vector4(entry.Position.X, entry.Position.Y, entry.Position.Z, 1),
                     entry.Quaternion,
                     new Vector2(1, 1),
-                    data.TagData.UnkE8.TagData.Unk40.Count > 0 ? data.TagData.UnkE8.TagData.Unk40[0].Vec : data.TagData.UnkE8.TagData.Unk60[0].Vec);
+                    data.TagData.UnkE8.TagData.Buffer1.Count > 0 ? data.TagData.UnkE8.TagData.Buffer1[0].Vec : data.TagData.UnkE8.TagData.Buffer2[0].Vec);
 
             }
         }
@@ -271,9 +271,9 @@ class MetadataScene
     public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color, float range = 13)
     {
         //Idk how color/intensity is handled, so if its above 1 just bring it down
-        //float R = color.X > 1 ? color.X / 100 : color.X;
-        //float G = color.Y > 1 ? color.Y / 100 : color.Y;
-        //float B = color.Z > 1 ? color.Z / 100 : color.Z;
+        float R = color.X > 1 ? color.X / 100 : color.X;
+        float G = color.Y > 1 ? color.Y / 100 : color.Y;
+        float B = color.Z > 1 ? color.Z / 100 : color.Z;
 
         if (!_config["Lights"].ContainsKey(name))
         {

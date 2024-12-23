@@ -84,6 +84,23 @@ public class StaticPart : MeshPart
         if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999)
         {
             DXBCIOSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
+            int b0Stride = buffers.Vertices0.TagData.Stride;
+            int b1Stride = buffers.Vertices1?.TagData.Stride ?? 0;
+            List<DXBCIOSignature> inputSignatures0 = new();
+            List<DXBCIOSignature> inputSignatures1 = new();
+            int stride = 0;
+            foreach (DXBCIOSignature inputSignature in inputSignatures)
+            {
+                if (stride < b0Stride)
+                    inputSignatures0.Add(inputSignature);
+                else
+                    inputSignatures1.Add(inputSignature);
+
+                if (inputSignature.Semantic == DXBCSemantic.Colour || inputSignature.Semantic == DXBCSemantic.BlendIndices || inputSignature.Semantic == DXBCSemantic.BlendWeight)
+                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+                else
+                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
+            }
 
             List<int> strides = new();
             if (buffers.Vertices0 != null) strides.Add(buffers.Vertices0.TagData.Stride);

@@ -205,6 +205,26 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             if (_tag.Meshes.Count == 0) return new List<StaticPart>();
             SStaticMeshBuffers mesh = _tag.Meshes[0];
 
+            // Get material map
+            int lowestDetail = 0xFF;
+            foreach (var d2Class386D8080 in _tag.MaterialAssignments)
+            {
+                if (d2Class386D8080.RenderStage < lowestDetail)
+                {
+                    lowestDetail = d2Class386D8080.RenderStage;
+                }
+            }
+
+            Dictionary<int, IMaterial> materialMap = new();
+            for (var i = 0; i < _tag.MaterialAssignments.Count; i++)
+            {
+                var entry = _tag.MaterialAssignments[i];
+                if (entry.RenderStage == lowestDetail)
+                {
+                    materialMap.Add(entry.PartIndex, parent.Materials[i].Material);
+                }
+            }
+
             foreach (var (i, staticPartEntry) in staticPartEntries)
             {
                 if (materialMap.ContainsKey(i))
@@ -244,25 +264,7 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                     }
                 }
             }
-            else if (detailLevel == ExportDetailLevel.LeastDetailed)
-            {
-                for (int i = 0; i < _tag.Parts.Count; i++)
-                {
-                    var staticPartEntry = _tag.Parts[i];
-                    if (!staticPartEntry.Lod.IsHighestLevel())
-                    {
-                        staticPartEntries.Add(i, staticPartEntry);
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < _tag.Parts.Count; i++)
-                {
-                    var staticPartEntry = _tag.Parts[i];
-                    staticPartEntries.Add(i, staticPartEntry);
-                }
-            }
+
             return staticPartEntries;
         }
     }

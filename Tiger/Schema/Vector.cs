@@ -254,14 +254,6 @@ public struct Vector4
         W = w / 255.0f;
     }
 
-    public Vector4(float x)
-    {
-        X = x;
-        Y = x;
-        Z = x;
-        W = x;
-    }
-
     public static Vector4 Zero
     {
         get

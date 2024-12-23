@@ -63,16 +63,6 @@ public class FbxExporter : AbstractExporter
                 }
             }
 
-            string outputDirectory = args.OutputDirectory;
-            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
-            {
-                outputDirectory = Path.Join(outputDirectory, scene.Name);
-            }
-            else if (scene.Type is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
-            {
-                outputDirectory = Path.Join(outputDirectory, "Maps");
-            }
-            else if (scene.Type is ExportType.StaticInMap)
             if (scene.Type == ExportType.API)
             {
                 FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);

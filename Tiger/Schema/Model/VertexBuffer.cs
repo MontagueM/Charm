@@ -491,6 +491,10 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
     {
         reader.Seek(vertexIndex * _tag.Stride, SeekOrigin.Begin);
 
+        bool HasWeights = false;
+        IntVector4 WeightValue = new();
+        IntVector4 WeightIndex = new();
+
         foreach (DXBCIOSignature inputSignature in inputSignatures)
         {
             if (inputSignature.ToString().Contains("SV_"))

@@ -63,7 +63,7 @@ public struct ExportMaterial
     public readonly MaterialType Type;
     public readonly bool IsTerrain;
 
-    public ExportMaterial(IMaterial material, MaterialType type, bool isTerrain = false)
+    public ExportMaterial(IMaterial material, MaterialType type = MaterialType.Opaque, bool isTerrain = false)
     {
         Material = material;
         IsTerrain = isTerrain;
@@ -263,14 +263,12 @@ public class ExporterScene
 
         EntityInstances[entity.Hash].Add(new Transform
         {
-            transform = new Transform
-            {
-                Position = dynamicResource.Translation.ToVec3(),
-                Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
-                Quaternion = dynamicResource.Rotation,
-                Scale = new Vector3(dynamicResource.Translation.W, dynamicResource.Translation.W, dynamicResource.Translation.W)
-            };
-        }
+            Position = dynamicResource.Translation.ToVec3(),
+            Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Rotation),
+            Quaternion = dynamicResource.Rotation,
+            Scale = new Vector3(dynamicResource.Translation.W, dynamicResource.Translation.W,
+                dynamicResource.Translation.W)
+        });
         EntityInstances[dynamicResource.GetEntityHash()].Add((Transform)transform);
     }
 
