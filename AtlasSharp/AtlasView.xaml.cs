@@ -262,7 +262,7 @@ public partial class AtlasView : UserControl
 
     public struct InputSignature
     {
-        public InputSemantic Semantic;
+        public DXBCSemantic Semantic;
         public int SemanticIndex;
         public int DxgiFormat;
         public int BufferIndex;
@@ -273,7 +273,7 @@ public partial class AtlasView : UserControl
         public Blob VSBytecode;
         public Blob PSBytecode;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public InputSignature[] InputSignatures;
+        public DXBCSemantic[] InputSignatures;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public Blob[] VSTextures;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
@@ -312,7 +312,7 @@ public partial class AtlasView : UserControl
                 switch (signature.Mask)
                 {
                     case ComponentMask.XYZW:
-                        if (signature.Semantic == InputSemantic.Colour)
+                        if (signature.Semantic == DXBCSemantic.Colour)
                         {
                             InputSignatures[sigIndex].DxgiFormat = (int)DXGI_FORMAT.R8G8B8A8_UNORM;
                             break;
