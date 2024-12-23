@@ -273,7 +273,7 @@ public partial class AtlasView : UserControl
         public Blob VSBytecode;
         public Blob PSBytecode;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public DXBCSemantic[] InputSignatures;
+        public InputSignature[] InputSignatures;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public Blob[] VSTextures;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
