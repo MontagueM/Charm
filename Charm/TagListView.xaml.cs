@@ -102,6 +102,14 @@ public enum ETagListType
     WeaponAudioList,
     [Description("Weapon Audio [Final]")]
     WeaponAudio,
+    [Description("BKHD Group List")]
+    BKHDGroupList,
+    [Description("BKHD Group [Final]")]
+    BKHDGroup,
+    [Description("BKHD Audio List")]
+    BKHDAudioList,
+    [Description("BKHD Audio [Final]")]
+    BKHDAudio,
     [Description("Material List [Packages]")]
     MaterialList,
     [Description("Material [Final]")]
@@ -279,12 +287,6 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.WeaponAudio:
                     await LoadWeaponAudio(contentValue as FileHash);
-                    break;
-                case ETagListType.MaterialList:
-                    await LoadMaterialList();
-                    break;
-                case ETagListType.Material:
-                    LoadMaterial(contentValue as FileHash);
                     break;
                 case ETagListType.MaterialList:
                     await LoadMaterialList();

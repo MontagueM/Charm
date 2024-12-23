@@ -197,11 +197,11 @@ public partial class MapView : UserControl
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
                 {
                     terrainArrangement.Terrain.Load();
-                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
+                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath);
                     if (exportStatics)
                     {
                         ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
+                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath);
                     }
                 }
             });
@@ -274,10 +274,12 @@ public partial class MapView : UserControl
                         {
                             if (File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
 
-                        string staticMeshName = part.Static.Hash.ToString();
-                        ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
-                        var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
-                        staticScene.AddStatic(part.Static.Hash, staticmesh);
+                            string staticMeshName = part.Static.Hash.ToString();
+                            ExporterScene staticScene =
+                                Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
+                            var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
+                            staticScene.AddStatic(part.Static.Hash, staticmesh);
+                        }
                     }
                 }
             });
@@ -348,7 +350,7 @@ public partial class MapView : UserControl
         List<StaticPart> parts = new();
         foreach (var partEntry in terrain.TagData.StaticParts)
         {
-            if (partEntry.DetailLevel == 0)
+            if (partEntry.Lod.DetailLevel == ELodCategory.MainGeom0)
             {
                 var part = terrain.MakePart(partEntry);
                 terrain.TransformPositions(part);

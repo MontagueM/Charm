@@ -178,7 +178,7 @@ public class Terrain : Tag<STerrain>
         return part;
     }
 
-    private void TransformPositions(StaticPart part)
+    public void TransformPositions(StaticPart part)
     {
         Debug.Assert(part.VertexPositions.Count == part.VertexNormals.Count);
         for (int i = 0; i < part.VertexPositions.Count; i++)
@@ -241,7 +241,7 @@ public class Terrain : Tag<STerrain>
         }
     }
 
-    private void TransformTexcoords(StaticPart part)
+    public void TransformTexcoords(StaticPart part)
     {
         for (int i = 0; i < part.VertexTexcoords0.Count; i++)
         {

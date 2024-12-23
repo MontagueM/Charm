@@ -15,6 +15,7 @@ using Tiger.Schema;
 using Tiger.Schema.Activity;
 using Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON;
 using Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601;
+using Tiger.Schema.Activity.DESTINY2_WITCHQUEEN_6307;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Havok;
 using Tiger.Schema.Shaders;
@@ -526,11 +527,6 @@ public partial class ActivityMapEntityView : UserControl
                         ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
                         dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
                         entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
-
-                        if (_config.GetS2VMDLExportEnabled())
-                        {
-                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
-                        }
                     }
                 }
             }
@@ -545,11 +541,6 @@ public partial class ActivityMapEntityView : UserControl
                         ExporterScene dynamicScene = Exporter.Get().CreateScene(entity.Hash, ExportType.EntityInMap);
                         dynamicScene.AddEntity(entry.GetEntityHash(), entity.Load(ExportDetailLevel.MostDetailed), entity.Skeleton?.GetBoneNodes());
                         entity.SaveMaterialsFromParts(dynamicScene, entity.Load(ExportDetailLevel.MostDetailed));
-
-                        if (_config.GetS2VMDLExportEnabled())
-                        {
-                            Source2Handler.SaveEntityVMDL($"{savePath}/Entities", entity);
-                        }
                     }
                     if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapSkyEntResource skyResource)
                     {
@@ -560,18 +551,13 @@ public partial class ActivityMapEntityView : UserControl
 
                             ExporterScene skyScene = Exporter.Get().CreateScene(element.Unk60.TagData.Unk08.Hash, ExportType.EntityInMap);
                             skyScene.AddModel(element.Unk60.TagData.Unk08);
-
-                            if (_config.GetS2VMDLExportEnabled())
-                            {
-                                Source2Handler.SaveEntityVMDL($"{savePath}/Entities", element.Unk60.TagData.Unk08.Hash, element.Unk60.TagData.Unk08.Load(ExportDetailLevel.MostDetailed, null));
-                            }
                         }
                     }
                     if (entry.DataResource.GetValue(dataTable.GetReader()) is SMapTerrainResource terrainArrangement)
                     {
                         ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
                         terrainArrangement.Terrain.Load();
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
+                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath);
                     }
                 });
             }
