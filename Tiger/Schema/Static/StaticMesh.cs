@@ -42,6 +42,7 @@ public class MeshPart
     public List<Vector4> VertexTangents = new List<Vector4>();
     public List<Vector4> VertexColours = new List<Vector4>();
     public IMaterial? Material;
+    public MaterialType MaterialType;
     public int GroupIndex = 0;
 }
 
@@ -65,10 +66,8 @@ public class StaticMesh : Tag<SStaticMesh>
         foreach (var part in parts)
         {
             if (part.Material == null)
-            {
                 continue;
-            }
-            scene.Materials.Add(new ExportMaterial(part.Material));
+            scene.Materials.Add(new ExportMaterial(part.Material, part.MaterialType));
         }
     }
 
@@ -92,14 +91,14 @@ public class StaticMesh : Tag<SStaticMesh>
         {
             if (detailLevel == ExportDetailLevel.MostDetailed)
             {
-                if (decalPartEntry.LODLevel != 1 && decalPartEntry.LODLevel != 2 && decalPartEntry.LODLevel != 10)
+                if (!decalPartEntry.Lod.IsHighestLevel())
                 {
                     continue;
                 }
             }
             else if (detailLevel == ExportDetailLevel.LeastDetailed)
             {
-                if (decalPartEntry.LODLevel == 1 || decalPartEntry.LODLevel == 2 || decalPartEntry.LODLevel == 10)
+                if (decalPartEntry.Lod.IsHighestLevel())
                 {
                     continue;
                 }
@@ -107,6 +106,7 @@ public class StaticMesh : Tag<SStaticMesh>
             StaticPart part = new StaticPart(decalPartEntry);
             part.GetDecalData(decalPartEntry, _tag);
             part.Material = decalPartEntry.Material;
+            part.MaterialType = MaterialType.Transparent;
             parts.Add(part);
         }
 

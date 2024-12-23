@@ -545,7 +545,7 @@ public struct D2Class_CB6E8080  // TODO use DCG to figure out what this is
     [SchemaField(0x1A, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public byte GearDyeChangeColorIndex;   // sbyte gear_dye_change_color_index
-    public ELodCategory LodCategory;
+    public ELod Lod;
     public byte Unk1E;
     public byte LodRun;  // lod_run
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -1765,6 +1765,36 @@ public struct D2Class_029D8080
 public struct D2Class_4D898080
 {
     public StringPointer Name;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "E58C8080", 0xF0)]
+public struct D2Class_E58C8080
+{
+    [SchemaField(0x68)]
+    public DynamicArray<D2Class_56998080> Unk68;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "56998080", 0x18)]
+public struct D2Class_56998080
+{
+    [SchemaField(0x10)]
+    public ResourcePointer Unk10; // C88C8080, C48C8080
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C88C8080", 0x38)]
+public struct D2Class_C88C8080
+{
+}
+
+
+/// <summary>
+/// Datatable for Kill/Turnback Havok volumes?
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "C48C8080", 0x38)]
+public struct D2Class_C48C8080
+{
+    [SchemaField(0x18)]
+    public Tag<SMapDataTable> DataTable;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "E3138080", 0x1190)]

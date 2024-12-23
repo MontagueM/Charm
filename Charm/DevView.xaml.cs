@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using ConcurrentCollections;
+using Arithmic;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -18,6 +19,7 @@ using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
+using Tiger.Schema.Havok;
 using Tiger.Schema.Static;
 
 namespace Charm;
@@ -185,6 +187,37 @@ public partial class DevView : UserControl
             }
             _mainWindow.SetNewestTabSelected();
         }
+        else if (fileMetadata.Type == 27 && fileMetadata.SubType == 0) // Havok
+        {
+            var shapeCollection = DestinyHavok.ReadShapeCollection(FileResourcer.Get().GetFile(hash).GetData());
+            if (shapeCollection is null)
+            {
+                Log.Error("Havok shape collection is null");
+                TagHashBox.Text = "NULL";
+                return;
+            }
+
+            Directory.CreateDirectory($"{ConfigSubsystem.Get().GetExportSavePath()}/HavokShapes");
+            int i = 0;
+            foreach (var shape in shapeCollection)
+            {
+                var vertices = shape.Vertices;
+                var indices = shape.Indices;
+
+                var sb = new StringBuilder();
+                foreach (var vertex in vertices)
+                {
+                    sb.AppendLine($"v {vertex.X} {vertex.Y} {vertex.Z}");
+                }
+                foreach (var index in indices.Chunk(3))
+                {
+                    sb.AppendLine($"f {index[0] + 1} {index[1] + 1} {index[2] + 1}");
+                }
+
+                Console.WriteLine($"Writing 'HavokShapes/shape_{hash}_{i}.obj'");
+                File.WriteAllText($"{ConfigSubsystem.Get().GetExportSavePath()}/HavokShapes/shape_{hash}_{i++}.obj", sb.ToString());
+            }
+        }
         else if ((fileMetadata.Type == 8 || fileMetadata.Type == 16) && fileMetadata.SubType == 0)
         {
             switch (reference.Hash32)
@@ -250,7 +283,7 @@ public partial class DevView : UserControl
                     foreach (DynamicMeshPart part in parts)
                     {
                         if (part.Material == null) continue;
-                        scene.Materials.Add(new ExportMaterial(part.Material));
+                        scene.Materials.Add(new ExportMaterial(part.Material, MaterialType.Opaque));
                     }
                     Exporter.Get().Export();
 
@@ -262,8 +295,8 @@ public partial class DevView : UserControl
                 case 0x8080714F:
                 case 0x80806C81:
                     Terrain terrain = FileResourcer.Get().GetFile<Terrain>(hash);
-                    ExporterScene terrainScene = Exporter.Get().CreateScene(hash, ExportType.Terrain);
-                    terrain.LoadIntoExporter(terrainScene, ConfigSubsystem.Get().GetExportSavePath(), false);
+                    ExporterScene terrainScene = Exporter.Get().CreateScene(hash, ExportType.Static);
+                    terrain.LoadIntoExporter(terrainScene, ConfigSubsystem.Get().GetExportSavePath());
                     Exporter.Get().Export();
                     break;
                 default:

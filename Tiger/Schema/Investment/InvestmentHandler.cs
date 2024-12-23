@@ -843,45 +843,50 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public void ExportShader(InventoryItem item, string savePath, string name, TextureExportFormat outputTextureFormat)
     {
-        if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
+        Dictionary<string, Dye> dyes = new();
+
+        // export all the customDyes
+        if (item.TagData.Unk90.GetValue(item.GetReader()) is D2Class_77738080 translationBlock)
         {
-            Dictionary<string, DyeD1> dyes = new();
-            if (item.TagData.Unk90.GetValue(item.GetReader()) is D2Class_77738080 translationBlock)
+            foreach (var dyeEntry in translationBlock.CustomDyes)
             {
-                foreach (var dyeEntry in translationBlock.CustomDyes)
-                {
-                    DyeD1 dye = GetD1DyeFromIndex(dyeEntry.DyeIndex);
-                    dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
-                    dyes.Add(DyeD1.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
-                }
+                Dye dye = GetDyeFromIndex(dyeEntry.DyeIndex);
+                dye.ExportTextures(savePath + "/Textures/DetailTextures/", outputTextureFormat);
+                dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
             }
-            // appliable shaders in D1 only supported armor
-            AutomatedExporter.SaveD1ShaderInfo(savePath, name, outputTextureFormat, new List<DyeD1> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armor"); // imagine spelling armor with a 'u' (laughs in freedom units)
         }
-        else
-        {
-            Dictionary<string, Dye> dyes = new();
-            // export all the customDyes
-            if (item.TagData.Unk90.GetValue(item.GetReader()) is D2Class_77738080 translationBlock)
-            {
-                foreach (var dyeEntry in translationBlock.CustomDyes)
-                {
-                    Dye dye = GetDyeFromIndex(dyeEntry.DyeIndex);
-                    dye.ExportTextures(savePath + "/Textures", outputTextureFormat);
-                    dyes.Add(Dye.GetChannelName(GetChannelHashFromIndex(dyeEntry.ChannelIndex)), dye);
-                }
-            }
-            // armor
-            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armour");
-            // ghost
-            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["GhostMain"], dyes["GhostHighlights"], dyes["GhostDecals"] }, "_ghost");
-            // ship
-            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ShipUpper"], dyes["ShipDecals"], dyes["ShipLower"] }, "_ship");
-            // sparrow
-            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["SparrowUpper"], dyes["SparrowEngine"], dyes["SparrowLower"] }, "_sparrow");
-            // weapon
-            AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["Weapon1"], dyes["Weapon2"], dyes["Weapon3"] }, "_weapon");
-        }
+
+        // armour
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armour");
+
+        // ghost
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["GhostMain"], dyes["GhostHighlights"], dyes["GhostDecals"] }, "_ghost");
+
+        // ship
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["ShipUpper"], dyes["ShipDecals"], dyes["ShipLower"] }, "_ship");
+
+        // sparrow
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["SparrowUpper"], dyes["SparrowEngine"], dyes["SparrowLower"] }, "_sparrow");
+
+        // weapon
+        AutomatedExporter.SaveBlenderApiFile(savePath, name, outputTextureFormat, new List<Dye> { dyes["Weapon1"], dyes["Weapon2"], dyes["Weapon3"] }, "_weapon");
+
+        // S&Box //
+
+        // armour
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["ArmorPlate"], dyes["ArmorSuit"], dyes["ArmorCloth"] }, "_armour");
+
+        // ghost
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["GhostMain"], dyes["GhostHighlights"], dyes["GhostDecals"] }, "_ghost");
+
+        // ship
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["ShipUpper"], dyes["ShipDecals"], dyes["ShipLower"] }, "_ship");
+
+        // sparrow
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["SparrowUpper"], dyes["SparrowEngine"], dyes["SparrowLower"] }, "_sparrow");
+
+        // weapon
+        SBoxHandler.SaveGearVMAT(savePath, name, outputTextureFormat, new List<Dye> { dyes["Weapon1"], dyes["Weapon2"], dyes["Weapon3"] }, "_weapon");
     }
 }
 

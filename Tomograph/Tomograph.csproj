@@ -31,7 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="AtlasTests.cs" />
       <None Include="PackageResourcerTests.cs" />
     </ItemGroup>
 

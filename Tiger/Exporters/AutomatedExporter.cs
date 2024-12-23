@@ -15,7 +15,7 @@ public class AutomatedExporter
         API
     }
 
-    public static void SaveInteropUnrealPythonFile(string saveDirectory, string meshName, ImportType importType, TextureExportFormat textureFormat, bool bSingleFolder = true)
+        public static void SaveInteropUnrealPythonFile(string saveDirectory, string meshName, ImportType importType, TextureExportFormat textureFormat, bool bSingleFolder = true)
     {
         // Copy and rename file
         File.Copy("Exporters/import_to_ue5.py", $"{saveDirectory}/{meshName}_import_to_ue5.py", true);
@@ -45,39 +45,6 @@ public class AutomatedExporter
         }
         File.WriteAllText($"{saveDirectory}/{meshName}_import_to_ue5.py", textExtensions);
     }
-
-    public static void SaveInteropBlenderPythonFile(string saveDirectory, string meshName, ImportType importType, TextureExportFormat textureFormat)
-    {
-        //Not gonna delete just in case
-
-        //// Copy and rename file
-        //saveDirectory = saveDirectory.Replace("\\", "/");
-        //File.Copy("Exporters/import_to_blender.py", $"{saveDirectory}/{meshName}_import_to_blender.py", true);
-
-        ////Lets just make a py for all exports now because why not
-        //string text = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        //text = text.Replace("HASH", $"{meshName}");
-        //text = text.Replace("OUTPUT_DIR", $"{saveDirectory}");
-        //text = text.Replace("IMPORT_TYPE", $"{importType.ToString().Replace("ImportType.", "")}");
-        //File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", text);
-
-        //// change extension
-        //string textExtensions = File.ReadAllText($"{saveDirectory}/{meshName}_import_to_blender.py");
-        //switch (textureFormat)
-        //{
-        //    case ETextureFormat.PNG:
-        //        textExtensions = textExtensions.Replace("TEX_EXT", ".png");
-        //        break;
-        //    case ETextureFormat.TGA:
-        //        textExtensions = textExtensions.Replace("TEX_EXT", ".tga");
-        //        break;
-        //    default:
-        //        textExtensions = textExtensions.Replace("TEX_EXT", ".dds");
-        //        break;
-        //}
-        //File.WriteAllText($"{saveDirectory}/{meshName}_import_to_blender.py", textExtensions);
-    }
-
 
     public static void SaveBlenderApiFile(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
     {

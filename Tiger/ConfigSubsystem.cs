@@ -26,7 +26,7 @@ public struct Settings
     public CommonSettings Common;
     public UnrealSettings Unreal;
     public BlenderSettings Blender;
-    public Source2Settings Source2;
+    public SBoxSettings SBox;
 }
 
 public class CommonSettings
@@ -54,59 +54,14 @@ public class BlenderSettings
 }
 
 // [ConfigSubsystem]
-public class Source2Settings
+public class SBoxSettings
 {
-    public bool Source2VShaderExportsEnabled { get; set; } = false;
-    public bool Source2VMATExportsEnabled { get; set; } = false;
-    public bool Source2VMDLExportsEnabled { get; set; } = false;
-    public string Source2Path { get; set; } = "";
+    public string SBoxToolsPath { get; set; } = "";
+    public string SBoxContentPath { get; set; } = "";
 }
-
-// class TypeExtensions
-// {
-//     public bool HasAttributeOfType<T>(this Type type) where T : Attribute
-//     {
-//         return type.GetCustomAttributes<T>(true).Any();
-//     }
-// }
 
 public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 {
-    // private Configuration _config =
-    // ConfigurationManager.OpenExeConfiguration(System.Windows.Forms.Application.ExecutablePath);
-
-    // private Dictionary<Type, dynamic?> _settings = new();
-
-
-    // protected override bool Initialise()
-    // {
-    //     // FillSettingsCache();
-    //     return true;
-    // }
-
-    // private void FillSettingsCache()
-    // {
-    //     HashSet<Type> allSettings = AppDomain.CurrentDomain.GetAssemblies()
-    //         .SelectMany(a => a.GetTypes())
-    //         .Where(t => t.HasAttributeOfType<ConfigAttribute>())
-    //         .ToHashSet();
-    //
-    //     foreach (Type settingType in allSettings)
-    //     {
-    //         dynamic? settings = Activator.CreateInstance(settingType);
-    //         _settings.Common.Common.Add(settingType, settings);
-    //     }
-    // }
-
-    // public T? GetSettings<T>() where T : struct
-    // {
-    //     if (_settings.Common.Common.TryGetValue(typeof(T), out dynamic? settings))
-    //     {
-    //         return (T) settings;
-    //     }
-    //
-    //     return null;
-    // }
 
     #region packagesPath
 
@@ -175,71 +130,44 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     #endregion
 
-    #region source2Path
+    #region S&Box
 
-    public string GetSource2Path()
+    public string GetSBoxToolsPath()
     {
-        return _settings.Source2.Source2Path;
+        return _settings.SBox.SBoxToolsPath;
     }
 
-    public bool TrySetSource2Path(string path)
+    public bool TrySetSBoxToolsPath(string path)
     {
         if (path == "")
-        {
             return false;
-        }
 
         if (!path.EndsWith("win64"))
-        {
             return false;
-        }
 
-        _settings.Source2.Source2Path = path;
+        _settings.SBox.SBoxToolsPath = path;
+
+        Save();
+        return true;
+    }
+
+    public string GetSBoxContentPath()
+    {
+        return _settings.SBox.SBoxContentPath;
+    }
+
+    public bool TrySetSBoxContentPath(string path)
+    {
+        if (path == "")
+            return false;
+
+        _settings.SBox.SBoxContentPath = path;
 
         Save();
         return true;
     }
 
     #endregion
-
-    #region source2ExportsEnabled
-
-    public void SetS2ShaderExportEnabled(bool bS2ShaderExportEnabled)
-    {
-        _settings.Source2.Source2VShaderExportsEnabled = bS2ShaderExportEnabled;
-        Save();
-    }
-
-    public bool GetS2ShaderExportEnabled()
-    {
-        return _settings.Source2.Source2VShaderExportsEnabled;
-    }
-
-    //
-    public void SetS2VMATExportEnabled(bool bS2VMATExportEnabled)
-    {
-        _settings.Source2.Source2VMATExportsEnabled = bS2VMATExportEnabled;
-        Save();
-    }
-
-    public bool GetS2VMATExportEnabled()
-    {
-        return _settings.Source2.Source2VMATExportsEnabled;
-    }
-
-    public void SetS2VMDLExportEnabled(bool bS2VMDLExportEnabled)
-    {
-        _settings.Source2.Source2VMDLExportsEnabled = bS2VMDLExportEnabled;
-        Save();
-    }
-
-    public bool GetS2VMDLExportEnabled()
-    {
-        return _settings.Source2.Source2VMDLExportsEnabled;
-    }
-
-    #endregion
-
 
     #region exportSavePath
 
@@ -387,7 +315,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     }
 
     private string _configFilePath = "./config.json";
-    // private Dictionary<string, dynamic?> _settings;
     private Settings _settings;
 
     public ConfigSubsystem()
@@ -425,22 +352,12 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
             Log.Error($"Failed to load config file {_configFilePath}: {e.Message}");
         }
 
-        // bool configIsMissingField = false;
-        // foreach (var field in GetConfigFields())
-        // {
-        //     configIsMissingField |= SetFieldValueFromConfig(field.Key, field, deserializedSettings);
-        // }
-        //
-        // if (configIsMissingField)
-        // {
-        //     return WriteConfig();
-        // }
         if (_settings.Common == null)
         {
             _settings.Common = new CommonSettings();
             _settings.Blender = new BlenderSettings();
+            _settings.SBox = new SBoxSettings();
             _settings.Unreal = new UnrealSettings();
-            _settings.Source2 = new Source2Settings();
             WriteConfig();
         }
 
@@ -484,8 +401,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     private void Save()
     {
         WriteConfig();
-        // _config.Save(ConfigurationSaveMode.Modified);
-        // ConfigurationManager.RefreshSection("appSettings");
     }
 
     protected internal override bool Initialise()

@@ -106,9 +106,9 @@ public enum ETagListType
     BKHDGroupList,
     [Description("BKHD Group [Final]")]
     BKHDGroup,
-    [Description("Weapon Audio List")]
+    [Description("BKHD Audio List")]
     BKHDAudioList,
-    [Description("Weapon Audio [Final]")]
+    [Description("BKHD Audio [Final]")]
     BKHDAudio,
     [Description("Material List [Packages]")]
     MaterialList,

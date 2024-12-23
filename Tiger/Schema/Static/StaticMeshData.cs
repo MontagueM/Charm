@@ -84,6 +84,15 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
                 {
                     StaticPart part = new(staticPartEntry);
                     part.Material = materialMap[i];
+                    part.MaterialType = MaterialType.Opaque;
+
+                    if (part.Material is null ||
+                    part.Material.VertexShader is null ||
+                    part.Material.PixelShader is null ||
+                    part.Material.Unk08 != 1 ||
+                    (part.Material.Unk20 & 0x8000) != 0)
+                        continue;
+
                     part.GetAllData(_tag.Buffers[staticPartEntry.BufferIndex], parent);
                     parts.Add(part);
                 }
@@ -101,7 +110,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
                 for (int i = 0; i < _tag.Parts.Count; i++)
                 {
                     var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel == 1 || staticPartEntry.DetailLevel == 2 || staticPartEntry.DetailLevel == 10)
+                    if (staticPartEntry.Lod.IsHighestLevel())
                     {
                         staticPartEntries.Add(i, staticPartEntry);
                     }
@@ -112,7 +121,7 @@ namespace Tiger.Schema.Static.DESTINY2_SHADOWKEEP_2601
                 for (int i = 0; i < _tag.Parts.Count; i++)
                 {
                     var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.DetailLevel != 1 && staticPartEntry.DetailLevel != 2 && staticPartEntry.DetailLevel != 10)
+                    if (!staticPartEntry.Lod.IsHighestLevel())
                     {
                         staticPartEntries.Add(i, staticPartEntry);
                     }
@@ -196,16 +205,44 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
             if (_tag.Meshes.Count == 0) return new List<StaticPart>();
             SStaticMeshBuffers mesh = _tag.Meshes[0];
 
+            // Get material map
+            int lowestDetail = 0xFF;
+            foreach (var d2Class386D8080 in _tag.MaterialAssignments)
+            {
+                if (d2Class386D8080.RenderStage < lowestDetail)
+                {
+                    lowestDetail = d2Class386D8080.RenderStage;
+                }
+            }
+
+            Dictionary<int, IMaterial> materialMap = new();
+            for (var i = 0; i < _tag.MaterialAssignments.Count; i++)
+            {
+                var entry = _tag.MaterialAssignments[i];
+                if (entry.RenderStage == lowestDetail)
+                {
+                    materialMap.Add(entry.PartIndex, parent.Materials[i].Material);
+                }
+            }
+
             foreach (var (i, staticPartEntry) in staticPartEntries)
             {
-                var material = parent.Materials[i].Material;
-                if (material is null || material.Unk08 != 1)
-                    continue;
+                if (materialMap.ContainsKey(i))
+                {
+                    StaticPart part = new StaticPart(staticPartEntry);
+                    part.Material = materialMap[i];
+                    part.MaterialType = MaterialType.Opaque;
 
-                StaticPart part = new StaticPart(staticPartEntry);
-                part.Material = material;
-                part.GetAllData(mesh, parent);
-                parts.Add(part);
+                    if (part.Material is null ||
+                    part.Material.VertexShader is null ||
+                    part.Material.PixelShader is null ||
+                    part.Material.Unk08 != 1 ||
+                    (part.Material.Unk20 & 0x8000) != 0)
+                        continue;
+
+                    part.GetAllData(mesh, parent);
+                    parts.Add(part);
+                }
             }
             return parts;
         }
@@ -220,26 +257,14 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
                 var part = _tag.Parts[mat.PartIndex];
                 if (part.BufferIndex == 0)
                 {
-                    switch (detailLevel)
+                    var staticPartEntry = _tag.Parts[i];
+                    if (staticPartEntry.Lod.IsHighestLevel())
                     {
-                        case ExportDetailLevel.MostDetailed:
-                            if (part.DetailLevel == 1 || part.DetailLevel == 2 || part.DetailLevel == 10)
-                            {
-                                staticPartEntries.Add(i, part);
-                            }
-                            break;
-                        case ExportDetailLevel.LeastDetailed:
-                            if (part.DetailLevel != 1 && part.DetailLevel != 2 && part.DetailLevel != 10)
-                            {
-                                staticPartEntries.Add(i, part);
-                            }
-                            break;
-                        default:
-                            staticPartEntries.Add(i, part);
-                            break;
+                        staticPartEntries.Add(i, staticPartEntry);
                     }
                 }
             }
+
             return staticPartEntries;
         }
     }

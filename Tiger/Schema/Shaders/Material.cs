@@ -3,44 +3,10 @@ using Tiger.Exporters;
 
 namespace Tiger.Schema.Shaders
 {
-
-    public struct TextureView
+    public enum MaterialType
     {
-        public string Dimension;
-        public string Type;
-        public string Variable;
-        public int Index;
-    }
-
-    public struct Buffer
-    {
-        public string Variable;
-        public string Type;
-        public int Index;
-    }
-
-    public struct Cbuffer
-    {
-        public string Variable;
-        public string Type;
-        public int Count;
-        public int Index;
-    }
-
-    public struct Input
-    {
-        public string Variable;
-        public string Type;
-        public int Index;
-        public string Semantic;
-    }
-
-    public struct Output
-    {
-        public string Variable;
-        public string Type;
-        public int Index;
-        public string Semantic;
+        Opaque,
+        Transparent
     }
 
     public interface IMaterial : ISchema
@@ -50,30 +16,22 @@ namespace Tiger.Schema.Shaders
         public uint Unk10 { get; }
         public uint Unk0C { get; } //Seems to be backface culling
         public ushort Unk20 { get; }
-
-        // Vertex
+        public IEnumerable<STextureTag> EnumerateVSTextures();
+        public IEnumerable<STextureTag> EnumeratePSTextures();
+        public IEnumerable<STextureTag> EnumerateCSTextures();
         public ShaderBytecode? VertexShader { get; }
+        public ShaderBytecode? PixelShader { get; }
+        public ShaderBytecode? ComputeShader { get; }
+        public FileHash PSVector4Container { get; }
         public FileHash VSVector4Container { get; }
+        public List<DirectXSampler> PS_Samplers { get; }
         public List<DirectXSampler> VS_Samplers { get; }
         public DynamicArray<D2Class_09008080> VS_TFX_Bytecode { get; }
         public DynamicArray<Vec4> VS_TFX_Bytecode_Constants { get; }
         public DynamicArray<Vec4> VS_CBuffers { get; }
-        public IEnumerable<STextureTag> EnumerateVSTextures();
-
-        // Pixel
-        public ShaderBytecode? PixelShader { get; }
-        public FileHash PSVector4Container { get; }
-        public List<DirectXSampler> PS_Samplers { get; }
         public DynamicArray<D2Class_09008080> PS_TFX_Bytecode { get; }
         public DynamicArray<Vec4> PS_TFX_Bytecode_Constants { get; }
         public DynamicArray<Vec4> PS_CBuffers { get; }
-        public IEnumerable<STextureTag> EnumeratePSTextures();
-
-        // Compute
-        public IEnumerable<STextureTag> EnumerateCSTextures();
-        public ShaderBytecode? ComputeShader { get; }
-
-
         public static object _lock = new object();
         private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
 
@@ -133,71 +91,54 @@ namespace Tiger.Schema.Shaders
             return hlsl;
         }
 
-        public void SavePixelShader(string saveDirectory, bool isTerrain = false)
+        public void SaveShaders(string saveDirectory, MaterialType type, bool isTerrain = false)
         {
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)
-                return;
-
+            Directory.CreateDirectory($"{saveDirectory}/Shaders");
             if (PixelShader != null && PixelShader.Hash.IsValid())
             {
                 string pixel = Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}");
                 string vertex = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, pixel, false) : "";
-                string vfx = Source2Handler.source2Shaders ? new S2ShaderConverter().HlslToVfx(this, pixel, vertex, isTerrain) : "";
-
-                Directory.CreateDirectory($"{saveDirectory}/Unreal");
-                if (Source2Handler.source2Shaders)
-                {
-                    Directory.CreateDirectory($"{saveDirectory}/Source2");
-                    Directory.CreateDirectory($"{saveDirectory}/Source2/materials");
-                }
+                string vfx = new S2ShaderConverter().HlslToVfx(this, pixel, vertex, type, isTerrain);
 
                 try
                 {
-                    if (usf != String.Empty && !File.Exists($"{saveDirectory}/Unreal/PS_{FileHash}.usf"))
+                    if (vfx != String.Empty)
                     {
-                        File.WriteAllText($"{saveDirectory}/Unreal/PS_{FileHash}.usf", usf);
-                    }
-                    if (vfx != String.Empty && !File.Exists($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader"))
-                    {
-                        File.WriteAllText($"{saveDirectory}/Source2/PS_{PixelShader.Hash}.shader", vfx);
+                        File.WriteAllText($"{saveDirectory}/Shaders/PS_{PixelShader.Hash}.shader", vfx);
+                        if (!isTerrain)
+                            SBoxHandler.SaveVMAT(saveDirectory, FileHash, this);
                     }
                 }
                 catch (IOException)  // threading error
                 {
                 }
-
-                //Need to save vmat after shader has be exported, to check if it exists
-                if (Source2Handler.source2Shaders)
-                    Source2Handler.SaveVMAT(saveDirectory, FileHash, this, isTerrain);
             }
         }
 
         public void SaveVertexShader(string saveDirectory)
         {
-            Directory.CreateDirectory($"{saveDirectory}");
-            if (VertexShader != null && VertexShader.Hash.IsValid())
-            {
-                string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
-                string usf = _config.GetUnrealInteropEnabled() ? new UsfConverter().HlslToUsf(this, hlsl, true) : "";
-                if (usf != String.Empty)
-                {
-                    try
-                    {
-                        File.WriteAllText($"{saveDirectory}/VS_{FileHash}.usf", usf);
-                        Console.WriteLine($"Saved vertex shader {FileHash}");
-                    }
-                    catch (IOException) // threading error
-                    {
-                    }
-                }
-            }
+            //Directory.CreateDirectory($"{saveDirectory}");
+            //if (VertexShader != null && VertexShader.Hash.IsValid())
+            //{
+            //    string hlsl = Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}");
+            //    if (usf != String.Empty)
+            //    {
+            //        try
+            //        {
+            //            File.WriteAllText($"{saveDirectory}/VS_{FileHash}.usf", usf);
+            //            Console.WriteLine($"Saved vertex shader {FileHash}");
+            //        }
+            //        catch (IOException) // threading error
+            //        {
+            //        }
+            //    }
+            //}
         }
 
         //Only useful for saving single material from DevView or MaterialView, better control for output compared to scene system
         public void SaveMaterial(string saveDirectory)
         {
-            var hlslPath = $"{saveDirectory}/Shaders/Raw";
+            var hlslPath = $"{saveDirectory}/Raw_Shaders";
             var texturePath = $"{saveDirectory}/Textures";
             Directory.CreateDirectory(hlslPath);
             Directory.CreateDirectory(texturePath);
@@ -205,12 +146,12 @@ namespace Tiger.Schema.Shaders
             if (PixelShader != null)
             {
                 Decompile(PixelShader.GetBytecode(), $"ps{PixelShader.Hash}", hlslPath);
-                SavePixelShader($"{saveDirectory}/Shaders/");
+                SaveShaders($"{saveDirectory}", MaterialType.Opaque);
             }
             if (VertexShader != null)
             {
                 Decompile(VertexShader.GetBytecode(), $"vs{VertexShader.Hash}", hlslPath);
-                SaveVertexShader($"{saveDirectory}/Shaders/");
+                SaveVertexShader($"{saveDirectory}");
             }
 
             foreach (STextureTag texture in EnumerateVSTextures())
@@ -226,6 +167,10 @@ namespace Tiger.Schema.Shaders
                     continue;
 
                 texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+                if (texture.Texture.IsCubemap())
+                {
+                    SBoxHandler.SaveVTEX(texture.Texture, $"{saveDirectory}/Textures");
+                }
             }
         }
 
@@ -255,57 +200,6 @@ namespace Tiger.Schema.Shaders
 //     public List<ConstantBuffer> VSConstantBuffers;
 // }
 
-namespace Tiger.Schema.Shaders.DESTINY1_RISE_OF_IRON
-{
-    public class Material : Tag<SMaterial_ROI>, IMaterial
-    {
-        public FileHash FileHash => Hash;
-        public uint Unk08 => _tag.Unk08;
-        public uint Unk10 => _tag.Unk10;
-        public uint Unk0C => _tag.Unk0C;
-        public ushort Unk20 => _tag.Unk20;
-        // Leaving shaders null until they (if ever) can be decompiled to hlsl
-        public ShaderBytecode VertexShader => _tag.VertexShader; // null;
-        public ShaderBytecode PixelShader => _tag.PixelShader; // null;
-        public ShaderBytecode ComputeShader => null;
-        public FileHash PSVector4Container => _tag.PSVector4Container;
-        public FileHash VSVector4Container => _tag.VSVector4Container;
-        public DynamicArray<D2Class_09008080> VS_TFX_Bytecode => _tag.VS_TFX_Bytecode;
-        public DynamicArray<Vec4> VS_TFX_Bytecode_Constants => _tag.VS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> VS_CBuffers => _tag.VS_CBuffers;
-        public DynamicArray<D2Class_09008080> PS_TFX_Bytecode => _tag.PS_TFX_Bytecode;
-        public DynamicArray<Vec4> PS_TFX_Bytecode_Constants => _tag.PS_TFX_Bytecode_Constants;
-        public DynamicArray<Vec4> PS_CBuffers => _tag.PS_CBuffers;
-        public List<DirectXSampler> VS_Samplers => _tag.VS_Samplers.Select(x => x.Samplers).ToList();
-        public List<DirectXSampler> PS_Samplers => _tag.PS_Samplers.Select(x => x.Samplers).ToList();
-
-        public IEnumerable<STextureTag> EnumerateVSTextures()
-        {
-            foreach (STextureTag texture in _tag.VSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumeratePSTextures()
-        {
-            foreach (STextureTag texture in _tag.PSTextures)
-            {
-                yield return texture;
-            }
-        }
-
-        public IEnumerable<STextureTag> EnumerateCSTextures()
-        {
-            return null;
-        }
-
-        public Material(FileHash fileHash) : base(fileHash)
-        {
-        }
-    }
-}
-
 namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
 {
     public class Material : Tag<SMaterial_SK>, IMaterial
@@ -314,7 +208,7 @@ namespace Tiger.Schema.Shaders.DESTINY2_SHADOWKEEP_2601
         public uint Unk08 => _tag.Unk08;
         public uint Unk10 => _tag.Unk10;
         public uint Unk0C => _tag.Unk0C;
-        public ushort Unk20 => _tag.Unk18;
+        public ushort Unk20 => _tag.Unk20;
         public ShaderBytecode VertexShader => _tag.VertexShader;
         public ShaderBytecode PixelShader => _tag.PixelShader;
         public ShaderBytecode ComputeShader => _tag.ComputeShader;
@@ -463,34 +357,26 @@ namespace Tiger.Schema.Shaders.DESTINY2_WITCHQUEEN_6307
         public Material(FileHash fileHash) : base(fileHash)
         {
         }
-    }
-}
 
-//TODO: Move this
-public enum TfxRenderStage
-{
-    GenerateGbuffer = 0,
-    Decals = 1,
-    InvestmentDecals = 2,
-    ShadowGenerate = 3,
-    LightingApply = 4,
-    LightProbeApply = 5,
-    DecalsAdditive = 6,
-    Transparents = 7,
-    Distortion = 8,
-    LightShaftOcclusion = 9,
-    SkinPrepass = 10,
-    LensFlares = 11,
-    DepthPrepass = 12,
-    WaterReflection = 13,
-    PostprocessTransparentStencil = 14,
-    Impulse = 15,
-    Reticle = 16,
-    WaterRipples = 17,
-    MaskSunLight = 18,
-    Volumetrics = 19,
-    Cubemaps = 20,
-    PostprocessScreen = 21,
-    WorldForces = 22,
-    ComputeSkinning = 23,
+        // public void SaveComputeShader(string saveDirectory)
+        // {
+        //     Directory.CreateDirectory($"{saveDirectory}");
+        //     if (_tag.ComputeShader != null && !File.Exists($"{saveDirectory}/CS_{Hash}.usf"))
+        //     {
+        //         string hlsl = Decompile(_tag.ComputeShader.GetBytecode(), "cs");
+        //         string usf = new UsfConverter().HlslToUsf(this, hlsl, false);
+        //         if (usf != String.Empty)
+        //         {
+        //             try
+        //             {
+        //                 File.WriteAllText($"{saveDirectory}/CS_{Hash}.usf", usf);
+        //                 Console.WriteLine($"Saved compute shader {Hash}");
+        //             }
+        //             catch (IOException)  // threading error
+        //             {
+        //             }
+        //         }
+        //     }
+        // }
+    }
 }

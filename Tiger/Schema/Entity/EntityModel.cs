@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+using System;
+using System.Diagnostics;
 using Arithmic;
 using Tiger.Schema.Shaders;
 
@@ -70,11 +71,11 @@ public class EntityModel : Tag<SEntityModel>
                 }
                 else
                 {
-                    if (eDetailLevel == ExportDetailLevel.MostDetailed && part.LodCategory is ELodCategory.MainGeom0 or ELodCategory.GripStock0 or ELodCategory.Stickers0 or ELodCategory.InternalGeom0 or ELodCategory.Detail0)
+                    if (eDetailLevel == ExportDetailLevel.MostDetailed && part.Lod.IsHighestLevel())
                     {
                         parts[meshIndex].Add(partIndex++, part);
                     }
-                    else if (eDetailLevel == ExportDetailLevel.LeastDetailed && part.LodCategory == ELodCategory.LowPolyGeom3)
+                    else if (eDetailLevel == ExportDetailLevel.LeastDetailed && !part.Lod.IsHighestLevel())
                     {
                         parts[meshIndex].Add(partIndex++, part);
                     }
@@ -115,8 +116,8 @@ public class EntityModel : Tag<SEntityModel>
                 DynamicMeshPart dynamicMeshPart = new(part, parentResource)
                 {
                     Index = i,
-                    GroupIndex = part.ExternalIdentifier,//partGroups[i],
-                    LodCategory = part.LodCategory,
+                    GroupIndex = partGroups[i],
+                    LodCategory = part.Lod.DetailLevel,
                     bAlphaClip = (part.GetFlags() & 0x8) != 0,
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex,
                     HasSkeleton = hasSkeleton,
@@ -128,33 +129,29 @@ public class EntityModel : Tag<SEntityModel>
                 if (Strategy.CurrentStrategy > TigerStrategy.DESTINY1_RISE_OF_IRON)
                 {
                     if (dynamicMeshPart.Material is null ||
-                    dynamicMeshPart.Material.VertexShader is null ||
-                    dynamicMeshPart.Material.PixelShader is null ||
-                    dynamicMeshPart.Material.Unk08 != 1 ||
-                    (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
+                        dynamicMeshPart.Material.VertexShader is null ||
+                        dynamicMeshPart.Material.PixelShader is null ||
+                        dynamicMeshPart.Material.Unk08 != 1 ||
+                        (dynamicMeshPart.Material.Unk20 & 0x8000) != 0)
                         continue;
                 }
                 else
                 {
                     if (dynamicMeshPart.Material is null ||
-                    dynamicMeshPart.Material.VertexShader is null ||
-                    dynamicMeshPart.Material.PixelShader is null) // || dynamicMeshPart.Material.Unk08 != 1)
+                        dynamicMeshPart.Material.VertexShader is null ||
+                        dynamicMeshPart.Material.PixelShader is null) // || dynamicMeshPart.Material.Unk08 != 1)
                         continue;
 
                     //if (dynamicMeshPart.Material.Unk08 != 1)
                     //    Console.WriteLine($"{dynamicMeshPart.Material.FileHash}");
                 }
-
                 dynamicMeshPart.GetAllData(mesh, _tag);
                 parts.Add(dynamicMeshPart);
             }
-
             meshIndex++;
         }
-
         return parts;
     }
-
 }
 
 public class DynamicMeshPart : MeshPart
@@ -212,20 +209,20 @@ public class DynamicMeshPart : MeshPart
 
         if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999 && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
         {
-            InputSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
+            DXBCIOSignature[] inputSignatures = Material.VertexShader.InputSignatures.ToArray();
             int b0Stride = mesh.Vertices1.TagData.Stride;
             int b1Stride = mesh.Vertices2?.TagData.Stride ?? 0;
-            List<InputSignature> inputSignatures0 = new();
-            List<InputSignature> inputSignatures1 = new();
+            List<DXBCIOSignature> inputSignatures0 = new();
+            List<DXBCIOSignature> inputSignatures1 = new();
             int stride = 0;
-            foreach (InputSignature inputSignature in inputSignatures)
+            foreach (DXBCIOSignature inputSignature in inputSignatures)
             {
                 if (stride < b0Stride)
                     inputSignatures0.Add(inputSignature);
                 else
                     inputSignatures1.Add(inputSignature);
 
-                if (inputSignature.Semantic == InputSemantic.Colour || inputSignature.Semantic == InputSemantic.BlendIndices || inputSignature.Semantic == InputSemantic.BlendWeight)
+                if (inputSignature.Semantic == DXBCSemantic.Colour || inputSignature.Semantic == DXBCSemantic.BlendIndices || inputSignature.Semantic == DXBCSemantic.BlendWeight)
                     stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
                 else
                     stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Tiger.Exporters;
+using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema.Entity;
 
@@ -119,7 +120,7 @@ public class Entity : Tag<SEntity>
         foreach (var dynamicPart in dynamicParts)
         {
             if (dynamicPart.Material == null) continue;
-            scene.Materials.Add(new ExportMaterial(dynamicPart.Material));
+            scene.Materials.Add(new ExportMaterial(dynamicPart.Material, MaterialType.Opaque));
         }
     }
 

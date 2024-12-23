@@ -16,50 +16,76 @@ public class FbxExporter : AbstractExporter
     {
         foreach (ExporterScene scene in args.Scenes)
         {
-            FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
+            string outputDirectory = args.OutputDirectory;
+            switch (scene.Type)
+            {
+                case ExportType.Static:
+                case ExportType.Entity:
+                case ExportType.API:
+                    outputDirectory = Path.Join(outputDirectory, scene.Name);
+                    break;
+                case ExportType.StaticInMap:
+                    outputDirectory = Path.Join(outputDirectory, "Maps", "Models", "Statics");
+                    break;
+                case ExportType.EntityInMap:
+                    outputDirectory = Path.Join(outputDirectory, "Maps", "Models", "Entities");
+                    break;
+                case ExportType.Terrain:
+                    outputDirectory = Path.Join(outputDirectory, "Maps", "Models", "Terrain");
+                    break;
+                default:
+                    outputDirectory = Path.Join(outputDirectory, "Maps");
+                    break;
+            }
 
             foreach (ExporterMesh mesh in scene.StaticMeshes)
             {
+                FbxScene fbxScene = FbxScene.Create(_manager, mesh.Hash);
                 AddMesh(fbxScene, mesh);
+                ExportScene(fbxScene, Path.Join(outputDirectory, mesh.Hash));
+                SBoxHandler.SaveStaticVMDL(outputDirectory, mesh);
+
             }
-            foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
+            foreach (ExporterMesh mesh in scene.TerrainMeshes)
             {
-                if (scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) != 1)
-                {
-                    var a = 0;
-                }
-                // Debug.Assert(scene.StaticMeshes.Count(s => s.Hash == meshInstance.Key) == 1);
-                AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
+                FbxScene fbxScene = FbxScene.Create(_manager, mesh.Hash);
+                AddMesh(fbxScene, mesh);
+                ExportScene(fbxScene, Path.Join(outputDirectory, mesh.Hash));
             }
             foreach (ExporterEntity entity in scene.Entities)
             {
-                AddEntity(fbxScene, entity);
+                if (scene.Type != ExportType.API)
+                {
+                    FbxScene fbxScene = FbxScene.Create(_manager, entity.Mesh.Hash);
+                    AddEntity(fbxScene, entity);
+                    ExportScene(fbxScene, Path.Join(outputDirectory, entity.Mesh.Hash));
+                    SBoxHandler.SaveEntityVMDL(outputDirectory, entity);
+                }
             }
 
-            foreach (var p in scene.EntityPoints)
+            if (scene.Type == ExportType.API)
             {
-                AddDynamicPoint(fbxScene, p);
+                FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
+                foreach (ExporterEntity entity in scene.Entities)
+                {
+                    AddEntity(fbxScene, entity);
+                }
+                ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
+                //SBoxHandler.SaveEntityVMDL(outputDirectory, entity);
             }
 
-            string outputDirectory = args.OutputDirectory;
-            if (scene.Type is ExportType.Static or ExportType.Entity or ExportType.API or ExportType.D1API)
-            {
-                outputDirectory = Path.Join(outputDirectory, scene.Name);
-            }
-            else if (scene.Type is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
-            {
-                outputDirectory = Path.Join(outputDirectory, "Maps");
-            }
-            else if (scene.Type is ExportType.StaticInMap)
-            {
-                outputDirectory = Path.Join(outputDirectory, "Maps", "Statics");
-            }
-            else if (scene.Type is ExportType.EntityInMap)
-            {
-                outputDirectory = Path.Join(outputDirectory, "Maps", "Entities");
-            }
-
-            ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
+            //foreach (var meshInstance in scene.ArrangedStaticMeshInstances)
+            //{
+            //    FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
+            //    AddInstancedMesh(fbxScene, scene.StaticMeshes.First(s => s.Hash == meshInstance.Key).Parts, meshInstance.Value);
+            //    ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
+            //}
+            //foreach (var p in scene.EntityPoints)
+            //{
+            //    FbxScene fbxScene = FbxScene.Create(_manager, scene.Name);
+            //    AddDynamicPoint(fbxScene, p);
+            //    ExportScene(fbxScene, Path.Join(outputDirectory, scene.Name));
+            //}
         }
     }
 
@@ -98,7 +124,7 @@ public class FbxExporter : AbstractExporter
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_ANIMATION, true);
         _manager.GetIOSettings().SetBoolProp(FbxWrapperNative.EXP_FBX_GLOBAL_SETTINGS, true);
         var exporter = Internal.Fbx.FbxExporter.Create(_manager, "");
-        exporter.Initialize(outputPath + ".fbx", -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient                                         
+        exporter.Initialize(outputPath + ".fbx", -1);  // -1 == detect via extension ie binary not ascii, binary is more space efficient
         if (fbxScene.GetRootNode().GetChildCount() > 0) // Only export if theres actually something to export
             exporter.Export(fbxScene);
         exporter.Destroy();

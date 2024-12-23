@@ -9,7 +9,6 @@ public class MaterialExporter : AbstractExporter
     {
         ConcurrentHashSet<Texture> mapTextures = new();
         ConcurrentHashSet<ExportMaterial> mapMaterials = new();
-        bool saveShaders = ConfigSubsystem.Get().GetUnrealInteropEnabled() || ConfigSubsystem.Get().GetS2ShaderExportEnabled();
 
         Parallel.ForEach(args.Scenes, scene =>
         {
@@ -36,12 +35,9 @@ public class MaterialExporter : AbstractExporter
                         textures.Add(texture.Texture);
                     }
 
-                    if (saveShaders)
-                    {
-                        string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Shaders";
-                        material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
-                        material.Material.SaveVertexShader(shaderSaveDirectory);
-                    }
+                    string shaderSaveDirectory = $"{args.OutputDirectory}/{scene.Name}";
+                    material.Material.SaveShaders(shaderSaveDirectory, material.Type, material.IsTerrain);
+                    material.Material.SaveVertexShader(shaderSaveDirectory);
                 }
 
                 string textureSaveDirectory = $"{args.OutputDirectory}/{scene.Name}/Textures";
@@ -80,17 +76,17 @@ public class MaterialExporter : AbstractExporter
             if (texture is null)
                 continue;
             texture.SavetoFile($"{textureSaveDirectory}/{texture.Hash}");
+            if (texture.IsCubemap())
+            {
+                SBoxHandler.SaveVTEX(texture, textureSaveDirectory);
+            }
         }
 
-        if (saveShaders)
+        string shaderSaveDirectory = $"{args.OutputDirectory}/Maps";
+        Directory.CreateDirectory(shaderSaveDirectory);
+        foreach (ExportMaterial material in mapMaterials)
         {
-            string shaderSaveDirectory = $"{args.OutputDirectory}/Maps/Shaders";
-            Directory.CreateDirectory(shaderSaveDirectory);
-            foreach (ExportMaterial material in mapMaterials)
-            {
-                material.Material.SavePixelShader(shaderSaveDirectory, material.IsTerrain);
-                material.Material.SaveVertexShader(shaderSaveDirectory);
-            }
+            material.Material.SaveShaders(shaderSaveDirectory, material.Type, material.IsTerrain);
         }
     }
 }

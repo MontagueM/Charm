@@ -58,15 +58,53 @@ public partial class MaterialView : UserControl
 
         if (material.VertexShader is not null)
         {
-            VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"ps{material.VertexShader.Hash}");
+            VertexShader.Text = material.Decompile(material.VertexShader.GetBytecode(), $"vs{material.VertexShader.Hash}");
             VS_CBufferList.ItemsSource = GetCBufferDetails(material, true);
+
+            var vs_test = material.VertexShader?.Resources;
+            Console.WriteLine($"----Vertex----");
+            foreach (var vsr in vs_test)
+            {
+                Console.WriteLine($"Type: {vsr.ResourceType} | Index:{vsr.Index} | Count: {vsr.Count}");
+            }
+
+            var vs_in = material.VertexShader.InputSignatures;
+            foreach (var b in vs_in)
+            {
+                Console.WriteLine($"v{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
+            }
+
+            var vs_out = material.VertexShader.OutputSignatures;
+            foreach (var b in vs_out)
+            {
+                Console.WriteLine($"o{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
+            }
         }
 
         if (material.PixelShader is not null)
         {
             PixelShader.Text = material.Decompile(material.PixelShader.GetBytecode(), $"ps{material.PixelShader.Hash}");
-            PS_CBufferList.ItemsSource = GetCBufferDetails(material); 
-        } 
+            PS_CBufferList.ItemsSource = GetCBufferDetails(material);
+
+            var ps_test = material.PixelShader?.Resources;
+            Console.WriteLine($"----Pixel----");
+            foreach (var a in ps_test)
+            {
+                Console.WriteLine($"Type: {a.ResourceType} | Index:{a.Index} | Count: {a.Count}");
+            }
+
+            var ps_in = material.PixelShader.InputSignatures;
+            foreach (var b in ps_in)
+            {
+                Console.WriteLine($"v{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
+            }
+
+            var ps_out = material.PixelShader.OutputSignatures;
+            foreach (var b in ps_out)
+            {
+                Console.WriteLine($"o{b.RegisterIndex}: {b.ToString()}{b.SemanticIndex}.{b.Mask}");
+            }
+        }
     }
 
     public List<TextureDetail> GetTextureDetails(IMaterial material)
@@ -159,7 +197,7 @@ public partial class MaterialView : UserControl
                 {
                     data.Add(vec.Vec);
                 }
-            }       
+            }
         }
         else
         {
@@ -202,13 +240,13 @@ public partial class MaterialView : UserControl
             Dispatcher.Invoke(() =>
             {
                 TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode : Material.VS_TFX_Bytecode));
-                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants);
+                var bytecode_hlsl = bytecode.Evaluate(dc.Stage == CBufferDetail.Shader.Pixel ? Material.PS_TFX_Bytecode_Constants : Material.VS_TFX_Bytecode_Constants, true);
 
                 ConcurrentBag<CBufferDataDetail> items = new ConcurrentBag<CBufferDataDetail>();
                 for (int i = 0; i < dc.Data.Count; i++)
                 {
                     CBufferDataDetail dataEntry = new();
-                    
+
                     dataEntry.Index = i;
                     if(bytecode_hlsl.ContainsKey(i))
                         dataEntry.Vector = $"Bytecode Assigned";

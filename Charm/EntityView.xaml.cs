@@ -137,10 +137,6 @@ public partial class EntityView : UserControl
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
                 entity.SaveTexturePlates(savePath);
             }
-            if (ConfigSubsystem.Get().GetS2VMDLExportEnabled())
-            {
-                Source2Handler.SaveEntityVMDL($"{savePath}", entity);
-            }
         }
 
         if (exportType == ExportTypeFlag.Full)
@@ -167,7 +163,7 @@ public partial class EntityView : UserControl
         EntitySkeleton overrideSkeleton = null;
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent 
+            Entity playerBase = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked("0000670F342E9595"))); // 64 bit more permanent
             overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
         else if (Strategy.CurrentStrategy == TigerStrategy.DESTINY1_RISE_OF_IRON)

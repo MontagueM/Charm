@@ -41,11 +41,6 @@ class MetadataScene
         ConcurrentDictionary<string, ConcurrentBag<string>> terrainDyemaps = new ConcurrentDictionary<string, ConcurrentBag<string>>();
         _config.TryAdd("TerrainDyemaps", terrainDyemaps);
 
-        if (ConfigSubsystem.Get().GetUnrealInteropEnabled())
-        {
-            SetUnrealInteropPath(ConfigSubsystem.Get().GetUnrealInteropPath());
-        }
-
         SetType(scene.Type.ToString());
         _exportType = scene.Type;
         SetMeshName(scene.Name);
@@ -55,9 +50,19 @@ class MetadataScene
             foreach (var part in mesh.Parts)
             {
                 if (part.Material != null)
-                {
                     AddMaterial(part.Material);
-                }
+
+                AddPart(part, part.Name);
+            }
+        }
+
+        foreach (var mesh in scene.TerrainMeshes)
+        {
+            foreach (var part in mesh.Parts)
+            {
+                if (part.Material != null)
+                    AddMaterial(part.Material);
+
                 AddPart(part, part.Name);
             }
         }
@@ -88,13 +93,13 @@ class MetadataScene
             AddTextureToMaterial(texture.Material, texture.Index, texture.Texture);
         }
 
-        foreach (CubemapResource cubemap in scene.Cubemaps)
+        foreach (var cubemap in scene.Cubemaps)
         {
-            AddCubemap(cubemap.CubemapName,
-                cubemap.CubemapSize.ToVec3(),
-                cubemap.CubemapRotation,
-                cubemap.CubemapPosition.ToVec3(),
-                cubemap.CubemapTexture != null ? cubemap.CubemapTexture.Hash : "");
+            AddCubemap(cubemap.Key.CubemapName,
+                cubemap.Key.CubemapSize.ToVec3(),
+                cubemap.Value.Quaternion,
+                cubemap.Value.Position,
+                cubemap.Key.CubemapTexture != null ? cubemap.Key.CubemapTexture.Hash : "");
         }
         foreach (var mapLight in scene.MapLights)
         {
@@ -114,8 +119,8 @@ class MetadataScene
                     "Point",
                     mapLight.Lights.TagData.Transforms[i].Translation,
                     mapLight.Lights.TagData.Transforms[i].Rotation,
-                    new Vector2(1, 1),
-                    color,
+                    new Vector2(1,1), //new Vector2(mapLight.Unk10.TagData.Unk30[i].UnkA0.W, mapLight.Unk10.TagData.Unk30[i].UnkB0.W), //Not right
+                    (data.TagData.Buffer1.Count > 0 ? data.TagData.Buffer1[0].Vec : data.TagData.Buffer2[0].Vec),
                     mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner2.X - mapLight.Lights.TagData.Bounds.TagData.InstanceBounds[i].Corner1.X);
             }
         }
@@ -146,13 +151,15 @@ class MetadataScene
         {
             foreach (var entry in mapLight.Value)
             {
+                var data = FileResourcer.Get().GetSchemaTag<D2Class_716C8080>(mapLight.Key);
                 AddLight(
                     mapLight.Key,
                     "Spot",
                     new Vector4(entry.Position.X, entry.Position.Y, entry.Position.Z, 1),
                     entry.Quaternion,
-                    new Vector2(1.0, 1.0),
-                    new Vector4(1.0, 1.0, 1.0, 1.0));
+                    new Vector2(1, 1),
+                    data.TagData.UnkE8.TagData.Buffer1.Count > 0 ? data.TagData.UnkE8.TagData.Buffer1[0].Vec : data.TagData.UnkE8.TagData.Buffer2[0].Vec);
+
             }
         }
 
@@ -264,9 +271,9 @@ class MetadataScene
     public void AddLight(string name, string type, Vector4 translation, Vector4 quatRotation, Vector2 size, Vector4 color, float range = 13)
     {
         //Idk how color/intensity is handled, so if its above 1 just bring it down
-        //float R = color.X > 1 ? color.X / 100 : color.X;
-        //float G = color.Y > 1 ? color.Y / 100 : color.Y;
-        //float B = color.Z > 1 ? color.Z / 100 : color.Z;
+        float R = color.X > 1 ? color.X / 100 : color.X;
+        float G = color.Y > 1 ? color.Y / 100 : color.Y;
+        float B = color.Z > 1 ? color.Z / 100 : color.Z;
 
         if (!_config["Lights"].ContainsKey(name))
         {
@@ -278,7 +285,7 @@ class MetadataScene
             Translation = new[] { translation.X, translation.Y, translation.Z },
             Rotation = new[] { quatRotation.X, quatRotation.Y, quatRotation.Z, quatRotation.W },
             Size = new[] { size.X, size.Y },
-            Color = new[] { color.X, color.Y, color.Z },
+            Color = new[] { R, G, B },
             Range = range
         });
     }
@@ -323,29 +330,29 @@ class MetadataScene
         {
             path = Path.Join(path, _config["MeshName"]);
         }
-        else if (_exportType is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints)
+        else //if (_exportType is ExportType.Map or ExportType.Terrain or ExportType.EntityPoints or ExportType.MapResource)
         {
             path = Path.Join(path, "Maps");
         }
-        else if (_exportType is ExportType.StaticInMap or ExportType.EntityInMap)
-        {
-            return;
-        }
+        //else if (_exportType is ExportType.StaticInMap or ExportType.EntityInMap)
+        //{
+        //    return;
+        //}
 
-        // If theres only 1 part, we need to rename it + the instance to the name of the mesh (unreal imports to fbx name if only 1 mesh inside)
-        if (_config["Parts"].Count == 1)
-        {
-            var part = _config["Parts"][_config["Parts"].Keys[0]];
-            //I'm not sure what to do if it's 0, so I guess I'll leave that to fix it in the future if something breakes.
-            if (_config["Instances"].Count != 0)
-            {
-                var instance = _config["Instances"][_config["Instances"].Keys[0]];
-                _config["Instances"] = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
-                _config["Instances"][_config["MeshName"]] = instance;
-            }
-            _config["Parts"] = new ConcurrentDictionary<string, string>();
-            _config["Parts"][_config["MeshName"]] = part;
-        }
+        //// If theres only 1 part, we need to rename it + the instance to the name of the mesh (unreal imports to fbx name if only 1 mesh inside)
+        //if (_config["Parts"].Count == 1)
+        //{
+        //    var part = _config["Parts"][_config["Parts"].Keys[0]];
+        //    //I'm not sure what to do if it's 0, so I guess I'll leave that to fix it in the future if something breakes.
+        //    if (_config["Instances"].Count != 0)
+        //    {
+        //        var instance = _config["Instances"][_config["Instances"].Keys[0]];
+        //        _config["Instances"] = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
+        //        _config["Instances"][_config["MeshName"]] = instance;
+        //    }
+        //    _config["Parts"] = new ConcurrentDictionary<string, string>();
+        //    _config["Parts"][_config["MeshName"]] = part;
+        //}
 
 
         //this just sorts the "instances" part of the cfg so its ordered by scale
@@ -396,6 +403,7 @@ class MetadataScene
         public float[] Size;
         public float[] Color;
         public float Range;
+        public bool Shadowing;
     }
     private struct JsonDecal
     {

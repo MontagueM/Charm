@@ -23,8 +23,6 @@ public partial class MapView : UserControl
     private static MainWindow _mainWindow = null;
 
     private static ConfigSubsystem _config = CharmInstance.GetSubsystem<ConfigSubsystem>();
-
-    private static bool source2Models = _config.GetS2VMDLExportEnabled();
     private static bool exportStatics = _config.GetIndvidualStaticsEnabled();
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -155,7 +153,7 @@ public partial class MapView : UserControl
 
     public static void ExportFullMap(Tag<SMapContainer> map, ExportTypeFlag exportTypeFlag)
     {
-        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.Map);
+        ExporterScene scene = Exporter.Get().CreateScene(map.Hash.ToString(), ExportType.StaticInMap);
 
         string meshName = map.Hash.ToString();
         string savePath = _config.GetExportSavePath() + $"/{meshName}";
@@ -199,11 +197,11 @@ public partial class MapView : UserControl
                 if (entry.DataResource.GetValue(data.MapDataTable.GetReader()) is SMapTerrainResource terrainArrangement)  // Terrain
                 {
                     terrainArrangement.Terrain.Load();
-                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled());
+                    terrainArrangement.Terrain.LoadIntoExporter(scene, savePath);
                     if (exportStatics)
                     {
                         ExporterScene staticScene = Exporter.Get().CreateScene($"{terrainArrangement.Terrain.Hash}_Terrain", ExportType.StaticInMap);
-                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath, _config.GetUnrealInteropEnabled() || _config.GetS2ShaderExportEnabled(), true);
+                        terrainArrangement.Terrain.LoadIntoExporter(staticScene, savePath);
                     }
                 }
             });
@@ -277,14 +275,10 @@ public partial class MapView : UserControl
                             if (File.Exists($"{savePath}/Statics/{part.Static.Hash}.fbx")) continue;
 
                             string staticMeshName = part.Static.Hash.ToString();
-                            ExporterScene staticScene = Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
+                            ExporterScene staticScene =
+                                Exporter.Get().CreateScene(staticMeshName, ExportType.StaticInMap);
                             var staticmesh = part.Static.Load(ExportDetailLevel.MostDetailed);
                             staticScene.AddStatic(part.Static.Hash, staticmesh);
-
-                            if (source2Models)
-                            {
-                                Source2Handler.SaveStaticVMDL($"{savePath}/Statics", staticMeshName, staticmesh);
-                            }
                         }
                     }
                 }
@@ -356,7 +350,7 @@ public partial class MapView : UserControl
         List<StaticPart> parts = new();
         foreach (var partEntry in terrain.TagData.StaticParts)
         {
-            if (partEntry.DetailLevel == 0)
+            if (partEntry.Lod.DetailLevel == ELodCategory.MainGeom0)
             {
                 var part = terrain.MakePart(partEntry);
                 terrain.TransformPositions(part);

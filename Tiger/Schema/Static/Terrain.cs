@@ -15,35 +15,20 @@ public class Terrain : Tag<STerrain>
     }
 
     // To test use edz.strike_hmyn and alleys_a adf6ae80
-    public void LoadIntoExporter(ExporterScene scene, string saveDirectory, bool bSaveShaders, bool exportStatic = false)
+    public void LoadIntoExporter(ExporterScene scene, string saveDirectory)
     {
         // Uses triangle strip + only using first set of vertices and indices
         Dictionary<StaticPart, IMaterial> parts = new Dictionary<StaticPart, IMaterial>();
         List<Texture> dyeMaps = new List<Texture>();
-        foreach (var partEntry in _tag.StaticParts)
-        {
-            if (partEntry.DetailLevel == 0)
-            {
-                if ((partEntry.Material is null || partEntry.Material.VertexShader is null) && Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
-                    continue;
-
-                var part = MakePart(partEntry);
-                parts.TryAdd(part, partEntry.Material);
-
-                scene.Materials.Add(new ExportMaterial(partEntry.Material, true));
-                part.Material = partEntry.Material;
-
-                if (exportStatic) //Need access to material early, before scene system exports
-                    partEntry.Material.SavePixelShader($"{saveDirectory}/Shaders", true);
-            }
-        }
 
         int terrainTextureIndex = 14;
         Texture lastValidEntry = null;
         for (int i = 0; i < _tag.MeshGroups.Count; i++)
         {
-            var partEntry = _tag.MeshGroups[i];
-            if (partEntry.Dyemap == null)
+            var meshGroup = _tag.MeshGroups[i];
+            // Check if the current Dyemap is null
+
+            if (meshGroup.Dyemap == null)
             {
                 if (lastValidEntry != null)
                 {
@@ -53,7 +38,7 @@ public class Terrain : Tag<STerrain>
                 }
                 else // Use the first valid dyemap if it gets to this point
                 {
-                    var firstValidDyemap = _tag.MeshGroups.FirstOrDefault(x => x.Dyemap != null).Dyemap;
+                    var firstValidDyemap = _tag.MeshGroups.First(x => x.Dyemap != null).Dyemap;
                     if (firstValidDyemap != null)
                     {
                         scene.Textures.Add(firstValidDyemap);
@@ -64,33 +49,62 @@ public class Terrain : Tag<STerrain>
             else
             {
                 // Update lastValidEntry with the current Dyemap
-                lastValidEntry = partEntry.Dyemap;
-                scene.Textures.Add(partEntry.Dyemap);
-                dyeMaps.Add(partEntry.Dyemap);
+                lastValidEntry = meshGroup.Dyemap;
+                scene.Textures.Add(meshGroup.Dyemap);
+                dyeMaps.Add(meshGroup.Dyemap);
             }
-        }
 
-        foreach (var part in parts)
-        {
-            TransformPositions(part.Key);
-            TransformTexcoords(part.Key);
-            TransformVertexColors(part.Key);
-        }
-
-        scene.AddStatic(Hash, parts.Keys.ToList());
-        // For now we pre-transform it
-        if (!exportStatic)
-        {
-            scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
-
-            for (int i = 0; i < dyeMaps.Count; i++)
+            foreach (var partEntry in _tag.StaticParts.Where(x => x.GroupIndex == i))
             {
-                scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
+                // MainGeom0 LOD0, GripStock0 LOD1, Stickers0 LOD2?
+                if (partEntry.Lod.DetailLevel == ELodCategory.MainGeom0)
+                {
+                    if (partEntry.Material != null || partEntry.Material.VertexShader != null)
+                    {
+                        var part = MakePart(partEntry);
+
+                        scene.Materials.Add(new ExportMaterial(partEntry.Material, MaterialType.Opaque, true));
+                        part.Material = partEntry.Material;
+
+                        //Need access to material early, before scene system exports
+                        partEntry.Material.SaveShaders($"{saveDirectory}", MaterialType.Opaque, true);
+
+                        TransformPositions(part);
+                        TransformTexcoords(part);
+                        TransformVertexColors(part);
+
+                        SBoxHandler.SaveVMAT(saveDirectory, $"{part.Material.FileHash}", part.Material, true, dyeMaps);
+
+                        parts.TryAdd(part, partEntry.Material);
+                    }
+                }
             }
+
+            //{ // LOD3?
+            //    var part = MakeLODPart(meshGroup, i);
+
+            //    scene.Materials.Add(new ExportMaterial(_tag.Unk6C, MaterialType.Opaque, true));
+            //    part.Material = _tag.Unk6C;
+
+            //    TransformPositions(part);
+            //    TransformTexcoords(part);
+            //    TransformVertexColors(part);
+
+            //    parts.TryAdd(part, _tag.Unk6C);
+            //}
+
+
+            scene.AddTerrain($"{Hash}_{i}", parts.Keys.ToList());
+            SBoxHandler.SaveTerrainVMDL($"{Hash}_{i}", saveDirectory, parts.Keys.ToList());
+
+            parts.Clear();
         }
 
-        if (CharmInstance.GetSubsystem<ConfigSubsystem>().GetS2VMDLExportEnabled())
-            Source2Handler.SaveTerrainVMDL(saveDirectory, Hash, parts.Keys.ToList(), TagData);
+        //scene.AddStaticInstance(Hash, 1, Vector4.Zero, Vector3.Zero);
+        for (int i = 0; i < dyeMaps.Count; i++)
+        {
+            scene.AddTerrainDyemap(Hash, dyeMaps[i].Hash);
+        }
     }
 
     public StaticPart MakePart(SStaticPart entry)
@@ -98,6 +112,9 @@ public class Terrain : Tag<STerrain>
         StaticPart part = new(entry);
         part.GroupIndex = entry.GroupIndex;
         part.Indices = _tag.Indices1.GetIndexData(PrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
+
+        //Console.WriteLine($"{_tag.Indices2.GetIndexData(PrimitiveType.TriangleStrip, _tag.MeshGroups[part.GroupIndex].Unk48, _tag.MeshGroups[part.GroupIndex].unk).Count}");
+
         // Get unique vertex indices we need to get data for
         HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
         foreach (UIntVector3 index in part.Indices)
@@ -108,37 +125,55 @@ public class Terrain : Tag<STerrain>
         }
         part.VertexIndices = uniqueVertexIndices.ToList();
 
-        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON)
+        List<DXBCIOSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
+        int b0Stride = _tag.Vertices1.TagData.Stride;
+        int b1Stride = _tag.Vertices2?.TagData.Stride ?? 0;
+        List<DXBCIOSignature> inputSignatures0 = new();
+        List<DXBCIOSignature> inputSignatures1 = new();
+        int stride = 0;
+        foreach (DXBCIOSignature inputSignature in inputSignatures)
         {
-            List<InputSignature> inputSignatures = entry.Material.VertexShader.InputSignatures;
-            int b0Stride = _tag.Vertices1.TagData.Stride;
-            int b1Stride = _tag.Vertices2?.TagData.Stride ?? 0;
-            List<InputSignature> inputSignatures0 = new();
-            List<InputSignature> inputSignatures1 = new();
-            int stride = 0;
-            foreach (InputSignature inputSignature in inputSignatures)
-            {
-                if (stride < b0Stride)
-                    inputSignatures0.Add(inputSignature);
-                else
-                    inputSignatures1.Add(inputSignature);
+            if (stride < b0Stride)
+                inputSignatures0.Add(inputSignature);
+            else
+                inputSignatures1.Add(inputSignature);
 
-                if (inputSignature.Semantic == InputSemantic.Colour)
-                    stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
-                else
-                    stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
-            }
-
-            Log.Debug($"Reading vertex buffers {_tag.Vertices1.Hash}/{_tag.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices2?.Hash}/{_tag.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
-            _tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures0, true);
-            _tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures1, true);
-
+            if (inputSignature.Semantic == DXBCSemantic.Colour)
+                stride += inputSignature.GetNumberOfComponents() * 1;  // 1 byte per component
+            else
+                stride += inputSignature.GetNumberOfComponents() * 2;  // 2 bytes per component
         }
-        else // Can't get input semantics (yet) for D1 / PS4
+
+        Log.Debug($"Reading vertex buffers {_tag.Vertices1.Hash}/{_tag.Vertices1.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices2?.Hash}/{_tag.Vertices2?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+        _tag.Vertices1.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures0, true);
+        _tag.Vertices2.ReadVertexDataSignatures(part, uniqueVertexIndices, inputSignatures1, true);
+
+        //_tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+        //_tag.Vertices2.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+
+        return part;
+    }
+
+    public StaticPart MakeLODPart(SMeshGroup entry, int groupIndex)
+    {
+        StaticPart part = new(entry);
+
+        part.GroupIndex = groupIndex;
+        part.Indices = _tag.Indices2.GetIndexData(PrimitiveType.TriangleStrip, entry.IndexOffset, entry.IndexCount);
+
+        // Get unique vertex indices we need to get data for
+        HashSet<uint> uniqueVertexIndices = new HashSet<uint>();
+        foreach (UIntVector3 index in part.Indices)
         {
-            _tag.Vertices1.ReadVertexData(part, uniqueVertexIndices, 0, _tag.Vertices2 != null ? _tag.Vertices2.TagData.Stride : -1, true);
-            _tag.Vertices2?.ReadVertexData(part, uniqueVertexIndices, 1, _tag.Vertices1.TagData.Stride, true);
+            uniqueVertexIndices.Add(index.X);
+            uniqueVertexIndices.Add(index.Y);
+            uniqueVertexIndices.Add(index.Z);
         }
+        part.VertexIndices = uniqueVertexIndices.ToList();
+
+        //Log.Debug($"Reading vertex buffers {_tag.Vertices3.Hash}/{_tag.Vertices3.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 0).DebugString()} and {_tag.Vertices4?.Hash}/{_tag.Vertices4?.TagData.Stride}/{inputSignatures.Where(s => s.BufferIndex == 1).DebugString()}");
+        _tag.Vertices3.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
+        _tag.Vertices4.ReadVertexData(part, uniqueVertexIndices, 0, -1, true);
 
         return part;
     }
@@ -216,14 +251,31 @@ public class Terrain : Tag<STerrain>
         }
     }
 
-    public void TransformVertexColors(StaticPart part)
+    private void TransformVertexColors(StaticPart part)
     {
         //Helper for dyemap assignment
-        //ROI and Pre-BL can have a max of 16 per terrain part
-        float alpha = part.GroupIndex / 15.0f;
+        //SK can have up to index 15, maybe more?
         for (int i = 0; i < part.VertexPositions.Count; i++)
         {
-            part.VertexColours.Add(new Vector4(0.0f, 0.0f, 0.0f, alpha));
+            int colorIndex = part.GroupIndex % 4;
+            switch (colorIndex)
+            {
+                case 0:
+                    part.VertexColours.Add(new Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+                    break;
+                case 1:
+                    part.VertexColours.Add(new Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+                    break;
+                case 2:
+                    part.VertexColours.Add(new Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+                    break;
+                case 3:
+                    part.VertexColours.Add(new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+                    break;
+                default:
+                    part.VertexColours.Add(new Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+                    break;
+            };
         }
     }
 }
@@ -231,7 +283,6 @@ public class Terrain : Tag<STerrain>
 /// <summary>
 /// Terrain data resource.
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "371C8080", 0x20)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4B718080", 0x20)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "7D6C8080", 0x20)]
 public struct SMapTerrainResource
@@ -240,7 +291,6 @@ public struct SMapTerrainResource
     public short Unk10;  // tile x-y coords?
     public short Unk12;
     public TigerHash Unk14;
-    [NoLoad]
     public Terrain Terrain;
     public Tag<SOcclusionBounds> TerrainBounds;
 }
@@ -248,7 +298,6 @@ public struct SMapTerrainResource
 /// <summary>
 /// Terrain _tag.
 /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "2E1B8080", 0xB0)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "4F718080", 0xB0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "816C8080", 0xB0)]
 public struct STerrain
@@ -258,7 +307,7 @@ public struct STerrain
     public Vector4 Unk10;
     public Vector4 Unk20;
     public Vector4 Unk30;
-    [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<SMeshGroup> MeshGroups;
 
@@ -267,21 +316,19 @@ public struct STerrain
     public IndexBuffer Indices1;
     public IMaterial Unk6C;
     public IMaterial Unk70;
-    [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<SStaticPart> StaticParts;
     public VertexBuffer Vertices3;
     public VertexBuffer Vertices4;
     public IndexBuffer Indices2;
-
-    [SchemaField(0xA4, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public IMaterial UnkA4;
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public Texture UnkA8; // A top down view of the terrain in-game (assuming for LOD)
+    [SchemaField(0xA0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x98, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public int Unk98;
+    public int Unk9C;
+    public int UnkA0;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F1A8080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "54718080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "866C8080", 0x60)]
 public struct SMeshGroup
@@ -296,14 +343,11 @@ public struct SMeshGroup
     public uint Unk3C;
     public uint Unk40;
     public uint Unk44;
-    public uint Unk48;
-    public uint Unk4C;
-    [SchemaField(0x58, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x50, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    public uint IndexOffset; // 75% sure this is right
+    public uint IndexCount;
     public Texture Dyemap;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "481A8080", 0x0C)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "52718080", 0x0C)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "846C8080", 0x0C)]
 public struct SStaticPart
@@ -312,5 +356,5 @@ public struct SStaticPart
     public uint IndexOffset;
     public ushort IndexCount;
     public byte GroupIndex;
-    public byte DetailLevel;
+    public ELod Lod;
 }
