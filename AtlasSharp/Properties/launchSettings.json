@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "AtlasSharp": {
+      "commandName": "Project",
+      "nativeDebugging": true,
+      "hotReloadEnabled": false
+    }
+  }
+}
