@@ -1,27 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Windows;
+﻿using System.Reflection;
 using Arithmic;
 using Newtonsoft.Json;
-// using MessageBox = System.Windows.Forms.MessageBox;
-using Tiger;
 using Tiger.Schema;
 
 namespace Tiger;
 
-// public class ConfigAttribute : Attribute
-// {
-//
-// }
-//
-// [ConfigSubsystem]
 
-public struct Settings
+public class Settings
 {
     public CommonSettings Common;
     public UnrealSettings Unreal;
@@ -352,12 +337,14 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
             Log.Error($"Failed to load config file {_configFilePath}: {e.Message}");
         }
 
-        if (_settings.Common == null)
+        foreach (FieldInfo field in _settings.GetType().GetFields())
         {
-            _settings.Common = new CommonSettings();
-            _settings.Blender = new BlenderSettings();
-            _settings.SBox = new SBoxSettings();
-            _settings.Unreal = new UnrealSettings();
+            if (field.GetValue(_settings) != null)
+            {
+                continue;
+            }
+
+            field.SetValue(_settings, Activator.CreateInstance(field.FieldType));
             WriteConfig();
         }
 
@@ -410,24 +397,11 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
             _configFilePath = configPath;
         }
 
-        if (ConfigFileExists())
+        if (!ConfigFileExists() && !WriteConfig())
         {
-            bool successfullyLoadedConfig = LoadConfig();
-            if (successfullyLoadedConfig)
-            {
-                return true;
-            }
-        }
-        else
-        {
-            WriteConfig();
-            bool successfullyLoadedConfig = LoadConfig();
-            if (successfullyLoadedConfig)
-            {
-                return true;
-            }
+            return false;
         }
 
-        return false;
+        return LoadConfig();
     }
 }

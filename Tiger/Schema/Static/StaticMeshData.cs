@@ -249,19 +249,22 @@ namespace Tiger.Schema.Static.DESTINY2_BEYONDLIGHT_3402
 
         public Dictionary<int, SStaticMeshPart> GetPartsOfDetailLevel(ExportDetailLevel detailLevel)
         {
-            Dictionary<int, SStaticMeshPart> staticPartEntries = new Dictionary<int, SStaticMeshPart>();
+            Dictionary<int, SStaticMeshPart> staticPartEntries = new();
 
+            // only export static parts that have a material assigned
             for (int i = 0; i < _tag.MaterialAssignments.Count; i++)
             {
                 var mat = _tag.MaterialAssignments[i];
                 var part = _tag.Parts[mat.PartIndex];
-                if (part.BufferIndex == 0)
+                if (part.BufferIndex != 0)
                 {
-                    var staticPartEntry = _tag.Parts[i];
-                    if (staticPartEntry.Lod.IsHighestLevel())
-                    {
-                        staticPartEntries.Add(i, staticPartEntry);
-                    }
+                    continue;
+                }
+
+                var staticPartEntry = _tag.Parts[mat.PartIndex];
+                if (staticPartEntry.Lod.IsHighestLevel())
+                {
+                    staticPartEntries.Add(i, staticPartEntry);
                 }
             }
 
