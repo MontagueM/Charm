@@ -77,10 +77,10 @@ public static class TfxBytecodeOp
                     Unk3aData.constant_index = reader.ReadByte();
                     tfxData.data = Unk3aData;
                     break;
-                case TfxBytecode.UnkLoadConstant:
-                    UnkLoadConstantData UnkLoadConstantData = new();
-                    UnkLoadConstantData.constant_index = reader.ReadByte();
-                    tfxData.data = UnkLoadConstantData;
+                case TfxBytecode.Gradient8Const:
+                    Gradient8ConstData Gradient8ConstData = new();
+                    Gradient8ConstData.constant_index = reader.ReadByte();
+                    tfxData.data = Gradient8ConstData;
                     break;
                 case TfxBytecode.PushExternInputFloat:
                     PushExternInputFloatData PushExternInputFloatData = new();
@@ -378,8 +378,32 @@ public static class TfxBytecodeOp
                     $"\n\tCthresholds: {Cthresholds}";
                 break;
 
-            case UnkLoadConstantData:
-                output = $"constant_index {((UnkLoadConstantData)tfxData.data).constant_index}: Constant value: {constants[((UnkLoadConstantData)tfxData.data).constant_index].Vec}";
+            case Gradient8ConstData:
+                index = ((Gradient8ConstData)tfxData.data).constant_index;
+                BaseColor = $"{constants[index].Vec}";
+                Cred = $"{constants[index + 1].Vec}";
+                Cgreen = $"{constants[index + 2].Vec}";
+                Cblue = $"{constants[index + 3].Vec}";
+                Calpha = $"{constants[index + 4].Vec}";
+                var Dred = $"{constants[index + 5].Vec}";
+                var Dgreen = $"{constants[index + 6].Vec}";
+                var Dblue = $"{constants[index + 7].Vec}";
+                var Dalpha = $"{constants[index + 8].Vec}";
+                Cthresholds = $"{constants[index + 9].Vec}";
+                var Dthresholds = $"{constants[index + 10].Vec}";
+
+                output = $"Index {index}:" +
+                    $"\n\tBaseColor: {BaseColor}" +
+                    $"\n\tCred: {Cred}" +
+                    $"\n\tCgreen: {Cgreen}" +
+                    $"\n\tCblue: {Cblue}" +
+                    $"\n\tCalpha: {Calpha}" +
+                    $"\n\tDred: {Dred}" +
+                    $"\n\tDgreen: {Dgreen}" +
+                    $"\n\tDblue: {Dblue}" +
+                    $"\n\tDalpha: {Dalpha}" +
+                    $"\n\tCthresholds: {Cthresholds}" +
+                    $"\n\tDthresholds: {Dthresholds}";
                 break;
 
             case PushExternInputFloatData:
@@ -550,7 +574,7 @@ public enum TfxBytecode : byte
     Spline8Const = 0x38,
     Spline8ConstChain = 0x39, // Spline8ConstChain?
     Gradient4Const = 0x3a,
-    UnkLoadConstant = 0x3b, //{ constant_index: u8 }
+    Gradient8Const = 0x3b, //{ constant_index: u8 }
     PushExternInputFloat = 0x3c,
     PushExternInputVec4 = 0x3d,
     PushExternInputMat4 = 0x3e,
@@ -624,7 +648,7 @@ public struct Gradient4ConstData
     public byte constant_index;
 }
 
-public struct UnkLoadConstantData
+public struct Gradient8ConstData
 {
     public byte constant_index;
 }

@@ -266,6 +266,22 @@ public class TfxBytecodeInterpreter
 
                         StackPush($"{bytecode_op_gradient4_const(g4c_X, BaseColor, Cred, Cgreen, Cblue, Calpha, Cthresholds)}");
                         break;
+                    case TfxBytecode.Gradient8Const: // A massive unknown function with a 12 inputs, maybe this is Gradient8Const? (idk if that exists)
+                        var g8c_X1 = StackTop();
+                        var g8c_BaseColor = $"float4{constants[((Gradient8ConstData)op.data).constant_index].Vec}";
+                        var g8c_Cred = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 1].Vec}";
+                        var g8c_Cgreen = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 2].Vec}";
+                        var g8c_Cblue = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 3].Vec}";
+                        var g8c_Calpha = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 4].Vec}";
+                        var g8c_Dred = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 5].Vec}";
+                        var g8c_Dgreen = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 6].Vec}";
+                        var g8c_Dblue = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 7].Vec}";
+                        var g8c_Dalpha = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 8].Vec}";
+                        var g8c_Cthresholds = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 9].Vec}";
+                        var g8c_Dthresholds = $"float4{constants[((Gradient8ConstData)op.data).constant_index + 10].Vec}";
+
+                        StackPush($"{bytecode_op_gradient8_const(g8c_X1, g8c_BaseColor, g8c_Cred, g8c_Cgreen, g8c_Cblue, g8c_Calpha, g8c_Dred, g8c_Dgreen, g8c_Dblue, g8c_Dalpha, g8c_Cthresholds, g8c_Dthresholds)}");
+                        break;
 
                     case TfxBytecode.PushExternInputFloat:
                         var v = Externs.GetExternFloat(((PushExternInputFloatData)op.data).extern_, ((PushExternInputFloatData)op.data).element * 4);
@@ -301,7 +317,7 @@ public class TfxBytecodeInterpreter
                         break;
                     /////
 
-                    case TfxBytecode.UnkLoadConstant: // A massive unknown function with a morbillion inputs
+
                     case TfxBytecode.PushExternInputTextureView:
                     case TfxBytecode.PushExternInputUav:
                     case TfxBytecode.SetShaderTexture:
@@ -432,6 +448,42 @@ public class TfxBytecodeInterpreter
         return gradient_result;
     }
 
+    // Guessing
+    private string bytecode_op_gradient8_const(
+        string X,
+        string BaseColor,
+        string Cred,
+        string Cgreen,
+        string Cblue,
+        string Calpha,
+        string Dred,
+        string Dgreen,
+        string Dblue,
+        string Dalpha,
+        string Cthresholds,
+        string Dthresholds)
+    {
+        string Coffsets_from_x = $"({X}-{Cthresholds})";
+        string Csegment_interval = $"(float4({Cthresholds}.y, {Cthresholds}.z, {Cthresholds}.w, 1.0f) - {Cthresholds})";
+        string Csafe_division = $"(({Coffsets_from_x} >= 0.0f) ? float4(1.0f, 1.0f, 1.0f, 1.0f) : float4(0.0f, 0.0f, 0.0f, 0.0f))";
+        string Cdivision = $"(({Csegment_interval} != 0.0f) ? ({Coffsets_from_x} / {Csegment_interval}) : {Csafe_division})";
+        string Cpercentages = $"(saturate({Cdivision}))";
+
+        string Doffsets_from_x = $"({X}-{Dthresholds})";
+        string Dsegment_interval = $"(float4({Dthresholds}.y, {Dthresholds}.z, {Dthresholds}.w, 1.0f) - {Dthresholds})";
+        string Dsafe_division = $"(({Doffsets_from_x} >= 0.0f) ? float4(1.0f, 1.0f, 1.0f, 1.0f) : float4(0.0f, 0.0f, 0.0f, 0.0f))";
+        string Ddivision = $"(({Dsegment_interval} != 0.0f) ? ({Doffsets_from_x} / {Dsegment_interval}) : {Dsafe_division})";
+        string Dpercentages = $"(saturate({Ddivision}))";
+
+        string Xinfluence = $"(({Cred} * {Cpercentages}) + ({Dred} * {Dpercentages}))"; // No idea if this is right
+        string Yinfluence = $"(({Cgreen} * {Cpercentages}) + ({Dgreen} * {Dpercentages}))";
+        string Zinfluence = $"(({Cblue} * {Cpercentages}) + ({Dblue} * {Dpercentages}))";
+        string Winfluence = $"(({Calpha} * {Cpercentages}) + ({Dalpha} * {Dpercentages}))";
+
+        string gradient_result = $"({BaseColor} + float4(dot4(1.0f, {Xinfluence}), dot4(1.0f, {Yinfluence}), dot4(1.0f, {Zinfluence}), dot4(1.0f, {Winfluence})))";
+        return gradient_result;
+    }
+
     // Lord have mercy...
     private string bytecode_op_spline8_const(
         string X,
@@ -450,7 +502,7 @@ public class TfxBytecodeInterpreter
         string C_low = $"({C1} * {X} + {C0})"; //C1 * X + C0;
         string D_high = $"({D3} * {X} + {D2})"; //D3 * X + D2;
         string D_low = $"({D1} * {X} + {D0})"; //D1 * X + D0;
-        string X2 = $"({X} * {X})"; //X * X;
+        string X2 = $"(sqr({X}))"; //X * X;
         string C_evaluated_spline = $"({C_high} * {X2} + {C_low})"; //C_high * X2 + C_low;
         string D_evaluated_spline = $"({D_high} * {X2} + {D_low})"; //D_high * X2 + D_low;
 
@@ -458,10 +510,10 @@ public class TfxBytecodeInterpreter
         string D_threshold_mask = $"(step({D_thresholds}, {X}))"; //step(D_thresholds, X);
 
         string a = _fake_bitwise_ops_fake_xor(C_threshold_mask, $"{C_threshold_mask}.yzww");
-        string C_channel_mask = $"(float4({a}.x, {a}.y, {a}.z, {C_threshold_mask}.w))"; //float4(_fake_bitwise_ops_fake_xor(C_threshold_mask, C_threshold_mask.yzww).xyz, C_threshold_mask.w);
+        string C_channel_mask = $"({a} * float4(1,1,1,0) + float4(0,0,0,{C_threshold_mask}.w))"; //float4(_fake_bitwise_ops_fake_xor(C_threshold_mask, C_threshold_mask.yzww).xyz, C_threshold_mask.w);
 
         a = _fake_bitwise_ops_fake_xor(D_threshold_mask, $"{D_threshold_mask}.yzww");
-        string D_channel_mask = $"(float4({a}.x, {a}.y, {a}.z, {D_threshold_mask}.w))"; //float4(_fake_bitwise_ops_fake_xor(D_threshold_mask, D_threshold_mask.yzww).xyz, D_threshold_mask.w);
+        string D_channel_mask = $"({a} * float4(1,1,1,0) + float4(0,0,0,{D_threshold_mask}.w))"; //float4(_fake_bitwise_ops_fake_xor(D_threshold_mask, D_threshold_mask.yzww).xyz, D_threshold_mask.w);
 
         string C_spline_result_in_4 = $"({C_evaluated_spline} * {C_channel_mask})"; //C_evaluated_spline * C_channel_mask;
         string D_spline_result_in_4 = $"({D_evaluated_spline} * {D_channel_mask})"; //D_evaluated_spline * D_channel_mask;
@@ -499,10 +551,10 @@ public class TfxBytecodeInterpreter
         string D_threshold_mask = $"(step({D_thresholds}, {X}))"; //step(D_thresholds, X);
 
         string a = _fake_bitwise_ops_fake_xor(C_threshold_mask, $"{C_threshold_mask}.yzww");
-        string C_channel_mask = $"(float4({a}.x, {a}.y, {a}.z, {C_threshold_mask}.w))"; //float4(_fake_bitwise_ops_fake_xor(C_threshold_mask, C_threshold_mask.yzww).xyz, C_threshold_mask.w);
+        string C_channel_mask = $"({a} * float4(1,1,1,0) + float4(0,0,0,{C_threshold_mask}.w))"; //float4(_fake_bitwise_ops_fake_xor(C_threshold_mask, C_threshold_mask.yzww).xyz, C_threshold_mask.w);
 
         a = _fake_bitwise_ops_fake_xor(D_threshold_mask, $"{D_threshold_mask}.yzww");
-        string D_channel_mask = $"(float4({a}.x, {a}.y, {a}.z, {D_threshold_mask}.w))"; //float4(_fake_bitwise_ops_fake_xor(D_threshold_mask, D_threshold_mask.yzww).xyz, D_threshold_mask.w);
+        string D_channel_mask = $"({a} * float4(1,1,1,0) + float4(0,0,0,{D_threshold_mask}.w))"; //float4(_fake_bitwise_ops_fake_xor(D_threshold_mask, D_threshold_mask.yzww).xyz, D_threshold_mask.w);
 
         string C_spline_result_in_4 = $"({C_evaluated_spline} * {C_channel_mask})"; //C_evaluated_spline * C_channel_mask;
         string D_spline_result_in_4 = $"({D_evaluated_spline} * {D_channel_mask})"; //D_evaluated_spline * D_channel_mask;

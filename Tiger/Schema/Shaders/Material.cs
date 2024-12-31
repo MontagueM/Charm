@@ -353,6 +353,16 @@ public struct StateSelection
             var dsState = RenderStates.DepthStencilStates[DepthStencilState()];
             states.AppendLine($"Depth Stencil State {DepthStencilState()}:\n {dsState.ToString()}");
         }
+        if (RasterizerState() != -1)
+        {
+            var rasterizer = RenderStates.RasterizerStates[RasterizerState()];
+            states.AppendLine($"Rasterizer State {RasterizerState()}:\n {rasterizer.ToString()}");
+        }
+        if (DepthBiasState() != -1)
+        {
+            var depthBias = RenderStates.DepthBiasStates[DepthBiasState()];
+            states.AppendLine($"Depth Bias State {DepthBiasState()}:\n {depthBias.ToString()}");
+        }
 
         return states.ToString();
     }

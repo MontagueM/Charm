@@ -249,7 +249,7 @@ public static class Source2Handler
                         break;
                     case 13: // Frame
                         vmat.AppendLine($"\t\tcb13_0 \"float4(Time, Time, 0.05, 0.016)\"");
-                        vmat.AppendLine($"\t\tcb13_1 \"float4(1,16,0.5,1.5)\"");
+                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.65,16,0.65,1.5)\"");
                         vmat.AppendLine($"\t\tcb13_2 \"float4((Time + 33.75) * 1.258699, (Time + 60.0) * 0.9583125, (Time + 60.0) * 8.789123, (Time + 33.75) * 2.311535)\"");
                         vmat.AppendLine($"\t\tcb13_4 \"float4(1,1,0,1)\"");
                         vmat.AppendLine($"\t\tcb13_5 \"float4(0,0,512,0)\"");

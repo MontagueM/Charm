@@ -241,7 +241,7 @@ public partial class MainWindow
     // Disabling update checking for now since the last github release is a fossil at this point
     private async void CheckVersion()
     {
-        var currentVersion = new ApplicationVersion("2.3.5");
+        var currentVersion = new ApplicationVersion("2.3.7");
         Arithmic.Log.Info($"Charm Version: {currentVersion.Id}");
         //var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/main/", currentVersion);
         //versionChecker.LatestVersionName = "version";

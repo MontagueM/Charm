@@ -130,6 +130,12 @@ PS
             texSamples.AppendLine($"\tSamplerState s{i + 1}_s < Filter({sampler.Filter}); AddressU({sampler.AddressU}); AddressV({sampler.AddressV}); AddressW({sampler.AddressW}); ComparisonFunc({sampler.ComparisonFunc}); MaxAniso({sampler.MaxAnisotropy}); >;");
         }
 
+        if (bTranslucent) //This way is stupid but it works
+        {
+            vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST 0\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT 1\r\n\t#endif");
+            vfxStructure = vfxStructure.Replace("Depth();", "//Depth();"); // ikd if this even does anything
+        }
+
         vfxStructure = vfxStructure.Replace("//ps_samplers", texSamples.ToString());
         vfxStructure = vfxStructure.Replace("//ps_CBuffers", WriteCbuffers(material, false).ToString());
         vfxStructure = vfxStructure.Replace("//ps_Inputs", WriteTexInputs(material, false).ToString());
@@ -137,19 +143,11 @@ PS
         if (Resources.Exists(cbuffer => cbuffer.ResourceType == ResourceType.CBuffer && cbuffer.Index == 12))
             vfxStructure = vfxStructure.Replace("//ps_additional", AddTPToProj());
 
-
         StringBuilder instructions = ConvertInstructions(material, false);
         if (instructions.ToString().Length == 0)
             return "";
 
         vfxStructure = vfxStructure.Replace("//ps_Function", instructions.ToString());
-
-        if (bTranslucent) //This way is stupid but it works
-        {
-            vfxStructure = vfxStructure.Replace("//alpha", $"#ifndef S_ALPHA_TEST\r\n\t#define S_ALPHA_TEST 0\r\n\t#endif\r\n\t#ifndef S_TRANSLUCENT\r\n\t#define S_TRANSLUCENT 1\r\n\t#endif");
-            vfxStructure = vfxStructure.Replace("Depth();", "//Depth();"); // ikd if this even does anything
-        }
-
         vfxStructure = vfxStructure.Replace("//ps_output", AddOutput().ToString());
 
         //------------------------------Vertex Shader-----------------------------------
@@ -848,7 +846,7 @@ PS
         mat.Metalness = saturate(o2.x);
         mat.AmbientOcclusion = saturate(o2.y * 2);
         mat.TintMask = 1;
-        mat.Opacity = {(bTranslucent ? "o0.w" : "1")};
+        mat.Opacity = {(bTranslucent || Material.RenderStates.BlendState() != -1 ? "o0.w" : "1")};
         mat.Emission = emission;       
         mat.Transmission = o2.z;
 
@@ -991,7 +989,7 @@ PS
             renderStates.AppendLine($"\tRenderState(BlendOp, {BlendOpString(blendState.BlendDesc.BlendOperation)})");
             renderStates.AppendLine($"\tRenderState(SrcBlendAlpha, {BlendOptionString(blendState.BlendDesc.SourceAlphaBlend)})");
             renderStates.AppendLine($"\tRenderState(DstBlendAlpha, {BlendOptionString(blendState.BlendDesc.DestinationAlphaBlend)})");
-            renderStates.AppendLine($"\tRenderState(BlendOpAlpha, {BlendOpString(blendState.BlendDesc.AlphaBlendOperation)})");
+            renderStates.AppendLine($"\tRenderState(BlendOpAlpha, {BlendOpString(blendState.BlendDesc.AlphaBlendOperation)})\n");
         }
 
         if (Material.RenderStates.RasterizerState() != -1)
@@ -999,15 +997,15 @@ PS
             var rasState = RenderStates.RasterizerStates[Material.RenderStates.RasterizerState()];
             renderStates.AppendLine($"\tRenderState(FillMode, {rasState.FillMode.ToString().ToUpper()})");
             renderStates.AppendLine($"\tRenderState(CullMode, {rasState.CullMode.ToString().ToUpper()})");
-            renderStates.AppendLine($"\tRenderState(DepthClipEnable, {rasState.DepthClipEnable.ToString().ToLower()})");
+            renderStates.AppendLine($"\tRenderState(DepthClipEnable, {rasState.DepthClipEnable.ToString().ToLower()})\n");
         }
 
         if (Material.RenderStates.DepthBiasState() != -1)
         {
             var depthState = RenderStates.DepthBiasStates[Material.RenderStates.DepthBiasState()];
-            renderStates.AppendLine($"\tRenderState(DepthBias, {depthState.DepthBias})");
-            renderStates.AppendLine($"\tRenderState(SlopeScaleDepthBias, {depthState.SlopeScaledDepthBias})");
-            renderStates.AppendLine($"\tRenderState(DepthBiasClamp, {depthState.DepthBiasClamp})");
+            renderStates.AppendLine($"\tRenderState(DepthBias, {depthState.DepthBias.ToString("F1")})");
+            renderStates.AppendLine($"\tRenderState(SlopeScaleDepthBias, {depthState.SlopeScaledDepthBias.ToString("F1")})");
+            renderStates.AppendLine($"\tRenderState(DepthBiasClamp, {depthState.DepthBiasClamp.ToString("F1")})\n");
         }
 
         if (Material.RenderStates.DepthStencilState() != -1)
@@ -1015,21 +1013,23 @@ PS
             var depthStencilState = RenderStates.DepthStencilStates[Material.RenderStates.DepthStencilState()];
             renderStates.AppendLine($"\tRenderState(DepthEnable, {depthStencilState.Depth.Enable.ToString().ToLower()})");
             renderStates.AppendLine($"\tRenderState(DepthWriteEnable, {(depthStencilState.Depth.WriteMask == 0 ? "false" : "true")})");
-            renderStates.AppendLine($"\tRenderState(DepthFunc, {CompareFuncString(depthStencilState.Depth.Func)})");
-            renderStates.AppendLine($"\tRenderState(StencilEnable, {depthStencilState.Stencil.StencilEnable.ToString().ToLower()})");
+            renderStates.AppendLine($"\tRenderState(DepthFunc, {CompareFuncString(depthStencilState.Depth.Func)})\n");
 
-            renderStates.AppendLine($"\tRenderState(StencilReadMask, {(byte)depthStencilState.Stencil.StencilReadMask})");
-            renderStates.AppendLine($"\tRenderState(StencilWriteMask, {(byte)depthStencilState.Stencil.StencilWriteMask})");
+            // TODO: Need correct StencilRef 
+            //renderStates.AppendLine($"\tRenderState(StencilEnable, {depthStencilState.Stencil.StencilEnable.ToString().ToLower()})");
+            //renderStates.AppendLine($"\tRenderState(StencilRef, 36)");
+            //renderStates.AppendLine($"\tRenderState(StencilReadMask, {(byte)depthStencilState.Stencil.StencilReadMask})");
+            //renderStates.AppendLine($"\tRenderState(StencilWriteMask, {(byte)depthStencilState.Stencil.StencilWriteMask})");
 
-            renderStates.AppendLine($"\tRenderState(StencilFailOp, {StencilOpString(depthStencilState.Stencil.FrontFace.FailOp)})");
-            renderStates.AppendLine($"\tRenderState(StencilDepthFailOp, {StencilOpString(depthStencilState.Stencil.FrontFace.DepthFailOp)})");
-            renderStates.AppendLine($"\tRenderState(StencilPassOp, {StencilOpString(depthStencilState.Stencil.FrontFace.PassOp)})");
-            renderStates.AppendLine($"\tRenderState(StencilFunc, {CompareFuncString(depthStencilState.Stencil.FrontFace.Func)})");
+            //renderStates.AppendLine($"\tRenderState(StencilFailOp, {StencilOpString(depthStencilState.Stencil.FrontFace.FailOp)})");
+            //renderStates.AppendLine($"\tRenderState(StencilDepthFailOp, {StencilOpString(depthStencilState.Stencil.FrontFace.DepthFailOp)})");
+            //renderStates.AppendLine($"\tRenderState(StencilPassOp, {StencilOpString(depthStencilState.Stencil.FrontFace.PassOp)})");
+            //renderStates.AppendLine($"\tRenderState(StencilFunc, {CompareFuncString(depthStencilState.Stencil.FrontFace.Func)})");
 
-            renderStates.AppendLine($"\tRenderState(BackStencilFailOp, {StencilOpString(depthStencilState.Stencil.BackFace.FailOp)})");
-            renderStates.AppendLine($"\tRenderState(BackStencilDepthFailOp, {StencilOpString(depthStencilState.Stencil.BackFace.DepthFailOp)})");
-            renderStates.AppendLine($"\tRenderState(BackStencilPassOp, {StencilOpString(depthStencilState.Stencil.BackFace.PassOp)})");
-            renderStates.AppendLine($"\tRenderState(BackStencilFunc, {CompareFuncString(depthStencilState.Stencil.BackFace.Func)})");
+            //renderStates.AppendLine($"\tRenderState(BackStencilFailOp, {StencilOpString(depthStencilState.Stencil.BackFace.FailOp)})");
+            //renderStates.AppendLine($"\tRenderState(BackStencilDepthFailOp, {StencilOpString(depthStencilState.Stencil.BackFace.DepthFailOp)})");
+            //renderStates.AppendLine($"\tRenderState(BackStencilPassOp, {StencilOpString(depthStencilState.Stencil.BackFace.PassOp)})");
+            //renderStates.AppendLine($"\tRenderState(BackStencilFunc, {CompareFuncString(depthStencilState.Stencil.BackFace.Func)})");
         }
 
         return renderStates.ToString();

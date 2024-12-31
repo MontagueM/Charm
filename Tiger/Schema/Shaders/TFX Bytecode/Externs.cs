@@ -232,20 +232,21 @@ public static class GlobalChannels
         Channels[33] = Vector4.One; // diffuse tint 2
         Channels[34] = Vector4.One; // diffuse tint 2 intensity
         Channels[35] = new Vector4(0.55f);
-        Channels[37] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog start
+        Channels[37] = new Vector4(500000.0f, 0.0f, 0.0f, 0.0f); // Fog start
         Channels[40] = Vector4.Zero;
         Channels[41] = new Vector4(50.0f, 0.0f, 0.0f, 0.0f); // Fog falloff
         Channels[43] = Vector4.Zero;
         Channels[82] = Vector4.Zero;
         Channels[83] = Vector4.Zero;
+        Channels[84] = Vector4.One;
         Channels[93] = new Vector4(1.0f, 0.0f, 0.0f, 0.0f);
         Channels[97] = Vector4.Zero;
         Channels[98] = Vector4.Zero;
-        Channels[100] = new Vector4(0.41105f, 0.71309f, 0.56793f, 0.56793f);
+        Channels[100] = Vector4.Zero; //new Vector4(0.41105f, 0.71309f, 0.56793f, 0.56793f);
         Channels[102] = Vector4.One; // Seems like sun angle
         Channels[113] = Vector4.Zero;
         Channels[127] = Vector4.Zero;
-        Channels[131] = new Vector4(0.5f, 0.0f, 0.3f, 0.0f); // Seems related to line lights
+        Channels[131] = new Vector4(0.0f, 0.5f, 0.3f, 0.0f); // Seems related to line lights
 
         return Channels;
     }
