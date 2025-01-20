@@ -23,7 +23,6 @@ public static class PS4SwizzleAlgorithm
         byte[] processed = new byte[data.Length];
         int pixelBlockSize = format.PixelBlockSize();
         int blockSize = format.BlockSize();
-        int array = arraySize > 1 ? arraySize - 1 : 1;
 
         int width_src = format.IsCompressed() ? width.CeilingToPowerOfTwo() : width;
         int height_src = format.IsCompressed() ? height.CeilingToPowerOfTwo() : height;
@@ -37,36 +36,41 @@ public static class PS4SwizzleAlgorithm
         int widthTexelsAligned = (widthTexels + 7) / 8;
 
         int dataIndex = 0;
-        for (int y = 0; y < heightTexelsAligned; ++y)
+        for (int z = 0; z < arraySize; ++z)
         {
-            for (int x = 0; x < widthTexelsAligned; ++x)
+            int sliceOffset = (z * width * height * format.Bpp()) / 8;
+            for (int y = 0; y < heightTexelsAligned; ++y)
             {
-                for (int t = 0; t < 64; ++t)
+                for (int x = 0; x < widthTexelsAligned; ++x)
                 {
-                    int pixelIndex = Morton(t, 8, 8);
-                    int num8 = pixelIndex / 8;
-                    int num9 = pixelIndex % 8;
-                    int yOffset = (y * 8) + num8;
-                    int xOffset = (x * 8) + num9;
-
-                    if (xOffset < width_texels_dest && yOffset < height_texels_dest)
+                    for (int t = 0; t < 64; ++t)
                     {
-                        int destPixelIndex = yOffset * width_texels_dest + xOffset;
-                        int destIndex = blockSize * destPixelIndex;
+                        int pixelIndex = Morton(t, 8, 8);
+                        int num8 = pixelIndex / 8;
+                        int num9 = pixelIndex % 8;
+                        int yOffset = (y * 8) + num8;
+                        int xOffset = (x * 8) + num9;
 
-                        try
+                        if (xOffset < width_texels_dest && yOffset < height_texels_dest)
                         {
-                            int src = unswizzle ? dataIndex : destIndex;
-                            int dst = unswizzle ? destIndex : dataIndex;
-                            if ((src + blockSize) <= data.Length && (dst + blockSize) <= processed.Length)
-                                Array.Copy(data, src, processed, dst, blockSize);
+                            int destPixelIndex = yOffset * width_texels_dest + xOffset;
+                            int destIndex = blockSize * destPixelIndex;
+
+                            try
+                            {
+                                int src = unswizzle ? dataIndex : destIndex;
+                                int dst = unswizzle ? destIndex : dataIndex;
+
+                                if ((src + blockSize) <= data.Length && (dst + blockSize) <= processed.Length - sliceOffset)
+                                    Array.Copy(data, src, processed, sliceOffset + dst, blockSize);
+                            }
+                            catch (Exception e)
+                            {
+                                throw new ArgumentException(e.Message);
+                            }
                         }
-                        catch (Exception e)
-                        {
-                            throw new ArgumentException(e.Message);
-                        }
+                        dataIndex += blockSize;
                     }
-                    dataIndex += blockSize;
                 }
             }
         }
