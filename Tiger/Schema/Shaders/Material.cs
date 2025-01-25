@@ -143,6 +143,9 @@ namespace Tiger.Schema.Shaders
                 foreach (var item in Pixel.Samplers.Select((sampler, index) => new { sampler, index }))
                 {
                     var sampler = item.sampler.GetSampler();
+                    if (sampler is null)
+                        continue;
+
                     if (sampler.Hash.GetFileMetadata().Type != 34)
                     {
                         var tex = FileResourcer.Get().GetFile<Texture>(sampler.Hash);
