@@ -35,6 +35,10 @@
         <Setter Property="Margin" Value="0,0,0,15" />
     </Style>
 
+    <Style TargetType="TabPanel">
+        <Setter Property="Background" Value="#584C4C57" />
+    </Style>
+
     <Style x:Key="ColumnHeader" TargetType="Grid">
         <Setter Property="Background" Value="#584C4C57" />
         <Style.Resources>
@@ -50,7 +54,7 @@
     </Style>
 
     <Style TargetType="Grid">
-        <Setter Property="Background" Value="{StaticResource BackgroundColour7}" />
+        <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <Style TargetType="Slider">
@@ -206,7 +210,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Panel.ZIndex" Value="100" />
                             <Setter TargetName="Border" Property="Opacity" Value="1" />
-                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BackgroundColour20}" />
+                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BackgroundColour14a}" />
                             <Setter TargetName="Border" Property="CornerRadius" Value="0" />
                             <Setter TargetName="Border" Property="BorderThickness" Value="0,0,0,2" />
                             <Setter Property="Background" Value="{StaticResource BackgroundColour30}" />

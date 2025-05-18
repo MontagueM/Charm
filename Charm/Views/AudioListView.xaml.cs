@@ -55,18 +55,6 @@ public partial class AudioListView : UserControl
         Panel.SetZIndex(ToolTip, 50);
         MainContainer.Children.Add(ToolTip);
 
-        if (ConfigSubsystem.Get().GetAnimatedBackground())
-        {
-            SpinnerShader _spinner = new();
-            Spinner.Effect = _spinner;
-            SizeChanged += _spinner.OnSizeChanged;
-            _spinner.ScreenWidth = (float)ActualWidth;
-            _spinner.ScreenHeight = (float)ActualHeight;
-            _spinner.Scale = new(0, 0);
-            _spinner.Offset = new(-3.6, -3.3);
-            SpinnerContainer.Visibility = Visibility.Visible;
-        }
-
         MusicPlayer.ProgressBar.ValueChanged -= (s, e) => UpdateWaveformProgress();
         MusicPlayer.ProgressBar.ValueChanged += (s, e) => UpdateWaveformProgress();
     }

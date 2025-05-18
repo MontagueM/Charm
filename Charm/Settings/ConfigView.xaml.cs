@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
-using Tiger;
 
 namespace Charm;
 
@@ -38,19 +35,7 @@ public partial class ConfigView : UserControl
 
     private void UserControl_Loaded(object sender, RoutedEventArgs e)
     {
-        SelectRadioButton(Settings, 0);
-
-        if (ConfigSubsystem.Get().GetAnimatedBackground())
-        {
-            SpinnerShader _spinner = new();
-            Spinner.Effect = _spinner;
-            SizeChanged += _spinner.OnSizeChanged;
-            _spinner.ScreenWidth = (float)ActualWidth;
-            _spinner.ScreenHeight = (float)ActualHeight;
-            _spinner.Scale = new(4, 4);
-            _spinner.Offset = new(-3.6, -3.3);
-            SpinnerContainer.Visibility = Visibility.Visible;
-        }
+        UIHelper.SelectRadioButton(Settings, 0);
     }
 
     // Not ideal but it works
@@ -64,7 +49,7 @@ public partial class ConfigView : UserControl
         // Set all controls to collapsed initially
         foreach (UIElement control in controlMapping.Values)
         {
-            UIHelper.AnimateFadeIn(control, 0.25f, 0.25f, 1);
+            UIHelper.AnimateFade(control, 0.25f, 0.25f, 1);
             control.Visibility = Visibility.Collapsed;
         }
 
@@ -72,27 +57,8 @@ public partial class ConfigView : UserControl
         if (controlMapping.TryGetValue(buttonText, out UIElement targetControl))
         {
             targetControl.Visibility = Visibility.Visible;
-            UIHelper.AnimateFadeIn(targetControl, 0.25f, 1, 0.25f);
+            UIHelper.AnimateFade(targetControl, 0.25f, 1, 0.25f);
         }
-    }
-
-    public void SelectRadioButton(ItemsControl itemsControl, int index)
-    {
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-            if (index < 0 || index >= itemsControl.Items.Count)
-                return;
-
-            object item = itemsControl.Items[index];
-            if (itemsControl.ItemContainerGenerator.ContainerFromItem(item) is ContentPresenter contentPresenter)
-            {
-                RadioButton radioButton = UIHelper.FindVisualChild<RadioButton>(contentPresenter);
-                if (radioButton != null)
-                {
-                    radioButton.IsChecked = true;
-                }
-            }
-        }), DispatcherPriority.Background);
     }
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)

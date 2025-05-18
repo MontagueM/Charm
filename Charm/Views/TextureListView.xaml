@@ -64,7 +64,7 @@
 
     </UserControl.Resources>
 
-    <Grid Style="{StaticResource GradientBackground}">
+    <Grid>
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -78,19 +78,6 @@
                 </BeginStoryboard>
             </EventTrigger>
         </Grid.Triggers>
-
-        <Grid
-            x:Name="SpinnerContainer"
-            Grid.RowSpan="2"
-            Background="Transparent"
-            Opacity="1"
-            Visibility="Hidden">
-            <Border
-                x:Name="Spinner"
-                Background="Transparent"
-                BorderThickness="0"
-                Opacity="1" />
-        </Grid>
 
         <Grid x:Name="MainContainer" Background="Transparent">
             <Grid.RenderTransform>

@@ -10,8 +10,7 @@
     Loaded="OnControlLoaded"
     mc:Ignorable="d">
 
-
-    <Grid Style="{StaticResource GradientBackground}">
+    <Grid Background="Transparent">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -31,18 +30,6 @@
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
 
-        <Grid
-            x:Name="SpinnerContainer"
-            Grid.RowSpan="2"
-            Background="Transparent"
-            Opacity="1"
-            Visibility="Hidden">
-            <Border
-                x:Name="Spinner"
-                Background="Transparent"
-                BorderThickness="0"
-                Opacity="1" />
-        </Grid>
 
         <Grid
             x:Name="MainContainer"

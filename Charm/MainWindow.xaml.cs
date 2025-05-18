@@ -28,22 +28,15 @@ public partial class MainWindow
     private bool _bHasInitialised = false;
     public FileVersionInfo GameInfo = null;
 
-    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
-    {
-        if (MainMenuTab.Visibility == Visibility.Visible)
-        {
-            Task.Run(InitialiseHandlers);
-            _bHasInitialised = true;
-        }
-
-        Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        CharmIcon.Source = GetBitmapSource(appIcon);
-    }
+    public static MainWindow Current;
+    public Spinner2 Spinner;
 
     public MainWindow()
     {
         InitializeComponent();
+        SourceInitialized += OnSourceInitialized;
 
+        Current = this;
         Progress = ProgressView;
 
         int numSingletons = InitialiseStrategistSingletons();
@@ -65,6 +58,16 @@ public partial class MainWindow
         };
 
         InitialiseSubsystems();
+
+        if (ConfigSubsystem.Get().GetAnimatedBackground())
+        {
+            if (Spinner is null)
+                Spinner = new Spinner2((int)Width, (int)Height);
+
+            SpinnerContainer.Children.Add(Spinner);
+        }
+        else
+            SpinnerContainer.Visibility = Visibility.Collapsed;
 
         _logView = new LogView();
         LogHandler.Initialise(_logView);
@@ -112,6 +115,18 @@ public partial class MainWindow
         };
     }
 
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        if (MainMenuTab.Visibility == Visibility.Visible)
+        {
+            Task.Run(InitialiseHandlers);
+            _bHasInitialised = true;
+        }
+
+        Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        CharmIcon.Source = GetBitmapSource(appIcon);
+    }
+
     private void ShowAgreement()
     {
         PopupBanner warn = new()
@@ -134,7 +149,6 @@ public partial class MainWindow
         warn.OnProgressComplete += () => ConfigSubsystem.Get().SetAcceptedAgreement(true);
         warn.Show();
     }
-
 
     private int InitialiseStrategistSingletons()
     {
@@ -320,6 +334,11 @@ public partial class MainWindow
         SetNewestTabSelected();
     }
 
+    public void SetLoggerSelected()
+    {
+        MainTabControl.SelectedItem = _logTab;
+    }
+
     public void HideMainMenu()
     {
         MainMenuTab.Visibility = Visibility.Collapsed;
@@ -344,11 +363,6 @@ public partial class MainWindow
     public void SetNewestTabSelected()
     {
         MainTabControl.SelectedItem = _newestTab;
-    }
-
-    public void SetLoggerSelected()
-    {
-        MainTabControl.SelectedItem = _logTab;
     }
 
     public void SetNewestTabName(string newName)
@@ -414,6 +428,33 @@ public partial class MainWindow
             else if (content is AudioListView audioView)
             {
                 audioView.MusicPlayer.Dispose();
+            }
+        }
+    }
+
+    private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.Source is TabControl tabControl)
+        {
+            if (tabControl.SelectedItem is TabItem selectedTab)
+            {
+                if (selectedTab.Content is null) // bug, first time start up
+                {
+                    if (Spinner is not null)
+                        Spinner.PositionScale = new(2, 2, -1, -1);
+                }
+                else if (selectedTab.Content is not MainMenuView)
+                {
+                    UIHelper.AnimateFade(SpinnerContainer, 0.1f, 0.5f, 1);
+                    if (Spinner is not null)
+                        Spinner.PositionScale = new(4f, 4f, -3.6f, -3.3f);
+                }
+                else
+                {
+                    UIHelper.AnimateFade(SpinnerContainer, 0.1f, 1.0f, 0.5f);
+                    if (Spinner is not null)
+                        Spinner.PositionScale = new(2, 2, -1, -1);
+                }
             }
         }
     }

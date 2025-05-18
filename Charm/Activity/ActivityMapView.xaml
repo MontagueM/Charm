@@ -60,7 +60,7 @@
         </ControlTemplate>
     </UserControl.Resources>
 
-    <Grid x:Name="MainContainer" Style="{StaticResource GradientBackground}">
+    <Grid x:Name="MainContainer">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -80,21 +80,6 @@
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
 
-        <Grid
-            x:Name="SpinnerContainer"
-            Grid.ColumnSpan="2"
-            Background="#AE5C5C5C"
-            Opacity="0.75"
-            Visibility="Hidden">
-            <Grid.Effect>
-                <BlurEffect Radius="5" />
-            </Grid.Effect>
-            <Border
-                x:Name="Spinner"
-                Background="Transparent"
-                BorderThickness="0"
-                Opacity="1" />
-        </Grid>
 
         <Grid Grid.Column="0" Background="Transparent">
             <Grid.RowDefinitions>

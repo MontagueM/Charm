@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -125,7 +126,7 @@ namespace Charm
 
     public static class UIHelper
     {
-        public static void AnimateFadeIn(dynamic obj, float seconds, float to = 1, float from = 0)
+        public static void AnimateFade(dynamic obj, float seconds, float to = 1, float from = 0)
         {
             Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
             {
@@ -189,6 +190,25 @@ namespace Charm
                 }
             }
             return children;
+        }
+
+        public static void SelectRadioButton(ItemsControl itemsControl, int index)
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (index < 0 || index >= itemsControl.Items.Count)
+                    return;
+
+                object item = itemsControl.Items[index];
+                if (itemsControl.ItemContainerGenerator.ContainerFromItem(item) is ContentPresenter contentPresenter)
+                {
+                    RadioButton radioButton = UIHelper.FindVisualChild<RadioButton>(contentPresenter);
+                    if (radioButton != null)
+                    {
+                        radioButton.IsChecked = true;
+                    }
+                }
+            }), DispatcherPriority.Background);
         }
     }
 }

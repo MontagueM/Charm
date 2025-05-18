@@ -115,7 +115,7 @@ public partial class BadgeView : UserControl
         }
 
         SingleItemList.ItemsSource = itemsToShow;
-        UIHelper.AnimateFadeIn(SingleItemList, 0.15f, 1f, 0.1f);
+        UIHelper.AnimateFade(SingleItemList, 0.15f, 1f, 0.1f);
     }
 
 

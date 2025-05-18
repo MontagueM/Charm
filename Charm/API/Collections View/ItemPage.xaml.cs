@@ -44,7 +44,7 @@ public partial class ItemPage : UserControl
         //}
 
         ItemList.ItemsSource = itemsToShow;
-        UIHelper.AnimateFadeIn(ItemList, 0.15f, 1f, 0.1f);
+        UIHelper.AnimateFade(ItemList, 0.15f, 1f, 0.1f);
     }
 
     private void PreviousPage_Click(object sender, RoutedEventArgs e)

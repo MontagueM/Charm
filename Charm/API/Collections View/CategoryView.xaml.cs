@@ -64,17 +64,6 @@ public partial class CategoryView : UserControl
         //MouseMove += ToolTip.UserControl_MouseMove;
         Panel.SetZIndex(ToolTip, 50);
         MainGrid.Children.Add(ToolTip);
-
-        if (ConfigSubsystem.Get().GetAnimatedBackground())
-        {
-            SpinnerShader _spinner = new();
-            Spinner.Effect = _spinner;
-            SizeChanged += _spinner.OnSizeChanged;
-            _spinner.ScreenWidth = (float)ActualWidth;
-            _spinner.ScreenHeight = (float)ActualHeight;
-            _spinner.Scale = new(0, 0);
-            _spinner.Offset = new(-3.6, -3.3);
-        }
     }
 
     public void LoadSubcategories(CollectionsView.ItemCategory itemCategory)
@@ -126,7 +115,7 @@ public partial class CategoryView : UserControl
             itemsToShow.Add(new SubcategoryChild { IsPlaceholder = true });
         }
         SubcategoryChildren.ItemsSource = itemsToShow;
-        UIHelper.AnimateFadeIn(SubcategoryChildren, 0.15f, 1f, 0.1f);
+        UIHelper.AnimateFade(SubcategoryChildren, 0.15f, 1f, 0.1f);
     }
 
     private void DisplayItems()
@@ -144,7 +133,7 @@ public partial class CategoryView : UserControl
         }
 
         SingleItemList.ItemsSource = itemsToShow;
-        UIHelper.AnimateFadeIn(SingleItemList, 0.15f, 1f, 0.1f);
+        UIHelper.AnimateFade(SingleItemList, 0.15f, 1f, 0.1f);
     }
 
     private void DisplayItemSets()
@@ -170,7 +159,7 @@ public partial class CategoryView : UserControl
         }
 
         ItemSetList.ItemsSource = itemsToShow;
-        UIHelper.AnimateFadeIn(ItemSetList, 0.15f, 1f, 0.1f);
+        UIHelper.AnimateFade(ItemSetList, 0.15f, 1f, 0.1f);
     }
 
     private void LoadItems(int categoryIndex)

@@ -32,17 +32,6 @@ public partial class CollectionsView : UserControl
         ToolTip = new();
         Panel.SetZIndex(ToolTip, 50);
         MainContainer.Children.Add(ToolTip);
-
-        if (ConfigSubsystem.Get().GetAnimatedBackground())
-        {
-            SpinnerShader _spinner = new();
-            Spinner.Effect = _spinner;
-            SizeChanged += _spinner.OnSizeChanged;
-            _spinner.ScreenWidth = (float)ActualWidth;
-            _spinner.ScreenHeight = (float)ActualHeight;
-            _spinner.Scale = new(0, 0);
-            _spinner.Offset = new(-3.6, -3.3);
-        }
     }
 
     public void LoadContent()

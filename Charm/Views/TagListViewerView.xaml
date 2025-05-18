@@ -10,7 +10,7 @@
     Loaded="OnControlLoaded"
     mc:Ignorable="d">
 
-    <Grid Style="{StaticResource GradientBackground}">
+    <Grid>
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -30,21 +30,6 @@
             <ColumnDefinition Width="100*" />
         </Grid.ColumnDefinitions>
 
-        <Grid
-            x:Name="SpinnerContainer"
-            Grid.ColumnSpan="2"
-            Background="#AE5C5C5C"
-            Opacity="0.75"
-            Visibility="Hidden">
-            <Grid.Effect>
-                <BlurEffect Radius="5" />
-            </Grid.Effect>
-            <Border
-                x:Name="Spinner"
-                Background="Transparent"
-                BorderThickness="0"
-                Opacity="1" />
-        </Grid>
 
         <local:TagListView x:Name="TagList" Grid.Column="0" />
         <local:TagView x:Name="TagView" Grid.Column="1" />

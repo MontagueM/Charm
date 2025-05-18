@@ -47,7 +47,7 @@ public partial class APITooltip : UserControl
             Dispatcher.Invoke(() =>
             {
                 InfoBox.Visibility = Visibility.Visible;
-                //UIHelper.AnimateFadeIn(InfoBox, 0.1f, 1f, 0f);
+                //UIHelper.AnimateFade(InfoBox, 0.1f, 1f, 0f);
                 InfoBox.DataContext = item;
             });
 

@@ -13,7 +13,16 @@
     PreviewKeyDown="MainWindow_PreviewKeyDown"
     WindowState="Maximized"
     mc:Ignorable="d">
-    <Grid Background="Transparent">
+    <Grid Style="{DynamicResource GradientBackground}">
+
+        <Grid
+            x:Name="SpinnerContainer"
+            Grid.RowSpan="2"
+            Panel.ZIndex="0"
+            Background="Transparent"
+            Opacity="1"
+            Visibility="Visible" />
+
         <StackPanel
             Margin="0,5,10,0"
             HorizontalAlignment="Right"
@@ -38,6 +47,29 @@
             x:Name="MainTabControl"
             Background="Transparent"
             FontFamily="{StaticResource MaterialDesignFont}">
+            <TabControl.Template>
+                <ControlTemplate TargetType="TabControl">
+                    <Grid>
+                        <DockPanel>
+                            <!--  Customized TabPanel  -->
+                            <TabPanel
+                                x:Name="HeaderPanel"
+                                Margin="0,0,0,0"
+                                Panel.ZIndex="1"
+                                Background="#0D0D0D"
+                                DockPanel.Dock="Top"
+                                IsItemsHost="True" />
+
+                            <!--  Content Presenter  -->
+                            <ContentPresenter
+                                x:Name="PART_SelectedContentHost"
+                                Margin="0"
+                                ContentSource="SelectedContent" />
+                        </DockPanel>
+                    </Grid>
+                </ControlTemplate>
+            </TabControl.Template>
+
             <TabItem
                 x:Name="SettingsTab"
                 HorizontalAlignment="Left"

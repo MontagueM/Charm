@@ -51,17 +51,8 @@ public partial class MainMenuView : UserControl
         Panel.SetZIndex(ToolTip, 50);
         MainContainer.Children.Add(ToolTip);
 
-        if (ConfigSubsystem.Get().GetAnimatedBackground())
-        {
-            SpinnerShader _spinner = new();
-            Spinner.Effect = _spinner;
-            SizeChanged += _spinner.OnSizeChanged;
-            _spinner.ScreenWidth = (float)ActualWidth;
-            _spinner.ScreenHeight = (float)ActualHeight;
-            _spinner.Scale = new(2, 2);
-            _spinner.Offset = new(-1, -1);
-            SpinnerContainer.Visibility = Visibility.Visible;
-        }
+        if (MainWindow.Current.Spinner is not null)
+            MainWindow.Current.Spinner.PositionScale = new(2, 2, -1, -1);
     }
 
     private bool ShowWQButtons(TigerStrategy strategy)
