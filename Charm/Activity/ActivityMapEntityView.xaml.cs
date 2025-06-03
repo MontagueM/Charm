@@ -453,9 +453,11 @@ public partial class ActivityMapEntityView : UserControl
 
                                     foreach (SF1918080 c in b)
                                     {
-                                        if (c.Unk10.GetValue(resource.GetReader()) is SD1918080 globals)
+                                        if (c.Unk10.GetValue(resource.GetReader()) is SD1918080)
                                         {
-                                            globalScene.AddToGlobalScene(globals);
+                                            // I dont like adding the whole resource here, but its the only way to get the data out of it
+                                            globalScene.AddToGlobalScene(resource);
+                                            break;
                                         }
                                     }
                                     break;

@@ -1,5 +1,6 @@
 ﻿using DirectXTexNet;
 using SharpDX.Direct3D11;
+using Tiger.Schema.Strings;
 
 namespace Tiger.Schema;
 
@@ -7,6 +8,7 @@ namespace Tiger.Schema;
 public class Globals : Strategy.StrategistSingleton<Globals>
 {
     private List<TigerInputLayout> _inputLayouts = new();
+    public Dictionary<TigerHash, Vector4> GlobalChannelDefaults = new();
     public Tag<SRenderGlobals> RenderGlobals;
 
     public Globals(TigerStrategy strategy, StrategyConfiguration strategyConfiguration) : base(strategy)
@@ -31,12 +33,24 @@ public class Globals : Strategy.StrategistSingleton<Globals>
 
     protected override void Initialise()
     {
+        FileHash hash = Strategy.CurrentStrategy switch
+        {
+            TigerStrategy.DESTINY1_RISE_OF_IRON => new FileHash("0020AF80"),
+            _ when Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402 => PackageResourcer.Get().GetNamedTag("render_globals"),
+            _ => PackageResourcer.Get().GetNamedTag("client_bootstrap_patchable")
+        };
+
+        Tag<SClientBootstrap> pkg = FileResourcer.Get().GetSchemaTag<SClientBootstrap>(hash);
+        RenderGlobals = pkg.TagData.RenderGlobals;
+
         FillVertexInputLayouts();
+        FillGlobalChannelDefaults();
     }
 
     protected override void Reset()
     {
         _inputLayouts.Clear();
+        GlobalChannelDefaults.Clear();
     }
 
     public List<TigerInputLayout> GetInputLayouts()
@@ -50,16 +64,6 @@ public class Globals : Strategy.StrategistSingleton<Globals>
 
         if (Strategy.IsD1()) // D1 has an extra base layout, so just gonna reuse the last entry (suuurely its fine)
             _inputLayouts.Add(BaseInputLayouts[BaseInputLayouts.Count - 1]);
-
-        FileHash hash = Strategy.CurrentStrategy switch
-        {
-            TigerStrategy.DESTINY1_RISE_OF_IRON => new FileHash("0020AF80"),
-            _ when Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_BEYONDLIGHT_3402 => PackageResourcer.Get().GetNamedTag("render_globals"),
-            _ => PackageResourcer.Get().GetNamedTag("client_bootstrap_patchable")
-        };
-
-        Tag<SClientBootstrap> pkg = FileResourcer.Get().GetSchemaTag<SClientBootstrap>(hash);
-        RenderGlobals = pkg.TagData.RenderGlobals;
 
         DynamicArray<SVertexInputElementSet> ElementSet = RenderGlobals.TagData.InputLayouts.TagData.Elements2.TagData.Sets;
         DynamicArray<SVertexLayout> Mappings = RenderGlobals.TagData.InputLayouts.TagData.ElementMappings.TagData.Layouts;
@@ -121,6 +125,16 @@ public class Globals : Strategy.StrategistSingleton<Globals>
         //        Console.WriteLine($"\t\tIsInstanceData {element.IsInstanceData}");
         //    }
         //}
+    }
+
+    private void FillGlobalChannelDefaults()
+    {
+        var hashes = RenderGlobals.TagData.GlobalChannelDefaults.TagData.ChannelHashes;
+        var values = RenderGlobals.TagData.GlobalChannelDefaults.TagData.ChannelDefaults;
+        for (int i = 0; i < hashes.Count; i++)
+        {
+            GlobalChannelDefaults.TryAdd(hashes[i].StringHash, values[i].Vec);
+        }
     }
 
     private List<TfxRenderStage> ExportRenderStages = new()
@@ -3275,6 +3289,15 @@ public struct SRenderGlobals
     //public DynamicArrayUnloaded<SRenderGlobalPipelines> Pipelines;
     [SchemaField(0x30)]
     public Tag<SGlobalTextures> Textures;
+    public Tag<SGlobalChannelDefaults> GlobalChannelDefaults;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8080822D", 0x38)]
+public struct SGlobalChannelDefaults
+{
+    [SchemaField(0x8)]
+    public DynamicArray<SStringHash> ChannelHashes;
+    public DynamicArray<Vec4> ChannelDefaults;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "841B8080", 0x20)]

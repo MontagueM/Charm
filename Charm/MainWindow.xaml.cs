@@ -34,7 +34,6 @@ public partial class MainWindow
     public MainWindow()
     {
         InitializeComponent();
-        SourceInitialized += OnSourceInitialized;
 
         Current = this;
         Progress = ProgressView;

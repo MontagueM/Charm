@@ -200,7 +200,7 @@ public class DialogueD1
                                         var h = (S79818080)resource.TagData.Unk18.GetValue(resource.GetReader());
                                         List<SF1918080> h1 = h.Array1;
                                         h1.AddRange(h.Array2);
-                                        h1.AddRange(h.Array3);
+                                        h1.AddRange(h.D1Array3);
                                         foreach (SF1918080 h2 in h1)
                                         {
                                             if ((h2.Unk10.GetValue(resource.GetReader()) is SAA078080 dialogue) && !sounds.Contains(dialogue))

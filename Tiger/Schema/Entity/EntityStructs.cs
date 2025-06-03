@@ -928,10 +928,15 @@ public struct S79818080
     public DynamicArray<SF1918080> Array2;
 
     [SchemaField(0x130, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)] // Not obsolete, just not used for anything atm
-    public DynamicArray<SF1918080> Array3;
-}
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)] // idk if this is in D2, theres no space for it in SK but theres a 0x10 gap in BL
+    public DynamicArray<SF1918080> D1Array3;
 
+    [SchemaField(0x140, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x178, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x1D8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x1F8, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArray<S6F818080> Array3;
+}
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "29068080", 0x8)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "E6938080", 0x18)]

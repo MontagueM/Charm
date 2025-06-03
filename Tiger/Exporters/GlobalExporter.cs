@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Tiger.Schema;
+using Tiger.Schema.Entity;
 using static Tiger.Exporters.MetadataScene;
 
 namespace Tiger.Exporters;
@@ -267,20 +268,60 @@ public class GlobalExporter : AbstractExporter
 
     private void ExportGlobalChannels()
     {
-        if (GlobalScene.Any<SD1918080>())
+        if (GlobalScene.Any<EntityResource>())
         {
-            List<GlobalChannelData> channels = new();
+            Dictionary<TigerHash, GlobalChannelData> channels = new();
             string dataSavePath = $"{SavePath}/Rendering";
             Directory.CreateDirectory(dataSavePath);
 
-            foreach (SD1918080 globals in GlobalScene.GetAllOfType<SD1918080>())
+            var defaults = Globals.Get().GlobalChannelDefaults;
+
+            // Just gonna export all channels
+            foreach (var defaultChannel in defaults)
             {
-                channels.Add(new GlobalChannelData
+                channels.TryAdd(defaultChannel.Key, new GlobalChannelData
                 {
-                    Index = globals.ChannelIndex,
-                    Bytecode = globals.UnkBytecode.Select(x => x.Value).ToList(),
-                    Constants = globals.Values.Select(x => x.Vec).ToList()
+                    Name = GlobalChannels.KnownChannelNames.TryGetValue(defaultChannel.Key.Hash32, out string name) ? name : defaultChannel.Key.ToString(),
+                    Index = defaults.Keys.ToList().IndexOf(defaultChannel.Key),
+                    Bytecode = new List<byte>(), // No bytecode for defaults
+                    Constants = new List<Vector4> { defaultChannel.Value } // Default value
                 });
+            }
+
+            // Overwrites defaults with any from the scene
+            foreach (EntityResource resource in GlobalScene.GetAllOfType<EntityResource>())
+            {
+                switch (resource.TagData.Unk10.GetValue(resource.GetReader()))
+                {
+                    case S79948080:
+                        var globals = ((S79818080)resource.TagData.Unk18.GetValue(resource.GetReader()));
+                        DynamicArray<SF1918080> map = globals.Array1;
+                        map.AddRange(globals.Array2);
+
+                        foreach (SF1918080 entry in map)
+                        {
+                            if (entry.Unk10.GetValue(resource.GetReader()) is SD1918080 global)
+                            {
+                                var id = globals.Array3[global.ChannelIndex].ID;
+
+                                if (channels.ContainsKey(id))
+                                {
+                                    channels[id] = new GlobalChannelData
+                                    {
+                                        Name = GlobalChannels.KnownChannelNames.TryGetValue(id.Hash32, out string name) ? name : id.ToString(),
+                                        Index = Globals.Get().GlobalChannelDefaults.Keys.ToList().IndexOf(id),
+                                        Bytecode = global.UnkBytecode.Select(x => x.Value).ToList(),
+                                        Constants = global.Values.Select(x => x.Vec).ToList()
+                                    };
+                                }
+                                else
+                                {
+                                    // Idk what to do with these, so just gonna skip for now
+                                }
+                            }
+                        }
+                        break;
+                }
 
                 //System.Console.WriteLine($"\t-{globals.Unk00}: Index {globals.ChannelIndex}");
 
@@ -358,6 +399,7 @@ public class GlobalExporter : AbstractExporter
 
     private struct GlobalChannelData
     {
+        public string Name;
         public int Index;
         public List<byte> Bytecode;
         public List<Vector4> Constants;

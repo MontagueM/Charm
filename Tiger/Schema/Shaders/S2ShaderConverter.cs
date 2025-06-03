@@ -551,7 +551,7 @@ PS
                     byte channelIndex = channelData.Index;
 
                     if (!funcDef.ToString().Contains($"GlobalChannel{channelIndex}"))
-                        funcDef.AppendLine($"\tfloat4 GlobalChannel{channelIndex} < Attribute(\"GlobalChannel{channelIndex}\"); Default4{GlobalChannels.Get(channelIndex).ToString()}; >;");
+                        funcDef.AppendLine($"\tfloat4 GlobalChannel{channelIndex} < Attribute(\"GlobalChannel{channelIndex}\"); Default4{GlobalChannels.GetDefault(channelIndex).ToString()}; >;");
                     break;
             }
         }
