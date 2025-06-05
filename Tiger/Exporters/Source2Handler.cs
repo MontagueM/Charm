@@ -184,7 +184,7 @@ public static class Source2Handler
             string temp_time_fix = $"CurTime = exists(CurrentTime) ? CurrentTime : Time;";
             foreach (KeyValuePair<int, string> entry in bytecode_hlsl)
             {
-                string expression = entry.Value.Contains("Time") ? $"{temp_time_fix} return {entry.Value.Replace("Time", "CurTime")};" : entry.Value;
+                string expression = (entry.Value.Contains("Time") && !entry.Value.Contains("FrameTimeOfDay")) ? $"{temp_time_fix} return {entry.Value.Replace("Time", "CurTime")};" : entry.Value;
                 vmat.AppendLine($"\t\tcb0_{entry.Key} \"{expression}\"");
             }
         }

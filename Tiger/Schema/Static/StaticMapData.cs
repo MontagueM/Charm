@@ -396,17 +396,17 @@ public struct SStaticMeshInstanceMap
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "AE7D8080", 0x50)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "1E898080", 0x60)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "1E898080", 0x6C)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "1E898080", 0x6C)]
 public struct SBubbleParent
 {
     public long FileSize;
 
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(TigerStrategy.DESTINY2_LATEST, Tag64 = true)] // Changed to Tag64 in Heresy
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)] // Changed to Tag64 in Heresy
     public Tag<SBubbleDefinition> ChildMapReference;
 
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
     public StringHash MapName;
 }
 
@@ -555,7 +555,7 @@ public struct SB3938080
 // /// Boss entity data resource?
 // /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "19808080", 0x50)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "19808080", 0x54)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "19808080", 0x54)]
 public struct S19808080
 {
     // todo rest of this

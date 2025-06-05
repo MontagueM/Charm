@@ -44,7 +44,7 @@ public struct S2F978080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2A978080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "2A978080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "2A978080", 0x40)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "2A978080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "2A978080", 0x40)]
 public struct S2A978080
 {
     [SchemaField(0x20, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -58,7 +58,7 @@ public struct S2A978080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "33978080", 0x68)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "33978080", 0x8C)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "33978080", 0x94)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "33978080", 0xA4)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "33978080", 0xA4)]
 public struct S33978080
 {
     // Male
@@ -82,7 +82,7 @@ public struct S33978080
     //[SchemaField(0x38, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     //[SchemaField(0x48, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
     //[SchemaField(0x50, TigerStrategy.DESTINY2_LIGHTFALL_7366, Tag64 = true)]
-    //[SchemaField(0x58, TigerStrategy.DESTINY2_LATEST, Tag64 = true)]
+    //[SchemaField(0x58, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
     //public WwiseSound SoundF;
 
     //[SchemaField(0x48, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -92,14 +92,14 @@ public struct S33978080
     //[SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Obsolete = true)]
     //[SchemaField(0x58, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     //[SchemaField(0x60, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
-    //[SchemaField(0x68, TigerStrategy.DESTINY2_LATEST)]
+    //[SchemaField(0x68, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
     //public StringReference64 VoicelineF;
 
     [SchemaField(0x3C, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x5C, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x7C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x84, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
-    [SchemaField(0x94, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x94, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
     public StringHash NarratorString;
 
 
@@ -115,7 +115,7 @@ public struct S33978080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "2D978080", 0x28)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "2D978080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "2D978080", 0x38)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "2D978080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "2D978080", 0x38)]
 public struct S2D978080
 {
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
