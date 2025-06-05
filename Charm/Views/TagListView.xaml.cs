@@ -1872,8 +1872,8 @@ public partial class TagListView : UserControl
         {
             if (item.GetWeaponPatternIndex() == -1)
                 return;
-            string name = Investment.Get().GetItemName(item);
-            string type = Investment.Get().InventoryItemStringThings[Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)].TagData.ItemType.Value;
+            string name = item.GetItemName();
+            string type = item.GetItemType();
             if (type == null)
             {
                 type = "";

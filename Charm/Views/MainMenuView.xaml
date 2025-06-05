@@ -85,8 +85,10 @@
                     Click="ActivitiesViewButton_OnClick"
                     MouseEnter="CategoryButton_MouseEnter"
                     MouseLeave="CategoryButton_MouseLeave"
-                    Style="{DynamicResource D2StyleButton}"
-                    Tag="MAPS AND ACTIVITIES:View Maps and Activity related content.">
+                    Style="{DynamicResource D2StyleButton}">
+                    <local:GenericTooltipProperties.TooltipData>
+                        <local:GenericTooltip Name="MAPS AND ACTIVITIES" Description="View Maps and Activity related content." />
+                    </local:GenericTooltipProperties.TooltipData>
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"
@@ -117,8 +119,10 @@
                             Click="ApiViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="API VIEWER:View and export any Player Gear.">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="API VIEWER" Description="View and export any Player Gear." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -133,8 +137,10 @@
                             Click="NamedEntitiesBagsViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="NAMED BAGS:View and export entities contained in developer named 'bags', like a collection of prefabs.">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="NAMED BAGS" Description="View and export entities contained in developer named 'bags', like a collection of prefabs." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -148,8 +154,10 @@
                             Click="AllEntitiesViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="DYNAMICS:View and export entities, some are even named!">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="DYNAMICS" Description="View and export entities, some are even named!" />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -164,8 +172,10 @@
                             Click="AllStaticsViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="STATICS:View and export static models. These are what make a map.">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="STATICS" Description="View and export static models. These are what make a map." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -195,8 +205,10 @@
                             Click="AllAudioViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="ALL SOUNDS:View and export any audio in the game.">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="ALL SOUNDS" Description="View and export any audio in the game." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -211,8 +223,10 @@
                             Click="WeaponAudioViewButton_Click"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="WEAPON SOUNDS:View and export specific weapon sounds.">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="WEAPON SOUNDS" Description="View and export specific weapon sounds." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -227,8 +241,10 @@
                             Click="AllBKHDViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="SOUND BANKS:View and export specific sounds from a named collection">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="SOUND BANKS" Description="View and export specific sounds from a named collection" />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -258,8 +274,10 @@
                             Click="AllStringsViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="STRINGS:View and export strings.">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="STRINGS" Description="View and export strings." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -273,8 +291,10 @@
                             Click="AllTexturesView2Button_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="TEXTURES:View and export textures.">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="TEXTURES" Description="View and export textures." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -288,8 +308,10 @@
                             Click="AllMaterialsViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="MATERIALS:View and export materials. These make everything look pretty.">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="MATERIALS" Description="View and export materials. These make everything look pretty." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -305,8 +327,10 @@
                             Click="CollectionsViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}"
-                            Tag="COLLECTIONS:View and inspect Player Gear in detail, just like in-game!">
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="COLLECTIONS" Description="View and inspect Player Gear in detail, just like in-game!" />
+                            </local:GenericTooltipProperties.TooltipData>
                             <Border Background="#BB181818">
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
@@ -382,8 +406,10 @@
                     Click="GithubButton_OnClick"
                     MouseEnter="CategoryButton_MouseEnter"
                     MouseLeave="CategoryButton_MouseLeave"
-                    Style="{DynamicResource D2StyleButton}"
-                    Tag="GITHUB:View the source code for Charm">
+                    Style="{DynamicResource D2StyleButton}">
+                    <local:GenericTooltipProperties.TooltipData>
+                        <local:GenericTooltip Name="GITHUB" Description="View the source code for Charm" />
+                    </local:GenericTooltipProperties.TooltipData>
                     <TextBlock
                         Margin="5"
                         d:FontFamily="Haas Grot Text 55 Roman"
@@ -398,8 +424,10 @@
                     Click="AboutButton_OnClick"
                     MouseEnter="CategoryButton_MouseEnter"
                     MouseLeave="CategoryButton_MouseLeave"
-                    Style="{DynamicResource D2StyleButton}"
-                    Tag="ABOUT:View the credits for Charm">
+                    Style="{DynamicResource D2StyleButton}">
+                    <local:GenericTooltipProperties.TooltipData>
+                        <local:GenericTooltip Name="ABOUT" Description="View the credits for Charm" />
+                    </local:GenericTooltipProperties.TooltipData>
                     <TextBlock
                         Margin="5"
                         d:FontFamily="Haas Grot Text 55 Roman"

@@ -16,7 +16,6 @@ using Restless.WaveForm.Renderer;
 using Restless.WaveForm.Settings;
 using Tiger;
 using Tiger.Schema.Audio;
-using static Charm.APIItemView;
 using static Charm.PackageList;
 
 namespace Charm;
@@ -28,7 +27,6 @@ public partial class AudioListView : UserControl
     private static SineSettings _sinePreviewSettings = SineSettings.CreatePreview();
     private static SineSettings _sineExportSettings = SineSettings.CreateExport();
     private ConfigSubsystem Config = TigerInstance.GetSubsystem<ConfigSubsystem>();
-    private APITooltip ToolTip;
 
     private ConcurrentBag<AudioItem> Sounds = new();
 
@@ -51,10 +49,6 @@ public partial class AudioListView : UserControl
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
-        ToolTip = new();
-        Panel.SetZIndex(ToolTip, 50);
-        MainContainer.Children.Add(ToolTip);
-
         MusicPlayer.ProgressBar.ValueChanged -= (s, e) => UpdateWaveformProgress();
         MusicPlayer.ProgressBar.ValueChanged += (s, e) => UpdateWaveformProgress();
     }
@@ -262,7 +256,6 @@ public partial class AudioListView : UserControl
 
         _currentSound.Load();
         using var stream = _currentSound.WemReaderClone;
-        Console.WriteLine(_currentSound.WemReaderClone is null);
         var wave = WaveFormRenderer.Create(stream, _sineExportSettings);
 
         // Overlay Right and Left
@@ -287,26 +280,10 @@ public partial class AudioListView : UserControl
 
     private void ExportButtons_MouseEnter(object sender, MouseEventArgs e)
     {
-        if (!(sender as Button).IsEnabled)
-            return;
-
-        ToolTip.ActiveItem = (sender as Button);
-        string[] text = (sender as Button).Tag.ToString().Split(":");
-
-        PlugItem plugItem = new()
-        {
-            Name = $"{text[0]}",
-            Description = $"{text[1]}",
-            PlugStyle = DestinySocketCategoryStyle.Reusable,
-        };
-
-        ToolTip.MakeTooltip(plugItem);
     }
 
     public void ExportButtons_MouseLeave(object sender, MouseEventArgs e)
     {
-        ToolTip.ClearTooltip();
-        ToolTip.ActiveItem = null;
     }
 
 

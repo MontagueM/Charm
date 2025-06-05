@@ -168,8 +168,10 @@
                             IsEnabled="False"
                             MouseEnter="ExportButtons_MouseEnter"
                             MouseLeave="ExportButtons_MouseLeave"
-                            Style="{StaticResource D2StyleButton}"
-                            Tag="EXPORT:Export the currently shown texture.">
+                            Style="{StaticResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="EXPORT" Description="Export the currently shown texture." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 Margin="5"
                                 VerticalAlignment="Center"
@@ -189,8 +191,10 @@
                             IsEnabled="False"
                             MouseEnter="ExportButtons_MouseEnter"
                             MouseLeave="ExportButtons_MouseLeave"
-                            Style="{StaticResource D2StyleButton}"
-                            Tag="EXPORT ALL:Export all textures from this package, based on the current filters.">
+                            Style="{StaticResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="EXPORT ALL" Description="Export all textures from this package, based on the current filters." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 Margin="5"
                                 VerticalAlignment="Center"

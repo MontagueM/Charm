@@ -9,11 +9,111 @@
     Title="Charm"
     Width="1920"
     Height="1080"
+    Focusable="False"
+    KeyboardNavigation.ControlTabNavigation="None"
+    KeyboardNavigation.DirectionalNavigation="None"
+    KeyboardNavigation.TabNavigation="None"
     Loaded="OnControlLoaded"
     PreviewKeyDown="MainWindow_PreviewKeyDown"
     WindowState="Maximized"
     mc:Ignorable="d">
-    <Grid Style="{DynamicResource GradientBackground}">
+    <Grid x:Name="MainGrid" Style="{DynamicResource GradientBackground}">
+
+        <!--  This probably sucks but it scales so...  -->
+        <Viewbox Panel.ZIndex="1">
+            <Grid
+                x:Name="ViewboxGrid"
+                Width="1920"
+                Height="1017"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                <local:Tooltip2 x:Name="ToolTip" Panel.ZIndex="100" />
+
+                <!--  Shared overlay for floating UI  -->
+                <Canvas
+                    x:Name="OverlayRoot"
+                    Panel.ZIndex="90"
+                    IsHitTestVisible="False">
+                    <Canvas.RenderTransform>
+                        <TranslateTransform />
+                    </Canvas.RenderTransform>
+                </Canvas>
+
+                <StackPanel
+                    Margin="0,5,10,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Panel.ZIndex="1"
+                    Orientation="Horizontal">
+                    <Image
+                        x:Name="CharmIcon"
+                        Width="20"
+                        Height="20"
+                        Margin="0,0,5,0"
+                        VerticalAlignment="Center" />
+                    <TextBlock
+                        x:Name="CurrentStrategyText"
+                        VerticalAlignment="Center"
+                        FontFamily="{StaticResource MaterialDesignFont}"
+                        FontSize="16"
+                        Text="NO GAME SELECTED" />
+                </StackPanel>
+
+                <TabControl
+                    x:Name="MainTabControl"
+                    Background="Transparent"
+                    FontFamily="{StaticResource MaterialDesignFont}"
+                    SelectionChanged="MainTabControl_SelectionChanged">
+                    <TabControl.Template>
+                        <ControlTemplate TargetType="TabControl">
+                            <Grid>
+                                <DockPanel>
+                                    <!--  Customized TabPanel  -->
+                                    <TabPanel
+                                        x:Name="HeaderPanel"
+                                        Margin="0,0,0,0"
+                                        Panel.ZIndex="1"
+                                        Background="#0D0D0D"
+                                        DockPanel.Dock="Top"
+                                        IsItemsHost="True" />
+
+                                    <!--  Content Presenter  -->
+                                    <ContentPresenter
+                                        x:Name="PART_SelectedContentHost"
+                                        Margin="0"
+                                        ContentSource="SelectedContent" />
+                                </DockPanel>
+                            </Grid>
+                        </ControlTemplate>
+                    </TabControl.Template>
+
+                    <TabItem
+                        x:Name="SettingsTab"
+                        HorizontalAlignment="Left"
+                        Header="SETTINGS">
+                        <local:ConfigView />
+                    </TabItem>
+                    <TabItem
+                        x:Name="Log"
+                        HorizontalAlignment="Left"
+                        Header="LOG">
+                        <local:LogView />
+                    </TabItem>
+                    <TabItem
+                        x:Name="MainMenuTab"
+                        HorizontalAlignment="Left"
+                        Header="MAIN MENU"
+                        IsSelected="True">
+                        <local:MainMenuView />
+                    </TabItem>
+                </TabControl>
+
+                <local:ProgressView
+                    x:Name="ProgressView"
+                    Grid.Row="0"
+                    Grid.RowSpan="2" />
+            </Grid>
+        </Viewbox>
 
         <Grid
             x:Name="SpinnerContainer"
@@ -22,78 +122,5 @@
             Background="Transparent"
             Opacity="1"
             Visibility="Visible" />
-
-        <StackPanel
-            Margin="0,5,10,0"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Top"
-            Panel.ZIndex="1"
-            Orientation="Horizontal">
-            <Image
-                x:Name="CharmIcon"
-                Width="20"
-                Height="20"
-                Margin="0,0,5,0"
-                VerticalAlignment="Center" />
-            <TextBlock
-                x:Name="CurrentStrategyText"
-                VerticalAlignment="Center"
-                FontFamily="{StaticResource MaterialDesignFont}"
-                FontSize="16"
-                Text="NO GAME SELECTED" />
-        </StackPanel>
-
-        <TabControl
-            x:Name="MainTabControl"
-            Background="Transparent"
-            FontFamily="{StaticResource MaterialDesignFont}">
-            <TabControl.Template>
-                <ControlTemplate TargetType="TabControl">
-                    <Grid>
-                        <DockPanel>
-                            <!--  Customized TabPanel  -->
-                            <TabPanel
-                                x:Name="HeaderPanel"
-                                Margin="0,0,0,0"
-                                Panel.ZIndex="1"
-                                Background="#0D0D0D"
-                                DockPanel.Dock="Top"
-                                IsItemsHost="True" />
-
-                            <!--  Content Presenter  -->
-                            <ContentPresenter
-                                x:Name="PART_SelectedContentHost"
-                                Margin="0"
-                                ContentSource="SelectedContent" />
-                        </DockPanel>
-                    </Grid>
-                </ControlTemplate>
-            </TabControl.Template>
-
-            <TabItem
-                x:Name="SettingsTab"
-                HorizontalAlignment="Left"
-                Header="SETTINGS">
-                <local:ConfigView />
-            </TabItem>
-            <TabItem
-                x:Name="Log"
-                HorizontalAlignment="Left"
-                Header="LOG">
-                <local:LogView />
-            </TabItem>
-            <TabItem
-                x:Name="MainMenuTab"
-                HorizontalAlignment="Left"
-                Header="MAIN MENU"
-                IsSelected="True">
-                <local:MainMenuView />
-            </TabItem>
-        </TabControl>
-
-        <local:ProgressView
-            x:Name="ProgressView"
-            Grid.Row="0"
-            Grid.RowSpan="2" />
     </Grid>
 </Window>

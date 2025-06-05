@@ -11,8 +11,10 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <Style x:Key="MainItemsButton" TargetType="Button">
-            <EventSetter Event="Click" Handler="ItemCategory_OnClick" />
+        <local:TitleCaseConverter x:Key="TitleCaseConverter" />
+
+        <Style x:Key="MainItemsButtonOld" TargetType="Button">
+            <EventSetter Event="Click" Handler="Category_OnClick" />
             <EventSetter Event="MouseEnter" Handler="ItemCategory_MouseEnter" />
             <EventSetter Event="MouseLeave" Handler="ItemCategory_MouseLeave" />
             <Setter Property="Template">
@@ -225,147 +227,139 @@
             </Setter>
         </Style>
 
-        <Style x:Key="BadgeItemButton" TargetType="Button">
-            <EventSetter Event="Click" Handler="BadgeCategory_OnClick" />
-            <EventSetter Event="MouseEnter" Handler="ItemCategory_MouseEnter" />
-            <EventSetter Event="MouseLeave" Handler="ItemCategory_MouseLeave" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Grid
-                            x:Name="MainGrid"
-                            Margin="5"
-                            Background="Transparent"
-                            Cursor="Hand">
-                            <Border
-                                x:Name="innerBorder"
-                                Margin="0"
-                                BorderBrush="#E6FFFFFF"
-                                BorderThickness="2"
-                                CornerRadius="0"
-                                IsHitTestVisible="False"
-                                Opacity="0" />
+        <DataTemplate x:Key="CollectionItemButton">
+            <Button
+                Margin="5"
+                local:StyleHelper.BorderThickness="2"
+                local:StyleHelper.CornerRadius="0,65,0,0"
+                Click="Category_OnClick"
+                MouseEnter="ItemCategory_MouseEnter"
+                MouseLeave="ItemCategory_MouseLeave"
+                Style="{StaticResource D2StyleButtonNoOverlay}">
+                <Grid Background="Transparent">
+                    <Image x:Name="CollectionItemBackground" Source="{Binding ItemCategoryIcon}" />
+                    <Image
+                        x:Name="CollectionItemBackgroundActive"
+                        Opacity="0"
+                        Source="{Binding Tag}" />
+                    <Image
+                        x:Name="CollectionItemIcon"
+                        Opacity="0.75"
+                        Source="{Binding ItemCategoryIcon3}" />
+
+                    <Grid
+                        x:Name="InfoGrid"
+                        Margin="50"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent"
+                        Opacity="0.75">
+                        <StackPanel Margin="0,0,0,0">
+                            <Grid Background="Transparent">
+                                <Border
+                                    HorizontalAlignment="Stretch"
+                                    BorderBrush="{StaticResource ForegroundColour60}"
+                                    BorderThickness="0,2,0,0"
+                                    Opacity="1" />
+                                <Border
+                                    HorizontalAlignment="Stretch"
+                                    BorderBrush="{StaticResource ForegroundColour100}"
+                                    BorderThickness="10,0,10,0"
+                                    Opacity="1" />
+                            </Grid>
+
+
+                            <TextBlock
+                                Margin="20"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                                FontSize="26"
+                                Foreground="{DynamicResource ForegroundColour90}"
+                                Text="{Binding ItemCategoryName}" />
 
                             <Border
-                                x:Name="outerBorder"
-                                Margin="-4"
-                                BorderBrush="#E6FFFFFF"
-                                BorderThickness="2"
-                                CornerRadius="0"
-                                IsHitTestVisible="False"
-                                Opacity="0" />
+                                HorizontalAlignment="Stretch"
+                                BorderBrush="{StaticResource ForegroundColour60}"
+                                BorderThickness="0,2,0,0"
+                                Opacity="1" />
 
-                            <Image
-                                MaxWidth="200"
-                                d:Source="https://www.bungie.net/common/destiny2_content/icons/af2cce8c5d02ee2eb792af196351fb5e.png"
-                                Source="{Binding ItemCategoryIcon}" />
+                            <TextBlock
+                                Margin="20"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="{DynamicResource Haas Grot Text 65 Medium}"
+                                FontSize="26"
+                                Foreground="{DynamicResource ForegroundColour90}"
+                                Text="{Binding ItemCategoryAmount}" />
 
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Normal">
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="MainGrid"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0.9"
-                                                Duration="0:0:0.1" />
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="outerBorder"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0"
-                                                Duration="0:0:0.15" />
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="innerBorder"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0"
-                                                Duration="0:0:0.15" />
-                                            <ThicknessAnimation
-                                                Storyboard.TargetName="outerBorder"
-                                                Storyboard.TargetProperty="Margin"
-                                                To="-8"
-                                                Duration="0:0:0.15">
-                                                <ThicknessAnimation.EasingFunction>
-                                                    <BounceEase
-                                                        Bounces="1"
-                                                        Bounciness="3"
-                                                        EasingMode="EaseOut" />
-                                                </ThicknessAnimation.EasingFunction>
-                                            </ThicknessAnimation>
-                                        </Storyboard>
-                                    </VisualState>
+                            <Grid Background="Transparent">
+                                <Border
+                                    HorizontalAlignment="Stretch"
+                                    BorderBrush="{StaticResource ForegroundColour60}"
+                                    BorderThickness="0,2,0,0"
+                                    Opacity="1" />
+                                <Border
+                                    HorizontalAlignment="Stretch"
+                                    BorderBrush="{StaticResource ForegroundColour100}"
+                                    BorderThickness="10,0,10,0"
+                                    Opacity="1" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
 
-                                    <VisualState x:Name="MouseOver">
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="MainGrid"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="1"
-                                                Duration="0:0:0.1" />
-                                            <DoubleAnimation
-                                                BeginTime="0:0:0.075"
-                                                Storyboard.TargetName="innerBorder"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0.75"
-                                                Duration="0:0:0.2" />
-                                            <DoubleAnimation
-                                                BeginTime="0:0:0.075"
-                                                Storyboard.TargetName="outerBorder"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0.75"
-                                                Duration="0:0:0.2" />
-                                            <ThicknessAnimation
-                                                BeginTime="0:0:0.075"
-                                                Storyboard.TargetName="outerBorder"
-                                                Storyboard.TargetProperty="Margin"
-                                                To="-5"
-                                                Duration="0:0:0.1">
-                                                <ThicknessAnimation.EasingFunction>
-                                                    <BounceEase
-                                                        Bounces="1"
-                                                        Bounciness="4"
-                                                        EasingMode="EaseOut" />
-                                                </ThicknessAnimation.EasingFunction>
-                                            </ThicknessAnimation>
-                                        </Storyboard>
-                                    </VisualState>
+                <Button.Triggers>
+                    <EventTrigger RoutedEvent="Button.MouseEnter">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetName="CollectionItemBackgroundActive"
+                                    Storyboard.TargetProperty="Opacity"
+                                    To="1"
+                                    Duration="0:0:0.15" />
 
-                                    <VisualState x:Name="Pressed">
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="MainGrid"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0.9"
-                                                Duration="0:0:0.1" />
-                                            <DoubleAnimation
-                                                AutoReverse="True"
-                                                BeginTime="0:0:0.075"
-                                                Storyboard.TargetName="outerBorder"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0"
-                                                Duration="0:0:0.15" />
-                                            <ThicknessAnimation
-                                                BeginTime="0:0:0.075"
-                                                Storyboard.TargetName="outerBorder"
-                                                Storyboard.TargetProperty="Margin"
-                                                To="-5"
-                                                Duration="0:0:0" />
-                                        </Storyboard>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                        </Grid>
+                                <DoubleAnimation
+                                    Storyboard.TargetName="InfoGrid"
+                                    Storyboard.TargetProperty="Opacity"
+                                    To="1"
+                                    Duration="0:0:0.15" />
 
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Trigger.Setters>
-                                    <Setter Property="Cursor" Value="Hand" />
-                                </Trigger.Setters>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                                <DoubleAnimation
+                                    Storyboard.TargetName="CollectionItemIcon"
+                                    Storyboard.TargetProperty="Opacity"
+                                    To="1"
+                                    Duration="0:0:0.15" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+
+                    <EventTrigger RoutedEvent="Button.MouseLeave">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation
+                                    Storyboard.TargetName="CollectionItemBackgroundActive"
+                                    Storyboard.TargetProperty="Opacity"
+                                    To="0"
+                                    Duration="0:0:0.15" />
+
+                                <DoubleAnimation
+                                    Storyboard.TargetName="InfoGrid"
+                                    Storyboard.TargetProperty="Opacity"
+                                    To="0.75"
+                                    Duration="0:0:0.15" />
+
+                                <DoubleAnimation
+                                    Storyboard.TargetName="CollectionItemIcon"
+                                    Storyboard.TargetProperty="Opacity"
+                                    To="0.75"
+                                    Duration="0:0:0.15" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Button.Triggers>
+            </Button>
+        </DataTemplate>
+
     </UserControl.Resources>
 
     <Grid>
@@ -383,111 +377,59 @@
             </EventTrigger>
         </Grid.Triggers>
 
-        <Grid.Background>
-            <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
-                <RadialGradientBrush.GradientStops>
-                    <GradientStop Offset="0" Color="#FF37393E" />
-                    <GradientStop Offset="0.8" Color="#111113" />
-                </RadialGradientBrush.GradientStops>
-            </RadialGradientBrush>
-        </Grid.Background>
-
         <Grid
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
+            x:Name="MainContainer"
             Background="Transparent"
-            Opacity="1">
-            <Border
-                x:Name="Spinner"
-                Background="Transparent"
-                BorderThickness="0"
-                Opacity="1" />
-        </Grid>
+            RenderTransformOrigin="0.5,0.5">
 
-        <Viewbox HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Grid
-                x:Name="MainContainer"
-                Margin="125"
-                Background="Transparent"
-                RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TranslateTransform />
+            </Grid.RenderTransform>
 
-                <Grid.RenderTransform>
-                    <TranslateTransform />
-                </Grid.RenderTransform>
-
+            <Viewbox HorizontalAlignment="Center" VerticalAlignment="Center">
+                <!--  Main StackPanel  -->
                 <StackPanel
+                    Margin="100"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Orientation="Horizontal">
 
+                    <!--  Items StackPanel  -->
                     <StackPanel
                         Name="CollectionsPanel"
-                        Margin="0,0,0,0"
+                        Grid.Row="0"
+                        Margin="0"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
+                        VerticalAlignment="Top"
+                        Visibility="Visible">
                         <Border
-                            Height="40"
+                            Height="auto"
                             BorderThickness="0,0,0,2"
                             Style="{StaticResource ColumnHeaderBorder}">
                             <Grid Style="{StaticResource ColumnHeader}">
                                 <TextBlock
                                     x:Name="ItemsTextTab"
-                                    Margin="0"
+                                    Margin="10"
                                     d:FontFamily="Haas Grot Text 55 Roman"
-                                    FontSize="18">
-                                    <Run Text="ITEMS - " />
-                                    <Run Text="{Binding TotalItemAmount}" />
-                                </TextBlock>
+                                    FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                                    FontSize="22"
+                                    Text="I  T  E  M  S" />
                             </Grid>
                         </Border>
-                        <UniformGrid
-                            x:Name="MainItemsGrid"
+                        <local:ItemPage
+                            x:Name="CollectiblesList"
+                            CollapsePageButtons="True"
                             Columns="3"
-                            Rows="2">
-                            <d:Button Style="{StaticResource MainItemsButton}" />
-                            <d:Button Style="{StaticResource MainItemsButton}" />
-                            <d:Button Style="{StaticResource MainItemsButton}" />
-                            <d:Button Style="{StaticResource MainItemsButton}" />
-                            <d:Button Style="{StaticResource MainItemsButton}" />
-                            <d:Button Style="{StaticResource MainItemsButton}" />
-                        </UniformGrid>
-                    </StackPanel>
-
-                    <Border
-                        Height="auto"
-                        Margin="25,0,25,0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Stretch"
-                        BorderBrush="{StaticResource BackgroundColour50}"
-                        BorderThickness="0,0,2,0"
-                        Opacity=".5"
-                        Visibility="Visible" />
-
-                    <StackPanel
-                        Name="BadgesPanel"
-                        Margin="0,0,0,0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Visibility="Visible">
-                        <Border
-                            Height="40"
-                            BorderThickness="0,0,0,2"
-                            Style="{StaticResource ColumnHeaderBorder}">
-                            <Grid Style="{StaticResource ColumnHeader}">
-                                <TextBlock
-                                    x:Name="BadgesTextTab"
-                                    Margin="0"
-                                    d:FontFamily="Haas Grot Text 55 Roman"
-                                    FontSize="18" />
-                            </Grid>
-                        </Border>
-                        <local:ItemPage x:Name="BadgesList" />
+                            ItemMargin="-2"
+                            ItemTemplate="{StaticResource CollectionItemButton}"
+                            ItemsPerPage="6" />
                     </StackPanel>
 
                 </StackPanel>
+            </Viewbox>
 
-            </Grid>
-        </Viewbox>
+        </Grid>
+
     </Grid>
 
 

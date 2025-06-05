@@ -206,10 +206,11 @@
                 x:Name="ExportControl"
                 Grid.Row="2"
                 Grid.Column="1"
-                Grid.ColumnSpan="1"
-                MouseEnter="ExportButton_MouseEnter"
-                MouseLeave="ExportButton_MouseLeave"
-                Tag="EXPORT SELECTED:Export the selected static map parts" />
+                Grid.ColumnSpan="1">
+                <local:GenericTooltipProperties.TooltipData>
+                    <local:GenericTooltip Name="EXPORT SELECTED" Description="Export the selected static map parts" />
+                </local:GenericTooltipProperties.TooltipData>
+            </local:ExportControl>
 
 
             <StackPanel
@@ -237,8 +238,10 @@
                     DataContext="0"
                     MouseEnter="ExportButton_MouseEnter"
                     MouseLeave="ExportButton_MouseLeave"
-                    Style="{DynamicResource D2StyleButton}"
-                    Tag="EXPORT ALL:Export everything from this map. &#x0a;(Static Map and Resources only)">
+                    Style="{DynamicResource D2StyleButton}">
+                    <local:GenericTooltipProperties.TooltipData>
+                        <local:GenericTooltip Name="EXPORT ALL" Description="Export everything from this map. &#x0a;(Static Map and Resources only)" />
+                    </local:GenericTooltipProperties.TooltipData>
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"
@@ -255,8 +258,10 @@
                     DataContext="1"
                     MouseEnter="ExportButton_MouseEnter"
                     MouseLeave="ExportButton_MouseLeave"
-                    Style="{DynamicResource D2StyleButton}"
-                    Tag="EXPORT STATIC MAP:Export this maps statics + terrain">
+                    Style="{DynamicResource D2StyleButton}">
+                    <local:GenericTooltipProperties.TooltipData>
+                        <local:GenericTooltip Name="EXPORT STATIC MAP" Description="Export this maps statics + terrain" />
+                    </local:GenericTooltipProperties.TooltipData>
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"
@@ -273,8 +278,10 @@
                     DataContext="2"
                     MouseEnter="ExportButton_MouseEnter"
                     MouseLeave="ExportButton_MouseLeave"
-                    Style="{DynamicResource D2StyleButton}"
-                    Tag="EXPORT RESOURCES:Export this maps resources. These include...&#x0a; Entities&#x0a; Sky Objects&#x0a; Decorators (foliage, small rocks, etc)&#x0a; Lights&#x0a; Decal and Cubemap information">
+                    Style="{DynamicResource D2StyleButton}">
+                    <local:GenericTooltipProperties.TooltipData>
+                        <local:GenericTooltip Name="EXPORT RESOURCES" Description="Export this maps resources. These include...&#x0a; Entities&#x0a; Sky Objects&#x0a; Decorators (foliage, small rocks, etc)&#x0a; Lights&#x0a; Decal and Cubemap information" />
+                    </local:GenericTooltipProperties.TooltipData>
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"
@@ -292,8 +299,10 @@
                     DataContext="3"
                     MouseEnter="ExportButton_MouseEnter"
                     MouseLeave="ExportButton_MouseLeave"
-                    Style="{DynamicResource D2StyleButton}"
-                    Tag="EXPORT ACTIVITY ENTITIES:Export entities specific to the current activity and its ambient version.&#x0a;These entities aren't included in the base map.">
+                    Style="{DynamicResource D2StyleButton}">
+                    <local:GenericTooltipProperties.TooltipData>
+                        <local:GenericTooltip Name="EXPORT ACTIVITY ENTITIES" Description="Export entities specific to the current activity and its ambient version.&#x0a;These entities aren't included in the base map." />
+                    </local:GenericTooltipProperties.TooltipData>
                     <Border Background="#BB181818">
                         <TextBlock
                             d:FontFamily="Haas Grot Text 55 Roman"

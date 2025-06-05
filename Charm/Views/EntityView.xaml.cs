@@ -144,7 +144,7 @@ public partial class EntityView : UserControl
         Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 
-    public static void ExportInventoryItem(ApiItem item, string savePath, bool aggregateOutput = false)
+    public static void ExportInventoryItem(DareItem item, string savePath, bool aggregateOutput = false)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
         string name = Helpers.SanitizeString(item.ItemName);
@@ -217,7 +217,7 @@ public partial class EntityView : UserControl
     }
 
     // I don't like this
-    public static void ExportGearShader(ApiItem item, string itemName, string savePath)
+    public static void ExportGearShader(DareItem item, string itemName, string savePath)
     {
         var config = ConfigSubsystem.Get();
 

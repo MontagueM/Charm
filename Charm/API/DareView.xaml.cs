@@ -13,15 +13,15 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Tiger;
+using Tiger.Schema;
 using Tiger.Schema.Investment;
-using static Charm.APIItemView;
 
 namespace Charm;
 
 public partial class DareView : UserControl
 {
-    private ConcurrentDictionary<uint, ApiItem> _allItems;
-    private ObservableCollection<ApiItem> _selectedItems;
+    private ConcurrentDictionary<uint, DareItem> _allItems;
+    private ObservableCollection<DareItem> _selectedItems;
 
     public DareView()
     {
@@ -42,7 +42,7 @@ public partial class DareView : UserControl
     {
         string searchTerm = SearchBox.Text.ToLower();
         int numToDisplay = AmountBox.Text.Length > 0 ? int.Parse(AmountBox.Text) : 0;
-        ConcurrentBag<ApiItem> items = new();
+        ConcurrentBag<DareItem> items = new();
 
         ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount };
         Parallel.ForEach(_allItems.Values, parallelOptions, item =>
@@ -56,15 +56,15 @@ public partial class DareView : UserControl
                 items.Add(item);
             }
         });
-        var sortedItems = new List<ApiItem>(items);
+        var sortedItems = new List<DareItem>(items);
         sortedItems.Sort((a, b) => b.ItemRarity.CompareTo(a.ItemRarity));
         DareListView.ItemsSource = sortedItems;
     }
 
     public async void LoadContent()
     {
-        _allItems = new ConcurrentDictionary<uint, ApiItem>();
-        _selectedItems = new ObservableCollection<ApiItem>();
+        _allItems = new ConcurrentDictionary<uint, DareItem>();
+        _selectedItems = new ObservableCollection<DareItem>();
         await LoadApiList();
         RefreshItemList();
     }
@@ -82,8 +82,8 @@ public partial class DareView : UserControl
             //    return;
             //}
 
-            string name = Investment.Get().GetItemName(item);
-            string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)).TagData.ItemType.Value;
+            string name = item.GetItemName();
+            string? type = item.GetItemType();
 
             type ??= "";
 
@@ -97,7 +97,7 @@ public partial class DareView : UserControl
 
                 if ((isD1 && !isOrnament && isNameNotEmpty) || (!isD1 && isNameNotEmpty && !isWeaponOrnament))
                 {
-                    var newItem = new ApiItem
+                    var newItem = new DareItem
                     {
                         ItemName = name,
                         ItemType = type,
@@ -117,7 +117,7 @@ public partial class DareView : UserControl
 
     private void DareItemControl_OnClick(object sender, RoutedEventArgs e)
     {
-        ApiItem apiItem = (sender as Button).DataContext as ApiItem;
+        DareItem apiItem = (sender as Button).DataContext as DareItem;
 
         // Remove from _allItems, add to _selectedItems if not already there otherwise remove from _selectedItems and add back to _allItems
         if (_allItems.TryRemove(apiItem.Item.TagData.InventoryItemHash.Hash32, out _))
@@ -142,7 +142,7 @@ public partial class DareView : UserControl
 
     private void ClearQueue_OnClick(object sender, RoutedEventArgs e)
     {
-        foreach (ApiItem selectedItem in _selectedItems)
+        foreach (DareItem selectedItem in _selectedItems)
         {
             _allItems.TryAdd(selectedItem.Item.TagData.InventoryItemHash.Hash32, selectedItem);
         }
@@ -260,7 +260,7 @@ public partial class DareView : UserControl
 
     public void CreateOrnamentItems(InventoryItem parent)
     {
-        List<InventoryItem> ornaments = parent.GetItemOrnaments();
+        ConcurrentBag<InventoryItem> ornaments = parent.GetItemOrnaments();
 
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
@@ -273,8 +273,8 @@ public partial class DareView : UserControl
                     strings.Load();
 
                 string? type = strings.TagData.ItemType.Value ?? "";
-                string name = Investment.Get().GetItemName(item);
-                var newItem = new ApiItem
+                string name = item.GetItemName();
+                var newItem = new DareItem
                 {
                     ItemName = name,
                     ItemType = type,
@@ -292,13 +292,13 @@ public partial class DareView : UserControl
         {
             for (int i = 0; i < ornaments.Count; i++)
             {
-                InventoryItem item = ornaments[i];
+                InventoryItem item = ornaments.OrderBy(x => x.ApiHash).ToList()[i];
                 Tag<S9F548080>? strings = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
 
                 string? type = strings.TagData.ItemType.Value ?? "";
 
-                string name = type != "Armor Ornament" ? Investment.Get().GetItemName(item) : $"{Investment.Get().GetItemName(parent)} Ornament {i + 1}";
-                var newItem = new ApiItem
+                string name = type != "Armor Ornament" ? item.GetItemName() : $"{parent.GetItemName()} Ornament {i + 1}";
+                var newItem = new DareItem
                 {
                     ItemName = name,
                     ItemType = type,
@@ -334,7 +334,7 @@ public partial class DareView : UserControl
             "Shader",
         };
 
-        Tag<S9F548080>? a = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash));
+        Tag<S9F548080>? a = item.GetItemStrings();
         string? b = a.TagData.ItemType.Value.ToString();
         return ((Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON
             && (b == "Artifact" || b == "Seasonal Artifact")
@@ -384,7 +384,7 @@ public partial class DareView : UserControl
     }
 }
 
-public class ApiItem
+public class DareItem
 {
     public InventoryItem Item { get; set; }
     public InventoryItem Parent { get; set; }
@@ -420,7 +420,7 @@ public class ApiItem
 
             if (IsD1)
             {
-                bgStream = ItemType != "Armor Ornament" ? Item.GetIconBackgroundStream() : Parent.GetTextureFromHash(new FileHash("1935A680"));
+                bgStream = ItemType != "Armor Ornament" ? Item.GetIconBackgroundStream() : Texture.GetTextureFromHash(new FileHash("1935A680"));
                 primaryStream = ItemType != "Armor Ornament" ? Item.GetIconPrimaryStream() : Parent.GetIconPrimaryStream();
                 overlayStream = ItemType != "Armor Ornament" ? Item.GetIconOverlayStream() : Parent.GetIconOverlayStream(); //parent.GetTextureFromHash(new FileHash("E1DBA580"));
             }
@@ -462,7 +462,7 @@ public class ApiItem
             UnmanagedMemoryStream? bgStream = Item.GetIconBackgroundStream();
             if (IsD1)
             {
-                bgStream = ItemType != "Armor Ornament" ? bgStream : Parent.GetTextureFromHash(new FileHash("1935A680"));
+                bgStream = ItemType != "Armor Ornament" ? bgStream : Texture.GetTextureFromHash(new FileHash("1935A680"));
                 bg = bgStream != null ? ItemType != "Armor Ornament" ?
                     ApiImageUtils.MakeBitmapImage(bgStream, 96, 96) :
                     ApiImageUtils.MakeBitmapImage(bgStream, 256, 128) : null;
@@ -479,6 +479,4 @@ public class ApiItem
             return brush;
         }
     }
-
-    public PlugItem PlugItem { get; set; }
 }

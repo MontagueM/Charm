@@ -242,7 +242,7 @@ public class DynamicArrayUnloaded<T> : DynamicArray<T>
     {
         if (index < 0 || index >= Count)
         {
-            throw new IndexOutOfRangeException($"Index ({index}) out of range ({reader.Hash:X})");
+            throw new IndexOutOfRangeException($"Index ({index}) out of range ({reader.Hash:X}, Position {reader.Position:X})");
         }
 
         return ReadElement(reader, index);

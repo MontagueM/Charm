@@ -11,7 +11,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Tiger;
 using Tiger.Schema;
-using static Charm.APIItemView;
 using static Charm.PackageList;
 
 namespace Charm;
@@ -22,7 +21,6 @@ namespace Charm;
 public partial class TextureListView : UserControl
 {
     private ConfigSubsystem Config = TigerInstance.GetSubsystem<ConfigSubsystem>();
-    private APITooltip ToolTip;
 
     private ConcurrentBag<TextureItem> Textures = new();
 
@@ -46,9 +44,6 @@ public partial class TextureListView : UserControl
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
-        ToolTip = new();
-        Panel.SetZIndex(ToolTip, 50);
-        MainContainer.Children.Add(ToolTip);
     }
 
     public async void LoadContent()
@@ -284,26 +279,10 @@ public partial class TextureListView : UserControl
 
     private void ExportButtons_MouseEnter(object sender, MouseEventArgs e)
     {
-        if (!(sender as Button).IsEnabled)
-            return;
-
-        ToolTip.ActiveItem = (sender as Button);
-        string[] text = (sender as Button).Tag.ToString().Split(":");
-
-        PlugItem plugItem = new()
-        {
-            Name = $"{text[0]}",
-            Description = $"{text[1]}",
-            PlugStyle = DestinySocketCategoryStyle.Reusable,
-        };
-
-        ToolTip.MakeTooltip(plugItem);
     }
 
     public void ExportButtons_MouseLeave(object sender, MouseEventArgs e)
     {
-        ToolTip.ClearTooltip();
-        ToolTip.ActiveItem = null;
     }
 
     private async void TagImage_Loaded(object sender, RoutedEventArgs e)

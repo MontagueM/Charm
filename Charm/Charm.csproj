@@ -38,7 +38,7 @@
       <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
       <PackageReference Include="Restless.WaveForm" Version="1.1.0" />
       <PackageReference Include="VersionChecker" Version="1.1.0" />
-      <PackageReference Include="VirtualizingWrapPanel" Version="2.1.1" />
+      <PackageReference Include="VirtualizingWrapPanel" Version="2.2.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -46,9 +46,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Page Update="API\Collections View\CollectionItemControl.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
       <Page Update="Settings\ConfigSettingControl.xaml">
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>ConfigView.xaml</DependentUpon>

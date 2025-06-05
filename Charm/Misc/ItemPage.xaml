@@ -1,0 +1,257 @@
+﻿<UserControl
+    x:Class="Charm.ItemPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    KeyboardNavigation.TabNavigation="None"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ItemsPanelTemplate x:Key="UniformGridPanel">
+            <UniformGrid Columns="{Binding Columns}">
+                <UniformGrid.Style>
+                    <Style TargetType="UniformGrid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsVertical}" Value="True">
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <TransformGroup>
+                                            <RotateTransform Angle="-90" />
+                                        </TransformGroup>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </UniformGrid.Style>
+            </UniformGrid>
+        </ItemsPanelTemplate>
+
+        <!--  StackPanel Panel  -->
+        <ItemsPanelTemplate x:Key="StackPanelPanel">
+            <StackPanel>
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Orientation" Value="Horizontal" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsVertical}" Value="True">
+                                <Setter Property="Orientation" Value="Vertical" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+            </StackPanel>
+        </ItemsPanelTemplate>
+    </UserControl.Resources>
+
+    <Grid Background="Transparent">
+        <Grid x:Name="MainLayout">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="LayoutTransform">
+                        <Setter.Value>
+                            <RotateTransform Angle="0" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsVertical}" Value="True" />
+                                <Condition Binding="{Binding UseStackPanel}" Value="False" />
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.Setters>
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="90" />
+                                    </Setter.Value>
+                                </Setter>
+                            </MultiDataTrigger.Setters>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <!--  PreviousPage  -->
+                <ColumnDefinition Width="*" />
+                <!--  ItemsControl  -->
+                <ColumnDefinition Width="Auto" />
+                <!--  NextPage  -->
+            </Grid.ColumnDefinitions>
+
+            <!--  Page Indicators  -->
+            <local:PageIndicator
+                x:Name="PageIndicatorItem"
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Margin="{Binding PageIndicatorMargin}"
+                HorizontalAlignment="Center"
+                CurrentPage="{Binding CurrentPage, Mode=TwoWay}"
+                DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
+                TotalPages="{Binding TotalPages, Mode=TwoWay}" />
+
+            <!--  PreviousPage Button  -->
+            <Button
+                x:Name="PreviousPage"
+                Grid.Column="0"
+                Width="35"
+                Height="Auto"
+                Margin="0,0,2,0"
+                local:StyleHelper.BorderThickness="1"
+                Click="PreviousPage_Click"
+                Focusable="False"
+                Visibility="Visible">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource D2StyleButtonNoOverlay}" TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsVertical}" Value="True">
+                                <Setter Property="Width" Value="Auto" />
+                                <Setter Property="Height" Value="35" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Border Background="#33FFFFFF" Focusable="False">
+                    <Polygon
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Fill="#CCFFFFFF"
+                        Points="0, 0 60, 50, 0, 100">
+                        <Polygon.Style>
+                            <Style TargetType="Polygon">
+                                <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
+                                            <RotateTransform Angle="180" />
+                                        </TransformGroup>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsVertical}" Value="True">
+                                        <Setter Property="LayoutTransform">
+                                            <Setter.Value>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
+                                                    <RotateTransform Angle="180" />
+                                                </TransformGroup>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Polygon.Style>
+                    </Polygon>
+                </Border>
+            </Button>
+
+            <!--  ItemList  -->
+            <ItemsControl
+                Name="ItemList"
+                Grid.Column="1"
+                Margin="0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                ItemTemplate="{Binding ItemTemplate}"
+                ItemTemplateSelector="{Binding ItemTemplateSelector}"
+                KeyboardNavigation.TabNavigation="None">
+
+                <ItemsControl.RenderTransform>
+                    <TranslateTransform />
+                </ItemsControl.RenderTransform>
+
+                <ItemsControl.Style>
+                    <Style TargetType="ItemsControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding UseStackPanel}" Value="True">
+                                <Setter Property="ItemsControl.ItemsPanel" Value="{StaticResource StackPanelPanel}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding UseStackPanel}" Value="False">
+                                <Setter Property="ItemsControl.ItemsPanel" Value="{StaticResource UniformGridPanel}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Style>
+
+                <!--  ItemContainerStyle stays unchanged  -->
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Margin">
+                            <Setter.Value>
+                                <Binding Path="ItemMargin" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+            </ItemsControl>
+
+            <!--  NextPage Button  -->
+            <Button
+                x:Name="NextPage"
+                Grid.Column="2"
+                Width="35"
+                Height="Auto"
+                Margin="2,0,0,0"
+                local:StyleHelper.BorderThickness="1"
+                Click="NextPage_Click"
+                Focusable="False"
+                Visibility="Visible">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource D2StyleButtonNoOverlay}" TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsVertical}" Value="False">
+                                <Setter Property="Width" Value="Auto" />
+                                <Setter Property="Height" Value="35" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Border Background="#33FFFFFF" Focusable="False">
+                    <Polygon
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Fill="#CCFFFFFF"
+                        Points="0, 0 60, 50, 0, 100">
+                        <Polygon.Style>
+                            <Style TargetType="Polygon">
+                                <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
+                                            <RotateTransform Angle="0" />
+                                        </TransformGroup>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsVertical}" Value="True">
+                                        <Setter Property="LayoutTransform">
+                                            <Setter.Value>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
+                                                    <RotateTransform Angle="00" />
+                                                </TransformGroup>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Polygon.Style>
+                    </Polygon>
+                </Border>
+            </Button>
+        </Grid>
+    </Grid>
+
+</UserControl>
+
+
+
+
+
+

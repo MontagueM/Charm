@@ -100,7 +100,7 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
         }
 
         // Debug font list
-        //List<string> fontList = fonts.Select(pair => (pair.Key.Family + " " + pair.Key.Subfamily).Trim()).ToList();
+        //List<string> fontList = Fonts.Select(pair => (pair.Key.Family + " : " + pair.Key.Subfamily).Trim()).ToList();
         //foreach (var s in fontList)
         //{
         //    Console.WriteLine(s);

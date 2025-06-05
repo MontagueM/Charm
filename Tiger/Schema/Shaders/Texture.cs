@@ -346,6 +346,13 @@ public class Texture : TigerReferenceFile<STextureHeader>
     {
         return 1 << (sizeof(uint) * 8 - BitOperations.LeadingZeroCount((uint)(value - 1)));
     }
+
+    public static UnmanagedMemoryStream? GetTextureFromHash(FileHash hash)
+    {
+        Texture texture = FileResourcer.Get().GetFile<Texture>(hash);
+
+        return texture.GetTexture();
+    }
 }
 
 // todo move this

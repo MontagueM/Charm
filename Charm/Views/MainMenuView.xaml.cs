@@ -7,14 +7,12 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Tiger;
 using Tiger.Schema.Investment;
-using static Charm.APIItemView;
 
 namespace Charm;
 
 public partial class MainMenuView : UserControl
 {
     private static MainWindow _mainWindow = null;
-    private APITooltip ToolTip;
 
     public MainMenuView()
     {
@@ -47,10 +45,6 @@ public partial class MainMenuView : UserControl
         GameVersion.Text = $"Game Version: {_mainWindow.GameInfo?.FileVersion}";
         MouseMove += UserControl_MouseMove;
 
-        ToolTip = new();
-        Panel.SetZIndex(ToolTip, 50);
-        MainContainer.Children.Add(ToolTip);
-
         if (MainWindow.Current.Spinner is not null)
             MainWindow.Current.Spinner.PositionScale = new(2, 2, -1, -1);
     }
@@ -82,23 +76,10 @@ public partial class MainMenuView : UserControl
 
     private void CategoryButton_MouseEnter(object sender, MouseEventArgs e)
     {
-        ToolTip.ActiveItem = (sender as Button);
-        string[] text = (sender as Button).Tag.ToString().Split(":");
-
-        PlugItem plugItem = new()
-        {
-            Name = $"{text[0]}",
-            Description = $"{text[1]}",
-            PlugRarityColor = DestinyTierType.Legendary.GetColor(),
-        };
-
-        ToolTip.MakeTooltip(plugItem);
     }
 
     public void CategoryButton_MouseLeave(object sender, MouseEventArgs e)
     {
-        ToolTip.ClearTooltip();
-        ToolTip.ActiveItem = null;
     }
 
     private async void ApiViewButton_OnClick(object sender, RoutedEventArgs e)

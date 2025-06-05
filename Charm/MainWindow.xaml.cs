@@ -8,12 +8,16 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Tiger;
 using Tiger.Schema;
 using VersionChecker;
+using static Charm.CategoryView;
+using static Charm.CollectionsView;
 
 namespace Charm;
 /// <summary>
@@ -34,10 +38,37 @@ public partial class MainWindow
     public MainWindow()
     {
         InitializeComponent();
-
         Current = this;
         Progress = ProgressView;
+        Initialize();
+        CompositionTarget.Rendering += OnRender;
+    }
 
+    private void OnRender(object sender, EventArgs e)
+    {
+        float x = -12f / (float)this.ActualWidth;
+        float y = -12f / (float)this.ActualHeight;
+
+        System.Windows.Point position = Mouse.GetPosition(this);
+        TranslateTransform gridTransform = (TranslateTransform)OverlayRoot.RenderTransform;
+        gridTransform.X = (int)Math.Round(position.X * x);
+        gridTransform.Y = (int)Math.Round(position.Y * y);
+    }
+
+    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
+    {
+        if (MainMenuTab.Visibility == Visibility.Visible)
+        {
+            Task.Run(InitialiseHandlers);
+            _bHasInitialised = true;
+        }
+
+        Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        CharmIcon.Source = GetBitmapSource(appIcon);
+    }
+
+    public void Initialize()
+    {
         int numSingletons = InitialiseStrategistSingletons();
 
         Strategy.BeforeStrategyEvent += args => { Progress.SetProgressStages(Enumerable.Range(1, numSingletons).Select(num => $"Initialising game version {args.Strategy}: {num}/{numSingletons}").ToList()); };
@@ -112,18 +143,19 @@ public partial class MainWindow
                 versionChanged.Show();
             });
         };
-    }
 
-    private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
-    {
-        if (MainMenuTab.Visibility == Visibility.Visible)
-        {
-            Task.Run(InitialiseHandlers);
-            _bHasInitialised = true;
-        }
+        // Global ToolTip detection
+        EventManager.RegisterClassHandler(
+            typeof(ButtonBase),
+            UIElement.MouseEnterEvent,
+            new MouseEventHandler(OnAnyButtonMouseEnter)
+        );
 
-        Icon appIcon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        CharmIcon.Source = GetBitmapSource(appIcon);
+        EventManager.RegisterClassHandler(
+            typeof(ButtonBase),
+            UIElement.MouseLeaveEvent,
+            new MouseEventHandler(OnAnyButtonMouseLeave)
+        );
     }
 
     private void ShowAgreement()
@@ -437,22 +469,27 @@ public partial class MainWindow
         {
             if (tabControl.SelectedItem is TabItem selectedTab)
             {
-                if (selectedTab.Content is null) // bug, first time start up
+                switch (selectedTab.Content)
                 {
-                    if (Spinner is not null)
-                        Spinner.PositionScale = new(2, 2, -1, -1);
-                }
-                else if (selectedTab.Content is not MainMenuView)
-                {
-                    UIHelper.AnimateFade(SpinnerContainer, 0.1f, 0.5f, 1);
-                    if (Spinner is not null)
-                        Spinner.PositionScale = new(4f, 4f, -3.6f, -3.3f);
-                }
-                else
-                {
-                    UIHelper.AnimateFade(SpinnerContainer, 0.1f, 1.0f, 0.5f);
-                    if (Spinner is not null)
-                        Spinner.PositionScale = new(2, 2, -1, -1);
+                    case null: // bug, first time start up
+                        if (Spinner is not null)
+                            Spinner.PositionScale = new(2, 2, -1, -1);
+                        break;
+                    case MainMenuView:
+                        UIHelper.AnimateFade(SpinnerContainer, 0.1f, 1.0f, 0.5f);
+                        if (Spinner is not null)
+                            Spinner.PositionScale = new(2, 2, -1, -1);
+                        break;
+                    case ConfigView:
+                        if (Spinner is not null)
+                            Spinner.PositionScale = new(4f, 4f, -3.6f, -3.3f);
+                        UIHelper.AnimateFade(SpinnerContainer, 0.1f, 0.5f, 1);
+                        break;
+                    default:
+                        if (Spinner is not null)
+                            Spinner.PositionScale = new(100f, 100f, -100f, -100f); // Setting all to 0 has bad side effects
+                        UIHelper.AnimateFade(SpinnerContainer, 0.1f, 0.5f, 1);
+                        break;
                 }
             }
         }
@@ -476,7 +513,7 @@ public partial class MainWindow
         {
             var tab = (TabItem)MainTabControl.Items[MainTabControl.SelectedIndex];
             dynamic content = tab.Content;
-            if (content is APIItemView or CategoryView)
+            if (content is ItemView or CategoryView)
                 MainTabControl.Items.Remove(tab);
         }
         else if (e.Key == Key.W
@@ -582,5 +619,71 @@ public partial class MainWindow
                  icon.Handle,
                  new Int32Rect(0, 0, icon.Width, icon.Height),
                  BitmapSizeOptions.FromEmptyOptions());
+    }
+
+    private void OnAnyButtonMouseEnter(object sender, MouseEventArgs e)
+    {
+        FrameworkElement element = sender as FrameworkElement;
+        if (element != null)
+        {
+            ToolTip.ActiveItem = element;
+            if (element.DataContext != null && !GenericTooltipProperties.HasTooltipData(element))
+            {
+                switch (element.DataContext)
+                {
+                    case APIPlugItem item:
+                        ToolTip.MakeTooltip(item.Item, item.ParentSocketStyle);
+                        break;
+                    case Category item:
+                        ToolTip.MakeTooltip(item);
+                        break;
+
+                    case CategoryEntry item:
+                        if (item.EntryType == CategoryEntryType.Record)
+                        {
+                            ToolTip.MakeTooltip(item);
+                        }
+                        else if (item.EntryType == CategoryEntryType.Collectible)
+                        {
+                            ToolTip.MakeTooltip(item.Item);
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                var tooltipData = GenericTooltipProperties.GetTooltipData(element);
+                if (tooltipData == null)
+                {
+                    // If not set directly, look up the visual tree to check the parent
+                    DependencyObject current = element;
+
+                    while (current != null)
+                    {
+                        if (current is not ContainerVisual)
+                        {
+                            tooltipData = GenericTooltipProperties.GetTooltipData((UIElement)current);
+                            if (tooltipData != null)
+                                break;
+                        }
+                        else
+                            return;
+
+                        current = VisualTreeHelper.GetParent(current);
+                    }
+                }
+
+                if (tooltipData != null)
+                {
+                    ToolTip.MakeTooltip(tooltipData);
+                }
+            }
+        }
+    }
+
+    private void OnAnyButtonMouseLeave(object sender, MouseEventArgs e)
+    {
+        ToolTip.ActiveItem = null;
+        ToolTip.ClearTooltip();
     }
 }

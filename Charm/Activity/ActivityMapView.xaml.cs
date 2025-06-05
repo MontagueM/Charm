@@ -13,7 +13,6 @@ using Arithmic;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Activity;
-using static Charm.APIItemView;
 
 namespace Charm;
 
@@ -23,8 +22,6 @@ public partial class ActivityMapView : UserControl
     private DisplayBubble _currentBubble;
     private string _destinationName;
 
-    private APITooltip ToolTip;
-
     public ActivityMapView()
     {
         InitializeComponent();
@@ -32,33 +29,14 @@ public partial class ActivityMapView : UserControl
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
-        if (ToolTip is null)
-        {
-            ToolTip = new();
-            Panel.SetZIndex(ToolTip, 50);
-            MainContainer.Children.Add(ToolTip);
-        }
     }
 
     private void ExportButton_MouseEnter(object sender, MouseEventArgs e)
     {
-        ToolTip.ActiveItem = (sender as FrameworkElement);
-        string[] text = (sender as FrameworkElement).Tag.ToString().Split(":");
-
-        PlugItem plugItem = new()
-        {
-            Name = $"{text[0]}",
-            Description = $"{text[1]}",
-            PlugStyle = DestinySocketCategoryStyle.Reusable
-        };
-
-        ToolTip.MakeTooltip(plugItem);
     }
 
     public void ExportButton_MouseLeave(object sender, MouseEventArgs e)
     {
-        ToolTip.ClearTooltip();
-        ToolTip.ActiveItem = null;
     }
 
     public void LoadUI(IActivity activity)

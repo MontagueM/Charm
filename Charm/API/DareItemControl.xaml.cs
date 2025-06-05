@@ -23,9 +23,9 @@ public partial class DareItemControl : UserControl
     private void InspectAPIItem_OnClick(object sender, RoutedEventArgs e)
     {
         e.Handled = true;
-        ApiItem apiItem = Container.DataContext as ApiItem;
+        DareItem apiItem = Container.DataContext as DareItem;
 
-        APIItemView apiItemView = new(apiItem);
+        ItemView apiItemView = new(apiItem.Item);
         _mainWindow.MakeNewTab(apiItem.ItemName, apiItemView);
         _mainWindow.SetNewestTabSelected();
     }

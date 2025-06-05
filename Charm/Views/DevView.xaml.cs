@@ -87,8 +87,8 @@ public partial class DevView : UserControl
                     MainWindow.Progress.CompleteStage();
 
                     item.Load();
-                    APIItemView apiItemView = new(item);
-                    _mainWindow.MakeNewTab(Investment.Get().GetItemName(item), apiItemView);
+                    ItemView apiItemView = new(item);
+                    _mainWindow.MakeNewTab(item.GetItemName(), apiItemView);
                     _mainWindow.SetNewestTabSelected();
                 }
                 else

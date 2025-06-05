@@ -1,12 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Tiger;
 using Tiger.Schema.Investment;
-using static Charm.APIItemView;
 
 namespace Charm;
 
@@ -16,8 +15,6 @@ public partial class CollectionsView : UserControl
 
     public Tag<SD7788080> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap;
     public Tag<S03588080> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap;
-    public int TotalItemAmount { get; set; }
-    private APITooltip ToolTip;
 
     public CollectionsView()
     {
@@ -28,97 +25,67 @@ public partial class CollectionsView : UserControl
     {
         _mainWindow = Window.GetWindow(this) as MainWindow;
         MouseMove += UserControl_MouseMove;
-
-        ToolTip = new();
-        Panel.SetZIndex(ToolTip, 50);
-        MainContainer.Children.Add(ToolTip);
     }
 
     public void LoadContent()
     {
-        LoadMainItemCategory();
-        LoadBadges();
+        LoadCollectibles();
     }
 
-    // Badges -> hash 498211331
-    public void LoadMainItemCategory(int i = 0)
+    public void LoadCollectibles()
     {
-        DynamicArray<SDB788080> nodes = PresentationNodes.TagData.PresentationNodeDefinitions;
-        DynamicArray<S07588080> strings = PresentationNodeStrings.TagData.PresentationNodeDefinitionStrings;
-
-        foreach (SED788080 node in nodes[0].PresentationNodes)
-        {
-            SDB788080 curNode = nodes[node.PresentationNodeIndex];
-            S07588080 curNodeStrings = strings[node.PresentationNodeIndex];
-
-            ItemCategory itemCategory = new()
-            {
-                ItemCategoryIndex = node.PresentationNodeIndex,
-                ItemCategoryIcon = ApiImageUtils.MakeFullIcon(curNodeStrings.IconIndex),
-                ItemCategoryIcon2 = ApiImageUtils.MakeFullIcon(curNodeStrings.IconIndex, 0, 0, 1),
-                ItemCategoryName = curNodeStrings.Name.Value.ToString().ToUpper(),
-                ItemCategoryDescription = curNodeStrings.Description.Value,
-                ItemCategoryAmount = GetItemCategoryAmount(node.PresentationNodeIndex)
-            };
-            TotalItemAmount += itemCategory.ItemCategoryAmount;
-
-            Button btn = new()
-            {
-                DataContext = itemCategory,
-                Style = (Style)FindResource("MainItemsButton")
-            };
-
-            MainItemsGrid.Children.Add(btn);
-        }
-        DataContext = this;
-    }
-
-    // Badges -> hash 498211331
-    public void LoadBadges()
-    {
-        ConcurrentBag<Button> _buttons = new();
+        List<Category> _buttons = new();
 
         int totalItemAmount = 0;
         var nodes = PresentationNodes.TagData.PresentationNodeDefinitions;
         var strings = PresentationNodeStrings.TagData.PresentationNodeDefinitionStrings;
 
-        var presNodes = nodes.Find(x => x.Hash.Hash32 == 498211331).PresentationNodes;
+        var presNodes = nodes.Find(x => x.Hash.Hash32 == 3790247699).PresentationNodes;
 
         foreach (var node in presNodes)
         {
             var curNode = nodes[node.PresentationNodeIndex];
             var curNodeStrings = strings[node.PresentationNodeIndex];
 
-            ItemCategory itemCategory = new()
+            Category itemCategory = new()
             {
                 ItemCategoryIndex = node.PresentationNodeIndex,
-                ItemCategoryIcon = ApiImageUtils.MakeFullIcon(curNodeStrings.IconIndex),
-                ItemCategoryIcon2 = ApiImageUtils.MakeFullIcon(curNodeStrings.IconIndex, 0, 2),
+                ItemCategoryIcon = ApiImageUtils.MakeIcon(new FileHash(0x80E64A0B)), // inactive
+                Tag = ApiImageUtils.MakeIcon(new FileHash(0x80E64A0D)), // active
+                ItemCategoryIcon2 = ApiImageUtils.MakeIcon(curNodeStrings.IconIndex, 0, 0, 1),
+                ItemCategoryIcon3 = ApiImageUtils.MakeIcon(curNodeStrings.IconIndex, 0, 0, 0),
                 ItemCategoryName = curNodeStrings.Name.Value.ToString().ToUpper(),
                 ItemCategoryDescription = curNodeStrings.Description.Value,
                 ItemCategoryAmount = GetItemCategoryAmount(node.PresentationNodeIndex),
-                Order = totalItemAmount
+                CategoryBannerColor = new SolidColorBrush(Color.FromArgb(0xFF, 0x93, 0x82, 0x4F)),
+                ScreenStyle = curNodeStrings.ScreenStyle,
+                DisplayStyle = curNodeStrings.DisplayStyle,
             };
-            totalItemAmount++;
+            totalItemAmount += itemCategory.ItemCategoryAmount;
 
-            _buttons.Add(new Button
-            {
-                DataContext = itemCategory,
-                Style = (Style)FindResource("BadgeItemButton")
-            });
+            _buttons.Add(itemCategory);
         }
-        BadgesTextTab.Text = $"BADGES - {totalItemAmount}";
-        BadgesList.ItemsPerPage = 9;
-        BadgesList.Columns = 3;
 
-        // Dumb but need to reverse since its like that in game
-        BadgesList.Buttons = _buttons.OrderBy(x => (x.DataContext as ItemCategory).Order).ToList();
+        ItemsTextTab.Text = UIHelper.AddSpacesBetweenChars($"ITEMS - {totalItemAmount}", 2);
+        CollectiblesList.Items = _buttons;
+
+        DataContext = this;
+    }
+
+    private void Category_OnClick(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        Category item = ((Button)sender).DataContext as Category;
+        UserControl userControl = new CategoryView(item);
+
+        _mainWindow.MakeNewTab(item.ItemCategoryName, userControl);
+        _mainWindow.SetNewestTabSelected();
     }
 
     public int GetItemCategoryAmount(int index)
     {
         SDB788080 node = PresentationNodes.TagData.PresentationNodeDefinitions[index];
-        int count = node.Collectables.Count;
+        int count = node.Collectibles.Count;
 
         for (int j = 0; j < node.PresentationNodes.Count; j++)
         {
@@ -128,62 +95,50 @@ public partial class CollectionsView : UserControl
         return count;
     }
 
-    private void BadgeCategory_OnClick(object sender, RoutedEventArgs e)
-    {
-        e.Handled = true;
-        ItemCategory item = ((Button)sender).DataContext as ItemCategory;
-
-        BadgeView categoryView = new(item);
-        _mainWindow.MakeNewTab(item.ItemCategoryName, categoryView);
-        _mainWindow.SetNewestTabSelected();
-    }
-
-    private void ItemCategory_OnClick(object sender, RoutedEventArgs e)
-    {
-        e.Handled = true;
-        ItemCategory item = ((Button)sender).DataContext as ItemCategory;
-
-        CategoryView categoryView = new(item);
-        _mainWindow.MakeNewTab(item.ItemCategoryName, categoryView);
-        _mainWindow.SetNewestTabSelected();
-    }
-
     private void ItemCategory_MouseEnter(object sender, RoutedEventArgs e)
     {
-        ToolTip.ActiveItem = (sender as Button);
-        ItemCategory item = ((Button)sender).DataContext as ItemCategory;
-
-        PlugItem plugItem = new()
-        {
-            Name = $"{item.ItemCategoryName}",
-            Description = $"{item.ItemCategoryDescription}",
-            PlugStyle = DestinySocketCategoryStyle.Reusable
-        };
-
-        ToolTip.MakeTooltip(plugItem);
     }
 
     public void ItemCategory_MouseLeave(object sender, MouseEventArgs e)
     {
-        ToolTip.ClearTooltip();
-        ToolTip.ActiveItem = null;
     }
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
-        System.Windows.Point position = e.GetPosition(this);
+        float x = -12f / (float)MainWindow.Current.ActualWidth;
+        float y = -12f / (float)MainWindow.Current.ActualHeight;
+        Point position = e.GetPosition(this);
+
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
-        gridTransform.X = position.X * -0.0075;
-        gridTransform.Y = position.Y * -0.0075;
+        gridTransform.X = (int)Math.Round(position.X * x);
+        gridTransform.Y = (int)Math.Round(position.Y * y);
     }
 
-    public class ItemCategory
+    // Essentially DestinyPresentationNodeDefinition
+    public class Category : CharmUIElement
     {
+        public uint ItemCategoryHash;
         public int ItemCategoryIndex;
+
+        public string ItemCategoryName { get; set; }
+        public string ItemCategoryType { get; set; }
+        public string ItemCategoryDescription { get; set; }
+
+        public string ItemCategoryLabel1 { get; set; }
+        public string ItemCategoryLabel2 { get; set; }
+        public string ItemCategoryLabel3 { get; set; }
+
+        public DestinyPresentationScreenStyle ScreenStyle { get; set; }
+        public DestinyPresentationDisplayStyle DisplayStyle { get; set; }
+
         public ImageSource ItemCategoryIcon { get; set; }
         public ImageSource ItemCategoryIcon2 { get; set; }
-        public string ItemCategoryName { get; set; }
-        public string ItemCategoryDescription { get; set; }
+        public ImageSource ItemCategoryIcon3 { get; set; }
+        public ImageSource ItemCategoryIcon4 { get; set; }
+        public ImageSource ItemCategoryBackground { get; set; }
+
+        public SolidColorBrush CategoryBannerColor { get; set; } = new SolidColorBrush(Color.FromArgb(0xFF, 0x72, 0xB6, 0xB1));
+
         public int ItemCategoryAmount { get; set; }
         public int Order;
     }

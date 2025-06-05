@@ -249,8 +249,10 @@
                             IsEnabled="False"
                             MouseEnter="ExportButtons_MouseEnter"
                             MouseLeave="ExportButtons_MouseLeave"
-                            Style="{StaticResource D2StyleButton}"
-                            Tag="EXPORT:Export the current sound.">
+                            Style="{StaticResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="EXPORT" Description="Export the current sound." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 Margin="5"
                                 VerticalAlignment="Center"
@@ -269,8 +271,10 @@
                             IsEnabled="False"
                             MouseEnter="ExportButtons_MouseEnter"
                             MouseLeave="ExportButtons_MouseLeave"
-                            Style="{StaticResource D2StyleButton}"
-                            Tag="EXPORT ALL:Export all sounds from this package.">
+                            Style="{StaticResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="EXPORT ALL" Description="Export all sounds from this package." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 Margin="5"
                                 VerticalAlignment="Center"
@@ -292,8 +296,10 @@
                             IsEnabled="False"
                             MouseEnter="ExportButtons_MouseEnter"
                             MouseLeave="ExportButtons_MouseLeave"
-                            Style="{StaticResource D2StyleButton}"
-                            Tag="EXPORT:Export the current sounds waveform as an image.">
+                            Style="{StaticResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="EXPORT" Description="Export the current sounds waveform as an image." />
+                            </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 Margin="5"
                                 VerticalAlignment="Center"

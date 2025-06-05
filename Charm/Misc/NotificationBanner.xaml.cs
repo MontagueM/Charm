@@ -26,8 +26,7 @@ public partial class NotificationBanner : UserControl
 
     public void Show()
     {
-        var rootPanel = Application.Current.MainWindow?.Content as Panel;
-        rootPanel.Children.Add(this);
+        MainWindow.Current.ViewboxGrid.Children.Add(this);
     }
 
     private void UserControl_Loaded(object sender, RoutedEventArgs e)

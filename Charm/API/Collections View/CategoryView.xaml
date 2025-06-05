@@ -11,100 +11,24 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-
-        <DataTemplate x:Key="ItemTemplate">
-            <Button
-                Height="auto"
-                Margin="0"
-                local:StyleHelper.BorderThickness="0.75"
-                Focusable="False"
-                MouseEnter="PlugItem_MouseEnter"
-                MouseLeave="PlugItem_MouseLeave"
-                MouseRightButtonDown="Button_MouseRightButtonDown"
-                Style="{DynamicResource D2StyleButton}">
-                <local:CollectionItemControl />
-            </Button>
-        </DataTemplate>
-        <DataTemplate x:Key="ItemSetTemplate">
-            <Grid Background="Transparent">
-                <Button
-                    Height="auto"
-                    Margin="0"
-                    local:StyleHelper.BorderThickness="0.75"
-                    Style="{DynamicResource D2StyleButton}">
-                    <Grid Name="Container" Background="#69696969">
-                        <StackPanel Orientation="Horizontal">
-                            <ItemsControl
-                                Name="ItemSetList"
-                                ItemTemplateSelector="{DynamicResource ItemSetInnerTemplateSelector}"
-                                ItemsSource="{Binding Items}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid HorizontalAlignment="Left" Rows="1" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-
-                                <ItemsControl.ItemContainerStyle>
-                                    <Style TargetType="ContentPresenter">
-                                        <Setter Property="Margin" Value="0,0,5,0" />
-                                    </Style>
-                                </ItemsControl.ItemContainerStyle>
-                            </ItemsControl>
-
-                            <TextBlock
-                                Grid.Column="1"
-                                Margin="10,0,0,15"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Panel.ZIndex="1"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                                FontSize="20"
-                                Foreground="{StaticResource ForegroundColour90}"
-                                IsHitTestVisible="False"
-                                Text="{Binding ItemCategoryName}"
-                                TextAlignment="Left"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                    </Grid>
-                </Button>
-            </Grid>
-        </DataTemplate>
-        <DataTemplate x:Key="ItemSetInnerTemplate">
-            <Button
-                Height="auto"
-                Margin="0,0,0,0"
-                local:StyleHelper.BorderThickness="1"
-                MouseEnter="PlugItem_MouseEnter"
-                MouseLeave="PlugItem_MouseLeave"
-                MouseRightButtonDown="Button_MouseRightButtonDown"
-                Style="{DynamicResource D2StyleButton}">
-                <Border
-                    HorizontalAlignment="Left"
-                    Panel.ZIndex="1"
-                    BorderBrush="White"
-                    BorderThickness="0">
-                    <Image Source="{Binding ImageSource}" />
-                </Border>
-            </Button>
-        </DataTemplate>
-
-        <DataTemplate x:Key="SubcategoryItemTemplate">
+        <DataTemplate x:Key="CategoryItemTemplate">
             <RadioButton
                 Margin="0,0,0,0"
-                Checked="Subcategory_OnSelect"
+                local:StyleHelper.BorderThickness="0.75"
+                Checked="Category_OnSelect"
                 Focusable="False"
-                GroupName="Subcategory"
+                GroupName="Categories"
                 IsChecked="{Binding IsSelected, Mode=TwoWay}"
                 MouseEnter="CategoryButton_MouseEnter"
                 MouseLeave="PlugItem_MouseLeave"
                 Style="{DynamicResource D2StyleRadioButton}">
-                <Border>
+                <Border Margin="5">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Style.Triggers>
                                 <!--  Trigger when IsSelected (IsChecked) is false  -->
                                 <DataTrigger Binding="{Binding IsSelected}" Value="False">
-                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Setter Property="Opacity" Value="0.3" />
                                 </DataTrigger>
                                 <!--  Trigger when IsSelected (IsChecked) is true  -->
                                 <DataTrigger Binding="{Binding IsSelected}" Value="True">
@@ -113,86 +37,484 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <Image Source="{Binding ItemCategoryIcon}" />
+                    <Image
+                        MaxWidth="84"
+                        MaxHeight="84"
+                        Source="{Binding ItemCategoryIcon}" />
                 </Border>
             </RadioButton>
         </DataTemplate>
-        <DataTemplate x:Key="SubcategoryChildItemTemplate">
-            <RadioButton
-                Margin="0,0,0,0"
-                Checked="SubcategoryChild_OnSelect"
-                Focusable="False"
-                GroupName="SubcategoryChild"
-                IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                Style="{DynamicResource D2StyleRadioButton}">
-                <TextBlock
-                    Margin="15"
-                    HorizontalAlignment="Left"
-                    d:FontFamily="Haas Grot Text 55 Roman"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="20"
-                    Foreground="{StaticResource ForegroundColour100}"
-                    Text="{Binding ItemCategoryName}">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Style.Triggers>
-                                <!--  Trigger when IsSelected (IsChecked) is false  -->
-                                <DataTrigger Binding="{Binding IsSelected}" Value="False">
-                                    <Setter Property="Opacity" Value="0.5" />
-                                </DataTrigger>
-                                <!--  Trigger when IsSelected (IsChecked) is true  -->
-                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                    <Setter Property="Opacity" Value="1.0" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-            </RadioButton>
+
+        <DataTemplate x:Key="SubcategoryItemTemplate">
+            <Grid Background="Transparent">
+                <RadioButton
+                    x:Name="SubcategoryButton"
+                    Margin="0,0,0,0"
+                    Checked="Subcategory_OnSelect"
+                    Focusable="False"
+                    GroupName="Subcategories"
+                    IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                    Style="{DynamicResource D2StyleRadioButton}"
+                    UseLayoutRounding="True"
+                    Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+
+                    <Border>
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                        <Setter Property="Background" Value="Transparent" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="Background" Value="#33FFFFFF" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <TextBlock
+                            Margin="15,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="19"
+                            Foreground="{StaticResource ForegroundColour90}"
+                            Text="{Binding ItemCategoryName, Converter={StaticResource CharSpacingConverter}, ConverterParameter=' :1'}"
+                            Typography.CapitalSpacing="True">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <!--  Trigger when IsSelected (IsChecked) is false  -->
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                            <Setter Property="Opacity" Value="0.5" />
+                                        </DataTrigger>
+                                        <!--  Trigger when IsSelected (IsChecked) is true  -->
+                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Opacity" Value="1.0" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+
+                </RadioButton>
+
+                <!--  Placeholder Rectangle  -->
+                <Rectangle Fill="#08FFFFFF" Visibility="{Binding IsPlaceholder, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
         </DataTemplate>
 
-        <DataTemplate x:Key="PlaceholderTemplate">
-            <Border Margin="0" Background="#50505055" />
-        </DataTemplate>
-        <DataTemplate x:Key="PlaceholderTemplate2">
-            <Border Margin="0" Background="#50505055" />
-        </DataTemplate>
-        <DataTemplate x:Key="PlaceholderTemplate3">
-            <Border
-                Margin="0,0,0,0"
-                Panel.ZIndex="1"
-                BorderBrush="#AEFFFFFF"
-                BorderThickness="1">
-                <Rectangle
-                    Width="1"
-                    Margin="-20"
-                    Fill="#AEFFFFFF">
-                    <Rectangle.LayoutTransform>
-                        <TransformGroup>
-                            <RotateTransform Angle="45" />
-                        </TransformGroup>
-                    </Rectangle.LayoutTransform>
-                </Rectangle>
-            </Border>
+        <!--  Entry Item templates  -->
+        <DataTemplate x:Key="RecordEntryTemplate">
+            <Grid Background="Transparent">
+                <Grid Background="#1AFFFFFF" Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Button
+                        x:Name="RecordItemButton"
+                        Margin="0,0,0,0"
+                        local:StyleHelper.BorderThickness="0.5"
+                        Focusable="False"
+                        MouseEnter="CategoryEntryButton_MouseEnter"
+                        MouseLeave="PlugItem_MouseLeave"
+                        Style="{DynamicResource D2StyleButton}"
+                        Visibility="{Binding EntryType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Record}">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
 
+                            <Rectangle
+                                Grid.Row="0"
+                                Grid.ColumnSpan="2"
+                                VerticalAlignment="Stretch"
+                                Stretch="Fill"
+                                Visibility="{Binding DataContext.ItemCategoryBackground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:CategoryView}}, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=False}">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0.5">
+                                        <GradientStop Offset="1" Color="#00000000" />
+                                        <GradientStop Offset="0" Color="#264dd1ff" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                            <Grid
+                                Grid.Column="0"
+                                Margin="20"
+                                Background="Transparent">
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50*" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="50*" />
+                                </Grid.RowDefinitions>
+
+                                <StackPanel
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+
+                                    <Image
+                                        Margin="0,0,10,4"
+                                        Opacity="0.75"
+                                        Source="{Binding ItemIcon}">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Margin="0,0,0,5"
+                                        d:FontFamily="Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                                        FontSize="22"
+                                        Foreground="{StaticResource ForegroundColour80}"
+                                        Text="{Binding ItemName}"
+                                        TextWrapping="WrapWithOverflow"
+                                        Typography.CapitalSpacing="True" />
+                                </StackPanel>
+
+                                <Border
+                                    Grid.Row="1"
+                                    Margin="0,4,0,4"
+                                    BorderBrush="#3AFFFFFF"
+                                    BorderThickness="0,0,0,2"
+                                    Visibility="Visible" />
+
+                                <Grid
+                                    Grid.Row="2"
+                                    Margin="0,0,0,0"
+                                    Background="Transparent">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        d:FontFamily="Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                        FontSize="20"
+                                        Foreground="{StaticResource ForegroundColour60}"
+                                        Text="{Binding ItemDescription}"
+                                        TextTrimming="WordEllipsis"
+                                        Typography.CapitalSpacing="True" />
+
+                                    <ItemsControl
+                                        Grid.Column="1"
+                                        Margin="5,5,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Bottom"
+                                        ItemTemplate="{DynamicResource RewardItemTemplate}"
+                                        KeyboardNavigation.TabNavigation="None">
+                                        <ItemsControl.Style>
+                                            <Style TargetType="ItemsControl">
+                                                <Setter Property="ItemsSource" Value="{Binding Rewards}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Rewards.Count}" Value="0">
+                                                        <Setter Property="ItemsSource" Value="{Binding IntervalRewards}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ItemsControl.Style>
+
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid
+                                                    Grid.Row="0"
+                                                    Width="auto"
+                                                    Margin="0,0,0,0"
+                                                    HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Center"
+                                                    Background="Transparent"
+                                                    FlowDirection="RightToLeft"
+                                                    Rows="1" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="ContentPresenter">
+                                                <Setter Property="Margin" Value="0,0,4,0" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPlaceholder}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                    </ItemsControl>
+                                </Grid>
+                            </Grid>
+
+                            <Border
+                                Grid.Column="1"
+                                Margin="0,0,20,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                BorderBrush="#CCFFFFFF"
+                                BorderThickness="2">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ItemIcon2}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Image
+                                    Width="86"
+                                    Height="86"
+                                    Source="{Binding ItemIcon2}"
+                                    Stretch="Fill" />
+                            </Border>
+
+                        </Grid>
+                    </Button>
+                </Grid>
+
+                <!--  Placeholder Rectangle  -->
+                <Rectangle Panel.ZIndex="-1" Fill="#08FFFFFF" />
+            </Grid>
         </DataTemplate>
 
-        <local:SubcategoryChildItemTemplateSelector
-            x:Key="SubcategoryChildItemTemplateSelector"
-            NormalItemTemplate="{StaticResource SubcategoryChildItemTemplate}"
-            PlaceholderTemplate="{StaticResource PlaceholderTemplate2}" />
-        <local:ItemTemplateSelector
-            x:Key="ItemTemplateSelector"
-            NormalItemTemplate="{StaticResource ItemTemplate}"
-            PlaceholderTemplate="{StaticResource PlaceholderTemplate}" />
-        <local:ItemSetTemplateSelector
-            x:Key="ItemSetTemplateSelector"
-            NormalItemTemplate="{StaticResource ItemSetTemplate}"
-            PlaceholderTemplate="{StaticResource PlaceholderTemplate}" />
-        <local:ItemTemplateSelector
-            x:Key="ItemSetInnerTemplateSelector"
-            NormalItemTemplate="{StaticResource ItemSetInnerTemplate}"
-            PlaceholderTemplate="{StaticResource PlaceholderTemplate3}" />
+        <DataTemplate x:Key="CollectibleEntryTemplate">
+            <Grid Background="Transparent">
+                <Grid Background="#1AFFFFFF" Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Button
+                        x:Name="CollectibleItemButton"
+                        Margin="0,0,0,0"
+                        local:StyleHelper.BorderThickness="0.5"
+                        Focusable="False"
+                        MouseEnter="CategoryEntryButton_MouseEnter"
+                        MouseLeave="PlugItem_MouseLeave"
+                        MouseRightButtonDown="Button_MouseRightButtonDown"
+                        Style="{DynamicResource D2StyleButton}"
+                        Visibility="{Binding EntryType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Collectible}">
+
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Image
+                                Margin="0,0,0,0"
+                                Opacity="1"
+                                Source="{Binding ItemIcon}">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+
+                            <Grid
+                                Grid.Column="1"
+                                Margin="20,0,0,0"
+                                Background="Transparent">
+
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="0,20,40,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="21"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="{Binding ItemName}"
+                                    TextAlignment="Left"
+                                    TextWrapping="WrapWithOverflow" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Margin="0,0,5,2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="12"
+                                    Foreground="{StaticResource ForegroundColour70}"
+                                    Text="{Binding ItemHash}"
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap"
+                                    Visibility="Visible" />
+                            </Grid>
+                        </Grid>
+
+                    </Button>
+                </Grid>
+
+                <!--  Placeholder Rectangle  -->
+                <Rectangle Panel.ZIndex="-1" Fill="#08FFFFFF" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CollectibleSetEntryTemplate">
+            <Grid Background="Transparent">
+                <Grid Background="#1AFFFFFF" Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Button
+                        x:Name="CollectibleSetItemButton"
+                        Margin="0,0,0,0"
+                        local:StyleHelper.BorderThickness="0.5"
+                        Focusable="False"
+                        Style="{DynamicResource D2StyleButton}"
+                        Visibility="{Binding EntryType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=CollectibleSet}">
+
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ItemsControl
+                                x:Name="SetEntries"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                ItemsSource="{Binding Children}"
+                                KeyboardNavigation.TabNavigation="None">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid
+                                            Grid.Row="0"
+                                            Width="auto"
+                                            Margin="0,0,0,0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Top"
+                                            Background="Transparent"
+                                            Rows="1" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Background="Transparent">
+                                            <Button
+                                                x:Name="SetEntryItemButton"
+                                                Margin="0,0,0,0"
+                                                local:StyleHelper.BorderThickness="0.5"
+                                                Focusable="False"
+                                                MouseEnter="CategoryEntryButton_MouseEnter"
+                                                MouseLeave="PlugItem_MouseLeave"
+                                                MouseRightButtonDown="Button_MouseRightButtonDown"
+                                                Style="{DynamicResource D2StyleButtonNoOverlay}"
+                                                Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                <Image
+                                                    Margin="-2"
+                                                    Opacity="1"
+                                                    Source="{Binding ItemIcon}">
+                                                    <Image.Style>
+                                                        <Style TargetType="Image">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Image.Style>
+                                                </Image>
+                                            </Button>
+
+                                            <!--  Placeholder Rectangle  -->
+                                            <Border
+                                                Margin="-1"
+                                                Panel.ZIndex="-1"
+                                                BorderBrush="White"
+                                                BorderThickness="1"
+                                                Opacity="0.2"
+                                                Visibility="{Binding IsPlaceholder, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <Rectangle
+                                                    Width="1"
+                                                    Margin="-20"
+                                                    Fill="White">
+                                                    <Rectangle.LayoutTransform>
+                                                        <TransformGroup>
+                                                            <RotateTransform Angle="45" />
+                                                        </TransformGroup>
+                                                    </Rectangle.LayoutTransform>
+                                                </Rectangle>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Margin" Value="0,0,8,0" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+
+                            <Grid
+                                Grid.Column="1"
+                                Margin="20,0,0,0"
+                                Background="Transparent">
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="0,20,40,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="21"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="{Binding ItemName}"
+                                    TextAlignment="Left"
+                                    TextWrapping="WrapWithOverflow" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Margin="0,0,5,2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="12"
+                                    Foreground="{StaticResource ForegroundColour70}"
+                                    Text="{Binding ItemHash}"
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap" />
+                            </Grid>
+                        </Grid>
+
+                    </Button>
+                </Grid>
+
+                <!--  Placeholder Rectangle  -->
+                <Rectangle Panel.ZIndex="-1" Fill="#08FFFFFF" />
+            </Grid>
+        </DataTemplate>
+
+
+        <DataTemplate x:Key="RewardItemTemplate">
+            <Image
+                MaxWidth="36"
+                MaxHeight="36"
+                Opacity="0.75"
+                Source="{Binding ItemIcon}" />
+        </DataTemplate>
 
         <Storyboard x:Key="TextChangeAnimation">
             <DoubleAnimation
@@ -211,445 +533,350 @@
             </ThicknessAnimation>
         </Storyboard>
 
-        <Storyboard x:Key="FadeIn 0.3">
-            <DoubleAnimation
-                Storyboard.TargetProperty="Opacity"
-                From="0"
-                To="1"
-                Duration="0:0:0.3" />
-        </Storyboard>
-        <Storyboard x:Key="FadeIn 0.2">
-            <DoubleAnimation
-                Storyboard.TargetProperty="Opacity"
-                From="0"
-                To="1"
-                Duration="0:0:0.2" />
-        </Storyboard>
-        <Storyboard x:Key="FadeIn 0.1">
-            <DoubleAnimation
-                Storyboard.TargetProperty="Opacity"
-                From="0"
-                To="1"
-                Duration="0:0:0.1" />
-        </Storyboard>
-
-
     </UserControl.Resources>
 
-    <Grid x:Name="MainGrid" Focusable="False">
-        <Grid.Background>
-            <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
-                <RadialGradientBrush.GradientStops>
-                    <GradientStop Offset="0" Color="#FF37393E" />
-                    <GradientStop Offset="0.8" Color="#111113" />
-                </RadialGradientBrush.GradientStops>
-            </RadialGradientBrush>
-        </Grid.Background>
+    <Grid
+        x:Name="MainGrid"
+        Focusable="False"
+        Style="{StaticResource GradientBackground}">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="90*" />
+            <RowDefinition Height="5*" />
+        </Grid.RowDefinitions>
+
+        <!--  Item Rarity banner  -->
         <Grid
             Name="ItemRarityBanner"
+            Grid.Row="0"
             Width="auto"
-            Height="55"
-            VerticalAlignment="Top"
+            VerticalAlignment="Stretch"
             Panel.ZIndex="1"
-            Background="Transparent">
-            <Rectangle>
-                <Rectangle.Fill>
-                    <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
-                        <GradientStop Offset="1" Color="#75BE9F28" />
-                        <GradientStop Offset="0" Color="#75BE9F28" />
-                    </LinearGradientBrush>
-                </Rectangle.Fill>
-            </Rectangle>
-            <Rectangle Margin="0,45,0,0">
-                <Rectangle.Fill>
-                    <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
-                        <GradientStop Offset="1" Color="#75BE9F28" />
-                        <GradientStop Offset="0" Color="#75BE9F28" />
-                    </LinearGradientBrush>
-                </Rectangle.Fill>
-            </Rectangle>
-        </Grid>
-
-        <Grid
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
             Background="Transparent"
-            Opacity="1">
-            <Border
-                x:Name="Spinner"
-                Background="Transparent"
-                BorderThickness="0"
-                Opacity="1" />
-        </Grid>
-
-        <Grid
-            x:Name="MainContainer"
-            Background="Transparent"
-            RenderTransformOrigin="0.5,0.5">
-            <Grid.RenderTransform>
-                <TranslateTransform />
-            </Grid.RenderTransform>
-
-            <Grid.Triggers>
-                <EventTrigger RoutedEvent="Grid.Loaded">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="Opacity"
-                                From="0"
-                                To="1"
-                                Duration="0:0:0.25" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Grid.Triggers>
-
+            Visibility="{Binding ItemCategoryBackground, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=true}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
+                <RowDefinition Height="80*" />
                 <RowDefinition Height="20*" />
-                <RowDefinition Height="125*" />
             </Grid.RowDefinitions>
 
-            <Grid
-                x:Name="Header"
+            <Rectangle
+                Grid.Row="0"
+                Grid.RowSpan="1"
+                Fill="{Binding CategoryBannerColor}"
+                Opacity="0.651" />
+            <Rectangle
                 Grid.Row="1"
-                Margin="115,0,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Bottom"
-                Background="Transparent">
-                <StackPanel Orientation="Horizontal">
-                    <Image
-                        Height="100"
-                        d:Source="https://www.bungie.net/common/destiny2_content/icons/67ac44db37a28df7458586b90eac56d1.png"
-                        Source="{Binding ItemCategoryIcon2}" />
+                Fill="{Binding CategoryBannerColor}"
+                Opacity="0.902" />
+        </Grid>
 
-                    <Grid Margin="15,0,0,0" Background="Transparent">
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock
-                                x:Name="SubcategoryName"
-                                Margin="0,0,0,-4"
-                                Panel.ZIndex="1"
-                                d:FontFamily="Haas Grot Text 65 Medium"
-                                d:Text="WEAPONS"
-                                FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
-                                FontSize="44"
-                                Foreground="{StaticResource ForegroundColour90}"
-                                Text="{Binding ItemCategoryName}"
-                                TextWrapping="Wrap" />
-                            <TextBlock
-                                x:Name="SubcategoryType"
-                                Margin="0,-4,0,0"
-                                Panel.ZIndex="1"
-                                d:FontFamily="Haas Grot Text 55 Roman"
-                                d:Text="PRIMARY"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                FontSize="32"
-                                Foreground="{StaticResource ForegroundColour50}" />
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Grid>
+        <!--  Optional background  -->
+        <Grid Grid.RowSpan="3" Background="#1d201f">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="75*" />
+                <RowDefinition Height="25*" />
+            </Grid.RowDefinitions>
 
+            <Rectangle
+                Grid.Row="0"
+                VerticalAlignment="Stretch"
+                Stretch="Fill">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                        <GradientStop Offset="0" Color="#00000000" />
+                        <GradientStop Offset="1" Color="#2100d1d1" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <Viewbox
+                Grid.RowSpan="1"
+                Margin="0,0,0,0"
+                VerticalAlignment="Top"
+                RenderTransformOrigin="0.5,0.5">
+                <Image
+                    IsHitTestVisible="False"
+                    Source="{Binding ItemCategoryBackground}"
+                    Stretch="Uniform">
+                    <Image.RenderTransform>
+                        <TranslateTransform X="0" Y="-405" />
+                    </Image.RenderTransform>
+                </Image>
+            </Viewbox>
+
+
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ItemCategoryBackground}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+        </Grid>
+
+        <Viewbox Grid.RowSpan="3">
             <Grid
-                Grid.Row="2"
-                Margin="50,0,50,50"
-                Background="Transparent">
+                x:Name="MainContainer"
+                Width="1920"
+                Height="990"
+                Background="Transparent"
+                ClipToBounds="True"
+                RenderTransformOrigin="0.5,0.5"
+                SnapsToDevicePixels="True">
+                <Grid.RenderTransform>
+                    <TranslateTransform />
+                </Grid.RenderTransform>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="180*" />
+                    <RowDefinition Height="700*" />
+                    <RowDefinition Height="100*" />
+                </Grid.RowDefinitions>
+
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="35*" />
-                    <ColumnDefinition Width="85*" />
+                    <ColumnDefinition Width="150*" />
+                    <ColumnDefinition Width="460*" />
+                    <ColumnDefinition Width="1400*" />
+
                 </Grid.ColumnDefinitions>
 
-                <Border
-                    Grid.RowSpan="1"
-                    Grid.Column="1"
-                    Height="auto"
-                    Margin="40,15,0,15"
-                    HorizontalAlignment="Left"
-                    BorderBrush="{StaticResource BackgroundColour50}"
-                    BorderThickness="0,0,2,0"
-                    Visibility="Visible" />
+                <Grid
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,5,50,-10"
+                    Background="Transparent"
+                    Opacity="0.4">
+                    <Border
+                        Width="10"
+                        Height="10"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        BorderBrush="White"
+                        BorderThickness="0,0,2,2" />
+
+                    <Border
+                        Width="10"
+                        Height="10"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        BorderBrush="White"
+                        BorderThickness="0,2,2,0" />
+                </Grid>
 
                 <Grid
-                    Grid.Column="0"
-                    Margin="60,15,15,15"
-                    Background="Transparent">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="15*" />
-                        <RowDefinition Height="80*" />
-                    </Grid.RowDefinitions>
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    Margin="0,5,80,-10"
+                    Background="Transparent"
+                    Opacity="0.4">
+                    <Border
+                        Width="10"
+                        Height="10"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        BorderBrush="White"
+                        BorderThickness="2,0,0,2" />
 
-                    <ItemsControl x:Name="Subcategories" ItemTemplate="{StaticResource SubcategoryItemTemplate}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid
-                                    Grid.Row="0"
-                                    Width="auto"
-                                    Height="95"
-                                    Margin="0,0,0,0"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Top"
-                                    Background="Transparent"
-                                    Rows="1" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="Margin" Value="4,0,4,0" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                    </ItemsControl>
-
-                    <StackPanel
-                        Grid.Row="1"
-                        Margin="0,0,0,0"
+                    <Border
+                        Width="10"
+                        Height="10"
+                        HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
-                        Orientation="Vertical">
+                        BorderBrush="White"
+                        BorderThickness="2,2,0,0" />
+                </Grid>
 
-                        <Button
-                            x:Name="PreviousChildPage"
-                            Width="auto"
-                            Height="35"
-                            Margin="4,0,4,4"
-                            HorizontalAlignment="Stretch"
+
+
+                <!--  Category Header  -->
+                <Grid
+                    x:Name="Header"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    Background="Transparent">
+                    <StackPanel Orientation="Horizontal">
+                        <Image
+                            Width="86"
+                            Height="86"
+                            d:Source="https://www.bungie.net/common/destiny2_content/icons/7564027686d50ee4438e0f66466f3abc.png"
+                            Source="{Binding ItemCategoryIcon2}" />
+
+                        <Grid
+                            Margin="15,0,0,0"
+                            HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            local:StyleHelper.BorderThickness="1"
-                            Click="PreviousChildPage_Click"
-                            Focusable="False"
-                            Style="{DynamicResource D2StyleButton}"
-                            Visibility="Collapsed">
-                            <Polygon
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Fill="#5DFFFFFF"
-                                Points="0, 0 80, 50, 0, 100">
-                                <Polygon.LayoutTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
-                                        <SkewTransform />
-                                        <RotateTransform Angle="-90" />
-                                        <TranslateTransform />
-                                    </TransformGroup>
-                                </Polygon.LayoutTransform>
-                            </Polygon>
-                        </Button>
+                            Background="Transparent">
+                            <StackPanel>
 
-                        <ItemsControl x:Name="SubcategoryChildren" ItemTemplateSelector="{StaticResource SubcategoryChildItemTemplateSelector}">
+                                <TextBlock
+                                    x:Name="SubcategoryName"
+                                    Margin="0,0,0,-5"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    d:FontFamily="Haas Grot Text 65 Medium"
+                                    d:Text="LORE"
+                                    FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                                    FontSize="44"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="{Binding ItemCategoryName}"
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap"
+                                    Typography.CapitalSpacing="True" />
+
+                                <TextBlock
+                                    x:Name="SubcategoryType"
+                                    VerticalAlignment="Top"
+                                    Panel.ZIndex="1"
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    d:Text="THE LIGHT"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="30"
+                                    Foreground="{StaticResource BackgroundColour40}"
+                                    Typography.CapitalSpacing="True" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+
+                <!--  Categories/Subcategories  -->
+                <Grid
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,15,0,0"
+                    Background="Transparent">
+
+                    <Grid
+                        Grid.Column="0"
+                        Background="Transparent"
+                        KeyboardNavigation.TabNavigation="None">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+
+                        <ItemsControl
+                            x:Name="Categories"
+                            Margin="0,0,0,30"
+                            VerticalAlignment="Top"
+                            ItemTemplate="{StaticResource CategoryItemTemplate}"
+                            KeyboardNavigation.TabNavigation="None">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid
                                         Grid.Row="0"
                                         Width="auto"
-                                        Height="auto"
                                         Margin="0,0,0,0"
                                         HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Center"
+                                        VerticalAlignment="Top"
                                         Background="Transparent"
-                                        Columns="1" />
+                                        Rows="1" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
 
                             <ItemsControl.ItemContainerStyle>
                                 <Style TargetType="ContentPresenter">
-                                    <Setter Property="Margin" Value="4" />
+                                    <Setter Property="Margin" Value="3,0,3,0" />
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
                         </ItemsControl>
 
-                        <Button
-                            x:Name="NextChildPage"
-                            Width="auto"
-                            Height="35"
-                            Margin="4,4,4,0"
+                        <local:ItemPage
+                            x:Name="Subcategories"
+                            Grid.Row="1"
+                            Margin="0,0,0,0"
                             HorizontalAlignment="Stretch"
-                            VerticalAlignment="Center"
-                            local:StyleHelper.BorderThickness="1"
-                            Click="NextChildPage_Click"
-                            Focusable="False"
-                            Style="{DynamicResource D2StyleButton}"
-                            Visibility="Hidden">
-                            <Polygon
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Fill="#5DFFFFFF"
-                                Points="0, 0 80, 50, 0, 100">
-                                <Polygon.LayoutTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
-                                        <SkewTransform />
-                                        <RotateTransform Angle="90" />
-                                        <TranslateTransform />
-                                    </TransformGroup>
-                                </Polygon.LayoutTransform>
-                            </Polygon>
-                        </Button>
-                    </StackPanel>
+                            VerticalAlignment="Stretch"
+                            CollapsePageButtons="True"
+                            Columns="1"
+                            Expand="True"
+                            IsVertical="True"
+                            ItemMargin="3,4,3,4"
+                            ItemsPerPage="9"
+                            UsePlaceholders="True" />
+                    </Grid>
                 </Grid>
 
+                <!--  Entries  -->
                 <Grid
+                    Grid.Row="1"
                     Grid.Column="2"
-                    Margin="50,15,15,15"
+                    Margin="0,15,0,0"
                     Background="Transparent">
+
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="4*" />
+                        <ColumnDefinition Width="100*" />
+                        <ColumnDefinition Width="8*" />
                     </Grid.ColumnDefinitions>
 
-                    <!--  Left Navigation Button  -->
-                    <Button
-                        x:Name="PreviousPage"
-                        Width="40"
+                    <Border
                         Margin="0,0,5,0"
-                        local:StyleHelper.BorderThickness="1"
-                        Click="PreviousPage_Click"
-                        Focusable="False"
-                        Style="{DynamicResource D2StyleButton}"
-                        Visibility="Hidden">
-                        <Border Background="#9E6C6C6C">
-                            <Polygon
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Fill="White"
-                                Points="0, 0 80, 50, 0, 100">
-                                <Polygon.LayoutTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
-                                        <SkewTransform />
-                                        <RotateTransform Angle="180" />
-                                        <TranslateTransform />
-                                    </TransformGroup>
-                                </Polygon.LayoutTransform>
-                            </Polygon>
-                        </Border>
-                    </Button>
+                        HorizontalAlignment="Right"
+                        BorderBrush="#1AFFFFFF"
+                        BorderThickness="0,0,2,0"
+                        Visibility="Visible" />
 
-                    <!--  Items Control  -->
-                    <ItemsControl
-                        Name="SingleItemList"
-                        Grid.Column="1"
-                        Margin="0"
-                        ItemTemplateSelector="{StaticResource ItemTemplateSelector}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Margin="0,-4,0,-4" Columns="3" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="Margin" Value="4" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                    </ItemsControl>
-
-                    <ItemsControl
-                        Name="ItemSetList"
-                        Grid.Column="1"
-                        Margin="5,-5,5,-5"
-                        ItemTemplateSelector="{StaticResource ItemSetTemplateSelector}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Margin="0" Columns="1" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="Margin" Value="0,4,0,4" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                    </ItemsControl>
-
-                    <!--  Right Navigation Button  -->
-                    <Button
-                        x:Name="NextPage"
-                        Grid.Column="2"
-                        Width="40"
-                        Margin="5,0,0,0"
-                        local:StyleHelper.BorderThickness="1"
-                        Click="NextPage_Click"
-                        Focusable="False"
-                        Style="{DynamicResource D2StyleButton}"
-                        Visibility="Collapsed">
-                        <Border Background="#9E6C6C6C">
-                            <Polygon
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Fill="White"
-                                Points="0, 0 80, 50, 0, 100">
-                                <Polygon.LayoutTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="0.15" ScaleY="0.15" />
-                                        <SkewTransform />
-                                        <RotateTransform Angle="0" />
-                                        <TranslateTransform />
-                                    </TransformGroup>
-                                </Polygon.LayoutTransform>
-                            </Polygon>
-                        </Border>
-                    </Button>
+                    <Grid Grid.Column="1" Background="Transparent">
+                        <local:ItemPage
+                            x:Name="SubcategoryItems"
+                            CollapsePageButtons="false"
+                            Columns="2"
+                            ItemMargin="3"
+                            ItemsPerPage="10"
+                            UsePlaceholders="True" />
+                    </Grid>
                 </Grid>
 
-
-                <Border
-                    Width="10"
-                    Height="10"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    BorderBrush="{StaticResource ForegroundColour50}"
-                    BorderThickness="0,0,1,1" />
-                <Border
-                    Width="10"
-                    Height="10"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom"
-                    BorderBrush="{StaticResource ForegroundColour50}"
-                    BorderThickness="0,1,1,0" />
-                <Border
-                    Grid.Column="2"
-                    Width="10"
-                    Height="10"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    BorderBrush="{StaticResource ForegroundColour50}"
-                    BorderThickness="1,1,0,0" />
-                <Border
-                    Grid.Column="2"
-                    Width="10"
-                    Height="10"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    BorderBrush="{StaticResource ForegroundColour50}"
-                    BorderThickness="1,0,0,1" />
             </Grid>
-        </Grid>
+        </Viewbox>
 
         <!--  User Controls  -->
-        <Grid VerticalAlignment="Bottom" Background="#38000000">
-            <StackPanel
-                Margin="0,10,150,10"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                FlowDirection="RightToLeft"
-                Orientation="Horizontal">
+        <Grid
+            Grid.Row="2"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            Background="#38000000">
+            <Viewbox HorizontalAlignment="Right" VerticalAlignment="Center">
+                <StackPanel
+                    Margin="0,10,75,10"
+                    FlowDirection="RightToLeft"
+                    Orientation="Horizontal">
 
-                <TextBlock
-                    Margin="0,0,25,0"
-                    VerticalAlignment="Center"
-                    Panel.ZIndex="1"
-                    d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
-                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                    FontSize="20"
-                    Foreground="{StaticResource ForegroundColour80}"
-                    Text=" Dismiss"
-                    TextAlignment="Left"
-                    TextWrapping="Wrap" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Panel.ZIndex="1"
+                        d:FontFamily="Haas Grot Text 55 Roman, Destiny Keys"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="20"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text=" Dismiss"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
 
-            </StackPanel>
-
+                </StackPanel>
+            </Viewbox>
         </Grid>
+
     </Grid>
 
 </UserControl>

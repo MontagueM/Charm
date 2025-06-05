@@ -50,6 +50,7 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
 #pragma warning disable S1104
     public uint Hash32;
     public const uint InvalidHash32 = 0xFFFFFFFF;
+    public long Position;
 
     public TigerHash()
     {
@@ -133,6 +134,7 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
 
     public virtual void Deserialize(TigerReader reader)
     {
+        Position = reader.Position;
         Hash32 = reader.ReadUInt32();
     }
 
