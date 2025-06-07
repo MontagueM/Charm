@@ -177,6 +177,24 @@ public struct S6F818080
     public TigerHash ID;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "CF918080", 0xF8)]
+public struct SCF918080
+{
+    [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public Tag<S80806BB7> Unk28;
+
+    // Theres bytecode here also but idk what its used for
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "80806BB7", 0x50)]
+public struct S80806BB7
+{
+    [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public Texture LUT;
+    public Texture Unk2C;
+    public Texture Unk30;
+}
+
 //[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D3938080", 0x50)]
 //[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "DF918080", 0x38)]
 //[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "DD918080", 0x38)]

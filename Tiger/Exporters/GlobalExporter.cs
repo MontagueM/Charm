@@ -270,7 +270,7 @@ public class GlobalExporter : AbstractExporter
     {
         if (GlobalScene.Any<EntityResource>())
         {
-            Dictionary<TigerHash, GlobalChannelData> channels = new();
+            Dictionary<string, GlobalChannelData> channels = new();
             string dataSavePath = $"{SavePath}/Rendering";
             Directory.CreateDirectory(dataSavePath);
 
@@ -318,6 +318,22 @@ public class GlobalExporter : AbstractExporter
                                 {
                                     // Idk what to do with these, so just gonna skip for now
                                 }
+                            }
+                            else if (entry.Unk10.GetValue(resource.GetReader()) is SCF918080 lut)
+                            {
+                                if (lut.Unk28 is null || lut.Unk28.TagData.LUT is null || channels.ContainsKey("LUT"))
+                                    continue;
+
+                                Directory.CreateDirectory($"{SavePath}/Textures/LUT");
+                                lut.Unk28.TagData.LUT.SavetoFile($"{SavePath}/Textures/LUT/{lut.Unk28.TagData.LUT.Hash}");
+                                Source2Handler.SaveVTEX(lut.Unk28.TagData.LUT, $"{SavePath}/Textures/LUT/", "LUT");
+
+                                // TODO move out of global channels when theres more general stuff to export
+                                channels.TryAdd("LUT", new GlobalChannelData
+                                {
+                                    Name = $"{lut.Unk28.TagData.LUT.Hash}",
+                                    Index = -1
+                                });
                             }
                         }
                         break;

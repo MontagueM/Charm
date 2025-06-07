@@ -991,7 +991,7 @@ PS
                                             break;
 
                                         case 0x28:
-                                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0,5,0.5,0,1).{dotAfter} //{equal_post}");
+                                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= float4(0.5,0.5,0,1).{dotAfter} //{equal_post}");
                                             break;
 
                                         default: // Unknown
