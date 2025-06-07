@@ -5,18 +5,10 @@ using Tiger.Schema;
 
 namespace Tiger;
 
-// public class ConfigAttribute : Attribute
-// {
-//
-// }
-//
-// [ConfigSubsystem]
-
 public struct Settings
 {
     public CommonSettings Common;
     public UnrealSettings Unreal;
-    public BlenderSettings Blender;
     public Source2Settings Source2;
 }
 
@@ -39,12 +31,6 @@ public class UnrealSettings
 {
     public bool UnrealInteropEnabled { get; set; } = false;
     public string UnrealInteropPath { get; set; } = "";
-}
-
-// [ConfigSubsystem]
-public class BlenderSettings
-{
-    public bool BlenderInteropEnabled { get; set; } = false;
 }
 
 // [ConfigSubsystem]
@@ -312,21 +298,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     #endregion
 
-    #region blenderInteropEnabled
-
-    public void SetBlenderInteropEnabled(bool bBlenderInteropEnabled)
-    {
-        _settings.Blender.BlenderInteropEnabled = bBlenderInteropEnabled;
-        Save();
-    }
-
-    public bool GetBlenderInteropEnabled()
-    {
-        return _settings.Blender.BlenderInteropEnabled;
-    }
-
-    #endregion
-
     #region singleFolderMapsEnabled
 
     public void SetSingleFolderMapAssetsEnabled(bool bSingleFolderMapAssetsEnabled)
@@ -423,7 +394,6 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
         if (_settings.Common == null)
         {
             _settings.Common = new CommonSettings();
-            _settings.Blender = new BlenderSettings();
             _settings.Unreal = new UnrealSettings();
             _settings.Source2 = new Source2Settings();
             WriteConfig();

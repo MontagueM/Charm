@@ -245,27 +245,11 @@ public partial class GeneralConfigView : UserControl
         }
     }
 
-    private void BlenderInteropEnabled_OnClick(object sender, RoutedEventArgs e)
-    {
-        if (!_config.GetBlenderInteropEnabled())
-        {
-            MessageBox.Show("Blender will NOT import shaders. Please have moderate Blender shader knowledge.");
-        }
-        _config.SetBlenderInteropEnabled(!_config.GetBlenderInteropEnabled());
-        PopulateConfigPanel();
-    }
-
     private void SingleFolderMapAssetsEnabled_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetSingleFolderMapAssetsEnabled(!_config.GetSingleFolderMapAssetsEnabled());
         PopulateConfigPanel();
     }
-
-    //private void IndvidualStaticsEnabled_OnClick(object sender, RoutedEventArgs e)
-    //{
-    //    _config.SetIndvidualStaticsEnabled(!_config.GetIndvidualStaticsEnabled());
-    //    PopulateConfigPanel();
-    //}
 
     private void OutputTextureFormat_OnSelectionChanged(object sender, RoutedEventArgs e)
     {
