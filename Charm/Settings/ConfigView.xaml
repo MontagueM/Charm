@@ -76,8 +76,7 @@
             </Grid.RenderTransform>
 
             <local:GeneralConfigView x:Name="ConfigControl" Visibility="Collapsed" />
-            <local:Source2ConfigView x:Name="Source2Control" Visibility="Collapsed" />
-            <local:UnrealConfigView x:Name="UnrealControl" Visibility="Collapsed" />
+            <local:PortingConfigView x:Name="PortingControl" Visibility="Collapsed" />
 
         </Grid>
 
