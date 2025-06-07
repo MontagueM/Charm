@@ -123,13 +123,10 @@ public partial class DareView : UserControl
         if (_allItems.TryRemove(apiItem.Item.TagData.InventoryItemHash.Hash32, out _))
         {
             _selectedItems.Add(apiItem);
-
-            //foreach (var a in Investment.Get().GetEntitiesFromHash(apiItem.Item.TagData.InventoryItemHash))
-            //{
-            //    if (a is null)
-            //        continue;
-            //    Console.WriteLine($"{a.Hash}");
-            //}
+#if DEBUG
+            Console.WriteLine($"Item: {apiItem.Item.Hash}");
+            Console.WriteLine($"Item Strings: {apiItem.Item.GetItemStrings().Hash}");
+#endif
         }
         else
         {

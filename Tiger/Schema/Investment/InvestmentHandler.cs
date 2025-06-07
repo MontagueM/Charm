@@ -569,7 +569,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public SC3598080? GetCollectibleStrings(int index)
     {
-        if (index == -1 || index > CollectableStrings.Count)
+        if (index == -1 || index > CollectableStrings.Count || Strategy.IsD1())
             return null;
 
         return CollectableStrings[index];
@@ -586,7 +586,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public int GetCollectibleIndexFromItemIndex(int itemIndex)
     {
-        if (itemIndex == -1)
+        if (itemIndex == -1 || Strategy.IsD1())
             return -1;
 
         if (_collectableIndexMap.TryGetValue(itemIndex, out int collectibleIndex))
@@ -598,6 +598,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     // Inventory Item index -> Collectible index
     public void GetCollectableIndexDict()
     {
+        if (Strategy.IsD1())
+            return;
+
         _collectableIndexMap = new ConcurrentDictionary<int, int>();
 
         using TigerReader reader = _collectableDefinitionMap.GetReader();
@@ -894,171 +897,10 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     }
     #endregion
 
-#if DEBUG
-    //    public void DebugAllInvestmentEntities()
-    //    {
-    //        Dictionary<string, Dictionary<dynamic, TigerHash>> data = new();
-    //        for (int i = _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.Count - 1; i >= 0; i--)
-    //        {
-    //            List<Entity.Entity> entities = GetEntitiesFromArrangementIndex(i);
-    //            foreach (Entity.Entity? entity in entities)
-    //            {
-    //                bool bAllValid = true;
-    //                if (entity is null || entity.Model is null)
-    //                    continue;
-    //                foreach (SCB6E8080 entry in entity.Model.TagData.Meshes[entity.Model.GetReader(), 0].Parts)
-    //                {
-    //                    foreach (System.Reflection.FieldInfo field in typeof(SCB6E8080).GetFields())
-    //                    {
-    //                        if (!data.ContainsKey(field.Name))
-    //                        {
-    //                            data.Add(field.Name, new Dictionary<dynamic, TigerHash>());
-    //                        }
-    //                        dynamic fieldValue = field.GetValue(entry);
-    //                        if (fieldValue is not null && !data[field.Name].ContainsKey(fieldValue) && data[field.Name].Count < 10)
-    //                        {
-    //                            data[field.Name].Add(fieldValue, _entityAssignmentTag.TagData.ArtArrangementEntityAssignments.ElementAt(_entityAssignmentTag.GetReader(), i).ArtArrangementHash);
-    //                        }
-
-    //                        bAllValid &= data[field.Name].Count > 1;
-    //                    }
-    //                }
-    //                if (bAllValid)
-    //                {
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    private static Random rng = new();
-
-    //    public void DebugAPIRequestAllInfo()
-    //    {
-    //        // get all inventory item hashes
-
-    //        // var itemHash = 138282166;
-    //        var l = _inventoryItemIndexmap.Keys.ToList();
-    //        var shuffled = l.OrderBy(a => rng.Next()).ToList();
-    //        foreach (uint itemHash in shuffled)
-    //        {
-    //            if (itemHash != 731561450)
-    //                continue;
-    //            ManifestData? itemDef;
-    //            byte[] tgxm;
-    //            try
-    //            {
-    //                itemDef = MakeGetRequestManifestData($"https://www.light.gg/db/items/{itemHash}/?raw=2");
-    //                // ManifestData? itemDef = MakeGetRequestManifestData($"https://lowlidev.com.au/destiny/api/gearasset/{itemHash.Hash}?destiny2");
-    //                if (itemDef is null || itemDef.gearAsset is null || itemDef.gearAsset.content.Length == 0 || itemDef.gearAsset.content[0].geometry is null || itemDef.gearAsset.content[0].geometry.Length == 0)
-    //                    continue;
-    //                tgxm = MakeGetRequest(
-    //                    $"https://www.bungie.net/common/destiny2_content/geometry/platform/mobile/geometry/{itemDef.gearAsset.content[0].geometry[0]}");
-    //            }
-    //            catch (Exception)
-    //            {
-    //                continue;
-    //            }
-
-    //            // Read TGXM
-    //            // File.WriteAllBytes("C:/T/geometry.tgxm", tgxm);
-    //            var br = new BinaryReader(new MemoryStream(tgxm));
-    //            // br.BaseStream.Seek(8, SeekOrigin.Begin);
-    //            byte[] magic = br.ReadBytes(4);
-    //            if (magic.Equals(new byte[] { 0x54, 0x47, 0x58, 0x4d }))
-    //            {
-    //                continue;
-    //            }
-    //            uint version = br.ReadUInt32();
-    //            int fileOffset = br.ReadInt32();
-    //            int fileCount = br.ReadInt32();
-    //            for (int i = 0; i < fileCount; i++)
-    //            {
-    //                br.BaseStream.Seek(fileOffset + 0x110 * i, SeekOrigin.Begin);
-    //                string fileName = Encoding.ASCII.GetString(br.ReadBytes(0x100)).TrimEnd('\0');
-    //                int offset = br.ReadInt32();
-    //                int type = br.ReadInt32();
-    //                int size = br.ReadInt32();
-    //                if (fileName.Contains(".js"))
-    //                {
-    //                    byte[] fileData;
-    //                    Array.Copy(tgxm, offset, fileData = new byte[size], 0, size);
-    //                    File.WriteAllBytes($"C:/T/geom/{itemHash}_{fileName}", fileData);
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    public void DebugAPIRenderMetadata()
-    //    {
-
-    //        string[] files = Directory.GetFiles("C:/T/geom");
-    //        foreach (string file in files)
-    //        {
-    //            dynamic json = JsonConvert.DeserializeObject(File.ReadAllText(file));
-    //            dynamic data = json["render_model"]["render_meshes"];
-    //        }
-    //    }
-
-    //    private ManifestData MakeGetRequestManifestData(string url)
-    //    {
-    //        using (var client = new HttpClient())
-    //        {
-    //            client.Timeout = TimeSpan.FromSeconds(2);
-    //            HttpResponseMessage response = client.GetAsync(url).Result;
-    //            string content = response.Content.ReadAsStringAsync().Result;
-    //            if (content.Contains("\"gearAsset\": false"))
-    //            {
-    //                return null;
-    //            }
-    //            ManifestData item = System.Text.Json.JsonSerializer.Deserialize<ManifestData>(content);
-    //            return item;
-    //        }
-    //    }
-
-    //    private byte[] MakeGetRequest(string url)
-    //    {
-    //        using (var client = new HttpClient())
-    //        {
-    //            client.Timeout = TimeSpan.FromSeconds(2);
-    //            HttpResponseMessage response = client.GetAsync(url).Result;
-    //            byte[] content = response.Content.ReadAsByteArrayAsync().Result;
-    //            return content;
-    //        }
-    //    }
-    //#pragma warning disable S1144 // Unused private types or members should be removed
-    //    private class ManifestData
-    //    {
-    //        public dynamic requestedId { get; set; }
-    //        public DestinyGearAssetsDefinition gearAsset { get; set; }
-    //        public dynamic definition { get; set; }
-    //    }
-
-    //    private class DestinyGearAssetsDefinition
-    //    {
-    //        public string[] gear { get; set; }
-    //        public ContentDefinition[] content { get; set; }
-    //    }
-
-    //    private class ContentDefinition
-    //    {
-    //        public string platform { get; set; }
-    //        public string[] geometry { get; set; }
-    //        public string[] textures { get; set; }
-    //        public IndexSet male_index_set { get; set; }
-    //        public IndexSet female_index_set { get; set; }
-    //        public IndexSet dye_index_set { get; set; }
-    //        public Dictionary<string, IndexSet[]> region_index_sets { get; set; }
-    //    }
-
-    //    private class IndexSet
-    //    {
-    //        public int[] textures { get; set; }
-    //        public int[] geometry { get; set; }
-    //    }
-#endif
-
     public void DebugPrintTags()
     {
+        if (Strategy.IsD1())
+            return;
 #if DEBUG
         Console.WriteLine($"_presentationNodeDefinitionMap {_presentationNodeDefinitionMap.Hash}");
         Console.WriteLine($"_presentationNodeDefinitionStringMap {_presentationNodeDefinitionStringMap.Hash}");
@@ -1111,6 +953,9 @@ public class InventoryItem : Tag<S9D798080>
     public List<DestinyTraitID> GetItemTraits()
     {
         List<DestinyTraitID> traits = new();
+        if (Strategy.IsD1())  // TODO D1 items dont have traits
+            return traits;
+
         foreach (var index in _tag.TraitIndices.Select(x => x.Index))
         {
             traits.Add(Investment.Get()._traitDefinitionMap.TagData.Traits[index].TraitHash);
