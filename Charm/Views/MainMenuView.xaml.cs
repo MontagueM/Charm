@@ -92,6 +92,16 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
+    private async void ApiView2Button_OnClick(object sender, RoutedEventArgs e)
+    {
+        await LoadInvestment();
+
+        DareView2 apiView = new();
+        apiView.LoadContent();
+        _mainWindow.MakeNewTab("API 2", apiView);
+        _mainWindow.SetNewestTabSelected();
+    }
+
     private async void CollectionsViewButton_OnClick(object sender, RoutedEventArgs e)
     {
         await LoadInvestment();

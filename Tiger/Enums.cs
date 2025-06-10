@@ -144,45 +144,77 @@ public enum DestinyPresentationScreenStyle : uint
 
 public enum DestinyTraitID : uint
 {
+    [Description("Other")]
+    other = 0,
+    [Description("Black Armory")]
     activities_black_armory = 2944045106,
+    [Description("Gambit")]
     activities_gambit = 853784306,
+    [Description("Iron Banner")]
     activities_iron_banner = 2716563063,
+    [Description("Gambit Prime")]
     activities_mamba = 1781288324,
+    [Description("Trials of Osiris")]
     activities_trials = 3439101959,
+    [Description("The Crucible")]
     faction_crucible = 2951764300,
+    [Description("Dead Orbit")]
     faction_dead_orbit = 3331226384,
+    [Description("Future War Cult")]
     faction_future_war_cult = 1345630660,
+    [Description("New Monarchy")]
     faction_new_monarchy = 1221030001,
+    [Description("Vanguard")]
     faction_vanguard = 3359893241,
+    [Description("Daito")]
     foundry_daito = 1866367371,
+    [Description("Field Forged")]
     foundry_field_forged = 3475344486,
+    [Description("FOTC")]
     foundry_fotc = 2217328812,
+    [Description("Hakke")]
     foundry_hakke = 2210483526,
+    [Description("Omolon")]
     foundry_omolon = 192828432,
+    [Description("Suros")]
     foundry_suros = 3690635686,
+    [Description("Tex Mechanica")]
     foundry_tex_mechanica = 1821231131,
+    [Description("Veist")]
     foundry_veist = 963390771,
+
     inventory_filtering_bounty = 201433599,
     inventory_filtering_quest = 1861210184,
     inventory_filtering_quest_featured = 3034243664,
+
+    [Description("Arm Armor")]
     item_armor_arms = 1851377542,
+    [Description("Chest Armor")]
     item_armor_chest = 374319058,
+    [Description("Class Item")]
     item_armor_class = 3367459877,
+    [Description("Head Armor")]
     item_armor_head = 1075323345,
+    [Description("Leg Armor")]
     item_armor_legs = 1968436740,
+
     item_aura = 3553898659,
     item_boost = 1030789163,
     item_bounty = 2443101659,
     item_consumable = 2062186907,
     item_currency = 3906525419,
+    [Description("Emblem")]
     item_emblem = 2455696884,
     item_emote = 888082966,
     item_engram = 2893978702,
     item_exotic_catalyst = 4036726046,
     item_finisher = 2582082890,
+    [Description("Ghost Shell")]
     item_ghost = 2570676179,
     item_ghost_hologram = 4118304139,
+    [Description("Armor Ornament")]
     item_ornament_armor = 3477257717,
+    [Description("Weapon Ornament")]
     item_ornament_weapon = 3828004164,
     item_package = 151064318,
     item_plug_aspect = 577926988,
@@ -204,30 +236,51 @@ public enum DestinyTraitID : uint
     item_quest_seasonal_season24 = 3904180889,
     item_quest_seasonal_season25 = 3904180888,
     item_quest_seasonal_season26 = 3904180891,
+    [Description("Shader")]
     item_shader = 2652561225,
+    [Description("Ship")]
     item_ship = 3607584152,
     item_spawnfx = 856705125,
     item_subclass_dark = 3224025418,
     item_subclass_light = 482679394,
     item_subclass_prism = 3820193993,
+    [Description("Sparrow")]
     item_vehicle = 3977049418,
+    [Description("Auto Rifle")]
     item_weapon_auto_rifle = 2729780558,
+    [Description("Combat Bow")]
     item_weapon_bow = 195373008,
+    [Description("Fusion Rifle")]
     item_weapon_fusion_rifle = 2891203715,
+    [Description("Glaive")]
     item_weapon_glaive = 888940472,
+    [Description("Grenade Launcher")]
     item_weapon_grenade_launcher = 130863397,
+    [Description("Hand Cannon")]
     item_weapon_hand_cannon = 3602983853,
+    [Description("Linear Fusion Rifle")]
     item_weapon_linear_fusion_rifle = 2100142349,
+    [Description("Machine Gun")]
     item_weapon_machinegun = 1143070403,
+    [Description("Pulse Rifle")]
     item_weapon_pulse_rifle = 1648572040,
+    [Description("Rocket Launcher")]
     item_weapon_rocket_launcher = 3925016055,
+    [Description("Scout Rifle")]
     item_weapon_scout_rifle = 12026609,
+    [Description("Shotgun")]
     item_weapon_shotgun = 2114179114,
+    [Description("Sidearm")]
     item_weapon_sidearm = 2034403781,
+    [Description("Sniper Rifle")]
     item_weapon_sniper_rifle = 3300229618,
+    [Description("Submachine Gun")]
     item_weapon_submachinegun = 2659552777,
+    [Description("Sword")]
     item_weapon_sword = 1531673855,
+    [Description("Trace Rifle")]
     item_weapon_trace_rifle = 446244952,
+
     keywords_buffs_arc_ionic_trace = 3824458961,
     keywords_buffs_arc_static_charge = 2935077680,
     keywords_buffs_arc_supercharged = 3291013836,

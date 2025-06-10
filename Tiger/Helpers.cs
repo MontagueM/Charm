@@ -382,7 +382,12 @@ public static class EnumExtensions
 
     public static string GetEnumDescription(this Enum enumValue)
     {
-        if (Convert.ToInt32(enumValue) == -1)
+        var underlyingType = Enum.GetUnderlyingType(enumValue.GetType());
+        long value = underlyingType == typeof(uint) || underlyingType == typeof(ulong)
+            ? Convert.ToInt64(Convert.ToUInt64(enumValue))
+            : Convert.ToInt64(enumValue);
+
+        if (value == -1)
             return string.Empty;
 
         FieldInfo? fieldInfo = enumValue.GetType().GetField(enumValue.ToString());

@@ -27,6 +27,7 @@ public partial class MainWindow
 {
     public static ProgressView Progress = null;
     private static TabItem _newestTab = null;
+    public TabItem CurrentTab = null;
     private static LogView _logView = null;
     private static TabItem _logTab = null;
     private bool _bHasInitialised = false;
@@ -469,6 +470,7 @@ public partial class MainWindow
         {
             if (tabControl.SelectedItem is TabItem selectedTab)
             {
+                CurrentTab = selectedTab;
                 switch (selectedTab.Content)
                 {
                     case null: // bug, first time start up

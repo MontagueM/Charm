@@ -324,13 +324,19 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     Action = $"{(preview.PreviewActionString.Value ?? "Details")}"
                 });
 
-                if (DareView.ShouldAddToList(item, item.GetItemType()))
-                    inputBlocks.Add(new InputBlock()
-                    {
-                        Order = 1,
-                        Key = $"",
-                        Action = $"Export"
-                    });
+                Dispatcher.Invoke(() =>
+                {
+                    if (MainWindow.Current.CurrentTab is not null
+                    && MainWindow.Current.CurrentTab.Content is CategoryView
+                    && DareView.ShouldAddToList(item, item.GetItemType()))
+                        inputBlocks.Add(new InputBlock()
+                        {
+                            Order = 1,
+                            Key = $"",
+                            Action = $"Export"
+                        });
+                });
+
             }
         });
 

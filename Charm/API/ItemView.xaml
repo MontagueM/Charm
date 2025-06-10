@@ -608,6 +608,7 @@
             ConsumableTemplate="{StaticResource ConsumableSocket}"
             LargePerkTemplate="{StaticResource LargePerkSocket}"
             ReusableTemplate="{StaticResource ReusableSocket}" />
+
         <DataTemplate x:Key="SocketCategory">
             <Grid
                 Width="726"

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -744,25 +745,64 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
 public class APIPlugItem : CharmUIElement
 {
+    public APIPlugItem() { }
+
+    public APIPlugItem(InventoryItem item)
+    {
+        Item = item;
+        Hash = item.ApiHash;
+    }
+
     public SocketEntry ParentSocket;
     public DestinySocketCategoryStyle ParentSocketStyle { get; set; } // meh
     public uint Hash { get; set; }
-    public InventoryItem Item { get; set; }
 
+    private InventoryItem _item = null;
+    public InventoryItem Item
+    {
+        get => _item;
+        set
+        {
+            if (_item == value)
+                return;
+
+            _item = value;
+            _icon = null;
+            OnPropertyChanged(nameof(Item));
+            OnPropertyChanged(nameof(Icon));
+        }
+    }
+
+    private bool _isLoadingIcon = false;
     private ImageSource _icon = null;
     public ImageSource Icon
     {
         get
         {
-            if (_icon is not null)
-                return _icon;
-
-            if (Item is not null)
+            if (_icon is null && !_isLoadingIcon && Item is not null)
             {
-                _icon = ApiImageUtils.MakeFullIcon(Item);
+                _ = LoadIconAsync(); // fire and forget
             }
+
             return _icon;
         }
+        private set
+        {
+            _icon = value;
+            OnPropertyChanged(nameof(Icon));
+        }
+    }
+
+    public async Task LoadIconAsync()
+    {
+        if (_isLoadingIcon || Item is null)
+            return;
+
+        _isLoadingIcon = true;
+        var loadedIcon = await Task.Run(() => ApiImageUtils.MakeFullIcon(Item));
+        _isLoadingIcon = false;
+
+        Icon = loadedIcon;
     }
 }
 

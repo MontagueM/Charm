@@ -37,6 +37,9 @@ public partial class CategoryView : UserControl
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
+        Focusable = true;
+        Focus();
+
         Subcategories.ItemTemplate = (DataTemplate)FindResource("SubcategoryItemTemplate");
         SubcategoryItems.ItemTemplateSelector = new CategoryEntryTemplateSelector
         {

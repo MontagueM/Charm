@@ -5,17 +5,40 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace Charm;
 
 public partial class ItemPage : UserControl, INotifyPropertyChanged
 {
-    public static readonly DependencyProperty ItemsProperty =
-    DependencyProperty.Register(
+    #region Backing Fields
+    private int _columns = 3;
+    private bool _isVertical = false;
+    private bool _usePlaceholders = false;
+    private bool _collapsePageButtons = true;
+    private bool _hidePageButtons = false;
+    private bool _expand = false;
+    private Thickness _itemMargin = new(0, 0, 0, 0);
+    private Thickness _pageIndicatorMargin = new(0, 0, 0, -20);
+    private bool _showVerticalPageIndicator = false;
+    private int _currentPage = 0;
+    private int _totalPages = 1;
+    private bool _useStackPanel = false;
+    private bool _selectOnPageChange = true;
+    private float _slideDistance = 3.0f;
+    private float _transitionSpeed = 0.075f;
+    #endregion
+
+    public static readonly DependencyProperty ItemsProperty = DependencyProperty.Register(
         nameof(Items),
         typeof(IEnumerable<CharmUIElement>),
         typeof(ItemPage),
         new PropertyMetadata(Enumerable.Empty<CharmUIElement>(), OnItemsChanged));
+    public IEnumerable<CharmUIElement> Items
+    {
+        get => (IEnumerable<CharmUIElement>)GetValue(ItemsProperty);
+        set => SetValue(ItemsProperty, value);
+    }
 
     private static void OnItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -27,40 +50,17 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
             control.DisplayItems(true);
     }
 
-    public IEnumerable<CharmUIElement> Items
-    {
-        get => (IEnumerable<CharmUIElement>)GetValue(ItemsProperty);
-        set => SetValue(ItemsProperty, value);
-    }
-
-    #region Backing Fields
-    private int _itemsPerPage = 3;
-    private int _columns = 3;
-    private bool _isVertical = false;
-    private bool _usePlaceholders = false;
-    private bool _collapsePageButtons = true;
-    private bool _hidePageButtons = false;
-    private bool _expand = false;
-    private Thickness _itemMargin = new(0, 0, 0, 0);
-    private Thickness _pageIndicatorMargin = new(0, 0, 0, -20);
-    private int _currentPage = 0;
-    private int _totalPages = 1;
-    private bool _useStackPanel = false;
-    private bool _selectOnPageChange = true;
-    private float _slideDistance = 3.0f;
-    #endregion
-
+    // needing to do this just to use bindings on it is so stupid
+    public static readonly DependencyProperty ItemsPerPageProperty = DependencyProperty.Register(
+           nameof(ItemsPerPage),
+           typeof(int),
+           typeof(ItemPage),
+           new PropertyMetadata(0)
+       );
     public int ItemsPerPage
     {
-        get => _itemsPerPage;
-        set
-        {
-            if (_itemsPerPage != value)
-            {
-                _itemsPerPage = value;
-                OnPropertyChanged();
-            }
-        }
+        get => (int)GetValue(ItemsPerPageProperty);
+        set => SetValue(ItemsPerPageProperty, value);
     }
 
     public int CurrentPage
@@ -110,6 +110,19 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
             if (_isVertical != value)
             {
                 _isVertical = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool ShowVerticalPageIndicator
+    {
+        get => _showVerticalPageIndicator;
+        set
+        {
+            if (_showVerticalPageIndicator != value)
+            {
+                _showVerticalPageIndicator = value;
                 OnPropertyChanged();
             }
         }
@@ -236,6 +249,22 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
     }
 
     /// <summary>
+    /// How long it'll take to change pages, if you want to change that for some reason
+    /// </summary>
+    public float TransitionSpeed
+    {
+        get => _transitionSpeed;
+        set
+        {
+            if (_transitionSpeed != value)
+            {
+                _transitionSpeed = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    /// <summary>
     /// Select the first element of the Items list on page change (only RadioButtons currently)
     /// </summary>
     public bool SelectOnPageChange
@@ -275,20 +304,44 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         set => SetValue(ItemTemplateSelectorProperty, value);
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string name = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-    }
-
-
     public event EventHandler<ItemsControl> OnPreviousPageClicked;
     public event EventHandler<ItemsControl> OnNextPageClicked;
 
     public event EventHandler<ItemsControl> OnBeforePageChange;
     public event EventHandler<ItemsControl> OnAfterPageChange;
 
-    private bool IsAnimating = false;
+    private ButtonBase _customNextButton = null;
+    public ButtonBase CustomNextButton
+    {
+        get => _customNextButton;
+        set
+        {
+            if (_customNextButton != value)
+            {
+                _customNextButton = value;
+                _customNextButton.Click += NextPage_Click;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private ButtonBase _customPrevButton = null;
+    public ButtonBase CustomPrevButton
+    {
+        get => _customPrevButton;
+        set
+        {
+            if (_customPrevButton != value)
+            {
+                _customPrevButton = value;
+                _customPrevButton.Click += PreviousPage_Click;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private bool _isAnimating = false;
+    private bool _firstTimeLoad = true;
 
     public ItemPage()
     {
@@ -298,7 +351,13 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
     {
         DataContext = this;
-        DisplayItems();
+        // stops returning to the first page if the user switches tabs and back
+        // doesnt happen in CategoryView but does in DareView, whack
+        if (_firstTimeLoad)
+        {
+            _firstTimeLoad = false;
+            DisplayItems();
+        }
     }
 
     public void DisplayItems(bool fromStart = false)
@@ -308,8 +367,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         if (Items is null)
             return;
 
-        int count = Items.Count();
-
+        var count = Items.Count();
         var itemsPerPage = (count > ItemsPerPage && (Expand && CollapsePageButtons) && ItemsPerPage != 1) ? ItemsPerPage - 1 : ItemsPerPage;
 
         TotalPages = (int)Math.Ceiling((double)count / itemsPerPage);
@@ -334,13 +392,11 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
             }
         }
         ItemList.ItemsSource = itemsToShow;
-
-        UIHelper.AnimateFade(ItemList, 0.075f, 1f, 0);
         CheckPages();
     }
 
     /// <summary>
-    /// Previous/Next page if using custom controls to change pages
+    /// Previous/Next page if using custom controls to change pages (arrow keys for example)
     /// </summary>
     /// <returns></returns>
     public bool SelectNextPage()
@@ -397,7 +453,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
 
     private bool ChangePage(int direction, Action beforeChange, Action afterChange, EventHandler completeAction)
     {
-        if (IsAnimating) return false;
+        if (_isAnimating) return false;
 
         var itemsPerPage = (Items.Count() > ItemsPerPage && (Expand && CollapsePageButtons) && ItemsPerPage != 1) ? ItemsPerPage - 1 : ItemsPerPage;
         int targetPage = CurrentPage + direction;
@@ -408,7 +464,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
 
         if (!canChange) return false;
 
-        IsAnimating = true;
+        _isAnimating = true;
         DisableNavigation();
 
         beforeChange?.Invoke();
@@ -425,21 +481,24 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
             exitSlide = direction < 0 ? new(0, -SlideDistance) : new(0, SlideDistance);
         }
 
-        UIHelper.AnimateSlide(ItemList, 0.075f, entrySlide, new(0, 0));
+        UIHelper.AnimateSlide(ItemList, TransitionSpeed, entrySlide, new(0, 0));
 
-        UIHelper.AnimateFade(ItemList, 0.075f, 0f, 1f, (s, e) =>
+        UIHelper.AnimateFade(ItemList, TransitionSpeed, 0f, 1f, (s, e) =>
         {
             CurrentPage = targetPage;
             DisplayItems();
             afterChange?.Invoke();
 
-            IsAnimating = false;
-            EnableNavigation();
+            UIHelper.AnimateSlide(ItemList, TransitionSpeed, new(0, 0), exitSlide);
+            UIHelper.AnimateFade(ItemList, TransitionSpeed, 1f, 0, (s, e) =>
+            {
+                _isAnimating = false;
+                EnableNavigation();
+                completeAction?.Invoke(s, e);
 
-            UIHelper.AnimateSlide(ItemList, 0.075f, new(0, 0), exitSlide);
+            }, additive: true);
 
-            completeAction?.Invoke(s, e);
-        });
+        }, additive: true);
         return true;
     }
 
@@ -458,20 +517,35 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         PreviousPage.IsEnabled = CurrentPage != 0;
         NextPage.IsEnabled = Items.Count() > 0 ? (CurrentPage + 1) * itemsPerPage < Items.Count() : false;
 
-        PageIndicatorItem.Visibility = (IsVertical || TotalPages <= 1) ? Visibility.Collapsed : Visibility.Visible;
+        CustomPrevButton?.SetValue(UIElement.IsEnabledProperty, PreviousPage.IsEnabled);
+        CustomNextButton?.SetValue(UIElement.IsEnabledProperty, NextPage.IsEnabled);
+
+        PageIndicatorItem.Visibility = ((IsVertical && !ShowVerticalPageIndicator) || TotalPages <= 1) ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void DisableNavigation()
     {
         PreviousPage.IsHitTestVisible = false;
         NextPage.IsHitTestVisible = false;
+
+        CustomPrevButton?.SetValue(UIElement.IsHitTestVisibleProperty, PreviousPage.IsHitTestVisible);
+        CustomNextButton?.SetValue(UIElement.IsHitTestVisibleProperty, NextPage.IsHitTestVisible);
     }
 
     private void EnableNavigation()
     {
         PreviousPage.IsHitTestVisible = true;
         NextPage.IsHitTestVisible = true;
+
+        CustomPrevButton?.SetValue(UIElement.IsHitTestVisibleProperty, PreviousPage.IsHitTestVisible);
+        CustomNextButton?.SetValue(UIElement.IsHitTestVisibleProperty, NextPage.IsHitTestVisible);
         CheckPages();
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    private void OnPropertyChanged([CallerMemberName] string name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

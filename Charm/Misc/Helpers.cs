@@ -82,7 +82,6 @@ public static class ApiImageUtils
         return bitmapImage;
     }
 
-    // TODO dont return Dictionary
     public static DrawingImage MakeFullIcon(InventoryItem item)
     {
         string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)).TagData.ItemType.Value ?? "";
@@ -103,7 +102,7 @@ public static class ApiImageUtils
         BitmapImage? bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
 
         //Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
-        BitmapImage? bgOverlay = bgOverlayStream != null && type.Contains("Ornament") ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
+        BitmapImage? bgOverlay = bgOverlayStream != null && !item.IsArmor ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
         BitmapImage? overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
 
         var group = new DrawingGroup();
@@ -405,10 +404,13 @@ public static class StyleHelper
 
 public static class UIHelper
 {
-    public static void AnimateFade(dynamic obj, float seconds, float to = 1, float from = 0, EventHandler func = null, bool autoReverse = false)
+    public static void AnimateFade(dynamic obj, float seconds, float to = 1, float from = 0, EventHandler func = null, bool autoReverse = false, bool additive = false)
     {
         Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
         {
+            if (additive && obj.Opacity != (double)from)
+                from = (float)obj.Opacity;
+
             DoubleAnimation fadeInAnimation = new();
             fadeInAnimation.From = from;
             fadeInAnimation.To = to;

@@ -257,6 +257,8 @@ public partial class EntityView : UserControl
                 foreach (S7B738080 dyeEntry in translationBlock.DefaultDyes)
                 {
                     Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
+                    if (dye is null)
+                        continue;
                     dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
 #if DEBUG
                     System.Console.WriteLine($"{item.ItemName}: DefaultDye {dye.Hash}");
@@ -265,6 +267,8 @@ public partial class EntityView : UserControl
                 foreach (S7B738080 dyeEntry in translationBlock.LockedDyes)
                 {
                     Dye dye = Investment.Get().GetDyeFromIndex(dyeEntry.DyeIndex);
+                    if (dye is null)
+                        continue;
                     dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
 #if DEBUG
                     System.Console.WriteLine($"{item.ItemName}: LockedDye {dye.Hash}");
