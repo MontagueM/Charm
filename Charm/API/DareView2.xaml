@@ -64,7 +64,7 @@
 
         <DataTemplate x:Key="DareSelectedEntry">
             <Grid Background="Transparent">
-                <Grid Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <Grid Loaded="DareSelectedEntry_Loaded" Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                     <Rectangle
                         Grid.Row="0"
                         IsHitTestVisible="False"
@@ -134,7 +134,6 @@
                             </StackPanel>
                         </Grid>
                     </Grid>
-
                 </Grid>
             </Grid>
         </DataTemplate>

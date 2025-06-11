@@ -84,7 +84,7 @@ public partial class MainWindow
                     .Where(t => t.Tag is 1 && !t.Header.ToString().Contains("configuration", StringComparison.InvariantCultureIgnoreCase))
                     .ToList()
                     .ForEach(t => MainTabControl.Items.Remove(t));
-                CurrentStrategyText.Text = args.Strategy.ToString().Split(".").Last();
+                CurrentStrategyText.Text = args.Strategy.GetEnumDescription().ToUpper();
             });
         };
 

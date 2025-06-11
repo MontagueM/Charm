@@ -231,7 +231,27 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     {
         APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
         if (!SelectedItems.Contains(apiItem))
+        {
+            apiItem.IsNewlyAdded = true;
             SelectedItems.Add(apiItem);
+        }
+    }
+
+    private void DareSelectedEntry_Loaded(object sender, RoutedEventArgs e)
+    {
+        var element = (sender as FrameworkElement);
+        APIPlugItem apiItem = element.DataContext as APIPlugItem;
+        if (apiItem is null)
+            return;
+
+        if (apiItem.IsNewlyAdded)
+        {
+            UIHelper.AnimateSlide(element, 0.15f, new(0, 0), new(-15, 0));
+            UIHelper.AnimateFade(element, 0.15f, func: (s, e) =>
+            {
+                apiItem.IsNewlyAdded = false; // reset newly added state when the item is loaded
+            });
+        }
     }
 
     private void ExportButton_Click(object sender, RoutedEventArgs e)

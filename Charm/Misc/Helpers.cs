@@ -44,6 +44,22 @@ public class CharmUIElement : INotifyPropertyChanged
         }
     }
 
+    // Not ideal but useful for triggering something like an animation for just this element if it gets added
+    // to an ItemPage or something. Should be set to false asap though, such as Loaded event
+    private bool _isNewlyAdded = false;
+    public bool IsNewlyAdded
+    {
+        get => _isNewlyAdded;
+        set
+        {
+            if (_isNewlyAdded != value)
+            {
+                _isNewlyAdded = value;
+                OnPropertyChanged(nameof(IsNewlyAdded));
+            }
+        }
+    }
+
     public int Index { get; set; }
     public dynamic Tag { get; set; }
 
@@ -478,30 +494,39 @@ public static class UIHelper
 {
     public static void AnimateFade(dynamic obj, float seconds, float to = 1, float from = 0, EventHandler func = null, bool autoReverse = false, bool additive = false)
     {
+        if (additive && obj.Opacity != (double)from)
+            from = (float)obj.Opacity;
+
+        obj.Opacity = from;
         Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
         {
-            if (additive && obj.Opacity != (double)from)
-                from = (float)obj.Opacity;
+            DoubleAnimation fadeInAnimation = new()
+            {
+                From = from,
+                To = to,
+                Duration = TimeSpan.FromSeconds(seconds),
+                AutoReverse = autoReverse,
 
-            DoubleAnimation fadeInAnimation = new();
-            fadeInAnimation.From = from;
-            fadeInAnimation.To = to;
-            fadeInAnimation.Duration = TimeSpan.FromSeconds(seconds);
-            fadeInAnimation.AutoReverse = autoReverse;
+            };
             if (func is not null)
                 fadeInAnimation.Completed += func;
+
             obj.BeginAnimation(UIElement.OpacityProperty, fadeInAnimation);
 
-        }));
+        }), DispatcherPriority.Render);
     }
 
     public static void AnimateSlide(UIElement obj, float seconds, Point to, Point from, bool autoReverse = false)
     {
+        var group = EnsureTransformGroup(obj);
+        var translate = GetOrAddTransform<TranslateTransform>(group);
+
+        // Set initial position before animation to avoid a flash
+        translate.X = from.X;
+        translate.Y = from.Y;
+
         Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
         {
-            var group = EnsureTransformGroup(obj);
-            var translate = GetOrAddTransform<TranslateTransform>(group);
-
             // Animate X
             var animX = new DoubleAnimation
             {
@@ -525,16 +550,20 @@ public static class UIHelper
             translate.BeginAnimation(TranslateTransform.XProperty, animX);
             translate.BeginAnimation(TranslateTransform.YProperty, animY);
 
-        }), DispatcherPriority.Background);
+        }), DispatcherPriority.Render);
     }
 
     public static void AnimateScale(UIElement obj, float seconds, Point to, Point from, bool autoReverse = false)
     {
+        var group = EnsureTransformGroup(obj);
+        var scale = GetOrAddTransform<ScaleTransform>(group);
+
+        // Set initial scale before animation to avoid a flash
+        scale.ScaleX = from.X;
+        scale.ScaleY = from.Y;
+
         Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
         {
-            var group = EnsureTransformGroup(obj);
-            var scale = GetOrAddTransform<ScaleTransform>(group);
-
             // Animate X
             var animX = new DoubleAnimation
             {
@@ -558,7 +587,7 @@ public static class UIHelper
             scale.BeginAnimation(ScaleTransform.ScaleXProperty, animX);
             scale.BeginAnimation(ScaleTransform.ScaleYProperty, animY);
 
-        }), DispatcherPriority.Background);
+        }), DispatcherPriority.Render);
     }
 
     public static TransformGroup EnsureTransformGroup(UIElement obj)
