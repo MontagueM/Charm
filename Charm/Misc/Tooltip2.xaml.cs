@@ -201,145 +201,146 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                 break;
         }
 
-
-        await Task.Run(() =>
+        if (!Strategy.IsD1())
         {
-            // Spacer Block
-            blocks.Add(new SpacerBlock()
+            await Task.Run(() =>
             {
-                Order = -1,
-            });
-
-            // Description
-            blocks.Add(new TextsBlock()
-            {
-                Order = 0,
-                Text = item.GetItemDescription()
-            });
-
-            // Flavor Text
-            blocks.Add(new TextsBlock()
-            {
-                Order = 1,
-                Italic = true,
-                Text = item.GetItemFlavorText()
-            });
-
-            // Emblem preview
-            if (item.GetItemTraits().Contains(DestinyTraitID.item_emblem))
-            {
-                blocks.Add(new EmblemBlock()
+                // Spacer Block
+                blocks.Add(new SpacerBlock()
                 {
-                    Emblem = ApiImageUtils.MakeIcon(strings.TagData.EmblemContainerIndex)
+                    Order = -1,
                 });
-            }
 
-            // Energy Mod Cost
-            if (strings.TagData.DisplayStyle == DestinyUIDisplayStyle.EnergyMod)
-            {
-                foreach (S86738080 stat in ((S81738080)item.TagData.Unk78.GetValue(item.GetReader())).InvestmentStats)
-                {
-                    S6F588080 statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
-                    if (statItem.StatHash.Hash32 is 3578062600 or 514071887)
-                    {
-                        blocks.Add(new EnergyModBlock()
-                        {
-                            Order = 2,
-                            Icon = ApiImageUtils.MakeIcon(statItem.StatIconIndex, iconIndex: 3),
-                            Cost = stat.Value
-                        });
-                    }
-                }
-            }
-
-
-            if (overrideStyle == DestinySocketCategoryStyle.Unknown)
-                // Source
-                if (item.Source != null && item.Source != "")
-                {
-                    blocks.Add(new SpacerBlock()
-                    {
-                        Order = 5,
-                        Height = 15,
-                        ShowBar = true
-                    });
-
-                    blocks.Add(new TextsBlock()
-                    {
-                        Order = 6,
-                        Text = item.Source
-                    });
-                }
-
-            if (overrideStyle != DestinySocketCategoryStyle.Reusable)
-            {
-                // Perks
-                if (item.TagData.Unk78.GetValue(item.GetReader()) is S81738080 stats)
-                {
-                    foreach (S87738080 perk in stats.Perks)
-                    {
-                        S33548080 perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
-                        if (perkStrings.IconIndex == -1)
-                            continue;
-
-                        blocks.Add(new PerkBlock()
-                        {
-                            Order = 7,
-                            Description = perkStrings.SandboxPerkDescription,
-                            Icon = ApiImageUtils.MakeIcon(perkStrings.IconIndex, 0, 0, 1)
-                        });
-                    }
-                }
-
-                // Tooltip Notifications
-                if (strings.TagData.TooltipNotifications.Any())
-                {
-                    blocks.Add(new SpacerBlock()
-                    {
-                        Order = 8,
-                        ShowBar = true,
-                        BarOpacity = 0.1f
-                    });
-
-                    foreach (SB2548080 notif in strings.TagData.TooltipNotifications)
-                    {
-                        blocks.Add(new NotificationBlock()
-                        {
-                            Order = 9,
-                            Text = notif.DisplayString.Value,
-                            Style = notif.DisplayStyle
-                        });
-                    }
-                }
-            }
-
-            // Input blocks
-            if (strings.TagData.Unk40.GetValue(strings.GetReader()) is SD7548080 preview)
-            {
-                inputBlocks.Add(new InputBlock()
+                // Description
+                blocks.Add(new TextsBlock()
                 {
                     Order = 0,
-                    Key = $"", // Key glyph
-                    KeyPress = $"", // 2nd key glyph (mouse left/right)
-                    Action = $"{(preview.PreviewActionString.Value ?? "Details")}"
+                    Text = item.GetItemDescription()
                 });
 
-                Dispatcher.Invoke(() =>
+                // Flavor Text
+                blocks.Add(new TextsBlock()
                 {
-                    if (MainWindow.Current.CurrentTab is not null
-                    && MainWindow.Current.CurrentTab.Content is CategoryView
-                    && DareView.ShouldAddToList(item, item.GetItemType()))
-                        inputBlocks.Add(new InputBlock()
-                        {
-                            Order = 1,
-                            Key = $"",
-                            Action = $"Export"
-                        });
+                    Order = 1,
+                    Italic = true,
+                    Text = item.GetItemFlavorText()
                 });
 
-            }
-        });
+                // Emblem preview
+                if (item.GetItemTraits().Contains(DestinyTraitID.item_emblem))
+                {
+                    blocks.Add(new EmblemBlock()
+                    {
+                        Emblem = ApiImageUtils.MakeIcon(strings.TagData.EmblemContainerIndex)
+                    });
+                }
 
+                // Energy Mod Cost
+                if (strings.TagData.DisplayStyle == DestinyUIDisplayStyle.EnergyMod)
+                {
+                    foreach (S86738080 stat in ((S81738080)item.TagData.Unk78.GetValue(item.GetReader())).InvestmentStats)
+                    {
+                        S6F588080 statItem = Investment.Get().StatStrings[stat.StatTypeIndex];
+                        if (statItem.StatHash.Hash32 is 3578062600 or 514071887)
+                        {
+                            blocks.Add(new EnergyModBlock()
+                            {
+                                Order = 2,
+                                Icon = ApiImageUtils.MakeIcon(statItem.StatIconIndex, iconIndex: 3),
+                                Cost = stat.Value
+                            });
+                        }
+                    }
+                }
+
+
+                if (overrideStyle == DestinySocketCategoryStyle.Unknown)
+                    // Source
+                    if (item.Source != null && item.Source != "")
+                    {
+                        blocks.Add(new SpacerBlock()
+                        {
+                            Order = 5,
+                            Height = 15,
+                            ShowBar = true
+                        });
+
+                        blocks.Add(new TextsBlock()
+                        {
+                            Order = 6,
+                            Text = item.Source
+                        });
+                    }
+
+                if (overrideStyle != DestinySocketCategoryStyle.Reusable)
+                {
+                    // Perks
+                    if (item.TagData.Unk78.GetValue(item.GetReader()) is S81738080 stats)
+                    {
+                        foreach (S87738080 perk in stats.Perks)
+                        {
+                            S33548080 perkStrings = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
+                            if (perkStrings.IconIndex == -1)
+                                continue;
+
+                            blocks.Add(new PerkBlock()
+                            {
+                                Order = 7,
+                                Description = perkStrings.SandboxPerkDescription,
+                                Icon = ApiImageUtils.MakeIcon(perkStrings.IconIndex, 0, 0, 1)
+                            });
+                        }
+                    }
+
+                    // Tooltip Notifications
+                    if (strings.TagData.TooltipNotifications.Any())
+                    {
+                        blocks.Add(new SpacerBlock()
+                        {
+                            Order = 8,
+                            ShowBar = true,
+                            BarOpacity = 0.1f
+                        });
+
+                        foreach (SB2548080 notif in strings.TagData.TooltipNotifications)
+                        {
+                            blocks.Add(new NotificationBlock()
+                            {
+                                Order = 9,
+                                Text = notif.DisplayString.Value,
+                                Style = notif.DisplayStyle
+                            });
+                        }
+                    }
+                }
+
+                // Input blocks
+                if (strings.TagData.Unk40.GetValue(strings.GetReader()) is SD7548080 preview)
+                {
+                    inputBlocks.Add(new InputBlock()
+                    {
+                        Order = 0,
+                        Key = $"", // Key glyph
+                        KeyPress = $"", // 2nd key glyph (mouse left/right)
+                        Action = $"{(preview.PreviewActionString.Value ?? "Details")}"
+                    });
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (MainWindow.Current.CurrentTab is not null
+                        && MainWindow.Current.CurrentTab.Content is CategoryView
+                        && DareView.ShouldAddToList(item, item.GetItemType()))
+                            inputBlocks.Add(new InputBlock()
+                            {
+                                Order = 1,
+                                Key = $"",
+                                Action = $"Export"
+                            });
+                    });
+
+                }
+            });
+        }
 
         foreach (var block in blocks)
             BodyBlocks.Add(block);

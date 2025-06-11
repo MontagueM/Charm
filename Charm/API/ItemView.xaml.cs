@@ -756,6 +756,7 @@ public class APIPlugItem : CharmUIElement
     public SocketEntry ParentSocket;
     public DestinySocketCategoryStyle ParentSocketStyle { get; set; } // meh
     public uint Hash { get; set; }
+    public Color RarityColor => Item?.GetItemRarity().GetColor() ?? Color.FromArgb(0, 0, 0, 0);
 
     private InventoryItem _item = null;
     public InventoryItem Item

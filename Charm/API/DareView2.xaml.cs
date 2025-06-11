@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,6 +36,20 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
     }
 
+    private ObservableCollection<APIPlugItem> _selectedItems = new();
+    public ObservableCollection<APIPlugItem> SelectedItems
+    {
+        get => _selectedItems;
+        set
+        {
+            if (_selectedItems != value)
+            {
+                _selectedItems = value;
+                OnPropertyChanged(nameof(SelectedItems));
+            }
+        }
+    }
+
     public event PropertyChangedEventHandler PropertyChanged;
     protected virtual void OnPropertyChanged(string propName)
     {
@@ -48,12 +64,20 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
 #endif
         InitializeComponent();
+
         Categories.CustomNextButton = NextPage;
         Categories.CustomPrevButton = PreviousPage;
+        SelectedItemsList.Items = SelectedItems;
+
+        // By default, DisplayItems only gets called if the whole collection is reassigned
+        // These trigger if something in the collection changes (add/remove), which will call DisplayItems.
+        SelectedItems.CollectionChanged += (s, e) => SelectedItemsList.DisplayItems();
+        ItemCategories.CollectionChanged += (s, e) => Categories.DisplayItems();
     }
 
     private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
     {
+        this.DataContext = this;
         Focusable = true;
         Focus();
     }
@@ -68,7 +92,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     {
         List<ComboBoxItem> types = new();
         ComboBoxControl presets = new();
-        presets.Text = "Presets";
+        presets.Text = "Filter By Type";
         presets.FontSize = 14;
         foreach (var type in SortedItems.Keys)
         {
@@ -108,7 +132,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             if (ShouldAddToList(item, type_string) && item.Name != string.Empty)
             {
-                if (!item.GetItemTraits().Any())
+                if (!item.GetItemTraits().Any() || item.GetItemTraits().Contains(DestinyTraitID.other))
                 {
                     if (!SortedItems.ContainsKey(DestinyTraitID.other))
                         SortedItems[DestinyTraitID.other] = new List<InventoryItem>();
@@ -127,6 +151,10 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
                     SortedItems[_trait].Add(item);
                 }
+
+                // this is needed to make sure its ornaments are loaded (if it has any)
+                // which in turn will set the ornaments parent item
+                _ = item.Ornaments;
             }
             MainWindow.Progress.CompleteStage();
         });
@@ -177,6 +205,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 newItem.Items = new ObservableCollection<APIPlugItem>(item.Items
                 .Where(x => x.Item.GetItemName().ToLower().Contains(searchStr.ToLower())
                             || x.Item.GetItemType().ToLower().Contains(searchStr.ToLower())
+                            || x.Item.Parent?.GetItemName().ToLower().Contains(searchStr.ToLower()) == true
                             || $"{x.Hash}" == searchStr));
             }
             else
@@ -185,7 +214,99 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             if (newItem.Items.Count != 0)
                 itemCategories.Add(newItem);
         }
+        if (itemCategories.Count == 1)
+            itemCategories.First().ItemsPerPage = 72;
+
         Categories.Items = itemCategories;
+    }
+
+    private void SelectedDareEntry_Click(object sender, RoutedEventArgs e)
+    {
+        APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
+        if (SelectedItems.Contains(apiItem))
+            SelectedItems.Remove(apiItem);
+    }
+
+    private void DareEntry_Click(object sender, RoutedEventArgs e)
+    {
+        APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
+        if (!SelectedItems.Contains(apiItem))
+            SelectedItems.Add(apiItem);
+    }
+
+    private void ExportButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedItems.Count == 0)
+        {
+            NotificationBanner notify = new()
+            {
+                Icon = "⚠",
+                Title = "NOTHING TO EXPORT!",
+                Description = $"Select some items to export, you silly goose!",
+                Style = NotificationBanner.PopupStyle.Warning
+            };
+            notify.Show();
+            return;
+        }
+
+        List<string> apiStages = SelectedItems.Select((_, i) => $"Exporting {SelectedItems[i].Item.Name} ({i + 1}/{SelectedItems.Count})").ToList();
+        ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
+        string savePath = config.GetExportSavePath();
+        bool aggregateOutput = (bool)AggregateOutputButton.IsChecked;
+
+        if (aggregateOutput && SelectedItems.Any(x => !x.Item.IsShader))
+            savePath = CreateNextOutputFolder(config.GetExportSavePath());
+
+        MainWindow.Progress.SetProgressStages(apiStages);
+        Task.Run(() =>
+        {
+            _selectedItems.ToList().ForEach(item =>
+            // Parallel.ForEach(_selectedItems, item =>
+            {
+                if (item.Item.Type == "Artifact" && item.Item.TagData.Unk28.GetValue(item.Item.GetReader()) is SC5738080 gearSet)
+                {
+                    if (gearSet.ItemList.Count != 0)
+                        item.Item = Investment.Get().GetInventoryItem(gearSet.ItemList.First().ItemIndex);
+                }
+
+                if (item.Item.GetArtArrangementIndex() != -1)
+                {
+                    // if has a model
+                    EntityView.ExportInventoryItem(item.Item, savePath, aggregateOutput);
+                }
+                else
+                {
+                    // shader
+                    string itemName = Helpers.SanitizeString(item.Item.Name);
+                    string savePath = config.GetExportSavePath(); // need to set again here
+                    savePath += $"/{itemName}";
+                    Directory.CreateDirectory(savePath);
+                    Directory.CreateDirectory(savePath + "/Textures");
+                    Investment.Get().ExportShader(item.Item, savePath, itemName, config.GetOutputTextureFormat());
+                }
+                MainWindow.Progress.CompleteStage();
+            });
+
+            Dispatcher.Invoke(() =>
+            {
+                NotificationBanner notify = new()
+                {
+                    Icon = "☑️",
+                    Title = "EXPORT COMPLETE",
+                    Description = $"Exported " +
+                    $"{(SelectedItems.Count == 1 ? $"{SelectedItems.First().Item.Name}" : $"{SelectedItems.Count} items")}" +
+                    $" to \"{config.GetExportSavePath()}\"",
+                    Style = NotificationBanner.PopupStyle.Information
+                };
+                notify.Show();
+            });
+        });
+    }
+
+    private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
+    {
+        ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
+        Process.Start("explorer.exe", config.GetExportSavePath());
     }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -218,6 +339,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void APIItem_View(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        if (Strategy.IsD1())
+            return;
+
         e.Handled = true;
         APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
 
@@ -258,6 +382,40 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             !blacklist.Any(x => type.ToLower().Contains(x.ToLower()));
     }
 
+    // For aggregated outputs
+    public static string CreateNextOutputFolder(string baseDirectory)
+    {
+        // Get all subdirectories that match the "Output#" pattern
+        string[] existingFolders = Directory.GetDirectories(baseDirectory, "ApiOutput*");
+        int maxNumber = 0;
+
+        // Regex to capture the numeric part of "Output#"
+        Regex regex = new(@"ApiOutput(\d+)$");
+
+        foreach (string folder in existingFolders)
+        {
+            Match match = regex.Match(Path.GetFileName(folder));
+            if (match.Success)
+            {
+                // Parse the number from the folder name
+                int folderNumber = int.Parse(match.Groups[1].Value);
+                if (folderNumber > maxNumber)
+                {
+                    maxNumber = folderNumber;
+                }
+            }
+        }
+
+        // Increment the max number to get the next available folder
+        int nextNumber = maxNumber + 1;
+        string newFolderName = $"ApiOutput{nextNumber}";
+        string newFolderPath = Path.Combine(baseDirectory, newFolderName);
+
+        // Create the new directory
+        Directory.CreateDirectory(newFolderPath);
+
+        return newFolderPath;
+    }
 
     public class Dare_ItemCategory : CharmUIElement
     {

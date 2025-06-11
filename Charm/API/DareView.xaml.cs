@@ -174,7 +174,7 @@ public partial class DareView : UserControl
                 if (item.Item.GetArtArrangementIndex() != -1)
                 {
                     // if has a model
-                    EntityView.ExportInventoryItem(item, savePath, aggregateOutput);
+                    EntityView.ExportInventoryItem(item.Item, savePath, aggregateOutput);
                 }
                 else
                 {

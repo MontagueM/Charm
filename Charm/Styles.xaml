@@ -11,6 +11,7 @@
     <charm:StringNullOrEmptyVisibilityConverter x:Key="StringNullOrEmptyVisibilityConverter" />
     <charm:CharSpacingConverter x:Key="CharSpacingConverter" />
     <charm:StringToUpperConverter x:Key="StringToUpperConverter" />
+    <charm:ColorToBrushConverter x:Key="ColorToBrush" />
 
     <DataTemplate x:Key="PlaceholderTemplate">
         <!--  Placeholder Rectangle  -->
@@ -408,6 +409,7 @@
         </Setter>
     </Style>
 
+    <!--  these buttons could be moved to a usercontrol if I really want more control over animations and what not  -->
     <Style x:Key="D2StyleButton" TargetType="Button">
         <Style.Resources>
             <Style TargetType="TextBlock">
@@ -513,34 +515,6 @@
                                     </Storyboard>
                                 </VisualState>
 
-                                <VisualState x:Name="Pressed">
-                                    <Storyboard>
-                                        <ColorAnimation
-                                            Storyboard.TargetName="MainOverlay"
-                                            Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
-                                            To="#3BFFFFFF"
-                                            Duration="0:0:0.05" />
-                                        <ColorAnimation
-                                            Storyboard.TargetName="Main"
-                                            Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
-                                            To="White"
-                                            Duration="0:0:0.1" />
-                                        <DoubleAnimation
-                                            AutoReverse="True"
-                                            BeginTime="0:0:0.075"
-                                            Storyboard.TargetName="outerBorder"
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="0"
-                                            Duration="0:0:0.15" />
-                                        <ThicknessAnimation
-                                            BeginTime="0:0:0.075"
-                                            Storyboard.TargetName="outerBorder"
-                                            Storyboard.TargetProperty="Margin"
-                                            To="-5"
-                                            Duration="0:0:0" />
-                                    </Storyboard>
-                                </VisualState>
-
                                 <VisualState x:Name="Disabled">
                                     <Storyboard>
                                         <ColorAnimation
@@ -576,6 +550,30 @@
                         </VisualStateManager.VisualStateGroups>
                     </Grid>
 
+                    <ControlTemplate.Resources>
+                        <Storyboard x:Key="PressedAnimation" AutoReverse="True">
+                            <DoubleAnimation
+                                Storyboard.TargetName="outerBorder"
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0"
+                                Duration="0:0:0.15" />
+                            <ThicknessAnimation
+                                Storyboard.TargetName="outerBorder"
+                                Storyboard.TargetProperty="Margin"
+                                From="-5"
+                                To="-3"
+                                Duration="0:0:0.15">
+                                <ThicknessAnimation.EasingFunction>
+                                    <BounceEase
+                                        Bounces="1"
+                                        Bounciness="4"
+                                        EasingMode="EaseOut" />
+                                </ThicknessAnimation.EasingFunction>
+                            </ThicknessAnimation>
+                        </Storyboard>
+                    </ControlTemplate.Resources>
+
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsPressed" Value="True">
                             <Trigger.Setters>
@@ -585,7 +583,12 @@
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Opacity" Value="0.4" />
                         </Trigger>
+
+                        <EventTrigger RoutedEvent="PreviewMouseLeftButtonDown">
+                            <BeginStoryboard Storyboard="{StaticResource PressedAnimation}" />
+                        </EventTrigger>
                     </ControlTemplate.Triggers>
+
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -1506,6 +1509,113 @@
                                             Storyboard.TargetName="Main"
                                             Storyboard.TargetProperty="BorderBrush.(SolidColorBrush.Color)"
                                             To="#DEDEDE"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.Setters>
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Trigger.Setters>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  TODO? Make look better but it works for now  -->
+    <Style x:Key="D2StyleToggleBoxButton" TargetType="ToggleButton">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid Background="Transparent" Cursor="Hand">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+
+
+                        <Border
+                            Grid.Column="0"
+                            MinWidth="25"
+                            MinHeight="25"
+                            Background="Black"
+                            BorderThickness="2"
+                            Opacity="1"
+                            Style="{StaticResource GreyBorderWhiteOnHover}">
+                            <Border
+                                x:Name="CheckBoxInner"
+                                Grid.Column="0"
+                                MinWidth="20"
+                                MinHeight="20"
+                                BorderThickness="2">
+                                <Border.Background>
+                                    <SolidColorBrush x:Name="CheckBoxInnerColor" Color="Transparent" />
+                                </Border.Background>
+                            </Border>
+                        </Border>
+
+
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="{TemplateBinding FontSize}"
+                            Text="{TemplateBinding Content}" />
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <Storyboard />
+                                </VisualState>
+
+                                <VisualState x:Name="MouseOver">
+                                    <Storyboard />
+                                </VisualState>
+
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard />
+                                </VisualState>
+                            </VisualStateGroup>
+
+                            <VisualStateGroup x:Name="CheckStates">
+                                <VisualState x:Name="Unchecked">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="CheckBoxInnerColor"
+                                            Storyboard.TargetProperty="Color"
+                                            To="Transparent"
+                                            Duration="0:0:0.1" />
+
+                                        <ThicknessAnimation
+                                            Storyboard.TargetName="CheckBoxInner"
+                                            Storyboard.TargetProperty="BorderThickness"
+                                            To="0"
+                                            Duration="0:0:0.1" />
+                                    </Storyboard>
+                                </VisualState>
+
+                                <VisualState x:Name="Checked">
+                                    <Storyboard>
+                                        <ColorAnimation
+                                            Storyboard.TargetName="CheckBoxInnerColor"
+                                            Storyboard.TargetProperty="Color"
+                                            To="#62aadd"
+                                            Duration="0:0:0.1" />
+
+                                        <ThicknessAnimation
+                                            Storyboard.TargetName="CheckBoxInner"
+                                            Storyboard.TargetProperty="BorderThickness"
+                                            To="2"
                                             Duration="0:0:0.1" />
                                     </Storyboard>
                                 </VisualState>

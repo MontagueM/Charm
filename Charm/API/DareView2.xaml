@@ -62,7 +62,84 @@
 
         </DataTemplate>
 
-        <DataTemplate x:Key="ConsumableEntry">
+        <DataTemplate x:Key="DareSelectedEntry">
+            <Grid Background="Transparent">
+                <Grid Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Rectangle
+                        Grid.Row="0"
+                        IsHitTestVisible="False"
+                        Opacity="1">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                                <GradientStop Offset="0.75" Color="{Binding RarityColor}" />
+                                <GradientStop Offset="0" Color="#00000000" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Image
+                            Margin="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Source="{Binding Icon}" />
+
+                        <Border
+                            BorderThickness="2"
+                            Focusable="False"
+                            Opacity="1"
+                            Style="{StaticResource GreyBorderWhiteOnHover}" />
+
+                        <Button
+                            Grid.ColumnSpan="2"
+                            HorizontalAlignment="Stretch"
+                            local:StyleHelper.BorderThickness="0.75"
+                            Click="SelectedDareEntry_Click"
+                            Focusable="False"
+                            IsHitTestVisible="True"
+                            MouseRightButtonDown="APIItem_View"
+                            Style="{StaticResource D2StyleButtonNoOverlay}" />
+
+                        <Grid Grid.Column="1" IsHitTestVisible="False">
+                            <StackPanel Margin="10,10,25,10" Orientation="Vertical">
+                                <Viewbox
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    StretchDirection="DownOnly">
+                                    <TextBlock
+                                        Margin="0,0,0,0"
+                                        Panel.ZIndex="1"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="20"
+                                        Foreground="White"
+                                        Text="{Binding Item.Name}" />
+
+                                </Viewbox>
+
+                                <TextBlock
+                                    Margin="0,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="16"
+                                    Foreground="White"
+                                    Opacity="0.5"
+                                    Text="{Binding Item.Type}" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DareEntry">
             <Grid Background="Transparent">
                 <Grid Focusable="False" IsHitTestVisible="False">
                     <Border
@@ -113,6 +190,7 @@
                         Width="86"
                         Height="86"
                         local:StyleHelper.BorderThickness="0.75"
+                        Click="DareEntry_Click"
                         Focusable="False"
                         IsHitTestVisible="True"
                         MouseRightButtonDown="APIItem_View"
@@ -154,7 +232,7 @@
                         CollapsePageButtons="False"
                         Columns="12"
                         ItemMargin="5"
-                        ItemTemplate="{StaticResource ConsumableEntry}"
+                        ItemTemplate="{StaticResource DareEntry}"
                         Items="{Binding Items}"
                         ItemsPerPage="{Binding ItemsPerPage}"
                         PageIndicatorMargin="0,0,0,-10"
@@ -240,14 +318,79 @@
                     <RowDefinition Height="5*" />
                 </Grid.RowDefinitions>
 
+                <Border
+                    Grid.RowSpan="3"
+                    Grid.Column="1"
+                    Background="#CC1B1C20"
+                    BorderBrush="#62FFFFFF"
+                    BorderThickness="2,0,0,0"
+                    Opacity="1" />
+
                 <Grid
                     Grid.Row="1"
                     Grid.Column="1"
-                    Background="#CC1B1C20">
-                    <Border
-                        BorderBrush="White"
-                        BorderThickness="2,0,0,0"
-                        Opacity="0.3" />
+                    Background="Transparent">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10*" />
+                        <RowDefinition Height="90*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Margin="0,15,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30*" />
+                            <ColumnDefinition Width="30*" />
+
+                        </Grid.ColumnDefinitions>
+
+                        <Button
+                            x:Name="ExportButton"
+                            Grid.Column="0"
+                            Margin="15,10,15,10"
+                            Click="ExportButton_Click"
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="EXPORT" Description="Exports everything in the current list" />
+                            </local:GenericTooltipProperties.TooltipData>
+                            <TextBlock
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="18"
+                                Text="EXPORT" />
+                        </Button>
+
+                        <Button
+                            x:Name="OpenOutputButton"
+                            Grid.Column="1"
+                            Margin="15,10,15,10"
+                            Click="OpenOutputFolder_Click"
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="OPEN OUTPUT" Description="Opens the output folder for your rips" />
+                            </local:GenericTooltipProperties.TooltipData>
+                            <TextBlock
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="18"
+                                Text="OPEN OUTPUT" />
+                        </Button>
+                    </Grid>
+
+                    <local:ItemPage
+                        x:Name="SelectedItemsList"
+                        Grid.Row="1"
+                        Margin="15,0,15,0"
+                        CollapsePageButtons="False"
+                        Columns="1"
+                        IsVertical="True"
+                        ItemMargin="5"
+                        ItemTemplate="{StaticResource DareSelectedEntry}"
+                        Items="{Binding SelectedItems}"
+                        ItemsPerPage="8"
+                        PageIndicatorMargin="0,0,0,-10"
+                        ShowVerticalPageIndicator="True"
+                        UsePlaceholders="True"
+                        UseStackPanel="False" />
                 </Grid>
 
                 <Grid
@@ -265,25 +408,50 @@
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0" Grid.Column="1">
+
                         <StackPanel
-                            x:Name="FilterOptions"
-                            Grid.Row="0"
-                            Margin="0,0,0,0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Orientation="Horizontal">
-                            <TextBox
-                                x:Name="SearchBox"
+                            <StackPanel
+                                x:Name="FilterOptions"
                                 Grid.Row="0"
-                                Width="500"
-                                Margin="10,0,10,0"
-                                HorizontalAlignment="Stretch"
+                                Margin="0,0,0,0"
+                                HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontSize="30"
-                                TextChanged="SearchBox_TextChanged"
-                                TextWrapping="Wrap" />
+                                Orientation="Horizontal">
+                                <TextBox
+                                    x:Name="SearchBox"
+                                    Grid.Row="0"
+                                    Width="500"
+                                    Margin="10,0,10,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    FontSize="30"
+                                    TextChanged="SearchBox_TextChanged"
+                                    TextWrapping="Wrap" />
 
+                            </StackPanel>
+
+                            <ToggleButton
+                                x:Name="AggregateOutputButton"
+                                Grid.Column="1"
+                                Margin="10"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Content="AGGREGATE OUTPUT"
+                                FontSize="18"
+                                Style="{DynamicResource D2StyleToggleBoxButton}">
+                                <local:GenericTooltipProperties.TooltipData>
+                                    <local:GenericTooltip
+                                        Name="AGGREGATE OUTPUT"
+                                        Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
+                                        Type="Export Option" />
+                                </local:GenericTooltipProperties.TooltipData>
+
+                            </ToggleButton>
                         </StackPanel>
+
                     </Grid>
 
                     <local:ItemPage

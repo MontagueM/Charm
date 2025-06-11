@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace Charm;
 
@@ -281,7 +282,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
     }
 
     public static readonly DependencyProperty ItemTemplateProperty =
-       DependencyProperty.Register(nameof(Template), typeof(DataTemplate), typeof(ItemPage), new PropertyMetadata(null));
+       DependencyProperty.Register(nameof(ItemTemplate), typeof(DataTemplate), typeof(ItemPage), new PropertyMetadata(null));
 
     public static readonly DependencyProperty ItemTemplateSelectorProperty =
         DependencyProperty.Register(nameof(ItemTemplateSelector), typeof(DataTemplateSelector), typeof(ItemPage), new PropertyMetadata(null));
@@ -363,14 +364,18 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
     public void DisplayItems(bool fromStart = false)
     {
         if (fromStart)
+        {
             CurrentPage = 0;
-        if (Items is null)
+            UIHelper.AnimateFade(ItemList, TransitionSpeed * 2, 1f, 0);
+        }
+
+        if (Items is null || ItemsPerPage <= 0)
             return;
 
         var count = Items.Count();
-        var itemsPerPage = (count > ItemsPerPage && (Expand && CollapsePageButtons) && ItemsPerPage != 1) ? ItemsPerPage - 1 : ItemsPerPage;
+        var itemsPerPage = GetItemsPerPage();
 
-        TotalPages = (int)Math.Ceiling((double)count / itemsPerPage);
+        TotalPages = Math.Max(1, (int)Math.Ceiling((double)count / itemsPerPage));
 
         if (!HidePageButtons)
         {
@@ -379,6 +384,10 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         }
 
         var itemsToShow = Items.Skip(CurrentPage * itemsPerPage).Take(itemsPerPage).ToList();
+        if (itemsToShow.Count == 0)
+        {
+            SelectPreviousPage();
+        }
 
         if (UsePlaceholders)
         {
@@ -427,7 +436,13 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
 
     private void PreviousPage_Click(object sender, RoutedEventArgs e)
     {
-        ChangePage(-1,
+        var targetPage = -1;
+        if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            targetPage = -TotalPages;
+        else if (((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) && TotalPages >= 4)
+            targetPage = (int)Math.Floor(-TotalPages / 4f);
+
+        ChangePage(targetPage,
             beforeChange: null,
             afterChange: () => OnPreviousPageClicked?.Invoke(this, ItemList),
             completeAction: (s, e2) =>
@@ -440,7 +455,13 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
 
     private void NextPage_Click(object sender, RoutedEventArgs e)
     {
-        ChangePage(1,
+        var targetPage = 1;
+        if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            targetPage = TotalPages;
+        else if (((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) && TotalPages >= 4)
+            targetPage = (int)Math.Ceiling(TotalPages / 4f);
+
+        ChangePage(targetPage,
             beforeChange: null,
             afterChange: () => OnNextPageClicked?.Invoke(this, ItemList),
             completeAction: (s, e2) =>
@@ -455,8 +476,8 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
     {
         if (_isAnimating) return false;
 
-        var itemsPerPage = (Items.Count() > ItemsPerPage && (Expand && CollapsePageButtons) && ItemsPerPage != 1) ? ItemsPerPage - 1 : ItemsPerPage;
-        int targetPage = CurrentPage + direction;
+        var itemsPerPage = GetItemsPerPage();
+        int targetPage = Math.Clamp(CurrentPage + direction, 0, TotalPages - 1);
 
         bool canChange = direction < 0
             ? CurrentPage > 0
@@ -499,12 +520,13 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
             }, additive: true);
 
         }, additive: true);
+
         return true;
     }
 
     public void CheckPages()
     {
-        var itemsPerPage = (Items.Count() > ItemsPerPage && (Expand && CollapsePageButtons) && ItemsPerPage != 1) ? ItemsPerPage - 1 : ItemsPerPage;
+        var itemsPerPage = GetItemsPerPage();
         if (Items.Count() == 0)
             CurrentPage = 0;
 
@@ -540,6 +562,14 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         CustomPrevButton?.SetValue(UIElement.IsHitTestVisibleProperty, PreviousPage.IsHitTestVisible);
         CustomNextButton?.SetValue(UIElement.IsHitTestVisibleProperty, NextPage.IsHitTestVisible);
         CheckPages();
+    }
+
+    private int GetItemsPerPage()
+    {
+        if (ItemsPerPage <= 1) return ItemsPerPage;
+        if (Expand && CollapsePageButtons && Items.Count() > ItemsPerPage)
+            return ItemsPerPage - 1;
+        return ItemsPerPage;
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

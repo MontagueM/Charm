@@ -12,7 +12,6 @@
     Visibility="Collapsed"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <local:ColorToBrushConverter x:Key="ColorToBrush" />
         <local:BlockColorSelector x:Key="BlockColorSelector" />
         <local:DamageTypeConverter x:Key="DamageTypeConverter" />
 

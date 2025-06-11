@@ -84,7 +84,12 @@ public static class ApiImageUtils
 
     public static DrawingImage MakeFullIcon(InventoryItem item)
     {
-        string? type = Investment.Get().GetItemStrings(Investment.Get().GetItemIndex(item.TagData.InventoryItemHash)).TagData.ItemType.Value ?? "";
+        bool isD1Ornament = false;
+        if (Strategy.IsD1() && item.IsArmorOrnament && item.Parent != null) // ew
+        {
+            item = item.Parent;
+            isD1Ornament = true;
+        }
 
         // streams
         UnmanagedMemoryStream? bgStream = item.GetIconBackgroundStream();
@@ -107,9 +112,24 @@ public static class ApiImageUtils
 
         var group = new DrawingGroup();
         group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
-        group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+        if (!Strategy.IsD1())
+            group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+
+        if (isD1Ornament)
+        {
+            bgOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(0x80A63BAA)), 96, 96);
+            var overlayNew = ChangeOpacity(bgOverlay, 0.5f);
+            group.Children.Add(new ImageDrawing(overlayNew, new Rect(0, 0, 96, 96)));
+        }
+
         group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
         group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
+
+        if (isD1Ornament)
+        {
+            var overlayTinted = TintImage(overlay, Color.FromArgb(255, 0, 200, 255));
+            group.Children.Add(new ImageDrawing(overlayTinted, new Rect(0, 0, 96, 96)));
+        }
 
         var dw = new DrawingImage(group);
         dw.Freeze();
@@ -317,6 +337,58 @@ public static class ApiImageUtils
 
             return bitmapImage;
         }
+    }
+
+    public static WriteableBitmap ChangeOpacity(BitmapSource source, double opacity)
+    {
+        if (opacity < 0 || opacity > 1)
+            throw new ArgumentOutOfRangeException(nameof(opacity), "Opacity must be between 0 and 1.");
+
+        int width = source.PixelWidth;
+        int height = source.PixelHeight;
+        int stride = width * 4;
+
+        byte[] pixelData = new byte[height * stride];
+        source.CopyPixels(pixelData, stride, 0);
+
+        for (int i = 0; i < pixelData.Length; i += 4)
+        {
+            // pixelData[i+3] is the alpha channel
+            pixelData[i + 3] = (byte)(pixelData[i + 3] * opacity);
+        }
+
+        WriteableBitmap writeable = new WriteableBitmap(width, height, source.DpiX, source.DpiY, PixelFormats.Bgra32, null);
+        writeable.WritePixels(new Int32Rect(0, 0, width, height), pixelData, stride, 0);
+
+        return writeable;
+    }
+
+    public static WriteableBitmap TintImage(BitmapSource source, Color tintColor)
+    {
+        int width = source.PixelWidth;
+        int height = source.PixelHeight;
+        int stride = width * 4;
+
+        byte[] pixels = new byte[height * stride];
+        source.CopyPixels(pixels, stride, 0);
+
+        for (int i = 0; i < pixels.Length; i += 4)
+        {
+            byte b = pixels[i];
+            byte g = pixels[i + 1];
+            byte r = pixels[i + 2];
+            byte a = pixels[i + 3];
+
+            // Multiply original RGB by tint color
+            pixels[i] = (byte)((b * tintColor.B) / 255); // Blue
+            pixels[i + 1] = (byte)((g * tintColor.G) / 255); // Green
+            pixels[i + 2] = (byte)((r * tintColor.R) / 255); // Red
+            pixels[i + 3] = a; // Preserve original alpha
+        }
+
+        WriteableBitmap dyed = new WriteableBitmap(width, height, source.DpiX, source.DpiY, PixelFormats.Bgra32, null);
+        dyed.WritePixels(new Int32Rect(0, 0, width, height), pixels, stride, 0);
+        return dyed;
     }
 }
 

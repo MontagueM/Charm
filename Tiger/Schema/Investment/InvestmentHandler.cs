@@ -778,7 +778,6 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Entity.Entity GetEntityFromAssignmentHash(TigerHash assignmentHash)
     {
         // We can binary search here as the list is sorted.
-        // var x = new S454F8080 {AssignmentHash = assignmentHash};
         // var index = _entityAssignmentsMap.TagData.EntityArrangementMap.BinarySearch(x, new S454F8080());
         if (!_sortedArrangementHashmap.ContainsKey(assignmentHash))
             return null;
@@ -945,6 +944,22 @@ public class InventoryItem : Tag<S9D798080>
     public string Description => GetItemDescription();
     public string FlavorText => GetItemFlavorText();
 
+    private ConcurrentBag<InventoryItem> _ornaments = null;
+    public ConcurrentBag<InventoryItem> Ornaments
+    {
+        get
+        {
+            if (_ornaments is not null)
+                return _ornaments;
+
+            _ornaments = GetItemOrnaments();
+            return _ornaments;
+        }
+    }
+
+    // If this item is an ornament this will be its parent item
+    public InventoryItem Parent = null;
+
     public int GetItemIndex()
     {
         return Investment.Get().GetItemIndex(_tag.InventoryItemHash);
@@ -953,8 +968,8 @@ public class InventoryItem : Tag<S9D798080>
     public List<DestinyTraitID> GetItemTraits()
     {
         List<DestinyTraitID> traits = new();
-        if (Strategy.IsD1())  // TODO D1 items dont have traits
-            return traits;
+        if (Strategy.IsD1())  // D1 items dont have traits
+            return MakeD1ItemTraitMap();
 
         foreach (var index in _tag.TraitIndices.Select(x => x.Index))
         {
@@ -987,7 +1002,14 @@ public class InventoryItem : Tag<S9D798080>
 
     public string GetItemName()
     {
-        return Investment.Get().GetItemName(this);
+        var name = Investment.Get().GetItemName(this);
+        if (Strategy.IsD1() && IsOrnament && name == "" && Parent != null) // ew
+            name = $"{Parent.Name} Ornament {Parent.Ornaments
+                .OrderBy(x => x.ApiHash)
+                .ToList()
+                .IndexOf(this)}";
+
+        return name;
     }
 
     public string GetItemType()
@@ -1096,7 +1118,9 @@ public class InventoryItem : Tag<S9D798080>
                     if (plug.PlugInventoryItemIndex == -1)
                         continue;
 
-                    ornaments.Add(Investment.Get().GetInventoryItem(plug.PlugInventoryItemIndex));
+                    var item = Investment.Get().GetInventoryItem(plug.PlugInventoryItemIndex);
+                    item.Parent = this;
+                    ornaments.Add(item);
                 }
             }
         }
@@ -1112,7 +1136,9 @@ public class InventoryItem : Tag<S9D798080>
                         if (entry2.PlugItemIndex == -1)
                             continue;
 
-                        ornaments.Add(Investment.Get().GetInventoryItem(entry2.PlugItemIndex));
+                        var item = Investment.Get().GetInventoryItem(entry2.PlugItemIndex);
+                        item.Parent = this;
+                        ornaments.Add(item);
                     }
                 }
             }
@@ -1203,5 +1229,90 @@ public class InventoryItem : Tag<S9D798080>
             return null;
         Texture? foundryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
         return foundryIcon.GetTexture();
+    }
+
+
+    // I hate this and theres probably a better way but I'm lazy
+    public List<DestinyTraitID> MakeD1ItemTraitMap()
+    {
+        List<DestinyTraitID> traits = new();
+        switch (Type.ToLower().Trim())
+        {
+            case "ghost shell":
+                traits.Add(DestinyTraitID.item_ghost);
+                break;
+            case "ship":
+                traits.Add(DestinyTraitID.item_ship);
+                break;
+            case "sparrow":
+                traits.Add(DestinyTraitID.item_vehicle);
+                break;
+            case "emblem":
+                traits.Add(DestinyTraitID.item_emblem);
+                break;
+            case "armor shader":
+                traits.Add(DestinyTraitID.item_shader);
+                break;
+            case "pulse rifle":
+                traits.Add(DestinyTraitID.item_weapon_pulse_rifle);
+                break;
+            case "hand cannon":
+                traits.Add(DestinyTraitID.item_weapon_hand_cannon);
+                break;
+            case "auto rifle":
+                traits.Add(DestinyTraitID.item_weapon_auto_rifle);
+                break;
+            case "scout rifle":
+                traits.Add(DestinyTraitID.item_weapon_scout_rifle);
+                break;
+            case "fusion rifle":
+                traits.Add(DestinyTraitID.item_weapon_fusion_rifle);
+                break;
+            case "shotgun":
+                traits.Add(DestinyTraitID.item_weapon_shotgun);
+                break;
+            case "sniper rifle":
+                traits.Add(DestinyTraitID.item_weapon_sniper_rifle);
+                break;
+            case "rocket launcher":
+                traits.Add(DestinyTraitID.item_weapon_rocket_launcher);
+                break;
+            case "machine gun":
+                traits.Add(DestinyTraitID.item_weapon_machinegun);
+                break;
+            case "sidearm":
+                traits.Add(DestinyTraitID.item_weapon_sidearm);
+                break;
+            case "sword":
+                traits.Add(DestinyTraitID.item_weapon_sword);
+                break;
+            case "armor ornament":
+                traits.Add(DestinyTraitID.item_ornament_armor);
+                break;
+            case "weapon ornament":
+                traits.Add(DestinyTraitID.item_ornament_weapon);
+                break;
+            case "helmet":
+                traits.Add(DestinyTraitID.item_armor_head);
+                break;
+            case "gauntlets":
+                traits.Add(DestinyTraitID.item_armor_arms);
+                break;
+            case "chest armor":
+                traits.Add(DestinyTraitID.item_armor_chest);
+                break;
+            case "leg armor":
+                traits.Add(DestinyTraitID.item_armor_arms);
+                break;
+            case "hunter cloak":
+            case "titan mark":
+            case "warlock bond":
+                traits.Add(DestinyTraitID.item_armor_class);
+                break;
+            default:
+                traits.Add(DestinyTraitID.other);
+                break;
+        }
+        return traits;
     }
 }

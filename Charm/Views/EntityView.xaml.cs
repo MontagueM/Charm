@@ -144,10 +144,14 @@ public partial class EntityView : UserControl
         Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 
-    public static void ExportInventoryItem(DareItem item, string savePath, bool aggregateOutput = false)
+    public static void ExportInventoryItem(InventoryItem item, string savePath, bool aggregateOutput = false)
     {
+        // just to be safe, hopefully this doesn't cause issues
+        if (item.IsOrnament && item.Parent is null)
+            item.Parent = Investment.Get().GetOrnamentParent(item).Result;
+
         ConfigSubsystem config = ConfigSubsystem.Get();
-        string name = Helpers.SanitizeString(item.ItemName);
+        string name = Helpers.SanitizeString(item.Name);
         if (!aggregateOutput)
             savePath = config.GetExportSavePath() + $"/{name}";
 
@@ -162,7 +166,7 @@ public partial class EntityView : UserControl
         EntitySkeleton overrideSkeleton = null;
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            string skeleHash = item.ItemType == "Ghost Shell" ? "0000603046D31C68" : "0000670F342E9595";
+            string skeleHash = item.Type == "Ghost Shell" ? "0000603046D31C68" : "0000670F342E9595";
             Entity skele = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked(skeleHash))); // 64 bit more permanent
             overrideSkeleton = new EntitySkeleton(skele.Skeleton.Hash);
         }
@@ -172,13 +176,13 @@ public partial class EntityView : UserControl
             overrideSkeleton = new EntitySkeleton(playerBase.Skeleton.Hash);
         }
 
-        Entity? val = Investment.Get().GetPatternEntityFromHash(item.Parent != null ? item.Parent.TagData.InventoryItemHash : item.Item.TagData.InventoryItemHash);
+        Entity? val = Investment.Get().GetPatternEntityFromHash(item.Parent != null ? item.Parent.TagData.InventoryItemHash : item.TagData.InventoryItemHash);
         if (val != null && val.Skeleton != null)
         {
             overrideSkeleton = val.Skeleton;
         }
 
-        List<Entity> entities = Investment.Get().GetEntitiesFromHash(item.Item.TagData.InventoryItemHash);
+        List<Entity> entities = Investment.Get().GetEntitiesFromHash(item.TagData.InventoryItemHash);
 
         Log.Info($"Exporting entity model name: {name}");
 
@@ -217,16 +221,16 @@ public partial class EntityView : UserControl
     }
 
     // I don't like this
-    public static void ExportGearShader(DareItem item, string itemName, string savePath)
+    public static void ExportGearShader(InventoryItem item, string itemName, string savePath)
     {
         var config = ConfigSubsystem.Get();
 
-        Log.Info($"Exporting Gear Shader for: {item.ItemName}");
+        Log.Info($"Exporting Gear Shader for: {item.Name}");
         // Export the dye info
         if (Strategy.IsD1())
         {
             Dictionary<TigerHash, DyeD1> dyes = new();
-            if (item.Item.TagData.Unk90.GetValue(item.Item.GetReader()) is S77738080 translationBlock)
+            if (item.TagData.Unk90.GetValue(item.GetReader()) is S77738080 translationBlock)
             {
                 foreach (S7B738080 dyeEntry in translationBlock.DefaultDyes)
                 {
@@ -252,7 +256,7 @@ public partial class EntityView : UserControl
         else
         {
             Dictionary<TigerHash, Dye> dyes = new();
-            if (item.Item.TagData.Unk90.GetValue(item.Item.GetReader()) is S77738080 translationBlock)
+            if (item.TagData.Unk90.GetValue(item.GetReader()) is S77738080 translationBlock)
             {
                 foreach (S7B738080 dyeEntry in translationBlock.DefaultDyes)
                 {
@@ -261,7 +265,7 @@ public partial class EntityView : UserControl
                         continue;
                     dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
 #if DEBUG
-                    System.Console.WriteLine($"{item.ItemName}: DefaultDye {dye.Hash}");
+                    System.Console.WriteLine($"{item.Name}: DefaultDye {dye.Hash}");
 #endif
                 }
                 foreach (S7B738080 dyeEntry in translationBlock.LockedDyes)
@@ -271,7 +275,7 @@ public partial class EntityView : UserControl
                         continue;
                     dyes.Add(Investment.Get().GetChannelHashFromIndex(dyeEntry.ChannelIndex), dye);
 #if DEBUG
-                    System.Console.WriteLine($"{item.ItemName}: LockedDye {dye.Hash}");
+                    System.Console.WriteLine($"{item.Name}: LockedDye {dye.Hash}");
 #endif
                 }
             }
@@ -282,7 +286,7 @@ public partial class EntityView : UserControl
             Texture iridesceneLookup = Globals.Get().RenderGlobals.TagData.Textures.TagData.IridescenceLookup;
             TextureExtractor.SaveTextureToFile($"{savePath}/Textures/Iridescence_Lookup", iridesceneLookup.GetScratchImage());
         }
-        Log.Info($"Exported Gear Shader for: {item.ItemName}");
+        Log.Info($"Exported Gear Shader for: {item.Name}");
     }
 
     private List<MainViewModel.DisplayPart> MakeEntityDisplayParts(List<Entity> entities, ExportDetailLevel detailLevel)

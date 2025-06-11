@@ -324,13 +324,7 @@ public partial class CategoryView : UserControl
 
                 if (item.Item.GetArtArrangementIndex() != -1)
                 {
-                    EntityView.ExportInventoryItem(new()
-                    {
-                        Item = item.Item,
-                        ItemName = item.ItemName,
-                        ItemType = item.ItemType,
-                        Parent = Investment.Get().GetOrnamentParent(item.Item).Result
-                    }, ConfigSubsystem.Get().GetExportSavePath());
+                    EntityView.ExportInventoryItem(item.Item, ConfigSubsystem.Get().GetExportSavePath());
                 }
                 else
                 {
