@@ -132,25 +132,6 @@
                         </Button>
 
                         <Button
-                            x:Name="ApiButton2"
-                            Grid.Column="1"
-                            Margin="10"
-                            Click="ApiView2Button_OnClick"
-                            MouseEnter="CategoryButton_MouseEnter"
-                            MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}">
-                            <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip Name="API VIEWER" Description="View and export any Player Gear." />
-                            </local:GenericTooltipProperties.TooltipData>
-                            <Border Background="#BB181818">
-                                <TextBlock
-                                    d:FontFamily="Haas Grot Text 55 Roman"
-                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                    Text="API 2" />
-                            </Border>
-                        </Button>
-
-                        <Button
                             x:Name="BagsButton"
                             Margin="10"
                             Click="NamedEntitiesBagsViewButton_OnClick"

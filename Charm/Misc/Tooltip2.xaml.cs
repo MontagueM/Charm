@@ -332,7 +332,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     {
                         if (MainWindow.Current.CurrentTab is not null
                         && MainWindow.Current.CurrentTab.Content is CategoryView
-                        && DareView.ShouldAddToList(item, item.GetItemType()))
+                        && DareView2.ShouldAddToList(item, item.GetItemType()))
                             inputBlocks.Add(new InputBlock()
                             {
                                 Order = 1,

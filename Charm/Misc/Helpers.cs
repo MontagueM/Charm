@@ -859,9 +859,6 @@ public class ItemTemplateSelector : DataTemplateSelector
     {
         switch (item)
         {
-            case DareItem itemObj:
-                return itemObj.IsPlaceholder ? Template2 : Template1;
-
             case CategoryEntry itemObj:
                 var invItem = Investment.Get().GetInventoryItem(itemObj.ItemIndex);
                 if (invItem.GetItemStrings().TagData.ItemType.Value != "Emblem")

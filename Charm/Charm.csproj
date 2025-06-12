@@ -86,11 +86,6 @@
         <Generator>MSBuild:Compile</Generator>
         <DependentUpon>MusicView.xaml</DependentUpon>
       </Page>
-
-      <Page Update="API\DareItemControl.xaml">
-        <Generator>MSBuild:Compile</Generator>
-        <DependentUpon>DareView.xaml</DependentUpon>
-      </Page>
     </ItemGroup>
 
     <ItemGroup>
