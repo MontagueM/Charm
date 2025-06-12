@@ -12,6 +12,8 @@ namespace Charm;
 
 public partial class ItemPage : UserControl, INotifyPropertyChanged
 {
+    public ItemsControl _ItemList => ItemList;
+
     #region Backing Fields
     private int _columns = 3;
     private bool _isVertical = false;

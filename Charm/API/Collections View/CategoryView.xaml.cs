@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,6 +25,8 @@ public partial class CategoryView : UserControl
     private DynamicArray<SDB788080> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
     private DynamicArray<S07588080> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
 
+    private Type _redacted = null;
+
     public CategoryView(Category itemCategory)
     {
 #if DEBUG
@@ -33,6 +36,13 @@ public partial class CategoryView : UserControl
         DataContext = itemCategory;
         InitializeComponent();
         LoadCategories(itemCategory);
+
+        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Redacted.dll");
+        if (File.Exists(dllPath))
+        {
+            var asm = Assembly.LoadFrom(dllPath);
+            _redacted = asm.GetType("Charm.Redacted.RedactedAPI");
+        }
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -146,6 +156,12 @@ public partial class CategoryView : UserControl
         {
             // I'm not sure if there can be an entry with multiple types?
             Debug.Assert((recordCount > 0) != (collectibleCount > 0) != (presCount > 0));
+        }
+
+        if (_redacted != null)
+        {
+            dynamic loader = Activator.CreateInstance(_redacted);
+            loader.LoadCategoryViewRecords(this, items, index);
         }
 
         // Collectibles
@@ -279,6 +295,7 @@ public partial class CategoryView : UserControl
     {
     }
 
+
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
         float x = -12f / (float)MainWindow.Current.ActualWidth;
@@ -377,6 +394,8 @@ public partial class CategoryView : UserControl
         Collectible,
         CollectibleSet
     }
+
+    public ItemPage _subcategoryItems => SubcategoryItems;
 }
 
 public class CategoryEntryTemplateSelector : DataTemplateSelector

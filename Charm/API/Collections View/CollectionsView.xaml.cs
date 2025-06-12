@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -30,6 +32,21 @@ public partial class CollectionsView : UserControl
     public void LoadContent()
     {
         LoadCollectibles();
+
+        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Redacted.dll");
+        if (File.Exists(dllPath))
+        {
+            var asm = Assembly.LoadFrom(dllPath);
+            var loaderType = asm.GetType("Charm.Redacted.RedactedAPI");
+            if (loaderType != null)
+            {
+                RedactedPanel.Visibility = Visibility.Visible;
+                RedactedPanelSeperator.Visibility = Visibility.Visible;
+                CollectionsPanel.Margin = new(0);
+                dynamic loader = Activator.CreateInstance(loaderType);
+                loader.Load(this);
+            }
+        }
     }
 
     public void LoadCollectibles()
@@ -72,11 +89,36 @@ public partial class CollectionsView : UserControl
         DataContext = this;
     }
 
+    private void BadgeCategory_OnClick(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        Category item = ((Button)sender).DataContext as Category;
+
+        UserControl categoryView = LoadRedactedUserControl("Charm.Redacted.BadgeView", item);
+        MainWindow.Current.MakeNewTab(item.ItemCategoryName, categoryView);
+        MainWindow.Current.SetNewestTabSelected();
+    }
+
     private void Category_OnClick(object sender, RoutedEventArgs e)
     {
         e.Handled = true;
         Category item = ((Button)sender).DataContext as Category;
-        UserControl userControl = new CategoryView(item);
+        UserControl userControl = null;
+
+        switch (item.ItemCategoryHash)
+        {
+            case 1993337477: // Lore
+                userControl = LoadRedactedUserControl("Charm.Redacted.LoreView", item);
+                break;
+            case 1866538467: // Triumphs
+            case 616318467: // Seals
+                item.CategoryBannerColor = new SolidColorBrush(Color.FromArgb(0xFF, 0x93, 0x82, 0x4F));
+                userControl = LoadRedactedUserControl("Charm.Redacted.TriumphView", item);
+                break;
+            default:
+                userControl = new CategoryView(item);
+                break;
+        }
 
         _mainWindow.MakeNewTab(item.ItemCategoryName, userControl);
         _mainWindow.SetNewestTabSelected();
@@ -141,6 +183,37 @@ public partial class CollectionsView : UserControl
 
         public int ItemCategoryAmount { get; set; }
         public int Order;
+    }
+
+    public class RibbonCategoryTheme
+    {
+        public SolidColorBrush Background { get; set; } = new SolidColorBrush(Color.FromArgb(0xD4, 0x00, 0x69, 0x6B));
+        public SolidColorBrush Border { get; set; } = new SolidColorBrush(Color.FromArgb(0xF7, 0x00, 0x7A, 0x7D));
+        public SolidColorBrush RibbonBackground { get; set; } = new SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x7d, 0x80));
+        public ImageSource RibbonBackgroundImage { get; set; }
+        public Thickness RibbonBackgroundMargin { get; set; } = new(0, -75, 0, 0);
+    }
+
+
+    // For Redacted API
+    public TextBlock _BadgesTextTab => this.BadgesTextTab;
+    public ItemPage _BadgesList => this.BadgesList;
+    public ItemPage _RecordsList => this.RecordsList;
+    public ItemPage _MiscList => this.MiscList;
+
+    private UserControl LoadRedactedUserControl(string typeName, object parameter)
+    {
+        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Redacted.dll");
+        if (!File.Exists(dllPath))
+            return null;
+
+        var asm = Assembly.LoadFrom(dllPath);
+        var type = asm.GetType(typeName);
+        if (type == null)
+            return null;
+
+        // Assumes the constructor takes a single parameter (Category)
+        return Activator.CreateInstance(type, parameter) as UserControl;
     }
 }
 
