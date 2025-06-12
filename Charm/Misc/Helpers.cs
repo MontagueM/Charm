@@ -492,31 +492,44 @@ public static class StyleHelper
 
 public static class UIHelper
 {
-    public static void AnimateFade(dynamic obj, float seconds, float to = 1, float from = 0, EventHandler func = null, bool autoReverse = false, bool additive = false)
+    /// <summary>
+    /// Animates the opacity of a UI element from a starting value to a target value.
+    /// </summary>
+    public static void AnimateFade(
+        UIElement obj,
+        float seconds,
+        float to = 1,
+        float from = 0,
+        EventHandler? completed = null,
+        bool autoReverse = false,
+        bool additive = false,
+        IEasingFunction? easing = null)
     {
         if (additive && obj.Opacity != (double)from)
             from = (float)obj.Opacity;
 
         obj.Opacity = from;
-        Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() =>
+
+        Dispatcher.CurrentDispatcher.BeginInvoke(() =>
         {
-            DoubleAnimation fadeInAnimation = new()
+            var animation = new DoubleAnimation
             {
                 From = from,
                 To = to,
                 Duration = TimeSpan.FromSeconds(seconds),
+                EasingFunction = easing ?? new QuadraticEase { EasingMode = EasingMode.EaseOut },
                 AutoReverse = autoReverse,
-
             };
-            if (func is not null)
-                fadeInAnimation.Completed += func;
+            if (completed is not null)
+                animation.Completed += completed;
 
-            obj.BeginAnimation(UIElement.OpacityProperty, fadeInAnimation);
+            obj.BeginAnimation(UIElement.OpacityProperty, animation);
 
-        }), DispatcherPriority.Render);
+        }, DispatcherPriority.Render);
     }
 
-    public static void AnimateSlide(UIElement obj, float seconds, Point to, Point from, bool autoReverse = false)
+    public static void AnimateSlide(UIElement obj, float seconds, Point to, Point from,
+        bool autoReverse = false, IEasingFunction easing = null)
     {
         var group = EnsureTransformGroup(obj);
         var translate = GetOrAddTransform<TranslateTransform>(group);
@@ -533,7 +546,7 @@ public static class UIHelper
                 From = from.X,
                 To = to.X,
                 Duration = TimeSpan.FromSeconds(seconds),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
+                EasingFunction = easing is null ? new QuadraticEase { EasingMode = EasingMode.EaseOut } : easing,
                 AutoReverse = autoReverse,
             };
 
@@ -543,7 +556,7 @@ public static class UIHelper
                 From = from.Y,
                 To = to.Y,
                 Duration = TimeSpan.FromSeconds(seconds),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
+                EasingFunction = easing is null ? new QuadraticEase { EasingMode = EasingMode.EaseOut } : easing,
                 AutoReverse = autoReverse,
             };
 
@@ -664,6 +677,28 @@ public static class UIHelper
             }
         }
         return children;
+    }
+
+    /// <summary>
+    /// Returns the parent at the specified depth from the given element.
+    /// Depth 1 is the immediate parent, 2 is the grandparent, etc.
+    /// Returns null if the chain is not that deep.
+    /// </summary>
+    public static DependencyObject GetParentAtDepth(DependencyObject element, int depth)
+    {
+        if (element == null || depth < 1)
+            return null;
+
+        DependencyObject current = element;
+
+        for (int i = 0; i < depth; i++)
+        {
+            current = VisualTreeHelper.GetParent(current);
+            if (current == null)
+                return null;
+        }
+
+        return current;
     }
 
     public static FrameworkElement FindElementWithDataType(DependencyObject start, Type targetType)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -10,6 +11,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using Tiger;
 using Tiger.Schema.Investment;
 
@@ -64,7 +67,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
 #endif
         InitializeComponent();
-
+        MouseMove += DareView2_MouseMove;
         Categories.CustomNextButton = NextPage;
         Categories.CustomPrevButton = PreviousPage;
         SelectedItemsList.Items = SelectedItems;
@@ -222,9 +225,21 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void SelectedDareEntry_Click(object sender, RoutedEventArgs e)
     {
-        APIPlugItem apiItem = (sender as FrameworkElement).DataContext as APIPlugItem;
-        if (SelectedItems.Contains(apiItem))
-            SelectedItems.Remove(apiItem);
+        var element = (sender as FrameworkElement);
+        APIPlugItem apiItem = element.DataContext as APIPlugItem;
+        if (SelectedItems.Contains(apiItem) && !apiItem.IsNewlyAdded) // Using IsNewlyAdded just to stop multi-clicking 
+        {
+            apiItem.IsNewlyAdded = true;
+
+            UIHelper.AnimateSlide((UIElement)UIHelper.GetParentAtDepth(element, 2),
+                0.1f, new(25, 0), new(0, 0), easing: new QuadraticEase { EasingMode = EasingMode.EaseInOut });
+
+            UIHelper.AnimateFade((UIElement)UIHelper.GetParentAtDepth(element, 2), 0.1f, 0f, 1f, completed: async (s, e) =>
+            {
+                await Task.Delay(100);
+                SelectedItems.Remove(apiItem);
+            });
+        }
     }
 
     private void DareEntry_Click(object sender, RoutedEventArgs e)
@@ -247,7 +262,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (apiItem.IsNewlyAdded)
         {
             UIHelper.AnimateSlide(element, 0.15f, new(0, 0), new(-15, 0));
-            UIHelper.AnimateFade(element, 0.15f, func: (s, e) =>
+            UIHelper.AnimateFade(element, 0.15f, completed: (s, e) =>
             {
                 apiItem.IsNewlyAdded = false; // reset newly added state when the item is loaded
             });
@@ -327,6 +342,31 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     {
         ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
         Process.Start("explorer.exe", config.GetExportSavePath());
+    }
+
+
+    private bool _isClearing = false;
+    private async void ClearAllButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isClearing) return;
+        _isClearing = true;
+
+        var items = SelectedItemsList.CurrentPageItems.Where(x => !x.IsPlaceholder).ToList();
+        foreach (var item in items)
+        {
+            var element = SelectedItemsList.ItemList.ItemContainerGenerator.ContainerFromItem(item) as FrameworkElement;
+            if (!item.IsNewlyAdded) // Using IsNewlyAdded just to stop multi-clicking 
+            {
+                item.IsNewlyAdded = false;
+
+                UIHelper.AnimateSlide(element, 0.1f, new(25, 0), new(0, 0), easing: new QuadraticEase { EasingMode = EasingMode.EaseInOut });
+
+                UIHelper.AnimateFade(element, 0.1f, 0f, 1f);
+            }
+            await Task.Delay(50);
+        }
+        SelectedItems.Clear();
+        _isClearing = false;
     }
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -435,6 +475,19 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         Directory.CreateDirectory(newFolderPath);
 
         return newFolderPath;
+    }
+
+    private void DareView2_MouseMove(object sender, MouseEventArgs e)
+    {
+        var group = UIHelper.EnsureTransformGroup(MainGrid);
+        var translate = UIHelper.GetOrAddTransform<TranslateTransform>(group);
+
+        float x = -7f / (float)MainWindow.Current.ActualWidth;
+        float y = -7f / (float)MainWindow.Current.ActualHeight;
+        Point position = Mouse.GetPosition(this);
+
+        translate.X = (int)Math.Round(position.X * x);
+        translate.Y = (int)Math.Round(position.Y * y);
     }
 
     public class Dare_ItemCategory : CharmUIElement

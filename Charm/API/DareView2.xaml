@@ -106,7 +106,7 @@
                             Style="{StaticResource D2StyleButtonNoOverlay}" />
 
                         <Grid Grid.Column="1" IsHitTestVisible="False">
-                            <StackPanel Margin="10,10,25,10" Orientation="Vertical">
+                            <StackPanel Margin="10,10,25,0" Orientation="Vertical">
                                 <Viewbox
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
@@ -131,6 +131,17 @@
                                     Foreground="White"
                                     Opacity="0.5"
                                     Text="{Binding Item.Type}" />
+
+                                <TextBlock
+                                    Margin="0,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Panel.ZIndex="1"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="12"
+                                    Foreground="White"
+                                    Opacity="0.5"
+                                    Text="{Binding Item.ApiHash}" />
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -244,10 +255,7 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid
-        x:Name="MainGrid"
-        Focusable="False"
-        Style="{StaticResource GradientBackgroundSemiTransparent}">
+    <Grid Focusable="False" Style="{StaticResource GradientBackgroundSemiTransparent}">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -299,7 +307,7 @@
             </Rectangle>
         </Grid>
 
-        <Viewbox Grid.RowSpan="3" Panel.ZIndex="0">
+        <Viewbox Grid.RowSpan="3" Panel.ZIndex="1">
             <Grid
                 Width="1920"
                 Height="990"
@@ -335,11 +343,27 @@
                         <RowDefinition Height="90*" />
                     </Grid.RowDefinitions>
 
+                    <ToggleButton
+                        x:Name="AggregateOutputButton"
+                        Margin="15,-15,15,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Content="AGGREGATE OUTPUT"
+                        FontSize="18"
+                        Style="{DynamicResource D2StyleToggleBoxButton}">
+                        <local:GenericTooltipProperties.TooltipData>
+                            <local:GenericTooltip
+                                Name="AGGREGATE OUTPUT"
+                                Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
+                                Type="Export Option" />
+                        </local:GenericTooltipProperties.TooltipData>
+                    </ToggleButton>
+
                     <Grid Margin="0,15,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30*" />
                             <ColumnDefinition Width="30*" />
-
+                            <ColumnDefinition Width="30*" />
                         </Grid.ColumnDefinitions>
 
                         <Button
@@ -349,7 +373,7 @@
                             Click="ExportButton_Click"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip Name="EXPORT" Description="Exports everything in the current list" />
+                                <local:GenericTooltip Name="EXPORT" Description="Exports everything in the export list" />
                             </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 d:FontFamily="Haas Grot Text 55 Roman"
@@ -361,7 +385,7 @@
                         <Button
                             x:Name="OpenOutputButton"
                             Grid.Column="1"
-                            Margin="15,10,15,10"
+                            Margin="0,10,0,10"
                             Click="OpenOutputFolder_Click"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
@@ -372,6 +396,22 @@
                                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                 FontSize="18"
                                 Text="OPEN OUTPUT" />
+                        </Button>
+
+                        <Button
+                            x:Name="ClearAllButton"
+                            Grid.Column="2"
+                            Margin="15,10,15,10"
+                            Click="ClearAllButton_Click"
+                            Style="{DynamicResource D2StyleButton}">
+                            <local:GenericTooltipProperties.TooltipData>
+                                <local:GenericTooltip Name="CLEAR" Description="Clears everything from the export list" />
+                            </local:GenericTooltipProperties.TooltipData>
+                            <TextBlock
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="18"
+                                Text="CLEAR" />
                         </Button>
                     </Grid>
 
@@ -393,7 +433,9 @@
                 </Grid>
 
                 <Grid
+                    x:Name="MainGrid"
                     Grid.Row="1"
+                    Grid.RowSpan="2"
                     Grid.Column="0"
                     Margin="25,0,0,0">
                     <Grid.ColumnDefinitions>
@@ -403,54 +445,28 @@
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10*" />
-                        <RowDefinition Height="90*" />
+                        <RowDefinition Height="95*" />
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0" Grid.Column="1">
-
                         <StackPanel
+                            x:Name="FilterOptions"
+                            Grid.Row="0"
+                            Margin="0,0,0,0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Orientation="Horizontal">
-                            <StackPanel
-                                x:Name="FilterOptions"
+                            <TextBox
+                                x:Name="SearchBox"
                                 Grid.Row="0"
-                                Margin="0,0,0,0"
-                                HorizontalAlignment="Center"
+                                Width="500"
+                                Margin="10,0,10,0"
+                                HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"
-                                Orientation="Horizontal">
-                                <TextBox
-                                    x:Name="SearchBox"
-                                    Grid.Row="0"
-                                    Width="500"
-                                    Margin="10,0,10,0"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Center"
-                                    FontSize="30"
-                                    TextChanged="SearchBox_TextChanged"
-                                    TextWrapping="Wrap" />
-
-                            </StackPanel>
-
-                            <ToggleButton
-                                x:Name="AggregateOutputButton"
-                                Grid.Column="1"
-                                Margin="10"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Content="AGGREGATE OUTPUT"
-                                FontSize="18"
-                                Style="{DynamicResource D2StyleToggleBoxButton}">
-                                <local:GenericTooltipProperties.TooltipData>
-                                    <local:GenericTooltip
-                                        Name="AGGREGATE OUTPUT"
-                                        Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
-                                        Type="Export Option" />
-                                </local:GenericTooltipProperties.TooltipData>
-
-                            </ToggleButton>
+                                FontSize="30"
+                                TextChanged="SearchBox_TextChanged"
+                                TextWrapping="Wrap" />
                         </StackPanel>
-
                     </Grid>
 
                     <local:ItemPage

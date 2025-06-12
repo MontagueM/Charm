@@ -1019,7 +1019,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public string GetItemDescription()
     {
-        return GetItemStrings().TagData.ItemDisplaySource.Value.ToString();
+        return GetItemStrings().TagData.ItemDisplaySource?.Value.ToString() ?? "";
     }
 
     public DestinyTierType GetItemRarity()

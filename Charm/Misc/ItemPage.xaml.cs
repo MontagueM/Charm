@@ -344,6 +344,8 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
     private bool _isAnimating = false;
     private bool _firstTimeLoad = true;
 
+    public List<CharmUIElement> CurrentPageItems { get; private set; } = new();
+
     public ItemPage()
     {
         InitializeComponent();
@@ -400,6 +402,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
                 });
             }
         }
+        CurrentPageItems = itemsToShow;
         ItemList.ItemsSource = itemsToShow;
         CheckPages();
     }

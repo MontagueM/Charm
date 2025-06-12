@@ -201,31 +201,31 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                 break;
         }
 
-        if (!Strategy.IsD1())
+        await Task.Run(() =>
         {
-            await Task.Run(() =>
+            // Spacer Block
+            blocks.Add(new SpacerBlock()
             {
-                // Spacer Block
-                blocks.Add(new SpacerBlock()
-                {
-                    Order = -1,
-                });
+                Order = -1,
+            });
 
-                // Description
-                blocks.Add(new TextsBlock()
-                {
-                    Order = 0,
-                    Text = item.GetItemDescription()
-                });
+            // Description
+            blocks.Add(new TextsBlock()
+            {
+                Order = 0,
+                Text = item.GetItemDescription()
+            });
 
-                // Flavor Text
-                blocks.Add(new TextsBlock()
-                {
-                    Order = 1,
-                    Italic = true,
-                    Text = item.GetItemFlavorText()
-                });
+            // Flavor Text
+            blocks.Add(new TextsBlock()
+            {
+                Order = 1,
+                Italic = true,
+                Text = item.GetItemFlavorText()
+            });
 
+            if (!Strategy.IsD1())
+            {
                 // Emblem preview
                 if (item.GetItemTraits().Contains(DestinyTraitID.item_emblem))
                 {
@@ -255,6 +255,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
 
                 if (overrideStyle == DestinySocketCategoryStyle.Unknown)
+                {
                     // Source
                     if (item.Source != null && item.Source != "")
                     {
@@ -271,6 +272,8 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                             Text = item.Source
                         });
                     }
+                }
+
 
                 if (overrideStyle != DestinySocketCategoryStyle.Reusable)
                 {
@@ -337,10 +340,10 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                                 Action = $"Export"
                             });
                     });
-
                 }
-            });
-        }
+            }
+        });
+
 
         foreach (var block in blocks)
             BodyBlocks.Add(block);
