@@ -135,9 +135,11 @@
                     </Border>
                     <Image
                         Grid.Column="0"
+                        Margin="25"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
                         Source="{Binding IconImage}"
+                        Stretch="None"
                         Visibility="Visible" />
 
                     <StackPanel

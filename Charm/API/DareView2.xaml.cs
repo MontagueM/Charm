@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Tiger;
+using Tiger.Schema;
 using Tiger.Schema.Investment;
 
 namespace Charm;
@@ -60,6 +61,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     }
 
     private DestinyTraitID? TypeFilter = null;
+    private DestinyTierType? RarityFilter = null;
 
     public DareView2()
     {
@@ -121,6 +123,33 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         presets.Combobox.MinWidth = 200;
         presets.Combobox.SelectionChanged += Filters_OnSelectionChanged;
         FilterOptions.Children.Add(presets);
+
+        List<ComboBoxItem> rarities = new();
+        ComboBoxControl rarity_presets = new();
+        rarity_presets.Text = "Filter By Rarity";
+        rarity_presets.FontSize = 14;
+
+        var values = Enum.GetValues(typeof(DestinyTierType)).Cast<DestinyTierType>().ToList();
+        foreach (var rarity in values.Where(x => x != DestinyTierType.Unknown))
+        {
+            rarities.Add(new()
+            {
+                Content = rarity.GetEnumDescription(),
+                Tag = rarity,
+                FontSize = 10
+            });
+        }
+
+        rarities.Insert(0, new() { Content = "All", FontSize = 10 });
+        rarity_presets.Combobox.ItemsSource = rarities;
+
+        if (rarity_presets.Combobox.SelectedIndex == -1)
+        {
+            rarity_presets.Combobox.SelectedIndex = 0;
+        }
+        rarity_presets.Combobox.MinWidth = 200;
+        rarity_presets.Combobox.SelectionChanged += RarityFilters_OnSelectionChanged;
+        FilterOptions.Children.Add(rarity_presets);
     }
 
     private async Task LoadApiList()
@@ -150,6 +179,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
                 foreach (var trait in item.GetItemTraits().Where(x => x.ToString().StartsWith("item_")))
                 {
+                    if (trait is DestinyTraitID.item_engram)
+                        continue;
+
                     var _trait = trait;
                     if (item.GetItemType() == "Trace Rifle" && _trait == DestinyTraitID.item_weapon_auto_rifle) // bungo pls fix
                         _trait = DestinyTraitID.item_weapon_trace_rifle;
@@ -218,6 +250,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             }
             else
                 newItem.Items = item.Items;
+
+            if (RarityFilter is not null)
+                newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemRarity() == RarityFilter));
 
             if (newItem.Items.Count != 0)
                 itemCategories.Add(newItem);
@@ -389,6 +424,16 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         RefreshItemList();
     }
 
+    private void RarityFilters_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (((sender as ComboBox).SelectedItem as ComboBoxItem).Tag is not null)
+            RarityFilter = (DestinyTierType)((sender as ComboBox).SelectedItem as ComboBoxItem).Tag;
+        else
+            RarityFilter = null;
+
+        RefreshItemList();
+    }
+
     private void UserControl_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.Key == Key.Down)
@@ -495,6 +540,25 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         translate.Y = (int)Math.Round(position.Y * y);
     }
 
+    private void HelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        PopupBanner about = new()
+        {
+            DarkenBackground = true,
+            //Icon = "❓",
+            IconImage = ApiImageUtils.MakeBitmapImage(Texture.GetTextureFromHash(new(0x80E65764)), 120, 120),
+            Title = $"WELCOME TO DARE",
+            Subtitle = "The Destiny API Ripping Extension",
+            Description = "You may already be familar with the old DARE, but if you're not, DARE used to be a program used to rip gear models/shaders from the Bungie API." +
+            "\n\nThis is it's spiritual successor. Charm rips player gear directly from the game files, which means you can rip even if the API is down or you are offline." +
+            "\n\n• Use the search bar to look for specific items and/or the drop downs to filter them." +
+            "\n• Clicking an items icon will add it to the export list on the right side." +
+            "\n• You can Shift+Click to skip to the start/end of a category, or Ctrl+Click to skip 1/4.",
+            Style = PopupBanner.PopupStyle.Information
+        };
+        about.Show();
+    }
+
     public class Dare_ItemCategory : CharmUIElement
     {
         private string _categoryName;
@@ -552,24 +616,5 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 }
             }
         }
-    }
-
-    private void HelpButton_Click(object sender, RoutedEventArgs e)
-    {
-        PopupBanner about = new()
-        {
-            DarkenBackground = true,
-            Icon = "❓",
-            Title = $"WELCOME TO DARE",
-            Subtitle = "The Destiny API Ripping Extension",
-            Description = "You may already be familar with the old DARE, but if you're not, DARE used to be a program used to rip gear models/shaders from the Bungie API." +
-            "\n\nCharm's version is the successor to it and hopefully improves the user experience. Charm rips player gear directly from the game files, which means you can rip even if the API is down or you are offline!" +
-            "\n\n• Use the search bar to look for specific items or use the drop down box to filter by item type, or both!" +
-            "\n• Clicking an items icon will add it to the export list on the right side." +
-            "\n• Shift+Click to skip to the start/end of a category" +
-            "\n• Ctrl+Click to skip 1/4 of a category",
-            Style = PopupBanner.PopupStyle.Information
-        };
-        about.Show();
     }
 }
