@@ -365,48 +365,44 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         }
     }
 
-    public void DisplayItems(bool fromStart = false)
+    public async void DisplayItems(bool fromStart = false)
     {
         if (fromStart)
-        {
             CurrentPage = 0;
-            UIHelper.AnimateFade(ItemList, TransitionSpeed * 2, 1f, 0);
-        }
 
-        if (Items is null || ItemsPerPage <= 0)
-            return;
-
-        var count = Items.Count();
-        var itemsPerPage = GetItemsPerPage();
-
-        TotalPages = Math.Max(1, (int)Math.Ceiling((double)count / itemsPerPage));
-
-        if (!HidePageButtons)
-        {
-            PreviousPage.Visibility = count > itemsPerPage ? Visibility.Visible : (CollapsePageButtons ? Visibility.Collapsed : Visibility.Hidden);
-            NextPage.Visibility = count > itemsPerPage ? Visibility.Visible : (CollapsePageButtons ? Visibility.Collapsed : Visibility.Hidden);
-        }
-
-        var itemsToShow = Items.Skip(CurrentPage * itemsPerPage).Take(itemsPerPage).ToList();
-        if (itemsToShow.Count == 0)
-        {
-            SelectPreviousPage();
-        }
+        var items = Items?.ToList() ?? new List<CharmUIElement>();
+        int itemsPerPage = GetItemsPerPage();
+        int count = items.Count;
+        int totalPages = Math.Max(1, (int)Math.Ceiling((double)count / itemsPerPage));
+        var itemsToShow = items.Skip(CurrentPage * itemsPerPage).Take(itemsPerPage).ToList();
 
         if (UsePlaceholders)
         {
             int placeholderCount = itemsPerPage - itemsToShow.Count;
             for (int i = 0; i < placeholderCount; i++)
-            {
-                itemsToShow.Add(new()
-                {
-                    IsPlaceholder = true
-                });
-            }
+                itemsToShow.Add(new CharmUIElement { IsPlaceholder = true });
         }
-        CurrentPageItems = itemsToShow;
-        ItemList.ItemsSource = itemsToShow;
-        CheckPages();
+
+        await Dispatcher.InvokeAsync(() =>
+        {
+            if (fromStart)
+                UIHelper.AnimateFade(ItemList, TransitionSpeed * 2, 1f, 0);
+
+            TotalPages = totalPages;
+
+            if (!HidePageButtons)
+            {
+                PreviousPage.Visibility = count > itemsPerPage ? Visibility.Visible : (CollapsePageButtons ? Visibility.Collapsed : Visibility.Hidden);
+                NextPage.Visibility = count > itemsPerPage ? Visibility.Visible : (CollapsePageButtons ? Visibility.Collapsed : Visibility.Hidden);
+            }
+
+            if (itemsToShow.Count == 0)
+                SelectPreviousPage();
+
+            CurrentPageItems = itemsToShow;
+            ItemList.ItemsSource = itemsToShow;
+            CheckPages();
+        });
     }
 
     /// <summary>
