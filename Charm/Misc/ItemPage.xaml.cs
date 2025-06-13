@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Charm;
 
@@ -23,6 +24,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
     private bool _expand = false;
     private Thickness _itemMargin = new(0, 0, 0, 0);
     private Thickness _pageIndicatorMargin = new(0, 0, 0, -20);
+    private SolidColorBrush _pageBackgroundColor = new(Color.FromArgb(0, 0, 0, 0));
     private bool _showVerticalPageIndicator = false;
     private int _currentPage = 0;
     private int _totalPages = 1;
@@ -170,6 +172,18 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         }
     }
 
+    public SolidColorBrush PageBackgroundColor
+    {
+        get => _pageBackgroundColor;
+        set
+        {
+            if (_pageBackgroundColor != value)
+            {
+                _pageBackgroundColor = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     /// <summary>
     /// Collapse the Prev/Next page buttons instead of hiding them

@@ -47,7 +47,7 @@
         </ItemsPanelTemplate>
     </UserControl.Resources>
 
-    <Grid Background="Transparent">
+    <Grid Background="Transparent" ClipToBounds="False">
         <Grid x:Name="MainLayout">
             <Grid.Style>
                 <Style TargetType="Grid">
@@ -157,6 +157,7 @@
                 Margin="0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
+                Background="{Binding PageBackgroundColor}"
                 ItemTemplate="{Binding ItemTemplate}"
                 ItemTemplateSelector="{Binding ItemTemplateSelector}"
                 KeyboardNavigation.TabNavigation="None">

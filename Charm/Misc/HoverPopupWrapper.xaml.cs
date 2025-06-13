@@ -71,7 +71,7 @@ public partial class HoverPopupWrapper : UserControl
 
         UIHelper.AnimateFade(_floatingContainer, 0.125f, 1, 0);
         //UIHelper.AnimateSlide(_floatingContainer, 0.1f, new(0, 0), new(0, -5));
-        UIHelper.AnimateScale(_floatingContainer, 0.05f, new(1, 1), new(0, 0));
+        UIHelper.AnimateScale(_floatingContainer, 0.15f, new(1, 1), new(0, 0));
 
         HoverOverlayTarget.Children.Add(_floatingContainer);
         HoverOverlayTarget.IsHitTestVisible = true;
@@ -101,8 +101,8 @@ public partial class HoverPopupWrapper : UserControl
 
     private async Task Close()
     {
-        UIHelper.AnimateFade(_floatingContainer, 0.05f, 0, additive: true);
-        UIHelper.AnimateScale(_floatingContainer, 0.05f, new(0, 0), new(1, 1));
+        UIHelper.AnimateFade(_floatingContainer, 0.1f, 0, additive: true);
+        UIHelper.AnimateScale(_floatingContainer, 0.15f, new(0, 0), new(1, 1));
         await Task.Delay(100);
         if (_floatingContainer?.Parent is Panel parentPanel)
         {
