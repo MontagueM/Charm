@@ -77,6 +77,14 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
         InitializeComponent();
         LoadItem();
+
+        SocketCategoriesPage.OnBeforePageChange += (s, e) =>
+        {
+            foreach (var popup in UIHelper.FindVisualChildren<HoverPopupWrapper>(this))
+            {
+                popup.ForceClose();
+            }
+        };
     }
 
     private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -589,7 +597,6 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         MainWindow.Current.ToolTip.ClearTooltip();
     }
 
-    //TODO close hovering popup if one is open 
     private void UserControl_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.IsRepeat)

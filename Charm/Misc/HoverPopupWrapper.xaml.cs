@@ -48,6 +48,7 @@ public partial class HoverPopupWrapper : UserControl
         }
 
         _floatingContainer = new Border();
+        _floatingContainer.IsHitTestVisible = true;
         var style = (Style)FindResource("FloatingContainerStyle");
         if (style != null)
             _floatingContainer.Style = style;
@@ -78,21 +79,38 @@ public partial class HoverPopupWrapper : UserControl
 
     private async Task TryClosePopup()
     {
-        if (_floatingContainer != null &&
-            !_floatingContainer.IsMouseOver &&
-            (Target as FrameworkElement)?.IsMouseOver == false)
+        if (_floatingContainer != null && !_floatingContainer.IsMouseOver && (Target as FrameworkElement)?.IsMouseOver == false)
         {
-
-            UIHelper.AnimateScale(_floatingContainer, 0.05f, new(0, 0), new(1, 1));
-            await Task.Delay(100);
-            if (_floatingContainer?.Parent is Panel parentPanel)
-            {
-                parentPanel.Children.Remove(_floatingContainer);
-            }
-
-            HoverOverlayTarget.Children.Remove(_floatingContainer);
-            _floatingContainer = null;
+            await Close();
         }
+    }
+
+    public async void ForceClose()
+    {
+        if (_floatingContainer != null)
+        {
+            if (_floatingContainer.IsMouseOver)
+                _floatingContainer.IsHitTestVisible = false; // turns out its that shrimple
+
+            else if ((Target as FrameworkElement)?.IsMouseOver == true)
+            {
+                await Close();
+            }
+        }
+    }
+
+    private async Task Close()
+    {
+        UIHelper.AnimateFade(_floatingContainer, 0.05f, 0, additive: true);
+        UIHelper.AnimateScale(_floatingContainer, 0.05f, new(0, 0), new(1, 1));
+        await Task.Delay(100);
+        if (_floatingContainer?.Parent is Panel parentPanel)
+        {
+            parentPanel.Children.Remove(_floatingContainer);
+        }
+
+        HoverOverlayTarget.Children.Remove(_floatingContainer);
+        _floatingContainer = null;
     }
 
     private void OnRender(object sender, EventArgs e)

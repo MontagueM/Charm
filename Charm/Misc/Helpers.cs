@@ -529,7 +529,7 @@ public static class UIHelper
     }
 
     public static void AnimateSlide(UIElement obj, float seconds, Point to, Point from,
-        bool autoReverse = false, IEasingFunction easing = null)
+        bool autoReverse = false, IEasingFunction easing = null, EventHandler? completed = null)
     {
         var group = EnsureTransformGroup(obj);
         var translate = GetOrAddTransform<TranslateTransform>(group);
@@ -549,6 +549,8 @@ public static class UIHelper
                 EasingFunction = easing is null ? new QuadraticEase { EasingMode = EasingMode.EaseOut } : easing,
                 AutoReverse = autoReverse,
             };
+            if (completed is not null)
+                animX.Completed += completed;
 
             // Animate Y
             var animY = new DoubleAnimation
@@ -566,7 +568,7 @@ public static class UIHelper
         }), DispatcherPriority.Render);
     }
 
-    public static void AnimateScale(UIElement obj, float seconds, Point to, Point from, bool autoReverse = false)
+    public static void AnimateScale(UIElement obj, float seconds, Point to, Point from, bool autoReverse = false, EventHandler? completed = null)
     {
         var group = EnsureTransformGroup(obj);
         var scale = GetOrAddTransform<ScaleTransform>(group);
@@ -586,6 +588,8 @@ public static class UIHelper
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
                 AutoReverse = autoReverse,
             };
+            if (completed is not null)
+                animX.Completed += completed;
 
             // Animate Y
             var animY = new DoubleAnimation
@@ -642,6 +646,21 @@ public static class UIHelper
             }
         }
         return null;
+    }
+
+    public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+    {
+        if (depObj == null) yield break;
+
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+            if (child is T t)
+                yield return t;
+
+            foreach (T childOfChild in FindVisualChildren<T>(child))
+                yield return childOfChild;
+        }
     }
 
     public static T GetChildOfType<T>(DependencyObject depObj) where T : DependencyObject

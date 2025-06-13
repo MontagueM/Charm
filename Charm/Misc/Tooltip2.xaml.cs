@@ -307,6 +307,9 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
                         foreach (SB2548080 notif in strings.TagData.TooltipNotifications)
                         {
+                            if (notif.DisplayString.Value is null || notif.DisplayString.Value == "")
+                                continue;
+
                             blocks.Add(new NotificationBlock()
                             {
                                 Order = 9,
@@ -584,6 +587,9 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
     private const double LerpSpeed = 0.35;
     private void OnRender(object sender, EventArgs e) // TODO clamp to left/right sides, not really needed rn
     {
+        if (ActiveItem == null && ToolTip.Visibility == Visibility.Visible)
+            ClearTooltip();
+
         if (ActiveItem == null || ToolTip.Visibility != Visibility.Visible || ActualHeight == 0)
             return;
 
@@ -868,7 +874,7 @@ public class BlockColorSelector : IMultiValueConverter
         var blockColor = values[1] as Color?;
         var overrideColor = values[0] as Color?;
 
-        return new SolidColorBrush((Color)(overrideColor ?? blockColor));
+        return new SolidColorBrush((Color)(overrideColor ?? blockColor ?? Color.FromArgb(0, 0, 0, 0)));
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
