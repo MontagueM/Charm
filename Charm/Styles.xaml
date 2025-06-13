@@ -425,18 +425,23 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Grid Background="Transparent" Cursor="Hand">
+                    <Grid
+                        Background="Transparent"
+                        ClipToBounds="False"
+                        Cursor="Hand">
                         <Border
                             x:Name="MainOverlay"
                             Panel.ZIndex="-1"
-                            Background="Transparent">
+                            Background="Transparent"
+                            CornerRadius="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.CornerRadius)}">
                             <ContentPresenter Margin="1" />
                         </Border>
                         <Border
                             x:Name="Main"
                             Background="Transparent"
                             BorderBrush="#AEFFFFFF"
-                            BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}">
+                            BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}"
+                            CornerRadius="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.CornerRadius)}">
                             <ContentPresenter Margin="1" />
                         </Border>
                         <Border
@@ -444,6 +449,7 @@
                             Margin="-8"
                             BorderBrush="#D9FFFFFF"
                             BorderThickness="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.BorderThickness)}"
+                            CornerRadius="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(charm:StyleHelper.CornerRadius)}"
                             IsHitTestVisible="False"
                             Opacity="0" />
 

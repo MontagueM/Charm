@@ -166,7 +166,7 @@ public partial class EntityView : UserControl
         EntitySkeleton overrideSkeleton = null;
         if (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
         {
-            string skeleHash = item.Type == "Ghost Shell" ? "0000603046D31C68" : "0000670F342E9595";
+            var skeleHash = item.IsGhost ? "0000603046D31C68" : "0000670F342E9595";
             Entity skele = FileResourcer.Get().GetFile<Entity>(new FileHash(Hash64Map.Get().GetHash32Checked(skeleHash))); // 64 bit more permanent
             overrideSkeleton = new EntitySkeleton(skele.Skeleton.Hash);
         }

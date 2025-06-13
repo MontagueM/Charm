@@ -759,7 +759,7 @@ public struct S015A8080
 public struct S075A8080
 {
     public TigerHash InventoryItemHash;
-    [SchemaField(0x10, Tag64 = true)]
+    [SchemaField(0x10, Tag64 = true), NoLoad]
     public Tag<SB83E8080> IconContainer;
 }
 

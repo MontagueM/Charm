@@ -87,6 +87,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     public async void LoadContent()
     {
+        List<string> loading = new() { "Loading API Items" };
+        MainWindow.Progress.SetProgressStages(loading, false, true);
+
         await LoadApiList();
         CreateFilterOptions();
     }
@@ -124,6 +127,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
     {
         ItemCategories.Clear();
         IEnumerable<InventoryItem> inventoryItems = await Investment.Get().GetInventoryItems();
+        MainWindow.Progress.CompleteStage();
+
         List<string> mapStages = inventoryItems.Select((_, i) => $"Loading {i + 1}/{inventoryItems.Count()}").ToList();
         MainWindow.Progress.SetProgressStages(mapStages, false, true);
 
@@ -547,5 +552,24 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 }
             }
         }
+    }
+
+    private void HelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        PopupBanner about = new()
+        {
+            DarkenBackground = true,
+            Icon = "❓",
+            Title = $"WELCOME TO DARE",
+            Subtitle = "The Destiny API Ripping Extension",
+            Description = "You may already be familar with the old DARE, but if you're not, DARE used to be a program used to rip gear models/shaders from the Bungie API." +
+            "\n\nCharm's version is the successor to it and hopefully improves the user experience. Charm rips player gear directly from the game files, which means you can rip even if the API is down or you are offline!" +
+            "\n\n• Use the search bar to look for specific items or use the drop down box to filter by item type, or both!" +
+            "\n• Clicking an items icon will add it to the export list on the right side." +
+            "\n• Shift+Click to skip to the start/end of a category" +
+            "\n• Ctrl+Click to skip 1/4 of a category",
+            Style = PopupBanner.PopupStyle.Information
+        };
+        about.Show();
     }
 }

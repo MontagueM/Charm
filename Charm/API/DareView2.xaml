@@ -247,7 +247,7 @@
                         ItemsPerPage="{Binding ItemsPerPage}"
                         PageIndicatorMargin="0,0,0,-10"
                         SelectOnPageChange="False"
-                        TransitionSpeed="0.04"
+                        TransitionSpeed="0.075"
                         UsePlaceholders="True" />
 
                 </Grid>
@@ -437,7 +437,8 @@
                     Grid.Row="1"
                     Grid.RowSpan="2"
                     Grid.Column="0"
-                    Margin="25,0,0,0">
+                    Margin="25,0,0,0"
+                    ClipToBounds="False">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="5*" />
                         <ColumnDefinition Width="90*" />
@@ -447,6 +448,22 @@
                         <RowDefinition Height="10*" />
                         <RowDefinition Height="95*" />
                     </Grid.RowDefinitions>
+
+                    <Button
+                        x:Name="HelpButton"
+                        Grid.Column="0"
+                        Width="50"
+                        Height="50"
+                        HorizontalAlignment="Right"
+                        local:StyleHelper.CornerRadius="100"
+                        Click="HelpButton_Click"
+                        Style="{DynamicResource D2StyleButton}">
+                        <TextBlock
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                            FontSize="32"
+                            Text="?" />
+                    </Button>
 
                     <Grid Grid.Row="0" Grid.Column="1">
                         <StackPanel
