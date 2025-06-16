@@ -1639,7 +1639,7 @@
                                 Grid.Row="1"
                                 Grid.ColumnSpan="1"
                                 Margin="0,0,30,0"
-                                HorizontalAlignment="Left"
+                                HorizontalAlignment="Stretch"
                                 Background="Transparent"
                                 HorizontalScrollBarVisibility="Disabled"
                                 VerticalScrollBarVisibility="Auto">

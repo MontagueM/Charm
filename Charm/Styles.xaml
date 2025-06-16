@@ -1607,13 +1607,13 @@
                                             Storyboard.TargetName="CheckBoxInnerColor"
                                             Storyboard.TargetProperty="Color"
                                             To="Transparent"
-                                            Duration="0:0:0.1" />
+                                            Duration="0:0:0.05" />
 
                                         <ThicknessAnimation
                                             Storyboard.TargetName="CheckBoxInner"
                                             Storyboard.TargetProperty="BorderThickness"
                                             To="0"
-                                            Duration="0:0:0.1" />
+                                            Duration="0:0:0.05" />
                                     </Storyboard>
                                 </VisualState>
 
@@ -1623,13 +1623,21 @@
                                             Storyboard.TargetName="CheckBoxInnerColor"
                                             Storyboard.TargetProperty="Color"
                                             To="#62aadd"
-                                            Duration="0:0:0.1" />
+                                            Duration="0:0:0.15">
+                                            <ColorAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut" />
+                                            </ColorAnimation.EasingFunction>
+                                        </ColorAnimation>
 
                                         <ThicknessAnimation
                                             Storyboard.TargetName="CheckBoxInner"
                                             Storyboard.TargetProperty="BorderThickness"
                                             To="2"
-                                            Duration="0:0:0.1" />
+                                            Duration="0:0:0.1">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseIn" />
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
                                     </Storyboard>
                                 </VisualState>
                             </VisualStateGroup>

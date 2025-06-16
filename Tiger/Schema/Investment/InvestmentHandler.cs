@@ -981,7 +981,23 @@ public class InventoryItem : Tag<S9D798080>
     public bool IsArmorOrnament => ItemTraits.Contains(DestinyTraitID.item_ornament_armor);
     public bool IsOrnament => IsWeaponOrnament || IsArmorOrnament;
 
-    public string Name => GetItemName();
+    private string _name = null;
+    public string Name
+    {
+        get
+        {
+            if (_name is not null)
+                return _name;
+
+            _name = GetItemName();
+            return _name;
+        }
+        set // Only really used for Artifacts since their "real" inventory item is nameless
+        {
+            _name = value;
+        }
+    }
+
     public string Type => GetItemType();
     public string Description => GetItemDescription();
     public string FlavorText => GetItemFlavorText();

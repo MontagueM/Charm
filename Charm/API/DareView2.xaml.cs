@@ -335,29 +335,32 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         MainWindow.Progress.SetProgressStages(apiStages);
         Task.Run(() =>
         {
-            _selectedItems.ToList().ForEach(item =>
-            // Parallel.ForEach(_selectedItems, item =>
+            SelectedItems.ToList().ForEach(item =>
             {
-                if (item.Item.Type == "Artifact" && item.Item.TagData.Unk28.GetValue(item.Item.GetReader()) is SC5738080 gearSet)
+                var curItem = item.Item;
+                if ((curItem.Type is "Artifact" or "Seasonal Artifact") && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
                 {
                     if (gearSet.ItemList.Count != 0)
-                        item.Item = Investment.Get().GetInventoryItem(gearSet.ItemList.First().ItemIndex);
+                    {
+                        curItem = Investment.Get().GetInventoryItem(gearSet.ItemList.First().ItemIndex);
+                        curItem.Name = item.Item.Name;
+                    }
                 }
 
-                if (item.Item.GetArtArrangementIndex() != -1)
+                if (curItem.GetArtArrangementIndex() != -1)
                 {
                     // if has a model
-                    EntityView.ExportInventoryItem(item.Item, savePath, aggregateOutput);
+                    EntityView.ExportInventoryItem(curItem, savePath, aggregateOutput);
                 }
                 else
                 {
                     // shader
-                    string itemName = Helpers.SanitizeString(item.Item.Name);
+                    string itemName = Helpers.SanitizeString(curItem.Name);
                     string savePath = config.GetExportSavePath(); // need to set again here
                     savePath += $"/{itemName}";
                     Directory.CreateDirectory(savePath);
                     Directory.CreateDirectory(savePath + "/Textures");
-                    Investment.Get().ExportShader(item.Item, savePath, itemName, config.GetOutputTextureFormat());
+                    Investment.Get().ExportShader(curItem, savePath, itemName, config.GetOutputTextureFormat());
                 }
                 MainWindow.Progress.CompleteStage();
             });
@@ -467,29 +470,22 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         string[] blacklist = new[]
         {
-        "Ghost Projection",
-        "Emote",
-        "Finisher",
-        "Ship Schematics"
+            "Ghost Projection",
+            "Emote",
+            "Finisher",
+            "Ship Schematics"
         };
 
         string[] whitelist = new[]
         {
-        // TODO: Add emotes and ghost projections for fx mesh exporting
-        "Shader",
+            // TODO: Add emotes and ghost projections for fx mesh exporting
+            "Shader",
         };
 
-        Tag<S9F548080>? a = item.GetItemStrings();
-        string? b = a.TagData.ItemType.Value.ToString();
-        return ((Strategy.CurrentStrategy != TigerStrategy.DESTINY1_RISE_OF_IRON
-            && (b == "Artifact" || b == "Seasonal Artifact")
-            && item.TagData.Unk28.GetValue(a.GetReader()) is SC5738080)
+        return ((!Strategy.IsD1() && (type is "Artifact" or "Seasonal Artifact") && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
             || item.GetArtArrangementIndex() != -1
-            ||
-            // Whitelist
-            whitelist.Any(x => type.ToLower().Contains(x.ToLower()))) &&
-            // Blacklist
-            !blacklist.Any(x => type.ToLower().Contains(x.ToLower()));
+            || (whitelist.Any(x => type.ToLower().Contains(x.ToLower())))  // Whitelist
+            && !blacklist.Any(x => type.ToLower().Contains(x.ToLower()))); // Blacklist
     }
 
     // For aggregated outputs
