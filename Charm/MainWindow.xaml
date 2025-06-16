@@ -73,7 +73,7 @@
                                         x:Name="HeaderPanel"
                                         Margin="0,0,0,0"
                                         Panel.ZIndex="1"
-                                        Background="#0D0D0D"
+                                        Background="#141416"
                                         DockPanel.Dock="Top"
                                         IsItemsHost="True" />
 

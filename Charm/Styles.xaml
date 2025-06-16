@@ -87,7 +87,7 @@
             <Setter.Value>
                 <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
                     <RadialGradientBrush.GradientStops>
-                        <GradientStop Offset="0" Color="#FF37393E" />
+                        <GradientStop Offset="0" Color="#FF383B44" />
                         <GradientStop Offset="0.8" Color="#111113" />
                     </RadialGradientBrush.GradientStops>
                 </RadialGradientBrush>
@@ -101,7 +101,7 @@
             <Setter.Value>
                 <RadialGradientBrush Center="0.5,0.25" GradientOrigin="0.5,0.25" RadiusX="1" RadiusY="1">
                     <RadialGradientBrush.GradientStops>
-                        <GradientStop Offset="0" Color="#7F37393E" />
+                        <GradientStop Offset="0" Color="#7F383B44" />
                         <GradientStop Offset="0.8" Color="#7F111113" />
                     </RadialGradientBrush.GradientStops>
                 </RadialGradientBrush>
@@ -109,25 +109,32 @@
         </Setter>
     </Style>
 
-    <Style x:Key="ColumnHeaderBorder" TargetType="Border">
-        <Setter Property="BorderBrush" Value="#AEFFFFFF" />
-        <Setter Property="BorderThickness" Value="0,0,0,5" />
-        <Setter Property="Margin" Value="0,0,0,15" />
-    </Style>
-
     <Style TargetType="TabPanel">
         <Setter Property="Background" Value="#584C4C57" />
     </Style>
 
-    <Style x:Key="ColumnHeader" TargetType="Grid">
-        <Setter Property="Background" Value="#584C4C57" />
+    <Style x:Key="ColumnHeader" TargetType="ContentControl">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContentControl">
+                    <Border
+                        Margin="0,0,0,5"
+                        Background="#0DFFFFFF"
+                        BorderBrush="#66FFFFFF"
+                        BorderThickness="0,0,0,2">
+                        <ContentPresenter />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
         <Style.Resources>
             <Style TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{StaticResource ForegroundColour80}" />
                 <Setter Property="FontFamily" Value="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}" />
                 <Setter Property="HorizontalAlignment" Value="Center" />
                 <Setter Property="VerticalAlignment" Value="Center" />
-                <Setter Property="Margin" Value="15" />
+                <Setter Property="Padding" Value="14" />
                 <Setter Property="FontSize" Value="36" />
             </Style>
         </Style.Resources>

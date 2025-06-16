@@ -542,7 +542,7 @@
     <Grid
         x:Name="MainGrid"
         Focusable="False"
-        Style="{StaticResource GradientBackground}">
+        Style="{StaticResource GradientBackgroundSemiTransparent}">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>

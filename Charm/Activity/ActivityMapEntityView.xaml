@@ -274,19 +274,17 @@
                 Grid.Row="1"
                 Grid.Column="0"
                 Background="Transparent">
-                <Border
+                <ContentControl
                     Margin="0,0,0,5"
                     VerticalAlignment="Top"
-                    Style="{StaticResource ColumnHeaderBorder}">
-                    <Grid Height="30" Style="{StaticResource ColumnHeader}">
-                        <TextBlock
-                            Margin="0"
-                            d:FontFamily="Haas Grot Text 55 Roman"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                            FontSize="20"
-                            Text="DATA TABLES" />
-                    </Grid>
-                </Border>
+                    Style="{StaticResource ColumnHeader}">
+                    <TextBlock
+                        Margin="0"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="20"
+                        Text="DATA TABLES" />
+                </ContentControl>
 
                 <ListView
                     x:Name="EntityContainerList"
@@ -326,19 +324,17 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 Background="Transparent">
-                <Border
+                <ContentControl
                     Margin="0,0,0,5"
                     VerticalAlignment="Top"
-                    Style="{StaticResource ColumnHeaderBorder}">
-                    <Grid Height="30" Style="{StaticResource ColumnHeader}">
-                        <TextBlock
-                            Margin="0"
-                            d:FontFamily="Haas Grot Text 55 Roman"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                            FontSize="20"
-                            Text="ENTITIES" />
-                    </Grid>
-                </Border>
+                    Style="{StaticResource ColumnHeader}">
+                    <TextBlock
+                        Margin="0"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="20"
+                        Text="ENTITIES" />
+                </ContentControl>
 
                 <ListView
                     x:Name="EntitiesList"

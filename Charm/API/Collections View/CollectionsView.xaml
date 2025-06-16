@@ -642,7 +642,7 @@
 
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Style="{StaticResource GradientBackgroundSemiTransparent}">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -682,20 +682,15 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Top"
                         Visibility="Visible">
-                        <Border
-                            Height="auto"
-                            BorderThickness="0,0,0,2"
-                            Style="{StaticResource ColumnHeaderBorder}">
-                            <Grid Style="{StaticResource ColumnHeader}">
-                                <TextBlock
-                                    x:Name="ItemsTextTab"
-                                    Margin="10"
-                                    d:FontFamily="Haas Grot Text 55 Roman"
-                                    FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                                    FontSize="22"
-                                    Text="I  T  E  M  S" />
-                            </Grid>
-                        </Border>
+                        <ContentControl Style="{StaticResource ColumnHeader}">
+                            <TextBlock
+                                x:Name="ItemsTextTab"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                                FontSize="20"
+                                Text="I  T  E  M  S" />
+                        </ContentControl>
+
                         <local:ItemPage
                             x:Name="CollectiblesList"
                             CollapsePageButtons="True"
@@ -740,20 +735,15 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Top"
                             Visibility="Visible">
-                            <Border
-                                Height="auto"
-                                BorderThickness="0,0,0,2"
-                                Style="{StaticResource ColumnHeaderBorder}">
-                                <Grid Style="{StaticResource ColumnHeader}">
-                                    <TextBlock
-                                        x:Name="MiscTextTab"
-                                        Margin="10"
-                                        d:FontFamily="Haas Grot Text 55 Roman"
-                                        FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                                        FontSize="22"
-                                        Text="M  I  S  C" />
-                                </Grid>
-                            </Border>
+                            <ContentControl Style="{StaticResource ColumnHeader}">
+                                <TextBlock
+                                    x:Name="MiscTextTab"
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                                    FontSize="20"
+                                    Text="M  I  S  C" />
+                            </ContentControl>
+
                             <local:ItemPage
                                 x:Name="MiscList"
                                 CollapsePageButtons="True"
@@ -774,20 +764,15 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Bottom"
                             Visibility="Visible">
-                            <Border
-                                Height="auto"
-                                BorderThickness="0,0,0,2"
-                                Style="{StaticResource ColumnHeaderBorder}">
-                                <Grid Style="{StaticResource ColumnHeader}">
-                                    <TextBlock
-                                        x:Name="RecordsTextTab"
-                                        Margin="10"
-                                        d:FontFamily="Haas Grot Text 55 Roman"
-                                        FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
-                                        FontSize="22"
-                                        Text="R  E  C  O  R  D  S" />
-                                </Grid>
-                            </Border>
+                            <ContentControl Style="{StaticResource ColumnHeader}">
+                                <TextBlock
+                                    x:Name="RecordsTextTab"
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource ResourceKey=Haas Grot Text 55 Roman}"
+                                    FontSize="20"
+                                    Text="R  E  C  O  R  D  S" />
+                            </ContentControl>
+
                             <local:ItemPage
                                 x:Name="RecordsList"
                                 CollapsePageButtons="True"
@@ -806,19 +791,15 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Bottom"
                             Visibility="Visible">
-                            <Border
-                                Height="auto"
-                                BorderThickness="0,0,0,2"
-                                Style="{StaticResource ColumnHeaderBorder}">
-                                <Grid Style="{StaticResource ColumnHeader}">
-                                    <TextBlock
-                                        x:Name="BadgesTextTab"
-                                        Margin="10"
-                                        d:FontFamily="Haas Grot Text 55 Roman"
-                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                                        FontSize="22" />
-                                </Grid>
-                            </Border>
+                            <ContentControl Style="{StaticResource ColumnHeader}">
+                                <TextBlock
+                                    x:Name="BadgesTextTab"
+                                    Margin="0"
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="20" />
+                            </ContentControl>
+
                             <local:ItemPage
                                 x:Name="BadgesList"
                                 HorizontalAlignment="Stretch"

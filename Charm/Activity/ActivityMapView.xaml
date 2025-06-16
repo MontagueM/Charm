@@ -166,15 +166,13 @@
                 d:Visibility="Visible"
                 Orientation="Vertical"
                 Visibility="Hidden">
-                <Border Style="{StaticResource ColumnHeaderBorder}">
-                    <Grid Style="{StaticResource ColumnHeader}">
-                        <TextBlock
-                            d:FontFamily="Haas Grot Text 55 Roman"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                            FontSize="24"
-                            Text="MANUAL EXPORT" />
-                    </Grid>
-                </Border>
+                <ContentControl Margin="0,0,0,15" Style="{StaticResource ColumnHeader}">
+                    <TextBlock
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="24"
+                        Text="MANUAL EXPORT" />
+                </ContentControl>
 
                 <ListView
                     x:Name="StaticList"
@@ -222,15 +220,13 @@
                 Orientation="Vertical"
                 Visibility="Hidden">
 
-                <Border Style="{StaticResource ColumnHeaderBorder}">
-                    <Grid Style="{StaticResource ColumnHeader}">
-                        <TextBlock
-                            d:FontFamily="Haas Grot Text 55 Roman"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                            FontSize="24"
-                            Text="QUICK EXPORT" />
-                    </Grid>
-                </Border>
+                <ContentControl Margin="0,0,0,15" Style="{StaticResource ColumnHeader}">
+                    <TextBlock
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="24"
+                        Text="QUICK EXPORT" />
+                </ContentControl>
 
                 <Button
                     Margin="0,0,0,15"

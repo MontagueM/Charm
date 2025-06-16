@@ -9,7 +9,7 @@
     d:DesignWidth="1914"
     Loaded="OnControlLoaded"
     mc:Ignorable="d">
-    <Grid Margin="100,50,100,50" Background="Transparent">
+    <Grid Margin="100,75,100,75" Background="Transparent">
         <StackPanel Margin="0" Orientation="Vertical">
             <Grid VerticalAlignment="Top" Background="Transparent">
                 <TextBlock
@@ -31,7 +31,7 @@
                         VerticalAlignment="Center"
                         d:FontFamily="Haas Grot Text 55 Roman"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="34"
+                        FontSize="28"
                         Foreground="{StaticResource ForegroundColour70}"
                         Text="GENERAL"
                         TextWrapping="Wrap" />
@@ -40,7 +40,7 @@
 
             <StackPanel
                 x:Name="GeneralConfigPanel"
-                Margin="0,10,0,20"
+                Margin="0,10,0,50"
                 Orientation="Vertical" />
 
             <Grid VerticalAlignment="Top" Background="Transparent">
@@ -63,7 +63,7 @@
                         VerticalAlignment="Center"
                         d:FontFamily="Haas Grot Text 55 Roman"
                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="34"
+                        FontSize="28"
                         Foreground="{StaticResource ForegroundColour70}"
                         Text="MISC"
                         TextWrapping="Wrap" />
