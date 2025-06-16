@@ -451,8 +451,10 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             return null;
 
         var container = _inventoryItemIconMap[index].IconContainer;
-        container.Load();
+        if (container is null)
+            return null;
 
+        container.Load();
         return container;
     }
 
@@ -1148,7 +1150,7 @@ public class InventoryItem : Tag<S9D798080>
                 || x.PlugCategoryHash.Hash32 != 3356843615)) // armor_skins_empty
                     continue;
 
-                if (socket.PlugItems.Count == 0 && socket.ReusablePlugSetIndex1 != -1) // huh?
+                if (socket.ReusablePlugSetIndex1 != -1) // huh?
                 {
                     foreach (SD5778080 randomPlugs in Investment.Get().GetRandomizedPlugSet(socket.ReusablePlugSetIndex1))
                     {
@@ -1156,7 +1158,7 @@ public class InventoryItem : Tag<S9D798080>
                             continue;
 
                         var item = Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex);
-                        if (item.IsOrnament)
+                        if (item.IsOrnament && !ornaments.Contains(item))
                         {
                             item.Parent = this;
                             ornaments.Add(item);
@@ -1170,7 +1172,7 @@ public class InventoryItem : Tag<S9D798080>
                         continue;
 
                     var item = Investment.Get().GetInventoryItem(plug.PlugInventoryItemIndex);
-                    if (item.IsOrnament)
+                    if (item.IsOrnament && !ornaments.Contains(item))
                     {
                         item.Parent = this;
                         ornaments.Add(item);
