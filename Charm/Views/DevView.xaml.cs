@@ -207,7 +207,7 @@ public partial class DevView : UserControl
                     List<Entity> entities = new() { entity };
                     entities.AddRange(entity.GetEntityChildren());
 
-                    EntityView.Export(entities, hash, ExportTypeFlag.Full);
+                    EntityView.Export(entities, hash);
                     _mainWindow.MakeNewTab(hash, entityView);
                     _mainWindow.SetNewestTabSelected();
                     break;

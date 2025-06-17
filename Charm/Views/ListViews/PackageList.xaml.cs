@@ -20,8 +20,9 @@ namespace Charm;
 /// </summary>
 public partial class PackageList : UserControl
 {
-    private ConcurrentBag<PackageItem> PackageItems;
+    public ConcurrentBag<PackageItem> PackageItems;
     public event EventHandler<PackageItem> PackageItemChecked;
+    public event EventHandler<ConcurrentBag<PackageItem>> OnSearchBarChanged;
 
     /// PackageList for dummies (me, I'm the dummy):
     /// Step 1: Add element to xaml
@@ -72,7 +73,7 @@ public partial class PackageList : UserControl
         RefreshPackageList();
     }
 
-    private void RefreshPackageList()
+    public void RefreshPackageList()
     {
         if (PackageItems == null)
             return;
@@ -139,7 +140,10 @@ public partial class PackageList : UserControl
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        RefreshPackageList();
+        if (OnSearchBarChanged is not null)
+            OnSearchBarChanged.Invoke(sender, PackageItems);
+        else
+            RefreshPackageList();
     }
 
     private PackageItemContents GetContentType<T>()

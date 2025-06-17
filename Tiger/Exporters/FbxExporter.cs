@@ -77,14 +77,19 @@ public class FbxExporter : AbstractExporter
                 if (entity.Mesh.Parts.Count == 0)
                     continue;
 
+                // this is dumb
+                string savePath = scene.Type == ExportType.Entities
+                && scene.DataType == DataExportType.Individual
+                && args.AggregateOutput ? args.OutputDirectory : outputDirectory;
+
                 FbxScene fbxIndivScene = FbxScene.Create(_manager, entity.Mesh.Hash);
                 AddEntity(fbxIndivScene, entity);
-                ExportScene(fbxIndivScene, Path.Join(outputDirectory, entity.Mesh.Hash));
+                ExportScene(fbxIndivScene, Path.Join(savePath, entity.Mesh.Hash));
 
                 if (_config.GetS2VMDLExportEnabled() && scene.Type != ExportType.Terrain)
                 {
                     string fbxPath = scene.DataType == DataExportType.Map ? modelSubDirectory : "Models";
-                    Source2Handler.SaveEntityVMDL(outputDirectory, fbxPath, entity);
+                    Source2Handler.SaveEntityVMDL(savePath, fbxPath, entity);
                 }
             }
 

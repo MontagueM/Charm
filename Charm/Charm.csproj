@@ -145,7 +145,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Views\AudioListView.xaml.cs">
+      <Compile Update="Views\ListViews\EntityListView.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\ListViews\AudioListView.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
     </ItemGroup>

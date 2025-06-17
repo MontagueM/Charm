@@ -118,6 +118,14 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
+    private void AllEntitiesView2Button_OnClick(object sender, RoutedEventArgs e)
+    {
+        EntityListView entityListView = new();
+        entityListView.LoadContent();
+        _mainWindow.MakeNewTab("Dynamics 2", entityListView);
+        _mainWindow.SetNewestTabSelected();
+    }
+
     private void ActivitiesViewButton_OnClick(object sender, RoutedEventArgs e)
     {
         TagListViewerView tagListView = new();

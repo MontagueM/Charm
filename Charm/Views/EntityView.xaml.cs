@@ -100,14 +100,13 @@ public partial class EntityView : UserControl
         return loaded;
     }
 
-    public static void Export(List<Entity> entities, string name, ExportTypeFlag exportType, EntitySkeleton overrideSkeleton = null, ExporterScene scene = null)
+    public static void Export(List<Entity> entities, string name, string overridePath = null, ExportTypeFlag exportType = ExportTypeFlag.Full, EntitySkeleton overrideSkeleton = null)
     {
         ConfigSubsystem config = ConfigSubsystem.Get();
         name = Helpers.SanitizeString(name);
-        string savePath = config.GetExportSavePath() + $"/{name}";
+        string savePath = (overridePath is null ? config.GetExportSavePath() : overridePath) + $"/{name}";
 
-        if (scene == null)
-            scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entities);
+        var scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entities);
 
         Log.Verbose($"Exporting entity model name: {name}");
 
@@ -138,9 +137,7 @@ public partial class EntityView : UserControl
             }
         }
 
-        // Scale and rotate
-        // fbxHandler.ScaleAndRotateForBlender(boneNodes[0]);
-        Tiger.Exporters.Exporter.Get().Export();
+        Tiger.Exporters.Exporter.Get().Export(savePath ?? null);
         Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 

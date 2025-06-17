@@ -179,6 +179,35 @@ public static class Helpers
         parsedHash = 0;
         return false;
     }
+
+    public static string? GetClassHashForStrategy(Type structType, TigerStrategy strategy)
+    {
+        var attrs = structType.GetCustomAttributes(inherit: false)
+            .OfType<SchemaStructAttribute>()
+            .ToList();
+
+        // Try exact match first
+        var match = attrs.FirstOrDefault(a => a.Strategy == strategy);
+        if (match != null)
+            return match.ClassHash;
+
+        // Try to find the next highest strategy (greater than the requested one)
+        var nextHighest = attrs
+            .Where(a => a.Strategy > strategy)
+            .OrderBy(a => a.Strategy)
+            .FirstOrDefault();
+
+        if (nextHighest != null)
+            return nextHighest.ClassHash;
+
+        // If not found, try the highest lower strategy
+        var lower = attrs
+            .Where(a => a.Strategy < strategy)
+            .OrderByDescending(a => a.Strategy)
+            .FirstOrDefault();
+
+        return lower?.ClassHash;
+    }
 }
 
 public static class NestedTypeHelpers

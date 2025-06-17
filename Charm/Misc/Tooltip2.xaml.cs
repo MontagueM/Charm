@@ -81,6 +81,8 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         }
     }
 
+    public TranslateTransform ExtraOffset = new(0, 0);
+
     public ObservableCollection<ToolTipBlock> BodyBlocks { get; } = new();
     public ObservableCollection<ToolTipBlock> InputBlocks { get; } = new();
 
@@ -140,6 +142,8 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
         foreach (var block in blocks)
             BodyBlocks.Add(block);
+
+        ExtraOffset = item.ExtraOffset;
 
         ShowTooltip();
     }
@@ -551,6 +555,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
     public void ClearTooltip()
     {
+        ExtraOffset = new(0, 0);
         Visibility = Visibility.Collapsed;
         Header = null;
         BodyBlocks.Clear();
@@ -595,18 +600,20 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
         Point mousePos = Mouse.GetPosition(this);
 
-        const float offset = 25f;
+        float const_offsetX = 25f + (float)ExtraOffset.X;
+        float const_offsetY = 25f + (float)ExtraOffset.Y;
         const float padding = 25f;
-        float xOffset = offset;
-        float yOffset = offset;
+
+        float xOffset = const_offsetX;
+        float yOffset = const_offsetY;
 
         // Flip horizontally if on right half of the screen
         if (mousePos.X >= ActualWidth / 2)
-            xOffset = -offset + 10 - (float)ToolTip.ActualWidth;
+            xOffset = -const_offsetX + 10 - (float)ToolTip.ActualWidth;
 
         // Flip vertically if on top half of the screen
         if (mousePos.Y <= ActualHeight / 2)
-            yOffset = -offset - 10 - (float)ToolTip.ActualHeight;
+            yOffset = -const_offsetY - 10 - (float)ToolTip.ActualHeight;
 
         // Clamp to top of the screen
         float tooltipTop = (float)(mousePos.Y - yOffset - padding - (float)ToolTip.ActualHeight);
@@ -909,6 +916,7 @@ public class GenericTooltip
     public string Type { get; set; }
     public string Label { get; set; }
     public HeaderBlock.HeaderStyle Style { get; set; } = HeaderBlock.HeaderStyle.Item;
+    public TranslateTransform ExtraOffset { get; set; } = new(0, 0);
 }
 
 public static class GenericTooltipProperties

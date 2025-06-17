@@ -16,6 +16,11 @@ public struct SEntity
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x08, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArrayUnloaded<SCD9A8080> EntityResources;
+
+    [SchemaField(0x68, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public DynamicArrayUnloaded<SED9A8080> UnkResources; // Basically EntityResources but contains the Resource's Unk10 ClassHash
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "06008080", 0x2)]
@@ -26,11 +31,22 @@ public struct S06008080
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "15078080", 0xC)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "049C8080", 0xC)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "CD9A8080", 0xC)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "CD9A8080", 0xC)]
 public struct SCD9A8080  // entity resource entry
 {
     public FileHash Resource; // Can sometimes be a non-entity resource in D1, for whatever reason
 }
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "70038080", 0x28)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "229C8080", 0x28)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "ED9A8080", 0x28)]
+public struct SED9A8080
+{
+    [SchemaField(0xC)]
+    public TigerHash Unk10ClassHash;
+    public FileHash Resource;
+}
+
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "61088080", 0xA0)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "369C8080", 0xA0)]

@@ -212,7 +212,7 @@ public partial class AudioListView : UserControl
         {
             Icon = "☑️",
             Title = "Bulk Export Complete",
-            Description = $"Exported {items.Count()} textures to \"{savePath}\"",
+            Description = $"Exported {items.Count()} Sounds to \"{savePath}\"",
             Style = NotificationBanner.PopupStyle.Information
         };
         notify.Show();
