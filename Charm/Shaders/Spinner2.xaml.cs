@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Arithmic;
 using SharpDX;
@@ -18,7 +19,7 @@ using VertexShader = SharpDX.Direct3D11.VertexShader;
 
 namespace Charm;
 
-public partial class Spinner2 : UserControl
+public partial class Spinner2 : UserControl, IDisposable
 {
     private Device5 _d3d11Device;
     private DeviceContext4 _d3d11Context;
@@ -37,6 +38,7 @@ public partial class Spinner2 : UserControl
 
     private int _width;
     private int _height;
+    private Vector2 _invResolution;
 
     private DispatcherTimer _renderTimer;
 
@@ -81,17 +83,29 @@ public partial class Spinner2 : UserControl
         Dispatcher.BeginInvoke(new Action(() =>
         {
             CreateRenderingResources((int)ActualWidth, (int)ActualHeight);
-            //CompositionTarget.Rendering += Render;
+            CompositionTarget.Rendering += OnRendering;
 
-            // Limiting the spinner fps just to save some gpu usage
-            _renderTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(1000 / 90) // 90 fps
-            };
-            _renderTimer.Tick += (s, args) => Render();
-            _renderTimer.Start();
+            //// Limiting the spinner fps just to save some gpu usage
+            //_renderTimer = new DispatcherTimer
+            //{
+            //    Interval = TimeSpan.FromMilliseconds(1000 / 90) // 90 fps
+            //};
+            //_renderTimer.Tick += (s, args) => Render();
+            //_renderTimer.Start();
 
         }), System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    private DateTime _lastRender = DateTime.MinValue;
+    private readonly double _targetFrameTime = 1000.0 / 90; // 90 FPS
+    private void OnRendering(object? sender, EventArgs e)
+    {
+        var now = DateTime.Now;
+        if ((now - _lastRender).TotalMilliseconds < _targetFrameTime)
+            return; // Skip this frame
+
+        _lastRender = now;
+        Render();
     }
 
     private void ShaderRenderHost_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -103,6 +117,7 @@ public partial class Spinner2 : UserControl
         {
             _width = newWidth;
             _height = newHeight;
+            _invResolution = new Vector2(1f / _width, 1f / _height);
             CreateRenderingResources(_width, _height);
         }
     }
@@ -239,9 +254,8 @@ public partial class Spinner2 : UserControl
             _d3d11Context.ClearRenderTargetView(_renderView, new RawColor4(0f, 0f, 0f, 1f));
 
             // Update the cbuffer with the inverse rez and time
-            Vector4 invTime = new Vector4(1f / (float)_width, 1f / (float)_height, clock.ElapsedMilliseconds / 1000f, 0);
+            Vector4 invTime = new Vector4(_invResolution.X, _invResolution.Y, clock.ElapsedMilliseconds / 1000f, 0);
             _d3d11Context.UpdateSubresource(ref invTime, _constantBuffer);
-
             _d3d11Context.UpdateSubresource(ref PositionScale, _posScaleConstantBuffer);
 
             // Draw
@@ -253,7 +267,7 @@ public partial class Spinner2 : UserControl
             _d3d11Device.ImmediateContext.Flush();
 
             //Call Lock(),AddDirtyRect(), Unlock() in a dispatcher call if you need the screen updated with the new image.
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(() =>
             {
                 _renderedImage.Lock();
                 _renderedImage.AddDirtyRect(new Int32Rect(0, 0, _width, _height));
@@ -276,15 +290,26 @@ public partial class Spinner2 : UserControl
         _displayTexture?.Dispose();
         _direct3D9Texture?.Dispose();
         _renderedImage = null;
+        _renderTexture = null;
+        _displayTexture = null;
     }
 
     public void DisposeControl()
     {
-        //CompositionTarget.Rendering -= Render;
+        CompositionTarget.Rendering -= OnRendering;
+        Loaded -= ShaderRenderHost_Loaded;
+        SizeChanged -= ShaderRenderHost_SizeChanged;
+
         DisposeRenderingResources();
         _renderTimer?.Stop();
         _renderTimer = null;
 
+        GC.SuppressFinalize(this);
+    }
+
+    public void Dispose()
+    {
+        DisposeControl();
         GC.SuppressFinalize(this);
     }
 }
