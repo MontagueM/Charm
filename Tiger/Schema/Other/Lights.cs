@@ -226,17 +226,17 @@ public struct SMapLightCollection
 
     [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xC0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0xC4, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0xC4, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Material Shading;
 
     [SchemaField(0x84, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xCC, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0xD0, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Tag<SA16D8080> BufferData;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0xD4, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0xD4, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Tag<SA16D8080> BufferData2;
 }

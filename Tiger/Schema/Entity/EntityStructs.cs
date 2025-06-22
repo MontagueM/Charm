@@ -531,11 +531,11 @@ public struct S0E848080
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "20888080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "1B848080", 0x18)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "1B848080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "1B848080", 0x38)]
 public struct S1B848080
 {
     [SchemaField(0x8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x28, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<S1D848080> Unk08;
 }
 
@@ -686,17 +686,17 @@ public struct SF19E8080
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "80258080", 0x598)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6E358080", 0x6b8)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "6E358080", 0x6d8)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "6E358080", 0x6d8)]
 public struct S6E358080
 {
     [SchemaField(0x538, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x648, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x668, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x668, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<S9B318080> PatternAudioGroups;
 
     [SchemaField(0x4E8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    [SchemaField(0x610, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)] // unsure if actually tag64
+    [SchemaField(0x610, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // unsure if actually tag64
     public Tag<SA36F8080> FallbackAudioGroup;
 }
 
@@ -746,7 +746,7 @@ public struct S0F8C8080
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "0E068080", 0x24)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "138C8080", 0x28)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "138C8080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "138C8080", 0x40)]
 public struct S138C8080
 {
     public short Unk00;
@@ -775,35 +775,35 @@ public struct SF62C8080
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "8D248080", 0x208)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "F42C8080", 0x338)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "F42C8080", 0x358)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "F42C8080", 0x358)]
 public struct SF42C8080
 {
-    [SchemaField(0x188, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x188, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public ResourcePointer Unk188;
 
     [SchemaField(0x1D8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x2C8, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x318, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x318, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<SFA2C8080> PatternAudioGroups;
 
     [SchemaField(0xD0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    [SchemaField(0xD0, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0xD0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Entity? FallbackAudio1;
 
     [SchemaField(0xF0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
-    [SchemaField(0x100, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x100, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Entity? FallbackAudio2;
 
-    [SchemaField(0x118, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x118, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Entity? FallbackAudio3;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "12238080", 0x140)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "FA2C8080", 0x258)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "EEBC8080", 0x278)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "73B78080", 0x2A8)] // Why does this keep changing???
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "73B78080", 0x2A8)] // Why does this keep changing???
 public struct SFA2C8080
 {
     [SchemaField(0x18, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -841,39 +841,39 @@ public struct SFA2C8080
 
     [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xF0, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    [SchemaField(0x120, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x120, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag<SA36F8080> AudioEntityParent;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x120, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x150, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)] // ??
+    [SchemaField(0x150, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // ??
     public TigerHash WeaponTypeHash2; // "weaponTypeHash" from API
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x130, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    [SchemaField(0x160, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x160, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag Unk130;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x148, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    [SchemaField(0x178, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x178, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag Unk148;
 
     [SchemaField(0x80, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x118, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
-    [SchemaField(0x148, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x148, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public ResourcePointer Unk118;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
     [SchemaField(0x1D0, TigerStrategy.DESTINY2_LIGHTFALL_7366, Tag64 = true)]
-    [SchemaField(0x200, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x200, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag Unk1C0;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x1D8, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
     [SchemaField(0x1E8, TigerStrategy.DESTINY2_LIGHTFALL_7366, Tag64 = true)]
-    [SchemaField(0x218, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x218, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag Unk1D8;
 
     // public DynamicArray<S87978080> Unk1E8;
@@ -883,7 +883,7 @@ public struct SFA2C8080
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x248, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
     [SchemaField(0x268, TigerStrategy.DESTINY2_LIGHTFALL_7366, Tag64 = true)]
-    [SchemaField(0x298, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x298, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag Unk248;
 }
 
@@ -934,13 +934,13 @@ public struct S79818080
     [SchemaField(0x110, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x158, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1A8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1C8, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)] // 100% gonna get changed with the next expansion, calling it now
+    [SchemaField(0x1C8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // 100% gonna get changed with the next expansion, calling it now
     public DynamicArray<SF1918080> Array1;
 
     [SchemaField(0x120, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x168, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1D8, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x1D8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<SF1918080> Array2;
 
     [SchemaField(0x130, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -950,7 +950,7 @@ public struct S79818080
     [SchemaField(0x140, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x178, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1D8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1F8, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x1F8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<S6F818080> Array3;
 }
 
@@ -966,12 +966,12 @@ public struct SF1918080
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "001F8080", 0x54)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "40668080", 0x68)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "40668080", 0x68)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "40668080", 0x68)]
 public struct S40668080
 {
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    [SchemaField(0x50, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public WwiseSound Sound;
 }
 
@@ -994,12 +994,12 @@ public struct S20698080
 {
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)] // TODO
     [SchemaField(0x14, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x18, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Material UnkMat;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag<S29698080> ModelContainer;
 }
 
@@ -1053,7 +1053,7 @@ public struct S40238080
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F6B8080", 0x1C0)] // Map cubemaps dont exist in D1 but this needs to exist
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7F6B8080", 0x1C0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "95668080", 0x1E0)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "95668080", 0x1DC)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "95668080", 0x1DC)]
 public struct SMapCubemapResource //Dataresource for cubemaps
 {
     [SchemaField(0x20)]
@@ -1071,19 +1071,19 @@ public struct SMapCubemapResource //Dataresource for cubemaps
     [SchemaField(0x190, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x190, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1B0, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Obsolete = true)] // :(
+    [SchemaField(0x1B0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)] // :(
     public StringPointer CubemapName;
 
     [SchemaField(0x198, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x198, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1B8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1AC, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x1AC, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Texture CubemapTexture;
 
     [SchemaField(0x1A0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1A0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x1C0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1B4, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x1B4, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Texture CubemapIBLTexture; //Sometype of reflection tint texture idk
 }
 
@@ -1213,7 +1213,7 @@ public struct S18808080
     [SchemaField(0x278, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x398, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x398, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)] // Got moved on Heresy Act 2 (3/11/25) update
+    [SchemaField(0x398, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // Got moved on Heresy Act 2 (3/11/25) update
     public Tag<S4D7E8080> Unk3C0;
 }
 
@@ -1278,12 +1278,12 @@ public struct S93278080
 
 // TODO: Other versions
 // Entity carried weapon resource?
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "E9318080", 0x490)] // Entity Resource 0x10
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "E9318080", 0x490)] // Entity Resource 0x10
 public struct SE9318080
 {
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "EA318080", 0x330)] // Entity Resource 0x18
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "EA318080", 0x330)] // Entity Resource 0x18
 public struct SEA318080
 {
     [SchemaField(0x38)]
@@ -1293,7 +1293,7 @@ public struct SEA318080
     public DynamicArray<SF2318080> Unk1C0;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "F2318080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "F2318080", 0x40)]
 public struct SF2318080
 {
     [SchemaField(0x8)]
@@ -1306,14 +1306,14 @@ public struct SF2318080
     public DynamicArray<SF8318080> Unk30;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "F8318080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "F8318080", 0x18)]
 public struct SF8318080
 {
     [SchemaField(0x8, Tag64 = true), NoLoad]
     public Entity Entity;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "F79A8080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "F79A8080", 0x18)]
 public struct SF79A8080
 {
     public int Unk00;
@@ -1321,7 +1321,7 @@ public struct SF79A8080
     public DynamicArray<SFB9A8080> Unk8;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "FB9A8080", 0x8)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "FB9A8080", 0x8)]
 public struct SFB9A8080
 {
     public TigerHash Unk00; // weapon_type

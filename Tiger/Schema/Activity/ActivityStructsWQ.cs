@@ -7,7 +7,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402;
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8E8E8080", 0xB4)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "8E8E8080", 0x78)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "8E8E8080", 0x88)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "8E8E8080", 0x88)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "8E8E8080", 0x88)]
 public struct SActivity_WQ
 {
     public long FileSize;
@@ -25,7 +25,7 @@ public struct SActivity_WQ
     public ResourcePointer Unk18;  // 6A988080 + 20978080 (+ 19978080, beyondlight)
     public FileHash64 Destination;  // S8B8E8080
 
-    //[SchemaField(0x30, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)] // Doesnt look useful?
+    //[SchemaField(0x30, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // Doesnt look useful?
     //public DynamicArray<S00978080> Unk30;
 
     [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -88,7 +88,7 @@ public struct S2E898080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "26898080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "26898080", 0x58)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "26898080", 0x68)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "26898080", 0x70)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "26898080", 0x70)]
 public struct S26898080
 {
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -114,7 +114,7 @@ public struct S26898080
     [SchemaField(0x70, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x48, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
-    [SchemaField(0x50, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x50, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<S48898080> Unk38;
 }
 
@@ -313,19 +313,19 @@ public struct S44938080
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "D5908080", 0x50)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "D5908080", 0x50)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "D5908080", 0x58)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "D5908080", 0x58)]
 public struct SD5908080
 {
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    [SchemaField(0x8, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag DialogueTable;
     [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x14, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
-    [SchemaField(0x1C, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x1C, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Tag<SMusicTemplate> Music;
     [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
-    [SchemaField(0x28, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<S28998080> Unk20;
 }
 
@@ -356,7 +356,7 @@ public struct S478F8080
 /// </summary>
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "24898080", 0x40)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "24898080", 0x38)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "24898080", 0x48)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "24898080", 0x48)]
 public struct S24898080
 {
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -435,15 +435,15 @@ public struct S6A988080
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)] // idk why these are needed when only WQ SchemaStruct is used
     [SchemaField(0x2C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x30, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Tag<SMusicTemplate> Music;
 
-    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Tag<SA4BC8080> Music2;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x68, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x68, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public StringPointer DescentMusicPath;
 
     [SchemaField(Tag64 = true)]
@@ -451,7 +451,7 @@ public struct S6A988080
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x7C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x84, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x84, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public Tag DescentMisc; // C7978080, contains anim clips and models used when loading into destination
 }
 
@@ -489,7 +489,7 @@ public struct S28898080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "B7978080", 0x14)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "B7978080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "B7978080", 0x10)]
 public struct SB7978080
 {
     [SchemaField(Tag64 = true)]
@@ -570,42 +570,42 @@ public struct S744F8080
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EB458080", 0x38)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "EB458080", 0x38)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "90BC8080", 0x28)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "90BC8080", 0x28)]
 public struct SMusicTemplate
 {
     public long FileSize;
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)]
     public StringPointer MusicTemplateName;
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true)]
-    [SchemaField(0x18, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag MusicTemplateTag; // F0458080
 
     [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x8, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<SED458080> Unk28;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "ED458080", 8)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "93BC8080", 8)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "93BC8080", 8)]
 public struct SED458080
 {
     public ResourcePointer Unk00;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F5458080", 0x30)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "94BC8080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "94BC8080", 0x40)]
 public struct SF5458080
 {
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)]
     public StringPointer WwiseMusicLoopName;
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true)]
-    [SchemaField(0x10, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public WwiseSound MusicLoopSound;
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_LIGHTFALL_7366)]
-    [SchemaField(0, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<SFB458080> Unk18;
 }
 
@@ -642,31 +642,31 @@ public struct S318A8080
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "FA458080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "FA458080", 0x20)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "9CBC8080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "9CBC8080", 0x30)]
 public struct SFA458080
 {
     public TigerHash Unk00;
     [SchemaField(8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)]
     public StringPointer EventName;
 
     [SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public TigerHash EventHash;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "FB458080", 0x20)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "FB458080", 0x30)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "FB458080", 0x30)]
 public struct SFB458080
 {
     public TigerHash Unk00;
     [SchemaField(0x8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Obsolete = true)] // TODO: Use TFS strategy once added (fuck we're old)
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)] // TODO: Use TFS strategy once added (fuck we're old)
     public StringPointer EventName;
 
     [SchemaField(0x14, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public TigerHash EventHash;
 }
 
@@ -680,27 +680,27 @@ public struct SF0458080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "E6BF8080", 0x38)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "97BC8080", 0x38)] // I think this is right?
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "97BC8080", 0x38)] // I think this is right?
 public struct SUnkMusicE6BF8080
 {
     [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Tag64 = true)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
     public Tag Unk18;
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<SUnkMusicE8BF8080> Unk28;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "E8BF8080", 0x30)]
 [SchemaStruct(TigerStrategy.DESTINY2_LIGHTFALL_7366, "E8BF8080", 0x40)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, "E8BF8080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "E8BF8080", 0x40)]
 public struct SUnkMusicE8BF8080
 {
     [SchemaField(0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8263)]
+    [SchemaField(0x20, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public TigerHash EventHash;
     [SchemaField(0x08, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8263, Obsolete = true)]
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)]
     public StringPointer EventDescription;
 }
 

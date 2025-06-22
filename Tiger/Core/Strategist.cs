@@ -33,7 +33,7 @@ public enum TigerStrategy
     [Description("Lightfall"), StrategyMetadata("w64", 1085660, 1085661, 7707143404100984016, 1085662, 5226038440689554798)]
     DESTINY2_LIGHTFALL_7366 = 7366,
     [Description("The Final Shape"), StrategyMetadata("w64", 1085660, 1085661, 5291025601265296976, 1085662, 3942758630768798747)]
-    DESTINY2_FINAL_SHAPE_8263 = 8263,
+    DESTINY2_FINAL_SHAPE_8264 = 8264,
     //[Description("Edge Of Fate"), StrategyMetadata("w64", 1085660, 1085661, ???, 1085662, ???)]
     //DESTINY2_EDGE_OF_FATE_9xxx = 9xxxx
 
