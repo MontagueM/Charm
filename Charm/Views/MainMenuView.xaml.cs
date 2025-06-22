@@ -217,18 +217,12 @@ public partial class MainMenuView : UserControl
         PopupBanner about = new()
         {
             DarkenBackground = true,
-            Icon = "",
-            //about.IconImage = MainWindow.GetBitmapSource(System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location));
+            Icon = "",
             Title = $"CHARM {App.CurrentVersion.Id}",
-            Subtitle = "Charm was created by Montague",
+            Subtitle = "The Destiny tool that does (almost) everything.",
             Description =
-            "Charm was developed for 3D artists, to preserve vaulted content as much as possible, and for learning how the Tiger engine works in general!\n\n" +
-            "Additional help/development from:\n" +
-            "• Delta\n" +
-            "• nblock\n" +
-            "• Cohae\n" +
-            "• BIOS\n" +
-            "• HighRTT\n",
+            "Charm was developed for 3D artists, nerds, to preserve vaulted content as much as possible, and for learning how the Tiger engine works in general!\n\n" +
+            "By using Charm, you agree to not use it to spread leaks/spoilers or anything that may break Bungie's TOS.",
             Style = PopupBanner.PopupStyle.Information
         };
         about.Show();
