@@ -30,7 +30,10 @@
             <RowDefinition Height="100*" />
         </Grid.RowDefinitions>
 
-        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+        <StackPanel
+            x:Name="CheckboxPanel"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
             <CheckBox
                 x:Name="GridCheckbox"
                 Margin="10,0,10,0"
@@ -63,6 +66,16 @@
                 </CheckBox.ToolTip>
                 Apply Texture
             </CheckBox>
+            <CheckBox
+                x:Name="SkeletonCheckBox"
+                Margin="10,0,10,0"
+                VerticalAlignment="Center"
+                VerticalContentAlignment="Center"
+                IsChecked="True"
+                Style="{StaticResource MaterialDesignCheckBox}"
+                Visibility="Collapsed">
+                Show Skeleton
+            </CheckBox>
             <ComboBox
                 x:Name="LodCombobox"
                 Margin="10,0,10,0"
@@ -93,6 +106,7 @@
             Title="{Binding Title}"
             Grid.Row="1"
             Grid.ColumnSpan="1"
+            BackgroundColor="#121215"
             Camera="{Binding Camera}"
             EffectsManager="{Binding EffectsManager}"
             EnableDeferredRendering="False"
@@ -113,7 +127,7 @@
             <hx:Viewport3DX.InputBindings>
                 <KeyBinding Key="R" Command="{Binding ResetCameraTransforms}" />
             </hx:Viewport3DX.InputBindings>
-            <hx:AmbientLight3D Color="#ffffffff" />
+            <hx:AmbientLight3D Color="White" />
             <hx:Element3DPresenter Content="{Binding ModelGroup}" />
             <hx:LineGeometryModel3D
                 Geometry="{Binding Grid}"

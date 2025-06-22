@@ -321,7 +321,7 @@ public partial class EntityView : UserControl
                 }
             }
 
-            if (ent.Skeleton != null)
+            if (ent.Skeleton != null && ModelView.SkeletonCheckBox.IsChecked == true)
             {
                 MainViewModel.DisplayPart displayPart = new();
                 displayPart.BoneNodes = ent.Skeleton.GetBoneNodes();
@@ -363,18 +363,22 @@ public partial class EntityView : UserControl
     private void SetupCheckboxHandlers()
     {
         ModelView.TextureCheckBox.Visibility = Visibility.Visible;
+        ModelView.SkeletonCheckBox.Visibility = Visibility.Visible;
 
         // Detach first to prevent multiple subscriptions
-        ModelView.TextureCheckBox.Checked -= TextureCheckBox_Checked;
-        ModelView.TextureCheckBox.Unchecked -= TextureCheckBox_Unchecked;
+        ModelView.TextureCheckBox.Checked -= ReloadEntity;
+        ModelView.TextureCheckBox.Unchecked -= ReloadEntity;
 
-        ModelView.TextureCheckBox.Checked += TextureCheckBox_Checked;
-        ModelView.TextureCheckBox.Unchecked += TextureCheckBox_Unchecked;
+        ModelView.SkeletonCheckBox.Checked -= ReloadEntity;
+        ModelView.SkeletonCheckBox.Unchecked -= ReloadEntity;
+
+        ModelView.TextureCheckBox.Checked += ReloadEntity;
+        ModelView.TextureCheckBox.Unchecked += ReloadEntity;
+
+        ModelView.SkeletonCheckBox.Checked += ReloadEntity;
+        ModelView.SkeletonCheckBox.Unchecked += ReloadEntity;
     }
 
-    private void TextureCheckBox_Checked(object sender, RoutedEventArgs e) =>
-        LoadEntity(Hash);
-
-    private void TextureCheckBox_Unchecked(object sender, RoutedEventArgs e) =>
+    private void ReloadEntity(object sender, RoutedEventArgs e) =>
         LoadEntity(Hash);
 }
