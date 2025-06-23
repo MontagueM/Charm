@@ -13,7 +13,7 @@ public class Entity : Tag<SEntity>
     public EntityResource? PatternAudioUnnamed { get; private set; }
     public EntityControlRig? ControlRig { get; private set; }
     public EntityResource? EntityChildren { get; private set; }
-    public List<EntityResource>? EntityChildren2 { get; private set; } // Some weird collection of entities
+    public List<EntityResource>? EntityChildren2 { get; private set; } // The Sequencer (tm) ?
 
     public EntityModel? Model => ModelParent?.GetModel();
     public EntityModel? PhysicsModel => PhysicsModelParent?.GetModel();

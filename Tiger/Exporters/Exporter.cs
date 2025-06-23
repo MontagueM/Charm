@@ -290,35 +290,41 @@ public class ExporterScene
         Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
     }
 
-    public void AddMapEntity(SMapDataEntry dynamicResource, Entity entity, Transform? transform = null)
+    public void AddMapEntity(SMapDataEntry entry, Transform? transform = null)
     {
-        if (_addedEntities.TryAdd(entity.Hash, true)) // Dont want duplicate entities being added
+        List<Entity> ents = new() { entry.Entity };
+        ents.AddRange(entry.Entity.GetEntityChildren());
+        foreach (var ent in ents)
         {
-            ExporterMesh mesh = new(dynamicResource.Entity.Hash);
-            List<DynamicMeshPart> parts = entity.Load(ExportDetailLevel.MostDetailed);
-            for (int i = 0; i < parts.Count; i++)
+            if (_addedEntities.TryAdd(ent.Hash, true)) // Dont want duplicate entities being added
             {
-                DynamicMeshPart part = parts[i];
-                if (part.Material == null)
-                    continue;
+                ExporterMesh mesh = new(ent.Hash);
+                List<DynamicMeshPart> parts = ent.Load(ExportDetailLevel.MostDetailed);
 
-                mesh.AddPart(dynamicResource.Entity.Hash, part, i);
+                for (int i = 0; i < parts.Count; i++)
+                {
+                    DynamicMeshPart part = parts[i];
+                    if (part.Material == null)
+                        continue;
+
+                    mesh.AddPart(ent.Hash, part, i);
+                }
+                Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = ent.Skeleton?.GetBoneNodes() });
             }
-            Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = entity.Skeleton?.GetBoneNodes() });
-        }
 
-        EntityInstances.TryAdd(dynamicResource.Entity.Hash, new());
-        if (transform is null)
-        {
-            transform = new Transform
+            EntityInstances.TryAdd(ent.Hash, new());
+            if (transform is null)
             {
-                Position = dynamicResource.Transfrom.Translation.ToVec3(),
-                Rotation = Vector4.QuaternionToEulerAngles(dynamicResource.Transfrom.Rotation),
-                Quaternion = dynamicResource.Transfrom.Rotation,
-                Scale = new Vector3(dynamicResource.Transfrom.Translation.W, dynamicResource.Transfrom.Translation.W, dynamicResource.Transfrom.Translation.W)
-            };
+                transform = new Transform
+                {
+                    Position = entry.Transfrom.Translation.ToVec3(),
+                    Rotation = Vector4.QuaternionToEulerAngles(entry.Transfrom.Rotation),
+                    Quaternion = entry.Transfrom.Rotation,
+                    Scale = new Vector3(entry.Transfrom.Translation.W, entry.Transfrom.Translation.W, entry.Transfrom.Translation.W)
+                };
+            }
+            EntityInstances[ent.Hash].Add((Transform)transform);
         }
-        EntityInstances[dynamicResource.Entity.Hash].Add((Transform)transform);
     }
 
     public void AddMapModel(EntityModel model, Transform transform, bool transparentsOnly = false)

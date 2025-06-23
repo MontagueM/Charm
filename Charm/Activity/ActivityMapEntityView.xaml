@@ -274,7 +274,13 @@
                 Grid.Row="1"
                 Grid.Column="0"
                 Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
                 <ContentControl
+                    Grid.Row="0"
                     Margin="0,0,0,5"
                     VerticalAlignment="Top"
                     Style="{StaticResource ColumnHeader}">
@@ -288,7 +294,8 @@
 
                 <ListView
                     x:Name="EntityContainerList"
-                    Margin="0,40,0,0"
+                    Grid.Row="1"
+                    Margin="0,0,0,0"
                     VerticalAlignment="Top"
                     d:ItemsSource="{d:SampleData ItemCount=5}"
                     Background="Transparent"
@@ -324,6 +331,12 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 Background="Transparent">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
                 <ContentControl
                     Margin="0,0,0,5"
                     VerticalAlignment="Top"
@@ -338,7 +351,8 @@
 
                 <ListView
                     x:Name="EntitiesList"
-                    Margin="0,40,0,0"
+                    Grid.Row="1"
+                    Margin="0,0,0,0"
                     VerticalAlignment="Top"
                     d:ItemsSource="{d:SampleData ItemCount=5}"
                     Background="Transparent"

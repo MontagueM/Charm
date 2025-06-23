@@ -421,7 +421,7 @@ public partial class ActivityMapEntityView : UserControl
                     Entity entity = FileResourcer.Get().GetFile<Entity>(entry.Entity.Hash);
                     if (entity.HasGeometry())
                     {
-                        entitiesScene.AddMapEntity(entry, entity);
+                        entitiesScene.AddMapEntity(entry);
                         entity.SaveMaterialsFromParts(entitiesScene, entity.Load(ExportDetailLevel.MostDetailed));
                     }
                     //else
@@ -436,7 +436,7 @@ public partial class ActivityMapEntityView : UserControl
                     Entity entity = FileResourcer.Get().GetFile<Entity>(entry.Entity.Hash);
                     if (entity.HasGeometry())
                     {
-                        entitiesScene.AddMapEntity(entry, entity);
+                        entitiesScene.AddMapEntity(entry);
                         entity.SaveMaterialsFromParts(entitiesScene, entity.Load(ExportDetailLevel.MostDetailed));
                     }
                     else
