@@ -1,5 +1,4 @@
-﻿using Tiger.Schema.Entity;
-using Tiger.Schema.Strings;
+﻿using Tiger.Schema.Strings;
 
 namespace Tiger.Schema.Investment;
 
@@ -666,7 +665,7 @@ public struct S8C978080
     public DynamicArrayUnloaded<S0F878080> AssignmentBSL;
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    public DynamicArray<S0B008080> Unk18;
+    public DynamicArray<SUInt32> Unk18;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D7058080", 0x8)]

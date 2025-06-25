@@ -134,7 +134,7 @@ public struct SScope
     public DynamicArray<STextureTag> Textures;
     public TigerHash Unk58;
     public TigerHash Unk5C;
-    public DynamicArray<S09008080> Bytecode;
+    public DynamicArray<SUInt8> Bytecode;
     public DynamicArray<Vec4> BytecodeConstants;
 
     [SchemaField(0x90)]

@@ -311,34 +311,33 @@ public struct SStaticMapData
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SStaticMeshInstanceTransform> Instances;
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    public DynamicArray<SUnknownUInt> Unk50;
+    public DynamicArray<SUInt32> Unk50;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x58, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public DynamicArray<SStaticMeshHash> Statics;
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SStaticMeshInstanceMap> InstanceCounts;
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x98, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public TigerHash Unk98;
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x80, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0xA0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     public Vector4 UnkA0; // likely a bound corner
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public Vector4 UnkB0; // likely the other bound corner
-}
-
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "0B008080", 0x04)]
-public struct SUnknownUInt
-{
-    public uint Unk00;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "83058080", 0x18)]
@@ -535,7 +534,7 @@ public struct SA16D8080
 {
     public ulong FileSize;
     [SchemaField(0x30)]
-    public DynamicArray<S09008080> Bytecode;
+    public DynamicArray<SUInt8> Bytecode;
     public DynamicArray<Vec4> Buffer1; // bytecode constants?
     [SchemaField(0x60)]
     public DynamicArray<Vec4> Buffer2;

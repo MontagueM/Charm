@@ -28,9 +28,9 @@ public class Decorator : Tag<SDecorator>
         using TigerReader reader = _tag.BufferData.TagData.InstanceBuffer.GetReferenceReader();
         for (int i = 0; i < _tag.InstanceRanges.Count - 1; i++)
         {
-            uint start = _tag.InstanceRanges[i].Unk00;
-            uint end = _tag.InstanceRanges[i + 1].Unk00;
-            uint count = end - start;
+            int start = _tag.InstanceRanges[i].Value;
+            int end = _tag.InstanceRanges[i + 1].Value;
+            int count = end - start;
 
             int dynID = models.Count == 1 ? i : 0;
             Tag<SB26C8080> model = models[models.Count == 1 ? 0 : i].DecoratorModel;
@@ -174,12 +174,12 @@ public struct SDecorator
 {
     public ulong Size;
     public DynamicArray<SB16C8080> DecoratorModels;
-    public DynamicArray<S07008080> InstanceRanges;
-    public DynamicArray<S07008080> Unk28;
-    public DynamicArray<S07008080> Unk38;
+    public DynamicArray<SInt32> InstanceRanges;
+    public DynamicArray<SInt32> Unk28;
+    public DynamicArray<SInt32> Unk38;
     public Tag<SA46C8080> BufferData;
     public Tag<SOcclusionBounds> OcculusionBounds;
-    public DynamicArray<S07008080> Unk50;
+    public DynamicArray<SInt32> Unk50;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "17488080", 0x4)]

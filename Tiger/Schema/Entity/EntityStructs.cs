@@ -23,11 +23,6 @@ public struct SEntity
     public DynamicArrayUnloaded<SED9A8080> UnkResources; // Basically EntityResources but contains the Resource's Unk10 ClassHash
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "06008080", 0x2)]
-public struct S06008080
-{
-    public short Unk0;
-}
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "15078080", 0xC)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "049C8080", 0xC)]
@@ -279,8 +274,8 @@ public struct SD6818080
     [SchemaField(0x90, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArrayUnloaded<S42868080> NodeHierarchy;
     public DynamicArrayUnloaded<S4F9F8080> DefaultInverseObjectSpaceTransforms;
-    //public DynamicArrayUnloaded<S06008080> RangeIndexMap;
-    //public DynamicArrayUnloaded<S06008080> InnerIndexMap;
+    //public DynamicArrayUnloaded<SInt16> RangeIndexMap;
+    //public DynamicArrayUnloaded<SInt16> InnerIndexMap;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "9A048080", 0xE0)]
@@ -294,8 +289,8 @@ public struct SDE818080
     public DynamicArrayUnloaded<S42868080> NodeHierarchy;
     public DynamicArrayUnloaded<S4F9F8080> DefaultObjectSpaceTransforms;
     public DynamicArrayUnloaded<S4F9F8080> DefaultInverseObjectSpaceTransforms;
-    public DynamicArrayUnloaded<S06008080> RangeIndexMap;
-    public DynamicArrayUnloaded<S06008080> InnerIndexMap;
+    public DynamicArrayUnloaded<SInt16> RangeIndexMap;
+    public DynamicArrayUnloaded<SInt16> InnerIndexMap;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "F4048080", 0x10)]
@@ -469,18 +464,6 @@ public struct S5B6D8080
 {
 }
 
-[SchemaStruct("0B008080", 4)]
-public struct S0B008080
-{
-    public uint Unk00;
-}
-
-[SchemaStruct("0F008080", 4)]
-public struct S0F008080
-{
-    public float Unk00;
-}
-
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "9B208080", 0x330)]
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "DA5E8080", 0x150)]
 public struct SDA5E8080
@@ -549,12 +532,6 @@ public struct S1D848080
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true)]
     public Tag Entity;
-}
-
-[SchemaStruct("07008080", 4)]
-public struct S07008080
-{
-    public uint Unk00;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "81888080", 0xEC)]

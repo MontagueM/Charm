@@ -73,7 +73,7 @@ public struct SMapSkyObjects
     public long FileSize;
     public DynamicArray<SA96A8080> Entries;
     //public DynamicArray<SB3938080> Unk18;
-    //public DynamicArray<S07008080> Unk28;
+    //public DynamicArray<SInt32> Unk28;
     [SchemaField(0x40)]
     public Vector4 Unk40;
     public Vector4 Unk50;
@@ -121,8 +121,8 @@ public struct SC58A8080
 public struct S438B8080
 {
     [SchemaField(0x10)]
-    public DynamicArray<S06008080> Unk00;
-    public DynamicArray<S06008080> Unk10;
+    public DynamicArray<SInt16> Unk00;
+    public DynamicArray<SInt16> Unk10;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "3A1B8080", 0x10)]

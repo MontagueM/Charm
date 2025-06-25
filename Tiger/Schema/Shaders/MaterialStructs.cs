@@ -74,7 +74,7 @@ public struct SMaterialShader
 
     [SchemaField(0x28, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    public DynamicArray<S09008080> TFX_Bytecode;
+    public DynamicArray<SUInt8> TFX_Bytecode;
     public DynamicArray<Vec4> TFX_Bytecode_Constants;
     public DynamicArray<SDirectXSamplerTag> Samplers;
     public DynamicArray<Vec4> CBuffers; // Fallback if Vector4Container doesn't exist, I guess..?
@@ -175,13 +175,6 @@ public struct SDirectXSamplerTag
         else
             return SamplerBL;
     }
-}
-
-
-[SchemaStruct("09008080", 1)]
-public struct S09008080
-{
-    public byte Value;
 }
 
 [SchemaStruct("90008080", 0x10)]

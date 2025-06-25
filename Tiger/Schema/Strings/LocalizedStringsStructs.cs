@@ -31,7 +31,7 @@ public struct SLocalizedStringsData
     // might be a colour table here
     [SchemaField(0x38, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArrayUnloaded<SStringCharacter> StringCharacters;
+    public DynamicArrayUnloaded<SInt8> StringCharacters;
     public DynamicArrayUnloaded<SStringPartDefinition> StringCombinations;
 }
 
@@ -47,12 +47,6 @@ public struct SStringPart
     public ushort ByteLength;    // these can differ if multibyte unicode
     public ushort StringLength;
     public ushort CipherShift;    // now always zero
-}
-
-[SchemaStruct("05008080", 0x01)]
-public struct SStringCharacter
-{
-    public byte Character;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "3E038080", 0x10)]

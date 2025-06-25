@@ -324,7 +324,7 @@ public partial class DevView : UserControl
                     Console.WriteLine($"\n{skyComplex.Hash}: Unk00 {a.Unk00.Count}");
                     for (int i = 0; i < a.Unk00.Count; i += 3)
                     {
-                        Vector3 half = new(a.Unk00[i].Unk0, a.Unk00[i + 1].Unk0, a.Unk00[i + 2].Unk0);
+                        Vector3 half = new(a.Unk00[i].Value, a.Unk00[i + 1].Value, a.Unk00[i + 2].Value);
                         Console.WriteLine(half);
                     }
                     break;

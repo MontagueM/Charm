@@ -163,7 +163,7 @@ public struct SD1918080
     [SchemaField(0x40, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x30, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
-    public DynamicArray<S09008080> UnkBytecode;
+    public DynamicArray<SUInt8> UnkBytecode;
     public DynamicArray<Vec4> Values;
 }
 
