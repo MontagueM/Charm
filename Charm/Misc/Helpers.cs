@@ -141,6 +141,12 @@ public static class ApiImageUtils
         group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
         group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
 
+        if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
+        {
+            var craftedOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(0x80E55268)), 96, 96);
+            group.Children.Add(new ImageDrawing(craftedOverlay, new Rect(0, 0, 96, 96)));
+        }
+
         if (isD1Ornament)
         {
             var overlayTinted = TintImage(overlay, Color.FromArgb(255, 0, 200, 255));

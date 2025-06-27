@@ -167,7 +167,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             string? type_string = item.GetItemType();
             type_string ??= "";
 
-            if (ShouldAddToList(item, type_string) && item.Name != string.Empty)
+            if (ShouldAddToList(item) && item.Name != string.Empty)
             {
                 if (!item.GetItemTraits().Any() || item.GetItemTraits().Contains(DestinyTraitID.other))
                 {
@@ -463,29 +463,27 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         MainWindow.Current.SetNewestTabSelected();
     }
 
-    public static bool ShouldAddToList(InventoryItem item, string type)
+    public static bool ShouldAddToList(InventoryItem item)
     {
-        if (type is null)
-            return false;
-
-        string[] blacklist = new[]
+        DestinyTraitID[] blacklist = new[]
         {
-            "Ghost Projection",
-            "Emote",
-            "Finisher",
-            "Ship Schematics"
+            DestinyTraitID.item_ghost_hologram,
+            DestinyTraitID.item_emote,
+            DestinyTraitID.item_finisher,
         };
 
-        string[] whitelist = new[]
+        DestinyTraitID[] whitelist = new[]
         {
             // TODO: Add emotes and ghost projections for fx mesh exporting
-            "Shader",
+            DestinyTraitID.item_shader,
         };
 
-        return ((!Strategy.IsD1() && (type is "Artifact" or "Seasonal Artifact") && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
+        if (item.GetItemTraits().Any(trait => blacklist.Contains(trait)))
+            return false;
+
+        return (!Strategy.IsD1() && (item.GetItemType() is "Artifact" or "Seasonal Artifact") && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
             || item.GetArtArrangementIndex() != -1
-            || (whitelist.Any(x => type.ToLower().Contains(x.ToLower())))  // Whitelist
-            && !blacklist.Any(x => type.ToLower().Contains(x.ToLower()))); // Blacklist
+            || item.GetItemTraits().Any(trait => whitelist.Contains(trait));
     }
 
     // For aggregated outputs
@@ -549,7 +547,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             "\n\nThis is it's spiritual successor. Charm rips player gear directly from the game files, which means you can rip even if the API is down or you are offline." +
             "\n\n• Use the search bar to look for specific items and/or the drop downs to filter them." +
             "\n• Clicking an items icon will add it to the export list on the right side." +
-            "\n• You can Shift+Click to skip to the start/end of a category, or Ctrl+Click to skip 1/4.",
+            "\n• You can Shift+Click to skip to the start/end of a category, or Ctrl+Click to skip 1/4." +
+            "\n• Holding Shift before hovering over an item will show its API hash next to its type.",
             Style = PopupBanner.PopupStyle.Information
         };
         about.Show();

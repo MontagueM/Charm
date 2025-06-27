@@ -416,6 +416,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     #region Icons
     private void GetItemIconMap()
     {
+        if (Strategy.IsD1())
+            return;
+
         _inventoryItemIconMap = new();
         using TigerReader reader = _inventoryItemIconTag.GetReader();
         for (int i = 0; i < _inventoryItemIconTag.TagData.InventoryItemIconsMap.Count; i++)
@@ -1072,7 +1075,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public string GetItemType()
     {
-        return Investment.Get().GetItemType(this);
+        return Investment.Get().GetItemType(this) ?? "";
     }
 
     public string GetItemDescription()

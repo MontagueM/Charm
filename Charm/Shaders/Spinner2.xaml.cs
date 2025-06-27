@@ -23,8 +23,9 @@ public partial class Spinner2 : UserControl, IDisposable
 {
     private Device5 _d3d11Device;
     private DeviceContext4 _d3d11Context;
-    private Texture2D1 _renderTexture;
-    private Texture2D1 _displayTexture;
+
+    private Texture2D _renderTexture;
+    private Texture2D _displayTexture;
     private RenderTargetView _renderView;
     private Direct3DEx _direct3dEx;
     private DeviceEx _deviceEx;
@@ -150,7 +151,7 @@ public partial class Spinner2 : UserControl, IDisposable
             _renderedImage?.Unlock();
 
             // Start creating the textures
-            _renderTexture = new SharpDX.Direct3D11.Texture2D1(_d3d11Device, new SharpDX.Direct3D11.Texture2DDescription1
+            _renderTexture = new SharpDX.Direct3D11.Texture2D(_d3d11Device, new SharpDX.Direct3D11.Texture2DDescription
             {
                 Width = imageWidth,
                 Height = imageHeight,
@@ -165,9 +166,8 @@ public partial class Spinner2 : UserControl, IDisposable
             });
 
             _renderView = new RenderTargetView(_d3d11Device, _renderTexture);
-            _d3d11Context.OutputMerger.SetTargets(_renderView);
 
-            _displayTexture = new SharpDX.Direct3D11.Texture2D1(_d3d11Device, new SharpDX.Direct3D11.Texture2DDescription1
+            _displayTexture = new SharpDX.Direct3D11.Texture2D(_d3d11Device, new SharpDX.Direct3D11.Texture2DDescription
             {
                 Width = imageWidth,
                 Height = imageHeight,
@@ -226,7 +226,6 @@ public partial class Spinner2 : UserControl, IDisposable
             _d3d11Context.VertexShader.Set(_vertexShader);
             _d3d11Context.PixelShader.Set(_pixelShader);
             _d3d11Context.Rasterizer.SetViewport(0, 0, imageWidth, imageHeight, 0.0f, 1.0f);
-            _d3d11Context.OutputMerger.SetTargets(_renderView);
 
             // Create Constant Buffer
             _constantBuffer = new Buffer(_d3d11Device, Utilities.SizeOf<Vector4>(), ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);

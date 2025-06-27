@@ -327,7 +327,7 @@ public partial class CategoryView : UserControl
             if (item.EntryType != CategoryEntryType.Collectible)
                 return;
 
-            if (!DareView2.ShouldAddToList(item.Item, item.ItemType))
+            if (!DareView2.ShouldAddToList(item.Item))
                 return;
 
             MainWindow.Progress.SetProgressStages(new() { $"Exporting {item.ItemName}" });

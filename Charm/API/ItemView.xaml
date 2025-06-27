@@ -421,6 +421,31 @@
                         BorderThickness="3"
                         Focusable="False"
                         Style="{StaticResource GreyBorderWhiteOnHover}" />
+
+                    <Border
+                        x:Name="EnhancedBorder"
+                        Margin="0"
+                        Padding="0"
+                        BorderBrush="#eade8b"
+                        BorderThickness="1"
+                        IsHitTestVisible="False">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0.5" EndPoint="0,1">
+                                <GradientStop Offset="1" Color="#eade8b" />
+                                <GradientStop Offset="0" Color="#00EADE8B" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Item.Type}" Value="Enhanced Trait">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                    </Border>
                 </Grid>
             </Grid>
         </DataTemplate>

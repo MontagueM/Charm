@@ -69,6 +69,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
     {
 #if DEBUG
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
+        Console.WriteLine($"ITEM: {item.Hash} ({item.ApiHash})");
+        Console.WriteLine($"STRINGS: {item.GetItemStrings()?.Hash}");
+        Console.WriteLine($"ICON: {Investment.Get().GetItemIconContainer(item)?.Hash}");
 #endif
 
         _invItem = item;

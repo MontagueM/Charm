@@ -172,6 +172,12 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
             LabelColor = rarity.GetLabelColor()
         };
 
+        if (item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
+            Header.Type = $"{Header.Type} Pattern";
+
+        if (Keyboard.IsKeyDown(Key.LeftShift))
+            Header.Type = $"{Header.Type} : {item.ApiHash}";
+
         if (TooltipStyle == DestinyTooltipStyle.Build)
         {
             HeaderColor = DestinyTierType.Unknown.GetColor();
@@ -339,7 +345,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                     {
                         if (MainWindow.Current.CurrentTab is not null
                         && MainWindow.Current.CurrentTab.Content is CategoryView
-                        && DareView2.ShouldAddToList(item, item.GetItemType()))
+                        && DareView2.ShouldAddToList(item))
                             inputBlocks.Add(new InputBlock()
                             {
                                 Order = 1,

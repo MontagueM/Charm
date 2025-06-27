@@ -33,6 +33,10 @@ public struct S9D798080
 {
     public long FileSize;
     public ResourcePointer Unk08;  // SE4768080, 16198080 D1
+
+    [SchemaField(0x10)]
+    public ResourcePointer Unk10;  // S49298080 D2
+
     [SchemaField(0x18)]
     public ResourcePointer Unk18;  // SE7778080, 06178080 D1
 
@@ -71,17 +75,25 @@ public struct S9D798080
     public TigerHash InventoryItemHash;
     public TigerHash UnkAC;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xA0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    public byte BucketTypeIndex; // 'bucketTypeHash'
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xA1, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    public byte RecoveryBucketIndex; // 'recoveryBucketTypeHash'
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0xA2, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    public short RecipeItemIndex; // 'recipeItemHash'
+
     [SchemaField(0x8A, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0xA4, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public byte ItemRarity;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
-    [SchemaField(0xAE, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    public byte UnkC4; // 'isInstanceItem'?
-
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
-    [SchemaField(0xCA, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    public byte RecipeItemIndex; // 'recipeItemHash'
+    [SchemaField(0xA5, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    public bool IsInstanceItem; // 'isInstanceItem'?
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0xE0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
@@ -132,6 +144,32 @@ public struct S3A7A8080
 {
     public int Unk00;
     public int Unk04;
+}
+
+// 'crafting'
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "49298080", 0x90)]
+public struct S49298080
+{
+    public short ItemIndex; // 'outputItemHash'
+
+    [SchemaField(0x18)]
+    public DynamicArrayUnloaded<SC9778080> RequiredSocketTypes; // 'requiredSocketTypeHashes'
+
+    [SchemaField(0x70)]
+    public DynamicArrayUnloaded<S5F298080> BonusPlugs; // 'bonusPlugs'
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "C9778080", 0x2)]
+public struct SC9778080
+{
+    public short Index;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "5F298080", 0x18)]
+public struct S5F298080
+{
+    [SchemaField(0x12)]
+    public short Index; // 'plugItemHash'
 }
 
 // 'quality'
