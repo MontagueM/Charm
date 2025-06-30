@@ -38,11 +38,10 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 
     private static void SaveAllFonts()
     {
-        if (Strategy.CurrentStrategy != TigerStrategy.DESTINY2_LATEST)
+        if (Strategy.IsPostBL())
         {
             if (!Directory.Exists("fonts/"))
-                MessageBox.Show("Fonts folder not found, game fonts are only saved when using the newest version of Destiny 2." +
-                    "\nGame fonts will not be loaded.", "Fonts not found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Log.Warning("Fonts folder not found, game fonts are only saved when using versions of Destiny 2 post Beyond Light. Game fonts will not be loaded.");
             return;
         }
 
