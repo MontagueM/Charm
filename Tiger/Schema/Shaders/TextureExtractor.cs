@@ -67,7 +67,7 @@ public class TextureExtractor
                                 Texture.FlattenCubemap(scratchImage).SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
                                 break;
                             default:
-                                scratchImage.SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
+                                scratchImage.SaveToWICFile(0, WIC_FLAGS.FORCE_SRGB, guid, savePath + ".png");
                                 break;
                         }
                         break;

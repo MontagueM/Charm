@@ -188,7 +188,8 @@
                             Click="AllEntitiesViewButton_OnClick"
                             MouseEnter="CategoryButton_MouseEnter"
                             MouseLeave="CategoryButton_MouseLeave"
-                            Style="{DynamicResource D2StyleButton}">
+                            Style="{DynamicResource D2StyleButton}"
+                            Visibility="Collapsed">
                             <local:GenericTooltipProperties.TooltipData>
                                 <local:GenericTooltip Name="DYNAMICS" Description="View and export entities, some are even named!" />
                             </local:GenericTooltipProperties.TooltipData>
@@ -213,7 +214,7 @@
                                 <TextBlock
                                     d:FontFamily="Haas Grot Text 55 Roman"
                                     FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
-                                    Text="DYNAMICS 2" />
+                                    Text="DYNAMICS" />
                             </Border>
                         </Button>
 

@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Arithmic;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Other;
