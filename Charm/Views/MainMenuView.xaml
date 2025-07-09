@@ -472,6 +472,23 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Orientation="Horizontal">
+
+                <Button
+                    Margin="5,0,5,0"
+                    Click="ChangelogButton_OnClick"
+                    Style="{DynamicResource D2StyleButton}">
+                    <local:GenericTooltipProperties.TooltipData>
+                        <local:GenericTooltip Name="CHANGELOG" Description="View recent changes to Charm." />
+                    </local:GenericTooltipProperties.TooltipData>
+                    <TextBlock
+                        Margin="5"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour80}"
+                        Text="CHANGELOG" />
+                </Button>
+
                 <Button
                     Margin="5,0,5,0"
                     Click="GithubButton_OnClick"
@@ -479,7 +496,7 @@
                     MouseLeave="CategoryButton_MouseLeave"
                     Style="{DynamicResource D2StyleButton}">
                     <local:GenericTooltipProperties.TooltipData>
-                        <local:GenericTooltip Name="GITHUB" Description="View the source code for Charm" />
+                        <local:GenericTooltip Name="GITHUB" Description="View the source code for Charm." />
                     </local:GenericTooltipProperties.TooltipData>
                     <TextBlock
                         Margin="5"
@@ -497,7 +514,7 @@
                     MouseLeave="CategoryButton_MouseLeave"
                     Style="{DynamicResource D2StyleButton}">
                     <local:GenericTooltipProperties.TooltipData>
-                        <local:GenericTooltip Name="ABOUT" Description="View the credits for Charm" />
+                        <local:GenericTooltip Name="ABOUT" Description="View the credits for Charm." />
                     </local:GenericTooltipProperties.TooltipData>
                     <TextBlock
                         Margin="5"

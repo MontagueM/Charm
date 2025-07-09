@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -195,6 +196,26 @@ public partial class MainMenuView : UserControl
     private void GithubButton_OnClick(object sender, RoutedEventArgs e)
     {
         Process.Start(new ProcessStartInfo { FileName = "https://github.com/MontagueM/Charm/tree/delta/TFS%2Bmisc", UseShellExecute = true });
+    }
+
+    private void ChangelogButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (!File.Exists($"./Changelog.json"))
+        {
+            NotificationBanner noChangelog = new()
+            {
+                Icon = "⚠️",
+                Title = "CHANGELOG NOT FOUND",
+                Description = "Changelog.json not found in the Charm root folder.",
+                Style = NotificationBanner.PopupStyle.Warning
+            };
+            noChangelog.Show();
+            return;
+        }
+
+        Changelog changelog = new();
+        MainWindow.Current.ViewboxGrid.Children.Add(changelog);
+        changelog.Load();
     }
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)

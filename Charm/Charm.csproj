@@ -18,6 +18,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Changelog.json" />
       <None Remove="Shaders\procedural_spinner.vs.cso" />
       <None Remove="Shaders\procedural_spinner.vs.hlsl" />
       <None Remove="Shaders\procedural_spinner_dark.ps.cso" />
@@ -117,6 +118,9 @@
     <ItemGroup>
       <Content Include="..\Tiger\Exporters\Shaders\TFXFunctions.hlsl">
         <Link>Shaders\TFXFunctions.hlsl</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Changelog.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <Content Include="Shaders\procedural_spinner.vs.cso">
