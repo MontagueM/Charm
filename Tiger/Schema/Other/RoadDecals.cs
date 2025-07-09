@@ -25,8 +25,15 @@ public class RoadDecals : Tag<SMapRoadDecals>
                 Scale = new(a.Position.W)
             };
 
-            int len = a.IndexCount * 3; //  Is actually face count
-            DynamicMeshPart part = MeshPart.CreateFromBuffers<DynamicMeshPart>(a.IndexBuffer, a.VertexBuffer, a.Material, PrimitiveType.Triangles, 9, (uint)len, a.IndexOffset);
+            DynamicMeshPart part = MeshPart.CreateFromBuffers<DynamicMeshPart>(
+                a.IndexBuffer,
+                a.VertexBuffer,
+                a.Material,
+                PrimitiveType.Triangles,
+                Strategy.IsPreBL() ? 8 : 9,
+                (uint)a.FaceCount * 3,
+                a.IndexOffset);
+
             part.TransformPosition(a.Offset, a.Scale);
             part.TransformTexcoord(a.TexcoordOffset, a.TexcoordScale);
 
@@ -36,6 +43,7 @@ public class RoadDecals : Tag<SMapRoadDecals>
     }
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F16D8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "E8688080", 0x18)]
 public struct SMapRoadDecalsResource
 {
@@ -43,6 +51,7 @@ public struct SMapRoadDecalsResource
     public RoadDecals RoadDecals; // Contrary to the name, it is more than just decals on roads
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F36D8080", 0x58)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EA688080", 0x58)]
 public struct SMapRoadDecals
 {
@@ -53,13 +62,14 @@ public struct SMapRoadDecals
     public AABB UnkBounds;
 }
 
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "EC6D8080", 0x60)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "E3688080", 0x60)]
 public struct SE3688080
 {
     public Material Material;
     public IndexBuffer IndexBuffer;
     public VertexBuffer VertexBuffer;
-    public ushort IndexCount; // Is actually face count, needs multiplied by 3
+    public ushort FaceCount; // Needs multiplied by 3
     public ushort IndexOffset; // Always 0, so idk if IndexCount is an int then
     public Vector4 Rotation;
     public Vector4 Position;

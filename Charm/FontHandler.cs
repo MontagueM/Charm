@@ -39,7 +39,7 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 
     private static void SaveAllFonts()
     {
-        if (Strategy.IsPostBL())
+        if (!Strategy.IsPostBL())
         {
             if (!Directory.Exists("fonts/"))
                 Log.Warning("Fonts folder not found, game fonts are only saved when using versions of Destiny 2 post Beyond Light. Game fonts will not be loaded.");

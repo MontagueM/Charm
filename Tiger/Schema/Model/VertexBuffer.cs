@@ -69,6 +69,9 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                         // Pre-BL liked to store bone indicies in the position W for mesh that were fully weighted to said bone
                         if (Strategy.CurrentStrategy <= TigerStrategy.DESTINY2_SHADOWKEEP_2999 && part is DynamicMeshPart)
                         {
+                            if ((part as DynamicMeshPart).VertexIndexMap.Count == 0)
+                                continue;
+
                             short w = (short)((part as DynamicMeshPart).VertexPositions[(part as DynamicMeshPart).VertexIndexMap[vertexIndex]].W * 32_767.0f);
                             if (w is >= 0 and < 0x800)
                             {
