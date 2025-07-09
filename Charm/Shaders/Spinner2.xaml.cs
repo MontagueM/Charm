@@ -136,6 +136,7 @@ public partial class Spinner2 : UserControl, IDisposable
         {
             _d3d11Device = device.QueryInterface<Device5>();
             _d3d11Context = _d3d11Device.ImmediateContext.QueryInterface<DeviceContext4>();
+            Configuration.EnableReleaseOnFinalizer = true;
         }
     }
 

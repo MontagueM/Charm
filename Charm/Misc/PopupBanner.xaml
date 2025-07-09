@@ -68,7 +68,11 @@
         x:Name="MainGrid"
         Panel.ZIndex="100"
         d:Background="#7F7F7F"
-        Background="Transparent">
+        Background="Transparent"
+        Focusable="False"
+        KeyboardNavigation.ControlTabNavigation="None"
+        KeyboardNavigation.DirectionalNavigation="None"
+        KeyboardNavigation.TabNavigation="None">
 
         <Border
             x:Name="ElementStack"

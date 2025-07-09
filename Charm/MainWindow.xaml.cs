@@ -168,17 +168,40 @@ public partial class MainWindow
             Icon = "⚠️",
             Title = "ATTENTION",
             Subtitle = "Charm is NOT a datamining tool!",
-            Description = $"Charm's main purpose is focused towards 3D artists, content preservation and learning how the game works!" +
-            $"\n\nBy using Charm, you agree to:" +
-            $"\n• Not use this to leak content." +
-            $"\n• Not use this to spread spoilers." +
-            $"\n\nSeeing leaks come from here makes public releases and updates less and less likely.\nDon't ruin the experience for yourself and others. Uncover things the way they were intended!",
+            Description =
+            "Charm is intended for 3D artists, content preservation, and understanding how the Tiger engine works." +
+            "\n\nBy using Charm, you agree to the following:" +
+            "\n• You will not use Charm to share spoilers or ruin the experience for others." +
+            "\n• You will not use Charm to leak or distribute unreleased content." +
+            "\n     - Including but not limited to screenshots, recordings, or exports." +
+            "\n• You will not use Charm in any way that violates Bungie’s Terms of Service." +
+            "\n     - Including but not limited to using code to develop cheats and/or exploits." +
+            "\n\nLeaks/spoilers originating from Charm reduce the likelihood of future public releases and updates. Don't ruin it for others." +
+            "\nDiscover things the way they were intended!",
 
             Style = PopupBanner.PopupStyle.Warning,
-            UserInput = "Accept",
+            UserInput = $"Accept{(!FontHandler.FontsLoaded ? " (Left Mouse)" : "")}",
+            UserInputSecondary = $"Reject{(!FontHandler.FontsLoaded ? " (Right Mouse)" : "")}",
             HoldDuration = 4000,
             Progress = true
         };
+        warn.MouseRightButtonDown += (s, e) =>
+        {
+            warn.Remove();
+            PopupBanner warn2 = new()
+            {
+                DarkenBackground = true,
+                Icon = "⚠️",
+                Title = "THAT'S TOO BAD",
+                Subtitle = "You must accept the agreement to use Charm!",
+                Description = "Charm will now close. You can try reading it again if you want.",
+                Style = PopupBanner.PopupStyle.Warning,
+                UserInput = "Okay",
+            };
+            warn2.OnProgressComplete += () => Application.Current.Shutdown(0);
+            warn2.Show();
+        };
+
         warn.OnProgressComplete += () => ConfigSubsystem.Get().SetAcceptedAgreement(true);
         warn.Show();
     }

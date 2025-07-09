@@ -18,6 +18,7 @@ namespace Charm;
 [InitializeAfter(typeof(Hash64Map))]
 public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 {
+    public static bool FontsLoaded { get; set; } = false;
     public ConcurrentDictionary<FontInfo, FontFamily> Fonts = new();
 
     public FontHandler(TigerStrategy strategy) : base(strategy)
@@ -28,8 +29,8 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
     {
         //return true;
         SaveAllFonts();
-        LoadAllFonts();
-        RegisterFonts();
+        if (LoadAllFonts())
+            RegisterFonts();
     }
 
     protected override void Reset()
@@ -37,7 +38,7 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
 
     }
 
-    private static void SaveAllFonts()
+    private void SaveAllFonts()
     {
         if (!Strategy.IsPostBL())
         {
@@ -103,6 +104,7 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
             if (!Application.Current.Resources.Contains($"{key.Family} {key.Subfamily}"))
                 Application.Current.Resources.Add($"{key.Family} {key.Subfamily}", value);
         }
+        FontsLoaded = true;
 
         // Debug font list
         //List<string> fontList = Fonts.Select(pair => (pair.Key.Family + " : " + pair.Key.Subfamily).Trim()).ToList();
