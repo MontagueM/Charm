@@ -1915,6 +1915,7 @@ public partial class TagListView : UserControl
         TigerReader resourceUnnamedReader = val.PatternAudioUnnamed.GetReader();
         var resourceUnnamed = (SF42C8080)val.PatternAudioUnnamed.TagData.Unk18.GetValue(resourceUnnamedReader);
         var resource = (S6E358080)val.PatternAudio.TagData.Unk18.GetValue(val.PatternAudio.GetReader());
+
         InventoryItem item = Investment.Get().GetInventoryItem(apiHash);
         TigerHash weaponContentGroupHash = Investment.Get().GetWeaponContentGroupHash(item);
 
@@ -2092,16 +2093,14 @@ public partial class TagListView : UserControl
                 EntityResource e = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
                 if (e.TagData.Unk18.GetValue(e.GetReader()) is S79818080 a)
                 {
-                    foreach (SF1918080 d2ClassF1918080 in a.Array1)
+                    var arrays = a.Array1;
+                    arrays.AddRange(a.Array2);
+                    if (Strategy.IsD1())
+                        arrays.AddRange(a.D1Array3);
+
+                    foreach (SF1918080 d2ClassF1918080 in arrays)
                     {
-                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is S40668080 b)
-                        {
-                            sounds.Add(b.Sound);
-                        }
-                    }
-                    foreach (SF1918080 d2ClassF1918080 in a.Array2)
-                    {
-                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is S40668080 b)
+                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is SSequenceAudioEvent b)
                         {
                             sounds.Add(b.Sound);
                         }
