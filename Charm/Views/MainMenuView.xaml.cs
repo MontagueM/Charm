@@ -137,9 +137,9 @@ public partial class MainMenuView : UserControl
 
     private void AllStaticsViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListViewerView tagListView = new();
-        tagListView.LoadContent(ETagListType.StaticsList);
-        _mainWindow.MakeNewTab("Statics", tagListView);
+        StaticListView statics = new();
+        statics.LoadContent();
+        _mainWindow.MakeNewTab("Statics", statics);
         _mainWindow.SetNewestTabSelected();
     }
 

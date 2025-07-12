@@ -1,0 +1,224 @@
+﻿<UserControl
+    x:Class="Charm.StaticListView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:wrap="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
+    d:DesignHeight="990"
+    d:DesignWidth="1920"
+    Loaded="OnControlLoaded"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <!--  this is stupid  -->
+        <local:GenericTooltip
+            x:Key="ExportTooltip"
+            Name="EXPORT"
+            Description="Export the current Static.">
+            <local:GenericTooltip.ExtraOffset>
+                <TranslateTransform X="525" Y="0" />
+            </local:GenericTooltip.ExtraOffset>
+        </local:GenericTooltip>
+
+        <local:GenericTooltip
+            x:Key="BulkExportTooltip"
+            Name="EXPORT ALL"
+            Description="Export all Statics from this package.">
+            <local:GenericTooltip.ExtraOffset>
+                <TranslateTransform X="675" Y="0" />
+            </local:GenericTooltip.ExtraOffset>
+        </local:GenericTooltip>
+
+        <DataTemplate x:Key="StaticTemplate">
+            <RadioButton
+                Width="500"
+                MaxHeight="128"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                local:StyleHelper.BorderThickness="1"
+                Checked="Static_OnClick"
+                GroupName="StaticItem"
+                Style="{DynamicResource D2StyleRadioButton}">
+                <Border Margin="0" Background="{StaticResource BackgroundColour14a}">
+                    <TextBlock
+                        Margin="10,25,10,25"
+                        HorizontalAlignment="Left"
+                        d:FontFamily="Haas Grot Text 55 Roman"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour70}"
+                        Text="{Binding Hash}" />
+                </Border>
+            </RadioButton>
+        </DataTemplate>
+
+        <Style x:Name="StaticListViewItem" TargetType="ListViewItem">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                        <Border
+                            x:Name="ButtonBackground"
+                            Background="Transparent"
+                            BorderBrush="{StaticResource BackgroundColour30}"
+                            BorderThickness="0">
+                            <ContentPresenter Margin="0" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+
+        <Grid x:Name="MainContainer" Background="Transparent">
+            <Grid.RenderTransform>
+                <TranslateTransform />
+            </Grid.RenderTransform>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="15*" />
+                <ColumnDefinition Width="20*" />
+                <ColumnDefinition Width="30*" />
+            </Grid.ColumnDefinitions>
+
+            <local:PackageList x:Name="PackageList" Margin="10" />
+
+            <Grid
+                Grid.Column="1"
+                Margin="0,10,0,10"
+                Background="Transparent">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5*" />
+                    <RowDefinition Height="95*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel
+                    x:Name="FilterOptions"
+                    Grid.Row="0"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Left"
+                    Orientation="Horizontal">
+                    <TextBox
+                        x:Name="StaticSearchBox"
+                        Grid.Row="0"
+                        Width="250"
+                        Margin="10,0,10,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Center"
+                        FontSize="30"
+                        TextChanged="StaticSearchBox_TextChanged"
+                        TextWrapping="Wrap" />
+
+                </StackPanel>
+
+
+                <ListView
+                    x:Name="StaticList"
+                    Grid.Row="1"
+                    Margin="0,10,0,5"
+                    Background="Transparent"
+                    BorderBrush="{StaticResource ForegroundColour70}"
+                    BorderThickness="0,0,1,0"
+                    ItemTemplate="{StaticResource StaticTemplate}"
+                    SelectionChanged="StaticList_SelectionChanged"
+                    Style="{DynamicResource StaticListViewItem}"
+                    VirtualizingPanel.IsContainerVirtualizable="True"
+                    VirtualizingPanel.ScrollUnit="Pixel">
+
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <wrap:VirtualizingWrapPanel HorizontalAlignment="Left" Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                </ListView>
+            </Grid>
+
+            <Grid Grid.Column="2" Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="95*" />
+                    <RowDefinition Height="5*" />
+                    <RowDefinition Height="10*" />
+                </Grid.RowDefinitions>
+
+                <local:StaticView
+                    x:Name="StaticViewer"
+                    Grid.Row="0"
+                    Margin="15,15,15,0"
+                    VerticalAlignment="Stretch"
+                    Visibility="Visible" />
+
+                <Border
+                    Grid.Row="1"
+                    Margin="15"
+                    VerticalAlignment="Center"
+                    BorderBrush="White"
+                    BorderThickness="0,0,0,1"
+                    Opacity="0.5" />
+
+                <StackPanel
+                    Grid.Row="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Orientation="Horizontal">
+
+                    <Border Margin="5" Background="{StaticResource BackgroundColour20}">
+                        <Button
+                            x:Name="ExportButton"
+                            local:GenericTooltipProperties.TooltipData="{StaticResource ExportTooltip}"
+                            Click="ExportButton_Click"
+                            IsEnabled="False"
+                            Style="{StaticResource D2StyleButton}">
+                            <TextBlock
+                                Margin="5"
+                                VerticalAlignment="Center"
+                                FontSize="22"
+                                IsHitTestVisible="False"
+                                Text="EXPORT CURRENT"
+                                TextAlignment="Center" />
+                        </Button>
+                    </Border>
+
+                    <Border Margin="5" Background="{StaticResource BackgroundColour20}">
+                        <Button
+                            x:Name="BulkExportButton"
+                            Grid.Row="1"
+                            local:GenericTooltipProperties.TooltipData="{StaticResource BulkExportTooltip}"
+                            Click="BulkExportButton_Click"
+                            IsEnabled="False"
+                            Style="{StaticResource D2StyleButton}">
+                            <TextBlock
+                                Margin="5"
+                                VerticalAlignment="Center"
+                                FontSize="22"
+                                IsHitTestVisible="False"
+                                Text="EXPORT ALL"
+                                TextAlignment="Center" />
+                        </Button>
+                    </Border>
+                </StackPanel>
+
+            </Grid>
+        </Grid>
+
+    </Grid>
+</UserControl>

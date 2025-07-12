@@ -153,6 +153,7 @@ public partial class PackageList : UserControl
             Type t when t == typeof(Texture) => PackageItemContents.Textures,
             Type t when t == typeof(Wem) => PackageItemContents.Sounds,
             Type t when t == typeof(Entity) => PackageItemContents.Entities,
+            Type t when t == typeof(StaticMesh) => PackageItemContents.Statics,
             _ => throw new NotImplementedException($"Type {typeof(T)} is not implemented. (implement it)")
         };
     }
@@ -175,6 +176,7 @@ public partial class PackageList : UserControl
         Textures,
         Sounds,
         Entities,
+        Statics,
     }
 }
 
