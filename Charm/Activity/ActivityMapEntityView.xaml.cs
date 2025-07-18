@@ -489,7 +489,7 @@ public partial class ActivityMapEntityView : UserControl
                                 mapLight.Lights.LoadIntoExporter();
                             break;
 
-                        case SMapShadowingLightResource shadowingLight:
+                        case SExpensiveLightResource shadowingLight:
                             shadowingLight.ShadowingLight?.Load();
                             if (shadowingLight.ShadowingLight is not null)
                             {

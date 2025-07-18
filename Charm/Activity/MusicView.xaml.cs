@@ -28,7 +28,7 @@ public partial class MusicView : UserControl
 
         if (extra is Entity entity)
         {
-            List<S40668080> sounds = new();
+            List<SSequenceAudioEvent> sounds = new();
             foreach (FileHash? resourceHash in entity.TagData.EntityResources.Select(entity.GetReader(), r => r.Resource))
             {
                 EntityResource e = FileResourcer.Get().GetFile<EntityResource>(resourceHash);
@@ -36,14 +36,14 @@ public partial class MusicView : UserControl
                 {
                     foreach (SF1918080 d2ClassF1918080 in a.Array1)
                     {
-                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is S40668080 b)
+                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is SSequenceAudioEvent b)
                         {
                             sounds.Add(b);
                         }
                     }
                     foreach (SF1918080 d2ClassF1918080 in a.Array2)
                     {
-                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is S40668080 b)
+                        if (d2ClassF1918080.Unk10.GetValue(e.GetReader()) is SSequenceAudioEvent b)
                         {
                             sounds.Add(b);
                         }

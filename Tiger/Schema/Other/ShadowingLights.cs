@@ -3,11 +3,11 @@ using Tiger.Schema.Shaders;
 
 namespace Tiger.Schema;
 
-public class ShadowingLights : Tag<SMapShadowingLight>
+public class ExpensiveLight : Tag<SExpensiveLight>
 {
     public TfxFeatureRenderer FeatureType = TfxFeatureRenderer.DeferredLights;
     public MapTransform Transfrom { get; set; }
-    public ShadowingLights(FileHash hash) : base(hash)
+    public ExpensiveLight(FileHash hash) : base(hash)
     {
     }
 
@@ -123,17 +123,17 @@ public class ShadowingLights : Tag<SMapShadowingLight>
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "C71B8080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "33718080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "5E6C8080", 0x20)]
-public struct SMapShadowingLightResource
+public struct SExpensiveLightResource
 {
     [SchemaField(0xC, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
     [SchemaField(0x10, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
-    public ShadowingLights ShadowingLight;
+    public ExpensiveLight ShadowingLight;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "D91B8080", 0xB0)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "40718080", 0xC0)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "716C8080", 0x110)]
-public struct SMapShadowingLight
+public struct SExpensiveLight
 {
     [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]

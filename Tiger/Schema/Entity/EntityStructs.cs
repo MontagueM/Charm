@@ -1,5 +1,4 @@
-﻿using Tiger.Schema.Audio;
-using Tiger.Schema.Investment;
+﻿using Tiger.Schema.Investment;
 using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
 
@@ -880,7 +879,7 @@ public struct SFA2C8080
     public Tag Unk248;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "65318080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "65318080", 0x48)]
 public struct S65318080
 {
     public long FileSize;
@@ -895,7 +894,6 @@ public struct S65318080
     [SchemaField(0x38)]
     public StringPointer TagPath4;
     public Entity? Entity4;
-
 }
 
 [SchemaStruct("092D8080", 0xA0)]
@@ -957,16 +955,6 @@ public struct SF1918080
     public ResourcePointer Unk10; // B9678080, 40668080
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "001F8080", 0x54)]
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "40668080", 0x68)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "40668080", 0x68)]
-public struct S40668080
-{
-    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x28, TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
-    [SchemaField(0x50, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
-    public WwiseSound Sound;
-}
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "B9678080", 0x110)]
 public struct SB9678080
