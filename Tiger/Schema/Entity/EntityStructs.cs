@@ -77,6 +77,8 @@ public struct S8F6D8080
     [SchemaField(0x15C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1DC, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x224, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x224, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x244, TigerStrategy.DESTINY2_LATEST)]
     public EntityModel Model;
 
     [SchemaField(0x1A8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -84,25 +86,33 @@ public struct S8F6D8080
     public DynamicArray<S121B8080> TexturePlatesROI;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
-    [SchemaField(0x310, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]  // todo shadowkeep, beyond light
+    [SchemaField(0x310, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x310, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x330, TigerStrategy.DESTINY2_LATEST)]
     public Tag<S1C6E8080> TexturePlates;
 
     [SchemaField(0x230, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x2D0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x360, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x3C0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x3E0, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntry> ExternalMaterialsMap;
 
     [SchemaField(0x260, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x300, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x398, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x3F0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x3F0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x410, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArrayUnloaded<S986D8080> Unk3F0;
 
     [SchemaField(0x270, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x3A0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x400, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x400, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x420, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArrayUnloaded<S14008080> ExternalMaterials;
 }
 
@@ -115,12 +125,16 @@ public struct S6C6D8080
     [SchemaField(0x15C, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x1DC, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x224, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x224, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x244, TigerStrategy.DESTINY2_LATEST)]
     public EntityModel PhysicsModel;
 
     [SchemaField(0x230, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x2D0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x360, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x3C0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x3C0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x3E0, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArrayUnloaded<SExternalMaterialMapEntry> ExternalMaterialsMap;
 
     //[SchemaField(0x260, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -133,6 +147,8 @@ public struct S6C6D8080
     [SchemaField(0x310, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x3A0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(0x400, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x400, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x420, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArrayUnloaded<S14008080> ExternalMaterials;
 }
 
