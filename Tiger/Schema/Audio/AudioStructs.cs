@@ -145,15 +145,25 @@ public struct S38978080
     [SchemaField(0x14, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_LATEST)]
     public BKHD SoundbankBL;
 
     [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(TigerStrategy.DESTINY2_LATEST, Obsolete = true)]
     public Tag<S63838080> SoundbankWQ;
 
     [SchemaField(0x38, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<Wem> Wems;
+
+    public BKHD GetSoundbank()
+    {
+        if (Strategy.IsLatest() || Strategy.IsBL() || Strategy.IsPreBL())
+            return SoundbankBL;
+        else
+            return SoundbankWQ.TagData.SoundBank;
+    }
 }
 
 [SchemaStruct("418A8080", 0x38)]

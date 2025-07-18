@@ -66,10 +66,17 @@ public class Wem : TigerFile
     }
 
     // 85840081 and FBEB1A81 for testing
-    public void Load()
+    public bool Load()
     {
+        if (Strategy.IsLatest()) //TODO FIX EVEN THO IDFK HOW IM NOT SMART ENOUGH TO DO THIS
+        {
+            Log.Error("Audio playback and exporting currently disabled. Blame Bungie.");
+            return false;
+        }
+
+
         if (GetReferenceHash() is null || GetReferenceHash().IsInvalid())
-            return;
+            return false;
 
         _bDisposed = false;
         _wemStream = GetWemStream();
@@ -85,6 +92,7 @@ public class Wem : TigerFile
         {
             Log.Error($"{e.Message}: {_wemReader.WaveFormat.ToString()}");
         }
+        return true;
     }
 
     private void GetWEMData()
@@ -93,10 +101,12 @@ public class Wem : TigerFile
             WemData = GetWEMMetadata(); //WemConverter.GetWwiseRIFFVorbis(GetStream());
     }
 
-    private void CheckLoaded()
+    private bool CheckLoaded()
     {
         if (_wemStream == null || _bDisposed)
-            Load();
+            return Load();
+
+        return true;
     }
 
     private MemoryStream GetWemStream()
@@ -109,6 +119,9 @@ public class Wem : TigerFile
     public WaveChannel32? MakeWaveChannel()
     {
         CheckLoaded();
+        if (_wemReader is null)
+            return null;
+
         try
         {
             var waveChannel = new WaveChannel32(_wemReader);
@@ -153,7 +166,9 @@ public class Wem : TigerFile
 
     public void SaveToFile(string savePath)
     {
-        CheckLoaded();
+        if (!CheckLoaded())
+            return;
+
         _wemReader.Position = 0;
 
         // Remake the reader so none of the downmix stuff gets exported, though idk if that really matters or not at this point

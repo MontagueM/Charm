@@ -1189,6 +1189,7 @@ public struct S3C758080
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "40758080", 0xA8)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "40758080", 0x98)]
 public struct S40758080
 {
     public TigerHash ObjectiveHash;

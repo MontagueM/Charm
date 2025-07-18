@@ -1975,7 +1975,7 @@ public partial class TagListView : UserControl
             if (Strategy.IsD1()) // && name == "")
                 name = sound.TagData.SoundbankBL.GetNameFromBank();
             else if (Strategy.IsPostBL())
-                name = sound.TagData.SoundbankWQ.TagData.SoundBank.GetNameFromBank();
+                name = sound.TagData.GetSoundbank().GetNameFromBank();
 
             _allTagItems.Add(new TagItem
             {

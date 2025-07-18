@@ -77,11 +77,7 @@ public partial class MusicView : UserControl
         {
             WemsControl.Load(f5458080);
             EventsControl.Load(f5458080);
-            FileHash sbhash = null;
-            if (Strategy.CurrentStrategy == TigerStrategy.DESTINY2_BEYONDLIGHT_3402)
-                sbhash = f5458080.MusicLoopSound.TagData.SoundbankBL.Hash;
-            else
-                sbhash = f5458080.MusicLoopSound.TagData.SoundbankWQ.TagData.SoundBank.Hash;
+            FileHash sbhash = f5458080.MusicLoopSound.TagData.GetSoundbank().Hash;
             SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.PackageId:X4}-{sbhash.FileIndex:X4}";
         }
         else if (resource is SF7458080 res)
@@ -90,7 +86,7 @@ public partial class MusicView : UserControl
             EventsControl.Load(res);
             if (res.AmbientMusicSet != null)
             {
-                FileHash sbhash = res.AmbientMusicSet.TagData.Unk08[0].MusicLoopSound.TagData.SoundbankWQ.TagData.SoundBank.Hash;
+                FileHash sbhash = res.AmbientMusicSet.TagData.Unk08[0].MusicLoopSound.TagData.GetSoundbank().Hash;
                 SoundbankHash.Text = $"Soundbank: {sbhash} / {sbhash.PackageId:X4}-{sbhash.FileIndex:X4}";
             }
         }

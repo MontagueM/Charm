@@ -367,7 +367,8 @@
                 Click="BadgeCategory_OnClick"
                 MouseEnter="ItemCategory_MouseEnter"
                 MouseLeave="ItemCategory_MouseLeave"
-                Style="{StaticResource D2StyleButtonNoOverlay}">
+                Style="{StaticResource D2StyleButtonNoOverlay}"
+                Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                 <Image
                     x:Name="MainGrid"
                     MaxWidth="250"
@@ -807,7 +808,8 @@
                                 CollapsePageButtons="False"
                                 Columns="3"
                                 IsVertical="False"
-                                ItemsPerPage="6" />
+                                ItemsPerPage="6"
+                                UsePlaceholders="True" />
                         </StackPanel>
 
                     </Grid>

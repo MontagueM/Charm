@@ -682,7 +682,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             Objectives.TryAdd(i, _objectiveDefinitionMap.TagData.ObjectiveDefinitionEntries[reader, i]);
         }
-        Console.WriteLine("GetObjectives");
+        Console.WriteLine($"GetObjectives {_objectiveDefinitionMap.Hash}");
     }
 
     private void GetObjectiveStrings()
@@ -696,7 +696,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             ObjectiveStrings.TryAdd(i, _objectiveStringsMap.TagData.ObjectiveDefinitionStringEntries[reader, i]);
         }
-        Console.WriteLine("GetObjectiveStrings");
+        Console.WriteLine($"GetObjectiveStrings {_objectiveStringsMap.Hash}");
     }
 
     public int GetObjectiveValue(int index)
@@ -704,6 +704,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         if (index == -1 || index > Objectives.Count)
             return 0;
 
+        Console.WriteLine($"{Objectives[index].ObjectiveHash}");
         return Objectives[index].CompletionValue;
     }
 

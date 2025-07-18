@@ -684,6 +684,7 @@ public struct S6E358080
     [SchemaField(0x538, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x648, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x668, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x680, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<S9B318080> PatternAudioGroups;
 
     [SchemaField(0x4E8, TigerStrategy.DESTINY1_RISE_OF_IRON)]

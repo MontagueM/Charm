@@ -124,7 +124,9 @@ public static class ApiImageUtils
 
         //Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
         BitmapImage? bgOverlay = bgOverlayStream != null && !item.IsArmor ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
-        BitmapImage? overlay = overlayStream != null ? MakeBitmapImage(overlayStream, 96, 96) : null;
+
+        int wh = Strategy.IsLatest() ? 24 : 96;
+        BitmapImage? overlay = overlayStream != null ? MakeBitmapImage(overlayStream, wh, wh) : null;
 
         var group = new DrawingGroup();
         group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
@@ -139,7 +141,7 @@ public static class ApiImageUtils
         }
 
         group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
-        group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, 96, 96)));
+        group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, wh, wh)));
 
         if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
         {
