@@ -284,6 +284,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             _inventoryItemIndexMap.TryAdd(i, entry.InventoryItem); // Index -> InventoryItem
             _inventoryItems.TryAdd(entry.InventoryItemHash, entry.InventoryItem); // Hash -> InventoryItem
         }
+        Console.WriteLine("GetInventoryItemDict");
     }
 
     public async Task<IEnumerable<InventoryItem>> GetInventoryItems()
@@ -353,6 +354,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             SandboxPerkStrings.TryAdd(i, _sandboxPerkMap.TagData.SandboxPerkDefinitionEntries[reader, i]);
         }
+        Console.WriteLine("GetSandboxPerkStrings");
     }
 
     private void GetInventoryItemStringThings()
@@ -363,6 +365,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             InventoryItemStringThings.TryAdd(i, _inventoryItemStringThing.TagData.StringThings[reader, i].StringThing);
         }
+        Console.WriteLine("GetInventoryItemStringThings");
     }
 
     private void GetInventoryItemLoreStrings()
@@ -376,6 +379,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             InventoryItemLoreStrings.TryAdd(i, _loreStringMap.TagData.LoreStringMap[reader, i]);
         }
+        Console.WriteLine("GetInventoryItemLoreStrings");
     }
 
     private void GetLocalizedStringsIndexDict()
@@ -425,6 +429,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             _inventoryItemIconMap.TryAdd(i, _inventoryItemIconTag.TagData.InventoryItemIconsMap[reader, i]);
         }
+        Console.WriteLine("GetItemIconMap");
     }
 
     public int GetItemIconContainerIndex(InventoryItem item)
@@ -483,6 +488,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             SocketTypeMap.TryAdd(i, _socketTypeMap.TagData.SocketTypeEntries[reader, i]);
         }
+        Console.WriteLine($"GetSocketTypeMap");
     }
 
     private void GetRandomPlugSetMap()
@@ -496,6 +502,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             RandomizedPlugSetMap.TryAdd(i, _randomizedPlugSetMap.TagData.PlugSetDefinitionEntries[reader, i]);
         }
+        Console.WriteLine($"GetRandomPlugSetMap");
     }
 
     private void GetSocketCategoryStrings()
@@ -509,6 +516,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             SocketCategoryStrings.TryAdd(i, _socketCategoryMap.TagData.SocketCategoryEntries[reader, i]);
         }
+        Console.WriteLine($"GetSocketCategoryStrings {_socketCategoryMap.Hash}");
     }
 
     private void GetStatStrings()
@@ -522,6 +530,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             StatStrings.TryAdd(i, _statDefinitionMap.TagData.StatDefinitions[reader, i]);
         }
+        Console.WriteLine($"GetStatStrings {_statDefinitionMap.Hash}");
     }
 
     private void GetSandboxPerkMap2()
@@ -535,6 +544,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             SandboxPerkMap2.TryAdd(i, _sandboxPerkMap2.TagData.SandboxPerkDefinitionEntries[reader, i]);
         }
+        Console.WriteLine($"GetSandboxPerkMap2");
     }
 
     public SBA768080 GetSocketType(int index)
@@ -589,6 +599,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             Collectables.TryAdd(i, _collectableDefinitionMap.TagData.CollectibleDefinitionEntries[reader, i]);
         }
+        Console.WriteLine($"GetCollectables {_collectableDefinitionMap.Hash}");
     }
 
     private void GetCollectableStrings()
@@ -602,6 +613,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             CollectableStrings.TryAdd(i, _collectableStringsMap.TagData.CollectibleDefinitionStringEntries[reader, i]);
         }
+        Console.WriteLine("GetCollectableStrings");
     }
 
     // Inventory Item index -> Collectible index
@@ -618,6 +630,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             short itemIndex = _collectableDefinitionMap.TagData.CollectibleDefinitionEntries[reader, i].InventoryItemIndex;
             _collectableIndexMap.TryAdd(itemIndex, i);
         }
+        Console.WriteLine("GetCollectableIndexDict");
     }
 
     public S2C788080? GetCollectible(int index)
@@ -669,6 +682,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             Objectives.TryAdd(i, _objectiveDefinitionMap.TagData.ObjectiveDefinitionEntries[reader, i]);
         }
+        Console.WriteLine("GetObjectives");
     }
 
     private void GetObjectiveStrings()
@@ -682,6 +696,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             ObjectiveStrings.TryAdd(i, _objectiveStringsMap.TagData.ObjectiveDefinitionStringEntries[reader, i]);
         }
+        Console.WriteLine("GetObjectiveStrings");
     }
 
     public int GetObjectiveValue(int index)
@@ -741,6 +756,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             _sortedArrangementHashmap.Add(e.AssignmentHash, e.EntityParent);
         }
+        Console.WriteLine("GetEntityAssignmentDict");
     }
 
     public Entity.Entity? GetPatternEntityFromHash(TigerHash hash)

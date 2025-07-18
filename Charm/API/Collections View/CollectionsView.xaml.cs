@@ -67,8 +67,8 @@ public partial class CollectionsView : UserControl
             Category itemCategory = new()
             {
                 ItemCategoryIndex = node.PresentationNodeIndex,
-                ItemCategoryIcon = ApiImageUtils.MakeIcon(new FileHash(0x80E64A0B)), // inactive
-                Tag = ApiImageUtils.MakeIcon(new FileHash(0x80E64A0D)), // active
+                ItemCategoryIcon = ApiImageUtils.MakeIcon(new FileHash(Strategy.IsLatest() ? 0x80C23280 : 0x80E64A0B)), // inactive
+                Tag = ApiImageUtils.MakeIcon(new FileHash(Strategy.IsLatest() ? 0x80C23282 : 0x80E64A0D)), // active
                 ItemCategoryIcon2 = ApiImageUtils.MakeIcon(curNodeStrings.IconIndex, 0, 0, 1),
                 ItemCategoryIcon3 = ApiImageUtils.MakeIcon(curNodeStrings.IconIndex, 0, 0, 0),
                 ItemCategoryName = curNodeStrings.Name.Value.ToString().ToUpper(),
@@ -76,7 +76,7 @@ public partial class CollectionsView : UserControl
                 ItemCategoryAmount = GetItemCategoryAmount(node.PresentationNodeIndex),
                 CategoryBannerColor = new SolidColorBrush(Color.FromArgb(0xFF, 0x93, 0x82, 0x4F)),
                 ScreenStyle = curNodeStrings.ScreenStyle,
-                DisplayStyle = curNodeStrings.DisplayStyle,
+                DisplayStyle = curNodeStrings.DisplayStyle
             };
             totalItemAmount += itemCategory.ItemCategoryAmount;
 

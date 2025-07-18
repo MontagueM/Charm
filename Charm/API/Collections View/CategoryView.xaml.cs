@@ -140,6 +140,8 @@ public partial class CategoryView : UserControl
                 return;
 
             Category item = ((RadioButton)sender).DataContext as Category;
+            if (item is null)
+                return;
 
             LoadItems(item.ItemCategoryIndex);
         }), DispatcherPriority.Normal);

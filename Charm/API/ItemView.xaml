@@ -955,7 +955,7 @@
                     Opacity="0.9"
                     Text="{Binding StatDisplayValue}"
                     TextAlignment="Right"
-                    TextWrapping="Wrap"
+                    TextWrapping="NoWrap"
                     UseLayoutRounding="True">
                     <TextBlock.Effect>
                         <DropShadowEffect
