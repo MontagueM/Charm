@@ -417,7 +417,7 @@ public partial class EntityListView : UserControl
                 // Only include hashes where NamedEntities contains the hash and at least one name matches the search string
                 var filteredHashes = pkg.Hashes
                     .Where(x => NamedEntities.TryGetValue(x, out var names) &&
-                                names.Any(n => n.Contains(searchStr, StringComparison.OrdinalIgnoreCase)))
+                                names.Any(n => n is not null && n.Contains(searchStr, StringComparison.OrdinalIgnoreCase)))
                     .ToList();
 
                 if (filteredHashes.Count > 0)

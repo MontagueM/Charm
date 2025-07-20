@@ -530,10 +530,12 @@ public struct S0E848080
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "20888080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "1B848080", 0x18)]
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "1B848080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "1B848080", 0x40)]
 public struct S1B848080
 {
     [SchemaField(0x8, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArray<S1D848080> Unk08;
 }
 
@@ -541,7 +543,7 @@ public struct S1B848080
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "1D848080", 0x18)]
 public struct S1D848080
 {
-    public int Unk00;
+    public TigerHash Unk00;
     public int Unk04;
 
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
