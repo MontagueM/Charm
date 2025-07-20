@@ -296,7 +296,7 @@
                                 <Style TargetType="Border">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Item.Type}" Value="Enhanced Trait">
+                                        <DataTrigger Binding="{Binding Item.Type, Converter={StaticResource StringContainsConverter}, ConverterParameter=Enhanced}" Value="True">
                                             <Setter Property="Visibility" Value="Visible" />
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -1280,7 +1280,35 @@
                                 Height="96"
                                 Panel.ZIndex="1"
                                 BorderBrush="White"
-                                BorderThickness="3" />
+                                BorderThickness="3">
+                                <Grid
+                                    Width="22"
+                                    Height="48"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Visibility="{Binding Item.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
+                                    <Rectangle
+                                        Grid.Row="1"
+                                        Width="22"
+                                        Height="48"
+                                        Opacity="0.6"
+                                        Stretch="Fill">
+                                        <Rectangle.Fill>
+                                            <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                                <GradientStop Offset="0" Color="#00000000" />
+                                                <GradientStop Offset="1" Color="Black" />
+                                            </LinearGradientBrush>
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                    <Image
+                                        Width="20"
+                                        Height="20"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top"
+                                        Source="{Binding Item.ItemWatermark}" />
+                                </Grid>
+                            </Border>
+
                             <Image
                                 Width="96"
                                 Height="96"

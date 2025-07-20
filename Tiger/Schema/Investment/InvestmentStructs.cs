@@ -195,6 +195,7 @@ public struct SDC778080
 {
     [SchemaField(0x08)]
     public short ProgressionLevelRequirementIndex; // 'progressionLevelRequirementHash'
+
     //[SchemaField(0x10)]
     //public DynamicArray<SStringHash> InfusionCategoryHashes;
 
@@ -1408,18 +1409,24 @@ public struct SF76F8080
     public TigerHash SeasonHash;
     public int SeasonNumber;
     public DynamicArray<S3A7A8080> Unk08;
-    public int SeasonPassIndex; // 'seasonPassHash' -> DestinySeasonPassDefinition
+    public DynamicArray<SBDB38080> SeasonPassIndexes;
 
     [SchemaField(0x20)]
     public DynamicArray<S3A7A8080> Unk20;
 
-    [SchemaField(0x38)]
+    [SchemaField(0x38)] // No longer valid in EoF
     public int NumberOfActs;
 
-    [SchemaField(0x40)]
+    [SchemaField(0x40)] // No longer valid in EoF
     public long Act1StartTime;
     public long Act2StartTime;
     public long Act3StartTime;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "BDB38080", 0x20)]
+public struct SBDB38080
+{
+    public int SeasonPassIndex; // 'seasonPassHash' -> DestinySeasonPassDefinition
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "80804F7E", 0x18)]

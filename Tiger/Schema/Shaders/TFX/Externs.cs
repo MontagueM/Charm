@@ -114,10 +114,116 @@ public enum TfxExtern : byte
     Evsm,
     DeferredMultiSampled,
 
+    // Added in EoF
+    CuiDrawingShader,
+    ParticleMeshEmissionCompute
 }
 
 public static class Externs
 {
+    private enum TfxExternD2_EoF : byte
+    {
+        None,
+        Frame,
+        View,
+        Deferred,
+        DeferredLight,
+        DeferredUberLight,
+        DeferredShadow,
+        Atmosphere,
+        RigidModel,
+        EditorMesh,
+        EditorMeshMaterial,
+        EditorDecal,
+        EditorTerrain,
+        EditorTerrainPatch,
+        EditorTerrainDebug,
+        SimpleGeometry,
+        UiFont,
+        CuiView,
+        CuiObject,
+        CuiBitmap,
+        CuiVideo,
+        CuiStandard,
+        CuiHud,
+        CuiScreenspaceBoxes,
+        CuiDrawingShader,
+        TextureVisualizer,
+        Generic,
+        Particle,
+        ParticleDebug,
+        GearDyeVisualizationMode,
+        ScreenArea,
+        Mlaa,
+        Msaa,
+        Hdao,
+        DownsampleTextureGeneric,
+        DownsampleDepth,
+        Ssao,
+        VolumetricObscurance,
+        Postprocess,
+        TextureSet,
+        Transparent,
+        Vignette,
+        GlobalLighting,
+        ShadowMask,
+        ObjectEffect,
+        Decal,
+        DecalSetTransform,
+        DynamicDecal,
+        DecoratorWind,
+        TextureCameraLighting,
+        VolumeFog,
+        Fxaa,
+        Smaa,
+        Letterbox,
+        DepthOfField,
+        PostprocessInitialDownsample,
+        CopyDepth,
+        DisplacementMotionBlur,
+        DebugShader,
+        MinmaxDepth,
+        SdsmBiasAndScale,
+        SdsmBiasAndScaleTextures,
+        ComputeShadowMapData,
+        ComputeLocalLightShadowMapData,
+        BilateralUpsample,
+        HealthOverlay,
+        LightProbeDominantLight,
+        LightProbeLightInstance,
+        Water,
+        LensFlare,
+        ScreenShader,
+        Scaler,
+        GammaControl,
+        SpeedtreePlacements,
+        Reticle,
+        Distortion,
+        WaterDebug,
+        ScreenAreaInput,
+        WaterDepthPrepass,
+        OverheadVisibilityMap,
+        ParticleCompute,
+        CubemapFiltering,
+        ParticleFastpath,
+        VolumetricsPass,
+        TemporalReprojection,
+        FxaaCompute,
+        VbCopyCompute,
+        UberDepth,
+        GearDye,
+        Cubemaps,
+        ShadowBlendWithPrevious,
+        DebugShadingOutput,
+        Ssao3d,
+        WaterDisplacement,
+        PatternBlending,
+        UiHdrTransform,
+        PlayerCenteredCascadedGrid,
+        SoftDeform,
+        ParticleMeshEmissionCompute
+    }
+
     private enum TfxExternD2 : byte
     {
         None = 0,
@@ -312,11 +418,16 @@ public static class Externs
     /// <exception cref="InvalidCastException"></exception>
     public static TfxExtern GetExtern(byte value)
     {
-        string name = Strategy.IsD1() ? ((TfxExternD1)value).ToString() : ((TfxExternD2)value).ToString();
+        string name =
+            Strategy.IsD1() ? ((TfxExternD1)value).ToString() :
+            Strategy.IsLatest() ? ((TfxExternD2_EoF)value).ToString() :
+            ((TfxExternD2)value).ToString();
+
+
         if (Enum.TryParse(name, out TfxExtern result))
             return result;
 
-        throw new InvalidCastException($"Couldn't cast extern value {value} ({(Strategy.IsD1() ? ((TfxExternD1)value).ToString() : ((TfxExternD2)value).ToString())}) for {Strategy.CurrentStrategy}");
+        throw new InvalidCastException($"Couldn't cast extern value {value} ({name}) for {Strategy.CurrentStrategy}");
     }
 
     public static string GetExternFloat(TfxExtern extern_, int element, bool bInline = false)

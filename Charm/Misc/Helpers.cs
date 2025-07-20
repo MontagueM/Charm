@@ -107,52 +107,59 @@ public static class ApiImageUtils
             isD1Ornament = true;
         }
 
+        var group = new DrawingGroup();
+
         // streams
         UnmanagedMemoryStream? bgStream = item.GetIconBackgroundStream();
         UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
         UnmanagedMemoryStream? primaryStream = item.GetIconPrimaryStream();
         UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream();
 
-        //sometimes only the primary icon is valid
-        BitmapImage? primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
-
-        // Icon dyes
-        if (bgOverlayStream != null && Strategy.IsD1())
-            primary = MakeDyedIcon(item);
-
+        // Main background (rarity color)
         BitmapImage? bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
-
-        //Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
-        BitmapImage? bgOverlay = bgOverlayStream != null && !item.IsArmor ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
-
-        int wh = Strategy.IsLatest() ? 24 : 96;
-        BitmapImage? overlay = overlayStream != null ? MakeBitmapImage(overlayStream, wh, wh) : null;
-
-        var group = new DrawingGroup();
         group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
+
+        // Background overlay (ornament, shiny, etc.)
+        // Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
+        BitmapImage? bgOverlay = bgOverlayStream != null && !item.IsArmor ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
         if (!Strategy.IsD1())
             group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
 
+        // For D1 Age Of Triumph ornaments
         if (isD1Ornament)
         {
             bgOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(0x80A63BAA)), 96, 96);
-            var overlayNew = ChangeOpacity(bgOverlay, 0.5f);
-            group.Children.Add(new ImageDrawing(overlayNew, new Rect(0, 0, 96, 96)));
+            var bgOverlayNew = ChangeOpacity(bgOverlay, 0.5f);
+            group.Children.Add(new ImageDrawing(bgOverlayNew, new Rect(0, 0, 96, 96)));
         }
 
-        group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
-        group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, wh, wh)));
+        // The main icon
+        BitmapImage? primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+        if (bgOverlayStream != null && Strategy.IsD1()) // D1 Icon dyes
+            primary = MakeDyedIcon(item);
 
+        group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
+
+        // Overlay (watermark, masterwork, etc.)
+        int wh = item.GetIconOverlayTexture()?.Width ?? 96;
+        if (overlayStream != null && wh == 96) // Actual full overlay, not the crappy new watermarks
+        {
+            BitmapImage? overlay = MakeBitmapImage(overlayStream, wh, wh);
+            group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, wh, wh)));
+
+            // Tints the watermark overlay blue for D1 ornaments (just to distinguish them)
+            if (isD1Ornament)
+            {
+                var overlayTinted = TintImage(overlay, Color.FromArgb(255, 0, 200, 255));
+                group.Children.Add(new ImageDrawing(overlayTinted, new Rect(0, 0, 96, 96)));
+            }
+        }
+
+        // Crafted overlay for patterns
         if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
         {
             var craftedOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80A9F577 : 0x80E55268)), 96, 96);
             group.Children.Add(new ImageDrawing(craftedOverlay, new Rect(0, 0, 96, 96)));
-        }
-
-        if (isD1Ornament)
-        {
-            var overlayTinted = TintImage(overlay, Color.FromArgb(255, 0, 200, 255));
-            group.Children.Add(new ImageDrawing(overlayTinted, new Rect(0, 0, 96, 96)));
         }
 
         var dw = new DrawingImage(group);
@@ -1072,6 +1079,25 @@ public class StringNullOrEmptyVisibilityConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         throw new NotSupportedException();
+    }
+}
+
+public class StringContainsConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var substring = parameter as string;
+
+        if (value is string str && !string.IsNullOrEmpty(substring))
+        {
+            return str.Contains(substring);
+        }
+        return false;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
 }
 

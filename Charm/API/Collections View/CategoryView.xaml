@@ -329,6 +329,34 @@
                             </Image>
 
                             <Grid
+                                Width="22"
+                                Height="48"
+                                Margin="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Visibility="{Binding ItemIcon2, Converter={StaticResource NullToVisibilityConverter}}">
+                                <Rectangle
+                                    Grid.Row="1"
+                                    Width="22"
+                                    Height="48"
+                                    Opacity="0.6"
+                                    Stretch="Fill">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                            <GradientStop Offset="0" Color="#00000000" />
+                                            <GradientStop Offset="1" Color="Black" />
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    Source="{Binding ItemIcon2}" />
+                            </Grid>
+
+                            <Grid
                                 Grid.Column="1"
                                 Margin="20,0,0,0"
                                 Background="Transparent">
@@ -422,20 +450,48 @@
                                                 MouseRightButtonDown="Button_MouseRightButtonDown"
                                                 Style="{DynamicResource D2StyleButtonNoOverlay}"
                                                 Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                                <Image
-                                                    Margin="-2"
-                                                    Opacity="1"
-                                                    Source="{Binding ItemIcon}">
-                                                    <Image.Style>
-                                                        <Style TargetType="Image">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
-                                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Image.Style>
-                                                </Image>
+                                                <Grid Margin="-2" Opacity="1">
+                                                    <Image Source="{Binding ItemIcon}">
+                                                        <Image.Style>
+                                                            <Style TargetType="Image">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Image.Style>
+                                                    </Image>
+
+                                                    <Grid
+                                                        Width="22"
+                                                        Height="48"
+                                                        Margin="0"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Top"
+                                                        Visibility="{Binding ItemIcon2, Converter={StaticResource NullToVisibilityConverter}}">
+                                                        <Rectangle
+                                                            Grid.Row="1"
+                                                            Width="22"
+                                                            Height="48"
+                                                            Opacity="0.6"
+                                                            Stretch="Fill">
+                                                            <Rectangle.Fill>
+                                                                <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                                                    <GradientStop Offset="0" Color="#00000000" />
+                                                                    <GradientStop Offset="1" Color="Black" />
+                                                                </LinearGradientBrush>
+                                                            </Rectangle.Fill>
+                                                        </Rectangle>
+                                                        <Image
+                                                            Width="20"
+                                                            Height="20"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Top"
+                                                            Source="{Binding ItemIcon2}" />
+                                                    </Grid>
+                                                </Grid>
+
                                             </Button>
 
                                             <!--  Placeholder Rectangle  -->

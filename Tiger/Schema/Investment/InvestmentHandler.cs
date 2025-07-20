@@ -1053,9 +1053,15 @@ public class InventoryItem : Tag<S9D798080>
         {
             traits.Add(Investment.Get()._traitDefinitionMap.TagData.Traits[index].TraitHash);
         }
+
+        // inherits traits from the parent, just release for now tho
+        if (Parent is not null)
+            traits.AddRange(Parent.ItemTraits.Where(x => x.ToString().Contains("releases")));
+
         return traits;
     }
 
+    [Obsolete("Power cap? Never heard of it.")]
     public int GetItemPowerCap()
     {
         if (_tag.Unk50.GetValue(GetReader()) is SDC778080 quality)
@@ -1312,6 +1318,15 @@ public class InventoryItem : Tag<S9D798080>
         if (overlayIcon is null)
             return null;
         return overlayIcon.GetTexture();
+    }
+
+    public Texture? GetIconOverlayTexture(int index = 0)
+    {
+        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        if (iconContainer == null || iconContainer.TagData.IconOverlayContainer == null)
+            return null;
+        Texture? overlayIcon = GetTexture(iconContainer.TagData.IconOverlayContainer, index);
+        return overlayIcon;
     }
 
     public UnmanagedMemoryStream? GetFoundryIconStream()

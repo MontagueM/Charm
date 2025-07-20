@@ -208,7 +208,33 @@
                     <Border
                         BorderThickness="3"
                         Focusable="False"
-                        Style="{StaticResource GreyBorderWhiteOnHover}" />
+                        Style="{StaticResource GreyBorderWhiteOnHover}">
+                        <Grid
+                            Width="22"
+                            Height="48"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top">
+                            <Rectangle
+                                Grid.Row="1"
+                                Width="22"
+                                Height="48"
+                                Opacity="0.6"
+                                Stretch="Fill">
+                                <Rectangle.Fill>
+                                    <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                        <GradientStop Offset="0" Color="#00000000" />
+                                        <GradientStop Offset="1" Color="Black" />
+                                    </LinearGradientBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <Image
+                                Width="20"
+                                Height="20"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                Source="{Binding ItemWatermark}" />
+                        </Grid>
+                    </Border>
                 </Grid>
             </Grid>
         </DataTemplate>
@@ -476,7 +502,7 @@
                             <TextBox
                                 x:Name="SearchBox"
                                 Grid.Row="0"
-                                Width="500"
+                                Width="350"
                                 Margin="10,0,10,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"

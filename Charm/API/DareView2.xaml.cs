@@ -62,6 +62,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private DestinyTraitID? TypeFilter = null;
     private DestinyTierType? RarityFilter = null;
+    private DestinyTraitID? ReleaseFilter = null;
 
     public DareView2()
     {
@@ -98,11 +99,13 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void CreateFilterOptions()
     {
+        int boxWidth = 200;
+
         List<ComboBoxItem> types = new();
         ComboBoxControl presets = new();
-        presets.Text = "Filter By Type";
+        presets.Text = "Type";
         presets.FontSize = 14;
-        foreach (var type in SortedItems.Keys)
+        foreach (var type in SortedItems.Keys.Where(x => x.ToString().StartsWith("item_")))
         {
             types.Add(new()
             {
@@ -120,13 +123,15 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         {
             presets.Combobox.SelectedIndex = 0;
         }
-        presets.Combobox.MinWidth = 200;
+        presets.Combobox.MinWidth = boxWidth;
         presets.Combobox.SelectionChanged += Filters_OnSelectionChanged;
         FilterOptions.Children.Add(presets);
 
+        //--------------------------------------------
+
         List<ComboBoxItem> rarities = new();
         ComboBoxControl rarity_presets = new();
-        rarity_presets.Text = "Filter By Rarity";
+        rarity_presets.Text = "Rarity";
         rarity_presets.FontSize = 14;
 
         var values = Enum.GetValues(typeof(DestinyTierType)).Cast<DestinyTierType>().ToList();
@@ -147,9 +152,38 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         {
             rarity_presets.Combobox.SelectedIndex = 0;
         }
-        rarity_presets.Combobox.MinWidth = 200;
+        rarity_presets.Combobox.MinWidth = boxWidth;
         rarity_presets.Combobox.SelectionChanged += RarityFilters_OnSelectionChanged;
         FilterOptions.Children.Add(rarity_presets);
+
+        //--------------------------------------------
+
+        List<ComboBoxItem> releases = new();
+        ComboBoxControl release_presets = new();
+        release_presets.Text = "Release";
+        release_presets.FontSize = 14;
+
+        foreach (var type in SortedItems.Keys.Where(x => x.ToString().Contains("releases")))
+        {
+            releases.Add(new()
+            {
+                Content = type.GetEnumDescription(),
+                Tag = type,
+                FontSize = 10
+            });
+        }
+
+        releases = releases.OrderBy(x => ((DestinyTraitID)x.Tag).ToString().Split("releases_v")[1].Split("_")[0]).ToList();
+        releases.Insert(0, new() { Content = "All", FontSize = 10 });
+        release_presets.Combobox.ItemsSource = releases;
+
+        if (release_presets.Combobox.SelectedIndex == -1)
+        {
+            release_presets.Combobox.SelectedIndex = 0;
+        }
+        release_presets.Combobox.MinWidth = boxWidth;
+        release_presets.Combobox.SelectionChanged += ReleaseFilters_OnSelectionChanged;
+        FilterOptions.Children.Add(release_presets);
     }
 
     private async Task LoadApiList()
@@ -177,7 +211,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                     SortedItems[DestinyTraitID.other].Add(item);
                 }
 
-                foreach (var trait in item.GetItemTraits().Where(x => x.ToString().StartsWith("item_")))
+                foreach (var trait in item.GetItemTraits())
                 {
                     if (trait is DestinyTraitID.item_engram)
                         continue;
@@ -214,7 +248,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             });
         }
-        Categories.Items = ItemCategories;
+        Categories.Items = ItemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_"));
     }
 
     private void RefreshItemList()
@@ -254,13 +288,16 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             if (RarityFilter is not null)
                 newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemRarity() == RarityFilter));
 
+            if (ReleaseFilter is not null)
+                newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemTraits().Contains(ReleaseFilter.Value)));
+
             if (newItem.Items.Count != 0)
                 itemCategories.Add(newItem);
         }
         if (itemCategories.Count == 1)
             itemCategories.First().ItemsPerPage = 72;
 
-        Categories.Items = itemCategories;
+        Categories.Items = itemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_"));
     }
 
     private void SelectedDareEntry_Click(object sender, RoutedEventArgs e)
@@ -433,6 +470,16 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             RarityFilter = (DestinyTierType)((sender as ComboBox).SelectedItem as ComboBoxItem).Tag;
         else
             RarityFilter = null;
+
+        RefreshItemList();
+    }
+
+    private void ReleaseFilters_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (((sender as ComboBox).SelectedItem as ComboBoxItem).Tag is not null)
+            ReleaseFilter = (DestinyTraitID)((sender as ComboBox).SelectedItem as ComboBoxItem).Tag;
+        else
+            ReleaseFilter = null;
 
         RefreshItemList();
     }

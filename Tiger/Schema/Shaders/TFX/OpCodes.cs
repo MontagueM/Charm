@@ -29,12 +29,29 @@ public static class TfxBytecodeOp
         return opcodes;
     }
 
+    public static TfxBytecode RemapOp(byte value)
+    {
+        string name =
+            Strategy.IsLatest() ? ((TfxBytecode_EoF)value).ToString() :
+
+            Strategy.IsD1() ? ((TfxBytecode_D1)value).ToString() :
+            Strategy.IsPreBL() || Strategy.IsBL() ? ((TfxBytecode_BL)value).ToString() :
+            Strategy.IsPostBL() ? ((TfxBytecode_TFS)value).ToString() :
+            ((TfxBytecode)value).ToString();
+
+
+        if (Enum.TryParse(name, out TfxBytecode result))
+            return result;
+
+        throw new InvalidCastException($"Couldn't cast TfxBytecode value {value} ({name}) for {Strategy.CurrentStrategy}");
+    }
+
     public static TfxData ReadTfxBytecodeOp(BinaryReader reader)
     {
         TigerStrategy _strat = Strategy.CurrentStrategy;
         TfxData tfxData = new()
         {
-            op = (TfxBytecode)reader.ReadByte(),
+            op = RemapOp(reader.ReadByte()),
             data = null
         };
 
@@ -47,71 +64,84 @@ public static class TfxBytecodeOp
                     PermuteData.fields = reader.ReadByte();
                     tfxData.data = PermuteData;
                     break;
+
                 case TfxBytecode.PushConstantVec4:
                     PushConstantVec4Data PushConstantVec4Data = new();
                     PushConstantVec4Data.constant_index = reader.ReadByte();
                     tfxData.data = PushConstantVec4Data;
                     break;
+
                 case TfxBytecode.LerpConstant:
                     LerpConstantData LerpConstantData = new();
                     LerpConstantData.constant_start = reader.ReadByte();
                     tfxData.data = LerpConstantData;
                     break;
+
                 case TfxBytecode.Spline4Const:
                     Spline4ConstData Spline4ConstData = new();
                     Spline4ConstData.constant_index = reader.ReadByte();
                     tfxData.data = Spline4ConstData;
                     break;
+
                 case TfxBytecode.Spline8Const:
                     Spline8ConstData Spline8ConstData = new();
                     Spline8ConstData.constant_index = reader.ReadByte();
                     tfxData.data = Spline8ConstData;
                     break;
+
                 case TfxBytecode.Spline8ConstChain:
                     Spline8ConstChainData Unk39Data = new();
                     Unk39Data.constant_index = reader.ReadByte();
                     tfxData.data = Unk39Data;
                     break;
-                case TfxBytecode.Gradient4Const: // Gradient4Const
+
+                case TfxBytecode.Gradient4Const:
                     Gradient4ConstData Unk3aData = new();
                     Unk3aData.constant_index = reader.ReadByte();
                     tfxData.data = Unk3aData;
                     break;
+
                 case TfxBytecode.Gradient8Const:
                     Gradient8ConstData Gradient8ConstData = new();
                     Gradient8ConstData.constant_index = reader.ReadByte();
                     tfxData.data = Gradient8ConstData;
                     break;
+
                 case TfxBytecode.PushExternInputFloat:
                     PushExternInputFloatData PushExternInputFloatData = new();
                     PushExternInputFloatData.extern_ = Externs.GetExtern(reader.ReadByte());
                     PushExternInputFloatData.element = reader.ReadByte();
                     tfxData.data = PushExternInputFloatData;
                     break;
+
                 case TfxBytecode.PushExternInputVec4:
                     PushExternInputVec4Data PushExternInputVec4Data = new();
                     PushExternInputVec4Data.extern_ = Externs.GetExtern(reader.ReadByte());
                     PushExternInputVec4Data.element = reader.ReadByte();
                     tfxData.data = PushExternInputVec4Data;
                     break;
+
                 case TfxBytecode.PushExternInputMat4:
                     PushExternInputMat4Data PushExternInputMat4Data = new();
                     PushExternInputMat4Data.extern_ = Externs.GetExtern(reader.ReadByte());
                     PushExternInputMat4Data.element = reader.ReadByte();
                     tfxData.data = PushExternInputMat4Data;
                     break;
+
                 case TfxBytecode.PushExternInputTextureView:
                     PushExternInputTextureViewData Unk3fData = new();
                     Unk3fData.extern_ = Externs.GetExtern(reader.ReadByte());
                     Unk3fData.element = reader.ReadByte();
                     tfxData.data = Unk3fData;
                     break;
+
                 case TfxBytecode.PushExternInputU32:
                     PushExternInputU32Data PushExternInputU32Data = new();
                     PushExternInputU32Data.extern_ = Externs.GetExtern(reader.ReadByte());
                     PushExternInputU32Data.element = reader.ReadByte();
                     tfxData.data = PushExternInputU32Data;
                     break;
+
                 case TfxBytecode.PushExternInputUav when !Strategy.IsD1():
                     PushExternInputUavData Unk41Data = new();
                     Unk41Data.extern_ = Externs.GetExtern(reader.ReadByte());
@@ -130,6 +160,7 @@ public static class TfxBytecodeOp
                     Unk43Data.element = reader.ReadByte();
                     tfxData.data = Unk43Data;
                     break;
+
                 case TfxBytecode.PopOutput - 2 when Strategy.IsD1():
                 case TfxBytecode.PopOutput - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PopOutput when Strategy.IsPostBL():
@@ -139,6 +170,7 @@ public static class TfxBytecodeOp
                     PopOutputData.slot = reader.ReadByte();
                     tfxData.data = PopOutputData;
                     break;
+
                 case TfxBytecode.PopOutputMat4 - 2 when Strategy.IsD1():
                 case TfxBytecode.PopOutputMat4 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
                 case TfxBytecode.PopOutputMat4 when Strategy.IsPostBL():
@@ -520,7 +552,358 @@ public static class TfxBytecodeOp
     }
 }
 
-public enum TfxBytecode : byte
+public enum TfxBytecode : byte // Not ordered by value, different versions get mapped to this
+{
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Multiply2,
+    Add2,
+    IsZero,
+    Min,
+    Max,
+    LessThan,
+    Dot,
+    Merge_1_3,
+    Merge_2_2,
+    Merge_3_1,
+    Cubic,
+    Lerp,
+    LerpSaturated,
+    MultiplyAdd,
+    Clamp,
+    Unk14,
+    Abs,
+    Sign,
+    Floor,
+    Ceil,
+    Round,
+    Frac,
+    Unk1b, // Normalize()?
+    Unk1c, // Maybe also normalize, but slightly different?
+    Negate,
+    VecRotSin,
+    VecRotCos,
+    VecRotSinCos,
+    PermuteAllX,
+    Permute,
+    Saturate,
+    Unk25,
+    Unk26,
+    Triangle,
+    Jitter,
+    Wander,
+    Rand,
+    RandSmooth,
+    Unk2c,
+    Unk2d,
+    TransformVec4,
+    PushConstantVec4,// Shifted to 0x3B in EOF, 0x34 => 0x3B
+    LerpConstant,
+    LerpConstantSaturated,
+    Spline4Const,
+    Spline8Const,
+    Spline8ConstChain,
+    Gradient4Const,
+    Gradient8Const,
+    PushExternInputFloat,
+    PushExternInputVec4,
+    PushExternInputMat4,
+    PushExternInputTextureView,
+    PushExternInputU32,
+    PushExternInputUav,
+    Unk42, // Not in Pre-BL
+    PushFromOutput,
+    PopOutput,
+    PopOutputMat4,
+    PushTemp,
+    PopTemp,
+    SetShaderTexture,
+    Unk49, //{ unk1: u8 }
+    SetShaderSampler,
+    SetShaderUav,
+    Unk4c, //{ unk1: u8 }
+    PushSampler,
+    PushObjectChannelVector,
+    PushGlobalChannelVector,
+    Unk50,
+    Unk51,
+    PushTexDimensions,
+    PushTexTileParams,
+    PushTexTileCount,
+    Unk55,
+    Unk56,
+    Unk57,
+    Unk58,
+
+    // Added in EoF
+    Unk34_EoF,
+    Unk35_EoF,
+    Unk36_EoF,
+    Unk37_EoF,
+    Unk38_EoF,
+    Unk39_EoF,
+    Unk3A_EoF,
+}
+
+// D1 RoI
+public enum TfxBytecode_D1 : byte
+{
+    Add = 0x01,
+    Subtract = 0x02,
+    Multiply = 0x03,
+    Divide = 0x04,
+    Multiply2 = 0x05,
+    Add2 = 0x06,
+    IsZero = 0x07,
+    Min = 0x08,
+    Max = 0x09,
+    LessThan = 0x0a,
+    Dot = 0x0b,
+    Merge_1_3 = 0x0c,
+    Merge_2_2 = 0x0d,
+    Merge_3_1 = 0x0e,
+    Cubic = 0x0f,
+    Lerp = 0x10,
+    LerpSaturated = 0x11,
+    MultiplyAdd = 0x12,
+    Clamp = 0x13,
+    Unk14 = 0x14,
+    Abs = 0x15,
+    Sign = 0x16,
+    Floor = 0x17,
+    Ceil = 0x18,
+    Round = 0x19,
+    Frac = 0x1a,
+    Unk1b = 0x1b,
+    Unk1c = 0x1c,
+    Negate = 0x1d,
+    VecRotSin = 0x1e,
+    VecRotCos = 0x1f,
+    VecRotSinCos = 0x20,
+    PermuteAllX = 0x21,
+    Permute = 0x22,
+    Saturate = 0x23,
+    Unk25 = 0x25,
+    Unk26 = 0x26,
+    Triangle = 0x27,
+    Jitter = 0x28,
+    Wander = 0x29,
+    Rand = 0x2a,
+    RandSmooth = 0x2b,
+    Unk2c = 0x2c,
+    Unk2d = 0x2d,
+    TransformVec4 = 0x2e,
+    PushConstantVec4 = 0x34,
+    LerpConstant = 0x35,
+    LerpConstantSaturated = 0x36,
+    Spline4Const = 0x37,
+    Spline8Const = 0x38,
+    Spline8ConstChain = 0x39,
+    Gradient4Const = 0x3a,
+    Gradient8Const = 0x3b,
+    PushExternInputFloat = 0x3c,
+    PushExternInputVec4 = 0x3d,
+    PushExternInputMat4 = 0x3e,
+    PushExternInputTextureView = 0x3f,
+    PushExternInputU32 = 0x40,
+    PushExternInputUav = 0x41,
+    PushFromOutput = 0x41,
+    PopOutput = 0x42,
+    PopOutputMat4 = 0x43,
+    PushTemp = 0x44,
+    PopTemp = 0x45,
+    SetShaderTexture = 0x46,
+    SetShaderSampler = 0x47,
+    PushSampler = 0x49,
+    PushObjectChannelVector = 0x4A,
+    PushGlobalChannelVector = 0x4B,
+    Unk50 = 0x4E,
+    PushTexDimensions = 0x50,
+    PushTexTileParams = 0x51,
+    PushTexTileCount = 0x52,
+    //Unk55 = 0x54, // No idea if these are in D1
+    //Unk56 = 0x55,
+    //Unk57 = 0x56,
+    //Unk58 = 0x57,
+}
+
+// SK to BL
+public enum TfxBytecode_BL : byte
+{
+    Add = 0x01,
+    Subtract = 0x02,
+    Multiply = 0x03,
+    Divide = 0x04,
+    Multiply2 = 0x05,
+    Add2 = 0x06,
+    IsZero = 0x07,
+    Min = 0x08,
+    Max = 0x09,
+    LessThan = 0x0a,
+    Dot = 0x0b,
+    Merge_1_3 = 0x0c,
+    Merge_2_2 = 0x0d,
+    Merge_3_1 = 0x0e,
+    Cubic = 0x0f,
+    Lerp = 0x10,
+    LerpSaturated = 0x11,
+    MultiplyAdd = 0x12,
+    Clamp = 0x13,
+    Unk14 = 0x14,
+    Abs = 0x15,
+    Sign = 0x16,
+    Floor = 0x17,
+    Ceil = 0x18,
+    Round = 0x19,
+    Frac = 0x1a,
+    Unk1b = 0x1b,
+    Unk1c = 0x1c,
+    Negate = 0x1d,
+    VecRotSin = 0x1e,
+    VecRotCos = 0x1f,
+    VecRotSinCos = 0x20,
+    PermuteAllX = 0x21,
+    Permute = 0x22,
+    Saturate = 0x23,
+    Unk25 = 0x25,
+    Unk26 = 0x26,
+    Triangle = 0x27,
+    Jitter = 0x28,
+    Wander = 0x29,
+    Rand = 0x2a,
+    RandSmooth = 0x2b,
+    Unk2c = 0x2c,
+    Unk2d = 0x2d,
+    TransformVec4 = 0x2e,
+    PushConstantVec4 = 0x34,
+    LerpConstant = 0x35,
+    LerpConstantSaturated = 0x36,
+    Spline4Const = 0x37,
+    Spline8Const = 0x38,
+    Spline8ConstChain = 0x39,
+    Gradient4Const = 0x3a,
+    Gradient8Const = 0x3b,
+    PushExternInputFloat = 0x3c,
+    PushExternInputVec4 = 0x3d,
+    PushExternInputMat4 = 0x3e,
+    PushExternInputTextureView = 0x3f,
+    PushExternInputU32 = 0x40,
+    PushExternInputUav = 0x41,
+    PushFromOutput = 0x42,
+    PopOutput = 0x43,
+    PopOutputMat4 = 0x44,
+    PushTemp = 0x45,
+    PopTemp = 0x46,
+    SetShaderTexture = 0x47,
+    Unk49 = 0x48,
+    SetShaderSampler = 0x49,
+    SetShaderUav = 0x4A,
+    Unk4c = 0x4B,
+    PushSampler = 0x4C,
+    PushObjectChannelVector = 0x4D,
+    PushGlobalChannelVector = 0x4E,
+    Unk50 = 0x4F,
+    Unk51 = 0x50,
+    PushTexDimensions = 0x51,
+    PushTexTileParams = 0x52,
+    PushTexTileCount = 0x53,
+    Unk55 = 0x54,
+    Unk56 = 0x55,
+    Unk57 = 0x56,
+    Unk58 = 0x57,
+}
+
+// WQ to TFS
+public enum TfxBytecode_TFS : byte
+{
+    Add = 0x01,
+    Subtract = 0x02,
+    Multiply = 0x03,
+    Divide = 0x04,
+    Multiply2 = 0x05,
+    Add2 = 0x06,
+    IsZero = 0x07,
+    Min = 0x08,
+    Max = 0x09,
+    LessThan = 0x0a,
+    Dot = 0x0b,
+    Merge_1_3 = 0x0c,
+    Merge_2_2 = 0x0d,
+    Merge_3_1 = 0x0e,
+    Cubic = 0x0f,
+    Lerp = 0x10,
+    LerpSaturated = 0x11,
+    MultiplyAdd = 0x12,
+    Clamp = 0x13,
+    Unk14 = 0x14,
+    Abs = 0x15,
+    Sign = 0x16,
+    Floor = 0x17,
+    Ceil = 0x18,
+    Round = 0x19,
+    Frac = 0x1a,
+    Unk1b = 0x1b,
+    Unk1c = 0x1c,
+    Negate = 0x1d,
+    VecRotSin = 0x1e,
+    VecRotCos = 0x1f,
+    VecRotSinCos = 0x20,
+    PermuteAllX = 0x21,
+    Permute = 0x22,
+    Saturate = 0x23,
+    Unk25 = 0x25,
+    Unk26 = 0x26,
+    Triangle = 0x27,
+    Jitter = 0x28,
+    Wander = 0x29,
+    Rand = 0x2a,
+    RandSmooth = 0x2b,
+    Unk2c = 0x2c,
+    Unk2d = 0x2d,
+    TransformVec4 = 0x2e,
+    PushConstantVec4 = 0x34,
+    LerpConstant = 0x35,
+    LerpConstantSaturated = 0x36,
+    Spline4Const = 0x37,
+    Spline8Const = 0x38,
+    Spline8ConstChain = 0x39,
+    Gradient4Const = 0x3a,
+    Gradient8Const = 0x3b,
+    PushExternInputFloat = 0x3c,
+    PushExternInputVec4 = 0x3d,
+    PushExternInputMat4 = 0x3e,
+    PushExternInputTextureView = 0x3f,
+    PushExternInputU32 = 0x40,
+    PushExternInputUav = 0x41,
+    Unk42 = 0x42,
+    PushFromOutput = 0x43,
+    PopOutput = 0x44,
+    PopOutputMat4 = 0x45,
+    PushTemp = 0x46,
+    PopTemp = 0x47,
+    SetShaderTexture = 0x48,
+    Unk49 = 0x49,
+    SetShaderSampler = 0x4a,
+    SetShaderUav = 0x4b,
+    Unk4c = 0x4c,
+    PushSampler = 0x4d,
+    PushObjectChannelVector = 0x4e,
+    PushGlobalChannelVector = 0x4f,
+    Unk50 = 0x50,
+    Unk51 = 0x51,
+    PushTexDimensions = 0x52,
+    PushTexTileParams = 0x53,
+    PushTexTileCount = 0x54,
+    Unk55 = 0x55,
+    Unk56 = 0x56,
+    Unk57 = 0x57,
+    Unk58 = 0x58,
+}
+
+// EoF
+public enum TfxBytecode_EoF : byte
 {
     Add = 0x01,
     Subtract = 0x02,
@@ -567,45 +950,55 @@ public enum TfxBytecode : byte
     Unk2c = 0x2c,
     Unk2d = 0x2d,
     TransformVec4 = 0x2e,
-    PushConstantVec4 = 0x34,
-    LerpConstant = 0x35,
-    LerpConstantSaturated = 0x36,
-    Spline4Const = 0x37,
-    Spline8Const = 0x38,
-    Spline8ConstChain = 0x39, // Spline8ConstChain?
-    Gradient4Const = 0x3a,
-    Gradient8Const = 0x3b, //{ constant_index: u8 }
-    PushExternInputFloat = 0x3c,
-    PushExternInputVec4 = 0x3d,
-    PushExternInputMat4 = 0x3e,
-    PushExternInputTextureView = 0x3f,
-    PushExternInputU32 = 0x40,
-    PushExternInputUav = 0x41,
 
-    Unk42 = 0x42, // Not in Pre-BL, everything further down is shifted - 1
-    PushFromOutput = 0x43,
-    PopOutput = 0x44,
-    PopOutputMat4 = 0x45,
-    PushTemp = 0x46,
-    PopTemp = 0x47,
-    SetShaderTexture = 0x48,
-    Unk49 = 0x49, //{ unk1: u8 }
-    SetShaderSampler = 0x4a,
-    SetShaderUav = 0x4b,
-    Unk4c = 0x4c, //{ unk1: u8 }
-    PushSampler = 0x4d,
-    PushObjectChannelVector = 0x4e,
-    PushGlobalChannelVector = 0x4f,
-    Unk50 = 0x50, //{ unk1: u8 }
-    Unk51 = 0x51,
-    PushTexDimensions = 0x52, //{ unk1: u8, unk2: u8 }
-    PushTexTileParams = 0x53, //{ unk1: u8, unk2: u8 }
-    PushTexTileCount = 0x54, //{ unk1: u8, unk2: u8 }
-    Unk55 = 0x55,
-    Unk56 = 0x56,
-    Unk57 = 0x57,
-    Unk58 = 0x58,
+    Unk34_EoF = 0x34,
+    Unk35_EoF = 0x35,
+    Unk36_EoF = 0x36,
+    Unk37_EoF = 0x37,
+    Unk38_EoF = 0x38,
+    Unk39_EoF = 0x39,
+    Unk3A_EoF = 0x3A,
+
+    PushConstantVec4 = 0x3B, // Shifted to 0x3B in EOF, 0x34 => 0x3B
+    LerpConstant = 0x3C,
+    LerpConstantSaturated = 0x3D,
+    Spline4Const = 0x3E,
+    Spline8Const = 0x3F,
+    Spline8ConstChain = 0x40,
+    Gradient4Const = 0x41,
+    Gradient8Const = 0x42,
+    PushExternInputFloat = 0x43,
+    PushExternInputVec4 = 0x44,
+    PushExternInputMat4 = 0x45,
+    PushExternInputTextureView = 0x46,
+    PushExternInputU32 = 0x47,
+    PushExternInputUav = 0x48,
+    Unk42 = 0x49,
+    PushFromOutput = 0x4A,
+    PopOutput = 0x4B,
+    PopOutputMat4 = 0x4C,
+    PushTemp = 0x4D,
+    PopTemp = 0x4E,
+    SetShaderTexture = 0x4F,
+    Unk49 = 0x50,
+    SetShaderSampler = 0x51,
+    SetShaderUav = 0x52,
+    Unk4c = 0x53,
+    PushSampler = 0x54,
+    PushObjectChannelVector = 0x55,
+    PushGlobalChannelVector = 0x56,
+    Unk50 = 0x57,
+    Unk51 = 0x58,
+    PushTexDimensions = 0x59,
+    PushTexTileParams = 0x5A,
+    PushTexTileCount = 0x5B,
+    Unk55 = 0x5C,
+    Unk56 = 0x5D,
+    Unk57 = 0x5E,
+    Unk58 = 0x5F,
 }
+
+
 
 public struct TfxData
 {

@@ -203,19 +203,24 @@ public enum DestinyTraitID : uint
     item_bounty = 2443101659,
     item_consumable = 2062186907,
     item_currency = 3906525419,
+
     [Description("Emblem")]
     item_emblem = 2455696884,
+
     item_emote = 888082966,
     item_engram = 2893978702,
     item_exotic_catalyst = 4036726046,
     item_finisher = 2582082890,
+
     [Description("Ghost Shell")]
     item_ghost = 2570676179,
     item_ghost_hologram = 4118304139,
+
     [Description("Armor Ornament")]
     item_ornament_armor = 3477257717,
     [Description("Weapon Ornament")]
     item_ornament_weapon = 3828004164,
+
     item_package = 151064318,
     item_plug_aspect = 577926988,
     item_plug_fragment = 2833630124,
@@ -224,10 +229,13 @@ public enum DestinyTraitID : uint
     item_quest_annual_v600 = 929402123,
     item_quest_annual_v700 = 2976021378,
     item_quest_annual_v800 = 3011401061,
+    item_quest_annual_v900 = 763053052,
+
     item_quest_campaign = 2973844452,
     item_quest_current_release = 2878306895,
     item_quest_event = 1056186694,
     item_quest_exotic = 370766376,
+    item_quest_frontier_apollo = 2799343944,
     item_quest_new_light = 520867389,
     item_quest_onramp = 170945933,
     item_quest_past = 2387836362,
@@ -236,14 +244,17 @@ public enum DestinyTraitID : uint
     item_quest_seasonal_season24 = 3904180889,
     item_quest_seasonal_season25 = 3904180888,
     item_quest_seasonal_season26 = 3904180891,
+
     [Description("Shader")]
     item_shader = 2652561225,
     [Description("Ship")]
     item_ship = 3607584152,
+
     item_spawnfx = 856705125,
     item_subclass_dark = 3224025418,
     item_subclass_light = 482679394,
     item_subclass_prism = 3820193993,
+
     [Description("Sparrow")]
     item_vehicle = 3977049418,
     [Description("Auto Rifle")]
@@ -320,6 +331,77 @@ public enum DestinyTraitID : uint
     mamba_role_defender = 2712954769,
     mamba_role_invader = 3090596947,
     mamba_role_killer = 3460933757,
+
+    [Description("Vanilla")]
+    releases_v300_annual = 2677200345,
+    [Description("Curse of Osiris")]
+    releases_v310_season = 3750900718,
+    [Description("Warmind")]
+    releases_v320_season = 3990406773,
+    [Description("Solstice (Year 1)")]
+    releases_v350_season = 977620370,
+    [Description("Forsaken")]
+    releases_v400_annual = 1385893620,
+    [Description("Festival (Year 1)")]
+    releases_v400_season = 1416106830,
+    [Description("Black Armory")]
+    releases_v410_season = 3619103539,
+    [Description("Drifter")]
+    releases_v420_season = 117031016,
+    [Description("Opulance")]
+    releases_v450_season = 1357347767,
+    [Description("Shadowkeep")]
+    releases_v460_season = 1160263324,
+    [Description("Dawn")]
+    releases_v470_season = 2326993577,
+    [Description("Worthy")]
+    releases_v480_season = 1573004294,
+    [Description("Arrivals")]
+    releases_v490_season = 2405803211,
+    [Description("Beyond Light")]
+    releases_v500_annual = 2184280643,
+    [Description("Hunt")]
+    releases_v500_season = 2752740613,
+    [Description("Chosen")]
+    releases_v510_season = 3361847320,
+    [Description("Splicer")]
+    releases_v520_season = 4020167523,
+    [Description("Lost")]
+    releases_v530_season = 3353022846,
+    [Description("30th Anniversary")]
+    releases_v540_season = 2656809369,
+    [Description("Witch Queen")]
+    releases_v600_annual = 823756278,
+    [Description("Risen")]
+    releases_v600_season = 3596220576,
+    [Description("Haunted")]
+    releases_v610_season = 2868778669,
+    [Description("Plunder")]
+    releases_v620_season = 2572971238,
+    [Description("Worthy")]
+    releases_v630_season = 2208921643,
+    [Description("Lightfall")]
+    releases_v700_annual = 2606653893,
+    [Description("Defiance")]
+    releases_v700_season = 3833926855,
+    [Description("Deep")]
+    releases_v710_season = 661041410,
+    [Description("Witch")]
+    releases_v720_season = 687504889,
+    [Description("Wish")]
+    releases_v730_season = 866931116,
+    [Description("The Final Shape")]
+    releases_v800_annual = 2906302736,
+    [Description("Echoes")]
+    releases_v800_season = 1348188306,
+    [Description("Revenant")]
+    releases_v810_season = 4062709591,
+    [Description("Heresy")]
+    releases_v820_season = 3870807100,
+    [Description("Resurgence")]
+    releases_v900_core = 1858131755,
+    [Description("Edge of Fate")]
+    releases_v900_dlc = 2725534325
 }
 
 

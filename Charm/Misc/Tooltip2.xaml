@@ -54,13 +54,35 @@
                     </Rectangle.Style>
                 </Rectangle>
 
-                <Image
+                <Grid
                     Grid.Row="1"
-                    MaxWidth="54"
-                    MaxHeight="54"
+                    Width="27"
+                    Height="40"
+                    Margin="0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    Source="{Binding Icon}" />
+                    Visibility="{Binding Icon, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Rectangle
+                        Grid.Row="1"
+                        Width="27"
+                        Height="40"
+                        Opacity="0.6"
+                        Stretch="Fill">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                <GradientStop Offset="0" Color="#00000000" />
+                                <GradientStop Offset="1" Color="Black" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Image
+                        Width="22"
+                        Height="22"
+                        Margin="2,3,3,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Source="{Binding Icon}" />
+                </Grid>
 
                 <Grid
                     Grid.Row="1"

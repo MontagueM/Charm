@@ -111,6 +111,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             ItemRarity = _invItem.GetItemRarity(),
             ItemDamageType = DestinyDamageType.GetDamageType(_invItem.GetItemDamageTypeIndex()),
             ItemIcon = ApiImageUtils.MakeFullIcon(_invItem),
+            ItemWatermark = ApiImageUtils.GetPlugWatermark(_invItem),
             ItemBackground = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{_invItem.ApiHash}.jpg")),
             ItemFoundryBanner = !_invItem.IsEmblem ? ApiImageUtils.MakeFoundryBanner(_invItem) : null,
         };
@@ -727,6 +728,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         public DestinyDamageTypeEnum ItemDamageType { get; set; }
 
         public ImageSource ItemIcon { get; set; }
+        public ImageSource ItemWatermark { get; set; }
         public ImageSource ItemFoundryBanner { get; set; }
 
         private ImageSource _itemBackground = null;
@@ -804,6 +806,26 @@ public class APIPlugItem : CharmUIElement
         }
     }
 
+    private bool _isLoadingWatermark = false;
+    private ImageSource _itemWatermark = null;
+    public ImageSource ItemWatermark
+    {
+        get
+        {
+            if (_itemWatermark is null && !_isLoadingWatermark && Item is not null)
+            {
+                _ = LoadWatermarkAsync();
+            }
+
+            return _itemWatermark;
+        }
+        private set
+        {
+            _itemWatermark = value;
+            OnPropertyChanged(nameof(ItemWatermark));
+        }
+    }
+
     public async Task LoadIconAsync()
     {
         if (_isLoadingIcon || Item is null)
@@ -811,9 +833,23 @@ public class APIPlugItem : CharmUIElement
 
         _isLoadingIcon = true;
         var loadedIcon = await Task.Run(() => ApiImageUtils.MakeFullIcon(Item));
+        var loadedIconWatermark = await Task.Run(() => ApiImageUtils.GetPlugWatermark(Item));
         _isLoadingIcon = false;
 
         Icon = loadedIcon;
+        ItemWatermark = loadedIconWatermark;
+    }
+
+    public async Task LoadWatermarkAsync()
+    {
+        if (_isLoadingWatermark || Item is null)
+            return;
+
+        _isLoadingWatermark = true;
+        var loadedIconWatermark = await Task.Run(() => ApiImageUtils.GetPlugWatermark(Item));
+        _isLoadingWatermark = false;
+
+        ItemWatermark = loadedIconWatermark;
     }
 }
 
