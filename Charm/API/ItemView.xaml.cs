@@ -806,6 +806,21 @@ public class APIPlugItem : CharmUIElement
         }
     }
 
+    public async Task LoadIconAsync()
+    {
+        if (_isLoadingIcon || Item is null)
+            return;
+
+        _isLoadingIcon = true;
+        var loadedIcon = await Task.Run(() => ApiImageUtils.MakeFullIcon(Item));
+        var loadedIconWatermark = await Task.Run(() => ApiImageUtils.GetPlugWatermark(Item));
+        _isLoadingIcon = false;
+
+        Icon = loadedIcon;
+        ItemWatermark = loadedIconWatermark;
+    }
+
+
     private bool _isLoadingWatermark = false;
     private ImageSource _itemWatermark = null;
     public ImageSource ItemWatermark
@@ -826,20 +841,6 @@ public class APIPlugItem : CharmUIElement
         }
     }
 
-    public async Task LoadIconAsync()
-    {
-        if (_isLoadingIcon || Item is null)
-            return;
-
-        _isLoadingIcon = true;
-        var loadedIcon = await Task.Run(() => ApiImageUtils.MakeFullIcon(Item));
-        var loadedIconWatermark = await Task.Run(() => ApiImageUtils.GetPlugWatermark(Item));
-        _isLoadingIcon = false;
-
-        Icon = loadedIcon;
-        ItemWatermark = loadedIconWatermark;
-    }
-
     public async Task LoadWatermarkAsync()
     {
         if (_isLoadingWatermark || Item is null)
@@ -847,10 +848,13 @@ public class APIPlugItem : CharmUIElement
 
         _isLoadingWatermark = true;
         var loadedIconWatermark = await Task.Run(() => ApiImageUtils.GetPlugWatermark(Item));
-        _isLoadingWatermark = false;
-
-        ItemWatermark = loadedIconWatermark;
+        if (loadedIconWatermark is not null)
+        {
+            _isLoadingWatermark = false;
+            ItemWatermark = loadedIconWatermark;
+        }
     }
+
 }
 
 public class SocketCategory : CharmUIElement

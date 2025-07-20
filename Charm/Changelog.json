@@ -1,42 +1,42 @@
 [
     {
-        "version": "v3.0.0",
-        "date": "07-09-2025",
-        "changes":
-        [
+        "version": "3.0.0",
+        "date": "07-20-2025",
+        "changes": [
+            {
+                "title": "Edge of Fate",
+                "notes": [
+                    "Fixes and UI updates for Edge of Fate, please report any issues you find in #charm-tool-help in DMR or on GitHub!"
+                ]
+            },
             {
                 "title": "DARE 2.0",
-                "notes":
-                [
+                "notes": [
                     "DARE has been completely overhauled. Featuring a new UI, filters and item categories."
                 ]
             },
             {
                 "title": "API Item Viewer 2.0",
-                "notes":
-                [
+                "notes": [
                     "The API Item viewer has been rewritten to look more accurate and now allows selecting item plugs."
 
                 ]
             },
             {
                 "title": "Collection Viewer 2.0",
-                "notes":
-                [
+                "notes": [
                     "The Collection viewer has also been rewritten to be more accurate and flexible."
                 ]
             },
             {
                 "title": "Entity View 2.0(ish)",
-                "notes":
-                [
+                "notes": [
                     "The Dynamics viewer UI has been updated to match the Sound and Texture viewer, still more to be done in terms of additional functionality."
                 ]
             },
             {
                 "title": "Simple changelog menu.",
-                "notes":
-                [
+                "notes": [
                     "This :)"
                 ]
             },
@@ -45,8 +45,7 @@
             },
             {
                 "title": "Misc updates for map exporting.",
-                "notes":
-                [
+                "notes": [
                     "Updated global channel exports.",
                     "LUT texture exporting."
                 ]
