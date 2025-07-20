@@ -23,6 +23,9 @@ public partial class MusicWemsControl : UserControl
 
     private ConcurrentBag<WemItem> GetWemItems(WwiseSound tag)
     {
+        if (tag is null)
+            return new ConcurrentBag<WemItem>();
+
         var items = new ConcurrentBag<WemItem>();
         Parallel.ForEach(tag.TagData.Wems, wem =>
         {

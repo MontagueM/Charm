@@ -58,7 +58,7 @@ public class FontHandler : Strategy.StrategistSingleton<FontHandler>
         {
             TigerFile ff = f.FontParent.TagData.FontFile;
             string? fontName = f.FontParent.TagData.FontName.Value;
-            //if (!File.Exists($"fonts/{fontName}"))
+            if (!File.Exists($"fonts/{fontName}")) // TODO changing versions causes a crash cus its trying to save the font when its in use
             {
                 using (TigerReader reader = ff.GetReader())
                 {
