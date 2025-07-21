@@ -156,8 +156,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
                 SBA768080 type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
 
-                // Hides the socket only if its set to hidden and not the new armor_archetypes stuff
-                if (type.SocketVisiblity == 1 && !type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 == 778194869))
+                if (type.SocketVisiblity == 1)// && !type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 == 778194869))
                     continue;
 
                 S5D4F8080 category = Investment.Get().SocketCategoryStrings[type.SocketCategoryIndex];
@@ -200,8 +199,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
                 SBA768080 type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
 
-                // Hides the socket only if its set to hidden and not the new armor_archetypes stuff
-                if (type.SocketVisiblity == 1 && !type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 == 778194869))
+                if (type.SocketVisiblity == 1)// && !type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 == 778194869))
                     continue;
 
                 S5D4F8080 category = Investment.Get().SocketCategoryStrings[type.SocketCategoryIndex];
@@ -267,6 +265,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                     }
                 }
 
+                if (type.SocketVisiblity == 2 && plugItems.Count == 0) // "HiddenWhenEmpty"
+                    continue;
+
                 ///--------------------------
                 socketEntry.SocketTypeIndex = socket.SocketTypeIndex;
                 socketEntry.SingleInitialItem = CreatePlugItem(socket.SingleInitialItemIndex, category.CategoryStyle);
@@ -274,8 +275,68 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                 socketEntry.CategoryHash = category.SocketCategoryHash;
                 socketEntry.PlugItems = plugItems.DistinctBy(x => x.Hash).ToList();
 
-                socketEntries.Add(socketEntry);
+                // TODO find a way to filter out "duplicate" nodes, each upgrade set (1-5) has the same name but different api hashes
+
+                // Kinda bad probably, just moves the Masterwork socket to be right after Infusion
+                if (type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 is 2198080209 or 3185182717) && socketEntries.Count >= 2) // "v460.plugs.armor.masterworks" or "v400.plugs.weapons.masterworks"
+                {
+                    //socketEntry.PlugItems = socketEntry.PlugItems.DistinctBy(x => ((SA1738080)x.Item.TagData.Unk48.GetValue(x.Item.GetReader())).PlugCategoryHash).ToList();
+                    //foreach (var item in socketEntry.PlugItems)
+                    //{
+                    //    if (item.Item.TagData.Unk48.GetValue(item.Item.GetReader()) is SA1738080 plug)
+                    //    {
+                    //        Console.WriteLine($"{item.Item.Name} {item.Item.Hash} {item.Item.ApiHash} {plug.PlugCategoryHash}");
+                    //    }
+                    //}
+                    socketEntries.Insert(1, socketEntry);
+                }
+                else
+                    socketEntries.Add(socketEntry);
             }
+
+
+            // Armor set bonuses
+            if (_invItem.IsArmor && _invItem.TagData.Unk18.GetValue(_invItem.GetReader()) is SE7778080 equippingBlock)
+            {
+                if (equippingBlock.ItemSetIndex != -1)
+                {
+                    var itemSet = Investment.Get().EquipableItemSets[equippingBlock.ItemSetIndex];
+                    var itemSetStrings = Investment.Get().EquipableItemSetStrings[equippingBlock.ItemSetIndex];
+
+                    SocketCategory setCategory = new()
+                    {
+                        CategoryStyle = DestinySocketCategoryStyle.ArmorPerkSet,
+                        CategoryHash = itemSet.SetHash,
+                        CategoryName = itemSetStrings.SetName?.Value ?? "",
+                        CategoryDescription = itemSetStrings.SetDescription?.Value ?? "",
+                        CategoryIndex = 99998,
+                        Sockets = new List<SocketEntry>
+                        {
+                            new()
+                            {
+                                CategoryStyle = DestinySocketCategoryStyle.ArmorPerkSet,
+                            }
+                        }
+                    };
+
+                    List<APIPlugItem> plugs = new();
+                    foreach (var perk in itemSet.SetPerks)
+                    {
+                        var sandboxPerk = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
+                        plugs.Add(new()
+                        {
+                            OverrideName = $"{perk.SetCount} PIECE | {sandboxPerk.SandboxPerkName?.Value}",
+                            OverrideDescription = sandboxPerk.SandboxPerkDescription?.Value ?? "",
+                            Hash = sandboxPerk.SandboxPerkHash,
+                            Icon = ApiImageUtils.MakeIcon(sandboxPerk.IconIndex)
+                        });
+                    }
+                    setCategory.Sockets.First().PlugItems = plugs;
+
+                    socketCategories.Add(setCategory);
+                }
+            }
+
 
             // Group socketEntries by CategoryHash and add to corresponding SocketCategory
             foreach (var category in socketCategories.OrderBy(x => x.CategoryIndex))
@@ -288,6 +349,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                 SocketCategories.Add(category);
             }
         }
+
 
         if (SocketCategories.Any(x => x.CategoryName.Contains("cosmetic", StringComparison.InvariantCultureIgnoreCase)))
         {
@@ -769,10 +831,15 @@ public class APIPlugItem : CharmUIElement
         Hash = item.ApiHash;
     }
 
+
+    public string OverrideName { get; set; } // Used for raw sandbox perks, since they arent InventoryItems
+    public string OverrideDescription { get; set; }
+
     public SocketEntry ParentSocket;
     public DestinySocketCategoryStyle ParentSocketStyle { get; set; } // meh
-    public uint Hash { get; set; }
     public Color RarityColor => Item?.GetItemRarity().GetColor() ?? Color.FromArgb(0, 0, 0, 0);
+
+    public uint Hash { get; set; }
 
     private InventoryItem _item = null;
     public InventoryItem Item
@@ -803,7 +870,7 @@ public class APIPlugItem : CharmUIElement
 
             return _icon;
         }
-        private set
+        set
         {
             _icon = value;
             OnPropertyChanged(nameof(Icon));
@@ -823,7 +890,6 @@ public class APIPlugItem : CharmUIElement
         Icon = loadedIcon;
         ItemWatermark = loadedIconWatermark;
     }
-
 
     private bool _isLoadingWatermark = false;
     private ImageSource _itemWatermark = null;
@@ -973,6 +1039,7 @@ public class SocketTemplateSelector : DataTemplateSelector
     public DataTemplate ReusableTemplate { get; set; }
     public DataTemplate ConsumableTemplate { get; set; }
     public DataTemplate LargePerkTemplate { get; set; }
+    public DataTemplate ArmorPerkSetTemplate { get; set; }
 
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
@@ -987,6 +1054,8 @@ public class SocketTemplateSelector : DataTemplateSelector
                     return ConsumableTemplate;
                 case DestinySocketCategoryStyle.LargePerk:
                     return LargePerkTemplate;
+                case DestinySocketCategoryStyle.ArmorPerkSet:
+                    return ArmorPerkSetTemplate;
                 default:
                     //Console.WriteLine(entry.CategoryStyle);
                     break;

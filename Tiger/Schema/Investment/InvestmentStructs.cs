@@ -1565,7 +1565,7 @@ public struct SC1B38080 // DestinyItemFilterDefinitions, currently only Featured
 public struct S8080B44E // DestinyEquipableItemSetDefinition
 {
     [SchemaField(0x8)]
-    public DynamicArray<S54B48080> ItemSetDefinitions;
+    public DynamicArrayUnloaded<S54B48080> ItemSetDefinitions;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "54B48080", 0x28)]
@@ -1597,7 +1597,7 @@ public struct S57B48080
 public struct S8080B2C6 // DestinyEquipableItemSetDefinition Strings
 {
     [SchemaField(0x8)]
-    public DynamicArray<S7AB28080> ItemSetDefinitionStrings;
+    public DynamicArrayUnloaded<S7AB28080> ItemSetDefinitionStrings;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_LATEST, "7AB28080", 0x28)]

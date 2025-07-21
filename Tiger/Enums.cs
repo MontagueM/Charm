@@ -58,6 +58,8 @@ public enum DestinySocketCategoryStyle : uint
     LargePerk = 2251952357, // 6
     Abilities = 1901312945, // 7
     Supers = 497024337, // 8
+
+    ArmorPerkSet = 3991564788, // 9, not real in game, using for armor set bonuses
 }
 
 public enum DestinyTooltipStyle : uint
