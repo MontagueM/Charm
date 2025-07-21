@@ -169,14 +169,6 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    private void AllStringsViewButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        TagListViewerView tagListView = new();
-        tagListView.LoadContent(ETagListType.StringContainersList);
-        _mainWindow.MakeNewTab("strings", tagListView);
-        _mainWindow.SetNewestTabSelected();
-    }
-
     private void AllTexturesView2Button_OnClick(object sender, RoutedEventArgs e)
     {
         TextureListView textureListView = new();

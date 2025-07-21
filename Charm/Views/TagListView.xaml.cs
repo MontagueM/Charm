@@ -6,7 +6,6 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,8 +25,6 @@ using Tiger.Schema.Audio;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Investment;
 using Tiger.Schema.Shaders;
-using Tiger.Schema.Static;
-using Tiger.Schema.Strings;
 using ActivityROI = Tiger.Schema.Activity.DESTINY1_RISE_OF_IRON.Activity;
 using ActivitySK = Tiger.Schema.Activity.DESTINY2_SHADOWKEEP_2601.Activity;
 using ActivityWQ = Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402.Activity;
@@ -38,48 +35,41 @@ public enum ETagListType
 {
     [Description("None")]
     None,
+    [Description("BACK")]
+    Back,
+    [Description("Package")]
+    Package,
+
     [Description("Destination Global Tag Bag List")]
     DestinationGlobalTagBagList,
     [Description("Destination Global Tag Bag")]
     DestinationGlobalTagBag,
+
     [Description("Budget Set")]
     BudgetSet,
-    [Description("Entity [Final]")]
-    Entity,
-    [Description("BACK")]
-    Back,
     [Description("Entity List [Packages]")]
     EntityList,
-    [Description("Package")]
-    Package,
+    [Description("Entity [Final]")]
+    Entity,
+
+    [Description("Texture [Final]")]
+    Texture,
+
     [Description("Activity List")]
     ActivityList,
     [Description("Activity [Final]")]
     Activity,
-    [Description("Statics List [Packages]")]
-    StaticsList,
-    [Description("Static [Final]")]
-    Static,
-    [Description("Texture List [Packages]")]
-    TextureList,
-    [Description("Texture [Final]")]
-    Texture,
+
     [Description("Dialogue List")]
     DialogueList,
     [Description("Dialogue [Final]")]
     Dialogue,
+
     [Description("Directive List")]
     DirectiveList,
     [Description("Directive [Final]")]
     Directive,
-    [Description("String Containers List [Packages]")]
-    StringContainersList,
-    [Description("String Container [Final]")]
-    StringContainer,
-    [Description("Strings")]
-    Strings,
-    [Description("String [Final]")]
-    String,
+
     [Description("Sounds Packages List")]
     SoundsPackagesList,
     [Description("Sounds Package [Final]")]
@@ -88,10 +78,12 @@ public enum ETagListType
     SoundsList,
     [Description("Sound [Final]")]
     Sound,
+
     [Description("Music List")]
     MusicList,
     [Description("Music [Final]")]
     Music,
+
     [Description("Weapon Audio Group List")]
     WeaponAudioGroupList,
     [Description("Weapon Audio Group [Final]")]
@@ -100,6 +92,7 @@ public enum ETagListType
     WeaponAudioList,
     [Description("Weapon Audio [Final]")]
     WeaponAudio,
+
     [Description("BKHD Group List")]
     BKHDGroupList,
     [Description("BKHD Group [Final]")]
@@ -108,6 +101,7 @@ public enum ETagListType
     BKHDAudioList,
     [Description("Weapon Audio [Final]")]
     BKHDAudio,
+
     [Description("Material List [Packages]")]
     MaterialList,
     [Description("Material [Final]")]
@@ -219,12 +213,6 @@ public partial class TagListView : UserControl
                 case ETagListType.Activity:
                     LoadActivity(contentValue as FileHash);
                     break;
-                case ETagListType.StaticsList:
-                    await LoadStaticList();
-                    break;
-                case ETagListType.Static:
-                    LoadStatic(contentValue as FileHash);
-                    break;
                 case ETagListType.Texture:
                     LoadTexture(contentValue as FileHash);
                     break;
@@ -239,17 +227,6 @@ public partial class TagListView : UserControl
                     break;
                 case ETagListType.Directive:
                     LoadDirective(contentValue as FileHash);
-                    break;
-                case ETagListType.StringContainersList:
-                    await LoadStringContainersList();
-                    break;
-                case ETagListType.StringContainer:
-                    LoadStringContainer(contentValue as FileHash);
-                    break;
-                case ETagListType.Strings:
-                    LoadStrings(contentValue as FileHash);
-                    break;
-                case ETagListType.String:
                     break;
                 case ETagListType.Sound:
                     LoadSound(contentValue as FileHash);
@@ -1589,59 +1566,6 @@ public partial class TagListView : UserControl
 
     #endregion
 
-    #region Static
-
-    private async Task LoadStaticList()
-    {
-        // If there are packages, we don't want to reload the view as very poor for performance.
-        if (_allTagItems != null)
-            return;
-
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            $"Loading Statics List",
-        });
-
-        await Task.Run(async () =>
-        {
-            _allTagItems = new ConcurrentBag<TagItem>();
-            ConcurrentHashSet<FileHash> eVals = await PackageResourcer.Get().GetAllHashesAsync<SStaticMesh>();
-            Parallel.ForEach(eVals, val =>
-            {
-                FileMetadata metadata = val.GetFileMetadata();
-                _allTagItems.Add(new TagItem
-                {
-                    Hash = val,
-                    Name = $"Static {metadata.FileIndex}",
-                    Subname = $"{Helpers.GetReadableSize(metadata.Size)}",
-                    TagType = ETagListType.Static
-                });
-            });
-
-            MakePackageTagItems();
-        });
-
-        MainWindow.Progress.CompleteStage();
-        RefreshItemList();  // bc of async stuff
-    }
-
-    private void LoadStatic(FileHash fileHash)
-    {
-        TagView viewer = GetViewer();
-        SetViewer(TagView.EViewerType.Static);
-        viewer.StaticControl.LoadStatic(fileHash, ExportDetailLevel.MostDetailed);
-        SetExportFunction(ExportStatic, (int)ExportTypeFlag.Full | (int)ExportTypeFlag.Minimal);
-        viewer.ExportControl.SetExportInfo(fileHash);
-    }
-
-    private void ExportStatic(ExportInfo info)
-    {
-        TagView viewer = GetViewer();
-        StaticView.ExportStatic(info.Hash as FileHash, info.Name, info.ExportType, info.SubPath);
-    }
-
-    #endregion
-
     #region Texture
 
     private void LoadTexture(FileHash fileHash)
@@ -1665,94 +1589,6 @@ public partial class TagListView : UserControl
     private void ExportTexture(ExportInfo info)
     {
         TextureExtractor.ExportTexture(info.Hash as FileHash);
-    }
-
-    #endregion
-
-    #region String
-
-    private async Task LoadStringContainersList()
-    {
-        // If there are packages, we don't want to reload the view as very poor for performance.
-        if (_allTagItems != null)
-            return;
-
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            "Caching String Tags",
-            "Loading String List",
-        });
-
-        await Task.Run(async () =>
-        {
-            _allTagItems = new ConcurrentBag<TagItem>();
-            ConcurrentHashSet<FileHash> vals = await PackageResourcer.Get().GetAllHashesAsync<LocalizedStrings>();
-            MainWindow.Progress.CompleteStage();
-
-            Parallel.ForEach(vals, val =>
-            {
-                FileMetadata metadata = val.GetFileMetadata();
-                _allTagItems.Add(new TagItem
-                {
-                    Hash = val,
-                    Name = $"String Container {metadata.FileIndex}",
-                    Subname = $"{Helpers.GetReadableSize(metadata.Size)}",
-                    TagType = ETagListType.StringContainer
-                });
-            });
-            MainWindow.Progress.CompleteStage();
-
-            MakePackageTagItems();
-        });
-
-        RefreshItemList();  // bc of async stuff
-    }
-
-    private void LoadStringContainer(FileHash fileHash)
-    {
-        SetViewer(TagView.EViewerType.TagList);
-        TagView viewer = GetViewer();
-        viewer.TagListControl.LoadContent(ETagListType.Strings, fileHash, true);
-    }
-
-    // Would be nice to do something with colour formatting.
-    private void LoadStrings(FileHash fileHash)
-    {
-        TagView viewer = GetViewer();
-        _allTagItems = new ConcurrentBag<TagItem>();
-        LocalizedStrings localizedStrings = FileResourcer.Get().GetFile<LocalizedStrings>(fileHash);
-
-        localizedStrings.GetAllStringViews().ForEach(view =>
-        {
-            _allTagItems.Add(new TagItem
-            {
-                Name = view.RawString,
-                Hash = view.StringHash,
-                TagType = ETagListType.String
-            });
-        });
-
-        RefreshItemList();
-        SetExportFunction(ExportString, (int)ExportTypeFlag.Full, hideBulkExport: true);
-        viewer.ExportControl.SetExportInfo(fileHash);
-    }
-
-    private void ExportString(ExportInfo info)
-    {
-        LocalizedStrings localizedStrings = FileResourcer.Get().GetFile<LocalizedStrings>(info.Hash);
-        StringBuilder text = new();
-
-        localizedStrings.GetAllStringViews().ForEach(view =>
-        {
-            text.Append($"{view.StringHash} : {view.RawString} \n");
-        });
-
-        ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
-        string saveDirectory = config.GetExportSavePath() + $"/Strings/{info.Hash}_{info.Name}/";
-        Directory.CreateDirectory(saveDirectory);
-
-        File.WriteAllText(saveDirectory + "strings.txt", text.ToString());
-
     }
 
     #endregion

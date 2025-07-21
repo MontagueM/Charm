@@ -234,14 +234,6 @@ public partial class DevView : UserControl
                     _mainWindow.SetNewestTabSelected();
                     break;
 
-                case 0x808099EF:
-                    var stringView = new TagView();
-                    stringView.SetViewer(TagView.EViewerType.TagList);
-                    stringView.TagListControl.LoadContent(ETagListType.Strings, hash, true);
-                    _mainWindow.MakeNewTab(hash, stringView);
-                    _mainWindow.SetNewestTabSelected();
-                    break;
-
                 case 0x808097B8:
                     var dialogueView = new DialogueView();
                     dialogueView.Load(hash, null);
