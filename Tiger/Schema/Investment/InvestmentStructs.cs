@@ -139,15 +139,21 @@ public struct S13108080
 /// <summary>
 /// D2 "equippingBlock"
 /// </summary>
-[SchemaStruct("E7778080", 0x20)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "E7778080", 0x28)]
 public struct SE7778080
 {
-    public DynamicArray<S387A8080> Unk00;
-    [SchemaField(0x14)]
     public StringHash UniqueLabel;
     public TigerHash UniqueLabelHash;
-    public byte EquipmentSlotTypeIndex; // 'equipmentSlotTypeHash'
+
+    [SchemaField(0xC)]
     public byte Attributes; // EquippingItemBlockAttributes (just 0 or 1)
+    public byte EquipmentSlotTypeIndex; // 'equipmentSlotTypeHash'
+
+    [SchemaField(0x10)]
+    public short ItemSetIndex; // 'equipableItemSetHash'
+
+    [SchemaField(0x18)]
+    public DynamicArray<S387A8080> Unk00;
 }
 
 [SchemaStruct("387A8080", 0x10)]
@@ -1536,6 +1542,74 @@ public struct SBE3E8080
     public TigerHash Unk00;
     public Tag<SCF3E8080> Container;
 }
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "8080B3ED", 0x18)]
+public struct S8080B3ED // DestinyItemFilterDefinitions
+{
+    [SchemaField(0x8)]
+    public DynamicArray<SC1B38080> Filters;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "C1B38080", 0x18)]
+public struct SC1B38080 // DestinyItemFilterDefinitions, currently only FeaturedItems 
+{
+    public TigerHash FilterHash;
+    [SchemaField(0x8)]
+    public DynamicArray<S26908080> FilterList;
+}
+#endregion
+
+#region DestinyEquipableItemSetDefinition
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "8080B44E", 0x28)]
+public struct S8080B44E // DestinyEquipableItemSetDefinition
+{
+    [SchemaField(0x8)]
+    public DynamicArray<S54B48080> ItemSetDefinitions;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "54B48080", 0x28)]
+public struct S54B48080
+{
+    public TigerHash SetHash;
+    public int Unk04;
+
+    [SchemaField(0x8)]
+    public DynamicArray<S58B48080> SetItems;
+    public DynamicArray<S57B48080> SetPerks;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "58B48080", 0x2)]
+public struct S58B48080
+{
+    public short ItemIndex;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "57B48080", 0x28)]
+public struct S57B48080
+{
+    [SchemaField(0x20)]
+    public short PerkIndex;
+    public short SetCount; // 'requiredSetCount'
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "8080B2C6", 0x18)]
+public struct S8080B2C6 // DestinyEquipableItemSetDefinition Strings
+{
+    [SchemaField(0x8)]
+    public DynamicArray<S7AB28080> ItemSetDefinitionStrings;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "7AB28080", 0x28)]
+public struct S7AB28080
+{
+    public TigerHash SetHash;
+    public int IconIndex; // Maybe its actually Unk04 in the main definition?
+    public StringIndexReference SetName;
+    public StringIndexReference SetDescription;
+    //public DynamicArray<S7CB28080> Unk18; // idk, all are zeros
+}
+
 #endregion
 
 #region Destiny 1 API stuff

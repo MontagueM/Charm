@@ -1101,3 +1101,20 @@ public class StringContainsConverter : IValueConverter
     }
 }
 
+public class Investment_IsFeaturedItem : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is uint hash)
+        {
+            return Investment.Get().FeaturedItems.Contains(Investment.Get().GetItemIndex(hash));
+        }
+        return false;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+

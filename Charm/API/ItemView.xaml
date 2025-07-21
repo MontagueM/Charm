@@ -1303,39 +1303,68 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
+
+                            <!--  Icon Watermark  -->
+                            <Grid
+                                Width="28"
+                                Height="48"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Panel.ZIndex="10"
+                                Visibility="{Binding Item.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
+                                <Rectangle
+                                    Grid.Row="1"
+                                    Width="22"
+                                    Height="48"
+                                    Margin="0,3,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    Opacity="0.6"
+                                    RenderOptions.EdgeMode="Aliased"
+                                    Stretch="Fill">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                                            <GradientStop Offset="0" Color="#00000000" />
+                                            <GradientStop Offset="1" Color="Black" />
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+
+                                <!--  Featured item banner  -->
+                                <Polygon
+                                    Width="28"
+                                    Height="32"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Fill="#109191"
+                                    Points="0,0 0,32 14,28 28,32 28,0">
+                                    <Polygon.Style>
+                                        <Style TargetType="Polygon">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Item.ItemHash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Polygon.Style>
+                                </Polygon>
+
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Margin="0,3,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    Source="{Binding Item.ItemWatermark}" />
+                            </Grid>
+
                             <Border
                                 Width="96"
                                 Height="96"
                                 Panel.ZIndex="1"
                                 BorderBrush="White"
-                                BorderThickness="3">
-                                <Grid
-                                    Width="22"
-                                    Height="48"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Visibility="{Binding Item.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
-                                    <Rectangle
-                                        Grid.Row="1"
-                                        Width="22"
-                                        Height="48"
-                                        Opacity="0.6"
-                                        Stretch="Fill">
-                                        <Rectangle.Fill>
-                                            <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
-                                                <GradientStop Offset="0" Color="#00000000" />
-                                                <GradientStop Offset="1" Color="Black" />
-                                            </LinearGradientBrush>
-                                        </Rectangle.Fill>
-                                    </Rectangle>
-                                    <Image
-                                        Width="20"
-                                        Height="20"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Top"
-                                        Source="{Binding Item.ItemWatermark}" />
-                                </Grid>
-                            </Border>
+                                BorderThickness="3" />
 
                             <Image
                                 Width="96"
@@ -1424,14 +1453,40 @@
                             <Grid
                                 x:Name="StatsPanel"
                                 Grid.Column="1"
-                                Margin="0,230,-65,0"
+                                Margin="0,150,-65,0"
                                 HorizontalAlignment="Right"
-                                VerticalAlignment="Center">
+                                VerticalAlignment="Center"
+                                ClipToBounds="False">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="auto" />
                                     <ColumnDefinition Width="auto" />
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
+
+                                <Rectangle
+                                    Grid.ColumnSpan="2"
+                                    Margin="-20"
+                                    VerticalAlignment="Stretch"
+                                    Opacity="0.4"
+                                    SnapsToDevicePixels="True"
+                                    Stretch="Fill">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                                            <GradientStop Offset="1" Color="#00000000" />
+                                            <GradientStop Offset="0.25" Color="Black" />
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+
+                                <Rectangle
+                                    Grid.Column="2"
+                                    Grid.ColumnSpan="2"
+                                    Margin="20,-20,-1000,-20"
+                                    VerticalAlignment="Stretch"
+                                    Fill="Black"
+                                    Opacity="0.4"
+                                    SnapsToDevicePixels="True"
+                                    Stretch="Fill" />
 
                                 <TextBlock
                                     x:Name="ItemDamageType"
@@ -1485,7 +1540,6 @@
                                     </TextBlock.Style>
                                 </TextBlock>
 
-                                <!--  TODO Looks like this will be a thing again in EOF  -->
                                 <Border
                                     Grid.Column="1"
                                     Margin="50,0,25,0"
@@ -1493,7 +1547,7 @@
                                     BorderThickness="2,0,0,0"
                                     Focusable="False"
                                     Opacity="0.5"
-                                    Visibility="Hidden" />
+                                    Visibility="Visible" />
 
                                 <StackPanel Grid.Column="2">
                                     <ItemsControl Margin="0,0,0,15" ItemsSource="{Binding StatEntries}" />

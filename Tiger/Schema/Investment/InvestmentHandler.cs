@@ -52,6 +52,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public Tag<S80805615> _unkStyleContainer1 = null; // Event/Activity/Seasonal style(?) container
 
+    public Tag<S8080B3ED> _itemFilterDefinitions = null;
+
     // Inventory item index -> Collectible index
     private ConcurrentDictionary<int, int> _collectableIndexMap = null;
     public ConcurrentDictionary<int, S2C788080> Collectables = null;
@@ -81,6 +83,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     // For exporting purposes, Parent item -> Ornaments
     private ConcurrentDictionary<InventoryItem, ConcurrentBag<InventoryItem>> _ornaments = new();
+
+    // uses item index
+    public ConcurrentBag<int> FeaturedItems = new();
 
     public Investment(TigerStrategy strategy) : base(strategy)
     {
@@ -244,6 +249,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     case 0x808057F6:
                         _traitDefinitionStringMap = FileResourcer.Get().GetSchemaTag<S808057F6>(val);
                         break;
+                    case 0x8080B3ED:
+                        _itemFilterDefinitions = FileResourcer.Get().GetSchemaTag<S8080B3ED>(val);
+                        break;
                 }
             });
         }
@@ -267,6 +275,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             Task.Run(GetSandboxPerkMap2),
             Task.Run(GetRandomPlugSetMap),
             Task.Run(GetSocketTypeMap),
+            Task.Run(GetFeaturedItemsList),
         });
     }
 
@@ -954,6 +963,21 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
             Texture iridesceneLookup = Globals.Get().RenderGlobals.TagData.Textures.TagData.IridescenceLookup;
             TextureExtractor.SaveTextureToFile($"{savePath}/Textures/Iridescence_Lookup", iridesceneLookup.GetScratchImage());
+        }
+    }
+    #endregion
+
+    #region Misc
+    public void GetFeaturedItemsList()
+    {
+        if (!Strategy.IsLatest())
+            return;
+
+        FeaturedItems = new();
+        using TigerReader reader = _itemFilterDefinitions.GetReader();
+        foreach (var item in _itemFilterDefinitions.TagData.Filters.First(x => x.FilterHash.Hash32 == 3471738395).FilterList)
+        {
+            FeaturedItems.Add(item.ItemIndex);
         }
     }
     #endregion

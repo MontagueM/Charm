@@ -155,7 +155,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                     continue;
 
                 SBA768080 type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
-                if (type.SocketVisiblity == 1) // Hidden
+
+                // Hides the socket only if its set to hidden and not the new armor_archetypes stuff
+                if (type.SocketVisiblity == 1 && !type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 == 778194869))
                     continue;
 
                 S5D4F8080 category = Investment.Get().SocketCategoryStrings[type.SocketCategoryIndex];
@@ -197,7 +199,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                     continue;
 
                 SBA768080 type = Investment.Get().GetSocketType(socket.SocketTypeIndex);
-                if (type.SocketVisiblity == 1) // Hidden
+
+                // Hides the socket only if its set to hidden and not the new armor_archetypes stuff
+                if (type.SocketVisiblity == 1 && !type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 == 778194869))
                     continue;
 
                 S5D4F8080 category = Investment.Get().SocketCategoryStrings[type.SocketCategoryIndex];

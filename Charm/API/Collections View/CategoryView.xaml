@@ -329,17 +329,21 @@
                             </Image>
 
                             <Grid
-                                Width="22"
+                                Width="28"
                                 Height="48"
-                                Margin="0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top"
+                                Panel.ZIndex="10"
                                 Visibility="{Binding ItemIcon2, Converter={StaticResource NullToVisibilityConverter}}">
                                 <Rectangle
                                     Grid.Row="1"
                                     Width="22"
                                     Height="48"
+                                    Margin="0,3,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
                                     Opacity="0.6"
+                                    RenderOptions.EdgeMode="Aliased"
                                     Stretch="Fill">
                                     <Rectangle.Fill>
                                         <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
@@ -348,13 +352,36 @@
                                         </LinearGradientBrush>
                                     </Rectangle.Fill>
                                 </Rectangle>
+
+                                <!--  Featured item banner  -->
+                                <Polygon
+                                    Width="28"
+                                    Height="32"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Fill="#109191"
+                                    Points="0,0 0,32 14,28 28,32 28,0">
+                                    <Polygon.Style>
+                                        <Style TargetType="Polygon">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ItemHash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Polygon.Style>
+                                </Polygon>
+
                                 <Image
                                     Width="20"
                                     Height="20"
+                                    Margin="0,3,0,0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
                                     Source="{Binding ItemIcon2}" />
                             </Grid>
+
 
                             <Grid
                                 Grid.Column="1"
