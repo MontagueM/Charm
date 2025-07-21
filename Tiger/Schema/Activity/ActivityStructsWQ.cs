@@ -339,6 +339,7 @@ public struct SD5908080
 {
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Tag64 = true)]
     [SchemaField(0x8, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Tag64 = true)]
+    [SchemaField(0x0, TigerStrategy.DESTINY2_LATEST, Tag64 = true)]
     public Tag DialogueTable;
 
     [SchemaField(0x38, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
