@@ -1593,8 +1593,8 @@ public struct S57B48080
     public short SetCount; // 'requiredSetCount'
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "8080B2C6", 0x18)]
-public struct S8080B2C6 // DestinyEquipableItemSetDefinition Strings
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "8080B2C4", 0x18)]
+public struct S8080B2C4 // DestinyEquipableItemSetDefinition Strings
 {
     [SchemaField(0x8)]
     public DynamicArrayUnloaded<S7AB28080> ItemSetDefinitionStrings;
