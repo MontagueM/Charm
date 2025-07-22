@@ -839,7 +839,7 @@
         <!--  Stats  -->
         <DataTemplate DataType="{x:Type local:StatEntry}">
             <Grid
-                Margin="0,0,0,1"
+                Margin="0,1,0,1"
                 HorizontalAlignment="Left"
                 Background="Transparent"
                 MouseEnter="ItemTooltip_MouseEnter"
@@ -848,7 +848,7 @@
                     <ColumnDefinition Width="250" />
                     <ColumnDefinition Width="210" />
                     <ColumnDefinition Width="55" />
-                    <ColumnDefinition Width="55" />
+                    <ColumnDefinition Width="60" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock
@@ -1045,7 +1045,7 @@
         </DataTemplate>
         <DataTemplate x:Key="NumericStatEntry">
             <Grid
-                Margin="0,0,0,1"
+                Margin="0,1,0,1"
                 HorizontalAlignment="Left"
                 Background="Transparent"
                 MouseEnter="ItemTooltip_MouseEnter"
@@ -1566,10 +1566,11 @@
                             <Grid
                                 x:Name="StatsPanel"
                                 Grid.Column="1"
-                                Margin="0,0,-65,100"
+                                Margin="0,0,-70,100"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Bottom"
-                                ClipToBounds="False">
+                                ClipToBounds="False"
+                                Visibility="{Binding StatEntries, Converter={StaticResource IsCollectionEmptyToVisConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="auto" />
                                     <ColumnDefinition Width="auto" />

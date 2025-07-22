@@ -85,7 +85,7 @@ public partial class MainWindow
                     .Where(t => t.Tag is 1 && !t.Header.ToString().Contains("configuration", StringComparison.InvariantCultureIgnoreCase))
                     .ToList()
                     .ForEach(t => MainTabControl.Items.Remove(t));
-                CurrentStrategyText.Text = args.Strategy.GetEnumDescription().ToUpper();
+                CurrentStrategyText.Text = $"{App.CurrentVersion.Id}: {args.Strategy.GetEnumDescription().ToUpper()}";
             });
         };
 
@@ -165,7 +165,7 @@ public partial class MainWindow
         PopupBanner warn = new()
         {
             DarkenBackground = true,
-            Icon = "⚠️",
+            //Icon = "⚠️",
             Title = "ATTENTION",
             Subtitle = "Charm is NOT a datamining tool!",
             Description =
@@ -176,7 +176,7 @@ public partial class MainWindow
             "\n     - Including but not limited to screenshots, recordings, or exports." +
             "\n• You will not use Charm in any way that violates Bungie’s Terms of Service." +
             "\n     - Including but not limited to using code to develop cheats and/or exploits." +
-            "\n\nLeaks/spoilers originating from Charm reduce the likelihood of future public releases and updates. Don't ruin it for others." +
+            "\n\nBreaking any of the above reduces the likelihood of future public releases and updates. Don't ruin it for others." +
             "\nDiscover things the way they were intended!",
 
             Style = PopupBanner.PopupStyle.Warning,
@@ -191,7 +191,7 @@ public partial class MainWindow
             PopupBanner warn2 = new()
             {
                 DarkenBackground = true,
-                Icon = "⚠️",
+                //Icon = "⚠️",
                 Title = "THAT'S TOO BAD",
                 Subtitle = "You must accept the agreement to use Charm!",
                 Description = "Charm will now close. You can try reading it again if you want.",
@@ -549,7 +549,7 @@ public partial class MainWindow
             PopupBanner test = new()
             {
                 DarkenBackground = false,
-                Icon = "ℹ️",
+                //Icon = "ℹ️",
                 Title = "INFORMATION",
                 Subtitle = "Test Information Popup Subtitle",
                 Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
@@ -573,7 +573,7 @@ public partial class MainWindow
             PopupBanner test = new()
             {
                 DarkenBackground = false,
-                Icon = "⚠️",
+                //Icon = "⚠️",
                 Title = "ERROR",
                 Subtitle = "Test Error Popup Subtitle",
                 Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nError code: Valumptious",
@@ -612,7 +612,7 @@ public partial class MainWindow
             PopupBanner test = new()
             {
                 DarkenBackground = false,
-                Icon = "💬",
+                //Icon = "💬",
                 Title = "GENERAL",
                 Subtitle = "Test General Popup Subtitle",
                 Description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",

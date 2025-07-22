@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -1118,3 +1119,25 @@ public class Investment_IsFeaturedItem : IValueConverter
     }
 }
 
+public class IsCollectionEmptyToVisConverter : IValueConverter
+{
+    public bool Invert { get; set; } = false;
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        bool isEmpty = true;
+
+        if (value is IEnumerable collection)
+            isEmpty = !collection.GetEnumerator().MoveNext();
+
+        if (Invert)
+            isEmpty = !isEmpty;
+
+        return isEmpty ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException("IsCollectionEmptyToVisConverter does not support ConvertBack.");
+    }
+}

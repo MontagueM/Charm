@@ -230,7 +230,7 @@ public partial class MainMenuView : UserControl
         PopupBanner about = new()
         {
             DarkenBackground = true,
-            Icon = "",
+            //Icon = "",
             Title = $"CHARM {App.CurrentVersion.Id}",
             Subtitle = "The Destiny tool that does (almost) everything.",
             Description =

@@ -335,7 +335,7 @@ public partial class MaterialView : UserControl
         {
             PopupBanner test = new()
             {
-                Icon = "⚠️",
+                //Icon = "⚠️",
                 Title = "ERROR",
                 Subtitle = "Idk why this breaks sometimes but it can...try again.",
                 Description = $"{ex.Message}",

@@ -7,6 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="400"
     d:DesignWidth="1920"
+    KeyboardNavigation.ControlTabNavigation="None"
+    KeyboardNavigation.DirectionalNavigation="None"
+    KeyboardNavigation.TabNavigation="None"
     Loaded="UserControl_Loaded"
     mc:Ignorable="d">
 
@@ -123,7 +126,8 @@
                         <ColumnDefinition Width="70*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Background="#4D000000">
+                    <Grid Grid.Column="0" Background="#4D000000">
+
                         <TextBlock
                             Margin="25"
                             HorizontalAlignment="Right"
@@ -136,7 +140,176 @@
                             FontWeight="Bold"
                             Foreground="{Binding IconColor}"
                             Text="{Binding Icon}" />
-                    </Border>
+
+                        <Grid x:Name="DefaultIconsGrid" Visibility="Collapsed">
+                            <Grid
+                                x:Name="InfoIcon"
+                                Grid.Column="0"
+                                Width="120"
+                                Height="120"
+                                Margin="25"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Visibility="Hidden">
+
+                                <Border
+                                    Name="InfoOuter"
+                                    Width="120"
+                                    Height="120"
+                                    BorderBrush="{Binding IconColor}"
+                                    BorderThickness="2"
+                                    CornerRadius="100"
+                                    Opacity="0.5"
+                                    RenderTransformOrigin="0.5,0.5" />
+
+                                <Border
+                                    Name="InfoInner"
+                                    Width="107"
+                                    Height="107"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="{Binding IconColor}"
+                                    BorderThickness="2"
+                                    CornerRadius="100"
+                                    Opacity="0.9"
+                                    RenderTransformOrigin="0.5,0.5" />
+
+                                <Border
+                                    Name="InfoInnerCircle"
+                                    Width="54"
+                                    Height="54"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{Binding IconColor}"
+                                    BorderBrush="{Binding IconColor}"
+                                    CornerRadius="100"
+                                    Opacity="0.2"
+                                    RenderTransformOrigin="0.5,0.5" />
+
+                                <Border
+                                    Name="InfoExclamation1"
+                                    Width="18"
+                                    Height="44"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{Binding IconColor}"
+                                    BorderBrush="{Binding IconColor}"
+                                    Opacity="1"
+                                    RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform X="0" Y="15" />
+                                    </Border.RenderTransform>
+                                </Border>
+
+                                <Border
+                                    Name="InfoExclamation2"
+                                    Width="18"
+                                    Height="18"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{Binding IconColor}"
+                                    BorderBrush="{Binding IconColor}"
+                                    CornerRadius="100"
+                                    Opacity="1"
+                                    RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform X="0" Y="-25" />
+                                    </Border.RenderTransform>
+                                </Border>
+                            </Grid>
+
+                            <Grid
+                                x:Name="AlertIcon"
+                                Grid.Column="0"
+                                Width="120"
+                                Height="120"
+                                Margin="25"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Visibility="Hidden">
+
+                                <Border
+                                    Name="AlertOuter"
+                                    Width="120"
+                                    Height="120"
+                                    BorderBrush="{Binding IconColor}"
+                                    BorderThickness="2"
+                                    Opacity="0.5"
+                                    RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="0.7071" ScaleY="0.7071" />
+                                            <RotateTransform Angle="45" />
+                                        </TransformGroup>
+                                    </Border.RenderTransform>
+                                </Border>
+
+                                <Border
+                                    Name="AlertInner"
+                                    Width="107"
+                                    Height="107"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="{Binding IconColor}"
+                                    BorderThickness="2"
+                                    Opacity="0.9"
+                                    RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="0.7071" ScaleY="0.7071" />
+                                            <RotateTransform Angle="45" />
+                                        </TransformGroup>
+                                    </Border.RenderTransform>
+                                </Border>
+
+                                <Border
+                                    Name="AlertInnerCircle"
+                                    Width="54"
+                                    Height="54"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{Binding IconColor}"
+                                    BorderBrush="{Binding IconColor}"
+                                    CornerRadius="100"
+                                    Opacity="0.2"
+                                    RenderTransformOrigin="0.5,0.5" />
+
+                                <Border
+                                    Name="AlertExclamation1"
+                                    Width="18"
+                                    Height="44"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{Binding IconColor}"
+                                    BorderBrush="{Binding IconColor}"
+                                    Opacity="1"
+                                    RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform X="0" Y="-15" />
+                                    </Border.RenderTransform>
+                                </Border>
+
+                                <Border
+                                    Name="AlertExclamation2"
+                                    Width="18"
+                                    Height="18"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{Binding IconColor}"
+                                    BorderBrush="{Binding IconColor}"
+                                    CornerRadius="100"
+                                    Opacity="1"
+                                    RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform X="0" Y="25" />
+                                    </Border.RenderTransform>
+                                </Border>
+                            </Grid>
+                        </Grid>
+
+                    </Grid>
+
+
                     <Image
                         Grid.Column="0"
                         Margin="25"

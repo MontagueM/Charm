@@ -23,7 +23,7 @@ public class CommonSettings
     public bool AnimatedBackground { get; set; } = true;
     public bool ExportMaterials { get; set; } = false;
 
-    public bool AcceptedAgreement { get; set; } = false;
+    public bool AcceptedAgreementV3 { get; set; } = false;
 }
 
 // [ConfigSubsystem]
@@ -91,12 +91,12 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     #region General
     public bool GetAcceptedAgreement()
     {
-        return _settings.Common.AcceptedAgreement;
+        return _settings.Common.AcceptedAgreementV3;
     }
 
     public void SetAcceptedAgreement(bool b)
     {
-        _settings.Common.AcceptedAgreement = b;
+        _settings.Common.AcceptedAgreementV3 = b;
         Save();
     }
     #endregion

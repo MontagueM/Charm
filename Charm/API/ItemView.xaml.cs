@@ -743,7 +743,8 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             HideMenuHint.Text = MainContainer.IsVisible ? " Show Menu" : " Hide Menu";
             if (MainContainer.Visibility != Visibility.Visible)
             {
-                ShowLoreHint.Visibility = Visibility.Visible;
+                if (Item.ItemLore != string.Empty)
+                    ShowLoreHint.Visibility = Visibility.Visible;
                 MainContainer.Visibility = Visibility.Visible;
                 ItemRarityBanner.Visibility = Visibility.Visible;
                 UIHelper.AnimateFade(MainContainer, 0.1f, 1f, 0f);

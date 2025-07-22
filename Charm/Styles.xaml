@@ -6,6 +6,7 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.AeroLite">
     <!--  https://material.io/design/color/dark-theme.html#ui-application  -->
+    <charm:IsCollectionEmptyToVisConverter x:Key="IsCollectionEmptyToVisConverter" />
     <charm:StringContainsConverter x:Key="StringContainsConverter" />
     <charm:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
     <charm:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />

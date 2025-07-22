@@ -39,14 +39,26 @@ public partial class Changelog : UserControl
 
     private void ChangelogEntry_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        DataContext = (sender as RadioButton).DataContext as ChangelogEntry;
+        var current = (sender as RadioButton).DataContext as ChangelogEntry;
+        if (SelectedEntry is null || SelectedEntry != current)
+        {
+            SelectedEntry = current;
+            UIHelper.AnimateFade(ChangeLogPanel, 0.2f, 1, 0);
+        }
         ChangeLogPanel.Visibility = Visibility.Visible;
+        DataContext = SelectedEntry;
     }
 
     private void ChangelogEntry_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        DataContext = (sender as RadioButton).DataContext as ChangelogEntry;
+        var current = (sender as RadioButton).DataContext as ChangelogEntry;
+        if (SelectedEntry is null || SelectedEntry != current)
+        {
+            SelectedEntry = current;
+            UIHelper.AnimateFade(ChangeLogPanel, 0.2f, 1, 0);
+        }
         ChangeLogPanel.Visibility = Visibility.Visible;
+        DataContext = SelectedEntry;
     }
 
     private void Exit_Click(object sender, RoutedEventArgs e)

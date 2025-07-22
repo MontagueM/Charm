@@ -92,6 +92,17 @@ public partial class PopupBanner : UserControl
         if (UserInputSecondary is null || UserInputSecondary == string.Empty)
             SecondaryUserInput.Visibility = Visibility.Collapsed;
 
+
+        if (Icon is null && IconImage is null)
+        {
+            DefaultIconsGrid.Visibility = Visibility.Visible;
+            if (Style == PopupStyle.Warning)
+                AlertIcon.Visibility = Visibility.Visible;
+            else
+                InfoIcon.Visibility = Visibility.Visible;
+        }
+
+
         DataContext = this;
     }
 

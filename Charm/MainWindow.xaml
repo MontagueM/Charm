@@ -54,8 +54,8 @@
                     <TextBlock
                         x:Name="CurrentStrategyText"
                         VerticalAlignment="Center"
-                        FontFamily="{StaticResource MaterialDesignFont}"
-                        FontSize="16"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="14"
                         Text="NO GAME SELECTED" />
                 </StackPanel>
 
@@ -96,7 +96,8 @@
                     <TabItem
                         x:Name="Log"
                         HorizontalAlignment="Left"
-                        Header="LOG">
+                        Header="LOG"
+                        Visibility="Collapsed">
                         <local:LogView />
                     </TabItem>
                     <TabItem
