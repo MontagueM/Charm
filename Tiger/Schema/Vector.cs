@@ -242,7 +242,7 @@ public struct Vector3
         if (float.IsInfinity(value) || float.IsNaN(value))
             return value.ToString(); // This will return "Infinity", "-Infinity", or "NaN"
 
-        return Decimal.Parse(value.ToString(), NumberStyles.Float).ToString();
+        return Decimal.Parse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture).ToString();
     }
 
     public System.Numerics.Vector3 ToSys()

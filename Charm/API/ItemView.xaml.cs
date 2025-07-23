@@ -1024,7 +1024,7 @@ public class RarityBannerConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         DestinyTierType rarity = (DestinyTierType)value;
-        float divisor = float.Parse(parameter as string);
+        float divisor = float.Parse(parameter as string, CultureInfo.InvariantCulture);
         return rarity.GetColor().Divide(divisor);
     }
 
