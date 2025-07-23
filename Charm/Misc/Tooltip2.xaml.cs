@@ -162,6 +162,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         BodyColor = rarity.GetBodyColor();
         Header = new()
         {
+            IsD1 = Strategy.IsD1(),
             Icon = ApiImageUtils.GetPlugWatermark(item),
             Name = item.GetItemName(),
             Type = item.GetItemType(),
@@ -665,6 +666,9 @@ public abstract class ToolTipBlock : CharmUIElement, INotifyPropertyChanged
 
 public class HeaderBlock : ToolTipBlock
 {
+    // bandaid fix
+    public bool IsD1 { get; set; }
+
     private ImageSource _icon;
     public ImageSource Icon
     {

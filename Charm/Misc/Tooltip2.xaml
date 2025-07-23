@@ -56,18 +56,30 @@
 
                 <Grid
                     Grid.Row="1"
-                    Width="27"
-                    Height="40"
                     Margin="0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
                     Visibility="{Binding Icon, Converter={StaticResource NullToVisibilityConverter}}">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Width" Value="27" />
+                            <Setter Property="Height" Value="40" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsD1}" Value="True">
+                                    <Setter Property="Width" Value="54" />
+                                    <Setter Property="Height" Value="54" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
                     <Rectangle
                         Grid.Row="1"
                         Width="27"
                         Height="40"
                         Opacity="0.6"
-                        Stretch="Fill">
+                        Stretch="Fill"
+                        Visibility="{Binding IsD1, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <Rectangle.Fill>
                             <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
                                 <GradientStop Offset="0" Color="#00000000" />
@@ -76,12 +88,24 @@
                         </Rectangle.Fill>
                     </Rectangle>
                     <Image
-                        Width="22"
-                        Height="22"
-                        Margin="2,3,3,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Top"
-                        Source="{Binding Icon}" />
+                        Source="{Binding Icon}">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Margin" Value="2,3,3,0" />
+                                <Setter Property="MaxWidth" Value="22" />
+                                <Setter Property="MaxHeight" Value="22" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsD1}" Value="True">
+                                        <Setter Property="Margin" Value="0" />
+                                        <Setter Property="MaxWidth" Value="54" />
+                                        <Setter Property="MaxHeight" Value="54" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
                 </Grid>
 
                 <Grid

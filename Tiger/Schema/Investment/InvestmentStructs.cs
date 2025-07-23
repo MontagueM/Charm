@@ -40,14 +40,17 @@ public struct S9D798080
     [SchemaField(0x18)]
     public ResourcePointer Unk18;  // SE7778080, 06178080 D1
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x20, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk28;  // SC5738080, 'gearset'
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x30, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x28, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk30;  // SB6738080, lore entry index (map CF508080 BDA1A780)
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x38, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x30, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk38;  // B0738080, 'objectives'

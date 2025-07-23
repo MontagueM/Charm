@@ -148,6 +148,7 @@ public struct S38978080
     [SchemaField(0x18, TigerStrategy.DESTINY2_LATEST)]
     public BKHD SoundbankBL;
 
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(TigerStrategy.DESTINY2_LATEST, Obsolete = true)]
     public Tag<S63838080> SoundbankWQ;
