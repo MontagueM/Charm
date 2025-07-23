@@ -226,15 +226,16 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
                 /// Plug Items ----------------------------
                 List<APIPlugItem> plugItems = new();
+                APIPlugItem? plugItem;
 
-                APIPlugItem? plugItem = CreatePlugItem(socket.SingleInitialItemIndex, category.CategoryStyle);
-                if (plugItem is not null)
+                APIPlugItem? initialPlugItem = CreatePlugItem(socket.SingleInitialItemIndex, category.CategoryStyle);
+                if (initialPlugItem is not null)
                 {
-                    plugItem.IsSelected = true;
-                    plugItem.ParentSocket = socketEntry;
-                    plugItem.Index = i;
-                    plugItems.Add(plugItem);
-                    ApplyPlugStats(plugItem);
+                    initialPlugItem.IsSelected = true;
+                    initialPlugItem.ParentSocket = socketEntry;
+                    initialPlugItem.Index = i;
+                    plugItems.Add(initialPlugItem);
+                    ApplyPlugStats(initialPlugItem);
                 }
 
                 foreach (SD5778080 plug in socket.PlugItems)
@@ -270,26 +271,24 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
                 ///--------------------------
                 socketEntry.SocketTypeIndex = socket.SocketTypeIndex;
-                socketEntry.SingleInitialItem = CreatePlugItem(socket.SingleInitialItemIndex, category.CategoryStyle);
                 socketEntry.CategoryStyle = category.CategoryStyle;
                 socketEntry.CategoryHash = category.SocketCategoryHash;
                 socketEntry.PlugItems = plugItems.DistinctBy(x => x.Hash).ToList();
+                if (initialPlugItem is null && socketEntry.PlugItems.Count != 0)
+                {
+                    var newInitial = socketEntry.PlugItems.First();
+                    newInitial.IsSelected = true;
+                    socketEntry.SingleInitialItem = newInitial;
+                    ApplyPlugStats(newInitial);
+                }
+                else
+                    socketEntry.SingleInitialItem = initialPlugItem;
 
                 // TODO find a way to filter out "duplicate" nodes, each upgrade set (1-5) has the same name but different api hashes
 
                 // Kinda bad probably, just moves the Masterwork socket to be right after Infusion
                 if (type.PlugWhitelists.Any(x => x.PlugCategoryHash.Hash32 is 2198080209 or 3185182717) && socketEntries.Count >= 2) // "v460.plugs.armor.masterworks" or "v400.plugs.weapons.masterworks"
-                {
-                    //socketEntry.PlugItems = socketEntry.PlugItems.DistinctBy(x => ((SA1738080)x.Item.TagData.Unk48.GetValue(x.Item.GetReader())).PlugCategoryHash).ToList();
-                    //foreach (var item in socketEntry.PlugItems)
-                    //{
-                    //    if (item.Item.TagData.Unk48.GetValue(item.Item.GetReader()) is SA1738080 plug)
-                    //    {
-                    //        Console.WriteLine($"{item.Item.Name} {item.Item.Hash} {item.Item.ApiHash} {plug.PlugCategoryHash}");
-                    //    }
-                    //}
                     socketEntries.Insert(1, socketEntry);
-                }
                 else
                     socketEntries.Add(socketEntry);
             }
