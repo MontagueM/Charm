@@ -48,7 +48,8 @@ public class Texture : TigerReferenceFile<STextureHeader>
             else
                 data = GetReferenceData();
 
-            if ((_tag.Flags1 & 0xC00) != 0x400 || IsCubemap())
+            //if ((_tag.Flags1 & 0xC00) != 0x400 || IsCubemap())
+            if ((_tag.Flags1 & 0xF00) != 0x500 || IsCubemap())
             {
                 GcnSurfaceFormatExtensions.GcnSurfaceFormat gcnformat = GcnSurfaceFormatExtensions.GetFormat(_tag.ROIFormat);
                 data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, _tag.ArraySize, gcnformat);
