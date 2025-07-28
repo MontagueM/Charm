@@ -111,19 +111,19 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    private void AllEntitiesViewButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        TagListViewerView tagListView = new();
-        tagListView.LoadContent(ETagListType.EntityList);
-        _mainWindow.MakeNewTab("Dynamics", tagListView);
-        _mainWindow.SetNewestTabSelected();
-    }
+    //private void AllEntitiesViewButton_OnClick(object sender, RoutedEventArgs e)
+    //{
+    //    TagListViewerView tagListView = new();
+    //    tagListView.LoadContent(ETagListType.EntityList);
+    //    _mainWindow.MakeNewTab("Dynamics Old", tagListView);
+    //    _mainWindow.SetNewestTabSelected();
+    //}
 
     private void AllEntitiesView2Button_OnClick(object sender, RoutedEventArgs e)
     {
         EntityListView entityListView = new();
         entityListView.LoadContent();
-        _mainWindow.MakeNewTab("Dynamics 2", entityListView);
+        _mainWindow.MakeNewTab("Dynamics", entityListView);
         _mainWindow.SetNewestTabSelected();
     }
 

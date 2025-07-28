@@ -350,7 +350,7 @@ public enum DestinyTraitID : uint
     releases_v410_season = 3619103539,
     [Description("Drifter")]
     releases_v420_season = 117031016,
-    [Description("Opulance")]
+    [Description("Opulence")]
     releases_v450_season = 1357347767,
     [Description("Shadowkeep")]
     releases_v460_season = 1160263324,
@@ -400,7 +400,7 @@ public enum DestinyTraitID : uint
     releases_v810_season = 4062709591,
     [Description("Heresy")]
     releases_v820_season = 3870807100,
-    [Description("Resurgence")]
+    [Description("Reclamation")]
     releases_v900_core = 1858131755,
     [Description("Edge of Fate")]
     releases_v900_dlc = 2725534325

@@ -277,9 +277,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             if (searchStr is not null && searchStr != string.Empty)
             {
                 newItem.Items = new ObservableCollection<APIPlugItem>(item.Items
-                .Where(x => x.Item.GetItemName().ToLower().Contains(searchStr.ToLower())
-                            || x.Item.GetItemType().ToLower().Contains(searchStr.ToLower())
-                            || x.Item.Parent?.GetItemName().ToLower().Contains(searchStr.ToLower()) == true
+                .Where(x => x.Item.GetItemName().Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)
+                            || x.Item.GetItemType().Contains(searchStr, StringComparison.InvariantCultureIgnoreCase)
+                            || x.Item.Parent?.GetItemName().Contains(searchStr, StringComparison.InvariantCultureIgnoreCase) == true
                             || $"{x.Hash}" == searchStr));
             }
             else
