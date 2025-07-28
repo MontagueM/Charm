@@ -145,6 +145,12 @@ public partial class MainMenuView : UserControl
 
     private async void WeaponAudioViewButton_Click(object sender, RoutedEventArgs e)
     {
+        if (Strategy.IsLatest())
+        {
+            AudioDisabledPopup();
+            return;
+        }
+
         await LoadInvestment();
 
         TagListViewerView tagListView = new();
@@ -155,6 +161,11 @@ public partial class MainMenuView : UserControl
 
     private void AllAudioViewButton_OnClick(object sender, RoutedEventArgs e)
     {
+        if (Strategy.IsLatest())
+        {
+            AudioDisabledPopup();
+            return;
+        }
         AudioListView audioListView = new();
         audioListView.LoadContent();
         _mainWindow.MakeNewTab("Sounds", audioListView);
@@ -239,5 +250,20 @@ public partial class MainMenuView : UserControl
             Style = PopupBanner.PopupStyle.Information
         };
         about.Show();
+    }
+
+    private void AudioDisabledPopup()
+    {
+        PopupBanner popup = new()
+        {
+            DarkenBackground = true,
+            //Icon = "",
+            Title = $"HEADS UP",
+            Subtitle = "Audio for Edge of Fate is currently disabled. Fix coming Soon™.",
+            Description =
+            "Bungie changed audio compression in Edge of Fate, Charm currently isn't setup for it yet. Older game versions will still work.",
+            Style = PopupBanner.PopupStyle.Warning
+        };
+        popup.Show();
     }
 }

@@ -65,15 +65,22 @@ public class Wem : TigerFile
     {
     }
 
+    public bool Test()
+    {
+        return false;
+    }
+
     // 85840081 and FBEB1A81 for testing
     public bool Load()
     {
         if (Strategy.IsLatest()) //TODO FIX EVEN THO IDFK HOW IM NOT SMART ENOUGH TO DO THIS
         {
             Log.Error("Audio playback and exporting currently disabled. Blame Bungie.");
+
+            _ = Test();
+
             return false;
         }
-
 
         if (GetReferenceHash() is null || GetReferenceHash().IsInvalid())
             return false;
