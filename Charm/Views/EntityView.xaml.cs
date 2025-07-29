@@ -106,12 +106,12 @@ public partial class EntityView : UserControl
         name = Helpers.SanitizeString(name);
         string savePath = (overridePath is null ? config.GetExportSavePath() : overridePath) + $"/{name}";
 
-        var scene = Tiger.Exporters.Exporter.Get().CreateScene(name, ExportType.Entities);
-
         Log.Verbose($"Exporting entity model name: {name}");
 
         foreach (Entity entity in entities)
         {
+            var scene = Tiger.Exporters.Exporter.Get().CreateScene(entity.Hash, ExportType.Entities);
+
             if (entity.Skeleton == null && overrideSkeleton != null)
                 entity.Skeleton = overrideSkeleton;
 
