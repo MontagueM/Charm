@@ -55,7 +55,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     public Tag<S8080B3ED> _itemFilterDefinitions = null;
 
     public Tag<S8080B44E> _equipableItemSetDefinition = null;
-    public Tag<S8080B2C4> _equipableItemSetDefinitionStrings = null;
+    public Tag<S8080B2C6> _equipableItemSetDefinitionStrings = null;
 
     // Inventory item index -> Collectible index
     private ConcurrentDictionary<int, int> _collectableIndexMap = null;
@@ -261,8 +261,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     case 0x8080B44E:
                         _equipableItemSetDefinition = FileResourcer.Get().GetSchemaTag<S8080B44E>(val);
                         break;
-                    case 0x8080B2C4:
-                        _equipableItemSetDefinitionStrings = FileResourcer.Get().GetSchemaTag<S8080B2C4>(val);
+                    case 0x8080B2C6:
+                        _equipableItemSetDefinitionStrings = FileResourcer.Get().GetSchemaTag<S8080B2C6>(val);
                         break;
                 }
             });
