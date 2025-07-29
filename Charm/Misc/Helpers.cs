@@ -1141,3 +1141,29 @@ public class IsCollectionEmptyToVisConverter : IValueConverter
         throw new NotSupportedException("IsCollectionEmptyToVisConverter does not support ConvertBack.");
     }
 }
+
+public class TextureFromHashConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (parameter is not string hash || string.IsNullOrWhiteSpace(hash))
+            return null;
+
+        var texture = FileResourcer.Get().GetFile<Texture>(hash);
+
+        if (texture == null)
+            return null;
+
+        BitmapImage? primary = ApiImageUtils.MakeBitmapImage(texture.GetTexture(), texture.TagData.Width, texture.TagData.Height);
+
+        var dw = new ImageBrush(primary);
+        dw.Freeze();
+
+        return dw.ImageSource;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}

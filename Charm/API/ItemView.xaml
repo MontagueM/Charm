@@ -267,11 +267,6 @@
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <Image
-                                Width="60"
-                                Height="60"
-                                Margin="0"
-                                Source="{Binding Icon}" />
                         </Border>
                         <Border
                             BorderBrush="#66FFFFFF"
@@ -279,6 +274,7 @@
                             CornerRadius="100"
                             Focusable="False" />
 
+                        <!--
                         <Border
                             x:Name="EnhancedBorder"
                             Margin="0"
@@ -303,9 +299,42 @@
                                 </Style>
                             </Border.Style>
                         </Border>
+                        -->
                     </Grid>
-
                 </RadioButton>
+
+                <Rectangle
+                    Width="96"
+                    Height="96"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    IsHitTestVisible="False">
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Item.Type, Converter={StaticResource StringContainsConverter}, ConverterParameter=Enhanced}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+
+                    <Rectangle.Fill>
+                        <SolidColorBrush Color="#f4d054" />
+                    </Rectangle.Fill>
+
+                    <Rectangle.OpacityMask>
+                        <ImageBrush ImageSource="{Binding Item.Type, Converter={StaticResource TextureFromHashConverter}, ConverterParameter=4645C280}" />
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+
+                <Image
+                    Width="60"
+                    Height="60"
+                    Margin="0"
+                    IsHitTestVisible="False"
+                    Source="{Binding Icon}" />
             </Grid>
 
         </DataTemplate>
@@ -403,6 +432,7 @@
                         Margin="0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
+                        RenderOptions.BitmapScalingMode="NearestNeighbor"
                         Source="{Binding Icon}" />
 
                     <RadioButton
@@ -1469,6 +1499,7 @@
                                     Margin="0,3,0,0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
+                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
                                     Source="{Binding Item.ItemWatermark}" />
                             </Grid>
 
@@ -1483,7 +1514,15 @@
                                 Width="96"
                                 Height="96"
                                 d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                                RenderOptions.BitmapScalingMode="NearestNeighbor"
                                 Source="{Binding Item.ItemIcon}" />
+
+                            <Image
+                                Width="96"
+                                Height="96"
+                                Panel.ZIndex="1"
+                                d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                                Source="{Binding Item.ItemIcon, Converter={StaticResource TextureFromHashConverter}, ConverterParameter=3C45C280}" />
 
                             <StackPanel
                                 Grid.Column="1"
@@ -1513,8 +1552,6 @@
                                     Foreground="{StaticResource ForegroundColour100}"
                                     Opacity="0.7"
                                     Text="{Binding Item.ItemType}" />
-
-
                             </StackPanel>
                         </Grid>
 
@@ -1628,6 +1665,10 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="">
                                                     <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Kinetic">
+                                                    <Setter Property="Foreground" Value="White" />
+                                                    <Setter Property="Text" Value="Kinetic" />
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding Item.ItemDamageType}" Value="Arc">
                                                     <Setter Property="Foreground" Value="#85c5ec" />

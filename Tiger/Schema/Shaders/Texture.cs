@@ -49,10 +49,10 @@ public class Texture : TigerReferenceFile<STextureHeader>
                 data = GetReferenceData();
 
             //if ((_tag.Flags1 & 0xC00) != 0x400 || IsCubemap())
-            if ((_tag.Flags1 & 0xF00) != 0x500 || IsCubemap())
+            if ((_tag.Flags1 & 0xF00) != 0x500 || IsCubemap() || IsVolume())
             {
                 GcnSurfaceFormatExtensions.GcnSurfaceFormat gcnformat = GcnSurfaceFormatExtensions.GetFormat(_tag.ROIFormat);
-                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, _tag.ArraySize, gcnformat);
+                data = PS4SwizzleAlgorithm.UnSwizzle(data, _tag.Width, _tag.Height, IsVolume() ? _tag.Depth : _tag.ArraySize, gcnformat);
             }
         }
         else
