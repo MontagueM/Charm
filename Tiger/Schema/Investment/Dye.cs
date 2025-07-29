@@ -42,6 +42,37 @@ public class Dye : Tag<SScope>
         return dyeInfo;
     }
 
+    // Very few cases where this will get used, based on the Primer shader
+    public static DyeInfo DefaultDye()
+    {
+        DyeInfo defaultDye = new();
+
+        defaultDye.DetailDiffuseTransform = new(1.5f, 1.5f, 0f, 0f);
+        defaultDye.DetailNormalTransform = new(1.5f, 1.5f, 0f, 0f);
+        defaultDye.SpecAaTransform = Vector4.Zero;
+        defaultDye.PrimaryAlbedoTint = new(0.1743545, 0.1743545, 0.1743545, 1.0);
+        defaultDye.PrimaryEmissiveTintColorAndIntensityBias = new(0, 0, 0, 1.0);
+        defaultDye.PrimaryMaterialParams = Vector4.Zero;
+        defaultDye.PrimaryMaterialAdvancedParams = new(0f, -1f, 0f, 1f);
+        defaultDye.PrimaryRoughnessRemap = new(0.8108102, 0.16216499, 0, 0.5);
+        defaultDye.PrimaryWornAlbedoTint = new(0.1746474, 0.1746474, 0.1746474, 1.0);
+        defaultDye.PrimaryWearRemap = new(-0.5f, 4f, 0f, 1f);
+        defaultDye.PrimaryWornRoughnessRemap = new(0.818018, 0.13693798, 0, 0.5);
+        defaultDye.PrimaryWornMaterialParameters = Vector4.Zero;
+
+        defaultDye.SecondaryAlbedoTint = new(0.1746474, 0.1746474, 0.1746474, 1.0);
+        defaultDye.SecondaryEmissiveTintColorAndIntensityBias = new(0, 0, 0, 1.0);
+        defaultDye.SecondaryMaterialParams = Vector4.Zero;
+        defaultDye.SecondaryMaterialAdvancedParams = new(0f, -1f, 0f, 1f);
+        defaultDye.SecondaryRoughnessRemap = new(0.798198, 0.13873982, 0, 0.5);
+        defaultDye.SecondaryWornAlbedoTint = new(0.1746474, 0.1746474, 0.1746474, 1.0);
+        defaultDye.SecondaryWearRemap = new(-0.5f, 4f, 0f, 1f);
+        defaultDye.SecondaryWornRoughnessRemap = new(0.854054, 0.046848, 0, 0.5);
+        defaultDye.SecondaryWornMaterialParameters = Vector4.Zero;
+
+        return defaultDye;
+    }
+
     private static Dictionary<uint, string> ChannelNames = new()
     {
         {662199250, "ArmorPlate"},

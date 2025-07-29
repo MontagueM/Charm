@@ -1,5 +1,17 @@
 [
     {
+        "version": "3.0.1",
+        "date": "07-29-2025",
+        "changes": [
+            {
+                "title": "Bug Fixes",
+                "notes": [
+                    "Fixed some bugs relating to API and API exporting"
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.0.0",
         "date": "07-20-2025",
         "changes": [

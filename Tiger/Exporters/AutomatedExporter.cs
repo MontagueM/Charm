@@ -60,11 +60,16 @@ public class AutomatedExporter
                 int dyeIndex = 1;
                 foreach (Dye? dye in dyes)
                 {
-                    if (dye is null)
-                        continue;
+                    DyeInfo dyeInfo = dye is not null ? dye.GetDyeInfo() : Dye.DefaultDye();
+                    if (dye is not null)
+                    {
+                        dye.ExportTextures($"{saveDirectory}/Textures", outputTextureFormat);
+                        STextureTag diff = dye.TagData.Textures[0];
+                        text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+                        STextureTag norm = dye.TagData.Textures[1];
+                        text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
+                    }
 
-                    dye.ExportTextures($"{saveDirectory}/Textures", outputTextureFormat);
-                    DyeInfo dyeInfo = dye.GetDyeInfo();
                     foreach (System.Reflection.FieldInfo fieldInfo in dyeInfo.GetType().GetFields())
                     {
                         Vector4 value = (Vector4)fieldInfo.GetValue(dyeInfo);
@@ -75,18 +80,18 @@ public class AutomatedExporter
                         {
                             text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
 
-                            // Rare case where dye list only has 1 dye?
+                            // Should be 3 total. Armor, Cloth, Suit
                             if (dyes.Count == 1)
                             {
                                 text = text.Replace($"{valueName}{dyeIndex + 1}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
                                 text = text.Replace($"{valueName}{dyeIndex + 2}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
                             }
+                            else if (dyes.Count == 2 && dyeIndex >= 1) // Dumb
+                            {
+                                text = text.Replace($"{valueName}{dyeIndex + 2}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+                            }
                         }
                     }
-                    STextureTag diff = dye.TagData.Textures[0];
-                    text = text.Replace($"DiffMap{dyeIndex}", $"{diff.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
-                    STextureTag norm = dye.TagData.Textures[1];
-                    text = text.Replace($"NormMap{dyeIndex}", $"{norm.Texture.Hash}.{TextureExtractor.GetExtension(outputTextureFormat)}");
                     dyeIndex++;
                 }
 
