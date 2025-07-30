@@ -161,11 +161,11 @@ public partial class MainMenuView : UserControl
 
     private void AllAudioViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (Strategy.IsLatest())
-        {
-            AudioDisabledPopup();
-            return;
-        }
+        //if (Strategy.IsLatest())
+        //{
+        //    AudioDisabledPopup();
+        //    return;
+        //}
         AudioListView audioListView = new();
         audioListView.LoadContent();
         _mainWindow.MakeNewTab("Sounds", audioListView);

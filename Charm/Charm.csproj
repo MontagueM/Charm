@@ -147,6 +147,9 @@
       <Compile Update="Views\ListViews\AudioListView.xaml.cs">
         <SubType>Code</SubType>
       </Compile>
+      <Content Include="ThirdParty\vgmstream\**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
