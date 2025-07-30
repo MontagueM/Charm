@@ -127,6 +127,8 @@ public partial class EntityView : UserControl
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
                 entity.SaveTexturePlates(savePath);
             }
+
+            Tiger.Exporters.Exporter.Get().Export(savePath ?? null); // 'temp' fix for file in-use crash
         }
 
         if (exportType == ExportTypeFlag.Full)
@@ -137,7 +139,7 @@ public partial class EntityView : UserControl
             }
         }
 
-        Tiger.Exporters.Exporter.Get().Export(savePath ?? null);
+        //Tiger.Exporters.Exporter.Get().Export(savePath ?? null);
         Log.Info($"Exported entity model {name} to {savePath.Replace('\\', '/')}/");
     }
 

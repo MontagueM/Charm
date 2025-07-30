@@ -316,7 +316,7 @@ public partial class EntityListView : UserControl
         });
     }
 
-    private void ExportButton_Click(object sender, RoutedEventArgs e)
+    private async void ExportButton_Click(object sender, RoutedEventArgs e)
     {
         if (_currentEntity is null)
             return;
@@ -335,8 +335,12 @@ public partial class EntityListView : UserControl
 
             EntityViewer.ModelView.Visibility = Visibility.Hidden;
         });
-        EntityView.Export(entities, _currentEntity);
-        MainWindow.Progress.CompleteStage();
+
+        await Task.Run(() =>
+        {
+            EntityView.Export(entities, _currentEntity);
+            MainWindow.Progress.CompleteStage();
+        });
 
         Dispatcher.Invoke(() =>
         {
