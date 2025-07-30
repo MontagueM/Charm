@@ -481,13 +481,13 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             if (statValue < 0 || stat.DisplayInterpolation is null)
                 return statValue;
 
-            if (stat.IsLinear == 1)
-            {
-                return statValue;
-            }
-            else if (stat.DisplayInterpolation.Any())
+            if (stat.DisplayInterpolation.Any())
             {
                 return InterpolateStatValue(stat, statValue, statGroup.Value.MaximumValue);
+            }
+            else if (stat.IsLinear == 1) // Is this even a thing? Idk if I've been wrong about this
+            {
+                return statValue;
             }
             else // This shouldnt happen, i don't think?
                 return statValue;
