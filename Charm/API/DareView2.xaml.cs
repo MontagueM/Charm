@@ -587,7 +587,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         {
             DarkenBackground = true,
             //Icon = "❓",
-            IconImage = ApiImageUtils.MakeBitmapImage(Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80C0D9B8 : 0x80E65764)), 120, 120),
             Title = $"WELCOME TO DARE",
             Subtitle = "The Destiny API Ripping Extension",
             Description = "You may already be familar with the old DARE, but if you're not, DARE used to be a program used to rip gear models/shaders from the Bungie API." +
@@ -598,6 +597,8 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             "\n• Holding Shift before hovering over an item will show its API hash next to its type.",
             Style = PopupBanner.PopupStyle.Information
         };
+        if (Strategy.IsLatest())
+            about.IconImage = ApiImageUtils.MakeBitmapImage(Texture.GetTextureFromHash(new(0x80C0D9B8)), 120, 120);
         about.Show();
     }
 
