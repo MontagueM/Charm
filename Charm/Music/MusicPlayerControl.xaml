@@ -43,7 +43,7 @@
             Background="{StaticResource BackgroundColour20}">
             <Button
                 x:Name="PlayPause"
-                Click="PlayPause_OnClick"
+                Click="PlayPause_Click"
                 Style="{StaticResource D2StyleButton}">
                 <TextBlock
                     Margin="5"
@@ -63,7 +63,7 @@
             IsMoveToPointEnabled="True"
             Maximum="1"
             Minimum="0"
-            ValueChanged="VolumeBar_OnValueChanged"
+            ValueChanged="VolumeBar_ValueChanged"
             Value="0.7" />
 
         <Grid
@@ -89,8 +89,8 @@
                 IsMoveToPointEnabled="True"
                 Maximum="1"
                 Minimum="0"
-                PreviewMouseUp="ProgressBar_OnPreviewMouseUp"
-                Thumb.DragCompleted="ProgressBar_OnDragCompleted"
+                PreviewMouseUp="ProgressBar_PreviewMouseUp"
+                Thumb.DragCompleted="ProgressBar_DragCompleted"
                 Value="0" />
             <TextBlock
                 x:Name="TotalDuration"

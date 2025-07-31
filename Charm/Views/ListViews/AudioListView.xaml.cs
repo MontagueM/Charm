@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Arithmic;
 using Restless.WaveForm.Renderer;
 using Restless.WaveForm.Settings;
 using Tiger;
@@ -164,6 +165,7 @@ public partial class AudioListView : UserControl
         {
             MusicPlayer.Play();
             DrawWaveform();
+            Log.Verbose($"Playing {wem.Hash}");
         }
 
         ExportButton.IsEnabled = true;

@@ -14,7 +14,7 @@
     <UserControl.Resources>
         <DataTemplate x:Key="AudioTemplate">
             <RadioButton
-                Width="500"
+                Width="550"
                 MaxHeight="128"
                 Margin="0,0,0,0"
                 HorizontalAlignment="Left"

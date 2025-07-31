@@ -146,7 +146,7 @@
 
         <DataTemplate x:Key="AudioTemplate">
             <RadioButton
-                Width="500"
+                Width="550"
                 MaxHeight="128"
                 Margin="0,0,0,0"
                 HorizontalAlignment="Left"
@@ -217,7 +217,7 @@
 
                 <ContentControl
                     Grid.Row="0"
-                    Margin="0,5,40,5"
+                    Margin="0,5,0,5"
                     Content="{Binding}"
                     ContentTemplate="{StaticResource CategoryHeader}">
                     <ContentControl.Style>
@@ -231,7 +231,7 @@
                     <ListView
                         Grid.Row="1"
                         MaxHeight="210"
-                        Margin="0,10,0,5"
+                        Margin="0,5,0,5"
                         Background="Transparent"
                         BorderBrush="{StaticResource ForegroundColour70}"
                         BorderThickness="0,0,1,0"
