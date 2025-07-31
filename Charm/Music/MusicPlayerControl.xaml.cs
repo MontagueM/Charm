@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +15,6 @@ public partial class MusicPlayerControl : UserControl
 {
     private WaveOut _output;
     private Wem _wem;
-    private WwiseSound _sound;
     private WaveChannel32 _waveProvider;
 
     public bool CanPlay { get; set; } = false;
@@ -74,6 +72,10 @@ public partial class MusicPlayerControl : UserControl
         {
             MakeOutput();
             _output.Init(_waveProvider);
+
+            _output.Stop();
+            _waveProvider.Position = 0;
+            SetSliderPosition(0, true);
         }
         catch (Exception ex)
         {
@@ -86,62 +88,14 @@ public partial class MusicPlayerControl : UserControl
         SetVolume(VolumeBar.Value);
         CanPlay = true;
 
-        // Ensure duration UI is updated and safe
         var totalTime = _waveProvider.TotalTime;
-        CurrentDuration.Text = Wem.GetDurationString((float)totalTime.TotalSeconds); // Could be 0 initially
+        CurrentDuration.Text = Wem.GetDurationString((float)totalTime.TotalSeconds);
         TotalDuration.Text = Wem.GetDurationString((float)totalTime.TotalSeconds);
 
         ProgressBar.Value = 0;
         SetPlayingText(wem.Hash);
 
         return true;
-    }
-
-    public async Task SetSound(WwiseSound sound)
-    {
-        if (_output != null)
-            _output.Dispose();
-        _sound = sound;
-        if (sound.TagData.Wems.Count > 10)
-        {
-            MainWindow.Progress.SetProgressStages(new List<string>
-            {
-                $"Loading Sound {sound.Hash}",
-            });
-            await Task.Run(() =>
-            {
-                _waveProvider = sound.MakeWaveChannel();
-            });
-            MainWindow.Progress.CompleteStage();
-        }
-        else
-        {
-            _waveProvider = sound.MakeWaveChannel();
-        }
-
-        try
-        {
-            MakeOutput();
-            _output.Init(_waveProvider);
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed to initialize audio output: {ex.Message}");
-            MessageBox.Show("Error initializing audio playback.");
-            CanPlay = false;
-            return;
-        }
-
-        SetVolume(VolumeBar.Value);
-        CanPlay = true;
-
-        // Ensure duration UI is updated and safe
-        var totalTime = _waveProvider.TotalTime;
-        CurrentDuration.Text = Wem.GetDurationString((float)totalTime.TotalSeconds); // Could be 0 initially
-        TotalDuration.Text = sound.Duration ?? Wem.GetDurationString((float)totalTime.TotalSeconds);
-
-        ProgressBar.Value = 0;
-        SetPlayingText(sound.Hash);
     }
 
     public void Play()
@@ -152,7 +106,7 @@ public partial class MusicPlayerControl : UserControl
             return;
         }
 
-        string name = _wem == null ? _sound.Hash : _wem.Hash;
+        string name = _wem.Hash;
         Log.Info($"Playing {name}");
         (PlayPause.Content as TextBlock).Text = "PAUSE";
 
@@ -196,7 +150,7 @@ public partial class MusicPlayerControl : UserControl
     {
         _output?.Pause();
         (PlayPause.Content as TextBlock).Text = "PLAY";
-        string name = _wem == null ? _sound.Hash : _wem.Hash;
+        string name = _wem.Hash;
         Log.Verbose($"Paused {name}");
     }
 
@@ -214,7 +168,7 @@ public partial class MusicPlayerControl : UserControl
 
     private void PlayPause_OnClick(object sender, RoutedEventArgs e)
     {
-        if (_wem == null && _sound == null)
+        if (_wem == null)
             return;
 
         if (IsPlaying())
@@ -239,8 +193,9 @@ public partial class MusicPlayerControl : UserControl
 
     private void SetPosition(Slider slider)
     {
-        if (_wem == null && _sound == null)
+        if (_wem == null)
             return;
+
         bool isAlreadyPaused = _output.PlaybackState == PlaybackState.Paused;
 
         Pause();

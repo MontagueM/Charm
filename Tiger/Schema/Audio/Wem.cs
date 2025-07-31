@@ -81,7 +81,7 @@ public class Wem : TigerFile
             byte[] wavData = File.ReadAllBytes(tempPath);
             _wemStream = new MemoryStream(wavData);
             _wemReader = new WaveFileReader(_wemStream);
-            WemReaderClone = new WaveFileReader(new MemoryStream(wavData));
+            WemReaderClone = Clone(); //new WaveFileReader(new MemoryStream(wavData));
 
             if (File.Exists(tempPath))
                 File.Delete(tempPath);
@@ -305,7 +305,7 @@ public class Wem : TigerFile
         _wemStream.CopyTo(memory);
         memory.Position = 0;
 
-        return new VorbisWaveReader(memory);
+        return Strategy.IsLatest() ? new WaveFileReader(memory) : new VorbisWaveReader(memory);
     }
 
     public void VgmstreamConvert(string savePath)

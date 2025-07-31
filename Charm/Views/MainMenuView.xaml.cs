@@ -145,17 +145,19 @@ public partial class MainMenuView : UserControl
 
     private async void WeaponAudioViewButton_Click(object sender, RoutedEventArgs e)
     {
-        if (Strategy.IsLatest())
-        {
-            AudioDisabledPopup();
-            return;
-        }
+        //if (Strategy.IsLatest())
+        //{
+        //    AudioDisabledPopup();
+        //    return;
+        //}
 
         await LoadInvestment();
 
-        TagListViewerView tagListView = new();
-        tagListView.LoadContent(ETagListType.WeaponAudioGroupList);
-        _mainWindow.MakeNewTab("Weapon Audio", tagListView);
+        //TagListViewerView tagListView = new();
+        //tagListView.LoadContent(ETagListType.WeaponAudioGroupList);
+        WeaponAudioListView weaponAudio = new();
+        weaponAudio.LoadContent();
+        _mainWindow.MakeNewTab("Weapon Audio", weaponAudio);
         _mainWindow.SetNewestTabSelected();
     }
 

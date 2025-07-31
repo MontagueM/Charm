@@ -157,7 +157,7 @@ public partial class AudioListView : UserControl
 
     private void LoadSound(FileHash hash)
     {
-        Wem wem = FileResourcer.Get().GetFile<Wem>(hash, false, false);
+        Wem wem = FileResourcer.Get().GetFile<Wem>(hash, true, false);
         _currentSound = wem;
 
         if (MusicPlayer.SetWem(wem))
@@ -328,8 +328,8 @@ public partial class AudioListView : UserControl
             if (_currentSound is null)
                 return;
 
-            using var stream = _currentSound.WemReaderClone;
-            var wave = WaveFormRenderer.Create(stream, _sinePreviewSettings);
+            //using var stream = _currentSound.WemReaderClone;
+            var wave = WaveFormRenderer.Create(_currentSound.WemReaderClone, _sinePreviewSettings);
 
             // Overlay Right and Left
             using var combined = new Bitmap(wave.ImageLeft.Width, wave.ImageLeft.Height);

@@ -138,6 +138,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Update="Views\ListViews\WeaponAudioListView.xaml.cs">
+        <SubType>Code</SubType>
+      </Compile>
       <Compile Update="Views\ListViews\StaticListView.xaml.cs">
         <SubType>Code</SubType>
       </Compile>

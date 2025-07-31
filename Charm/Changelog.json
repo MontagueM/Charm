@@ -1,5 +1,24 @@
 [
     {
+        "version": "3.0.4",
+        "date": "07-31-2025",
+        "changes": [
+            {
+                "title": "Audio Fixes",
+                "notes": [
+                    "Audio for Edge of Fate should now work.",
+                    "PLEASE report any crashes/bug/issues! This is a new system and I'm not the biggest fan of it."
+                ]
+            },
+            {
+                "title": "Weapon Audio Viewer 2.0",
+                "notes": [
+                    "The Weapon Audio Viewer has been redone. You can now export individual category sounds, all sounds in a category, or all the sounds in general!"
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.0.2",
         "date": "07-30-2025",
         "changes": [

@@ -47,12 +47,6 @@ public partial class MusicWemsControl : UserControl
         PlayWem(item);
     }
 
-    public async void PlaySound(WwiseSound sound)
-    {
-        await MusicPlayer.SetSound(sound);
-        MusicPlayer.Play();
-    }
-
     public void PlayWem(WemItem wem)
     {
         if (MusicPlayer.SetWem(wem.Wem))
