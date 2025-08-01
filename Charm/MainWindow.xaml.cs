@@ -318,7 +318,7 @@ public partial class MainWindow
     private async void CheckVersion()
     {
         Arithmic.Log.Info($"Charm Version: {App.CurrentVersion.Id}");
-        var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/delta/TFS", App.CurrentVersion);
+        var versionChecker = new ApplicationVersionChecker("https://github.com/MontagueM/Charm/raw/delta/EOF", App.CurrentVersion);
         versionChecker.LatestVersionName = "version";
         try
         {
