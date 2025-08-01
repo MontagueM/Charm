@@ -26,7 +26,8 @@ Charm currently supports:
 | 3.4.0.2 | Beyond Light last update | DepotDownloader | 5631185797932644936 | 3832609057880895101  |
 | 6.3.0.7 | Witch Queen last update  | DepotDownloader | 6051526863119423207 | 1078048403901153652  |
 | 7.3.6.6 | Lightfall last update    | DepotDownloader | 7707143404100984016 | 5226038440689554798  |
-| N/A     | The Final Shape latest   | Steam           | N/A                 | N/A                  |
+| 8.2.6.4 | The Final Shape last update | DepotDownloader | 3593201409625956155 | 6975584800172104419 |
+| N/A     | Edge of Fate Latest      | Steam           | N/A                 | N/A                  |
 
 If you just want to look at the latest release, you only need Destiny 2 downloaded on Steam.
 
@@ -64,8 +65,9 @@ Also take a look at the [Charm wiki](https://github.com/MontagueM/DestinyDocs/bl
 If you experience any issue, you can register an issue in this repository. If the program has crashed, it is extremely valuable to provide the charm.log file.
 
 ## Known issues
+- The Animated Background may cause startup crashes for some people, set "AnimatedBackground" to false in your config.json file
 - Textures will not export if the export path contains a period
-- UI elements do not scale correctly for any resolution other than 1080p
+- UI elements may not scale correctly for any resolution other than 1080p
 - API crashes for some people (extremely rare?) (Related to DirectXTex)
 
 
@@ -89,10 +91,6 @@ If you experience any issue, you can register an issue in this repository. If th
 
 ## Unreal Engine
 - Unreal Engine importing isn't supported at this current moment. All the discoveries with maps (skyboxes, lights, etc) and rendering and what not have made things a little complicated and I (Delta) personally have little experience in scripting for UE
-
-## Learning and Contributing
-
-To learn about how Charm works or to contribute, check out the [wiki](https://github.com/MontagueM/Charm/wiki).
 
 ## Sponsor
 
