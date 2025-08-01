@@ -1102,6 +1102,16 @@ public class InventoryItem : Tag<S9D798080>
             traits.Add(Investment.Get()._traitDefinitionMap.TagData.Traits[index].TraitHash);
         }
 
+        // Custom assignments
+        if (_tag.TraitIndices.Count == 0)
+        {
+            if (_tag.BucketTypeIndex == 42) // Seasonal Artifact
+                traits.Add(DestinyTraitID.item_seasonal_artifact);
+
+            if (Type.Contains("mask ornament", StringComparison.InvariantCultureIgnoreCase))
+                traits.Add(DestinyTraitID.item_mask);
+        }
+
         // inherits traits from the parent, just release for now tho
         if (Parent is not null)
             traits.AddRange(Parent.ItemTraits.Where(x => x.ToString().Contains("releases")));
@@ -1465,7 +1475,7 @@ public class InventoryItem : Tag<S9D798080>
                 traits.Add(DestinyTraitID.item_armor_class);
                 break;
             default:
-                traits.Add(DestinyTraitID.other);
+                traits.Add(DestinyTraitID.item_other);
                 break;
         }
         return traits;

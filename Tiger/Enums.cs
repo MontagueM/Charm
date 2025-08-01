@@ -146,8 +146,15 @@ public enum DestinyPresentationScreenStyle : uint
 
 public enum DestinyTraitID : uint
 {
+    // Not in game, instead defined for custom assignment
     [Description("Other")]
-    other = 0,
+    item_other = 0,
+    [Description("Mask")]
+    item_mask = 1,
+    [Description("Seasonal Artifact")]
+    item_seasonal_artifact = 2,
+
+    // Defined in game
     [Description("Black Armory")]
     activities_black_armory = 2944045106,
     [Description("Gambit")]

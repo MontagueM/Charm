@@ -204,12 +204,12 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             if (ShouldAddToList(item) && item.Name != string.Empty)
             {
-                if (!item.GetItemTraits().Any() || item.GetItemTraits().Contains(DestinyTraitID.other))
+                if (!item.GetItemTraits().Any() || item.GetItemTraits().Contains(DestinyTraitID.item_other))
                 {
-                    if (!SortedItems.ContainsKey(DestinyTraitID.other))
-                        SortedItems[DestinyTraitID.other] = new List<InventoryItem>();
+                    if (!SortedItems.ContainsKey(DestinyTraitID.item_other))
+                        SortedItems[DestinyTraitID.item_other] = new List<InventoryItem>();
 
-                    SortedItems[DestinyTraitID.other].Add(item);
+                    SortedItems[DestinyTraitID.item_other].Add(item);
                 }
 
                 foreach (var trait in item.GetItemTraits())
@@ -249,7 +249,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             });
         }
-        Categories.Items = ItemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_") || x.CategoryType == DestinyTraitID.other);
+        Categories.Items = ItemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_"));
     }
 
     private void RefreshItemList()
@@ -298,7 +298,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (itemCategories.Count == 1)
             itemCategories.First().ItemsPerPage = 72;
 
-        Categories.Items = itemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_") || x.CategoryType == DestinyTraitID.other);
+        Categories.Items = itemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_"));
     }
 
     private void SelectedDareEntry_Click(object sender, RoutedEventArgs e)
