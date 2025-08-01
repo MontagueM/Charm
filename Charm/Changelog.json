@@ -1,5 +1,18 @@
 [
     {
+        "version": "3.0.5",
+        "date": "08-1-2025",
+        "changes": [
+            {
+                "title": "More API fixes",
+                "notes": [
+                    "Fixed Seasonal Artifacts not showing and exporting.",
+                    "Added Seasonal Artifacts and Masks to their own categories."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.0.4",
         "date": "07-31-2025",
         "changes": [
