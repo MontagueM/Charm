@@ -48,6 +48,8 @@ public class AutomatedExporter
         File.WriteAllText($"{saveDirectory}/{meshName}_import_to_ue5.py", textExtensions);
     }
 
+
+    // TODO, clean this up, its getting ugly
     public static void SaveBlenderApiFile(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
     {
         try
@@ -56,8 +58,27 @@ public class AutomatedExporter
             {
                 string text = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}/Exporters/blender_api_template.py");
                 string[] components = { "X", "Y", "Z", "W" };
-
                 int dyeIndex = 1;
+
+                // TEMP and gross fix for very rare case where theres just no dyes...
+                if (dyes.Count == 0)
+                {
+                    DyeInfo dyeInfo = Dye.DefaultDye();
+                    foreach (System.Reflection.FieldInfo fieldInfo in dyeInfo.GetType().GetFields())
+                    {
+                        Vector4 value = (Vector4)fieldInfo.GetValue(dyeInfo);
+                        if (!fieldInfo.CustomAttributes.Any())
+                            continue;
+                        string valueName = fieldInfo.CustomAttributes.First().ConstructorArguments[0].Value.ToString();
+                        for (int i = 0; i < 4; i++)
+                        {
+                            text = text.Replace($"{valueName}{dyeIndex}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+                            text = text.Replace($"{valueName}{dyeIndex + 1}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+                            text = text.Replace($"{valueName}{dyeIndex + 2}.{components[i]}", $"{value[i].ToString().Replace(",", ".")}");
+                        }
+                    }
+                }
+
                 foreach (Dye? dye in dyes)
                 {
                     DyeInfo dyeInfo = dye is not null ? dye.GetDyeInfo() : Dye.DefaultDye();
@@ -105,6 +126,7 @@ public class AutomatedExporter
             Log.Error($"{e.Message}");
         }
     }
+
 
     public static void SaveD1ShaderInfo(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<DyeD1> dyes, string fileSuffix = "")
     {

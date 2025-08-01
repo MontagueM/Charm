@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Arithmic;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Investment;
@@ -248,7 +249,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
             });
         }
-        Categories.Items = ItemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_"));
+        Categories.Items = ItemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_") || x.CategoryType == DestinyTraitID.other);
     }
 
     private void RefreshItemList()
@@ -297,7 +298,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (itemCategories.Count == 1)
             itemCategories.First().ItemsPerPage = 72;
 
-        Categories.Items = itemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_"));
+        Categories.Items = itemCategories.Where(x => x.CategoryType.ToString().StartsWith("item_") || x.CategoryType == DestinyTraitID.other);
     }
 
     private void SelectedDareEntry_Click(object sender, RoutedEventArgs e)
@@ -375,13 +376,17 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
             SelectedItems.ToList().ForEach(item =>
             {
                 var curItem = item.Item;
-                if ((curItem.Type is "Artifact" or "Seasonal Artifact") && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
+                // GearSet was removed from artifacts in EoF, for some reason?
+                // THIS IS A VERY HACK SOLUTION, just get the next item in the inventory items list lol
+                if ((curItem.Type is "Artifact" or "Seasonal Artifact"))// && curItem.TagData.Unk28.GetValue(curItem.GetReader()) is SC5738080 gearSet)
                 {
-                    if (gearSet.ItemList.Count != 0)
-                    {
-                        curItem = Investment.Get().GetInventoryItem(gearSet.ItemList.First().ItemIndex);
-                        curItem.Name = item.Item.Name;
-                    }
+                    curItem = Investment.Get().GetInventoryItem(curItem.GetItemIndex() + 1);
+                    curItem.Name = item.Item.Name;
+                    //if (gearSet.ItemList.Count != 0)
+                    //{
+                    //    curItem = Investment.Get().GetInventoryItem(gearSet.ItemList.First().ItemIndex);
+                    //    curItem.Name = item.Item.Name;
+                    //}
                 }
 
                 if (curItem.GetArtArrangementIndex() != -1)
@@ -389,7 +394,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                     // if has a model
                     EntityView.ExportInventoryItem(curItem, savePath, aggregateOutput);
                 }
-                else
+                else if (curItem.IsShader)
                 {
                     // shader
                     string itemName = Helpers.SanitizeString(curItem.Name);
@@ -398,6 +403,10 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                     Directory.CreateDirectory(savePath);
                     Directory.CreateDirectory(savePath + "/Textures");
                     Investment.Get().ExportShader(curItem, savePath, itemName, config.GetOutputTextureFormat());
+                }
+                else
+                {
+                    Log.Error($"Can't export item '{curItem.Name}' because it doesn't have a 3D model or isn't a Shader");
                 }
                 MainWindow.Progress.CompleteStage();
             });
@@ -528,7 +537,11 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         if (item.GetItemTraits().Any(trait => blacklist.Contains(trait)))
             return false;
 
-        return (!Strategy.IsD1() && (item.GetItemType() is "Artifact" or "Seasonal Artifact") && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
+        // Gearset was removed on Artifacts in EoF for some reason, so the next best hacky solution is to:
+        // 1: Check if the items InventoryBucket is the Seasonal Artifacts bucket
+        // 2: Get the item next to it in the inventory items list and check if it has a model
+        // 3: Profit?
+        return (!Strategy.IsD1() && (item.TagData.BucketTypeIndex == 42 && Investment.Get().GetInventoryItem(item.GetItemIndex() + 1).GetArtArrangementIndex() != -1)) // && item.TagData.Unk28.GetValue(item.GetReader()) is SC5738080)
             || item.GetArtArrangementIndex() != -1
             || item.GetItemTraits().Any(trait => whitelist.Contains(trait));
     }
