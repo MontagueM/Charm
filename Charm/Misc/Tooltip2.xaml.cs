@@ -163,6 +163,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         Header = new()
         {
             IsD1 = Strategy.IsD1(),
+            Hash = item.ApiHash,
             Icon = ApiImageUtils.GetPlugWatermark(item),
             Name = item.GetItemName(),
             Type = item.GetItemType(),
@@ -668,6 +669,20 @@ public class HeaderBlock : ToolTipBlock
 {
     // bandaid fix
     public bool IsD1 { get; set; }
+
+    private uint _hash;
+    public uint Hash
+    {
+        get => _hash;
+        set
+        {
+            if (_hash != value)
+            {
+                _hash = value;
+                OnPropertyChanged(nameof(Hash));
+            }
+        }
+    }
 
     private ImageSource _icon;
     public ImageSource Icon

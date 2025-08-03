@@ -1106,7 +1106,7 @@ public class Investment_IsFeaturedItem : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is uint hash)
+        if (Strategy.IsLatest() && value is uint hash && hash != 0)
         {
             return Investment.Get().FeaturedItems.Contains(Investment.Get().GetItemIndex(hash));
         }

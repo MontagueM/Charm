@@ -75,7 +75,7 @@
 
                     <Rectangle
                         Grid.Row="1"
-                        Width="27"
+                        Width="28"
                         Height="40"
                         Opacity="0.6"
                         Stretch="Fill"
@@ -87,13 +87,34 @@
                             </LinearGradientBrush>
                         </Rectangle.Fill>
                     </Rectangle>
+
+                    <!--  Featured item banner  -->
+                    <Polygon
+                        Width="28"
+                        Height="32"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Fill="#109191"
+                        Points="0,0 0,32 14,28 28,32 28,0">
+                        <Polygon.Style>
+                            <Style TargetType="Polygon">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Hash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Polygon.Style>
+                    </Polygon>
+
                     <Image
                         HorizontalAlignment="Center"
                         VerticalAlignment="Top"
                         Source="{Binding Icon}">
                         <Image.Style>
                             <Style TargetType="Image">
-                                <Setter Property="Margin" Value="2,3,3,0" />
+                                <Setter Property="Margin" Value="3" />
                                 <Setter Property="MaxWidth" Value="22" />
                                 <Setter Property="MaxHeight" Value="22" />
                                 <Style.Triggers>
