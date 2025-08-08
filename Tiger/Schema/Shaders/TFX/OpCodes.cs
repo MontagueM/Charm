@@ -267,7 +267,7 @@ public static class TfxBytecodeOp
                     tfxData.op = TfxBytecode.PushObjectChannelVector;
 
                     PushObjectChannelVectorData PushObjectChannelVector = new();
-                    PushObjectChannelVector.hash = Strategy.IsD1() ? reader.ReadByte() : reader.ReadUInt32();
+                    PushObjectChannelVector.hash = Strategy.IsD1() ? reader.ReadByte() : Endian.SwapU32(reader.ReadUInt32());
                     tfxData.data = PushObjectChannelVector;
                     break;
 
