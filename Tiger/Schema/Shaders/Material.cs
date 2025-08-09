@@ -127,6 +127,13 @@ namespace Tiger.Schema.Shaders
                 psCB.Bytecode = Pixel.TFX_Bytecode.Select(x => x.Value).ToList();
                 psCB.Constants = Pixel.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
 
+                var bytecode = new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(Pixel.TFX_Bytecode));
+                foreach (var objectChannel in bytecode.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
+                {
+                    var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
+                    material.UsedChannelNames.TryAdd(hash, GlobalStrings.Get().GetString(hash));
+                }
+
                 psCB.Textures = new();
                 foreach (STextureTag texture in Pixel.EnumerateTextures())
                 {
@@ -185,6 +192,13 @@ namespace Tiger.Schema.Shaders
                 vsCB.CBuffers = Vertex.GetCBuffer0();
                 vsCB.Bytecode = Vertex.TFX_Bytecode.Select(x => x.Value).ToList();
                 vsCB.Constants = Vertex.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
+
+                var bytecode = new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(Vertex.TFX_Bytecode));
+                foreach (var objectChannel in bytecode.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
+                {
+                    var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
+                    material.UsedChannelNames.TryAdd(hash, GlobalStrings.Get().GetString(hash));
+                }
 
                 vsCB.Textures = new();
                 foreach (STextureTag texture in Vertex.EnumerateTextures())
@@ -252,6 +266,7 @@ namespace Tiger.Schema.Shaders
             public List<TfxExtern> Externs { get; set; } = new();
             public StateSelection RenderStates { get; set; } = new();
             public Dictionary<ShaderStage, ShaderDetails> Material { get; set; } = new();
+            public Dictionary<uint, string> UsedChannelNames { get; set; } = new();
 
             public enum ShaderStage
             {
