@@ -858,6 +858,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         {
             return FileResourcer.Get().GetFile<Entity.Entity>(tag.TagData.EntityData);
         }
+#if DEBUG
+        Log.Warning($"Hash is not an Entity: {tag.TagData.EntityData}");
+#endif
         return null;
         // return new Entity(_entityAssignmentsMap.TagData.EntityArrangementMap[index].EntityParent.TagData.Entity);
         // return null;

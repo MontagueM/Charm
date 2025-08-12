@@ -211,7 +211,7 @@ public class DynamicMeshPart : MeshPart
         //    lookup[VertexIndices[i]] = i;
         //}
 
-        Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
+        //Log.Debug($"Reading vertex buffers {mesh.Vertices1.Hash}/{mesh.Vertices1.TagData.Stride} and {mesh.Vertices2?.Hash}/{mesh.Vertices2?.TagData.Stride}");
         mesh.Vertices1.ReadVertexDataFromLayout(this, uniqueVertexIndices, 0);
         mesh.Vertices2?.ReadVertexDataFromLayout(this, uniqueVertexIndices, 1);
 

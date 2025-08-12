@@ -176,6 +176,9 @@ public partial class EntityView : UserControl
         }
 
         Entity? val = Investment.Get().GetPatternEntityFromHash(item.Parent != null ? item.Parent.TagData.InventoryItemHash : item.TagData.InventoryItemHash);
+
+        Log.Debug($"Pattern Entity {val?.Hash}");
+
         if (val != null && val.Skeleton != null)
         {
             overrideSkeleton = val.Skeleton;
@@ -187,6 +190,7 @@ public partial class EntityView : UserControl
 
         foreach (Entity entity in entities)
         {
+            Log.Debug($"Entity {entity?.Hash}: HasGeometry {entity?.HasGeometry()}");
             if (entity.Skeleton == null && overrideSkeleton != null)
                 entity.Skeleton = overrideSkeleton;
 
