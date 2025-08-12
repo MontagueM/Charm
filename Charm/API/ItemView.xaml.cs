@@ -110,7 +110,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             ItemSource = collectible != null ? collectible.Value.SourceString?.Value : "",
             ItemRarity = _invItem.GetItemRarity(),
             ItemDamageType = DestinyDamageType.GetDamageType(_invItem.GetItemDamageTypeIndex()),
-            ItemIcon = ApiImageUtils.MakeFullIcon(_invItem),
+            ItemIcon = ApiImageUtils.MakeFullItemIcon(_invItem),
             ItemWatermark = ApiImageUtils.GetPlugWatermark(_invItem),
             ItemBackground = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{_invItem.ApiHash}.jpg")),
             ItemFoundryBanner = !_invItem.IsEmblem ? ApiImageUtils.MakeFoundryBanner(_invItem) : null,
@@ -883,7 +883,7 @@ public class APIPlugItem : CharmUIElement
             return;
 
         _isLoadingIcon = true;
-        var loadedIcon = await Task.Run(() => ApiImageUtils.MakeFullIcon(Item));
+        var loadedIcon = await Task.Run(() => ApiImageUtils.MakeFullItemIcon(Item));
         _isLoadingIcon = false;
 
         Icon = loadedIcon;

@@ -99,7 +99,7 @@ public static class ApiImageUtils
         return bitmapImage;
     }
 
-    public static DrawingImage MakeFullIcon(InventoryItem item)
+    public static DrawingImage MakeFullItemIcon(InventoryItem item)
     {
         bool isD1Ornament = false;
         if (Strategy.IsD1() && item.IsArmorOrnament && item.Parent != null) // ew

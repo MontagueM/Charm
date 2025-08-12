@@ -1,5 +1,4 @@
-﻿using Arithmic;
-using Tiger.Exporters;
+﻿using Tiger.Exporters;
 using Tiger.Schema.Entity;
 using Tiger.Schema.Model;
 using Tiger.Schema.Shaders;
@@ -91,7 +90,7 @@ public class MeshPart
         }
         part.VertexIndices = uniqueVertexIndices.ToList();
 
-        Log.Debug($"Reading vertex buffers {vb.Hash}/{vb.TagData.Stride}");
+        //Log.Debug($"Reading vertex buffers {vb.Hash}/{vb.TagData.Stride}");
         vb.ReadVertexDataFromLayout(part, uniqueVertexIndices, 0);
 
         return part;
