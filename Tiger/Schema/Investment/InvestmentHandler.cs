@@ -1069,6 +1069,19 @@ public class InventoryItem : Tag<S9D798080>
         }
     }
 
+    private bool? _isHolofoil = null;
+    public bool IsHolofoil
+    {
+        get
+        {
+            if (_isHolofoil is not null)
+                return _isHolofoil.Value;
+
+            _isHolofoil = IsItemHolofoil();
+            return _isHolofoil.Value;
+        }
+    }
+
     public string Type => GetItemType();
     public string Description => GetItemDescription();
     public string FlavorText => GetItemFlavorText();
@@ -1088,6 +1101,16 @@ public class InventoryItem : Tag<S9D798080>
 
     // If this item is an ornament this will be its parent item
     public InventoryItem Parent = null;
+
+    private bool IsItemHolofoil()
+    {
+        if (_tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk)
+        {
+            if (Unk.Unk10.Any(x => x.Unk00 == 0xF1))
+                return true;
+        }
+        return false;
+    }
 
     public int GetItemIndex()
     {

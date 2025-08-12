@@ -81,6 +81,9 @@ public struct S9D798080
     [SchemaField(0x70, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk90;  // S77738080
 
+    [SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
+    public ResourcePointer Unk78_EoF;  // S77738080
+
     [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x90, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_LATEST)]
@@ -330,6 +333,27 @@ public struct S7B738080
 {
     public short ChannelIndex;  // "channelHash" from API
     public short DyeIndex;  // "dyeHash" from API
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "74738080", 0x30)]
+public struct S74738080
+{
+    public DynamicArray<S497A8080> Unk00;
+    public DynamicArray<S66798080> Unk10;
+    public DynamicArray<S66798080> Unk20;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "497A8080", 0x8)]
+public struct S497A8080
+{
+    public int Unk00;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "66798080", 0x8)]
+public struct S66798080
+{
+    public int Unk00;
+    public int Unk04;
 }
 
 #endregion

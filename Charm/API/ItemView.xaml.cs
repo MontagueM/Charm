@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -110,8 +111,12 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             ItemSource = collectible != null ? collectible.Value.SourceString?.Value : "",
             ItemRarity = _invItem.GetItemRarity(),
             ItemDamageType = DestinyDamageType.GetDamageType(_invItem.GetItemDamageTypeIndex()),
-            ItemIcon = ApiImageUtils.MakeFullIcon(_invItem),
+
+            ItemIconBackground = ApiImageUtils.MakeItemIconBackground(_invItem),
+            ItemIcon = ApiImageUtils.MakeItemIconForeground(_invItem),
+            ItemIconOverlay = ApiImageUtils.MakeItemIconOvarlay(_invItem),
             ItemWatermark = ApiImageUtils.GetPlugWatermark(_invItem),
+
             ItemBackground = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{_invItem.ApiHash}.jpg")),
             ItemFoundryBanner = !_invItem.IsEmblem ? ApiImageUtils.MakeFoundryBanner(_invItem) : null,
         };
@@ -793,7 +798,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         public DestinyTierType ItemRarity { get; set; }
         public DestinyDamageTypeEnum ItemDamageType { get; set; }
 
+        public ImageSource ItemIconBackground { get; set; }
         public ImageSource ItemIcon { get; set; }
+        public ImageSource ItemIconOverlay { get; set; }
         public ImageSource ItemWatermark { get; set; }
         public ImageSource ItemFoundryBanner { get; set; }
 
@@ -857,17 +864,42 @@ public class APIPlugItem : CharmUIElement
         }
     }
 
-    private bool _isLoadingIcon = false;
-    private ImageSource _icon = null;
+    private bool _isLoadingIconBG;
+    private ImageSource _iconBackground;
+    public ImageSource IconBackground
+    {
+        get
+        {
+            if (_iconBackground is null && !_isLoadingIconBG && Item is not null)
+            {
+                _ = LoadImageAsync(
+                    () => _isLoadingIconBG,
+                    v => _isLoadingIconBG = v,
+                    () => _iconBackground,
+                    v => _iconBackground = v,
+                    () => ApiImageUtils.MakeItemIconBackground(Item),
+                    nameof(IconBackground));
+            }
+            return _iconBackground;
+        }
+    }
+
+    private bool _isLoadingIcon;
+    private ImageSource _icon;
     public ImageSource Icon
     {
         get
         {
             if (_icon is null && !_isLoadingIcon && Item is not null)
             {
-                _ = LoadIconAsync(); // fire and forget
+                _ = LoadImageAsync(
+                    () => _isLoadingIcon,
+                    v => _isLoadingIcon = v,
+                    () => _icon,
+                    v => _icon = v,
+                    () => ApiImageUtils.MakeItemIconForeground(Item),
+                    nameof(Icon));
             }
-
             return _icon;
         }
         set
@@ -877,49 +909,75 @@ public class APIPlugItem : CharmUIElement
         }
     }
 
-    public async Task LoadIconAsync()
+    private bool _isLoadingIconOverlay;
+    private ImageSource _iconOverlay;
+    public ImageSource IconOverlay
     {
-        if (_isLoadingIcon || Item is null)
-            return;
-
-        _isLoadingIcon = true;
-        var loadedIcon = await Task.Run(() => ApiImageUtils.MakeFullIcon(Item));
-        _isLoadingIcon = false;
-
-        Icon = loadedIcon;
+        get
+        {
+            if (_iconOverlay is null && !_isLoadingIconOverlay && Item is not null)
+            {
+                _ = LoadImageAsync(
+                    () => _isLoadingIconOverlay,
+                    v => _isLoadingIconOverlay = v,
+                    () => _iconOverlay,
+                    v => _iconOverlay = v,
+                    () => ApiImageUtils.MakeItemIconOvarlay(Item),
+                    nameof(IconOverlay));
+            }
+            return _iconOverlay;
+        }
     }
 
-    private bool _isLoadingWatermark = false;
-    private ImageSource _itemWatermark = null;
+    private bool _isLoadingWatermark;
+    private ImageSource _itemWatermark;
     public ImageSource ItemWatermark
     {
         get
         {
             if (!Strategy.IsD1() && _itemWatermark is null && !_isLoadingWatermark && Item is not null)
             {
-                _ = LoadWatermarkAsync();
+                _ = LoadImageAsync(
+                    () => _isLoadingWatermark,
+                    v => _isLoadingWatermark = v,
+                    () => _itemWatermark,
+                    v => _itemWatermark = v,
+                    () => ApiImageUtils.GetPlugWatermark(Item),
+                    nameof(ItemWatermark));
             }
-
             return _itemWatermark;
-        }
-        private set
-        {
-            _itemWatermark = value;
-            OnPropertyChanged(nameof(ItemWatermark));
         }
     }
 
-    public async Task LoadWatermarkAsync()
+    private static SemaphoreSlim _iconLoadLimiter = new SemaphoreSlim(12);
+
+    private async Task LoadImageAsync(
+        Func<bool> getIsLoading,
+        Action<bool> setIsLoading,
+        Func<ImageSource> getField,
+        Action<ImageSource> setField,
+        Func<ImageSource> loader,
+        string propertyName)
     {
-        if (_isLoadingWatermark || Item is null)
+        if (getIsLoading() || Item is null || getField() is not null)
             return;
 
-        _isLoadingWatermark = true;
-        var loadedIconWatermark = await Task.Run(() => ApiImageUtils.GetPlugWatermark(Item));
-        if (loadedIconWatermark is not null)
+        setIsLoading(true);
+
+        await _iconLoadLimiter.WaitAsync();
+        try
         {
-            _isLoadingWatermark = false;
-            ItemWatermark = loadedIconWatermark;
+            var img = await Task.Run(loader);
+            if (img is not null)
+            {
+                setField(img);
+                OnPropertyChanged(propertyName);
+            }
+        }
+        finally
+        {
+            _iconLoadLimiter.Release();
+            setIsLoading(false);
         }
     }
 

@@ -227,6 +227,12 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                     SortedItems[_trait].Add(item);
                 }
 
+                if (item.TagData.Unk78_EoF.GetValue(item.GetReader()) is S74738080 Unk)
+                {
+                    if (Unk.Unk10.Any(x => x.Unk00 == 0xF1))
+                        Console.WriteLine($"{item.Name} ({item.ApiHash}): Is holofoil?");
+                }
+
                 // this is needed to make sure its ornaments are loaded (if it has any)
                 // which in turn will set the ornaments parent item
                 _ = item.Ornaments;

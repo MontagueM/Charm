@@ -250,7 +250,43 @@
                         Margin="0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
+                        RenderOptions.CachingHint="Cache"
+                        Source="{Binding IconBackground}" />
+
+                    <Grid
+                        Width="86"
+                        Height="86"
+                        Visibility="{Binding Item.IsHolofoil, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid CacheMode="BitmapCache">
+                            <Grid.Effect>
+                                <local:HolofoilShader IsHolofoil="{Binding Item.IsHolofoil}" RenderOptions.CachingHint="Cache" />
+                            </Grid.Effect>
+                        </Grid>
+
+                        <Border
+                            BorderBrush="White"
+                            BorderThickness="8"
+                            Opacity="0.15" />
+                    </Grid>
+
+                    <Image
+                        Width="86"
+                        Height="86"
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        RenderOptions.CachingHint="Cache"
                         Source="{Binding Icon}" />
+
+                    <Image
+                        Width="86"
+                        Height="86"
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        RenderOptions.CachingHint="Cache"
+                        Source="{Binding IconOverlay}" />
+
                     <Button
                         Width="86"
                         Height="86"

@@ -19,6 +19,7 @@
 
     <ItemGroup>
       <None Remove="Changelog.json" />
+      <None Remove="Shaders\Holofoil_ps.fx" />
       <None Remove="Shaders\procedural_spinner.vs.cso" />
       <None Remove="Shaders\procedural_spinner.vs.hlsl" />
       <None Remove="Shaders\procedural_spinner_dark.ps.cso" />
@@ -121,6 +122,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <Content Include="Changelog.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Shaders\Holofoil_ps.fx">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
       <Content Include="Shaders\procedural_spinner.vs.cso">
