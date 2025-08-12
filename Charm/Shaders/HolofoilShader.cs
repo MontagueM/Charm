@@ -33,19 +33,11 @@ public class HolofoilShader : ShaderEffect
     "Time", typeof(float), typeof(HolofoilShader),
     new UIPropertyMetadata(0.0f, PixelShaderConstantCallback(0)));
 
-    public static readonly DependencyProperty IsHolofoilProperty = DependencyProperty.Register(
-    "IsHolofoil", typeof(bool), typeof(HolofoilShader), new PropertyMetadata(false));
 
     public float Time
     {
         get => (float)GetValue(TimeProperty);
         set => SetValue(TimeProperty, value);
-    }
-
-    public bool IsHolofoil
-    {
-        get => (bool)GetValue(IsHolofoilProperty);
-        set => SetValue(IsHolofoilProperty, value);
     }
 
     public static System.Uri MakePackUri(string relativeFile)
@@ -58,9 +50,6 @@ public class HolofoilShader : ShaderEffect
 
     private void UpdateTime(object sender, EventArgs e)
     {
-        if (!IsHolofoil)
-            return;
-
         Time = (float)(DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalSeconds;
     }
 }

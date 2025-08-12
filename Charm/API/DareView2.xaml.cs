@@ -67,9 +67,10 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     public DareView2()
     {
-#if DEBUG
+        //#if DEBUG
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
-#endif
+        //#endif
+
         InitializeComponent();
         MouseMove += DareView2_MouseMove;
         Categories.CustomNextButton = NextPage;
@@ -225,12 +226,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                         SortedItems[_trait] = new List<InventoryItem>();
 
                     SortedItems[_trait].Add(item);
-                }
-
-                if (item.TagData.Unk78_EoF.GetValue(item.GetReader()) is S74738080 Unk)
-                {
-                    if (Unk.Unk10.Any(x => x.Unk00 == 0xF1))
-                        Console.WriteLine($"{item.Name} ({item.ApiHash}): Is holofoil?");
                 }
 
                 // this is needed to make sure its ornaments are loaded (if it has any)

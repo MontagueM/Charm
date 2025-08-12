@@ -1535,7 +1535,7 @@
                                 Visibility="{Binding Item.Item.IsHolofoil, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid>
                                     <Grid.Effect>
-                                        <local:HolofoilShader IsHolofoil="{Binding Item.Item.IsHolofoil}" />
+                                        <local:HolofoilShader />
                                     </Grid.Effect>
                                 </Grid>
 

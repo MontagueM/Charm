@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -185,9 +186,11 @@ public static class ApiImageUtils
 
         // Background overlay (ornament, shiny, etc.)
         // Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
-        BitmapImage? bgOverlay = bgOverlayStream != null && !item.IsArmor ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
         if (!Strategy.IsD1())
+        {
+            BitmapImage? bgOverlay = bgOverlayStream != null && !item.IsArmor ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
             group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+        }
 
         var dw = new DrawingImage(group);
         dw.Freeze();
@@ -207,14 +210,16 @@ public static class ApiImageUtils
         var group = new DrawingGroup();
 
         // streams
-        UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
         UnmanagedMemoryStream? primaryStream = item.GetIconPrimaryStream();
-        UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream();
 
         // The main icon
         BitmapImage? primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
-        if (bgOverlayStream != null && Strategy.IsD1()) // D1 Icon dyes
-            primary = MakeDyedIcon(item);
+        if (Strategy.IsD1()) // D1 Icon dyes
+        {
+            UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
+            if (bgOverlayStream != null)
+                primary = MakeDyedIcon(item);
+        }
 
         group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
 
@@ -523,6 +528,81 @@ public static class ApiImageUtils
     }
 }
 
+public sealed class AsyncImageLoader
+{
+    private readonly Func<ImageSource> _loader;
+    private readonly Action<string> _notifyPropertyChanged;
+    private readonly string _propertyName;
+
+    private bool _isLoading;
+    private ImageSource _image;
+
+    public AsyncImageLoader(
+        Func<ImageSource> loader,
+        Action<string> notifyPropertyChanged,
+        string propertyName)
+    {
+        _loader = loader;
+        _notifyPropertyChanged = notifyPropertyChanged;
+        _propertyName = propertyName;
+    }
+
+    public ImageSource GetImage(object currentItem)
+    {
+        if (_image != null || _isLoading || currentItem == null)
+            return _image;
+
+        StartLoading();
+        return null;
+    }
+
+    public void SetImage(ImageSource value)
+    {
+        _image = value;
+        _notifyPropertyChanged(_propertyName);
+    }
+
+    private async void StartLoading()
+    {
+        _isLoading = true;
+        try
+        {
+            var img = await AsyncImageWorker.LoadAsync(_loader);
+            if (img != null)
+            {
+                _image = img;
+                _notifyPropertyChanged(_propertyName);
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}
+
+public static class AsyncImageWorker
+{
+    //private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(18, 36);
+
+    public static async Task<ImageSource> LoadAsync(Func<ImageSource> loader)
+    {
+        //await _semaphore.WaitAsync();
+        try
+        {
+            var img = await Task.Run(loader);
+
+            //if (img is BitmapSource bmp && bmp.CanFreeze)
+            //    bmp.Freeze();
+
+            return img;
+        }
+        finally
+        {
+            //_semaphore.Release();
+        }
+    }
+}
 
 public static class StyleHelper
 {

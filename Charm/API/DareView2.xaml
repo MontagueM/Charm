@@ -16,6 +16,114 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
+        <local:HolofoilShader
+            x:Key="HolofoilShader"
+            RenderOptions.BitmapScalingMode="LowQuality"
+            RenderOptions.CachingHint="Cache" />
+
+        <DataTemplate x:Key="ItemIconTemplate">
+            <Grid>
+                <Image
+                    Width="86"
+                    Height="86"
+                    Margin="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Source="{Binding IconBackground}" />
+
+                <Grid
+                    Width="86"
+                    Height="86"
+                    IsHitTestVisible="False"
+                    Visibility="{Binding Item.IsHolofoil, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.Effect>
+                            <StaticResource ResourceKey="HolofoilShader" />
+                        </Grid.Effect>
+                    </Grid>
+
+                    <Border
+                        BorderBrush="White"
+                        BorderThickness="8"
+                        Opacity="0.15" />
+                </Grid>
+
+                <Image
+                    Width="86"
+                    Height="86"
+                    Margin="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Source="{Binding Icon}" />
+
+                <Image
+                    Width="86"
+                    Height="86"
+                    Margin="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Source="{Binding IconOverlay}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ItemIconWatermarkTemplate">
+            <!--  Icon Watermark  -->
+            <Grid
+                Width="28"
+                Height="48"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Panel.ZIndex="10"
+                IsHitTestVisible="False"
+                Visibility="{Binding ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
+                <Rectangle
+                    Grid.Row="1"
+                    Width="22"
+                    Height="48"
+                    Margin="0,3,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Opacity="0.6"
+                    RenderOptions.EdgeMode="Aliased"
+                    Stretch="Fill">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
+                            <GradientStop Offset="0" Color="#00000000" />
+                            <GradientStop Offset="1" Color="Black" />
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+
+                <!--  Featured item banner  -->
+                <Polygon
+                    Width="28"
+                    Height="32"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Fill="#109191"
+                    Points="0,0 0,32 14,28 28,32 28,0">
+                    <Polygon.Style>
+                        <Style TargetType="Polygon">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Hash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Polygon.Style>
+                </Polygon>
+
+                <Image
+                    Width="20"
+                    Height="20"
+                    Margin="0,3,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Source="{Binding ItemWatermark}" />
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="CategoryHeader">
             <Grid Opacity="0.5">
                 <Grid.Triggers>
@@ -63,7 +171,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="DareSelectedEntry">
-            <Grid Background="Transparent">
+            <Grid Height="92" Background="Transparent">
                 <Grid Loaded="DareSelectedEntry_Loaded" Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                     <Rectangle
                         Grid.Row="0"
@@ -79,15 +187,18 @@
 
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="92" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Image
-                            Margin="0"
-                            HorizontalAlignment="Left"
+                        <ContentControl
+                            x:Name="IconHost"
+                            Width="92"
+                            Height="92"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Source="{Binding Icon}" />
+                            Content="{Binding}"
+                            ContentTemplate="{StaticResource ItemIconTemplate}" />
 
                         <!--  Icon Watermark  -->
                         <Grid
@@ -145,7 +256,7 @@
                         </Grid>
 
                         <Border
-                            BorderThickness="2"
+                            BorderThickness="3"
                             Focusable="False"
                             Opacity="1"
                             Style="{StaticResource GreyBorderWhiteOnHover}" />
@@ -160,8 +271,11 @@
                             MouseRightButtonDown="APIItem_View"
                             Style="{StaticResource D2StyleButtonNoOverlay}" />
 
-                        <Grid Grid.Column="1" IsHitTestVisible="False">
-                            <StackPanel Margin="10,10,25,0" Orientation="Vertical">
+                        <Grid
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            IsHitTestVisible="False">
+                            <StackPanel Margin="10,0,25,0" Orientation="Vertical">
                                 <Viewbox
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
@@ -243,49 +357,17 @@
                         BorderThickness="0,1,1,0"
                         Focusable="False" />
                 </Grid>
+
                 <Grid Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <Image
+
+                    <ContentControl
+                        x:Name="IconHost"
                         Width="86"
                         Height="86"
-                        Margin="0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        RenderOptions.CachingHint="Cache"
-                        Source="{Binding IconBackground}" />
-
-                    <Grid
-                        Width="86"
-                        Height="86"
-                        Visibility="{Binding Item.IsHolofoil, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid CacheMode="BitmapCache">
-                            <Grid.Effect>
-                                <local:HolofoilShader IsHolofoil="{Binding Item.IsHolofoil}" RenderOptions.CachingHint="Cache" />
-                            </Grid.Effect>
-                        </Grid>
-
-                        <Border
-                            BorderBrush="White"
-                            BorderThickness="8"
-                            Opacity="0.15" />
-                    </Grid>
-
-                    <Image
-                        Width="86"
-                        Height="86"
-                        Margin="0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        RenderOptions.CachingHint="Cache"
-                        Source="{Binding Icon}" />
-
-                    <Image
-                        Width="86"
-                        Height="86"
-                        Margin="0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        RenderOptions.CachingHint="Cache"
-                        Source="{Binding IconOverlay}" />
+                        Content="{Binding}"
+                        ContentTemplate="{StaticResource ItemIconTemplate}" />
 
                     <Button
                         Width="86"
@@ -296,65 +378,21 @@
                         IsHitTestVisible="True"
                         MouseRightButtonDown="APIItem_View"
                         Style="{StaticResource D2StyleButton}" />
+
                     <Border
                         BorderThickness="3"
                         Focusable="False"
                         Style="{StaticResource GreyBorderWhiteOnHover}" />
 
-                    <!--  Icon Watermark  -->
-                    <Grid
-                        Width="28"
-                        Height="48"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Panel.ZIndex="10"
-                        Visibility="{Binding ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
-                        <Rectangle
-                            Grid.Row="1"
-                            Width="22"
-                            Height="48"
-                            Margin="0,3,0,0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Top"
-                            Opacity="0.6"
-                            RenderOptions.EdgeMode="Aliased"
-                            Stretch="Fill">
-                            <Rectangle.Fill>
-                                <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
-                                    <GradientStop Offset="0" Color="#00000000" />
-                                    <GradientStop Offset="1" Color="Black" />
-                                </LinearGradientBrush>
-                            </Rectangle.Fill>
-                        </Rectangle>
+                    <ContentControl
+                        x:Name="IconWatermarkHost"
+                        Width="86"
+                        Height="86"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Content="{Binding}"
+                        ContentTemplate="{StaticResource ItemIconWatermarkTemplate}" />
 
-                        <!--  Featured item banner  -->
-                        <Polygon
-                            Width="28"
-                            Height="32"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            Fill="#109191"
-                            Points="0,0 0,32 14,28 28,32 28,0">
-                            <Polygon.Style>
-                                <Style TargetType="Polygon">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Hash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Polygon.Style>
-                        </Polygon>
-
-                        <Image
-                            Width="20"
-                            Height="20"
-                            Margin="0,3,0,0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Top"
-                            Source="{Binding ItemWatermark}" />
-                    </Grid>
                 </Grid>
             </Grid>
         </DataTemplate>
@@ -568,10 +606,10 @@
                         CollapsePageButtons="False"
                         Columns="1"
                         IsVertical="True"
-                        ItemMargin="5"
+                        ItemMargin="3,0,3,0"
                         ItemTemplate="{StaticResource DareSelectedEntry}"
                         Items="{Binding SelectedItems}"
-                        ItemsPerPage="8"
+                        ItemsPerPage="7"
                         PageIndicatorMargin="0,0,0,-10"
                         ShowVerticalPageIndicator="True"
                         UsePlaceholders="True"
@@ -611,6 +649,23 @@
                             Text="?" />
                     </Button>
 
+                    <Grid
+                        Name="HolofoilShaderPreload"
+                        Width="1"
+                        Height="1"
+                        Opacity="0">
+                        <Grid CacheMode="BitmapCache">
+                            <Grid.Effect>
+                                <StaticResource ResourceKey="HolofoilShader" />
+                            </Grid.Effect>
+                        </Grid>
+
+                        <Border
+                            BorderBrush="White"
+                            BorderThickness="8"
+                            Opacity="0.15" />
+                    </Grid>
+
                     <Grid Grid.Row="0" Grid.Column="1">
                         <StackPanel
                             x:Name="FilterOptions"
@@ -648,7 +703,7 @@
                         SelectOnPageChange="False"
                         ShowVerticalPageIndicator="True"
                         SlideDistance="5"
-                        TransitionSpeed="0.04"
+                        TransitionSpeed="0.075"
                         UsePlaceholders="False"
                         UseStackPanel="False" />
 

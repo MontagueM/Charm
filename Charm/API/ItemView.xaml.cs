@@ -5,8 +5,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -368,12 +366,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             return null;
 
         InventoryItem item = Investment.Get().GetInventoryItem(index);
-        return new APIPlugItem()
-        {
-            ParentSocketStyle = parentSocketStyle,
-            Item = item,
-            Hash = item.ApiHash,
-        };
+        var plug = new APIPlugItem(item);
+        plug.ParentSocketStyle = parentSocketStyle;
+        return plug;
     }
 
     private void LoadItemStats()
@@ -834,6 +829,26 @@ public class APIPlugItem : CharmUIElement
 
     public APIPlugItem(InventoryItem item)
     {
+        _iconBgLoader = new AsyncImageLoader(
+            () => ApiImageUtils.MakeItemIconBackground(item),
+            OnPropertyChanged,
+            nameof(IconBackground));
+
+        _iconLoader = new AsyncImageLoader(
+            () => ApiImageUtils.MakeItemIconForeground(item),
+            OnPropertyChanged,
+            nameof(Icon));
+
+        _iconOverlayLoader = new AsyncImageLoader(
+            () => ApiImageUtils.MakeItemIconOvarlay(item),
+            OnPropertyChanged,
+            nameof(IconOverlay));
+
+        _watermarkLoader = new AsyncImageLoader(
+            () => ApiImageUtils.GetPlugWatermark(item),
+            OnPropertyChanged,
+            nameof(ItemWatermark));
+
         Item = item;
         Hash = item.ApiHash;
     }
@@ -858,129 +873,29 @@ public class APIPlugItem : CharmUIElement
                 return;
 
             _item = value;
-            _icon = null;
             OnPropertyChanged(nameof(Item));
-            OnPropertyChanged(nameof(Icon));
         }
     }
 
-    private bool _isLoadingIconBG;
-    private ImageSource _iconBackground;
-    public ImageSource IconBackground
-    {
-        get
-        {
-            if (_iconBackground is null && !_isLoadingIconBG && Item is not null)
-            {
-                _ = LoadImageAsync(
-                    () => _isLoadingIconBG,
-                    v => _isLoadingIconBG = v,
-                    () => _iconBackground,
-                    v => _iconBackground = v,
-                    () => ApiImageUtils.MakeItemIconBackground(Item),
-                    nameof(IconBackground));
-            }
-            return _iconBackground;
-        }
-    }
 
-    private bool _isLoadingIcon;
-    private ImageSource _icon;
+    private readonly AsyncImageLoader _iconBgLoader;
+    private readonly AsyncImageLoader _iconLoader;
+    private readonly AsyncImageLoader _iconOverlayLoader;
+    private readonly AsyncImageLoader _watermarkLoader;
+
+    public ImageSource IconBackground => _iconBgLoader.GetImage(Item);
+    public ImageSource IconOverlay => _iconOverlayLoader.GetImage(Item);
+    public ImageSource ItemWatermark => Strategy.IsD1() ? null : _watermarkLoader.GetImage(Item);
+
     public ImageSource Icon
     {
-        get
-        {
-            if (_icon is null && !_isLoadingIcon && Item is not null)
-            {
-                _ = LoadImageAsync(
-                    () => _isLoadingIcon,
-                    v => _isLoadingIcon = v,
-                    () => _icon,
-                    v => _icon = v,
-                    () => ApiImageUtils.MakeItemIconForeground(Item),
-                    nameof(Icon));
-            }
-            return _icon;
-        }
+        get => _iconLoader.GetImage(Item);
         set
         {
-            _icon = value;
+            _iconLoader.SetImage(value);
             OnPropertyChanged(nameof(Icon));
         }
     }
-
-    private bool _isLoadingIconOverlay;
-    private ImageSource _iconOverlay;
-    public ImageSource IconOverlay
-    {
-        get
-        {
-            if (_iconOverlay is null && !_isLoadingIconOverlay && Item is not null)
-            {
-                _ = LoadImageAsync(
-                    () => _isLoadingIconOverlay,
-                    v => _isLoadingIconOverlay = v,
-                    () => _iconOverlay,
-                    v => _iconOverlay = v,
-                    () => ApiImageUtils.MakeItemIconOvarlay(Item),
-                    nameof(IconOverlay));
-            }
-            return _iconOverlay;
-        }
-    }
-
-    private bool _isLoadingWatermark;
-    private ImageSource _itemWatermark;
-    public ImageSource ItemWatermark
-    {
-        get
-        {
-            if (!Strategy.IsD1() && _itemWatermark is null && !_isLoadingWatermark && Item is not null)
-            {
-                _ = LoadImageAsync(
-                    () => _isLoadingWatermark,
-                    v => _isLoadingWatermark = v,
-                    () => _itemWatermark,
-                    v => _itemWatermark = v,
-                    () => ApiImageUtils.GetPlugWatermark(Item),
-                    nameof(ItemWatermark));
-            }
-            return _itemWatermark;
-        }
-    }
-
-    private static SemaphoreSlim _iconLoadLimiter = new SemaphoreSlim(12);
-
-    private async Task LoadImageAsync(
-        Func<bool> getIsLoading,
-        Action<bool> setIsLoading,
-        Func<ImageSource> getField,
-        Action<ImageSource> setField,
-        Func<ImageSource> loader,
-        string propertyName)
-    {
-        if (getIsLoading() || Item is null || getField() is not null)
-            return;
-
-        setIsLoading(true);
-
-        await _iconLoadLimiter.WaitAsync();
-        try
-        {
-            var img = await Task.Run(loader);
-            if (img is not null)
-            {
-                setField(img);
-                OnPropertyChanged(propertyName);
-            }
-        }
-        finally
-        {
-            _iconLoadLimiter.Release();
-            setIsLoading(false);
-        }
-    }
-
 }
 
 public class SocketCategory : CharmUIElement

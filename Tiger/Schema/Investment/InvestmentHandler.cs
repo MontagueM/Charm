@@ -1104,11 +1104,9 @@ public class InventoryItem : Tag<S9D798080>
 
     private bool IsItemHolofoil()
     {
-        if (_tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk)
-        {
-            if (Unk.Unk10.Any(x => x.Unk00 == 0xF1))
-                return true;
-        }
+        if (_tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk && Unk.Unk10.Any(x => x.Unk00 == 0xF1))
+            return true;
+
         return false;
     }
 
