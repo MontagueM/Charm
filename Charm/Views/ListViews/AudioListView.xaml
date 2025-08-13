@@ -25,8 +25,18 @@
                 Style="{DynamicResource D2StyleRadioButton}"
                 Unloaded="Tag_Unloaded">
                 <Border Background="{StaticResource BackgroundColour14a}">
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel Margin="5" Orientation="Vertical">
+                    <Grid Margin="5">
+                        <TextBlock
+                            Margin="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            d:FontFamily="Haas Grot Text 55 Roman"
+                            FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                            FontSize="14"
+                            Foreground="{StaticResource ForegroundColour70}"
+                            Text="{Binding Index}" />
+
+                        <StackPanel Orientation="Vertical">
                             <TextBlock
                                 Margin="0"
                                 HorizontalAlignment="Left"
@@ -35,6 +45,15 @@
                                 FontSize="16"
                                 Foreground="{StaticResource ForegroundColour70}"
                                 Text="{Binding DisplayHash}" />
+
+                            <TextBlock
+                                Margin="0"
+                                HorizontalAlignment="Left"
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="16"
+                                Foreground="{StaticResource ForegroundColour70}"><Run Text="ID: " />
+                                <Run Text="{Binding DisplayID}" /></TextBlock>
 
                             <TextBlock
                                 Margin="0"
@@ -69,18 +88,9 @@
                                 <Run Text="{Binding Channels}" />
                             </TextBlock>
                         </StackPanel>
-                        <Image
-                            x:Name="Waveform"
-                            Grid.Row="0"
-                            MaxWidth="300"
-                            MaxHeight="100"
-                            Margin="15"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            IsHitTestVisible="False"
-                            Stretch="Uniform"
-                            Visibility="Collapsed" />
-                    </StackPanel>
+
+                    </Grid>
+
 
                 </Border>
             </RadioButton>

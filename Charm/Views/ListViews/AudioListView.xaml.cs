@@ -31,7 +31,7 @@ public partial class AudioListView : UserControl
 
     private ConcurrentBag<AudioItem> Sounds = new();
 
-    private int SortByIndex = 4;
+    private int SortByIndex = 5;
     private Wem _currentSound;
 
     public AudioListView()
@@ -44,7 +44,9 @@ public partial class AudioListView : UserControl
 
         PackageList.PackageItemChecked += async (s, item) =>
         {
-            await LoadAudioList(item);
+            MainWindow.Progress.SetProgressStage($"Loading Audio From {item.Name}");
+            await Task.Run(() => LoadAudioList(item));
+            MainWindow.Progress.CompleteStage();
         };
     }
 
@@ -56,10 +58,7 @@ public partial class AudioListView : UserControl
 
     public async void LoadContent()
     {
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            "Creating Audio List",
-        });
+        MainWindow.Progress.SetProgressStage("Creating Audio List");
         await PackageList.MakePackageItems<Wem>();
         MainWindow.Progress.CompleteStage();
 
@@ -74,10 +73,11 @@ public partial class AudioListView : UserControl
         sortBy.Combobox.MinWidth = 175;
         sortBy.Combobox.ItemsSource = new List<ComboBoxItem>()
         {
-            new() { Content = "Hash ↓", Tag = 4 },
-            new() { Content = "Hash ↑", Tag = 3 },
-            new() { Content = "Duration ↓", Tag = 2 },
-            new() { Content = "Duration ↑", Tag = 1 }
+            new() { Content = "Hash ↓", Tag = 5 },
+            new() { Content = "Hash ↑", Tag = 4 },
+            new() { Content = "Duration ↓", Tag = 3 },
+            new() { Content = "Duration ↑", Tag = 2 },
+            new() { Content = "Channels ↓", Tag = 1 }
         };
         if (sortBy.Combobox.SelectedIndex == -1)
         {
@@ -95,13 +95,15 @@ public partial class AudioListView : UserControl
 
         await Task.Run(() => Parallel.ForEachAsync(item.Hashes, async (hash, ct) =>
         {
-            if (hash.GetReferenceHash().IsInvalid())
-                return;
+            //if (hash.GetReferenceHash().IsInvalid())
+            //    return;
 
             AudioItem item = new()
             {
                 Hash = hash,
-                DisplayHash = $"[{hash}]"
+                Index = hash.FileIndex,
+                DisplayHash = $"[{hash}]",
+                DisplayID = hash.GetReferenceHash(),
             };
             await item.LoadWEMAsync();
 
@@ -118,33 +120,40 @@ public partial class AudioListView : UserControl
         if (Sounds.IsEmpty)
             return;
 
-        string searchStr = AudioSearchBox.Text;
-
-        uint parsedHash = 0;
-        bool isHash = Helpers.ParseHash(searchStr, out parsedHash);
-
-        var displayItems = new ConcurrentBag<AudioItem>();
-        Parallel.ForEach(Sounds, tex =>
+        Dispatcher.Invoke(() =>
         {
-            if ((isHash && tex.Hash.Hash32 == parsedHash) || tex.Hash.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+            string searchStr = AudioSearchBox.Text;
+
+            uint parsedHash = 0;
+            bool isHash = Helpers.ParseHash(searchStr, out parsedHash);
+
+            var displayItems = new ConcurrentBag<AudioItem>();
+            Parallel.ForEach(Sounds, sound =>
             {
-                displayItems.Add(tex);
-            }
+                if ((isHash && sound.Hash.Hash32 == parsedHash)
+                || sound.Hash.GetReferenceHash().ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase)
+                || sound.Hash.ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase))
+                {
+                    displayItems.Add(sound);
+                }
+            });
+
+            List<AudioItem> items = displayItems.ToList();
+
+            items = SortByIndex switch
+            {
+                5 => items.OrderByDescending(x => x.Hash).ToList(),
+                4 => items.OrderBy(x => x.Hash).ToList(),
+                3 => items.OrderByDescending(x => x.Seconds).ToList(),
+                2 => items.OrderBy(x => x.Seconds).ToList(),
+                1 => items.OrderByDescending(x => x.Channels).ToList(),
+                _ => items
+            };
+
+            AudioList.ItemsSource = items;
+            BulkExportButton.IsEnabled = items.Count > 0;
+            Console.WriteLine(items.Count);
         });
-
-        List<AudioItem> items = displayItems.ToList();
-
-        items = SortByIndex switch
-        {
-            4 => items.OrderByDescending(x => x.Hash).ToList(),
-            3 => items.OrderBy(x => x.Hash).ToList(),
-            2 => items.OrderByDescending(x => x.Seconds).ToList(),
-            1 => items.OrderBy(x => x.Seconds).ToList(),
-            _ => items
-        };
-
-        AudioList.ItemsSource = items;
-        BulkExportButton.IsEnabled = items.Count > 0;
     }
 
     private void Audio_OnClick(object sender, RoutedEventArgs e)
@@ -205,7 +214,7 @@ public partial class AudioListView : UserControl
             Parallel.ForEach(items, item =>
             {
                 Wem wem = FileResourcer.Get().GetFile<Wem>(item.Hash, false, false);
-                wem.SaveToFile($"{savePath}/{wem.Hash}.wav");
+                wem.SaveToFile($"{savePath}/{wem.GetReferenceHash()}_{wem.Hash}.wav");
                 MainWindow.Progress.CompleteStage();
             });
         });
@@ -231,7 +240,7 @@ public partial class AudioListView : UserControl
         string savePath = Config.GetExportSavePath() + $"/Sound/{pkgName}";
         Directory.CreateDirectory(savePath);
 
-        wem.SaveToFile($"{savePath}/{wem.Hash}.wav");
+        wem.SaveToFile($"{savePath}/{wem.GetReferenceHash()}_{wem.Hash}.wav");
 
         NotificationBanner notify = new()
         {
@@ -400,6 +409,7 @@ public partial class AudioListView : UserControl
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
 
         public FileHash Hash { get; set; }
+        public int Index { get; set; }
 
         private string _displayHash;
         public string DisplayHash
@@ -409,6 +419,17 @@ public partial class AudioListView : UserControl
             {
                 _displayHash = value;
                 OnPropertyChanged(nameof(DisplayHash));
+            }
+        }
+
+        private string _displayID;
+        public string DisplayID
+        {
+            get => _displayID;
+            set
+            {
+                _displayID = value;
+                OnPropertyChanged(nameof(DisplayID));
             }
         }
 
@@ -468,6 +489,7 @@ public partial class AudioListView : UserControl
             Application.Current.Dispatcher.Invoke(() =>
             {
                 DisplayHash = $"[{Hash}] {(wem.Channels > 2 ? "⚠" : "")}";
+                DisplayID = Hash.GetReferenceHash();
                 Duration = wem.Duration;
                 Seconds = wem.Seconds;
                 Channels = wem.Channels;
