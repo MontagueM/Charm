@@ -95,8 +95,8 @@ public partial class AudioListView : UserControl
 
         await Task.Run(() => Parallel.ForEachAsync(item.Hashes, async (hash, ct) =>
         {
-            //if (hash.GetReferenceHash().IsInvalid())
-            //    return;
+            if (hash.GetReferenceHash().IsInvalid())
+                return;
 
             AudioItem item = new()
             {

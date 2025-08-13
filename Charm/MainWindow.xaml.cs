@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -124,6 +125,10 @@ public partial class MainWindow
             {
                 ShowAgreement();
             }
+
+            // Log package count and package path
+            Arithmic.Log.Info($"Package Path: {config.GetPackagesPath(Strategy.CurrentStrategy)}");
+            Arithmic.Log.Info($"Total Package Count: {Directory.GetFiles(config.GetPackagesPath(Strategy.CurrentStrategy)).Where(x => x.EndsWith(".pkg")).Count()}");
         }
         else
         {
