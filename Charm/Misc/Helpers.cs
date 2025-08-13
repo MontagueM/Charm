@@ -1346,3 +1346,17 @@ public class TextureFromHashConverter : IValueConverter
         throw new NotSupportedException();
     }
 }
+
+// TODO make a converter that allows getting any config value?
+public class HolofoilEnabledConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return ConfigSubsystem.Get().GetHolofoilShader();
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}

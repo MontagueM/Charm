@@ -1529,10 +1529,23 @@
                                 RenderOptions.BitmapScalingMode="NearestNeighbor"
                                 Source="{Binding Item.ItemIconBackground}" />
 
-                            <Grid
-                                Width="96"
-                                Height="96"
-                                Visibility="{Binding Item.Item.IsHolofoil, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid Width="96" Height="96">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Item.Item.IsHolofoil, Converter={StaticResource HolofoilEnabledConverter}}" Value="True" />
+                                                    <Condition Binding="{Binding Item.Item.IsHolofoil}" Value="True" />
+                                                </MultiDataTrigger.Conditions>
+                                                <MultiDataTrigger.Setters>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger.Setters>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
                                 <Grid>
                                     <Grid.Effect>
                                         <local:HolofoilShader />

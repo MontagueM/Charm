@@ -102,8 +102,8 @@ public partial class GeneralConfigView : UserControl
         ConfigSettingToggleControl cfe = new();
         cfe.SettingName = "Unified Map Asset Exports";
         cfe.SettingLabel = "Export all map assets to a single \"Maps/Assets/\" folder.";
-        bool eval = _config.GetSingleFolderMapAssetsEnabled();
-        cfe.SettingValue = eval.ToString();
+        bool bVal = _config.GetSingleFolderMapAssetsEnabled();
+        cfe.SettingValue = bVal.ToString();
         cfe.ChangeButton.Click += SingleFolderMapAssetsEnabled_OnClick;
         MiscConfigPanel.Children.Add(cfe);
 
@@ -111,18 +111,26 @@ public partial class GeneralConfigView : UserControl
         ConfigSettingToggleControl disBg = new();
         disBg.SettingName = "Animated Background";
         disBg.SettingLabel = "Requires a restart to take effect.";
-        bool bval = _config.GetAnimatedBackground();
-        disBg.SettingValue = bval.ToString();
+        bVal = _config.GetAnimatedBackground();
+        disBg.SettingValue = bVal.ToString();
         disBg.ChangeButton.Click += AnimatedBackground_OnClick;
         MiscConfigPanel.Children.Add(disBg);
 
         ConfigSettingToggleControl disME = new();
         disME.SettingName = "Motion Effects";
-        disME.SettingLabel = "Fake parallax effect when moving the mouse in menus.";
-        bool mval = _config.GetMotionEffects();
-        disME.SettingValue = mval.ToString();
+        disME.SettingLabel = "Enables a fake parallax effect when moving the mouse in menus.";
+        bVal = _config.GetMotionEffects();
+        disME.SettingValue = bVal.ToString();
         disME.ChangeButton.Click += MotionEffects_OnClick;
         MiscConfigPanel.Children.Add(disME);
+
+        ConfigSettingToggleControl disHL = new();
+        disHL.SettingName = "Holofoil Effect";
+        disHL.SettingLabel = "Enables the Holofoil effect on weapon icons in the API View";
+        bVal = _config.GetHolofoilShader();
+        disHL.SettingValue = bVal.ToString();
+        disHL.ChangeButton.Click += HolofoilShader_OnClick;
+        MiscConfigPanel.Children.Add(disHL);
     }
 
     private void PackagePathStrategyComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -295,6 +303,12 @@ public partial class GeneralConfigView : UserControl
     private void MotionEffects_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetMotionEffects(!_config.GetMotionEffects());
+        PopulateConfigPanel();
+    }
+
+    private void HolofoilShader_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetHolofoilShader(!_config.GetHolofoilShader());
         PopulateConfigPanel();
     }
 }

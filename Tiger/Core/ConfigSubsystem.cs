@@ -22,6 +22,7 @@ public class CommonSettings
     public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.PNG;
     public bool AnimatedBackground { get; set; } = true;
     public bool MotionEffects { get; set; } = true;
+    public bool HolofoilShader { get; set; } = true;
 
     public bool AcceptedAgreementV3 { get; set; } = false;
 }
@@ -361,6 +362,17 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     public bool GetMotionEffects()
     {
         return _settings.Common.MotionEffects;
+    }
+
+    public void SetHolofoilShader(bool b)
+    {
+        _settings.Common.HolofoilShader = b;
+        Save();
+    }
+
+    public bool GetHolofoilShader()
+    {
+        return _settings.Common.HolofoilShader;
     }
 
     private string _configFilePath = "./config.json";

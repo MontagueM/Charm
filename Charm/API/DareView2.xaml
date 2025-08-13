@@ -34,8 +34,23 @@
                 <Grid
                     Width="86"
                     Height="86"
-                    IsHitTestVisible="False"
-                    Visibility="{Binding Item.IsHolofoil, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    IsHitTestVisible="False">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Item.IsHolofoil, Converter={StaticResource HolofoilEnabledConverter}}" Value="True" />
+                                        <Condition Binding="{Binding Item.IsHolofoil}" Value="True" />
+                                    </MultiDataTrigger.Conditions>
+                                    <MultiDataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger.Setters>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
                     <Grid>
                         <Grid.Effect>
                             <StaticResource ResourceKey="HolofoilShader" />
@@ -654,6 +669,16 @@
                         Width="1"
                         Height="1"
                         Opacity="0">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding {x:Null}, Converter={StaticResource HolofoilEnabledConverter}}" Value="True">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
                         <Grid CacheMode="BitmapCache">
                             <Grid.Effect>
                                 <StaticResource ResourceKey="HolofoilShader" />
