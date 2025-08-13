@@ -1,5 +1,27 @@
 [
     {
+        "version": "3.0.6",
+        "date": "08-13-2025",
+        "changes": [
+            {
+                "title": "Additions",
+                "notes": [
+                    "Added reference hashes (ID) to audio list and exports.",
+                    "Added a config option to disable fake parallax effect.",
+                    "Added the holofoil background effect to weapons in API View.",
+                    "Added a config option to disable the holofoil effect."
+                ]
+            },
+            {
+                "title": "General Fixes",
+                "notes": [
+                    "Hopefully fixed a rare crash that can occur when rendering an audios waveform.",
+                    "Couple material export fixes."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.0.5",
         "date": "08-1-2025",
         "changes": [
