@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arithmic;
+using NAudio.Wave;
 using Restless.WaveForm.Renderer;
 using Restless.WaveForm.Settings;
 using Tiger;
@@ -33,6 +34,7 @@ public partial class AudioListView : UserControl
 
     private int SortByIndex = 5;
     private Wem _currentSound;
+    private WaveStream _currentSoundStream;
 
     public AudioListView()
     {
@@ -172,6 +174,7 @@ public partial class AudioListView : UserControl
 
         if (MusicPlayer.SetWem(wem))
         {
+            _currentSoundStream = wem.Clone();
             MusicPlayer.Play();
             DrawWaveform();
             Log.Verbose($"Playing {wem.Hash}");
@@ -179,6 +182,7 @@ public partial class AudioListView : UserControl
 
         ExportButton.IsEnabled = true;
         ExportWaveform.IsEnabled = true;
+        //_currentSoundStream?.Dispose();
     }
 
     private void AudioSearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -266,7 +270,7 @@ public partial class AudioListView : UserControl
         Directory.CreateDirectory(savePath);
 
         _currentSound.Load();
-        using var stream = _currentSound.WemReaderClone;
+        using var stream = _currentSoundStream;
         var wave = WaveFormRenderer.Create(stream, _sineExportSettings);
 
         // Overlay Right and Left
@@ -336,11 +340,11 @@ public partial class AudioListView : UserControl
                 Waveform.Source = null;
                 WaveformLoading.Visibility = Visibility.Visible;
             });
-            if (_currentSound is null)
+            if (_currentSound is null || _currentSound.Channels > 4)
                 return;
 
             //using var stream = _currentSound.WemReaderClone;
-            var wave = WaveFormRenderer.Create(_currentSound.WemReaderClone, _sinePreviewSettings);
+            var wave = WaveFormRenderer.Create(_currentSoundStream, _sinePreviewSettings);
 
             // Overlay Right and Left
             using var combined = new Bitmap(wave.ImageLeft.Width, wave.ImageLeft.Height);

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Arithmic;
+using NAudio.Wave;
 using Restless.WaveForm.Renderer;
 using Restless.WaveForm.Settings;
 using Tiger;
@@ -33,6 +34,8 @@ public partial class WeaponAudioListView : UserControl
     private ConcurrentBag<WeaponAudioCategory> Sounds = new();
 
     private WeaponAudioItem _currentSound;
+    private WaveStream _currentSoundStream;
+
     private WeaponItem _currentWeapon;
 
     public WeaponAudioListView()
@@ -168,12 +171,15 @@ public partial class WeaponAudioListView : UserControl
 
         if (MusicPlayer.SetWem(wem))
         {
+            _currentSoundStream = wem.Clone();
             MusicPlayer.Play();
-            DrawWaveform(wem);
+            DrawWaveform();
+            Log.Verbose($"Playing {wem.Hash}");
         }
 
         ExportButton.IsEnabled = true;
         ExportWaveform.IsEnabled = true;
+        //_currentSoundStream?.Dispose();
     }
 
     private void AudioSearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -312,7 +318,7 @@ public partial class WeaponAudioListView : UserControl
         Directory.CreateDirectory(savePath);
 
         wem.Load();
-        using var stream = wem.WemReaderClone;
+        using var stream = _currentSoundStream;
         var wave = WaveFormRenderer.Create(stream, _sineExportSettings);
 
         // Overlay Right and Left
@@ -614,25 +620,20 @@ public partial class WeaponAudioListView : UserControl
         }
     }
 
-    private async void DrawWaveform(Wem wem)
+    private async void DrawWaveform()
     {
         await Task.Run(() =>
         {
-            if (wem is null)
-                return;
-
             Application.Current.Dispatcher.BeginInvoke(() =>
             {
                 Waveform.Source = null;
                 WaveformLoading.Visibility = Visibility.Visible;
             });
-
-            //using var stream = wem.WemReaderClone;
-            //if (stream is null)
-            //    return;
+            if (_currentSoundStream is null || _currentSound.Channels > 4)
+                return;
 
             // Somethings up with the wave stream somehow becoming null? Idfk whats going on
-            var wave = WaveFormRenderer.Create(wem.WemReaderClone, _sinePreviewSettings);
+            var wave = WaveFormRenderer.Create(_currentSoundStream, _sinePreviewSettings);
 
             // Overlay Right and Left
             using var combined = new Bitmap(wave.ImageLeft.Width, wave.ImageLeft.Height);

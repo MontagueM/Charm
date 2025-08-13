@@ -19,9 +19,7 @@ namespace Tiger.Schema.Audio;
 public class Wem : TigerFile
 {
     private MemoryStream _wemStream = null;
-
     private WaveStream _wemReader = null;
-    public WaveStream WemReaderClone = null;
 
     private bool _bDisposed = false;
     public WEMMetadata? WemData = null;
@@ -81,7 +79,6 @@ public class Wem : TigerFile
             byte[] wavData = File.ReadAllBytes(tempPath);
             _wemStream = new MemoryStream(wavData);
             _wemReader = new WaveFileReader(_wemStream);
-            WemReaderClone = Clone(); //new WaveFileReader(new MemoryStream(wavData));
 
             if (File.Exists(tempPath))
                 File.Delete(tempPath);
@@ -90,7 +87,6 @@ public class Wem : TigerFile
         {
             _wemStream = GetWemStream();
             _wemReader = new VorbisWaveReader(_wemStream);
-            WemReaderClone = Clone();
         }
 
         try
@@ -304,7 +300,7 @@ public class Wem : TigerFile
         _wemStream.Position = 0;
         _wemStream.CopyTo(memory);
         memory.Position = 0;
-
+        _wemStream.Position = 0;
         return Strategy.IsLatest() ? new WaveFileReader(memory) : new VorbisWaveReader(memory);
     }
 
@@ -364,7 +360,6 @@ public class Wem : TigerFile
     {
         _wemReader?.Dispose();
         _wemStream?.Dispose();
-        WemReaderClone?.Dispose();
         _bDisposed = true;
     }
 
