@@ -766,6 +766,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
     private void OnRender(object sender, EventArgs e)
     {
+        if (!ConfigSubsystem.Get().GetMotionEffects())
+            return;
+
         float x = -12f / (float)MainWindow.Current.ActualWidth;
         float y = -12f / (float)MainWindow.Current.ActualHeight;
         Point position = Mouse.GetPosition(this);

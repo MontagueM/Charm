@@ -302,6 +302,9 @@ public partial class CategoryView : UserControl
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
+        if (!ConfigSubsystem.Get().GetMotionEffects())
+            return;
+
         float x = -12f / (float)MainWindow.Current.ActualWidth;
         float y = -12f / (float)MainWindow.Current.ActualHeight;
         Point position = e.GetPosition(this);

@@ -49,6 +49,9 @@ public partial class MainWindow
 
     private void OnRender(object sender, EventArgs e)
     {
+        if (!ConfigSubsystem.Get().GetMotionEffects())
+            return;
+
         float x = -12f / (float)this.ActualWidth;
         float y = -12f / (float)this.ActualHeight;
 

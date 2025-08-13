@@ -225,6 +225,9 @@ public partial class MainMenuView : UserControl
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
+        if (!ConfigSubsystem.Get().GetMotionEffects())
+            return;
+
         System.Windows.Point position = e.GetPosition(this);
         TranslateTransform gridTransform = (TranslateTransform)MainContainer.RenderTransform;
         gridTransform.X = position.X * -0.0075;

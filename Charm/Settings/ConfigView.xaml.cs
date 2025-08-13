@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Tiger;
 
 namespace Charm;
 
@@ -61,6 +62,9 @@ public partial class ConfigView : UserControl
 
     private void UserControl_MouseMove(object sender, MouseEventArgs e)
     {
+        if (!ConfigSubsystem.Get().GetMotionEffects())
+            return;
+
         System.Windows.Point position = e.GetPosition(this);
         TranslateTransform gridTransform = (TranslateTransform)SettingsPage.RenderTransform;
         gridTransform.X = position.X * -0.0075;
