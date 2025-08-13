@@ -101,7 +101,7 @@ public partial class GeneralConfigView : UserControl
         // instead of "ExportPath/(MapName)/".
         ConfigSettingToggleControl cfe = new();
         cfe.SettingName = "Unified Map Asset Exports";
-        cfe.SettingLabel = "Export all map assets to a single \"Maps/Assets/\" folder";
+        cfe.SettingLabel = "Export all map assets to a single \"Maps/Assets/\" folder.";
         bool eval = _config.GetSingleFolderMapAssetsEnabled();
         cfe.SettingValue = eval.ToString();
         cfe.ChangeButton.Click += SingleFolderMapAssetsEnabled_OnClick;
@@ -110,11 +110,19 @@ public partial class GeneralConfigView : UserControl
 
         ConfigSettingToggleControl disBg = new();
         disBg.SettingName = "Animated Background";
-        disBg.SettingLabel = "(Requires Restart)";
+        disBg.SettingLabel = "Requires a restart to take effect.";
         bool bval = _config.GetAnimatedBackground();
         disBg.SettingValue = bval.ToString();
         disBg.ChangeButton.Click += AnimatedBackground_OnClick;
         MiscConfigPanel.Children.Add(disBg);
+
+        ConfigSettingToggleControl disME = new();
+        disME.SettingName = "Motion Effects";
+        disME.SettingLabel = "Fake parallax effect when moving the mouse in menus.";
+        bool mval = _config.GetMotionEffects();
+        disME.SettingValue = mval.ToString();
+        disME.ChangeButton.Click += MotionEffects_OnClick;
+        MiscConfigPanel.Children.Add(disME);
     }
 
     private void PackagePathStrategyComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -281,6 +289,12 @@ public partial class GeneralConfigView : UserControl
     private void AnimatedBackground_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetAnimatedBackground(!_config.GetAnimatedBackground());
+        PopulateConfigPanel();
+    }
+
+    private void MotionEffects_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetMotionEffects(!_config.GetMotionEffects());
         PopulateConfigPanel();
     }
 }

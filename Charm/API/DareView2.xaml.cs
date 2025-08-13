@@ -584,6 +584,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void DareView2_MouseMove(object sender, MouseEventArgs e)
     {
+        if (!ConfigSubsystem.Get().GetMotionEffects())
+            return;
+
         var group = UIHelper.EnsureTransformGroup(MainGrid);
         var translate = UIHelper.GetOrAddTransform<TranslateTransform>(group);
 

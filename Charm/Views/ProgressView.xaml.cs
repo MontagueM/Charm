@@ -34,6 +34,11 @@ public partial class ProgressView : UserControl
         ProgressText.Text = GetCurrentStageName();
     }
 
+    public void SetProgressStage(string stage)
+    {
+        SetProgressStages(new List<string> { stage });
+    }
+
     public void SetProgressStages(List<string> progressStages, bool bLogProgress = true, bool bUseFullBar = false)
     {
         this.bLogProgress = bLogProgress;

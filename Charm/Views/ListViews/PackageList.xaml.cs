@@ -104,6 +104,18 @@ public partial class PackageList : UserControl
             {
                 displayItems.Add(pkg);
             }
+            else if (pkg.Hashes.Any(x => x.GetReferenceHash().ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase)))
+            {
+                IEnumerable<FileHash> hashes = pkg.Hashes.Where(x => x.GetReferenceHash().ToString().Contains(searchStr, StringComparison.OrdinalIgnoreCase));
+                displayItems.Add(new PackageItem
+                {
+                    Name = pkg.Name,
+                    ID = pkg.ID,
+                    Count = hashes.Count(),
+                    Hashes = new(hashes),
+                    Content = pkg.Content
+                });
+            }
         });
 
         List<PackageItem> items = displayItems.OrderBy(x => x.Name).ToList();

@@ -81,7 +81,7 @@ public class WwiseSound : TigerReferenceFile<S38978080>
         CheckLoaded();
         _tag.Wems.ForEach(wem =>
         {
-            wem.SaveToFile($"{saveDirectory}/{wem.Hash}_{ReferenceHash}.wav");
+            wem.SaveToFile($"{saveDirectory}/{ReferenceHash}_{wem.Hash}.wav");
         });
     }
 }

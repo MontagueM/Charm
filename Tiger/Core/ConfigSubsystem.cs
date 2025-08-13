@@ -21,7 +21,7 @@ public class CommonSettings
     public bool IndividualStaticsEnabled { get; set; } = false;
     public TextureExportFormat OutputTextureFormat { get; set; } = TextureExportFormat.PNG;
     public bool AnimatedBackground { get; set; } = true;
-    public bool ExportMaterials { get; set; } = false;
+    public bool MotionEffects { get; set; } = true;
 
     public bool AcceptedAgreementV3 { get; set; } = false;
 }
@@ -350,6 +350,17 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     public bool GetAnimatedBackground()
     {
         return _settings.Common.AnimatedBackground;
+    }
+
+    public void SetMotionEffects(bool b)
+    {
+        _settings.Common.MotionEffects = b;
+        Save();
+    }
+
+    public bool GetMotionEffects()
+    {
+        return _settings.Common.MotionEffects;
     }
 
     private string _configFilePath = "./config.json";
