@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -99,6 +100,8 @@ public static class ApiImageUtils
         return bitmapImage;
     }
 
+    #region Item Icon stuff
+
     public static DrawingImage MakeFullItemIcon(InventoryItem item)
     {
         bool isD1Ornament = false;
@@ -168,6 +171,107 @@ public static class ApiImageUtils
 
         return dw;
     }
+
+    public static DrawingImage MakeItemIconBackground(InventoryItem item)
+    {
+        var group = new DrawingGroup();
+
+        // streams
+        UnmanagedMemoryStream? bgStream = item.GetIconBackgroundStream();
+        UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
+
+        // Main background (rarity color)
+        BitmapImage? bg = bgStream != null ? MakeBitmapImage(bgStream, 96, 96) : null;
+        group.Children.Add(new ImageDrawing(bg, new Rect(0, 0, 96, 96)));
+
+        // Background overlay (ornament, shiny, etc.)
+        // Most if not all legendary armor will use the ornament overlay because of transmog (I assume)
+        if (!Strategy.IsD1())
+        {
+            BitmapImage? bgOverlay = bgOverlayStream != null && !item.IsArmor ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
+            group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+        }
+
+        var dw = new DrawingImage(group);
+        dw.Freeze();
+
+        return dw;
+    }
+
+    public static DrawingImage MakeItemIconForeground(InventoryItem item)
+    {
+        bool isD1Ornament = false;
+        if (Strategy.IsD1() && item.IsArmorOrnament && item.Parent != null) // ew
+        {
+            item = item.Parent;
+            isD1Ornament = true;
+        }
+
+        var group = new DrawingGroup();
+
+        // streams
+        UnmanagedMemoryStream? primaryStream = item.GetIconPrimaryStream();
+
+        // The main icon
+        BitmapImage? primary = primaryStream != null ? MakeBitmapImage(primaryStream, 96, 96) : null;
+        if (Strategy.IsD1()) // D1 Icon dyes
+        {
+            UnmanagedMemoryStream? bgOverlayStream = item.GetIconBackgroundOverlayStream();
+            if (bgOverlayStream != null)
+                primary = MakeDyedIcon(item);
+        }
+
+        group.Children.Add(new ImageDrawing(primary, new Rect(0, 0, 96, 96)));
+
+        var dw = new DrawingImage(group);
+        dw.Freeze();
+
+        return dw;
+    }
+
+    public static DrawingImage MakeItemIconOvarlay(InventoryItem item)
+    {
+        bool isD1Ornament = false;
+        if (Strategy.IsD1() && item.IsArmorOrnament && item.Parent != null) // ew
+        {
+            item = item.Parent;
+            isD1Ornament = true;
+        }
+
+        var group = new DrawingGroup();
+
+        // streams
+        UnmanagedMemoryStream? overlayStream = item.GetIconOverlayStream();
+
+        // Overlay (watermark, masterwork, etc.)
+        int wh = item.GetIconOverlayTexture()?.Width ?? 96;
+        if (overlayStream != null && wh == 96) // Actual full overlay, not the crappy new watermarks
+        {
+            BitmapImage? overlay = MakeBitmapImage(overlayStream, wh, wh);
+            group.Children.Add(new ImageDrawing(overlay, new Rect(0, 0, wh, wh)));
+
+            // Tints the watermark overlay blue for D1 ornaments (just to distinguish them)
+            if (isD1Ornament)
+            {
+                var overlayTinted = TintImage(overlay, Color.FromArgb(255, 0, 200, 255));
+                group.Children.Add(new ImageDrawing(overlayTinted, new Rect(0, 0, 96, 96)));
+            }
+        }
+
+        // Crafted overlay for patterns
+        if (!Strategy.IsD1() && item.TagData.Unk10.GetValue(item.GetReader()) is S49298080)
+        {
+            var craftedOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(Strategy.IsLatest() ? 0x80A9F577 : 0x80E55268)), 96, 96);
+            group.Children.Add(new ImageDrawing(craftedOverlay, new Rect(0, 0, 96, 96)));
+        }
+
+        var dw = new DrawingImage(group);
+        dw.Freeze();
+
+        return dw;
+    }
+
+    #endregion
 
     public static DrawingImage MakeFoundryBanner(InventoryItem item)
     {
@@ -424,6 +528,81 @@ public static class ApiImageUtils
     }
 }
 
+public sealed class AsyncImageLoader
+{
+    private readonly Func<ImageSource> _loader;
+    private readonly Action<string> _notifyPropertyChanged;
+    private readonly string _propertyName;
+
+    private bool _isLoading;
+    private ImageSource _image;
+
+    public AsyncImageLoader(
+        Func<ImageSource> loader,
+        Action<string> notifyPropertyChanged,
+        string propertyName)
+    {
+        _loader = loader;
+        _notifyPropertyChanged = notifyPropertyChanged;
+        _propertyName = propertyName;
+    }
+
+    public ImageSource GetImage(object currentItem)
+    {
+        if (_image != null || _isLoading || currentItem == null)
+            return _image;
+
+        StartLoading();
+        return null;
+    }
+
+    public void SetImage(ImageSource value)
+    {
+        _image = value;
+        _notifyPropertyChanged(_propertyName);
+    }
+
+    private async void StartLoading()
+    {
+        _isLoading = true;
+        try
+        {
+            var img = await AsyncImageWorker.LoadAsync(_loader);
+            if (img != null)
+            {
+                _image = img;
+                _notifyPropertyChanged(_propertyName);
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}
+
+public static class AsyncImageWorker
+{
+    //private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(18, 36);
+
+    public static async Task<ImageSource> LoadAsync(Func<ImageSource> loader)
+    {
+        //await _semaphore.WaitAsync();
+        try
+        {
+            var img = await Task.Run(loader);
+
+            //if (img is BitmapSource bmp && bmp.CanFreeze)
+            //    bmp.Freeze();
+
+            return img;
+        }
+        finally
+        {
+            //_semaphore.Release();
+        }
+    }
+}
 
 public static class StyleHelper
 {
@@ -1160,6 +1339,20 @@ public class TextureFromHashConverter : IValueConverter
         dw.Freeze();
 
         return dw.ImageSource;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
+// TODO make a converter that allows getting any config value?
+public class HolofoilEnabledConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return ConfigSubsystem.Get().GetHolofoilShader();
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

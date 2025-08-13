@@ -433,7 +433,25 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         RenderOptions.BitmapScalingMode="NearestNeighbor"
+                        Source="{Binding IconBackground}" />
+
+                    <Image
+                        Width="96"
+                        Height="96"
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        RenderOptions.BitmapScalingMode="NearestNeighbor"
                         Source="{Binding Icon}" />
+
+                    <Image
+                        Width="96"
+                        Height="96"
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        RenderOptions.BitmapScalingMode="NearestNeighbor"
+                        Source="{Binding IconOverlay}" />
 
                     <RadioButton
                         Width="96"
@@ -448,6 +466,7 @@
                         MouseLeave="PlugItem_MouseLeave"
                         MouseRightButtonDown="Consumable_RightClick"
                         Style="{StaticResource D2StyleRadioButtonNoSelectedOverlay}" />
+
                     <Border
                         BorderThickness="3"
                         Focusable="False"
@@ -1322,13 +1341,6 @@
         <Grid Grid.RowSpan="3" Panel.ZIndex="0">
             <Image
                 VerticalAlignment="Center"
-                Panel.ZIndex="12"
-                Opacity="1"
-                Source="C:\Users\Michael\Desktop\item_lore.png"
-                Stretch="None"
-                Visibility="Collapsed" />
-            <Image
-                VerticalAlignment="Center"
                 d:Source="https://www.bungie.net/common/destiny2_content/screenshots/3211806999.jpg"
                 Source="{Binding Item.ItemBackground}"
                 Stretch="UniformToFill" />
@@ -1515,7 +1527,51 @@
                                 Height="96"
                                 d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
                                 RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                Source="{Binding Item.ItemIcon}" />
+                                Source="{Binding Item.ItemIconBackground}" />
+
+                            <Grid Width="96" Height="96">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Item.Item.IsHolofoil, Converter={StaticResource HolofoilEnabledConverter}}" Value="True" />
+                                                    <Condition Binding="{Binding Item.Item.IsHolofoil}" Value="True" />
+                                                </MultiDataTrigger.Conditions>
+                                                <MultiDataTrigger.Setters>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger.Setters>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Grid>
+                                    <Grid.Effect>
+                                        <local:HolofoilShader />
+                                    </Grid.Effect>
+                                </Grid>
+
+                                <Border
+                                    BorderBrush="White"
+                                    BorderThickness="8"
+                                    Opacity="0.15" />
+                            </Grid>
+
+                            <Image
+                                Width="96"
+                                Height="96"
+                                d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                Source="{Binding Item.ItemIcon}"
+                                Visibility="Visible" />
+
+                            <Image
+                                Width="96"
+                                Height="96"
+                                d:Source="https://www.bungie.net/common/destiny2_content/icons/7a793b17f8c18aaed66c6b87de9ff5f8.jpg"
+                                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                Source="{Binding Item.ItemIconOverlay}" />
 
                             <Image
                                 Width="96"

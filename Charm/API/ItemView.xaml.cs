@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -110,8 +109,12 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             ItemSource = collectible != null ? collectible.Value.SourceString?.Value : "",
             ItemRarity = _invItem.GetItemRarity(),
             ItemDamageType = DestinyDamageType.GetDamageType(_invItem.GetItemDamageTypeIndex()),
-            ItemIcon = ApiImageUtils.MakeFullItemIcon(_invItem),
+
+            ItemIconBackground = ApiImageUtils.MakeItemIconBackground(_invItem),
+            ItemIcon = ApiImageUtils.MakeItemIconForeground(_invItem),
+            ItemIconOverlay = ApiImageUtils.MakeItemIconOvarlay(_invItem),
             ItemWatermark = ApiImageUtils.GetPlugWatermark(_invItem),
+
             ItemBackground = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{_invItem.ApiHash}.jpg")),
             ItemFoundryBanner = !_invItem.IsEmblem ? ApiImageUtils.MakeFoundryBanner(_invItem) : null,
         };
@@ -363,12 +366,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
             return null;
 
         InventoryItem item = Investment.Get().GetInventoryItem(index);
-        return new APIPlugItem()
-        {
-            ParentSocketStyle = parentSocketStyle,
-            Item = item,
-            Hash = item.ApiHash,
-        };
+        var plug = new APIPlugItem(item);
+        plug.ParentSocketStyle = parentSocketStyle;
+        return plug;
     }
 
     private void LoadItemStats()
@@ -796,7 +796,9 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
         public DestinyTierType ItemRarity { get; set; }
         public DestinyDamageTypeEnum ItemDamageType { get; set; }
 
+        public ImageSource ItemIconBackground { get; set; }
         public ImageSource ItemIcon { get; set; }
+        public ImageSource ItemIconOverlay { get; set; }
         public ImageSource ItemWatermark { get; set; }
         public ImageSource ItemFoundryBanner { get; set; }
 
@@ -830,6 +832,26 @@ public class APIPlugItem : CharmUIElement
 
     public APIPlugItem(InventoryItem item)
     {
+        _iconBgLoader = new AsyncImageLoader(
+            () => ApiImageUtils.MakeItemIconBackground(item),
+            OnPropertyChanged,
+            nameof(IconBackground));
+
+        _iconLoader = new AsyncImageLoader(
+            () => ApiImageUtils.MakeItemIconForeground(item),
+            OnPropertyChanged,
+            nameof(Icon));
+
+        _iconOverlayLoader = new AsyncImageLoader(
+            () => ApiImageUtils.MakeItemIconOvarlay(item),
+            OnPropertyChanged,
+            nameof(IconOverlay));
+
+        _watermarkLoader = new AsyncImageLoader(
+            () => ApiImageUtils.GetPlugWatermark(item),
+            OnPropertyChanged,
+            nameof(ItemWatermark));
+
         Item = item;
         Hash = item.ApiHash;
     }
@@ -854,78 +876,29 @@ public class APIPlugItem : CharmUIElement
                 return;
 
             _item = value;
-            _icon = null;
             OnPropertyChanged(nameof(Item));
-            OnPropertyChanged(nameof(Icon));
         }
     }
 
-    private bool _isLoadingIcon = false;
-    private ImageSource _icon = null;
+
+    private readonly AsyncImageLoader _iconBgLoader;
+    private readonly AsyncImageLoader _iconLoader;
+    private readonly AsyncImageLoader _iconOverlayLoader;
+    private readonly AsyncImageLoader _watermarkLoader;
+
+    public ImageSource IconBackground => _iconBgLoader.GetImage(Item);
+    public ImageSource IconOverlay => _iconOverlayLoader.GetImage(Item);
+    public ImageSource ItemWatermark => Strategy.IsD1() ? null : _watermarkLoader.GetImage(Item);
+
     public ImageSource Icon
     {
-        get
-        {
-            if (_icon is null && !_isLoadingIcon && Item is not null)
-            {
-                _ = LoadIconAsync(); // fire and forget
-            }
-
-            return _icon;
-        }
+        get => _iconLoader.GetImage(Item);
         set
         {
-            _icon = value;
+            _iconLoader.SetImage(value);
             OnPropertyChanged(nameof(Icon));
         }
     }
-
-    public async Task LoadIconAsync()
-    {
-        if (_isLoadingIcon || Item is null)
-            return;
-
-        _isLoadingIcon = true;
-        var loadedIcon = await Task.Run(() => ApiImageUtils.MakeFullItemIcon(Item));
-        _isLoadingIcon = false;
-
-        Icon = loadedIcon;
-    }
-
-    private bool _isLoadingWatermark = false;
-    private ImageSource _itemWatermark = null;
-    public ImageSource ItemWatermark
-    {
-        get
-        {
-            if (!Strategy.IsD1() && _itemWatermark is null && !_isLoadingWatermark && Item is not null)
-            {
-                _ = LoadWatermarkAsync();
-            }
-
-            return _itemWatermark;
-        }
-        private set
-        {
-            _itemWatermark = value;
-            OnPropertyChanged(nameof(ItemWatermark));
-        }
-    }
-
-    public async Task LoadWatermarkAsync()
-    {
-        if (_isLoadingWatermark || Item is null)
-            return;
-
-        _isLoadingWatermark = true;
-        var loadedIconWatermark = await Task.Run(() => ApiImageUtils.GetPlugWatermark(Item));
-        if (loadedIconWatermark is not null)
-        {
-            _isLoadingWatermark = false;
-            ItemWatermark = loadedIconWatermark;
-        }
-    }
-
 }
 
 public class SocketCategory : CharmUIElement

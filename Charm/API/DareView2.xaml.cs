@@ -67,9 +67,10 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     public DareView2()
     {
-#if DEBUG
+        //#if DEBUG
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
-#endif
+        //#endif
+
         InitializeComponent();
         MouseMove += DareView2_MouseMove;
         Categories.CustomNextButton = NextPage;
