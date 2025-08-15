@@ -136,8 +136,14 @@ public partial class PopupBanner : UserControl
     }
 
     // isnt actually removed here, just starts the animation that calls the actual function when it ends
-    public void Remove()
+    public void Remove(bool force = false)
     {
+        if (force && this.Parent is Panel parentPanel)
+        {
+            parentPanel.Children.Remove(this);
+            return;
+        }
+
         double currentHeight = ElementStack.ActualHeight;
         var heightAnimation = new DoubleAnimation
         {

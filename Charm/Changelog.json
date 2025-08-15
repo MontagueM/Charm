@@ -1,5 +1,18 @@
 [
     {
+        "version": "3.0.7",
+        "date": "08-15-2025",
+        "changes": [
+            {
+                "title": "Small Fixes",
+                "notes": [
+                    "Fixed a couple small but long overdue bugs when setting up a new version in Settings. (Surely I did't introduce more...)",
+                    "Fixed the user agreement always setting to true regardless of the users decision...oops.."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.0.6",
         "date": "08-13-2025",
         "changes": [

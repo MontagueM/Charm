@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -47,8 +48,8 @@ public partial class GeneralConfigView : UserControl
         {
             cs.SettingsCombobox.SelectedIndex = 0;
         }
-        cs.SettingsCombobox.SelectionChanged += PackagePathStrategyComboBox_OnSelectionChanged;
         cs.SettingsCombobox.SelectionChanged += CurrentStrategy_OnSelectionChanged;
+
         cs.ChangeButton.Visibility = Visibility.Hidden;
         GeneralConfigPanel.Children.Add(cs);
 
@@ -131,16 +132,6 @@ public partial class GeneralConfigView : UserControl
         disHL.SettingValue = bVal.ToString();
         disHL.ChangeButton.Click += HolofoilShader_OnClick;
         MiscConfigPanel.Children.Add(disHL);
-    }
-
-    private void PackagePathStrategyComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        TigerStrategy strategy = (TigerStrategy)(((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedItem as ComboBoxItem).Tag;
-        if (_packagePathStrategy != strategy)
-        {
-            _packagePathStrategy = strategy;
-            PopulateConfigPanel();
-        }
     }
 
     private List<ComboBoxItem> MakeEnumComboBoxItems<T>() where T : Enum
@@ -275,23 +266,45 @@ public partial class GeneralConfigView : UserControl
         PopulateConfigPanel();
     }
 
-    private void CurrentStrategy_OnSelectionChanged(object sender, RoutedEventArgs e)
+    // This is a mess
+    private async void CurrentStrategy_OnSelectionChanged(object sender, RoutedEventArgs e)
     {
-        TigerStrategy strategy = (TigerStrategy)(((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedItem as ComboBoxItem).Tag;
-        if (!Strategy.HasConfiguration(strategy))
+        var prevStrat = Strategy.CurrentStrategy;
+        TigerStrategy targetStrategy = (TigerStrategy)(((sender as ComboBox).DataContext as ConfigSettingComboControl).SettingsCombobox.SelectedItem as ComboBoxItem).Tag;
+
+        MainWindow.Progress.SetProgressStage(
+            $"Changing from {prevStrat.GetEnumDescription()} to {targetStrategy.GetEnumDescription()}");
+
+        // dumb but allows with progress view to show up without wrapping shit in a task.run, which causes more headaches
+        await Task.Delay(100);
+
+        bool hasConfig = Strategy.HasConfiguration(targetStrategy);
+        if (!hasConfig)
         {
-            Log.Warning($"Strategy {strategy} has no configuration set.");
-            if (!OpenPackagesPathDialog(strategy))
+            Log.Warning($"Strategy {targetStrategy} has no configuration set.");
+            Strategy.SetStrategy(TigerStrategy.NONE);
+
+            bool result = OpenPackagesPathDialog(targetStrategy);
+            if (!result)
             {
-                Strategy.SetStrategy(TigerStrategy.NONE);
-                PopulateConfigPanel();
+                MainWindow.Progress.CompleteStage();
+                SetStrategy(prevStrat);
                 return;
             }
         }
-        _config.SetCurrentStrategy(strategy);
-        Strategy.SetStrategy(_config.GetCurrentStrategy());
-        PopulateConfigPanel();
+
+        MainWindow.Progress.CompleteStage();
+        SetStrategy(targetStrategy);
         ConsiderShowingMainMenu();
+    }
+
+    private void SetStrategy(TigerStrategy targetStrategy)
+    {
+        _packagePathStrategy = targetStrategy;
+        _config.SetCurrentStrategy(targetStrategy);
+        Strategy.SetStrategy(targetStrategy);
+
+        PopulateConfigPanel();
     }
 
     private void AnimatedBackground_OnClick(object sender, RoutedEventArgs e)

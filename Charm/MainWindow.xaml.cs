@@ -135,7 +135,8 @@ public partial class MainWindow
         }
         else
         {
-            MakeNewTab("Configuration", new ConfigView());
+            //MakeNewTab("Configuration", new ConfigView());
+            SetCurrentTab("settings");
             SetNewestTabSelected();
         }
 
@@ -195,7 +196,7 @@ public partial class MainWindow
         };
         warn.MouseRightButtonDown += (s, e) =>
         {
-            warn.Remove();
+            warn.Remove(true);
             PopupBanner warn2 = new()
             {
                 DarkenBackground = true,
@@ -338,14 +339,14 @@ public partial class MainWindow
             if (!upToDate)
             {
                 //MessageBox.Show($"New version available on GitHub! (local {versionChecker.CurrentVersion.Id} vs ext {versionChecker.LatestVersion.Id})");
-                Arithmic.Log.Info($"Version is not up-to-date (local {versionChecker.CurrentVersion.Id} vs ext {latestVersion.Id}).");
+                Arithmic.Log.Info($"Version is not up-to-date (Local {versionChecker.CurrentVersion.Id} vs Github {latestVersion.Id}).");
 
                 PopupBanner update = new()
                 {
                     DarkenBackground = true,
                     Icon = "",
                     Title = "UPDATE AVAILABLE",
-                    Subtitle = "A new Charm version is available!",
+                    Subtitle = "A new Charm update is available!",
                     Description =
                     $"Current Version: v{App.CurrentVersion.Id}\n" +
                     $"Latest Version: v{latestVersion.Id}",
@@ -361,16 +362,12 @@ public partial class MainWindow
             }
             else
             {
-                Arithmic.Log.Info($"Version is up to date (v{versionChecker.CurrentVersion.Id}, Github v{latestVersion.Id}).");
+                Arithmic.Log.Info($"Version is up to date (Local v{versionChecker.CurrentVersion.Id}, Github v{latestVersion.Id}).");
             }
         }
         catch (Exception e)
         {
-            // Could not get or parse version file
-#if !DEBUG
-            MessageBox.Show("Could not get version.");
-#endif
-            Arithmic.Log.Error($"Could not get version error {e}.");
+            Arithmic.Log.Error($"Could not get version. Error {e}.");
         }
     }
 
@@ -384,12 +381,6 @@ public partial class MainWindow
         // Set texture format
         ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
         TextureExtractor.SetTextureFormat(config.GetOutputTextureFormat());
-    }
-
-    private void OpenConfigPanel_OnClick(object sender, RoutedEventArgs e)
-    {
-        MakeNewTab("Configuration", new ConfigView());
-        SetNewestTabSelected();
     }
 
     private void OpenLogPanel_OnClick(object sender, RoutedEventArgs e)
@@ -411,7 +402,8 @@ public partial class MainWindow
     public void ShowMainMenu()
     {
         MainMenuTab.Visibility = Visibility.Visible;
-        // MainTabControl.SelectedItem = MainMenuTab;
+        MainTabControl.SelectedItem = MainMenuTab;
+
         if (_bHasInitialised == false)
         {
             Task.Run(InitialiseHandlers);
