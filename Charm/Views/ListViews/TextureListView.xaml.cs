@@ -114,6 +114,8 @@ public partial class TextureListView : UserControl
         if (Textures.Count != 0)
             Textures.Clear();
 
+        Dispatcher.Invoke(() => TextureListLoading.Visibility = Visibility.Visible);
+
         await Task.Run(() => Parallel.ForEachAsync(item.Hashes, async (hash, ct) =>
         {
             // Get the textures dimensions directly from the raw data but only if we're loading from a parent pkg.
@@ -134,6 +136,7 @@ public partial class TextureListView : UserControl
 
         TextureList.ItemsSource = Textures.OrderBy(x => x.Hash);
         RefreshTextureList();
+        Dispatcher.Invoke(() => TextureListLoading.Visibility = Visibility.Collapsed);
     }
 
 
