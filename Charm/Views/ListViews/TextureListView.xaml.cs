@@ -27,6 +27,7 @@ public partial class TextureListView : UserControl
     private int SortByIndex = 4;
 
     private FileHash _currentDisplayedTexture;
+    private bool _isCubemap = false;
 
     public TextureListView()
     {
@@ -198,6 +199,7 @@ public partial class TextureListView : UserControl
     private void LoadTexture(FileHash fileHash)
     {
         Texture textureHeader = FileResourcer.Get().GetFile<Texture>(fileHash);
+        _isCubemap = textureHeader.IsCubemap();
         _currentDisplayedTexture = fileHash;
 
         TextureControl.Visibility = textureHeader.IsCubemap() ? Visibility.Hidden : Visibility.Visible;
@@ -266,7 +268,10 @@ public partial class TextureListView : UserControl
             return;
 
         FileHash hash = _currentDisplayedTexture;
-        TextureControl.ExportCurrent();
+        if (_isCubemap)
+            CubemapControl.ExportCurrent();
+        else
+            TextureControl.ExportCurrent();
 
         string pkgName = PackageResourcer.Get().GetPackage(hash.PackageId).GetPackageMetadata().Name.Split(".")[0];
         string savePath = Config.GetExportSavePath() + $"/Textures/{pkgName}";

@@ -81,15 +81,18 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             }
                         }
                         break;
+
                     case "NORMAL":
                         Vector4 norm = (Vector4)ReadVertexDataFromElement(handle, element);
                         part.VertexNormals.Add(norm);
                         if (part is DynamicMeshPart)
                             AddVertexColourSlotInfo(part as DynamicMeshPart, (short)(norm.W * 32_767.0f));
                         break;
+
                     case "TANGENT":
                         part.VertexTangents.Add((Vector4)ReadVertexDataFromElement(handle, element));
                         break;
+
                     case "TEXCOORD":
                         dynamic texcoord = ReadVertexDataFromElement(handle, element);
                         if (texcoord is Vector2)
@@ -114,9 +117,11 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             }
                         }
                         break;
+
                     case "COLOR":
                         part.VertexColours.Add((Vector4)ReadVertexDataFromElement(handle, element));
                         break;
+
                     case "BLENDINDICES": // can be R16G16B16A16_UINT or R8G8B8A8_UINT
                         var indices = (Vector4)ReadVertexDataFromElement(handle, element);
                         WeightIndex = new IntVector4((int)indices.X, (int)indices.Y, (int)indices.Z, (int)indices.W);
@@ -133,10 +138,12 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                             (part as DynamicMeshPart).VertexWeights.Add(vw2);
                         }
                         break;
+
                     case "BLENDWEIGHT": // always R8G8B8A8_UNORM
                         HasWeights = true;
                         WeightValue = new IntVector4(handle.ReadByte(), handle.ReadByte(), handle.ReadByte(), handle.ReadByte());
                         break;
+
                     default:
                         throw new NotImplementedException($"Implement parsing for {element.SemanticName} ({element.HlslType}, {element.Format}, size 0x{element.Stride:X2})");
                 }
@@ -170,6 +177,7 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 DXGI_FORMAT.R16G16_FLOAT => new Vector2(handle.ReadHalf(), handle.ReadHalf()),
                 _ => new Vector2(handle.ReadInt16(), handle.ReadInt16()),
             },
+
             // 8
             0x8 => element.Format switch
             {
@@ -180,12 +188,14 @@ public class VertexBuffer : TigerReferenceFile<SVertexHeader>
                 DXGI_FORMAT.R16G16B16A16_UINT => new Vector4((float)handle.ReadUInt16(), handle.ReadUInt16(), handle.ReadUInt16(), handle.ReadUInt16()),
                 _ => new Vector4(handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16(), handle.ReadInt16()),
             },
+
             // 12
             0xC => element.Format switch
             {
                 DXGI_FORMAT.R32G32B32_FLOAT => new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), 0),
                 _ => (dynamic)new Vector4(handle.ReadSingle(), handle.ReadSingle(), handle.ReadSingle(), 0),
             },
+
             // 16
             0x10 => element.Format switch
             {
