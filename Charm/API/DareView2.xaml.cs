@@ -374,6 +374,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         MainWindow.Progress.SetProgressStages(apiStages);
         Task.Run(() =>
         {
+            var dupNames = new HashSet<string>();
             SelectedItems.ToList().ForEach(item =>
             {
                 var curItem = item.Item;
@@ -389,6 +390,9 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                     //    curItem.Name = item.Item.Name;
                     //}
                 }
+
+                if (!dupNames.Add(curItem.Name))
+                    curItem.Name += $" {curItem.ApiHash}";
 
                 if (curItem.GetArtArrangementIndex() != -1)
                 {
