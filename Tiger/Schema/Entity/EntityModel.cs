@@ -51,18 +51,6 @@ public class EntityModel : Tag<SEntityModel>
             for (int i = 0; i < mesh.Parts.Count; i++)
             {
                 SCB6E8080 part = mesh.Parts[reader, i];
-                //Console.WriteLine($"{i}--------------");
-                //Console.WriteLine($"Material {part.Material?.FileHash}");
-                //Console.WriteLine($"VariantShaderIndex {part.VariantShaderIndex}");
-                //Console.WriteLine($"PrimitiveType {part.PrimitiveType}");
-                //Console.WriteLine($"IndexOffset {part.IndexOffset}");
-                //Console.WriteLine($"IndexCount {part.IndexCount}");
-                //Console.WriteLine($"Unk10 {part.Unk10}");
-                //Console.WriteLine($"ExternalIdentifier {part.ExternalIdentifier}");
-                //Console.WriteLine($"Unk16 {part.Unk16}");
-                //Console.WriteLine($"FlagsD1 {part.FlagsD1}");
-                //Console.WriteLine($"GearDyeChangeColorIndex {part.GearDyeChangeColorIndex}");
-                //Console.WriteLine($"LodCategory {part.LodCategory}");
 
                 if (eDetailLevel == ExportDetailLevel.AllLevels)
                 {
@@ -90,8 +78,6 @@ public class EntityModel : Tag<SEntityModel>
 
     private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, SCB6E8080>> dynamicParts, EntityResource parentResource, bool hasSkeleton = false)
     {
-        TigerStrategy _strategy = Strategy.CurrentStrategy;
-
         List<DynamicMeshPart> parts = new();
         List<int> exportPartRange = new();
         if (_tag.Meshes.Count == 0) return parts;
@@ -104,19 +90,37 @@ public class EntityModel : Tag<SEntityModel>
                 if (!exportPartRange.Contains(i))
                     continue;
 
+                var renderStage = Array.IndexOf(mesh.PartRangePerRenderStage, (short)i);
                 DynamicMeshPart dynamicMeshPart = new(part, parentResource)
                 {
                     Index = i,
                     GroupIndex = part.ExternalIdentifier,
                     LodCategory = part.LodCategory,
-                    bAlphaClip = (part.GetFlags() & 0x8) != 0,
+                    bAlphaClip = (part.GetFlags() & 0x8) != 0
+                    || ((part.GetFlags() & 0x20) != 0 && (TfxRenderStage)renderStage == TfxRenderStage.Decals),
                     GearDyeChangeColorIndex = part.GearDyeChangeColorIndex,
                     HasSkeleton = hasSkeleton,
                     RotationOffset = RotationOffset,
                     TranslationOffset = TranslationOffset,
                     VertexLayoutIndex = mesh.GetInputLayoutForStage(0),
-                    RenderStage = (TfxRenderStage)Array.IndexOf(mesh.PartRangePerRenderStage, (short)i)
+                    // -1 shouldnt be possible..right?
+                    RenderStage = renderStage == -1 ? TfxRenderStage.GenerateGbuffer : (TfxRenderStage)renderStage
                 };
+
+                //Console.WriteLine($"{i}--------------");
+                //Console.WriteLine($"Material {part.Material?.Hash}");
+                //Console.WriteLine($"VariantShaderIndex {part.VariantShaderIndex}");
+                //Console.WriteLine($"PrimitiveType {part.PrimitiveType}");
+                //Console.WriteLine($"IndexOffset {part.IndexOffset}");
+                //Console.WriteLine($"IndexCount {part.IndexCount}");
+                //Console.WriteLine($"Unk10 {part.Unk10}");
+                //Console.WriteLine($"ExternalIdentifier {part.ExternalIdentifier}");
+                //Console.WriteLine($"Unk16 {part.Unk16}");
+                //Console.WriteLine($"FlagsD1 {part.FlagsD1}");
+                //Console.WriteLine($"FlagsD2 {part.FlagsD2}");
+                //Console.WriteLine($"GearDyeChangeColorIndex {part.GearDyeChangeColorIndex}");
+                //Console.WriteLine($"LodCategory {part.LodCategory}");
+                //Console.WriteLine($"RenderStage {dynamicMeshPart.RenderStage} ({Array.IndexOf(mesh.PartRangePerRenderStage, (short)i)}, {(short)i})");
 
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
