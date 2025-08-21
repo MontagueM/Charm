@@ -112,7 +112,7 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
 
             ItemIconBackground = ApiImageUtils.MakeItemIconBackground(_invItem),
             ItemIcon = ApiImageUtils.MakeItemIconForeground(_invItem),
-            ItemIconOverlay = ApiImageUtils.MakeItemIconOvarlay(_invItem),
+            ItemIconOverlay = ApiImageUtils.MakeItemIconOverlay(_invItem),
             ItemWatermark = ApiImageUtils.GetPlugWatermark(_invItem),
 
             ItemBackground = new BitmapImage(new Uri($"https://www.bungie.net/common/destiny2_content/screenshots/{_invItem.ApiHash}.jpg")),
@@ -843,7 +843,7 @@ public class APIPlugItem : CharmUIElement
             nameof(Icon));
 
         _iconOverlayLoader = new AsyncImageLoader(
-            () => ApiImageUtils.MakeItemIconOvarlay(item),
+            () => ApiImageUtils.MakeItemIconOverlay(item),
             OnPropertyChanged,
             nameof(IconOverlay));
 

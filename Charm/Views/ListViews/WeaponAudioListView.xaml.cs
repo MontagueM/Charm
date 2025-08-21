@@ -430,15 +430,10 @@ public partial class WeaponAudioListView : UserControl
             if (categorySounds == null)
                 continue;
 
-            string name = "";
-            if (Strategy.IsD1()) // && name == "")
-                name = categorySounds.TagData.SoundbankBL.GetNameFromBank();
-            else if (Strategy.IsPostBL())
-                name = categorySounds.TagData.GetSoundbank().GetNameFromBank();
-
             if (categorySounds.Hash.GetReferenceHash().IsInvalid())
                 return;
 
+            string name = categorySounds.TagData.GetSoundbank().GetNameFromBank();
             WeaponAudioCategory category = new()
             {
                 Name = name == "" ? categorySounds.Hash : name,

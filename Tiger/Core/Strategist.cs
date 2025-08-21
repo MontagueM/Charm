@@ -397,6 +397,9 @@ public class Strategy
         /// <returns></returns>
         public static void LazyInit()
         {
+            if (_instance is not null && _instance._strategy != CurrentStrategy)
+                _instance = null;
+
             if (_instance == null)
             {
                 AddNewStrategyInstance(_currentStrategy);

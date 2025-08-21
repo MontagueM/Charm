@@ -146,12 +146,12 @@ public struct S38978080
     [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     [SchemaField(TigerStrategy.DESTINY2_WITCHQUEEN_6307, Obsolete = true)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_LATEST)]
-    public BKHD SoundbankBL;
+    public BKHD SoundbankBL; // D1 - BL, EoF
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(TigerStrategy.DESTINY2_LATEST, Obsolete = true)]
-    public Tag<S63838080> SoundbankWQ;
+    public Tag<S63838080> SoundbankWQ; // WQ - TFS
 
     [SchemaField(0x38, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x18, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
@@ -160,7 +160,7 @@ public struct S38978080
 
     public BKHD GetSoundbank()
     {
-        if (Strategy.IsLatest() || Strategy.IsBL() || Strategy.IsPreBL())
+        if (Strategy.IsLatest() || Strategy.IsBL() || Strategy.IsPreBL() || Strategy.IsD1())
             return SoundbankBL;
         else
             return SoundbankWQ.TagData.SoundBank;

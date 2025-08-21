@@ -174,6 +174,13 @@ public static class ApiImageUtils
 
     public static DrawingImage MakeItemIconBackground(InventoryItem item)
     {
+        bool isD1Ornament = false;
+        if (Strategy.IsD1() && item.IsArmorOrnament && item.Parent != null) // ew
+        {
+            item = item.Parent;
+            isD1Ornament = true;
+        }
+
         var group = new DrawingGroup();
 
         // streams
@@ -190,6 +197,14 @@ public static class ApiImageUtils
         {
             BitmapImage? bgOverlay = bgOverlayStream != null && !item.IsArmor ? MakeBitmapImage(bgOverlayStream, 96, 96) : null;
             group.Children.Add(new ImageDrawing(bgOverlay, new Rect(0, 0, 96, 96)));
+        }
+
+        // For D1 Age Of Triumph ornaments
+        if (isD1Ornament)
+        {
+            BitmapImage? bgOverlay = MakeBitmapImage(Texture.GetTextureFromHash(new(0x80A63BAA)), 96, 96);
+            var bgOverlayNew = ChangeOpacity(bgOverlay, 0.5f);
+            group.Children.Add(new ImageDrawing(bgOverlayNew, new Rect(0, 0, 96, 96)));
         }
 
         var dw = new DrawingImage(group);
@@ -229,7 +244,7 @@ public static class ApiImageUtils
         return dw;
     }
 
-    public static DrawingImage MakeItemIconOvarlay(InventoryItem item)
+    public static DrawingImage MakeItemIconOverlay(InventoryItem item)
     {
         bool isD1Ornament = false;
         if (Strategy.IsD1() && item.IsArmorOrnament && item.Parent != null) // ew
