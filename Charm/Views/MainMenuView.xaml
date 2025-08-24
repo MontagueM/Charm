@@ -25,9 +25,9 @@
 
     <Grid>
         <Grid.Background>
-            <RadialGradientBrush Center="0.5,0.5" GradientOrigin="1,0" RadiusX="2" RadiusY="2">
+            <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0,0" Opacity="0.4" RadiusX="2" RadiusY="2">
                 <RadialGradientBrush.GradientStops>
-                    <GradientStop Offset="0" Color="#A9112D5C" />
+                    <GradientStop Offset="0" Color="#008081" />
                     <GradientStop Offset="0.5" Color="#00000000" />
                 </RadialGradientBrush.GradientStops>
             </RadialGradientBrush>
@@ -52,6 +52,12 @@
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
 
+        <Border
+            Grid.RowSpan="2"
+            Margin="10,10,10,50"
+            BorderBrush="White"
+            BorderThickness="2,2,2,0"
+            Opacity="0.2" />
 
         <Grid
             x:Name="MainContainer"

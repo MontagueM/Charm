@@ -474,6 +474,7 @@
         <DataTemplate x:Key="RibbonItemButton">
             <Grid Background="Transparent">
                 <Button
+                    Width="405"
                     MaxHeight="130"
                     Margin="0,0,0,0"
                     local:StyleHelper.BorderThickness="1"
@@ -513,7 +514,7 @@
                                     <DropShadowEffect
                                         BlurRadius="20"
                                         Direction="-90"
-                                        Opacity="1"
+                                        Opacity="{Binding Tag.DropShadowOpacity}"
                                         ShadowDepth="10" />
                                 </Image.Effect>
                             </Image>
@@ -574,6 +575,15 @@
                                         Opacity="1"
                                         ShadowDepth="2" />
                                 </TextBlock.Effect>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ItemCategoryAmount}" Value="0">
+                                                <Setter Property="Visibility" Value="Hidden" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
                             </TextBlock>
                         </StackPanel>
 

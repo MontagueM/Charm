@@ -326,6 +326,12 @@ public static class ApiImageUtils
         return dw.ImageSource;
     }
 
+
+    public static ImageSource MakeIcon(InventoryItem item, int containerIndex = 0, int iconIndex = 0, int listIndex = 0)
+    {
+        return MakeIcon(Investment.Get().GetItemIconContainerIndex(item), containerIndex, iconIndex, listIndex);
+    }
+
     public static ImageSource MakeIcon(int index, int containerIndex = 0, int iconIndex = 0, int listIndex = 0)
     {
         Tag<SB83E8080>? container = Investment.Get().GetItemIconContainer(index);
@@ -1373,5 +1379,84 @@ public class HolofoilEnabledConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         throw new NotSupportedException();
+    }
+}
+
+public class TextureFromIconContainerConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (parameter is not string)
+            return null;
+
+        var indicies = (parameter as string).Split("|");
+        var index = int.Parse(indicies[0]);
+        var listIndex = int.Parse(indicies[1]);
+
+        if (value is InventoryItem item)
+        {
+            var tex = item.GetIconPrimaryTexture(index, listIndex);
+            if (tex is null)
+                return null;
+
+            BitmapImage? primary = ApiImageUtils.MakeBitmapImage(tex.GetTexture(), tex.Width, tex.Height);
+
+            var dw = new ImageBrush(primary);
+            dw.Freeze();
+
+            return dw.ImageSource;
+        }
+        else if (value is FileHash containerHash && containerHash is not null)
+        {
+            var tex = Investment.Get().GetTextureFromContainer(containerHash, index, listIndex);
+            if (tex is null)
+                return null;
+
+            BitmapImage? primary = ApiImageUtils.MakeBitmapImage(tex.GetTexture(), tex.Width, tex.Height);
+
+            var dw = new ImageBrush(primary);
+            dw.Freeze();
+
+            return dw.ImageSource;
+        }
+        return null;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
+// cringe
+public class AddOneConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is int intValue)
+            return intValue + 1;
+
+        return value;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class ListCountConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is ICollection collection)
+            return collection.Count;
+
+        return 0;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
 }
