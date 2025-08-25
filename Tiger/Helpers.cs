@@ -191,7 +191,17 @@ public static class Helpers
         if (match != null)
             return match.ClassHash;
 
-        // Try to find the next highest strategy (greater than the requested one)
+        // If not found, try the highest lower strategy
+        // ex: if SHADOWKEEP_2999 isnt defined, use SHADOWKEEP_2601 (or RISE_OF_IRON if 2601 isnt defined either)
+        var lower = attrs
+            .Where(a => a.Strategy < strategy)
+            .OrderByDescending(a => a.Strategy)
+            .FirstOrDefault();
+
+        if (lower != null)
+            return lower?.ClassHash;
+
+        // Worst case, use the next higher strategy (which will probably be the wrong class hash)
         var nextHighest = attrs
             .Where(a => a.Strategy > strategy)
             .OrderBy(a => a.Strategy)
@@ -200,13 +210,7 @@ public static class Helpers
         if (nextHighest != null)
             return nextHighest.ClassHash;
 
-        // If not found, try the highest lower strategy
-        var lower = attrs
-            .Where(a => a.Strategy < strategy)
-            .OrderByDescending(a => a.Strategy)
-            .FirstOrDefault();
-
-        return lower?.ClassHash;
+        return null;
     }
 }
 
