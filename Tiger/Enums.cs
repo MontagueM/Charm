@@ -153,6 +153,7 @@ public enum DestinyTraitID : uint
     item_mask = 1,
     [Description("Seasonal Artifact")]
     item_seasonal_artifact = 2,
+    item_quest_all = 3,
 
     // Defined in game
     [Description("Black Armory")]
@@ -233,22 +234,29 @@ public enum DestinyTraitID : uint
     item_package = 151064318,
     item_plug_aspect = 577926988,
     item_plug_fragment = 2833630124,
+
     item_quest_annual_v460 = 2908763903,
     item_quest_annual_v500 = 2774395792,
     item_quest_annual_v600 = 929402123,
     item_quest_annual_v700 = 2976021378,
     item_quest_annual_v800 = 3011401061,
     item_quest_annual_v900 = 763053052,
-
     item_quest_campaign = 2973844452,
+    [Description("The Edge of Fate Quest")]
     item_quest_current_release = 2878306895,
+    [Description("Seasonal Event Quest")]
     item_quest_event = 1056186694,
+    [Description("Exotic Quest")]
     item_quest_exotic = 370766376,
     item_quest_frontier_apollo = 2799343944,
+    [Description("New Light Quest")]
     item_quest_new_light = 520867389,
     item_quest_onramp = 170945933,
+    [Description("Legacy Quest")]
     item_quest_past = 2387836362,
+    [Description("Playlist Quest")]
     item_quest_playlists = 500105683,
+    [Description("Seasonal Quest")]
     item_quest_seasonal = 3671004794,
     item_quest_seasonal_season24 = 3904180889,
     item_quest_seasonal_season25 = 3904180888,

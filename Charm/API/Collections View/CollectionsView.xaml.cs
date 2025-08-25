@@ -29,7 +29,7 @@ public partial class CollectionsView : UserControl
         MouseMove += UserControl_MouseMove;
     }
 
-    public void LoadContent()
+    public async void LoadContent()
     {
         LoadCollectibles();
 
@@ -110,11 +110,17 @@ public partial class CollectionsView : UserControl
             case 1993337477: // Lore
                 userControl = LoadRedactedUserControl("Charm.Redacted.LoreView", item);
                 break;
+
             case 1866538467: // Triumphs
             case 616318467: // Seals
                 item.CategoryBannerColor = new SolidColorBrush(Color.FromArgb(0xFF, 0x93, 0x82, 0x4F));
                 userControl = LoadRedactedUserControl("Charm.Redacted.TriumphView", item);
                 break;
+
+            case uint.MaxValue: // quests
+                userControl = LoadRedactedUserControl("Charm.Redacted.QuestListView", item);
+                break;
+
             default:
                 userControl = new CategoryView(item);
                 break;
@@ -195,8 +201,8 @@ public partial class CollectionsView : UserControl
         public SolidColorBrush RibbonBackground { get; set; } = new SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0x7d, 0x80));
         public ImageSource RibbonBackgroundImage { get; set; }
         public Thickness RibbonBackgroundMargin { get; set; } = new(0, -75, 0, 0);
+        public float DropShadowOpacity { get; set; } = 0f;
     }
-
 
     // For Redacted API
     public TextBlock _BadgesTextTab => this.BadgesTextTab;

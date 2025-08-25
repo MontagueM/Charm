@@ -597,7 +597,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
     private Point _tooltipPos = new Point(0, 0);
     private bool _firstShow = true;
-    private const double LerpSpeed = 0.35;
+    private const double LerpSpeed = 0.75;
     private void OnRender(object sender, EventArgs e) // TODO clamp to left/right sides, not really needed rn
     {
         if (ActiveItem == null && ToolTip.Visibility == Visibility.Visible)
@@ -922,14 +922,12 @@ public class ObjBlockTemplateSelector : DataTemplateSelector
 
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
-        var objBlock = item as ObjectiveBlock;
-        switch (objBlock.Style)
+        switch (((dynamic)item).Style)
         {
             case DestinyUnlockValueUIStyle.Checkbox:
                 return CheckboxTemplate;
             default:
                 return PercentageTemplate;
-
         }
     }
 }

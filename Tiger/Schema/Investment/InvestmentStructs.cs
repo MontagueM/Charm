@@ -63,6 +63,9 @@ public struct S9D798080
     [SchemaField(0x48, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk50; // 8B178080 D1
 
+    [SchemaField(0x58, TigerStrategy.DESTINY2_LATEST)]
+    public ResourcePointer Unk58; // 88738080 D2
+
     [SchemaField(0x70, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x68, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_LATEST)]
@@ -83,6 +86,9 @@ public struct S9D798080
 
     [SchemaField(0x78, TigerStrategy.DESTINY2_LATEST)]
     public ResourcePointer Unk78_EoF;  // S77738080
+
+    [SchemaField(0x80, TigerStrategy.DESTINY2_LATEST)]
+    public ResourcePointer Unk80_EoF;  // S7C758080
 
     [SchemaField(0x78, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x90, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
@@ -464,6 +470,9 @@ public struct S9F548080
     [SchemaField(0x48, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public ResourcePointer Unk40;  // SD7548080
 
+    [SchemaField(0x58, TigerStrategy.DESTINY2_LATEST)]
+    public ResourcePointer Unk58;  // SD0548080
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x60, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public ResourcePointer Unk60;  // SCF548080
@@ -492,6 +501,10 @@ public struct S9F548080
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x94, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    public StringIndexReference ItemDescription; // "displayProperties" -> "description"
+
+    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
+    [SchemaField(0x9C, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public StringIndexReference ItemDisplaySource; // "displaySource"
 
     [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
@@ -1262,6 +1275,60 @@ public struct S15908080
 {
     public short ObjectiveIndex;
 }
+#endregion
+
+#region Quest stuff
+/// <summary>
+/// 'setData' in InventoryItemDefinition
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "88738080", 0x30)]
+public struct S88738080 // 0x58 pointer in inv item tag
+{
+    public DynamicArray<S8A738080> ItemList; // 'itemList'
+
+    [SchemaField(0x18)]
+    public TigerHash Type; // 'setType'
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "8A738080", 0x8)]
+public struct S8A738080
+{
+    public int Value; // 'trackingValue'
+    public int Index; // 'itemIndex'
+}
+
+/// <summary>
+/// 'value' in InventoryItemDefinition
+/// </summary>
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "7C758080", 0x4C)]
+public struct S7C758080
+{
+    public DynamicStruct<SQuestStepReward> Reward1;
+    public DynamicStruct<SQuestStepReward> Reward2;
+    public DynamicStruct<SQuestStepReward> Reward3;
+    public DynamicStruct<SQuestStepReward> Reward4;
+    public DynamicStruct<SQuestStepReward> Reward5;
+    public DynamicStruct<SQuestStepReward> Reward6;
+}
+
+[NonSchemaStruct(TigerStrategy.DESTINY2_LATEST, 0xC)]
+public struct SQuestStepReward
+{
+    public int Unk00;
+    public short ItemIndex;
+    public short Unk06;
+    public int Quantity;
+}
+
+// String tag stuff
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "D0548080", 0x18)]
+public struct SD0548080 // 0x58 pointer in string tags
+{
+    public StringIndexReference QuestLineName; // 'questLineName'
+    public StringIndexReference QuestLineDescription; // 'questLineDescription'
+    public StringIndexReference QuestStepSummary; // 'questStepSummary'
+}
+
 #endregion
 
 #region DestinyPresentationNodeDefinitions

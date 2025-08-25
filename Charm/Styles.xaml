@@ -16,14 +16,104 @@
     <charm:StringToUpperConverter x:Key="StringToUpperConverter" />
     <charm:ColorToBrushConverter x:Key="ColorToBrush" />
     <charm:TextureFromHashConverter x:Key="TextureFromHashConverter" />
-
+    <charm:TextureFromIconContainerConverter x:Key="TextureFromIconContainerConverter" />
+    <charm:AddOneConverter x:Key="AddOneConverter" />
     <charm:Investment_IsFeaturedItem x:Key="Investment_IsFeaturedItem" />
+    <charm:ListCountConverter x:Key="ListCountConverter" />
+
+    <DataTemplate x:Key="ObjCheckbox">
+        <Grid Margin="20,0,20,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Width="30"
+                Height="30"
+                Margin="0,0,10,0"
+                Background="Black"
+                BorderBrush="#c0c0c0"
+                BorderThickness="2"
+                Opacity="0.75" />
+            <Viewbox
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Stretch="Uniform"
+                StretchDirection="DownOnly">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="24"
+                    Foreground="{StaticResource ForegroundColour95}"
+                    Text="{Binding Description}"
+                    TextAlignment="Left"
+                    TextWrapping="Wrap" />
+            </Viewbox>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="ObjPercentage">
+        <Grid Margin="20,0,20,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Width="30"
+                Height="30"
+                Margin="0,0,5,0"
+                Background="Black"
+                BorderBrush="#c0c0c0"
+                BorderThickness="2"
+                Opacity="0.75" />
+            <Grid
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                Background="#80000000">
+                <Viewbox
+                    HorizontalAlignment="Left"
+                    Stretch="Uniform"
+                    StretchDirection="DownOnly">
+                    <TextBlock
+                        Margin="5,0,75,0"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="24"
+                        Foreground="{StaticResource ForegroundColour95}"
+                        Text="{Binding Description}"
+                        TextAlignment="Left"
+                        TextWrapping="Wrap" />
+                </Viewbox>
+
+                <Viewbox
+                    HorizontalAlignment="Right"
+                    Stretch="Uniform"
+                    StretchDirection="DownOnly">
+                    <TextBlock
+                        Margin="0,0,5,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                        FontSize="24"
+                        Foreground="{StaticResource ForegroundColour95}"
+                        Text="{Binding Value}"
+                        TextAlignment="Right"
+                        TextWrapping="Wrap" />
+                </Viewbox>
+            </Grid>
+        </Grid>
+    </DataTemplate>
+    <charm:ObjBlockTemplateSelector
+        x:Key="ObjBlockTemplateSelector"
+        CheckboxTemplate="{StaticResource ObjCheckbox}"
+        PercentageTemplate="{StaticResource ObjPercentage}" />
 
     <DataTemplate x:Key="PlaceholderTemplate">
         <!--  Placeholder Rectangle  -->
         <Rectangle Panel.ZIndex="-1" Fill="#08FFFFFF" />
     </DataTemplate>
-
 
     <Style TargetType="Control">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -1748,6 +1838,52 @@
                                                     <GradientStop Offset="1.0" Color="{StaticResource BackgroundColour14C}" />
                                                 </GradientStopCollection>
                                             </LinearGradientBrush.GradientStops>
+                                        </LinearGradientBrush>
+                                    </Thumb.Background>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="HorizontalScrollBarStyle" TargetType="ScrollBar">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Height" Value="10" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid VerticalAlignment="Center">
+                        <Grid.Height>
+                            <Binding
+                                FallbackValue="10"
+                                Path="Height"
+                                RelativeSource="{RelativeSource TemplatedParent}" />
+                        </Grid.Height>
+
+                        <Border
+                            Grid.ColumnSpan="3"
+                            Background="{StaticResource BackgroundColour30a}"
+                            CornerRadius="0" />
+
+                        <Track
+                            x:Name="PART_Track"
+                            Grid.Column="1"
+                            IsDirectionReversed="false">
+                            <Track.Thumb>
+                                <Thumb Margin="0" Style="{StaticResource ScrollBarThumb}">
+                                    <Thumb.BorderBrush>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="{StaticResource BackgroundColour14C}" />
+                                            <GradientStop Offset="1.0" Color="{StaticResource BackgroundColour14C}" />
+                                        </LinearGradientBrush>
+                                    </Thumb.BorderBrush>
+                                    <Thumb.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="{StaticResource BackgroundColour14C}" />
+                                            <GradientStop Offset="1.0" Color="{StaticResource BackgroundColour14C}" />
                                         </LinearGradientBrush>
                                     </Thumb.Background>
                                 </Thumb>

@@ -87,6 +87,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     public ConcurrentDictionary<int, S54B48080> EquipableItemSets = null;
     public ConcurrentDictionary<int, S7AB28080> EquipableItemSetStrings = null;
 
+    public ConcurrentDictionary<int, SFA578080> TraitIndexMap = null;
+    public ConcurrentDictionary<DestinyTraitID, SFA578080> TraitMap = null;
+
     // For exporting purposes, Parent item -> Ornaments
     private ConcurrentDictionary<InventoryItem, ConcurrentBag<InventoryItem>> _ornaments = new();
 
@@ -289,6 +292,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             Task.Run(GetSocketTypeMap),
             Task.Run(GetFeaturedItemsList),
             Task.Run(GetEquipableItemSetMap),
+            Task.Run(GetTraitMap),
         });
     }
 
@@ -433,6 +437,34 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         return null;
     }
 
+    private void GetTraitMap()
+    {
+        TraitMap = new();
+        TraitIndexMap = new();
+        for (int i = 0; i < _traitDefinitionStringMap.TagData.TraitStrings.Count; i++)
+        {
+            var trait = _traitDefinitionStringMap.TagData.TraitStrings[i];
+            TraitMap.TryAdd(trait.TraitHash, trait);
+            TraitIndexMap.TryAdd(i, trait);
+        }
+    }
+
+    public SFA578080? GetTrait(int index)
+    {
+        if (!TraitIndexMap.ContainsKey(index))
+            return null;
+
+        return TraitIndexMap[index];
+    }
+
+    public SFA578080? GetTrait(DestinyTraitID traitID)
+    {
+        if (!TraitMap.ContainsKey(traitID))
+            return null;
+
+        return TraitMap[traitID];
+    }
+
     #endregion
 
     #region Icons
@@ -491,6 +523,33 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
         return GetItemIconContainer(iconIndex);
     }
+
+    public Texture? GetTextureFromContainer(Tag<SCF3E8080> iconContainer, int index = 0, int listIndex = 0)
+    {
+        using TigerReader reader = iconContainer.GetReader();
+        dynamic? prim = iconContainer.TagData.Unk10.GetValue(reader);
+        if (prim is SCD3E8080 structCD3E8080)
+        {
+            // TextureList[0] is default, others are for colourblind modes
+            if (index >= structCD3E8080.Unk00[reader, listIndex].TextureList.Count)
+                return null;
+            return structCD3E8080.Unk00[reader, listIndex].TextureList[reader, index].IconTexture;
+        }
+        if (prim is SCB3E8080 structCB3E8080)
+        {
+            if (index >= structCB3E8080.Unk00[reader, listIndex].TextureList.Count)
+                return null;
+            return structCB3E8080.Unk00[reader, listIndex].TextureList[reader, index].IconTexture;
+        }
+        return null;
+    }
+
+
+    public Texture? GetTextureFromContainer(FileHash containerHash, int index, int listIndex = 0)
+    {
+        return GetTextureFromContainer(FileResourcer.Get().GetSchemaTag<SCF3E8080>(containerHash), index, listIndex);
+    }
+
     #endregion
 
     #region Stats/Sockets
@@ -1123,7 +1182,7 @@ public class InventoryItem : Tag<S9D798080>
 
         foreach (var index in _tag.TraitIndices.Select(x => x.Index))
         {
-            traits.Add(Investment.Get()._traitDefinitionMap.TagData.Traits[index].TraitHash);
+            traits.Add(Investment.Get().GetTrait(index).Value.TraitHash);
         }
 
         // Custom assignments
@@ -1185,7 +1244,7 @@ public class InventoryItem : Tag<S9D798080>
 
     public string GetItemDescription()
     {
-        return GetItemStrings().TagData.ItemDisplaySource?.Value.ToString() ?? "";
+        return GetItemStrings().TagData.ItemDescription?.Value.ToString() ?? "";
     }
 
     public DestinyTierType GetItemRarity()
@@ -1326,32 +1385,13 @@ public class InventoryItem : Tag<S9D798080>
         return ornaments;
     }
 
-    private Texture? GetTexture(Tag<SCF3E8080> iconSecondaryContainer, int index = 0)
-    {
-        using TigerReader reader = iconSecondaryContainer.GetReader();
-        dynamic? prim = iconSecondaryContainer.TagData.Unk10.GetValue(reader);
-        if (prim is SCD3E8080 structCD3E8080)
-        {
-            // TextureList[0] is default, others are for colourblind modes
-            if (index >= structCD3E8080.Unk00[reader, 0].TextureList.Count)
-                return null;
-            return structCD3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
-        }
-        if (prim is SCB3E8080 structCB3E8080)
-        {
-            if (index >= structCB3E8080.Unk00[reader, 0].TextureList.Count)
-                return null;
-            return structCB3E8080.Unk00[reader, 0].TextureList[reader, index].IconTexture;
-        }
-        return null;
-    }
-
+    #region Icon Background
     public UnmanagedMemoryStream? GetIconBackgroundStream()
     {
         Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconBackgroundContainer == null)
             return null;
-        Texture? backgroundIcon = GetTexture(iconContainer.TagData.IconBackgroundContainer);
+        Texture? backgroundIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconBackgroundContainer);
         return backgroundIcon.GetTexture();
     }
 
@@ -1360,25 +1400,27 @@ public class InventoryItem : Tag<S9D798080>
         Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconBGOverlayContainer == null)
             return null;
-        Texture? backgroundIcon = GetTexture(iconContainer.TagData.IconBGOverlayContainer);
+        Texture? backgroundIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconBGOverlayContainer);
         return backgroundIcon.GetTexture();
     }
+    #endregion
 
+    #region Icon Foreground
     public UnmanagedMemoryStream? GetIconPrimaryStream()
     {
         Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
-        Texture? primaryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
+        Texture? primaryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);
         return primaryIcon.GetTexture();
     }
 
-    public UnmanagedMemoryStream? GetIconPrimaryStream(int index)
+    public UnmanagedMemoryStream? GetIconPrimaryStream(int itemIndex)
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(index);
+        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(itemIndex);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
-        Texture? primaryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
+        Texture? primaryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);
         return primaryIcon.GetTexture();
     }
 
@@ -1387,16 +1429,27 @@ public class InventoryItem : Tag<S9D798080>
         Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
-        Texture? primaryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
+        Texture? primaryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);
         return primaryIcon;
     }
 
+    public Texture? GetIconPrimaryTexture(int index, int listIndex = 0)
+    {
+        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
+        if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
+            return null;
+        Texture? primaryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer, index, listIndex);
+        return primaryIcon;
+    }
+    #endregion
+
+    #region Icon Overlay
     public UnmanagedMemoryStream? GetIconOverlayStream(int index = 0)
     {
         Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconOverlayContainer == null)
             return null;
-        Texture? overlayIcon = GetTexture(iconContainer.TagData.IconOverlayContainer, index);
+        Texture? overlayIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconOverlayContainer, index);
         if (overlayIcon is null)
             return null;
         return overlayIcon.GetTexture();
@@ -1407,16 +1460,17 @@ public class InventoryItem : Tag<S9D798080>
         Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconOverlayContainer == null)
             return null;
-        Texture? overlayIcon = GetTexture(iconContainer.TagData.IconOverlayContainer, index);
+        Texture? overlayIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconOverlayContainer, index);
         return overlayIcon;
     }
+    #endregion
 
     public UnmanagedMemoryStream? GetFoundryIconStream()
     {
         Tag<SB83E8080>? iconContainer = Investment.Get().GetFoundryItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
-        Texture? foundryIcon = GetTexture(iconContainer.TagData.IconPrimaryContainer);
+        Texture? foundryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);
         return foundryIcon.GetTexture();
     }
 

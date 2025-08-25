@@ -37,6 +37,7 @@ public partial class MainWindow
     public static MainWindow Current;
     public Spinner2 Spinner;
     public Tooltip2 _ToolTip => ToolTip;
+    public TabControl _MainTabControl => MainTabControl;
 
     public MainWindow()
     {
