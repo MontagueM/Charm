@@ -345,7 +345,7 @@ public static class TfxBytecodeOp
                 output = $"{constants[((PushConstantVec4Data)tfxData.data).constant_index].Vec.ToString().Replace("Infinity", "1.#INF")}";
                 break;
             case LerpConstantData:
-                output = $"A: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: B: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
+                output = $"From: {constants[((LerpConstantData)tfxData.data).constant_start].Vec}: To: {constants[((LerpConstantData)tfxData.data).constant_start + 1].Vec}";
                 break;
             case Spline4ConstData:
                 index = ((Spline4ConstData)tfxData.data).constant_index;
