@@ -1,3 +1,5 @@
+# The Main branch is not regularly maintained, see [Here](https://github.com/MontagueM/Charm/tree/delta/EOF) for the latest.
+
 # Charm - the Destiny tool that does everything
 
 ## What is this?
