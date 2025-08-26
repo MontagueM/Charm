@@ -561,16 +561,18 @@ public sealed class AsyncImageLoader
     public AsyncImageLoader(
         Func<ImageSource> loader,
         Action<string> notifyPropertyChanged,
-        string propertyName)
+        string propertyName, bool runNow = false)
     {
         _loader = loader;
         _notifyPropertyChanged = notifyPropertyChanged;
         _propertyName = propertyName;
+        if (runNow)
+            GetImage();
     }
 
-    public ImageSource GetImage(object currentItem)
+    public ImageSource GetImage()
     {
-        if (_image != null || _isLoading || currentItem == null)
+        if (_image != null || _isLoading)
             return _image;
 
         StartLoading();

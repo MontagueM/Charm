@@ -67,7 +67,7 @@
             Margin="30"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
-            Opacity="0.25">
+            Opacity="0.35">
             <Path
                 Data="{StaticResource Hexagon}"
                 Stretch="Uniform"
@@ -475,7 +475,10 @@
                     Click="ChangelogButton_OnClick"
                     Style="{DynamicResource D2StyleButton}">
                     <local:GenericTooltipProperties.TooltipData>
-                        <local:GenericTooltip Name="CHANGELOG" Description="View recent changes to Charm." />
+                        <local:GenericTooltip
+                            Name="CHANGELOG"
+                            Description="View recent changes to Charm."
+                            Style="Category" />
                     </local:GenericTooltipProperties.TooltipData>
                     <TextBlock
                         Margin="5"
@@ -493,7 +496,10 @@
                     MouseLeave="CategoryButton_MouseLeave"
                     Style="{DynamicResource D2StyleButton}">
                     <local:GenericTooltipProperties.TooltipData>
-                        <local:GenericTooltip Name="GITHUB" Description="View the source code for Charm." />
+                        <local:GenericTooltip
+                            Name="GITHUB"
+                            Description="View the source code for Charm."
+                            Style="Category" />
                     </local:GenericTooltipProperties.TooltipData>
                     <TextBlock
                         Margin="5"
@@ -511,7 +517,10 @@
                     MouseLeave="CategoryButton_MouseLeave"
                     Style="{DynamicResource D2StyleButton}">
                     <local:GenericTooltipProperties.TooltipData>
-                        <local:GenericTooltip Name="ABOUT" Description="View the credits for Charm." />
+                        <local:GenericTooltip
+                            Name="ABOUT"
+                            Description="View the credits for Charm."
+                            Style="Category" />
                     </local:GenericTooltipProperties.TooltipData>
                     <TextBlock
                         Margin="5"

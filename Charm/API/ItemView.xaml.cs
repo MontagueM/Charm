@@ -325,13 +325,19 @@ public partial class ItemView : UserControl, INotifyPropertyChanged
                     foreach (var perk in itemSet.SetPerks)
                     {
                         var sandboxPerk = Investment.Get().SandboxPerkStrings[perk.PerkIndex];
-                        plugs.Add(new()
+                        var plugItem = new APIPlugItem()
                         {
                             OverrideName = $"{perk.SetCount} PIECE | {sandboxPerk.SandboxPerkName?.Value}",
                             OverrideDescription = sandboxPerk.SandboxPerkDescription?.Value ?? "",
                             Hash = sandboxPerk.SandboxPerkHash,
-                            Icon = ApiImageUtils.MakeIcon(sandboxPerk.IconIndex)
-                        });
+                        };
+
+                        plugItem._iconLoader = new AsyncImageLoader(
+                        () => ApiImageUtils.MakeIcon(sandboxPerk.IconIndex),
+                        OnPropertyChanged,
+                        nameof(APIPlugItem.Icon), true);
+
+                        plugs.Add(plugItem);
                     }
                     setCategory.Sockets.First().PlugItems = plugs;
 
@@ -880,22 +886,21 @@ public class APIPlugItem : CharmUIElement
         }
     }
 
-
+    protected internal AsyncImageLoader _iconLoader;
     private readonly AsyncImageLoader _iconBgLoader;
-    private readonly AsyncImageLoader _iconLoader;
     private readonly AsyncImageLoader _iconOverlayLoader;
     private readonly AsyncImageLoader _watermarkLoader;
 
-    public ImageSource IconBackground => _iconBgLoader.GetImage(Item);
-    public ImageSource IconOverlay => _iconOverlayLoader.GetImage(Item);
-    public ImageSource ItemWatermark => Strategy.IsD1() ? null : _watermarkLoader.GetImage(Item);
+    public ImageSource IconBackground => _iconBgLoader.GetImage();
+    public ImageSource IconOverlay => _iconOverlayLoader.GetImage();
+    public ImageSource ItemWatermark => Strategy.IsD1() ? null : _watermarkLoader.GetImage();
 
     public ImageSource Icon
     {
-        get => _iconLoader.GetImage(Item);
+        get => _iconLoader?.GetImage() ?? null;
         set
         {
-            _iconLoader.SetImage(value);
+            _iconLoader?.SetImage(value);
             OnPropertyChanged(nameof(Icon));
         }
     }
