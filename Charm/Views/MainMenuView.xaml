@@ -21,13 +21,15 @@
                 </Setter.Value>
             </Setter>-->
         </Style>
+
+        <Geometry x:Key="Hexagon">M43.3013,0 L86.6025,25 L86.6025,75 L43.3013,100 L0,75 L0,25 Z</Geometry>
     </UserControl.Resources>
 
     <Grid>
         <Grid.Background>
             <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0,0" Opacity="0.4" RadiusX="2" RadiusY="2">
                 <RadialGradientBrush.GradientStops>
-                    <GradientStop Offset="0" Color="#008081" />
+                    <GradientStop x:Name="Gradient" Offset="0" Color="#008081" />
                     <GradientStop Offset="0.5" Color="#00000000" />
                 </RadialGradientBrush.GradientStops>
             </RadialGradientBrush>
@@ -57,7 +59,27 @@
             Margin="10,10,10,50"
             BorderBrush="White"
             BorderThickness="2,2,2,0"
-            Opacity="0.2" />
+            Opacity="0.25" />
+
+        <Grid
+            Width="120"
+            Height="120"
+            Margin="30"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Opacity="0.25">
+            <Path
+                Data="{StaticResource Hexagon}"
+                Stretch="Uniform"
+                Stroke="White"
+                StrokeThickness="2" />
+
+            <Image
+                x:Name="StrategyIcon"
+                Width="75"
+                Height="75" />
+        </Grid>
+
 
         <Grid
             x:Name="MainContainer"
@@ -73,9 +95,9 @@
 
             <StackPanel>
                 <Grid
-                    Margin="0,0,0,0"
+                    Margin="-10,0,-10,0"
                     Background="Transparent"
-                    Opacity="0.5">
+                    Opacity="0.4">
                     <Border
                         Grid.Column="1"
                         Margin="0,10,0,0"
@@ -147,6 +169,7 @@
 
                         <ContentControl Style="{StaticResource ColumnHeader}">
                             <TextBlock
+                                Padding="10"
                                 d:FontFamily="Haas Grot Text 55 Roman"
                                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                 Text="MODELS" />
@@ -242,6 +265,7 @@
                         Background="Transparent">
                         <ContentControl Style="{StaticResource ColumnHeader}">
                             <TextBlock
+                                Padding="10"
                                 d:FontFamily="Haas Grot Text 55 Roman"
                                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                 Text="AUDIO" />
@@ -318,6 +342,7 @@
                         Background="Transparent">
                         <ContentControl Style="{StaticResource ColumnHeader}">
                             <TextBlock
+                                Padding="10"
                                 d:FontFamily="Haas Grot Text 55 Roman"
                                 FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
                                 Text="OTHER" />
@@ -382,9 +407,9 @@
                 </StackPanel>
 
                 <Grid
-                    Margin="0,0,0,0"
+                    Margin="-10,0,-10,0"
                     Background="Transparent"
-                    Opacity="0.5">
+                    Opacity="0.4">
                     <Border
                         Grid.Column="1"
                         Margin="0,10,0,0"

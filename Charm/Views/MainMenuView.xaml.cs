@@ -19,17 +19,11 @@ public partial class MainMenuView : UserControl
     {
         InitializeComponent();
 
-        ApiButton.IsEnabled = ShowAPIButton(Strategy.CurrentStrategy);
-        BagsButton.IsEnabled = ShowIfD2(Strategy.CurrentStrategy);
-        WeaponAudioButton.IsEnabled = ShowAPIButton(Strategy.CurrentStrategy);
-        StaticsButton.IsEnabled = ShowIfD2(Strategy.CurrentStrategy);
-        SoundBanksButton.Visibility = ShowIfD1(Strategy.CurrentStrategy) ? Visibility.Visible : Visibility.Hidden;
-        CollectionsButton.IsEnabled = ShowIfLatest(Strategy.CurrentStrategy);
-
-        Strategy.OnStrategyChangedEvent += delegate (StrategyEventArgs args)
+        Strategy.AfterStrategyEvent += delegate (StrategyEventArgs args)
         {
             Dispatcher.Invoke(() =>
             {
+                SetStrategyTheme(args.Strategy);
                 ApiButton.IsEnabled = ShowAPIButton(args.Strategy);
                 BagsButton.IsEnabled = ShowIfD2(args.Strategy);
                 WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy) || ShowIfD1(args.Strategy);
@@ -48,11 +42,6 @@ public partial class MainMenuView : UserControl
 
         if (MainWindow.Current.Spinner is not null)
             MainWindow.Current.Spinner.PositionScale = new(2, 2, -1, -1);
-    }
-
-    private bool ShowWQButtons(TigerStrategy strategy)
-    {
-        return strategy > TigerStrategy.DESTINY2_BEYONDLIGHT_3402;
     }
 
     private bool ShowIfD2(TigerStrategy strategy)
@@ -111,14 +100,6 @@ public partial class MainMenuView : UserControl
         _mainWindow.SetNewestTabSelected();
     }
 
-    //private void AllEntitiesViewButton_OnClick(object sender, RoutedEventArgs e)
-    //{
-    //    TagListViewerView tagListView = new();
-    //    tagListView.LoadContent(ETagListType.EntityList);
-    //    _mainWindow.MakeNewTab("Dynamics Old", tagListView);
-    //    _mainWindow.SetNewestTabSelected();
-    //}
-
     private void AllEntitiesView2Button_OnClick(object sender, RoutedEventArgs e)
     {
         EntityListView entityListView = new();
@@ -145,16 +126,8 @@ public partial class MainMenuView : UserControl
 
     private async void WeaponAudioViewButton_Click(object sender, RoutedEventArgs e)
     {
-        //if (Strategy.IsLatest())
-        //{
-        //    AudioDisabledPopup();
-        //    return;
-        //}
-
         await LoadInvestment();
 
-        //TagListViewerView tagListView = new();
-        //tagListView.LoadContent(ETagListType.WeaponAudioGroupList);
         WeaponAudioListView weaponAudio = new();
         weaponAudio.LoadContent();
         _mainWindow.MakeNewTab("Weapon Audio", weaponAudio);
@@ -163,11 +136,6 @@ public partial class MainMenuView : UserControl
 
     private void AllAudioViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        //if (Strategy.IsLatest())
-        //{
-        //    AudioDisabledPopup();
-        //    return;
-        //}
         AudioListView audioListView = new();
         audioListView.LoadContent();
         _mainWindow.MakeNewTab("Sounds", audioListView);
@@ -257,18 +225,44 @@ public partial class MainMenuView : UserControl
         about.Show();
     }
 
-    private void AudioDisabledPopup()
+    private void SetStrategyTheme(TigerStrategy strategy)
     {
-        PopupBanner popup = new()
+        Color col = Color.FromArgb(0xFF, 0x50, 0x50, 0x50);
+        ImageSource strategyIcon = null;
+        switch (strategy)
         {
-            DarkenBackground = true,
-            //Icon = "",
-            Title = $"HEADS UP",
-            Subtitle = "Audio for Edge of Fate is currently disabled. Fix coming Soon™.",
-            Description =
-            "Bungie changed audio compression in Edge of Fate, Charm currently isn't setup for it yet. Older game versions will still work.",
-            Style = PopupBanner.PopupStyle.Warning
-        };
-        popup.Show();
+            case TigerStrategy.DESTINY1_RISE_OF_IRON:
+                col = Color.FromArgb(0xFF, 0xEA, 0xC9, 0x60);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("29ECA580"));
+                break;
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2601:
+            case TigerStrategy.DESTINY2_SHADOWKEEP_2999:
+                col = Color.FromArgb(0xFF, 0xA0, 0x00, 0x00);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("2EE03281"));
+                break;
+            case TigerStrategy.DESTINY2_BEYONDLIGHT_3402:
+                col = Color.FromArgb(0xFF, 0x4D, 0x7F, 0xF2);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("B0B1CF80"));
+                break;
+            case TigerStrategy.DESTINY2_WITCHQUEEN_6307:
+                col = Color.FromArgb(0xFF, 0x73, 0xE3, 0xBE);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("E357CE80"));
+                break;
+            case TigerStrategy.DESTINY2_LIGHTFALL_7366:
+                //col = Color.FromArgb(0xFF, 0xFC, 0x00, 0xFF);
+                col = Color.FromArgb(0xFF, 0x6D, 0x2C, 0xE0);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("FEBEA780"));
+                break;
+            case TigerStrategy.DESTINY2_FINAL_SHAPE_8264:
+                col = Color.FromArgb(0xFF, 0xFF, 0x36, 0xD1);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("2A11DC80"));
+                break;
+            case TigerStrategy.DESTINY2_LATEST:
+                col = Color.FromArgb(0xFF, 0x00, 0x80, 0x81);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("D643DE80"));
+                break;
+        }
+        StrategyIcon.Source = strategyIcon;
+        Gradient.Color = col;
     }
 }

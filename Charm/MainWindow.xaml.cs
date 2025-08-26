@@ -91,6 +91,7 @@ public partial class MainWindow
                     .ToList()
                     .ForEach(t => MainTabControl.Items.Remove(t));
                 CurrentStrategyText.Text = $"{App.CurrentVersion.Id}: {args.Strategy.GetEnumDescription().ToUpper()}";
+                CheckGameVersion();
             });
         };
 
@@ -321,6 +322,7 @@ public partial class MainWindow
         }
         catch (Exception e)
         {
+            GameInfo = null;
             Arithmic.Log.Error($"Could not get game version error {e}.");
         }
     }
