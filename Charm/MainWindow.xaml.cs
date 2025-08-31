@@ -5,7 +5,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -131,9 +130,8 @@ public partial class MainWindow
                 ShowAgreement();
             }
 
-            // Log package count and package path
-            Arithmic.Log.Info($"Package Path: {config.GetPackagesPath(Strategy.CurrentStrategy)}");
-            Arithmic.Log.Info($"Total Package Count: {Directory.GetFiles(config.GetPackagesPath(Strategy.CurrentStrategy)).Where(x => x.EndsWith(".pkg")).Count()}");
+            // TODO, only shows on initial load after a version is already set, doesnt work when changing version
+            LogConfigDetails();
         }
         else
         {
@@ -169,6 +167,15 @@ public partial class MainWindow
             UIElement.MouseLeaveEvent,
             new MouseEventHandler(OnAnyButtonMouseLeave)
         );
+    }
+
+    private void LogConfigDetails()
+    {
+        ConfigSubsystem config = TigerInstance.GetSubsystem<ConfigSubsystem>();
+
+        Arithmic.Log.Info($"Package Path: {config.GetPackagesPath(Strategy.CurrentStrategy)}");
+        Arithmic.Log.Info($"Total Package Count: {Directory.GetFiles(config.GetPackagesPath(Strategy.CurrentStrategy)).Where(x => x.EndsWith(".pkg")).Count()}");
+        Arithmic.Log.Info($"Export Path: {config.GetExportSavePath()}");
     }
 
     private void ShowAgreement()
