@@ -1,5 +1,27 @@
 [
     {
+        "version": "3.0.9",
+        "date": "08-31-2025",
+        "changes": [
+            {
+                "title": "Fixes",
+                "notes": [
+                    "Cubemaps are assembled correctly when exporting.",
+                    "Fixed dark cubemap exports and previews.",
+                    "Fixed incorrect damage types after D2 9.0.0.8 update.",
+                    "Fixed a crash when inspecting armor with set bonuses.",
+                    "Fixed search not working in Entity View for versions that arent Latest."
+                ]
+            },
+            {
+                "title": "Additions",
+                "notes": [
+                    "Added main menu theming based on the current game version."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.0.7",
         "date": "08-15-2025",
         "changes": [

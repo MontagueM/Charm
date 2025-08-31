@@ -72,7 +72,7 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid Background="#B0000000">
+    <Grid Background="#D0000000">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
