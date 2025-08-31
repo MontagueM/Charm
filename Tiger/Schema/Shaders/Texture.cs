@@ -28,6 +28,11 @@ public class Texture : TigerReferenceFile<STextureHeader>
         return _tag.Depth != 1;
     }
 
+    public bool IsSrgb()
+    {
+        return TexHelper.Instance.IsSRGB(_tag.GetFormat());
+    }
+
     public TextureDimension GetDimension()
     {
         if (IsCubemap())
@@ -94,19 +99,10 @@ public class Texture : TigerReferenceFile<STextureHeader>
             }
             if (TexHelper.Instance.IsCompressed(format))
             {
-                scratchImage = DecompressScratchImage(scratchImage, IsSrgb() ? DXGI_FORMAT.R8G8B8A8_UNORM_SRGB : DXGI_FORMAT.R8G8B8A8_UNORM);
+                scratchImage = DecompressScratchImage(scratchImage,
+                    format == DXGI_FORMAT.BC6H_UF16 ? DXGI_FORMAT.R16G16B16A16_UNORM : DXGI_FORMAT.R8G8B8A8_UNORM); //IsSrgb() ? DXGI_FORMAT.R8G8B8A8_UNORM_SRGB : DXGI_FORMAT.R8G8B8A8_UNORM);
+                scratchImage = scratchImage.PremultiplyAlpha(TEX_PMALPHA_FLAGS.SRGB_OUT);
             }
-            ScratchImage s1 = scratchImage.FlipRotate(2, TEX_FR_FLAGS.FLIP_VERTICAL).FlipRotate(0, TEX_FR_FLAGS.FLIP_HORIZONTAL);
-            ScratchImage s2 = scratchImage.FlipRotate(0, TEX_FR_FLAGS.ROTATE90);
-            ScratchImage s3 = scratchImage.FlipRotate(1, TEX_FR_FLAGS.ROTATE270);
-            ScratchImage s4 = scratchImage.FlipRotate(4, TEX_FR_FLAGS.FLIP_VERTICAL).FlipRotate(0, TEX_FR_FLAGS.FLIP_HORIZONTAL);
-            scratchImage = TexHelper.Instance.InitializeTemporary(
-                new[]
-                {
-                    s3.GetImage(0), s2.GetImage(0), s4.GetImage(0),
-                    scratchImage.GetImage(5), s1.GetImage(0), scratchImage.GetImage(3),
-                },
-                scratchImage.GetMetadata());
         }
         else
         {
@@ -160,49 +156,47 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
     public static ScratchImage FlattenCubemap(ScratchImage input)
     {
-        Image image = input.GetImage(0);
-        if (image.Width == 0)
+        if (input == null || input.GetImageCount() != 6)
             return null;
 
-        if (input.GetImageCount() != 6)
-            return input;
+        var img0 = input.GetImage(0);
+        if (img0 == null || img0.Width == 0)
+            return null;
 
-        bool bSrgb = TexHelper.Instance.IsSRGB(image.Format);
-        int faceWidth = image.Width;
-        int faceHeight = image.Height;
+        int w = img0.Width;
+        int h = img0.Height;
 
-        // Define the dimensions for the output image (4x3 layout)
-        int outputWidth = faceWidth * 4;
-        int outputHeight = faceHeight * 3;
+        int outW = w * 4;
+        int outH = h * 3;
+        var output = TexHelper.Instance.Initialize2D(
+            img0.Format,
+            outW, outH, 1, 0, 0);
 
-        ScratchImage outputPlate = TexHelper.Instance.Initialize2D(
-            bSrgb ? DXGI_FORMAT.B8G8R8A8_UNORM_SRGB : DXGI_FORMAT.B8G8R8A8_UNORM,
-            outputWidth, outputHeight, 1, 0, 0);
+        ScratchImage xPos = input.FlipRotate(0, TEX_FR_FLAGS.ROTATE90);
+        ScratchImage xNeg = input.FlipRotate(1, TEX_FR_FLAGS.ROTATE270);
+        ScratchImage yPos = input.FlipRotate(2, TEX_FR_FLAGS.ROTATE180);
+        ScratchImage yNeg = input.CreateImageCopy(3, false, 0);
+        ScratchImage zPos = input.FlipRotate(4, TEX_FR_FLAGS.ROTATE90);
+        ScratchImage zNeg = input.FlipRotate(5, TEX_FR_FLAGS.ROTATE90);
 
-        // Arrange the faces in a 4x3 layout
-        // Define the positions for each cubemap face
-        var facePositions = new (int x, int y)[]
-        {
-            (faceWidth * 2, faceHeight),       // +Z (Front) 
-            (0, faceHeight),                   // -X (Left)
-            (faceWidth, 0),                    // +Y (Up)
-            (faceWidth, faceHeight * 2),       // -Y (Down)
-            (faceWidth, faceHeight),           // +X (Right)
-            (faceWidth * 3, faceHeight)        // -Z (Back)
-        };
+        //    -- Z+ -- --
+        //    Y-  X+  Y+  X-
+        //    -- Z- -- --
+        TexHelper.Instance.CopyRectangle(zPos.GetImage(0), 0, 0, w, h, output.GetImage(0), 0, w, 0);
+        TexHelper.Instance.CopyRectangle(yNeg.GetImage(0), 0, 0, w, h, output.GetImage(0), 0, 0, h);
+        TexHelper.Instance.CopyRectangle(xPos.GetImage(0), 0, 0, w, h, output.GetImage(0), 0, w, h);
+        TexHelper.Instance.CopyRectangle(yPos.GetImage(0), 0, 0, w, h, output.GetImage(0), 0, w * 2, h);
+        TexHelper.Instance.CopyRectangle(xNeg.GetImage(0), 0, 0, w, h, output.GetImage(0), 0, w * 3, h);
+        TexHelper.Instance.CopyRectangle(zNeg.GetImage(0), 0, 0, w, h, output.GetImage(0), 0, w, h * 2);
 
-        for (int i = 0; i < input.GetImageCount(); i++)
-        {
-            (int x, int y) = facePositions[i];
-            TexHelper.Instance.CopyRectangle(
-                input.GetImage(i), 0, 0, faceWidth, faceHeight,
-                outputPlate.GetImage(0),
-                bSrgb ? TEX_FILTER_FLAGS.SEPARATE_ALPHA : 0,
-                x, y);
-        }
+        xPos.Dispose();
+        xNeg.Dispose();
+        yPos.Dispose();
+        yNeg.Dispose();
+        zPos.Dispose();
+        zNeg.Dispose();
 
-        input.Dispose();
-        return outputPlate;
+        return output;
     }
 
     public static ScratchImage FlattenVolume(ScratchImage input) // TODO: Figure out why R#G#_ formats dont work here
@@ -221,11 +215,6 @@ public class Texture : TigerReferenceFile<STextureHeader>
         }
         input.Dispose();
         return outputPlate;
-    }
-
-    public bool IsSrgb()
-    {
-        return TexHelper.Instance.IsSRGB(_tag.GetFormat());
     }
 
     public UnmanagedMemoryStream GetTexture()
@@ -252,6 +241,8 @@ public class Texture : TigerReferenceFile<STextureHeader>
             index = 0;
 
         ScratchImage scratchImage = GetScratchImage();
+        if (index == 0) // for thumbnail purposes
+            scratchImage = scratchImage.FlipRotate(0, TEX_FR_FLAGS.ROTATE90);
 
         UnmanagedMemoryStream ms;
         Guid guid = TexHelper.Instance.GetWICCodec(WICCodecs.BMP);
@@ -307,25 +298,6 @@ public class Texture : TigerReferenceFile<STextureHeader>
         }
 
         SavetoFile(savePath, simg, GetDimension());// || (IsVolume() && !ConfigSubsystem.Get().GetS2ShaderExportEnabled()));
-    }
-
-    public UnmanagedMemoryStream GetTextureToDisplay()
-    {
-        ScratchImage scratchImage = GetScratchImage();
-        UnmanagedMemoryStream ms;
-        if (IsCubemap())
-        {
-            // TODO add assemble feature to show the entire cubemap in display
-            Guid guid = TexHelper.Instance.GetWICCodec(WICCodecs.BMP);
-            ms = scratchImage.SaveToWICMemory(0, WIC_FLAGS.NONE, guid);
-        }
-        else
-        {
-            Guid guid = TexHelper.Instance.GetWICCodec(WICCodecs.BMP);
-            ms = scratchImage.SaveToWICMemory(0, WIC_FLAGS.NONE, guid);
-        }
-        scratchImage.Dispose();
-        return ms;
     }
 
     public ScratchImage ResizeToNearestPowerOf2(ScratchImage image)

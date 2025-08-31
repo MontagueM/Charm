@@ -64,7 +64,7 @@ public class TextureExtractor
                             //    Texture.FlattenVolume(scratchImage).SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
                             //    break;
                             case TextureDimension.CUBE when scratchImage.GetImageCount() == 6:
-                                Texture.FlattenCubemap(scratchImage).SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
+                                Texture.FlattenCubemap(scratchImage).SaveToWICFile(0, WIC_FLAGS.FORCE_SRGB, guid, savePath + ".png");
                                 break;
                             default:
                                 scratchImage.SaveToWICFile(0, WIC_FLAGS.FORCE_SRGB, guid, savePath + ".png");
