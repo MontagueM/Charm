@@ -65,12 +65,9 @@ public class TigerHash : IHash, ITigerDeserialize, IComparable<TigerHash>, IEqua
     public TigerHash(string hash, bool bBigEndianString = true)
     {
         bool parsed = uint.TryParse(hash, NumberStyles.HexNumber, null, out Hash32);
-        if (parsed)
+        if (parsed && (hash.EndsWith("80") || hash.EndsWith("81") || bBigEndianString))
         {
-            if (hash.EndsWith("80") || hash.EndsWith("81") || bBigEndianString)
-            {
-                Hash32 = Endian.SwapU32(Hash32);
-            }
+            Hash32 = Endian.SwapU32(Hash32);
         }
     }
 

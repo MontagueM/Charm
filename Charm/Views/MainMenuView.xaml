@@ -314,7 +314,7 @@
                             MouseLeave="CategoryButton_MouseLeave"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip Name="SOUND BANKS" Description="View and export specific sounds from a named collection" />
+                                <local:GenericTooltip Name="SOUND BANKS" Description="View and export sounds from WWise soundbanks.&#x0a;All from Destiny 1 have names, otherwise only some are named." />
                             </local:GenericTooltipProperties.TooltipData>
                             <Border Style="{StaticResource MainMenuButton}">
                                 <TextBlock

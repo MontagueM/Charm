@@ -28,7 +28,7 @@ public partial class MainMenuView : UserControl
                 BagsButton.IsEnabled = ShowIfD2(args.Strategy);
                 WeaponAudioButton.IsEnabled = ShowIfLatest(args.Strategy) || ShowIfD1(args.Strategy);
                 StaticsButton.IsEnabled = ShowIfD2(args.Strategy);
-                SoundBanksButton.Visibility = ShowIfD1(args.Strategy) ? Visibility.Visible : Visibility.Hidden;
+                //SoundBanksButton.Visibility = ShowIfD1(args.Strategy) ? Visibility.Visible : Visibility.Hidden;
                 CollectionsButton.IsEnabled = ShowIfLatest(args.Strategy);
             });
         };
