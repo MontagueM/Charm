@@ -170,6 +170,19 @@ public partial class PopupBanner : UserControl
         }
     }
 
+    public static void ShowRedactedPopup()
+    {
+        PopupBanner warn = new()
+        {
+            Icon = "🔐",
+            Title = "REDACTED CONTENT",
+            Subtitle = "No decryption key found, can not display content.",
+            Description = "This item belongs to a redacted package and no valid decryption key was found, which means its content can not be shown.",
+            Style = PopupBanner.PopupStyle.Warning
+        };
+        warn.Show();
+    }
+
     public enum PopupStyle
     {
         Warning,

@@ -355,7 +355,6 @@ public partial class MainWindow
                 PopupBanner update = new()
                 {
                     DarkenBackground = true,
-                    Icon = "",
                     Title = "UPDATE AVAILABLE",
                     Subtitle = "A new Charm update is available!",
                     Description =

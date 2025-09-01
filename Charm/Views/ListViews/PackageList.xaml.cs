@@ -133,15 +133,7 @@ public partial class PackageList : UserControl
             if (pkg.GetPackageMetadata().Name.Contains("redacted") && !PackageResourcer.Get().Keys.ContainsKey(pkg.GetPackageMetadata().PackageGroup))
             {
                 Log.Error($"No decryption key found for package {pkg.GetPackageMetadata().Name}, can not display content.");
-                PopupBanner warn = new()
-                {
-                    Icon = "🔐",
-                    Title = "ERROR",
-                    Subtitle = "No decryption key found, can not display content.",
-                    Description = "This item belongs to a redacted package, which means its content can not be shown.",
-                    Style = PopupBanner.PopupStyle.Warning
-                };
-                warn.Show();
+                PopupBanner.ShowRedactedPopup();
 
                 btn.IsChecked = false;
                 return;
