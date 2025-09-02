@@ -117,10 +117,6 @@
 
 
     <ItemGroup>
-      <Content Include="..\Tiger\Exporters\Shaders\TFXFunctions.hlsl">
-        <Link>Shaders\TFXFunctions.hlsl</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
       <Content Include="Changelog.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>

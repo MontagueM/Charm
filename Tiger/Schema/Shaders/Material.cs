@@ -68,6 +68,9 @@ namespace Tiger.Schema.Shaders
                         Directory.CreateDirectory($"{saveDirectory}/Shaders/Source2");
                         Directory.CreateDirectory($"{saveDirectory}/Shaders/Source2/materials");
 
+                        if (!File.Exists($"{saveDirectory}/Shaders/TFXFunctions.hlsl"))
+                            File.Copy("./Exporters/Shaders/TFXFunctions.hlsl", $"{saveDirectory}/Shaders/TFXFunctions.hlsl");
+
                         FileHash hash = (Pixel.GetBytecode().CanInlineBytecode() || RenderStage == TfxRenderStage.WaterReflection) ? Hash : Pixel.Shader.Hash;
                         File.WriteAllText($"{saveDirectory}/Shaders/Source2/PS_{hash}.shader", vfx);
                         if (!isTerrain)
