@@ -26,11 +26,11 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
             }
 
             _inputSignatures = GetInputSignatures();
-            Log.Debug($"Input signatures for shader {Hash} ({_inputSignatures.Count}):");
-            foreach (DXBCIOSignature inputSignature in _inputSignatures)
-            {
-                Log.Debug(inputSignature.DebugString());
-            }
+            //Log.Debug($"Input signatures for shader {Hash} ({_inputSignatures.Count}):");
+            //foreach (DXBCIOSignature inputSignature in _inputSignatures)
+            //{
+            //    Log.Debug(inputSignature.DebugString());
+            //}
             return _inputSignatures;
         }
     }
@@ -49,11 +49,11 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
             }
 
             _outputSignatures = GetOutputSignatures();
-            Log.Debug($"Output signatures for shader {Hash} ({_outputSignatures.Count}):");
-            foreach (DXBCIOSignature outputSignature in _outputSignatures)
-            {
-                Log.Debug(outputSignature.DebugString());
-            }
+            //Log.Debug($"Output signatures for shader {Hash} ({_outputSignatures.Count}):");
+            //foreach (DXBCIOSignature outputSignature in _outputSignatures)
+            //{
+            //    Log.Debug(outputSignature.DebugString());
+            //}
             return _outputSignatures;
         }
     }
@@ -72,11 +72,11 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
             }
 
             _resources = GetShaderResources();
-            Log.Debug($"Shader Resources for shader {Hash} ({_resources.Count}):");
-            foreach (DXBCShaderResource resource in _resources)
-            {
-                Log.Debug(resource.DebugString());
-            }
+            //Log.Debug($"Shader Resources for shader {Hash} ({_resources.Count}):");
+            //foreach (DXBCShaderResource resource in _resources)
+            //{
+            //    Log.Debug(resource.DebugString());
+            //}
             return _resources;
         }
     }
