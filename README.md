@@ -85,7 +85,7 @@ If you experience any issue, you can register an issue in this repository. If th
 - Use the [Blender Importer addon](https://github.com/DeltaDesigns/d2-map-importer-addon) to simplify and automate importing maps and models into Blender.
 
 ## S&Box
- - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/Source-2-Importing)
+ - [Import guide](https://github.com/DeltaDesigns/Charm/wiki/S&Box-Importing)
  - Generates .shader files for accurate game shaders
  - Generates .vmat (material) and .vmdl (model) files
 
