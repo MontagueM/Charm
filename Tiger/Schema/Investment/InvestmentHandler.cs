@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Arithmic;
 using ConcurrentCollections;
@@ -22,7 +23,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private Tag<S8C978080> _sandboxPatternAssignmentsTag = null;
     private Tag<SAA528080> _sandboxPatternGlobalTagIdTag = null;
     private Tag<S095A8080> _localizedStringsIndexTag = null;
-    public Tag<S26BA8080> _localizedStringsIndexTag2 = null;
+    private Tag<S26BA8080> _localizedStringsIndexTag2 = null;
     private Tag<S015A8080> _inventoryItemIconTag = null;
     private Tag<SC2558080> _artDyeReferenceTag = null;
     private Tag<SDyeChannels> _dyeChannelTag = null;
@@ -124,6 +125,21 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             allHashes = PackageResourcer.Get().GetAllHashes(PackageFilterFunc);
             Parallel.ForEach(allHashes, (val, state, i) =>
             {
+                // Dumb but string index tags must be set first since StringIndexReference depends on it
+                switch (val.GetReferenceHash().Hash32)
+                {
+                    case 0x80805a09:
+                        _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<S095A8080>(val);
+                        break;
+                    case 0x8080BA26:
+                        _localizedStringsIndexTag2 = FileResourcer.Get().GetSchemaTag<S26BA8080>(val);
+                        break;
+                }
+            });
+            GetLocalizedStringsIndexDict(); // must be done before anything else that uses strings
+
+            Parallel.ForEach(allHashes, (val, state, i) =>
+            {
                 switch (val.GetReferenceHash().Hash32)
                 {
                     case 0x80807997:
@@ -137,9 +153,6 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                         break;
                     case 0x80805499:
                         _inventoryItemStringThing = FileResourcer.Get().GetSchemaTag<S99548080>(val);
-                        break;
-                    case 0x80805a09:
-                        _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<S095A8080>(val);
                         break;
                     case 0x80804ea4: // points to parent of the sandbox pattern ref list thing + entity assignment map
                         Tag<SA44E8080> parent = FileResourcer.Get().GetSchemaTag<SA44E8080>(val);
@@ -158,40 +171,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                     case 0x808051f2:  // shadowkeep is 0x80805bde
                         _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(val);
                         break;
-                    case 0x8080BA26:
-                        _localizedStringsIndexTag2 = FileResourcer.Get().GetSchemaTag<S26BA8080>(val);
-                        break;
-                }
-            });
-        }
-        else if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON) // No need to loop hashes when D1 will never change
-        {
-            _inventoryItemMap = FileResourcer.Get().GetSchemaTag<S97798080>(new FileHash("BEFFA580"));
-            _entityAssignmentTag = FileResourcer.Get().GetSchemaTag<SCE558080>(new FileHash("A7FFA580"));
-            _inventoryItemStringThing = FileResourcer.Get().GetSchemaTag<S99548080>(new FileHash("9CFFA580"));
-            _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<S095A8080>(new FileHash("1AE2A580"));
-            _sandboxPatternAssignmentsTag = FileResourcer.Get().GetSchemaTag<S8C978080>(new FileHash("DCE1A780")); // also art dye refs
-            _entityAssignmentsMap = FileResourcer.Get().GetSchemaTag<S434F8080>(new FileHash("DDE1A780"));
 
-            // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
-            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<SAA528080>(new FileHash("A9FFA580"));
 
-            _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<SC2558080>(new FileHash("A8FFA580"));
-            _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(new FileHash("49E2A580"));
-
-            _talentGridMap = FileResourcer.Get().GetSchemaTag<SC2188080>(new FileHash("27E2A580"));
-        }
-
-        GetLocalizedStringsIndexDict(); // must be before GetInventoryItemStringThings
-
-        // must be after string index is built
-
-        if (_strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307)
-        {
-            Parallel.ForEach(allHashes, (val, state, i) =>
-            {
-                switch (val.GetReferenceHash().Hash32)
-                {
                     case 0x808077CD:
                         _randomizedPlugSetMap = FileResourcer.Get().GetSchemaTag<SCD778080>(val);
                         break;
@@ -269,6 +250,25 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                         break;
                 }
             });
+        }
+        else if (_strategy == TigerStrategy.DESTINY1_RISE_OF_IRON) // No need to loop hashes when D1 will never change
+        {
+            _localizedStringsIndexTag = FileResourcer.Get().GetSchemaTag<S095A8080>(new FileHash("1AE2A580"));
+            GetLocalizedStringsIndexDict();
+
+            _inventoryItemMap = FileResourcer.Get().GetSchemaTag<S97798080>(new FileHash("BEFFA580"));
+            _entityAssignmentTag = FileResourcer.Get().GetSchemaTag<SCE558080>(new FileHash("A7FFA580"));
+            _inventoryItemStringThing = FileResourcer.Get().GetSchemaTag<S99548080>(new FileHash("9CFFA580"));
+            _sandboxPatternAssignmentsTag = FileResourcer.Get().GetSchemaTag<S8C978080>(new FileHash("DCE1A780")); // also art dye refs
+            _entityAssignmentsMap = FileResourcer.Get().GetSchemaTag<S434F8080>(new FileHash("DDE1A780"));
+
+            // inventory item -> sandbox pattern index -> pattern global tag id -> entity assignment
+            _sandboxPatternGlobalTagIdTag = FileResourcer.Get().GetSchemaTag<SAA528080>(new FileHash("A9FFA580"));
+
+            _artDyeReferenceTag = FileResourcer.Get().GetSchemaTag<SC2558080>(new FileHash("A8FFA580"));
+            _dyeChannelTag = FileResourcer.Get().GetSchemaTag<SDyeChannels>(new FileHash("49E2A580"));
+
+            _talentGridMap = FileResourcer.Get().GetSchemaTag<SC2188080>(new FileHash("27E2A580"));
         }
 
         Task.WaitAll(new[]
@@ -536,12 +536,14 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             // TextureList[0] is default, others are for colourblind modes
             if (index >= structCD3E8080.Unk00[reader, listIndex].TextureList.Count)
                 return null;
+
             return structCD3E8080.Unk00[reader, listIndex].TextureList[reader, index].IconTexture;
         }
         if (prim is SCB3E8080 structCB3E8080)
         {
             if (index >= structCB3E8080.Unk00[reader, listIndex].TextureList.Count)
                 return null;
+
             return structCB3E8080.Unk00[reader, listIndex].TextureList[reader, index].IconTexture;
         }
         return null;
@@ -875,14 +877,20 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             if (entry.FeminineSingleEntityAssignment.IsValid())
             {
                 Entity.Entity entity = GetEntityFromAssignmentHash(entry.FeminineSingleEntityAssignment);
-                entity.Gender = DestinyGenderDefinition.Feminine;
-                entities.Add(entity);
+                if (entity != null)
+                {
+                    entity.Gender = DestinyGenderDefinition.Feminine;
+                    entities.Add(entity);
+                }
             }
             if (entry.MasculineSingleEntityAssignment.IsValid())
             {
                 Entity.Entity entity = GetEntityFromAssignmentHash(entry.MasculineSingleEntityAssignment);
-                entity.Gender = DestinyGenderDefinition.Masculine;
-                entities.Add(entity);
+                if (entity != null)
+                {
+                    entity.Gender = DestinyGenderDefinition.Masculine;
+                    entities.Add(entity);
+                }
             }
         }
         else
@@ -910,22 +918,21 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         // var index = _entityAssignmentsMap.TagData.EntityArrangementMap.BinarySearch(x, new S454F8080());
         if (!_sortedArrangementHashmap.ContainsKey(assignmentHash))
             return null;
+
         Tag<SA36F8080> tag = _sortedArrangementHashmap[assignmentHash];
         tag.Load();
+
         if (tag.TagData.EntityData.IsInvalid() || tag.TagData.EntityData is null)
             return null;
 
         // if entity
         if (tag.TagData.EntityData.GetReferenceHash() == (_strategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307 ? 0x80809ad8 : 0x80800734))
-        {
             return FileResourcer.Get().GetFile<Entity.Entity>(tag.TagData.EntityData);
-        }
+
 #if DEBUG
         Log.Warning($"Hash is not an Entity: {tag.TagData.EntityData}");
 #endif
         return null;
-        // return new Entity(_entityAssignmentsMap.TagData.EntityArrangementMap[index].EntityParent.TagData.Entity);
-        // return null;
     }
 
     private async Task PopulateOrnaments()
@@ -1076,12 +1083,23 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
         if (Strategy.IsD1())
             return;
 #if DEBUG
-        Console.WriteLine($"_presentationNodeDefinitionMap {_presentationNodeDefinitionMap.Hash}");
-        Console.WriteLine($"_presentationNodeDefinitionStringMap {_presentationNodeDefinitionStringMap.Hash}");
-        Console.WriteLine($"_recordNodeDefinitionMap {_recordNodeDefinitionMap.Hash}");
-        Console.WriteLine($"_recordNodeDefinitionStringMap {_recordNodeDefinitionStringMap.Hash}");
-        Console.WriteLine($"_seasonDefinitionMap {_seasonDefinitionMap.Hash}");
-        Console.WriteLine($"_seasonDefinitionStringMap {_seasonDefinitionStringMap.Hash}");
+        var fields = typeof(Investment).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        foreach (var field in fields)
+        {
+            if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(Tag<>))
+            {
+                var tagInstance = field.GetValue(this);
+                if (tagInstance != null)
+                {
+                    var hashProperty = field.FieldType.GetField("Hash");
+                    if (hashProperty != null)
+                    {
+                        var hashValue = hashProperty.GetValue(tagInstance);
+                        Console.WriteLine($"{field.Name}: {hashValue}");
+                    }
+                }
+            }
+        }
 #endif
     }
 }
@@ -1274,27 +1292,27 @@ public class InventoryItem : Tag<S9D798080>
                 }
             }
         }
-        else
+
+        // if the damage type wasnt found in perks
+        if (index == -1 && _tag.Unk70.GetValue(GetReader()) is SC0778080 sockets)
         {
-            if (_tag.Unk70.GetValue(GetReader()) is SC0778080 sockets)
+            sockets.SocketEntries.ForEach(entry =>
             {
-                sockets.SocketEntries.ForEach(entry =>
+                if (entry.SocketTypeIndex == -1 || entry.SingleInitialItemIndex == -1)
+                    return;
+
+                SBA768080 socket = Investment.Get().GetSocketType(entry.SocketTypeIndex);
+                foreach (SC5768080 a in socket.PlugWhitelists)
                 {
-                    if (entry.SocketTypeIndex == -1 || entry.SingleInitialItemIndex == -1)
-                        return;
-                    SBA768080 socket = Investment.Get().GetSocketType(entry.SocketTypeIndex);
-                    foreach (SC5768080 a in socket.PlugWhitelists)
+                    if (a.PlugCategoryHash.Hash32 == 1466776700) // 'v300.weapon.damage_type.energy', Y1 weapon that uses a damage type mod from ye olden days
                     {
-                        if (a.PlugCategoryHash.Hash32 == 1466776700) // 'v300.weapon.damage_type.energy', Y1 weapon that uses a damage type mod from ye olden days
-                        {
-                            InventoryItem item = Investment.Get().GetInventoryItem(entry.SingleInitialItemIndex);
-                            item.Load(true); // idk why the item sometimes isnt fully loaded
-                            index = item.GetItemDamageTypeIndex();
-                            break;
-                        }
+                        InventoryItem item = Investment.Get().GetInventoryItem(entry.SingleInitialItemIndex);
+                        item.Load(true); // idk why the item sometimes isnt fully loaded
+                        index = item.GetItemDamageTypeIndex();
+                        break;
                     }
-                });
-            }
+                }
+            });
         }
         return index;
     }
@@ -1302,21 +1320,17 @@ public class InventoryItem : Tag<S9D798080>
     public int GetArtArrangementIndex()
     {
         if (_tag.Unk90 is null) return -1;
-        if (_tag.Unk90.GetValue(GetReader()) is S77738080 entry)
-        {
-            if (entry.Arrangements.Count > 0)
-                return entry.Arrangements[GetReader(), 0].ArtArrangementHash;
-        }
+        if (_tag.Unk90.GetValue(GetReader()) is S77738080 entry && entry.Arrangements.Count > 0)
+            return entry.Arrangements[GetReader(), 0].ArtArrangementHash;
+
         return -1;
     }
 
     public int GetWeaponPatternIndex()
     {
-        if (_tag.Unk90.GetValue(GetReader()) is S77738080 entry)
-        {
-            if (entry.WeaponPatternIndex > 0)
-                return entry.WeaponPatternIndex;
-        }
+        if (_tag.Unk90.GetValue(GetReader()) is S77738080 entry && entry.WeaponPatternIndex > 0)
+            return entry.WeaponPatternIndex;
+
         return -1;
     }
 
@@ -1400,31 +1414,25 @@ public class InventoryItem : Tag<S9D798080>
 
     public UnmanagedMemoryStream? GetIconBackgroundOverlayStream()
     {
+        Texture? backgroundIcon = GetIconBackgroundOverlayTexture();
+        return backgroundIcon?.GetTexture();
+    }
+
+    public Texture? GetIconBackgroundOverlayTexture()
+    {
         Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconBGOverlayContainer == null)
             return null;
         Texture? backgroundIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconBGOverlayContainer);
-        return backgroundIcon.GetTexture();
+        return backgroundIcon;
     }
     #endregion
 
     #region Icon Foreground
     public UnmanagedMemoryStream? GetIconPrimaryStream()
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
-        if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
-            return null;
-        Texture? primaryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);
-        return primaryIcon.GetTexture();
-    }
-
-    public UnmanagedMemoryStream? GetIconPrimaryStream(int itemIndex)
-    {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(itemIndex);
-        if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
-            return null;
-        Texture? primaryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);
-        return primaryIcon.GetTexture();
+        Texture? primaryIcon = GetIconPrimaryTexture();
+        return primaryIcon?.GetTexture();
     }
 
     public Texture? GetIconPrimaryTexture()
@@ -1449,13 +1457,8 @@ public class InventoryItem : Tag<S9D798080>
     #region Icon Overlay
     public UnmanagedMemoryStream? GetIconOverlayStream(int index = 0)
     {
-        Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(this);
-        if (iconContainer == null || iconContainer.TagData.IconOverlayContainer == null)
-            return null;
-        Texture? overlayIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconOverlayContainer, index);
-        if (overlayIcon is null)
-            return null;
-        return overlayIcon.GetTexture();
+        Texture? overlayIcon = GetIconOverlayTexture(index);
+        return overlayIcon?.GetTexture();
     }
 
     public Texture? GetIconOverlayTexture(int index = 0)
@@ -1470,13 +1473,18 @@ public class InventoryItem : Tag<S9D798080>
 
     public UnmanagedMemoryStream? GetFoundryIconStream()
     {
+        Texture? foundryIcon = GetFoundryIconTexture();
+        return foundryIcon?.GetTexture();
+    }
+
+    public Texture? GetFoundryIconTexture()
+    {
         Tag<SB83E8080>? iconContainer = Investment.Get().GetFoundryItemIconContainer(this);
         if (iconContainer == null || iconContainer.TagData.IconPrimaryContainer == null)
             return null;
         Texture? foundryIcon = Investment.Get().GetTextureFromContainer(iconContainer.TagData.IconPrimaryContainer);
-        return foundryIcon.GetTexture();
+        return foundryIcon;
     }
-
 
     // I hate this and theres probably a better way but I'm lazy
     public List<DestinyTraitID> MakeD1ItemTraitMap()
@@ -1484,6 +1492,9 @@ public class InventoryItem : Tag<S9D798080>
         List<DestinyTraitID> traits = new();
         switch (Type.ToLower().Trim())
         {
+            case "emote":
+                traits.Add(DestinyTraitID.item_emote);
+                break;
             case "ghost shell":
                 traits.Add(DestinyTraitID.item_ghost);
                 break;

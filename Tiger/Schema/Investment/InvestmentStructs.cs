@@ -485,6 +485,10 @@ public struct S9F548080
     [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)]
     public Tag<SB83E8080> IconContainer;
 
+    [SchemaField(0x70, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)]
+    public Tag<SB83E8080> EmblemContainer;
+
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public short IconIndex;

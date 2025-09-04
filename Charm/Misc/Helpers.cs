@@ -339,6 +339,14 @@ public static class ApiImageUtils
         if (container == null)
             return null;
 
+        return MakeIcon(container, containerIndex, iconIndex, listIndex);
+    }
+
+    public static ImageSource MakeIcon(Tag<SB83E8080> container, int containerIndex = 0, int iconIndex = 0, int listIndex = 0)
+    {
+        if (container == null)
+            return null;
+
         List<Tag<SCF3E8080>> containers = new()
         {
             container.TagData.IconPrimaryContainer,
@@ -384,17 +392,36 @@ public static class ApiImageUtils
     public static BitmapImage MakeDyedIcon(InventoryItem item)
     {
         Tag<SB83E8080>? iconContainer = Investment.Get().GetItemIconContainer(item);
-        UnmanagedMemoryStream? primaryStream = item.GetIconPrimaryStream();
-        UnmanagedMemoryStream? maskStream = item.GetIconBackgroundOverlayStream();
+        return MakeDyedIcon(iconContainer);
+    }
 
-        Bitmap mainImage = primaryStream != null ? MakeBitmap(primaryStream) : null;
-        Bitmap colorMaskImage = maskStream != null ? MakeBitmap(maskStream) : null;
+    public static BitmapImage MakeDyedIcon(Tag<SB83E8080>? iconContainer)
+    {
+        Texture? primary = null;
+        Texture? mask = null;
+
+        var primCont = iconContainer.TagData.IconPrimaryContainer;
+        var maskCont = iconContainer.TagData.IconBGOverlayContainer;
+
+        if (primCont is not null)
+            primary = GetTexture(primCont);
+
+        if (maskCont is not null)
+            mask = GetTexture(maskCont);
+
+        Bitmap mainImage = primary != null ? MakeBitmap(primary.GetTexture()) : null;
+        Bitmap colorMaskImage = mask != null ? MakeBitmap(mask.GetTexture()) : null;
         if (mainImage is null || colorMaskImage is null)
-            return Bitmap2BitmapImage(mainImage, 96, 96);
+            return Bitmap2BitmapImage(mainImage);
 
         // both mask and main have to be the same size
-        if (iconContainer.TagData.IconBGOverlayContainer is not null && (GetTexture(iconContainer.TagData.IconBGOverlayContainer).TagData.Height < GetTexture(iconContainer.TagData.IconPrimaryContainer).TagData.Height))
-            colorMaskImage = MakeBitmap(maskStream, GetTexture(iconContainer.TagData.IconPrimaryContainer).TagData.Height);
+        if (maskCont is not null && (mask.Height * mask.Width != primary.Height * primary.Width))
+        {
+            if (primary.Width * primary.Height > mask.Width * mask.Height)
+                colorMaskImage = MakeBitmap(mask.GetTexture(), new System.Numerics.Vector2(primary.Width, primary.Height));
+            else
+                mainImage = MakeBitmap(primary.GetTexture(), new System.Numerics.Vector2(mask.Width, mask.Height));
+        }
 
         // Define RGB colors
         System.Drawing.Color[] overlayColors = new System.Drawing.Color[]
@@ -446,10 +473,10 @@ public static class ApiImageUtils
             }
         }
 
-        return Bitmap2BitmapImage(mainImage, 96, 96);
+        return Bitmap2BitmapImage(mainImage);
     }
 
-    private static Bitmap MakeBitmap(UnmanagedMemoryStream stream, int wH = 0)
+    private static Bitmap MakeBitmap(UnmanagedMemoryStream stream, System.Numerics.Vector2? wH = null)
     {
         using (var memoryStream = new System.IO.MemoryStream())
         {
@@ -457,23 +484,23 @@ public static class ApiImageUtils
             encoder.Frames.Add(BitmapFrame.Create(stream));
             encoder.Save(memoryStream);
 
-            if (wH == 0)
+            if (wH is null)
                 return new Bitmap(memoryStream);
             else
             {
                 Bitmap originalBitmap = new(memoryStream);
-                Bitmap resizedBitmap = new(wH, wH);
+                Bitmap resizedBitmap = new((int)wH.Value.X, (int)wH.Value.Y);
 
                 using (Graphics graphics = Graphics.FromImage(resizedBitmap))
                 {
-                    graphics.DrawImage(originalBitmap, 0, 0, wH, wH);
+                    graphics.DrawImage(originalBitmap, 0, 0, (int)wH.Value.X, (int)wH.Value.Y);
                 }
                 return resizedBitmap;
             }
         }
     }
 
-    public static BitmapImage Bitmap2BitmapImage(Bitmap bitmap, int width, int height)
+    public static BitmapImage Bitmap2BitmapImage(Bitmap bitmap, int width = -1, int height = -1)
     {
         using (MemoryStream memoryStream = new())
         {
@@ -484,8 +511,8 @@ public static class ApiImageUtils
             // Create new BitmapImage and load it from memory stream
             BitmapImage bitmapImage = new();
             bitmapImage.BeginInit();
-            bitmapImage.DecodePixelWidth = width;
-            bitmapImage.DecodePixelHeight = height;
+            bitmapImage.DecodePixelWidth = width == -1 ? bitmap.Width : width;
+            bitmapImage.DecodePixelHeight = height == -1 ? bitmap.Height : height;
             bitmapImage.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
             bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
             bitmapImage.StreamSource = memoryStream;
