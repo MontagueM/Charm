@@ -20,7 +20,7 @@ public partial class StaticListView : UserControl
     private ConfigSubsystem Config = TigerInstance.GetSubsystem<ConfigSubsystem>();
     private ConcurrentBag<StaticItem> Statics = new();
 
-    private int SortByIndex = 4;
+    private int SortByIndex = 2;
     private FileHash _currentStatic;
 
     public StaticListView()
@@ -64,8 +64,8 @@ public partial class StaticListView : UserControl
         sortBy.Combobox.MinWidth = 175;
         sortBy.Combobox.ItemsSource = new List<ComboBoxItem>()
         {
-            new() { Content = "Hash ↓", Tag = 4 },
-            new() { Content = "Hash ↑", Tag = 3 },
+            new() { Content = "Hash ↓", Tag = 2 },
+            new() { Content = "Hash ↑", Tag = 1 },
         };
         if (sortBy.Combobox.SelectedIndex == -1)
         {
