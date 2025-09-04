@@ -439,6 +439,9 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     private void GetTraitMap()
     {
+        if (Strategy.IsD1())
+            return;
+
         TraitMap = new();
         TraitIndexMap = new();
         for (int i = 0; i < _traitDefinitionStringMap.TagData.TraitStrings.Count; i++)
