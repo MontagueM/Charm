@@ -247,22 +247,16 @@ public static class FileHashExtensions
 
     public static bool ContainsHash(this FileHash fileHash, uint searchValue)
     {
-        byte[] data = PackageResourcer.Get().GetFileData(fileHash);
-        using (TigerReader br = new(data))
+        using var stream = new MemoryStream(PackageResourcer.Get().GetFileData(fileHash));
+        using var reader = new BinaryReader(stream);
+        long length = stream.Length;
+        while (stream.Position + sizeof(uint) <= length)
         {
-            long position = 0;
-            long length = data.Length;
-            while (position + sizeof(uint) <= length)
-            {
-                uint value = br.ReadUInt32();
-                if (value == searchValue)
-                {
-                    return true;
-                }
-                position += sizeof(uint);
-            }
-            return false;
+            uint value = reader.ReadUInt32();
+            if (value == searchValue)
+                return true;
         }
+        return false;
     }
 }
 

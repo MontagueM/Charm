@@ -497,33 +497,6 @@ public class ResourcePointer : RelativePointer
         }
     }
 
-    ///// <summary>
-    ///// Gets just the type of this ResourcePointer, instead of deserializing.
-    ///// </summary>
-    ///// <param name="reader"></param>
-    ///// <returns></returns>
-    ///// <exception cref="Exception"></exception>
-    //public Type? GetType(TigerReader reader)
-    //{
-    //    try
-    //    {
-    //        if (ResourceClassHash == TigerHash.InvalidHash32)
-    //        {
-    //            return null;
-    //        }
-    //        else if (SchemaDeserializer.Get().TryGetSchemaType(ResourceClassHash, out Type schemaType))
-    //        {
-    //            return schemaType;
-    //        }
-
-    //        return null;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw new Exception($"[{reader.Hash:X2}] Failed to read at position {reader.BaseStream.Position:X}. Stream length: {reader.BaseStream.Length}", ex);
-    //    }
-    //}
-
     public uint GetValueRaw(TigerReader reader)
     {
         return ResourceClassHash;
