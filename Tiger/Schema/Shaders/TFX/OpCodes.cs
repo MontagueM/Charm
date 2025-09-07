@@ -39,7 +39,6 @@ public static class TfxBytecodeOp
             Strategy.IsPostBL() ? ((TfxBytecode_TFS)value).ToString() :
             ((TfxBytecode)value).ToString();
 
-
         if (Enum.TryParse(name, out TfxBytecode result))
             return result;
 
@@ -48,7 +47,6 @@ public static class TfxBytecodeOp
 
     public static TfxData ReadTfxBytecodeOp(BinaryReader reader)
     {
-        TigerStrategy _strat = Strategy.CurrentStrategy;
         TfxData tfxData = new()
         {
             op = RemapOp(reader.ReadByte()),
@@ -149,175 +147,105 @@ public static class TfxBytecodeOp
                     tfxData.data = Unk41Data;
                     break;
 
-                // From here forward, SK and BL is op-1, D1 is all over the place....so its gonna get ugly
-
-                case TfxBytecode.PushFromOutput - 2 when Strategy.IsD1():
-                case TfxBytecode.PushFromOutput - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PushFromOutput when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PushFromOutput;
-
+                case TfxBytecode.PushFromOutput:
                     PushFromOutputData Unk43Data = new();
                     Unk43Data.element = reader.ReadByte();
                     tfxData.data = Unk43Data;
                     break;
 
-                case TfxBytecode.PopOutput - 2 when Strategy.IsD1():
-                case TfxBytecode.PopOutput - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PopOutput when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PopOutput;
-
+                case TfxBytecode.PopOutput:
                     PopOutputData PopOutputData = new();
                     PopOutputData.slot = reader.ReadByte();
                     tfxData.data = PopOutputData;
                     break;
 
-                case TfxBytecode.PopOutputMat4 - 2 when Strategy.IsD1():
-                case TfxBytecode.PopOutputMat4 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PopOutputMat4 when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PopOutputMat4;
-
+                case TfxBytecode.PopOutputMat4:
                     PopOutputMat4Data Unk45Data = new();
                     Unk45Data.slot = reader.ReadByte();
                     tfxData.data = Unk45Data;
                     break;
 
-                case TfxBytecode.PushTemp - 2 when Strategy.IsD1():
-                case TfxBytecode.PushTemp - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PushTemp when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PushTemp;
-
+                case TfxBytecode.PushTemp:
                     PushTempData PushTempData = new();
                     PushTempData.slot = reader.ReadByte();
                     tfxData.data = PushTempData;
                     break;
 
-                case TfxBytecode.PopTemp - 2 when Strategy.IsD1():
-                case TfxBytecode.PopTemp - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PopTemp when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PopTemp;
-
+                case TfxBytecode.PopTemp:
                     PopTempData PopTempData = new();
                     PopTempData.slot = reader.ReadByte();
                     tfxData.data = PopTempData;
                     break;
 
-                case TfxBytecode.SetShaderTexture - 2 when Strategy.IsD1():
-                case TfxBytecode.SetShaderTexture - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.SetShaderTexture when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.SetShaderTexture;
-
+                case TfxBytecode.SetShaderTexture:
                     SetShaderTextureData Unk48Data = new();
                     Unk48Data.value = reader.ReadByte();
                     tfxData.data = Unk48Data;
                     break;
 
-                //case TfxBytecode.Unk49 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk49 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.Unk49 when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.Unk49;
-
+                case TfxBytecode.Unk49:
                     Unk49Data Unk49 = new();
                     Unk49.unk1 = reader.ReadByte();
                     tfxData.data = Unk49;
                     break;
 
-                case TfxBytecode.SetShaderSampler - 3 when Strategy.IsD1(): // 0x47
-                case TfxBytecode.SetShaderSampler - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.SetShaderSampler when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.SetShaderSampler;
-
+                case TfxBytecode.SetShaderSampler:
                     SetShaderSamplerData Unk4aData = new();
                     Unk4aData.value = reader.ReadByte();
                     tfxData.data = Unk4aData;
                     break;
 
-                //case TfxBytecode.SetShaderUav - 2 when Strategy.IsD1():
-                case TfxBytecode.SetShaderUav - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.SetShaderUav when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.SetShaderUav;
-
+                case TfxBytecode.SetShaderUav:
                     SetShaderUavData Unk4bData = new();
                     Unk4bData.value = reader.ReadByte();
                     tfxData.data = Unk4bData;
                     break;
 
-                //case TfxBytecode.Unk4c - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk4c - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.Unk4c when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.Unk4c;
-
+                case TfxBytecode.Unk4c:
                     Unk4cData Unk4cData = new();
                     Unk4cData.unk1 = reader.ReadByte();
                     tfxData.data = Unk4cData;
                     break;
 
-                case TfxBytecode.PushSampler - 4 when Strategy.IsD1(): // 0x49
-                case TfxBytecode.PushSampler - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PushSampler when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PushSampler;
-
+                case TfxBytecode.PushSampler:
                     PushSamplerData PushSampler = new();
                     PushSampler.unk1 = reader.ReadByte();
                     tfxData.data = PushSampler;
                     break;
 
-                case TfxBytecode.PushObjectChannelVector - 4 when Strategy.IsD1(): // I think...?? Uses an index instead of hash?
-                case TfxBytecode.PushObjectChannelVector - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PushObjectChannelVector when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PushObjectChannelVector;
-
+                case TfxBytecode.PushObjectChannelVector:
                     PushObjectChannelVectorData PushObjectChannelVector = new();
                     PushObjectChannelVector.hash = Strategy.IsD1() ? reader.ReadByte() : Endian.SwapU32(reader.ReadUInt32());
                     tfxData.data = PushObjectChannelVector;
                     break;
 
-                case TfxBytecode.PushGlobalChannelVector - 4 when Strategy.IsD1():
-                case TfxBytecode.PushGlobalChannelVector - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PushGlobalChannelVector when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PushGlobalChannelVector;
-
+                case TfxBytecode.PushGlobalChannelVector:
                     PushGlobalChannelVectorData PushGlobalChannelVector = new();
                     PushGlobalChannelVector.Index = reader.ReadByte();
                     tfxData.data = PushGlobalChannelVector;
                     break;
 
-                case TfxBytecode.Unk50 - 2 when Strategy.IsD1():
-                case TfxBytecode.Unk50 - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.Unk50 when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.Unk50;
-
+                case TfxBytecode.Unk50:
                     Unk50Data Unk50Data = new();
                     Unk50Data.unk1 = reader.ReadByte();
                     tfxData.data = Unk50Data;
                     break;
 
-                case TfxBytecode.PushTexDimensions - 2 when Strategy.IsD1():
-                case TfxBytecode.PushTexDimensions - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PushTexDimensions when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PushTexDimensions;
-
+                case TfxBytecode.PushTexDimensions:
                     PushTexDimensionsData Unk52Data = new();
                     Unk52Data.index = reader.ReadByte();
                     Unk52Data.fields = reader.ReadByte();
                     tfxData.data = Unk52Data;
                     break;
 
-                case TfxBytecode.PushTexTileParams - 2 when Strategy.IsD1():
-                case TfxBytecode.PushTexTileParams - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PushTexTileParams when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PushTexTileParams;
-
+                case TfxBytecode.PushTexTileParams:
                     PushTexTileParamsData Unk53Data = new();
                     Unk53Data.index = reader.ReadByte();
                     Unk53Data.fields = reader.ReadByte();
                     tfxData.data = Unk53Data;
                     break;
 
-                case TfxBytecode.PushTexTileCount - 2 when Strategy.IsD1():
-                case TfxBytecode.PushTexTileCount - 1 when Strategy.IsPreBL() || Strategy.IsBL():
-                case TfxBytecode.PushTexTileCount when Strategy.IsPostBL():
-                    tfxData.op = TfxBytecode.PushTexTileCount;
-
+                case TfxBytecode.PushTexTileCount:
                     PushTexTileCountData Unk54Data = new();
                     Unk54Data.index = reader.ReadByte();
                     Unk54Data.fields = reader.ReadByte();
