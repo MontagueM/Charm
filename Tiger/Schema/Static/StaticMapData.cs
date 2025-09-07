@@ -553,13 +553,10 @@ public struct SB3938080
 // /// <summary>
 // /// Boss entity data resource?
 // /// </summary>
-[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "19808080", 0x50)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "19808080", 0x50)]
 [SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "19808080", 0x54)]
 public struct S19808080
 {
-    // todo rest of this
-    // [DestinyField(FieldType.ResourcePointer)]
-    // public dynamic? Unk00;
     [SchemaField(0x24)]
     public StringHash EntityName;
 }
