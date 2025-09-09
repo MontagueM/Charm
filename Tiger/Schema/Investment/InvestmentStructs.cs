@@ -1611,11 +1611,11 @@ public struct S80803EA5
     [SchemaField(0x8)]
     public TigerHash CodeName;
 
+    [SchemaField(0x10, Tag64 = true)]
     public Tag<S80803EBA> Container;
 
     [SchemaField(Tag64 = true)]
     public LocalizedStrings Strings;
-
     public DynamicArray<SB73B8080> ColorSchemes;
 }
 
