@@ -90,6 +90,7 @@ public enum DestinyUIDisplayStyle : uint
     Token = 4060663772, // 'ui_display_style_token'
     Infuse = 1494624843, // 'ui_display_style_infuse'
     Memory = 1497864296, // 'ui_display_style_memory'
+    Deepsight = 2609099574,
 }
 
 public enum DestinyScreenStyle : uint

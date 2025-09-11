@@ -92,6 +92,16 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
     }
 
+    private static readonly HashSet<string> BlacklistedNotifications = new()
+    {
+        "This weapon can be enhanced further.",
+        "This weapon is fully enhanced.",
+        "This weapon can be enhanced further and modified at the Relic on Mars.",
+        "This weapon is fully enhanced and can be modified at the Relic on Mars.",
+        "Deepsight activation is available for this weapon.",
+        "Deepsight activation is not available for this weapon instance."
+    };
+
     public Tooltip2()
     {
         InitializeComponent();
@@ -319,13 +329,17 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
                         foreach (SB2548080 notif in strings.TagData.TooltipNotifications)
                         {
-                            if (notif.DisplayString.Value is null || notif.DisplayString.Value == "")
+                            string? message = notif.DisplayString.Value;
+                            if (string.IsNullOrWhiteSpace(message))
+                                continue;
+
+                            if (BlacklistedNotifications.Contains(message))
                                 continue;
 
                             blocks.Add(new NotificationBlock()
                             {
                                 Order = 9,
-                                Text = notif.DisplayString.Value,
+                                Text = message,
                                 Style = notif.DisplayStyle
                             });
                         }
