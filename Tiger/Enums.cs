@@ -419,7 +419,10 @@ public enum DestinyTraitID : uint
     [Description("Reclamation")]
     releases_v900_core = 1858131755,
     [Description("Edge of Fate")]
-    releases_v900_dlc = 2725534325
+    releases_v900_dlc = 2725534325,
+    releases_v910 = 753559279,
+    [Description("Ash and Iron")]
+    releases_v910_core = 2052231686
 }
 
 
