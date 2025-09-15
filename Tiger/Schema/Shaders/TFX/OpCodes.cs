@@ -140,7 +140,7 @@ public static class TfxBytecodeOp
                     tfxData.data = PushExternInputU32Data;
                     break;
 
-                case TfxBytecode.PushExternInputUav when !Strategy.IsD1():
+                case TfxBytecode.PushExternInputUav:
                     PushExternInputUavData Unk41Data = new();
                     Unk41Data.extern_ = Externs.GetExtern(reader.ReadByte());
                     Unk41Data.element = reader.ReadByte();
@@ -445,7 +445,7 @@ public static class TfxBytecodeOp
                 var ptd = ((PushTexDimensionsData)tfxData.data);
                 Texture tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptd.index].Hash);
 
-                output = $"{DecodePermuteParam(ptd.fields).ToUpper()}: " +
+                output = $"Tex {tex.Hash} ({ptd.index}): {DecodePermuteParam(ptd.fields).ToUpper()}: " +
                     $"({tex.TagData.Width}, {tex.TagData.Height}, {tex.TagData.Depth}, {tex.TagData.ArraySize})";
                 break;
 
@@ -453,7 +453,7 @@ public static class TfxBytecodeOp
                 var ptt = ((PushTexTileParamsData)tfxData.data);
                 tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[ptt.index].Hash);
 
-                output = $"{DecodePermuteParam(ptt.fields).ToUpper()}: " +
+                output = $"Tex {tex.Hash} ({ptt.index}): {DecodePermuteParam(ptt.fields).ToUpper()}: " +
                     $"{tex.TagData.TilingScaleOffset}";
                 break;
 
@@ -461,7 +461,7 @@ public static class TfxBytecodeOp
                 var pttc = ((PushTexTileCountData)tfxData.data);
                 tex = FileResourcer.Get().GetFile<Texture>(material.PSSamplers[pttc.index].Hash);
 
-                output = $"{DecodePermuteParam(pttc.fields).ToUpper()}: " +
+                output = $"Tex {tex.Hash} ({pttc.index}): {DecodePermuteParam(pttc.fields).ToUpper()}: " +
                     $"({tex.TagData.TileCount}, {tex.TagData.ArraySize}, 0, 0)"; break;
         }
 
@@ -636,7 +636,7 @@ public enum TfxBytecode_D1 : byte
     PushExternInputMat4 = 0x3e,
     PushExternInputTextureView = 0x3f,
     PushExternInputU32 = 0x40,
-    PushExternInputUav = 0x41,
+    PushExternInputUav = 0x41, // idk if this is in D1, F3487E81 uses this but doesnt seem right
     PushFromOutput = 0x41,
     PopOutput = 0x42,
     PopOutputMat4 = 0x43,

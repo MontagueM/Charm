@@ -105,7 +105,6 @@ namespace Tiger.Schema.Shaders
             }
         }
 
-        // TODO: Remove material data from cfg and use this instead, cfg is too cluttered 
         public void Export(string saveDirectory)
         {
             string texturePath = $"{saveDirectory}/Textures";
@@ -117,9 +116,10 @@ namespace Tiger.Schema.Shaders
             {
                 Hash = Hash,
                 Scopes = EnumerateScopes().ToList(),
-                Externs = GetExterns().ToList(),
+                Externs = GetExterns(),
                 RenderStates = RenderStates
             };
+
             if (Pixel.Shader != null)
             {
                 SavePixelShader($"{saveDirectory}");
@@ -150,6 +150,8 @@ namespace Tiger.Schema.Shaders
                         Dimension = texture.Texture.GetDimension().GetEnumDescription(),
                         Format = texture.Texture.TagData.GetFormat().ToString()
                     });
+
+                    texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
                 }
 
                 psCB.TileTextureDetails = new();
@@ -166,7 +168,7 @@ namespace Tiger.Schema.Shaders
                         if (tex is null)
                             continue;
 
-                        psCB.TileTextureDetails.Add(new()
+                        psCB.TileTextureDetails.TryAdd(item.index, new()
                         {
                             Hash = sampler.Hash,
                             Width = tex.TagData.Width,
@@ -216,26 +218,43 @@ namespace Tiger.Schema.Shaders
                         Dimension = texture.Texture.GetDimension().GetEnumDescription(),
                         Format = texture.Texture.TagData.GetFormat().ToString()
                     });
+
+                    texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+                }
+
+                vsCB.TileTextureDetails = new();
+                vsCB.Samplers = new();
+                foreach (var item in Vertex.Samplers.Select((sampler, index) => new { sampler, index }))
+                {
+                    DirectXSampler? sampler = item.sampler.GetSampler();
+                    if (sampler is null)
+                        continue;
+
+                    if (sampler.Hash.GetFileMetadata().Type != 34)
+                    {
+                        Texture? tex = FileResourcer.Get().GetFile<Texture>(sampler.Hash);
+                        if (tex is null)
+                            continue;
+
+                        vsCB.TileTextureDetails.TryAdd(item.index, new()
+                        {
+                            Hash = sampler.Hash,
+                            Width = tex.TagData.Width,
+                            Height = tex.TagData.Height,
+                            Depth = tex.TagData.Depth,
+                            ArraySize = tex.TagData.ArraySize,
+                            TileCount = tex.TagData.TileCount,
+                            TilingScaleOffset = tex.TagData.TilingScaleOffset
+                        });
+                    }
+                    else
+                    {
+                        vsCB.Samplers.TryAdd(item.index + 1, sampler.Sampler);
+                    }
                 }
 
                 material.Material.TryAdd(JsonMaterial.ShaderStage.Vertex, vsCB);
             }
-
-            foreach (STextureTag texture in Vertex.EnumerateTextures())
-            {
-                if (texture.Texture == null || File.Exists($"{saveDirectory}/Textures/{texture.Texture.Hash}.{_config.GetOutputTextureFormat()}"))
-                    continue;
-
-                texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
-            }
-            foreach (STextureTag texture in Pixel.EnumerateTextures())
-            {
-                if (texture.Texture == null || File.Exists($"{saveDirectory}/Textures/{texture.Texture.Hash}.{_config.GetOutputTextureFormat()}"))
-                    continue;
-
-                texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
-            }
-
 
             var jsonSettings = new JsonSerializerSettings
             {
@@ -288,7 +307,7 @@ namespace Tiger.Schema.Shaders
             public List<byte> Bytecode { get; set; } = new();
             public List<Vector4> Constants { get; set; } = new();
             public Dictionary<int, D3D11_SAMPLER_DESC> Samplers { get; set; } = new();
-            public List<TileTextureDetails> TileTextureDetails { get; set; } = new();
+            public Dictionary<int, TileTextureDetails> TileTextureDetails { get; set; } = new();
         }
 
         private struct TextureDetails
