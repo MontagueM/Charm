@@ -23,6 +23,7 @@ public class CommonSettings
     public bool AnimatedBackground { get; set; } = true;
     public bool MotionEffects { get; set; } = true;
     public bool HolofoilShader { get; set; } = true;
+    public bool SaveShaderHLSL { get; set; } = false;
 
     public bool AcceptedAgreementV3 { get; set; } = false;
 }
@@ -373,6 +374,20 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
     public bool GetHolofoilShader()
     {
         return _settings.Common.HolofoilShader;
+    }
+
+    public void SetSaveShaderHLSL(bool val)
+    {
+        if (_settings.Source2.Source2ShaderExportsEnabled)
+            val = true;
+
+        _settings.Common.SaveShaderHLSL = val;
+        Save();
+    }
+
+    public bool GetSaveShaderHLSL()
+    {
+        return _settings.Common.SaveShaderHLSL;
     }
 
     private string _configFilePath = "./config.json";

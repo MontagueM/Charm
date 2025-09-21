@@ -81,6 +81,7 @@ public partial class PortingConfigView : UserControl
         if (_config.GetS2ShaderExportEnabled())
         {
             _config.SetS2TexPow2Enabled(true);
+            _config.SetSaveShaderHLSL(true);
         }
         PopulateS2ConfigPanel();
     }

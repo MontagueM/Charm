@@ -42,9 +42,14 @@ namespace Tiger.Schema.Shaders
 
         private static ConfigSubsystem _config = TigerInstance.GetSubsystem<ConfigSubsystem>();
 
-        public void SavePixelShader(string saveDirectory, bool isTerrain = false)
+        public void SavePixelShader(string saveDirectory, bool fromMaterialViewer = false)
         {
             if (Strategy.IsD1())
+                return;
+
+            // Dont export the hlsl if none of the shader related settings are enabled
+            // but force export if we're saving from the material viewer
+            if (!_config.GetSaveShaderHLSL() && !_config.GetS2ShaderExportEnabled() && !fromMaterialViewer)
                 return;
 
             if (Pixel.Shader != null && Pixel.Shader.Hash.IsValid())
@@ -73,8 +78,7 @@ namespace Tiger.Schema.Shaders
 
                         FileHash hash = (Pixel.GetBytecode().CanInlineBytecode() || RenderStage == TfxRenderStage.WaterReflection) ? Hash : Pixel.Shader.Hash;
                         File.WriteAllText($"{saveDirectory}/Shaders/Source2/PS_{hash}.shader", vfx);
-                        if (!isTerrain)
-                            Source2Handler.SaveVMAT(saveDirectory, Hash, this);
+                        Source2Handler.SaveVMAT(saveDirectory, Hash, this);
                     }
                 }
                 catch (IOException e)  // threading error
@@ -85,9 +89,14 @@ namespace Tiger.Schema.Shaders
         }
 
         // TODO: do this properly
-        public void SaveVertexShader(string saveDirectory)
+        public void SaveVertexShader(string saveDirectory, bool fromMaterialViewer = false)
         {
             if (Strategy.IsD1())
+                return;
+
+            // Dont export the hlsl if none of the shader related settings are enabled
+            // but force export if we're saving from the material viewer
+            if (!_config.GetSaveShaderHLSL() && !_config.GetS2ShaderExportEnabled() && !fromMaterialViewer)
                 return;
 
             if (Vertex.Shader != null && Vertex.Shader.Hash.IsValid())
@@ -105,7 +114,7 @@ namespace Tiger.Schema.Shaders
             }
         }
 
-        public void Export(string saveDirectory)
+        public void Export(string saveDirectory, bool fromMaterialViewer = false)
         {
             string texturePath = $"{saveDirectory}/Textures";
             string materialPath = $"{saveDirectory}/Materials";
@@ -122,7 +131,7 @@ namespace Tiger.Schema.Shaders
 
             if (Pixel.Shader != null)
             {
-                SavePixelShader($"{saveDirectory}");
+                SavePixelShader($"{saveDirectory}", fromMaterialViewer);
 
                 ShaderDetails psCB = new();
                 psCB.Hash = Pixel.Shader.Hash;
@@ -190,7 +199,7 @@ namespace Tiger.Schema.Shaders
 
             if (Vertex.Shader != null)
             {
-                SaveVertexShader($"{saveDirectory}/Shaders/");
+                SaveVertexShader($"{saveDirectory}/Shaders/", fromMaterialViewer);
 
                 ShaderDetails vsCB = new();
                 vsCB.Hash = Vertex.Shader.Hash;

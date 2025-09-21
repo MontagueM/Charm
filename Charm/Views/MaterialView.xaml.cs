@@ -34,7 +34,16 @@ public partial class MaterialView : UserControl
         {
             Dispatcher.Invoke(() =>
             {
-                Material.Export($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.Hash}");
+                Material.Export($"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.Hash}", true);
+
+                NotificationBanner notify = new()
+                {
+                    Icon = "☑️",
+                    Title = "Export Complete",
+                    Description = $"Exported Material {Material.Hash} to \"{ConfigSubsystem.Get().GetExportSavePath()}/Materials/{Material.Hash}/\"",
+                    Style = NotificationBanner.PopupStyle.Information
+                };
+                notify.Show();
             });
         });
     }

@@ -35,6 +35,9 @@ public partial class GeneralConfigView : UserControl
 
     private void PopulateConfigPanel()
     {
+        bool bVal;
+
+        #region General
         // ---- General settings panel ----
         GeneralConfigPanel.Children.Clear();
 
@@ -94,7 +97,23 @@ public partial class GeneralConfigView : UserControl
         ctf.SettingsCombobox.SelectionChanged += OutputTextureFormat_OnSelectionChanged;
         ctf.ChangeButton.Visibility = Visibility.Hidden;
         GeneralConfigPanel.Children.Add(ctf);
+        #endregion
 
+        #region Materials
+        // ---- Material settings panel ----
+        MaterialsConfigPanel.Children.Clear();
+
+        // Whether to export shader hlsl files, always true if S&Box shaders are enabled
+        ConfigSettingToggleControl hlsl = new();
+        hlsl.SettingName = "Export Shader HLSL";
+        hlsl.SettingLabel = "Save shader hlsl code, can slow down larger exports such as maps.";
+        bVal = _config.GetSaveShaderHLSL();
+        hlsl.SettingValue = bVal.ToString();
+        hlsl.ChangeButton.Click += SaveShaderHLSL_OnClick;
+        MaterialsConfigPanel.Children.Add(hlsl);
+        #endregion
+
+        #region Misc
         // ---- Misc settings panel ----
         MiscConfigPanel.Children.Clear();
 
@@ -103,7 +122,7 @@ public partial class GeneralConfigView : UserControl
         ConfigSettingToggleControl cfe = new();
         cfe.SettingName = "Unified Map Asset Exports";
         cfe.SettingLabel = "Export all map assets to a single \"Maps/Assets/\" folder.";
-        bool bVal = _config.GetSingleFolderMapAssetsEnabled();
+        bVal = _config.GetSingleFolderMapAssetsEnabled();
         cfe.SettingValue = bVal.ToString();
         cfe.ChangeButton.Click += SingleFolderMapAssetsEnabled_OnClick;
         MiscConfigPanel.Children.Add(cfe);
@@ -132,6 +151,7 @@ public partial class GeneralConfigView : UserControl
         disHL.SettingValue = bVal.ToString();
         disHL.ChangeButton.Click += HolofoilShader_OnClick;
         MiscConfigPanel.Children.Add(disHL);
+        #endregion
     }
 
     private List<ComboBoxItem> MakeEnumComboBoxItems<T>() where T : Enum
@@ -322,6 +342,12 @@ public partial class GeneralConfigView : UserControl
     private void HolofoilShader_OnClick(object sender, RoutedEventArgs e)
     {
         _config.SetHolofoilShader(!_config.GetHolofoilShader());
+        PopulateConfigPanel();
+    }
+
+    private void SaveShaderHLSL_OnClick(object sender, RoutedEventArgs e)
+    {
+        _config.SetSaveShaderHLSL(!_config.GetSaveShaderHLSL());
         PopulateConfigPanel();
     }
 }
