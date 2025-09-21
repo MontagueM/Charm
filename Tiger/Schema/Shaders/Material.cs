@@ -160,7 +160,11 @@ namespace Tiger.Schema.Shaders
                         Format = texture.Texture.TagData.GetFormat().ToString()
                     });
 
-                    texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
+                    string savePath = $"{saveDirectory}/Textures/{texture.Texture.Hash}";
+                    if (File.Exists($"{savePath}.png"))
+                        continue;
+
+                    texture.Texture.SavetoFile(savePath);
                 }
 
                 psCB.TileTextureDetails = new();
@@ -227,6 +231,10 @@ namespace Tiger.Schema.Shaders
                         Dimension = texture.Texture.GetDimension().GetEnumDescription(),
                         Format = texture.Texture.TagData.GetFormat().ToString()
                     });
+
+                    string savePath = $"{saveDirectory}/Textures/{texture.Texture.Hash}";
+                    if (File.Exists($"{savePath}.png"))
+                        continue;
 
                     texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
                 }
