@@ -454,16 +454,16 @@ public static class RenderStates
 
         public override string ToString()
         {
-            return $"\tAlphaToCoverageEnable: {AlphaToCoverageEnable}\n" +
-                $"\tIndependentBlendEnable: {IndependentBlendEnable}\n" +
-                $"\tIsBlendEnabled: {BlendDesc.IsBlendEnabled}\n" +
-                $"\tSourceBlend: {BlendDesc.SourceBlend}\n" +
-                $"\tDestinationBlend: {BlendDesc.DestinationBlend}\n" +
-                $"\tBlendOperation: {BlendDesc.BlendOperation}\n" +
-                $"\tSourceAlphaBlend: {BlendDesc.SourceAlphaBlend}\n" +
-                $"\tDestinationAlphaBlend: {BlendDesc.DestinationAlphaBlend}\n" +
-                $"\tAlphaBlendOperation: {BlendDesc.AlphaBlendOperation}\n" +
-                $"\tRenderTargetWriteMask: {BlendDesc.RenderTargetWriteMask}\n";
+            return $"AlphaToCoverageEnable: {AlphaToCoverageEnable}\n" +
+                $"IndependentBlendEnable: {IndependentBlendEnable}\n" +
+                $"IsBlendEnabled: {BlendDesc.IsBlendEnabled}\n" +
+                $"SourceBlend: {BlendDesc.SourceBlend}\n" +
+                $"DestinationBlend: {BlendDesc.DestinationBlend}\n" +
+                $"BlendOperation: {BlendDesc.BlendOperation}\n" +
+                $"SourceAlphaBlend: {BlendDesc.SourceAlphaBlend}\n" +
+                $"DestinationAlphaBlend: {BlendDesc.DestinationAlphaBlend}\n" +
+                $"AlphaBlendOperation: {BlendDesc.AlphaBlendOperation}\n" +
+                $"RenderTargetWriteMask: {BlendDesc.RenderTargetWriteMask}";
         }
     }
 
@@ -477,11 +477,11 @@ public static class RenderStates
 
         public override string ToString()
         {
-            return $"\tFillMode: {FillMode}\n" +
-                $"\tCullMode: {CullMode}\n" +
-                $"\tFrontCounterClockwise: {FrontCounterClockwise}\n" +
-                $"\tDepthClipEnable: {DepthClipEnable}\n" +
-                $"\tScissorEnable: {ScissorEnable}\n";
+            return $"FillMode: {FillMode}\n" +
+                $"CullMode: {CullMode}\n" +
+                $"FrontCounterClockwise: {FrontCounterClockwise}\n" +
+                $"DepthClipEnable: {DepthClipEnable}\n" +
+                $"ScissorEnable: {ScissorEnable}";
         }
     }
 
@@ -493,9 +493,9 @@ public static class RenderStates
 
         public override string ToString()
         {
-            return $"\tDepthBias: {DepthBias}\n" +
-                $"\tSlopeScaledDepthBias: {SlopeScaledDepthBias}\n" +
-                $"\tDepthBiasClamp: {DepthBiasClamp}\n";
+            return $"DepthBias: {DepthBias}\n" +
+                $"SlopeScaledDepthBias: {SlopeScaledDepthBias}\n" +
+                $"DepthBiasClamp: {DepthBiasClamp}";
         }
     }
 
@@ -509,11 +509,11 @@ public static class RenderStates
 
         public override string ToString()
         {
-            return $"\tStencilEnable: {StencilEnable}\n" +
-                $"\tStencilReadMask: {StencilReadMask}\n" +
-                $"\tStencilWriteMask: {StencilWriteMask}\n" +
-                $"\tFrontFace:\n{FrontFace}\n" +
-                $"\tBackFace:\n{BackFace}\n";
+            return $"StencilEnable: {StencilEnable}\n" +
+                $"StencilReadMask: {StencilReadMask}\n" +
+                $"StencilWriteMask: {StencilWriteMask}\n" +
+                $"FrontFace:\n{FrontFace}\n" +
+                $"BackFace:\n{BackFace}";
         }
     }
 
@@ -526,10 +526,10 @@ public static class RenderStates
 
         public override string ToString()
         {
-            return $"\tFunc: {Func}\n" +
-                $"\tPassOp: {PassOp}\n" +
-                $"\tFailOp: {FailOp}\n" +
-                $"\tDepthFailOp: {DepthFailOp}\n";
+            return $"Func: {Func}\n" +
+                $"PassOp: {PassOp}\n" +
+                $"FailOp: {FailOp}\n" +
+                $"DepthFailOp: {DepthFailOp}";
         }
     }
 
@@ -544,12 +544,12 @@ public static class RenderStates
 
         public override string ToString()
         {
-            return $"\tEnable: {Enable}\n" +
-                $"\tWriteMask: {WriteMask}\n" +
-                $"\tFunc: {Func}\n" +
-                $"\tEnableAlt: {EnableAlt}\n" +
-                $"\tWriteMaskAlt: {WriteMaskAlt}\n" +
-                $"\tFuncAlt: {FuncAlt}\n";
+            return $"Enable: {Enable}\n" +
+                $"WriteMask: {WriteMask}\n" +
+                $"Func: {Func}\n" +
+                $"EnableAlt: {EnableAlt}\n" +
+                $"WriteMaskAlt: {WriteMaskAlt}\n" +
+                $"FuncAlt: {FuncAlt}";
         }
     }
 
@@ -560,8 +560,8 @@ public static class RenderStates
 
         public override string ToString()
         {
-            return $"\tDepth:\n{Depth}\n" +
-                   $"\tStencil:\n{Stencil}\n";
+            return $"Depth:\n{Depth}\n" +
+                   $"Stencil:\n{Stencil}";
         }
     }
 

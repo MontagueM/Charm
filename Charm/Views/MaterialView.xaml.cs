@@ -332,10 +332,6 @@ public partial class MaterialView : UserControl
         var s = sender as Button;
         var dc = s.DataContext as CBufferDataDetail;
 
-        //float r = dc.Color.R / 255;
-        //float g = dc.Color.R / 255;
-        //float b = dc.Color.R / 255;
-
         try
         {
             Clipboard.SetText($"[{dc.Vector.X}, {dc.Vector.Y}, {dc.Vector.Z}, 1.0]");

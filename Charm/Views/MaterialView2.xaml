@@ -1,0 +1,924 @@
+﻿<UserControl
+    x:Class="Charm.MaterialView2"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Charm"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="992"
+    d:DesignWidth="1920"
+    Loaded="UserControl_Loaded"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ControlTemplate x:Key="TextureViewTemplate">
+            <Grid Margin="5,0,0,10" Background="{StaticResource BackgroundColour14a}">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Grid.RowSpan="6"
+                    Grid.ColumnSpan="2"
+                    Panel.ZIndex="0"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="2" />
+
+                <Button
+                    Grid.RowSpan="6"
+                    Margin="0,0,0,0"
+                    Panel.ZIndex="1"
+                    Click="Texture_OnClick"
+                    Style="{StaticResource D2StyleButton}">
+                    <Image
+                        Width="128"
+                        Height="128"
+                        Source="{Binding Texture}" />
+                </Button>
+
+                <StackPanel
+                    Grid.Column="1"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Orientation="Vertical">
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="5"
+                        HorizontalAlignment="Left"
+                        FontFamily="{DynamicResource Haas Grot Text 65 Medium Keys}"
+                        FontSize="28"
+                        Foreground="White"
+                        Text="{Binding Hash}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Left"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Index}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Left"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Type}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Left"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Dimension}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Left"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="16"
+                        Foreground="{StaticResource ForegroundColour90}"
+                        Text="{Binding Format}" />
+                </StackPanel>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="5"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                    FontSize="14"
+                    Foreground="{StaticResource ForegroundColour75}"
+                    Text="{Binding Dimensions}" />
+
+
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="CBufferDataViewTemplate">
+            <Grid Margin="0,1,0,1" Background="#1D1D23">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*" />
+                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="5*" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Grid.RowSpan="3"
+                    Grid.ColumnSpan="3"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1" />
+
+
+                <TextBlock
+                    Grid.Column="0"
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                    FontSize="20"
+                    Foreground="{StaticResource ForegroundColour65}"
+                    Text="{Binding Index}" />
+
+                <Border
+                    Grid.Column="0"
+                    Panel.ZIndex="1"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="0,0,1,0" />
+
+                <TextBox
+                    Grid.Column="1"
+                    Margin="5,0,5,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                    FontSize="18"
+                    IsReadOnly="True"
+                    Text="{Binding StringVector}" />
+
+                <Button
+                    Grid.Column="3"
+                    Click="CBufferColor_OnClick"
+                    Cursor="Hand">
+                    <Rectangle>
+                        <Rectangle.Fill>
+                            <SolidColorBrush Color="{Binding Color}" />
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </Button>
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="SamplerDataViewTemplate">
+            <UniformGrid
+                Grid.Row="1"
+                HorizontalAlignment="Stretch"
+                Background="Transparent"
+                Columns="5"
+                Rows="0">
+                <Border
+                    Margin="0,0,0,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="2"
+                        HorizontalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="18"
+                        Text="{Binding Slot}" />
+                </Border>
+
+                <Border
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Center"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="2"
+                        HorizontalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="18"
+                        Text="{Binding Filter}" />
+                </Border>
+
+                <Border
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Center"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="2"
+                        HorizontalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="18"
+                        Text="{Binding AddressU}" />
+                </Border>
+
+                <Border
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Center"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="2"
+                        HorizontalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="18"
+                        Text="{Binding AddressV}" />
+                </Border>
+
+                <Border
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Center"
+                    BorderBrush="{StaticResource BackgroundColour30}"
+                    BorderThickness="1">
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="2"
+                        HorizontalAlignment="Center"
+                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                        FontSize="18"
+                        Text="{Binding ComparisonFunc}" />
+                </Border>
+
+            </UniformGrid>
+        </ControlTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            From="0"
+                            To="1"
+                            Duration="0:0:0.25" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="95*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel
+            Grid.Row="0"
+            Grid.RowSpan="1"
+            Grid.ColumnSpan="3"
+            Margin="50,0,50,0"
+            Orientation="Horizontal">
+
+            <ItemsControl x:Name="ShaderStagesList" ItemsSource="{Binding ShaderStages}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton
+                            Margin="5"
+                            Checked="ShaderStack_OnClick"
+                            GroupName="ShaderStage"
+                            Style="{StaticResource D2StyleRadioButton}">
+                            <TextBlock
+                                d:FontFamily="Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                FontSize="16"
+                                Text="{Binding Key}" />
+                        </RadioButton>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border
+                Margin="15,5,15,5"
+                BorderBrush="{StaticResource ForegroundColour80}"
+                BorderThickness="1,0,1,0" />
+
+            <Button
+                Margin="5"
+                Click="ExportMaterial_OnClick"
+                Style="{StaticResource D2StyleButton}">
+                <TextBlock
+                    d:FontFamily="Haas Grot Text 55 Roman"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="16"
+                    Text="Export Material" />
+            </Button>
+
+            <Button
+                Margin="5"
+                Click="OpenMaterial_OnClick"
+                Style="{StaticResource D2StyleButton}">
+                <TextBlock
+                    d:FontFamily="Haas Grot Text 55 Roman"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                    FontSize="16"
+                    Text="Open In HxD" />
+            </Button>
+        </StackPanel>
+
+
+
+        <Grid Grid.Row="1" Margin="50,0,50,50">
+
+            <TabControl Background="Transparent" FontFamily="{DynamicResource Haas Grot Text 55 Roman}">
+                <TabControl.Template>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <DockPanel>
+                                <TabPanel
+                                    x:Name="HeaderPanel"
+                                    Margin="3,0,0,0"
+                                    Panel.ZIndex="1"
+                                    Background="Transparent"
+                                    DockPanel.Dock="Top"
+                                    IsItemsHost="True" />
+
+                                <ContentPresenter
+                                    x:Name="PART_SelectedContentHost"
+                                    Margin="0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    ContentSource="SelectedContent" />
+                            </DockPanel>
+                        </Grid>
+                    </ControlTemplate>
+                </TabControl.Template>
+
+                <TabItem Header="Main" IsSelected="True">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="33*" />
+                            <ColumnDefinition Width="33*" />
+                            <ColumnDefinition Width="33*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Margin="0,0,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                Grid.Row="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                d:FontFamily=" Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="18"
+                                Foreground="{StaticResource ForegroundColour90}"
+                                Text="HLSL"
+                                TextWrapping="Wrap" />
+
+                            <avalonEdit:TextEditor
+                                xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+                                x:Name="HLSLText"
+                                Grid.Row="1"
+                                HorizontalAlignment="Stretch"
+                                Background="#1D1D23"
+                                FontFamily="Consolas"
+                                FontSize="15"
+                                Foreground="White"
+                                HorizontalScrollBarVisibility="Auto"
+                                IsReadOnly="True"
+                                LineNumbersForeground="Gray"
+                                ShowLineNumbers="True"
+                                SyntaxHighlighting="HLSL"
+                                VerticalScrollBarVisibility="Auto"
+                                WordWrap="False" />
+
+                        </Grid>
+
+                        <Grid Grid.Column="1" Margin="15,0,15,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="3*" />
+                                <RowDefinition Height="50*" />
+                                <RowDefinition Height="3*" />
+                                <RowDefinition Height="50*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                Grid.Row="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                d:FontFamily=" Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="18"
+                                Foreground="{StaticResource ForegroundColour90}"
+                                Text="CBuffer"
+                                TextWrapping="Wrap" />
+
+                            <ListView
+                                Grid.Row="1"
+                                Margin="0,0,0,10"
+                                VerticalAlignment="Stretch"
+                                Background="Transparent"
+                                BorderBrush="{StaticResource BackgroundColour50}"
+                                BorderThickness="0,0,0,2"
+                                ItemsSource="{Binding CurrentStage.CB0.Data}">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                                        <Setter Property="Template" Value="{StaticResource CBufferDataViewTemplate}" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                            </ListView>
+
+
+                            <TextBlock
+                                Grid.Row="2"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                d:FontFamily=" Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="18"
+                                Foreground="{StaticResource ForegroundColour90}"
+                                Text="Bytecode Constants"
+                                TextWrapping="Wrap" />
+
+                            <ListView
+                                Grid.Row="3"
+                                VerticalAlignment="Stretch"
+                                Background="Transparent"
+                                BorderBrush="{StaticResource BackgroundColour50}"
+                                BorderThickness="0,0,0,0"
+                                ItemsSource="{Binding CurrentStage.Constants.Data}">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                                        <Setter Property="Template" Value="{StaticResource CBufferDataViewTemplate}" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                            </ListView>
+
+                        </Grid>
+
+                        <Grid Grid.Row="1" Grid.Column="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                Grid.Row="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                d:FontFamily=" Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="18"
+                                Foreground="{StaticResource ForegroundColour90}"
+                                Text="Textures"
+                                TextWrapping="Wrap" />
+
+                            <ListView
+                                Grid.Row="1"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                ItemsSource="{Binding CurrentStage.Textures}">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                                        <Setter Property="Template" Value="{StaticResource TextureViewTemplate}" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                            </ListView>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Misc">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="75*" />
+                            <RowDefinition Height="25*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="25*" />
+                                <ColumnDefinition Width="25*" />
+                                <ColumnDefinition Width="25*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="50*" />
+                                    <RowDefinition Height="50*" />
+                                </Grid.RowDefinitions>
+
+                                <Grid
+                                    Name="UsedScopes"
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Margin="0,0,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        d:FontFamily=" Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Foreground="{StaticResource ForegroundColour90}"
+                                        Text="Used Scopes"
+                                        TextWrapping="Wrap" />
+
+                                    <ListView
+                                        Grid.Row="1"
+                                        VerticalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource BackgroundColour50}"
+                                        BorderThickness="0,0,0,2"
+                                        ItemsSource="{Binding CurrentStage.UsedScopes}">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    Margin="5,0,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                                    FontSize="24"
+                                                    Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </Grid>
+
+                                <Grid
+                                    Name="UsedExterns"
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Margin="0,15,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        d:FontFamily=" Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Foreground="{StaticResource ForegroundColour90}"
+                                        Text="Used Externs"
+                                        TextWrapping="Wrap" />
+
+                                    <ListView
+                                        Grid.Row="1"
+                                        VerticalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource BackgroundColour50}"
+                                        BorderThickness="0,0,0,0"
+                                        ItemsSource="{Binding CurrentStage.UsedExterns}">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    Margin="5,0,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                                    FontSize="24"
+                                                    Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </Grid>
+                            </Grid>
+
+                            <Grid
+                                Name="States"
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Margin="15,0,15,0"
+                                Background="Transparent">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    d:FontFamily=" Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="18"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="Render States"
+                                    TextWrapping="Wrap" />
+
+                                <Grid
+                                    Name="BlendState"
+                                    Grid.Row="1"
+                                    Visibility="{Binding CurrentStage.States.Blend, Converter={StaticResource StringNullOrEmptyVisibilityConverter}}">
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        d:FontFamily=" Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Foreground="{StaticResource ForegroundColour90}"
+                                        Text="Blend State:"
+                                        TextWrapping="Wrap" />
+
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center"
+                                        d:FontFamily=" Haas Grot Text 55 Roman"
+                                        Background="#4B000000"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Foreground="{StaticResource ForegroundColour80}"
+                                        Text="{Binding CurrentStage.States.Blend}"
+                                        TextWrapping="Wrap" />
+
+                                    <Border
+                                        Grid.Row="3"
+                                        Margin="0,15,0,15"
+                                        BorderBrush="{StaticResource ForegroundColour50}"
+                                        BorderThickness="0,0,0,1" />
+                                </Grid>
+
+
+                                <Grid
+                                    Name="RasterizeState"
+                                    Grid.Row="2"
+                                    Visibility="{Binding CurrentStage.States.Rasterizer, Converter={StaticResource StringNullOrEmptyVisibilityConverter}}">
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        d:FontFamily=" Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Foreground="{StaticResource ForegroundColour90}"
+                                        Text="Rasterizer State:"
+                                        TextWrapping="Wrap" />
+
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        d:FontFamily=" Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Foreground="{StaticResource ForegroundColour70}"
+                                        Text="{Binding CurrentStage.States.Rasterizer}"
+                                        TextWrapping="Wrap" />
+
+                                    <Border
+                                        Grid.Row="3"
+                                        Margin="0,15,0,15"
+                                        BorderBrush="{StaticResource ForegroundColour50}"
+                                        BorderThickness="0,0,0,1" />
+                                </Grid>
+
+                                <Grid
+                                    Name="DepthState"
+                                    Grid.Row="3"
+                                    Visibility="{Binding CurrentStage.States.DepthBias, Converter={StaticResource StringNullOrEmptyVisibilityConverter}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        d:FontFamily=" Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Foreground="{StaticResource ForegroundColour90}"
+                                        Text="Depth State:"
+                                        TextWrapping="Wrap" />
+
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        d:FontFamily=" Haas Grot Text 55 Roman"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Foreground="{StaticResource ForegroundColour70}"
+                                        Text="{Binding CurrentStage.States.DepthBias}"
+                                        TextWrapping="Wrap" />
+
+                                    <Border
+                                        Grid.Row="3"
+                                        Margin="0,15,0,15"
+                                        BorderBrush="{StaticResource ForegroundColour50}"
+                                        BorderThickness="0,0,0,1" />
+                                </Grid>
+                            </Grid>
+
+
+                            <Grid
+                                Name="BytecodeOps"
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                Margin="0,0,0,0"
+                                Background="Transparent">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    d:FontFamily=" Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="18"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="Bytecode Operations"
+                                    TextWrapping="Wrap" />
+
+
+                                <ScrollViewer
+                                    Grid.Row="1"
+                                    Margin="5,0,5,0"
+                                    VerticalAlignment="Stretch"
+                                    VerticalContentAlignment="Center"
+                                    HorizontalScrollBarVisibility="Auto">
+                                    <TextBox
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        FontFamily="Consolas"
+                                        FontSize="18"
+                                        IsReadOnly="True"
+                                        Text="{Binding CurrentStage.PrintedOps}"
+                                        TextWrapping="Wrap" />
+                                </ScrollViewer>
+                            </Grid>
+                        </Grid>
+
+                        <Grid
+                            Name="Samplers"
+                            Grid.Row="1"
+                            Background="Transparent">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                Grid.Row="0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                d:FontFamily=" Haas Grot Text 55 Roman"
+                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                FontSize="18"
+                                Foreground="{StaticResource ForegroundColour90}"
+                                Text="Texture Samplers"
+                                TextWrapping="Wrap" />
+
+                            <UniformGrid
+                                Grid.Row="1"
+                                Margin="1"
+                                HorizontalAlignment="Stretch"
+                                Background="Transparent"
+                                Columns="5"
+                                Rows="0">
+                                <Border
+                                    Margin="0,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="{StaticResource BackgroundColour30}"
+                                    BorderThickness="1">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Margin="2"
+                                        HorizontalAlignment="Center"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Text="Sampler Slot" />
+                                </Border>
+
+                                <Border
+                                    Margin="0,0,0,0"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="{StaticResource BackgroundColour30}"
+                                    BorderThickness="1">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Margin="2"
+                                        HorizontalAlignment="Center"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Text="Filter" />
+                                </Border>
+
+
+                                <Border
+                                    Margin="0,0,0,0"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="{StaticResource BackgroundColour30}"
+                                    BorderThickness="1">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Margin="2"
+                                        HorizontalAlignment="Center"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Text="AddressU" />
+                                </Border>
+
+                                <Border
+                                    Margin="0,0,0,0"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="{StaticResource BackgroundColour30}"
+                                    BorderThickness="1">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Margin="2"
+                                        HorizontalAlignment="Center"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Text="AddressV" />
+                                </Border>
+
+                                <Border
+                                    Margin="0,0,0,0"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="{StaticResource BackgroundColour30}"
+                                    BorderThickness="1">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Margin="2"
+                                        HorizontalAlignment="Center"
+                                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                        FontSize="18"
+                                        Text="Comparison Function" />
+                                </Border>
+
+                            </UniformGrid>
+
+                            <ListView
+                                Grid.Row="2"
+                                Margin="0"
+                                d:ItemsSource="{d:SampleData ItemCount=3}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                ItemsSource="{Binding CurrentStage.Samplers}">
+
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                                        <Setter Property="Template" Value="{StaticResource SamplerDataViewTemplate}" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+
+                                </ListView.ItemsPanel>
+                            </ListView>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+
+        </Grid>
+
+    </Grid>
+</UserControl>

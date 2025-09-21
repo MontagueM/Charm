@@ -1,4 +1,5 @@
-﻿using Arithmic;
+﻿using System.Text;
+using Arithmic;
 using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Shaders;
@@ -8,6 +9,8 @@ public class TfxBytecodeInterpreter
     public List<TfxData> Opcodes { get; set; }
     public List<string> Stack { get; set; }
     public List<string> Temp { get; set; }
+
+    public StringBuilder PrintedOps = new();
 
     public TfxBytecodeInterpreter(List<TfxData> opcodes)
     {
@@ -56,12 +59,14 @@ public class TfxBytecodeInterpreter
         Dictionary<int, string> hlsl = new();
         try
         {
-            if (print)
-                Console.WriteLine($"--------Evaluating Bytecode:");
             foreach ((int _ip, TfxData op) in Opcodes.Select((value, index) => (index, value)))
             {
                 if (print)
-                    Console.WriteLine($"0x{op.op:X} {op.op} : {TfxBytecodeOp.TfxToString(op, constants, material)}");
+                {
+                    var opString = $"0x{op.op:X} {op.op} : {TfxBytecodeOp.TfxToString(op, constants, material)}";
+                    PrintedOps.AppendLine(opString);
+                }
+
                 switch (op.op)
                 {
                     case TfxBytecode.Add:
@@ -435,19 +440,18 @@ public class TfxBytecodeInterpreter
                         break;
 
                     case TfxBytecode.PopOutput:
-                        if (print)
-                            Console.WriteLine($"----Output Stack Count: {Stack.Count}\n");
-
                         if (Stack.Count == 0) // Shouldnt happen
                             hlsl.TryAdd(((PopOutputData)op.data).slot, "float4(0, 0, 0, 0)");
                         else
                             hlsl.TryAdd(((PopOutputData)op.data).slot, StackTop());
 
                         Stack.Clear(); // Does this matter?
+                        if (print)
+                            PrintedOps.AppendLine($"----Output Stack Count: {Stack.Count}\n");
                         break;
                     default:
                         if (print)
-                            Console.WriteLine($"Not Implemented: {op.op}");
+                            PrintedOps.AppendLine($"Not Implemented: {op.op}");
                         break;
 
                 }
@@ -457,6 +461,14 @@ public class TfxBytecodeInterpreter
         {
             Log.Error(e.Message);
         }
+
+#if DEBUG
+        if (print)
+        {
+            Console.WriteLine($"--------Evaluating Bytecode:");
+            Console.WriteLine(PrintedOps.ToString());
+        }
+#endif
 
         return hlsl;
     }

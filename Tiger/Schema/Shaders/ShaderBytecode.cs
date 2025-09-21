@@ -93,11 +93,14 @@ public class ShaderBytecode : TigerReferenceFile<SShaderBytecode>
     private static object _lock = new();
     public string Decompile(string name, string savePath = "hlsl_temp")
     {
+        if (Strategy.IsD1())
+            return "";
+
         if (_decompiled is not null)
             return _decompiled;
 
         byte[] shaderBytecode = GetBytecode();
-        if (Strategy.IsD1() || shaderBytecode.Length == 0)
+        if (shaderBytecode.Length == 0)
             return "";
 
         string binPath = $"{savePath}/{name}.bin";

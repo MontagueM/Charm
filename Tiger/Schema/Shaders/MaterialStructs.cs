@@ -112,12 +112,9 @@ public struct SMaterialShader
         {
             data = GetVec4Container();
         }
-        else
+        else if (CBuffers.Count != 0)
         {
-            foreach (Vec4 vec in CBuffers)
-            {
-                data.Add(vec.Vec);
-            }
+            data = CBuffers.Select(vec => vec.Vec).ToList();
         }
         return data;
     }

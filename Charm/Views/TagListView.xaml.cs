@@ -1441,7 +1441,7 @@ public partial class TagListView : UserControl
 
     private void LoadMaterial(FileHash fileHash)
     {
-        var materialView = new MaterialView();
+        var materialView = new MaterialView2();
         materialView.Load(fileHash);
         _mainWindow.MakeNewTab(fileHash, materialView);
         _mainWindow.SetNewestTabSelected();

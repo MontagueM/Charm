@@ -368,7 +368,10 @@ public static class TfxBytecodeOp
 
             case PushExternInputFloatData:
                 byte pFloat = ((PushExternInputFloatData)tfxData.data).element;
-                output = $"extern {((PushExternInputFloatData)tfxData.data).extern_}, element {pFloat} (0x{(pFloat * 4):X})";
+                var _extern = ((PushExternInputFloatData)tfxData.data).extern_;
+                output = $"extern {_extern}, element {pFloat} (0x{(pFloat * 4):X})";
+                if (_extern == TfxExtern.Frame && pFloat == 0)
+                    output += " (Time)";
                 break;
             case PushExternInputVec4Data:
                 byte pVec = ((PushExternInputVec4Data)tfxData.data).element;

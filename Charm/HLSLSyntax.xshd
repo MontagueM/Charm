@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SyntaxDefinition name="HLSL" extensions=".hlsl;.cg" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+	<!-- Colors -->
+	<Color name="DEFAULT" foreground="#CCCCCC" />
+	<Color name="COMMENTS" foreground="#57A64A" />       <!-- greenish -->
+	<Color name="LINE COMMENTS" foreground="#57A64A" />
+	<Color name="NUMBERS" foreground="#B5CEA8" />        <!-- light green -->
+	<Color name="KEYWORDS1" foreground="#569CD6" fontWeight="bold" />   <!-- bright blue -->
+	<Color name="KEYWORDS2" foreground="#4EC9B0" />      <!-- teal/cyan -->
+	<Color name="KEYWORDS3" foreground="#4EC9B0" />      <!-- teal/cyan -->
+	<Color name="KEYWORDS4" foreground="#569CD6" fontWeight="bold" />   <!-- bright blue -->
+	<Color name="KEYWORDS5" foreground="#C586C0" fontWeight="bold" />   <!-- pink/purple -->
+	<Color name="KEYWORDS6" foreground="#C586C0" fontWeight="bold" />   <!-- pink/purple -->
+	<Color name="KEYWORDS7" foreground="#DCDCAA" fontWeight="bold" />   <!-- yellowish -->
+	<Color name="KEYWORDS8" foreground="#DCDCAA" fontWeight="bold" />   <!-- yellowish -->
+	<Color name="OPERATORS" foreground="#759EFF" fontWeight="bold" />   <!-- light gray -->
+	<Color name="STRING" foreground="#CE9178" fontWeight="bold" />      <!-- orange -->
+
+  <RuleSet ignoreCase="false">
+    <!-- Comments -->
+    <Span color="COMMENTS" begin="//" end="\n" />
+    <Span color="COMMENTS" begin="/\*" end="\*/" />
+    <!-- Numbers -->
+    <Rule color="NUMBERS">\b\d+(\.\d+)?([fF])?\b</Rule>
+    <Rule color="NUMBERS">0x[0-9A-Fa-f]+\b</Rule>
+    <!-- Strings -->
+    <Span color="STRING" begin="&quot;" end="&quot;" />
+	<!-- Semantics -->
+	<Rule color="KEYWORDS5">\b(TEXCOORD|SV_TARGET|POSITION|NORMAL|COLOR|SV_POSITION|SV_VERTEXID|SV_isFrontFace|TANGENT|SV_InstanceID)\d*\b</Rule>
+    <!-- Operators -->
+    <Keywords color="OPERATORS">
+      <Word>(</Word>
+      <Word>)</Word>
+      <Word>:</Word>
+      <Word>;</Word>
+      <Word>{</Word>
+      <Word>}</Word>
+      <Word>+</Word>
+      <Word>-</Word>
+      <Word>=</Word>
+      <Word>,</Word>
+      <Word>&lt;</Word>
+      <Word>&gt;</Word>
+      <Word>&lt;=</Word>
+      <Word>&gt;=</Word>
+      <Word>==</Word>
+      <Word>[</Word>
+      <Word>]</Word>
+      <Word>/</Word>
+      <Word>*</Word>
+      <Word>*=</Word>
+      <Word>/=</Word>
+      <Word>+=</Word>
+      <Word>-=</Word>
+      <Word>%=</Word>
+      <Word>|</Word>
+      <Word>&amp;</Word>
+      <Word>||</Word>
+      <Word>&amp;&amp;</Word>
+      <Word>%</Word>
+      <Word>!=</Word>
+      <Word>!</Word>
+      <Word>++</Word>
+      <Word>--</Word>
+      <Word>.</Word>
+      <Word>~</Word>
+      <Word>&lt;&lt;</Word>
+      <Word>&gt;&gt;</Word>
+      <Word>^</Word>
+      <Word>&amp;=</Word>
+      <Word>|=</Word>
+      <Word>^=</Word>
+    </Keywords>
+    <!-- Keywords1 -->
+    <Keywords color="KEYWORDS1">
+      <Word>break</Word>
+      <Word>continue</Word>
+      <Word>if</Word>
+      <Word>else</Word>
+      <Word>switch</Word>
+      <Word>return</Word>
+      <Word>for</Word>
+      <Word>while</Word>
+      <Word>do</Word>
+      <Word>typedef</Word>
+      <Word>namespace</Word>
+      <Word>true</Word>
+      <Word>false</Word>
+      <Word>compile</Word>
+      <Word>#define</Word>
+      <Word>#include</Word>
+      <Word>#if</Word>
+      <Word>#ifdef</Word>
+      <Word>#ifndef</Word>
+      <Word>#else</Word>
+      <Word>#elif</Word>
+      <Word>#endif</Word>
+      <Word>#pragma</Word>
+      <Word>discard</Word>
+      <Word>inline</Word>
+    </Keywords>
+    <!-- Keywords2 -->
+    <Keywords color="KEYWORDS2">
+      <Word>const</Word>
+      <Word>void</Word>
+      <Word>struct</Word>
+      <Word>static</Word>
+      <Word>extern</Word>
+      <Word>register</Word>
+      <Word>volatile</Word>
+      <Word>inline</Word>
+      <Word>target</Word>
+      <Word>nointerpolation</Word>
+      <Word>shared</Word>
+      <Word>uniform</Word>
+      <Word>row_major</Word>
+      <Word>column_major</Word>
+      <Word>snorm</Word>
+      <Word>unorm</Word>
+      <Word>bool</Word>
+      <Word>bool1</Word>
+      <Word>bool2</Word>
+      <Word>bool3</Word>
+      <Word>bool4</Word>
+      <Word>int</Word>
+      <Word>int1</Word>
+      <Word>int2</Word>
+      <Word>int3</Word>
+      <Word>int4</Word>
+      <Word>uint</Word>
+      <Word>uint1</Word>
+      <Word>uint2</Word>
+      <Word>uint3</Word>
+      <Word>uint4</Word>
+      <Word>half</Word>
+      <Word>half1</Word>
+      <Word>half2</Word>
+      <Word>half3</Word>
+      <Word>half4</Word>
+      <Word>float</Word>
+      <Word>float1</Word>
+      <Word>float2</Word>
+      <Word>float3</Word>
+      <Word>float4</Word>
+      <Word>double</Word>
+      <Word>double1</Word>
+      <Word>double2</Word>
+      <Word>double3</Word>
+      <Word>double4</Word>
+      <Word>matrix</Word>
+      <Word>bool1x1</Word>
+      <Word>bool1x2</Word>
+      <Word>bool1x3</Word>
+      <Word>bool1x4</Word>
+      <Word>bool2x1</Word>
+      <Word>bool2x2</Word>
+      <Word>bool2x3</Word>
+      <Word>bool2x4</Word>
+      <Word>bool3x1</Word>
+      <Word>bool3x2</Word>
+      <Word>bool3x3</Word>
+      <Word>bool3x4</Word>
+      <Word>bool4x1</Word>
+      <Word>bool4x2</Word>
+      <Word>bool4x3</Word>
+      <Word>bool4x4</Word>
+      <Word>int1x1</Word>
+      <Word>int1x2</Word>
+      <Word>int1x3</Word>
+      <Word>int1x4</Word>
+      <Word>int2x1</Word>
+      <Word>int2x2</Word>
+      <Word>int2x3</Word>
+      <Word>int2x4</Word>
+      <Word>int3x1</Word>
+      <Word>int3x2</Word>
+      <Word>int3x3</Word>
+      <Word>int3x4</Word>
+      <Word>int4x1</Word>
+      <Word>int4x2</Word>
+      <Word>int4x3</Word>
+      <Word>int4x4</Word>
+      <Word>uint1x1</Word>
+      <Word>uint1x2</Word>
+      <Word>uint1x3</Word>
+      <Word>uint1x4</Word>
+      <Word>uint2x1</Word>
+      <Word>uint2x2</Word>
+      <Word>uint2x3</Word>
+      <Word>uint2x4</Word>
+      <Word>uint3x1</Word>
+      <Word>uint3x2</Word>
+      <Word>uint3x3</Word>
+      <Word>uint3x4</Word>
+      <Word>uint4x1</Word>
+      <Word>uint4x2</Word>
+      <Word>uint4x3</Word>
+      <Word>uint4x4</Word>
+      <Word>half1x1</Word>
+      <Word>half1x2</Word>
+      <Word>half1x3</Word>
+      <Word>half1x4</Word>
+      <Word>half2x1</Word>
+      <Word>half2x2</Word>
+      <Word>half2x3</Word>
+      <Word>half2x4</Word>
+      <Word>half3x1</Word>
+      <Word>half3x2</Word>
+      <Word>half3x3</Word>
+      <Word>half3x4</Word>
+      <Word>half4x1</Word>
+      <Word>half4x2</Word>
+      <Word>half4x3</Word>
+      <Word>half4x4</Word>
+      <Word>float1x1</Word>
+      <Word>float1x2</Word>
+      <Word>float1x3</Word>
+      <Word>float1x4</Word>
+      <Word>float2x1</Word>
+      <Word>float2x2</Word>
+      <Word>float2x3</Word>
+      <Word>float2x4</Word>
+      <Word>float3x1</Word>
+      <Word>float3x2</Word>
+      <Word>float3x3</Word>
+      <Word>float3x4</Word>
+      <Word>float4x1</Word>
+      <Word>float4x2</Word>
+      <Word>float4x3</Word>
+      <Word>float4x4</Word>
+      <Word>double1x1</Word>
+      <Word>double1x2</Word>
+      <Word>double1x3</Word>
+      <Word>double1x4</Word>
+      <Word>double2x1</Word>
+      <Word>double2x2</Word>
+      <Word>double2x3</Word>
+      <Word>double2x4</Word>
+      <Word>double3x1</Word>
+      <Word>double3x2</Word>
+      <Word>double3x3</Word>
+      <Word>double3x4</Word>
+      <Word>double4x1</Word>
+      <Word>double4x2</Word>
+      <Word>double4x3</Word>
+      <Word>double4x4</Word>
+      <Word>cbuffer</Word>
+      <Word>groupshared</Word>
+      <Word>SamplerState</Word>
+      <Word>in</Word>
+      <Word>out</Word>
+      <Word>inout</Word>
+      <Word>vector</Word>
+      <Word>matrix</Word>
+      <Word>interface</Word>
+      <Word>class</Word>
+      <Word>point</Word>
+      <Word>triangle</Word>
+      <Word>line</Word>
+      <Word>lineadj</Word>
+      <Word>triangleadj</Word>
+    </Keywords>
+    <!-- Keywords3 -->
+    <Keywords color="KEYWORDS3">
+      <Word>Texture</Word>
+      <Word>Texture1D</Word>
+      <Word>Texture1DArray</Word>
+      <Word>Texture2D</Word>
+      <Word>Texture2DArray</Word>
+      <Word>Texture2DMS</Word>
+      <Word>Texture2DMSArray</Word>
+      <Word>Texture3D</Word>
+      <Word>TextureCube</Word>
+      <Word>RWTexture1D</Word>
+      <Word>RWTexture1DArray</Word>
+      <Word>RWTexture2D</Word>
+      <Word>RWTexture2DArray</Word>
+      <Word>RWTexture3D</Word>
+      <Word>Buffer</Word>
+      <Word>StructuredBuffer</Word>
+      <Word>AppendStructuredBuffer</Word>
+      <Word>ConsumeStructuredBuffer</Word>
+      <Word>RWBuffer</Word>
+      <Word>RWStructuredBuffer</Word>
+      <Word>ByteAddressBuffer</Word>
+      <Word>RWByteAddressBuffer</Word>
+      <Word>PointStream</Word>
+      <Word>TriangleStream</Word>
+      <Word>LineStream</Word>
+      <Word>InputPatch</Word>
+      <Word>OutputPatch</Word>
+    </Keywords>
+    <!-- Keywords4 -->
+    <Keywords color="KEYWORDS4">
+      <Word>unroll</Word>
+      <Word>loop</Word>
+      <Word>flatten</Word>
+      <Word>branch</Word>
+      <Word>earlydepthstencil</Word>
+      <Word>domain</Word>
+      <Word>instance</Word>
+      <Word>maxtessfactor</Word>
+      <Word>outputcontrolpoints</Word>
+      <Word>outputtopology</Word>
+      <Word>partitioning</Word>
+      <Word>patchconstantfunc</Word>
+      <Word>numthreads</Word>
+      <Word>maxvertexcount</Word>
+      <Word>precise</Word>
+    </Keywords>
+    <!-- Keywords5 -->
+    <Keywords color="KEYWORDS5">
+      <Word>SV_DispatchThreadID</Word>
+      <Word>SV_DomainLocation</Word>
+      <Word>SV_GroupID</Word>
+      <Word>SV_GroupIndex</Word>
+      <Word>SV_GroupThreadID</Word>
+      <Word>SV_GSInstanceID</Word>
+      <Word>SV_InsideTessFactor</Word>
+      <Word>SV_OutputControlPointID</Word>
+      <Word>SV_Coverage</Word>
+      <Word>SV_Depth</Word>
+      <Word>SV_Position</Word>
+      <Word>SV_IsFrontFace</Word>
+      <Word>SV_RenderTargetArrayIndex</Word>
+      <Word>SV_SampleIndex</Word>
+      <Word>SV_ViewportArrayIndex</Word>
+      <Word>SV_InstanceID</Word>
+      <Word>SV_PrimitiveID</Word>
+      <Word>SV_VertexID</Word>
+    </Keywords>
+    <!-- Keywords6 -->
+    <Keywords color="KEYWORDS6">
+      <Word>SV_ClipDistance</Word>
+      <Word>SV_CullDistance</Word>
+      <Word>SV_Target</Word>
+    </Keywords>
+    <!-- Keywords7 -->
+    <Keywords color="KEYWORDS7">
+      <Word>abs</Word>
+      <Word>acos</Word>
+      <Word>all</Word>
+      <Word>AllMemoryBarrier</Word>
+      <Word>AllMemoryBarrierWithGroupSync</Word>
+      <Word>any</Word>
+      <Word>asdouble</Word>
+      <Word>asfloat</Word>
+      <Word>asin</Word>
+      <Word>asint</Word>
+      <Word>asuint</Word>
+      <Word>atan</Word>
+      <Word>atan2</Word>
+      <Word>ceil</Word>
+      <Word>clamp</Word>
+      <Word>clip</Word>
+      <Word>cos</Word>
+      <Word>cosh</Word>
+      <Word>countbits</Word>
+      <Word>cross</Word>
+      <Word>ddx</Word>
+      <Word>ddx_coarse</Word>
+      <Word>ddx_fine</Word>
+      <Word>ddy</Word>
+      <Word>ddy_coards</Word>
+      <Word>ddy_fine</Word>
+      <Word>degrees</Word>
+      <Word>determinant</Word>
+      <Word>DeviceMemoryBarrier</Word>
+      <Word>DeviceMemoryBarrierWithGroupSync</Word>
+      <Word>distance</Word>
+      <Word>dot</Word>
+      <Word>dst</Word>
+      <Word>EvaluateAttributeAtCentroid</Word>
+      <Word>EvaluateAttributeAtSample</Word>
+      <Word>EvaluateAttributeSnapped</Word>
+      <Word>exp</Word>
+      <Word>exp2</Word>
+      <Word>f16tof32</Word>
+      <Word>f32tof16</Word>
+      <Word>faceforward</Word>
+      <Word>firstbithigh</Word>
+      <Word>firstbitlow</Word>
+      <Word>floor</Word>
+      <Word>fmod</Word>
+      <Word>frac</Word>
+      <Word>frexp</Word>
+      <Word>fwidth</Word>
+      <Word>GetRenderTargetSampleCount</Word>
+      <Word>GetRenderTargetSamplePosition</Word>
+      <Word>GroupMemoryBarrier</Word>
+      <Word>GroupMemoryBarrierWithGroupSync</Word>
+      <Word>InterlockedAdd</Word>
+      <Word>InterlockedAnd</Word>
+      <Word>InterlockedCompareExchange</Word>
+      <Word>InterlockedExchange</Word>
+      <Word>InterlockedMax</Word>
+      <Word>InterlockedMin</Word>
+      <Word>IntterlockedOr</Word>
+      <Word>InterlockedXor</Word>
+      <Word>isfinite</Word>
+      <Word>isinf</Word>
+      <Word>isnan</Word>
+      <Word>ldexp</Word>
+      <Word>length</Word>
+      <Word>lerp</Word>
+      <Word>lit</Word>
+      <Word>log</Word>
+      <Word>log10</Word>
+      <Word>log2</Word>
+      <Word>mad</Word>
+      <Word>max</Word>
+      <Word>min</Word>
+      <Word>modf</Word>
+      <Word>mul</Word>
+      <Word>normalize</Word>
+      <Word>pow</Word>
+      <Word>Process2DQuadTessFactorsAvg</Word>
+      <Word>Process2DQuadTessFactorsMax</Word>
+      <Word>Process2DQuadTessFactorsMin</Word>
+      <Word>ProcessIsolineTessFactors</Word>
+      <Word>ProcessQuadTessFactorsAvg</Word>
+      <Word>ProcessQuadTessFactorsMax</Word>
+      <Word>ProcessQuadTessFactorsMin</Word>
+      <Word>ProcessTriTessFactorsAvg</Word>
+      <Word>ProcessTriTessFactorsMax</Word>
+      <Word>ProcessTriTessFactorsMin</Word>
+      <Word>radians</Word>
+      <Word>rcp</Word>
+      <Word>reflect</Word>
+      <Word>refract</Word>
+      <Word>reversebits</Word>
+      <Word>round</Word>
+      <Word>rsqrt</Word>
+      <Word>saturate</Word>
+      <Word>sign</Word>
+      <Word>sin</Word>
+      <Word>sincos</Word>
+      <Word>sinh</Word>
+      <Word>smoothstep</Word>
+      <Word>sqrt</Word>
+      <Word>step</Word>
+      <Word>tan</Word>
+      <Word>tanh</Word>
+      <Word>transpose</Word>
+      <Word>trunc</Word>
+    </Keywords>
+    <!-- Keywords8 -->
+    <Keywords color="KEYWORDS8">
+      <Word>Append</Word>
+      <Word>RestartStrip</Word>
+      <Word>CalculateLevelOfDetail</Word>
+      <Word>CalculateLevelOfDetailUnclamped</Word>
+      <Word>GetDimensions</Word>
+      <Word>GetSamplePosition</Word>
+      <Word>Load</Word>
+      <Word>Sample</Word>
+      <Word>SampleBias</Word>
+      <Word>SampleCmp</Word>
+      <Word>SampleCmpLevelZero</Word>
+      <Word>SampleGrad</Word>
+      <Word>SampleLevel</Word>
+      <Word>Load2</Word>
+      <Word>Load3</Word>
+      <Word>Load4</Word>
+      <Word>Consume</Word>
+      <Word>Store</Word>
+      <Word>Store2</Word>
+      <Word>Store3</Word>
+      <Word>Store4</Word>
+      <Word>DecrementCounter</Word>
+      <Word>IncrementCounter</Word>
+      <Word>mips</Word>
+      <Word>Gather</Word>
+      <Word>GatherRed</Word>
+      <Word>GatherGreen</Word>
+      <Word>GatherBlue</Word>
+      <Word>GatherAlpha</Word>
+      <Word>GatherCmp</Word>
+      <Word>GatherCmpRed</Word>
+      <Word>GatherCmpGreen</Word>
+      <Word>GatherCmpBlue</Word>
+      <Word>GatherCmpAlpha</Word>
+    </Keywords>
+  </RuleSet>
+</SyntaxDefinition>

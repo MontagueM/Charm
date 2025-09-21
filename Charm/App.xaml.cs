@@ -2,6 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Xml;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using Microsoft.Win32;
 using VersionChecker;
 
@@ -38,24 +41,11 @@ public partial class App : Application
             }
         }
 
-        string[] args = e.Args;
-        if (args.Length > 0)
+
+        using (var reader = XmlReader.Create("HLSLSyntax.xshd"))
         {
-            uint apiHash = 0;
-            int c = 0;
-            while (c < args.Length)
-            {
-                if (args[c] == "--api")
-                {
-                    apiHash = Convert.ToUInt32(args[c + 1]);
-                    break;
-                }
-                c++;
-            }
-            if (apiHash != 0)
-            {
-                return;
-            }
+            var highlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+            HighlightingManager.Instance.RegisterHighlighting("HLSL", new[] { ".hlsl", ".cg" }, highlighting);
         }
     }
 

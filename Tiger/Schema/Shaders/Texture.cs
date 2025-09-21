@@ -17,6 +17,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
     public int Width => _tag.Width;
     public int Height => _tag.Height;
+    public int Depth => IsCubemap() ? _tag.ArraySize : _tag.Depth;
 
     public bool IsCubemap()
     {
@@ -409,7 +410,6 @@ public enum TextureDimension
     CUBEARRAY
 }
 
-// Adding D1 stuff to everything is gonna become an ugly mess...
 [NonSchemaStruct(0x40, 32, new[] { 1, 2, 3 })]
 public struct STextureHeader
 {
