@@ -393,65 +393,106 @@
 
                         <Grid Grid.Column="1" Margin="15,0,15,0">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="3*" />
                                 <RowDefinition Height="50*" />
-                                <RowDefinition Height="3*" />
                                 <RowDefinition Height="50*" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock
-                                Grid.Row="0"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                d:FontFamily=" Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                                FontSize="18"
-                                Foreground="{StaticResource ForegroundColour90}"
-                                Text="CBuffer"
-                                TextWrapping="Wrap" />
+                            <TabControl Background="Transparent" FontFamily="{DynamicResource Haas Grot Text 55 Roman}">
+                                <TabControl.Template>
+                                    <ControlTemplate TargetType="TabControl">
+                                        <Grid>
+                                            <DockPanel>
+                                                <TabPanel
+                                                    Margin="0,0,0,0"
+                                                    Panel.ZIndex="1"
+                                                    Background="Transparent"
+                                                    DockPanel.Dock="Top"
+                                                    IsItemsHost="True" />
 
-                            <ListView
+                                                <ContentPresenter
+                                                    Margin="0"
+                                                    HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Stretch"
+                                                    ContentSource="SelectedContent" />
+                                            </DockPanel>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </TabControl.Template>
+
+                                <TabItem Header="CBuffer" IsSelected="True">
+                                    <ListView
+                                        Margin="0,0,0,0"
+                                        VerticalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource BackgroundColour50}"
+                                        BorderThickness="0,0,0,2"
+                                        ItemsSource="{Binding CurrentStage.CB0.Data}">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="OverridesDefaultStyle" Value="True" />
+                                                <Setter Property="Template" Value="{StaticResource CBufferDataViewTemplate}" />
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                    </ListView>
+                                </TabItem>
+
+                                <TabItem Header="Bytecode Constants">
+                                    <ListView
+                                        VerticalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderBrush="{StaticResource BackgroundColour50}"
+                                        BorderThickness="0,0,0,0"
+                                        ItemsSource="{Binding CurrentStage.Constants.Data}">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="OverridesDefaultStyle" Value="True" />
+                                                <Setter Property="Template" Value="{StaticResource CBufferDataViewTemplate}" />
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                    </ListView>
+                                </TabItem>
+
+                            </TabControl>
+
+                            <Grid
+                                Name="BytecodeOps"
                                 Grid.Row="1"
-                                Margin="0,0,0,10"
-                                VerticalAlignment="Stretch"
-                                Background="Transparent"
-                                BorderBrush="{StaticResource BackgroundColour50}"
-                                BorderThickness="0,0,0,2"
-                                ItemsSource="{Binding CurrentStage.CB0.Data}">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="OverridesDefaultStyle" Value="True" />
-                                        <Setter Property="Template" Value="{StaticResource CBufferDataViewTemplate}" />
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                            </ListView>
+                                Margin="0,0,0,0"
+                                Background="Transparent">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Margin="0,10,0,10"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    d:FontFamily=" Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="18"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="TFX Bytecode Operations"
+                                    TextWrapping="Wrap" />
 
 
-                            <TextBlock
-                                Grid.Row="2"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                d:FontFamily=" Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                                FontSize="18"
-                                Foreground="{StaticResource ForegroundColour90}"
-                                Text="Bytecode Constants"
-                                TextWrapping="Wrap" />
-
-                            <ListView
-                                Grid.Row="3"
-                                VerticalAlignment="Stretch"
-                                Background="Transparent"
-                                BorderBrush="{StaticResource BackgroundColour50}"
-                                BorderThickness="0,0,0,0"
-                                ItemsSource="{Binding CurrentStage.Constants.Data}">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="OverridesDefaultStyle" Value="True" />
-                                        <Setter Property="Template" Value="{StaticResource CBufferDataViewTemplate}" />
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                            </ListView>
+                                <ScrollViewer
+                                    Grid.Row="1"
+                                    Margin="5,0,5,0"
+                                    VerticalAlignment="Stretch"
+                                    VerticalContentAlignment="Center"
+                                    HorizontalScrollBarVisibility="Auto">
+                                    <TextBox
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        FontFamily="Consolas"
+                                        FontSize="18"
+                                        IsReadOnly="True"
+                                        Text="{Binding CurrentStage.PrintedOps}"
+                                        TextWrapping="Wrap" />
+                                </ScrollViewer>
+                            </Grid>
 
                         </Grid>
 
@@ -753,45 +794,7 @@
                             </Grid>
 
 
-                            <Grid
-                                Name="BytecodeOps"
-                                Grid.Row="0"
-                                Grid.Column="2"
-                                Margin="0,0,0,0"
-                                Background="Transparent">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
 
-                                <TextBlock
-                                    Grid.Row="0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    d:FontFamily=" Haas Grot Text 55 Roman"
-                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                                    FontSize="18"
-                                    Foreground="{StaticResource ForegroundColour90}"
-                                    Text="Bytecode Operations"
-                                    TextWrapping="Wrap" />
-
-
-                                <ScrollViewer
-                                    Grid.Row="1"
-                                    Margin="5,0,5,0"
-                                    VerticalAlignment="Stretch"
-                                    VerticalContentAlignment="Center"
-                                    HorizontalScrollBarVisibility="Auto">
-                                    <TextBox
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch"
-                                        FontFamily="Consolas"
-                                        FontSize="18"
-                                        IsReadOnly="True"
-                                        Text="{Binding CurrentStage.PrintedOps}"
-                                        TextWrapping="Wrap" />
-                                </ScrollViewer>
-                            </Grid>
                         </Grid>
 
                         <Grid
