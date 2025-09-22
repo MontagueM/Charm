@@ -379,7 +379,7 @@
                                 HorizontalAlignment="Stretch"
                                 Background="#1D1D23"
                                 FontFamily="Consolas"
-                                FontSize="15"
+                                FontSize="16"
                                 Foreground="White"
                                 HorizontalScrollBarVisibility="Auto"
                                 IsReadOnly="True"
@@ -638,6 +638,7 @@
 
                                     <TextBlock
                                         Grid.Row="0"
+                                        Margin="0,0,0,5"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         d:FontFamily=" Haas Grot Text 55 Roman"
@@ -680,6 +681,7 @@
 
                                     <TextBlock
                                         Grid.Row="0"
+                                        Margin="0,0,0,5"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         d:FontFamily=" Haas Grot Text 55 Roman"
@@ -691,9 +693,10 @@
 
                                     <TextBlock
                                         Grid.Row="1"
-                                        HorizontalAlignment="Left"
+                                        HorizontalAlignment="Stretch"
                                         VerticalAlignment="Center"
                                         d:FontFamily=" Haas Grot Text 55 Roman"
+                                        Background="#4B000000"
                                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                                         FontSize="18"
                                         Foreground="{StaticResource ForegroundColour70}"
@@ -719,6 +722,7 @@
 
                                     <TextBlock
                                         Grid.Row="0"
+                                        Margin="0,0,0,5"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Center"
                                         d:FontFamily=" Haas Grot Text 55 Roman"
@@ -730,9 +734,10 @@
 
                                     <TextBlock
                                         Grid.Row="1"
-                                        HorizontalAlignment="Left"
+                                        HorizontalAlignment="Stretch"
                                         VerticalAlignment="Center"
                                         d:FontFamily=" Haas Grot Text 55 Roman"
+                                        Background="#4B000000"
                                         FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
                                         FontSize="18"
                                         Foreground="{StaticResource ForegroundColour70}"

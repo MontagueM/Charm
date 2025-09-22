@@ -244,7 +244,7 @@ public partial class DevView : UserControl
 
                 case 0x808071E8:
                 case 0x80806DAA:
-                    var materialView = new MaterialView();
+                    var materialView = new MaterialView2();
                     materialView.Load(hash);
                     _mainWindow.MakeNewTab(hash, materialView);
                     _mainWindow.SetNewestTabSelected();

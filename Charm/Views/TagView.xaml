@@ -49,10 +49,6 @@
             x:Name="TagListControl"
             Grid.ColumnSpan="2"
             Visibility="Hidden" />
-        <local:MaterialView
-            x:Name="MaterialControl"
-            Grid.ColumnSpan="2"
-            Visibility="Hidden" />
         <local:ExportControl
             x:Name="ExportControl"
             Grid.Row="1"

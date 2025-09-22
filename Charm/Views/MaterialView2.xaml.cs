@@ -103,13 +103,19 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
                 PrintedOps = _bytecode.PrintedOps.ToString()
             };
 
-            HLSLText.Text = CurrentStage.HLSL;
+            if (Strategy.IsD1())
+            {
+                HLSLText.SyntaxHighlighting = null;
+                HLSLText.Text = "Shader Decompilation is not supported for Destiny 1 :(";
+            }
+            else
+                HLSLText.Text = CurrentStage.HLSL;
         }
     }
 
-    private async Task<List<TextureDetail>> GetTextures(SMaterialShader shader)
+    private async Task<List<MaterialViewer_TextureDetail>> GetTextures(SMaterialShader shader)
     {
-        List<TextureDetail> items = new();
+        List<MaterialViewer_TextureDetail> items = new();
         await Task.Run(() =>
         {
             foreach (STextureTag tex in shader.EnumerateTextures())
@@ -117,7 +123,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
                 if (tex.Texture is null)
                     continue;
 
-                items.Add(new TextureDetail
+                items.Add(new MaterialViewer_TextureDetail
                 {
                     Hash = $"{tex.Texture.Hash}",
                     Index = $"Index: {tex.TextureIndex}",
@@ -164,26 +170,27 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
         return entries;
     }
 
-    private async Task<List<SamplerDetail>> GetSamplers(SMaterialShader shader)
+    private async Task<List<MaterialViewer_SamplerDetail>> GetSamplers(SMaterialShader shader)
     {
-        List<SamplerDetail> items = new();
+        List<MaterialViewer_SamplerDetail> items = new();
         await Task.Run(() =>
         {
-            int i = 0;
-            foreach (var sampler in shader.EnumerateSamplers())
+            if (Strategy.IsD1())
+                return;
+
+            for (int i = 0; i < shader.Samplers.Count; i++)
             {
-                i++;
-                if (sampler is null)
+                if (shader.Samplers[i].GetSampler().Hash.GetFileMetadata().Type != 34)
                     continue;
 
-                var samp = sampler.Sampler;
-                items.Add(new SamplerDetail
+                DirectXSampler.D3D11_SAMPLER_DESC sampler = shader.Samplers[i].GetSampler().Sampler;
+                items.Add(new MaterialViewer_SamplerDetail
                 {
-                    Slot = i,
-                    Filter = samp.Filter.ToString(),
-                    AddressU = samp.AddressU.ToString(),
-                    AddressV = samp.AddressV.ToString(),
-                    ComparisonFunc = samp.ComparisonFunc.ToString()
+                    Slot = i + 1,
+                    Filter = sampler.Filter.ToString(),
+                    AddressU = sampler.AddressU.ToString(),
+                    AddressV = sampler.AddressV.ToString(),
+                    ComparisonFunc = sampler.ComparisonFunc.ToString()
                 });
             }
         });
@@ -248,7 +255,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
     private void Texture_OnClick(object sender, RoutedEventArgs e)
     {
         var s = sender as Button;
-        var dc = s.DataContext as TextureDetail;
+        var dc = s.DataContext as MaterialViewer_TextureDetail;
 
         Texture textureHeader = FileResourcer.Get().GetFile<Texture>(dc.Hash);
         if (textureHeader.IsCubemap())
@@ -296,11 +303,11 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
         public string HLSL { get; set; }
         public MaterialViewer_CBuffer CB0 { get; set; }
         public MaterialViewer_CBuffer Constants { get; set; }
-        public List<TextureDetail> Textures { get; set; }
-        public List<SamplerDetail> Samplers { get; set; }
+        public List<MaterialViewer_TextureDetail> Textures { get; set; }
+        public List<MaterialViewer_SamplerDetail> Samplers { get; set; }
         public List<TfxScope> UsedScopes { get; set; }
         public List<TfxExtern> UsedExterns { get; set; }
-        public RenderStates States { get; set; }
+        public MaterialViewer_RenderStates States { get; set; }
         public string PrintedOps { get; set; }
     }
 
@@ -318,7 +325,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
         public Color Color { get; set; } = Color.FromArgb(255, 0, 0, 0);
     }
 
-    public class TextureDetail
+    public class MaterialViewer_TextureDetail
     {
         public string Hash { get; set; }
         public string Index { get; set; }
@@ -330,7 +337,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
         public ImageSource Texture { get; set; }
     }
 
-    public class SamplerDetail
+    public class MaterialViewer_SamplerDetail
     {
         public int Slot { get; set; }
         public string Filter { get; set; }
@@ -339,7 +346,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
         public string ComparisonFunc { get; set; }
     }
 
-    public class RenderStates
+    public class MaterialViewer_RenderStates
     {
         public string Blend { get; set; }
         public string Rasterizer { get; set; }
