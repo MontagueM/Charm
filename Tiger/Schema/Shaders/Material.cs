@@ -161,7 +161,7 @@ namespace Tiger.Schema.Shaders
                     });
 
                     string savePath = $"{saveDirectory}/Textures/{texture.Texture.Hash}";
-                    if (File.Exists($"{savePath}.png"))
+                    if (File.Exists($"{savePath}.{TextureExtractor.GetExtension(_config.GetOutputTextureFormat())}"))
                         continue;
 
                     texture.Texture.SavetoFile(savePath);
@@ -233,7 +233,7 @@ namespace Tiger.Schema.Shaders
                     });
 
                     string savePath = $"{saveDirectory}/Textures/{texture.Texture.Hash}";
-                    if (File.Exists($"{savePath}.png"))
+                    if (File.Exists($"{savePath}.{TextureExtractor.GetExtension(_config.GetOutputTextureFormat())}"))
                         continue;
 
                     texture.Texture.SavetoFile($"{saveDirectory}/Textures/{texture.Texture.Hash}");
