@@ -1,5 +1,26 @@
 [
     {
+        "version": "3.1.4",
+        "date": "09-24-2025",
+        "changes": [
+            {
+                "title": "Fixes",
+                "notes": [
+                    "Fixed a D1 export crash related to materials.",
+                    "Fixed textures being overwritten on exports, causing larger exports to slow down."
+                ]
+            },
+            {
+                "title": "Additions",
+                "notes": [
+                    "Material Viewer 2.0. New UI and some new functionallity.",
+                    "Added a config option to toggle shader HLSL exports. Can cause slow down on larger exports such as maps.",
+                    "Added Ash & Iron to the API release filter options."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.1.0",
         "date": "09-04-2025",
         "changes": [
