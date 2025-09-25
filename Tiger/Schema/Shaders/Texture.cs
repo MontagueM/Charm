@@ -157,8 +157,11 @@ public class Texture : TigerReferenceFile<STextureHeader>
 
     public static ScratchImage FlattenCubemap(ScratchImage input)
     {
-        if (input == null || input.GetImageCount() != 6)
+        if (input == null)
             return null;
+
+        if (input.GetImageCount() != 6)
+            return input;
 
         var img0 = input.GetImage(0);
         if (img0 == null || img0.Width == 0)

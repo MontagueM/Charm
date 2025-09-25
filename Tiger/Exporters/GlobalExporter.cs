@@ -165,6 +165,9 @@ public class GlobalExporter : AbstractExporter
 
             foreach (Texture tex in textures)
             {
+                if (tex is null)
+                    continue;
+
                 TextureExtractor.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : Texture.FlattenCubemap(tex.GetScratchImage()));
                 if (_config.GetS2ShaderExportEnabled())
                     Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Cubemaps");
@@ -215,6 +218,9 @@ public class GlobalExporter : AbstractExporter
 
             foreach (Texture tex in textures)
             {
+                if (tex is null)
+                    continue;
+
                 tex.SavetoFile($"{texSavePath}/{tex.Hash}");
                 if (_config.GetS2ShaderExportEnabled())
                     Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Lights");
