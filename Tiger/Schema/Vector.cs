@@ -187,6 +187,11 @@ public struct Vector3
         }
     }
 
+    public static Vector3 operator +(Vector3 x, Vector3 y)
+    {
+        return new Vector3(x.X + y.X, x.Y + y.Y, x.Z + y.Z);
+    }
+
     public static Vector3 operator -(Vector3 x, Vector3 y)
     {
         return new Vector3(x.X - y.X, x.Y - y.Y, x.Z - y.Z);
@@ -209,6 +214,11 @@ public struct Vector3
         return x.X != y.X &&
         x.Y != y.Y &&
         x.Z != y.Z;
+    }
+
+    public static Vector3 Transform(Vector4 value, Vector4 rotation)
+    {
+        return Transform(value.ToVec3(), rotation);
     }
 
     public static Vector3 Transform(Vector3 value, Vector4 rotation)
@@ -327,6 +337,7 @@ public struct Vector4
         W = 0;
     }
 
+
     public Vector4(int x, int y, int z, int w, bool bIsVector3 = false)
     {
         if (bIsVector3)
@@ -390,6 +401,22 @@ public struct Vector4
             Z = z / 255.0f;
             W = w / 255.0f;
         }
+    }
+
+    public Vector4(Vector3 vec3)
+    {
+        X = vec3.X;
+        Y = vec3.Y;
+        Z = vec3.Z;
+        W = 1;
+    }
+
+    public Vector4(Quaternion quat)
+    {
+        X = quat.X;
+        Y = quat.Y;
+        Z = quat.Z;
+        W = quat.W;
     }
 
     public static Vector4 Zero
@@ -457,6 +484,11 @@ public struct Vector4
     public System.Numerics.Vector4 ToSys()
     {
         return new System.Numerics.Vector4(X, Y, Z, W);
+    }
+
+    public System.Numerics.Quaternion ToQuat()
+    {
+        return new System.Numerics.Quaternion(X, Y, Z, W);
     }
 
     public float this[int index]

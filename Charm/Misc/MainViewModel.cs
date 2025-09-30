@@ -127,7 +127,6 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
     public struct DisplayPart
     {
         public MeshPart BasePart = new();
-        public DynamicMeshPart EntityPart = new();
         public List<Vector3> Translations = new();
         public List<Vector4> Rotations = new();
         public List<Vector3> Scales = new();
@@ -280,7 +279,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
             }
             if (part.BoneNodes.Count > 0)
             {
-                AddSkeletonVisual(part.BoneNodes);
+                AddSkeletonVisual(part);
             }
 
             mesh.Positions = positions;
@@ -312,12 +311,19 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
         }
     }
 
-    public void AddSkeletonVisual(List<BoneNode> bones)
+    public void AddSkeletonVisual(DisplayPart part)
     {
         var positions = new Vector3Collection();
         var indices = new IntCollection();
-        Matrix correction = SharpDX.Matrix.RotationX(-(float)Math.PI / 2) * SharpDX.Matrix.RotationY(-(float)Math.PI / 2);
+        Matrix correction =
+            SharpDX.Matrix.RotationQuaternion(new SharpDX.Quaternion(part.Rotations[0].X,
+                                                            part.Rotations[0].Y,
+                                                            part.Rotations[0].Z,
+                                                            part.Rotations[0].W))
+            * SharpDX.Matrix.RotationX(-(float)Math.PI / 2)
+            * SharpDX.Matrix.RotationY(-(float)Math.PI / 2);
 
+        var bones = part.BoneNodes;
         foreach (BoneNode bone in bones)
         {
             if (bone.ParentNodeIndex > 0 && bone.ParentNodeIndex < bones.Count)
@@ -326,17 +332,14 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
                 int startIndex = positions.Count;
 
+                var childTrans = bone.DefaultObjectSpaceTransform.Translation + part.Translations[0];
+                var parentTrans = parent.DefaultObjectSpaceTransform.Translation + part.Translations[0];
+
                 var childPos = SharpDX.Vector3.TransformCoordinate(
-                    new SharpDX.Vector3(bone.DefaultObjectSpaceTransform.Translation.X,
-                                        bone.DefaultObjectSpaceTransform.Translation.Y,
-                                        bone.DefaultObjectSpaceTransform.Translation.Z),
-                    correction);
+                    new SharpDX.Vector3(childTrans.X, childTrans.Y, childTrans.Z), correction);
 
                 var parentPos = SharpDX.Vector3.TransformCoordinate(
-                    new SharpDX.Vector3(parent.DefaultObjectSpaceTransform.Translation.X,
-                                        parent.DefaultObjectSpaceTransform.Translation.Y,
-                                        parent.DefaultObjectSpaceTransform.Translation.Z),
-                    correction);
+                    new SharpDX.Vector3(parentTrans.X, parentTrans.Y, parentTrans.Z), correction);
 
                 positions.Add(childPos);
                 positions.Add(parentPos);
@@ -347,10 +350,7 @@ public class MainViewModel : INotifyPropertyChanged, IDisposable
 
                 // Adds sphere at joint
                 var jointPos = SharpDX.Vector3.TransformCoordinate(
-                    new SharpDX.Vector3(bone.DefaultObjectSpaceTransform.Translation.X,
-                                        bone.DefaultObjectSpaceTransform.Translation.Y,
-                                        bone.DefaultObjectSpaceTransform.Translation.Z),
-                    correction);
+                    new SharpDX.Vector3(childTrans.X, childTrans.Y, childTrans.Z), correction);
 
                 var sphereMeshBuilder = new MeshBuilder();
                 sphereMeshBuilder.AddSphere(new SharpDX.Vector3(jointPos.X, jointPos.Y, jointPos.Z), 0.0075, 6, 6);

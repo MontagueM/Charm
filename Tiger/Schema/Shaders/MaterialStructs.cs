@@ -180,6 +180,20 @@ public struct Vec4
     public Vector4 Vec;
 }
 
+
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "80806927", 0x158)]
+public struct S80806927 // temp, particle system
+{
+    [SchemaField(0x8)]
+    public DynamicArray<Vec4> Unk08;
+    public DynamicArray<SUInt8> Unk18;
+
+    [SchemaField(0x58)]
+    public DynamicArray<SUInt8> UnkBytecode;
+    public DynamicArray<Vec4> UnkConstants;
+}
+
+
 [Flags]
 public enum ScopeBitsBL : ulong
 {

@@ -21,6 +21,7 @@ public class EntitySkeleton : EntityResource
             {
                 BoneNode node = new();
                 node.ParentNodeIndex = skelInfo.NodeHierarchy[reader, i].ParentNodeIndex;
+                node.Index = i;
                 node.Hash = skelInfo.NodeHierarchy[reader, i].NodeHash;
                 node.DefaultObjectSpaceTransform = new ObjectSpaceTransform
                 {
@@ -42,6 +43,7 @@ public class EntitySkeleton : EntityResource
             for (int i = 0; i < weirdSkeleInfo.NodeHierarchy.Count; i++)
             {
                 BoneNode node = new();
+                node.Index = i;
                 node.ParentNodeIndex = weirdSkeleInfo.NodeHierarchy[reader, i].ParentNodeIndex;
                 node.Hash = weirdSkeleInfo.NodeHierarchy[reader, i].NodeHash;
                 node.DefaultInverseObjectSpaceTransform = new ObjectSpaceTransform
@@ -66,6 +68,13 @@ public class EntitySkeleton : EntityResource
                 nodes.Add(node);
             }
         }
+
+        foreach (var node in nodes)
+        {
+            //Console.WriteLine($"{node.Hash}: Index {node.Index}, Parent {node.ParentNodeIndex}");
+            //Console.WriteLine($"\t{node.DefaultObjectSpaceTransform.Translation} : {node.DefaultObjectSpaceTransform.QuaternionRotation}");
+        }
+
         return nodes;
     }
 }
@@ -80,6 +89,7 @@ public struct BoneNode
 {
     public ObjectSpaceTransform DefaultObjectSpaceTransform;
     public ObjectSpaceTransform DefaultInverseObjectSpaceTransform;
+    public int Index;
     public int ParentNodeIndex;
     public TigerHash Hash;
     public FbxNode Node;

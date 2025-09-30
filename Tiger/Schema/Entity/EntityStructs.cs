@@ -1268,22 +1268,26 @@ public struct S93278080
 
 // TODO: Other versions
 // Entity carried weapon resource?
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "E9318080", 0x490)] // Entity Resource 0x10
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "E9318080", 0x260)] // Entity Resource 0x10
 public struct SE9318080
 {
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "EA318080", 0x330)] // Entity Resource 0x18
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EA318080", 0x2F8)] // Entity Resource 0x18
 public struct SEA318080
 {
     [SchemaField(0x38)]
     public DynamicArray<SF79A8080> Unk38;
 
-    [SchemaField(0x1C0)]
+    [SchemaField(0x180, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x1C0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<SF2318080> Unk1C0;
+
+    [SchemaField(0x220, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    public DynamicArray<SC99A8080> Unk220;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "F2318080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F2318080", 0x40)]
 public struct SF2318080
 {
     [SchemaField(0x8)]
@@ -1296,7 +1300,7 @@ public struct SF2318080
     public DynamicArray<SF8318080> Unk30;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "F8318080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F8318080", 0x18)]
 public struct SF8318080
 {
     [SchemaField(0x8, Tag64 = true), NoLoad]
@@ -1317,3 +1321,47 @@ public struct SFB9A8080
     public TigerHash Unk00; // weapon_type
     public TigerHash Unk04; // weapon name
 }
+
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "C99A8080", 0x30)]
+public struct SC99A8080
+{
+    public Vector4 Translation;
+    public Vector4 Rotation;
+    [SchemaField(0x24)]
+    public int ParentBoneIndex; // I think?
+    public StringHash UnkName;
+}
+
+// Some other weapon entity resource, spider tank cannon 80C3EA34
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "742E8080", 0xDF0)] // Entity Resource 0x10
+public struct S742E8080
+{
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "282C8080", 0x8C8)] // Resource 0x18
+public struct S282C8080
+{
+    [SchemaField(0x1D8)]
+    public DynamicArray<S202C8080> Unk1D8;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "202C8080", 0x98)]
+public struct S202C8080
+{
+    [SchemaField(0x18, Tag64 = true), NoLoad]
+    public Entity Entity;
+
+    [SchemaField(0x80)]
+    public DynamicArray<SFD368080> Transform;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "FD368080", 0x30)]
+public struct SFD368080
+{
+    public Vector4 Rotation;
+    public Vector4 Translation; // ZXY???
+    [SchemaField(0x24)]
+    public int ParentBoneIndex;
+    public StringHash UnkName;
+}
+

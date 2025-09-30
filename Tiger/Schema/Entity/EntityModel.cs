@@ -10,8 +10,8 @@ public class EntityModel : Tag<SEntityModel>
     {
     }
 
-    public Vector4 RotationOffset = new();
-    public Vector4 TranslationOffset = new();
+    public Vector4 RotationOffset = Vector4.Quaternion;
+    public Vector4 TranslationOffset = Vector4.Zero;
 
     /*
      * We need the parent resource to get access to the external materials
@@ -170,9 +170,6 @@ public class DynamicMeshPart : MeshPart
     public bool HasSkeleton;
     public byte GearDyeChangeColorIndex = 0xFF;
 
-    public Vector4 RotationOffset = new();
-    public Vector4 TranslationOffset = new();
-
     public TfxRenderStage RenderStage;
 
     public DynamicMeshPart(SCB6E8080 part, EntityResource parentResource) : base()
@@ -300,9 +297,9 @@ public class DynamicMeshPart : MeshPart
         for (int i = 0; i < VertexPositions.Count; i++)
         {
             VertexPositions[i] = new Vector4(
-                VertexPositions[i].X * modelScale.X + modelTranslation.X + TranslationOffset.X,
-                VertexPositions[i].Y * modelScale.Y + modelTranslation.Y + TranslationOffset.Y,
-                VertexPositions[i].Z * modelScale.Z + modelTranslation.Z + TranslationOffset.Z,
+                VertexPositions[i].X * modelScale.X + modelTranslation.X,
+                VertexPositions[i].Y * modelScale.Y + modelTranslation.Y,
+                VertexPositions[i].Z * modelScale.Z + modelTranslation.Z,
                 VertexPositions[i].W
             );
         }

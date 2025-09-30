@@ -347,6 +347,13 @@ public partial class DevView : UserControl
 
                     break;
 
+                //case 0x80806927: // particle system, 80E11F57 taken eye test
+                //    Tag<S80806927> farticle = FileResourcer.Get().GetSchemaTag<S80806927>(hash);
+                //    bytecode = new(TfxBytecodeOp.ParseAll(farticle.TagData.UnkBytecode, TfxBytecodeOp.BytecodeType.Sequencer));
+                //    _ = bytecode.Evaluate(farticle.TagData.UnkConstants, true);
+
+                //    break;
+
                 default:
                     MessageBox.Show("Unknown reference: " + Endian.U32ToString(reference));
                     break;

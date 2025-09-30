@@ -275,10 +275,10 @@ public class ExporterScene
         EntityPoints.Add(points);
     }
 
-    public void AddEntity(FileHash entityHash, List<DynamicMeshPart> parts, List<BoneNode> boneNodes, DestinyGenderDefinition gender = DestinyGenderDefinition.None)
+    public void AddEntity(Entity entity, List<DynamicMeshPart> parts, List<BoneNode> boneNodes)
     {
-        ExporterMesh mesh = new(entityHash);
-        string name = $"{entityHash}" + (gender == DestinyGenderDefinition.None ? "" : $"_{gender}");
+        ExporterMesh mesh = new(entity.Hash);
+        string name = $"{entity.Hash}" + (entity.Gender == DestinyGenderDefinition.None ? "" : $"_{entity.Gender}");
         for (int i = 0; i < parts.Count; i++)
         {
             DynamicMeshPart part = parts[i];
@@ -287,7 +287,19 @@ public class ExporterScene
 
             mesh.AddPart(name, part, i);
         }
-        Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = boneNodes });
+        var exporterEntity = new ExporterEntity
+        {
+            Mesh = mesh,
+            BoneNodes = boneNodes,
+        };
+
+        if (entity.Model != null)
+        {
+            exporterEntity.TranslationOffset = entity.Model.TranslationOffset;
+            exporterEntity.RotationOffset = entity.Model.RotationOffset;
+        }
+
+        Entities.Add(exporterEntity);
     }
 
     public void AddMapEntity(SMapDataEntry entry, Transform? transform = null)
@@ -309,7 +321,13 @@ public class ExporterScene
 
                     mesh.AddPart(ent.Hash, part, i);
                 }
-                Entities.Add(new ExporterEntity { Mesh = mesh, BoneNodes = ent.Skeleton?.GetBoneNodes() });
+                Entities.Add(new ExporterEntity
+                {
+                    Mesh = mesh,
+                    BoneNodes = ent.Skeleton?.GetBoneNodes(),
+                    TranslationOffset = ent.Model.TranslationOffset,
+                    RotationOffset = ent.Model.RotationOffset
+                });
             }
 
             EntityInstances.TryAdd(ent.Hash, new());
@@ -417,6 +435,8 @@ public class ExporterEntity
 {
     public ExporterMesh Mesh { get; set; }
     public List<BoneNode> BoneNodes { get; set; } = new();
+    public Vector4 TranslationOffset = Vector4.Zero;
+    public Vector4 RotationOffset = Vector4.Quaternion;
 }
 
 public class ExporterMesh

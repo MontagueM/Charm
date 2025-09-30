@@ -5,7 +5,14 @@ using Tiger.Schema.Shaders;
 
 public static class TfxBytecodeOp
 {
-    public static List<TfxData> ParseAll(DynamicArray<SUInt8> bytecode)
+    public enum BytecodeType
+    {
+        Expression = 0,
+        Sequencer = 1,
+        Particle = 2
+    }
+
+    public static List<TfxData> ParseAll(DynamicArray<SUInt8> bytecode, BytecodeType type = BytecodeType.Expression)
     {
         byte[] data = new byte[bytecode.Count];
         for (int i = 0; i < bytecode.Count; i++)
@@ -20,7 +27,7 @@ public static class TfxBytecodeOp
             {
                 while (stream.Position < data.Length)
                 {
-                    TfxData op = ReadTfxBytecodeOp(reader);
+                    TfxData op = ReadTfxBytecodeOp(reader, type);
                     opcodes.Add(op);
                 }
             }
@@ -45,7 +52,7 @@ public static class TfxBytecodeOp
         throw new InvalidCastException($"Couldn't cast TfxBytecode value {value} ({name}) for {Strategy.CurrentStrategy}");
     }
 
-    public static TfxData ReadTfxBytecodeOp(BinaryReader reader)
+    public static TfxData ReadTfxBytecodeOp(BinaryReader reader, BytecodeType type)
     {
         TfxData tfxData = new()
         {
@@ -504,7 +511,7 @@ public enum TfxBytecode : byte // Not ordered by value, different versions get m
     LerpSaturated,
     MultiplyAdd,
     Clamp,
-    Unk14,
+    Unk14, // SmoothStep?
     Abs,
     Sign,
     Floor,
@@ -521,7 +528,7 @@ public enum TfxBytecode : byte // Not ordered by value, different versions get m
     Permute,
     Saturate,
     Unk25,
-    Unk26,
+    Unk26, // Also normalize apparently
     Triangle,
     Jitter,
     Wander,
