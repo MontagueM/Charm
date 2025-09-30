@@ -1,16 +1,20 @@
-﻿
-using Internal.Fbx;
+﻿using Internal.Fbx;
 
 namespace Tiger.Schema.Entity;
 
 public class EntitySkeleton : EntityResource
 {
+    private List<BoneNode>? _cachedBoneNodes;
+
     public EntitySkeleton(FileHash resource) : base(resource)
     {
     }
 
     public List<BoneNode> GetBoneNodes()
     {
+        if (_cachedBoneNodes != null)
+            return _cachedBoneNodes;
+
         using TigerReader reader = GetReader();
         var nodes = new List<BoneNode>();
 
@@ -69,13 +73,8 @@ public class EntitySkeleton : EntityResource
             }
         }
 
-        foreach (var node in nodes)
-        {
-            //Console.WriteLine($"{node.Hash}: Index {node.Index}, Parent {node.ParentNodeIndex}");
-            //Console.WriteLine($"\t{node.DefaultObjectSpaceTransform.Translation} : {node.DefaultObjectSpaceTransform.QuaternionRotation}");
-        }
-
-        return nodes;
+        _cachedBoneNodes = nodes;
+        return _cachedBoneNodes;
     }
 }
 
