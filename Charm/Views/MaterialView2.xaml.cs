@@ -74,6 +74,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
             CurrentStage = new()
             {
                 HLSL = shader.Shader.Decompile($"{stage}_{shader.Shader.Hash}"),
+                ShaderHash = $"Shader {shader.Shader.Hash}",
                 CB0 = new MaterialViewer_CBuffer
                 {
                     Name = "CB0",
@@ -301,6 +302,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
     public struct ShaderStageItem
     {
         public string HLSL { get; set; }
+        public string ShaderHash { get; set; }
         public MaterialViewer_CBuffer CB0 { get; set; }
         public MaterialViewer_CBuffer Constants { get; set; }
         public List<MaterialViewer_TextureDetail> Textures { get; set; }

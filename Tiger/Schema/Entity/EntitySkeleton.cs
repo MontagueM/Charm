@@ -24,8 +24,11 @@ public class EntitySkeleton : EntityResource
             for (int i = 0; i < skelInfo.NodeHierarchy.Count; i++)
             {
                 BoneNode node = new();
-                node.ParentNodeIndex = skelInfo.NodeHierarchy[reader, i].ParentNodeIndex;
                 node.Index = i;
+                node.ParentNodeIndex = skelInfo.NodeHierarchy[reader, i].ParentNodeIndex;
+                node.FirstChildNodeIndex = skelInfo.NodeHierarchy[reader, i].FirstChildNodeIndex;
+                node.NextSiblingNodeIndex = skelInfo.NodeHierarchy[reader, i].NextSiblingNodeIndex;
+
                 node.Hash = skelInfo.NodeHierarchy[reader, i].NodeHash;
                 node.DefaultObjectSpaceTransform = new ObjectSpaceTransform
                 {
@@ -49,6 +52,9 @@ public class EntitySkeleton : EntityResource
                 BoneNode node = new();
                 node.Index = i;
                 node.ParentNodeIndex = weirdSkeleInfo.NodeHierarchy[reader, i].ParentNodeIndex;
+                node.FirstChildNodeIndex = weirdSkeleInfo.NodeHierarchy[reader, i].FirstChildNodeIndex;
+                node.NextSiblingNodeIndex = weirdSkeleInfo.NodeHierarchy[reader, i].NextSiblingNodeIndex;
+
                 node.Hash = weirdSkeleInfo.NodeHierarchy[reader, i].NodeHash;
                 node.DefaultInverseObjectSpaceTransform = new ObjectSpaceTransform
                 {
@@ -90,6 +96,19 @@ public struct BoneNode
     public ObjectSpaceTransform DefaultInverseObjectSpaceTransform;
     public int Index;
     public int ParentNodeIndex;
+    public int FirstChildNodeIndex;
+    public int NextSiblingNodeIndex;
     public TigerHash Hash;
     public FbxNode Node;
+}
+
+public struct ExportBoneNode
+{
+    public ObjectSpaceTransform DefaultObjectSpaceTransform { get; set; }
+    public ObjectSpaceTransform DefaultInverseObjectSpaceTransform { get; set; }
+    public int Index { get; set; }
+    public int ParentNodeIndex { get; set; }
+    public int FirstChildNodeIndex;
+    public int NextSiblingNodeIndex;
+    public string Hash { get; set; }
 }

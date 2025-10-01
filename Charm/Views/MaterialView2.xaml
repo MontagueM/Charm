@@ -361,16 +361,34 @@
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock
+                            <StackPanel
                                 Grid.Row="0"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                d:FontFamily=" Haas Grot Text 55 Roman"
-                                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                                FontSize="18"
-                                Foreground="{StaticResource ForegroundColour90}"
-                                Text="HLSL"
-                                TextWrapping="Wrap" />
+                                Orientation="Horizontal">
+
+                                <TextBlock
+                                    d:FontFamily=" Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="18"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    Text="HLSL"
+                                    TextWrapping="Wrap" />
+
+                                <TextBlock
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    d:FontFamily=" Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                                    FontSize="18"
+                                    Foreground="{StaticResource ForegroundColour90}"
+                                    TextWrapping="Wrap">
+                                    <Run Text=" - " />
+                                    <Run Text="{Binding CurrentStage.ShaderHash}" />
+                                </TextBlock>
+                            </StackPanel>
+
 
                             <avalonEdit:TextEditor
                                 xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
