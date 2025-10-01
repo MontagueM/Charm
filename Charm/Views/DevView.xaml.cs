@@ -11,6 +11,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using ConcurrentCollections;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
