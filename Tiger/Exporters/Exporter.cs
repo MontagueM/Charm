@@ -115,7 +115,7 @@ public class GlobalExporterScene : ExporterScene
         // Check if an item of the same type already exists (if there should only be one)
         dynamic type = item.GetType();
         if (isUnique && _objects.Any(existing => existing.GetType() == type))
-            throw new InvalidOperationException($"A unique item of type {type.Name} already exists in the Global Scene.");
+            throw new InvalidOperationException($"A unique item of type {type.Name} already exists in the Global Scene. This shouldn't happen.");
 
         _objects.Add(item);
     }

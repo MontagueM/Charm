@@ -41,6 +41,7 @@ public class GlobalExporter : AbstractExporter
             if (atmosphere.Lookup4 != null)
                 AtmosTextures.Add(atmosphere.Lookup4);
 
+            // TODO, stitch together D1 atmos textures to resemble D2
             //foreach (var tex in atmosphere.D1Lookup)
             //{
             //    tex.Load();

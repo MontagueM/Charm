@@ -14,6 +14,9 @@ public class Decorator : Tag<SDecorator>
 
     public void LoadIntoExporter(ExporterScene scene, string saveDirectory)
     {
+        if (_tag.BufferData is null)
+            return;
+
         DynamicArray<SB16C8080> models = _tag.DecoratorModels;
         // Model transform offsets
         List<Vector4> SpeedtreePlacements = new() { Vector4.Zero, Vector4.Zero.WithW(1) };

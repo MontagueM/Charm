@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -520,7 +521,8 @@ public partial class ActivityMapEntityView : UserControl
                             break;
 
                         case SMapAtmosphere atmosphere:
-                            globalScene.AddToGlobalScene(atmosphere, true);
+                            if (!globalScene.Any<SMapAtmosphere>())
+                                globalScene.AddToGlobalScene(atmosphere, true);
                             break;
 
                         case SMapLensFlareResource lensFlare:
@@ -540,7 +542,8 @@ public partial class ActivityMapEntityView : UserControl
                             break;
 
                         case S716A8080 dayCycle:
-                            globalScene.AddToGlobalScene(dayCycle, true);
+                            if (!globalScene.Any<S716A8080>())
+                                globalScene.AddToGlobalScene(dayCycle, true);
                             break;
 
                         default:
