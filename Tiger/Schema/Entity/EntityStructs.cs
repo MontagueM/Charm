@@ -511,23 +511,16 @@ public struct S23978080
     public StringHash EntityName;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "63268080", 0xC60)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "1C888080", 0x50)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "12848080", 0x50)]
 public struct S12848080
 {
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "08278080", 0x598)]
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "18888080", 0x90)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "0E848080", 0xA0)]
 public struct S0E848080
 {
-    [SchemaField(0x100, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]
-    public DynamicArray<S712B8080> Unk100;
-
-    [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
     [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x88, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public DynamicArray<S1B848080> Unk88;
@@ -1248,58 +1241,64 @@ public struct SDA288080
     public Entity? Unk68;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "712B8080", 0xA0)]
-public struct S712B8080
-{
-    [SchemaField(0x20)]
-    public FileHash Entity;
-
-    [SchemaField(0x88)]
-    public DynamicArray<S93278080> Transforms;
-}
-
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "93278080", 0x40)]
-public struct S93278080
-{
-    [SchemaField(0x10)]
-    public Vector4 Rotation;
-    public Vector4 Translation;
-}
-
 // TODO: Other versions
 // Entity carried weapon resource?
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "E9318080", 0x490)] // Entity Resource 0x10
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "B4248080", 0x480)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "BB3E8080", 0x260)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "E9318080", 0x260)] // Entity Resource 0x10
 public struct SE9318080
 {
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "EA318080", 0x330)] // Entity Resource 0x18
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "08248080", 0x248)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "BC3E8080", 0x278)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "EA318080", 0x2F8)] // Entity Resource 0x18
 public struct SEA318080
 {
-    [SchemaField(0x38)]
-    public DynamicArray<SF79A8080> Unk38;
+    //[SchemaField(0x38)]
+    //public DynamicArray<SF79A8080> Unk38;
 
-    [SchemaField(0x1C0)]
+    [SchemaField(0xE8, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)] // ??
+    public DynamicArray<SF8318080> UnkE8;
+
+    [SchemaField(0x108, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x120, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x180, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x1C0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
     public DynamicArray<SF2318080> Unk1C0;
+
+    [SchemaField(0x170, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x180, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x1E0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x220, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    public DynamicArray<SC99A8080> Unk220;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "F2318080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "9D268080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "C43E8080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F2318080", 0x40)]
 public struct SF2318080
 {
-    [SchemaField(0x8)]
-    public int Unk08;
-    [SchemaField(0x10)]
-    public int Unk10;
-    [SchemaField(0x28)]
-    public float Unk28;
-    [SchemaField(0x30)]
+    //[SchemaField(0x8)]
+    //public int Unk08;
+    //[SchemaField(0x10)]
+    //public int Unk10;
+    //[SchemaField(0x28)]
+    //public float Unk28;
+
+    [SchemaField(0x28, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     public DynamicArray<SF8318080> Unk30;
 }
 
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "F8318080", 0x18)]
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "AE2B8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F8318080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "F8318080", 0x18)]
 public struct SF8318080
 {
-    [SchemaField(0x8, Tag64 = true), NoLoad]
+    [SchemaField(0x8, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true), NoLoad]
     public Entity Entity;
 }
 
@@ -1317,3 +1316,82 @@ public struct SFB9A8080
     public TigerHash Unk00; // weapon_type
     public TigerHash Unk04; // weapon name
 }
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "08068080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "009C8080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "C99A8080", 0x30)]
+public struct SC99A8080
+{
+    [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public Vector4 Rotation;
+    public Vector4 Translation; // ZXY???
+
+    [SchemaField(0x4, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x24, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public int ParentBoneIndex;
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public StringHash UnkName;
+}
+
+// Some other weapon entity resource, spider tank cannon 80C3EA34
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "63268080", 0xC60)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "233C8080", 0xDE0)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "742E8080", 0xDE0)] // Entity Resource 0x10
+public struct S742E8080
+{
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "08278080", 0x598)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "003A8080", 0x6E8)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "282C8080", 0x828)] // Resource 0x18
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "282C8080", 0x858)]
+[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "282C8080", 0x880)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "282C8080", 0x8C8)]
+public struct S282C8080
+{
+    [SchemaField(0x100, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x148, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x160, TigerStrategy.DESTINY2_SHADOWKEEP_2999)]
+    [SchemaField(0x1B8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    [SchemaField(0x1D8, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArray<S202C8080> Unk1D8;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "712B8080", 0xA0)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "F7398080", 0x90)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "202C8080", 0x98)]
+public struct S202C8080
+{
+    [SchemaField(0x20, TigerStrategy.DESTINY1_RISE_OF_IRON), NoLoad]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_SHADOWKEEP_2601), NoLoad]
+    [SchemaField(0x18, TigerStrategy.DESTINY2_BEYONDLIGHT_3402, Tag64 = true), NoLoad]
+    public Entity Entity;
+
+    [SchemaField(0x88, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x78, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
+    [SchemaField(0x80, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public DynamicArray<SFD368080> Transform;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "93278080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "913E8080", 0x40)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "FD368080", 0x30)]
+public struct SFD368080
+{
+    [SchemaField(0x10, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public Vector4 Rotation;
+    public Vector4 Translation; // ZXY???
+
+    [SchemaField(0x4, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x24, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public int ParentBoneIndex;
+
+    [SchemaField(0x30, TigerStrategy.DESTINY1_RISE_OF_IRON)]
+    [SchemaField(0x28, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
+    public StringHash UnkName;
+}
+

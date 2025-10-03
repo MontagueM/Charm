@@ -121,7 +121,7 @@ public partial class EntityView : UserControl
             {
                 boneNodes = entity.Skeleton.GetBoneNodes();
             }
-            scene.AddEntity(entity.Hash, dynamicParts, boneNodes, entity.Gender);
+            scene.AddEntity(entity, dynamicParts, boneNodes);
             if (exportType == ExportTypeFlag.Full)
             {
                 entity.SaveMaterialsFromParts(scene, dynamicParts);
@@ -200,7 +200,7 @@ public partial class EntityView : UserControl
             {
                 boneNodes = entity.Skeleton.GetBoneNodes();
             }
-            scene.AddEntity(entity.Hash, dynamicParts, boneNodes, entity.Gender);
+            scene.AddEntity(entity, dynamicParts, boneNodes);
             entity.SaveMaterialsFromParts(scene, dynamicParts);
             entity.SaveTexturePlates(savePath);
         }
@@ -299,6 +299,8 @@ public partial class EntityView : UserControl
         ConcurrentBag<MainViewModel.DisplayPart> displayParts = new();
         foreach (Entity ent in entities)
         {
+            var offsetTrans = Vector3.Zero;
+            var offsetRot = Vector4.Quaternion;
             if (ent.HasGeometry())
             {
                 List<DynamicMeshPart> dynamicParts = ent.Load(detailLevel);
@@ -306,12 +308,14 @@ public partial class EntityView : UserControl
                 if (ModelView.GetSelectedGroupIndex() != -1)
                     dynamicParts = dynamicParts.Where(x => x.GroupIndex == ModelView.GetSelectedGroupIndex()).ToList();
 
+                offsetTrans = ent.Model.TranslationOffset.ToVec3();
+                offsetRot = ent.Model.RotationOffset;
                 foreach (DynamicMeshPart part in dynamicParts)
                 {
                     MainViewModel.DisplayPart displayPart = new();
                     displayPart.BasePart = part;
-                    displayPart.Translations.Add(Vector3.Zero);
-                    displayPart.Rotations.Add(Vector4.Zero);
+                    displayPart.Translations.Add(Vector3.Zero + offsetTrans);
+                    displayPart.Rotations.Add(new(System.Numerics.Quaternion.Identity * offsetRot.ToQuat()));
                     displayPart.Scales.Add(Vector3.One);
 
                     if (useTextures && part.Material?.Pixel.Textures.Any() == true)
@@ -331,8 +335,8 @@ public partial class EntityView : UserControl
             {
                 MainViewModel.DisplayPart displayPart = new();
                 displayPart.BoneNodes = ent.Skeleton.GetBoneNodes();
-                displayPart.Translations.Add(Vector3.Zero);
-                displayPart.Rotations.Add(Vector4.Zero);
+                displayPart.Translations.Add(offsetTrans);
+                displayPart.Rotations.Add(offsetRot);
                 displayPart.Scales.Add(Vector3.One);
 
                 displayParts.Add(displayPart);

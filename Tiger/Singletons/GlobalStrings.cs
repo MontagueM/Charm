@@ -89,6 +89,11 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         Log.Info($"Parsed Wordlist: {stopwatch.ElapsedMilliseconds}ms ({_wordlistStrings.Count} lines)");
     }
 
+    public string GetString(TigerHash hash)
+    {
+        return GetString(new StringHash(hash));
+    }
+
     public string GetString(StringHash hash)
     {
         if (_strings.TryGetValue(hash, out List<StringBiasView>? sv))

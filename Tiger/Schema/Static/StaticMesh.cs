@@ -39,6 +39,9 @@ public class MeshPart
     public int MaxVertexColorIndex = -1;
     public bool Collision = true;
 
+    public Vector4 RotationOffset = Vector4.Quaternion;
+    public Vector4 TranslationOffset = Vector4.Zero;
+
     /// <summary>
     /// Creates an instance of a specified type, derived from MeshPart, using data from the provided index and vertex buffers and other data.
     /// </summary>

@@ -1,4 +1,7 @@
-﻿using Tiger.Exporters;
+﻿using System.Diagnostics;
+using System.Numerics;
+using Arithmic;
+using Tiger.Exporters;
 
 namespace Tiger.Schema.Entity;
 
@@ -12,8 +15,13 @@ public class Entity : Tag<SEntity>
     public EntityResource? PatternAudio { get; private set; }
     public EntityResource? PatternAudioUnnamed { get; private set; }
     public EntityControlRig? ControlRig { get; private set; }
+    public EntityResource? CarriedWeapon { get; private set; }
+
+    public EntityResource? Attachments { get; private set; }
+
     public EntityResource? EntityChildren { get; private set; }
     public List<EntityResource>? EntityChildren2 { get; private set; } // The Sequencer (tm) ?
+
 
     public EntityModel? Model => ModelParent?.GetModel();
     public EntityModel? PhysicsModel => PhysicsModelParent?.GetModel();
@@ -110,6 +118,14 @@ public class Entity : Tag<SEntity>
                     EntityChildren = resource;
                     break;
 
+                case SE9318080:
+                    CarriedWeapon = resource;
+                    break;
+
+                case S742E8080:
+                    Attachments = resource;
+                    break;
+
                 default:
                     //Console.WriteLine($"{resource.TagData.Unk18.GetValue(resource.GetReader())}");
                     // throw new NotImplementedException($"Implement parsing for {resource.Resource._tag.Unk08}");
@@ -190,56 +206,148 @@ public class Entity : Tag<SEntity>
         }
 
         List<Entity> entities = new();
+        if (CarriedWeapon is not null)
+        {
+            Log.Debug($"CarriedWeapon {CarriedWeapon.Hash}");
+            var weaponEntry = (SEA318080)CarriedWeapon.TagData.Unk18.GetValue(CarriedWeapon.GetReader());
+
+            var offsetTrans = Vector4.Zero;
+            var offsetRot = Vector4.Quaternion;
+
+            if (weaponEntry.Unk220.Any())
+            {
+                Debug.Assert(weaponEntry.Unk220.Count == 1);
+
+                var offset = weaponEntry.Unk220[0];
+                var parentBone = offset.ParentBoneIndex;
+                if (parentBone is not -1 && Skeleton is not null)
+                {
+                    var nodes = Skeleton.GetBoneNodes();
+                    if (nodes.Count >= parentBone)
+                    {
+                        offsetTrans = new(nodes[parentBone].DefaultObjectSpaceTransform.Translation);
+                        offsetRot = nodes[parentBone].DefaultObjectSpaceTransform.QuaternionRotation;
+
+                        Quaternion newRot = offsetRot.ToQuat() * offset.Rotation.ToQuat();
+
+                        offsetTrans += new Vector4(offset.Translation.X, offset.Translation.Y, offset.Translation.Z);
+                        offsetRot = new Vector4(newRot.X, newRot.Y, newRot.Z, newRot.W);
+
+                        //Log.Debug($"{GlobalStrings.Get().GetString(nodes[parentBone].Hash)}: {offsetTrans} : {offsetRot}");
+                    }
+                }
+            }
+
+            if (weaponEntry.Unk1C0.Any())
+            {
+                foreach (var entry in weaponEntry.Unk1C0.Select(x => x.Unk30))
+                {
+                    foreach (var entity in entry.Select(x => x.Entity))
+                    {
+                        if (entity is null || entities.Contains(entity))
+                            continue;
+
+                        entities.Add(entity);
+
+                        entity.Load();
+                        if (entity.ModelParent is not null && entity.Model is not null)
+                        {
+                            entity.Model.TranslationOffset = offsetTrans;
+                            entity.Model.RotationOffset = offsetRot;
+                        }
+                    }
+                }
+            }
+
+            if (Strategy.IsD1()) // ??
+            {
+                foreach (var entry in weaponEntry.UnkE8)
+                {
+                    if (entry.Entity is null || entities.Contains(entry.Entity))
+                        continue;
+
+                    entities.Add(entry.Entity);
+
+                    entry.Entity.Load();
+                    if (entry.Entity.ModelParent is not null && entry.Entity.Model is not null)
+                    {
+                        entry.Entity.Model.TranslationOffset = offsetTrans;
+                        entry.Entity.Model.RotationOffset = offsetRot;
+                    }
+                }
+            }
+        }
+
+        if (Attachments is not null)
+        {
+            Log.Debug($"Attachments {Attachments.Hash} ({Attachments.TagData.Unk18.GetValueRaw(Attachments.GetReader()):X})");
+            var attachmentEntry = (S282C8080)Attachments.TagData.Unk18.GetValue(Attachments.GetReader());
+            foreach (var entry in attachmentEntry.Unk1D8)
+            {
+                if (entry.Entity is null || entities.Contains(entry.Entity))
+                    continue;
+
+                if (!entry.Transform.Any())
+                    continue;
+
+                Debug.Assert(entry.Transform.Count == 1);
+
+                var offsetTrans = Vector4.Zero;
+                var offsetRot = Vector4.Quaternion;
+
+                var offset = entry.Transform[0];
+                var parentBone = offset.ParentBoneIndex;
+                if (parentBone is not -1 && Skeleton is not null)
+                {
+                    var nodes = Skeleton.GetBoneNodes();
+                    if (nodes.Count >= parentBone)
+                    {
+                        offsetTrans = new(nodes[parentBone].DefaultObjectSpaceTransform.Translation);
+                        offsetRot = nodes[parentBone].DefaultObjectSpaceTransform.QuaternionRotation;
+
+                        Quaternion newRot = offsetRot.ToQuat() * offset.Rotation.ToQuat();
+
+                        offsetTrans += new Vector4(offset.Translation.Z, offset.Translation.X, offset.Translation.Y);
+                        offsetRot = new Vector4(newRot.X, newRot.Y, newRot.Z, newRot.W);
+
+                        //Log.Debug($"{entry.Entity.Hash}, {GlobalStrings.Get().GetString(nodes[parentBone].Hash)}: {offsetTrans} : {Vector4.QuaternionToEulerAngles(offsetRot)}");
+                    }
+                }
+
+                entry.Entity.Load();
+                if (entry.Entity.ModelParent is not null && entry.Entity.Model is not null)
+                {
+                    entry.Entity.Model.TranslationOffset = offsetTrans;
+                    entry.Entity.Model.RotationOffset = offsetRot;
+                }
+
+                entities.Add(entry.Entity);
+            }
+        }
+
         if (EntityChildren2 is not null)
             entities.AddRange(GetEntityChildren2());
 
         if (EntityChildren is null)
             return entities;
 
-        if (Strategy.IsD1())
-        {
-            foreach (S712B8080 entry in ((S0E848080)EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader())).Unk100)
-            {
-                if (entry.Entity is null)
-                    continue;
-                Entity entity = FileResourcer.Get().GetFile<Entity>(entry.Entity);
-                if (entity.HasGeometry())
-                {
-                    //entity.ModelParent = ModelParent;
-                    //var parent = entity.ModelParent.TagData.Meshes.Enumerate(entity.ModelParent.GetReader()).FirstOrDefault().ModelTranslation;
-                    //var offset = entry.Transforms.FirstOrDefault().Translation;
-                    //Console.WriteLine($"Entity {entity.Hash}");
-                    //Console.WriteLine($"ModelParent {parent}");
-                    //Console.WriteLine($"TranslationOffset {offset}");
 
-                    //entity.Model.TranslationOffset = parent + new Vector4(offset.Z, offset.X, offset.Y);
-                    //entity.Model.RotationOffset = entry.Transforms.FirstOrDefault().Rotation;
-                    entities.Add(entity);
-                    //Just in case
-                    foreach (Entity child in entity.GetEntityChildren())
-                        entities.Add(child);
-                }
-            }
-        }
-        else
+        if (EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader()) is S0E848080)
         {
-            if (EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader()) is S0E848080)
+            foreach (S1B848080 entry in ((S0E848080)EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader())).Unk88)
             {
-                foreach (S1B848080 entry in ((S0E848080)EntityChildren.TagData.Unk18.GetValue(EntityChildren.GetReader())).Unk88)
+                foreach (S1D848080 entry2 in entry.Unk08)
                 {
-                    foreach (S1D848080 entry2 in entry.Unk08)
+                    if (entry2.Entity is null)
+                        continue;
+
+                    Entity entity = FileResourcer.Get().GetFile<Entity>(entry2.Entity.Hash);
+                    if (entity.HasGeometry())
                     {
-                        if (entry2.Entity is null)
-                            continue;
-
-                        Entity entity = FileResourcer.Get().GetFile<Entity>(entry2.Entity.Hash);
-                        if (entity.HasGeometry())
-                        {
-                            entities.Add(entity);
-                            //Just in case
-                            foreach (Entity child in entity.GetEntityChildren())
-                                entities.Add(child);
-                        }
+                        entities.Add(entity);
+                        //Just in case
+                        foreach (Entity child in entity.GetEntityChildren())
+                            entities.Add(child);
                     }
                 }
             }

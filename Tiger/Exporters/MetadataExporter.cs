@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Newtonsoft.Json;
+using Tiger.Schema;
 
 namespace Tiger.Exporters;
 
@@ -25,7 +26,7 @@ class MetadataScene
 
     public MetadataScene(ExporterScene scene, Exporter.ExportEventArgs args)
     {
-        ConcurrentDictionary<string, Dictionary<string, string>> parts = new();
+        ConcurrentDictionary<string, JsonPart> parts = new();
         _config.TryAdd("Parts", parts);
         ConcurrentDictionary<string, ConcurrentBag<JsonInstance>> instances = new();
         _config.TryAdd("Instances", instances);
@@ -84,7 +85,11 @@ class MetadataScene
         {
             foreach (ExporterPart part in entityMesh.Mesh.Parts)
             {
-                AddPart(part, part.Name);
+                AddPart(part, part.Name, new MapTransform()
+                {
+                    Translation = entityMesh.TranslationOffset,
+                    Rotation = entityMesh.RotationOffset
+                });
             }
         }
 
@@ -95,14 +100,29 @@ class MetadataScene
         }
     }
 
-    public void AddPart(ExporterPart part, string partName)
+    public void AddPart(ExporterPart part, string partName, MapTransform? offset = null)
     {
         if (!_config["Parts"].ContainsKey(part.SubName))
         {
-            _config["Parts"][part.SubName] = new Dictionary<string, string>();
+            var jsonPart = new JsonPart
+            {
+                TranslationOffset = new float[] { 0, 0, 0 },
+                RotationOffset = new float[] { 0, 0, 0, 1 },
+                PartMaterials = new Dictionary<string, string>()
+            };
+
+            if (offset is not null)
+            {
+                var trans = offset.Value.Translation;
+                var rot = offset.Value.Rotation;
+                jsonPart.TranslationOffset = new float[] { trans.X, trans.Y, trans.Z };
+                jsonPart.RotationOffset = new float[] { rot.X, rot.Y, rot.Z, rot.W };
+            }
+
+            _config["Parts"][part.SubName] = jsonPart;
         }
 
-        _config["Parts"][part.SubName].TryAdd(partName, part.Material?.Hash ?? "");
+        _config["Parts"][part.SubName].PartMaterials[partName] = part.Material?.Hash ?? "";
     }
 
     public void SetType(ExportType type, DataExportType datatype)
@@ -178,27 +198,18 @@ class MetadataScene
             //}
         }
 
-        // Are these needed anymore?
-        // If theres only 1 part, we need to rename it + the instance to the name of the mesh (unreal imports to fbx name if only 1 mesh inside)
-        //if (_config["Parts"].Count == 1)
-        //{
-        //    var part = _config["Parts"][_config["Parts"].Keys[0]];
-        //    //I'm not sure what to do if it's 0, so I guess I'll leave that to fix it in the future if something breakes.
-        //    if (_config["Instances"].Count != 0)
-        //    {
-        //        var instance = _config["Instances"][_config["Instances"].Keys[0]];
-        //        _config["Instances"] = new ConcurrentDictionary<string, ConcurrentBag<JsonInstance>>();
-        //        _config["Instances"][_config["MeshName"]] = instance;
-        //    }
-        //    _config["Parts"] = new ConcurrentDictionary<string, string>();
-        //    _config["Parts"][_config["MeshName"]] = part;
-        //}
-
         string s = JsonConvert.SerializeObject(_config, Formatting.Indented);
         if (_config.ContainsKey("MeshName"))
             File.WriteAllText($"{path}/{_config["MeshName"]}_info.cfg", s);
         else
             File.WriteAllText($"{path}/info.cfg", s);
+    }
+
+    public struct JsonPart
+    {
+        public float[] TranslationOffset;
+        public float[] RotationOffset;  // Quaternion
+        public Dictionary<string, string> PartMaterials;
     }
 
     public struct JsonInstance

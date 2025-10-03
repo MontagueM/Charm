@@ -18,16 +18,17 @@ public class StringHash : TigerHash
 {
     public const uint InvalidHash32 = 0x811c9dc5;
 
+    public StringHash(TigerHash hash) : base(hash.Hash32)
+    {
+        Hash32 = hash.Hash32;
+    }
+
     public StringHash(uint hash32) : base(hash32)
     {
         Hash32 = hash32;
     }
 
     public StringHash() : base(InvalidHash32)
-    {
-    }
-
-    public StringHash(string hash) : base(hash)
     {
     }
 

@@ -1,16 +1,20 @@
-﻿
-using Internal.Fbx;
+﻿using Internal.Fbx;
 
 namespace Tiger.Schema.Entity;
 
 public class EntitySkeleton : EntityResource
 {
+    private List<BoneNode>? _cachedBoneNodes;
+
     public EntitySkeleton(FileHash resource) : base(resource)
     {
     }
 
     public List<BoneNode> GetBoneNodes()
     {
+        if (_cachedBoneNodes != null)
+            return _cachedBoneNodes;
+
         using TigerReader reader = GetReader();
         var nodes = new List<BoneNode>();
 
@@ -46,6 +50,7 @@ public class EntitySkeleton : EntityResource
             for (int i = 0; i < weirdSkeleInfo.NodeHierarchy.Count; i++)
             {
                 BoneNode node = new();
+                node.Index = i;
                 node.ParentNodeIndex = weirdSkeleInfo.NodeHierarchy[reader, i].ParentNodeIndex;
                 node.FirstChildNodeIndex = weirdSkeleInfo.NodeHierarchy[reader, i].FirstChildNodeIndex;
                 node.NextSiblingNodeIndex = weirdSkeleInfo.NodeHierarchy[reader, i].NextSiblingNodeIndex;
@@ -73,7 +78,9 @@ public class EntitySkeleton : EntityResource
                 nodes.Add(node);
             }
         }
-        return nodes;
+
+        _cachedBoneNodes = nodes;
+        return _cachedBoneNodes;
     }
 }
 
