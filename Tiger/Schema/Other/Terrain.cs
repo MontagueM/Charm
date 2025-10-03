@@ -154,14 +154,14 @@ public class Terrain : Tag<STerrain>
             r0.W = 0.000122070313f * r0.Z;
 
             //r1.xyz = float3(0,1,0) * v1.yzx;
-            r1.X = 0 * v1.Y;
-            r1.Y = 1 * v1.Z;
-            r1.Z = 0 * v1.X;
+            r1.X = 0f * v1.Y;
+            r1.Y = 1f * v1.Z;
+            r1.Z = 0f * v1.X;
 
             //r1.xyz = v1.zxy * float3(0,0,1) + -r1.xyz;
-            r1.X = v1.Z * 0 + -r1.X;
-            r1.Y = v1.X * 0 + -r1.Y;
-            r1.Z = v1.Y * 1 + -r1.Z;
+            r1.X = v1.Z * 0f + -r1.X;
+            r1.Y = v1.X * 0f + -r1.Y;
+            r1.Z = v1.Y * 1f + -r1.Z;
 
             //r0.z = dot(r1.yz, r1.yz);
             r0.Z = System.Numerics.Vector2.Dot(new(r1.Y, r1.Z), new(r1.Y, r1.Z));
@@ -189,7 +189,12 @@ public class Terrain : Tag<STerrain>
             r0.Z = System.Numerics.Vector3.Dot(new(r2.X, r2.Y, r2.Z), new(r2.X, r2.Y, r2.Z));
             r0.Z = MathF.ReciprocalSqrtEstimate(r0.Z);
 
-            part.VertexPositions[i] = new Vector4(r0.X, r0.Y, r0.Z * r0.W, r0.W);
+            r1 = new System.Numerics.Vector4(0, 1, 0, 0) * r0.Y;
+            r1 = new System.Numerics.Vector4(1, 0, 0, 0) * r0.X + r1;
+            r0 = new System.Numerics.Vector4(0, 0, 1, 0) * r0.W + r1;
+            r0 = new System.Numerics.Vector4(0, 0, 0, 1) + r0;
+
+            part.VertexPositions[i] = new Vector4(r0.X, r0.Y, r0.Z, r0.W);
         }
     }
 
