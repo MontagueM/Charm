@@ -3286,10 +3286,21 @@ public struct SRenderGlobals
     public Tag<SVertexInputLayouts> InputLayouts;
     //[SchemaField(0x10, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     //public DynamicArrayUnloaded<SRenderGlobalScopes> Scopes;
-    //public DynamicArrayUnloaded<SRenderGlobalPipelines> Pipelines;
+    [SchemaField(0x20)]
+    public DynamicArrayUnloaded<SRenderGlobalPipelines> Pipelines;
     [SchemaField(0x30)]
     public Tag<SGlobalTextures> Textures;
     public Tag<SGlobalChannelDefaults> GlobalChannelDefaults;
+}
+
+[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "A11B8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "B56C8080", 0x10)]
+[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "AC678080", 0x10)]
+public struct SRenderGlobalPipelines
+{
+    public StringPointer Name;
+    [SchemaField(0xC)]
+    public FileHash Technique;
 }
 
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "8080822D", 0x38)]

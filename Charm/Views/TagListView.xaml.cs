@@ -1420,7 +1420,29 @@ public partial class TagListView : UserControl
             ConcurrentHashSet<FileHash> mats = PackageResourcer.Get().GetAllHashes<Material>();
             MainWindow.Progress.CompleteStage();
 
-            Parallel.ForEach(mats, val =>
+            // named render global materials
+            ConcurrentBag<FileHash> _added = new();
+            var globals = Globals.Get().RenderGlobals;
+            Parallel.ForEach(globals.TagData.Pipelines.Enumerate(globals.GetReader()), pipeline =>
+            {
+                if (pipeline.Technique.IsInvalid() || _added.Contains(pipeline.Technique))
+                    return;
+
+                FileMetadata metadata = pipeline.Technique.GetFileMetadata();
+                _allTagItems.Add(new TagItem
+                {
+                    Hash = pipeline.Technique,
+                    Name = $"Pipeline: {pipeline.Name.Value}",
+                    Subname = $"{Helpers.GetReadableSize(metadata.Size)}",
+                    TagType = ETagListType.Material
+                });
+                _added.Add(pipeline.Technique);
+            });
+
+            HashSet<FileHash> remainingVals = new HashSet<FileHash>(mats);
+            remainingVals.ExceptWith(_added);
+
+            Parallel.ForEach(remainingVals, val =>
             {
                 FileMetadata metadata = val.GetFileMetadata();
                 _allTagItems.Add(new TagItem
@@ -1431,6 +1453,7 @@ public partial class TagListView : UserControl
                     TagType = ETagListType.Material
                 });
             });
+
             MainWindow.Progress.CompleteStage();
 
             MakePackageTagItems();
