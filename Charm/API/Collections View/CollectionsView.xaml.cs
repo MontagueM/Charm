@@ -33,11 +33,9 @@ public partial class CollectionsView : UserControl
     {
         LoadCollectibles();
 
-        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Redacted.dll");
-        if (File.Exists(dllPath))
+        if (App.CharmRedacted is not null)
         {
-            var asm = Assembly.LoadFrom(dllPath);
-            var loaderType = asm.GetType("Charm.Redacted.RedactedAPI");
+            var loaderType = App.CharmRedacted.GetType("Charm.Redacted.RedactedAPI");
             if (loaderType != null)
             {
                 RedactedPanel.Visibility = Visibility.Visible;

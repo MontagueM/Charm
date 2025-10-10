@@ -90,6 +90,9 @@ public struct S8F6D8080
     [SchemaField(0x330, TigerStrategy.DESTINY2_LATEST)]
     public Tag<S1C6E8080> TexturePlates;
 
+    //[SchemaField(0x3B8, TigerStrategy.DESTINY2_LATEST)]
+    //public DynamicArray<S91958080> UnkChannels;
+
     [SchemaField(0x230, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x2D0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
     [SchemaField(0x360, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
@@ -150,6 +153,13 @@ public struct S6C6D8080
     [SchemaField(0x420, TigerStrategy.DESTINY2_LATEST)]
     public DynamicArrayUnloaded<S14008080> ExternalMaterials;
 }
+
+//[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "91958080", 0x28)]
+//public struct S91958080
+//{
+//    [SchemaField(0x20)]
+//    public TigerHash ChannelHash;
+//}
 
 [SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "121B8080", 0x30)]
 public struct S121B8080

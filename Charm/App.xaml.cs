@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Xml;
 using ICSharpCode.AvalonEdit.Highlighting;
@@ -16,6 +17,7 @@ namespace Charm;
 public partial class App : Application
 {
     public static ApplicationVersion CurrentVersion = new("3.1.6");
+    public static Assembly? CharmRedacted = null;
 
     private void Application_Startup(object sender, StartupEventArgs e)
     {
@@ -41,12 +43,20 @@ public partial class App : Application
             }
         }
 
-
         using (var reader = XmlReader.Create("HLSLSyntax.xshd"))
         {
             var highlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
             HighlightingManager.Instance.RegisterHighlighting("HLSL", new[] { ".hlsl", ".cg" }, highlighting);
         }
+
+        LoadRedactedDLL();
+    }
+
+    public void LoadRedactedDLL()
+    {
+        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Redacted.dll");
+        if (File.Exists(dllPath))
+            CharmRedacted = Assembly.LoadFrom(dllPath);
     }
 
     bool IsVcRedistInstalled()

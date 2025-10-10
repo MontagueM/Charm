@@ -696,6 +696,9 @@ PS
 
             foreach (DXBCIOSignature i in Inputs)
             {
+                if (shaderType == ShaderType.Terrain)
+                    continue;
+
                 switch (i.GetMaskType())
                 {
                     case "uint":
