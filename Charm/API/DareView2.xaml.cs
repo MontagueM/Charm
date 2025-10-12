@@ -227,10 +227,6 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
                     SortedItems[_trait].Add(item);
                 }
-
-                // this is needed to make sure its ornaments are loaded (if it has any)
-                // which in turn will set the ornaments parent item
-                _ = item.Ornaments;
             }
             MainWindow.Progress.CompleteStage();
         });

@@ -314,7 +314,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
     public async Task<IEnumerable<InventoryItem>> GetInventoryItems()
     {
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 16, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = CancellationToken.None };
         await Parallel.ForEachAsync(_inventoryItems.Values, parallelOptions, async (item, ct) =>
         {
             // todo needs a proper consumer queue
@@ -1182,6 +1182,15 @@ public class InventoryItem : Tag<S9D798080>
     // If this item is an ornament this will be its parent item
     public InventoryItem Parent = null;
 
+    public override void Load(bool force = false)
+    {
+        base.Load(force);
+
+        // this is needed to make sure its ornaments are loaded (if it has any)
+        // which in turn will set the ornaments parent item
+        _ = Ornaments;
+    }
+
     private bool IsItemHolofoil()
     {
         if (!Strategy.IsD1() && _tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk && Unk.Unk10.Any(x => x.Unk00 == 0xF1))
@@ -1358,6 +1367,10 @@ public class InventoryItem : Tag<S9D798080>
                             continue;
 
                         var item = Investment.Get().GetInventoryItem(randomPlugs.PlugInventoryItemIndex);
+                        // hacky and stupid
+                        if (item.Type.Contains("universal ornament", StringComparison.InvariantCultureIgnoreCase) || item.Type == "Armor Ornament")
+                            continue;
+
                         if (item.IsOrnament && !ornaments.Contains(item))
                         {
                             item.Parent = this;
@@ -1372,6 +1385,10 @@ public class InventoryItem : Tag<S9D798080>
                         continue;
 
                     var item = Investment.Get().GetInventoryItem(plug.PlugInventoryItemIndex);
+                    // hacky and stupid
+                    if (item.Type.Contains("universal ornament", StringComparison.InvariantCultureIgnoreCase) || item.Type == "Armor Ornament")
+                        continue;
+
                     if (item.IsOrnament && !ornaments.Contains(item))
                     {
                         item.Parent = this;

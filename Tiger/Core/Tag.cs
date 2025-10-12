@@ -45,7 +45,7 @@ public class Tag<T> : TigerFile where T : struct
         _isLoaded = true;
     }
 
-    public void Load(bool force = false)
+    public virtual void Load(bool force = false)
     {
         if (!_isLoaded || force)
             Deserialize(force);

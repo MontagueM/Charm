@@ -219,7 +219,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 16, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = CancellationToken.None };
         await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
         {
             fileHashes.UnionWith(await Task.Run(() => package.GetAllHashes(schemaType), ct));
@@ -237,7 +237,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
         Parallel.ForEach(_packagesCache.Values, parallelOptions, (package) =>
         {
             fileHashes.UnionWith(package.GetAllHashes(schemaType));
@@ -250,7 +250,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
         IEnumerable<Package> packages = _packagesCache.Values.Where(package => packageFilterFunc(package.PackagePath));
         Parallel.ForEach(packages, parallelOptions, (package) =>
         {
@@ -264,7 +264,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
         IEnumerable<Package> packages = _packagesCache.Values.Where(package => packageFilterFunc(package.PackagePath));
         Parallel.ForEach(packages, parallelOptions, (package) =>
         {
@@ -278,7 +278,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
         IEnumerable<Package> packages = _packagesCache.Values.Where(package => packageFilterFunc(package.PackagePath));
         await Parallel.ForEachAsync(packages, parallelOptions, async (package, ct) =>
         {
@@ -292,7 +292,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         ConcurrentHashSet<FileHash> fileHashes = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
         IEnumerable<Package> packages = _packagesCache.Values.Where(package => packageFilterFunc(package.GetPackageMetadata().Id));
         await Parallel.ForEachAsync(packages, parallelOptions, async (package, ct) =>
         {
@@ -329,7 +329,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         ConcurrentHashSet<PackageActivityEntry> activityEntries = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
         Parallel.ForEach(_packagesCache.Values, parallelOptions, async (package, ct) =>
         {
             activityEntries.UnionWith(package.GetAllActivities());
@@ -357,7 +357,7 @@ public class PackageResourcer : Strategy.StrategistSingleton<PackageResourcer>
     {
         ConcurrentHashSet<PackageActivityEntry> activityEntries = new();
 
-        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = 5, CancellationToken = CancellationToken.None };
+        ParallelOptions parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2, CancellationToken = CancellationToken.None };
         await Parallel.ForEachAsync(_packagesCache.Values, parallelOptions, async (package, ct) =>
         {
             activityEntries.UnionWith(package.GetAllActivities());
