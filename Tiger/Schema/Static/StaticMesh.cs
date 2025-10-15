@@ -125,12 +125,6 @@ public class MeshPart
     }
 }
 
-public struct VertexWeight
-{
-    public IntVector4 WeightValues;
-    public IntVector4 WeightIndices;
-}
-
 public class StaticMesh : Tag<SStaticMesh>
 {
     public StaticMesh(FileHash hash) : base(hash) { }

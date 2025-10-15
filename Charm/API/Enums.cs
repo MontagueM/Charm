@@ -7,7 +7,7 @@ using Tiger.Schema;
 namespace Charm;
 
 // TODO: Find where these indexes actually go?
-// Would be nice if bungie stopped changing these every season :)
+// Would be nice if these stopped changing EVERY UPDATE :)
 public static class DestinyDamageType
 {
     public static DestinyDamageTypeEnum GetDamageType(int index)
@@ -18,27 +18,27 @@ public static class DestinyDamageType
                 return DestinyDamageTypeEnum.None;
 
             case 1492: // TFS
-            case 1893:
+            case 1894:
                 return DestinyDamageTypeEnum.Kinetic;
 
             case 1493: // TFS
-            case 1894:
+            case 1895:
                 return DestinyDamageTypeEnum.Arc;
 
             case 1494: // TFS
-            case 1895:
+            case 1896:
                 return DestinyDamageTypeEnum.Solar;
 
             case 1495: // TFS
-            case 1896:
+            case 1897:
                 return DestinyDamageTypeEnum.Void;
 
             case 1496: // TFS
-            case 1897:
+            case 1898:
                 return DestinyDamageTypeEnum.Stasis;
 
             case 1497: // TFS
-            case 1898:
+            case 1899:
                 return DestinyDamageTypeEnum.Strand;
 
             default:

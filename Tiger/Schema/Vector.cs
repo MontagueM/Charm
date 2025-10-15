@@ -4,6 +4,12 @@ using System.Runtime.InteropServices;
 
 namespace Tiger.Schema;
 
+public struct VertexWeight
+{
+    public IntVector4 WeightValues;
+    public IntVector4 WeightIndices;
+}
+
 /// <summary>
 /// A Map Transfrom
 /// </summary>
