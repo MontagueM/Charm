@@ -49,7 +49,7 @@ namespace Tiger.Schema.Shaders
 
             // Dont export the hlsl if none of the shader related settings are enabled
             // but force export if we're saving from the material viewer
-            if (!_config.GetSaveShaderHLSL() && !_config.GetS2ShaderExportEnabled() && !fromMaterialViewer)
+            if (!_config.GetSaveShaderHLSL() && !_config.GetSBoxExportEnabled() && !fromMaterialViewer)
                 return;
 
             if (Pixel.Shader != null && Pixel.Shader.Hash.IsValid())
@@ -67,7 +67,7 @@ namespace Tiger.Schema.Shaders
                         File.WriteAllText($"{saveDirectory}/Shaders/Unreal/PS_{Pixel.Shader.Hash}.usf", usf);
                     }
 
-                    if (_config.GetS2ShaderExportEnabled())
+                    if (_config.GetSBoxExportEnabled())
                     {
                         string vfx = new S2ShaderConverter().HlslToVfx(this);
                         Directory.CreateDirectory($"{saveDirectory}/Shaders/Source2");
@@ -96,7 +96,7 @@ namespace Tiger.Schema.Shaders
 
             // Dont export the hlsl if none of the shader related settings are enabled
             // but force export if we're saving from the material viewer
-            if (!_config.GetSaveShaderHLSL() && !_config.GetS2ShaderExportEnabled() && !fromMaterialViewer)
+            if (!_config.GetSaveShaderHLSL() && !_config.GetSBoxExportEnabled() && !fromMaterialViewer)
                 return;
 
             if (Vertex.Shader != null && Vertex.Shader.Hash.IsValid())

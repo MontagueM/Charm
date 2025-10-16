@@ -38,10 +38,8 @@ public class UnrealSettings
 // [ConfigSubsystem]
 public class Source2Settings
 {
-    public bool Source2ShaderExportsEnabled { get; set; } = false;
-    public bool Source2VMDLExportsEnabled { get; set; } = false;
-    public bool Source2ResizeTexPow2Enabled { get; set; } = false;
-    public string Source2Path { get; set; } = "";
+    public bool Source2ExportsEnabled { get; set; } = false;
+    //public string Source2Path { get; set; } = "";
 }
 
 // class TypeExtensions
@@ -172,64 +170,42 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     #region source2Path
 
-    public string GetSource2Path()
-    {
-        return _settings.Source2.Source2Path;
-    }
+    //public string GetSource2Path()
+    //{
+    //    return _settings.Source2.Source2Path;
+    //}
 
-    public bool TrySetSource2Path(string path)
-    {
-        if (path == "")
-        {
-            return false;
-        }
+    //public bool TrySetSource2Path(string path)
+    //{
+    //    if (path == "")
+    //    {
+    //        return false;
+    //    }
 
-        if (!path.EndsWith("win64"))
-        {
-            return false;
-        }
+    //    if (!path.EndsWith("win64"))
+    //    {
+    //        return false;
+    //    }
 
-        _settings.Source2.Source2Path = path;
+    //    _settings.Source2.Source2Path = path;
 
-        Save();
-        return true;
-    }
+    //    Save();
+    //    return true;
+    //}
 
     #endregion
 
     #region source2ExportsEnabled
 
-    public void SetS2ShaderExportEnabled(bool bS2ShaderExportEnabled)
+    public void SetSBoxExportEnabled(bool bS2ExportEnabled)
     {
-        _settings.Source2.Source2ShaderExportsEnabled = bS2ShaderExportEnabled;
+        _settings.Source2.Source2ExportsEnabled = bS2ExportEnabled;
         Save();
     }
 
-    public bool GetS2ShaderExportEnabled()
+    public bool GetSBoxExportEnabled()
     {
-        return _settings.Source2.Source2ShaderExportsEnabled;
-    }
-
-    public void SetS2VMDLExportEnabled(bool bS2VMDLExportEnabled)
-    {
-        _settings.Source2.Source2VMDLExportsEnabled = bS2VMDLExportEnabled;
-        Save();
-    }
-
-    public bool GetS2VMDLExportEnabled()
-    {
-        return _settings.Source2.Source2VMDLExportsEnabled;
-    }
-
-    public void SetS2TexPow2Enabled(bool bS2TexPow2Enabled)
-    {
-        _settings.Source2.Source2ResizeTexPow2Enabled = bS2TexPow2Enabled;
-        Save();
-    }
-
-    public bool GetS2TexPow2Enabled()
-    {
-        return _settings.Source2.Source2ResizeTexPow2Enabled;
+        return _settings.Source2.Source2ExportsEnabled;
     }
 
     #endregion
@@ -378,7 +354,7 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     public void SetSaveShaderHLSL(bool val)
     {
-        if (_settings.Source2.Source2ShaderExportsEnabled)
+        if (_settings.Source2.Source2ExportsEnabled)
             val = true;
 
         _settings.Common.SaveShaderHLSL = val;

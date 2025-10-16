@@ -72,7 +72,7 @@ public class Terrain : Tag<STerrain>
                         TransformTexcoords(part);
                         TransformVertexColors(part);
 
-                        if (_config.GetS2ShaderExportEnabled())
+                        if (_config.GetSBoxExportEnabled())
                             Source2Handler.SaveVMAT($"{saveDirectory}", $"{part.Material.Hash}", part.Material, dyeMaps);
 
                         parts.TryAdd(part, partEntry.Material);
@@ -82,7 +82,7 @@ public class Terrain : Tag<STerrain>
 
             scene.AddTerrain($"{Hash}", parts.Keys.ToList(), identifier, i);
 
-            if (_config.GetS2VMDLExportEnabled())
+            if (_config.GetSBoxExportEnabled())
                 Source2Handler.SaveTerrainVMDL($"{Hash}_{i}", saveDirectory, parts.Keys.ToList());
 
             parts.Clear();

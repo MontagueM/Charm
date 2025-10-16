@@ -55,7 +55,7 @@ public class GlobalExporter : AbstractExporter
             {
                 // Not ideal but it works
                 TextureExtractor.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : tex.GetScratchImage());
-                if (_config.GetS2ShaderExportEnabled())
+                if (_config.GetSBoxExportEnabled())
                     Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Atmosphere");
             }
 
@@ -170,7 +170,7 @@ public class GlobalExporter : AbstractExporter
                     continue;
 
                 TextureExtractor.SaveTextureToFile($"{texSavePath}/{tex.Hash}", tex.IsVolume() ? Texture.FlattenVolume(tex.GetScratchImage(true)) : Texture.FlattenCubemap(tex.GetScratchImage()));
-                if (_config.GetS2ShaderExportEnabled())
+                if (_config.GetSBoxExportEnabled())
                     Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Cubemaps");
             }
 
@@ -223,7 +223,7 @@ public class GlobalExporter : AbstractExporter
                     continue;
 
                 tex.SavetoFile($"{texSavePath}/{tex.Hash}");
-                if (_config.GetS2ShaderExportEnabled())
+                if (_config.GetSBoxExportEnabled())
                     Source2Handler.SaveVTEX(tex, $"{texSavePath}", "Lights");
             }
             var jsonSettings = new JsonSerializerSettings

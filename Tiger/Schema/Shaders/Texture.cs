@@ -284,10 +284,10 @@ public class Texture : TigerReferenceFile<STextureHeader>
     public void SavetoFile(string savePath, int index = 0)
     {
         ScratchImage simg = GetScratchImage(index: index);
-        if (ConfigSubsystem.Get().GetS2TexPow2Enabled()) // TODO make not shit
+        if (ConfigSubsystem.Get().GetSBoxExportEnabled()) // TODO make not shit
             simg = ResizeToNearestPowerOf2(simg);
 
-        if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+        if (ConfigSubsystem.Get().GetSBoxExportEnabled())
         {
             if (_tag.LargeTextureBuffer == null) // ??
             {
@@ -301,7 +301,7 @@ public class Texture : TigerReferenceFile<STextureHeader>
             }
         }
 
-        SavetoFile(savePath, simg, GetDimension());// || (IsVolume() && !ConfigSubsystem.Get().GetS2ShaderExportEnabled()));
+        SavetoFile(savePath, simg, GetDimension());// || (IsVolume() && !ConfigSubsystem.Get().GetSBoxExportEnabled()));
     }
 
     public ScratchImage ResizeToNearestPowerOf2(ScratchImage image)

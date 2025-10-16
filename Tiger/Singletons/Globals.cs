@@ -150,7 +150,7 @@ public class Globals : Strategy.StrategistSingleton<Globals>
 
     public List<TfxRenderStage> GetExportStages()
     {
-        if (ConfigSubsystem.Get().GetS2ShaderExportEnabled())
+        if (ConfigSubsystem.Get().GetSBoxExportEnabled())
         {
             return ExportRenderStages.Append(TfxRenderStage.WaterReflection).ToList();
         }

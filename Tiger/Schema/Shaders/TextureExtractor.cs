@@ -60,7 +60,7 @@ public class TextureExtractor
                         Guid guid = TexHelper.Instance.GetWICCodec(WICCodecs.PNG);
                         switch (dimension)
                         {
-                            //case TextureDimension.D3 when ConfigSubsystem.Get().GetS2ShaderExportEnabled():
+                            //case TextureDimension.D3 when ConfigSubsystem.Get().GetSBoxExportEnabled():
                             //    Texture.FlattenVolume(scratchImage).SaveToWICFile(0, WIC_FLAGS.NONE, guid, savePath + ".png");
                             //    break;
                             case TextureDimension.CUBE when scratchImage.GetImageCount() == 6:
@@ -75,7 +75,7 @@ public class TextureExtractor
                     case TextureExportFormat.TGA:
                         switch (dimension)
                         {
-                            //case TextureDimension.D3 when ConfigSubsystem.Get().GetS2ShaderExportEnabled():
+                            //case TextureDimension.D3 when ConfigSubsystem.Get().GetSBoxExportEnabled():
                             //    Texture.FlattenVolume(scratchImage).SaveToTGAFile(0, savePath + ".tga");
                             //    break;
                             case TextureDimension.CUBE when scratchImage.GetImageCount() == 6:

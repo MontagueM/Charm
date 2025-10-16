@@ -24,29 +24,14 @@ public partial class PortingConfigView : UserControl
     {
         S2ConfigPanel.Children.Clear();
 
-        // Enable source 2 shader generation
+        // Enable source 2 asset generation
         ConfigSettingToggleControl cbe = new();
-        cbe.SettingName = "Generate Shaders";
-        bool bval2 = _config.GetS2ShaderExportEnabled();
+        cbe.SettingName = "Generate S&Box Asset Files";
+        cbe.SettingLabel = "Generates shader, material and model files.";
+        bool bval2 = _config.GetSBoxExportEnabled();
         cbe.SettingValue = bval2.ToString();
-        cbe.ChangeButton.Click += S2ShaderExportEnabled_OnClick;
+        cbe.ChangeButton.Click += SBoxExportEnabled_OnClick;
         S2ConfigPanel.Children.Add(cbe);
-
-        // Enable vmdl model generation
-        ConfigSettingToggleControl cfe = new();
-        cfe.SettingName = "Generate Models";
-        bool bval = _config.GetS2VMDLExportEnabled();
-        cfe.SettingValue = bval.ToString();
-        cfe.ChangeButton.Click += S2VMDLExportEnabled_OnClick;
-        S2ConfigPanel.Children.Add(cfe);
-
-        // Resize textures to nearest power of 2
-        ConfigSettingToggleControl pw2 = new();
-        pw2.SettingName = "Resize Textures to Nearest Power of 2";
-        bool bval3 = _config.GetS2TexPow2Enabled();
-        pw2.SettingValue = bval3.ToString();
-        pw2.ChangeButton.Click += S2TexPow2Enabled_OnClick;
-        S2ConfigPanel.Children.Add(pw2);
     }
 
     private void PopulateUEConfigPanel()
@@ -75,26 +60,12 @@ public partial class PortingConfigView : UserControl
         PopulateS2ConfigPanel();
     }
 
-    private void S2ShaderExportEnabled_OnClick(object sender, RoutedEventArgs e)
+    private void SBoxExportEnabled_OnClick(object sender, RoutedEventArgs e)
     {
-        _config.SetS2ShaderExportEnabled(!_config.GetS2ShaderExportEnabled());
-        if (_config.GetS2ShaderExportEnabled())
-        {
-            _config.SetS2TexPow2Enabled(true);
+        _config.SetSBoxExportEnabled(!_config.GetSBoxExportEnabled());
+        if (_config.GetSBoxExportEnabled())
             _config.SetSaveShaderHLSL(true);
-        }
-        PopulateS2ConfigPanel();
-    }
 
-    private void S2VMDLExportEnabled_OnClick(object sender, RoutedEventArgs e)
-    {
-        _config.SetS2VMDLExportEnabled(!_config.GetS2VMDLExportEnabled());
-        PopulateS2ConfigPanel();
-    }
-
-    private void S2TexPow2Enabled_OnClick(object sender, RoutedEventArgs e)
-    {
-        _config.SetS2TexPow2Enabled(!_config.GetS2TexPow2Enabled());
         PopulateS2ConfigPanel();
     }
 

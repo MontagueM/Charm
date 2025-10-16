@@ -65,7 +65,7 @@ public class FbxExporter : AbstractExporter
                 AddMesh(fbxIndivScene, mesh);
                 ExportScene(fbxIndivScene, Path.Join(savePath, mesh.Hash));
 
-                if (_config.GetS2VMDLExportEnabled() && scene.Type != ExportType.Terrain)
+                if (_config.GetSBoxExportEnabled() && scene.Type != ExportType.Terrain)
                 {
                     string fbxPath = scene.DataType == DataExportType.Map ? modelSubDirectory : "Models";
                     Source2Handler.SaveStaticVMDL(savePath, fbxPath, mesh);
@@ -86,7 +86,7 @@ public class FbxExporter : AbstractExporter
                 AddEntity(fbxIndivScene, entity);
                 ExportScene(fbxIndivScene, Path.Join(savePath, entity.Mesh.Hash));
 
-                if (_config.GetS2VMDLExportEnabled() && scene.Type != ExportType.Terrain)
+                if (_config.GetSBoxExportEnabled() && scene.Type != ExportType.Terrain)
                 {
                     string fbxPath = scene.DataType == DataExportType.Map ? modelSubDirectory : "Models";
                     Source2Handler.SaveEntityVMDL(savePath, fbxPath, entity);
