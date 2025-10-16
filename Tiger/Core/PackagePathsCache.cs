@@ -60,7 +60,11 @@ public class PackagePathsCache
     {
         if (IsCacheFileInvalid())
         {
-            Log.Info($"Cache file is invalid, creating new from packages directory '{_packagesDirectory}'.");
+            // Writing directly to console since Log.Info gets held up here, but still want the info in the log file
+            string log = $"Cache file is invalid, creating new cache from packages directory '{_packagesDirectory}'. This may take a few seconds.";
+            Log.Console(log);
+            Log.Info(log);
+
             if (File.Exists("./EntityNames.json")) // Surely this is fine
             {
                 NamedEntities Ents;
