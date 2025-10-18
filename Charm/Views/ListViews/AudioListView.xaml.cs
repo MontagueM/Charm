@@ -69,7 +69,7 @@ public partial class AudioListView : UserControl
 
     public async void LoadContent()
     {
-        MainWindow.Progress.SetProgressStage("Creating Audio List");
+        MainWindow.Progress.SetProgressStage(_loadType == AudioListViewType.Sounds ? "Creating Audio List" : "Loading Soundbanks");
         if (_loadType == AudioListViewType.Sounds)
             await PackageList.MakePackageItems<Wem>();
         else
@@ -85,14 +85,20 @@ public partial class AudioListView : UserControl
         if (PackageList.PackageItems != null)
             return;
 
+        Stopwatch stopwatch = Stopwatch.StartNew();
         await Task.Run(() =>
         {
             PackageList.PackageItems = new();
 
-            HashSet<WwiseSound> banks = PackageResourcer.Get().GetAllFiles<WwiseSound>();
+            var hashes = PackageResourcer.Get().GetAllHashes<WwiseSound>();
 
-            Parallel.ForEach(banks, bank =>
+            stopwatch.Stop();
+            Log.Debug($"Stage 1: Getting all WwiseSound Tags took {stopwatch.Elapsed.TotalSeconds} seconds to process. ({hashes.Count})");
+            stopwatch = Stopwatch.StartNew();
+
+            Parallel.ForEach(hashes, hash =>
             {
+                var bank = FileResourcer.Get().GetFile<WwiseSound>(hash, true, false);
                 if (bank.TagData.Wems.Count > 0)
                 {
                     string name = bank.TagData.GetSoundbank().GetNameFromBank();
@@ -109,9 +115,17 @@ public partial class AudioListView : UserControl
                     });
                 }
             });
+
+            stopwatch.Stop();
+            Log.Debug($"Stage 2: Creating all Bank entries took {stopwatch.Elapsed.TotalSeconds} seconds to process. ({PackageList.PackageItems.Count})");
+            stopwatch = Stopwatch.StartNew();
         });
 
+
         RefreshSoundbankList();
+
+        stopwatch.Stop();
+        Log.Debug($"Stage 3: Refreshing List took {stopwatch.Elapsed.TotalSeconds} seconds to process.");
     }
 
     private void CreateFilterOptions()
@@ -202,7 +216,6 @@ public partial class AudioListView : UserControl
 
             AudioList.ItemsSource = items;
             BulkExportButton.IsEnabled = items.Count > 0;
-            Console.WriteLine(items.Count);
         });
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.IO.Compression;
 using Arithmic;
 using Tiger.Schema;
 using Tiger.Schema.Strings;
@@ -72,13 +73,15 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
     private void AddFromWordlist()
     {
-        if (!File.Exists("./wordlist.txt"))
+        if (!File.Exists("./wordlist.txt.gz"))
             return;
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         string line;
-        using (FileStream fs = new("./wordlist.txt", FileMode.Open, FileAccess.Read, FileShare.Read, 65536, true))
-        using (StreamReader sr = new(fs))
+        //using (FileStream fs = new("./wordlist.txt", FileMode.Open, FileAccess.Read, FileShare.Read, 65536, true))
+        using (var fs = File.OpenRead("./wordlist.txt.gz"))
+        using (var gz = new GZipStream(fs, CompressionMode.Decompress))
+        using (StreamReader sr = new(gz))
         {
             while ((line = sr.ReadLine()) != null)
             {

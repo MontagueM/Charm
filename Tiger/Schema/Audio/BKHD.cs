@@ -14,7 +14,7 @@ public class BKHD : Tag
     private string GetNameFromStringHash()
     {
         using TigerReader reader = GetReader();
-        // Get the size of the BKHD chunk
+
         reader.Seek(0xC, SeekOrigin.Begin);
         var stringHash = new StringHash(reader.ReadUInt32());
 
