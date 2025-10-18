@@ -103,10 +103,12 @@
             Grid.Row="1"
             Background="Transparent"
             BorderThickness="0"
-            ItemTemplate="{StaticResource PackageItemTemplate}">
+            ItemTemplate="{StaticResource PackageItemTemplate}"
+            VirtualizingPanel.IsVirtualizing="True">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <UniformGrid
+                    <!--  HOPEFULLY this doesnt break anything changing from UniformGrid  -->
+                    <VirtualizingStackPanel
                         Grid.Row="0"
                         Width="auto"
                         Height="auto"
@@ -114,7 +116,7 @@
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Top"
                         Background="Transparent"
-                        Columns="1" />
+                        Orientation="Vertical" />
                 </ItemsPanelTemplate>
             </ListView.ItemsPanel>
         </ListView>

@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Arithmic;
+using ConcurrentCollections;
 using NAudio.Wave;
 using Restless.WaveForm.Renderer;
 using Restless.WaveForm.Settings;
@@ -33,16 +34,21 @@ public partial class AudioListView : UserControl
     private ConcurrentBag<AudioItem> Sounds = new();
 
     private int SortByIndex = 5;
+    private PackageItem _currentPkg;
     private Wem _currentSound;
     private WaveStream _currentSoundStream;
 
-    public AudioListView()
+    public AudioListViewType _loadType = AudioListViewType.Sounds;
+
+    public AudioListView(AudioListViewType loadType = AudioListViewType.Sounds)
     {
         InitializeComponent();
 #if DEBUG
         // I can't be asked to fix these seemingly harmless but lag inducing xaml binding errors
         PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
 #endif
+        _loadType = loadType;
+
 
         PackageList.PackageItemChecked += async (s, item) =>
         {
@@ -50,6 +56,9 @@ public partial class AudioListView : UserControl
             await Task.Run(() => LoadAudioList(item));
             MainWindow.Progress.CompleteStage();
         };
+
+        if (_loadType == AudioListViewType.SoundBanks)
+            PackageList.OnSearchBarChanged += (s, e) => RefreshSoundbankList();
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -61,10 +70,48 @@ public partial class AudioListView : UserControl
     public async void LoadContent()
     {
         MainWindow.Progress.SetProgressStage("Creating Audio List");
-        await PackageList.MakePackageItems<Wem>();
+        if (_loadType == AudioListViewType.Sounds)
+            await PackageList.MakePackageItems<Wem>();
+        else
+            await MakeSoundbanks();
+
         MainWindow.Progress.CompleteStage();
 
         CreateFilterOptions();
+    }
+
+    private async Task MakeSoundbanks()
+    {
+        if (PackageList.PackageItems != null)
+            return;
+
+        await Task.Run(() =>
+        {
+            PackageList.PackageItems = new();
+
+            HashSet<WwiseSound> banks = PackageResourcer.Get().GetAllFiles<WwiseSound>();
+
+            Parallel.ForEach(banks, bank =>
+            {
+                if (bank.TagData.Wems.Count > 0)
+                {
+                    string name = bank.TagData.GetSoundbank().GetNameFromBank();
+                    if (name == string.Empty || name is null)
+                        name = bank.TagData.GetSoundbank().Hash;
+
+                    PackageList.PackageItems.Add(new PackageItem
+                    {
+                        Name = name,
+                        ID = bank.Hash.PackageId,
+                        Count = bank.TagData.Wems.Count,
+                        Hashes = new ConcurrentHashSet<FileHash>(bank.TagData.Wems.Where(x => x != null).Select(x => x.Hash)),
+                        Content = PackageItemContents.Sounds
+                    });
+                }
+            });
+        });
+
+        RefreshSoundbankList();
     }
 
     private void CreateFilterOptions()
@@ -95,6 +142,7 @@ public partial class AudioListView : UserControl
         if (Sounds.Count != 0)
             Sounds.Clear();
 
+        _currentPkg = item;
         await Task.Run(() => Parallel.ForEachAsync(item.Hashes, async (hash, ct) =>
         {
             if (hash.GetReferenceHash().IsInvalid())
@@ -158,6 +206,30 @@ public partial class AudioListView : UserControl
         });
     }
 
+    public void RefreshSoundbankList()
+    {
+        if (PackageList.PackageItems == null)
+            return;
+        if (PackageList.PackageItems.IsEmpty)
+            return;
+
+        string searchStr = PackageList.SearchBox.Text;
+        var displayItems = new ConcurrentBag<PackageItem>();
+        Parallel.ForEach(PackageList.PackageItems, pkg =>
+        {
+            if (pkg.Name.Contains(searchStr, StringComparison.InvariantCultureIgnoreCase))
+            {
+                displayItems.Add(pkg);
+            }
+        });
+
+        List<PackageItem> items = displayItems.OrderBy(x => x.Name).ToList();
+        Dispatcher.Invoke(() =>
+        {
+            PackageList.PackageListView.ItemsSource = items;
+        });
+    }
+
     private void Audio_OnClick(object sender, RoutedEventArgs e)
     {
         if ((sender as RadioButton) is null)
@@ -207,7 +279,8 @@ public partial class AudioListView : UserControl
         if (AudioList.ItemsSource is not IEnumerable<AudioItem> items || !items.Any())
             return;
 
-        string pkgName = PackageResourcer.Get().GetPackage(items.First().Hash.PackageId).GetPackageMetadata().Name.Split(".")[0];
+        //string pkgName = PackageResourcer.Get().GetPackage(items.First().Hash.PackageId).GetPackageMetadata().Name.Split(".")[0];
+        string pkgName = _currentPkg.Name;
         string savePath = Config.GetExportSavePath() + $"/Sound/{pkgName}";
         Directory.CreateDirectory(savePath);
 
@@ -240,7 +313,8 @@ public partial class AudioListView : UserControl
 
         Wem wem = _currentSound;
 
-        string pkgName = PackageResourcer.Get().GetPackage(wem.Hash.PackageId).GetPackageMetadata().Name.Split(".")[0];
+        string pkgName = _currentPkg.Name;
+
         string savePath = Config.GetExportSavePath() + $"/Sound/{pkgName}";
         Directory.CreateDirectory(savePath);
 
@@ -537,6 +611,12 @@ public partial class AudioListView : UserControl
 
         public static SineSettings CreatePreview() => new SineSettings(800, 200);
         public static SineSettings CreateExport() => new SineSettings(4096, 1024);
+    }
+
+    public enum AudioListViewType
+    {
+        Sounds,
+        SoundBanks,
     }
 }
 

@@ -144,9 +144,9 @@ public partial class MainMenuView : UserControl
 
     private void AllBKHDViewButton_OnClick(object sender, RoutedEventArgs e)
     {
-        TagListViewerView tagListView = new();
-        tagListView.LoadContent(ETagListType.BKHDGroupList);
-        _mainWindow.MakeNewTab("Sound Banks", tagListView);
+        AudioListView audioListView = new(AudioListView.AudioListViewType.SoundBanks);
+        audioListView.LoadContent();
+        _mainWindow.MakeNewTab("Sound Banks", audioListView);
         _mainWindow.SetNewestTabSelected();
     }
 

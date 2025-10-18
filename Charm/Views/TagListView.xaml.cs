@@ -81,15 +81,6 @@ public enum ETagListType
     [Description("Music [Final]")]
     Music,
 
-    [Description("BKHD Group List")]
-    BKHDGroupList,
-    [Description("BKHD Group [Final]")]
-    BKHDGroup,
-    [Description("Weapon Audio List")]
-    BKHDAudioList,
-    [Description("Weapon Audio [Final]")]
-    BKHDAudio,
-
     [Description("Material List [Packages]")]
     MaterialList,
     [Description("Material [Final]")]
@@ -229,15 +220,7 @@ public partial class TagListView : UserControl
                 case ETagListType.Material:
                     LoadMaterial(contentValue as FileHash);
                     break;
-                case ETagListType.BKHDGroupList:
-                    await LoadBKHDGroupList();
-                    break;
-                case ETagListType.BKHDGroup:
-                    LoadBKHDAudioGroup(contentValue as FileHash);
-                    break;
-                case ETagListType.BKHDAudioList:
-                    LoadBKHDAudioList(contentValue as FileHash);
-                    break;
+
                 default:
                     throw new NotImplementedException();
             }
@@ -1234,71 +1217,6 @@ public partial class TagListView : UserControl
     #endregion
 
     #region Sound
-
-    // TODO, make as a list view
-    private async Task LoadBKHDGroupList()
-    {
-        MainWindow.Progress.SetProgressStages(new List<string>
-        {
-            "Loading Sound Banks",
-        });
-
-        await Task.Run(() =>
-        {
-            HashSet<WwiseSound> banks = PackageResourcer.Get().GetAllFiles<WwiseSound>();
-            _allTagItems = new ConcurrentBag<TagItem>();
-
-            Parallel.ForEach(banks, bank =>
-            {
-                if (bank.TagData.Wems.Count > 0)
-                {
-                    string name = bank.TagData.GetSoundbank().GetNameFromBank();
-
-                    _allTagItems.Add(new TagItem
-                    {
-                        Hash = bank.Hash,
-                        Name = name,
-                        Subname = $"{bank.TagData.Wems.Count} Sounds",
-                        TagType = ETagListType.BKHDGroup
-                    });
-                }
-            });
-        });
-
-        MainWindow.Progress.CompleteStage();
-        RefreshItemList();
-    }
-
-    private void LoadBKHDAudioGroup(FileHash hash)
-    {
-        TagView viewer = GetViewer();
-        SetViewer(TagView.EViewerType.TagList);
-        viewer.TagListControl.LoadContent(ETagListType.BKHDAudioList, hash, true);
-        viewer.MusicPlayer.Visibility = Visibility.Visible;
-    }
-
-    private void LoadBKHDAudioList(FileHash hash)
-    {
-        _allTagItems = new ConcurrentBag<TagItem>();
-        WwiseSound bank = FileResourcer.Get().GetFile<WwiseSound>(hash);
-
-        Parallel.ForEach(bank.TagData.Wems, wem =>
-        {
-            if (wem is null || wem.GetData().Length == 1)
-                return;
-
-            _allTagItems.Add(new TagItem
-            {
-                Name = wem.Hash,
-                Hash = wem.Hash,
-                Subname = wem.Duration,
-                TagType = ETagListType.Sound
-            });
-        });
-
-        RefreshItemList();
-    }
-
     private void LoadSound(FileHash fileHash)
     {
         TagView viewer = GetViewer();

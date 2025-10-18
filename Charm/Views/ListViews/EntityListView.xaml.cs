@@ -440,7 +440,10 @@ public partial class EntityListView : UserControl
         });
 
         List<PackageItem> items = displayItems.OrderBy(x => x.Name).ToList();
-        PackageList.PackageListView.ItemsSource = items;
+        Dispatcher.Invoke(() =>
+        {
+            PackageList.PackageListView.ItemsSource = items;
+        });
     }
 
     private async void Tag_Loaded(object sender, RoutedEventArgs e)

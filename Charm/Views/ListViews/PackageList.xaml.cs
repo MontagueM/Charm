@@ -119,7 +119,10 @@ public partial class PackageList : UserControl
         });
 
         List<PackageItem> items = displayItems.OrderBy(x => x.Name).ToList();
-        PackageListView.ItemsSource = items;
+        Dispatcher.Invoke(() =>
+        {
+            PackageListView.ItemsSource = items;
+        });
     }
 
     private void PackageItem_Checked(object sender, RoutedEventArgs e)
