@@ -72,6 +72,7 @@ public partial class ActivityView : UserControl
     public void Dispose()
     {
         MapControl.Dispose();
+        MapEntityControl.Dispose();
         MusicControl.TagList.TagView.MusicControl.WemsControl.MusicPlayer.Dispose();
     }
 }

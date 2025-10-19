@@ -732,4 +732,10 @@ public partial class EntityListView : UserControl
 
         return Ents.EntityNames[Strategy.CurrentStrategy];
     }
+
+    public void Dispose()
+    {
+        MainViewModel MVM = (MainViewModel)EntityViewer.ModelView.UCModelView.Resources["MVM"];
+        MVM.Dispose();
+    }
 }
