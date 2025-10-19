@@ -193,7 +193,7 @@ public class GlobalExporter : AbstractExporter
             foreach (Lights.LightData light in GlobalScene.GetAllOfType<Lights.LightData>())
             {
                 // this is so stupid...but ensures theres no accidental overwrites with mismatches
-                uint hash = Helpers.Fnv($"{light.LightType}{light.Material}{light.Hash}");
+                uint hash = Helpers.Fnv1a32($"{light.LightType}{light.Material}{light.Hash}");
                 LightData lightData = data.GetOrAdd($"{light.LightType}_{hash.ToString("X")}", _ => new LightData
                 {
                     Type = light.LightType.ToString(),

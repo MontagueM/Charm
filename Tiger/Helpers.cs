@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Buffers;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
@@ -82,7 +83,7 @@ public static class Helpers
         Debug.Assert(strideBound + 4 >= offset);
     }
 
-    public static uint Fnv(string fnvString, bool le = false)
+    public static uint Fnv1a32(string fnvString, bool le = false)
     {
         uint value = 0x811c9dc5;
         for (int i = 0; i < fnvString.Length; i++)
@@ -98,6 +99,17 @@ public static class Helpers
         }
         else
             return value;
+    }
+
+    public static void EnsureCapacity(ref byte[] buf, int required, ArrayPool<byte> pool)
+    {
+        if (buf.Length >= required) return;
+        int newSize = buf.Length * 2;
+        while (newSize < required) newSize *= 2;
+        byte[] newBuf = pool.Rent(newSize);
+        Buffer.BlockCopy(buf, 0, newBuf, 0, buf.Length);
+        pool.Return(buf);
+        buf = newBuf;
     }
 
     public static string SanitizeString(string input, string replacement = "_")

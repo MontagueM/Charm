@@ -319,10 +319,11 @@
                     Grid.Row="1"
                     Background="Transparent"
                     BorderThickness="0"
-                    ItemTemplate="{StaticResource WeaponItemTemplate}">
+                    ItemTemplate="{StaticResource WeaponItemTemplate}"
+                    VirtualizingPanel.IsVirtualizing="True">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <UniformGrid
+                            <VirtualizingStackPanel
                                 Grid.Row="0"
                                 Width="auto"
                                 Height="auto"
@@ -330,7 +331,7 @@
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Top"
                                 Background="Transparent"
-                                Columns="1" />
+                                Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>

@@ -1,6 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Text;
 using Arithmic;
 using Tiger.Schema;
 using Tiger.Schema.Strings;
@@ -19,7 +21,7 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
     private readonly ConcurrentDictionary<StringHash, List<StringBiasView>> _strings = new();
     private readonly ConcurrentBag<TigerHash> _addedLocalizedStrings = new();
     private readonly ConcurrentBag<TigerHash> _localizedStringsBias = new();
-    private ConcurrentDictionary<uint, string> _wordlistStrings { get; set; } = new();
+    private readonly Dictionary<uint, string> _wordlistStrings = new Dictionary<uint, string>();
 
 
     protected override void Initialise()
@@ -71,23 +73,88 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         _wordlistStrings.Clear();
     }
 
+    private const int FileStreamBuffer = 1 << 20;   // 1 MiB file buffer
+    private const int ReadBuffer = 1 << 16;         // 64 KiB read buffer
     private void AddFromWordlist()
     {
-        if (!File.Exists("./wordlist.txt.gz"))
-            return;
-
-        Stopwatch stopwatch = Stopwatch.StartNew();
-        string line;
-        //using (FileStream fs = new("./wordlist.txt", FileMode.Open, FileAccess.Read, FileShare.Read, 65536, true))
-        using (var fs = File.OpenRead("./wordlist.txt.gz"))
-        using (var gz = new GZipStream(fs, CompressionMode.Decompress))
-        using (StreamReader sr = new(gz))
+        const string path = "./wordlist.txt.gz";
+        if (!File.Exists(path))
         {
-            while ((line = sr.ReadLine()) != null)
+            Log.Info($"Wordlist not found, skipping");
+            return;
+        }
+
+        var stopwatch = Stopwatch.StartNew();
+
+        using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
+                                      bufferSize: FileStreamBuffer, options: FileOptions.SequentialScan);
+        using var gz = new GZipStream(fs, CompressionMode.Decompress, leaveOpen: false);
+
+        var pool = ArrayPool<byte>.Shared;
+        byte[] readBuf = pool.Rent(ReadBuffer);
+        byte[] lineBuf = pool.Rent(ReadBuffer * 4);
+        int lineBufLen = 0;
+
+        try
+        {
+            int bytesRead;
+            while ((bytesRead = gz.Read(readBuf, 0, readBuf.Length)) > 0)
             {
-                _wordlistStrings.TryAdd(Helpers.Fnv(line), line);
+                int pos = 0;
+                while (pos < bytesRead)
+                {
+                    int nl = Array.IndexOf(readBuf, (byte)'\n', pos, bytesRead - pos);
+                    if (nl == -1)
+                    {
+                        Helpers.EnsureCapacity(ref lineBuf, lineBufLen + (bytesRead - pos), pool);
+                        Buffer.BlockCopy(readBuf, pos, lineBuf, lineBufLen, bytesRead - pos);
+                        lineBufLen += bytesRead - pos;
+                        break;
+                    }
+                    else
+                    {
+                        int chunkLen = nl - pos;
+                        Helpers.EnsureCapacity(ref lineBuf, lineBufLen + chunkLen, pool);
+                        Buffer.BlockCopy(readBuf, pos, lineBuf, lineBufLen, chunkLen);
+                        lineBufLen += chunkLen;
+
+                        int actualLen = lineBufLen;
+                        if (actualLen > 0 && lineBuf[actualLen - 1] == (byte)'\r')
+                            actualLen--;
+
+                        string s = Encoding.UTF8.GetString(lineBuf, 0, actualLen);
+                        uint hash = Helpers.Fnv1a32(s);
+                        if (!_wordlistStrings.ContainsKey(hash))
+                        {
+                            _wordlistStrings.Add(hash, s);
+                        }
+
+                        lineBufLen = 0;
+                        pos = nl + 1;
+                    }
+                }
+            }
+
+            if (lineBufLen > 0)
+            {
+                int actualLen = lineBufLen;
+                if (actualLen > 0 && lineBuf[actualLen - 1] == (byte)'\r')
+                    actualLen--;
+
+                string s = Encoding.UTF8.GetString(lineBuf, 0, actualLen);
+                uint hash = Helpers.Fnv1a32(s);
+                if (!_wordlistStrings.ContainsKey(hash))
+                {
+                    _wordlistStrings.Add(hash, s);
+                }
             }
         }
+        finally
+        {
+            pool.Return(readBuf);
+            pool.Return(lineBuf);
+        }
+
         stopwatch.Stop();
         Log.Info($"Parsed Wordlist: {stopwatch.ElapsedMilliseconds}ms ({_wordlistStrings.Count} lines)");
     }

@@ -512,7 +512,7 @@ namespace Tiger.Schema.Activity.DESTINY2_BEYONDLIGHT_3402 // BL + all the way to
                                 {
                                     if (a.Unk00.Value?.Name.Value is not null)
                                     {
-                                        strings.TryAdd(Helpers.Fnv(a.Unk00.Value.Value.Name.Value), a.Unk00.Value.Value.Name.Value);
+                                        strings.TryAdd(Helpers.Fnv1a32(a.Unk00.Value.Value.Name.Value), a.Unk00.Value.Value.Name.Value);
                                     }
                                 }
                                 foreach (var worldid in resourceValue.Unk58)
