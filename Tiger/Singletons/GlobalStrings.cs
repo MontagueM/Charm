@@ -9,74 +9,19 @@ using Tiger.Schema.Strings;
 
 namespace Tiger;
 
-[InitializeAfter(typeof(Hash64Map))]
-public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
+public static class Wordlist
 {
-    struct StringBiasView
-    {
-        public string String;
-        public TigerHash ContainerHash;
-    }
-
-    private readonly ConcurrentDictionary<StringHash, List<StringBiasView>> _strings = new();
-    private readonly ConcurrentBag<TigerHash> _addedLocalizedStrings = new();
-    private readonly ConcurrentBag<TigerHash> _localizedStringsBias = new();
-    private readonly Dictionary<uint, string> _wordlistStrings = new Dictionary<uint, string>();
-
-
-    protected override void Initialise()
-    {
-        AddFromWordlist();
-
-        if (Strategy.IsD1())
-        {
-            ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S50058080>();
-            Parallel.ForEach(vals, val =>
-            {
-                Tag<S50058080> tag = FileResourcer.Get().GetSchemaTag<S50058080>(val);
-                AddStrings(tag.TagData.CharacterNames);
-                AddStrings(tag.TagData.ActivityGlobalStrings);
-            });
-        }
-        // surely this is fine..
-        else
-        {
-            ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S02218080>(); //TODO: Beyond Light
-            Parallel.ForEach(vals, val =>
-            {
-                Tag<S02218080> tag = FileResourcer.Get().GetSchemaTag<S02218080>(val);
-                foreach (S0E3C8080 entry in tag.TagData.Unk28)
-                {
-                    if (Strategy.IsPostBL() && entry.Unk10 is not null && entry.Unk10.Hash.GetReferenceHash() == 0x808099EF) // EF998080
-                    {
-                        AddStrings(FileResourcer.Get().GetFile<LocalizedStrings>(entry.Unk10.Hash));
-                    }
-                    else if (Strategy.IsBL() && entry.Unk00 is not null)
-                    {
-                        Tag<S8080760A> tag2 = FileResourcer.Get().GetSchemaTag<S8080760A>(entry.Unk00.Hash);
-                        if (tag2.TagData.Container is not null && tag2.TagData.Container.Hash.GetReferenceHash() == 0x808099EF)
-                            AddStrings(FileResourcer.Get().GetFile<LocalizedStrings>(tag2.TagData.Container.Hash));
-                    }
-                    else if (Strategy.IsPreBL() && entry.Unk00 is not null && entry.Unk00.Hash.GetReferenceHash() == 0x80809A88)
-                    {
-                        AddStrings(FileResourcer.Get().GetFile<LocalizedStrings>(entry.Unk00.Hash));
-                    }
-                }
-            });
-        }
-    }
-
-    protected override void Reset()
-    {
-        _strings.Clear();
-        _localizedStringsBias.Clear();
-        _wordlistStrings.Clear();
-    }
-
+    private static readonly Dictionary<uint, string> _strings = new Dictionary<uint, string>();
     private const int FileStreamBuffer = 1 << 20;   // 1 MiB file buffer
     private const int ReadBuffer = 1 << 16;         // 64 KiB read buffer
-    private void AddFromWordlist()
+
+    public static Dictionary<uint, string> Strings => _strings;
+
+    public static void AddFromWordlist()
     {
+        if (_strings.Count > 0) // Already filled, dont fill when changing versions as its a waste of time.
+            return;
+
         const string path = "./wordlist.txt.gz";
         if (!File.Exists(path))
         {
@@ -124,9 +69,9 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
                         string s = Encoding.UTF8.GetString(lineBuf, 0, actualLen);
                         uint hash = Helpers.Fnv1a32(s);
-                        if (!_wordlistStrings.ContainsKey(hash))
+                        if (!_strings.ContainsKey(hash))
                         {
-                            _wordlistStrings.Add(hash, s);
+                            _strings.Add(hash, s);
                         }
 
                         lineBufLen = 0;
@@ -143,9 +88,9 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
                 string s = Encoding.UTF8.GetString(lineBuf, 0, actualLen);
                 uint hash = Helpers.Fnv1a32(s);
-                if (!_wordlistStrings.ContainsKey(hash))
+                if (!_strings.ContainsKey(hash))
                 {
-                    _wordlistStrings.Add(hash, s);
+                    _strings.Add(hash, s);
                 }
             }
         }
@@ -156,7 +101,70 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
         }
 
         stopwatch.Stop();
-        Log.Info($"Parsed Wordlist: {stopwatch.ElapsedMilliseconds}ms ({_wordlistStrings.Count} lines)");
+        Log.Info($"Parsed Wordlist: {stopwatch.ElapsedMilliseconds}ms ({_strings.Count} lines)");
+    }
+
+}
+
+[InitializeAfter(typeof(Hash64Map))]
+public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
+{
+    struct StringBiasView
+    {
+        public string String;
+        public TigerHash ContainerHash;
+    }
+
+    private readonly ConcurrentDictionary<StringHash, List<StringBiasView>> _strings = new();
+    private readonly ConcurrentBag<TigerHash> _addedLocalizedStrings = new();
+    private readonly ConcurrentBag<TigerHash> _localizedStringsBias = new();
+
+    protected override void Initialise()
+    {
+        Wordlist.AddFromWordlist();
+
+        if (Strategy.IsD1())
+        {
+            ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S50058080>();
+            Parallel.ForEach(vals, val =>
+            {
+                Tag<S50058080> tag = FileResourcer.Get().GetSchemaTag<S50058080>(val);
+                AddStrings(tag.TagData.CharacterNames);
+                AddStrings(tag.TagData.ActivityGlobalStrings);
+            });
+        }
+        // surely this is fine..
+        else
+        {
+            ConcurrentCollections.ConcurrentHashSet<FileHash> vals = PackageResourcer.Get().GetAllHashes<S02218080>(); //TODO: Beyond Light
+            Parallel.ForEach(vals, val =>
+            {
+                Tag<S02218080> tag = FileResourcer.Get().GetSchemaTag<S02218080>(val);
+                foreach (S0E3C8080 entry in tag.TagData.Unk28)
+                {
+                    if (Strategy.IsPostBL() && entry.Unk10 is not null && entry.Unk10.Hash.GetReferenceHash() == 0x808099EF) // EF998080
+                    {
+                        AddStrings(FileResourcer.Get().GetFile<LocalizedStrings>(entry.Unk10.Hash));
+                    }
+                    else if (Strategy.IsBL() && entry.Unk00 is not null)
+                    {
+                        Tag<S8080760A> tag2 = FileResourcer.Get().GetSchemaTag<S8080760A>(entry.Unk00.Hash);
+                        if (tag2.TagData.Container is not null && tag2.TagData.Container.Hash.GetReferenceHash() == 0x808099EF)
+                            AddStrings(FileResourcer.Get().GetFile<LocalizedStrings>(tag2.TagData.Container.Hash));
+                    }
+                    else if (Strategy.IsPreBL() && entry.Unk00 is not null && entry.Unk00.Hash.GetReferenceHash() == 0x80809A88)
+                    {
+                        AddStrings(FileResourcer.Get().GetFile<LocalizedStrings>(entry.Unk00.Hash));
+                    }
+                }
+            });
+        }
+    }
+
+    protected override void Reset()
+    {
+        _strings.Clear();
+        _localizedStringsBias.Clear();
     }
 
     public string GetString(TigerHash hash)
@@ -179,7 +187,7 @@ public class GlobalStrings : Strategy.StrategistSingleton<GlobalStrings>
 
             return sv[0].String;
         }
-        else if (_wordlistStrings.TryGetValue(hash.Hash32, out string value))
+        else if (Wordlist.Strings.TryGetValue(hash.Hash32, out string value))
             return value;
 
         return hash;
