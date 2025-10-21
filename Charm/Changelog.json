@@ -1,5 +1,25 @@
 [
     {
+        "version": "3.1.7",
+        "date": "10-21-2025",
+        "changes": [
+            {
+                "title": "Fixes",
+                "notes": [
+                    "Fixed some D1 Age of Triumphs ornaments not appearing the API view.",
+                    "Fixed a small terrain vertex position calculation error.",
+                    "Misc under the hood changes."
+                ]
+            },
+            {
+                "title": "Additions",
+                "notes": [
+                    "The Soundbank Viewer is now similar to the current Sound Viewer."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.1.6",
         "date": "10-03-2025",
         "changes": [
