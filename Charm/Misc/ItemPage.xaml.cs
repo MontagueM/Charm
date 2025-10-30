@@ -32,6 +32,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
     private bool _selectOnPageChange = true;
     private float _slideDistance = 3.0f;
     private float _transitionSpeed = 0.075f;
+    private bool _fadeInOnLoad = true;
     #endregion
 
     public static readonly DependencyProperty ItemsProperty = DependencyProperty.Register(
@@ -297,6 +298,22 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Fade in on first time load
+    /// </summary>
+    public bool FadeInOnLoad
+    {
+        get => _fadeInOnLoad;
+        set
+        {
+            if (_fadeInOnLoad != value)
+            {
+                _fadeInOnLoad = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public static readonly DependencyProperty ItemTemplateProperty =
        DependencyProperty.Register(nameof(ItemTemplate), typeof(DataTemplate), typeof(ItemPage), new PropertyMetadata(null));
 
@@ -399,7 +416,7 @@ public partial class ItemPage : UserControl, INotifyPropertyChanged
 
         await Dispatcher.InvokeAsync(() =>
         {
-            if (fromStart)
+            if (fromStart && FadeInOnLoad)
                 UIHelper.AnimateFade(ItemList, TransitionSpeed * 2, 1f, 0);
 
             TotalPages = totalPages;

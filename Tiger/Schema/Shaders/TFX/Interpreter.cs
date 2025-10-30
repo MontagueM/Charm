@@ -784,6 +784,11 @@ public class TfxBytecodeInterpreter
     /// <returns></returns>
     public bool CanInlineBytecode()
     {
+        //TODO or something: Material expressions were removed in S&Box :))))
+        // Idfk why they removed them, so they all have to be inlined into the shader itself now.
+        // I LOOOVE having unnecessary duplicate shaders!!
+        return true;
+
         if (Opcodes.Count > 100 ||
             (Opcodes.Exists(x => x.op == TfxBytecode.Spline4Const) ||
             Opcodes.Exists(x => x.op == TfxBytecode.Spline8Const) ||

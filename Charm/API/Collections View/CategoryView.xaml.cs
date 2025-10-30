@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,8 +24,6 @@ public partial class CategoryView : UserControl
     private DynamicArray<SDB788080> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
     private DynamicArray<S07588080> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
 
-    private Type _redacted = null;
-
     public CategoryView(Category itemCategory)
     {
 #if DEBUG
@@ -36,13 +33,6 @@ public partial class CategoryView : UserControl
         DataContext = itemCategory;
         InitializeComponent();
         LoadCategories(itemCategory);
-
-        string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Charm.Redacted.dll");
-        if (File.Exists(dllPath))
-        {
-            var asm = Assembly.LoadFrom(dllPath);
-            _redacted = asm.GetType("Charm.Redacted.RedactedAPI");
-        }
     }
 
     private void OnControlLoaded(object sender, RoutedEventArgs routedEventArgs)
@@ -160,10 +150,14 @@ public partial class CategoryView : UserControl
             Debug.Assert((recordCount > 0) != (collectibleCount > 0) != (presCount > 0));
         }
 
-        if (_redacted != null)
+        if (App.CharmRedacted is not null)
         {
-            dynamic loader = Activator.CreateInstance(_redacted);
-            loader.LoadCategoryViewRecords(this, items, index);
+            var loaderType = App.CharmRedacted.GetType("Charm.Redacted.RedactedAPI");
+            if (loaderType != null)
+            {
+                dynamic loader = Activator.CreateInstance(loaderType);
+                loader.LoadCategoryViewRecords(this, items, index);
+            }
         }
 
         // Collectibles

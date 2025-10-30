@@ -84,7 +84,6 @@ public static class Source2Handler
 
         Directory.CreateDirectory(path);
         StringBuilder vmat = new();
-        StringBuilder expressions = new();
 
         vmat.AppendLine("Layer0\n{");
 
@@ -147,12 +146,7 @@ public static class Source2Handler
                                     else
                                         vmat.AppendLine($"\tPS_TextureT{slot} \"[1.000000 1.000000 1.000000 1.000000]\"");
                                     break;
-                                case 0xE0:
-                                    expressions.AppendLine($"\t\tPS_TextureT1 \"AtmosFar\"");
-                                    break;
-                                case 0xF0:
-                                    expressions.AppendLine($"\t\tPS_TextureT2 \"AtmosNear\"");
-                                    break;
+
                             }
                             break;
 
@@ -170,134 +164,8 @@ public static class Source2Handler
             }
         }
 
-        vmat.AppendLine(PopulateCBuffers(material).ToString()); // PS
-        vmat.AppendLine(PopulateCBuffers(material, true).ToString()); // VS
-
-        // PS Dynamic expressions
-        TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(material.Pixel.TFX_Bytecode));
-
-        vmat.AppendLine($"\tDynamicParams\r\n\t{{");
-
-        if (!bytecode.CanInlineBytecode())
-        {
-            Dictionary<int, string> bytecode_hlsl = bytecode.Evaluate(material.Pixel.TFX_Bytecode_Constants, false, material);
-            string temp_time_fix = $"CurTime = exists(CurrentTime) ? CurrentTime : Time;";
-            foreach (KeyValuePair<int, string> entry in bytecode_hlsl)
-            {
-                string expression = (entry.Value.Contains("Time") && !entry.Value.Contains("FrameTimeOfDay")) ? $"{temp_time_fix} return {entry.Value.Replace("Time", "CurTime")};" : entry.Value;
-                vmat.AppendLine($"\t\tcb0_{entry.Key} \"{expression}\"");
-            }
-        }
-
-        foreach (TfxScope scope in material.EnumerateScopes())
-        {
-            switch (scope)
-            {
-                case TfxScope.TRANSPARENT:
-                    vmat.AppendLine($"\t\tPS_TextureT11 \"AtmosFar\"");
-                    vmat.AppendLine($"\t\tPS_TextureT13 \"AtmosNear\"");
-                    vmat.AppendLine($"\t\tPS_TextureT15 \"AtmosDensity\"");
-                    break;
-            }
-        }
-
-        foreach (DXBCShaderResource resource in material.Pixel.Shader.Resources)
-        {
-            if (resource.ResourceType == Schema.ResourceType.CBuffer)
-            {
-                switch (resource.Index)
-                {
-                    case 2: // Transparent
-                        if (material.EnumerateScopes().Contains(TfxScope.TRANSPARENT))
-                        {
-                            for (int i = 0; i < resource.Count; i++)
-                            {
-                                if (i == 0)
-                                    vmat.AppendLine($"\t\tcb2_{i} \"float4(0,100,0,0)\"");
-                                else
-                                    vmat.AppendLine($"\t\tcb2_{i} \"float4(1,1,1,1)\"");
-                            }
-                        }
-                        break;
-                    case 8: // Transparent_Advanced
-                        if (material.EnumerateScopes().Contains(TfxScope.TRANSPARENT_ADVANCED))
-                        {
-                            vmat.AppendLine($"\t\tcb8_0 \"float4(0.0009849314,0.0019836868,0.0007783567,0.0015586712)\"");
-                            vmat.AppendLine($"\t\tcb8_1 \"float4(0.00098604,0.002085914,0.0009838239,0.0018864698)\"");
-                            vmat.AppendLine($"\t\tcb8_2 \"float4(0.0011860824,0.0024346288,0.0009468408,0.001850187)\"");
-                            vmat.AppendLine($"\t\tcb8_3 \"float4(0.7903466, 0.7319064, 0.56213695, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_4 \"float4(0.0, 1.0, 0.109375, 0.046875)\"");
-                            vmat.AppendLine($"\t\tcb8_5 \"float4(0.0, 0.0, 0.0, 0.00086945295)\"");
-                            vmat.AppendLine($"\t\tcb8_6 \"float4(0.05, 0.05, 0.05, 0.5)\""); // Main Tint? // float4(0.55, 0.41091052, 0.22670946, 0.50381273)
-                            vmat.AppendLine($"\t\tcb8_7 \"float4(1.0, 1.0, 1.0, 0.9997778)\""); // Cubemap Reflection Tint?
-                            vmat.AppendLine($"\t\tcb8_8 \"float4(132.92885, 66.40444, 56.853416, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_9 \"float4(132.92885, 66.40444, 1000.0, 0.0001)\"");
-                            vmat.AppendLine($"\t\tcb8_10 \"float4(131.92885, 65.40444, 55.853416, 0.6784314)\"");
-                            vmat.AppendLine($"\t\tcb8_11 \"float4(131.92885, 65.40444, 999.0, 5.5)\"");
-                            vmat.AppendLine($"\t\tcb8_12 \"float4(0.0, 0.5, 25.575994, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_13 \"float4(0.0, 0.0, 0.0, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_14 \"float4(0.025, 10000.0, -9999.0, 1.0)\"");
-                            vmat.AppendLine($"\t\tcb8_15 \"float4(1.0, 1.0, 1.0, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_16 \"float4(0.0, 0.0, 0.0, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_17 \"float4(10.979255, 7.1482353, 6.3034935, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_18 \"float4(0.0037614072, 0.0, 0.0, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_19 \"float4(0.0, 0.0075296126, 0.0, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_20 \"float4(0.0, 0.0, 0.017589089, 0.0)\"");
-                            vmat.AppendLine($"\t\tcb8_21 \"float4(0.27266484, -0.31473818, -0.15603681, 1.0)\"");
-                            vmat.AppendLine($"\t\tcb8_36 \"float4(1.0, 0.0, 0.0, 0.0)\"");
-
-                            //for (int i = 0; i < resource.Count; i++)
-                            //{
-                            //    vmat.AppendLine($"\t\tcb8_{i} \"float4(0,0,0,0)\"");
-                            //}
-                        }
-                        break;
-                    case 13: // Frame
-                        vmat.AppendLine($"\t\tcb13_0 \"float4(Time, Time, 0.05, 0.016)\"");
-                        vmat.AppendLine($"\t\tcb13_1 \"float4(0.65,16,0.65,1.5)\"");
-                        vmat.AppendLine($"\t\tcb13_2 \"float4((Time + 33.75) * 1.258699, (Time + 60.0) * 0.9583125, (Time + 60.0) * 8.789123, (Time + 33.75) * 2.311535)\"");
-                        vmat.AppendLine($"\t\tcb13_3 \"float4(0.5,0.5,0,0)\"");
-                        vmat.AppendLine($"\t\tcb13_4 \"float4(1,1,0,1)\"");
-                        vmat.AppendLine($"\t\tcb13_5 \"float4(0,0,512,0)\"");
-                        vmat.AppendLine($"\t\tcb13_6 \"float4(0,1,sin(Time * 6.0) * 0.5 + 0.5,0)\"");
-                        vmat.AppendLine($"\t\tcb13_7 \"float4(0,0.5,180,0)\"");
-                        break;
-                }
-            }
-        }
-
-        if (material.Vertex.Unk64 != 0) // Vertex animation?
-        {
-            bytecode = new(TfxBytecodeOp.ParseAll(material.Vertex.TFX_Bytecode));
-            if (!bytecode.CanInlineBytecode())
-            {
-                Dictionary<int, string> bytecode_hlsl = bytecode.Evaluate(material.Vertex.TFX_Bytecode_Constants, false, material);
-                string temp_time_fix = $"CurTime = exists(CurrentTime) ? CurrentTime : Time;";
-                foreach (KeyValuePair<int, string> entry in bytecode_hlsl)
-                {
-                    string expression = entry.Value.Contains("Time") ? $"{temp_time_fix} return {entry.Value.Replace("Time", "CurTime")};" : entry.Value;
-                    vmat.AppendLine($"\t\tvs_cb0_{entry.Key} \"{expression}\"");
-                }
-            }
-
-            foreach (DXBCShaderResource resource in material.Vertex.Shader.Resources)
-            {
-                if (resource.ResourceType == Schema.ResourceType.CBuffer)
-                {
-                    switch (resource.Index)
-                    {
-                        case 13: // Frame
-                            vmat.AppendLine($"\t\tvs_cb13_0 \"float4(Time, Time, 0.05, 0.016)\"");
-                            vmat.AppendLine($"\t\tvs_cb13_1 \"float4(1,16,0.5,1.5)\"");
-                            break;
-                    }
-                }
-            }
-        }
-
-        vmat.AppendLine(expressions.ToString());
-
-        vmat.AppendLine($"\t}}");
+        //vmat.AppendLine(PopulateCBuffers(material).ToString()); // PS
+        //vmat.AppendLine(PopulateCBuffers(material, true).ToString()); // VS
         vmat.AppendLine("}");
 
         if (terrainDyemaps is not null)

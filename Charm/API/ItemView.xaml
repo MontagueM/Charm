@@ -701,6 +701,7 @@
                 <local:ItemPage
                     CollapsePageButtons="True"
                     Columns="1"
+                    FadeInOnLoad="False"
                     ItemTemplate="{StaticResource LargePerkEntry}"
                     Items="{Binding PlugItems}"
                     ItemsPerPage="1" />

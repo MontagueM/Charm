@@ -98,11 +98,6 @@ public struct PackageHeader : IPackageHeader
             hash64List.Add(entry);
         }
 
-        if (PackageId != 0x013e)
-        {
-            return hash64List;
-        }
-
         return hash64List;
     }
 
