@@ -313,28 +313,36 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <Image
-                                Margin="0,0,0,0"
-                                Opacity="1"
-                                Source="{Binding ItemIcon}">
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Style>
-                            </Image>
 
+                            <Grid>
+                                <Image
+                                    Margin="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Source="{Binding Collectible.IconBackground}" />
+
+                                <Image
+                                    Margin="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Source="{Binding Collectible.Icon}" />
+
+                                <Image
+                                    Margin="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Source="{Binding Collectible.IconOverlay}" />
+                            </Grid>
+
+                            <!--  Icon Watermark  -->
                             <Grid
                                 Width="28"
                                 Height="48"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top"
                                 Panel.ZIndex="10"
-                                Visibility="{Binding ItemIcon2, Converter={StaticResource NullToVisibilityConverter}}">
+                                IsHitTestVisible="False"
+                                Visibility="{Binding Collectible.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
                                 <Rectangle
                                     Grid.Row="1"
                                     Width="22"
@@ -365,7 +373,7 @@
                                         <Style TargetType="Polygon">
                                             <Setter Property="Visibility" Value="Collapsed" />
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ItemHash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
+                                                <DataTrigger Binding="{Binding Collectible.Hash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -379,7 +387,7 @@
                                     Margin="0,3,0,0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Top"
-                                    Source="{Binding ItemIcon2}" />
+                                    Source="{Binding Collectible.ItemWatermark}" />
                             </Grid>
 
 
@@ -478,30 +486,44 @@
                                                 Style="{DynamicResource D2StyleButtonNoOverlay}"
                                                 Visibility="{Binding IsPlaceholder, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                                 <Grid Margin="-2" Opacity="1">
-                                                    <Image Source="{Binding ItemIcon}">
-                                                        <Image.Style>
-                                                            <Style TargetType="Image">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding ItemIcon}" Value="{x:Null}">
-                                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Image.Style>
-                                                    </Image>
+                                                    <Grid>
+                                                        <Image
+                                                            Margin="0"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Source="{Binding Collectible.IconBackground}" />
 
+                                                        <Image
+                                                            Margin="0"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Source="{Binding Collectible.Icon}" />
+
+                                                        <Image
+                                                            Margin="0"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Source="{Binding Collectible.IconOverlay}" />
+                                                    </Grid>
+
+                                                    <!--  Icon Watermark  -->
                                                     <Grid
-                                                        Width="22"
+                                                        Width="28"
                                                         Height="48"
-                                                        Margin="0"
                                                         HorizontalAlignment="Left"
                                                         VerticalAlignment="Top"
-                                                        Visibility="{Binding ItemIcon2, Converter={StaticResource NullToVisibilityConverter}}">
+                                                        Panel.ZIndex="10"
+                                                        IsHitTestVisible="False"
+                                                        Visibility="{Binding Collectible.ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
                                                         <Rectangle
                                                             Grid.Row="1"
                                                             Width="22"
                                                             Height="48"
+                                                            Margin="0,3,0,0"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Top"
                                                             Opacity="0.6"
+                                                            RenderOptions.EdgeMode="Aliased"
                                                             Stretch="Fill">
                                                             <Rectangle.Fill>
                                                                 <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
@@ -510,12 +532,34 @@
                                                                 </LinearGradientBrush>
                                                             </Rectangle.Fill>
                                                         </Rectangle>
+
+                                                        <!--  Featured item banner  -->
+                                                        <Polygon
+                                                            Width="28"
+                                                            Height="32"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Top"
+                                                            Fill="#109191"
+                                                            Points="0,0 0,32 14,28 28,32 28,0">
+                                                            <Polygon.Style>
+                                                                <Style TargetType="Polygon">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Collectible.Hash, Converter={StaticResource Investment_IsFeaturedItem}}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Polygon.Style>
+                                                        </Polygon>
+
                                                         <Image
                                                             Width="20"
                                                             Height="20"
+                                                            Margin="0,3,0,0"
                                                             HorizontalAlignment="Center"
                                                             VerticalAlignment="Top"
-                                                            Source="{Binding ItemIcon2}" />
+                                                            Source="{Binding Collectible.ItemWatermark}" />
                                                     </Grid>
                                                 </Grid>
 

@@ -20,6 +20,7 @@ namespace Charm;
 public partial class CategoryView : UserControl
 {
     private static MainWindow _mainWindow = null;
+    private Investment Investment => Investment.Get();
 
     private DynamicArray<SDB788080> PresentationNodes = Investment.Get()._presentationNodeDefinitionMap.TagData.PresentationNodeDefinitions;
     private DynamicArray<S07588080> PresentationNodeStrings = Investment.Get()._presentationNodeDefinitionStringMap.TagData.PresentationNodeDefinitionStrings;
@@ -134,7 +135,7 @@ public partial class CategoryView : UserControl
                 return;
 
             LoadItems(item.ItemCategoryIndex);
-        }), DispatcherPriority.Normal);
+        }), DispatcherPriority.Send);
     }
 
     private void LoadItems(int index)
@@ -163,18 +164,18 @@ public partial class CategoryView : UserControl
         // Collectibles
         foreach (var collectible in PresentationNodes[index].Collectibles)
         {
-            var item = Investment.Get().GetCollectible(collectible.CollectableIndex).Value;
-            var strings = Investment.Get().GetCollectibleStrings(collectible.CollectableIndex).Value;
+            var item = Investment.GetCollectible(collectible.CollectableIndex).Value;
+            var strings = Investment.GetCollectibleStrings(collectible.CollectableIndex).Value;
 
-            var invItem = Investment.Get().GetInventoryItem(item.InventoryItemIndex);
+            var invItem = Investment.GetInventoryItem(item.InventoryItemIndex);
 
             CategoryEntry subcategory = new()
             {
-                Item = invItem,
+                Collectible = new(invItem),
                 ItemHash = invItem.ApiHash,
                 ItemIndex = collectible.CollectableIndex,
-                ItemIcon = strings.IconIndex != -1 ? ApiImageUtils.MakeFullItemIcon(invItem) : null,
-                ItemIcon2 = ApiImageUtils.GetPlugWatermark(invItem),
+                //ItemIcon = strings.IconIndex != -1 ? ApiImageUtils.MakeFullItemIcon(invItem) : null,
+                //ItemIcon2 = ApiImageUtils.GetPlugWatermark(invItem),
                 ItemName = strings.CollectibleName.Value?.ToString() ?? "",
                 ItemType = invItem.GetItemType() ?? "",
                 ItemDescription = invItem.GetItemFlavorText() ?? "",
@@ -189,6 +190,7 @@ public partial class CategoryView : UserControl
         }
 
         // Collectible Sets
+        // TODO taking around half a second on first load for some reason, too slow for my liking
         foreach (var collectibleSet in PresentationNodes[index].PresentationNodes)
         {
             SDB788080 curNode = PresentationNodes[collectibleSet.PresentationNodeIndex];
@@ -204,26 +206,26 @@ public partial class CategoryView : UserControl
 
             for (int i = 0; i < 5; i++)
             {
-                if (i >= PresentationNodes[collectibleSet.PresentationNodeIndex].Collectibles.Count)
+                if (i >= curNode.Collectibles.Count)
                 {
                     set.Children.Add(new() { IsPlaceholder = true });
                     continue;
                 }
 
-                var collectible = PresentationNodes[collectibleSet.PresentationNodeIndex].Collectibles[i];
+                var collectible = curNode.Collectibles[i];
 
-                var item = Investment.Get().GetCollectible(collectible.CollectableIndex).Value;
-                var strings = Investment.Get().GetCollectibleStrings(collectible.CollectableIndex).Value;
+                var item = Investment.GetCollectible(collectible.CollectableIndex).Value;
+                var strings = Investment.GetCollectibleStrings(collectible.CollectableIndex).Value;
 
-                var invItem = Investment.Get().GetInventoryItem(item.InventoryItemIndex);
+                var invItem = Investment.GetInventoryItem(item.InventoryItemIndex);
 
                 CategoryEntry setEntry = new()
                 {
-                    Item = invItem,
+                    Collectible = new(invItem),
                     ItemHash = invItem.ApiHash,
                     ItemIndex = collectible.CollectableIndex,
-                    ItemIcon = strings.IconIndex != -1 ? ApiImageUtils.MakeFullItemIcon(invItem) : null,
-                    ItemIcon2 = ApiImageUtils.GetPlugWatermark(invItem),
+                    //ItemIcon = strings.IconIndex != -1 ? ApiImageUtils.MakeFullItemIcon(invItem) : null,
+                    //ItemIcon2 = ApiImageUtils.GetPlugWatermark(invItem),
                     ItemName = strings.CollectibleName.Value?.ToString() ?? "",
                     ItemType = invItem.GetItemType() ?? "",
                     ItemDescription = invItem.GetItemFlavorText() ?? "",
@@ -251,19 +253,6 @@ public partial class CategoryView : UserControl
         SubcategoryItems.DisplayItems(true);
     }
 
-    public int GetItemCategoryAmount(int index)
-    {
-        SDB788080 node = PresentationNodes[index];
-        int count = 0;
-
-        for (int i = 0; i < node.PresentationNodes.Count; i++)
-        {
-            count += PresentationNodes[node.PresentationNodes[i].PresentationNodeIndex].Records.Count;
-        }
-
-        return count;
-    }
-
     private void AnimateTextBlock()
     {
         Storyboard textChangeAnimation = (Storyboard)FindResource("TextChangeAnimation");
@@ -276,7 +265,7 @@ public partial class CategoryView : UserControl
         CategoryEntry item = (sender as Button).DataContext as CategoryEntry;
 
         //APIItemView apiItemView = new(item.Item);
-        ItemView apiItemView = new(item.Item);
+        ItemView apiItemView = new(item.Collectible.Item);
         _mainWindow.MakeNewTab(item.ItemName, apiItemView);
         _mainWindow.SetNewestTabSelected();
     }
@@ -328,21 +317,22 @@ public partial class CategoryView : UserControl
             if (item.EntryType != CategoryEntryType.Collectible)
                 return;
 
-            if (!DareView2.ShouldAddToList(item.Item))
+            if (!DareView2.ShouldAddToList(item.Collectible.Item))
                 return;
 
             MainWindow.Progress.SetProgressStages(new() { $"Exporting {item.ItemName}" });
             await Task.Run(() =>
             {
-                if ((item.ItemType == "Artifact" || item.ItemType == "Seasonal Artifact") && item.Item.TagData.Unk28.GetValue(item.Item.GetReader()) is SC5738080 gearSet)
+                if ((item.ItemType == "Artifact" || item.ItemType == "Seasonal Artifact")
+                && item.Collectible.Item.TagData.Unk28.GetValue(item.Collectible.Item.GetReader()) is SC5738080 gearSet)
                 {
                     if (gearSet.ItemList.Count != 0)
-                        item.Item = Investment.Get().GetInventoryItem(gearSet.ItemList.First().ItemIndex);
+                        item.Collectible.Item = Investment.GetInventoryItem(gearSet.ItemList.First().ItemIndex);
                 }
 
-                if (item.Item.GetArtArrangementIndex() != -1)
+                if (item.Collectible.Item.GetArtArrangementIndex() != -1)
                 {
-                    EntityView.ExportInventoryItem(item.Item, ConfigSubsystem.Get().GetExportSavePath());
+                    EntityView.ExportInventoryItem(item.Collectible.Item, ConfigSubsystem.Get().GetExportSavePath());
                 }
                 else
                 {
@@ -353,7 +343,7 @@ public partial class CategoryView : UserControl
                     savePath += $"/{itemName}";
                     Directory.CreateDirectory(savePath);
                     Directory.CreateDirectory(savePath + "/Textures");
-                    Investment.Get().ExportShader(item.Item, savePath, itemName, config.GetOutputTextureFormat());
+                    Investment.ExportShader(item.Collectible.Item, savePath, itemName, config.GetOutputTextureFormat());
                 }
             });
             MainWindow.Progress.CompleteStage();
@@ -363,7 +353,8 @@ public partial class CategoryView : UserControl
     // Essentially DestinyRecordDefinition
     public class CategoryEntry : CharmUIElement
     {
-        public InventoryItem Item; // only use on Collectible
+        public APIPlugItem Collectible { get; set; } // only used on Collectible
+
         public int ItemIndex { get; set; }
         public uint ItemHash { get; set; }
         public string ItemName { get; set; }
@@ -372,7 +363,6 @@ public partial class CategoryView : UserControl
 
         public ImageSource ItemIcon { get; set; }
         public ImageSource ItemIcon2 { get; set; }
-        public ImageSource ItemIcon3 { get; set; }
 
         public int IntervalIndex { get; set; }
         public List<int> Objectives { get; set; } = new();
@@ -381,7 +371,7 @@ public partial class CategoryView : UserControl
         public List<CategoryEntry> Rewards { get; set; } = new();
         public List<CategoryEntry> IntervalRewards { get; set; } = new();
 
-        public List<Category> Parents { get; set; } // Probably not needed
+        //public List<Category> Parents { get; set; } // Probably not needed
         public List<CategoryEntry> Children { get; set; } = new(); // Used for collectible sets
 
         public bool RewardOnComplete { get; set; } = false;

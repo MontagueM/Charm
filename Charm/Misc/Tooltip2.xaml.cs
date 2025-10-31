@@ -518,14 +518,14 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
                     foreach (var reward in item.Rewards)
                     {
-                        if (reward.Item is null)
+                        if (reward.Collectible.Item is null)
                             continue;
                         rewards.Rewards.Add(new RewardBlock()
                         {
                             ItemName = reward.ItemName,
                             Icon = reward.ItemIcon,
                             LargeIcon = reward.ItemIcon2,
-                            IsEmblem = reward.Item.GetItemTraits().Contains(DestinyTraitID.item_emblem)
+                            IsEmblem = reward.Collectible.Item.GetItemTraits().Contains(DestinyTraitID.item_emblem)
                         });
                     }
                     blocks.Add(rewards);
@@ -541,7 +541,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
                     foreach (var reward in item.IntervalRewards)
                     {
-                        if (reward.Item is null)
+                        if (reward.Collectible.Item is null)
                             continue;
 
                         rewards.Rewards.Add(new RewardBlock()
@@ -551,7 +551,7 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
                             ItemName = reward.ItemName,
                             Icon = reward.ItemIcon,
                             LargeIcon = reward.ItemIcon2,
-                            IsEmblem = reward.Item.GetItemTraits().Contains(DestinyTraitID.item_emblem)
+                            IsEmblem = reward.Collectible.Item.GetItemTraits().Contains(DestinyTraitID.item_emblem)
                         });
                     }
                     blocks.Add(rewards);

@@ -685,7 +685,7 @@ public partial class MainWindow
                         }
                         else if (item.EntryType == CategoryEntryType.Collectible)
                         {
-                            ToolTip.MakeTooltip(item.Item);
+                            ToolTip.MakeTooltip(item.Collectible.Item);
                         }
                         break;
                 }

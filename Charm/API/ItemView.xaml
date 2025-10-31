@@ -476,6 +476,7 @@
                             Height="48"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
+                            IsHitTestVisible="False"
                             Visibility="{Binding ItemWatermark, Converter={StaticResource NullToVisibilityConverter}}">
                             <Rectangle
                                 Grid.Row="1"
