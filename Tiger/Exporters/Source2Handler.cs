@@ -223,6 +223,33 @@ public static class Source2Handler
         }
     }
 
+    public static void SaveVTEX(Texture tex, VTEX custom, string savePath, string vtexPath = "")
+    {
+        if (!Directory.Exists(savePath))
+            Directory.CreateDirectory(savePath);
+
+        if (vtexPath != "" && !vtexPath.EndsWith('/'))
+            vtexPath = $"{vtexPath}/";
+
+        var vtex = new VTEX
+        {
+            Images = new List<string> { $"textures/{vtexPath}{tex.Hash}.png" },
+            OutputFormat = custom.OutputFormat ?? null,
+            OutputColorSpace = custom.OutputColorSpace ?? null,
+            InputColorSpace = custom.InputColorSpace ?? null,
+            OutputTypeString = custom.OutputTypeString ?? null
+        };
+
+        string json = JsonConvert.SerializeObject(vtex, Formatting.Indented);
+        try
+        {
+            File.WriteAllText($"{savePath}/{tex.Hash}.vtex", json);
+        }
+        catch
+        {
+        }
+    }
+
     public static void SaveGearVMAT(string saveDirectory, string meshName, TextureExportFormat outputTextureFormat, List<Dye> dyes, string fileSuffix = "")
     {
         File.Copy($"Exporters/template.vmat", $"{saveDirectory}/{meshName}{fileSuffix}.vmat", true);

@@ -333,7 +333,16 @@ public class GlobalExporter : AbstractExporter
 
                                 Directory.CreateDirectory($"{SavePath}/Textures/LUT");
                                 lut.Unk28.TagData.LUT.SavetoFile($"{SavePath}/Textures/LUT/{lut.Unk28.TagData.LUT.Hash}");
-                                Source2Handler.SaveVTEX(lut.Unk28.TagData.LUT, $"{SavePath}/Textures/LUT/", "LUT");
+
+                                Source2Handler.SaveVTEX(
+                                    lut.Unk28.TagData.LUT,
+                                    new VTEX
+                                    {
+                                        OutputFormat = "RGBA8888",
+                                        OutputTypeString = "2D"
+                                    },
+                                    $"{SavePath}/Textures/LUT/",
+                                    "LUT");
 
                                 // TODO move out of global channels when theres more general stuff to export
                                 channels.TryAdd("LUT", new GlobalChannelData

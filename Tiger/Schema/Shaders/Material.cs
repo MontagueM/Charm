@@ -76,6 +76,9 @@ namespace Tiger.Schema.Shaders
                         if (!File.Exists($"{saveDirectory}/Shaders/TFXFunctions.hlsl"))
                             File.Copy("./Exporters/Shaders/TFXFunctions.hlsl", $"{saveDirectory}/Shaders/TFXFunctions.hlsl");
 
+                        if (!File.Exists($"{saveDirectory}/Shaders/D2ShadingModel.hlsl"))
+                            File.Copy("./Exporters/Shaders/D2ShadingModel.hlsl", $"{saveDirectory}/Shaders/D2ShadingModel.hlsl");
+
                         FileHash hash = (Pixel.GetBytecode().CanInlineBytecode() || RenderStage == TfxRenderStage.WaterReflection) ? Hash : Pixel.Shader.Hash;
                         File.WriteAllText($"{saveDirectory}/Shaders/Source2/PS_{hash}.shader", vfx);
                         Source2Handler.SaveVMAT(saveDirectory, Hash, this);

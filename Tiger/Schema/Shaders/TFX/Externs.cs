@@ -461,12 +461,31 @@ public static class Externs
                 return element switch
                 {
                     0x70 => InlineOrDefault("AtmosTimeOfDay", "0.5"),
+                    0x74 => InlineOrDefault("AtmosUnk74", "0"),
+                    0x78 => InlineOrDefault("AtmosUnk78", "0"),
+                    0x150 => InlineOrDefault("AtmosUnk150", "0"),
+                    0x154 => InlineOrDefault("AtmosUnk154", "0"),
+                    0x160 => InlineOrDefault("AtmosFogIntensity", "0"),
+                    0x164 => InlineOrDefault("AtmosUnk164", "0"),
+                    0x168 => InlineOrDefault("AtmosUnk168", "0"),
+                    0x16c => InlineOrDefault("AtmosUnk16C", "0"),
+                    0x170 => InlineOrDefault("AtmosUnk170", "0.0001"),
+                    0x190 => InlineOrDefault("AtmosUnk190", "0"),
+                    0x194 => InlineOrDefault("AtmosUnk194", "0"),
+                    0x198 => InlineOrDefault("AtmosUnk198", "0.0001"),
                     0x1b4 => InlineOrDefault("AtmosRotation", "0"),
                     0x1b8 => InlineOrDefault("AtmosIntensity", "1"),
+                    0x1bc => InlineOrDefault("AtmosUnk1BC", "0.5"),
+                    0x1c0 => InlineOrDefault("AtmosUnk1C0", "0"),
+                    0x1c4 => InlineOrDefault("AtmosUnk1C4", "0"),
+                    0x1e0 => InlineOrDefault("AtmosUnk1E0", "0"),
                     0x1e4 => InlineOrDefault("AtmosSunIntensity", "0.05923"),
-                    0x198 or 0x170 => "float4(0.0001,0.0001,0.0001,0.0001)",
-                    0x1bc => "float4(0.5,0.5,0.5,0.5)",
-                    0x1e8 => "float4(0,0,0,0)",
+                    0x1e8 => InlineOrDefault("AtmosUnk1E8", "0"),
+                    0x1ec => InlineOrDefault("AtmosUnk1EC", "0"),
+                    0x1f8 => InlineOrDefault("AtmosUnk1F8", "0"),
+                    0x1fc => InlineOrDefault("AtmosUnk1FC", "0"),
+                    0x208 => InlineOrDefault("AtmosUnk208", "0"),
+
                     _ => HandleUnknownElement(element, extern_)
                 };
 
@@ -492,7 +511,7 @@ public static class Externs
             case TfxExtern.Deferred:
                 return element switch
                 {
-                    0 => "float4(0.0, 100, 0.0, 0.0)",
+                    0x0 => "float4((1 / g_flFarPlane)*TO_INCHES, ((g_flFarPlane - g_flNearPlane) / (g_flFarPlane * g_flNearPlane))*TO_INCHES,0,0)",
                     _ => HandleUnknownElement(element, extern_)
                 };
 
@@ -507,18 +526,20 @@ public static class Externs
             case TfxExtern.Atmosphere:
                 return element switch
                 {
-                    0xD0 => "float4(512.0, 512.0, 1.0 / 512.0, 1.0 / 512.0)",
                     0x90 => InlineOrDefault("AtmosRTDimensions", "float4(480.0, 270.0, 0.00208, 0.0037)"),
+                    0xD0 => "float4(512.0, 512.0, 1.0 / 512.0, 1.0 / 512.0)", // depth_angle_density_lookup_resolution
                     0x110 => InlineOrDefault("AtmosSunDir", "float4(-0.30372, -0.59835, 0.74144, 0.0)"),
-                    0x140 => InlineOrDefault("AtmosSunColor", "float4(1.0, 0.95, 0.85, 1.0)"),
-                    0x1D0 => "float4(0,0,0,0)",
+                    0x140 => InlineOrDefault("AtmosSunColor", "float4(1.0, 0.95, 0.85, 1.0)"), // actually fog color..?
+                    0x180 => InlineOrDefault("AtmosUnk180", "float4(0,0,0,0)"),
+                    0x1D0 => InlineOrDefault("AtmosUnk1D0", "float4(0,0,0,0)"),
+                    0x210 => InlineOrDefault("AtmosUnk210", "float4(0,0,0,0)"),
                     _ => HandleUnknownElement(element, extern_)
                 };
 
             case TfxExtern.Decal:
                 return element switch
                 {
-                    0x10 => "float4(0, 100, 0, 0)",
+                    0x10 => "float4((1 / g_flFarPlane)*TO_INCHES, ((g_flFarPlane - g_flNearPlane) / (g_flFarPlane * g_flNearPlane))*TO_INCHES,0,0)",
                     0x20 => "float4(0.03, 0, 0, 0)",
                     _ => HandleUnknownElement(element, extern_)
                 };

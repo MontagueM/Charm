@@ -34,6 +34,11 @@
         <Link>Exporters\Shaders\TFXFunctions.hlsl</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <Content Include="..\Tiger\Exporters\Shaders\D2ShadingModel.hlsl">
+        <Link>Exporters\Shaders\D2ShadingModel.hlsl</Link>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      
       <None Update="blender_map_importer_addon.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

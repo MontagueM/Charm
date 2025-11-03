@@ -36,10 +36,6 @@ public class S2ShaderConverter
     private bool bRT0 = true;
     private bool bTranslucent = false;
 
-    private bool bUsesNormalBuffer = false;
-    private bool bUsesFrameBuffer = false;
-    private bool bUsesDepthBuffer = false;
-
     public string vfxStructure =
 $@"HEADER
 {{
@@ -70,6 +66,7 @@ COMMON
     float CurrentTime < Attribute( ""CurrentTime"" ); Default1( 0.0 ); >;
 
     //global_channels
+    //object_channels
 }}
 
 struct VertexInput
@@ -91,7 +88,7 @@ struct PixelInput
 
 PS
 {{
-    #include ""common/pixel.hlsl""
+    #include ""D2ShadingModel.hlsl""
     #define CUSTOM_TEXTURE_FILTERING
     #define cmp -
 
@@ -132,11 +129,15 @@ PS
         if (material.RenderStage == TfxRenderStage.LensFlares)
             shaderType = ShaderType.LensFlare;
 
+
         if (Scopes.Contains(TfxScope.TERRAIN))
             shaderType = ShaderType.Terrain;
         if (Scopes.Contains(TfxScope.INSTANCES))
             shaderType = ShaderType.Decorator;
-        if (Scopes.Contains(TfxScope.DECAL) && Externs.Contains(TfxExtern.Decal))
+        if (Scopes.Contains(TfxScope.DECAL) // bleh 
+            && (!Scopes.Contains(TfxScope.CHUNK_MODEL)
+            && !Scopes.Contains(TfxScope.RIGID_MODEL))
+            && !Scopes.Contains(TfxScope.SKINNING))
             shaderType = ShaderType.Decal;
 
         if (Inputs.Exists(input => input.Semantic == DXBCSemantic.SystemIsFrontFace))
@@ -150,6 +151,7 @@ PS
         }
 
         vfxStructure = vfxStructure.Replace("//global_channels", AddGlobalChannels().ToString());
+        vfxStructure = vfxStructure.Replace("//object_channels", AddObjectChannels().ToString());
 
         //------------------------------Pixel Shader-----------------------------------
         {
@@ -169,7 +171,7 @@ PS
                             WriteCbuffers(material, false).ToString()
                         );
 
-            vfxStructure = vfxStructure.Replace("//ps_Inputs", WriteTexInputs(material, false).ToString());
+            vfxStructure = vfxStructure.Replace("//ps_Inputs", WriteInputs(material, false).ToString());
 
             if (Scopes.Contains(TfxScope.VIEW))
                 AddTPToProj();
@@ -229,7 +231,7 @@ PS
                     return "";
 
                 vfxStructure = vfxStructure.Replace("//vs_Function", instructions.ToString());
-                vfxStructure = vfxStructure.Replace("//vs_Inputs", WriteTexInputs(material, true).ToString());
+                vfxStructure = vfxStructure.Replace("//vs_Inputs", WriteInputs(material, true).ToString());
 
                 vfxStructure = vfxStructure.Replace("//vs_output", AddOutput(true).ToString());
             }
@@ -283,6 +285,33 @@ PS
         return globalChannels;
     }
 
+    private StringBuilder AddObjectChannels()
+    {
+        StringBuilder objectChannels = new();
+        HashSet<string> channels = new();
+
+        TfxBytecodeInterpreter opcodes = Material.Pixel.GetBytecode();
+        foreach (var objectChannel in opcodes.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
+        {
+            var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
+            channels.Add(GlobalStrings.Get().GetString(hash));
+        }
+
+        opcodes = Material.Vertex.GetBytecode();
+        foreach (var objectChannel in opcodes.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
+        {
+            var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
+            channels.Add(GlobalStrings.Get().GetString(hash));
+        }
+
+        foreach (var id in channels)
+        {
+            objectChannels.AppendLine($"\tfloat4 ObjectChannel_{id} < Attribute(\"ObjectChannel_{id}\"); Default4(1,1,1,1); >;");
+        }
+
+        return objectChannels;
+    }
+
     private StringBuilder WriteCbuffers(Material material, bool isVertexShader)
     {
         bool bInline = (isVertexShader ? material.Vertex : material.Pixel).GetBytecode().CanInlineBytecode() || (isVertexShader && shaderType == ShaderType.WaterDecal);
@@ -304,7 +333,7 @@ PS
                             CBuffers.AppendLine($"\n\t\tfloat4 cb0[{cb0.Count}] =\n\t\t{{");
                             foreach (Vector4 vec in cb0)
                             {
-                                CBuffers.AppendLine($"\t\t\tfloat4{vec.ToString().Replace("Infinity", "1.#INF")},");
+                                CBuffers.AppendLine($"\t\t\tfloat4{vec.ToString()},");
                             }
                             CBuffers.AppendLine($"\t\t}};");
 
@@ -333,11 +362,14 @@ PS
             }
         }
 
+        CBuffers = CBuffers.Replace("∞", "(1.0 / 0.0)");
+        CBuffers = CBuffers.Replace("NaN", "(0.0 / 0.0)");
+
         return CBuffers;
     }
 
     // TODO: CLEAN ALL THIS SHIT UP
-    private StringBuilder WriteTexInputs(Material material, bool isVertexShader)
+    private StringBuilder WriteInputs(Material material, bool isVertexShader)
     {
         StringBuilder funcDef = new();
         bool bAlreadyUsingFB = false;
@@ -398,10 +430,31 @@ PS
                             {
                                 TfxExtern.Atmosphere, new Dictionary<int, string>
                                 {
-                                    { 0x70,  "\tfloat AtmosTimeOfDay < Attribute( \"AtmosTimeOfDay\" ); Default1( 0.5 ); >;" },
-                                    { 0x1b4, "\tfloat AtmosRotation < Attribute( \"AtmosRotation\" ); Default1( 0 ); >;" },
-                                    { 0x1b8, "\tfloat AtmosIntensity < Attribute( \"AtmosIntensity\" ); Default1( 1 ); >;" },
-                                    { 0x1e4, "\tfloat AtmosSunIntensity < Attribute( \"AtmosSunIntensity\" ); Default1( 0.05923 ); >;" }
+                                    { 0x70,   "\tfloat AtmosTimeOfDay < Attribute( \"AtmosTimeOfDay\" ); Default1( 0.5 ); >;" },
+                                    { 0x74,   "\tfloat AtmosUnk74 < Attribute( \"AtmosUnk74\" ); Default1( 0 ); >;" },
+                                    { 0x78,   "\tfloat AtmosUnk78 < Attribute( \"AtmosUnk78\" ); Default1( 0 ); >;" },
+                                    { 0x150,  "\tfloat AtmosUnk150 < Attribute( \"AtmosUnk150\" ); Default1( 0 ); >;" },
+                                    { 0x154,  "\tfloat AtmosUnk154 < Attribute( \"AtmosUnk154\" ); Default1( 0 ); >;" },
+                                    { 0x160,  "\tfloat AtmosFogIntensity < Attribute( \"AtmosFogIntensity\" ); Default1( 0 ); >;" },
+                                    { 0x164,  "\tfloat AtmosUnk164 < Attribute( \"AtmosUnk164\" ); Default1( 0 ); >;" },
+                                    { 0x168,  "\tfloat AtmosUnk168 < Attribute( \"AtmosUnk168\" ); Default1( 0 ); >;" },
+                                    { 0x16c,  "\tfloat AtmosUnk16C < Attribute( \"AtmosUnk16C\" ); Default1( 0 ); >;" },
+                                    { 0x170,  "\tfloat AtmosUnk170 < Attribute( \"AtmosUnk170\" ); Default1( 0.0001 ); >;" },
+                                    { 0x190,  "\tfloat AtmosUnk190 < Attribute( \"AtmosUnk190\" ); Default1( 0 ); >;" },
+                                    { 0x194,  "\tfloat AtmosUnk194 < Attribute( \"AtmosUnk194\" ); Default1( 0 ); >;" },
+                                    { 0x198,  "\tfloat AtmosUnk198 < Attribute( \"AtmosUnk198\" ); Default1( 0.0001 ); >;" },
+                                    { 0x1b4,  "\tfloat AtmosRotation < Attribute( \"AtmosRotation\" ); Default1( 0 ); >;" },
+                                    { 0x1b8,  "\tfloat AtmosIntensity < Attribute( \"AtmosIntensity\" ); Default1( 1 ); >;" },
+                                    { 0x1bc,  "\tfloat AtmosUnk1BC < Attribute( \"AtmosUnk1BC\" ); Default1( 0.5 ); >;" },
+                                    { 0x1c0,  "\tfloat AtmosUnk1C0 < Attribute( \"AtmosUnk1C0\" ); Default1( 0 ); >;" },
+                                    { 0x1c4,  "\tfloat AtmosUnk1C4 < Attribute( \"AtmosUnk1C4\" ); Default1( 0 ); >;" },
+                                    { 0x1e0,  "\tfloat AtmosUnk1E0 < Attribute( \"AtmosUnk1E0\" ); Default1( 0 ); >;" },
+                                    { 0x1e4,  "\tfloat AtmosSunIntensity < Attribute( \"AtmosSunIntensity\" ); Default1( 0.05923 ); >;" },
+                                    { 0x1e8,  "\tfloat AtmosUnk1E8 < Attribute( \"AtmosUnk1E8\" ); Default1( 0 ); >;" },
+                                    { 0x1ec,  "\tfloat AtmosUnk1EC < Attribute( \"AtmosUnk1EC\" ); Default1( 0 ); >;" },
+                                    { 0x1f8,  "\tfloat AtmosUnk1F8 < Attribute( \"AtmosUnk1F8\" ); Default1( 0 ); >;" },
+                                    { 0x1fc,  "\tfloat AtmosUnk1FC < Attribute( \"AtmosUnk1FC\" ); Default1( 0 ); >;" },
+                                    { 0x208,  "\tfloat AtmosUnk208 < Attribute( \"AtmosUnk208\" ); Default1( 0 ); >;" },
                                 }
                             }
                         };
@@ -428,7 +481,10 @@ PS
                                 {
                                     { 0x90,  "\tfloat4 AtmosRTDimensions < Attribute( \"AtmosRTDimensions\" ); Default4( 480.0, 270.0, 0.00208, 0.0037 ); >;" },
                                     { 0x110, "\tfloat4 AtmosSunDir < Attribute( \"AtmosSunDir\" ); Default4( -0.30372, -0.59835, 0.74144, 0.0 ); >;" },
-                                    { 0x140, "\tfloat4 AtmosSunColor < Attribute( \"AtmosSunColor\" ); Default4( 1, 1, 1, 1 ); >;" }
+                                    { 0x140, "\tfloat4 AtmosSunColor < Attribute( \"AtmosSunColor\" ); Default4( 1.0, 0.95, 0.85, 1.0 ); >;" },
+                                    { 0x180, "\tfloat4 AtmosUnk180 < Attribute( \"AtmosUnk180\" ); Default4( 0,0,0,0 ); >;" },
+                                    { 0x1D0, "\tfloat4 AtmosUnk1D0 < Attribute( \"AtmosUnk1D0\" ); Default4( 0,0,0,0 ); >;" },
+                                    { 0x210, "\tfloat4 AtmosUnk210 < Attribute( \"AtmosUnk210\" ); Default4( 0,0,0,0 ); >;" },
                                 }
                             }
                         };
@@ -462,7 +518,7 @@ PS
                         case TfxExtern.Deferred:
                             switch (index)
                             {
-                                case 0x48:
+                                case 0x88:
                                     if (!bAlreadyUsingFB)
                                         funcDef.AppendLine($"\tBoolAttribute( bWantsFBCopyTexture, true );");
 
@@ -470,7 +526,11 @@ PS
                                     bAlreadyUsingFB = true;
                                     break;
 
-                                case 0x98: // Generated sky hemisphere
+                                case 0x90: // Normal buffer
+                                    funcDef.AppendLine($"\tint NormalsIndex < Attribute(\"NormalsTextureIndex\");>;");
+                                    break;
+
+                                case 0xD8: // Generated sky hemisphere
                                     funcDef.AppendLine($"\tTexture2D g_t{slot} < Attribute( \"AtmosHemisphere\" ); SrgbRead( true ); >;\n");
                                     break;
                             }
@@ -566,10 +626,10 @@ PS
         if (isVertexShader)
         {
             funcDef.AppendLine(AddViewScope(isVertexShader));
-            if (shaderType != ShaderType.Decal)
-                funcDef.AppendLine(AddCB1());
-            else
+            if (shaderType == ShaderType.Decal || Scopes.Contains(TfxScope.DECAL))
                 funcDef.AppendLine(AddDecalScope(isVertexShader));
+            else
+                funcDef.AppendLine(AddCB1());
 
             foreach (DXBCIOSignature i in Inputs)
             {
@@ -823,6 +883,11 @@ PS
                 {
                     break;
                 }
+                else if (line.Contains("t0.Load") && isVertexShader)
+                {
+                    string equal = line.Split("=")[0];
+                    funcDef.AppendLine($"\t\t{equal.TrimStart()}= i.vColor.xyzw;");
+                }
                 else if (line.Contains("Sample") || line.Contains("Load"))
                 {
                     string type = line.Contains("Sample") ? "Sample" : "Load";
@@ -958,8 +1023,17 @@ PS
                                 case TfxExtern.Deferred:
                                     switch (index)
                                     {
-                                        case 0x48: // Framebuffer?
-                                        case 0x98: // Generated sky hemisphere
+                                        case 0x78: // Depth Buffer
+                                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= Depth::GetNormalized({sampleUv}).xxxx; //{equal_post}");
+                                            break;
+
+                                        case 0x90: // Normal buffer
+                                            funcDef.AppendLine($"\t\tTexture2DMS<float4> g_t{texIndex} = Bindless::GetTexture2DMS(NormalsIndex);");
+                                            funcDef.AppendLine($"\t\t{equal.TrimStart()}= g_t{texIndex}.Load({sampleUv}, 0).{dotAfter}");
+                                            break;
+
+                                        case 0x88: // Framebuffer?
+                                        case 0xD8: // Generated sky hemisphere
                                             funcDef.AppendLine(defaultString);
                                             break;
 
@@ -1130,7 +1204,7 @@ PS
 
 		Material mat = Material::Init();
         mat.Albedo = o0.xyz;
-        mat.Normal = {(bUsesNormalBuffer ? "i.vNormalWs.xyz" : "normal")};
+        mat.Normal = normal;
         mat.Roughness = 1 - roughness;
         mat.Metalness = saturate(o2.x);
         mat.AmbientOcclusion = saturate(o2.y * 2);
@@ -1147,14 +1221,12 @@ PS
 		mat.WorldTangentV = i.vTangentVWs;
         mat.TextureCoords = i.vTextureCoords.xy;
 
-		return ShadingModelStandard::Shade(i, mat);");
+		return D2ShadingModelStandard::Shade(mat, o0.w);");
 
             }
             else //only uses o0
             {
-                bool a = bUsesNormalBuffer || bTranslucent || bUsesFrameBuffer || bUsesDepthBuffer;
-
-                if (a) //??
+                if (bTranslucent) //??
                 {
                     //output.Append($"\t\treturn float4(o0.xyz, {(bUsesFrameBuffer ? "1" : "alpha")});");
                     output.Append($"\t\treturn float4(o0.xyz, o0.w);");

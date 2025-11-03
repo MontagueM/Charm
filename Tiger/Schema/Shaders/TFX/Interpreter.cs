@@ -257,6 +257,7 @@ public class TfxBytecodeInterpreter
 
                         StackPush($"(saturate(lerp(float4{a}, float4{b}, {t})))");
                         break;
+
                     case TfxBytecode.Spline4Const:
                         string X = StackTop();
                         string C3 = $"float4{constants[((Spline4ConstData)op.data).constant_index].Vec}";
@@ -270,6 +271,7 @@ public class TfxBytecodeInterpreter
                         else
                             StackPush($"{bytecode_op_spline4_const(X, C3, C2, C1, C0, threshold)}");
                         break;
+
                     case TfxBytecode.Spline8Const:
                         string s8c_X = StackTop();
                         string s8c_C3 = $"float4{constants[((Spline8ConstData)op.data).constant_index].Vec}";
@@ -288,6 +290,7 @@ public class TfxBytecodeInterpreter
                         else
                             StackPush($"{bytecode_op_spline8_const(s8c_X, s8c_C3, s8c_C2, s8c_C1, s8c_C0, s8c_D3, s8c_D2, s8c_D1, s8c_D0, s8c_CThresholds, s8c_DThresholds)}");
                         break;
+
                     case TfxBytecode.Spline8ConstChain:
                         string s8cc_X = StackTop();
                         string s8cc_Recursion = $"float4{constants[((Spline8ConstChainData)op.data).constant_index].Vec}";
@@ -305,7 +308,9 @@ public class TfxBytecodeInterpreter
                         if (bInline)
                             StackPush($"bytecode_op_spline8_chain_const({s8cc_X}, {s8cc_Recursion}, {s8cc_C3}, {s8cc_C2}, {s8cc_C1}, {s8cc_C0}, {s8cc_D3}, {s8cc_D2}, {s8cc_D1}, {s8cc_D0}, {s8cc_CThresholds}, {s8cc_DThresholds})");
                         else
-                            StackPush($"{bytecode_op_spline8_chain_const(s8cc_X, s8cc_Recursion, s8cc_C3, s8cc_C2, s8cc_C1, s8cc_C0, s8cc_D3, s8cc_D2, s8cc_D1, s8cc_D0, s8cc_CThresholds, s8cc_DThresholds)}"); break;
+                            StackPush($"{bytecode_op_spline8_chain_const(s8cc_X, s8cc_Recursion, s8cc_C3, s8cc_C2, s8cc_C1, s8cc_C0, s8cc_D3, s8cc_D2, s8cc_D1, s8cc_D0, s8cc_CThresholds, s8cc_DThresholds)}");
+                        break;
+
                     case TfxBytecode.Gradient4Const:
                         string g4c_X = StackTop();
                         string BaseColor = $"float4{constants[((Gradient4ConstData)op.data).constant_index].Vec}";
@@ -320,6 +325,7 @@ public class TfxBytecodeInterpreter
                         else
                             StackPush($"{bytecode_op_gradient4_const(g4c_X, BaseColor, Cred, Cgreen, Cblue, Calpha, Cthresholds)}");
                         break;
+
                     case TfxBytecode.Gradient8Const: // A massive unknown function with a 12 inputs, maybe this is Gradient8Const? (idk if that exists)
                         string g8c_X1 = StackTop();
                         string g8c_BaseColor = $"float4{constants[((Gradient8ConstData)op.data).constant_index].Vec}";
@@ -436,7 +442,9 @@ public class TfxBytecodeInterpreter
                         StackPush($"GlobalChannel{((PushGlobalChannelVectorData)op.data).Index}");
                         break;
                     case TfxBytecode.PushObjectChannelVector:
-                        StackPush($"float4(1, 1, 1, 1)");
+                        //StackPush($"float4(1, 1, 1, 1)");
+                        var hash = new StringHash(((PushObjectChannelVectorData)op.data).hash);
+                        StackPush($"ObjectChannel_{GlobalStrings.Get().GetString(hash)}");
                         break;
 
                     case TfxBytecode.PopOutput:
