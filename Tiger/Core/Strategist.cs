@@ -204,7 +204,7 @@ public class Strategy
     /// </summary>
     /// <exception cref="DirectoryNotFoundException">Package directory does not exist.</exception>
     /// <exception cref="ArgumentException">Package directory contents is invalid.</exception>
-    private static bool CheckValidPackagesDirectory(TigerStrategy strategy, string packagesDirectory)
+    public static bool CheckValidPackagesDirectory(TigerStrategy strategy, string packagesDirectory)
     {
         if (PackagesDirectoryDoesNotExist(packagesDirectory))
         {
@@ -214,19 +214,20 @@ public class Strategy
 
         if (PackagesDirectoryEmpty(packagesDirectory))
         {
-            Log.Error($"The packages directory is empty: {packagesDirectory}");
+            Log.Error($"The packages directory contains no package files: {packagesDirectory}");
             return false;
+        }
+
+        // Warn but allow non-pkg files, shouldn't be a big deal as they will just be ignored
+        if (PackageFilesHasInvalidExtension(packagesDirectory))
+        {
+            Log.Warning($"The packages directory contains files without the .pkg extension: {packagesDirectory}");
+            //return false;
         }
 
         if (PackageFilesHasInvalidPrefix(strategy, packagesDirectory))
         {
             Log.Error($"The packages directory contains a package without the correct prefix '{GetStrategyPackagePrefix(strategy)}': {packagesDirectory}");
-            return false;
-        }
-
-        if (PackageFilesHasInvalidExtension(packagesDirectory))
-        {
-            Log.Error($"The packages directory contains a package without the correct extension '.pkg': {packagesDirectory}");
             return false;
         }
 
@@ -240,7 +241,7 @@ public class Strategy
 
     private static bool PackagesDirectoryEmpty(string packagesDirectory)
     {
-        return !Directory.EnumerateFiles(packagesDirectory).Any();
+        return !Directory.EnumerateFiles(packagesDirectory).Any(path => path.EndsWith(".pkg"));
     }
 
     private static bool PackageFilesHasInvalidPrefix(TigerStrategy strategy, string packagesDirectory)
@@ -248,7 +249,9 @@ public class Strategy
         IEnumerable<string> packagePaths = Directory.EnumerateFiles(packagesDirectory);
         string prefix = GetStrategyPackagePrefix(strategy);
 
-        return packagePaths.Any(path => !path.Contains(prefix + "_"));
+        return packagePaths
+            .Where(path => path.EndsWith(".pkg"))
+            .Any(path => !path.Contains(prefix + "_"));
     }
 
     private static bool PackageFilesHasInvalidExtension(string packagesDirectory)

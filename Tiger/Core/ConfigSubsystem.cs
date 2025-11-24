@@ -115,22 +115,12 @@ public class ConfigSubsystem : Subsystem<ConfigSubsystem>
 
     public bool TrySetPackagePath(string path, TigerStrategy strategy)
     {
-        if (path == "")
-        {
+        if (path == "" || !Strategy.CheckValidPackagesDirectory(strategy, path))
             return false;
-        }
-
-        // Verify this is a valid path by checking to see if a .pkg file is inside
-        string[] files = Directory.GetFiles(path, "*.pkg", SearchOption.TopDirectoryOnly);
-        if (files.Length == 0)
-        {
-            return false;
-        }
 
         if (_settings.Common.PackagesPath.ContainsKey(strategy))
-        {
             _settings.Common.PackagesPath.Remove(strategy);
-        }
+
         _settings.Common.PackagesPath.Add(strategy, path);
 
         Save();
