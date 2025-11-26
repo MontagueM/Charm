@@ -44,7 +44,10 @@
                 Margin="0,10,0,50"
                 Orientation="Vertical" />
 
-            <Grid VerticalAlignment="Top" Background="Transparent">
+            <Grid
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Collapsed">
                 <TextBlock
                     Margin="-50,0,0,10"
                     VerticalAlignment="Center"
@@ -74,9 +77,13 @@
             <StackPanel
                 x:Name="UnrealConfigPanel"
                 Margin="0,10,0,50"
-                Orientation="Vertical" />
+                Orientation="Vertical"
+                Visibility="Collapsed" />
 
-            <Grid VerticalAlignment="Top" Background="Transparent">
+            <Grid
+                VerticalAlignment="Top"
+                Background="Transparent"
+                Visibility="Collapsed">
                 <TextBlock
                     Margin="-50,0,0,10"
                     VerticalAlignment="Center"
@@ -108,7 +115,8 @@
             <StackPanel
                 x:Name="UnityConfigPanel"
                 Margin="0,10,0,20"
-                Orientation="Vertical" />
+                Orientation="Vertical"
+                Visibility="Collapsed" />
         </StackPanel>
     </Grid>
 </UserControl>
