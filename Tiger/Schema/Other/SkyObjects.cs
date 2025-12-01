@@ -18,10 +18,13 @@ public class SkyObjects : Tag<SMapSkyObjects>
         if (_tag.Entries is null)
             return;
 
-        foreach ((int i, SA96A8080 element) in _tag.Entries.Select((value, index) => (index, value)))
+        int i = 0;
+        foreach (SA96A8080 element in _tag.Entries)
         {
             if (element.Model.TagData.Model is null || (Strategy.CurrentStrategy >= TigerStrategy.DESTINY2_WITCHQUEEN_6307 && element.Unk70 == 5))
                 continue;
+
+            //Console.WriteLine($"{i} Hash {element.Model?.TagData.Model?.Hash}: Unk64 {element.Unk64}, Unk68 {element.Unk68}");
 
             Matrix4x4 matrix = element.Transform;
 
@@ -36,7 +39,7 @@ public class SkyObjects : Tag<SMapSkyObjects>
                 Rotation = Vector4.QuaternionToEulerAngles(quat),
                 Quaternion = quat,
                 Scale = scale,
-                Order = element.Unk68
+                Order = i, //element.Unk64 I guess the order is just the index? Idk
             });
 
             foreach (DynamicMeshPart part in element.Model.TagData.Model.Load(ExportDetailLevel.MostDetailed, null))
@@ -45,6 +48,7 @@ public class SkyObjects : Tag<SMapSkyObjects>
                 part.Material.RenderStage = TfxRenderStage.Transparents;
                 scene.Materials.Add(new ExportMaterial(part.Material));
             }
+            i++;
         }
     }
 }
@@ -87,6 +91,7 @@ public struct SA96A8080
     public Matrix4x4 Transform;
     public AABB Bounds;
     public Tag<SAE6A8080> Model;
+    //public float Unk64;
 
     [SchemaField(0x60, TigerStrategy.DESTINY1_RISE_OF_IRON)]
     [SchemaField(0x64, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]

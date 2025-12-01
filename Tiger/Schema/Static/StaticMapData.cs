@@ -602,8 +602,9 @@ public struct SMapAtmosphere
     [SchemaField(0xD0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
     public Texture Lookup4; // used in atmo_depth_angle_density_lookup_generate, result set to T15 (transparent scope)
 
-    public FileHash UnkD4; // Some weird RGBA byte texture that looks like when Lookup4 is sampled in atmo_depth_angle_density_lookup_generate
+    public FileHash UnkD4; // Lookup4 but in RGBA byte form, for some reason
 
+    // Actually 16 floats, some type of ramp? Usually starts at around 0.2 and ends around 0.9
     public Vector4 UnkD8;
     public Vector4 UnkE8;
     public Vector4 UnkF8;

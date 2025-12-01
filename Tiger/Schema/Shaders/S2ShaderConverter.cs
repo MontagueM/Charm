@@ -63,7 +63,10 @@ COMMON
     #include ""TFXFunctions.hlsl""
     #define CUSTOM_MATERIAL_INPUTS
 
+    // Frame Scope attributes
     float CurrentTime < Attribute( ""CurrentTime"" ); Default1( 0.0 ); >;
+    float ExposureScale < Attribute( ""ExposureScale"" ); Default1( 0.65 ); >;
+    float ExposureIllumRelative < Attribute( ""ExposureIllumRelative"" ); Default1( 1 ); >;
 
     //global_channels
     //object_channels
@@ -404,10 +407,10 @@ PS
             }
         }
 
-        if (isVertexShader)
-            return funcDef;
+        //if (isVertexShader)
+        //    return funcDef;
 
-        TfxBytecodeInterpreter opcodes = material.Pixel.GetBytecode();
+        TfxBytecodeInterpreter opcodes = (isVertexShader ? material.Vertex : material.Pixel).GetBytecode();
         bool bInline = opcodes.CanInlineBytecode() || material.RenderStage == TfxRenderStage.WaterReflection;
         foreach ((int i, TfxData op) in opcodes.Opcodes.Select((value, index) => (index, value)))
         {
@@ -435,20 +438,20 @@ PS
                                     { 0x78,   "\tfloat AtmosUnk78 < Attribute( \"AtmosUnk78\" ); Default1( 0 ); >;" },
                                     { 0x150,  "\tfloat AtmosUnk150 < Attribute( \"AtmosUnk150\" ); Default1( 0 ); >;" },
                                     { 0x154,  "\tfloat AtmosUnk154 < Attribute( \"AtmosUnk154\" ); Default1( 0 ); >;" },
-                                    { 0x160,  "\tfloat AtmosFogIntensity < Attribute( \"AtmosFogIntensity\" ); Default1( 0 ); >;" },
-                                    { 0x164,  "\tfloat AtmosUnk164 < Attribute( \"AtmosUnk164\" ); Default1( 0 ); >;" },
+                                    { 0x160,  "\tfloat AtmosFogIntensity < Attribute( \"AtmosFogIntensity\" ); Default1( 1 ); >;" },
+                                    { 0x164,  "\tfloat AtmosUnk164 < Attribute( \"AtmosUnk164\" ); Default1( 1 ); >;" },
                                     { 0x168,  "\tfloat AtmosUnk168 < Attribute( \"AtmosUnk168\" ); Default1( 0 ); >;" },
-                                    { 0x16c,  "\tfloat AtmosUnk16C < Attribute( \"AtmosUnk16C\" ); Default1( 0 ); >;" },
+                                    { 0x16c,  "\tfloat AtmosUnk16C < Attribute( \"AtmosUnk16C\" ); Default1( 1 ); >;" },
                                     { 0x170,  "\tfloat AtmosUnk170 < Attribute( \"AtmosUnk170\" ); Default1( 0.0001 ); >;" },
                                     { 0x190,  "\tfloat AtmosUnk190 < Attribute( \"AtmosUnk190\" ); Default1( 0 ); >;" },
                                     { 0x194,  "\tfloat AtmosUnk194 < Attribute( \"AtmosUnk194\" ); Default1( 0 ); >;" },
                                     { 0x198,  "\tfloat AtmosUnk198 < Attribute( \"AtmosUnk198\" ); Default1( 0.0001 ); >;" },
                                     { 0x1b4,  "\tfloat AtmosRotation < Attribute( \"AtmosRotation\" ); Default1( 0 ); >;" },
                                     { 0x1b8,  "\tfloat AtmosIntensity < Attribute( \"AtmosIntensity\" ); Default1( 1 ); >;" },
-                                    { 0x1bc,  "\tfloat AtmosUnk1BC < Attribute( \"AtmosUnk1BC\" ); Default1( 0.5 ); >;" },
+                                    { 0x1bc,  "\tfloat AtmosUnk1BC < Attribute( \"AtmosUnk1BC\" ); Default1( 0.33713 ); >;" },
                                     { 0x1c0,  "\tfloat AtmosUnk1C0 < Attribute( \"AtmosUnk1C0\" ); Default1( 0 ); >;" },
                                     { 0x1c4,  "\tfloat AtmosUnk1C4 < Attribute( \"AtmosUnk1C4\" ); Default1( 0 ); >;" },
-                                    { 0x1e0,  "\tfloat AtmosUnk1E0 < Attribute( \"AtmosUnk1E0\" ); Default1( 0 ); >;" },
+                                    { 0x1e0,  "\tfloat AtmosUnk1E0 < Attribute( \"AtmosUnk1E0\" ); Default1( -0.8365 ); >;" },
                                     { 0x1e4,  "\tfloat AtmosSunIntensity < Attribute( \"AtmosSunIntensity\" ); Default1( 0.05923 ); >;" },
                                     { 0x1e8,  "\tfloat AtmosUnk1E8 < Attribute( \"AtmosUnk1E8\" ); Default1( 0 ); >;" },
                                     { 0x1ec,  "\tfloat AtmosUnk1EC < Attribute( \"AtmosUnk1EC\" ); Default1( 0 ); >;" },
@@ -588,17 +591,18 @@ PS
             }
         }
 
+        // Textures from scopes
         foreach (TfxScope scope in Scopes) // These should be compilied out if not used
         {
             switch (scope)
             {
-                case TfxScope.FRAME:
-                    //funcDef.AppendLine($"\tfloat CurrentTime < Attribute( \"CurrentTime\" ); Default1( 0.0 ); >;");
-                    funcDef.AppendLine($"\tfloat ExposureScale < Attribute( \"ExposureScale\" ); Default1( 0.65 ); >;");
-                    funcDef.AppendLine($"\tfloat ExposureIllumRelative < Attribute( \"ExposureIllumRelative\" ); Default1( 1 ); >;\n");
-                    break;
+                //case TfxScope.FRAME:
+                //    //funcDef.AppendLine($"\tfloat CurrentTime < Attribute( \"CurrentTime\" ); Default1( 0.0 ); >;");
+                //    funcDef.AppendLine($"\tfloat ExposureScale < Attribute( \"ExposureScale\" ); Default1( 0.65 ); >;");
+                //    funcDef.AppendLine($"\tfloat ExposureIllumRelative < Attribute( \"ExposureIllumRelative\" ); Default1( 1 ); >;\n");
+                //    break;
 
-                case TfxScope.TRANSPARENT:
+                case TfxScope.TRANSPARENT when !isVertexShader:
                     funcDef.AppendLine($"\tTexture2D g_t11 < Attribute( \"AtmosFar\" ); Default1( 0.0 ); >;");
                     funcDef.AppendLine($"\tTexture2D g_t13 < Attribute( \"AtmosNear\" ); Default1( 0.0 ); >;");
                     funcDef.AppendLine($"\tTexture2D g_t15 < Attribute( \"AtmosDensity\" ); Default1( 0.0 ); >;");
@@ -609,7 +613,7 @@ PS
                     funcDef.AppendLine($"\tTexture2D g_t23 < Attribute( \"FrameBufferCopyTexture\" ); SrgbRead( true ); Filter( MIN_MAG_MIP_LINEAR ); AddressU( CLAMP ); AddressV( CLAMP ); >;\n");
                     bAlreadyUsingFB = true;
                     break;
-                case TfxScope.TERRAIN:
+                case TfxScope.TERRAIN when !isVertexShader:
                     funcDef.AppendLine($"\tTexture2D g_t14 < Attribute( \"TerrainDyemap\" ); SrgbRead( false ); >;\n");
                     break;
             }
@@ -626,6 +630,8 @@ PS
         if (isVertexShader)
         {
             funcDef.AppendLine(AddViewScope(isVertexShader));
+            funcDef.AppendLine(AddFrameScope());
+
             if (shaderType == ShaderType.Decal || Scopes.Contains(TfxScope.DECAL))
                 funcDef.AppendLine(AddDecalScope(isVertexShader));
             else

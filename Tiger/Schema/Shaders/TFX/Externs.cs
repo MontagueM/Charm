@@ -430,6 +430,7 @@ public static class Externs
         throw new InvalidCastException($"Couldn't cast extern value {value} ({name}) for {Strategy.CurrentStrategy}");
     }
 
+    // TODO s&box, remove InlineOrDefault since they are defined in the shader now since the removal of dynamic expressions
     public static string GetExternFloat(TfxExtern extern_, int element, bool bInline = false)
     {
         string InlineOrDefault(string name, string defaultValue) =>

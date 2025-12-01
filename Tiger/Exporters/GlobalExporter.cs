@@ -82,14 +82,23 @@ public class GlobalExporter : AbstractExporter
                 {
                     Seconds = dayCycle.Unk14,
                     Unk1 = dayCycle.Unk18,
+                    DayCycleRotations = new()
                 };
 
-                if (dayCycle.Unk10 is not null && dayCycle.Unk10.TagData.Unk10 is not null)
+                if (dayCycle.Unk10 is not null)
                 {
-                    Tag<SC88A8080> cycles = dayCycle.Unk10.TagData.Unk10;
-                    data.DayCycle.Unk2 = cycles.TagData.Unk08;
-                    data.DayCycle.Unk3 = cycles.TagData.Unk0C;
-                    data.DayCycle.Rotations = cycles.TagData.Unk30.Enumerate(cycles.GetReader()).Select(x => x.Vec).ToList();
+                    data.DayCycle.Unk2 = dayCycle.Unk10.TagData.Unk00;
+
+                    var tags = new[] { dayCycle.Unk10.TagData.Unk10, dayCycle.Unk10.TagData.Unk14, dayCycle.Unk10.TagData.Unk18, dayCycle.Unk10.TagData.Unk1C };
+                    foreach (var tag in tags.Where(x => x is not null))
+                    {
+                        data.DayCycle.DayCycleRotations.Add(new DayCycleRotation()
+                        {
+                            Unk1 = tag.TagData.Unk08,
+                            Unk2 = tag.TagData.Unk0C,
+                            Rotations = tag.TagData.Unk30.Enumerate(tag.GetReader()).Select(x => x.Vec).ToList()
+                        });
+                    }
                 }
             }
 
@@ -394,8 +403,14 @@ public class GlobalExporter : AbstractExporter
     {
         public float Seconds;
         public float Unk1;
+        public Vector4 Unk2;
+        public List<DayCycleRotation> DayCycleRotations;
+    }
+
+    private struct DayCycleRotation
+    {
+        public float Unk1;
         public float Unk2;
-        public float Unk3;
         public List<Vector4> Rotations;
     }
 
