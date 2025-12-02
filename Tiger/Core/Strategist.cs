@@ -37,7 +37,7 @@ public enum TigerStrategy
     //[Description("Edge Of Fate"), StrategyMetadata("w64", 1085660, 1085661, ???, 1085662, ???)]
     //DESTINY2_EDGE_OF_FATE_9xxx = 9xxxx
 
-    [Description("Edge of Fate"), StrategyMetadata("w64")]
+    [Description("Renegades"), StrategyMetadata("w64")]
     DESTINY2_LATEST = 20000,  // there probably wont be a destiny version higher than this (surely)
 }
 

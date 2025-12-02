@@ -258,8 +258,11 @@ public partial class MainMenuView : UserControl
                 strategyIcon = ApiImageUtils.MakeIcon(new FileHash("2A11DC80"));
                 break;
             case TigerStrategy.DESTINY2_LATEST:
-                col = Color.FromArgb(0xFF, 0x00, 0x80, 0x81);
-                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("D643DE80"));
+                //col = Color.FromArgb(0xFF, 0x00, 0x80, 0x81);
+                //strategyIcon = ApiImageUtils.MakeIcon(new FileHash("D643DE80")); // EoF
+
+                col = Color.FromArgb(0xFF, 0xFF, 0x30, 0x10);
+                strategyIcon = ApiImageUtils.MakeIcon(new FileHash("07D7DF80")); // Renegades
                 break;
         }
         StrategyIcon.Source = strategyIcon;

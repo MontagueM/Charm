@@ -95,7 +95,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     private ConcurrentDictionary<InventoryItem, ConcurrentBag<InventoryItem>> _ornaments = new();
 
     // uses item index
-    public ConcurrentBag<int> FeaturedItems = new();
+    public ConcurrentHashSet<int> FeaturedItems = new();
 
     public Investment(TigerStrategy strategy) : base(strategy)
     {
@@ -271,6 +271,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             _talentGridMap = FileResourcer.Get().GetSchemaTag<SC2188080>(new FileHash("27E2A580"));
         }
 
+
         Task.WaitAll(new[]
         {
             Task.Run(DebugPrintTags),
@@ -294,6 +295,28 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
             Task.Run(GetEquipableItemSetMap),
             Task.Run(GetTraitMap),
         });
+
+        // Debug, slower load times but helps track down issues when things hang
+        //RunWithLogging(nameof(DebugPrintTags), DebugPrintTags);
+        //RunWithLogging(nameof(GetInventoryItemDict), GetInventoryItemDict);
+        //RunWithLogging(nameof(GetEntityAssignmentDict), GetEntityAssignmentDict);
+        //RunWithLogging(nameof(GetInventoryItemStringThings), GetInventoryItemStringThings);
+        //RunWithLogging(nameof(GetItemIconMap), GetItemIconMap);
+        //RunWithLogging(nameof(GetSocketCategoryStrings), GetSocketCategoryStrings);
+        //RunWithLogging(nameof(GetInventoryItemLoreStrings), GetInventoryItemLoreStrings);
+        //RunWithLogging(nameof(GetSandboxPerkStrings), GetSandboxPerkStrings);
+        //RunWithLogging(nameof(GetStatStrings), GetStatStrings);
+        //RunWithLogging(nameof(GetCollectableIndexDict), GetCollectableIndexDict);
+        //RunWithLogging(nameof(GetCollectables), GetCollectables);
+        //RunWithLogging(nameof(GetCollectableStrings), GetCollectableStrings);
+        //RunWithLogging(nameof(GetObjectives), GetObjectives);
+        //RunWithLogging(nameof(GetObjectiveStrings), GetObjectiveStrings);
+        //RunWithLogging(nameof(GetSandboxPerkMap2), GetSandboxPerkMap2);
+        //RunWithLogging(nameof(GetRandomPlugSetMap), GetRandomPlugSetMap);
+        //RunWithLogging(nameof(GetSocketTypeMap), GetSocketTypeMap);
+        //RunWithLogging(nameof(GetFeaturedItemsList), GetFeaturedItemsList);
+        //RunWithLogging(nameof(GetEquipableItemSetMap), GetEquipableItemSetMap);
+        //RunWithLogging(nameof(GetTraitMap), GetTraitMap);
     }
 
     public void GetInventoryItemDict()
@@ -1050,7 +1073,7 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
 
         FeaturedItems = new();
         using TigerReader reader = _itemFilterDefinitions.GetReader();
-        foreach (var item in _itemFilterDefinitions.TagData.Filters.First(x => x.FilterHash.Hash32 == 3471738395).FilterList)
+        foreach (var item in _itemFilterDefinitions.TagData.Filters.First(x => x.FilterHash.Hash32 == 1812452478).FilterList)
         {
             FeaturedItems.Add(item.ItemIndex);
         }
@@ -1078,6 +1101,21 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
     }
     #endregion
 
+    private void RunWithLogging(string methodName, Action method)
+    {
+        try
+        {
+            Log.Debug($"Starting {methodName}");
+            method();
+            Log.Debug($"Completed {methodName}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Error in {methodName}: {ex.Message}");
+            throw;
+        }
+    }
+
     public void DebugPrintTags()
     {
         if (Strategy.IsD1())
@@ -1092,11 +1130,8 @@ public class Investment : Strategy.LazyStrategistSingleton<Investment>
                 if (tagInstance != null)
                 {
                     var hashProperty = field.FieldType.GetField("Hash");
-                    if (hashProperty != null)
-                    {
-                        var hashValue = hashProperty.GetValue(tagInstance);
-                        Console.WriteLine($"{field.Name}: {hashValue}");
-                    }
+                    var hashValue = hashProperty?.GetValue(tagInstance) ?? null;
+                    Console.WriteLine($"{field.Name}: {(hashValue ?? $"NULL")}");
                 }
             }
         }
@@ -1193,7 +1228,7 @@ public class InventoryItem : Tag<S9D798080>
 
     private bool IsItemHolofoil()
     {
-        if (!Strategy.IsD1() && _tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk && Unk.Unk10.Any(x => x.Unk00 == 0xF1))
+        if (!Strategy.IsD1() && _tag.Unk78_EoF.GetValue(GetReader()) is S74738080 Unk && Unk.Unk20.Any(x => x.Unk00 == 0xF3))
             return true;
 
         return false;
@@ -1214,6 +1249,13 @@ public class InventoryItem : Tag<S9D798080>
         {
             traits.Add(Investment.Get().GetTrait(index).Value.TraitHash);
         }
+
+        // not ideal, should be done elsewhere
+        if (GetItemRarity() == DestinyTierType.Exotic && (traits.Any(x => x.ToString().Contains("item_weapon")) || traits.Any(x => x.ToString().Contains("item_armor"))))
+            Investment.Get().FeaturedItems.Add(GetItemIndex());
+
+        if (Investment.Get().FeaturedItems.Contains(GetItemIndex()))
+            traits.Add(DestinyTraitID.item_featured);
 
         // Custom assignments
         if (_tag.TraitIndices.Count == 0)

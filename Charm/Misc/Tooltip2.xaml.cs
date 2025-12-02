@@ -116,16 +116,8 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
 
         var blocks = new List<ToolTipBlock>();
 
-        if (item.Style == HeaderBlock.HeaderStyle.Item)
-        {
-            HeaderColor = DestinyTierType.Legendary.GetColor();
-            BodyColor = DestinyTierType.Legendary.GetBodyColor();
-        }
-        else
-        {
-            HeaderColor = Color.FromArgb(255, 0, 0, 0);
-            BodyColor = Color.FromArgb(255, 0x1C, 0x1C, 0x1C);
-        }
+        HeaderColor = item.HeaderColor != default ? item.HeaderColor : (item.Style == HeaderBlock.HeaderStyle.Item ? DestinyTierType.Legendary.GetColor() : Color.FromArgb(255, 0, 0, 0));
+        BodyColor = item.BodyColor != default ? item.BodyColor : (item.Style == HeaderBlock.HeaderStyle.Item ? DestinyTierType.Legendary.GetBodyColor() : Color.FromArgb(255, 0x1C, 0x1C, 0x1C));
 
         Header = new()
         {
@@ -665,6 +657,18 @@ public partial class Tooltip2 : UserControl, INotifyPropertyChanged
         TooltipTranslate.X = _tooltipPos.X;
         TooltipTranslate.Y = _tooltipPos.Y;
     }
+
+    //private void UserControl_KeyDown(object sender, KeyEventArgs e)
+    //{
+    //    if (e.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+    //    {
+    //        if (ActiveItem?.DataContext is APIPlugItem item && item.Item is not null)
+    //        {
+    //            Clipboard.SetText($"{item.Item.ApiHash}");
+    //            Log.Debug($"Copied {item.Item.Name} API Hash");
+    //        }
+    //    }
+    //}
 }
 
 public abstract class ToolTipBlock : CharmUIElement, INotifyPropertyChanged
@@ -954,6 +958,8 @@ public class GenericTooltip
     public string Label { get; set; }
     public HeaderBlock.HeaderStyle Style { get; set; } = HeaderBlock.HeaderStyle.Item;
     public TranslateTransform ExtraOffset { get; set; } = new(0, 0);
+    public Color HeaderColor { get; set; }
+    public Color BodyColor { get; set; }
 }
 
 public static class GenericTooltipProperties

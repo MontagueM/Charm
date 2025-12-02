@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using Arithmic;
 using Tiger;
 using Tiger.Schema;
@@ -63,7 +64,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private DestinyTraitID? TypeFilter = null;
     private DestinyTierType? RarityFilter = null;
-    private DestinyTraitID? ReleaseFilter = null;
+    private List<DestinyTraitID>? ReleaseFilter = null;
 
     public DareView2()
     {
@@ -119,6 +120,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
         types = types.OrderBy(x => x.Content as string).ToList();
         types.Insert(0, new() { Content = "All", FontSize = 10 });
+        types.Insert(1, new() { Content = "Featured", Tag = DestinyTraitID.item_featured, FontSize = 10 });
         presets.Combobox.ItemsSource = types;
 
         if (presets.Combobox.SelectedIndex == -1)
@@ -127,6 +129,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         }
         presets.Combobox.MinWidth = boxWidth;
         presets.Combobox.SelectionChanged += Filters_OnSelectionChanged;
+
         FilterOptions.Children.Add(presets);
 
         //--------------------------------------------
@@ -165,24 +168,27 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         release_presets.Text = "Release";
         release_presets.FontSize = 14;
 
-        foreach (var type in SortedItems.Keys.Where(x => x.ToString().Contains("releases")))
+        // Groups duplicate EnumDescriptions into one combobox item
+        // No more seperate items for "main release, release season" releases
+        foreach (var typeGroup in SortedItems.Keys
+            .Where(x => x.ToString().Contains("releases"))
+            .GroupBy(x => x.GetEnumDescription()))
         {
             releases.Add(new()
             {
-                Content = type.GetEnumDescription(),
-                Tag = type,
+                Content = typeGroup.Key,
+                Tag = typeGroup.Select(x => x).ToList(),
                 FontSize = 10
             });
         }
 
-        releases = releases.OrderBy(x => ((DestinyTraitID)x.Tag).ToString().Split("releases_v")[1].Split("_")[0]).ToList();
+        releases = releases.OrderBy(x => (((List<DestinyTraitID>)x.Tag).First()).ToString().Split("releases_v")[1].Split("_")[0]).ToList();
         releases.Insert(0, new() { Content = "All", FontSize = 10 });
         release_presets.Combobox.ItemsSource = releases;
 
         if (release_presets.Combobox.SelectedIndex == -1)
-        {
             release_presets.Combobox.SelectedIndex = 0;
-        }
+
         release_presets.Combobox.MinWidth = boxWidth;
         release_presets.Combobox.SelectionChanged += ReleaseFilters_OnSelectionChanged;
         FilterOptions.Children.Add(release_presets);
@@ -287,7 +293,7 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
                 newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemRarity() == RarityFilter));
 
             if (ReleaseFilter is not null)
-                newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemTraits().Contains(ReleaseFilter.Value)));
+                newItem.Items = new ObservableCollection<APIPlugItem>(newItem.Items.Where(x => x.Item.GetItemTraits().Any(trait => ReleaseFilter.Contains(trait))));
 
             if (newItem.Items.Count != 0)
                 itemCategories.Add(newItem);
@@ -459,9 +465,24 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
         _isClearing = false;
     }
 
+    private DispatcherTimer _searchDebounceTimer;
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        RefreshItemList();
+        if (_searchDebounceTimer == null)
+        {
+            _searchDebounceTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(250)
+            };
+            _searchDebounceTimer.Tick += (s, args) =>
+            {
+                _searchDebounceTimer.Stop();
+                RefreshItemList();
+            };
+        }
+
+        _searchDebounceTimer.Stop();
+        _searchDebounceTimer.Start();
     }
 
     private void Filters_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -486,10 +507,17 @@ public partial class DareView2 : UserControl, INotifyPropertyChanged
 
     private void ReleaseFilters_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (((sender as ComboBox).SelectedItem as ComboBoxItem).Tag is not null)
-            ReleaseFilter = (DestinyTraitID)((sender as ComboBox).SelectedItem as ComboBoxItem).Tag;
+        var selectedItem = (sender as ComboBox).SelectedItem as ComboBoxItem;
+        if (selectedItem?.Tag is List<DestinyTraitID> selectedTraitIDs)
+            ReleaseFilter = selectedTraitIDs;
         else
             ReleaseFilter = null;
+
+        if (ReleaseFilter?.FirstOrDefault().GetEnumDescription() == "Renegades")
+            RenegadesDisclaimer.Visibility = Visibility.Visible;
+        else
+            RenegadesDisclaimer.Visibility = Visibility.Collapsed;
+
 
         RefreshItemList();
     }

@@ -455,7 +455,7 @@ public struct SDD978080
 /// </summary>
 /// 
 [SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "6A988080", 0x84)]
-[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "6A988080", 0xA0)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "6A988080", 0xA4)]
 public struct S6A988080
 {
     // Idk why these got swapped in EoF
@@ -473,10 +473,10 @@ public struct S6A988080
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)] // idk why these are needed when only WQ SchemaStruct is used
     [SchemaField(0x2C, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
     [SchemaField(0x30, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    [SchemaField(0x34, TigerStrategy.DESTINY2_LATEST)]
+    [SchemaField(0x30, TigerStrategy.DESTINY2_LATEST)] // EoF x34 -> RNG x30
     public Tag<SMusicTemplate> Music;
 
-    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
+    [SchemaField(TigerStrategy.DESTINY2_FINAL_SHAPE_8264)] // Tag64 in Renegades?
     public Tag<SA4BC8080> Music2;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, Obsolete = true)]
@@ -510,10 +510,18 @@ public struct SA6BC8080
 /// <summary>
 /// Directive table for public events so no audio linked.
 /// </summary>
-[SchemaStruct("20978080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_WITCHQUEEN_6307, "20978080", 0x38)]
+[SchemaStruct(TigerStrategy.DESTINY2_LATEST, "20978080", 0x40)]
 public struct S20978080
 {
-    public DynamicArray<S28898080> PEDirectiveTables;
+    // Idk why these got swapped in EoF
+    [SchemaField(0x0, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x10, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArray<S28898080> DirectiveTables;
+
+    [SchemaField(0x10, TigerStrategy.DESTINY2_WITCHQUEEN_6307)]
+    [SchemaField(0x0, TigerStrategy.DESTINY2_LATEST)]
+    public DynamicArray<SB7978080> DialogueTables;
 
     [SchemaField(0x20)]
     public TigerHash StartingBubbleName;

@@ -155,6 +155,8 @@ public enum DestinyTraitID : uint
     [Description("Seasonal Artifact")]
     item_seasonal_artifact = 2,
     item_quest_all = 3,
+    [Description("Featured")]
+    item_featured = 4,
 
     // Defined in game
     [Description("Black Armory")]
@@ -243,7 +245,7 @@ public enum DestinyTraitID : uint
     item_quest_annual_v800 = 3011401061,
     item_quest_annual_v900 = 763053052,
     item_quest_campaign = 2973844452,
-    [Description("The Edge of Fate Quest")]
+    [Description("Renegades Quest")]
     item_quest_current_release = 2878306895,
     [Description("Seasonal Event Quest")]
     item_quest_event = 1056186694,
@@ -396,7 +398,7 @@ public enum DestinyTraitID : uint
     releases_v610_season = 2868778669,
     [Description("Plunder")]
     releases_v620_season = 2572971238,
-    [Description("Worthy")]
+    [Description("Seraph")]
     releases_v630_season = 2208921643,
     [Description("Lightfall")]
     releases_v700_annual = 2606653893,
@@ -416,13 +418,23 @@ public enum DestinyTraitID : uint
     releases_v810_season = 4062709591,
     [Description("Heresy")]
     releases_v820_season = 3870807100,
-    [Description("Reclamation")]
+
+    [Description("Edge of Fate")]
     releases_v900_core = 1858131755,
     [Description("Edge of Fate")]
     releases_v900_dlc = 2725534325,
+
+    [Description("Ash and Iron")]
     releases_v910 = 753559279,
     [Description("Ash and Iron")]
-    releases_v910_core = 2052231686
+    releases_v910_core = 2052231686,
+
+    [Description("Renegades")]
+    releases_v950 = 686448803,
+    [Description("Renegades")]
+    releases_v950_core = 2987314010,
+    [Description("Renegades")]
+    releases_v950_dlc = 2773025918
 }
 
 

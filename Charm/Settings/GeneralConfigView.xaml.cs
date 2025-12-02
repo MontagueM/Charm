@@ -351,3 +351,9 @@ public partial class GeneralConfigView : UserControl
         PopulateConfigPanel();
     }
 }
+
+public class ConfigViewSectionData
+{
+    public string Icon { get; set; }
+    public string Title { get; set; }
+}

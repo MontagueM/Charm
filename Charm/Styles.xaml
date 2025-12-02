@@ -21,6 +21,60 @@
     <charm:Investment_IsFeaturedItem x:Key="Investment_IsFeaturedItem" />
     <charm:ListCountConverter x:Key="ListCountConverter" />
 
+    <DataTemplate x:Key="ConfigViewSectionTemplate">
+        <Grid
+            VerticalAlignment="Top"
+            Background="Transparent"
+            Opacity="0.75">
+            <Grid.Triggers>
+                <EventTrigger RoutedEvent="MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                To="1"
+                                Duration="0:0:0.075" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+
+                <EventTrigger RoutedEvent="MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                To="0.75"
+                                Duration="0:0:0.075" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Grid.Triggers>
+
+            <TextBlock
+                Margin="-50,0,0,10"
+                VerticalAlignment="Center"
+                FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                FontSize="26"
+                Foreground="{StaticResource ForegroundColour100}"
+                Text="{Binding Icon}"
+                TextWrapping="Wrap" />
+            <Border
+                Margin="0,0,0,0"
+                VerticalAlignment="Center"
+                BorderBrush="{StaticResource ForegroundColour90}"
+                BorderThickness="0,0,0,2">
+                <TextBlock
+                    Margin="0,0,0,10"
+                    VerticalAlignment="Center"
+                    FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
+                    FontSize="28"
+                    Foreground="{StaticResource ForegroundColour100}"
+                    Text="{Binding Title}"
+                    TextWrapping="Wrap" />
+            </Border>
+        </Grid>
+    </DataTemplate>
+
     <DataTemplate x:Key="ObjCheckbox">
         <Grid Margin="20,0,20,5">
             <Grid.ColumnDefinitions>

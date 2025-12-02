@@ -24,7 +24,7 @@ public partial class Changelog : UserControl
         Focus();
 
         var json = File.ReadAllText($"./Changelog.json");
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, AllowTrailingCommas = true };
         Entries = JsonSerializer.Deserialize<List<ChangelogEntry>>(json, options);
 
         ChangelogVersions.Items = Entries;

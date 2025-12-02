@@ -238,6 +238,7 @@ public enum ScopeBitsBL : ulong
     PLAYER_CENTERED_CASCADED_GRID = 1UL << 38,
     GEAR_DYE_012 = 1UL << 39,
     COLOR_GRADING_UBERSHADER = 1UL << 40,
+    CUI_DRAWING = 1UL << 41,
 }
 
 [Flags]

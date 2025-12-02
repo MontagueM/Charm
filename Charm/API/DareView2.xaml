@@ -554,6 +554,7 @@
                             <local:GenericTooltip
                                 Name="AGGREGATE OUTPUT"
                                 Description="Exports selected items to a singular folder in your Charm output path.&#x0a;&#x0a;The folder will be named 'ApiOutput#', where the hashtag represents the current ApiOutput folder count"
+                                Style="Category"
                                 Type="Export Option" />
                         </local:GenericTooltipProperties.TooltipData>
                     </ToggleButton>
@@ -572,7 +573,10 @@
                             Click="ExportButton_Click"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip Name="EXPORT" Description="Exports everything in the export list" />
+                                <local:GenericTooltip
+                                    Name="EXPORT"
+                                    Description="Exports everything in the export list"
+                                    Style="Category" />
                             </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 d:FontFamily="Haas Grot Text 55 Roman"
@@ -588,7 +592,10 @@
                             Click="OpenOutputFolder_Click"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip Name="OPEN OUTPUT" Description="Opens the output folder for your rips" />
+                                <local:GenericTooltip
+                                    Name="OPEN OUTPUT"
+                                    Description="Opens the output folder for your rips"
+                                    Style="Category" />
                             </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 d:FontFamily="Haas Grot Text 55 Roman"
@@ -604,7 +611,10 @@
                             Click="ClearAllButton_Click"
                             Style="{DynamicResource D2StyleButton}">
                             <local:GenericTooltipProperties.TooltipData>
-                                <local:GenericTooltip Name="CLEAR" Description="Clears everything from the export list" />
+                                <local:GenericTooltip
+                                    Name="CLEAR"
+                                    Description="Clears everything from the export list"
+                                    Style="Category" />
                             </local:GenericTooltipProperties.TooltipData>
                             <TextBlock
                                 d:FontFamily="Haas Grot Text 55 Roman"
@@ -710,6 +720,33 @@
                                 TextChanged="SearchBox_TextChanged"
                                 TextWrapping="Wrap" />
                         </StackPanel>
+
+                        <Grid
+                            x:Name="RenegadesDisclaimer"
+                            Margin="0,-20,50,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Background="#755C0000"
+                            Visibility="Collapsed">
+                            <Button
+                                Grid.Column="0"
+                                Panel.ZIndex="100"
+                                Style="{DynamicResource D2StyleButton}">
+                                <local:GenericTooltipProperties.TooltipData>
+                                    <local:GenericTooltip
+                                        Name="DISCLAIMER"
+                                        BodyColor="#100000"
+                                        Description=" Any Star Wars themed gear CAN NOT be uploaded to the Destiny Model Rips Discord or Google Drive due to potential copyright claims by Disney...&#x0a;&#x0a; Many item strings may appear as 'NotFound' if you do not have the correct decryption key, due to those strings being in redacted pkg files."
+                                        HeaderColor="#5C0000"
+                                        Style="Category" />
+                                </local:GenericTooltipProperties.TooltipData>
+                                <TextBlock
+                                    d:FontFamily="Haas Grot Text 55 Roman"
+                                    FontFamily="{DynamicResource Haas Grot Text 55 Roman Keys}"
+                                    FontSize="14"
+                                    Text="RENEGADES DISCLAIMER" />
+                            </Button>
+                        </Grid>
                     </Grid>
 
                     <local:ItemPage

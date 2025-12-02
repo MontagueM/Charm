@@ -9,6 +9,7 @@
     d:DesignWidth="1914"
     Loaded="OnControlLoaded"
     mc:Ignorable="d">
+
     <Grid Background="Transparent">
         <ScrollViewer
             Margin="50,75,50,75"
@@ -21,96 +22,33 @@
             </ScrollViewer.Resources>
 
             <StackPanel Margin="50,0,50,0" Orientation="Vertical">
-                <Grid VerticalAlignment="Top" Background="Transparent">
-                    <TextBlock
-                        Margin="-50,0,0,10"
-                        VerticalAlignment="Center"
-                        d:FontFamily="Haas Grot Text 55 Roman"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="26"
-                        Foreground="{StaticResource ForegroundColour70}"
-                        Text="💾"
-                        TextWrapping="Wrap" />
-                    <Border
-                        Margin="0,0,0,0"
-                        VerticalAlignment="Center"
-                        BorderBrush="{StaticResource ForegroundColour70}"
-                        BorderThickness="0,0,0,2">
-                        <TextBlock
-                            Margin="0,0,0,10"
-                            VerticalAlignment="Center"
-                            d:FontFamily="Haas Grot Text 55 Roman"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                            FontSize="28"
-                            Foreground="{StaticResource ForegroundColour70}"
-                            Text="GENERAL"
-                            TextWrapping="Wrap" />
-                    </Border>
-                </Grid>
+                <ContentControl ContentTemplate="{StaticResource ConfigViewSectionTemplate}">
+                    <ContentControl.Content>
+                        <local:ConfigViewSectionData Title="GENERAL" Icon="💾" />
+                    </ContentControl.Content>
+                </ContentControl>
 
                 <StackPanel
                     x:Name="GeneralConfigPanel"
                     Margin="0,10,0,50"
                     Orientation="Vertical" />
 
-                <Grid VerticalAlignment="Top" Background="Transparent">
-                    <TextBlock
-                        Margin="-50,0,0,10"
-                        VerticalAlignment="Center"
-                        d:FontFamily="Haas Grot Text 55 Roman"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="26"
-                        Foreground="{StaticResource ForegroundColour70}"
-                        Text="🎨"
-                        TextWrapping="Wrap" />
-                    <Border
-                        Margin="0,0,0,0"
-                        VerticalAlignment="Center"
-                        BorderBrush="{StaticResource ForegroundColour70}"
-                        BorderThickness="0,0,0,2">
-                        <TextBlock
-                            Margin="0,0,0,10"
-                            VerticalAlignment="Center"
-                            d:FontFamily="Haas Grot Text 55 Roman"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                            FontSize="28"
-                            Foreground="{StaticResource ForegroundColour70}"
-                            Text="MATERIALS"
-                            TextWrapping="Wrap" />
-                    </Border>
-                </Grid>
+                <ContentControl ContentTemplate="{StaticResource ConfigViewSectionTemplate}">
+                    <ContentControl.Content>
+                        <local:ConfigViewSectionData Title="MATERIALS" Icon="🎨" />
+                    </ContentControl.Content>
+                </ContentControl>
 
                 <StackPanel
                     x:Name="MaterialsConfigPanel"
                     Margin="0,10,0,50"
                     Orientation="Vertical" />
 
-                <Grid VerticalAlignment="Top" Background="Transparent">
-                    <TextBlock
-                        Margin="-50,0,0,10"
-                        VerticalAlignment="Center"
-                        d:FontFamily="Haas Grot Text 55 Roman"
-                        FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                        FontSize="26"
-                        Foreground="{StaticResource ForegroundColour70}"
-                        Text="⚙️"
-                        TextWrapping="Wrap" />
-                    <Border
-                        Margin="0,0,0,0"
-                        VerticalAlignment="Center"
-                        BorderBrush="{StaticResource ForegroundColour70}"
-                        BorderThickness="0,0,0,2">
-                        <TextBlock
-                            Margin="0,0,0,10"
-                            VerticalAlignment="Center"
-                            d:FontFamily="Haas Grot Text 55 Roman"
-                            FontFamily="{DynamicResource Haas Grot Text 55 Roman}"
-                            FontSize="28"
-                            Foreground="{StaticResource ForegroundColour70}"
-                            Text="MISC"
-                            TextWrapping="Wrap" />
-                    </Border>
-                </Grid>
+                <ContentControl ContentTemplate="{StaticResource ConfigViewSectionTemplate}">
+                    <ContentControl.Content>
+                        <local:ConfigViewSectionData Title="MISC" Icon="⚙️" />
+                    </ContentControl.Content>
+                </ContentControl>
 
                 <StackPanel
                     x:Name="MiscConfigPanel"

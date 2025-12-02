@@ -1,5 +1,27 @@
 [
     {
+        "version": "3.1.9",
+        "date": "12-02-2025",
+        "changes": [
+            {
+                "title": "Renegades Fixes",
+                "notes": [
+                    "Fixed issues caused by Star Wa- I mean Renegades."
+                ]
+            },
+            {
+                "title": "Misc",
+                "notes": [
+                    "Hid Unreal Engine porting options.",
+                    "Misc S&Box related things.",
+                    "Added Featured items filter option to API.",
+                    "Added a disclaimer when using Renegades release filter in API.",
+                    "Updated main menu theme."
+                ]
+            }
+        ]
+    },
+    {
         "version": "3.1.7",
         "date": "10-21-2025",
         "changes": [
