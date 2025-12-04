@@ -27,7 +27,7 @@ Charm currently supports:
 | 6.3.0.7 | Witch Queen last update  | DepotDownloader | 6051526863119423207 | 1078048403901153652  |
 | 7.3.6.6 | Lightfall last update    | DepotDownloader | 7707143404100984016 | 5226038440689554798  |
 | 8.2.6.4 | The Final Shape last update | DepotDownloader | 3593201409625956155 | 6975584800172104419 |
-| N/A     | Edge of Fate Latest      | Steam           | N/A                 | N/A                  |
+| N/A     | Renegades (Latest)      | Steam           | N/A                 | N/A                  |
 
 If you just want to look at the latest release, you only need Destiny 2 downloaded on Steam.
 
@@ -73,12 +73,14 @@ If you experience any issue, you can register an issue in this repository. If th
 
 ## Screenshots
 <p float="left">
-    <img src="https://github.com/user-attachments/assets/e93e3c4d-9ec4-4829-a94c-c650d03cffc4" width="400" />
-    <img src="https://github.com/user-attachments/assets/ecc2c483-717f-4412-a7c1-e42764af3fe7" width="400" /> 
-    <img src="https://github.com/user-attachments/assets/a1b1a6ee-17be-4872-ab7c-dd0116229a64" width="400" />
-    <img src="https://github.com/user-attachments/assets/926a6112-1aad-48e7-9a79-63ff5c30873d" width="400" />
-    <img src="https://github.com/user-attachments/assets/4cd8abfd-3eda-4d90-874f-5a2da36f2dc5" width="400" />
-    <img src="https://github.com/user-attachments/assets/da13a70b-4d89-4e4a-af97-b4e56c7920d7" width="400" />
+    <img width="400" src="https://github.com/user-attachments/assets/3487d37f-5750-4715-9d5e-affbb53a87c0" />
+    <img width="400" src="https://github.com/user-attachments/assets/31538576-8d63-4cc4-8f89-6ae50d0266a0" />
+    <img width="400" src="https://github.com/user-attachments/assets/abfea0e5-71ad-4bec-813b-0b9095a25f25" />
+    <img width="400" src="https://github.com/user-attachments/assets/0a48f0ea-0474-41e8-b465-9bf51d764705" />
+    <img width="400" src="https://github.com/user-attachments/assets/9634f527-7062-4617-929d-266533eb7288" />
+    <img width="400" src="https://github.com/user-attachments/assets/082ccc15-4684-4954-b3f1-b2b8cc4b1ee2" />
+    <img width="400" src="https://github.com/user-attachments/assets/14705aee-c857-4cb4-b21a-add89b86c9b2" />
+    <img width="400" src="https://github.com/user-attachments/assets/794bbffb-6c14-4b44-a63a-6f74a15092b0" />
 </p>
 
 ## Blender
