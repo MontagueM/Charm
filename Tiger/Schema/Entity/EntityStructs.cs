@@ -1043,42 +1043,6 @@ public struct S40238080
 
 #endregion
 
-[SchemaStruct(TigerStrategy.DESTINY1_RISE_OF_IRON, "7F6B8080", 0x1C0)] // Map cubemaps dont exist in D1 but this needs to exist
-[SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "7F6B8080", 0x1C0)]
-[SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "95668080", 0x1E0)]
-[SchemaStruct(TigerStrategy.DESTINY2_FINAL_SHAPE_8264, "95668080", 0x1DC)]
-public struct SMapCubemapResource //Dataresource for cubemaps
-{
-    [SchemaField(0x20)]
-    public Vector4 CubemapSize; //XYZ, no W
-    public Vector4 CubemapPosition; // Not actually right afaik
-
-    [SchemaField(0xB0)]
-    public long WorldID; // Same as the ID in the datatable entry
-
-    [SchemaField(0x140, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x140, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x100, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    public Vector4 CubemapRotation;
-
-    [SchemaField(0x190, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x190, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x1B0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1B0, TigerStrategy.DESTINY2_FINAL_SHAPE_8264, Obsolete = true)] // :(
-    public StringPointer CubemapName;
-
-    [SchemaField(0x198, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x198, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x1B8, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1AC, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    public Texture CubemapTexture;
-
-    [SchemaField(0x1A0, TigerStrategy.DESTINY1_RISE_OF_IRON)]
-    [SchemaField(0x1A0, TigerStrategy.DESTINY2_SHADOWKEEP_2601)]
-    [SchemaField(0x1C0, TigerStrategy.DESTINY2_BEYONDLIGHT_3402)]
-    [SchemaField(0x1B4, TigerStrategy.DESTINY2_FINAL_SHAPE_8264)]
-    public Texture CubemapIBLTexture; //Sometype of reflection tint texture idk
-}
 
 [SchemaStruct(TigerStrategy.DESTINY2_SHADOWKEEP_2601, "D99B8080", 0x190)]
 [SchemaStruct(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, "D8928080", 0x190)]

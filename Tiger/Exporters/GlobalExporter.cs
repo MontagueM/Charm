@@ -153,18 +153,22 @@ public class GlobalExporter : AbstractExporter
 
             foreach (Cubemap cubemapEntry in GlobalScene.GetAllOfType<Cubemap>())
             {
+                var position = cubemapEntry.CubemapTransform.Translation;
+                var rotation = cubemapEntry.CubemapTransform.Rotation;
+
                 Schema.Entity.SMapCubemapResource cubemap = cubemapEntry.CubemapEntry;
                 string name = cubemap.CubemapName != null ? cubemap.CubemapName.Value : $"Cubemap_{cubemap.WorldID:X}";
                 _ = data.GetOrAdd(name, _ => new CubemapData
                 {
                     Transform = new JsonInstance
                     {
-                        Translation = new[] { cubemap.CubemapPosition.X, cubemap.CubemapPosition.Y, cubemap.CubemapPosition.Z },
-                        Rotation = new[] { cubemap.CubemapRotation.X, cubemap.CubemapRotation.Y, cubemap.CubemapRotation.Z, cubemap.CubemapRotation.W },
+                        Translation = new[] { position.X, position.Y, position.Z },
+                        Rotation = new[] { rotation.X, rotation.Y, rotation.Z, rotation.W },
                         Scale = new[] { cubemap.CubemapSize.X, cubemap.CubemapSize.Y, cubemap.CubemapSize.Z, }
                     },
                     CubemapTexture = cubemap.CubemapTexture != null ? cubemap.CubemapTexture.Hash : "",
                     CubemapIBLTexture = cubemap.CubemapIBLTexture != null ? cubemap.CubemapIBLTexture.Hash : "",
+                    CubemapShape = cubemapEntry.Shape.ToString()
                 });
 
                 if (cubemap.CubemapTexture != null)
@@ -430,6 +434,7 @@ public class GlobalExporter : AbstractExporter
         public JsonInstance Transform;
         public string CubemapTexture;
         public string CubemapIBLTexture;
+        public string CubemapShape;
     }
 
     private struct LightData
