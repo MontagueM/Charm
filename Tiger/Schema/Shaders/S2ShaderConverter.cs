@@ -254,7 +254,7 @@ PS
         StringBuilder globalChannels = new();
         HashSet<int> ids = new();
 
-        TfxBytecodeInterpreter opcodes = Material.Pixel.GetBytecode();
+        TfxBytecodeInterpreterHLSL opcodes = Material.Pixel.GetBytecode();
         foreach (TfxData op in opcodes.Opcodes)
         {
             switch (op.op)
@@ -293,7 +293,7 @@ PS
         StringBuilder objectChannels = new();
         HashSet<string> channels = new();
 
-        TfxBytecodeInterpreter opcodes = Material.Pixel.GetBytecode();
+        TfxBytecodeInterpreterHLSL opcodes = Material.Pixel.GetBytecode();
         foreach (var objectChannel in opcodes.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
         {
             var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
@@ -343,7 +343,7 @@ PS
                             if (shaderType != ShaderType.WaterDecal)
                             {
                                 // Dynamic expressions
-                                TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(isVertexShader ? material.Vertex.TFX_Bytecode : material.Pixel.TFX_Bytecode));
+                                TfxBytecodeInterpreterHLSL bytecode = new(TfxBytecodeOp.ParseAll(isVertexShader ? material.Vertex.TFX_Bytecode : material.Pixel.TFX_Bytecode));
                                 Dictionary<int, string> bytecode_hlsl = bytecode.Evaluate(isVertexShader ? material.Vertex.TFX_Bytecode_Constants : material.Pixel.TFX_Bytecode_Constants, false, material);
 
                                 foreach (KeyValuePair<int, string> entry in bytecode_hlsl)
@@ -410,7 +410,7 @@ PS
         //if (isVertexShader)
         //    return funcDef;
 
-        TfxBytecodeInterpreter opcodes = (isVertexShader ? material.Vertex : material.Pixel).GetBytecode();
+        TfxBytecodeInterpreterHLSL opcodes = (isVertexShader ? material.Vertex : material.Pixel).GetBytecode();
         bool bInline = opcodes.CanInlineBytecode() || material.RenderStage == TfxRenderStage.WaterReflection;
         foreach ((int i, TfxData op) in opcodes.Opcodes.Select((value, index) => (index, value)))
         {
@@ -998,7 +998,7 @@ PS
                         }
 
                         // Textures provided through Externs (dynamic texture slots)
-                        TfxBytecodeInterpreter opcodes = (isVertexShader ? material.Vertex : material.Pixel).GetBytecode();
+                        TfxBytecodeInterpreterHLSL opcodes = (isVertexShader ? material.Vertex : material.Pixel).GetBytecode();
                         foreach ((int i, TfxData op) in opcodes.Opcodes.Select((value, index) => (index, value)))
                         {
                             if (op.op != TfxBytecode.PushExternInputTextureView)

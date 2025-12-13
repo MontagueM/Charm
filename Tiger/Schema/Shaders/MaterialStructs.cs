@@ -133,9 +133,9 @@ public struct SMaterialShader
         return data;
     }
 
-    public TfxBytecodeInterpreter GetBytecode()
+    public TfxBytecodeInterpreterHLSL GetBytecode()
     {
-        return new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(TFX_Bytecode));
+        return new TfxBytecodeInterpreterHLSL(TfxBytecodeOp.ParseAll(TFX_Bytecode));
     }
 }
 

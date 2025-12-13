@@ -13,6 +13,12 @@ public enum ExportDetailLevel
     AllLevels
 }
 
+public enum LoadLevel
+{
+    Full,
+    Minimal
+}
+
 /// <summary>
 /// A processed form of RawMeshPart that is ready to be exported.
 /// </summary>
@@ -38,6 +44,7 @@ public class MeshPart
     public int VertexLayoutIndex = -1;
     public int MaxVertexColorIndex = -1;
     public bool Collision = true;
+    public TfxRenderStage RenderStage;
 
     public Vector4 RotationOffset = Vector4.Quaternion;
     public Vector4 TranslationOffset = Vector4.Zero;

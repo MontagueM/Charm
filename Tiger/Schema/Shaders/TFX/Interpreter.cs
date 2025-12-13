@@ -4,7 +4,7 @@ using Tiger;
 using Tiger.Schema;
 using Tiger.Schema.Shaders;
 
-public class TfxBytecodeInterpreter
+public class TfxBytecodeInterpreterHLSL
 {
     public List<TfxData> Opcodes { get; set; }
     public List<string> Stack { get; set; }
@@ -12,7 +12,7 @@ public class TfxBytecodeInterpreter
 
     public StringBuilder PrintedOps = new();
 
-    public TfxBytecodeInterpreter(List<TfxData> opcodes)
+    public TfxBytecodeInterpreterHLSL(List<TfxData> opcodes)
     {
         Opcodes = opcodes ?? new List<TfxData>();
         Stack = new(capacity: 64);
@@ -292,23 +292,23 @@ public class TfxBytecodeInterpreter
                         break;
 
                     case TfxBytecode.Spline8ConstChain:
-                        string s8cc_X = StackTop();
-                        string s8cc_Recursion = $"float4{constants[((Spline8ConstChainData)op.data).constant_index].Vec}";
-                        string s8cc_C3 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 1].Vec}";
-                        string s8cc_C2 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 2].Vec}";
-                        string s8cc_C1 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 3].Vec}";
-                        string s8cc_C0 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 4].Vec}";
-                        string s8cc_D3 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 5].Vec}";
-                        string s8cc_D2 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 6].Vec}";
-                        string s8cc_D1 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 7].Vec}";
-                        string s8cc_D0 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 8].Vec}";
-                        string s8cc_CThresholds = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 9].Vec}";
-                        string s8cc_DThresholds = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 10].Vec}";
+                        var s8cc_X = StackPop(2);
+                        string s8cc_Recursion = s8cc_X[1];
+                        string s8cc_C3 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 0].Vec}";
+                        string s8cc_C2 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 1].Vec}";
+                        string s8cc_C1 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 2].Vec}";
+                        string s8cc_C0 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 3].Vec}";
+                        string s8cc_D3 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 4].Vec}";
+                        string s8cc_D2 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 5].Vec}";
+                        string s8cc_D1 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 6].Vec}";
+                        string s8cc_D0 = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 7].Vec}";
+                        string s8cc_CThresholds = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 8].Vec}";
+                        string s8cc_DThresholds = $"float4{constants[((Spline8ConstChainData)op.data).constant_index + 9].Vec}";
 
                         if (bInline)
-                            StackPush($"bytecode_op_spline8_chain_const({s8cc_X}, {s8cc_Recursion}, {s8cc_C3}, {s8cc_C2}, {s8cc_C1}, {s8cc_C0}, {s8cc_D3}, {s8cc_D2}, {s8cc_D1}, {s8cc_D0}, {s8cc_CThresholds}, {s8cc_DThresholds})");
+                            StackPush($"bytecode_op_spline8_chain_const({s8cc_X[1]}, {s8cc_X[0]}, {s8cc_C3}, {s8cc_C2}, {s8cc_C1}, {s8cc_C0}, {s8cc_D3}, {s8cc_D2}, {s8cc_D1}, {s8cc_D0}, {s8cc_CThresholds}, {s8cc_DThresholds})");
                         else
-                            StackPush($"{bytecode_op_spline8_chain_const(s8cc_X, s8cc_Recursion, s8cc_C3, s8cc_C2, s8cc_C1, s8cc_C0, s8cc_D3, s8cc_D2, s8cc_D1, s8cc_D0, s8cc_CThresholds, s8cc_DThresholds)}");
+                            StackPush($"{bytecode_op_spline8_chain_const(s8cc_X[1], s8cc_X[0], s8cc_C3, s8cc_C2, s8cc_C1, s8cc_C0, s8cc_D3, s8cc_D2, s8cc_D1, s8cc_D0, s8cc_CThresholds, s8cc_DThresholds)}");
                         break;
 
                     case TfxBytecode.Gradient4Const:

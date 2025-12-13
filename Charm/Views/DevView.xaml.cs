@@ -11,8 +11,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using ConcurrentCollections;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Tiger;
 using Tiger.Exporters;
 using Tiger.Schema;
@@ -295,7 +293,7 @@ public partial class DevView : UserControl
                 case 0x808071DC:
                 case 0x80806DA1:
                     Tag<SA16D8080> lightData = FileResourcer.Get().GetSchemaTag<SA16D8080>(hash);
-                    TfxBytecodeInterpreter bytecode = new(TfxBytecodeOp.ParseAll(lightData.TagData.Bytecode));
+                    TfxBytecodeInterpreterHLSL bytecode = new(TfxBytecodeOp.ParseAll(lightData.TagData.Bytecode));
                     _ = bytecode.Evaluate(lightData.TagData.Buffer1, true);
 
                     //foreach (var a in bytecode_hlsl)

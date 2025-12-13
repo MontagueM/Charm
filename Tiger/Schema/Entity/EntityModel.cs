@@ -13,13 +13,17 @@ public class EntityModel : Tag<SEntityModel>
     public Vector4 RotationOffset = Vector4.Quaternion;
     public Vector4 TranslationOffset = Vector4.Zero;
 
+    public Vector4 Scale => _tag.ModelScale;
+    public Vector4 Translation => _tag.ModelTranslation;
+
     /*
      * We need the parent resource to get access to the external materials
      */
-    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource, bool transparentsOnly = false, bool hasSkeleton = false)
+    public List<DynamicMeshPart> Load(ExportDetailLevel detailLevel, EntityResource parentResource, bool transparentsOnly = false, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Full)
     {
         Dictionary<int, Dictionary<int, SCB6E8080>> dynamicParts = GetPartsOfDetailLevel(detailLevel);
-        List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource, hasSkeleton);
+        List<DynamicMeshPart> parts = GenerateParts(dynamicParts, parentResource, hasSkeleton, loadLevel);
+
         if (transparentsOnly) // ROI decal/transparent mesh purposes. I hate this and its not the right way to do this
             return parts.Where(x => x.Material.RenderStates.BlendState() != -1).ToList();
         else
@@ -76,11 +80,12 @@ public class EntityModel : Tag<SEntityModel>
         return parts;
     }
 
-    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, SCB6E8080>> dynamicParts, EntityResource parentResource, bool hasSkeleton = false)
+    private List<DynamicMeshPart> GenerateParts(Dictionary<int, Dictionary<int, SCB6E8080>> dynamicParts, EntityResource parentResource, bool hasSkeleton = false, LoadLevel loadLevel = LoadLevel.Full)
     {
         List<DynamicMeshPart> parts = new();
         List<int> exportPartRange = new();
         if (_tag.Meshes.Count == 0) return parts;
+
         int meshIndex = 0;
         foreach (SEntityModelMesh mesh in _tag.Meshes.Enumerate(GetReader()))
         {
@@ -90,7 +95,7 @@ public class EntityModel : Tag<SEntityModel>
                 if (!exportPartRange.Contains(i))
                     continue;
 
-                var renderStage = Array.IndexOf(mesh.PartRangePerRenderStage, (short)i);
+                var renderStage = GetStageForPart(mesh, i);
                 DynamicMeshPart dynamicMeshPart = new(part, parentResource)
                 {
                     Index = i,
@@ -104,7 +109,7 @@ public class EntityModel : Tag<SEntityModel>
                     TranslationOffset = TranslationOffset,
                     VertexLayoutIndex = mesh.GetInputLayoutForStage(0),
                     // -1 shouldnt be possible..right?
-                    RenderStage = renderStage == -1 ? TfxRenderStage.GenerateGbuffer : (TfxRenderStage)renderStage
+                    RenderStage = renderStage ?? TfxRenderStage.GenerateGbuffer
                 };
 
                 //Console.WriteLine($"{i}--------------");
@@ -120,7 +125,7 @@ public class EntityModel : Tag<SEntityModel>
                 //Console.WriteLine($"FlagsD2 {part.FlagsD2}");
                 //Console.WriteLine($"GearDyeChangeColorIndex {part.GearDyeChangeColorIndex}");
                 //Console.WriteLine($"LodCategory {part.LodCategory}");
-                //Console.WriteLine($"RenderStage {dynamicMeshPart.RenderStage} ({Array.IndexOf(mesh.PartRangePerRenderStage, (short)i)}, {(short)i})");
+                //Console.WriteLine($"RenderStage {dynamicMeshPart.RenderStage}");
 
                 //We only care about the vertex shader for now for mesh data
                 //But if theres also no pixel shader then theres no point in adding it
@@ -129,8 +134,10 @@ public class EntityModel : Tag<SEntityModel>
                 dynamicMeshPart.Material.Pixel.Shader is null) // || dynamicMeshPart.Material.Unk08 != 1)
                     continue;
 
-                dynamicMeshPart.Material.RenderStage = dynamicMeshPart.RenderStage;
-                dynamicMeshPart.GetAllData(mesh, _tag);
+                dynamicMeshPart.Material.RenderStage = (TfxRenderStage)renderStage;
+                if (loadLevel == LoadLevel.Full)
+                    dynamicMeshPart.GetAllData(mesh, _tag);
+
                 parts.Add(dynamicMeshPart);
             }
 
@@ -156,6 +163,22 @@ public class EntityModel : Tag<SEntityModel>
 
         return exportPartRange;
     }
+
+    public static TfxRenderStage? GetStageForPart(SEntityModelMesh mesh, int partIndex)
+    {
+        for (int stageIndex = 0; stageIndex < 24; stageIndex++)
+        {
+            ushort start = mesh.PartRangePerRenderStage[stageIndex];
+            ushort end = mesh.PartRangePerRenderStage[stageIndex + 1];
+
+            if (partIndex >= start && partIndex < end)
+            {
+                return (TfxRenderStage)stageIndex;
+            }
+        }
+
+        return null;
+    }
 }
 
 public class DynamicMeshPart : MeshPart
@@ -169,8 +192,6 @@ public class DynamicMeshPart : MeshPart
     public bool bAlphaClip;
     public bool HasSkeleton;
     public byte GearDyeChangeColorIndex = 0xFF;
-
-    public TfxRenderStage RenderStage;
 
     public DynamicMeshPart(SCB6E8080 part, EntityResource parentResource) : base()
     {
@@ -362,3 +383,4 @@ public class DynamicMeshPart : MeshPart
         dynamicPart.VertexColourSlots.Add(vc);
     }
 }
+

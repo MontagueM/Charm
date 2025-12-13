@@ -156,7 +156,7 @@ public class GlobalExporter : AbstractExporter
                 var position = cubemapEntry.CubemapTransform.Translation;
                 var rotation = cubemapEntry.CubemapTransform.Rotation;
 
-                Schema.Entity.SMapCubemapResource cubemap = cubemapEntry.CubemapEntry;
+                SMapCubemapResource cubemap = cubemapEntry.CubemapEntry;
                 string name = cubemap.CubemapName != null ? cubemap.CubemapName.Value : $"Cubemap_{cubemap.WorldID:X}";
                 _ = data.GetOrAdd(name, _ => new CubemapData
                 {

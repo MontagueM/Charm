@@ -417,7 +417,7 @@ public struct SEntityModelMesh
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 20)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, ArraySizeConst = 24)]
     [SchemaField(TigerStrategy.DESTINY2_BEYONDLIGHT_3402, ArraySizeConst = 25)] // ArraySizeConst being the number of elements
-    public short[] PartRangePerRenderStage;
+    public ushort[] PartRangePerRenderStage;
 
     [SchemaField(TigerStrategy.DESTINY1_RISE_OF_IRON, ArraySizeConst = 19)]
     [SchemaField(TigerStrategy.DESTINY2_SHADOWKEEP_2601, Obsolete = true)]

@@ -59,6 +59,8 @@ public static class TfxBytecodeOp
             op = RemapOp(reader.ReadByte()),
             data = null
         };
+        if (type == BytecodeType.Sequencer && tfxData.op == TfxBytecode.PushExternInputMat4)
+            tfxData.op = TfxBytecode.PopOutput;
 
         try
         {
@@ -80,6 +82,12 @@ public static class TfxBytecodeOp
                     LerpConstantData LerpConstantData = new();
                     LerpConstantData.constant_start = reader.ReadByte();
                     tfxData.data = LerpConstantData;
+                    break;
+
+                case TfxBytecode.LerpConstantSaturated:
+                    LerpConstantData LerpConstantSatData = new();
+                    LerpConstantSatData.constant_start = reader.ReadByte();
+                    tfxData.data = LerpConstantSatData;
                     break;
 
                 case TfxBytecode.Spline4Const:
@@ -114,7 +122,9 @@ public static class TfxBytecodeOp
 
                 case TfxBytecode.PushExternInputFloat:
                     PushExternInputFloatData PushExternInputFloatData = new();
-                    PushExternInputFloatData.extern_ = Externs.GetExtern(reader.ReadByte());
+                    if (type != BytecodeType.Sequencer)
+                        PushExternInputFloatData.extern_ = Externs.GetExtern(reader.ReadByte());
+
                     PushExternInputFloatData.element = reader.ReadByte();
                     tfxData.data = PushExternInputFloatData;
                     break;
@@ -325,8 +335,31 @@ public static class TfxBytecodeOp
                 break;
 
             case Spline8ConstChainData:
-                output = $"Index {((Spline8ConstChainData)tfxData.data).constant_index}";
+                index = ((Spline8ConstChainData)tfxData.data).constant_index;
+                string s8c_C3 = $"{constants[index].Vec}";
+                string s8c_C2 = $"{constants[index + 1].Vec}";
+                string s8c_C1 = $"{constants[index + 2].Vec}";
+                string s8c_C0 = $"{constants[index + 3].Vec}";
+                string s8c_D3 = $"{constants[index + 4].Vec}";
+                string s8c_D2 = $"{constants[index + 5].Vec}";
+                string s8c_D1 = $"{constants[index + 6].Vec}";
+                string s8c_D0 = $"{constants[index + 7].Vec}";
+                string C1_thresholds = $"{constants[index + 8].Vec}";
+                string D1_thresholds = $"{constants[index + 9].Vec}";
+
+                output = $"Index {index}:" +
+                    $"\n\tC3: {s8c_C3}" +
+                    $"\n\tC2: {s8c_C2}" +
+                    $"\n\tC1: {s8c_C1}" +
+                    $"\n\tC0: {s8c_C0}" +
+                    $"\n\tD3: {s8c_D3}" +
+                    $"\n\tD2: {s8c_D2}" +
+                    $"\n\tD1: {s8c_D1}" +
+                    $"\n\tD0: {s8c_D0}" +
+                    $"\n\tC_thresholds: {C1_thresholds}" +
+                    $"\n\tD_thresholds: {D1_thresholds}";
                 break;
+
             case Gradient4ConstData: // Gradient4Const
                 index = ((Gradient4ConstData)tfxData.data).constant_index;
                 string BaseColor = $"{constants[index].Vec}";

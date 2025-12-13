@@ -142,7 +142,7 @@ namespace Tiger.Schema.Shaders
                 psCB.Bytecode = Pixel.TFX_Bytecode.Select(x => x.Value).ToList();
                 psCB.Constants = Pixel.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
 
-                var bytecode = new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(Pixel.TFX_Bytecode));
+                var bytecode = new TfxBytecodeInterpreterHLSL(TfxBytecodeOp.ParseAll(Pixel.TFX_Bytecode));
                 foreach (var objectChannel in bytecode.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
                 {
                     var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);
@@ -214,7 +214,7 @@ namespace Tiger.Schema.Shaders
                 vsCB.Bytecode = Vertex.TFX_Bytecode.Select(x => x.Value).ToList();
                 vsCB.Constants = Vertex.TFX_Bytecode_Constants.Select(x => x.Vec).ToList();
 
-                var bytecode = new TfxBytecodeInterpreter(TfxBytecodeOp.ParseAll(Vertex.TFX_Bytecode));
+                var bytecode = new TfxBytecodeInterpreterHLSL(TfxBytecodeOp.ParseAll(Vertex.TFX_Bytecode));
                 foreach (var objectChannel in bytecode.Opcodes.Where(x => x.op == TfxBytecode.PushObjectChannelVector))
                 {
                     var hash = new StringHash(((PushObjectChannelVectorData)objectChannel.data).hash);

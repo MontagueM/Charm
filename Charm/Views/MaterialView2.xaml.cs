@@ -31,7 +31,7 @@ public partial class MaterialView2 : UserControl, INotifyPropertyChanged
         }
     }
 
-    private TfxBytecodeInterpreter _bytecode;
+    private TfxBytecodeInterpreterHLSL _bytecode;
 
     public event PropertyChangedEventHandler PropertyChanged;
     private void OnPropertyChanged(string propName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
