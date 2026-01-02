@@ -34,6 +34,9 @@ public class EntityModelParent : EntityResource
     // materials, 8109A271 to test
     public ModelPermutation? GetModelPermutations()
     {
+        if (!Strategy.IsLatest())
+            return null;
+
         if (Reader.Unk400.Count == 0 || Reader.Unk410.Count == 0)
             return null;
 

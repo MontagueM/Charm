@@ -376,7 +376,7 @@ public partial class EntityListView : UserControl
             {
                 Icon = "☑️",
                 Title = "Export Complete",
-                Description = $"Exported Entity {_currentEntity} to \"{ConfigSubsystem.Get().GetExportSavePath()}\\{_currentEntity}\\\"",
+                Description = $"Exported Entity {_currentEntity.Hash} to \"{ConfigSubsystem.Get().GetExportSavePath()}\\{_currentEntity.Hash}\\\"",
                 Style = NotificationBanner.PopupStyle.Information
             };
             notify.Show();

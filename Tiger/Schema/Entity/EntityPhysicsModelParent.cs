@@ -33,6 +33,9 @@ public class EntityPhysicsModelParent : EntityResource
 
     public ModelPermutation? GetModelPermutations()
     {
+        if (!Strategy.IsLatest())
+            return null;
+
         if (Reader.Unk400.Count == 0 || Reader.Unk410.Count == 0)
             return null;
 
